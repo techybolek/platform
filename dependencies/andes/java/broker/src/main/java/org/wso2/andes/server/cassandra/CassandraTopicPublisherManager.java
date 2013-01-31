@@ -136,7 +136,7 @@ public class CassandraTopicPublisherManager {
                 }
 
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(50);
                 } catch (InterruptedException e) {
                     log.error("Error in thread sleep" ,e);
                 }
