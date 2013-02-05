@@ -17,18 +17,18 @@
 */
 package org.wso2.carbon.security.deployment;
 
+import java.util.HashMap;
+
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
-import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.jdbc.utils.Transaction;
 import org.wso2.carbon.security.SecurityServiceHolder;
-
-import java.util.HashMap;
+import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
 public class SecurityDeploymentListener extends AbstractAxis2ConfigurationContextObserver {
 
@@ -36,7 +36,7 @@ public class SecurityDeploymentListener extends AbstractAxis2ConfigurationContex
 
     public void createdConfigurationContext(ConfigurationContext configCtx) {
         AxisConfiguration axisConfig = configCtx.getAxisConfiguration();
-        int tenantId = SuperTenantCarbonContext.getCurrentContext(axisConfig).getTenantId();
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfig).getTenantId();
         //Register SecurityDeploymentInterceptor as an AxisObserver in tenant's AxisConfig.
 
         SecurityDeploymentInterceptor secDeployInterceptor = new SecurityDeploymentInterceptor();

@@ -24,8 +24,10 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.indexing.indexer.Indexer;
 import org.wso2.carbon.registry.indexing.indexer.IndexerException;
 import org.wso2.carbon.registry.indexing.solr.SolrClient;
+import org.wso2.carbon.utils.WaitBeforeShutdownObserver;
 
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The run() method of this class takes files from a blocking queue and indexes them.
@@ -37,6 +39,7 @@ public class AsyncIndexer implements Runnable {
     private static Log log = LogFactory.getLog(AsyncIndexer.class);
     private final SolrClient client;
     private LinkedBlockingQueue<File2Index> queue = new LinkedBlockingQueue<File2Index>();
+    private boolean canAcceptFiles = true;
 
     @SuppressWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
     public static class File2Index {
@@ -55,12 +58,30 @@ public class AsyncIndexer implements Runnable {
     }
 
     public void addFile(File2Index file2Index) {
-        queue.offer(file2Index);
+        if (canAcceptFiles) {
+            queue.offer(file2Index);
+        } else {
+            log.warn("Can't accept resource for indexing. Shutdown in progress: path=" +
+                    file2Index.path);
+        }
     }
 
     protected AsyncIndexer() throws RegistryException {
         try {
             client = SolrClient.getInstance();
+            Utils.setWaitBeforeShutdownObserver(new WaitBeforeShutdownObserver() {
+                public void startingShutdown() {
+                    canAcceptFiles = false;
+                    do {
+                        indexFile();
+                    } while (queue.size() != 0);
+                }
+
+                public boolean isTaskComplete() {
+                    // if the queue is not empty task is not complete.
+                    return !(queue.size() > 0);
+                }
+            });
         } catch (IndexerException e) {
             throw new RegistryException("Error initializing Async Indexer " + e.getMessage(), e);
         }
@@ -76,7 +97,15 @@ public class AsyncIndexer implements Runnable {
      */
     public void run() {
         while (!Thread.currentThread().isInterrupted()) { //to be compatible with executor framework
-            try {
+            if (!indexFile()) {
+                return;
+            }
+        }
+    }
+
+    private boolean indexFile() {
+        try {
+            if (queue.size() > 0) {
                 File2Index fileData = queue.take();
                 Indexer indexer = IndexingManager.getInstance().getIndexerForMediaType(
                         fileData.mediaType);
@@ -86,13 +115,25 @@ public class AsyncIndexer implements Runnable {
                     log.warn("Could not index the resource: path=" + fileData.path +
                             ", media type=" + fileData.mediaType); // to ease debugging
                 }
-            } catch (Throwable e) { // Throwable is caught to prevent the executor termination
-                if (e instanceof InterruptedException) {
-                    return; // to be compatible with executor framework. No need of logging anything
-                } else {
-                    log.error("Error while indexing.", e);
+            }else{
+                if(!canAcceptFiles){
+                    return false;
                 }
+
+                Thread.sleep(getIndexingFreqInMilliSecs());
+            }
+        } catch (Throwable e) { // Throwable is caught to prevent the executor termination
+            if (e instanceof InterruptedException) {
+                return false; // to be compatible with executor framework. No need of logging anything
+            } else {
+                log.error("Error while indexing.", e);
             }
         }
+        return true;
+    }
+
+    private long getIndexingFreqInMilliSecs(){
+        long freqInSec = IndexingManager.getInstance().getIndexingFreqInSecs();
+        return TimeUnit.MILLISECONDS.convert(freqInSec,TimeUnit.SECONDS);
     }
 }

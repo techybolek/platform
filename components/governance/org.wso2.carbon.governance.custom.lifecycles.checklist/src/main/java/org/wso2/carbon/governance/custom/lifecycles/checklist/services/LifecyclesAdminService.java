@@ -18,10 +18,11 @@ package org.wso2.carbon.governance.custom.lifecycles.checklist.services;
 
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.beans.LifecycleBean;
-import org.wso2.carbon.governance.custom.lifecycles.checklist.util.*;
+import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CommonUtil;
+import org.wso2.carbon.governance.custom.lifecycles.checklist.util.InvokeAspectUtil;
+import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleBeanPopulator;
 import org.wso2.carbon.registry.admin.api.governance.IChecklistLifecycleService;
 import org.wso2.carbon.registry.common.services.RegistryAbstractAdmin;
-import org.wso2.carbon.registry.common.utils.RegistryUtil;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 

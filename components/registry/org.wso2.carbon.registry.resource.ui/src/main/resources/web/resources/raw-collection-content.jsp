@@ -110,7 +110,7 @@
     <table class="styledLeft">
     <tr>
         <td class="middle-header" colspan="2"><fmt:message key="upload.content.from.file1"/></td>
-    </tr>
+   </tr>
     <tr>
         <td valign="top" style="width:120px;">
             <span><fmt:message key="file"/> <span class="required">*</span></span></td>
@@ -290,7 +290,7 @@
     </td>
 </tr>
 <tr>
-    <td style="width:120px;"><fmt:message key="media.type"/></td>
+    <td style="width:80px;"><fmt:message key="media.type"/></td>
     <td><select id="customMediaTypeID" onchange="updateOther('customMediaTypeID', 'other')">
 <%
             if(mimeMappings != null) {
@@ -303,7 +303,7 @@
 %>
         <option value="other"><fmt:message key="other"/></option>
         </select>&nbsp;&nbsp;
-        <span id="customMediaTypeIDOther" style="display:none"><fmt:message key="other.display"/>&nbsp;
+       <span id="customMediaTypeIDOther" style="display:none">&nbsp;<fmt:message key="other.display"/>
             <input type="text" id="customMediaTypeIDOtherValue"/>
         </span>
     </td>
@@ -710,8 +710,9 @@ if (CarbonUIUtil.isSuperTenant(request)) {
         <span style="cursor:default" title="<%=resourceData.getFormattedCreatedOn()%>">
         <%
             if (resourceData.getFormattedCreatedOn().length() > 12) {
+                String createdOn = resourceData.getFormattedCreatedOn();
             // Full date scenario
-        %><%=resourceData.getFormattedCreatedOn().subSequence(0, 6)%>
+        %><%=createdOn.subSequence(0, createdOn.indexOf("ago") + 3)%>
         <%
         } else { %>
         <%=resourceData.getFormattedCreatedOn()%>

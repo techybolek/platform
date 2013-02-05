@@ -21,7 +21,7 @@ package org.wso2.carbon.registry.reporting.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.core.TaskManager;
 import org.wso2.carbon.ntask.core.service.TaskService;
@@ -57,12 +57,12 @@ public class ReportingServiceComponent {
 
     public static TaskManager getTaskManager(int tenantId) {
         try {
-            SuperTenantCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.startTenantFlow();
             try {
-                SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantId);
+                PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
                 return taskService.getTaskManager(REPORTING_TASK_MANAGER);
             } finally {
-                SuperTenantCarbonContext.endTenantFlow();
+                PrivilegedCarbonContext.endTenantFlow();
             }
         } catch (TaskException e) {
             log.error("Unable to obtain task manager", e);

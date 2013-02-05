@@ -38,7 +38,6 @@ import org.wso2.carbon.dataservices.core.description.resource.Resource;
 import org.wso2.carbon.dataservices.core.description.resource.Resource.ResourceID;
 import org.wso2.carbon.dataservices.core.description.xa.DSSXATransactionManager;
 import org.wso2.carbon.dataservices.core.internal.DataServicesDSComponent;
-import org.wso2.carbon.dataservices.core.listeners.EventBrokerServiceListener;
 import org.wso2.carbon.event.core.EventBroker;
 import org.wso2.carbon.event.core.exception.EventBrokerException;
 import org.wso2.carbon.event.core.subscription.Subscription;
@@ -56,7 +55,7 @@ import java.util.Set;
  * This class is the logical representation of a data service, and is the
  * location of all the queries, operations and configurations associated with a specific DS.
  */
-public class DataService implements EventBrokerServiceListener {
+public class DataService {
 
     private static final Log log = LogFactory.getLog(DataService.class);
 
@@ -217,7 +216,7 @@ public class DataService implements EventBrokerServiceListener {
         }
         
         /* set tenant id */
-        this.tenantId = DBUtils.getDeploymentTimeTenantId();
+        this.tenantId = DBUtils.getCurrentTenantId();
     }
 
     private void initXA() throws DataServiceFault {
@@ -389,26 +388,6 @@ public class DataService implements EventBrokerServiceListener {
             }
         } catch (EventBrokerException e) {
             throw new DataServiceFault(e);
-        }
-    }
-
-    public void initEventing(EventBroker eventBroker)
-            throws DataServiceFault {
-        /* clear earlier subscriptions, in case the subscriptions were changed in the data service,
-           * i.e. old subscriptions were removed. */
-        this.clearDataServicesEventSubscriptions(eventBroker);
-        /* register new subscriptions */
-        EventTrigger inTrigger;
-        EventTrigger outTrigger;
-        for (Query query : this.getQueries().values()) {
-            inTrigger = query.getInputEventTrigger();
-            outTrigger = query.getOutputEventTrigger();
-            if (inTrigger != null) {
-                inTrigger.initEventBroker(eventBroker);
-            }
-            if (outTrigger != null) {
-                outTrigger.initEventBroker(eventBroker);
-            }
         }
     }
 
@@ -661,11 +640,4 @@ public class DataService implements EventBrokerServiceListener {
         return buff.toString();
     }
 
-    public void setEventBroker(EventBroker eventBroker) {
-        try {
-            this.initEventing(eventBroker);
-        } catch (DataServiceFault e) {
-            log.error("Error in setting event broker", e);
-        }
-    }
 }

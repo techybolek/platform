@@ -61,7 +61,12 @@ public class DefaultAttributeFinder extends AbstractPIPAttributeFinder {
 		}
 	}
 
-	/*
+    @Override
+    public String getModuleName() {
+        return "Default Attribute Finder";
+    }
+
+    /*
 	 * (non-Javadoc)
 	 * 
 	 * @see

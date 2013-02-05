@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -46,7 +46,7 @@ public class OAuth2TokenClient {
         backendServerURL = CarbonUIUtil.getServerURL(
                 serviceComponentHolder.getServerConfigurationService());
         configContext = serviceComponentHolder.
-                getConfigurationContextService().getClientConfigContext();
+                getConfigurationContextService().getServerConfigContext();
     }
 
     public OAuth2AccessTokenRespDTO getAccessToken(OAuthTokenRequest oauthRequest)
@@ -66,6 +66,8 @@ public class OAuth2TokenClient {
             tokenReqDTO.setResourceOwnerPassword(oauthRequest.getPassword());
         } else if (GrantType.REFRESH_TOKEN.toString().equals(grantType)){
             tokenReqDTO.setRefreshToken(oauthRequest.getRefreshToken());
+        } else if (GrantType.SAML20_BEARER_ASSERTION.toString().equals(grantType)) {
+            tokenReqDTO.setAssertion(oauthRequest.getAssertion());
         }
 
         try {

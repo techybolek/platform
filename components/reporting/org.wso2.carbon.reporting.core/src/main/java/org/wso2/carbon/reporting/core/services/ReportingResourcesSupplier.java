@@ -55,11 +55,7 @@ public class ReportingResourcesSupplier extends AbstractAdmin {
         Registry registry;
         try {
 
-            try {
-                registry = ReportingComponent.getRegistryService().getConfigSystemRegistry();
-            } catch (RegistryException e) {
-                throw new ReportingException("Failed to get registry",e);
-            }
+            registry = getConfigSystemRegistry();
             template = CommonUtil.getReportResources(componentName, reportTemplate,
                                                       registry);
             return template;

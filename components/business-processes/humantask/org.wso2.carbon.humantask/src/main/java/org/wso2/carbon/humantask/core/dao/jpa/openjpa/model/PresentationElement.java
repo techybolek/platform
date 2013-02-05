@@ -24,7 +24,7 @@ import javax.persistence.*;
  * Domain Object for presentation element.
  */
 @Entity
-@Table(name = "PRESENTATION_ELEMENT")
+@Table(name = "HT_PRESENTATION_ELEMENT")
 @Inheritance
 @DiscriminatorColumn(name = "PE_TYPE")
 public class PresentationElement {
@@ -36,7 +36,7 @@ public class PresentationElement {
     @Column(name = "XML_LANG")
     private String xmlLang;
 
-    @Column(name = "CONTENT")
+    @Column(name = "PE_CONTENT", length = 2000)
     private String value;
 
     @ManyToOne

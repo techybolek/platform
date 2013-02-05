@@ -21,7 +21,8 @@ import org.wso2.carbon.databridge.agent.thrift.conf.AgentConfiguration;
 import org.wso2.carbon.databridge.agent.thrift.Agent;
 
 
-
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -38,17 +39,19 @@ public class TenantBamAgentHolder {
 
     public static TenantBamAgentHolder getInstance() {
         if (null == instance) {
-            instance = new TenantBamAgentHolder();
+            synchronized (TenantBamAgentHolder.class) {
+                if(instance == null)
+                instance = new TenantBamAgentHolder();
+            }
         }
-        createAgent();
         return instance;
     }
 
-    private static void createAgent(){
+    public synchronized Agent createAgent(AgentConfiguration configuration){
          if(agent == null){
-            AgentConfiguration configuration = new AgentConfiguration();
             agent = new Agent(configuration);
         }
+        return agent;
     }
 
     public Agent getAgent(Integer tenantId) {
@@ -59,15 +62,25 @@ public class TenantBamAgentHolder {
         return tenantDataPublisherMap.get(tenantId);
     }
 
-    public void addDataPublisher(Integer tenantId, DataPublisher publisher) {
+    public synchronized  void addDataPublisher(Integer tenantId, DataPublisher publisher) {
         tenantDataPublisherMap.put(tenantId, publisher);
     }
 
-    public void removeDataPublisher(Integer tenantId) {
+    public synchronized void removeDataPublisher(Integer tenantId) {
         tenantDataPublisherMap.remove(tenantId);
     }
 
-    public void removeAgent() {
+    public synchronized void removeAgent() {
         agent.shutdown();
+    }
+
+    public synchronized void removeDataPublishers() {
+        Collection<DataPublisher> publishers = tenantDataPublisherMap.values();
+        Iterator<DataPublisher> iterator = publishers.iterator();
+        while(iterator.hasNext()){
+           DataPublisher publisher = iterator.next();
+            publisher.stop();
+        }
+        publishers.clear();
     }
 }

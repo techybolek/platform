@@ -17,6 +17,8 @@
 package org.wso2.carbon.broker.core.internal.brokers.ws;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.util.StAXUtils;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.engine.AxisConfiguration;
@@ -34,10 +36,14 @@ import org.wso2.carbon.event.client.broker.BrokerClientException;
 import org.wso2.carbon.event.client.stub.generated.authentication.AuthenticationExceptionException;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import java.io.ByteArrayInputStream;
 import java.rmi.RemoteException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class WSBrokerType implements BrokerType {
@@ -84,17 +90,17 @@ public final class WSBrokerType implements BrokerType {
         return this.brokerTypeDto;
     }
 
-    public void subscribe(String topicName,
+    public String subscribe(String topicName,
                           BrokerListener brokerListener,
                           BrokerConfiguration brokerConfiguration,
                           AxisConfiguration axisConfiguration)
             throws BrokerEventProcessingException {
 
-
+                 String subscriptionId= UUID.randomUUID().toString();
         try {
 
             AxisService axisService =
-                    Axis2Util.registerAxis2Service(topicName, brokerListener, brokerConfiguration, axisConfiguration);
+                    Axis2Util.registerAxis2Service(topicName, brokerListener, brokerConfiguration, axisConfiguration, subscriptionId);
 
             String httpEpr = null;
             for (String epr : axisService.getEPRs()) {
@@ -120,14 +126,15 @@ public final class WSBrokerType implements BrokerType {
             String subscriptionID = brokerClient.subscribe(topicName, httpEpr);
 
             // keep the subscription id to unsubscribe
-            Map<String, String> topicSubscriptionsMap =
+            Map<String, String> localSubscriptionIdSubscriptionsMap =
                     this.brokerSubscriptionsMap.get(brokerConfiguration.getName());
-            if (topicSubscriptionsMap == null) {
-                topicSubscriptionsMap = new ConcurrentHashMap<String, String>();
-                this.brokerSubscriptionsMap.put(brokerConfiguration.getName(), topicSubscriptionsMap);
+            if (localSubscriptionIdSubscriptionsMap == null) {
+                localSubscriptionIdSubscriptionsMap = new ConcurrentHashMap<String, String>();
+                this.brokerSubscriptionsMap.put(brokerConfiguration.getName(), localSubscriptionIdSubscriptionsMap);
             }
 
-            topicSubscriptionsMap.put(topicName, subscriptionID);
+            localSubscriptionIdSubscriptionsMap.put(subscriptionId, subscriptionID);
+            return subscriptionId;
 
         } catch (BrokerClientException e) {
             throw new BrokerEventProcessingException("Can not create the broker client", e);
@@ -161,24 +168,38 @@ public final class WSBrokerType implements BrokerType {
 
     }
 
+    @Override
+    public void testConnection(BrokerConfiguration brokerConfiguration) throws BrokerEventProcessingException {
+        String testMessage = " <brokerConfigurationTest>\n" +
+                "   <message>This is a test message.</message>\n" +
+                "   </brokerConfigurationTest>";
+        try {
+            XMLStreamReader reader1 = StAXUtils.createXMLStreamReader(new ByteArrayInputStream(testMessage.getBytes()));
+            StAXOMBuilder builder1 = new StAXOMBuilder(reader1);
+            publish("test", builder1.getDocumentElement(), brokerConfiguration);
+        } catch (XMLStreamException e) {
+            //ignored as this will not happen
+        }
+    }
+
     public void unsubscribe(String topicName,
                             BrokerConfiguration brokerConfiguration,
-                            AxisConfiguration axisConfiguration)
+                            AxisConfiguration axisConfiguration,String subscriptionId)
             throws BrokerEventProcessingException {
         try {
-            Axis2Util.removeOperation(topicName, brokerConfiguration, axisConfiguration);
+            Axis2Util.removeOperation(topicName, brokerConfiguration, axisConfiguration, subscriptionId);
         } catch (AxisFault axisFault) {
             throw new BrokerEventProcessingException("Can not unsubscribe from the broker", axisFault);
         }
 
-        Map<String, String> topicSubscriptionsMap =
+        Map<String, String> localSubscriptionIdSubscriptionsMap =
                 this.brokerSubscriptionsMap.get(brokerConfiguration.getName());
-        if (topicSubscriptionsMap == null) {
+        if (localSubscriptionIdSubscriptionsMap == null) {
             throw new BrokerEventProcessingException("There is no subscription for broker "
                                                      + brokerConfiguration.getName());
         }
 
-        String subscriptionID = topicSubscriptionsMap.remove(topicName);
+        String subscriptionID = localSubscriptionIdSubscriptionsMap.remove(subscriptionId);
         if (subscriptionID == null) {
             throw new BrokerEventProcessingException("There is no subscriptions for this topic" + topicName);
         }

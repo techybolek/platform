@@ -86,7 +86,7 @@
         if(captchaInfoBean == null){
     %>
         <div>
-            Error in generating the captcha image.
+            <p><fmt:message key="error.captcha.generate"/></p>.
         </div>
     <%
             return;
@@ -100,7 +100,6 @@
     <form id="userIdValidation" action="forgot_password_step2.jsp" method="post">
         <table>
             <tbody>
-            <tr>
             <tr>
                 <td><fmt:message key="enter.user.id"/><span class="required">*</span></td>
                 <td colspan="2"><input type="text" tabindex="1" name="userName" id="userName"

@@ -32,7 +32,7 @@ import org.wso2.carbon.automation.api.clients.eventing.EventSourceAdminClient;
 import org.wso2.carbon.automation.api.clients.jarservices.JARServiceUploaderClient;
 import org.wso2.carbon.automation.api.clients.localentry.LocalEntriesAdminClient;
 import org.wso2.carbon.automation.api.clients.mashup.MashupFileUploaderClient;
-import org.wso2.carbon.automation.api.clients.mediation.MassageStoreAdminClient;
+import org.wso2.carbon.automation.api.clients.mediation.MessageStoreAdminClient;
 import org.wso2.carbon.automation.api.clients.mediation.MessageProcessorClient;
 import org.wso2.carbon.automation.api.clients.mediation.SynapseConfigAdminClient;
 import org.wso2.carbon.automation.api.clients.priority.executor.PriorityMediationAdminClient;
@@ -270,6 +270,7 @@ public class ArtifactDeployerUtil {
                 }
             }
         }
+        assert sqlFileLis != null;
         if (sqlFileLis.size() > 0) {
             SqlDataSourceUtil dssUtil =
                     new SqlDataSourceUtil(sessionCookie, backEndUrl, frameworkProperties, artifact.getUserId());
@@ -578,8 +579,8 @@ public class ArtifactDeployerUtil {
             for (String messageStoreFile : messageStoreFiles) {
                 log.info("Deploying Message Store configuration in " + messageStoreFile);
 
-                MassageStoreAdminClient messageStoreAdmin =
-                        new MassageStoreAdminClient(backendURL, sessionCookie);
+                MessageStoreAdminClient messageStoreAdmin =
+                        new MessageStoreAdminClient(backendURL, sessionCookie);
                 URL messageStore = new URL("file:///" + scenarioConfigDir + File.separator +
                                            MESSAGESTORE_DIR + File.separator + messageStoreFile);
                 DataHandler messageStoreDh = new DataHandler(messageStore);

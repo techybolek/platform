@@ -20,24 +20,13 @@ package org.wso2.carbon.bam.data.publisher.util;
 
 public class BAMDataPublisherConstants {
 
-    public static final String AGENT_CONFIG = "agent.xml";
-    public static final String PUBLISHER_CONFIG_THREAD_POOL_ELEMENT = "ThreadPool";
-
-    public static final String PUBLISHER_CONFIG_TASK_QUEUE_SIZE_ELEMENT = "TaskQueue";
-    public static final String PUBLISHER_CONFIG_CORE_POOL_SIZE_ELEMENT = "CorePool";
-    public static final String PUBLISHER_CONFIG_MAX_POOL_SIZE_ELEMENT = "MaxPool";
-
-    public static final String PUBLISHER_CONFIG_EVENT_QUEUE_SIZE_ELEMENT = "EventQueue";
-
-    public static final String PUBLISHER_CONFIG_CONNECTION_POOL_ELEMENT = "ConnectionPool";
-    public static final String PUBLISHER_CONFIG_MAX_IDLE_SIZE_ELEMENT = "MaxIdle";
-    public static final String PUBLISHER_CONFIG_TIME_GAP_EVICTION_RUN_ELEMENT = "TimeBetweenEvictionRunsMillis";
-    public static final String PUBLISHER_CONFIG_MIN_IDLE_TIME_ELEMENT = "MinEvictableIdleTimeMillis";
-
 
     public static final String STATISTICS_REQUEST_RECIEVED_TIME = "wso2statistics.request.received.time";
 
 
+    public static final String IN_DIRECTION = "IN";
+    public static final String OUT_DIRECTION = "OUT";
+    
     public static final String HTTP_HEADER_USER_AGENT = "user-agent";
     public static final String HTTP_HEADER_HOST = "host";
     public static final String HTTP_HEADER_REFERER = "referer";
@@ -56,6 +45,8 @@ public class BAMDataPublisherConstants {
     public static final String MSG_ACTIVITY_ID = "bam_activity_id";
     public static final String MSG_ID = "message_id";
     public static final String MSG_BODY = "message_body";
+    public static final String SOAP_BODY = "soap_body";
+    public static final String SOAP_HEADER = "soap_header";
     public static final String IN_MSG_ID = "in_message_id";
     public static final String IN_MSG_BODY = "in_message_body";
     public static final String OUT_MSG_ID = "out_message_id";
@@ -75,10 +66,17 @@ public class BAMDataPublisherConstants {
     public static final String NICK_NAME = "nickName";
     public static final String DESCRIPTION = "description";
 
+    public static final String ACTIVIY_STREAM_NAME = "activityStreamName";
+    public static final String ACTIVITY_VERSION = "activityVersion";
+    public static final String ACTIVITY_NICK_NAME = "activityNickName";
+    public static final String ACTIVITY_DESCRIPTION = "activityDescription";
+
 
     public static final String SOAP_ENVELOP_NAMESPACE_URI = "soap_envelop_namespace";
 
     public static final String PUBLISH_DATA = "event_data";
+    public static final String ACTIVITY_PUBLISH_DATA = "activity_data";
+    public static final String STAT_PUBLISH_DATA = "stat_data";
     public static final String HOSTNAME_AND_PORT_SEPARATOR = ":";
     public static final String PREFIX_FOR_REGISTRY_HIDDEN_PROPERTIES = "registry.";
 }

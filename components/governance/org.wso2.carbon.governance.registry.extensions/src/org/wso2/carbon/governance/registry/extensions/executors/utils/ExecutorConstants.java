@@ -1,5 +1,8 @@
 package org.wso2.carbon.governance.registry.extensions.executors.utils;
 
+import org.wso2.carbon.governance.api.util.GovernanceConstants;
+import org.wso2.carbon.registry.core.RegistryConstants;
+
 public class ExecutorConstants {
 
     /**
@@ -20,7 +23,28 @@ public class ExecutorConstants {
     /**
      * Defines the service media type key
      */
-    public static final String SERVICE_MEDIATYPE = "service.mediatype";
+    public static final String SERVICE_MEDIA_TYPE_KEY = "service.mediatype";
+
+    /**
+     * defines the endpoint media type
+     */
+    public static final String WSDL_MEDIA_TYPE = GovernanceConstants.WSDL_MEDIA_TYPE;
+
+    /**
+     * defines the endpoint media type
+     */
+    public static final String SCHEMA_MEDIA_TYPE = GovernanceConstants.SCHEMA_MEDIA_TYPE;
+
+    /**
+     * defines the endpoint media type
+     */
+    public static final String ENDPOINT_MEDIA_TYPE = GovernanceConstants.ENDPOINT_MEDIA_TYPE;
+
+    /**
+     * defines the policy media type
+     */
+    public static final String POLICY_MEDIA_TYPE = GovernanceConstants.POLICY_XML_MEDIA_TYPE;
+
 
     /**
      * Defines the copy comments key
@@ -67,4 +91,13 @@ public class ExecutorConstants {
      */
     public static final String RESOURCE_VERSION = "{@version}";
 
+    /**
+     * Defines the xpath expression that is used to find import elements
+     */
+    public static final String IMPORT_XPATH_STRING = "//x:import";
+
+    /**
+     * Defines the xpath expression that is used to find the embedded schema
+     */
+    public static final String XSD_XPATH_STRING = "//x:schema";
 }

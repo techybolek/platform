@@ -62,6 +62,11 @@ public class TaskAdminClient {
         taskAdminStub.addTaskDescription(scheduleTaskElem);
     }
 
+    public void addTask(OMElement scheduleTaskElem)
+            throws TaskManagementException, RemoteException {
+        taskAdminStub.addTaskDescription(scheduleTaskElem);
+    }
+
     public void deleteTask(String name, String group)
             throws TaskManagementException, RemoteException {
         taskAdminStub.deleteTaskDescription(name, group);

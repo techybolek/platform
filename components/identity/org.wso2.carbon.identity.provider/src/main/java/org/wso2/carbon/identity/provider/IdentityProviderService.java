@@ -17,11 +17,13 @@
 */
 package org.wso2.carbon.identity.provider;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Element;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.core.util.AdminServicesUtil;
 import org.wso2.carbon.identity.base.IdentityConstants.ServerConfig;
@@ -29,9 +31,6 @@ import org.wso2.carbon.identity.core.persistence.IdentityPersistenceManager;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.utils.ServerConstants;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 /**
  * This services has the functionality related to Information Cards / OpenID dash-board

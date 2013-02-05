@@ -6,10 +6,18 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
        
-        <fileSet>
+	<fileSet>
+ 		<directory>src/main/resources/</directory>
+  		<outputDirectory>lib</outputDirectory>
+  		<includes>
+   			 <include>linkedinj-1.0.0.wso2v1.jar</include>
+  		</includes>
+	</fileSet>
+
+        <!--fileSet>
             <directory>target/connector/dependencies</directory>
             <outputDirectory>lib</outputDirectory>
-        </fileSet>
+        </fileSet-->
         <fileSet>
             <directory>target/classes</directory>
             <outputDirectory></outputDirectory>

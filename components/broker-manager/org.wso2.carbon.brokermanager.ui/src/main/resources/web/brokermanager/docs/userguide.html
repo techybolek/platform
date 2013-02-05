@@ -27,7 +27,7 @@
 
 <h2>Create New Broker</h2>
 
-<P>There are three broker types available to create such as Local, WS-Event and JMS-Qpid.</P>
+<P>There are four broker types available to create such as Local, WS-Event, Agent and JMS.</P>
 <ul>
     <li>
         <h2>Create Local Broker</h2>
@@ -36,7 +36,8 @@
 
         <p>Figure 1: Create Local Broker</p>
 
-        <p>To create a local broker, only the broker name is required.</p>
+        <p>To create a local broker, only the broker name is required.When Local Broker is used CEP
+            will use Local Transport when receiving events from the broker and sending events to the broker.</p>
     </li>
     <li>
         <h2>Create WS-Event Broker</h2>
@@ -45,18 +46,30 @@
 
         <p>Figure 2: Create WS-Event Broker</p>
 
-        <p>To create a ws-event broker, add the Event broker service URI in URI field.</p>
+        <p>WS-Event Broker can be used to send and receive XML/SOAP messages as WS-Events.</p>
     </li>
     <li>
-        <h2>Create JMS-Qpid Broker</h2>
+        <h2>Create JMS Broker</h2>
 
         <p><img alt="" src="../images/jmsBroker.png"/></p>
 
-        <p>Figure 3: Create JMS-Qpid Broker</p>
+        <p>Figure 3: Create JMS Broker</p>
 
-        <p>To create a jms-qpid broker, set the properties as in the image. Virtual host name can be
-           found in virtualhosts.xml file located in $CARBON_HOME/repository/conf/advanced/. These
-           parameters are used to get a TCP connection to the broker.</p>
+        <p>Using JMS Broker any type of XML and Map events can be sent as JMS events using JMS transport.</p>
+    </li>
+    <li>
+        <h2>Create Agent Broker</h2>
+
+        <p><img alt="" src="../images/agentBroker.png"/></p>
+
+        <p>Figure 4: Create Agent Broker</p>
+
+        <p>Agent Broker is a broker that handles WSO2 Common Events. This can receive events over
+            Thrift using TCP, SSL, HTTP, and HTTPS, and it can also receive JSON events via HTTP and
+            HTTPS.CEP is shipped with an Agent Broker which will be used
+            to receive fired events and handover them to CEP using Local Transport.
+            From CEP we can send output events to any Agent Broker using Thrift over TCP, SSL, HTTP,
+            or HTTPS.</p>
     </li>
 </ul>
 
@@ -64,7 +77,7 @@
 
 <p><img alt="" src="../images/listBrokers.png"/></p>
 
-<p>Figure 4: List Brokers</p>
+<p>Figure 5: List Brokers</p>
 
 <p>All the created brokers are listed and can be deleted.</p>
 

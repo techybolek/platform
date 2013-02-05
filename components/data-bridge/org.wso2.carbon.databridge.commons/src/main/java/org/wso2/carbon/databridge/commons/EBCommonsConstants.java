@@ -23,7 +23,10 @@ public class EBCommonsConstants {
     public static final String DESCRIPTION = "description";
     public static final String TAGS = "tags";
     public static final String META_DATA = "metaData";
+    public static final String META = "meta";
     public static final String CORRELATION_DATA = "correlationData";
+    public static final String CORRELATION = "correlation";
+    public static final String ARBITRARY_DATA_MAP = "arbitraryDataMap";
     public static final String PAYLOAD_DATA = "payloadData";
     public static final String TIME_STAMP = "timeStamp";
 }

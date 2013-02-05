@@ -19,7 +19,7 @@ package org.wso2.carbon.dashboard.mgt.gadgetrepo.handlers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.dashboard.common.DashboardConstants;
 import org.wso2.carbon.dashboard.mgt.gadgetrepo.GadgetRepoContext;
 import org.wso2.carbon.registry.core.Collection;
@@ -46,7 +46,7 @@ public class GadgetZipUploadHandler extends Handler {
 
     public void put(RequestContext requestContext) throws RegistryException {
 
-        int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
+        int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
         Registry sysRegistry = GadgetRepoContext.getRegistryService().getConfigSystemRegistry(tenantId);
 
         // adding the stream from the resource to the zip input

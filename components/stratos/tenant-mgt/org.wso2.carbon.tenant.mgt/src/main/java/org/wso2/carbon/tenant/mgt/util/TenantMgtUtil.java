@@ -372,7 +372,7 @@ public class TenantMgtUtil {
         }
 
         //activating the subscription
-        try {
+        /*try {
             if (TenantMgtServiceComponent.getBillingService() != null) {
                 TenantMgtServiceComponent.getBillingService().activateUsagePlan(tenantDomain);
             }
@@ -380,7 +380,7 @@ public class TenantMgtUtil {
             String msg = "Error while activating subscription for domain: " + tenantDomain + ".";
             log.error(msg, e);
             throw new Exception(msg, e);
-        }
+        }*/
     }
 
     /**

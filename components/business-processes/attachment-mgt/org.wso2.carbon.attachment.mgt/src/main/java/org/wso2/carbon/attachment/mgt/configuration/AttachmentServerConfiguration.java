@@ -57,7 +57,7 @@ public class AttachmentServerConfiguration {
     private boolean showSql;
 
     public AttachmentServerConfiguration() {
-        this.dataSourceName = "attachmentds";
+        this.dataSourceName = "bpsds";
         this.dataSourceJNDIRepoInitialContextFactory = null;
         this.dataSourceJNDIRepoProviderURL = null;
         this.daoConnectionFactoryClass = "org.wso2.carbon.attachment.mgt.core.dao.impl.jpa" +

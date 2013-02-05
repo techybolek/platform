@@ -111,6 +111,7 @@
         addServiceParameter("message.processor.fault.sequence", document.getElementById('message_processor_fault_sequence').value);
         addServiceParameter("quartz.conf", document.getElementById('quartz_conf').value);
         addServiceParameter("cronExpression", document.getElementById('cron_expression').value);
+        addServiceParameter("pinnedServers", document.getElementById('pinnedServers').value);
     }
 
     function addServiceParameter(parameter, value) {
@@ -368,13 +369,11 @@
                     <tr>
                         <td><fmt:message key="message.processor.reply.sequence"/></td>
                         <td><input type="text" id="message_processor_reply_sequence"
-                                   name="message_processor_reply_sequence"
+                                   name="message_processor_reply_sequence" style="float: left; position: relative;"
                                    value="<%=((null!=processorData)&& processorData.getParams() != null
                                         && !processorData.getParams().isEmpty()&&(processorData.getParams().get("message.processor.reply.sequence")!=null))?processorData.getParams().get("message.processor.reply.sequence"):""%>"
                                 />
-                      	
-                        </td>
-                        <td>
+
                             <a href="#" class="registry-picker-icon-link"  onclick="showRegistryBrowser('message_processor_reply_sequence','/_system/config')"><fmt:message key="processor.conf.registry.browser"/></a>
                        		<a href="#" class="registry-picker-icon-link"  onclick="showRegistryBrowser('message_processor_reply_sequence','/_system/governance')"><fmt:message key="processor.gov.registry.browser"/></a>
                 
@@ -384,12 +383,11 @@
                     <tr>
                         <td><fmt:message key="message.processor.fault.sequence"/></td>
                         <td><input type="text" id="message_processor_fault_sequence"
-                                   name="message_processor_fault_sequence"
+                                   name="message_processor_fault_sequence" style="float: left; position: relative;"
                                    value="<%=((null!=processorData)&& processorData.getParams() != null
                                         && !processorData.getParams().isEmpty()&&(processorData.getParams().get("message.processor.fault.sequence")!=null))?processorData.getParams().get("message.processor.fault.sequence"):""%>"
                                 />
-                         </td>
-                         <td>
+
                              <a href="#" class="registry-picker-icon-link"  onclick="showRegistryBrowser('message_processor_fault_sequence','/_system/config')"><fmt:message key="processor.conf.registry.browser"/></a>
                        		<a href="#" class="registry-picker-icon-link"  onclick="showRegistryBrowser('message_processor_fault_sequence','/_system/governance')"><fmt:message key="processor.gov.registry.browser"/></a>
                          </td>
@@ -408,6 +406,14 @@
                         <td><input type="text" id="cron_expression" name="cron_expression"
                                    value="<%=((null!=processorData)&& processorData.getParams() != null
                                         && !processorData.getParams().isEmpty()&&(processorData.getParams().get("cronExpression")!=null))?processorData.getParams().get("cronExpression"):""%>"
+                                   size="75"/>
+                        </td>
+                    </tr>
+                     <tr>
+                        <td><fmt:message key="message.pinned.severs"/></td>
+                        <td><input type="text" id="pinnedServers" name="pinnedServers"
+                                   value="<%=((null!=processorData)&& processorData.getParams() != null
+                                        && !processorData.getParams().isEmpty()&&(processorData.getParams().get("pinnedServers")!=null))?processorData.getParams().get("pinnedServers"):""%>"
                                    size="75"/>
                         </td>
                     </tr>

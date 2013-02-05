@@ -17,6 +17,7 @@
 package org.wso2.carbon.governance.custom.lifecycles.checklist.util;
 
 import org.wso2.carbon.governance.custom.lifecycles.checklist.beans.LifecycleBean;
+import org.wso2.carbon.governance.registry.extensions.aspects.utils.LifecycleConstants;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
@@ -41,7 +42,7 @@ public class LifecycleBeanPopulator {
         LifecycleBean lifecycleBean;
         ResourcePath resourcePath = new ResourcePath(path);
         UserRealm userRealm;
-
+        boolean isTransactionStarted = false;
         try {
             Resource resource = registry.get(path);
             if (resource != null) {
@@ -80,7 +81,6 @@ public class LifecycleBeanPopulator {
 
                 List<String> lifecycleAspectsToAdd = new LinkedList<String>();
                 if (aspectsToAdd != null) {
-                    boolean isTransactionStarted = false;
                     String tempResourcePath = "/governance/lcm/" + UUIDGenerator.generateUUID();
                     for (String aspectToAdd : aspectsToAdd) {
                         if (systemRegistry.getRegistryContext().isReadOnly()) {
@@ -118,6 +118,7 @@ public class LifecycleBeanPopulator {
                     if (isTransactionStarted) {
                         systemRegistry.delete(tempResourcePath);
                         systemRegistry.rollbackTransaction();
+                        isTransactionStarted = false;
                     }
                 }
                 lifecycleBean.setAspectsToAdd(lifecycleAspectsToAdd.toArray(
@@ -126,6 +127,7 @@ public class LifecycleBeanPopulator {
                 resource = registry.get(path);
                 Properties props = resource.getProperties();
                 List<Property> propList = new ArrayList<Property>();
+                List<Property> voteList = new ArrayList<Property>();
                 Iterator iKeys = props.keySet().iterator();
                 while (iKeys.hasNext()) {
                     String propKey = (String) iKeys.next();
@@ -139,10 +141,31 @@ public class LifecycleBeanPopulator {
                         List<String> propValues = (List<String>) props.get(propKey);
                         property.setValues(propValues.toArray(new String[propValues.size()]));
                         propList.add(property);
+                    } else if (propKey.startsWith("registry.custom_lifecycle.votes.option.")) {
+                    	Property property = new Property();
+                        property.setKey(propKey);
+                        List<String> propValues = (List<String>) props.get(propKey);
+                        if (propKey.endsWith(".vote")) {                        	
+                            boolean userVoted = false;
+                            for (String propValue : propValues) {
+    							if (propValue.startsWith("users:")) {
+    								String users = propValue.replace("users:", "");
+    			                	String[] votedUsers = users.split(",");
+    			                	userVoted = Arrays.asList(votedUsers).contains(registry.getUserName()); 
+    							}
+    						} 
+                            propValues.add("uservote:"+userVoted); 
+                        }                        
+                    	
+                        property.setValues(propValues.toArray(new String[propValues.size()]));
+                        voteList.add(property);
                     }
                 }
+               
+                
 
                 lifecycleBean.setLifecycleProperties(propList.toArray(new Property[propList.size()]));
+                lifecycleBean.setLifecycleApproval(voteList.toArray(new Property[voteList.size()]));
 
                 lifecycleBean.setPathWithVersion(resourcePath.getPathWithVersion());
                 lifecycleBean.setVersionView(!resourcePath.isCurrentVersion());
@@ -170,6 +193,10 @@ public class LifecycleBeanPopulator {
                     resourcePath + ". " + e.getMessage();
             log.error(msg, e);
             throw new Exception(msg, e);
+        } finally {
+            if (isTransactionStarted) {
+                systemRegistry.rollbackTransaction();
+            }
         }
 
         return lifecycleBean;

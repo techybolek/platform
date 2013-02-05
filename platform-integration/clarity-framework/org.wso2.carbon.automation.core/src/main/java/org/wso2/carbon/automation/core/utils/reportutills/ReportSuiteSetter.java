@@ -97,9 +97,14 @@ public class ReportSuiteSetter {
                 return state;  //To change body of implemented methods use File | Settings | File Templates.
             }
 
-            public IAnnotationFinder getAnnotationFinder(String type) {
-                return suite.getAnnotationFinder(type);  //To change body of implemented methods use File | Settings | File Templates.
+            public IAnnotationFinder getAnnotationFinder(String s) {
+                return null;  //To change body of implemented methods use File | Settings | File Templates.
             }
+
+            public IAnnotationFinder getAnnotationFinder() {
+                return suite.getAnnotationFinder();  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
 
             public XmlSuite getXmlSuite() {
                 return suite.getXmlSuite();  //To change body of implemented methods use File | Settings | File Templates.

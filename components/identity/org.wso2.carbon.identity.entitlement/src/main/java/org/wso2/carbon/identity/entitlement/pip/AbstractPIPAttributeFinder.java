@@ -24,19 +24,14 @@ import org.wso2.balana.attr.AttributeValue;
 import org.wso2.balana.attr.BagAttribute;
 import org.wso2.balana.attr.StringAttribute;
 import org.wso2.balana.cond.EvaluationResult;
-import net.sf.jsr107cache.Cache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.caching.core.identity.IdentityCacheEntry;
-import org.wso2.carbon.caching.core.identity.IdentityCacheKey;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
-import org.wso2.carbon.identity.entitlement.EntitlementUtil;
+import org.wso2.carbon.identity.entitlement.cache.PIPAbstractAttributeCache;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
@@ -46,9 +41,9 @@ import java.util.Set;
 public abstract class AbstractPIPAttributeFinder implements PIPAttributeFinder {
 
 	private static Log log = LogFactory.getLog(AbstractPIPAttributeFinder.class);
-	private Cache abstractAttributeFinderCache = null;
+	private PIPAbstractAttributeCache abstractAttributeFinderCache = null;
 	private boolean isAbstractAttributeCachingEnabled = false;
-	private int tenantId;
+	protected int tenantId;
 
 	/**
 	 * This is the overloaded simplify version of the getAttributeValues() method. Any one who extends the
@@ -84,6 +79,8 @@ public abstract class AbstractPIPAttributeFinder implements PIPAttributeFinder {
         EvaluationResult environment;
         String environmentId = null;
         Set<String> attributeValues = null;
+        
+        tenantId =  CarbonContext.getCurrentContext().getTenantId();
 
         subject = evaluationCtx.getAttribute(new URI(StringAttribute.identifier), new URI(
                 EntitlementConstants.SUBJECT_ID_DEFAULT), issuer, new URI(XACMLConstants.SUBJECT_CATEGORY));
@@ -141,28 +138,15 @@ public abstract class AbstractPIPAttributeFinder implements PIPAttributeFinder {
             }
         }
 
-        IdentityCacheKey cacheKey = null;
+        String key  = null;
         
         if(isAbstractAttributeCachingEnabled){
-            String key = (subjectId != null  ? subjectId : "")  + (resourceId != null  ? resourceId : "") +
+            key = (subjectId != null  ? subjectId : "")  + (resourceId != null  ? resourceId : "") +
                                 (environmentId != null  ? environmentId : "") + (attributeId != null ? attributeId : "") +
                                 (issuer != null  ? issuer : "" ) +
                                 (actionId != null ? actionId:"");
 
-            tenantId = CarbonContext.getCurrentContext().getTenantId();
-            cacheKey = new IdentityCacheKey(tenantId, key);
-            if(cacheKey != null){
-                IdentityCacheEntry entry = (IdentityCacheEntry) abstractAttributeFinderCache
-                        .get(cacheKey);
-                if (entry != null) {
-                    String[] values= entry.getCacheEntryArray();
-                    attributeValues = new HashSet<String>(Arrays.asList(values));
-                    if (log.isDebugEnabled()) {
-                        log.debug("Carbon Attribute Cache Hit");
-                    }
-                }
-            }
-
+            attributeValues = abstractAttributeFinderCache.getFromCache(tenantId, key);
         }
         
         if(attributeValues == null){
@@ -171,13 +155,15 @@ public abstract class AbstractPIPAttributeFinder implements PIPAttributeFinder {
             }
             attributeValues = getAttributeValues(subjectId, resourceId, actionId, environmentId,
                                                 attributeId.toString(), issuer);
-            if (isAbstractAttributeCachingEnabled && cacheKey != null) {
+            if (isAbstractAttributeCachingEnabled && key != null) {
                 if(attributeValues != null && !attributeValues.isEmpty()){
-                    IdentityCacheEntry cacheEntry = new IdentityCacheEntry(attributeValues.
-                            toArray(new String[attributeValues.size()]));
-                    abstractAttributeFinderCache.put(cacheKey, cacheEntry);
+                    abstractAttributeFinderCache.addToCache(tenantId, key, attributeValues);
                 }
             }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Carbon Attribute Cache Hit");
+            }            
         }
 
         return attributeValues;
@@ -186,10 +172,9 @@ public abstract class AbstractPIPAttributeFinder implements PIPAttributeFinder {
 
 	@Override
 	public boolean overrideDefaultCache() {
-        Properties properties = EntitlementServiceComponent.getEntitlementConfig().getCachingProperties();        
+        Properties properties = EntitlementServiceComponent.getEntitlementConfig().getEngineProperties();
         if ("true".equals(properties.getProperty(EntitlementConstants.ATTRIBUTE_CACHING))) {
-            abstractAttributeFinderCache = EntitlementUtil
-                    .getCommonCache(EntitlementConstants.PIP_ABSTRACT_ATTRIBUTE_CACHE);
+            abstractAttributeFinderCache = PIPAbstractAttributeCache.getInstance();
             isAbstractAttributeCachingEnabled = true;
             return true;
         } else {
@@ -200,7 +185,7 @@ public abstract class AbstractPIPAttributeFinder implements PIPAttributeFinder {
 	@Override
 	public void clearCache() {
         if(abstractAttributeFinderCache != null){
-            abstractAttributeFinderCache.clear();
+            abstractAttributeFinderCache.clearCache(tenantId);
         }
 	}
 

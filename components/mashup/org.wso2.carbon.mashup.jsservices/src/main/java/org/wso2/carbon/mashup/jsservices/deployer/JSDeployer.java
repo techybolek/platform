@@ -40,7 +40,7 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.wso2.carbon.CarbonException;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mashup.javascript.hostobjects.system.MSTaskAdmin;
 import org.wso2.carbon.mashup.javascript.messagereceiver.JavaScriptEngine;
 import org.wso2.carbon.mashup.javascript.messagereceiver.JavaScriptEngineUtils;
@@ -154,9 +154,8 @@ public class JSDeployer extends AbstractDeployer {
         String jsFileName = deploymentFileData.getName();
         try {
             //Set tenant flow with the relevant tenant id
-            tenantId = SuperTenantCarbonContext.getCurrentContext(this.configCtx).getTenantId();
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantId);
+            tenantId = PrivilegedCarbonContext.getCurrentContext(this.configCtx).getTenantId();
+            PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
 
             deploymentFileData.setClassLoader(axisConfig.getServiceClassLoader());
             AxisServiceGroup serviceGroup = new AxisServiceGroup(axisConfig);
@@ -203,7 +202,6 @@ public class JSDeployer extends AbstractDeployer {
 
             }
             //End tenant flow
-            SuperTenantCarbonContext.endTenantFlow();
             RhinoEngine.exitContext();
         }
     }
@@ -250,9 +248,9 @@ public class JSDeployer extends AbstractDeployer {
             String username = tokenizer.nextToken();
 
             //Set tenant flow with the relevant tenant id
-            tenantId = SuperTenantCarbonContext.getCurrentContext(this.configCtx).getTenantId();
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantId);
+            tenantId = PrivilegedCarbonContext.getCurrentContext(this.configCtx).getTenantId();
+           
+            PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
 
             String serviceGroupName = username + MashupConstants.SEPARATOR_CHAR + jsFileNameShort;
             AxisServiceGroup group = axisConfig.getServiceGroup(serviceGroupName);
@@ -304,8 +302,7 @@ public class JSDeployer extends AbstractDeployer {
 
         } catch (AxisFault axisFault) {
             throw new DeploymentException(axisFault);
-        } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+       
         }
     }
 

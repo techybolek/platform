@@ -59,24 +59,7 @@ public class ClaimsMgtUtil {
             log.warn(msg, e);
             // Not exceptions, due to the existence of tenants with no full name.
         }
-
-        if(firstName == null || firstName.trim().length() < 1){
-            RealmService realmService = IdentityMgtServiceComponent.getRealmService();
-            if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
-                return realmService.getBootstrapRealmConfiguration().getAdminUserName();
-            }
-            try {
-                if (realmService.getTenantManager().getTenant(tenantId) != null) {
-                    firstName = realmService.getTenantManager().getTenant(tenantId).getAdminName();
-                }
-            } catch (UserStoreException e) {
-                String msg = "Unable to retrieve the first name for tenant admin with the tenant Id: " +
-                        tenantId;
-                log.error(msg, e);
-                throw new IdentityMgtException(msg, e);
-            }
-        }
-
+        
         return firstName;
     }
 
@@ -148,8 +131,11 @@ public class ClaimsMgtUtil {
         
         try {
             if (userStoreManager != null) {
-                userStoreManager.setUserClaimValue(userName, claim, value,
-                                                                UserCoreConstants.DEFAULT_PROFILE);
+                String oldValue = userStoreManager.getUserClaimValue(userName, claim, null);
+                if(oldValue == null || !oldValue.equals(value)){                
+                    ((AbstractUserStoreManager)userStoreManager).doSetUserClaimValue(userName, claim, value,
+                                                                    UserCoreConstants.DEFAULT_PROFILE);
+                }
             }
         } catch (Exception e) {
             String msg =  "Unable to set the claim for user : " + userName;
@@ -186,7 +172,7 @@ public class ClaimsMgtUtil {
         }
         try {
             if (userStoreManager != null) {
-                userList = ((AbstractUserStoreManager)userStoreManager).getUserList(claim, value, null);
+                userList = userStoreManager.getUserList(claim, value, null);
             }
             return userList;
         } catch (Exception e) {
@@ -231,5 +217,4 @@ public class ClaimsMgtUtil {
 
         return email;
     }
-
 }

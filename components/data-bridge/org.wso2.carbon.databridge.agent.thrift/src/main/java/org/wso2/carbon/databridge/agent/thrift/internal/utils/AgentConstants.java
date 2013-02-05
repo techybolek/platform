@@ -27,7 +27,8 @@ package org.wso2.carbon.databridge.agent.thrift.internal.utils;
 public final class AgentConstants {
 
 
-    private AgentConstants() { }
+    private AgentConstants() {
+    }
 
     public static final String HOSTNAME_AND_PORT_SEPARATOR = ":";
     public static final String SEPARATOR = ",";
@@ -35,6 +36,7 @@ public final class AgentConstants {
     public static final String AGENT_CONF = "thrift-agent-config.xml";
     public static final String AGENT_CONF_NAMESPACE = "http://wso2.org/carbon/databridge/agent/thrift";
     public static final String AGENT_CONF_ELE_ROOT = "thriftAgentConfiguration";
+    public static final String AGENT_CONF_DIR = "data-bridge";
 
     public static final String BUFFERED_EVENTS_SIZE = "bufferedEventsSize";
     public static final String POOL_SIZE = "poolSize";
@@ -48,6 +50,8 @@ public final class AgentConstants {
     public static final String SECURE_MAX_IDLE_CONNECTIONS = "secureMaxIdleConnections";
     public static final String SECURE_EVICTION_TIME_PERIOD = "secureEvictionTimePeriod";
     public static final String SECURE_MIN_IDLE_TIME_IN_POOL = "secureMinIdleTimeInPool";
+    public static final String ASYNC_BUFFER_SIZE = "asyncDataPublisherBufferedEventSize";
+    public static final String RECONNECTION_INTERVAL = "loadBalancingReconnectionInterval";
 
     public static final String MAX_MESSAGE_BUNDLE_SIZE = "maxMessageBundleSize";
 
@@ -60,6 +64,9 @@ public final class AgentConstants {
 
     //AgentConfiguration
     public static final int DEFAULT_BUFFERED_EVENTS_SIZE = 200;
+    public static final int DEFAULT_ASYNC_CLIENT_BUFFERED_EVENTS_SIZE = 10000;
+    public static final long DEFAULT_RECONNECTION_INTERVAL = 30;
+
     public static final int DEFAULT_POOL_SIZE = 30;
 
     public static final int DEFAULT_MAX_TRANSPORT_POOL_SIZE = 250;

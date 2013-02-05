@@ -21,7 +21,7 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -204,7 +204,7 @@ public class Util {
             registry.put(secretKeyPath, resource);
             // sending the mail
             EmailSender sender = new EmailSender(serviceConfig, emailAddress, secretKey,
-                    SuperTenantCarbonContext.getCurrentContext().getTenantDomain(true), data);
+                 PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true), data);
             sender.sendEmail();
         } catch (Exception e) {
             String msg = "Error in sending the email to validation.";

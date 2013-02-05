@@ -154,6 +154,7 @@
                             if (isAuthorizedToManagePackages) {
                                 //abstract only the package name from the request param
                                 String name = packageName.substring(0, packageName.lastIndexOf("-"));
+                                if (processesInPackage.getErrorLog() == null) {
                         %>
                              <tr>
                                  <td>
@@ -189,7 +190,7 @@
 
 
                              </tr>
-                             <%
+                             <%  }
                                  String path = RegistryConstants.CONFIG_REGISTRY_BASE_PATH + RegistryConstants.PATH_SEPARATOR + "bpel" + RegistryConstants.PATH_SEPARATOR + "packages" + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + name.concat(".zip");
                                  if (packageName.contains(name)) {
                                 %>
@@ -216,7 +217,9 @@
                         <tr>&nbsp;</tr>
                     </table>
 
-
+                    <% if ((isAuthorizedToManagePackages || isAuthorizedToMonitor) && processList != null) {
+                        for (LimitedProcessInfoType processInfo : processList) {
+                    %>
                     <table id="packageListTable" class="styledLeft" width="100%">
                         <thead>
                         <tr>
@@ -227,10 +230,6 @@
                         </thead>
 
                         <tbody>
-
-                        <% if ((isAuthorizedToManagePackages || isAuthorizedToMonitor) && processList != null) {
-                            for (LimitedProcessInfoType processInfo : processList) {
-                        %>
                         <tr>
                             <td>
                                 <a href="./process_info.jsp?Pid=<%=processInfo.getPid()%>"><%=processInfo.getPid()%>
@@ -238,13 +237,13 @@
 
                             </td>
                         </tr>
-                        <%
-                                }
-                            }
-                        %>
-
                         </tbody>
                     </table>
+
+                    <%
+                            }
+                        }
+                    %>
 
                     <table>
                         <tr>&nbsp;</tr>

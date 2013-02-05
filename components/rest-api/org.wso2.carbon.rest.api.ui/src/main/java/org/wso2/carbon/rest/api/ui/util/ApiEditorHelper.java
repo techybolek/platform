@@ -39,7 +39,7 @@ public class ApiEditorHelper {
 			apiData.setContext(context.getAttributeValue());
 		}
 		
-		OMAttribute host = apiOM.getAttribute(new QName("host"));
+		OMAttribute host = apiOM.getAttribute(new QName("hostname"));
 		if(host != null){
 			apiData.setHost(host.getAttributeValue());
 		}
@@ -47,6 +47,9 @@ public class ApiEditorHelper {
 		OMAttribute port = apiOM.getAttribute(new QName("port"));
 		if(port != null){
 			apiData.setPort(Integer.parseInt(port.getAttributeValue()));
+		}
+		else{
+			apiData.setPort(-1);
 		}
 		
 		Iterator childIterator = apiOM.getChildElements();

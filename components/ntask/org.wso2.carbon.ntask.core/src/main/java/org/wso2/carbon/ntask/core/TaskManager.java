@@ -16,7 +16,6 @@
 package org.wso2.carbon.ntask.core;
 
 import java.util.List;
-import java.util.Map;
 
 import org.wso2.carbon.ntask.common.TaskException;
 
@@ -49,9 +48,10 @@ public interface TaskManager {
 	/**
 	 * Stops and deletes a task with the given name.
 	 * @param taskName The name of the task
+	 * @return true if the task was found and deleted
 	 * @throws TaskException
 	 */
-	public void deleteTask(String taskName) throws TaskException;
+	public boolean deleteTask(String taskName) throws TaskException;
 	
 	/**
 	 * Pauses a task with the given name.
@@ -83,17 +83,10 @@ public interface TaskManager {
 	public TaskState getTaskState(String taskName) throws TaskException;
 	
 	/**
-	 * Get all the task states. 
-	 * @return State of the task
-	 * @throws TaskException
-	 */
-	public Map<String, TaskState> getAllTaskStates() throws TaskException;
-	
-	/**
 	 * Get task information.
 	 * @param taskName The name of the task
 	 * @return The task information 
-	 * @throws TaskException
+	 * @throws TaskException if the task cannot be found
 	 */
 	public TaskInfo getTask(String taskName) throws TaskException;
 	
@@ -103,30 +96,6 @@ public interface TaskManager {
 	 * @throws TaskException
 	 */
 	public List<TaskInfo> getAllTasks() throws TaskException;
-	
-	/**
-	 * Returns the task server count.
-	 * @return The server count.
-	 * @throws TaskException
-	 */
-	public int getServerCount() throws TaskException;
-	
-	/**
-	 * Lists all the tasks in a given server location.
-	 * @param location The 0 based index of a server
-	 * @return The task information list
-	 * @throws TaskException
-	 */
-	public List<TaskInfo> getTasksInServer(int location) throws TaskException;
-	
-	/**
-	 * Lists all the tasks in all the servers.
-	 * @return The outer-most list represent a server in each element, with the server location,
-	 *         corresponding to the list location, the content of that list element is the list of
-	 *         tasks assigned to that server
-	 * @throws TaskException
-	 */
-	public List<List<TaskInfo>> getAllTasksInServers() throws TaskException;
 	
 	/**
 	 * Checks if the given task is already scheduled.
@@ -140,11 +109,12 @@ public interface TaskManager {
 	 * Task states.
 	 */
 	public enum TaskState {
-		STARTED,
-		STOPPED,
+		NORMAL,
 		PAUSED,
 		ERROR,
 		FINISHED,
+		NONE,
+		BLOCKED,
 		UNKNOWN
 	}
 	

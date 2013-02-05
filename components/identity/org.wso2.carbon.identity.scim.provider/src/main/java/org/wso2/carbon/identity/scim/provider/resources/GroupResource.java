@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.scim.provider.impl.IdentitySCIMManager;
 import org.wso2.carbon.identity.scim.provider.util.JAXRSResponseBuilder;
 import org.wso2.charon.core.encoder.Encoder;
+import org.wso2.charon.core.exceptions.BadRequestException;
 import org.wso2.charon.core.exceptions.CharonException;
 import org.wso2.charon.core.exceptions.FormatNotSupportedException;
 import org.wso2.charon.core.exceptions.UnauthorizedException;
@@ -34,12 +35,15 @@ import org.wso2.charon.core.protocol.endpoints.GroupResourceEndpoint;
 import org.wso2.charon.core.protocol.endpoints.UserResourceEndpoint;
 import org.wso2.charon.core.schema.SCIMConstants;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
@@ -86,6 +90,7 @@ public class GroupResource extends AbstractResource {
             return new JAXRSResponseBuilder().buildResponse(scimResponse);
 
         } catch (CharonException e) {
+            e.printStackTrace();
             //create SCIM response with code as the same of exception and message as error message of the exception
             if (e.getCode() == -1) {
                 e.setCode(ResponseCodeConstants.CODE_INTERNAL_SERVER_ERROR);
@@ -93,9 +98,11 @@ public class GroupResource extends AbstractResource {
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (UnauthorizedException e) {
+            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (FormatNotSupportedException e) {
+            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         }
@@ -117,6 +124,8 @@ public class GroupResource extends AbstractResource {
                 String error = SCIMConstants.CONTENT_TYPE_HEADER + " not present in the request header";
                 throw new FormatNotSupportedException(error);
             }
+	        //identify input format
+            inputFormat = identifyInputFormat(inputFormat);
             //set the format in which the response should be encoded, if not specified in the request,
             // defaults to application/json.
             outputFormat = identifyOutputFormat(outputFormat);
@@ -141,27 +150,27 @@ public class GroupResource extends AbstractResource {
             return new JAXRSResponseBuilder().buildResponse(response);
 
         } catch (CharonException e) {
+            e.printStackTrace();
             //create SCIM response with code as the same of exception and message as error message of the exception
             if (e.getCode() == -1) {
                 e.setCode(ResponseCodeConstants.CODE_INTERNAL_SERVER_ERROR);
             }
-            logger.error(e.getMessage());
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (UnauthorizedException e) {
-            logger.error(e.getMessage());
+            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (FormatNotSupportedException e) {
-            logger.error(e.getMessage());
+            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         }
     }
-    /*
+    
     @DELETE
     @Path("{id}")
-    public Response deleteUser(@PathParam(SCIMConstants.CommonSchemaConstants.ID) String id,
+    public Response deleteGroup(@PathParam(SCIMConstants.CommonSchemaConstants.ID) String id,
                                @HeaderParam(SCIMConstants.ACCEPT_HEADER) String format,
                                @HeaderParam(SCIMConstants.AUTHORIZATION_HEADER) String authorization) {
         Encoder encoder = null;
@@ -172,6 +181,9 @@ public class GroupResource extends AbstractResource {
             if (format == null) {
                 format = SCIMConstants.APPLICATION_JSON;
             }
+            //set the format in which the response should be encoded, if not specified in the request,
+            // defaults to application/json.
+            format = identifyOutputFormat(format);
             //obtain the encoder at this layer in case exceptions needs to be encoded.
             encoder = identitySCIMManager.getEncoder(SCIMConstants.identifyFormat(format));
             //perform authentication
@@ -184,15 +196,16 @@ public class GroupResource extends AbstractResource {
             UserManager userManager = IdentitySCIMManager.getInstance().getUserManager(
                     authInfo.getUserName());
 
-            //create charon-SCIM user endpoint and hand-over the request.
-            UserResourceEndpoint userResourceEndpoint = new UserResourceEndpoint();
+            //create charon-SCIM group endpoint and hand-over the request.
+            GroupResourceEndpoint groupResourceEndpoint = new GroupResourceEndpoint();
 
-            SCIMResponse scimResponse = userResourceEndpoint.delete(id, userManager, format);
+            SCIMResponse scimResponse = groupResourceEndpoint.delete(id, userManager, format);
             //needs to check the code of the response and return 200 0k or other error codes
             // appropriately.
             return new JAXRSResponseBuilder().buildResponse(scimResponse);
 
         } catch (CharonException e) {
+            e.printStackTrace();
             //create SCIM response with code as the same of exception and message as error message of the exception
             if (e.getCode() == -1) {
                 e.setCode(ResponseCodeConstants.CODE_INTERNAL_SERVER_ERROR);
@@ -200,16 +213,18 @@ public class GroupResource extends AbstractResource {
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (UnauthorizedException e) {
+            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (FormatNotSupportedException e) {
+            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         }
     }
 
     @GET
-    public Response getUser(@HeaderParam(SCIMConstants.ACCEPT_HEADER) String format,
+    public Response getGroup(@HeaderParam(SCIMConstants.ACCEPT_HEADER) String format,
                             @HeaderParam(SCIMConstants.AUTHORIZATION_HEADER) String authorization,
                             @QueryParam("attributes") String searchAttribute,
                             @QueryParam("filter") String filter,
@@ -221,9 +236,7 @@ public class GroupResource extends AbstractResource {
             IdentitySCIMManager identitySCIMManager = IdentitySCIMManager.getInstance();
 
             // defaults to application/json.
-            if (format == null) {
-                format = SCIMConstants.APPLICATION_JSON;
-            }
+            format = identifyOutputFormat(format);
             //obtain the encoder at this layer in case exceptions needs to be encoded.
             encoder = identitySCIMManager.getEncoder(SCIMConstants.identifyFormat(format));
             //perform authentication
@@ -237,21 +250,21 @@ public class GroupResource extends AbstractResource {
                     authInfo.getUserName());
 
             //create charon-SCIM user endpoint and hand-over the request.
-            UserResourceEndpoint userResourceEndpoint = new UserResourceEndpoint();
+            GroupResourceEndpoint groupResourceEndpoint = new GroupResourceEndpoint();
             SCIMResponse scimResponse = null;
             if (searchAttribute != null) {
-                scimResponse = userResourceEndpoint.listByAttribute(searchAttribute, userManager, format);
+                scimResponse = groupResourceEndpoint.listByAttribute(searchAttribute, userManager, format);
             } else if (filter != null) {
-                scimResponse = userResourceEndpoint.listByFilter(filter, userManager, format);
+                scimResponse = groupResourceEndpoint.listByFilter(filter, userManager, format);
             } else if (startIndex != null && count != null) {
-                scimResponse = userResourceEndpoint.listWithPagination(Integer.valueOf(startIndex),
+                scimResponse = groupResourceEndpoint.listWithPagination(Integer.valueOf(startIndex),
                                                                        Integer.valueOf(count),
                                                                        userManager, format);
             } else if (sortBy != null) {
-                scimResponse = userResourceEndpoint.listBySort(sortBy, sortOrder, userManager, format);
+                scimResponse = groupResourceEndpoint.listBySort(sortBy, sortOrder, userManager, format);
             } else if (searchAttribute == null && filter == null && startIndex == null &&
                        count == null && sortBy == null) {
-                scimResponse = userResourceEndpoint.list(userManager, format);
+                scimResponse = groupResourceEndpoint.list(userManager, format);
             } else {
                 //bad request
                 throw new BadRequestException(ResponseCodeConstants.DESC_BAD_REQUEST_GET);
@@ -260,6 +273,7 @@ public class GroupResource extends AbstractResource {
             return new JAXRSResponseBuilder().buildResponse(scimResponse);
 
         } catch (CharonException e) {
+            e.printStackTrace();
             //create SCIM response with code as the same of exception and message as error message of the exception
             if (e.getCode() == -1) {
                 e.setCode(ResponseCodeConstants.CODE_INTERNAL_SERVER_ERROR);
@@ -267,12 +281,15 @@ public class GroupResource extends AbstractResource {
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (UnauthorizedException e) {
+            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (FormatNotSupportedException e) {
+            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (BadRequestException e) {
+            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         }
@@ -280,7 +297,7 @@ public class GroupResource extends AbstractResource {
 
     @PUT
     @Path("{id}")
-    public Response updateUser(@PathParam(SCIMConstants.CommonSchemaConstants.ID) String id,
+    public Response updateGroup(@PathParam(SCIMConstants.CommonSchemaConstants.ID) String id,
                                @HeaderParam(SCIMConstants.CONTENT_TYPE_HEADER) String inputFormat,
                                @HeaderParam(SCIMConstants.ACCEPT_HEADER) String outputFormat,
                                @HeaderParam(SCIMConstants.AUTHORIZATION_HEADER) String authorization,
@@ -295,11 +312,11 @@ public class GroupResource extends AbstractResource {
                 String error = SCIMConstants.CONTENT_TYPE_HEADER + " not present in the request header";
                 throw new FormatNotSupportedException(error);
             }
+	    //identify input format
+            inputFormat = identifyInputFormat(inputFormat);
             //set the format in which the response should be encoded, if not specified in the request,
             // defaults to application/json.
-            if (outputFormat == null) {
-                outputFormat = SCIMConstants.APPLICATION_JSON;
-            }
+            outputFormat = identifyOutputFormat(outputFormat);
             //obtain the encoder at this layer in case exceptions needs to be encoded.
             encoder = identitySCIMManager.getEncoder(SCIMConstants.identifyFormat(outputFormat));
             //perform authentication
@@ -313,14 +330,15 @@ public class GroupResource extends AbstractResource {
                     authInfo.getUserName());
 
             //create charon-SCIM user endpoint and hand-over the request.
-            UserResourceEndpoint userResourceEndpoint = new UserResourceEndpoint();
+            GroupResourceEndpoint groupResourceEndpoint = new GroupResourceEndpoint();
 
-            SCIMResponse response = userResourceEndpoint.updateWithPUT(id, resourceString, inputFormat,
+            SCIMResponse response = groupResourceEndpoint.updateWithPUT(id, resourceString, inputFormat,
                                                                        outputFormat, userManager);
 
             return new JAXRSResponseBuilder().buildResponse(response);
 
         } catch (CharonException e) {
+            e.printStackTrace();
             //create SCIM response with code as the same of exception and message as error message of the exception
             if (e.getCode() == -1) {
                 e.setCode(ResponseCodeConstants.CODE_INTERNAL_SERVER_ERROR);
@@ -328,13 +346,15 @@ public class GroupResource extends AbstractResource {
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (UnauthorizedException e) {
+            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (FormatNotSupportedException e) {
+            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         }
-    }*/
+    }
 
     /*@PATCH
     public Response patchUser(@HeaderParam(SCIMConstants.CONTENT_TYPE_HEADER) String inputFormat,

@@ -2,7 +2,7 @@
 <definitions xmlns="http://ws.apache.org/ns/synapse">
 
     <!--  If condition satisfied send it to service -->
-    <sequence name="cnd1_seq" trace="enable">
+    <sequence name="cnd1_seq">
         <log>
             <property name="message"
                       value="**********Conditional Router Test Condition Satisfied **************"/>

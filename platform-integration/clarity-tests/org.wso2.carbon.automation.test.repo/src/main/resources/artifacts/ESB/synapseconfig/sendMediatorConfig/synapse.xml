@@ -755,6 +755,769 @@
         </target>
     </proxy>
 
+    <!--#####################################Load Balancing Endpoint############################################-->
+
+
+    <proxy name="loadBalancingEndPoint1" transports="http,https">
+        <target>
+            <inSequence>
+                <send>
+                    <endpoint>
+                        <loadbalance
+                                algorithm="org.apache.synapse.endpoints.algorithms.WeightedRoundRobin">
+                            <endpoint>
+                                <address uri="http://localhost:9001/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="1"/>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9002/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="2"/>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9003/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="1"/>
+                            </endpoint>
+                        </loadbalance>
+                    </endpoint>
+                </send>
+                <drop/>
+            </inSequence>
+            <outSequence>
+                <drop/>
+            </outSequence>
+        </target>
+    </proxy>
+
+    <proxy name="loadBalancingEndPoint2" transports="http,https">
+        <target>
+            <inSequence>
+                <send>
+                    <endpoint>
+                        <loadbalance
+                                algorithm="org.apache.synapse.endpoints.algorithms.RoundRobin">
+                            <endpoint>
+                                <address uri="http://localhost:9001/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9002/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9003/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>                               4
+                        </loadbalance>
+                    </endpoint>
+                </send>
+                <drop/>
+            </inSequence>
+            <outSequence>
+                <drop/>
+            </outSequence>
+        </target>
+    </proxy>
+
+    <proxy name="loadBalancingEndPoint3" transports="http,https">
+        <target>
+            <inSequence>
+                <send buildmessage="true">
+                    <endpoint>
+                        <loadbalance
+                                algorithm="org.apache.synapse.endpoints.algorithms.WeightedRoundRobin">
+                            <endpoint>
+                                <address uri="http://localhost:9001/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="1"/>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9002/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="2"/>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9003/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="1"/>
+                            </endpoint>
+                        </loadbalance>
+                    </endpoint>
+                </send>
+                <drop/>
+            </inSequence>
+            <outSequence>
+                <drop/>
+            </outSequence>
+        </target>
+    </proxy>
+
+    <proxy name="loadBalancingEndPoint4" transports="http,https">
+        <target>
+            <inSequence>
+                <send buildmessage="true">
+                    <endpoint>
+                        <loadbalance
+                                algorithm="org.apache.synapse.endpoints.algorithms.RoundRobin">
+                            <endpoint>
+                                <address uri="http://localhost:9001/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9002/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9003/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                        </loadbalance>
+                    </endpoint>
+                </send>
+                <drop/>
+            </inSequence>
+            <outSequence>
+                <drop/>
+            </outSequence>
+        </target>
+    </proxy>
+
+    <proxy name="loadBalancingEndPoint5" transports="http,https">
+        <target>
+            <inSequence>
+                <send receive="conf:/test_sequences_config/receivingSequence_Conf.xml">
+                    <endpoint>
+                        <loadbalance
+                                algorithm="org.apache.synapse.endpoints.algorithms.WeightedRoundRobin">
+                            <endpoint>
+                                <address uri="http://localhost:9001/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="1"/>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9002/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="2"/>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9003/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="1"/>
+                            </endpoint>
+                        </loadbalance>
+                    </endpoint>
+                </send>
+                <drop/>
+            </inSequence>
+            <outSequence>
+                <drop/>
+            </outSequence>
+        </target>
+    </proxy>
+
+    <proxy name="loadBalancingEndPoint6" transports="http,https">
+        <target>
+            <inSequence>
+                <send receive="conf:/test_sequences_config/receivingSequence_Conf.xml">
+                    <endpoint>
+                        <loadbalance
+                                algorithm="org.apache.synapse.endpoints.algorithms.RoundRobin">
+                            <endpoint>
+                                <address uri="http://localhost:9001/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9002/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9003/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                        </loadbalance>
+                    </endpoint>
+                </send>
+                <drop/>
+            </inSequence>
+            <outSequence>
+                <drop/>
+            </outSequence>
+        </target>
+    </proxy>
+
+    <proxy name="loadBalancingEndPoint7" transports="http,https">
+        <target>
+            <inSequence>
+                <send buildmessage="true" receive="conf:/test_sequences_config/receivingSequence_Conf.xml">
+                    <endpoint>
+                        <loadbalance
+                                algorithm="org.apache.synapse.endpoints.algorithms.WeightedRoundRobin">
+                            <endpoint>
+                                <address uri="http://localhost:9001/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="1"/>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9002/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="2"/>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9003/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="1"/>
+                            </endpoint>
+                        </loadbalance>
+                    </endpoint>
+                </send>
+                <drop/>
+            </inSequence>
+            <outSequence>
+                <drop/>
+            </outSequence>
+        </target>
+    </proxy>
+
+    <proxy name="loadBalancingEndPoint8" transports="http,https">
+        <target>
+            <inSequence>
+                <send buildmessage="true" receive="conf:/test_sequences_config/receivingSequence_Conf.xml">
+                    <endpoint>
+                        <loadbalance
+                                algorithm="org.apache.synapse.endpoints.algorithms.RoundRobin">
+                            <endpoint>
+                                <address uri="http://localhost:9001/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9002/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9003/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                        </loadbalance>
+                    </endpoint>
+                </send>
+                <drop/>
+            </inSequence>
+            <outSequence>
+                <drop/>
+            </outSequence>
+        </target>
+    </proxy>
+
+    <proxy name="loadBalancingEndPoint9" transports="http,https">
+        <target>
+            <inSequence>
+                <send receive="gov:/test_sequences_gov/receivingSequence_Gov.xml">
+                    <endpoint>
+                        <loadbalance
+                                algorithm="org.apache.synapse.endpoints.algorithms.WeightedRoundRobin">
+                            <endpoint>
+                                <address uri="http://localhost:9001/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="1"/>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9002/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="2"/>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9003/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="1"/>
+                            </endpoint>
+                        </loadbalance>
+                    </endpoint>
+                </send>
+                <drop/>
+            </inSequence>
+            <outSequence>
+                <drop/>
+            </outSequence>
+        </target>
+    </proxy>
+
+    <proxy name="loadBalancingEndPoint10" transports="http,https">
+        <target>
+            <inSequence>
+                <send receive="gov:/test_sequences_gov/receivingSequence_Gov.xml">
+                    <endpoint>
+                        <loadbalance
+                                algorithm="org.apache.synapse.endpoints.algorithms.RoundRobin">
+                            <endpoint>
+                                <address uri="http://localhost:9001/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9002/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9003/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                        </loadbalance>
+                    </endpoint>
+                </send>
+                <drop/>
+            </inSequence>
+            <outSequence>
+                <drop/>
+            </outSequence>
+        </target>
+    </proxy>
+
+    <proxy name="loadBalancingEndPoint11" transports="http,https">
+        <target>
+            <inSequence>
+                <send buildmessage="true" receive="gov:/test_sequences_gov/receivingSequence_Gov.xml">
+                    <endpoint>
+                        <loadbalance
+                                algorithm="org.apache.synapse.endpoints.algorithms.WeightedRoundRobin">
+                            <endpoint>
+                                <address uri="http://localhost:9001/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="1"/>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9002/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="2"/>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9003/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="1"/>
+                            </endpoint>
+                        </loadbalance>
+                    </endpoint>
+                </send>
+                <drop/>
+            </inSequence>
+            <outSequence>
+                <drop/>
+            </outSequence>
+        </target>
+    </proxy>
+
+    <proxy name="loadBalancingEndPoint12" transports="http,https">
+        <target>
+            <inSequence>
+                <send buildmessage="true" receive="gov:/test_sequences_gov/receivingSequence_Gov.xml">
+                    <endpoint>
+                        <loadbalance
+                                algorithm="org.apache.synapse.endpoints.algorithms.RoundRobin">
+                            <endpoint>
+                                <address uri="http://localhost:9001/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9002/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9003/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                        </loadbalance>
+                    </endpoint>
+                </send>
+                <drop/>
+            </inSequence>
+            <outSequence>
+                <drop/>
+            </outSequence>
+        </target>
+    </proxy>
+
+    <proxy name="loadBalancingEndPoint13" transports="http,https">
+        <target>
+            <inSequence>
+                <property name="receiving_sequence"
+                          value="dynamic_receiving_sequence"
+                          scope="default"
+                          type="STRING"/>
+                <send receive="{get-property('receiving_sequence')}">
+                    <endpoint>
+                        <loadbalance
+                                algorithm="org.apache.synapse.endpoints.algorithms.WeightedRoundRobin">
+                            <endpoint>
+                                <address uri="http://localhost:9001/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="1"/>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9002/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="2"/>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9003/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="1"/>
+                            </endpoint>
+                        </loadbalance>
+                    </endpoint>
+                </send>
+                <drop/>
+            </inSequence>
+            <outSequence>
+                <drop/>
+            </outSequence>
+        </target>
+    </proxy>
+
+    <proxy name="loadBalancingEndPoint14" transports="http,https">
+        <target>
+            <inSequence>
+                <property name="receiving_sequence"
+                          value="dynamic_receiving_sequence"
+                          scope="default"
+                          type="STRING"/>
+                <send receive="{get-property('receiving_sequence')}">
+                    <endpoint>
+                        <loadbalance
+                                algorithm="org.apache.synapse.endpoints.algorithms.RoundRobin">
+                            <endpoint>
+                                <address uri="http://localhost:9001/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9002/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9003/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                        </loadbalance>
+                    </endpoint>
+                </send>
+                <drop/>
+            </inSequence>
+            <outSequence>
+                <drop/>
+            </outSequence>
+        </target>
+    </proxy>
+
+    <proxy name="loadBalancingEndPoint15" transports="http,https">
+        <target>
+            <inSequence>
+                <property name="receiving_sequence"
+                          value="dynamic_receiving_sequence"
+                          scope="default"
+                          type="STRING"/>
+                <send buildmessage="true" receive="{get-property('receiving_sequence')}">
+                    <endpoint>
+                        <loadbalance
+                                algorithm="org.apache.synapse.endpoints.algorithms.WeightedRoundRobin">
+                            <endpoint>
+                                <address uri="http://localhost:9001/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="1"/>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9002/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="2"/>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9003/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                                <property name="loadbalance.weight" value="1"/>
+                            </endpoint>
+                        </loadbalance>
+                    </endpoint>
+                </send>
+                <drop/>
+            </inSequence>
+            <outSequence>
+                <drop/>
+            </outSequence>
+        </target>
+    </proxy>
+
+    <proxy name="loadBalancingEndPoint16" transports="http,https">
+        <target>
+            <inSequence>
+                <property name="receiving_sequence"
+                          value="dynamic_receiving_sequence"
+                          scope="default"
+                          type="STRING"/>
+                <send buildmessage="true" receive="{get-property('receiving_sequence')}">
+                    <endpoint>
+                        <loadbalance
+                                algorithm="org.apache.synapse.endpoints.algorithms.RoundRobin">
+                            <endpoint>
+                                <address uri="http://localhost:9001/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9002/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                            <endpoint>
+                                <address uri="http://localhost:9003/services/LBService1">
+                                    <enableAddressing/>
+                                    <suspendOnFailure>
+                                        <initialDuration>1000</initialDuration>
+                                        <progressionFactor>1.0</progressionFactor>
+                                    </suspendOnFailure>
+                                </address>
+                            </endpoint>
+                        </loadbalance>
+                    </endpoint>
+                </send>
+                <drop/>
+            </inSequence>
+            <outSequence>
+                <drop/>
+            </outSequence>
+        </target>
+    </proxy>
+
     <!--########################################################################################################-->
 
     <!--#####################################Dynamic Receiving Sequence#########################################-->
@@ -764,4 +1527,13 @@
             <property name="Receiving Sequence" value="Config Reg" ></property>
         </log>
     </sequence>
+
+    <!--########################################################################################################-->
+
+
+
+    <!--########################################################################################################-->
+
 </definitions>
+
+

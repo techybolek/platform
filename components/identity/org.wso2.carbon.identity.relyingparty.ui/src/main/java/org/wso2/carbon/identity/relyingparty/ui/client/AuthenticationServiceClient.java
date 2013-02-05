@@ -17,33 +17,28 @@
 */
 package org.wso2.carbon.identity.relyingparty.ui.client;
 
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
-import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.identity.relyingparty.stub.auth.LoggedUserInfoAdminStub;
-import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-
 public class AuthenticationServiceClient {
 
     private AuthenticationAdminStub stub;
-    private static final Log log = LogFactory.getLog(AuthenticationServiceClient.class);
-
     /**
      * Instantiates RelyingPartyServiceClient
      * 

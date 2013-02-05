@@ -5,7 +5,7 @@ import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.url.mapper.internal.util.HostUtil;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
@@ -37,7 +37,7 @@ public class UrlMappingServiceListener extends AbstractAxis2ConfigurationContext
                 return;
             } else {
                 if (((String)mapping.getValue()).equalsIgnoreCase("true")) {
-                    tenantId = SuperTenantCarbonContext.
+                    tenantId = PrivilegedCarbonContext.
                             getCurrentContext(configCtx).getTenantId();
                     HostUtil.removeUrlMappingFromMap(tenantId, entry.getValue().getName());
                     log.info("removing service mapping" + entry.getValue().getName() );

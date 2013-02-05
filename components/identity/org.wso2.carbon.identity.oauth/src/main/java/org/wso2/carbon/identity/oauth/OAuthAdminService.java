@@ -1,34 +1,43 @@
 /*
- *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*WSO2 Inc. licenses this file to you under the Apache License,
+*Version 2.0 (the "License"); you may not use this file except
+*in compliance with the License.
+*You may obtain a copy of the License at
+*
+*http://www.apache.org/licenses/LICENSE-2.0
+*
+*Unless required by applicable law or agreed to in writing,
+*software distributed under the License is distributed on an
+*"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+*KIND, either express or implied.  See the License for the
+*specific language governing permissions and limitations
+*under the License.
+*/
+
 package org.wso2.carbon.identity.oauth;
 
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.model.OAuthAppDO;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
 import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
+import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
+import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDAO;
 import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
+import org.wso2.carbon.identity.oauth.dto.OAuthRevocationRequestDTO;
+import org.wso2.carbon.identity.oauth.dto.OAuthRevocationResponseDTO;
+import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
+import org.wso2.carbon.identity.oauth2.dao.TokenMgtDAO;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -208,4 +217,84 @@ public class OAuthAdminService extends AbstractAdmin {
         }
         return null;
     }
+
+    /**
+     * Get apps that are authorized by the given user
+     * @param username authorizedUser
+     * @return OAuth applications authorized by the user that have tokens in ACTIVE or EXPIRED state
+     */
+    public OAuthConsumerAppDTO[] getAppsAuthorizedByUser(String username) throws IdentityOAuth2Exception {
+
+        TokenMgtDAO tokenMgtDAO = new TokenMgtDAO();
+        OAuthAppDAO appDAO = new OAuthAppDAO();
+        OAuthAppDO[] appDOs = tokenMgtDAO.getAppsAuthorizedByUser(username);
+        OAuthConsumerAppDTO[] appDTOs = new OAuthConsumerAppDTO[appDOs.length];
+        for(int i = 0; i < appDTOs.length ; i++){
+            try {
+                OAuthAppDO appDO = appDAO.getAppInformation(appDOs[i].getOauthConsumerKey());
+                OAuthConsumerAppDTO appDTO = new OAuthConsumerAppDTO();
+                appDTO.setApplicationName(appDO.getApplicationName());
+                appDTO.setUsername(appDO.getUserName());
+                appDTOs[i] = appDTO;
+            } catch (IdentityOAuthAdminException e) {
+                log.error(e.getMessage());
+            } catch (InvalidOAuthClientException e) {
+                log.error(e.getMessage());
+            }
+        }
+        return appDTOs;
+    }
+
+    /**
+     * Revoke authorization for OAuth apps by resource owners
+     * @param revokeRequestDTO DTO representing authorized user and apps[]
+     * @return revokeRespDTO DTO representing success or failure message
+     */
+    public OAuthRevocationResponseDTO revokeAuthzForAppsByResoureOwner(OAuthRevocationRequestDTO revokeRequestDTO) {
+
+        TokenMgtDAO tokenMgtDAO = new TokenMgtDAO();
+        OAuthAppDAO appDAO = new OAuthAppDAO();
+        try{
+            if(revokeRequestDTO.getAuthzUser() != null && revokeRequestDTO.getApps() != null) {
+                String loggedInUser = PrivilegedCarbonContext.getCurrentContext().getUsername();
+                if(!revokeRequestDTO.getAuthzUser().equals(loggedInUser)){
+                    throw new IdentityOAuth2Exception(loggedInUser +
+                            " not authorized to revoke tokens of " + revokeRequestDTO.getAuthzUser());
+                }
+                String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(revokeRequestDTO.getAuthzUser());
+                OAuthAppDO[] oauthAppDOs =  tokenMgtDAO.getAppsAuthorizedByUser(tenantAwareUsername);
+                for (String app : revokeRequestDTO.getApps()) {
+                    for(OAuthAppDO appDO:oauthAppDOs){
+                        appDO =  appDAO.getAppInformation(appDO.getOauthConsumerKey());
+                        if(appDO.getApplicationName().equals(app)){
+                            tokenMgtDAO.revokeAccessTokensByResourceOwner(appDO.getOauthConsumerKey(), tenantAwareUsername);
+                            org.wso2.carbon.identity.oauth.OAuthUtil.clearOAuthCache(appDO.getOauthConsumerKey(),tenantAwareUsername);
+                        }
+                    }
+                }
+            } else {
+                OAuthRevocationResponseDTO revokeRespDTO = new OAuthRevocationResponseDTO();
+                revokeRespDTO.setError(true);
+                revokeRespDTO.setErrorCode(OAuth2ErrorCodes.SERVER_ERROR);
+                revokeRespDTO.setErrorMsg("Invalid revocation request");
+                return revokeRespDTO;
+            }
+            return new OAuthRevocationResponseDTO();
+        } catch (IdentityException e) {
+            log.error(e.getMessage());
+            OAuthRevocationResponseDTO revokeRespDTO = new OAuthRevocationResponseDTO();
+            revokeRespDTO.setError(true);
+            revokeRespDTO.setErrorCode(OAuth2ErrorCodes.SERVER_ERROR);
+            revokeRespDTO.setErrorMsg("Error when processing the revocation request");
+            return revokeRespDTO;
+        } catch (InvalidOAuthClientException e) {
+            log.error(e.getMessage());
+            OAuthRevocationResponseDTO revokeRespDTO = new OAuthRevocationResponseDTO();
+            revokeRespDTO.setError(true);
+            revokeRespDTO.setErrorCode(OAuth2ErrorCodes.SERVER_ERROR);
+            revokeRespDTO.setErrorMsg("Error when processing the revocation request");
+            return revokeRespDTO;
+        }
+    }
+
 }

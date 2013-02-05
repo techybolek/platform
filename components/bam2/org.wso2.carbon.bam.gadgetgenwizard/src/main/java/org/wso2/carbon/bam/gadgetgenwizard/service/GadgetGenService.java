@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.bam.gadgetgenwizard.internal.GGWUtils;
 import org.wso2.carbon.bam.gadgetgenwizard.service.beans.*;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.ndatasource.core.CarbonDataSource;
 import org.wso2.carbon.registry.common.services.RegistryAbstractAdmin;
@@ -22,6 +23,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.AuthorizationManager;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -31,6 +33,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,8 +93,7 @@ public class GadgetGenService extends RegistryAbstractAdmin {
             SORT_BOTH_PNG, SORT_DESC_PNG, SORT_DESC__DISABLED_PNG};
 
     private static final Log log = LogFactory.getLog(GadgetGenService.class);
-    private static final String JAGGERY_APP_DIR = CarbonUtils.getCarbonRepository()  + "jaggeryapps";
-    private static final String GADGET_GEN_APP_DIR = JAGGERY_APP_DIR + File.separator + "gadgetgen";
+
 //    public static final String GADGETGEN_JAG_FILEPATH = GADGET_GEN_APP_DIR + File.separator + "gadgetgen.jag";
 
     private static final String GADGETGEN_COMP_REG_PATH = "repository/components/org.wso2.carbon.bam.gadgetgen/";
@@ -101,7 +104,7 @@ public class GadgetGenService extends RegistryAbstractAdmin {
         String gadgetXMLPath = applyXSLTForGadgetXML(intermediateXML);
         applyXSLTForJaggeryScript(intermediateXML);
         copyGadgetResourcesToRegistry(GADGETGEN_COMP_REG_PATH);
-        return gadgetXMLPath;
+        return getServerURL(map)+"registry/resource"+gadgetXMLPath;
     }
 
     public String[] getDataSourceNames() throws GadgetGenException {
@@ -145,7 +148,7 @@ public class GadgetGenService extends RegistryAbstractAdmin {
                 List<String> rowList = new ArrayList<String>();
                 for (int j = 1; j < (columnCount + 1); j++) {
                     // optimization: add column names also in this loop, but only once
-                    if (i == 1) {
+                    if (i == 0) {
                         String columnName = metaData.getColumnName(j);
                         columnNames.add(columnName);
                     }
@@ -266,7 +269,7 @@ public class GadgetGenService extends RegistryAbstractAdmin {
             log.error(msg, e);
             throw new GadgetGenException(msg, e);
         } catch (UserStoreException e) {
-            String msg = "Cannot get authorization manager. " + e.getMessage() ;
+            String msg = "Cannot get authorization manager. " + e.getMessage();
             log.error(msg, e);
             throw new GadgetGenException(msg, e);
         }
@@ -282,7 +285,7 @@ public class GadgetGenService extends RegistryAbstractAdmin {
             resource.setContent(bytes);
             return resource;
         } catch (IOException e) {
-            String msg = "Error converting file to byte array. " + e.getMessage() ;
+            String msg = "Error converting file to byte array. " + e.getMessage();
             log.error(msg, e);
             throw new GadgetGenException(msg, e);
         } catch (RegistryException e) {
@@ -293,24 +296,33 @@ public class GadgetGenService extends RegistryAbstractAdmin {
     }
 
     private void applyXSLTForJaggeryScript(OMDocument intermediateXML) throws GadgetGenException {
+        String jaggery_app_dir = "";
+        int  tenantId = CarbonContext.getCurrentContext().getTenantId();
+        if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+            jaggery_app_dir = CarbonUtils.getCarbonRepository() + File.separator + "jaggeryapps";
+        } else {
+            jaggery_app_dir = CarbonUtils.getCarbonTenantsDirPath() + File.separator
+                    + CarbonContext.getCurrentContext().getTenantId() + File.separator + "jaggeryapps";
+        }
+        String gadget_gen_app_dir = jaggery_app_dir + File.separator + "gadgetgen";
         try {
-            File gadgetGenAppDir = new File(GADGET_GEN_APP_DIR);
+            File gadgetGenAppDir = new File(gadget_gen_app_dir);
             if (!gadgetGenAppDir.exists()) {
                 FileUtils.forceMkdir(gadgetGenAppDir);
             }
             String gadgetFileName = getGadgetFileName(intermediateXML);
-            File gadgetGenFile = new File(GADGET_GEN_APP_DIR + File.separator + gadgetFileName + ".jag");
+            File gadgetGenFile = new File(gadget_gen_app_dir + File.separator + gadgetFileName + ".jag");
             if (gadgetGenFile.exists()) {
                 FileUtils.forceDelete(gadgetGenFile);
             }
             applyXSLT(intermediateXML, FileUtils.openOutputStream(gadgetGenFile), JAGGERY_APP_GENERATOR_XSLT);
 
         } catch (FileNotFoundException e) {
-            String error = "XSLT file not found. This should be in the classpath. " + e.getMessage() ;
+            String error = "XSLT file not found. This should be in the classpath. " + e.getMessage();
             log.error(error, e);
             throw new GadgetGenException(error, e);
         } catch (IOException e) {
-            String error = "Error creating directory structure for jaggery app. " + e.getMessage() ;
+            String error = "Error creating directory structure for jaggery app. " + e.getMessage();
             log.error(error, e);
             throw new GadgetGenException(error, e);
         }
@@ -355,11 +367,11 @@ public class GadgetGenService extends RegistryAbstractAdmin {
             Transformer transformer = transFact.newTransformer(xsltSource);
             transformer.transform(xmlSource, result);
         } catch (XMLStreamException e) {
-            String error = "XML error reading XSLT file. " + e.getMessage() ;
+            String error = "XML error reading XSLT file. " + e.getMessage();
             log.error(error, e);
             throw new GadgetGenException(error, e);
         } catch (TransformerException e) {
-            String error = "XSLT transformation error during Code generation. " + e.getMessage() ;
+            String error = "XSLT transformation error during Code generation. " + e.getMessage();
             log.error(error, e);
             throw new GadgetGenException(error, e);
         }
@@ -412,6 +424,10 @@ public class GadgetGenService extends RegistryAbstractAdmin {
                 OMElement omElement = factory.createOMElement(wsMapElement.getKey(), gadgetgenNamespace);
                 omElement.setText(wsMapElement.getValue());
                 table.addChild(omElement);
+            } else if (wsMapElement.getKey().startsWith("jaggeryAppUrl")) {
+                OMElement omElement = factory.createOMElement(wsMapElement.getKey(), gadgetgenNamespace);
+                omElement.setText(getJaggeryFileUrl(wsMapElement.getValue()));
+                rootElement.addChild(omElement);
             }
 
             OMElement omElement = factory.createOMElement(wsMapElement.getKey(), gadgetgenNamespace);
@@ -424,7 +440,40 @@ public class GadgetGenService extends RegistryAbstractAdmin {
         if (tableFound) {
             rootElement.addChild(table);
         }
+
         omDocument.addChild(rootElement);
         return omDocument;
+    }
+
+    private String getJaggeryFileUrl(String serverUrl) {
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+            return serverUrl+"gadgetgen/";
+        } else {
+            return serverUrl + "jaggeryapps/gadgetgen/";
+        }
+    }
+
+    private String getServerURL(WSMap map) {
+        WSMapElement[] wsMapElements = map.getWsMapElements();
+        String stringUrl = "";
+        for (WSMapElement wsMapElement : wsMapElements) {
+           if (wsMapElement.getKey().startsWith("jaggeryAppUrl")) {
+                stringUrl= wsMapElement.getValue();
+               break;
+           }
+        }
+        try {
+            URL url = new URL(stringUrl);
+            String portOffset = CarbonUtils.getServerConfiguration().
+                        getFirstProperty("Ports.Offset");
+              int  port =  CarbonUtils.
+                      getTransportPort(GGWUtils.getConfigurationContextService().
+                              getServerConfigContext(), "http")+
+                        Integer.parseInt(portOffset);
+            return "http://"+url.getHost()+":"+port+url.getPath();
+        } catch (MalformedURLException e) {
+            return "";
+        }
     }
 }

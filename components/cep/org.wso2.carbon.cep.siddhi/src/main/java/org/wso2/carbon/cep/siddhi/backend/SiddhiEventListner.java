@@ -17,8 +17,10 @@
 package org.wso2.carbon.cep.siddhi.backend;
 
 import org.wso2.carbon.cep.core.listener.CEPEventListener;
+import org.wso2.carbon.databridge.commons.AttributeType;
 import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.stream.output.Callback;
+import org.wso2.siddhi.core.query.output.QueryCallback;
+import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
 import java.util.ArrayList;
@@ -29,16 +31,36 @@ import java.util.List;
  * This class receives events from the siddhi cep framework and
  * send the messages through QueryResultListner
  */
-public class SiddhiEventListner extends Callback {
+public class SiddhiEventListner extends QueryCallback {
 
     private CEPEventListener cepEventListener;
+    private StreamDefinition siddhiStreamDefinition;
     private String[] names;
 
     public SiddhiEventListner(StreamDefinition streamDefinition,
                               CEPEventListener cepEventListener) {
-//        super(eventStream.getStreamId());
         this.cepEventListener = cepEventListener;
+        this.siddhiStreamDefinition = streamDefinition;
         this.names = streamDefinition.getAttributeNameArray();
+    }
+
+    private AttributeType attributeTypeConverter(Attribute.Type type) {
+        switch (type) {
+
+            case STRING:
+                return AttributeType.STRING;
+            case INT:
+                return AttributeType.INT;
+            case LONG:
+                return AttributeType.LONG;
+            case FLOAT:
+                return AttributeType.FLOAT;
+            case DOUBLE:
+                return AttributeType.DOUBLE;
+            case BOOL:
+                return AttributeType.BOOL;
+        }
+        return null;
     }
 
 
@@ -57,11 +79,27 @@ public class SiddhiEventListner extends Callback {
 
     @Override
     public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+//        if (inEvents != null) {
+//            cepEventListener.onComplexEvent(toMap(inEvents));
+//        }
+//        if (removeEvents != null) {
+//            cepEventListener.onComplexEvent(toMap(removeEvents));
+//        }
         if (inEvents != null) {
-            cepEventListener.onComplexEvent(toMap(inEvents));
+            send(inEvents);
         }
         if (removeEvents != null) {
-            cepEventListener.onComplexEvent(toMap(removeEvents));
+            send(removeEvents);
         }
+    }
+
+    private void send(Event[] inEvents) {
+        for (Event event : inEvents) {
+            cepEventListener.onSingleComplexEvent(toTuple(event));
+        }
+    }
+
+    private Object toTuple(Event event) {
+        return new org.wso2.carbon.databridge.commons.Event(siddhiStreamDefinition.getStreamId(), event.getTimeStamp(), null, null, event.getData());
     }
 }

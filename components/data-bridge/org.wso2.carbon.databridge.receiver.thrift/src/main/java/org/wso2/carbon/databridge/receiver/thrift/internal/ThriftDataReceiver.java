@@ -140,8 +140,10 @@ public class ThriftDataReceiver {
 
         TServerSocket serverTransport;
         try {
+            InetAddress inetAddress = InetAddress.getByName(hostName);
             serverTransport = TSSLTransportFactory.getServerSocket(
-                    port, DataBridgeConstants.CLIENT_TIMEOUT_MS, InetAddress.getByName(hostName), params);
+                    port, DataBridgeConstants.CLIENT_TIMEOUT_MS, inetAddress, params);
+            log.info("Thrift Server started at "+hostName);
         } catch (TTransportException e) {
             throw new TransportException("Thrift transport exception occurred ", e);
         }

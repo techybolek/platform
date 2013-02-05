@@ -20,7 +20,7 @@ import org.apache.synapse.task.TaskDescriptionRepository;
 import org.apache.synapse.task.TaskScheduler;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.initializer.services.*;
 import org.wso2.carbon.mediation.initializer.utils.ConfigurationHolder;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -112,7 +112,7 @@ public class ConfigurationManager {
                 synpaseConfigurationsRoot = parameter.getValue().toString();
             }
 
-            tenantId = SuperTenantCarbonContext.
+            tenantId = PrivilegedCarbonContext.
                     getCurrentContext(configurationContext).getTenantId();
         } catch (RegistryException e) {
             handleException("Cannot initialize the configuration tracker: ", e);

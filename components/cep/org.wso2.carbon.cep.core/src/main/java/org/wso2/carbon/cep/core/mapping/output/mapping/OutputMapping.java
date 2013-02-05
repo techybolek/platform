@@ -17,6 +17,7 @@
 package org.wso2.carbon.cep.core.mapping.output.mapping;
 
 import org.wso2.carbon.cep.core.exception.CEPEventProcessingException;
+import org.wso2.carbon.databridge.commons.Attribute;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 
@@ -35,34 +36,20 @@ public abstract class OutputMapping {
     protected Map<Class, Map<String, Method>> methodCache;
 
     //For tuple Events
-    protected Map<String, StreamDefinition> typeDefMap;
-    protected Map<String, Map<String, Integer>> typeDefCache;
+    protected StreamDefinition rowStreamDefinition;
+    protected Map<String, Integer> positions;
 
     protected OutputMapping() {
-        typeDefMap = new HashMap<String, StreamDefinition>();
         methodCache = new HashMap<Class, Map<String, Method>>();
-        typeDefCache = new HashMap<String, Map<String, Integer>>();
     }
 
     public abstract Object convert(Object event);
 
     protected Object getPropertyValue(Object event, String property)
             throws CEPEventProcessingException {
-
-
         if (event instanceof Map) {
             return ((Map) event).get(property);
         } else if (event instanceof Event) {
-            Map<String, Integer> positions = typeDefCache.get(((Event) event).getStreamId());
-            if (positions == null) {
-                List<org.wso2.carbon.databridge.commons.Attribute> attributes = typeDefMap.get(((Event) event).getStreamId()).getPayloadData();
-                positions = new HashMap<String, Integer>();
-                for (int i = 0, attributesSize = attributes.size(); i < attributesSize; i++) {
-                    positions.put(attributes.get(i).getName(), i);
-
-                }
-                typeDefCache.put(((Event) event).getStreamId(), positions);
-            }
             return ((Event) event).getPayloadData()[positions.get(property)];
         } else {
             Map<String, Method> methodMap = methodCache.get(event.getClass());
@@ -112,8 +99,14 @@ public abstract class OutputMapping {
         this.methodCache = methodCache;
     }
 
-    public void defineStream(StreamDefinition eventStreamDefinition) {
-        typeDefMap.put(eventStreamDefinition.getName(), eventStreamDefinition);
+    public void setStreamDefinition(StreamDefinition eventStreamDefinition) {
+        rowStreamDefinition =eventStreamDefinition;
+        List<Attribute> attributes = rowStreamDefinition.getPayloadData();
+        positions = new HashMap<String, Integer>();
+        for (int i = 0, attributesSize = attributes.size(); i < attributesSize; i++) {
+            positions.put(attributes.get(i).getName(), i);
+
+        }
     }
 
 }

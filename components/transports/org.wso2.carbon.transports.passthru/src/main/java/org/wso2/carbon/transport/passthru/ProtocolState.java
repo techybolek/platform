@@ -31,7 +31,7 @@ public enum ProtocolState {
     REQUEST_DONE,
     /** The connection is reading the response headers */
     RESPONSE_HEAD,
-    /** The connection si reading the response body */
+    /** The connection is reading the response body */
     RESPONSE_BODY,
     /** The response is completed */
     RESPONSE_DONE,

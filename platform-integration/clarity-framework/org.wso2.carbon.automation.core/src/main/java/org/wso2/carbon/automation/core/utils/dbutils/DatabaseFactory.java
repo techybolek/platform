@@ -30,7 +30,7 @@ public class DatabaseFactory {
     private static final DataSource dbConfig = new EnvironmentBuilder().getFrameworkSettings().getDataSource();
 
     private static final String JDBC_URL = dbConfig.getDbUrl();
-    private static final String JDBC_DRIVER = dbConfig.getM_dbDriverName();
+    private static final String JDBC_DRIVER = dbConfig.get_dbDriverName();
     private static final String DB_USER = dbConfig.getDbUser();
     private static final String DB_PASSWORD = dbConfig.getDbPassword();
 
@@ -42,8 +42,8 @@ public class DatabaseFactory {
 
     }
 
-    public static DatabaseManager getDatabaseConnector(String jdbcUrl,
-                                                       String userName, String passWord)
+    public static DatabaseManager getDatabaseConnector(String jdbcUrl, String userName,
+                                                       String passWord)
             throws ClassNotFoundException, SQLException {
 
         return new SqlDatabaseManager(JDBC_DRIVER, jdbcUrl, userName, passWord);

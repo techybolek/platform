@@ -27,15 +27,15 @@ import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.WSDL2Constants;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.bam.data.publisher.util.BAMDataPublisherConstants;
-import org.wso2.carbon.bam.service.data.publisher.conf.EventingConfigData;
+import org.wso2.carbon.bam.data.publisher.util.PublisherUtil;
+import org.wso2.carbon.bam.service.data.publisher.conf.EventConfigNStreamDef;
 import org.wso2.carbon.bam.service.data.publisher.data.BAMServerInfo;
 import org.wso2.carbon.bam.service.data.publisher.data.Event;
 import org.wso2.carbon.bam.service.data.publisher.data.EventData;
@@ -43,16 +43,14 @@ import org.wso2.carbon.bam.service.data.publisher.data.PublishData;
 import org.wso2.carbon.bam.service.data.publisher.publish.EventPublisher;
 import org.wso2.carbon.bam.service.data.publisher.publish.ServiceAgentUtil;
 import org.wso2.carbon.bam.service.data.publisher.util.ActivityPublisherConstants;
-import org.wso2.carbon.bam.service.data.publisher.util.CommonConstants;
 import org.wso2.carbon.bam.service.data.publisher.util.TenantEventConfigData;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.core.util.SystemFilter;
 
 import javax.xml.namespace.QName;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
 
 public class ActivityOutHandler extends AbstractHandler {
 
@@ -60,22 +58,22 @@ public class ActivityOutHandler extends AbstractHandler {
 
     public InvocationResponse invoke(MessageContext messageContext) throws AxisFault {
 
-        AxisConfiguration axisConfiguration = messageContext.getConfigurationContext().getAxisConfiguration();
-        int tenantID = SuperTenantCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
-        Map<Integer, EventingConfigData> tenantSpecificEventConfig = TenantEventConfigData.getTenantSpecificEventingConfigData();
-        EventingConfigData eventingConfigData = tenantSpecificEventConfig.get(tenantID);
+        int tenantID = PublisherUtil.getTenantId(messageContext);
+        Map<Integer, EventConfigNStreamDef> tenantSpecificEventConfig = TenantEventConfigData.getTenantSpecificEventingConfigData();
+        EventConfigNStreamDef eventingConfigData = tenantSpecificEventConfig.get(tenantID);
 
         if (eventingConfigData != null && eventingConfigData.isMsgDumpingEnable()) {
 
             AxisService service = messageContext.getAxisService();
-            Parameter adminServiceParam = service.getParameter(CommonConstants.ADMIN_SERVICE_PARAMETER);
-            Parameter hiddenServiceParam = service.getParameter(CommonConstants.HIDDEN_SERVICE_PARAMETER);
+//            Parameter adminServiceParam = service.getParameter(CommonConstants.ADMIN_SERVICE_PARAMETER);
+//            Parameter hiddenServiceParam = service.getParameter(CommonConstants.HIDDEN_SERVICE_PARAMETER);
 
-            if (adminServiceParam == null && hiddenServiceParam == null) {
+            if (service == null || SystemFilter.isFilteredOutService(service.getAxisServiceGroup()) || service.isClientSide()) {
+                return InvocationResponse.CONTINUE;
+            } else {
 
                 if (messageContext.getMessageID() == null) {
-                    UUID msgUUID = UUID.randomUUID();
-                    messageContext.setMessageID(msgUUID.toString());
+                    messageContext.setMessageID(getUniqueId());
                 }
                 //get IN Message Context from OutMessageContext to track request and response
                 MessageContext inMessageContext = messageContext.getOperationContext().getMessageContext(
@@ -93,7 +91,7 @@ public class ActivityOutHandler extends AbstractHandler {
                 Timestamp timestamp = null;
                 if (inMessageContext != null) {
                     publishData = (PublishData) inMessageContext.getProperty(
-                            BAMDataPublisherConstants.PUBLISH_DATA);
+                            BAMDataPublisherConstants.ACTIVITY_PUBLISH_DATA);
                 } else {
                     Date date = new Date();
                     timestamp = new Timestamp(date.getTime());
@@ -120,7 +118,7 @@ public class ActivityOutHandler extends AbstractHandler {
                 }*/
 
                 addDetailsOfTheMessage(eventData, timestamp, activityID, messageContext);
-
+                
                 publishData.setEventData(eventData);
 
                 // Skip setting bam server info if already set in the INFLOW
@@ -131,13 +129,17 @@ public class ActivityOutHandler extends AbstractHandler {
 
                 // If service statistics is not enabled publish the event. Else let service stat
                 // handler do the job.
-                if (!eventingConfigData.isServiceStatsEnable()) {
+/*                if (!eventingConfigData.isServiceStatsEnable()) {
                     Event  event = ServiceAgentUtil.makeEventList(publishData, eventingConfigData);
                     EventPublisher publisher = new EventPublisher();
                     publisher.publish(event,eventingConfigData);
                 } else {
                     messageContext.setProperty(BAMDataPublisherConstants.PUBLISH_DATA, publishData);
-                }
+                }*/
+
+                Event event = ServiceAgentUtil.makeEventList(publishData, eventingConfigData);
+                EventPublisher publisher = new EventPublisher();
+                publisher.publish(event, eventingConfigData);
 
                 // Now set all values to response
                 engageSOAPHeaders(messageContext, activityID);
@@ -148,7 +150,6 @@ public class ActivityOutHandler extends AbstractHandler {
 
         return InvocationResponse.CONTINUE;
     }
-
 
 
     private void engageSOAPHeaders(MessageContext messageContext, String activityID) {
@@ -215,9 +216,13 @@ public class ActivityOutHandler extends AbstractHandler {
             eventData.setServiceName(outMessageContext.getAxisOperation().getName().getLocalPart());
         }
 
-        eventData.setOutMessageId(outMessageContext.getMessageID());
+        eventData.setMessageDirection(BAMDataPublisherConstants.OUT_DIRECTION);
+        eventData.setMessageId(outMessageContext.getMessageID());
         //eventData.setMessageDirection(ActivityPublisherConstants.ACTIVITY_DATA_MESSAGE_DIRECTION_OUT);
-        eventData.setOutMessageBody(outMessageContext.getEnvelope().getBody().toString());
+
+        SOAPEnvelope envelope = outMessageContext.getEnvelope();
+        eventData.setSOAPHeader(envelope.getHeader().toString());
+        eventData.setSOAPBody(envelope.getBody().toString());
 
         return eventData;
     }
@@ -227,11 +232,15 @@ public class ActivityOutHandler extends AbstractHandler {
                 WSDL2Constants.MESSAGE_LABEL_IN);
 
         if (inMessageContext != null &&
-            inMessageContext.getProperty(BAMDataPublisherConstants.PUBLISH_DATA) != null) {
+            inMessageContext.getProperty(BAMDataPublisherConstants.ACTIVITY_PUBLISH_DATA) != null) {
             return true;
         }
 
         return false;
+    }
+
+    public String getUniqueId() {
+        return System.nanoTime() + "_" + Thread.currentThread().getId();
     }
 
 }

@@ -32,7 +32,7 @@ public abstract class AbstractFixedDataReader implements DataReader {
     public AbstractFixedDataReader(Connection connection) throws SQLException {
         this.connection = connection;
         this.data = new HashMap<String, DataTable>();
-        populateData();
+        this.populateData();
     }
 
     public abstract void populateData() throws SQLException;
@@ -46,8 +46,12 @@ public abstract class AbstractFixedDataReader implements DataReader {
     }
     
     @Override
-    public DataTable getDataTable(String name) {
-    	return this.getData().get(name);
+    public DataTable getDataTable(String name) throws SQLException {
+        DataTable result = this.getData().get(name);
+        if (result == null) {
+            throw new SQLException("Sheet '" + name + "' does not exist");
+        }
+        return result;
     }
 
 }

@@ -15,12 +15,18 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
+<%@page import="org.wso2.carbon.dataservices.common.DBConstants.DataSourceTypes"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ page import="java.util.Iterator" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.wso2.carbon.dataservices.ui.beans.*" %>
 <%@ page import="org.wso2.carbon.dataservices.common.DBConstants" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
+<%@page import="org.apache.axis2.context.ConfigurationContext"%>
+<%@ page import="org.wso2.carbon.CarbonConstants" %>
+<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="org.wso2.carbon.dataservices.ui.DataServiceAdminClient" %>
 <jsp:include page="../resources/resources-i18n-ajaxprocessor.jsp"/>
 <jsp:include page="../dialog/display_messages.jsp"/>
 <fmt:bundle basename="org.wso2.carbon.dataservices.ui.i18n.Resources">
@@ -58,12 +64,14 @@
     Query query = null;
     String useConfig = "#";
     String datasourceType = "";
+    String customDSType = "";
     String wrapperElementName = "";
     String rdfBaseURI = "";
     String rowName = "";
     String resultNamespace = "";
     String rdfResultNamespace = "";
     String sql = null;
+    String expression = null;
     String cql = null;
     String sparql = null;
     String workBookName = null;
@@ -115,6 +123,7 @@
             query = dataService.getQuery(queryId);
             useConfig = query.getConfigToUse();
             sql = query.getSql();
+            expression = query.getExpression();
             cql = query.getSql();
             sparql = query.getSparql();
             scraperVaribale = query.getScraperVariable();
@@ -123,6 +132,44 @@
             keyColumns = query.getKeyColumns();
             if (c != null) {
                 datasourceType = c.getDataSourceType();
+                if (datasourceType != null && c.getPropertyValue(DBConstants.RDBMS.URL) instanceof String 
+                		&& ((String)c.getPropertyValue(DBConstants.RDBMS.URL)).trim().length() != 0 ) {
+                	if (datasourceType.equals(DataSourceTypes.EXCEL)) {
+                		datasourceType = DataSourceTypes.RDBMS;
+                	} else if (datasourceType.equals(DataSourceTypes.GDATA_SPREADSHEET)) {
+                		datasourceType = DataSourceTypes.RDBMS;
+                	}
+                } 
+                if (datasourceType != null && c.getPropertyValue(DBConstants.Excel.DATASOURCE) instanceof String &&
+            			((String)c.getPropertyValue(DBConstants.Excel.DATASOURCE)).trim().length() != 0) {
+                	datasourceType = DataSourceTypes.EXCEL;
+                } 
+            	if (datasourceType != null && c.getPropertyValue(DBConstants.GSpread.DATASOURCE) instanceof String &&
+            			((String)c.getPropertyValue(DBConstants.GSpread.DATASOURCE)).trim().length() != 0) {
+            		datasourceType = DataSourceTypes.GDATA_SPREADSHEET;
+                } 
+                if (c.getPropertyValue(DBConstants.CustomDataSource.DATA_SOURCE_QUERY_CLASS) instanceof String) {
+            		customDSType = DBConstants.DataSourceTypes.CUSTOM_QUERY;
+            	} else if (c.getPropertyValue(DBConstants.CustomDataSource.DATA_SOURCE_TABULAR_CLASS) instanceof String) {
+            		customDSType = DBConstants.DataSourceTypes.CUSTOM_TABULAR;
+            	}
+                if (c.getPropertyValue(DBConstants.CarbonDatasource.NAME) != null &&
+                		((String)c.getPropertyValue(DBConstants.CarbonDatasource.NAME)).trim().length() != 0) {
+            		String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
+                    ConfigurationContext configContext =
+                            (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+                    String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+                    DataServiceAdminClient client = new DataServiceAdminClient(cookie, backendServerURL, configContext);
+                    String type = client.getCarbonDataSourceType((String)c.getPropertyValue(DBConstants.CarbonDatasource.NAME));
+                    if (type != null && !type.equals(DataSourceTypes.RDBMS)) {
+                    	datasourceType = DataSourceTypes.CUSTOM;
+                    	if (type.equals("DS_CUSTOM_QUERY")) {
+                    		customDSType = DBConstants.DataSourceTypes.CUSTOM_QUERY;
+                    	} else if (type.equals("DS_CUSTOM_TABULAR")) {
+                    		customDSType = DBConstants.DataSourceTypes.CUSTOM_TABULAR;
+                    	}
+                    }
+            	}
             }
             Result result = query.getResult();
             if (result != null) {
@@ -219,9 +266,44 @@
         Iterator<Config> itrConfigs = configs.iterator();
         while (itrConfigs.hasNext()) {
             Config c = itrConfigs.next();
+            String customDatasourceType = "";
+            String dsType = c.getDataSourceType();
             if (c != null) {
+            	if (c.getPropertyValue(DBConstants.CustomDataSource.DATA_SOURCE_QUERY_CLASS) instanceof String) {
+            		customDatasourceType = DBConstants.DataSourceTypes.CUSTOM_QUERY;
+            	}
+            	if ( c.getPropertyValue(DBConstants.CarbonDatasource.NAME) !=null
+            			&& ((String)c.getPropertyValue(DBConstants.CarbonDatasource.NAME)).trim().length() != 0) {
+            		String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
+                    ConfigurationContext configContext =
+                            (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+                    String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+                    DataServiceAdminClient client = new DataServiceAdminClient(cookie, backendServerURL, configContext);
+                    String type = client.getCarbonDataSourceType((String)c.getPropertyValue(DBConstants.CarbonDatasource.NAME));
+                    if (!type.equals(DataSourceTypes.RDBMS)) {
+                    	dsType = DataSourceTypes.CUSTOM;
+                    	customDatasourceType = type;
+                    }
+            	}
+            	if (dsType != null && c.getPropertyValue(DBConstants.RDBMS.URL) instanceof String &&
+            			((String)c.getPropertyValue(DBConstants.RDBMS.URL)).trim().length() != 0) {
+                	if (dsType.equals(DataSourceTypes.EXCEL)) {
+                		dsType = DataSourceTypes.RDBMS;
+                	} else if (dsType.equals(DataSourceTypes.GDATA_SPREADSHEET)) {
+                		dsType = DataSourceTypes.RDBMS;
+                	}
+                } 
+            	if (dsType != null && c.getPropertyValue(DBConstants.Excel.DATASOURCE) instanceof String &&
+            			((String)c.getPropertyValue(DBConstants.Excel.DATASOURCE)).trim().length() != 0) {
+                	dsType = DataSourceTypes.EXCEL;
+                } 
+            	if (dsType != null && c.getPropertyValue(DBConstants.GSpread.DATASOURCE) instanceof String &&
+            			((String)c.getPropertyValue(DBConstants.GSpread.DATASOURCE)).trim().length() != 0) {
+                	dsType = DataSourceTypes.GDATA_SPREADSHEET;
+                } 
 %>
-<input type="hidden" id="<%=c.getId()%>" value="<%=c.getDataSourceType()%>"/>
+<input type="hidden" id="<%=c.getId()%>" value="<%=dsType%>"/>
+<input type="hidden" id="customDatasourceType<%=c.getId()%>" value="<%=customDatasourceType%>"/>
 <%
             }
         }
@@ -296,7 +378,8 @@
 
 <tr id="RDBMSnJNDIRow" style="<%=(datasourceType.equals("RDBMS") ||
                             datasourceType.equals("JNDI") ||
-                            datasourceType.equals("CARBON_DATASOURCE"))?"":"display:none"%>">
+                            datasourceType.equals("CARBON_DATASOURCE") ||
+                            customDSType.equals("CUSTOM_TABULAR"))?"":"display:none"%>">
     <td colspan="2">
         <table>
             <tr>
@@ -330,6 +413,20 @@
                 </td>
             </tr>
         </table>
+    </td>
+</tr>
+
+<tr id="CustomQueryRow" style="<%=(customDSType.equals("CUSTOM_QUERY"))?"":"display:none"%>">
+    <td colspan="2">
+        <table>
+            <tr>
+                <td align="left" class="leftCol-small"><fmt:message key="datasources.query.expression"/><font
+                        color='red'>*</font></td>
+                <td><textarea cols="50" rows="8" id="expression"
+                              name="expression"><%=(query != null) ? expression : ""%></textarea></td>
+            </tr>
+           
+           </table>
     </td>
 </tr>
 
@@ -392,7 +489,8 @@
 
                     <a class="icon-link" style="background-image: url(../admin/images/delete.gif);"
                        onclick="deleteSQLDialectAddQuery('<%=queryId%>','<%=dialects%>');"
-                       href="#"/>
+                       href="#"><fmt:message
+                            key="delete"/></a>
                 </td>
             </tr>
             </tbody>
@@ -543,7 +641,7 @@
 </tr>
 
 <% boolean inputMappingsSupported = (datasourceType.equals("RDBMS") || datasourceType.equals("JNDI") ||
-                                     datasourceType.equals("CARBON_DATASOURCE") || datasourceType.equals("RDF") || datasourceType.equals("SPARQL") || datasourceType.equals("Cassandra")); %>
+                                     datasourceType.equals("CARBON_DATASOURCE") || datasourceType.equals("RDF") || datasourceType.equals("SPARQL") || datasourceType.equals("Cassandra") || datasourceType.equals("CUSTOM")); %>
 <tr style="<%=inputMappingsSupported ? "" : "display:none"%>">
    <td colspan="7" />                                                           
 </tr>                                                          
@@ -970,6 +1068,7 @@
             String xportType = "";
             String namespace = "";
             String arrayName = "";
+            String optional = "";
 
             if (element.getRequiredRoles() != null && element.getRequiredRoles().trim().length() > 0) {
                 roles = element.getRequiredRoles();
@@ -994,6 +1093,9 @@
             }
             if (element.getArrayName() != null) {
                 arrayName = element.getArrayName();
+            }
+            if (element.getOptional() != null) {
+                optional = element.getOptional();
             }
 %>
 <tr>
@@ -1027,7 +1129,7 @@
         } else {
         %>
         <a class="icon-link" style="background-image:url(../admin/images/edit.gif);"
-           href="addOutputMapping.jsp?queryId=<%=queryId%>&name=<%=element.getName()%>&datasourceType=<%=element.getDataSourceType()%>&datasourceValue=<%=element.getDataSourceValue()%>&txtDataServiceElementNamespace=<%=namespace%>&requiredRoles=<%=roles%>&xsdType=<%=xType%>&exportName=<%=xportName%>&exportType=<%=xportType%>&edit=<%=element.getName()%>&mappingType=element&flag=save&arrayName=<%=arrayName%>"><fmt:message
+           href="addOutputMapping.jsp?queryId=<%=queryId%>&name=<%=element.getName()%>&datasourceType=<%=element.getDataSourceType()%>&datasourceValue=<%=element.getDataSourceValue()%>&txtDataServiceElementNamespace=<%=namespace%>&requiredRoles=<%=roles%>&xsdType=<%=xType%>&exportName=<%=xportName%>&exportType=<%=xportType%>&edit=<%=element.getName()%>&mappingType=element&flag=save&arrayName=<%=arrayName%>&optional=<%=optional%>"><fmt:message
                 key="edit"/></a>
 
         <%
@@ -1052,6 +1154,7 @@
             String xportName = "";
             String xportType = "";
             String arrayName = "";
+            String optional = "";
             if (attribute.getRequiredRoles() != null && 
             		attribute.getRequiredRoles().trim().length() > 0) {
                 roles = attribute.getRequiredRoles();
@@ -1074,6 +1177,9 @@
             if (attribute.getArrayName() != null) {
                 arrayName = attribute.getArrayName();
             }
+            if (attribute.getOptional() != null) {
+                optional = attribute.getOptional();
+            }
 %>
 <tr>
     <input type="hidden" id="<%=attribute.getName()%>" name="<%=attribute.getName()%>"
@@ -1095,7 +1201,7 @@
         <%--</td>--%>
     <td>
         <a class="icon-link" style="background-image:url(../admin/images/edit.gif);"
-           href="addOutputMapping.jsp?queryId=<%=queryId%>&name=<%=attribute.getName()%>&datasourceType=<%=attribute.getDataSourceType()%>&datasourceValue=<%=attribute.getDataSourceValue()%>&requiredRoles=<%=roles%>&xsdType=<%=xType%>&exportName=<%=xportName%>&exportType=<%=xportType%>&edit=<%=attribute.getName()%>&mappingType=attribute&flag=save&arrayName=<%=arrayName%>"><fmt:message
+           href="addOutputMapping.jsp?queryId=<%=queryId%>&name=<%=attribute.getName()%>&datasourceType=<%=attribute.getDataSourceType()%>&datasourceValue=<%=attribute.getDataSourceValue()%>&requiredRoles=<%=roles%>&xsdType=<%=xType%>&exportName=<%=xportName%>&exportType=<%=xportType%>&edit=<%=attribute.getName()%>&mappingType=attribute&flag=save&arrayName=<%=arrayName%>&optional=<%=optional%>"><fmt:message
                 key="edit"/></a>
         <a class="icon-link" style="background-image:url(../admin/images/delete.gif);"
            href="#"

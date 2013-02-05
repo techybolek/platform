@@ -55,7 +55,7 @@
 </form>
 <script type="text/javascript">
      if(document.getElementById('flag').value == 'add'){
-        location.href= "addOperationParameter.jsp?operationName=<%=operationName%>&action=<%=action%>";
+        location.href= "addOperation.jsp?operationName=<%=operationName%>&action=<%=action%>";
      } else {
         location.href = "operations.jsp";
      }

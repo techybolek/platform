@@ -22,11 +22,13 @@ import org.apache.commons.codec.binary.Base64;
 import javax.servlet.http.HttpServletRequest;
 
 public class BasicAuthCallBackHandler extends EntitlementFilterCallBackHandler {
+
     public BasicAuthCallBackHandler(HttpServletRequest request) {
         String authHeaderEn =request.getHeader("Authorization");
         String tempArr[]=authHeaderEn.split(" ");
         String authHeaderDc = new String(Base64.decodeBase64(tempArr[1].getBytes()));
-        tempArr =authHeaderDc.split(":");
+        tempArr = authHeaderDc.split(":");
         setUserName(tempArr[0]);
     }
+
 }

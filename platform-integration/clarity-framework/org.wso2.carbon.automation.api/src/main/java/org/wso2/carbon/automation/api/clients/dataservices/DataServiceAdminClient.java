@@ -22,7 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.api.clients.utils.AuthenticateStub;
 import org.wso2.carbon.dataservices.ui.stub.DataServiceAdminStub;
-//import org.wso2.carbon.dataservices.ui.stub.admin.core.xsd.DSTaskInfo;
+import org.wso2.carbon.dataservices.ui.stub.admin.core.xsd.PaginatedTableInfo;
+
 
 import java.rmi.RemoteException;
 
@@ -39,27 +40,20 @@ public class DataServiceAdminClient {
         AuthenticateStub.authenticateStub(sessionCookie, dataServiceAdminStub);
     }
 
-    public DataServiceAdminClient(String backEndUrl, String userName, String password) throws AxisFault {
+    public DataServiceAdminClient(String backEndUrl, String userName, String password)
+            throws AxisFault {
         String endPoint = backEndUrl + serviceName;
         dataServiceAdminStub = new DataServiceAdminStub(endPoint);
         AuthenticateStub.authenticateStub(userName, password, dataServiceAdminStub);
     }
 
     public String[] getCarbonDataSources() throws RemoteException {
-
-        String[] dataSourceList;
-
-        dataSourceList = dataServiceAdminStub.getCarbonDataSourceNames();
-
-        return dataSourceList;
+        return dataServiceAdminStub.getCarbonDataSourceNames();
     }
 
     public void editDataService(String serviceName, String serviceHierachy,
-                                String dataServiceContent)
-            throws RemoteException {
-
+                                String dataServiceContent) throws RemoteException {
         dataServiceAdminStub.saveDataService(serviceName, serviceHierachy, dataServiceContent);
-
     }
 
     public String getDataServiceContent(String serviceName)
@@ -69,61 +63,99 @@ public class DataServiceAdminClient {
         return content;
     }
 
-/*    public void scheduleTask(String sessionCookie, DSTaskInfo dSTaskInfo) {
-        new AuthenticateStub().authenticateStub(sessionCookie, dataServiceAdminStub);
-        try {
-            dataServiceAdminStub.scheduleTask(dSTaskInfo);
-            log.info("ScheduleTask added");
-        } catch (RemoteException e) {
-            log.error("Remote Exception when adding scheduleTask :", e);
-            Assert.fail("Remote Exception when adding scheduleTask : " + e);
-        }
 
+    public void saveDataService(String serviceName, String serviceGroup, String serviceContents)
+            throws AxisFault {
+        try {
+            dataServiceAdminStub.saveDataService(serviceName, serviceGroup, serviceContents);
+        } catch (RemoteException e) {
+            log.error("Error occurred while saving dataservice : " + serviceName, e);
+            throw new AxisFault("Saving " + serviceName + " failed.", e);
+        }
     }
 
-    public void rescheduleTask(String sessionCookie, DSTaskInfo dSTaskInfo) {
-        new AuthenticateStub().authenticateStub(sessionCookie, dataServiceAdminStub);
+    /**
+     * @param driverClass   JDBC driver class name
+     * @param jdbcURL       JDBC Url
+     * @param username      username
+     * @param password      password
+     * @param passwordAlias password alias
+     * @return a string representing success or the failure of the JDBC connection
+     * @throws AxisFault axisFault
+     */
+    public String testJDBCConnection(String driverClass, String jdbcURL, String username,
+                                     String password, String passwordAlias) throws AxisFault {
+        String response = "";
         try {
-            dataServiceAdminStub.rescheduleTask(dSTaskInfo);
-            log.info("Task rescheduled");
+            response = dataServiceAdminStub.testJDBCConnection(driverClass, jdbcURL, username,
+                                                               password, passwordAlias);
         } catch (RemoteException e) {
-            log.error("Remote Exception when rescheduling Task :", e);
-            Assert.fail("Remote Exception when rescheduling Task : " + e);
+            throw new AxisFault("Error connecting to " + jdbcURL + ". Message from the service is : ", e);
         }
-
+        return response;
     }
 
-    public void deleteTask(String sessionCookie, String taskName) {
-        new AuthenticateStub().authenticateStub(sessionCookie, dataServiceAdminStub);
+    public String testGSpreadConnection(String userName, String password, String visibility,
+                                        String documentURL, String passwordAlias) throws AxisFault {
+        String response = "";
         try {
-            dataServiceAdminStub.deleteTask(taskName);
-            log.info("ScheduleTask deleted");
+            response =
+                    dataServiceAdminStub.testGSpreadConnection(userName, password, visibility, documentURL,
+                                                               passwordAlias);
         } catch (RemoteException e) {
-            log.error("Remote Exception when deleting Task :", e);
-            Assert.fail("Remote Exception when deleting Task : " + e);
+            throw new AxisFault("Error connecting to " + documentURL + ". Message from the service is : ", e);
         }
-
+        return response;
     }
 
-    public boolean isTaskScheduled(String sessionCookie, String taskName) {
-        new AuthenticateStub().authenticateStub(sessionCookie, dataServiceAdminStub);
-        try {
-            return dataServiceAdminStub.isTaskScheduled(taskName);
-        } catch (RemoteException e) {
-            log.error("Remote Exception when getting task info :", e);
-            Assert.fail("Remote Exception when getting task info : " + e);
-        }
-        return false;
+    public String[] getOutputColumnNames(String query) throws Exception {
+        return dataServiceAdminStub.getOutputColumnNames(query);
     }
 
-    public String[] getAllTaskNames(String sessionCookie) {
-        new AuthenticateStub().authenticateStub(sessionCookie, dataServiceAdminStub);
+    public String[] getInputMappingNames(String query) throws Exception {
+        return dataServiceAdminStub.getInputMappingNames(query);
+    }
+
+    public PaginatedTableInfo getPaginatedTableInfo(int pageNumber,
+                                                    String datasourceId, String dbName,
+                                                    String[] schemas) throws Exception {
+        return dataServiceAdminStub.getPaginatedTableInfo(pageNumber, datasourceId, dbName, schemas);
+    }
+
+    public PaginatedTableInfo getPaginatedSchemaInfo(int pageNumber,
+                                                     String datasourceId) throws Exception {
+        return dataServiceAdminStub.getPaginatedSchemaInfo(pageNumber, datasourceId);
+    }
+
+    public String[] getTableInfo(String datasourceId, String dbName, String[] schemas)
+            throws Exception {
+        return dataServiceAdminStub.getTableList(datasourceId, dbName, schemas);
+    }
+
+    public String[] getdbSchemaList(String datasourceId) throws Exception {
+        return dataServiceAdminStub.getdbSchemaList(datasourceId);
+    }
+
+
+    public String[] getDSServiceList(String dataSourceId, String dbName, String[] schemas,
+                                     String[] tableNames, String serviceNamespace) {
         try {
-            return dataServiceAdminStub.getAllTaskNames();
-        } catch (RemoteException e) {
-            log.error("Remote Exception when getting AllTaskNames :", e);
-            Assert.fail("Remote Exception when getting AllTaskNames : " + e);
+            return dataServiceAdminStub.getDSServiceList(dataSourceId, dbName, schemas, tableNames,
+                                                         false, serviceNamespace);
+        } catch (Exception e) {
+            return null;
         }
-        return null;
-    }*/
+    }
+
+    public String getDSService(String dataSourceId, String dbName, String[] schemas,
+                               String[] tableNames, String serviceName, String serviceNamespace) {
+        try {
+            return dataServiceAdminStub.getDSService(dataSourceId, dbName, schemas, tableNames, true, serviceName,
+                                                     serviceNamespace);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+
 }

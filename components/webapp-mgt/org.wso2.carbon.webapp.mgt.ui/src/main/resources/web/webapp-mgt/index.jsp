@@ -21,7 +21,7 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@ page import="org.wso2.carbon.webapp.list.ui.WebappAdminClient" %>
+<%@ page import="org.wso2.carbon.webapp.mgt.ui.WebappAdminClient" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@page import="org.wso2.carbon.webapp.mgt.stub.types.carbon.WebappMetadata" %>
 <%@page import="org.wso2.carbon.webapp.mgt.stub.types.carbon.WebappsWrapper" %>
@@ -59,18 +59,12 @@
 
     String webappState = request.getParameter("webappState");
     if (webappState == null) {
-        webappState = "all";
+        webappState = "started";
     }
-
-    String webappType = request.getParameter("webappType");
-    if (webappType == null) {
-        webappType = "all";
-    }
-
     try {
         client = new WebappAdminClient(cookie, backendServerURL, configContext, request.getLocale());
         webappsWrapper = client.getPagedWebappsSummary(webappSearchString,
-                                                       webappState, webappType,
+                                                       webappState,
                                                        Integer.parseInt(pageNumber));
         numberOfPages = webappsWrapper.getNumberOfPages();
         webapps = webappsWrapper.getWebapps();
@@ -89,11 +83,11 @@
     ResourceBundle bundle = ResourceBundle.getBundle(WebappAdminClient.BUNDLE, request.getLocale());
 %>
 
-<fmt:bundle basename="org.wso2.carbon.webapp.list.ui.i18n.Resources">
+<fmt:bundle basename="org.wso2.carbon.webapp.mgt.ui.i18n.Resources">
 <carbon:breadcrumb
         label="webapps"
-        resourceBundle="org.wso2.carbon.webapp.list.ui.i18n.Resources"
-        topPage="false"
+        resourceBundle="org.wso2.carbon.webapp.mgt.ui.i18n.Resources"
+        topPage="true"
         request="<%=request%>"/>
 
 <jsp:include page="javascript_include.jsp"/>
@@ -274,7 +268,7 @@
 </script>
 
 <div id="middle">
-<h2><fmt:message key="running.apps"/></h2>
+<h2><fmt:message key="running.webapps"/></h2>
 
 <div id="workArea">
 <form action="index.jsp" name="searchForm">
@@ -282,14 +276,14 @@
         <tr>
             <td style="border:0; !important">
                 <nobr>
-                    <%= numOfWebapps%> <fmt:message key="running.apps"/>.&nbsp;
+                    <%= numOfWebapps%> <fmt:message key="running.webapps"/>.&nbsp;
                     <%
                         if (numOfFaultyWebapps > 0) {
                     %>
                     <u>
-                        <a href="faulty_webapps.jsp?webappType=<%=webappType%>">
+                        <a href="faulty_webapps.jsp">
                             <font color="red"><%= numOfFaultyWebapps%>
-                                <fmt:message key="faulty.apps"/>
+                                <fmt:message key="faulty.webapps"/>
                             </font>
                         </a>
                     </u>
@@ -312,7 +306,7 @@
                                 <fmt:message key="webapp.state"/>
                                 <select name="webappState">
                                     <%
-                                        for (String state : new String[]{"Started", "Stopped", "All"}) {
+                                        for (String state : new String[]{"Started", "Stopped"}) {
                                             if (webappState.equalsIgnoreCase(state)) {
                                     %>
                                     <option value="<%= state%>" selected="selected">
@@ -322,30 +316,6 @@
                                     } else {
                                     %>
                                     <option value="<%= state%>"><%= state%>
-                                    </option>
-                                    <%
-                                            }
-                                        }
-                                    %>
-                                </select>
-                            </nobr>
-                        </td>
-                        <td style="border:0; !important">
-                            <nobr>
-                                <fmt:message key="webapp.type"/>
-                                <select name="webappType">
-                                    <%
-                                        for (String type : new String[]{"Webapp", "JaxWebapp",
-                                                                        "JaggeryWebapp", "All"}) {
-                                            if (webappType.equalsIgnoreCase(type)) {
-                                    %>
-                                    <option value="<%= type%>" selected="selected">
-                                        <%= type%>
-                                    </option>
-                                    <%
-                                    } else {
-                                    %>
-                                    <option value="<%= type%>"><%= type%>
                                     </option>
                                     <%
                                             }
@@ -391,29 +361,20 @@
         } else if (webappState.equalsIgnoreCase("stopped")) {
             extraHtml = "<a href='#' onclick='startWebapps()' class='item-selector-link' style='background-image:url(images/start.gif)';> " +
                         bundle.getString("webapps.start") + "</a>";
-        } else if(webappState.equalsIgnoreCase("all")) {
-            extraHtml = "<a href='#' onclick='expireSessions()' class='item-selector-link' style='background-image:url(images/expire_session.gif)';>" +
-                        bundle.getString("webapps.expire.sessions") + "</a>" +
-                        "<a href='#' onclick='reloadWebapps()' class='item-selector-link' style='background-image:url(images/reload.gif)';> " +
-                        bundle.getString("webapps.reload") + "</a>" +
-                        "<a href='#' onclick='startWebapps()' class='item-selector-link' style='background-image:url(images/start.gif)';> " +
-                        bundle.getString("webapps.start") + "</a>" +
-                        "<a href='#' onclick='stopWebapps()' class='item-selector-link' style='background-image:url(images/stop.gif)';> " +
-                        bundle.getString("webapps.stop") + "</a>";
-        }else {
+        } else {
             throw new RuntimeException("Unknown webapp state: " + webappState);
         }
 %>
 
 <carbon:paginator pageNumber="<%=pageNumberInt%>" numberOfPages="<%=numberOfPages%>"
                   page="index.jsp" pageNumberParameterName="pageNumber"
-                  resourceBundle="org.wso2.carbon.webapp.list.ui.i18n.Resources"
+                  resourceBundle="org.wso2.carbon.webapp.mgt.ui.i18n.Resources"
                   prevKey="prev" nextKey="next"
                   parameters="<%=parameters%>"/>
 <carbon:itemGroupSelector selectAllInPageFunction="selectAllInThisPage(true)"
                           selectAllFunction="selectAllInAllPages()"
                           selectNoneFunction="selectAllInThisPage(false)"
-                          resourceBundle="org.wso2.carbon.webapp.list.ui.i18n.Resources"
+                          resourceBundle="org.wso2.carbon.webapp.mgt.ui.i18n.Resources"
                           selectAllInPageKey="selectAllInPage"
                           selectAllKey="selectAll"
                           selectNoneKey="selectNone"
@@ -447,7 +408,6 @@
 <form action="delete_webapps.jsp" name="webappsForm" method="post">
     <input type="hidden" name="pageNumber" value="<%= pageNumber%>"/>
     <input type="hidden" name="webappState" value="<%= webappState %>"/>
-    <input type="hidden" name="webappType" value="<%= webappType %>"/>
     <table class="styledLeft" id="webappsTable" width="100%">
         <thead>
         <tr>
@@ -459,9 +419,6 @@
             <th>
                 <nobr><fmt:message key="webapp.state"/></nobr>
             </th>
-            <th>
-                <nobr><fmt:message key="webapp.type"/></nobr>
-            </th>
             <th width="8%" style="text-align: right; padding-right: 5px; !important"><fmt:message
                     key="webapp.sessions"/></th>
             <th>
@@ -470,8 +427,7 @@
             <th>
                 <nobr><fmt:message key="webapp.last.modified"/></nobr>
             </th>
-            <% if (webappState.equalsIgnoreCase("started") ||
-                   webappState.equalsIgnoreCase("all")) { %>
+            <% if (webappState.equalsIgnoreCase("started")) { %>
             <th colspan="2"><fmt:message key="webapp.action"/></th>
             <% } else { %>
             <th><fmt:message key="webapp.action"/></th>
@@ -496,13 +452,7 @@
             for (WebappMetadata webapp : webapps) {
                 String bgColor = ((position % 2) == 1) ? "#EEEFFB" : "white";
                 position++;
-                String currentWebappType = webapp.getWebappType();
-                String webappURL;
-                if(currentWebappType.equalsIgnoreCase("JaxWebapp")){
-                    webappURL = urlPrefix + webapp.getContext() + "/services";
-                } else {
-                    webappURL = urlPrefix + webapp.getContext();
-                }
+                String webappURL = urlPrefix + webapp.getContext();
         %>
 
         <tr bgcolor="<%= bgColor%>">
@@ -512,7 +462,7 @@
                        onclick="resetVars()" class="chkBox"/>
             </td>
             <td>
-                <a href="../webapp-list/webapp_info.jsp?webappFileName=<%= webapp.getWebappFile()%>&webappState=<%= webappState %>&hostName=<%= webappsWrapper.getHostName()%>&httpPort=<%= webappsWrapper.getHttpPort()%>&webappType=<%=currentWebappType%>">
+                <a href="webapp_info.jsp?webappFileName=<%= webapp.getWebappFile()%>&webappState=<%= webappState %>&hostName=<%= webappsWrapper.getHostName()%>&httpPort=<%= webappsWrapper.getHttpPort()%>">
                     <%= webapp.getContext()%>
                 </a>
             </td>
@@ -520,40 +470,19 @@
             </td>
             <td><%= (webapp.getState() != null ? webapp.getState() : "") %>
             </td>
-            <td>
-                <%
-                    String iconPath = "";
-                    if(currentWebappType.equalsIgnoreCase("Webapp")) {
-                        iconPath = "../webapp-mgt/images/webapps.gif";
-                    } else if(currentWebappType.equalsIgnoreCase("JaxWebapp")) {
-                        iconPath = "../jax-webapp-mgt/images/jax_type.gif";
-                    } else if(currentWebappType.equalsIgnoreCase("JaggeryWebapp")) {
-                        iconPath = "../jaggeryapp-mgt/images/webapps.gif";
-                    }
-                %>
-                <nobr>
-                    <img src="<%=iconPath%>"
-                         title="<%= currentWebappType%>"
-                         alt="<%= currentWebappType%>"/>
-                    <%= (webapp.getWebappType() != null ? webapp.getWebappType() : "") %>
-                </nobr>
-            </td>
-
             <td style="text-align: right; !important">
                 <%
-                if(!currentWebappType.equalsIgnoreCase("JaxWebapp")) {
                     if (webapp.getStatistics().getActiveSessions() != 0) {
                 %>
                 <a href="sessions.jsp?webappFileName=<%= webapp.getWebappFile() %>">
                     <%= webapp.getStatistics().getActiveSessions() %>
                 </a>
                 <%
-                    } else {
+                } else {
                 %>
                 <%= webapp.getStatistics().getActiveSessions() %>
                 <%
                     }
-                }
                 %>
             </td>
             <td>
@@ -568,36 +497,22 @@
                 <nobr><%= lastModified %>
                 </nobr>
             </td>
-            <% if (!"stopped".equalsIgnoreCase(webapp.getState())) {
+            <% if (webappState.equalsIgnoreCase("started")) {
             %>
             <td>
-                <a href="<%= webappURL %>" target="_blank" 
-                   style='background:url(images/goto_url.gif) no-repeat;padding-left:20px;display:block;white-space: nowrap;height:16px;'>
-                    <%
-                        if(currentWebappType.equalsIgnoreCase("JaxWebapp")) {
-                    %>
-                    <fmt:message key="find.services"/>
-                    <%
-                        } else {
-                    %>
+                <a href="<%= webappURL %>" target="_blank" class="icon-link"
+                   style='background-image:url(images/goto_url.gif)'>
                     <fmt:message key="go.to.url"/>
-                    <%
-                        }
-                    %>
                 </a>
             </td>
-            <% } else { %>
+            <% } %>
             <td>
-            </td>
-            <%}%>
-            <td>
-                <%--<%if (webapp.getWebappFile().endsWith(".war")) {%>--%>
-                <a href="download-ajaxprocessor.jsp?name=<%=webapp.getWebappFile()%>&type=<%=webapp.getWebappType()%>"
-                   target="_self"
-						style='background:url(images/download.gif) no-repeat;padding-left:20px;display:block;white-space: nowrap;height:16px;'>
+                <%if (webapp.getWebappFile().endsWith(".war")) {%>
+                <a href="download-ajaxprocessor.jsp?name=<%= webapp.getWebappFile()%>" target="_self"
+                        style='background-image:url(images/download.gif)' class="icon-link">
                     <fmt:message key="download"/>
                 </a>
-                <%--<% } %>--%>
+                <% } %>
             </td>
         </tr>
         <% } %>
@@ -608,7 +523,7 @@
 <carbon:itemGroupSelector selectAllInPageFunction="selectAllInThisPage(true)"
                           selectAllFunction="selectAllInAllPages()"
                           selectNoneFunction="selectAllInThisPage(false)"
-                          resourceBundle="org.wso2.carbon.webapp.list.ui.i18n.Resources"
+                          resourceBundle="org.wso2.carbon.webapp.mgt.ui.i18n.Resources"
                           selectAllInPageKey="selectAllInPage"
                           selectAllKey="selectAll"
                           selectNoneKey="selectNone"
@@ -619,7 +534,7 @@
                           extraHtml="<%= extraHtml%>"/>
 <carbon:paginator pageNumber="<%=pageNumberInt%>" numberOfPages="<%=numberOfPages%>"
                   page="index.jsp" pageNumberParameterName="pageNumber"
-                  resourceBundle="org.wso2.carbon.webapp.list.ui.i18n.Resources"
+                  resourceBundle="org.wso2.carbon.webapp.mgt.ui.i18n.Resources"
                   prevKey="prev" nextKey="next"
                   parameters="<%= parameters%>"/>
 <%

@@ -76,13 +76,13 @@ public class TResultSet implements ResultSet {
 
     public String getString(int columnIndex) throws SQLException {
         determineResultSetState();
-        Object value = getValue(columnIndex - 1);
+        Object value = getValue(columnIndex);
         return (value != null) ? value.toString() : null;
     }
 
     public boolean getBoolean(int columnIndex) throws SQLException {
         determineResultSetState();
-        return Boolean.parseBoolean(getValue(columnIndex - 1).toString());
+        return Boolean.parseBoolean(getValue(columnIndex).toString());
     }
 
     public byte getByte(int columnIndex) throws SQLException {
@@ -92,34 +92,34 @@ public class TResultSet implements ResultSet {
 
     public short getShort(int columnIndex) throws SQLException {
         determineResultSetState();
-        String value = getValue(columnIndex - 1).toString();
+        String value = getValue(columnIndex).toString();
         return Short.parseShort(value.substring(0, value.indexOf(".")));
     }
 
     public int getInt(int columnIndex) throws SQLException {
         determineResultSetState();
-        String value = getValue(columnIndex - 1).toString();
+        String value = getValue(columnIndex).toString();
         return Integer.parseInt(value.substring(0, value.indexOf(".")));
     }
 
     public long getLong(int columnIndex) throws SQLException {
         determineResultSetState();
-        return Long.parseLong(getValue(columnIndex - 1).toString());
+        return Long.parseLong(getValue(columnIndex).toString());
     }
 
     public float getFloat(int columnIndex) throws SQLException {
         determineResultSetState();
-        return Float.parseFloat(getValue(columnIndex - 1).toString());
+        return Float.parseFloat(getValue(columnIndex).toString());
     }
 
     public double getDouble(int columnIndex) throws SQLException {
         determineResultSetState();
-        return Double.parseDouble(getValue(columnIndex - 1).toString());
+        return Double.parseDouble(getValue(columnIndex).toString());
     }
 
     public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
         determineResultSetState();
-        return BigDecimal.valueOf(Long.parseLong(getValue(columnIndex - 1).toString()));
+        return BigDecimal.valueOf(Long.parseLong(getValue(columnIndex).toString()));
     }
 
     public byte[] getBytes(int columnIndex) throws SQLException {
@@ -291,7 +291,7 @@ public class TResultSet implements ResultSet {
 
     public int findColumn(String columnLabel) throws SQLException {
         determineResultSetState();
-        Object o = getData().getHeaders().get(columnLabel);
+        Object o = getData().getHeader(columnLabel);
         if (o == null) {
             throw new SQLException("Invalid column name '" + columnLabel + "'");
         }

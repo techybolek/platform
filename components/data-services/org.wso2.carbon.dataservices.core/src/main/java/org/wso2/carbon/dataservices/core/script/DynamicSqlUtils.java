@@ -20,6 +20,8 @@ package org.wso2.carbon.dataservices.core.script;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.wso2.carbon.dataservices.core.DBUtils;
+
 /**
  * This class create SQL Statement in Dynamically When Consider One Statement it
  * build by part by part in the Runtime after complete the Statement it executed
@@ -36,13 +38,13 @@ public class DynamicSqlUtils {
 	 * 
 	 * @param tableName
 	 *            -table Name of the given table
+	 * @param schema the database schema
 	 * @return SQL statement as a String
 	 */
-	public String getSelectAll(String tableName, String colomNames) {
-
+	public String getSelectAll(String tableName, String schema, String columnNames) {
 		StringBuffer statement = new StringBuffer();
-		statement.append("SELECT"+colomNames+"  FROM ");
-		statement.append(tableName);
+		statement.append("SELECT " + columnNames.trim() + " FROM ");
+		statement.append((DBUtils.isEmptyString(schema) ? "" : (schema + ".")) + tableName.trim());
 		return new String(statement);
 	}
 
@@ -53,15 +55,16 @@ public class DynamicSqlUtils {
 	 * 
 	 * @param tableName
 	 *            -table Name of the given table
+	 * @param schema the database schema
 	 * @param pKey
 	 *            -primary key of table
 	 * @return SQL statement as a String
 	 */
-	public String getSelectByKey(String tableName, String pKey, String colomNames) {
-
+	public String getSelectByKey(String tableName, String schema, 
+			String pKey, String columnNames) {
 		StringBuffer statement = new StringBuffer();
-		statement.append("SELECT "+colomNames +" FROM ");
-		statement.append(tableName);
+		statement.append("SELECT " + columnNames.trim() + " FROM ");
+		statement.append((DBUtils.isEmptyString(schema) ? "" : (schema + ".")) + tableName.trim());
 		statement.append(" WHERE ");
 		statement.append(pKey).append("=?");
 		return new String(statement);
@@ -76,13 +79,13 @@ public class DynamicSqlUtils {
 	 *            -List of parameters values
 	 * @param tableName
 	 *            -table Name of the given table
+	 * @param schema the database schema
 	 * @return SQL statement as a String
 	 */
-	public String getInsertStatement(String tableName, List<String> param) {
-
+	public String getInsertStatement(String tableName, String schema, List<String> param) {
 		StringBuffer statement = new StringBuffer();
 		statement.append("INSERT INTO ");
-		statement.append(tableName);
+		statement.append((DBUtils.isEmptyString(schema) ? "" : (schema + ".")) + tableName.trim());
 		statement.append("(");
 		int last = param.size();
 		int index = 1;
@@ -119,13 +122,13 @@ public class DynamicSqlUtils {
 	 *            -List of parameters values
 	 * @param tableName
 	 *            -table Name of the given table
+	 * @param schema the database schema
 	 * @param pKey
 	 *            -primary key of table
 	 * @return SQL statement as a String
 	 */
-	public String getUpdateStatement(String tableName, List<String> param2,
+	public String getUpdateStatement(String tableName, String schema, List<String> param2,
 			String pKey) {
-
 		List<String> param = new ArrayList<String>();
 		for (String par : param2) {
 			if (!par.equals(pKey))
@@ -134,7 +137,7 @@ public class DynamicSqlUtils {
 
 		StringBuffer statement = new StringBuffer();
 		statement.append("UPDATE ");
-		statement.append(tableName);
+		statement.append((DBUtils.isEmptyString(schema) ? "" : (schema + ".")) + tableName.trim());
 		statement.append(" SET ");
 		int last = param.size();
 		int index = 1;
@@ -158,22 +161,21 @@ public class DynamicSqlUtils {
 	 * 
 	 * @param tableName
 	 *            -table Name of the given table
+	 * @param schema the database schema
 	 * @param pKey
 	 *            -primary key of table
 	 * @return SQL statement as a String
 	 */
-	public String getDeleteStatement(String tableName, String pKey) {
-
+	public String getDeleteStatement(String tableName, String schema, String pKey) {
 		StringBuffer statement = new StringBuffer();
 		statement.append("DELETE FROM ");
-		statement.append(tableName);
+		statement.append((DBUtils.isEmptyString(schema) ? "" : (schema + ".")) + tableName.trim());
 		statement.append(" WHERE ");
 		statement.append(pKey).append("=?");
 		return new String(statement);
 	}
 
 	public String getProcedureInvokeStatement(String proceName) {
-
 		return "call " + proceName + "(?)";
 	}
 

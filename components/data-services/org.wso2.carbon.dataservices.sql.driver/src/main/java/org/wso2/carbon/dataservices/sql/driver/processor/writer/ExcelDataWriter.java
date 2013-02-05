@@ -27,7 +27,6 @@ import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataRow;
 import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataTable;
 
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,7 +50,7 @@ public class ExcelDataWriter implements DataWriter {
         for (DataTable table : tables) {
             Set<DataRow> rows = (Set<DataRow>) table.getRows().values();
             for (DataRow row : rows) {
-                List<DataCell> cells = row.getCells();
+                Set<DataCell> cells = (Set<DataCell>) row.getCells().values();
                 for (DataCell cell : cells) {
 
                 }

@@ -31,11 +31,12 @@
         <wsmr:RelayAssertion>
             <wsp:Policy>
                 <wsp:All>
-                    <wsmr:includeHiddenServices>false</wsmr:includeHiddenServices>
+                    <wsmr:includeHiddenServices>true</wsmr:includeHiddenServices>
                     <wsmr:services>
                         <wsmr:service>RegistryEventingService</wsmr:service>
                         <wsmr:service>PolicyEditorService</wsmr:service>
                         <wsmr:service>UserPrefsService</wsmr:service>
+			<wsmr:service>OAuth2Service</wsmr:service>
                     </wsmr:services>
                     <!--<wsmr:builders>-->
                         <!--<wsmr:messageBuilder contentType="abc" class="" [formatterClass=""]/>-->

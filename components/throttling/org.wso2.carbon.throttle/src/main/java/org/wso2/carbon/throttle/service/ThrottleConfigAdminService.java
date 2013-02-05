@@ -385,7 +385,8 @@ public class ThrottleConfigAdminService extends AbstractAdmin {
                     if ((adminParamValue != null && adminParamValue.length() != 0 &&
                             Boolean.parseBoolean(adminParamValue.trim())) ||
                             (hiddenParamValue != null && hiddenParamValue.length() != 0 &&
-                                    Boolean.parseBoolean(hiddenParamValue.trim()))) {
+                                    Boolean.parseBoolean(hiddenParamValue.trim())) ||
+                            service.isClientSide()) {
                         continue;
                     }
                     this.enableThrottling(service.getName(), policy);
@@ -739,8 +740,8 @@ public class ThrottleConfigAdminService extends AbstractAdmin {
                 sfpm.rollbackTransaction(serviceGroupId);
                 throw new ThrottleComponentException("errorDisablingAtRegistry");
             } catch (RegistryException e) {
-                log.error("Error while deleting throttling policy from registry path : "+
-                        registryPolicyPath + wSO2ServiceThrottlingPolicyId , e);
+                log.error("Error while deleting throttling policy from registry path : " +
+                        registryPolicyPath + wSO2ServiceThrottlingPolicyId, e);
                 sfpm.rollbackTransaction(serviceGroupId);
                 throw new ThrottleComponentException("errorDisablingAtRegistry");
             }
@@ -1067,7 +1068,9 @@ public class ThrottleConfigAdminService extends AbstractAdmin {
                                         assertionName.equals(ThrottleConstants
                                                 .OPERATION_THROTTLE_ASSERTION_QNAME) ||
                                         assertionName.equals(ThrottleConstants
-                                                .MEDIATOR_THROTTLE_ASSERTION_QNAME)) {
+                                                .MEDIATOR_THROTTLE_ASSERTION_QNAME) ||
+                                        assertionName.equals(ThrottleConstants
+                                                .THROTTLE_ASSERTION_QNAME)) {
                                     if (log.isDebugEnabled()) {
                                         log.debug("Existing ThrottleAssertion found");
                                     }

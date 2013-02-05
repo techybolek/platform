@@ -29,7 +29,7 @@ import java.util.Date;
  * Task Attachment Persistent Class.
  */
 @Entity
-@Table(name = "TASK_ATTACHMENT")
+@Table(name = "HT_TASK_ATTACHMENT")
 public class Attachment implements AttachmentDAO {
     /**
      * Class logger
@@ -74,7 +74,7 @@ public class Attachment implements AttachmentDAO {
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private OrganizationalEntity attachedBy;
 
-    @Column(name="VALUE")
+    @Column(name="ATTACHMENT_VALUE")
     private String value;
 
     @ManyToOne

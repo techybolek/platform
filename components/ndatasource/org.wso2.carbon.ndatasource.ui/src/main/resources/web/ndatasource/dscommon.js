@@ -62,11 +62,18 @@ function showJNDIConfigurations() {
 	}
 }
 
-function isDSValid(namemsg, invalidnamemsg, drivermsg, urlmsg) {
+function isDSValid(namemsg, invalidnamemsg, drivermsg, urlmsg, customdsmsg) {
 
     var name = document.getElementById('dsName').value;
     if (name == null || name == '') {
         CARBON.showWarningDialog(namemsg);
+        return false;
+    }
+    
+    var dsType = document.getElementById('dsType').value;
+    var customDsType = document.getElementById('customDsType').value;
+    if (dsType != 'RDBMS' && (customDsType == null || customDsType == '')) {
+    	CARBON.showWarningDialog(customdsmsg);
         return false;
     }
 
@@ -134,6 +141,8 @@ function doTestConnection(successmsg) {
     }
 	var query = document.getElementById('dsName').value;
 	var dsProvider = document.getElementById('dsProviderType').value;
+	var datasourceType = document.getElementById('dsType').value;
+	var datasourceCustomType = document.getElementById('customDsType').value;
 	if (dsProvider == 'default') {
 		var driver = document.getElementById('driver').value;
 		var url = document.getElementById('url').value;
@@ -145,7 +154,7 @@ function doTestConnection(successmsg) {
 	}
 	var requestUrl = '../ndatasource/validateconnection-ajaxprocessor.jsp?&dsName=' + document.getElementById('dsName').value+'&dsProviderType='+dsProvider+
     	'&dsclassname='+dsclassname+'&dsclassname='+dsclassname+'&dsproviderProperties='+dsproviderProperties+'&driver='+driver+
-    	'&url='+url+'&username='+username+'&password='+password;
+    	'&url='+url+'&username='+username+'&password='+password+'&dsType='+datasourceType+'&customDsType='+datasourceCustomType;
     jQuery.post(requestUrl, ({}),
             function(data, status) {
                 if (status != "success") {
@@ -168,57 +177,59 @@ function trim(stringValue) {
 }
 
 function ValidateProperties() {
-	if (document.getElementById("maxActive").value < 0) {
-		CARBON.showErrorDialog("Please enter a positive value for maxActive");
-		return false;
-	}
-	if (document.getElementById("maxIdle").value < 0) {
-		CARBON.showErrorDialog("Please enter a positive value for maxIdle");
-		return false;
-	}
-	if (document.getElementById("minIdle").value < 0) {
-		CARBON.showErrorDialog("Please enter a positive value for minIdle");
-		return false;
-	}
-	if (document.getElementById("initialSize").value < 0) {
-		CARBON.showErrorDialog("Please enter a positive value for initialSize");
-		return false;
-	}
-	if (document.getElementById("maxWait").value < 0) {
-		CARBON.showErrorDialog("Please enter a positive value for maxWait");
-		return false;
-	}
-	if (document.getElementById("timeBetweenEvictionRunsMillis").value < 0) {
-		CARBON.showErrorDialog("Please enter a positive value for timeBetweenEvictionRunsMillis");
-		return false;
-	}
-	if (document.getElementById("numTestsPerEvictionRun").value < 0) {
-		CARBON.showErrorDialog("Please enter a positive value for numTestsPerEvictionRun");
-		return false;
-	}
-	if (document.getElementById("minEvictableIdleTimeMillis").value < 0) {
-		CARBON.showErrorDialog("Please enter a positive value for minEvictableIdleTimeMillis");
-		return false;
-	}
-	if (document.getElementById("removeAbandonedTimeout").value < 0) {
-		CARBON.showErrorDialog("Please enter a positive value for removeAbandonedTimeout");
-		return false;
-	}
-	if (document.getElementById("validationInterval").value < 0) {
-		CARBON.showErrorDialog("Please enter a positive value for validationInterval");
-		return false;
-	}
-	if (document.getElementById("abandonWhenPercentageFull").value < 0) {
-		CARBON.showErrorDialog("Please enter a positive value for abandonWhenPercentageFull");
-		return false;
-	}
-	if (document.getElementById("maxAge").value < 0) {
-		CARBON.showErrorDialog("Please enter a positive value for maxAge");
-		return false;
-	}
-	if (document.getElementById("suspectTimeout").value < 0) {
-		CARBON.showErrorDialog("Please enter a positive value for suspectTimeout");
-		return false;
+	if (document.getElementById("dsType").value == 'RDBMS') {
+		if (document.getElementById("maxActive").value < 0) {
+			CARBON.showErrorDialog("Please enter a positive value for maxActive");
+			return false;
+		}
+		if (document.getElementById("maxIdle").value < 0) {
+			CARBON.showErrorDialog("Please enter a positive value for maxIdle");
+			return false;
+		}
+		if (document.getElementById("minIdle").value < 0) {
+			CARBON.showErrorDialog("Please enter a positive value for minIdle");
+			return false;
+		}
+		if (document.getElementById("initialSize").value < 0) {
+			CARBON.showErrorDialog("Please enter a positive value for initialSize");
+			return false;
+		}
+		if (document.getElementById("maxWait").value < 0) {
+			CARBON.showErrorDialog("Please enter a positive value for maxWait");
+			return false;
+		}
+		if (document.getElementById("timeBetweenEvictionRunsMillis").value < 0) {
+			CARBON.showErrorDialog("Please enter a positive value for timeBetweenEvictionRunsMillis");
+			return false;
+		}
+		if (document.getElementById("numTestsPerEvictionRun").value < 0) {
+			CARBON.showErrorDialog("Please enter a positive value for numTestsPerEvictionRun");
+			return false;
+		}
+		if (document.getElementById("minEvictableIdleTimeMillis").value < 0) {
+			CARBON.showErrorDialog("Please enter a positive value for minEvictableIdleTimeMillis");
+			return false;
+		}
+		if (document.getElementById("removeAbandonedTimeout").value < 0) {
+			CARBON.showErrorDialog("Please enter a positive value for removeAbandonedTimeout");
+			return false;
+		}
+		if (document.getElementById("validationInterval").value < 0) {
+			CARBON.showErrorDialog("Please enter a positive value for validationInterval");
+			return false;
+		}
+		if (document.getElementById("abandonWhenPercentageFull").value < 0) {
+			CARBON.showErrorDialog("Please enter a positive value for abandonWhenPercentageFull");
+			return false;
+		}
+		if (document.getElementById("maxAge").value < 0) {
+			CARBON.showErrorDialog("Please enter a positive value for maxAge");
+			return false;
+		}
+		if (document.getElementById("suspectTimeout").value < 0) {
+			CARBON.showErrorDialog("Please enter a positive value for suspectTimeout");
+			return false;
+		}
 	}
 	return true;
 }
@@ -226,6 +237,11 @@ function ValidateProperties() {
 function disableForm(){
 	if(document.getElementById("isSystem").value == 'true') {
 		document.getElementById("description").readOnly = true;
+		document.getElementById("customDsType").readOnly = true;
+		if (document.getElementById("configuration") != null) {
+			document.getElementById("configuration").readOnly = true;
+		}
+		editAreaLoader.execCommand('configuration', 'set_editable', !editAreaLoader.execCommand('configuration', 'is_editable'));
 		if (document.getElementById("driver") != null) {
 			document.getElementById("driver").readOnly = true;
 		}
@@ -241,41 +257,43 @@ function disableForm(){
 		if (document.getElementById("dsclassname") != null) {
 			document.getElementById("dsclassname").readOnly = true;
 		}
-		document.getElementById("jndiname").readOnly = true;
-		document.getElementById("useDataSourceFactory").readOnly = true;
-		document.getElementById("defaultCatalog").readOnly = true;
-		document.getElementById("maxActive").readOnly = true;
-		document.getElementById("maxIdle").readOnly = true;
-		document.getElementById("minIdle").readOnly = true;
-		document.getElementById("initialSize").readOnly = true;
-		document.getElementById("maxWait").readOnly = true;
-		document.getElementById("validationquery").readOnly = true;
-		document.getElementById("validatorClassName").readOnly = true;
-		document.getElementById("timeBetweenEvictionRunsMillis").readOnly = true;
-		document.getElementById("numTestsPerEvictionRun").readOnly = true;
-		document.getElementById("minEvictableIdleTimeMillis").readOnly = true;
-		document.getElementById("removeAbandonedTimeout").readOnly = true;
-		document.getElementById("connectionProperties").readOnly = true;
-		document.getElementById("initSQL").readOnly = true;
-		document.getElementById("jdbcInterceptors").readOnly = true;
-		document.getElementById("validationInterval").readOnly = true;
-		document.getElementById("abandonWhenPercentageFull").readOnly = true;
-		document.getElementById("maxAge").readOnly = true;
-		document.getElementById("useEquals").readOnly = true;
-		document.getElementById("suspectTimeout").readOnly = true;
-		
-		document.getElementById("datasourceProvider").disabled = true;
-		document.getElementById("defaultTransactionIsolation").disabled = true;
-		document.getElementById("testOnBorrow").disabled = true;
-		document.getElementById("testOnReturn").disabled = true;
-		document.getElementById("testWhileIdle").disabled = true;
-		document.getElementById("accessToUnderlyingConnectionAllowed").disabled = true;
-		document.getElementById("removeAbandoned").disabled = true;
-		document.getElementById("logAbandoned").disabled = true;
-		document.getElementById("fairQueue").disabled = true;
-		document.getElementById("jmxEnabled").disabled = true;
-		document.getElementById("useEquals").disabled = true;
-		document.getElementById("alternateUsernameAllowed").disabled = true;
+		if (document.getElementById("dsType").value == 'RDBMS' ) {
+			document.getElementById("jndiname").readOnly = true;
+			document.getElementById("useDataSourceFactory").readOnly = true;
+			document.getElementById("defaultCatalog").readOnly = true;
+			document.getElementById("maxActive").readOnly = true;
+			document.getElementById("maxIdle").readOnly = true;
+			document.getElementById("minIdle").readOnly = true;
+			document.getElementById("initialSize").readOnly = true;
+			document.getElementById("maxWait").readOnly = true;
+			document.getElementById("validationquery").readOnly = true;
+			document.getElementById("validatorClassName").readOnly = true;
+			document.getElementById("timeBetweenEvictionRunsMillis").readOnly = true;
+			document.getElementById("numTestsPerEvictionRun").readOnly = true;
+			document.getElementById("minEvictableIdleTimeMillis").readOnly = true;
+			document.getElementById("removeAbandonedTimeout").readOnly = true;
+			document.getElementById("connectionProperties").readOnly = true;
+			document.getElementById("initSQL").readOnly = true;
+			document.getElementById("jdbcInterceptors").readOnly = true;
+			document.getElementById("validationInterval").readOnly = true;
+			document.getElementById("abandonWhenPercentageFull").readOnly = true;
+			document.getElementById("maxAge").readOnly = true;
+			document.getElementById("useEquals").readOnly = true;
+			document.getElementById("suspectTimeout").readOnly = true;
+			
+			document.getElementById("datasourceProvider").disabled = true;
+			document.getElementById("defaultTransactionIsolation").disabled = true;
+			document.getElementById("testOnBorrow").disabled = true;
+			document.getElementById("testOnReturn").disabled = true;
+			document.getElementById("testWhileIdle").disabled = true;
+			document.getElementById("accessToUnderlyingConnectionAllowed").disabled = true;
+			document.getElementById("removeAbandoned").disabled = true;
+			document.getElementById("logAbandoned").disabled = true;
+			document.getElementById("fairQueue").disabled = true;
+			document.getElementById("jmxEnabled").disabled = true;
+			document.getElementById("useEquals").disabled = true;
+			document.getElementById("alternateUsernameAllowed").disabled = true;
+	}
 	} 
 }
 

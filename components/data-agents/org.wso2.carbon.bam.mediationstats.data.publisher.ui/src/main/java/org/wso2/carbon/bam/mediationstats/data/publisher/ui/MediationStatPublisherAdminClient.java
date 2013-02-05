@@ -65,6 +65,25 @@ public class MediationStatPublisherAdminClient {
         }
     }
 
+    public boolean isCloudDeployment() throws RemoteException {
+        try {
+            return stub.isCloudDeployment();
+        } catch (RemoteException e) {
+            handleException(bundle.getString("backend.server.unavailable"), e);
+        }
+        return false;
+    }
+
+    public String getBAMServerURL() throws RemoteException {
+        try {
+            return stub.getServerConfigBAMServerURL();
+        } catch (RemoteException e) {
+            handleException(bundle.getString("backend.server.unavailable"), e);
+        }
+        return "";
+    }
+
+
     private void handleException(String msg, java.lang.Exception e) throws RemoteException {
         log.error(msg, e);
         throw new RemoteException(msg, e);

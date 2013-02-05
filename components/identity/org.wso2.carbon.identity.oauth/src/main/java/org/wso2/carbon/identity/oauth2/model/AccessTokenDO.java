@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -26,6 +26,8 @@ public class AccessTokenDO extends CacheEntry {
 
     private static final long serialVersionUID = -8123522530178387354L;
 
+    private String consumerKey;
+
     private String authzUser;
 
     private String[] scope;
@@ -34,15 +36,37 @@ public class AccessTokenDO extends CacheEntry {
 
     private String refreshToken;
 
+    private String accessToken;
+
     private Timestamp issuedTime;
+
+    private long validityPeriodInMillis;
+
+    public String getConsumerKey() {
+        return consumerKey;
+    }
+
+    public void setConsumerKey(String consumerKey) {
+        this.consumerKey = consumerKey;
+    }
+
+    public void setIssuedTime(Timestamp issuedTime) {
+        this.issuedTime = issuedTime;
+    }
+
+    public void setValidityPeriod(long validityPeriod) {
+        this.validityPeriod = validityPeriod;
+    }
 
     private long validityPeriod;
 
-    public AccessTokenDO(String authzUser, String[] scope, Timestamp issuedTime, long validityPeriod) {
+    public AccessTokenDO(String consumerKey, String authzUser, String[] scope, Timestamp issuedTime, long validityPeriod) {
+        this.setConsumerKey(consumerKey);
         this.authzUser = authzUser;
         this.scope = scope;
         this.issuedTime = issuedTime;
         this.validityPeriod = validityPeriod;
+        this.validityPeriodInMillis = validityPeriod * 1000;
     }
 
     public String getAuthzUser() {
@@ -79,5 +103,21 @@ public class AccessTokenDO extends CacheEntry {
 
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public long getValidityPeriodInMillis() {
+        return validityPeriodInMillis;
+    }
+
+    public void setValidityPeriodInMillis(long validityPeriodInMillis) {
+        this.validityPeriodInMillis = validityPeriodInMillis;
     }
 }

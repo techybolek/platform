@@ -109,4 +109,9 @@ public abstract class ListEndpoint extends Endpoint{
         }
     }
 
+    /*
+     * Check whether retry option is available with the Endpoint type
+     */
+    public abstract boolean isRetryAvailable();
+
 }

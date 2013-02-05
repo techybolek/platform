@@ -23,6 +23,7 @@ import org.jaxen.JaxenException;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.schema.dataobjects.Schema;
+import org.wso2.carbon.governance.api.schema.dataobjects.SchemaImpl;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
@@ -63,7 +64,7 @@ public class SchemaManager {
      */
     public Schema newSchema(String url) throws GovernanceException {
         String schemaId = UUID.randomUUID().toString();
-        Schema schema = new Schema(schemaId, url);
+        SchemaImpl schema = new SchemaImpl(schemaId, url);
         schema.associateRegistry(registry);
         return schema;
     }
@@ -92,7 +93,7 @@ public class SchemaManager {
     public Schema newSchema(byte[] content, String name)
             throws RegistryException {
         String schemaId = UUID.randomUUID().toString();
-    	Schema schema = new Schema(schemaId, name != null ? "name://" + name : null);
+        SchemaImpl schema = new SchemaImpl(schemaId, name != null ? "name://" + name : null);
     	schema.associateRegistry(registry);
     	schema.setSchemaElement(GovernanceUtils.buildOMElement(content));
     	return schema;
@@ -100,7 +101,10 @@ public class SchemaManager {
 
 
     /**
-     * Adds the given schema artifact to the registry.
+     * Adds the given schema artifact to the registry. Please do not use this method to update an
+     * existing artifact use the update method instead. If this method is used to update an existing
+     * artifact, all existing properties (such as lifecycle details) will be removed from the
+     * existing artifact.
      *
      * @param schema the schema artifact.
      *
@@ -110,7 +114,7 @@ public class SchemaManager {
         boolean succeeded = false;
         try {
             registry.beginTransaction();
-            String url = schema.getUrl();
+            String url = ((SchemaImpl)schema).getUrl();
             Resource schemaResource = registry.newResource();
             schemaResource.setMediaType(GovernanceConstants.SCHEMA_MEDIA_TYPE);
             schemaResource.setUUID(schema.getId());
@@ -138,15 +142,15 @@ public class SchemaManager {
                 registry.importResource(tmpPath, url, schemaResource);
             }
 //            schema.setId(schemaResource.getUUID());
-            schema.updatePath();
-            //schema.loadSchemaDetails();
+            ((SchemaImpl)schema).updatePath();
+            ((SchemaImpl)schema).loadSchemaDetails();
             succeeded = true;
         } catch (RegistryException e) {
             String msg = "Error in adding the Schema. schema id: " + schema.getId() + ".";
             log.error(msg, e);
             throw new GovernanceException(msg, e);
         } catch (MalformedURLException e) {
-            String msg = "Malformed schema url provided. url: " + schema.getUrl() + ".";
+            String msg = "Malformed schema url provided. url: " + ((SchemaImpl)schema).getUrl() + ".";
             log.error(msg, e);
             throw new GovernanceException(msg, e);
         } finally {
@@ -208,7 +212,7 @@ public class SchemaManager {
             schemaResource.setUUID(schema.getId());
             registry.put(oldSchema.getPath(), schemaResource);
             schema.setId(schemaResource.getUUID());
-            schema.updatePath();
+            ((SchemaImpl)schema).updatePath();
             //schema.loadSchemaDetails();
 
             succeeded = true;

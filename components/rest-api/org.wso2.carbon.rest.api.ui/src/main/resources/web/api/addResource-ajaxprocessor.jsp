@@ -335,12 +335,12 @@
                                     key="define.inline"/></label></td>
                             <td style="vertical-align:middle;" class="nopadding">
                                 <% if (anonInAddEdit.equalsIgnoreCase(bundle.getString("create"))) {%>
-                                <a href="#" class="icon-link" id="inAnonAddEdit"
+                                <a class="icon-link" id="inAnonAddEdit"
                                    style="background-image: url(../admin/images/add.gif);"
                                    onclick="anonSeqAddEdit('in');"><%=anonInAddEdit%>
                                 </a>
                                 <% } else {%>
-                                <a href="#" class="icon-link" id="inAnonAddEdit"
+                                <a class="icon-link" id="inAnonAddEdit"
                                    style="background-image: url(../admin/images/edit.gif);"
                                    onclick="anonSeqAddEdit('in');"><%=anonInAddEdit%>
                                 </a>
@@ -348,7 +348,7 @@
                             </td>
                             <td class="nopadding">&nbsp;</td>
                             <td style="vertical-align:middle;" class="nopadding">
-                                <a href="#" class="icon-link"
+                                <a class="icon-link"
                                    style="background-image: url(../admin/images/delete.gif);"
                                    id="inAnonClear" onclick="anonSeqClear('in');"><fmt:message
                                         key="clear"/></a>
@@ -373,13 +373,13 @@
                                                    readonly="readonly"/>
                                         </td>
                                         <td class="nopadding">
-                                            <a href="#" class="registry-picker-icon-link"
+                                            <a class="registry-picker-icon-link"
                                                style="padding-left:40px"
                                                onclick="showRegistryBrowserWithoutLocalEntries('api.in.registry','/_system/config');"><fmt:message
                                                     key="conf.registry"/></a>
                                         </td>
                                         <td class="nopadding">
-                                            <a href="#" class="registry-picker-icon-link"
+                                            <a class="registry-picker-icon-link"
                                                style="padding-left:40px"
                                                onclick="showRegistryBrowserWithoutLocalEntries('api.in.registry','/_system/governance');"><fmt:message
                                                     key="gov.registry"/></a>
@@ -459,12 +459,12 @@
                                     key="define.inline"/></label></td>
                             <td style="vertical-align:middle;" class="nopadding">
                                 <% if (anonOutAddEdit.equalsIgnoreCase(bundle.getString("create"))) {%>
-                                <a href="#" class="icon-link" id="outAnonAddEdit"
+                                <a class="icon-link" id="outAnonAddEdit"
                                    style="background-image: url(../admin/images/add.gif);"
                                    onclick="anonSeqAddEdit('out');"><%=anonOutAddEdit%>
                                 </a>
                                 <% } else {%>
-                                <a href="#" class="icon-link" id="outAnonAddEdit"
+                                <a class="icon-link" id="outAnonAddEdit"
                                    style="background-image: url(../admin/images/edit.gif);"
                                    onclick="anonSeqAddEdit('out');"><%=anonOutAddEdit%>
                                 </a>
@@ -472,7 +472,7 @@
                             </td>
                             <td class="nopadding">&nbsp;</td>
                             <td style="vertical-align:middle;" class="nopadding">
-                                <a href="#" class="icon-link"
+                                <a class="icon-link"
                                    style="background-image: url(../admin/images/delete.gif);"
                                    id="outAnonClear"
                                    onclick="anonSeqClear('out');"><fmt:message
@@ -501,13 +501,13 @@
                                                    readonly="readonly"/>
                                         </td>
                                         <td class="nopadding">
-                                            <a href="#" class="registry-picker-icon-link"
+                                            <a class="registry-picker-icon-link"
                                                style="padding-left:40px"
                                                onclick="showRegistryBrowserWithoutLocalEntries('api.out.registry','/_system/config');"><fmt:message
                                                     key="conf.registry"/></a>
                                         </td>
                                         <td class="nopadding">
-                                            <a href="#" class="registry-picker-icon-link"
+                                            <a class="registry-picker-icon-link"
                                                style="padding-left:40px"
                                                onclick="showRegistryBrowserWithoutLocalEntries('api.out.registry','/_system/governance');"><fmt:message
                                                     key="gov.registry"/></a>
@@ -587,12 +587,12 @@
                                     key="define.inline"/></label></td>
                             <td style="vertical-align:middle;" class="nopadding">
                                 <% if (anonFaultAddEdit.equalsIgnoreCase(bundle.getString("create"))) {%>
-                                <a href="#" class="icon-link" id="faultAnonAddEdit"
+                                <a class="icon-link" id="faultAnonAddEdit"
                                    style="background-image: url(../admin/images/add.gif);"
                                    onclick="anonSeqAddEdit('fault');"><%=anonFaultAddEdit%>
                                 </a>
                                 <% } else {%>
-                                <a href="#" class="icon-link" id="faultAnonAddEdit"
+                                <a class="icon-link" id="faultAnonAddEdit"
                                    style="background-image: url(../admin/images/edit.gif);"
                                    onclick="anonSeqAddEdit('fault');"><%=anonFaultAddEdit%>
                                 </a>
@@ -600,10 +600,10 @@
                             </td>
                             <td class="nopadding">&nbsp;</td>
                             <td style="vertical-align:middle;" class="nopadding">
-                                <a href="#" class="icon-link"
+                                <a class="icon-link"
                                    style="background-image: url(../admin/images/delete.gif);"
                                    id="faultAnonClear"
-                                   onclick="anonSeqClear('fault    ');"><fmt:message
+                                   onclick="anonSeqClear('fault');"><fmt:message
                                         key="clear"/></a>
                             </td>
                         </tr>
@@ -627,13 +627,13 @@
                                                    readonly="readonly"/>
                                         </td>
                                         <td class="nopadding">
-                                            <a href="#" class="registry-picker-icon-link"
+                                            <a class="registry-picker-icon-link"
                                                style="padding-left:40px"
                                                onclick="showRegistryBrowserWithoutLocalEntries('api.fault.registry','/_system/config');"><fmt:message
                                                     key="conf.registry"/></a>
                                         </td>
                                         <td class="nopadding">
-                                            <a href="#" class="registry-picker-icon-link"
+                                            <a class="registry-picker-icon-link"
                                                style="padding-left:40px"
                                                onclick="showRegistryBrowserWithoutLocalEntries('api.fault.registry','/_system/governance');"><fmt:message
                                                     key="gov.registry"/></a>

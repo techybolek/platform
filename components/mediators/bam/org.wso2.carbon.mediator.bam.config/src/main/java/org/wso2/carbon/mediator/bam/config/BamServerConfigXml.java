@@ -36,18 +36,22 @@ public class BamServerConfigXml {
     private org.apache.axiom.om.OMFactory fac = OMAbstractFactory.getOMFactory();
     private org.apache.axiom.om.OMNamespace synNS = SynapseConstants.SYNAPSE_OMNAMESPACE;
 
-    public OMElement buildServerProfile(String ip, String authenticationPort, String receiverPort, String userName, String password, String secure,
+    public OMElement buildServerProfile(String urlSet, String ip, String authenticationPort, String receiverPort,
+                                        String userName, String password, String secure, String loadbalancer,
                                         List<StreamConfiguration> streamConfigurations){
         OMElement serverProfileElement = this.serializeServerProfile();
-        serverProfileElement.addChild(this.serializeConnection(secure, ip, authenticationPort, receiverPort));
+        serverProfileElement.addChild(this.serializeConnection(loadbalancer, secure, urlSet, ip, authenticationPort, receiverPort));
         serverProfileElement.addChild(this.serializeCredential(userName, password));
         serverProfileElement.addChild(this.serializeStreams(streamConfigurations));
         return serverProfileElement;
     }
 
-    private OMElement serializeConnection(String secure, String ip, String authenticationPort, String receiverPort){
+    private OMElement serializeConnection(String loadbalancer, String secure, String urlSet, String ip,
+                                          String authenticationPort, String receiverPort){
         OMElement credentialElement = fac.createOMElement("connection", synNS);
+        credentialElement.addAttribute("loadbalancer", loadbalancer, null);
         credentialElement.addAttribute("secure", secure, null);
+        credentialElement.addAttribute("urlSet", urlSet, null);
         credentialElement.addAttribute("ip", ip, null);
         credentialElement.addAttribute("authPort", authenticationPort, null);
         credentialElement.addAttribute("receiverPort", receiverPort, null);
@@ -119,12 +123,15 @@ public class BamServerConfigXml {
         if(properties != null){
             String tmpEntryName;
             String tmpEntryValue;
+            String tmpEntryType;
             boolean tmpIsExpression;
             for (Property property : properties) {
                 tmpEntryName = property.getKey();
                 tmpEntryValue = property.getValue();
+                tmpEntryType = property.getType();
                 tmpIsExpression = property.isExpression();
-                propertiesElement.addChild(this.serializeProperty(tmpEntryName, tmpEntryValue, tmpIsExpression));
+                propertiesElement.addChild(this.serializeProperty(tmpEntryName, tmpEntryValue,
+                                                                  tmpEntryType, tmpIsExpression));
             }
         }
         return streamElement;
@@ -146,10 +153,11 @@ public class BamServerConfigXml {
         return fac.createOMElement("properties", synNS);
     }
 
-    private OMElement serializeProperty(String name, String value, boolean isExpression){
+    private OMElement serializeProperty(String name, String value, String type, boolean isExpression){
         OMElement propertyElement = fac.createOMElement("property", synNS);
         propertyElement.addAttribute("name", name, null);
         propertyElement.addAttribute("value", value, null);
+        propertyElement.addAttribute("type", type, null);
         if(isExpression){
             propertyElement.addAttribute("isExpression", "true", null);
         } else {

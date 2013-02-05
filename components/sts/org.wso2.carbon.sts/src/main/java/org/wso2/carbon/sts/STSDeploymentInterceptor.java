@@ -33,12 +33,14 @@ import org.apache.rahas.impl.SAMLTokenIssuerConfig;
 import org.apache.rahas.impl.TokenIssuerUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.deployment.DeploymentInterceptor;
 import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.core.util.KeyStoreUtil;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.security.keystore.KeyStoreAdmin;
 import org.wso2.carbon.security.keystore.service.KeyStoreData;
 import org.wso2.carbon.security.util.RampartConfigUtil;
@@ -46,6 +48,7 @@ import org.wso2.carbon.security.util.ServerCrypto;
 import org.wso2.carbon.sts.internal.STSServiceDataHolder;
 import org.wso2.carbon.utils.ServerConstants;
 
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -88,7 +91,6 @@ public class STSDeploymentInterceptor implements AxisObserver {
         AxisService service = null;
         Registry configRegistry = null;
         Registry governRegistry = null;
-        String keyAlias = null;
         String keyPassword = null;
         KeyStoreAdmin admin = null;
         KeyStoreData[] keystores = null;
@@ -97,10 +99,12 @@ public class STSDeploymentInterceptor implements AxisObserver {
         String issuerName = null;
         ServerConfiguration serverConfig = null;
 
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+
         configRegistry = STSServiceDataHolder.getInstance().getRegistryService()
-                .getConfigSystemRegistry();
+                .getConfigSystemRegistry(tenantId);
         governRegistry = STSServiceDataHolder.getInstance().getRegistryService()
-                .getGovernanceSystemRegistry();
+                .getGovernanceSystemRegistry(tenantId);
 
         if (configRegistry == null || config.getService(ServerConstants.STS_NAME) == null) {
             if (log.isDebugEnabled()) {
@@ -110,26 +114,51 @@ public class STSDeploymentInterceptor implements AxisObserver {
         }
 
         serverConfig = ServerConfiguration.getInstance();
-        keyAlias = serverConfig.getFirstProperty("Security.KeyStore.KeyAlias");
-        keyPassword = serverConfig.getFirstProperty("Security.KeyStore.KeyPassword");
-        issuerName = serverConfig.getFirstProperty("HostName"); 
+        admin = new KeyStoreAdmin(tenantId, governRegistry);
+
+        if(MultitenantConstants.SUPER_TENANT_ID == tenantId){
+            keyPassword = serverConfig.getFirstProperty("Security.KeyStore.KeyPassword");
+            keystores = admin.getKeyStores(true);
+
+            for (int i = 0; i < keystores.length; i++) {
+                if (KeyStoreUtil.isPrimaryStore(keystores[i].getKeyStoreName())) {
+                    keyStoreName = keystores[i].getKeyStoreName();
+                    privateKeyAlias = KeyStoreUtil.getPrivateKeyAlias(KeyStoreManager.getInstance(
+                            MultitenantConstants.SUPER_TENANT_ID)
+                            .getKeyStore(keyStoreName));
+                    break;
+                }
+            }
+        } else {
+            // this is not the proper way to find out the primary key store of the tenant. We need
+            // check a better way  TODO
+            String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
+            if(tenantDomain == null){
+                tenantDomain = STSServiceDataHolder.getInstance().getRealmService().
+                                                             getTenantManager().getDomain(tenantId);
+            }
+
+            if(tenantDomain != null){
+                // assuming domain always in this format -> example.com
+                keyStoreName = tenantDomain.replace(".", "-") + ".jks";
+                KeyStore keyStore = KeyStoreManager.getInstance(tenantId).getKeyStore(keyStoreName);
+                if(keyStore != null){
+                    privateKeyAlias = KeyStoreUtil.getPrivateKeyAlias(keyStore);
+                    keyPassword = KeyStoreManager.getInstance(tenantId).getKeyStorePassword(keyStoreName);
+                } else {
+                    log.warn("No key store is exist as " + keyStoreName + ". STS would be fail");
+                }                
+            } else {
+                throw new Exception("Tenant Domain can not be null");
+            }
+
+        }
+
+        issuerName = serverConfig.getFirstProperty("HostName");
 
         if (issuerName == null) {
             // HostName not set :-( use wso2wsas-sts
             issuerName = ServerConstants.STS_NAME;
-        }
-
-        admin = new KeyStoreAdmin(MultitenantConstants.SUPER_TENANT_ID, governRegistry);
-        keystores = admin.getKeyStores(true);
-
-        for (int i = 0; i < keystores.length; i++) {
-            if (KeyStoreUtil.isPrimaryStore(keystores[i].getKeyStoreName())) {
-                keyStoreName = keystores[i].getKeyStoreName();
-                privateKeyAlias = KeyStoreUtil.getPrivateKeyAlias(KeyStoreManager.getInstance(
-                        MultitenantConstants.SUPER_TENANT_ID)
-                        .getKeyStore(keyStoreName));
-                break;
-            }
         }
 
         if (privateKeyAlias != null) {
@@ -142,7 +171,7 @@ public class STSDeploymentInterceptor implements AxisObserver {
 
             SAMLTokenIssuerConfig stsSamlConfig = new SAMLTokenIssuerConfig(issuerName,
                     cryptoProvider, props);
-            stsSamlConfig.setIssuerKeyAlias(keyAlias);
+            stsSamlConfig.setIssuerKeyAlias(privateKeyAlias);
             stsSamlConfig.setIssuerKeyPassword(keyPassword);
             stsSamlConfig.setAddRequestedAttachedRef(true);
             stsSamlConfig.setAddRequestedUnattachedRef(true);
@@ -162,6 +191,9 @@ public class STSDeploymentInterceptor implements AxisObserver {
                     iterator = properties.entrySet().iterator();
                     while (iterator.hasNext()) {
                         Entry entry = (Entry) iterator.next();
+                        if(RegistryUtils.isHiddenProperty(entry.getKey().toString())){
+                            continue;
+                        }
                         stsSamlConfig.addTrustedServiceEndpointAddress((String) entry.getKey(),
                                 (String) ((List) entry.getValue()).get(0));
                     }

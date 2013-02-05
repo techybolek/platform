@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.throttling.manager.dataobjects.ThrottlingDataContext;
 import org.wso2.carbon.throttling.manager.exception.ThrottlingException;
 import org.wso2.carbon.throttling.manager.rules.KnowledgeBaseManager;
@@ -29,6 +30,7 @@ import org.wso2.carbon.throttling.manager.utils.Util;
 import org.wso2.carbon.throttling.manager.validation.ValidationInfoManager;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.tenant.Tenant;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +42,8 @@ public class ThrottlingJob implements Job {
     public static final String THROTTLING_TASK_CONTEXT_KEY = "throttlingTask";
 
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        carbonContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
         Task task = (Task) jobExecutionContext.getMergedJobDataMap().get(THROTTLING_TASK_CONTEXT_KEY);
         executeTask(task);
     }

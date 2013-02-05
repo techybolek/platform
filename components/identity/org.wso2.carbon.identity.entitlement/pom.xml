@@ -18,12 +18,14 @@
 	<parent>
 		<groupId>org.wso2.carbon</groupId>
 		<artifactId>identity</artifactId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>4.0.0</version>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wso2.carbon</groupId>
 	<artifactId>org.wso2.carbon.identity.entitlement</artifactId>
+	<version>4.0.5</version>
 	<packaging>bundle</packaging>
 	<name>WSO2 Carbon - Identity Entitlement</name>
 	<description>A custom wso2 products or solution</description>
@@ -33,14 +35,17 @@
 		<dependency>
 			<groupId>org.wso2.balana</groupId>
 			<artifactId>org.wso2.balana</artifactId>
+			<version>1.0.0-wso2v4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.registry.core</artifactId>
+			<version>4.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.core</artifactId>
+			<version>4.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
@@ -49,20 +54,22 @@
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.identity.core</artifactId>
-            		<version>${identity.version}</version>
+            		<version>4.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.identity.thrift.authentication</artifactId>
-            		<version>${identity.version}</version>
+            		<version>4.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.user.core</artifactId>
+			<version>4.0.2</version>
 		</dependency>
                 <dependency>
                         <groupId>org.wso2.carbon</groupId>
                         <artifactId>org.wso2.carbon.utils</artifactId>
+			<version>4.0.2</version>
                 	<exclusions>
                		<exclusion>
                     		<groupId>libthrift</groupId>
@@ -77,6 +84,7 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.caching.core</artifactId>
+		<version>4.0.1</version>
             </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -85,6 +93,16 @@
         <dependency>
             <groupId>libthrift.wso2</groupId>
             <artifactId>libthrift</artifactId>
+        </dependency>
+	<dependency>
+            <groupId>opensaml.wso2</groupId>
+            <artifactId>opensaml2</artifactId>
+            <version>2.4.1.wso2v1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2.wso2</groupId>
+            <artifactId>axis2</artifactId>
+            <version>1.6.1.wso2v5</version>
         </dependency>
 	</dependencies>
 

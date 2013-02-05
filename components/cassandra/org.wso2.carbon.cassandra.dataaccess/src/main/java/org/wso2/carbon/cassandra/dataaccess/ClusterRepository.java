@@ -61,7 +61,7 @@ public interface ClusterRepository {
     /**
      * Remove all the hector cluster instances belonged to the current user
      */
-    void removeMyClusters();
+    void removeMyClusters(String owner);
 
     /**
      * Remove all the hector cluster instances in the system

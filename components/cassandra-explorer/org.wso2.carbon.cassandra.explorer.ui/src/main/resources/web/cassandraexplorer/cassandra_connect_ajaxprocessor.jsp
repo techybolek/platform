@@ -27,10 +27,13 @@
     String connectionUrl = request.getParameter("connection_url");
     String userName = request.getParameter("user_name");
     String password = request.getParameter("password");
+    int maxRowCount = Integer.parseInt(request.getParameter("max_row_count"));
     //Connection URL is being reused as ClusterName since it should be unique
     boolean isConnectionSuccess = false;
     try {
         isConnectionSuccess = adminClient.connectToCassandraCluster(connectionUrl, connectionUrl, userName, password);
+        adminClient.setMaxRowCount(maxRowCount);
+
     } catch (Exception exception) { %>
 <script type="text/javascript">
     location.href = "cassandra_connect.jsp";

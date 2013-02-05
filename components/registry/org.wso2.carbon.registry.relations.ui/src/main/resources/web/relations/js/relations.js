@@ -89,9 +89,9 @@ function loadAssociationDiv(resourcePath, assoType, page) {
 function changeTextVisibility(optionTYpe){
   var option = $('associationOptionList').value;
     if(option == "other") {
-      $('type').disabled = "";
+      $('type').style.visibility = "";
     } else {
-        $('type').disabled = "disabled";
+        $('type').style.visibility = "hidden";
     }
 }
 
@@ -102,7 +102,7 @@ function addAssociation(mainType) {
         CARBON.showWarningDialog(org_wso2_carbon_registry_common_ui_jsi18n["the"] + " "+ "association path content"+" " + org_wso2_carbon_registry_common_ui_jsi18n["contains.illegal.chars"]);
         return false;
     }
-    var ass_option = $('associationOptionList').value;
+
     var typeForm = document.forms[mainType];
     var addDivId = 'associationsAddDiv';
     var fillingDiv = 'associationsDiv';
@@ -119,12 +119,19 @@ function addAssociation(mainType) {
     }
     
     if (mainType != "depForm") {
+        //validate a non empty association type is selected
+        if($('associationOptionList').value == "0") {
+            CARBON.showWarningDialog(org_wso2_carbon_registry_common_ui_jsi18n["the"] + " "+ "association type"+" " + org_wso2_carbon_registry_common_ui_jsi18n["cannot.empty"]);
+            return false;
+        }
+
+        var ass_option = $('associationOptionList').value;
         var assTypeVal;
 
         if(ass_option == "other") {
             assoType = typeForm.type.value;
             assTypeVal = typeForm.type;
-        } else if(ass_option == "ownedBy" || ass_option == "usedBy") {
+        } else {
           assoType = ass_option;
           assTypeVal = $('associationOptionList');
         }

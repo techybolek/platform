@@ -84,6 +84,10 @@ public class APIManagerConfiguration {
         return value.get(0);
     }
     
+    public List<String> getProperty(String key) {
+        return configuration.get(key);
+    }
+    
     public void reloadSystemProperties() {
         for (Map.Entry<String,List<String>> entry : configuration.entrySet()) {
             List<String> list = entry.getValue();

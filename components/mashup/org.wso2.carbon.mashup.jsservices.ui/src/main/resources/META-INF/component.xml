@@ -55,6 +55,7 @@
             <icon>../js_service/images/mashup-uploading.gif</icon>
             <require-permission>/permission/admin/manage/add/service</require-permission>
         </menu>
+
     </menus>
     <FileUploadConfig>
         <Mapping>

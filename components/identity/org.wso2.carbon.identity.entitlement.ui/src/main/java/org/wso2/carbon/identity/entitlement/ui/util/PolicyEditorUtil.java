@@ -20,10 +20,7 @@ package org.wso2.carbon.identity.entitlement.ui.util;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean;
-import org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants;
-import org.wso2.carbon.identity.entitlement.ui.PolicyEditorConstants;
-import org.wso2.carbon.identity.entitlement.ui.PolicyEditorException;
+import org.wso2.carbon.identity.entitlement.ui.*;
 import org.wso2.carbon.identity.entitlement.ui.dto.*;
 
 import java.util.*;
@@ -32,6 +29,692 @@ import java.util.*;
  * Util class that helps to create the XACML policy which is defined by the XACML basic policy editor
  */
 public class PolicyEditorUtil {
+
+    /**
+     * map of apply element w.r.t identifier
+     */
+    private static Map<String, ApplyElementDTO> applyElementMap = new HashMap<String, ApplyElementDTO>();
+
+    /**
+     * Create XACML policy with the simplest input attributes
+     *
+     * @param policyEditorDTO
+     * @param document
+     * @return
+     * @throws EntitlementPolicyCreationException
+     */
+    public static String createBasicPolicy(BasicPolicyEditorDTO policyEditorDTO, Document document)
+                                                        throws EntitlementPolicyCreationException {
+
+        PolicyElementDTO policyElementDTO = new PolicyElementDTO();
+        BasicTargetElementDTO basicTargetElementDTO = null;
+        List<BasicRuleElementDTO> ruleElementDTOs = new ArrayList<BasicRuleElementDTO>();
+
+        //create policy element
+        policyElementDTO.setPolicyName(policyEditorDTO.getPolicyId());
+        // setting rule combining algorithm
+        policyElementDTO.setRuleCombiningAlgorithms(PolicyEditorConstants.
+                                                    CombiningAlog.RULE_COMBINING_FIRST_APPLICABLE);
+        policyElementDTO.setPolicyDescription(policyEditorDTO.getDescription());
+
+
+        if(PolicyEditorConstants.SOA_CATEGORY_USER.equals(policyEditorDTO.getAppliedCategory())){
+
+            if(policyEditorDTO.getUserAttributeValue() != null &&
+                    !PolicyEditorConstants.ANY.equals(policyEditorDTO.getUserAttributeValue().trim())){
+
+                basicTargetElementDTO = new BasicTargetElementDTO();
+
+                if(policyEditorDTO.getUserAttributeId() == null){
+                    Set<String> attributeSet = policyEditorDTO.getAttributeIdMap().
+                                                    get(PolicyEditorConstants.SOA_CATEGORY_SUBJECT);
+                    if(attributeSet != null && attributeSet.size() > 0){
+                        basicTargetElementDTO.setSubjectId(attributeSet.iterator().next());
+                    } else {
+                        basicTargetElementDTO.setSubjectId(PolicyEditorConstants.SUBJECT_ID_DEFAULT);
+                    }
+                } else {
+                    basicTargetElementDTO.setSubjectId(policyEditorDTO.getUserAttributeId());
+                }
+
+                if(policyEditorDTO.getAttributeIdDataTypeMap().
+                                    get(basicTargetElementDTO.getSubjectId()) != null){
+                    basicTargetElementDTO.setSubjectDataType(policyEditorDTO.getAttributeIdDataTypeMap().
+                                    get(basicTargetElementDTO.getSubjectId()));
+                }
+
+                if(basicTargetElementDTO.getSubjectDataType() == null){
+                    Set<String> dataSet = policyEditorDTO.getDataTypeMap().
+                                                    get(PolicyEditorConstants.SOA_CATEGORY_SUBJECT);
+                    if(dataSet != null && dataSet.size() > 0){
+                        basicTargetElementDTO.setSubjectDataType(dataSet.iterator().next());
+                    } else {
+                        basicTargetElementDTO.setSubjectDataType(PolicyEditorConstants.DataType.STRING);
+                    }
+                }
+
+                String function = findFunction(policyEditorDTO.getUserAttributeValue());
+                String value = findAttributeValue(policyEditorDTO.getUserAttributeValue());
+                basicTargetElementDTO.setSubjectList(value);
+                basicTargetElementDTO.setFunctionOnSubjects(function);
+            }
+
+            List<BasicPolicyEditorElementDTO> elementDTOs = policyEditorDTO.getBasicPolicyEditorElementDTOs();
+
+            if(elementDTOs != null){
+                int ruleNo = 1;
+                for(BasicPolicyEditorElementDTO dto : elementDTOs){
+                    BasicRuleElementDTO ruleElementDTO = new BasicRuleElementDTO();
+
+                    if(dto.getResourceValue() != null && dto.getResourceValue().trim().length() > 0 &&
+                        !PolicyEditorConstants.ANY.equals(dto.getResourceValue().trim())){
+                        addResourceElement(ruleElementDTO, policyEditorDTO, dto);
+                    }
+
+                    if(dto.getActionValue() != null && dto.getActionValue().trim().length() > 0 &&
+                        !PolicyEditorConstants.ANY.equals(dto.getActionValue().trim())){
+                        addActionElement(ruleElementDTO, policyEditorDTO, dto);
+                    }
+
+                    if(dto.getEnvironmentValue() != null && dto.getEnvironmentValue().trim().length() > 0 &&
+                        !PolicyEditorConstants.ANY.equals(dto.getEnvironmentValue().trim())){
+                        addEnvironmentElement(ruleElementDTO, policyEditorDTO, dto);
+                    }
+
+                    if(dto.getOperationType() != null && PolicyEditorConstants.PreFunctions.
+                                                    CAN_DO.equals(dto.getOperationType().trim())){
+                        ruleElementDTO.setRuleEffect(PolicyEditorConstants.RULE_EFFECT_PERMIT);
+                    } else {
+                        ruleElementDTO.setRuleEffect(PolicyEditorConstants.RULE_EFFECT_DENY);
+                    }
+                    ruleElementDTO.setRuleId("Rule-" + ruleNo);
+                    ruleElementDTOs.add(ruleElementDTO);
+                    ruleNo ++;
+                }
+            }
+        } else if(PolicyEditorConstants.SOA_CATEGORY_RESOURCE.equals(policyEditorDTO.getAppliedCategory())){
+
+            if(policyEditorDTO.getResourceValue() != null &&
+                    !PolicyEditorConstants.ANY.equals(policyEditorDTO.getResourceValue().trim())){
+                basicTargetElementDTO = new BasicTargetElementDTO();
+
+                Set<String> attributeSet = policyEditorDTO.getAttributeIdMap().
+                                                get(PolicyEditorConstants.SOA_CATEGORY_RESOURCE);
+                if(attributeSet != null && attributeSet.size() > 0){
+                    basicTargetElementDTO.setResourceId(attributeSet.iterator().next());
+                } else {
+                    basicTargetElementDTO.setResourceId(PolicyEditorConstants.RESOURCE_ID_DEFAULT);
+                }
+
+                if(policyEditorDTO.getAttributeIdDataTypeMap().
+                                    get(basicTargetElementDTO.getResourceId()) != null){
+                    basicTargetElementDTO.setResourceDataType(policyEditorDTO.getAttributeIdDataTypeMap().
+                                    get(basicTargetElementDTO.getResourceId()));
+                }
+
+                if(basicTargetElementDTO.getResourceDataType() == null){
+                    Set<String> dataSet = policyEditorDTO.getDataTypeMap().
+                                                    get(PolicyEditorConstants.SOA_CATEGORY_RESOURCE);
+                    if(dataSet != null && dataSet.size() > 0){
+                        basicTargetElementDTO.setResourceDataType(dataSet.iterator().next());
+                    } else {
+                        basicTargetElementDTO.setResourceDataType(PolicyEditorConstants.DataType.STRING);
+                    }
+                }
+
+                String function = findFunction(policyEditorDTO.getResourceValue());
+                String value = findAttributeValue(policyEditorDTO.getResourceValue());                
+                basicTargetElementDTO.setResourceList(value);
+                basicTargetElementDTO.setFunctionOnResources(function);
+            }
+
+            List<BasicPolicyEditorElementDTO> elementDTOs = policyEditorDTO.getBasicPolicyEditorElementDTOs();
+
+            if(elementDTOs != null){
+                int ruleNo = 1;
+                for(BasicPolicyEditorElementDTO dto : elementDTOs){
+                    BasicRuleElementDTO ruleElementDTO = new BasicRuleElementDTO();
+
+                    if(dto.getResourceValue() != null && dto.getResourceValue().trim().length() > 0 &&
+                        !PolicyEditorConstants.ANY.equals(dto.getResourceValue().trim())){
+                        
+                        addResourceElement(ruleElementDTO, policyEditorDTO, dto);
+                    }
+
+                    if(dto.getUserAttributeValue() != null && dto.getUserAttributeValue().trim().length() > 0 &&
+                        !PolicyEditorConstants.ANY.equals(dto.getUserAttributeValue().trim())){
+
+                        addSubjectElement(ruleElementDTO, policyEditorDTO, dto);
+                    }
+
+                    if(dto.getActionValue() != null && dto.getActionValue().trim().length() > 0 &&
+                        !PolicyEditorConstants.ANY.equals(dto.getActionValue().trim())){
+
+                        addActionElement(ruleElementDTO, policyEditorDTO, dto);
+                    }
+
+                    if(dto.getEnvironmentValue() != null && dto.getEnvironmentValue().trim().length() > 0 &&
+                        !PolicyEditorConstants.ANY.equals(dto.getEnvironmentValue().trim())){
+
+                        addEnvironmentElement(ruleElementDTO, policyEditorDTO, dto);
+                    }
+                    
+                    ruleElementDTO.setRuleEffect(PolicyEditorConstants.RULE_EFFECT_PERMIT);
+                    ruleElementDTO.setRuleId("Rule-" + ruleNo);
+                    ruleElementDTOs.add(ruleElementDTO);
+                    ruleNo ++;
+                }
+
+                BasicRuleElementDTO ruleElementDTO = new BasicRuleElementDTO();
+                ruleElementDTO.setRuleId("Deny-Rule");
+                ruleElementDTO.setRuleEffect(PolicyEditorConstants.RULE_EFFECT_DENY);
+                ruleElementDTOs.add(ruleElementDTO);
+            }
+        } else if(PolicyEditorConstants.SOA_CATEGORY_ACTION.equals(policyEditorDTO.getAppliedCategory())){
+
+            if(policyEditorDTO.getActionValue() != null &&
+                    !PolicyEditorConstants.ANY.equals(policyEditorDTO.getActionValue().trim())){
+
+                basicTargetElementDTO = new BasicTargetElementDTO();
+
+                Set<String> attributeSet = policyEditorDTO.getAttributeIdMap().
+                                                get(PolicyEditorConstants.SOA_CATEGORY_ACTION);
+                if(attributeSet != null && attributeSet.size() > 0){
+                    basicTargetElementDTO.setActionId(attributeSet.iterator().next());
+                } else {
+                    basicTargetElementDTO.setActionId(PolicyEditorConstants.ACTION_ID_DEFAULT);
+                }
+
+                if(policyEditorDTO.getAttributeIdDataTypeMap().
+                                    get(basicTargetElementDTO.getActionId()) != null){
+                    basicTargetElementDTO.setActionDataType(policyEditorDTO.getAttributeIdDataTypeMap().
+                                    get(basicTargetElementDTO.getActionId()));
+                }
+
+                if(basicTargetElementDTO.getActionDataType() == null){
+                    Set<String> dataSet = policyEditorDTO.getDataTypeMap().
+                                                    get(PolicyEditorConstants.SOA_CATEGORY_ACTION);
+                    if(dataSet != null && dataSet.size() > 0){
+                        basicTargetElementDTO.setActionDataType(dataSet.iterator().next());
+                    } else {
+                        basicTargetElementDTO.setActionDataType(PolicyEditorConstants.DataType.STRING);
+                    }
+                }
+
+                String function = findFunction(policyEditorDTO.getActionValue());
+                String value = findAttributeValue(policyEditorDTO.getActionValue());
+                basicTargetElementDTO.setActionList(value);
+                basicTargetElementDTO.setFunctionOnActions(function);
+
+            }
+            List<BasicPolicyEditorElementDTO> elementDTOs = policyEditorDTO.getBasicPolicyEditorElementDTOs();
+
+            if(elementDTOs != null){
+                int ruleNo = 1;
+                for(BasicPolicyEditorElementDTO dto : elementDTOs){
+                    BasicRuleElementDTO ruleElementDTO = new BasicRuleElementDTO();
+
+                    if(dto.getResourceValue() != null && dto.getResourceValue().trim().length() > 0 &&
+                        !PolicyEditorConstants.ANY.equals(dto.getResourceValue().trim())){
+                        addResourceElement(ruleElementDTO, policyEditorDTO, dto);
+                    }
+
+                    if(dto.getUserAttributeValue() != null && dto.getUserAttributeValue().trim().length() > 0 &&
+                        !PolicyEditorConstants.ANY.equals(dto.getUserAttributeValue().trim())){
+                        addSubjectElement(ruleElementDTO, policyEditorDTO, dto);
+                    }
+
+                    if(dto.getEnvironmentValue() != null && dto.getEnvironmentValue().trim().length() > 0 &&
+                        !PolicyEditorConstants.ANY.equals(dto.getEnvironmentValue().trim())){
+                        addEnvironmentElement(ruleElementDTO, policyEditorDTO, dto);
+                    }
+
+                    if(dto.getOperationType() != null && PolicyEditorConstants.PreFunctions.CAN_DO.
+                                                            equals(dto.getOperationType().trim())){
+                        ruleElementDTO.setRuleEffect(PolicyEditorConstants.RULE_EFFECT_PERMIT);
+                    } else {
+                        ruleElementDTO.setRuleEffect(PolicyEditorConstants.RULE_EFFECT_DENY);
+                    }
+                    ruleElementDTO.setRuleId("Rule-" + ruleNo);
+                    ruleElementDTOs.add(ruleElementDTO);
+                    ruleNo ++;
+                }
+            }            
+        } else if(PolicyEditorConstants.SOA_CATEGORY_ENVIRONMENT.equals(policyEditorDTO.getAppliedCategory())){
+
+            if(policyEditorDTO.getEnvironmentValue() != null &&
+                    !PolicyEditorConstants.ANY.equals(policyEditorDTO.getEnvironmentValue().trim())){
+
+                basicTargetElementDTO = new BasicTargetElementDTO();
+                
+                if(policyEditorDTO.getEnvironmentId() == null){
+                    Set<String> attributeSet = policyEditorDTO.getAttributeIdMap().
+                                                    get(PolicyEditorConstants.SOA_CATEGORY_ENVIRONMENT);
+                    if(attributeSet != null && attributeSet.size() > 0){
+                        basicTargetElementDTO.setEnvironmentId(attributeSet.iterator().next());
+                    } else {
+                        basicTargetElementDTO.setEnvironmentId(PolicyEditorConstants.ENVIRONMENT_ID_DEFAULT);
+                    }
+                } else {
+                    basicTargetElementDTO.setEnvironmentId(findAttributeId(policyEditorDTO.getEnvironmentId()));
+                }
+
+                String dataType = findDataType(policyEditorDTO.getEnvironmentId());
+
+                if(dataType == null){
+                    if(policyEditorDTO.getAttributeIdDataTypeMap().
+                                        get(basicTargetElementDTO.getEnvironmentId()) != null){
+                        basicTargetElementDTO.setEnvironmentDataType(policyEditorDTO.getAttributeIdDataTypeMap().
+                                        get(basicTargetElementDTO.getEnvironmentId()));
+                    }
+
+                    if(basicTargetElementDTO.getEnvironmentDataType() == null){
+                        Set<String> dataSet = policyEditorDTO.getDataTypeMap().
+                                                        get(PolicyEditorConstants.SOA_CATEGORY_ACTION);
+                        if(dataSet != null && dataSet.size() > 0){
+                            basicTargetElementDTO.setEnvironmentDataType(dataSet.iterator().next());
+                        } else {
+                            basicTargetElementDTO.setEnvironmentDataType(PolicyEditorConstants.DataType.STRING);
+                        }
+                    }
+                }
+
+                String function = findFunction(policyEditorDTO.getEnvironmentValue());
+                String value = findAttributeValue(policyEditorDTO.getEnvironmentValue());
+                basicTargetElementDTO.setEnvironmentDataType(dataType);
+                basicTargetElementDTO.setEnvironmentList(value);
+                basicTargetElementDTO.setFunctionOnEnvironment(function);
+
+            }
+            List<BasicPolicyEditorElementDTO> elementDTOs = policyEditorDTO.getBasicPolicyEditorElementDTOs();
+
+            if(elementDTOs != null){
+                int ruleNo = 1;
+                for(BasicPolicyEditorElementDTO dto : elementDTOs){
+                    BasicRuleElementDTO ruleElementDTO = new BasicRuleElementDTO();
+
+                    if(dto.getResourceValue() != null && dto.getResourceValue().trim().length() > 0 &&
+                        !PolicyEditorConstants.ANY.equals(dto.getResourceValue().trim())){
+                        addResourceElement(ruleElementDTO, policyEditorDTO, dto);
+                    }
+
+                    if(dto.getUserAttributeValue() != null && dto.getUserAttributeValue().trim().length() > 0 &&
+                        !PolicyEditorConstants.ANY.equals(dto.getUserAttributeValue().trim())){
+                        addSubjectElement(ruleElementDTO, policyEditorDTO, dto);
+                    }
+
+                    if(dto.getActionValue() != null && dto.getActionValue().trim().length() > 0 &&
+                        !PolicyEditorConstants.ANY.equals(dto.getActionValue().trim())){
+                        addActionElement(ruleElementDTO, policyEditorDTO, dto);
+                    }
+
+                    if(dto.getOperationType() != null && PolicyEditorConstants.PreFunctions.CAN_DO.
+                                                            equals(dto.getOperationType().trim())){
+                        ruleElementDTO.setRuleEffect(PolicyEditorConstants.RULE_EFFECT_PERMIT);
+                    } else {
+                        ruleElementDTO.setRuleEffect(PolicyEditorConstants.RULE_EFFECT_DENY);
+                    }
+                    ruleElementDTO.setRuleId("Rule-" + ruleNo);
+                    ruleElementDTOs.add(ruleElementDTO);
+                    ruleNo ++;
+                }
+            }
+        }
+
+        Element policyElement = PolicyCreatorUtil.createPolicyElement(policyElementDTO, document);
+        document.appendChild(policyElement);
+
+        if(basicTargetElementDTO != null){
+            Element target = PolicyCreatorUtil.createBasicTargetElementDTO(basicTargetElementDTO, document);
+            policyElement.appendChild(target);
+        } else {
+            policyElement.appendChild(document.createElement(EntitlementPolicyConstants.TARGET_ELEMENT));    
+        }
+
+        if(ruleElementDTOs.size() > 0){
+            for(BasicRuleElementDTO dto : ruleElementDTOs){
+                Element rule = PolicyCreatorUtil.createBasicRuleElementDTO(dto, document);
+                policyElement.appendChild(rule);
+            }
+        }
+
+        return PolicyCreatorUtil.getStringFromDocument(document);
+    }
+
+    private static void addResourceElement(BasicRuleElementDTO ruleElementDTO,
+                                              BasicPolicyEditorDTO policyEditorDTO,
+                                              BasicPolicyEditorElementDTO editorElementDTO){
+
+        Set<String> attributeSet = policyEditorDTO.getAttributeIdMap().
+                                        get(PolicyEditorConstants.SOA_CATEGORY_RESOURCE);
+        if(attributeSet != null && attributeSet.size() > 0){
+            ruleElementDTO.setResourceId(attributeSet.iterator().next());
+        } else {
+            ruleElementDTO.setResourceId(PolicyEditorConstants.RESOURCE_ID_DEFAULT);
+        }
+
+        if(policyEditorDTO.getAttributeIdDataTypeMap().
+                            get(ruleElementDTO.getResourceId()) != null){
+            ruleElementDTO.setResourceDataType(policyEditorDTO.getAttributeIdDataTypeMap().
+                            get(ruleElementDTO.getResourceId()));
+        }
+
+        if(ruleElementDTO.getResourceDataType() == null){
+            Set<String> dataSet = policyEditorDTO.getDataTypeMap().
+                                            get(PolicyEditorConstants.SOA_CATEGORY_RESOURCE);
+            if(dataSet != null && dataSet.size() > 0){
+                ruleElementDTO.setResourceDataType(dataSet.iterator().next());
+            } else {
+                ruleElementDTO.setResourceDataType(PolicyEditorConstants.DataType.STRING);
+            }
+        }
+
+        String function = findFunction(editorElementDTO.getResourceValue());
+        String value = findAttributeValue(editorElementDTO.getResourceValue());
+        ruleElementDTO.setResourceList(value);
+        ruleElementDTO.setFunctionOnResources(function);
+    }
+
+    private static void addSubjectElement(BasicRuleElementDTO ruleElementDTO,
+                                              BasicPolicyEditorDTO policyEditorDTO,
+                                              BasicPolicyEditorElementDTO editorElementDTO){
+
+        if(editorElementDTO.getUserAttributeId() == null){
+            Set<String> attributeSet = policyEditorDTO.getAttributeIdMap().
+                                            get(PolicyEditorConstants.SOA_CATEGORY_SUBJECT);
+            if(attributeSet != null && attributeSet.size() > 0){
+                ruleElementDTO.setSubjectId(attributeSet.iterator().next());
+            } else {
+                ruleElementDTO.setSubjectId(PolicyEditorConstants.SUBJECT_ID_DEFAULT);
+            }
+        } else {
+            ruleElementDTO.setSubjectId(editorElementDTO.getUserAttributeId());
+        }
+
+        if(policyEditorDTO.getAttributeIdDataTypeMap().
+                            get(ruleElementDTO.getSubjectId()) != null){
+            ruleElementDTO.setSubjectDataType(policyEditorDTO.getAttributeIdDataTypeMap().
+                            get(ruleElementDTO.getSubjectId()));
+        }
+
+        if(ruleElementDTO.getSubjectDataType() == null){
+            Set<String> dataSet = policyEditorDTO.getDataTypeMap().
+                                            get(PolicyEditorConstants.SOA_CATEGORY_SUBJECT);
+            if(dataSet != null && dataSet.size() > 0){
+                ruleElementDTO.setSubjectDataType(dataSet.iterator().next());
+            } else {
+                ruleElementDTO.setSubjectDataType(PolicyEditorConstants.DataType.STRING);
+            }
+        }
+
+        String function = findFunction(editorElementDTO.getUserAttributeValue());
+        String value = findAttributeValue(editorElementDTO.getUserAttributeValue());
+        ruleElementDTO.setSubjectList(value);
+        ruleElementDTO.setFunctionOnSubjects(function);
+    }
+
+    private static void addActionElement(BasicRuleElementDTO ruleElementDTO,
+                                              BasicPolicyEditorDTO policyEditorDTO,
+                                              BasicPolicyEditorElementDTO editorElementDTO){
+
+        Set<String> attributeSet = policyEditorDTO.getAttributeIdMap().
+                                        get(PolicyEditorConstants.SOA_CATEGORY_ACTION);
+        if(attributeSet != null && attributeSet.size() > 0){
+            ruleElementDTO.setActionId(attributeSet.iterator().next());
+        } else {
+            ruleElementDTO.setActionId(PolicyEditorConstants.ACTION_ID_DEFAULT);
+        }
+
+        if(policyEditorDTO.getAttributeIdDataTypeMap().
+                            get(ruleElementDTO.getActionId()) != null){
+            ruleElementDTO.setActionDataType(policyEditorDTO.getAttributeIdDataTypeMap().
+                            get(ruleElementDTO.getActionId()));
+        }
+
+        if(ruleElementDTO.getActionDataType() == null){
+            Set<String> dataSet = policyEditorDTO.getDataTypeMap().
+                                            get(PolicyEditorConstants.SOA_CATEGORY_ACTION);
+            if(dataSet != null && dataSet.size() > 0){
+                ruleElementDTO.setActionDataType(dataSet.iterator().next());
+            } else {
+                ruleElementDTO.setActionDataType(PolicyEditorConstants.DataType.STRING);
+            }
+        }
+
+        String function = findFunction(editorElementDTO.getActionValue());
+        String value = findAttributeValue(editorElementDTO.getActionValue());
+        ruleElementDTO.setActionList(value);
+        ruleElementDTO.setFunctionOnActions(function);
+    }
+
+    private static void addEnvironmentElement(BasicRuleElementDTO ruleElementDTO,
+                                              BasicPolicyEditorDTO policyEditorDTO,
+                                              BasicPolicyEditorElementDTO editorElementDTO){
+
+        if(editorElementDTO.getEnvironmentId() == null){
+            Set<String> attributeSet = policyEditorDTO.getAttributeIdMap().
+                                            get(PolicyEditorConstants.SOA_CATEGORY_ENVIRONMENT);
+            if(attributeSet != null && attributeSet.size() > 0){
+                ruleElementDTO.setEnvironmentId(attributeSet.iterator().next());
+            } else {
+                ruleElementDTO.setEnvironmentId(PolicyEditorConstants.ENVIRONMENT_ID_DEFAULT);
+            }
+        } else {
+            ruleElementDTO.setEnvironmentId(findAttributeId(editorElementDTO.getEnvironmentId()));
+        }
+
+        String dataType = findDataType(editorElementDTO.getEnvironmentId());
+
+        if(dataType == null){
+            if(policyEditorDTO.getAttributeIdDataTypeMap().
+                                get(ruleElementDTO.getEnvironmentId()) != null){
+                ruleElementDTO.setEnvironmentDataType(policyEditorDTO.getAttributeIdDataTypeMap().
+                                get(ruleElementDTO.getEnvironmentId()));
+            }
+
+            if(ruleElementDTO.getEnvironmentDataType() == null){
+                Set<String> dataSet = policyEditorDTO.getDataTypeMap().
+                                                get(PolicyEditorConstants.SOA_CATEGORY_ACTION);
+                if(dataSet != null && dataSet.size() > 0){
+                    ruleElementDTO.setEnvironmentDataType(dataSet.iterator().next());
+                } else {
+                    ruleElementDTO.setEnvironmentDataType(PolicyEditorConstants.DataType.STRING);
+                }
+            }
+        }
+
+        String function = findFunction(editorElementDTO.getEnvironmentValue());
+        String value = findAttributeValue(editorElementDTO.getEnvironmentValue());
+        ruleElementDTO.setEnvironmentDataType(dataType);
+        ruleElementDTO.setEnvironmentList(value);
+        ruleElementDTO.setFunctionOnEnvironment(function);
+
+    }
+
+    private static String findFunction(String value){
+
+        if(value == null){
+            return EntitlementPolicyConstants.EQUAL_TO;
+        }
+
+        if(value.startsWith(PolicyEditorConstants.EQUAL_RANGE)){
+            if(value.contains(PolicyEditorConstants.RANGE)){
+                return PolicyEditorConstants.RuleFunctions.FUNCTION_GREATER_EQUAL_AND_LESS;
+            } else {
+                return PolicyEditorConstants.RuleFunctions.FUNCTION_GREATER_EQUAL_AND_LESS_EQUAL;
+            }
+        }
+
+        if(value.startsWith(PolicyEditorConstants.RANGE)){
+            if(value.contains(PolicyEditorConstants.EQUAL_RANGE)){
+                return PolicyEditorConstants.RuleFunctions.FUNCTION_GREATER_AND_LESS_EQUAL;
+            } else {
+                return PolicyEditorConstants.RuleFunctions.FUNCTION_GREATER_AND_LESS;
+            }
+        }
+
+        if(value.startsWith(PolicyEditorConstants.GREATER)){
+            return PolicyEditorConstants.RuleFunctions.FUNCTION_GREATER;
+        } else if(value.startsWith(PolicyEditorConstants.GREATER_EQUAL)){
+            return PolicyEditorConstants.RuleFunctions.FUNCTION_GREATER_EQUAL;
+        } else if(value.startsWith(PolicyEditorConstants.LESS)){
+            return PolicyEditorConstants.RuleFunctions.FUNCTION_LESS;
+        } else if(value.startsWith(PolicyEditorConstants.LESS_EQUAL)){
+            return PolicyEditorConstants.RuleFunctions.FUNCTION_LESS_EQUAL;
+        }
+
+        if(value.startsWith(PolicyEditorConstants.REGEX)){
+            return EntitlementPolicyConstants.REGEXP_MATCH;
+        }
+
+
+        if(value.contains(PolicyEditorConstants.ATTRIBUTE_SEPARATOR)){
+            return EntitlementPolicyConstants.AT_LEAST;
+        }
+
+        return EntitlementPolicyConstants.EQUAL_TO;
+    }
+
+
+    private static String findAttributeValue(String value){
+
+        if(value == null){
+            return null;    
+        }
+
+        if(value.startsWith(PolicyEditorConstants.EQUAL_RANGE) ||
+                value.startsWith(PolicyEditorConstants.RANGE) ||
+                value.startsWith(PolicyEditorConstants.REGEX) ){
+
+            return value.substring(1, value.length() -1);
+
+        } else if (value.startsWith(PolicyEditorConstants.GREATER) ||
+                value.startsWith(PolicyEditorConstants.LESS)){
+            return value.substring(1);
+        } else if (value.startsWith(PolicyEditorConstants.GREATER_EQUAL) ||
+                value.startsWith(PolicyEditorConstants.LESS_EQUAL)){
+            return value.substring(2);
+        }
+
+        return value;
+    }
+
+    private static String findAttributeId(String attributeId){
+
+        if(attributeId == null){
+            return PolicyEditorConstants.ENVIRONMENT_ID_DEFAULT;
+        }
+
+        if(attributeId.equals(PolicyEditorConstants.AttributeId.ENV_DATE)){ 
+            return PolicyEditorConstants.ENVIRONMENT_CURRENT_DATE;
+        } else if (attributeId.equals(PolicyEditorConstants.AttributeId.ENV_TIME)){
+            return PolicyEditorConstants.ENVIRONMENT_CURRENT_TIME;
+        } else if (PolicyEditorConstants.AttributeId.ENV_DATE_TIME.equals(attributeId)){
+            return PolicyEditorConstants.ENVIRONMENT_CURRENT_DATETIME;    
+        }
+
+        return PolicyEditorConstants.ENVIRONMENT_ID_DEFAULT;
+        
+    }
+
+
+    private static String findDataType(String attributeId){
+
+        if(attributeId == null){
+            return null;
+        }
+
+        if(attributeId.equals(PolicyEditorConstants.AttributeId.ENV_DATE)){
+            return PolicyEditorConstants.DataType.DATE;
+        } else if (attributeId.equals(PolicyEditorConstants.AttributeId.ENV_TIME)){
+            return PolicyEditorConstants.DataType.TIME;
+        } else if (PolicyEditorConstants.AttributeId.ENV_DATE_TIME.equals(attributeId)){
+            return PolicyEditorConstants.DataType.DATE_TIME;
+        } else if (PolicyEditorConstants.AttributeId.ENV_IP.equals(attributeId)){
+            return PolicyEditorConstants.DataType.IP_ADDRESS;
+        }
+
+        return null;
+
+    }
+
+    public static String createRules(List<BasicPolicyEditorElementDTO> elementDTOs, Document doc)
+                                                        throws EntitlementPolicyCreationException {
+
+        List<BasicRuleElementDTO> ruleElementDTOs = new ArrayList<BasicRuleElementDTO>();
+        if(elementDTOs != null){
+            int ruleNo = 1;
+            for(BasicPolicyEditorElementDTO dto : elementDTOs){
+                BasicRuleElementDTO ruleElementDTO = new BasicRuleElementDTO();
+
+                if(dto.getResourceValue() != null && dto.getResourceValue().trim().length() > 0 &&
+                    !PolicyEditorConstants.ANY.equals(dto.getResourceValue().trim())){
+                    ruleElementDTO.setResourceDataType(PolicyEditorConstants.DataType.STRING);
+                    ruleElementDTO.setResourceId(PolicyEditorConstants.RESOURCE_ID_DEFAULT);
+                    ruleElementDTO.setResourceList(dto.getResourceValue());
+                    ruleElementDTO.setFunctionOnResources(getBasicPolicyEditorFunction(dto.
+                                                                    getFunctionOnResources()));
+                }
+
+                if(dto.getUserAttributeValue() != null && dto.getUserAttributeValue().trim().length() > 0 &&
+                    !PolicyEditorConstants.ANY.equals(dto.getUserAttributeValue().trim())){
+                    ruleElementDTO.setSubjectDataType(PolicyEditorConstants.DataType.STRING);
+                    ruleElementDTO.setSubjectId(dto.getUserAttributeId());
+                    ruleElementDTO.setSubjectList(dto.getUserAttributeValue());
+                    ruleElementDTO.setFunctionOnSubjects(getBasicPolicyEditorFunction(dto.
+                                                                        getFunctionOnUsers()));
+                }
+
+                if(dto.getActionValue() != null && dto.getActionValue().trim().length() > 0 &&
+                    !PolicyEditorConstants.ANY.equals(dto.getActionValue().trim())){
+                    ruleElementDTO.setActionDataType(PolicyEditorConstants.DataType.STRING);
+                    ruleElementDTO.setActionList(dto.getActionValue());
+                    ruleElementDTO.setActionId(PolicyEditorConstants.ACTION_ID_DEFAULT);
+                    ruleElementDTO.setFunctionOnActions(getBasicPolicyEditorFunction(dto.
+                                                                    getFunctionOnActions()));
+                }
+
+                if(dto.getEnvironmentValue() != null && dto.getEnvironmentValue().trim().length() > 0 &&
+                    !PolicyEditorConstants.ANY.equals(dto.getEnvironmentValue().trim())){
+                    ruleElementDTO.setEnvironmentId(dto.getEnvironmentId());
+                    ruleElementDTO.setEnvironmentList(dto.getEnvironmentValue());
+                    ruleElementDTO.setEnvironmentDataType(PolicyEditorConstants.DataType.STRING);
+                    ruleElementDTO.setFunctionOnEnvironment(getBasicPolicyEditorFunction(dto.
+                                                                getFunctionOnEnvironments()));
+                }
+
+                if(dto.getOperationType() != null && PolicyEditorConstants.PreFunctions.CAN_DO.
+                                                        equals(dto.getOperationType().trim())){
+                    ruleElementDTO.setRuleEffect(PolicyEditorConstants.RULE_EFFECT_PERMIT);
+                } else {
+                    ruleElementDTO.setRuleEffect(PolicyEditorConstants.RULE_EFFECT_DENY);
+                }
+                ruleElementDTO.setRuleId("Rule-" + System.currentTimeMillis() + "-" + ruleNo);
+                ruleElementDTOs.add(ruleElementDTO);
+                ruleNo ++;
+            }
+        }
+
+         if(ruleElementDTOs.size() > 0){
+            for(BasicRuleElementDTO dto : ruleElementDTOs){
+                Element rule = PolicyCreatorUtil.createBasicRuleElementDTO(dto, doc);
+                doc.appendChild(rule);
+            }
+        }
+
+        return PolicyCreatorUtil.getStringFromDocument(doc);        
+    }
+
+    /**
+     * helper function
+     * 
+     * @param value
+     * @return
+     */
+    private static String getBasicPolicyEditorFunction(String value){
+
+        return null;
+    }
 
     /**
      * Creates DOM representation of the XACML rule element.
@@ -48,7 +731,25 @@ public class PolicyEditorUtil {
         ruleElementDTO.setRuleId(ruleDTO.getRuleId());
         ruleElementDTO.setRuleEffect(ruleDTO.getRuleEffect());
         BasicTargetDTO targetDTO = ruleDTO.getTargetDTO();
-        
+        List<ExtendAttributeDTO> dynamicAttributeDTOs = ruleDTO.getAttributeDTOs();
+        List<ObligationDTO> obligationDTOs = ruleDTO.getObligationDTOs();
+
+        if(dynamicAttributeDTOs != null && dynamicAttributeDTOs.size() > 0){
+            Map<String, ExtendAttributeDTO> dtoMap = new HashMap<String, ExtendAttributeDTO>();
+            //1st creating map of dynamic attribute elements
+            for(ExtendAttributeDTO dto : dynamicAttributeDTOs){
+                dtoMap.put("${" + dto.getId().trim() + "}", dto);
+            }
+            //creating map of apply element with identifier
+            for(ExtendAttributeDTO dto : dynamicAttributeDTOs){
+                ApplyElementDTO applyElementDTO = createApplyElement(dto, dtoMap);
+                if(applyElementDTO == null){
+                    continue;
+                }
+                applyElementMap.put("${" + dto.getId().trim() + "}", applyElementDTO);
+            }
+        }
+
         if(targetDTO != null && targetDTO.getRowDTOList() != null && targetDTO.getRowDTOList().size() > 0){
             NewTargetElementDTO targetElementDTO = createTargetDTO(ruleDTO.getTargetDTO());
             if(targetElementDTO != null){
@@ -63,8 +764,64 @@ public class PolicyEditorUtil {
             }
         }
 
+        if(obligationDTOs != null && obligationDTOs.size() > 0){
+            for(ObligationDTO obligationDTO : obligationDTOs){
+                ObligationElementDTO elementDTO = createObligationElement(obligationDTO);
+                if(elementDTO != null){
+                    ruleElementDTO.addObligationElementDTO(elementDTO);
+                }
+            }
+        }        
+
         return PolicyCreatorUtil.createRuleElement(ruleElementDTO, doc);
     }
+
+    /**
+     * creates DOM representation of the XACML obligation/advice element.
+     * 
+     * @param obligationDTOs
+     * @param doc
+     * @return
+     * @throws PolicyEditorException
+     */
+    public static List<Element> createObligation(List<ObligationDTO> obligationDTOs, Document doc)
+                                                                    throws PolicyEditorException {
+
+        List<ObligationElementDTO> obligationElementDTOs = new ArrayList<ObligationElementDTO>();
+        List<Element> returnList = new ArrayList<Element>();
+
+        if(obligationDTOs != null){
+            for(ObligationDTO obligationDTO : obligationDTOs){
+                ObligationElementDTO elementDTO = createObligationElement(obligationDTO);
+                if(elementDTO != null){
+                    obligationElementDTOs.add(elementDTO);
+                }
+            }
+        }
+
+        if(obligationElementDTOs.size() > 0){
+            List<ObligationElementDTO> obligations = new ArrayList<ObligationElementDTO>();
+            List<ObligationElementDTO> advices = new ArrayList<ObligationElementDTO>();
+            for(ObligationElementDTO obligationElementDTO : obligationElementDTOs){
+                if(obligationElementDTO.getType() == ObligationElementDTO.ADVICE){
+                    advices.add(obligationElementDTO);
+                } else {
+                    obligations.add(obligationElementDTO);
+                }
+            }
+            Element obligation = PolicyCreatorUtil.createObligationsElement(obligations, doc);
+            Element advice = PolicyCreatorUtil.createObligationsElement(advices, doc);
+            if(obligation != null){
+                returnList.add(obligation);
+            }
+            if(advice != null){
+                returnList.add(advice);
+            }
+        }
+
+        return returnList;
+    }
+
 
     /**
      * Creates DOM representation of the XACML target element.
@@ -85,6 +842,134 @@ public class PolicyEditorUtil {
         }
 
         return targetElement;
+    }
+
+    /**
+     *
+     * @param dynamicAttributeDTO
+     * @param map
+     * @return
+     */
+    private static ApplyElementDTO createApplyElement(ExtendAttributeDTO dynamicAttributeDTO,
+                                                       Map<String, ExtendAttributeDTO> map){
+
+        if(PolicyEditorConstants.DYNAMIC_SELECTOR_CATEGORY.equals(dynamicAttributeDTO.getSelector())){
+
+            String category = dynamicAttributeDTO.getCategory();
+            String attributeId  = dynamicAttributeDTO.getAttributeId();
+            String attributeDataType = dynamicAttributeDTO.getDataType();
+
+            if(category != null && category.trim().length() > 0 && attributeDataType != null &&
+                    attributeDataType.trim().length() > 0) {
+                AttributeDesignatorDTO designatorDTO = new AttributeDesignatorDTO();
+                designatorDTO.setCategory(category);
+                designatorDTO.setAttributeId(attributeId);
+                designatorDTO.setDataType(attributeDataType);
+                designatorDTO.setMustBePresent("true");
+
+                ApplyElementDTO applyElementDTO = new ApplyElementDTO();
+                applyElementDTO.setAttributeDesignators(designatorDTO);
+                applyElementDTO.setFunctionId(processFunction("bag", attributeDataType));
+                return applyElementDTO;
+            }
+
+        } else {
+
+            String function  = dynamicAttributeDTO.getFunction();
+            String attributeValue = dynamicAttributeDTO.getAttributeValue();
+            String attributeId  = dynamicAttributeDTO.getAttributeId();
+            String attributeDataType = dynamicAttributeDTO.getDataType();
+
+            if(attributeValue != null && function != null){
+                String[] values = attributeValue.split(",");
+
+                if(values != null && values.length > 0){
+
+                    if(function.contains("concatenate")){
+                        ApplyElementDTO applyElementDTO = new ApplyElementDTO();
+                        applyElementDTO.setFunctionId(processFunction(function, attributeDataType, "2.0"));
+                        // there can be any number of inputs
+                        for(String value : values){
+                            if(map.containsKey(value)){
+                                applyElementDTO.setApplyElement(createApplyElement(map.get(value), map));
+                            } else {
+                                AttributeValueElementDTO valueElementDTO = new AttributeValueElementDTO();
+                                valueElementDTO.setAttributeDataType(attributeDataType);
+                                valueElementDTO.setAttributeValue(value);
+                                applyElementDTO.setAttributeValueElementDTO(valueElementDTO);
+                            }
+                        }
+
+                        return applyElementDTO;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+
+    private static ObligationElementDTO createObligationElement(ObligationDTO obligationDTO){
+
+        String id = obligationDTO.getObligationId();
+        String effect = obligationDTO.getEffect();
+        String type = obligationDTO.getType();
+
+        if(id != null && id.trim().length() > 0 && effect != null){
+
+            ObligationElementDTO elementDTO = new ObligationElementDTO();
+            elementDTO.setId(id);
+            elementDTO.setEffect(effect);
+            if("Advice".equals(type)){
+                elementDTO.setType(ObligationElementDTO.ADVICE);
+            } else {
+                elementDTO.setType(ObligationElementDTO.OBLIGATION);
+            }
+
+            String attributeValue = obligationDTO.getAttributeValue();
+            String attributeDataType = obligationDTO.getAttributeValueDataType();
+            String resultingAttributeId = obligationDTO.getResultAttributeId();
+
+            if(attributeValue != null && attributeValue.trim().length() > 0 &&
+                    resultingAttributeId != null && resultingAttributeId.trim().length() > 0){
+                
+                AttributeAssignmentElementDTO assignmentElementDTO = new
+                                                                    AttributeAssignmentElementDTO();
+                assignmentElementDTO.setAttributeId(resultingAttributeId);
+                if(attributeValue.contains(",")){
+                    String[] values = attributeValue.split(",");
+                    ApplyElementDTO applyElementDTO = new ApplyElementDTO();
+                    applyElementDTO.setFunctionId(processFunction("bag", attributeDataType));
+                    for(String value : values){
+                        if(applyElementMap.containsKey(value)){
+                            applyElementDTO.setApplyElement(applyElementMap.get(value));
+                        } else {
+                            AttributeValueElementDTO valueElementDTO = new AttributeValueElementDTO();
+                            valueElementDTO.setAttributeDataType(attributeDataType);
+                            valueElementDTO.setAttributeValue(value);
+                            applyElementDTO.setAttributeValueElementDTO(valueElementDTO);
+                        }
+                    }
+                    assignmentElementDTO.setApplyElementDTO(applyElementDTO);
+                } else {
+                    if(applyElementMap.containsKey(attributeValue)){
+                        assignmentElementDTO.setApplyElementDTO(applyElementMap.get(attributeValue));
+                    } else {
+                        AttributeValueElementDTO valueElementDTO = new AttributeValueElementDTO();
+                        valueElementDTO.setAttributeDataType(attributeDataType);
+                        valueElementDTO.setAttributeValue(attributeValue);
+                        assignmentElementDTO.setValueElementDTO(valueElementDTO);
+                    }
+                }
+
+                elementDTO.addAssignmentElementDTO(assignmentElementDTO);
+            }
+
+            return elementDTO;
+        }
+
+        return null;
     }
 
     /**
@@ -124,10 +1009,9 @@ public class PolicyEditorUtil {
         listSet.add(temp);
 
         if(listSet.size() > 1){
+            ApplyElementDTO orApplyDTO = new ApplyElementDTO();
+            orApplyDTO.setFunctionId(processFunction("or"));
             for(ArrayList<RowDTO> rowDTOArrayList : listSet){
-                ApplyElementDTO orApplyDTO = new ApplyElementDTO();
-                orApplyDTO.setFunctionId(processFunction("or"));
-
                 if(rowDTOArrayList.size() > 1){
                      ApplyElementDTO andApplyDTO = new ApplyElementDTO();
                      andApplyDTO.setFunctionId(processFunction("and"));
@@ -136,12 +1020,14 @@ public class PolicyEditorUtil {
                         andApplyDTO.setApplyElement(applyElementDTO);
                     }
                     orApplyDTO.setApplyElement(andApplyDTO);
+
                 } else if (rowDTOArrayList.size() == 1) {
                     RowDTO rowDTO = rowDTOArrayList.get(0);
                     ApplyElementDTO andApplyDTO = createApplyElement(rowDTO);
                     orApplyDTO.setApplyElement(andApplyDTO);
                 }
             }
+            rootApplyDTO.setApplyElement(orApplyDTO);
         } else if(listSet.size() == 1) {
             ArrayList<RowDTO> rowDTOArrayList = listSet.iterator().next();
             if(rowDTOArrayList.size() > 1){
@@ -151,6 +1037,7 @@ public class PolicyEditorUtil {
                     ApplyElementDTO applyElementDTO = createApplyElement(rowDTO);
                     andApplyDTO.setApplyElement(applyElementDTO);
                 }
+                rootApplyDTO.setApplyElement(andApplyDTO);
             } else if (rowDTOArrayList.size() == 1) {
                 RowDTO rowDTO = rowDTOArrayList.get(0);
                 ApplyElementDTO andApplyDTO = createApplyElement(rowDTO);
@@ -196,7 +1083,7 @@ public class PolicyEditorUtil {
         if(rowDTO.getFunction().contains("less" ) || rowDTO.getFunction().contains("greater" )){
             applyElementDTO = processGreaterLessThanFunctions(function, dataType, attributeValue,
                                                                                 designatorDTO);
-        } else if(PolicyEditorConstants.FUNCTION_EQUAL.equals(rowDTO.getFunction())){
+        } else if(PolicyEditorConstants.RuleFunctions.FUNCTION_EQUAL.equals(rowDTO.getFunction())){
             applyElementDTO = processEqualFunctions(function, dataType, attributeValue, designatorDTO);
         } else {
             applyElementDTO = processBagFunction(function, dataType, attributeValue, designatorDTO);
@@ -222,7 +1109,7 @@ public class PolicyEditorUtil {
 
         // pre function processing
         for(RowDTO rowDTO : rowDTOs){
-            if(PolicyEditorConstants.PRE_FUNCTION_ARE.equals(rowDTO.getPreFunction())){
+            if(PolicyEditorConstants.PreFunctions.PRE_FUNCTION_ARE.equals(rowDTO.getPreFunction())){
                 String[] attributeValues = rowDTO.getAttributeValue().split(",");
                 allOfElementDTO =  new AllOfElementDTO();
                 for(int j = 0; j < attributeValues.length; j ++){
@@ -319,24 +1206,27 @@ public class PolicyEditorUtil {
      */
     public static ApplyElementDTO processBagFunction(String function, String dataType,
                                     String attributeValue, AttributeDesignatorDTO designatorDTO){
-        if(PolicyEditorConstants.FUNCTION_IS_IN.equals(function)){
+
+        if(PolicyEditorConstants.RuleFunctions.FUNCTION_IS_IN.equals(function)){
             ApplyElementDTO applyElementDTO = new ApplyElementDTO();
             applyElementDTO.setFunctionId(processFunction("is-in", dataType));
-
-            AttributeValueElementDTO valueElementDTO = new AttributeValueElementDTO();
-            valueElementDTO.setAttributeDataType(dataType);
-            valueElementDTO.setAttributeValue(attributeValue);
+            if(applyElementMap.containsKey(attributeValue)){
+                applyElementDTO.setApplyElement(applyElementMap.get(attributeValue));
+            } else {
+                AttributeValueElementDTO valueElementDTO = new AttributeValueElementDTO();
+                valueElementDTO.setAttributeDataType(dataType);
+                valueElementDTO.setAttributeValue(attributeValue);
+                applyElementDTO.setAttributeValueElementDTO(valueElementDTO);
+            }
 
             applyElementDTO.setAttributeDesignators(designatorDTO);
-            applyElementDTO.setAttributeValueElementDTO(valueElementDTO);
-
             return applyElementDTO;
 
-        } else if(PolicyEditorConstants.FUNCTION_AT_LEAST_ONE.equals(function) ||
-                PolicyEditorConstants.FUNCTION_SET_EQUALS.equals(function)){
+        } else if(PolicyEditorConstants.RuleFunctions.FUNCTION_AT_LEAST_ONE.equals(function) ||
+                PolicyEditorConstants.RuleFunctions.FUNCTION_SET_EQUALS.equals(function)){
 
             ApplyElementDTO applyElementDTO = new ApplyElementDTO();
-            if(PolicyEditorConstants.FUNCTION_AT_LEAST_ONE.equals(function)){
+            if(PolicyEditorConstants.RuleFunctions.FUNCTION_AT_LEAST_ONE.equals(function)){
                 applyElementDTO.setFunctionId(processFunction("at-least-one-member-of", dataType));
             } else {
                 applyElementDTO.setFunctionId(processFunction("set-equals", dataType));    
@@ -346,11 +1236,15 @@ public class PolicyEditorUtil {
 
             ApplyElementDTO applyBagElementDTO = new ApplyElementDTO();
             applyBagElementDTO.setFunctionId(processFunction("bag", dataType));
-            for(String value : values){
-                AttributeValueElementDTO valueElementDTO = new AttributeValueElementDTO();
-                valueElementDTO.setAttributeDataType(dataType);
-                valueElementDTO.setAttributeValue(value);
-                applyBagElementDTO.setAttributeValueElementDTO(valueElementDTO);
+            for(String value : values){                
+                if(applyElementMap.containsKey(value)){
+                    applyBagElementDTO.setApplyElement(applyElementMap.get(value));
+                } else {
+                    AttributeValueElementDTO valueElementDTO = new AttributeValueElementDTO();
+                    valueElementDTO.setAttributeDataType(dataType);
+                    valueElementDTO.setAttributeValue(value);
+                    applyBagElementDTO.setAttributeValueElementDTO(valueElementDTO);
+                }
             }
 
             applyElementDTO.setAttributeDesignators(designatorDTO);
@@ -374,11 +1268,11 @@ public class PolicyEditorUtil {
     public static ApplyElementDTO processEqualFunctions(String function, String dataType,
                                     String attributeValue, AttributeDesignatorDTO designatorDTO) {
 
-        if(PolicyEditorConstants.FUNCTION_EQUAL.equals(function)){
+        if(PolicyEditorConstants.RuleFunctions.FUNCTION_EQUAL.equals(function)){
 
             ApplyElementDTO applyElementDTO = new ApplyElementDTO();
-            if(PolicyEditorConstants.DAY_TIME_DURATION.equals(dataType) ||
-                    PolicyEditorConstants.YEAR_MONTH_DURATION.equals(dataType)){
+            if(PolicyEditorConstants.DataType.DAY_TIME_DURATION.equals(dataType) ||
+                    PolicyEditorConstants.DataType.YEAR_MONTH_DURATION.equals(dataType)){
                 applyElementDTO.setFunctionId(processFunction("equal", dataType, "3.0"));                
             } else {
                 applyElementDTO.setFunctionId(processFunction("equal", dataType));
@@ -388,12 +1282,16 @@ public class PolicyEditorUtil {
             oneAndOnlyApplyElement.setFunctionId(processFunction("one-and-only", dataType));
             oneAndOnlyApplyElement.setAttributeDesignators(designatorDTO);
 
-            AttributeValueElementDTO valueElementDTO = new AttributeValueElementDTO();
-            valueElementDTO.setAttributeDataType(dataType);
-            valueElementDTO.setAttributeValue(attributeValue);
+            if(applyElementMap.containsKey(attributeValue)){
+                applyElementDTO.setApplyElement(applyElementMap.get(attributeValue));
+            } else {
+                AttributeValueElementDTO valueElementDTO = new AttributeValueElementDTO();
+                valueElementDTO.setAttributeDataType(dataType);
+                valueElementDTO.setAttributeValue(attributeValue);
+                applyElementDTO.setAttributeValueElementDTO(valueElementDTO);
+            }
 
             applyElementDTO.setApplyElement(oneAndOnlyApplyElement);
-            applyElementDTO.setAttributeValueElementDTO(valueElementDTO);
 
             return applyElementDTO;
         }
@@ -418,10 +1316,10 @@ public class PolicyEditorUtil {
         String[] values = attributeValue.split(PolicyEditorConstants.ATTRIBUTE_SEPARATOR);
 
 
-        if(PolicyEditorConstants.FUNCTION_GREATER_EQUAL_AND_LESS_EQUAL.equals(function) ||
-            PolicyEditorConstants.FUNCTION_GREATER_AND_LESS_EQUAL.equals(function) ||
-            PolicyEditorConstants.FUNCTION_GREATER_EQUAL_AND_LESS.equals(function) ||
-            PolicyEditorConstants.FUNCTION_GREATER_AND_LESS.equals(function)) {
+        if(PolicyEditorConstants.RuleFunctions.FUNCTION_GREATER_EQUAL_AND_LESS_EQUAL.equals(function) ||
+            PolicyEditorConstants.RuleFunctions.FUNCTION_GREATER_AND_LESS_EQUAL.equals(function) ||
+            PolicyEditorConstants.RuleFunctions.FUNCTION_GREATER_EQUAL_AND_LESS.equals(function) ||
+            PolicyEditorConstants.RuleFunctions.FUNCTION_GREATER_AND_LESS.equals(function)) {
 
             String leftValue;
             String rightValue;
@@ -439,8 +1337,8 @@ public class PolicyEditorUtil {
             andApplyElement.setFunctionId(processFunction("and"));
 
             ApplyElementDTO greaterThanApplyElement = new ApplyElementDTO();
-            if(PolicyEditorConstants.FUNCTION_GREATER_AND_LESS.equals(function) ||
-                    PolicyEditorConstants.FUNCTION_GREATER_AND_LESS_EQUAL.equals(function)){
+            if(PolicyEditorConstants.RuleFunctions.FUNCTION_GREATER_AND_LESS.equals(function) ||
+                    PolicyEditorConstants.RuleFunctions.FUNCTION_GREATER_AND_LESS_EQUAL.equals(function)){
                 greaterThanApplyElement.setFunctionId(processFunction("greater-than", dataType));
             } else {
                 greaterThanApplyElement.setFunctionId(processFunction("greater-than-or-equal", dataType));                     
@@ -448,8 +1346,8 @@ public class PolicyEditorUtil {
 
 
             ApplyElementDTO lessThanApplyElement = new ApplyElementDTO();
-            if(PolicyEditorConstants.FUNCTION_GREATER_AND_LESS.equals(function) ||
-                    PolicyEditorConstants.FUNCTION_GREATER_EQUAL_AND_LESS.equals(function)){
+            if(PolicyEditorConstants.RuleFunctions.FUNCTION_GREATER_AND_LESS.equals(function) ||
+                    PolicyEditorConstants.RuleFunctions.FUNCTION_GREATER_EQUAL_AND_LESS.equals(function)){
                 lessThanApplyElement.setFunctionId(processFunction("less-than", dataType));
             } else {
                 lessThanApplyElement.setFunctionId(processFunction("less-than-or-equal", dataType));
@@ -482,13 +1380,13 @@ public class PolicyEditorUtil {
 
             ApplyElementDTO applyElementDTO = new ApplyElementDTO();
             
-            if(PolicyEditorConstants.FUNCTION_GREATER.equals(function)){
+            if(PolicyEditorConstants.RuleFunctions.FUNCTION_GREATER.equals(function)){
                 applyElementDTO.setFunctionId(processFunction("greater-than", dataType));
-            } else if(PolicyEditorConstants.FUNCTION_GREATER_EQUAL.equals(function)){
+            } else if(PolicyEditorConstants.RuleFunctions.FUNCTION_GREATER_EQUAL.equals(function)){
                 applyElementDTO.setFunctionId(processFunction("greater-than-or-equal", dataType));
-            } else if(PolicyEditorConstants.FUNCTION_LESS.equals(function)){
+            } else if(PolicyEditorConstants.RuleFunctions.FUNCTION_LESS.equals(function)){
                 applyElementDTO.setFunctionId(processFunction("less-than", dataType));
-            } else if(PolicyEditorConstants.FUNCTION_LESS_EQUAL.equals(function)){
+            } else if(PolicyEditorConstants.RuleFunctions.FUNCTION_LESS_EQUAL.equals(function)){
                 applyElementDTO.setFunctionId(processFunction("less-than-or-equal", dataType));
             } else {
                 throw new PolicyEditorException("Can not create Apply element:" +
@@ -544,6 +1442,45 @@ public class PolicyEditorUtil {
     private static String processFunction(String function, String type){
         return  "urn:oasis:names:tc:xacml:1.0:function:" + getDataTypePrefix(type) + "-" + function;
     }
+//
+//    /**
+//     * Helper method to check whether attribute value is pre-defined one
+//     *
+//     * @param value
+//     * @return
+//     */
+//    private static boolean isPreDefinedValue(String value){
+//
+//        if(value != null && applyElementMap != null && applyElementMap.size() > 0){
+//            value = value.trim();
+//            if(value.startsWith("${") && value.endsWith("}")){
+//                value = value.substring(value.indexOf("{") + 1, value.indexOf("}"));
+//                return applyElementMap.containsKey(value);
+//            }
+//        }
+//
+//        return false;
+//    }
+//
+//    /**
+//     * Helper method to check whether attribute value is pre-defined one
+//     *
+//     * @param value
+//     * @param map
+//     * @return
+//     */
+//    private static boolean isPreDefinedValue(String value, Map<String, ExtendAttributeDTO> map){
+//
+//        if(value != null && map != null && map.size() > 0){
+//            value = value.trim();
+//            if(value.startsWith("${") && value.endsWith("}")){
+//                value = value.substring(value.indexOf("{") + 1, value.indexOf("}"));
+//                return map.containsKey(value);
+//            }
+//        }
+//
+//        return false;
+//    }
 
     /**
      * Helper method to create full XACML function URI
@@ -559,7 +1496,7 @@ public class PolicyEditorUtil {
             } else if(dataTypeUri.contains(":")){
                 String[] stringArray = dataTypeUri.split(":");
                 if(stringArray != null && stringArray.length > 0){
-                    return stringArray[stringArray.length];
+                    return stringArray[stringArray.length - 1];
                 }
             }
         }
@@ -779,10 +1716,11 @@ public class PolicyEditorUtil {
      *
      * @param targetDTO
      * @param ruleDTOs
+     * @param ruleElementOrder
      * @param policyBean
      */
-    public static void processPolicyData(BasicTargetDTO targetDTO,  List<RuleDTO> ruleDTOs,
-                                                                EntitlementPolicyBean policyBean){
+    public static String[] processPolicyData(BasicTargetDTO targetDTO,  List<RuleDTO> ruleDTOs,
+              List<ObligationDTO>  obligationDTOs, String ruleElementOrder, EntitlementPolicyBean policyBean){
 
         Map<String, Set<String>> defaultDataTypeMap = policyBean.getDefaultDataTypeMap();
         Map<String, Set<String>> defaultAttributeIdMap = policyBean.getDefaultAttributeIdMap();
@@ -790,6 +1728,22 @@ public class PolicyEditorUtil {
 	    Map<String, String> ruleFunctionMap = policyBean.getRuleFunctionMap();
 	    Map<String, String> categoryMap = policyBean.getCategoryMap();
 
+        List<String> policyMetaDataList = new ArrayList<String>();
+
+        List<RuleDTO> arrangedRules = new ArrayList<RuleDTO>();
+
+        if(ruleElementOrder != null && ruleElementOrder.trim().length() > 0){
+            String[] ruleIds = ruleElementOrder.
+                    split(EntitlementPolicyConstants.ATTRIBUTE_SEPARATOR);
+            for(String ruleId : ruleIds){
+                for(RuleDTO ruleDTO : ruleDTOs) {
+                    if(ruleId.equals(ruleDTO.getRuleId())){
+                        arrangedRules.add(ruleDTO);
+                    }
+                }
+            }
+            ruleDTOs = arrangedRules;
+        }
 
         if(targetDTO != null && targetDTO.getRowDTOList() != null){
             List<RowDTO> newRowDTOs = new ArrayList<RowDTO>();
@@ -817,6 +1771,8 @@ public class PolicyEditorUtil {
                     if(defaultDataTypeMap.get(category) != null){
                         rowDTO.setAttributeDataType((defaultDataTypeMap.
                                             get(category).iterator().next()));
+                    } else {
+                        rowDTO.setAttributeDataType(PolicyEditorConstants.DataType.STRING);
                     }
                 }
 
@@ -838,6 +1794,11 @@ public class PolicyEditorUtil {
                         rowDTO.setFunction(targetFunctionMap.get(function));
                     }
                 }
+
+                RowDTO odlRowDTO = new RowDTO(rowDTO);
+                odlRowDTO.setCategory(category);
+                odlRowDTO.setFunction(function);
+                createMetaDataFromRowDTO("target", odlRowDTO, policyMetaDataList);
                 newRowDTOs.add(rowDTO);
             }
             targetDTO.setRowDTOList(newRowDTOs);
@@ -870,6 +1831,8 @@ public class PolicyEditorUtil {
                         if(defaultDataTypeMap.get(category) != null){
                             rowDTO.setAttributeDataType((defaultDataTypeMap.
                                                 get(category).iterator().next()));
+                        } else {
+                            rowDTO.setAttributeDataType(PolicyEditorConstants.DataType.STRING);
                         }
                     }
 
@@ -890,6 +1853,11 @@ public class PolicyEditorUtil {
                             rowDTO.setFunction(ruleFunctionMap.get(function));
                         }
                     }
+
+                    RowDTO odlRowDTO = new RowDTO(rowDTO);
+                    odlRowDTO.setCategory(category);
+                    odlRowDTO.setFunction(function);
+                    createMetaDataFromRowDTO("rule" + ruleDTO.getRuleId(), odlRowDTO, policyMetaDataList);
                     newRowDTOs.add(rowDTO);
                 }
 
@@ -926,6 +1894,8 @@ public class PolicyEditorUtil {
                         if(defaultDataTypeMap.get(category) != null){
                             rowDTO.setAttributeDataType((defaultDataTypeMap.
                                                 get(category).iterator().next()));
+                        } else {
+                            rowDTO.setAttributeDataType(PolicyEditorConstants.DataType.STRING);
                         }
                     }
 
@@ -947,11 +1917,332 @@ public class PolicyEditorUtil {
                             rowDTO.setFunction(targetFunctionMap.get(function));
                         }
                     }
+
+                    RowDTO odlRowDTO = new RowDTO(rowDTO);
+                    odlRowDTO.setCategory(category);
+                    odlRowDTO.setFunction(function);
+                    createMetaDataFromRowDTO("ruleTarget" + ruleDTO.getRuleId(), odlRowDTO, policyMetaDataList);
                     newTargetRowDTOs.add(rowDTO);
                 }
+
                 ruleTargetDTO.setRowDTOList(newTargetRowDTOs);
+
+                List<ObligationDTO> ruleObligationDTOs = ruleDTO.getObligationDTOs();
+
+                if(ruleObligationDTOs != null){
+                    for(ObligationDTO dto : ruleObligationDTOs){
+
+                        if(dto.getAttributeValueDataType() == null ||
+                                dto.getAttributeValueDataType().trim().length() < 1 ||
+                                dto.getAttributeValueDataType().trim().equals("null")) {
+                            dto.setAttributeValueDataType(PolicyEditorConstants.DataType.STRING);
+                        }
+
+                        if(dto.getObligationId() != null){
+                            createMetaDataFromObligation("ruleObligation" + ruleDTO.getRuleId(),
+                                                                            dto, policyMetaDataList);
+                        }
+                    }
+                }
+
                 ruleDTO.setTargetDTO(ruleTargetDTO);
             }
         }
+
+        if(obligationDTOs != null){
+            for(ObligationDTO dto : obligationDTOs){
+                if(dto.getAttributeValueDataType() == null ||
+                        dto.getAttributeValueDataType().trim().length() < 1 ||
+                        dto.getAttributeValueDataType().trim().equals("null")) {
+                    dto.setAttributeValueDataType(PolicyEditorConstants.DataType.STRING);
+                }
+                if(dto.getObligationId() != null){
+                    createMetaDataFromObligation("obligation" ,dto, policyMetaDataList);
+                }
+            }
+        }
+
+//        for(ExtendAttributeDTO attributeDTO : ruleDTO.getAttributeDTOs()){
+//
+//            String id = attributeDTO.getId();
+//            String selector = attributeDTO.getSelector();
+//            String category = null;
+//            String function = null;
+//
+//            if(id == null){
+//                continue;
+//            }
+//
+//            if(PolicyEditorConstants.DYNAMIC_SELECTOR_FUNCTION.equals(selector)){
+//
+//                String attributeValue = attributeDTO.getAttributeValue();
+//                if(attributeValue == null || attributeValue.trim().length() < 1){
+//                    continue;
+//                }
+//                function = attributeDTO.getFunction();
+//                if(function != null){
+//                    function = function.replace("&gt;", ">");
+//                    function = function.replace("&lt;", "<");
+//
+//                    if(ruleFunctionMap.get(function) != null){// TODO
+//                        attributeDTO.setFunction(ruleFunctionMap.get(function));
+//                    }
+//                }
+//
+//                if(attributeDTO.getDataType() == null ||
+//                        attributeDTO.getDataType().trim().length() < 1 ||
+//                        attributeDTO.getDataType().trim().equals("null")) {
+//
+//                    if(category != null && defaultDataTypeMap.get(category) != null){
+//                        attributeDTO.setDataType((defaultDataTypeMap.
+//                                            get(category).iterator().next()));
+//                    } else {
+//                        attributeDTO.setDataType(PolicyEditorConstants.DataType.STRING);
+//                    }
+//                }
+//
+//            } else {
+//
+//                category = attributeDTO.getCategory();
+//
+//                if(category == null || category.trim().length() < 1){
+//                    continue;
+//                }
+//
+//                if(categoryMap.get(category) != null){
+//                    attributeDTO.setCategory(categoryMap.get(category));
+//                }
+//
+//                if(attributeDTO.getDataType() == null ||
+//                        attributeDTO.getDataType().trim().length() < 1 ||
+//                        attributeDTO.getDataType().trim().equals("null")) {
+//
+//                    if(defaultDataTypeMap.get(category) != null){
+//                        attributeDTO.setDataType((defaultDataTypeMap.
+//                                            get(category).iterator().next()));
+//                    } else {
+//                        attributeDTO.setDataType(PolicyEditorConstants.DataType.STRING);
+//                    }
+//                }
+//
+//                if(attributeDTO.getAttributeId() == null ||
+//                        attributeDTO.getAttributeId().trim().length() < 1 ||
+//                        attributeDTO.getAttributeId().trim().equals("null")) {
+//                    if(defaultAttributeIdMap.get(category) != null){
+//                        attributeDTO.setAttributeId((defaultAttributeIdMap.
+//                                            get(category).iterator().next()));
+//                    }
+//                }
+//            }
+//
+//
+//            ExtendAttributeDTO odlRowDTO = new ExtendAttributeDTO(attributeDTO);
+//            odlRowDTO.setCategory(category);
+//            odlRowDTO.setFunction(function);
+//            createMetaDataFromDynamicAttribute("targetRule" + odlRowDTO.getId(), odlRowDTO,
+//                                                policyMetaDataList);
+//            //newDynamicAttributeDTOs.add(attributeDTO);
+//        }
+
+
+
+
+        return policyMetaDataList.toArray(new String[policyMetaDataList.size()]);
+    }
+
+    private static void createMetaDataFromRowDTO(String prefix, RowDTO rowDTO, List<String> metaDataList){
+
+        if(metaDataList != null){
+            metaDataList.add(prefix + "|" + rowDTO.getCategory());
+            metaDataList.add(prefix + "|" + rowDTO.getPreFunction());
+            metaDataList.add(prefix + "|" + rowDTO.getFunction());
+            metaDataList.add(prefix + "|" + rowDTO.getAttributeValue());
+            metaDataList.add(prefix + "|" + rowDTO.getAttributeId());
+            metaDataList.add(prefix + "|" + rowDTO.getAttributeDataType());
+            metaDataList.add(prefix + "|" + rowDTO.getCombineFunction());
+        }
+    }
+
+    private static void createMetaDataFromDynamicAttribute(String prefix, ExtendAttributeDTO dto,
+                                                                        List<String> metaDataList){
+
+        if(metaDataList != null){
+            metaDataList.add(prefix + "|" + dto.getCategory());
+            metaDataList.add(prefix + "|" + dto.getSelector());
+            metaDataList.add(prefix + "|" + dto.getFunction());
+            metaDataList.add(prefix + "|" + dto.getAttributeValue());
+            metaDataList.add(prefix + "|" + dto.getAttributeId());
+            metaDataList.add(prefix + "|" + dto.getDataType());
+            metaDataList.add(prefix + "|" + dto.getId());
+        }
+    }
+
+    private static void createMetaDataFromObligation(String prefix, ObligationDTO dto,
+                                                                        List<String> metaDataList){
+
+        if(metaDataList != null){
+            metaDataList.add(prefix + "|" + dto.getType());
+            metaDataList.add(prefix + "|" + dto.getObligationId());
+            metaDataList.add(prefix + "|" + dto.getEffect());
+            metaDataList.add(prefix + "|" + dto.getAttributeValue());
+            metaDataList.add(prefix + "|" + dto.getResultAttributeId());
+            metaDataList.add(prefix + "|" + dto.getAttributeValueDataType());
+        }
+    }
+
+    public static String[] createBasicPolicyData(BasicPolicyEditorDTO policyEditorDTO,
+                                                                        EntitlementPolicyBean bean){
+
+        List<String> metaDataList = new ArrayList<String>();
+        Map<String, String> attributeMap = bean.getAttributeIdMap();
+
+        metaDataList.add("policyId|" + policyEditorDTO.getPolicyId());
+        metaDataList.add("category|" + policyEditorDTO.getAppliedCategory());
+        metaDataList.add("policyDescription|" + policyEditorDTO.getDescription());
+        metaDataList.add("userAttributeId|" + policyEditorDTO.getUserAttributeId());
+        metaDataList.add("userAttributeValue|" + policyEditorDTO.getUserAttributeValue());
+        metaDataList.add("function|" + policyEditorDTO.getFunction());
+        metaDataList.add("actionValue|" + policyEditorDTO.getActionValue());
+        metaDataList.add("resourceValue|" + policyEditorDTO.getResourceValue());
+        metaDataList.add("category|" + policyEditorDTO.getAppliedCategory());
+        metaDataList.add("environmentValue|" + policyEditorDTO.getEnvironmentValue());
+        metaDataList.add("environmentId|" + policyEditorDTO.getEnvironmentId());
+        if(attributeMap.get(policyEditorDTO.getUserAttributeId()) != null){
+             policyEditorDTO.setUserAttributeId(attributeMap.get(policyEditorDTO.getUserAttributeId()));
+        } else {
+            policyEditorDTO.setUserAttributeId(PolicyEditorConstants.SUBJECT_ID_DEFAULT);
+        }
+
+
+        List<BasicPolicyEditorElementDTO>  elementDTOs = policyEditorDTO.getBasicPolicyEditorElementDTOs();
+
+        if(elementDTOs != null && elementDTOs.size() > 0){
+            for(int i = 0; i < elementDTOs.size(); i ++){
+                BasicPolicyEditorElementDTO dto = elementDTOs.get(i);
+                if(dto.getResourceValue() != null){
+                    metaDataList.add("resourceValue" + i + "|" + dto.getResourceValue());
+                } else {
+                    metaDataList.add("resourceValue" + i);
+                }
+                if(dto.getEnvironmentValue() != null){
+                    metaDataList.add("environmentValue" + i + "|" + dto.getEnvironmentValue());
+                } else {
+                    metaDataList.add("environmentValue" + i);
+                }
+                if(dto.getActionValue() != null){
+                    metaDataList.add("actionValue" + i + "|" + dto.getActionValue());
+                } else {
+                    metaDataList.add("actionValue" + i);    
+                }
+                if(dto.getOperationType() != null){
+                    metaDataList.add("operationValue" + i + "|" + dto.getOperationType());
+                } else {
+                    metaDataList.add("operationValue" + i);
+                }
+                if(dto.getUserAttributeId() != null){
+                    metaDataList.add("userAttributeId" + i + "|" + dto.getUserAttributeId());
+                } else {
+                    metaDataList.add("userAttributeId" + i);
+                }
+                if(dto.getUserAttributeValue() != null){
+                    metaDataList.add("userAttributeValue" + i + "|" + dto.getUserAttributeValue());
+                } else {
+                    metaDataList.add("userAttributeValue" + i);
+                }
+                if(dto.getEnvironmentId() != null){
+                    metaDataList.add("environmentId" + i + "|" + dto.getEnvironmentId());
+                } else {
+                    metaDataList.add("environmentId" + i);
+                }
+                if(dto.getFunctionOnResources() != null){
+                    metaDataList.add("functionOnResources" + i + "|" + dto.getFunctionOnResources());
+                } else {
+                    metaDataList.add("functionOnResources" + i);
+                }
+                if(dto.getFunctionOnActions() != null){
+                    metaDataList.add("functionOnActions" + i + "|" + dto.getFunctionOnActions());
+                } else {
+                    metaDataList.add("functionOnActions" + i);
+                }
+                if(dto.getFunctionOnUsers() != null){
+                    metaDataList.add("functionOnUsers" + i + "|" + dto.getFunctionOnUsers());
+                } else {
+                    metaDataList.add("functionOnUsers" + i);
+                }
+                if(dto.getFunctionOnEnvironments() != null){
+                    metaDataList.add("functionOnEnvironments" + i + "|" + dto.getFunctionOnEnvironments());
+                } else {
+                    metaDataList.add("functionOnEnvironments" + i);
+                }
+                
+                if(attributeMap.get(dto.getUserAttributeId()) != null){
+                     dto.setUserAttributeId(attributeMap.get(dto.getUserAttributeId()));
+                } else {
+                    dto.setUserAttributeId(PolicyEditorConstants.SUBJECT_ID_DEFAULT);
+                }
+            }
+        }
+        return metaDataList.toArray(new String[metaDataList.size()]);
+    }
+
+    public static BasicPolicyEditorDTO createBasicPolicyEditorDTO(String[] policyEditorData){
+
+        Map<String, String> metaDataMap = new HashMap<String, String>();
+        List<BasicPolicyEditorElementDTO>  basicPolicyEditorElementDTOs = new ArrayList<BasicPolicyEditorElementDTO>();
+
+        int i = 0;
+
+        if(policyEditorData != null){
+            for(String data : policyEditorData){
+                if(data.contains("|")){
+                    String identifier = data.substring(0, data.indexOf("|"));
+                    String value = data.substring(data.indexOf("|") + 1);
+                    metaDataMap.put(identifier, value);
+                }
+                i++;
+            }
+        }
+
+        BasicPolicyEditorDTO policyEditorDTO = new BasicPolicyEditorDTO();
+        policyEditorDTO.setPolicyId(metaDataMap.get("policyId"));
+        policyEditorDTO.setAppliedCategory(metaDataMap.get("policyId"));
+        policyEditorDTO.setFunction(metaDataMap.get("function"));
+        policyEditorDTO.setActionValue(metaDataMap.get("actionValue"));
+        policyEditorDTO.setDescription(metaDataMap.get("policyDescription"));
+        policyEditorDTO.setUserAttributeId(metaDataMap.get("userAttributeId"));
+        policyEditorDTO.setUserAttributeValue(metaDataMap.get("userAttributeValue"));
+        policyEditorDTO.setResourceValue(metaDataMap.get("resourceValue"));
+        policyEditorDTO.setEnvironmentValue(metaDataMap.get("environmentValue"));
+        policyEditorDTO.setEnvironmentId(metaDataMap.get("environmentId"));
+        policyEditorDTO.setAppliedCategory(metaDataMap.get("category"));
+
+        i = (i-11)/11;
+
+        for(int j = 0; j < i; j++){
+
+            BasicPolicyEditorElementDTO elementDTO = new BasicPolicyEditorElementDTO();
+
+            elementDTO.setResourceValue(metaDataMap.get("resourceValue" + j));
+            elementDTO.setEnvironmentValue(metaDataMap.get("environmentValue" + j));
+            if(metaDataMap.get("actionValue" + j) != null){
+                elementDTO.setActionValue(metaDataMap.get("actionValue" + j));
+            }
+            elementDTO.setOperationType(metaDataMap.get("operationValue" + j));
+            elementDTO.setUserAttributeId(metaDataMap.get("userAttributeId" + j));
+            elementDTO.setUserAttributeValue(metaDataMap.get("userAttributeValue" + j));
+            elementDTO.setEnvironmentId(metaDataMap.get("environmentId" + j));
+            elementDTO.setFunctionOnResources(metaDataMap.get("functionOnResources" + j));
+            elementDTO.setFunctionOnActions(metaDataMap.get("functionOnActions" + j));
+            elementDTO.setFunctionOnUsers(metaDataMap.get("functionOnUsers" + j));
+            elementDTO.setFunctionOnEnvironments(metaDataMap.get("functionOnEnvironments" + j));
+
+            basicPolicyEditorElementDTOs.add(elementDTO);
+        }
+
+        if(basicPolicyEditorElementDTOs.size() > 0){
+            policyEditorDTO.setBasicPolicyEditorElementDTOs(basicPolicyEditorElementDTOs);
+        }
+
+        return policyEditorDTO;
     }
 }

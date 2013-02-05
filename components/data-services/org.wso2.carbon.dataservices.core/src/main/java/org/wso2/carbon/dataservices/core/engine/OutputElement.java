@@ -28,17 +28,28 @@ import java.util.Set;
  * Represents an entity which can yield a result, i.e. elements in a result section.
  */
 public abstract class OutputElement extends XMLWriterHelper {
-
-    private String arrayName;
-
+    /**
+     * name of element/attribute
+     */
     private String name;
 
+    /**
+     * param value
+     */
+    private String param;
+
+    /**
+     * i.e. column, query-param, value
+     */
     private String paramType;
 
-    private String param;
-    
+    /**
+     * If this element corresponds to a SQLArray, its name
+     */
+    private String arrayName;
+
     private Set<String> requiredRoles;
-    
+
     /**
      * This flag is used to force this output element to be optional, this is used in situations such as,
      * the output element is in the first level of the result, and the result doesn't have a result row,
@@ -46,9 +57,27 @@ public abstract class OutputElement extends XMLWriterHelper {
      */
     private boolean optionalOverride;
 
-	public OutputElement(String namespace, Set<String> requiredRoles) {
+    public OutputElement(String namespace, Set<String> requiredRoles) {
         super(namespace);
         this.requiredRoles = requiredRoles;
+    }
+
+    public OutputElement(String name, String namespace, Set<String> requiredRoles,
+                         String arrayName) {
+        super(namespace);
+        this.name = name;
+        this.requiredRoles = requiredRoles;
+        this.arrayName = arrayName;
+    }
+
+    public OutputElement(String name, String namespace, Set<String> requiredRoles, String param,
+                         String paramType, String arrayName) {
+        super(namespace);
+        this.name = name;
+        this.requiredRoles = requiredRoles;
+        this.param = param;
+        this.paramType = paramType;
+        this.arrayName = arrayName;
     }
 
     /**
@@ -59,7 +88,7 @@ public abstract class OutputElement extends XMLWriterHelper {
         if (this.getArrayName() == null) {
             this.executeElement(xmlWriter, params, queryLevel);
         } else {
-           ExternalParam exParam = this.getExternalParam(params);
+            ExternalParam exParam = this.getExternalParam(params);
             if (exParam == null) {
                 throw new DataServiceFault("The array '" + this.getArrayName() +
                         "' does not exist");
@@ -89,7 +118,7 @@ public abstract class OutputElement extends XMLWriterHelper {
      * Returns the requires roles to view this element.
      */
     public Set<String> getRequiredRoles() {
-    	return requiredRoles;
+        return requiredRoles;
     }
 
     /**
@@ -97,17 +126,17 @@ public abstract class OutputElement extends XMLWriterHelper {
      * if so, this has to be mentioned in the schema for WSDL generation.
      */
     public boolean isOptional() {
-		return this.isOptionalOverride()
-				|| (this.getRequiredRoles() != null && this.getRequiredRoles().size() > 0);
+        return this.isOptionalOverride()
+                || (this.getRequiredRoles() != null && this.getRequiredRoles().size() > 0);
     }
-    
-    public boolean isOptionalOverride() {
-		return optionalOverride;
-	}
 
-	public void setOptionalOverride(boolean optionalOverride) {
-		this.optionalOverride = optionalOverride;
-	}
+    public boolean isOptionalOverride() {
+        return optionalOverride;
+    }
+
+    public void setOptionalOverride(boolean optionalOverride) {
+        this.optionalOverride = optionalOverride;
+    }
 
     public String getArrayName() {
         return arrayName;
@@ -129,8 +158,8 @@ public abstract class OutputElement extends XMLWriterHelper {
      * Extracts out the external parameter corresponds to the user defined object name from the
      * external parameter collection
      *
-     * @param params    External parameter collection
-     * @return          External parameter associated with the provided user defined object name
+     * @param params External parameter collection
+     * @return External parameter associated with the provided user defined object name
      */
     private ExternalParam getExternalParam(ExternalParamCollection params) {
         ExternalParam exParam = params.getParam(getParamName(this.getArrayName()));
@@ -144,7 +173,7 @@ public abstract class OutputElement extends XMLWriterHelper {
      * Extracts User Defined Column name from the param name
      *
      * @param paramName Original parameter name
-     * @return          Column name corresponds to the User Defined object
+     * @return Column name corresponds to the User Defined object
      */
     private static String getParamName(String paramName) {
         String udtObjName = DBUtils.extractUDTObjectName(paramName);

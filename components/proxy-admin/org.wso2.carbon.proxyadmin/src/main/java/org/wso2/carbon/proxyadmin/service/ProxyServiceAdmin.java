@@ -33,8 +33,8 @@ import org.apache.synapse.core.axis2.ProxyService;
 import org.apache.synapse.endpoints.Endpoint;
 import org.apache.synapse.util.PolicyInfo;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.RegistryResources;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.wso2.carbon.mediation.initializer.AbstractServiceBusAdmin;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
 import org.wso2.carbon.mediation.initializer.ServiceBusUtils;
@@ -47,7 +47,6 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -80,8 +79,8 @@ public class ProxyServiceAdmin extends AbstractServiceBusAdmin {
             lock.lock();
 
             //set tenantIDs for tenant-aware logging
-            int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
-            CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(tenantId);
+            int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
             ProxyService proxy = getSynapseConfiguration().getProxyService(proxyName);
             if (proxy != null) {
@@ -123,8 +122,8 @@ public class ProxyServiceAdmin extends AbstractServiceBusAdmin {
             lock.lock();
 
             //set tenantIDs for tenant-aware logging
-            int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
-            CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(tenantId);
+            int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
             ProxyService proxy = getSynapseConfiguration().getProxyService(proxyName);
             if (proxy != null) {
@@ -165,8 +164,8 @@ public class ProxyServiceAdmin extends AbstractServiceBusAdmin {
         try {
             lock.lock();
             //set tenantIDs for tenant-aware logging
-            int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
-            CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(tenantId);
+            int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
             ProxyService proxy = getSynapseConfiguration().getProxyService(proxyName);
             proxy.setTraceState(SynapseConstants.TRACING_ON);
@@ -195,8 +194,8 @@ public class ProxyServiceAdmin extends AbstractServiceBusAdmin {
         try {
             lock.lock();
             //set tenantIDs for tenant-aware logging
-            int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
-            CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(tenantId);
+            int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
             ProxyService proxy = getSynapseConfiguration().getProxyService(proxyName);
             proxy.setTraceState(SynapseConstants.TRACING_OFF);
@@ -311,17 +310,17 @@ public class ProxyServiceAdmin extends AbstractServiceBusAdmin {
                 SynapseConfiguration synapseConfig = getSynapseConfiguration();
 
                 ProxyService currentProxy = synapseConfig.getProxyService(proxyName);
-                boolean wasRunning;
+                boolean wasRunning = false;
                 if (currentProxy == null) {
                     handleException(log, "A proxy service named "
                             + proxyName + " does not exist", null);
 
                 } else {
-                    wasRunning = currentProxy.isRunning();
                     log.debug("Deleting existing proxy service : " + proxyName);
                     AxisService axisService = synapseConfig.getAxisConfiguration().
                             getService(proxyName);
                     if (axisService != null) {
+                        wasRunning = axisService.isActive();
                         axisService.getParent().addParameter(
                                 CarbonConstants.KEEP_SERVICE_HISTORY_PARAM, "true");
                         updateAndSyncServiceParameters(currentProxy,axisService);
@@ -404,8 +403,8 @@ public class ProxyServiceAdmin extends AbstractServiceBusAdmin {
         try {
             lock.lock();
             //set tenantIDs for tenant-aware logging
-            int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
-            CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(tenantId);
+            int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
             if (log.isDebugEnabled()) {
                 log.debug("Deleting proxy service : " + proxyName);
@@ -563,8 +562,8 @@ public class ProxyServiceAdmin extends AbstractServiceBusAdmin {
         try {
             lock.lock();
             //set tenantIDs for tenant-aware logging
-            int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
-            CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(tenantId);
+            int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
             ProxyService proxy = getSynapseConfiguration().getProxyService(proxyName);
             List pinnedServers = proxy.getPinnedServers();
@@ -599,8 +598,8 @@ public class ProxyServiceAdmin extends AbstractServiceBusAdmin {
         try {
             lock.lock();
             //set tenantIDs for tenant-aware logging
-            int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
-            CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(tenantId);
+            int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
             ProxyService proxy = getSynapseConfiguration().getProxyService(proxyName);
             List pinnedServers = proxy.getPinnedServers();
@@ -635,8 +634,8 @@ public class ProxyServiceAdmin extends AbstractServiceBusAdmin {
         try {
             lock.lock();
             //set tenantIDs for tenant-aware logging
-            int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
-            CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(tenantId);
+            int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
             ProxyService currentProxy = getSynapseConfiguration().getProxyService(proxyName);
             if (currentProxy != null) {
@@ -680,8 +679,8 @@ public class ProxyServiceAdmin extends AbstractServiceBusAdmin {
         try {
             lock.lock();
             //set tenantIDs for tenant-aware logging
-            int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
-            CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(tenantId);
+            int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
             addProxyService(pd.retrieveOM(), null, false);
             return SUCCESSFUL;
@@ -696,8 +695,8 @@ public class ProxyServiceAdmin extends AbstractServiceBusAdmin {
         try {
             lock.lock();
             //set tenantIDs for tenant-aware logging
-            int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
-            CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(tenantId);
+            int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
             modifyProxyService(pd.retrieveOM());
             return SUCCESSFUL;
@@ -901,7 +900,7 @@ public class ProxyServiceAdmin extends AbstractServiceBusAdmin {
         service.addParameterObserver(paramObserver);
     }
 
-    private void persistProxyService(ProxyService proxy) throws ProxyAdminException {
+    public void persistProxyService(ProxyService proxy) throws ProxyAdminException {
         MediationPersistenceManager pm = getMediationPersistenceManager();
         if (pm != null) {
             pm.saveItem(proxy.getName(), ServiceBusConstants.ITEM_TYPE_PROXY_SERVICE);

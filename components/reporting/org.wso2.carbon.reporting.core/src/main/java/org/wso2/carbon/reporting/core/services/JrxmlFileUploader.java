@@ -20,8 +20,10 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.reporting.api.ReportingException;
 import org.wso2.carbon.reporting.core.ReportConstants;
 import org.wso2.carbon.reporting.core.utils.ImageLoader;
@@ -56,8 +58,11 @@ public class JrxmlFileUploader extends AbstractAdmin {
                 Registry registry = getConfigSystemRegistry();
                 Resource reportFilesResource = registry.newResource();
                 reportFilesResource.setContent(fileContent);
+                String reportPath = ReportConstants.JRXML_PATH +RegistryConstants.PATH_SEPARATOR+ fileName + ".jrxml";
 
-                registry.put(ReportConstants.REPORT_BASE_PATH + fileName + ".jrxml", reportFilesResource);
+                String relativePathToConfig = RegistryUtils.getRelativePathToOriginal(reportPath,
+                        RegistryConstants.CONFIG_REGISTRY_BASE_PATH);
+                registry.put(relativePathToConfig,reportFilesResource);
                 status = "success";
             } catch (RegistryException e) {
                 throw new ReportingException("Failed to upload " + "\"" + fileName + "\"", e);
@@ -69,7 +74,7 @@ public class JrxmlFileUploader extends AbstractAdmin {
     }
 
     public String uploadLogo(String imageName, String reportName, DataHandler imageContent) throws ReportingException {
-        if (!"".equals(imageContent)) {
+        if (null != imageContent && !"".equals(imageName)) {
             ImageLoader loader = new ImageLoader();
             loader.saveImage(imageName, reportName, imageContent);
         } else {

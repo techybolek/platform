@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.automation.utils.governance;
 
-import org.wso2.carbon.automation.utils.governance.utils.FileReader;
+import org.wso2.carbon.automation.core.utils.fileutils.FileManager;
 import org.wso2.carbon.governance.api.policies.PolicyManager;
 import org.wso2.carbon.governance.api.policies.dataobjects.Policy;
 import org.wso2.carbon.governance.api.schema.SchemaManager;
@@ -54,7 +54,7 @@ public class MetaDataUtils {
     public static String addSchema(String name, Registry governance, String schemaFilePath)
             throws IOException, RegistryException {
         SchemaManager schemaManager = new SchemaManager(governance);
-        Schema schema = schemaManager.newSchema(FileReader.readFile(schemaFilePath).getBytes(), name);
+        Schema schema = schemaManager.newSchema(FileManager.readFile(schemaFilePath).getBytes(), name);
         schemaManager.addSchema(schema);
         schema = schemaManager.getSchema(schema.getId());
         return schema.getPath();
@@ -63,7 +63,7 @@ public class MetaDataUtils {
     public static String addPolicy(String policyName, Registry governance, String policyFilePath)
             throws RegistryException, IOException {
         PolicyManager policyManager = new PolicyManager(governance);
-        Policy policy = policyManager.newPolicy(FileReader.readFile(policyFilePath).getBytes(), policyName);
+        Policy policy = policyManager.newPolicy(FileManager.readFile(policyFilePath).getBytes(), policyName);
         policyManager.addPolicy(policy);
         policy = policyManager.getPolicy(policy.getId());
         return policy.getPath();
@@ -73,7 +73,7 @@ public class MetaDataUtils {
     public static String addWSDL(String name, Registry governance, String wsdlFilePath, Wsdl wsdl)
             throws IOException, RegistryException {
         WsdlManager wsdlManager = new WsdlManager(governance);
-        wsdl = wsdlManager.newWsdl(FileReader.readFile(wsdlFilePath).getBytes(), name);
+        wsdl = wsdlManager.newWsdl(FileManager.readFile(wsdlFilePath).getBytes(), name);
         wsdlManager.addWsdl(wsdl);
         wsdl = wsdlManager.getWsdl(wsdl.getId());
 

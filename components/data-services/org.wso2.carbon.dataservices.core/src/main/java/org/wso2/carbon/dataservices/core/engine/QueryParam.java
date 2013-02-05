@@ -28,6 +28,8 @@ import org.wso2.carbon.dataservices.core.validation.Validator;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Query param is an input parameter associated with a query,
@@ -47,8 +49,8 @@ public class QueryParam {
 	/** i.e. SCALAR, ARRAY */
 	private String paramType; 
 		
-	/** ordinal of the parameter */
-	private int ordinal; 
+	/** ordinals of the parameter */
+	private Set<Integer> ordinals; 
 
 	/** default value of the parameter */
     private ParamValue defaultValue; 
@@ -65,7 +67,8 @@ public class QueryParam {
 		this.sqlType = sqlType;
 		this.type = type;
 		this.paramType = paramType;
-		this.ordinal = ordinal;
+		this.ordinals = new TreeSet<Integer>();
+		this.ordinals.add(ordinal);
         this.defaultValue = defaultValue;
         this.structType = structType;
         this.validators = validators;
@@ -130,7 +133,11 @@ public class QueryParam {
 	}
 
 	public int getOrdinal() {
-		return ordinal;
+		return this.ordinals.iterator().next();
+	}
+	
+	public Set<Integer> getOrdinals() {
+		return ordinals;
 	}
 
 	public String getSqlType() {
@@ -157,8 +164,20 @@ public class QueryParam {
     	return this.getDefaultValue() != null;
     }
 
-    public void setOrdinal(int ordinal){
-        this.ordinal = ordinal;
+    /**
+     * This method is here to retain backward compatibility.
+     */
+    public void setOrdinal(int ordinal) {
+        this.clearOrdinals();
+        this.ordinals.add(ordinal);
     }
 		
+    public void addOrdinal(int ordinal) {
+    	this.ordinals.add(ordinal);
+    }
+    
+    public void clearOrdinals() {
+    	this.ordinals.clear();
+    }
+    
 }

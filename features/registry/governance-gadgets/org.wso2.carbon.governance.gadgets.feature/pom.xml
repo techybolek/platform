@@ -22,14 +22,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>governance.gadgets-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.governance.gadgets.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Governance Gadgets Feature</name>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.2</version>
     <url>http://wso2.org</url>
     <description>
         This contains the various gadgets that are available as a part of the WSO2 Governance
@@ -47,19 +48,19 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.governance.gadgets.resourceimpact.feature</artifactId>
-            <version>${project.version}</version>
+            <version>4.0.0</version>
             <type>zip</type>
 	    </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.governance.gadgets.lifecycle.feature</artifactId>
-            <version>${project.version}</version>
+            <version>4.0.1</version>
             <type>zip</type>
 	    </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.governance.gadgets.ui.feature</artifactId>
-            <version>${project.version}</version>
+            <version>4.0.0</version>
             <type>zip</type>
 	    </dependency>
     </dependencies>
@@ -79,15 +80,15 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.governance.gadgets</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.registry.core:${registry.core.feature.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.impactanalysis.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.lifecycle.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.resourceimpact.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.ui.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.impactanalysis.feature:4.0.2</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.lifecycle.feature:4.0.1</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.resourceimpact.feature:4.0.0</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.ui.feature:4.0.0</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

@@ -29,6 +29,8 @@ public class WebappMetadata {
     private boolean isFaulty;
     private String faultException;
     private String state;
+    private String webappType;
+    private String servletContext;
 
     public String getContext() {
         return context;
@@ -108,5 +110,21 @@ public class WebappMetadata {
 
     public String getState() {
         return state;
+    }
+
+    public String getWebappType() {
+        return webappType;
+    }
+
+    public void setWebappType(String webappType) {
+        this.webappType = webappType;
+    }
+
+    public String getServletContext() {
+        return servletContext;
+    }
+
+    public void setServletContext(String servletContext) {
+        this.servletContext = servletContext;
     }
 }

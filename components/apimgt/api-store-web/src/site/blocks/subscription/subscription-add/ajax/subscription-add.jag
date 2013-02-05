@@ -106,6 +106,36 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
+     }else if (action == "refreshToken") {
+        if (!user) {
+            print({
+                error:true,
+                message:msg.error.loginRequired(action)
+            });
+            return;
+        }
+        application = request.getParameter("application");
+        keyType = request.getParameter("keytype");
+        username = user.username;
+        oldAccessToken = request.getParameter("oldAccessToken");
+
+        mod = jagg.module("subscription");
+        result = mod.refreshToken(username,application,keyType,oldAccessToken);
+
+        if (result.error) {
+            obj = {
+                error:result.error,
+                message:result.message
+            };
+        } else {
+            obj = {
+                error:false,
+                data:{
+                    key:result.key
+                }
+            }
+        }
+        print(obj);
      }else {
         print({
             error:true,

@@ -35,7 +35,7 @@ public class AppFactoryCommonServiceComponent {
         BundleContext bundleContext = context.getBundleContext();
         AppFactoryConfiguration configuration;
         try {
-            configuration = AppFactoryUtil.loadAppFactoryConfiguration();
+            configuration = AppFactoryUtil.getAppfactoryConfiguration();
             bundleContext.registerService(AppFactoryConfiguration.class.getName(), configuration, null);
             if (log.isDebugEnabled()) {
                 log.debug("Appfactory common bundle is activated");

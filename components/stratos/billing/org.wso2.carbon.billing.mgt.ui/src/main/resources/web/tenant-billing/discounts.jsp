@@ -33,11 +33,65 @@
     <script type="text/javascript">
 
         function submitDiscountForm(){
+            var tenantDomain = document.getElementById("tenantDomain").value;
+            if(tenantDomain==null || tenantDomain==""){
+                CARBON.showErrorDialog("Please provide a tenant domain.");
+                return;
+            }
+
+            var discountType = document.getElementById("discountType").value;
+            var discountRadio = document.discountForm.discountTypeRadio;
+            for(var i=0; i<discountRadio.length; i++){
+                if(discountRadio[i].checked){
+                    discountType = discountRadio[i].value;
+                    break;
+                }
+            }
+            //if the hidden variable is not set properly, we should set it
+            //just making sure it is set..
+            document.getElementById("discountType").value = discountType;
+
+            if(discountType=="percentage"){
+                var percentage = document.getElementById("percentage").value;
+                if(percentage==null || percentage==""){
+                    CARBON.showErrorDialog("Please enter a valid discount percentage.");
+                    return;
+                }
+            }else if(discountType=="amount"){
+                var amount = document.getElementById("amount").value;
+                if(amount==null || amount==""){
+                    CARBON.showErrorDialog("Please enter a valid discount amount.");
+                    return;
+                }
+            }
+
+            var startDate = document.getElementById("startDate").value;
+            if(startDate==null || startDate==""){
+                CARBON.showErrorDialog("Please enter a valid start date.");
+                return;
+            }
+
+            var endDate = document.getElementById("endDate").value;
+            if(endDate==null || endDate==""){
+                CARBON.showErrorDialog("Please enter a valid end date.");
+                return;
+            }
+
             document.discountForm.submit();
         }
 
         function manageDiscountTypeRow(discountType){
             document.discountForm.discountType.value = discountType;
+
+            if(discountType=="percentage"){
+                document.getElementById("percentageRow").style.display="";
+                document.getElementById("amountRow").style.display="none";
+            }else if(discountType=="amount"){
+                document.getElementById("percentageRow").style.display="none";
+                document.getElementById("amountRow").style.display="";
+            }else{
+                //do nothing
+            }
         }
 
         function cancel(){
@@ -79,7 +133,7 @@
         <h2><fmt:message key="discounts"/></h2>
         <div id="workArea">
             <form name="discountForm" action="add_discount_ajaxprocessor.jsp" method="post">
-                <input type="hidden" name="discountType" />
+                <input type="hidden" name="discountType" id="discountType"/>
                 <table class="styledLeft" cellspacing="0">
                     <thead>
                     <tr>
@@ -94,15 +148,15 @@
                     <tr>
                         <td style="width:180px"><fmt:message key="discount.type"/></td>
                         <td colspan="2">
-                            <input type="radio" name="discountTypeRadio" value="percentage" onclick="manageDiscountTypeRow(this.value);" ><fmt:message key="type.percentage"/>
+                            <input type="radio" name="discountTypeRadio" value="percentage" checked onclick="manageDiscountTypeRow(this.value);" ><fmt:message key="type.percentage"/>
                             <input type="radio" name="discountTypeRadio" value="amount" onclick="manageDiscountTypeRow(this.value);" ><fmt:message key="type.amount"/>
                         </td>
                     </tr>
-                    <tr>
+                    <tr id="percentageRow">
                         <td style="width:180px"><fmt:message key="discount.percentage"/></td>
                         <td colspan="2"><input type="text" name="percentage" id="percentage"></td>
                     </tr>
-                    <tr>
+                    <tr id="amountRow" style="display: none;">
                         <td style="width:180px"><fmt:message key="amount"/></td>
                         <td colspan="2"><input type="text" name="amount" id="amount"></td>
                     </tr>

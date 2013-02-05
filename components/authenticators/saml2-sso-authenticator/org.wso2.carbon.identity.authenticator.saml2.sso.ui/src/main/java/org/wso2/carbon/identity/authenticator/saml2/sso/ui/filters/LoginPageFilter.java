@@ -17,8 +17,8 @@
 */
 package org.wso2.carbon.identity.authenticator.saml2.sso.ui.filters;
 
-import org.wso2.carbon.identity.authenticator.saml2.sso.ui.SAML2SSOAuthenticatorConstants;
-import org.wso2.carbon.identity.authenticator.saml2.sso.ui.Util;
+import org.wso2.carbon.identity.authenticator.saml2.sso.common.SAML2SSOAuthenticatorConstants;
+import org.wso2.carbon.identity.authenticator.saml2.sso.common.Util;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;

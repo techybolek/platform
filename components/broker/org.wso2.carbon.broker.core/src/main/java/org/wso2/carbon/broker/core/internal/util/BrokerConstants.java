@@ -60,4 +60,5 @@ public interface BrokerConstants {
     String BROKER_TYPE_JMS_QPID = "jms-qpid";
     String BROKER_TYPE_JMS_GENERIC = "jms";
     String BROKER_TYPE_AGENT = "agent";
+    String BROKER_TYPE_EMAIL = "e-mail";
 }

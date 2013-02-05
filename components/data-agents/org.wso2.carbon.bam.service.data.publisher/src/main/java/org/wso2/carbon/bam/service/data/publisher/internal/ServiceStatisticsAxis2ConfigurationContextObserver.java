@@ -21,11 +21,16 @@ import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.bam.service.data.publisher.conf.EventConfigNStreamDef;
 import org.wso2.carbon.bam.service.data.publisher.conf.EventingConfigData;
 import org.wso2.carbon.bam.service.data.publisher.conf.RegistryPersistenceManager;
+import org.wso2.carbon.bam.service.data.publisher.publish.ServiceAgentUtil;
+import org.wso2.carbon.bam.service.data.publisher.publish.StreamDefinitionCreatorUtil;
 import org.wso2.carbon.bam.service.data.publisher.util.ServiceStatisticsPublisherConstants;
+import org.wso2.carbon.bam.service.data.publisher.util.StatisticsType;
 import org.wso2.carbon.bam.service.data.publisher.util.TenantEventConfigData;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
 import java.util.Map;
@@ -34,34 +39,46 @@ import java.util.Map;
 * when a new tenant is created.
 */
 public class ServiceStatisticsAxis2ConfigurationContextObserver extends
-                                                                AbstractAxis2ConfigurationContextObserver {
+        AbstractAxis2ConfigurationContextObserver {
     private static final Log log = LogFactory.getLog(ServiceStatisticsAxis2ConfigurationContextObserver.class);
 
     public void createdConfigurationContext(ConfigurationContext configContext) {
 
-        AxisConfiguration axisConfiguration = configContext.getAxisConfiguration();
+        //Enaging module for the tenant if the service publishing is enabled in the bam.xml
+        if (StatisticsServiceComponent.isPublishingEnabled()) {
+            AxisConfiguration axisConfiguration = configContext.getAxisConfiguration();
 
-        setEventingConfigDataSpecificForTenant(axisConfiguration);
+            setEventingConfigDataSpecificForTenant(axisConfiguration);
 
-        AxisModule serviceStatisticsModule = axisConfiguration
-                .getModule(ServiceStatisticsPublisherConstants.BAM_SERVICE_STATISTICS_PUBLISHER_MODULE_NAME);
-        int tenantId = SuperTenantCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
-        if (serviceStatisticsModule != null) {
-            try {
-                axisConfiguration
-                        .engageModule(ServiceStatisticsPublisherConstants.BAM_SERVICE_STATISTICS_PUBLISHER_MODULE_NAME);
-            } catch (AxisFault e) {
-                log.error("Cannot engage ServiceStatistics module for the tenant :" + tenantId, e);
+            AxisModule serviceStatisticsModule = axisConfiguration
+                    .getModule(ServiceStatisticsPublisherConstants.BAM_SERVICE_STATISTICS_PUBLISHER_MODULE_NAME);
+            int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+            if (serviceStatisticsModule != null) {
+                try {
+                    axisConfiguration
+                            .engageModule(ServiceStatisticsPublisherConstants.BAM_SERVICE_STATISTICS_PUBLISHER_MODULE_NAME);
+                } catch (AxisFault e) {
+                    log.error("Cannot engage ServiceStatistics module for the tenant :" + tenantId, e);
+                }
             }
         }
     }
 
     private void setEventingConfigDataSpecificForTenant(AxisConfiguration axisConfiguration) {
-        int tenantID = SuperTenantCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
-        Map<Integer, EventingConfigData> eventingConfigDataMap = TenantEventConfigData.getTenantSpecificEventingConfigData();
+        int tenantID = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+        Map<Integer, EventConfigNStreamDef> eventingConfigDataMap = TenantEventConfigData.getTenantSpecificEventingConfigData();
         RegistryPersistenceManager persistenceManager = new RegistryPersistenceManager();
         EventingConfigData eventingConfigData = persistenceManager.getEventingConfigData();
-        eventingConfigDataMap.put(tenantID,eventingConfigData);
+        EventConfigNStreamDef eventConfigNStreamDef = new RegistryPersistenceManager().
+                fillEventingConfigData(eventingConfigData);
+
+        StatisticsType statisticsType = ServiceAgentUtil.findTheStatisticType(eventingConfigData);
+        if (statisticsType != null) {
+            StreamDefinition streamDefinition = StreamDefinitionCreatorUtil.getStreamDefinition(
+                    eventingConfigData, statisticsType);
+            eventConfigNStreamDef.setStreamDefinition(streamDefinition);
+            eventingConfigDataMap.put(tenantID, eventConfigNStreamDef);
+        }
     }
 
 

@@ -17,6 +17,7 @@ package org.wso2.carbon.ndatasource.ui;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,10 +29,17 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.wso2.carbon.ndatasource.ui.config.DSXMLConfiguration;
 import org.wso2.carbon.ndatasource.ui.config.RDBMSDSXMLConfiguration;
 import org.wso2.carbon.ndatasource.ui.config.RDBMSDSXMLConfiguration.DataSourceProperty;
@@ -41,6 +49,7 @@ import org.wso2.carbon.ndatasource.ui.stub.core.services.xsd.WSDataSourceMetaInf
 import org.wso2.carbon.ndatasource.ui.stub.core.xsd.JNDIConfig;
 import org.wso2.carbon.ndatasource.ui.stub.core.xsd.JNDIConfig_EnvEntry;
 import org.wso2.carbon.ndatasource.ui.stub.core.services.xsd.WSDataSourceMetaInfo_WSDataSourceDefinition;
+import org.wso2.carbon.utils.xml.XMLPrettyPrinter;
 
 public class NDataSourceHelper {
 
@@ -49,8 +58,10 @@ public class NDataSourceHelper {
 	private static ResourceBundle bundle;
 	
 	public static WSDataSourceMetaInfo createWSDataSourceMetaInfo(HttpServletRequest request) {
-		//UI still has no input for data Source type. Assigned RDBMS
-		String datasourceType = "RDBMS";
+		WSDataSourceMetaInfo_WSDataSourceDefinition dataSourceDefinition = null;
+		String datasourceType = request.getParameter("dsType");
+		String datasourceCustomType = request.getParameter("customDsType");
+		boolean configView = Boolean.parseBoolean(request.getParameter("configView"));
 		bundle = ResourceBundle.getBundle("org.wso2.carbon.ndatasource.ui.i18n.Resources",
 				request.getLocale());
 		String name = request.getParameter("dsName");
@@ -59,6 +70,10 @@ public class NDataSourceHelper {
 			if (name == null || "".equals(name)) {
 				handleException(bundle.getString("ds.name.cannotfound.msg"));
 			}
+		}
+		
+		if (configView && (datasourceCustomType == null || "".equals(datasourceCustomType))) {
+			handleException(bundle.getString("custom.ds.type.name.cannotfound.msg"));
 		}
 
 		String description = request.getParameter("description");
@@ -69,24 +84,34 @@ public class NDataSourceHelper {
 		if (description != null && !("".equals(description))) {
 			dataSourceMetaInfo.setDescription(description);
 		}
-		
-		if (request.getParameter("jndiname") != null && !request.getParameter("jndiname").equals("")) {
-			dataSourceMetaInfo.setJndiConfig(createJNDIConfig(request));
-		} else {
-			if (request.getParameter("useDataSourceFactory") != null || 
-					(request.getParameter("jndiProperties") != null && !request.getParameter("jndiProperties").equals(""))) {
-				handleException(bundle.getString("jndi.name.cannotfound.msg"));
+		if (configView) {
+			dataSourceDefinition = createCustomDS(request.getParameter("configContent"), datasourceCustomType);
+		} else if (datasourceType.equals(NDataSourceClientConstants.RDBMS_DTAASOURCE_TYPE)) {
+			if (request.getParameter("jndiname") != null && !request.getParameter("jndiname").equals("")) {
+				dataSourceMetaInfo.setJndiConfig(createJNDIConfig(request));
+			} else {
+				if (request.getParameter("useDataSourceFactory") != null || 
+						(request.getParameter("jndiProperties") != null && !request.getParameter("jndiProperties").equals(""))) {
+					handleException(bundle.getString("jndi.name.cannotfound.msg"));
+				}
 			}
+	
+			DSXMLConfiguration dsXMLConfig = createDSXMLConfiguration(datasourceType, request);
+	
+			dataSourceDefinition = createWSDataSourceDefinition(
+					dsXMLConfig, datasourceType);
+		} else {
+			throw new IllegalArgumentException("Provided Data Source type not supported");
 		}
-
-		DSXMLConfiguration dsXMLConfig = createDSXMLConfiguration(datasourceType, request);
-
-		WSDataSourceMetaInfo_WSDataSourceDefinition dataSourceDefinition = createWSDataSourceDefinition(
-				dsXMLConfig, datasourceType);
-
 		dataSourceMetaInfo.setDefinition(dataSourceDefinition);
 		return dataSourceMetaInfo;
-
+	}
+	
+	private static WSDataSourceMetaInfo_WSDataSourceDefinition createCustomDS(String configuration, String datasourceType) {
+		WSDataSourceMetaInfo_WSDataSourceDefinition wSDataSourceDefinition = new WSDataSourceMetaInfo_WSDataSourceDefinition();
+		wSDataSourceDefinition.setDsXMLConfiguration(configuration);
+		wSDataSourceDefinition.setType(datasourceType);
+		return wSDataSourceDefinition;				
 	}
 
 	private static DSXMLConfiguration createDSXMLConfiguration(String type,
@@ -304,7 +329,7 @@ public class NDataSourceHelper {
 			rdbmsDSXMLConfig.setTestOnBorrow(testOnBorrow);
 		}
 		Boolean testOnReturn = Boolean.parseBoolean(request.getParameter("testOnReturn"));
-		if (testOnReturn != false && !"".equals(testOnReturn)) {
+		if (testOnReturn != false) {
 			rdbmsDSXMLConfig.setTestOnReturn(testOnReturn);
 		}
 		Boolean testWhileIdle = Boolean.parseBoolean(request.getParameter("testWhileIdle"));
@@ -429,6 +454,82 @@ public class NDataSourceHelper {
 			rdbmsDSXMLConfig.setAlternateUsernameAllowed(alternateUsernameAllowed);
 		}
 	}
+	
+	public static String elementToString(Element element) {
+		try {
+			if (element == null) {
+				return null;
+			}
+		    Transformer transformer = TransformerFactory.newInstance().newTransformer();
+		    StringWriter buff = new StringWriter();
+		    transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		    transformer.transform(new DOMSource(element), new StreamResult(buff));
+		    return buff.toString();
+		} catch (Exception e) {
+			log.error("Error while convering element to string: " + e.getMessage(), e);
+			return null;
+		}
+	}
+	
+	private static List<Element> getChildElements(Element element) {
+    	List<Element> childEls = new ArrayList<Element>();
+    	for (Node tmpNode : getNodesAsList(element)) {
+    		if (tmpNode.getNodeType() == Node.ELEMENT_NODE) {
+    			childEls.add((Element) tmpNode);
+    		}
+    	}
+    	return childEls;
+    }
+	
+	private static List<Node> getNodesAsList(Element element) {
+    	List<Node> nodes = new ArrayList<Node>();
+    	NodeList nodeList = element.getChildNodes();
+    	int count = nodeList.getLength();
+    	for (int i = 0; i < count; i++) {
+    		nodes.add(nodeList.item(i));
+    	}
+    	return nodes;
+    }
+    
+    private static List<Node> getWhitespaceNodes(Element element) {
+    	List<Node> nodes = new ArrayList<Node>();
+    	for (Node node : getNodesAsList(element)) {
+    		if (node.getNodeType() == Node.TEXT_NODE) {
+    			node.setNodeValue(node.getNodeValue().trim());
+    			if (node.getNodeValue().length() == 0) {
+    				nodes.add(node);
+    			}
+    		}
+    	}
+    	return nodes;
+    }
+	
+	private static void removeWhitespaceInMixedContentElements(Element element)  {
+    	List<Element> childEls = getChildElements(element);
+    	if (childEls.size() > 0) {
+    		for (Node node : getWhitespaceNodes(element)) {
+    			element.removeChild(node);
+    		}
+    		for (Element childEl : childEls) {
+    			removeWhitespaceInMixedContentElements(childEl);
+    		}
+    	}
+    }
+	
+	/**
+     * Prettify a given XML string
+     */
+    public static String prettifyXML(String xmlContent) {
+    	Element element = stringToElement(xmlContent);
+    	if (element == null) {
+    	    throw new RuntimeException("Error in converting string to XML: " + xmlContent);
+    	}
+		removeWhitespaceInMixedContentElements(element);
+    	xmlContent = elementToString(element);
+        ByteArrayInputStream byteIn = new ByteArrayInputStream(xmlContent.getBytes());
+        XMLPrettyPrinter prettyPrinter = new XMLPrettyPrinter(byteIn);
+        return prettyPrinter.xmlFormat().trim();
+    }
 	
 	private static void handleException(String msg) {
 		log.error(msg);

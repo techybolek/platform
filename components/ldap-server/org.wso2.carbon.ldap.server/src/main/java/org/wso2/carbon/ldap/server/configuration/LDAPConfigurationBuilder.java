@@ -19,7 +19,6 @@
 package org.wso2.carbon.ldap.server.configuration;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.apacheds.AdminGroupInfo;
@@ -30,7 +29,10 @@ import org.wso2.carbon.apacheds.PartitionInfo;
 import org.wso2.carbon.apacheds.PasswordAlgorithm;
 import org.wso2.carbon.ldap.server.exception.DirectoryServerException;
 import org.wso2.carbon.ldap.server.util.EmbeddingLDAPException;
+import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
+import org.wso2.carbon.user.core.ldap.LDAPConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.xml.namespace.QName;
@@ -67,11 +69,8 @@ public class LDAPConfigurationBuilder {
 
     private boolean kdcEnabled = false;
 
-    private static String CARBON_LDAP_PORT_CONFIG_SECTION = "Ports.EmbeddedLDAP.LDAPServerPort";
     private static String CARBON_KDC_PORT_CONFIG_SECTION = "Ports.EmbeddedLDAP.KDCServerPort";
     private static int DEFAULT_KDC_SERVER_PORT = 8000;
-    private static String ADMIN_USER_NAME = "uid";
-    private static String ADMIN_ROLE_NAME = "adminRoleName";
 
 
     /**
@@ -175,26 +174,28 @@ public class LDAPConfigurationBuilder {
         /*Set properties in ldapConfiguration object from those read from the config element.*/
         buildLDAPConfigurations(embeddedLdap);
 
-        /*Set properties in partitionConfigurations object from those read from the config file.*/
-        buildPartitionConfigurations(documentElement);
+        if(ldapConfiguration.isEnable()){
+            /*Set properties in partitionConfigurations object from those read from the config file.*/
+            buildPartitionConfigurations(documentElement);
 
-        /*Extract the part that contains kdc-server specific configurations*/
-        OMElement kdcConfigElement = documentElement.getFirstChildWithName(new QName("KDCServer"));
-        /*Set properties in kdcConfiguration object from those read from the config element.*/
-        buildKDCConfigurations(kdcConfigElement);
+            /*Extract the part that contains kdc-server specific configurations*/
+            OMElement kdcConfigElement = documentElement.getFirstChildWithName(new QName("KDCServer"));
+            /*Set properties in kdcConfiguration object from those read from the config element.*/
+            buildKDCConfigurations(kdcConfigElement);
 
-        /*Says root partition that KDC is enabled. Root partition admin should have KDC object
-        attributes in LDAP*/
-        this.partitionConfigurations.setKdcEnabled(this.kdcEnabled);
+            /*Says root partition that KDC is enabled. Root partition admin should have KDC object
+          attributes in LDAP*/
+            this.partitionConfigurations.setKdcEnabled(this.kdcEnabled);
 
-        // Do some cross checking
-        if (this.kdcEnabled) {
+            // Do some cross checking
+            if (this.kdcEnabled) {
 
-            this.kdcConfigurations.setSystemAdminPassword(this.getConnectionPassword());
+                this.kdcConfigurations.setSystemAdminPassword(this.getConnectionPassword());
 
-            // Set admin partition for KDC
-            this.kdcConfigurations.setPartitionInfo(this.getPartitionConfigurations());
+                // Set admin partition for KDC
+                this.kdcConfigurations.setPartitionInfo(this.getPartitionConfigurations());
 
+            }
         }
     }
 
@@ -363,6 +364,9 @@ public class LDAPConfigurationBuilder {
      */
     private void buildPartitionConfigurations(OMElement documentElement) {
 
+        //read user-mgt.xml
+        RealmConfiguration realmConfig = getUserManagementXMLElement();
+        
         this.partitionConfigurations = new PartitionInfo();
 
         OMElement defaultPartition = documentElement.getFirstChildWithName(new QName(
@@ -380,19 +384,10 @@ public class LDAPConfigurationBuilder {
         OMElement partitionAdmin = documentElement.getFirstChildWithName(new QName(
                 "PartitionAdmin"));
         propertyMap = getChildPropertyElements(partitionAdmin);
-        //override admin user properties from user-mgt.xml
-        propertyMap = overridePropertiesFromUserMgt(propertyMap, ADMIN_USER_NAME);
+        
+        AdminInfo defaultPartitionAdmin = buildPartitionAdminConfigurations(realmConfig, propertyMap);
 
-        AdminInfo defaultPartitionAdmin = buildPartitionAdminConfigurations(propertyMap);
-
-        OMElement partitionAdminGroup = documentElement.getFirstChildWithName(new QName(
-                "PartitionAdminGroup"));
-        propertyMap = getChildPropertyElements(partitionAdminGroup);
-
-        //override admin role properties from user-mgt.xml
-        propertyMap = overridePropertiesFromUserMgt(propertyMap, ADMIN_ROLE_NAME);
-
-        AdminGroupInfo adminGroupInfo = buildPartitionAdminGroupConfigurations(propertyMap);
+        AdminGroupInfo adminGroupInfo = buildPartitionAdminGroupConfigurations(realmConfig);
 
         defaultPartitionAdmin.setGroupInformation(adminGroupInfo);
 
@@ -400,27 +395,27 @@ public class LDAPConfigurationBuilder {
 
     }
 
-    private AdminInfo buildPartitionAdminConfigurations(final Map<String, String> propertyMap) {
+    private AdminInfo buildPartitionAdminConfigurations(RealmConfiguration realmConfig, Map<String, String> propertyMap) {
         AdminInfo adminInfo = new AdminInfo();
 
-        adminInfo.setAdminUID(propertyMap.get("uid"));
+        adminInfo.setAdminUserName(realmConfig.getAdminUserName());
         adminInfo.setAdminCommonName(propertyMap.get("firstName"));
         adminInfo.setAdminLastName(propertyMap.get("lastName"));
         adminInfo.setAdminEmail(propertyMap.get("email"));
-        adminInfo.setAdminPassword(propertyMap.get("password"));
-        adminInfo.setPasswordAlgorithm(PasswordAlgorithm.valueOf(propertyMap.get("passwordType")));
+        adminInfo.setAdminPassword(realmConfig.getAdminPassword());
+        adminInfo.setPasswordAlgorithm(PasswordAlgorithm.valueOf(realmConfig.getUserStoreProperty(LDAPConstants.PASSWORD_HASH_METHOD)));
         adminInfo.addObjectClass(ldapConfiguration.getAdminEntryObjectClass());
+        adminInfo.setUsernameAttribute(realmConfig.getUserStoreProperty(LDAPConstants.USER_NAME_ATTRIBUTE));
 
         return adminInfo;
     }
 
-    private AdminGroupInfo buildPartitionAdminGroupConfigurations(
-            final Map<String, String> propertyMap) {
+    private AdminGroupInfo buildPartitionAdminGroupConfigurations(RealmConfiguration realmConfig) {
         AdminGroupInfo adminGroupInfo = new AdminGroupInfo();
 
-        adminGroupInfo.setAdminRoleName(propertyMap.get("adminRoleName"));
-        adminGroupInfo.setGroupNameAttribute(propertyMap.get("groupNameAttribute"));
-        adminGroupInfo.setMemberNameAttribute(propertyMap.get("memberNameAttribute"));
+        adminGroupInfo.setAdminRoleName(realmConfig.getAdminRoleName());
+        adminGroupInfo.setGroupNameAttribute(realmConfig.getUserStoreProperty(LDAPConstants.GROUP_NAME_ATTRIBUTE));
+        adminGroupInfo.setMemberNameAttribute(realmConfig.getUserStoreProperty(LDAPConstants.MEMBERSHIP_ATTRIBUTE));
 
         return adminGroupInfo;
     }
@@ -537,61 +532,12 @@ public class LDAPConfigurationBuilder {
         return ldapConfiguration.isEnable();
     }
 
-    /**
-     * Use this method if we need to override any property in embedded-ldap.xml from those in
-     * user-mgt.xml
-     *
-     * @param propertyMap
-     * @return
-     */
-    private Map<String, String> overridePropertiesFromUserMgt(Map<String, String> propertyMap,
-                                                              String propToBeChanged) {
-        try {
-            //read user-mgt.xml
-            OMElement realmElement = getUserManagementXMLElement();
-
-            //read the corresponding property from user-mgt.xml and replace in property map
-            OMElement configurationElement = realmElement.getFirstChildWithName(
-                    new QName(UserCoreConstants.RealmConfig.LOCAL_NAME_CONFIGURATION));
-            if (ADMIN_ROLE_NAME.equals(propToBeChanged)) {
-                OMElement adminRoleNameElement = configurationElement.getFirstChildWithName(new QName(
-                        UserCoreConstants.RealmConfig.LOCAL_NAME_ADMIN_ROLE));
-                String adminRole = adminRoleNameElement.getText();
-                if (adminRole != null) {
-                    propertyMap.remove("adminRoleName");
-                    propertyMap.put("adminRoleName", adminRole);
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Admin Role Name in embedded-ldap.xml is overridden by that of " +
-                                     "user-mgt.xml");
-                    }
-                }
-            } else if (ADMIN_USER_NAME.equals(propToBeChanged)) {
-                OMElement adminUserElement = configurationElement.getFirstChildWithName(new QName(
-                        UserCoreConstants.RealmConfig.LOCAL_NAME_ADMIN_USER));
-                OMElement adminUserName = adminUserElement.getFirstChildWithName(new QName(
-                        UserCoreConstants.RealmConfig.LOCAL_NAME_USER_NAME));
-                String userName = adminUserName.getText();
-                if (userName != null) {
-                    propertyMap.remove("uid");
-                    propertyMap.put("uid", userName);
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Admin Role Name in embedded-ldap.xml is overridden by that of " +
-                                     "user-mgt.xml");
-                    }
-                }
-            }
-        } catch (OMException e) {
-            String errorMessage = "Error in parsing the user-mgt.xml";
-            logger.error(errorMessage, e);
-        }
-        return propertyMap;
-    }
-
-    protected OMElement getUserManagementXMLElement() {
+    protected RealmConfiguration getUserManagementXMLElement() {
         String REALM_CONFIG_FILE = "user-mgt.xml";
         StAXOMBuilder builder = null;
         InputStream inStream = null;
         OMElement realmElement = null;
+        RealmConfiguration config = null;
         if (userMgtXMLFilePath == null) {
             String carbonHome = CarbonUtils.getCarbonHome();
             if (carbonHome != null) {
@@ -610,6 +556,8 @@ public class LDAPConfigurationBuilder {
 
             realmElement = documentElement.getFirstChildWithName(new QName(
                     UserCoreConstants.RealmConfig.LOCAL_NAME_REALM));
+            RealmConfigXMLProcessor rmProcessor = new RealmConfigXMLProcessor();
+            config = rmProcessor.buildRealmConfiguration(realmElement);
         } catch (XMLStreamException e) {
             String errorMsg = "User-mgt.xml is not found. " +
                               "Hence admin properties will be read from embedded-ldap.xml";
@@ -624,7 +572,7 @@ public class LDAPConfigurationBuilder {
             }
         }
 
-        return realmElement;
+        return config;
     }
 
     public void setUserMgtXMLFilePath(String filePath) {

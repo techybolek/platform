@@ -19,12 +19,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>registry</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.registry.reporting.ui</artifactId>
     <packaging>bundle</packaging>
+    <version>4.0.1</version>
     <name>WSO2 Carbon - Registry - Reporting UI</name>
 
     <build>
@@ -63,6 +65,10 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.reporting.stub</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.registry.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>

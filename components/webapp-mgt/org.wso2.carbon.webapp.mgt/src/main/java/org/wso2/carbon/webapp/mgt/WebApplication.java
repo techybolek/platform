@@ -19,9 +19,10 @@ import org.apache.catalina.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonException;
-import org.wso2.carbon.context.ApplicationContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 import org.wso2.carbon.utils.FileManipulator;
-import org.wso2.carbon.utils.multitenancy.CarbonApplicationContextHolder;
+import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
 import org.wso2.carbon.webapp.mgt.utils.GhostWebappDeployerUtils;
 
 import java.io.File;
@@ -52,7 +53,7 @@ public class WebApplication {
     private TomcatGenericWebappsDeployer tomcatGenericWebappsDeployer;
 
     // We need this variable to use in the Statistics inner class which is static
-    private static boolean isThisGhost = false;
+    private boolean isThisGhost = false;
 
     public WebApplication(TomcatGenericWebappsDeployer tomcatGenericWebappsDeployer, Context context, File webappFile) {
         this.tomcatGenericWebappsDeployer = tomcatGenericWebappsDeployer;
@@ -224,25 +225,28 @@ public class WebApplication {
         lazyUnload(this.context);
     }
 
-    private void lazyUnload(Context contextOfWepap) throws CarbonException {
+    private void lazyUnload(Context context) throws CarbonException {
+        Host host = DataHolder.getCarbonTomcatService().getTomcat().getHost();
         try {
-            if (contextOfWepap.getAvailable()) {
+            if (context.getAvailable()) {
                 // If the following is not done, the Realm will throw a LifecycleException, because
                 // Realm.stop is called for each context.
-                contextOfWepap.setRealm(null);
-                contextOfWepap.stop();
-                contextOfWepap.destroy();
-                log.info("Unloaded webapp: " + contextOfWepap);
+                context.setRealm(null);
+                context.stop();
+                context.destroy();
+                host.removeChild(context);
+                log.info("Unloaded webapp: " + context);
             }
             //if the webapp is stopped above context.getAvailable() becomes false.
             //So to unload stopped webapps this is done.
-            else if (LifecycleState.STOPPED.equals(contextOfWepap.getState())) {
-                contextOfWepap.setRealm(null);
-                contextOfWepap.destroy();
-                log.info("Unloaded webapp: " + contextOfWepap);
+            else if (LifecycleState.STOPPED.equals(context.getState())) {
+                context.setRealm(null);
+                context.destroy();
+                host.removeChild(context);
+                log.info("Unloaded webapp: " + context);
             }
         } catch (Exception e) {
-            throw new CarbonException("Cannot lazy unload webapp " + context, e);
+            throw new CarbonException("Cannot lazy unload webapp " + this.context, e);
         }
     }
 
@@ -253,27 +257,35 @@ public class WebApplication {
      * @throws CarbonException If an error occurs while undeploying this webapp
      */
     public void undeploy() throws CarbonException {
-        CarbonApplicationContextHolder currentCarbonAppContextHolder =
-                CarbonApplicationContextHolder.getCurrentCarbonAppContextHolder();
-        currentCarbonAppContextHolder.startApplicationFlow();
+        PrivilegedCarbonContext currentCarbonAppContextHolder =
+                PrivilegedCarbonContext.getThreadLocalCarbonContext();
         currentCarbonAppContextHolder.setApplicationName(TomcatUtil.
                 getApplicationNameFromContext(this.context.getBaseName()));
         //lazyunload the context of WebApplication
         lazyUnload();
         File webappDir;
+        File warFile;
         if (webappFile.getAbsolutePath().endsWith(".war")) {
             String filePath = webappFile.getAbsolutePath();
             webappDir = new File(filePath.substring(0, filePath.lastIndexOf('.')));
+            warFile = webappFile;
         } else {
             webappDir = webappFile;
+            warFile = new File(webappFile.getAbsolutePath().concat(".war"));
         }
         // Delete the exploded dir of war based webapps upon undeploy. But omit deleting
+        // Delete the exploded dir of war based webapps upon undeploy. But omit deleting
         // directory based webapps.
+        //Also delete .war file upon deletion of the relevant exploded dir
         if (TomcatUtil.checkUnpackWars() && webappDir.exists() && !webappFile.isDirectory() &&
                 !FileManipulator.deleteDir(webappDir)) {
             throw new CarbonException("exploded Webapp directory " + webappDir + " deletion failed");
         }
-        currentCarbonAppContextHolder.endApplicationFlow();
+        if (TomcatUtil.checkUnpackWars() && webappFile.isDirectory() && warFile.exists() &&
+                 !FileManipulator.deleteDir(warFile)) {
+            throw new CarbonException("Webapp file " + warFile + " deletion failed");
+        }
+
     }
 
     /**
@@ -285,8 +297,8 @@ public class WebApplication {
      */
     private void handleHotUpdateToHost(String nameOfOperation) throws CarbonException {
         if (DataHolder.getHotUpdateService() != null) {
-            List<String> mappings = ApplicationContext.getCurrentApplicationContext().
-                    getUrlMappingsPerApplication(this.context.getName());
+          List<String> mappings = URLMappingHolder.getInstance().
+                   getUrlMappingsPerApplication(this.context.getName());
             Engine engine = DataHolder.getCarbonTomcatService().getTomcat().getEngine();
             Context hostContext;
             Host host;
@@ -494,7 +506,7 @@ public class WebApplication {
     /**
      * Represents statistics corresponding to this webapp
      */
-    public final static class Statistics {
+    public final class Statistics {
 
         /**
          * The Tomcat Session Manager
@@ -526,7 +538,7 @@ public class WebApplication {
         }
 
         public int getActiveSessions() {
-            if (GhostWebappDeployerUtils.isGhostOn()) {
+            if (GhostDeployerUtils.isGhostOn()) {
                 //If this webapp is in ghost from then we return 0
                 if (isThisGhost || sessionManager == null) {
                     return 0;

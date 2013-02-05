@@ -22,42 +22,23 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>usage-feature</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
+        <version>2.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.stratos.usage.server.feature</artifactId>
+    <version>2.0.5</version>
     <packaging>pom</packaging>
     <name>WSO2 Stratos - Usage Server Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for usage data accumilating and retreiving functionality</description>
 
         <dependencies>
- 	<dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.registry.common</artifactId>
-                <version>${wso2carbon.version}</version>
-        </dependency>
-	<dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.usage.ui</artifactId>
-                <version>${stratos.version}</version>
-        </dependency>
-	<dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.usage.summary.generator</artifactId>
-                <version>${stratos.version}</version>
-        </dependency>
 	<dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.usage</artifactId>
-                <version>${stratos.version}</version>
-        </dependency>
-	 <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.usage.agent</artifactId>
-	    <version>${stratos.version}</version>
+                <version>2.0.5</version>
         </dependency>
         </dependencies>
     <build>
@@ -75,7 +56,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.stratos.usage.server</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:console</propertyDef>
@@ -83,13 +64,8 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-				<bundleDef>org.wso2.carbon:org.wso2.carbon.usage.ui</bundleDef>
-				<bundleDef>org.wso2.carbon:org.wso2.carbon.usage.stub:${wso2carbon.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.usage.agent</bundleDef>
-				<bundleDef>org.wso2.carbon:org.wso2.carbon.usage</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.usage.summary.generator</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.usage.meteringsummarygenerationds.stub:${carbon.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.usage.meteringqueryds.stub:${carbon.version}</bundleDef>
+				<bundleDef>org.wso2.carbon:org.wso2.carbon.usage:2.0.5</bundleDef>
+                                <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.usage.meteringqueryds.stub:${carbon.version}</bundleDef>-->
                             </bundles>
                             <!--importFeatures>
                                 <importFeatureDef>org.wso2.carbon.stratos.common:${wso2carbon.version}</importFeatureDef>

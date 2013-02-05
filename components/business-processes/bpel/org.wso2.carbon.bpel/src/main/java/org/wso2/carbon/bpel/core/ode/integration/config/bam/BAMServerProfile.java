@@ -16,8 +16,7 @@
 
 package org.wso2.carbon.bpel.core.ode.integration.config.bam;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.commons.collections.map.MultiKeyMap;
 
 /**
  * Holds the BAM Server profile information
@@ -32,8 +31,9 @@ public class BAMServerProfile {
     private String keyStoreLocation;
     private String keyStorePassword;
     private boolean isSecurityEnabled = true;
-    private Map<String, BAMStreamConfiguration> streamConfigurations =
-            new HashMap<String, BAMStreamConfiguration>();
+    private MultiKeyMap streamConfigurations = new MultiKeyMap();
+//    private Map<String, BAMStreamConfiguration> streamConfigurations =
+//            new HashMap<String, BAMStreamConfiguration>();
 
     //    public BAMServerProfile() {}
 //
@@ -86,13 +86,13 @@ public class BAMServerProfile {
         return isSecurityEnabled;
     }
 
-    public BAMStreamConfiguration getBAMStreamConfiguration(String streamName) {
-        return streamConfigurations.get(streamName);
+    public BAMStreamConfiguration getBAMStreamConfiguration(String streamName, String version) {
+        return (BAMStreamConfiguration)streamConfigurations.get(streamName, version);
     }
 
-    public void addBAMStreamConfiguration(String streamName,
+    public void addBAMStreamConfiguration(String streamName, String version,
                                           BAMStreamConfiguration streamConfiguration) {
-        streamConfigurations.put(streamName, streamConfiguration);
+        streamConfigurations.put(streamName, version, streamConfiguration);
     }
 
     public void setName(String name) {

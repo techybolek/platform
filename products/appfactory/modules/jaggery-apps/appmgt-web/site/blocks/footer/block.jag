@@ -1,7 +1,0 @@
-<%
-jagg.block("footer", {
-    initialize:function (data) {
-
-    }
-});
-%>

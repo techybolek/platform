@@ -15,25 +15,28 @@
  */
 package org.wso2.carbon.theme.mgt.util;
 
-import org.wso2.carbon.stratos.common.constants.StratosConstants;
-import org.wso2.carbon.stratos.common.util.CommonUtil;
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.service.RegistryService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.stratos.common.constants.StratosConstants;
+import org.wso2.carbon.stratos.common.util.CommonUtil;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ServerConstants;
 
-import java.io.*;
-import java.util.*;
-
-
 import javax.activation.MimetypesFileTypeMap;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ThemeUtil {
 
@@ -240,13 +243,9 @@ public class ThemeUtil {
             }
             systemTenantRegistry.delete(targetPath);
         }
-        // get a dump of source
-        Writer writer = new StringWriter();
-        systemZeroRegistry.dump(sourcePath, writer);
 
-        // put the dump to the target
-        Reader reader = new StringReader(writer.toString());
-        systemTenantRegistry.restore(targetPath, reader);
+        // copy theme resources to tenant's registry 
+        addResourcesRecursively(sourcePath, targetPath, systemZeroRegistry, systemTenantRegistry);
 
         // replace the logo
         if (logoR != null) {
@@ -269,6 +268,21 @@ public class ThemeUtil {
                     " to the anonymous user and everyone role.";
             log.error(msg, e);
             throw new RegistryException(msg, e);
+        }
+    }
+
+    private static void addResourcesRecursively(String sourcePath, String targetPath,
+                                                Registry superRegistry, Registry tenantRegistry)
+            throws RegistryException {
+        Resource resource = superRegistry.get(sourcePath);
+        tenantRegistry.put(targetPath, resource);
+
+        if (resource instanceof Collection) {
+            String[] children = ((Collection) resource).getChildren();
+            for (String child : children) {
+                String childName = child.substring(child.lastIndexOf("/"), child.length());
+                addResourcesRecursively(child, targetPath + childName, superRegistry, tenantRegistry);
+            }
         }
     }
 

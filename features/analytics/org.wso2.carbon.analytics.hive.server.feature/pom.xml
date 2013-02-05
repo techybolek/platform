@@ -22,11 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>analytics-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.analytics.hive.server.feature</artifactId>
+    <version>4.0.7</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Hive Analytics Feature</name>
     <url>http://wso2.org</url>
@@ -36,12 +38,50 @@
         <dependency>
             <groupId>org.apache.hive.wso2</groupId>
             <artifactId>hive</artifactId>
-	    <version>${hive.orbit.version}</version>
+	        <version>${hive.orbit.version}</version>
+		<exclusions>
+			<exclusion>
+			  <groupId>org.apache.hive</groupId>
+			  <artifactId>hive-exec</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.apache.hive</groupId>
+			  <artifactId>hive-shims</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.apache.hive</groupId>
+			  <artifactId>hive-builtins</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.apache.hive</groupId>
+			  <artifactId>hive-service</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.apache.hive</groupId>
+			  <artifactId>hive-serde</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.apache.hive</groupId>
+			  <artifactId>hive-metastore</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.apache.hive</groupId>
+			  <artifactId>hive-cassandra</artifactId>
+			</exclusion>
+			<exclusion>
+			  <groupId>org.apache.hive</groupId>
+			  <artifactId>hive-jdbc</artifactId>
+			</exclusion>
+			<exclusion>
+			   <groupId>org.wso2.carbon</groupId>
+			   <artifactId>hive-jdbc-handler</artifactId>
+			</exclusion>
+		</exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.hive.data.source.access</artifactId>
-            <version>4.0.0-SNAPSHOT</version>
+            <version>${carbon.patch.release.version405}</version>
         </dependency>
         <dependency>
             <groupId>antlr.wso2</groupId>
@@ -163,12 +203,17 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
+         <dependency>
+            <groupId>org.apache.cassandra.wso2</groupId>
+            <artifactId>apache-cassandra</artifactId>
+            <version>1.1.3.wso2v2</version>
+        </dependency>
     </dependencies>
 
     <properties>
-        <hive.orbit.version>0.8.1-wso2v2</hive.orbit.version>
-        <antlr.orbit.version>3.0.1.wso2v1</antlr.orbit.version>
-        <zookeeper.orbit.version>3.3.5.wso2v1</zookeeper.orbit.version>
+        <hive.orbit.version>0.8.1.wso2v6</hive.orbit.version>
+        <antlr.orbit.version>3.2.0.wso2v1</antlr.orbit.version>
+        <zookeeper.orbit.version>3.4.4.wso2v1</zookeeper.orbit.version>
         <asm.orbit.version>3.1.wso2v1</asm.orbit.version>
         <commons.cli.orbit.version>1.2.0.wso2v1</commons.cli.orbit.version>
 	<commons.codec.orbit.version>1.4.0.wso2v1</commons.codec.orbit.version>
@@ -180,13 +225,15 @@
 	<datanucleus.orbit.version>3.0.1.wso2v1</datanucleus.orbit.version>
 	<!--guava.orbit.version>11.0.1.wso2v1</guava.orbit.version>
   -->
-	<hadoop.orbit.version>0.20.203.1.wso2v1</hadoop.orbit.version>
+	<hadoop.orbit.version>0.20.203.1.wso2v4</hadoop.orbit.version>
 	<javaewah.orbit.version>0.3.2.wso2v1</javaewah.orbit.version>
 	<jdo2.orbit.version>2.3-ec.wso2v1</jdo2.orbit.version>
 	<json.orbit.version>2.0.0.wso2v1</json.orbit.version>
 	<libfb303.orbit.version>0.7.0.wso2v1</libfb303.orbit.version>
 	<libthrift.orbit.version>0.7.wso2v1</libthrift.orbit.version>
 	<slf4j.version>1.6.1</slf4j.version>
+        <carbon.patch.release.version402>4.0.2</carbon.patch.release.version402>
+        <carbon.patch.release.version405>4.0.5</carbon.patch.release.version405>
     </properties>
 
     <build>
@@ -203,10 +250,7 @@
                         <configuration>
                             <outputDirectory>src/main/resources</outputDirectory>
                             <resources>
-                                <resource>
-                                    <directory>resources</directory>
-                                    <includes>
-                                        <include>conf/hive-site.xml</include>
+                                <resource> <directory>resources</directory> <includes> <include>conf/hive-site.xml</include>
                                         <include>conf/hive-site-win.xml</include>
                                         <include>p2.inf</include>
                                         <include>build.properties</include>
@@ -230,7 +274,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.analytics.hive.server</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server
@@ -268,6 +312,7 @@
                                 <importBundleDef>org.slf4j:slf4j-log4j12</importBundleDef>
                                 <importBundleDef>org.slf4j:slf4j-api</importBundleDef>
                                 <importBundleDef>org.wso2.carbon:org.wso2.carbon.hive.data.source.access</importBundleDef>
+                                <importBundelDef>org.apache.cassandra.wso2:apache-cassandra</importBundelDef>
                             </importBundles>
                         </configuration>
                     </execution>

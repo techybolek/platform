@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.registry.common.utils.artifact.manager.ArtifactManager;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -36,8 +37,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Iterator;
-import java.util.UUID;
+import java.util.*;
 
 public class PolicyMediaTypeHandler extends Handler {
     private static final Log log = LogFactory.getLog(PolicyMediaTypeHandler.class);
@@ -64,16 +64,6 @@ public class PolicyMediaTypeHandler extends Handler {
                 }
             }
         }
-        AuthorizationUtils.addAuthorizeRoleListener(
-                RegistryConstants.ADD_POLICY_AUTHORIZE_ROLE_LISTENER_EXECUTION_ORDER_ID,
-                getChrootedLocation(RegistryContext.getBaseInstance()),
-                UserMgtConstants.UI_ADMIN_PERMISSION_ROOT + "manage/resources/govern/metadata/add",
-                UserMgtConstants.EXECUTE_ACTION);
-        AuthorizationUtils.addAuthorizeRoleListener(
-                RegistryConstants.LIST_POLICY_AUTHORIZE_ROLE_LISTENER_EXECUTION_ORDER_ID, 
-                getChrootedLocation(RegistryContext.getBaseInstance()),
-                UserMgtConstants.UI_ADMIN_PERMISSION_ROOT + "manage/resources/govern/metadata/list",
-                UserMgtConstants.EXECUTE_ACTION, new String[]{ActionConstants.GET});
         this.locationConfiguration = locationConfiguration;
     }
 
@@ -90,19 +80,19 @@ public class PolicyMediaTypeHandler extends Handler {
             Resource resource = requestContext.getResource();
             Registry registry = requestContext.getRegistry();
 
-            Object newContent = resource.getContent();
-            if (newContent instanceof String) {
-                newContent = RegistryUtils.encodeString(((String)newContent));
+            Object resourceContentObj = resource.getContent();
+            String resourceContent; // here the resource content is url
+            if (resourceContentObj instanceof String) {
+                resourceContent = (String)resourceContentObj;
+                resource.setContent(RegistryUtils.encodeString(resourceContent));
+            } else {
+                resourceContent = RegistryUtils.decodeBytes((byte[])resourceContentObj);
             }
             try {
-                // If the policy is already there, we don't need to re-run this handler unless the content is changed.
-                // Re-running this handler causes issues with downstream handlers and other behaviour (ex:- lifecycles).
-                // If you need to do a replace programatically, delete-then-replace.
                 if (registry.resourceExists(path)) {
                     Resource oldResource = registry.get(path);
-                    Object oldContent = oldResource.getContent();
-                    if ((newContent == null && oldContent == null) ||
-                            (newContent != null && newContent.equals(oldContent))) {
+                    byte[] oldContent = (byte[])oldResource.getContent();
+                    if (oldContent != null && RegistryUtils.decodeBytes(oldContent).equals(resourceContent)) {
                         // this will continue adding from the default path.
                         return;
                     }
@@ -112,10 +102,12 @@ public class PolicyMediaTypeHandler extends Handler {
                 log.error(msg, e);
                 throw new RegistryException(msg, e);
             }
+            Object newContent = RegistryUtils.encodeString((String)resourceContent);
             if (newContent != null) {
                 InputStream inputStream = new ByteArrayInputStream((byte[])newContent);
                 addPolicyToRegistry(requestContext, inputStream);
             }
+            ArtifactManager.getArtifactManager().getTenantArtifactRepository().addArtifact(path);
         } finally {
             CommonUtil.releaseUpdateLock();
         }
@@ -163,7 +155,6 @@ public class PolicyMediaTypeHandler extends Handler {
         } catch (IOException e) {
             throw new RegistryException("Exception occured while reading policy content", e);
         }
-        policyResource.setContent(outputStream.toByteArray());
 
         try {
             AXIOMUtil.stringToOM(RegistryUtils.decodeBytes(outputStream.toByteArray()));
@@ -174,28 +165,25 @@ public class PolicyMediaTypeHandler extends Handler {
         String resourcePath = requestContext.getResourcePath().getPath();
         String policyFileName = resourcePath.substring(resourcePath.lastIndexOf(RegistryConstants.PATH_SEPARATOR) + 1);
         Registry systemRegistry = CommonUtil.getUnchrootedSystemRegistry(requestContext);
-        String commonLocation = getChrootedLocation(requestContext.getRegistryContext());
+        RegistryContext registryContext = requestContext.getRegistryContext();
+        String commonLocation = getChrootedLocation(registryContext);
         if (!systemRegistry.resourceExists(commonLocation)) {
             systemRegistry.put(commonLocation, systemRegistry.newCollection());
         }
 
         String policyPath;
-        if(!resourcePath.startsWith(commonLocation)
-                && !resourcePath.equals(RegistryConstants.PATH_SEPARATOR + policyFileName)
-                && !resourcePath.equals(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH
-                + RegistryConstants.PATH_SEPARATOR +policyFileName)){
+        if (!resourcePath.startsWith(commonLocation)
+                && !resourcePath.equals(RegistryUtils.getAbsolutePath(registryContext,
+                RegistryConstants.PATH_SEPARATOR + policyFileName))
+                && !resourcePath.equals(RegistryUtils.getAbsolutePath(registryContext,
+                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH
+                        + RegistryConstants.PATH_SEPARATOR + policyFileName))) {
             policyPath = resourcePath;
         }else{
             policyPath = commonLocation + extractResourceFromURL(policyFileName, ".xml");
         }
 
 
-        String policyId = policyResource.getUUID();
-        if (policyId == null) {
-            // generate a service id
-            policyId = UUID.randomUUID().toString();
-            policyResource.setUUID(policyId);
-        }
 //        CommonUtil.addGovernanceArtifactEntryWithAbsoluteValues(
 //                    CommonUtil.getUnchrootedSystemRegistry(requestContext),
 //                    policyId, policyPath);
@@ -204,12 +192,45 @@ public class PolicyMediaTypeHandler extends Handler {
         // adn then get the relative path to the GOVERNANCE_BASE_PATH
         relativeArtifactPath = RegistryUtils.getRelativePathToOriginal(relativeArtifactPath,
                 RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
-        addPolicyToRegistry(requestContext, policyPath, requestContext.getSourceURL(),
-                policyResource, registry);
-        ((ResourceImpl)policyResource).setPath(relativeArtifactPath);
 
-        String symlinkLocation = RegistryUtils.getAbsolutePath(requestContext.getRegistryContext(),
-                policyResource.getProperty(RegistryConstants.SYMLINK_PROPERTY_NAME));
+        Resource newResource;
+        if (registry.resourceExists(policyPath)) {
+            newResource = registry.get(policyPath);
+        } else {
+            newResource = new ResourceImpl();
+            Properties properties = policyResource.getProperties();
+            if (properties != null) {
+                List<String> linkProperties = Arrays.asList(
+                        RegistryConstants.REGISTRY_LINK,
+                        RegistryConstants.REGISTRY_USER,
+                        RegistryConstants.REGISTRY_MOUNT,
+                        RegistryConstants.REGISTRY_AUTHOR,
+                        RegistryConstants.REGISTRY_MOUNT_POINT,
+                        RegistryConstants.REGISTRY_TARGET_POINT,
+                        RegistryConstants.REGISTRY_ACTUAL_PATH,
+                        RegistryConstants.REGISTRY_REAL_PATH);
+                for (Map.Entry<Object, Object> e : properties.entrySet()) {
+                    String key = (String) e.getKey();
+                    if (!linkProperties.contains(key)) {
+                        newResource.setProperty(key, (List<String>) e.getValue());
+                    }
+                }
+            }
+        }
+        newResource.setMediaType("application/policy+xml");
+        String policyId = policyResource.getUUID();
+        if (policyId == null) {
+            // generate a service id
+            policyId = UUID.randomUUID().toString();
+        }
+        newResource.setUUID(policyId);
+        newResource.setContent(outputStream.toByteArray());
+        addPolicyToRegistry(requestContext, policyPath, requestContext.getSourceURL(),
+                newResource, registry);
+        ((ResourceImpl)newResource).setPath(relativeArtifactPath);
+
+        String symlinkLocation = RegistryUtils.getAbsolutePath(registryContext,
+                newResource.getProperty(RegistryConstants.SYMLINK_PROPERTY_NAME));
         if (symlinkLocation != null) {
             Resource resource = requestContext.getRegistry().get(symlinkLocation);
             if (resource != null) {
@@ -223,6 +244,7 @@ public class PolicyMediaTypeHandler extends Handler {
             }
             requestContext.getSystemRegistry().createLink(symlinkLocation + policyFileName, policyPath);
         }
+        requestContext.setResource(newResource);
         requestContext.setProcessingComplete(true);
     }
 
@@ -256,7 +278,7 @@ public class PolicyMediaTypeHandler extends Handler {
     }
 
     private String getChrootedLocation(RegistryContext registryContext) {
-        return RegistryUtils.getAbsolutePath(registryContext, 
+        return RegistryUtils.getAbsolutePath(registryContext,
                 RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + location);
     }
 }

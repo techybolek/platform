@@ -29,7 +29,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.AttributeValueDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.AttributeDTO" %>
 
 <%
     String policyId = "";
@@ -57,10 +57,10 @@
     attributeId = (String)request.getParameter("attributeId");
     attributeDataType = (String)request.getParameter("attributeDataType");
     
-    List<AttributeValueDTO> attributeValueDTOs = new ArrayList<AttributeValueDTO>();
+    List<AttributeDTO> attributeValueDTOs = new ArrayList<AttributeDTO>();
 
     if(policyId != null && !"".equals(policyId)){
-        AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
+        AttributeDTO attributeValueDTO = new AttributeDTO();
         attributeValueDTO.setPolicyId(policyId);
         if(!EntitlementPolicyConstants.COMBO_BOX_ANY_VALUE.equals(attributeType)){
             attributeValueDTO.setAttributeType(attributeType);            
@@ -75,7 +75,7 @@
                     serverURL, configContext);
         policyIds = client.getAllPolicyIds();
         if(attributeValueDTOs.size() > 0){
-            results = client.getAdvanceSearchResult(attributeValueDTOs.toArray(new AttributeValueDTO[attributeValueDTOs.size()]));
+            results = client.getAdvanceSearchResult(attributeValueDTOs.toArray(new AttributeDTO[attributeValueDTOs.size()]));
         }
 
     } catch (Exception e) {

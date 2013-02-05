@@ -61,4 +61,27 @@ function loadPagedList(page, filter, contextName, pageName, itemName) {
 
     }
 }
-    
+
+function downloadDependencies(path) {
+    sessionAwareFunction(function() {
+            new Ajax.Request('../list/download_util_ajaxprocessor.jsp',
+            {
+                method:'post',
+                parameters: {path: path},
+
+                onSuccess: function(transport) {
+                  var str = transport.responseText.trim();
+                  var resp = str.substring(str.indexOf('{')+1).split('}')[0].trim();
+                  var url = resp.split('**')[0];
+                  var hasDependencies = resp.split('**')[1];
+                  downloadWithDependencies(url,hasDependencies);
+                },
+
+                onFailure: function() {
+                    CARBON.showErrorDialog(transport.responseText);
+                }
+            });
+
+    }, org_wso2_carbon_governance_list_ui_jsi18n["session.timed.out"]);
+}
+

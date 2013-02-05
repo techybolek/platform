@@ -22,8 +22,11 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.humantask.core.HumanTaskServer;
+import org.wso2.carbon.humantask.core.dao.TaskPackageStatus;
 import org.wso2.carbon.humantask.core.deployment.SimpleTaskDefinitionInfo;
 import org.wso2.carbon.humantask.core.internal.HumanTaskServiceComponent;
 import org.wso2.carbon.humantask.core.store.HumanTaskBaseConfiguration;
@@ -43,7 +46,6 @@ import org.wso2.carbon.humantask.skeleton.mgt.services.types.TaskStatusType;
 import org.wso2.carbon.humantask.skeleton.mgt.services.types.TaskType;
 import org.wso2.carbon.humantask.skeleton.mgt.services.types.Task_type0;
 import org.wso2.carbon.humantask.skeleton.mgt.services.types.UndeployStatus_type0;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.activation.DataHandler;
@@ -72,8 +74,8 @@ public class HumanTaskPackageManagementSkeleton extends AbstractAdmin
      */
     @Override
     public DeployedPackagesPaginated listDeployedPackagesPaginated(int page) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         return null;
     }
 
@@ -87,8 +89,8 @@ public class HumanTaskPackageManagementSkeleton extends AbstractAdmin
     @Override
     public Task_type0[] listTasksInPackage(String packageName) throws PackageManagementException {
 
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
 
         if (StringUtils.isEmpty(packageName)) {
             throw new IllegalArgumentException("The provided package name is empty!");
@@ -115,9 +117,8 @@ public class HumanTaskPackageManagementSkeleton extends AbstractAdmin
     @Override
     public DeployedTaskDefinitionsPaginated listDeployedTaskDefinitionsPaginated(int page)
             throws PackageManagementException {
-
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
 
         int tPage = page;
         try {
@@ -155,9 +156,9 @@ public class HumanTaskPackageManagementSkeleton extends AbstractAdmin
 
     @Override
     public TaskInfoType getTaskInfo(QName taskId) throws PackageManagementException {
-        int tenentId = CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId();
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(tenentId);
+        int tenentId = CarbonContext.getCurrentContext().getTenantId();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
 
         TaskInfoType taskInfo = null;
         HumanTaskBaseConfiguration taskConf = HumanTaskServiceComponent.
@@ -167,7 +168,17 @@ public class HumanTaskPackageManagementSkeleton extends AbstractAdmin
             taskInfo = new TaskInfoType();
             taskInfo.setTaskId(taskConf.getName());
             taskInfo.setPackageName(taskConf.getPackageName());
-            taskInfo.setStatus(TaskStatusType.ACTIVE);
+
+            if (TaskPackageStatus.ACTIVE.equals(taskConf.getPackageStatus())) {
+                taskInfo.setStatus(TaskStatusType.ACTIVE);
+            } else if (TaskPackageStatus.INACTIVE.equals(taskConf.getPackageStatus())) {
+                taskInfo.setStatus(TaskStatusType.INACTIVE);
+            } else if (TaskPackageStatus.UNDEPLOYING.equals(taskConf.getPackageStatus())) {
+                taskInfo.setStatus(TaskStatusType.UNDEPLOYING);
+            }
+
+            taskInfo.setDeploymentError(taskConf.getDeploymentError());
+            taskInfo.setErroneous(taskConf.isErroneous());
             if (taskConf instanceof TaskConfiguration) {
                 taskInfo.setTaskType(TaskType.TASK);
             } else if (taskConf instanceof NotificationConfiguration) {
@@ -231,7 +242,19 @@ public class HumanTaskPackageManagementSkeleton extends AbstractAdmin
 
         taskDef.setPackageName(taskConfiguration.getPackageName());
         taskDef.setTaskName(taskConfiguration.getTaskName());
-        taskDef.setState(TaskStatusType.ACTIVE);
+
+
+        if (TaskPackageStatus.ACTIVE.equals(taskConfiguration.getPackageStatus())) {
+            taskDef.setState(TaskStatusType.ACTIVE);
+        } else if (TaskPackageStatus.INACTIVE.equals(taskConfiguration.getPackageStatus())) {
+            taskDef.setState(TaskStatusType.INACTIVE);
+        } else if (TaskPackageStatus.UNDEPLOYING.equals(taskConfiguration.getPackageStatus())) {
+            taskDef.setState(TaskStatusType.UNDEPLOYING);
+        }
+
+        taskDef.setDeploymentError(taskConfiguration.getDeploymentError());
+        taskDef.setErroneous(taskConfiguration.isErroneous());
+
         if (org.wso2.carbon.humantask.core.dao.TaskType.TASK.equals(
                 taskConfiguration.getTaskType())) {
             taskDef.setType(TaskType.TASK);
@@ -253,15 +276,18 @@ public class HumanTaskPackageManagementSkeleton extends AbstractAdmin
             task.setType(TaskType.NOTIFICATION);
         }
 
+        task.setErroneous(taskConfiguration.isErroneous());
+        task.setDeploymentError(taskConfiguration.getDeploymentError());
+
         return task;
     }
 
     @Override
     public HumanTaskPackageDownloadData downloadHumanTaskPackage(String packageName)
             throws PackageManagementException {
-        int tenentId = CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId();
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(tenentId);
+        int tenentId = CarbonContext.getCurrentContext().getTenantId();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
 
         File humanTaskArchive = getTenantTaskStore().getHumanTaskArchiveLocation(packageName);
 
@@ -281,12 +307,13 @@ public class HumanTaskPackageManagementSkeleton extends AbstractAdmin
 
     @Override
     public UndeployStatus_type0 undeployHumanTaskPackage(String packageName) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             // We will only delete the zip file. The HumanTaskDeployer's undeploy method will
             // be executed. The un-deployement logic is written there.
             getTenantTaskStore().deleteHumanTaskArchive(packageName);
+            getTenantTaskStore().updateTaskStatusForPackage(packageName, TaskPackageStatus.UNDEPLOYING);
         } catch (Exception ex) {
             log.error("undeployHumanTaskPackage operation failed", ex);
             return UndeployStatus_type0.FAILED;

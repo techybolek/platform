@@ -21,17 +21,48 @@ import org.apache.axiom.om.OMDocument;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.*;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.RelatesTo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.core.axis2.Axis2Sender;
+import org.apache.synapse.transport.nhttp.NhttpConstants;
 
 import javax.xml.namespace.QName;
 import java.util.Iterator;
+import java.util.Map;
 
 public class Utils {
     
     private static final Log log = LogFactory.getLog(Utils.class);
+    
+    public static void sendFault(MessageContext messageContext, int status) {
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+
+        axis2MC.setProperty(NhttpConstants.HTTP_SC, status);
+        messageContext.setResponse(true);
+        messageContext.setProperty("RESPONSE", "true");
+        messageContext.setTo(null);        
+        axis2MC.removeProperty("NO_ENTITY_BODY");
+        String method = (String) axis2MC.getProperty(Constants.Configuration.HTTP_METHOD);
+        if (method.matches("^(?!.*(POST|PUT)).*$")) {
+            // If the request was not an entity enclosing request, send a XML response back
+            axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/xml");
+        }
+        // Always remove the ContentType - Let the formatter do its thing
+        axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
+        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        if (headers != null) {
+            headers.remove(HttpHeaders.AUTHORIZATION);
+            headers.remove(HttpHeaders.ACCEPT);
+            headers.remove(HttpHeaders.HOST);
+        }
+        Axis2Sender.sendBack(messageContext);
+    }
     
     public static void setFaultPayload(MessageContext messageContext, OMElement payload) {
         OMElement firstChild = messageContext.getEnvelope().getBody().getFirstElement();
@@ -85,8 +116,8 @@ public class Utils {
         if (messageContext.getEnvelope() != null) {
             SOAPHeader soapHeader = messageContext.getEnvelope().getHeader();
             if (soapHeader != null) {
-                for (Iterator iter = soapHeader.examineAllHeaderBlocks(); iter.hasNext();) {
-                    Object o = iter.next();
+                for (Iterator iterator = soapHeader.examineAllHeaderBlocks(); iterator.hasNext();) {
+                    Object o = iterator.next();
                     if (o instanceof SOAPHeaderBlock) {
                         SOAPHeaderBlock header = (SOAPHeaderBlock) o;
                         faultEnvelope.getHeader().addChild(header);

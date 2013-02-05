@@ -17,7 +17,14 @@
 */
 package org.wso2.carbon.mediator.autoscale.lbautoscale.util;
 
+import org.apache.axis2.clustering.ClusteringAgent;
+import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration;
+import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration.LBConfiguration;
+import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration.ServiceConfiguration;
+import org.wso2.carbon.lb.common.service.LoadBalancerConfigurationService;
+import org.wso2.carbon.stratos.cloud.controller.interfaces.CloudControllerService;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 /**
@@ -26,7 +33,12 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 public class AutoscalerTaskDSHolder {
     
     private ConfigurationContextService configurationContextService;
-    private LoadBalancerConfiguration lbConfig;
+    private LoadBalancerConfiguration wholeLbConfig;
+    private CloudControllerService cloudControllerService;  
+
+    private RealmService realmService;
+    private ClusteringAgent agent;
+    private ConfigurationContext configCtxt;
 
     private static AutoscalerTaskDSHolder instance = new AutoscalerTaskDSHolder();
 
@@ -45,13 +57,54 @@ public class AutoscalerTaskDSHolder {
     public void setConfigurationContextService(ConfigurationContextService cCtxService){
         this.configurationContextService = cCtxService;
     }
-
-    public void setLoadBalancerConfig(LoadBalancerConfiguration lbConf) {
-        this.lbConfig = lbConf;
+    
+    public LoadBalancerConfiguration getWholeLoadBalancerConfig() {
+        return wholeLbConfig;
     }
     
-    public LoadBalancerConfiguration getLoadBalancerConfig() {
-        return lbConfig;
+    public LBConfiguration getLoadBalancerConfig() {
+        return wholeLbConfig.getLoadBalancerConfig();
+    }
+
+    public ClusteringAgent getAgent() {
+        return agent;
+    }
+
+    public void setAgent(ClusteringAgent agent) {
+        this.agent = agent;
+    }
+
+
+    public void setRealmService(RealmService realmService) {
+        this.realmService = realmService;
+    }
+
+    public RealmService getRealmService() {
+        return realmService;
+    }
+    
+    public void setLbConfigService(LoadBalancerConfigurationService lbConfigSer) {
+        if (lbConfigSer != null) {
+            this.wholeLbConfig = (LoadBalancerConfiguration) lbConfigSer.getLoadBalancerConfig();
+        } else {
+            this.wholeLbConfig = null;
+        }
+    }
+
+	public void setConfigCtxt(ConfigurationContext configCtxt) {
+		this.configCtxt = configCtxt;
+	}
+
+	public ConfigurationContext getConfigCtxt() {
+		return configCtxt;
+	}
+
+	public void setCloudControllerService(CloudControllerService cc) {
+        this.cloudControllerService = cc;
+    }
+	
+	public CloudControllerService getCloudControllerService() {
+        return cloudControllerService;
     }
 
 }

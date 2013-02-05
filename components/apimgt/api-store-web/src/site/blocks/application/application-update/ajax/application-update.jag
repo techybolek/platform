@@ -17,10 +17,11 @@ include("/jagg/jagg.jag");
 
         applicationOld = request.getParameter("applicationOld");
         applicationNew = request.getParameter("applicationNew");
+        tier = request.getParameter("tier");
         username = user.username;
 
         mod = jagg.module("application");
-        result = mod.updateApplication(applicationNew,applicationOld,username);
+        result = mod.updateApplication(applicationNew,applicationOld,username,tier);
 
         if (result.error) {
             obj = {
@@ -33,7 +34,8 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-    } else {
+    }
+    else {
         print({
             error:true,
             message:msg.error.invalidAction(action)

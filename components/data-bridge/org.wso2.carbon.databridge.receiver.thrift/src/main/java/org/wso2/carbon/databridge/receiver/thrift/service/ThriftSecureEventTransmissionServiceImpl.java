@@ -19,19 +19,9 @@
 package org.wso2.carbon.databridge.receiver.thrift.service;
 
 import org.apache.thrift.TException;
-import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
-import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
-import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
-import org.wso2.carbon.databridge.commons.exception.NoStreamDefinitionExistException;
-import org.wso2.carbon.databridge.commons.exception.SessionTimeoutException;
-import org.wso2.carbon.databridge.commons.exception.UndefinedEventTypeException;
+import org.wso2.carbon.databridge.commons.exception.*;
 import org.wso2.carbon.databridge.commons.thrift.data.ThriftEventBundle;
-import org.wso2.carbon.databridge.commons.thrift.exception.ThriftAuthenticationException;
-import org.wso2.carbon.databridge.commons.thrift.exception.ThriftDifferentStreamDefinitionAlreadyDefinedException;
-import org.wso2.carbon.databridge.commons.thrift.exception.ThriftMalformedStreamDefinitionException;
-import org.wso2.carbon.databridge.commons.thrift.exception.ThriftNoStreamDefinitionExistException;
-import org.wso2.carbon.databridge.commons.thrift.exception.ThriftSessionExpiredException;
-import org.wso2.carbon.databridge.commons.thrift.exception.ThriftUndefinedEventTypeException;
+import org.wso2.carbon.databridge.commons.thrift.exception.*;
 import org.wso2.carbon.databridge.commons.thrift.service.secure.ThriftSecureEventTransmissionService;
 import org.wso2.carbon.databridge.core.DataBridgeReceiverService;
 import org.wso2.carbon.databridge.core.EventConverter;
@@ -88,14 +78,38 @@ public class ThriftSecureEventTransmissionServiceImpl
             throws ThriftNoStreamDefinitionExistException, ThriftSessionExpiredException,
                    TException {
         try {
-            return dataBridgeReceiverService.findStreamId(sessionId, streamName, streamVersion);
-        } catch (NoStreamDefinitionExistException e) {
-            throw new ThriftNoStreamDefinitionExistException(e.getErrorMessage());
+            String streamDefinition = dataBridgeReceiverService.findStreamId(sessionId, streamName, streamVersion);
+            if (streamDefinition == null) {
+                //this is used as Thrift cannot send null values
+                throw new ThriftNoStreamDefinitionExistException("Stream definition not exist for " + streamName + " " + streamVersion);
+            }
+            return streamDefinition;
         } catch (SessionTimeoutException e) {
             throw new ThriftSessionExpiredException(e.getErrorMessage());
         }
     }
 
+    @Override
+    public boolean deleteStreamById(String sessionId, String streamId)
+            throws ThriftSessionExpiredException,
+            TException {
+        try {
+            return dataBridgeReceiverService.deleteStream(sessionId, sessionId);
+        } catch (SessionTimeoutException e) {
+            throw new ThriftSessionExpiredException(e.getErrorMessage());
+        }
+    }
+
+    @Override
+    public boolean deleteStreamByNameVersion(String sessionId, String streamName, String streamVersion)
+            throws ThriftSessionExpiredException,
+            TException {
+        try {
+            return dataBridgeReceiverService.deleteStream(sessionId, streamName, streamVersion);
+        } catch (SessionTimeoutException e) {
+            throw new ThriftSessionExpiredException(e.getErrorMessage());
+        }
+    }
 
     public void publish(ThriftEventBundle eventBundle)
             throws ThriftUndefinedEventTypeException, ThriftSessionExpiredException, TException {

@@ -377,10 +377,6 @@
                     <td>
                         <input type="hidden" name="clName<%=j%>" id="clName<%=j%>"
                                value="<%=name%>"/>
-                        <a class="edit-icon-link"
-                           onclick="showCLEditor('edit','<%=name%>','<%=columnFamily%>','<%=keyspace%>');"
-                           href="#"><fmt:message
-                                key="cassandra.actions.edit"/></a>
                         <a class="delete-icon-link"
                            onclick="deleteCL('<%=columnFamily%>','<%=j%>');"
                            href="#"><fmt:message

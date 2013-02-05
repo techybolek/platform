@@ -58,6 +58,10 @@ public class TargetErrorHandler {
                 mc.getAxisOperation().getMessageReceiver() == null) {
             return;
         }
+        
+        if(mc.getOperationContext().isComplete()){
+        	return;
+        }
 
         targetConfiguration.getWorkerPool().execute(new Runnable() {
             public void run() {

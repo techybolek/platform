@@ -21,13 +21,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>identity</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.identity.oauth.mediator</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.6</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Identity OAuth Mediator</name>
     <description>A custom wso2 products or solution</description>
@@ -37,14 +38,17 @@
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2</artifactId>
+	    <version>1.6.1.wso2v7</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
+            <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
+	    <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.apache.ws.commons.axiom.wso2</groupId>
@@ -53,7 +57,7 @@
         <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-core</artifactId>
-            <version>${synapse.version.identity}</version>
+            <version>2.1.1-wso2v1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -67,6 +71,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
+	        <version>4.0.6</version>
         </dependency>
     </dependencies>
 
@@ -94,6 +99,7 @@
                             !org.apache.axis2.databinding.utils.reader,
                             !org.pache.axis2.databinding.utils.writer,
                             !org.wso2.carbon.identity.oauth.mediator.*,
+                            org.wso2.carbon.identity.oauth2.stub.*;version="${carbon.platform.package.export.version}",
                             org.wso2.carbon.oauth.stub.*;version="${carbon.platform.package.import.version.range}",
                             *; resolution:=optional
                         </Import-Package>

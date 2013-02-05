@@ -17,17 +17,9 @@
 */
 package org.wso2.stratos.identity.saml2.sso.mgt.ui.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.service.component.ComponentContext;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.wso2.carbon.identity.sso.saml.SSOServiceProviderConfigManager;
-import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.stratos.identity.saml2.sso.mgt.ui.SSOLoginPageFilter;
-import org.wso2.stratos.identity.saml2.sso.mgt.ui.SSORedirectPageFilter;
-import org.wso2.stratos.identity.saml2.sso.mgt.ui.Util;
+import java.io.IOException;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
@@ -35,12 +27,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
-import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Hashtable;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.identity.sso.saml.SSOServiceProviderConfigManager;
+import org.wso2.stratos.identity.saml2.sso.mgt.ui.SSOLoginPageFilter;
+import org.wso2.stratos.identity.saml2.sso.mgt.ui.SSORedirectPageFilter;
+import org.wso2.stratos.identity.saml2.sso.mgt.ui.Util;
 
 /**
  * @scr.component name="org.wso2.stratos.identity.saml2.sso.mgt.ui"

@@ -53,6 +53,7 @@ import org.apache.neethi.PolicyComponent;
 import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.PolicyReference;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.core.Resources;
 import org.wso2.carbon.core.persistence.PersistenceFactory;
@@ -77,7 +78,6 @@ import org.wso2.carbon.utils.FileManipulator;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.ServerException;
 import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
-import org.wso2.carbon.utils.multitenancy.CarbonApplicationContextHolder;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
@@ -879,30 +879,50 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
 
         String fileName = null;
         for (Iterator<AxisService> serviceIter = asGroup.getServices(); serviceIter.hasNext(); ) {
-            CarbonApplicationContextHolder carbonApplicationContextHolder =
-                    CarbonApplicationContextHolder.getCurrentCarbonAppContextHolder();
-            carbonApplicationContextHolder.startApplicationFlow();
+            PrivilegedCarbonContext privilegedCarbonContext =
+                    PrivilegedCarbonContext.getCurrentContext();
+            PrivilegedCarbonContext.startTenantFlow();
             AxisService axisService = serviceIter.next();
             URL fn = axisService.getFileName();
             if (fn != null) {
                 fileName = fn.getPath();
             }
-            carbonApplicationContextHolder.setApplicationName(serviceGroupName);
-            // removing the service from axis configuration
-            axisConfig.removeService(axisService.getName());
-            //adding log per service in order to notify user about the service's state when viewing logs.
-            log.info("Undeploying Axis2 Service: " + axisService.getName());
-            carbonApplicationContextHolder.endApplicationFlow();
+            privilegedCarbonContext.setApplicationName(axisService.getName());
+
+            /*
+            WSAS-933 - We should not remove service from axisConfig, let Deployer to undeploy.
+            Only delete the file is enough.
+
+            TODO - For the moment this fix work for all service types expect proxy services defined on synspase.xml
+             */
+           if("proxy".equalsIgnoreCase(getServiceType(axisService))){
+               //originator param will read from ProxyObserver to identify if service is removed from
+               //Service listing UI
+               axisService.addParameter("originator","ServiceAdmin");
+               // removing the service from axis configuration
+               axisConfig.removeService(axisService.getName());
+               //adding log per service in order to notify user about the service's state when viewing logs.
+               log.info("Undeploying Axis2 Service: " + axisService.getName());
+
+           }
+
+
+
+            PrivilegedCarbonContext.endTenantFlow();
         }
+        /*
+            WSAS-933 - We should not remove service from axisConfig, let Deployer to undeploy.
+            Only delete the file is enough.
+             */
         // remove the service group from axis config and config context
-        AxisServiceGroup serviceGroup = axisConfig.removeServiceGroup(asGroup.getServiceGroupName());
-        if (serviceGroup != null) {
-            getConfigContext().removeServiceGroupContext(serviceGroup);
-            log.info(Messages.getMessage(DeploymentErrorMsgs.SERVICE_REMOVED,
-                                         fileName != null ? fileName : serviceGroupName));
-        } else {
-            axisConfig.removeFaultyService(fileName);
-        }
+        // AxisServiceGroup serviceGroup = axisConfig.removeServiceGroup(asGroup.getServiceGroupName());
+        // if (serviceGroup != null) {
+        //    getConfigContext().removeServiceGroupContext(serviceGroup);
+        //    log.info(Messages.getMessage(DeploymentErrorMsgs.SERVICE_REMOVED,
+        //                                 fileName != null ? fileName : serviceGroupName));
+        // } else {
+        //    axisConfig.removeFaultyService(fileName);
+        //  }
 
         /*
         TODO This code does not work
@@ -1059,7 +1079,13 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
 
     private String[] getServiceEPRs(String serviceName) throws AxisFault {
         getAxisService(serviceName).setEPRs(null);
-        return getAxisService(serviceName).getEPRs();
+        try{
+            return getAxisService(serviceName).getEPRs();
+        }catch(NullPointerException ignored){
+            //TODO: Hack to get rid of https://wso2.org/jira/browse/ESBJAVA-1545
+            //If any transport except HTTP/S added there will be NPE
+            return new String[0];
+        }
     }
 
     public void changeServiceState(String serviceName, boolean isActive) throws AxisFault {
@@ -1563,6 +1589,10 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
                 OMElement paramEle = param.getParameterElement();
                 if (paramEle != null) {
                     params.add(paramEle.toString());
+                } else if (param.getParameterType() == Parameter.TEXT_PARAMETER) {
+                    Parameter paramElement = ParameterUtil.createParameter(param.getName().trim(),
+                            (String) param.getValue(), param.isLocked());
+                    params.add(paramElement.getParameterElement().toString());
                 }
             }
 
@@ -1675,34 +1705,9 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
         // persistence
         ModuleFilePersistenceManager mfpm = pf.getModuleFilePM();
         try {
-            boolean isTransactionStarted = mfpm.isTransactionStarted(moduleName);
-            if (!isTransactionStarted) {
-                mfpm.beginTransaction(moduleName);
-            }
-            OMElement policyElement = PersistenceUtils.createPolicyElement(policy);
-            OMFactory omFactory = OMAbstractFactory.getOMFactory();
-            OMElement policyWrapperElement = omFactory.createOMElement(Resources.POLICY, null);
-
-            OMElement idElement = omFactory.createOMElement(Resources.ServiceProperties.POLICY_UUID, null);
-            idElement.setText("" + policy.getId());
-            policyWrapperElement.addChild(idElement);
-
-            policyWrapperElement.addAttribute(Resources.ServiceProperties.POLICY_TYPE,
-                                              "" + PolicyInclude.AXIS_MODULE_POLICY, null);
-            policyWrapperElement.addAttribute(Resources.VERSION, moduleVersion, null);
-            policyWrapperElement.addChild(policyElement);
-
-            String policiesPath = PersistenceUtils.
-                    getResourcePath(axisModule) + "/" + Resources.POLICIES;
-            if (!spm.getModuleFilePM().elementExists(moduleName, policiesPath)) {
-                OMElement policiesEl = omFactory.createOMElement(Resources.POLICIES, null);
-                spm.getModuleFilePM().put(moduleName, policiesEl, PersistenceUtils.getResourcePath(axisModule));
-            }
-
-            spm.getModuleFilePM().put(moduleName, policyWrapperElement, policiesPath);
-            if (!isTransactionStarted) {
-                mfpm.commitTransaction(moduleName);
-            }
+            pf.getModulePM().persistModulePolicy(moduleName, moduleVersion,
+                    policy, policy.getId(), "" + PolicyInclude.AXIS_MODULE_POLICY,
+                    PersistenceUtils.getResourcePath(axisModule));
         } catch (Exception e) {
             String msg = "Cannot persist module policy addition. Module " + moduleName + moduleVersion;
             log.error(msg, e);
@@ -1998,36 +2003,9 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
         // persistence
         ServiceGroupFilePersistenceManager sfpm = pf.getServiceGroupFilePM();
         try {
-            boolean isTransactionStarted = sfpm.isTransactionStarted(serviceGroupId);
-            if (!isTransactionStarted) {
-                sfpm.beginTransaction(serviceGroupId);
-            }
-            OMElement policyElement = PersistenceUtils.createPolicyElement(policy);
-            OMFactory omFactory = OMAbstractFactory.getOMFactory();
-            OMElement policyWrapperElement = omFactory.createOMElement(Resources.POLICY, null);
-
-            OMElement idElement = omFactory.createOMElement(Resources.ServiceProperties.POLICY_UUID, null);
-            idElement.setText("" + policy.getId());
-            policyWrapperElement.addChild(idElement);
-//            policyWrapperElement.addAttribute(Resources.ServiceProperties.POLICY_UUID, policy.getId(), null);
-
-            policyWrapperElement.addAttribute(Resources.ServiceProperties.POLICY_TYPE,
-                                              "" + PolicyInclude.AXIS_SERVICE_POLICY, null);
-            policyWrapperElement.addChild(policyElement);
-
-            sfpm.put(serviceGroupId, idElement.cloneOMElement(), PersistenceUtils.getResourcePath(axisService));
-
-            String policiesPath = PersistenceUtils.
-                    getResourcePath(axisService) + "/" + Resources.POLICIES;
-            if (!spm.getServiceGroupFilePM().elementExists(serviceGroupId, policiesPath)) {
-                OMElement policiesEl = omFactory.createOMElement(Resources.POLICIES, null);
-                spm.getServiceGroupFilePM().put(serviceGroupId, policiesEl, PersistenceUtils.getResourcePath(axisService));
-            }
-
-            spm.getServiceGroupFilePM().put(serviceGroupId, policyWrapperElement, policiesPath);
-            if (!isTransactionStarted) {
-                sfpm.commitTransaction(serviceGroupId);
-            }
+           String serviceXPath = PersistenceUtils.getResourcePath(axisService);
+           spm.persistServicePolicy(serviceGroupId, policy, policy.getId(),
+                    "" + PolicyInclude.AXIS_SERVICE_POLICY, serviceXPath, serviceXPath);
         } catch (Exception e) {
             String msg = "Cannot persist service policy addition. Service " + serviceGroupId;
             log.error(msg, e);
@@ -2058,42 +2036,15 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
             policy.setId(UIDGenerator.generateUID());
         }
 
+        // Persist the new policy to the file system
         try {
             String serviceXPath = PersistenceUtils.getResourcePath(axisService);
-            boolean transactionStarted = sfpm.isTransactionStarted(serviceGroupId);
-            if (!transactionStarted) {
-                sfpm.beginTransaction(serviceGroupId);
-            }
+            String operationXPath = PersistenceUtils.getResourcePath(
+                    axisService.getOperation(new QName(operationName)));
+            spm.persistServicePolicy(serviceGroupId, policy, policy.getId(),
+                    "" + PolicyInclude.AXIS_OPERATION_POLICY, serviceXPath,
+                    operationXPath);
 
-            // Persist the new policy to the file system
-            OMElement policyElement = PersistenceUtils.createPolicyElement(policy);
-            OMFactory omFactory = OMAbstractFactory.getOMFactory();
-            OMElement policyWrapperElement = omFactory.createOMElement(Resources.POLICY, null);
-
-            OMElement idElement = omFactory.createOMElement(Resources.ServiceProperties.POLICY_UUID, null);
-            idElement.setText("" + policy.getId());
-            policyWrapperElement.addChild(idElement);
-//            policyWrapperElement.addAttribute(Resources.ServiceProperties.POLICY_UUID, policy.getId(), null);
-
-            policyWrapperElement.addAttribute(Resources.ServiceProperties.POLICY_TYPE,
-                                              "" + PolicyInclude.AXIS_OPERATION_POLICY, null);
-            policyWrapperElement.addChild(policyElement);
-
-            // Update the service operation resource to point to this merged policy
-            sfpm.put(serviceGroupId, idElement.cloneOMElement(), PersistenceUtils.getResourcePath(axisService) + "/" +
-                                                                 Resources.OPERATION + PersistenceUtils.getXPathAttrPredicate(Resources.NAME, operationName));   //add it to operation element
-
-            String policiesPath = PersistenceUtils.
-                    getResourcePath(axisService) + "/" + Resources.POLICIES;
-            if (!spm.getServiceGroupFilePM().elementExists(serviceGroupId, policiesPath)) {
-                OMElement policiesEl = omFactory.createOMElement(Resources.POLICIES, null);
-                spm.getServiceGroupFilePM().put(serviceGroupId, policiesEl, PersistenceUtils.getResourcePath(axisService));
-            }
-
-            spm.getServiceGroupFilePM().put(serviceGroupId, policyWrapperElement, policiesPath);
-            if (!transactionStarted) {
-                sfpm.commitTransaction(serviceGroupId);
-            }
         } catch (Exception e) {
             log.error(e.getMessage());
             sfpm.rollbackTransaction(serviceGroupId);
@@ -2152,14 +2103,16 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
                 idElement.setText("" + policy.getId());
 
                 sfpm.put(serviceGroupId, messageInIdElement, PersistenceUtils.getResourcePath(axisService) + "/" +
-                                                             Resources.OPERATION + PersistenceUtils.getXPathAttrPredicate(Resources.NAME, operationName));   //add it to operation element
+                        Resources.OPERATION + PersistenceUtils.getXPathAttrPredicate(Resources.NAME, operationName));
+                        //add it to operation element
             } else if (messageType.equals(WSDLConstants.MESSAGE_LABEL_OUT_VALUE)) {
                 OMElement messageOutIdElement = omFactory.createOMElement(
                         Resources.ServiceProperties.MESSAGE_OUT_POLICY_UUID, null);
                 idElement.setText("" + policy.getId());
 
                 sfpm.put(serviceGroupId, messageOutIdElement, PersistenceUtils.getResourcePath(axisService) + "/" +
-                                                              Resources.OPERATION + PersistenceUtils.getXPathAttrPredicate(Resources.NAME, operationName));   //add it to operation element
+                        Resources.OPERATION + PersistenceUtils.getXPathAttrPredicate(Resources.NAME, operationName));
+                        //add it to operation element
             }
 
             String policiesPath = PersistenceUtils.
@@ -2167,6 +2120,15 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
             if (!spm.getServiceGroupFilePM().elementExists(serviceGroupId, policiesPath)) {
                 OMElement policiesEl = omFactory.createOMElement(Resources.POLICIES, null);
                 spm.getServiceGroupFilePM().put(serviceGroupId, policiesEl, PersistenceUtils.getResourcePath(axisService));
+            } else {
+                //you must manually delete the existing policy before adding new one.
+                String pathToPolicy = policiesPath +
+                        "/" + Resources.POLICY +
+                        PersistenceUtils.getXPathTextPredicate(
+                                Resources.ServiceProperties.POLICY_UUID, policy.getId());
+                if (spm.getServiceGroupFilePM().elementExists(serviceGroupId, pathToPolicy)) {
+                    spm.getServiceGroupFilePM().delete(serviceGroupId, pathToPolicy);
+                }
             }
 
             spm.getServiceGroupFilePM().put(serviceGroupId, policyWrapperElement, policiesPath);
@@ -2204,40 +2166,14 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
 
         try {
             String serviceXPath = PersistenceUtils.getResourcePath(axisService);
-            boolean transactionStarted = sfpm.isTransactionStarted(serviceGroupId);
-            if (!transactionStarted) {
-                sfpm.beginTransaction(serviceGroupId);
-            }
+            String bindingXPath = PersistenceUtils.getResourcePath(axisService) +
+                    "/" + Resources.ServiceProperties.BINDINGS +
+                    "/" + Resources.ServiceProperties.BINDING_XML_TAG +
+                    PersistenceUtils.getXPathAttrPredicate(Resources.NAME, bindingName);
+            spm.persistServicePolicy(serviceGroupId, policy, policy.getId(),
+                    "" + PolicyInclude.BINDING_POLICY, serviceXPath, bindingXPath);
 
-            // Persist the new policy to the file system
-            OMElement policyElement = PersistenceUtils.createPolicyElement(policy);
-            OMFactory omFactory = OMAbstractFactory.getOMFactory();
-            OMElement policyWrapperElement = omFactory.createOMElement(Resources.POLICY, null);
-            OMElement idElement = omFactory.createOMElement(Resources.ServiceProperties.POLICY_UUID, null);
-            idElement.setText("" + policy.getId());
-            policyWrapperElement.addChild(idElement);
 
-            policyWrapperElement.addAttribute(Resources.ServiceProperties.POLICY_TYPE,
-                                              "" + PolicyInclude.BINDING_POLICY, null);
-            policyWrapperElement.addChild(policyElement);
-
-            // Update the binding resource to point to this merged policy
-            sfpm.put(serviceGroupId, idElement.cloneOMElement(), PersistenceUtils.getResourcePath(axisService) +
-                                                                 "/" + Resources.ServiceProperties.BINDINGS +
-                                                                 "/" + Resources.ServiceProperties.BINDING_XML_TAG +
-                                                                 PersistenceUtils.getXPathAttrPredicate(Resources.NAME, bindingName));   //add it to binding element
-
-            String policiesPath = PersistenceUtils.
-                    getResourcePath(axisService) + "/" + Resources.POLICIES;
-            if (!spm.getServiceGroupFilePM().elementExists(serviceGroupId, policiesPath)) {
-                OMElement policiesEl = omFactory.createOMElement(Resources.POLICIES, null);
-                spm.getServiceGroupFilePM().put(serviceGroupId, policiesEl, PersistenceUtils.getResourcePath(axisService));
-            }
-
-            spm.getServiceGroupFilePM().put(serviceGroupId, policyWrapperElement, policiesPath);
-            if (!transactionStarted) {
-                sfpm.commitTransaction(serviceGroupId);
-            }
         } catch (Exception e) {
             log.error(e.getMessage());
             sfpm.rollbackTransaction(serviceGroupId);
@@ -2276,43 +2212,16 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
 
         try {
             String serviceXPath = PersistenceUtils.getResourcePath(axisService);
-            boolean transactionStarted = sfpm.isTransactionStarted(serviceGroupId);
-            if (!transactionStarted) {
-                sfpm.beginTransaction(serviceGroupId);
-            }
+            String bindingOperationXPath = PersistenceUtils.getResourcePath(axisService) +
+                    "/" + Resources.ServiceProperties.BINDINGS +
+                    "/" + Resources.ServiceProperties.BINDING_XML_TAG +
+                    PersistenceUtils.getXPathAttrPredicate(Resources.NAME, bindingName) +
+                    "/" + Resources.OPERATION +
+                    PersistenceUtils.getXPathAttrPredicate(Resources.NAME, operationName);
+            spm.persistServicePolicy(serviceGroupId, policy, policy.getId(),
+                    "" + PolicyInclude.BINDING_OPERATION_POLICY, serviceXPath,
+                    bindingOperationXPath);
 
-            // Persist the new policy to the file system
-            OMElement policyElement = PersistenceUtils.createPolicyElement(policy);
-            OMFactory omFactory = OMAbstractFactory.getOMFactory();
-            OMElement policyWrapperElement = omFactory.createOMElement(Resources.POLICY, null);
-
-            OMElement idElement = omFactory.createOMElement(Resources.ServiceProperties.POLICY_UUID, null);
-            idElement.setText("" + policy.getId());
-            policyWrapperElement.addChild(idElement);
-
-            policyWrapperElement.addAttribute(Resources.ServiceProperties.POLICY_TYPE,
-                                              "" + PolicyInclude.BINDING_OPERATION_POLICY, null);
-            policyWrapperElement.addChild(policyElement);
-
-            // Update the service operation resource to point to this merged policy
-            sfpm.put(serviceGroupId, idElement.cloneOMElement(), PersistenceUtils.getResourcePath(axisService) +
-                                                                 "/" + Resources.ServiceProperties.BINDINGS +
-                                                                 "/" + Resources.ServiceProperties.BINDING_XML_TAG +
-                                                                 PersistenceUtils.getXPathAttrPredicate(Resources.NAME, bindingName) +
-                                                                 "/" + Resources.OPERATION +
-                                                                 PersistenceUtils.getXPathAttrPredicate(Resources.NAME, operationName));   //add it to binding operation element
-
-            String policiesPath = PersistenceUtils.
-                    getResourcePath(axisService) + "/" + Resources.POLICIES;
-            if (!spm.getServiceGroupFilePM().elementExists(serviceGroupId, policiesPath)) {
-                OMElement policiesEl = omFactory.createOMElement(Resources.POLICIES, null);
-                spm.getServiceGroupFilePM().put(serviceGroupId, policiesEl, PersistenceUtils.getResourcePath(axisService));
-            }
-
-            spm.getServiceGroupFilePM().put(serviceGroupId, policyWrapperElement, policiesPath);
-            if (!transactionStarted) {
-                sfpm.commitTransaction(serviceGroupId);
-            }
         } catch (Exception e) {
             log.error(e.getMessage());
             sfpm.rollbackTransaction(serviceGroupId);

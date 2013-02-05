@@ -19,6 +19,7 @@ import org.apache.axiom.attachments.Attachments;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.AxisService;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.receivers.AbstractInMessageReceiver;
 import org.apache.commons.logging.Log;
@@ -30,7 +31,8 @@ import org.wso2.carbon.bpel.core.BPELConstants;
 import org.wso2.carbon.bpel.core.ode.integration.BPELMessageContext;
 import org.wso2.carbon.bpel.core.ode.integration.BPELProcessProxy;
 import org.wso2.carbon.bpel.core.ode.integration.utils.BPELMessageContextFactory;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.activation.DataHandler;
 import java.util.ArrayList;
@@ -49,8 +51,12 @@ import static org.wso2.carbon.bpel.core.ode.integration.utils.BPELMessageContext
 public class BPELMessageReceiver extends AbstractInMessageReceiver {
     private static Log log = LogFactory.getLog(BPELMessageReceiver.class);
     private static Log messageTraceLog = LogFactory.getLog(BPELConstants.MESSAGE_TRACE);
+    private static final String REQ_RES_TRACE = "org.wso2.carbon.bpel.ReqResTraceLog";
+    private static Log reqResTraceLog = LogFactory.getLog(REQ_RES_TRACE);
 
     private BPELProcessProxy processProxy;
+    private long requestTime;
+    private String status = "FAIL";
 
     /**
      * Upload each attachment from attachment-map and returns a list of attachment ids.
@@ -95,8 +101,8 @@ public class BPELMessageReceiver extends AbstractInMessageReceiver {
 
     protected final void invokeBusinessLogic(final MessageContext inMessageContext)
             throws AxisFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(CarbonContext.
+                getCurrentContext().getTenantId());
 
         if (messageTraceLog.isDebugEnabled()) {
            /* messageTraceLog.debug("Message received: Message Id: " +
@@ -145,14 +151,20 @@ public class BPELMessageReceiver extends AbstractInMessageReceiver {
     }
 
     private void handleInOutOperation(BPELMessageContext bpelMessageContext) throws AxisFault {
+        traceRequestLine(bpelMessageContext.getInMessageContext());
         if (log.isDebugEnabled()) {
             log.debug("Received request message for "
                     + bpelMessageContext.getInMessageContext().getAxisService().getName() + "."
                     + bpelMessageContext.getInMessageContext().getAxisOperation().getName());
         }
-
-        processProxy.onAxisServiceInvoke(bpelMessageContext);
-
+        try {
+            processProxy.onAxisServiceInvoke(bpelMessageContext);
+        } catch (AxisFault e) {
+            status = "FAIL";
+            traceStatus(bpelMessageContext.getInMessageContext().getMessageID(), "response");
+            throw e;
+        }
+        status = bpelMessageContext.getOutMessageContext().isFault()? "FAIL" : "SUCCESS";
         if (log.isDebugEnabled()) {
             log.debug("Reply for "
                     + bpelMessageContext.getInMessageContext().getAxisService().getName() + "."
@@ -160,19 +172,55 @@ public class BPELMessageReceiver extends AbstractInMessageReceiver {
             log.debug("\tReply message "
                     + bpelMessageContext.getOutMessageContext().getEnvelope());
         }
-
-        AxisEngine.send(bpelMessageContext.getOutMessageContext());
+        try {
+            AxisEngine.send(bpelMessageContext.getOutMessageContext());
+        } catch (AxisFault e) {
+            status = "FAIL";
+            traceStatus(bpelMessageContext.getInMessageContext().getMessageID(), "response");
+            throw e;
+        }
+        status = "SUCCESS";
+        traceStatus(bpelMessageContext.getInMessageContext().getMessageID(), "response");
     }
 
     private void handleInOnlyOperation(BPELMessageContext bpelMessageContext) throws AxisFault {
+        traceRequestLine(bpelMessageContext.getInMessageContext());
         if (log.isDebugEnabled()) {
             log.debug("Received one-way message for "
                     + bpelMessageContext.getInMessageContext().getAxisService().getName() + "."
                     + bpelMessageContext.getInMessageContext().getAxisOperation().getName());
         }
-
-        processProxy.onAxisServiceInvoke(bpelMessageContext);
+        try {
+            processProxy.onAxisServiceInvoke(bpelMessageContext);
+        } catch (AxisFault e) {
+            status = "FAIL";
+            traceStatus(bpelMessageContext.getInMessageContext().getMessageID(), "response");
+            throw e;
+        }
+        status = "SUCCESS";
+        traceStatus(bpelMessageContext.getInMessageContext().getMessageID(), "response");
     }
 
+    private void traceStatus(String messageId, String direction) {
+        if (reqResTraceLog.isTraceEnabled()) {
+            reqResTraceLog.trace("UUID=" + messageId +
+                                  ",Direction:" + direction +
+                                  ",Status=" + status +
+                                  ",timeSpentForResponse=" + (System.currentTimeMillis() - requestTime));
+        }
+    }
+
+    private void traceRequestLine(final MessageContext inMessageContext) {
+        if (reqResTraceLog.isTraceEnabled()) {
+            requestTime = System.currentTimeMillis();
+            AxisService axisService = inMessageContext.getAxisService();
+            String epName = axisService.getEndpointName();
+            epName = axisService.getEndpoint(epName).getEndpointURL();
+            reqResTraceLog.trace("To:" + epName +
+                                  ",MessageID:" + inMessageContext.getMessageID() +
+                                  ",Direction:request" +
+                                  ",requestTime:" + requestTime);
+        }
+    }
 
 }

@@ -25,8 +25,8 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.WSDL2Constants;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
+import org.wso2.carbon.dataservices.core.DBUtils;
 import org.wso2.carbon.ntask.core.TaskInfo;
 import org.wso2.carbon.ntask.core.TaskInfo.TriggerInfo;
 import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
@@ -90,14 +90,6 @@ public class DSTaskUtils {
 		cal.setTime(date);
 		return cal;
 	}
-    
-    public static String getTenantDomainFromId(int tid) {
-        SuperTenantCarbonContext.startTenantFlow();
-        SuperTenantCarbonContext.getCurrentContext().setTenantId(tid);
-        String tenantDomain = SuperTenantCarbonContext.getCurrentContext().getTenantDomain();
-        SuperTenantCarbonContext.endTenantFlow();
-        return tenantDomain;
-    }
 
     public static String extractHTTPEPR(AxisService axisService) {
         for (String epr : axisService.getEPRs()) {
@@ -127,7 +119,7 @@ public class DSTaskUtils {
 		if (tid == MultitenantConstants.SUPER_TENANT_ID) {
 			tenantAxisConf = mainConfigCtx.getAxisConfiguration();
 		} else {
-		    String tenantDomain = DSTaskUtils.getTenantDomainFromId(tid);
+		    String tenantDomain = DBUtils.getTenantDomainFromId(tid);
 		    tenantAxisConf = TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, 
 		    		mainConfigCtx);
 		}

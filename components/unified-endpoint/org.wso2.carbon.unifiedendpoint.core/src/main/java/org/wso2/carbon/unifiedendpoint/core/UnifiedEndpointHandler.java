@@ -32,7 +32,7 @@ import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.api.Registry;
@@ -209,16 +209,18 @@ public class UnifiedEndpointHandler extends AbstractHandler {
                     String trimmedKey = key.trim();
                     String trimmedValue = uepTransport.getTransportProperties().get(trimmedKey)
                             .trim();
-                    if(trimmedKey.equals("FORCE_HTTP_1.0")) {
-                        if (trimmedValue.equals("true")) {
-                            //If the "FORCE_HTTP_1.0" key value is "true" -> "HTTPConstants.CHUNKED" key value is "false"
-                            msgContext.getOptions().setProperty(HTTPConstants.CHUNKED, false);
-                        } else {
-                            log.warn("Wrong parameter value: \"" + trimmedValue + "\" for the key: " +
-                                     trimmedKey);
+                    if (trimmedKey.equals("FORCE_HTTP_1.0") || trimmedKey.equals("authorization-username") || trimmedKey.equals("authorization-password")) {
+                        if (trimmedKey.equals("FORCE_HTTP_1.0")) {
+                            if (trimmedValue.equals("true")) {
+                                //If the "FORCE_HTTP_1.0" key value is "true" -> "HTTPConstants.CHUNKED" key value is "false"
+                                msgContext.getOptions().setProperty(HTTPConstants.CHUNKED, false);
+                            } else {
+                                log.warn("Wrong parameter value: \"" + trimmedValue + "\" for the key: " +
+                                        trimmedKey);
+                            }
                         }
                     } else {
-                        log.info("The property key: \"" + trimmedKey + "\" is still not supported.");
+                        log.info("The property key: \"" + trimmedKey + "\" is not supported.");
                     }
                 }
 
@@ -276,7 +278,7 @@ public class UnifiedEndpointHandler extends AbstractHandler {
                 throw new AxisFault(errMsg, e);
             }
         } else if (path.startsWith(UnifiedEndpointConstants.VIRTUAL_GOV_REG)) {
-            Registry reg = SuperTenantCarbonContext.getCurrentContext(
+            Registry reg = PrivilegedCarbonContext.getCurrentContext(
                     msgContext.getConfigurationContext()).
                     getRegistry(RegistryType.SYSTEM_GOVERNANCE);
             path = path.substring(UnifiedEndpointConstants.VIRTUAL_GOV_REG.length());
@@ -291,7 +293,7 @@ public class UnifiedEndpointHandler extends AbstractHandler {
                 throw new AxisFault(errMsg, e);
             }
         } else if (path.startsWith(UnifiedEndpointConstants.VIRTUAL_CONF_REG)) {
-            Registry reg = SuperTenantCarbonContext.getCurrentContext(
+            Registry reg = PrivilegedCarbonContext.getCurrentContext(
                     msgContext.getConfigurationContext()).
                     getRegistry(RegistryType.SYSTEM_CONFIGURATION);
             path = path.substring(UnifiedEndpointConstants.VIRTUAL_CONF_REG.length());

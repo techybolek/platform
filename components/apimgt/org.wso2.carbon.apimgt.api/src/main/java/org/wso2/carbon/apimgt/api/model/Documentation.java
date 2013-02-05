@@ -32,6 +32,25 @@ public class Documentation {
     private DocumentSourceType sourceType;
     private String sourceUrl;
     private Date lastUpdated;
+    private String filePath;
+
+    public String getOtherTypeName() {
+        return otherTypeName;
+    }
+
+    public void setOtherTypeName(String otherTypeName) {
+        this.otherTypeName = otherTypeName;
+    }
+
+    private String otherTypeName;
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
 
     public String getSourceUrl() {
         return sourceUrl;
@@ -98,7 +117,7 @@ public class Documentation {
     }
 
     public enum DocumentSourceType {
-        INLINE("In line"), URL("URL");
+        INLINE("In line"), URL("URL"), FILE("File");
 
         private String type;
 

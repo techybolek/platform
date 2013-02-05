@@ -478,6 +478,8 @@ public class CommonUtil {
                         config.setAdminUserName(element.getText());
                     } else if ("adminPassword".equals(element.getLocalName())) {
                         config.setAdminPassword(element.getText());
+                    } else if("SSOLoadingMessage".equals(element.getLocalName())){
+                        config.setSsoLoadingMessage(element.getText());
                     }
                 }
                 return config;

@@ -43,5 +43,9 @@ public class SAMLSSOConstants {
     public class AuthRequestElement{
     	public static final String ATTR_CONSUMING_SERVICE_INDEX = "AttributeConsumingServiceIndex";
     }
+    
+    public class Attribute {
+    	public static final String ISSUER_FORMAT = "urn:oasis:names:tc:SAML:2.0:nameid-format:entity";
+    }
 }
 

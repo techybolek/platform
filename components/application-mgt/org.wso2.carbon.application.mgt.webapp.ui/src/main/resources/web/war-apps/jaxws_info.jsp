@@ -80,12 +80,12 @@
             <% if ("Faulty".equals(data.getState())) { %>
                 <td><%= data.getContext()%></td>
             <% } else { %>
-                <td><%= data.getContext()%></td>
+                <td><a href="../webapp-list/webapp_info.jsp?webappFileName=<%= data.getWebappFileName()%>&webappState=<%= state%>&hostName=<%=data.getHostName()%>&httpPort=<%=data.getHttpPort()%>&webappType=jaxWebapp"><%= data.getContext()%></a></td>
             <% } %>
             <td><%= data.getState()%></td>
             <td>
                 <% if ("Started".equals(data.getState())) { %>
-                <a href="<%= "http://" + data.getHostName() + ":" + data.getHttpPort() + data.getContext() + "/services" %>" target="_blank" class="icon-link"
+                <a href="<%= "http://" + data.getHostName() + ":" + data.getHttpPort() + data.getContext() %>" target="_blank" class="icon-link"
                    style='background-image:url(../webapp-list/images/goto_url.gif)'>
                     <fmt:message key="carbonapps.jax.webapp.find.services"/>
                 </a>

@@ -255,7 +255,7 @@
                             type = "Message Sampling Processor";
                         }
                     } else {
-                        type = "Not defined";
+                        type = "Custom Message Processor";
                     }
                 } catch (Exception e) {
 
@@ -380,10 +380,10 @@
         </thead>
 
         <tr>
-            <td style="width:250px;">
+            <td style="width:155px;">
                 <a 
-                   href="manageMessageForwardingProcessor.jsp"
-                   style="background: url(../admin/images/add.gif) no-repeat; padding-left:20px;display:block;">
+                   href="manageMessageForwardingProcessor.jsp"  class="icon-link"
+                   style="background: url(../admin/images/add.gif)  no-repeat;">
                     <fmt:message key="scheduled.message.forwarding.processor"/>
                 </a>
             </td>
@@ -392,10 +392,10 @@
             </td>
         </tr>
         <tr>
-            <td style="width:250px;">
+            <td style="width:155px;">
                 <a 
-                   href="manageMessageSamplingProcessor.jsp"
-                   style="background: url(../admin/images/add.gif) no-repeat; padding-left:20px;">
+                   href="manageMessageSamplingProcessor.jsp" class="icon-link"
+                   style="background: url(../admin/images/add.gif)  no-repeat;">
                     <fmt:message key="message.sampling.processor"/>
                 </a>
             </td>
@@ -404,10 +404,10 @@
             </td>
         </tr>
         <tr>
-            <td style="width:170px;">
+            <td style="width:155px;">
                 <a 
-                   href="manageCustomMessageProcessor.jsp"
-                   style="background: url(../admin/images/add.gif) no-repeat; padding-left:20px;">
+                   href="manageCustomMessageProcessor.jsp" class="icon-link"
+                   style="background: url(../admin/images/add.gif) no-repeat;">
                     <fmt:message key="custom.message.processor"/>
                 </a>
             </td>

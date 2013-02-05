@@ -28,8 +28,6 @@ import org.wso2.carbon.governance.api.test.utils.BaseTestCase;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.api.wsdls.WsdlManager;
 import org.wso2.carbon.governance.api.wsdls.dataobjects.Wsdl;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.utils.RegistryUtils;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -128,10 +126,6 @@ public class ServiceTest extends BaseTestCase {
         assertTrue(services[1].getQName().equals(service.getQName()) ||
                 services[1].getQName().equals(service2.getQName()));
 
-        // update the service2
-        service2.setQName(new QName("http://bom.bom.com/baaaang", "bingo"));
-        serviceManager.updateService(service2);
-
         newService = serviceManager.getService(service2.getId());
         assertEquals(service2.getAttribute("custom-attribute"), "custom-value2");
 
@@ -184,14 +178,13 @@ public class ServiceTest extends BaseTestCase {
         Policy policy = policyManager.newPolicy(
                 "http://svn.wso2.org/repos/wso2/tags/wsf/php/2.1.0/samples/security/" +
                         "complete/policy.xml");
-        policy.setName("mypolicy.xml");
         policyManager.addPolicy(policy);
 
         service.attachPolicy(policy);
 
         Policy[] policies = service.getAttachedPolicies();
         assertEquals(policies.length, 1);
-        assertEquals(policies[0].getQName(), new QName("mypolicy.xml"));
+        assertEquals(policies[0].getQName(), new QName("policy.xml"));
 
         File file = new File("src/test/resources/service.metadata.xml");
         FileInputStream fileInputStream = new FileInputStream(file);
@@ -208,52 +201,10 @@ public class ServiceTest extends BaseTestCase {
             Service servicex = serviceManager.getService(serviceId);
             Policy[] policiesx = servicex.getAttachedPolicies();
             if (policiesx != null && policiesx.length != 0) {
-                assertEquals(policiesx[0].getQName(), new QName("mypolicy.xml"));
+                assertEquals(policiesx[0].getQName(), new QName("policy.xml"));
             }
         }
 
-    }
-
-    public void testServiceRename() throws Exception {
-        ServiceManager serviceManager = new ServiceManager(registry);
-
-        Service service = serviceManager.newService(new QName("http://banga.queek.queek/blaa", "sfosf"));
-        serviceManager.addService(service);
-
-        service.setQName(new QName("http://doc.x.ge/yong", "almdo"));
-        serviceManager.updateService(service);
-
-        Service exactServiceCopy = serviceManager.getService(service.getId());
-        QName qname = exactServiceCopy.getQName();
-
-        assertEquals(new QName("http://doc.x.ge/yong", "almdo"), qname);
-        assertEquals(RegistryUtils.getRelativePathToOriginal(registry.getRegistryContext().getServicePath(),
-                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                "/ge/x/doc/yong/almdo", exactServiceCopy.getPath());
-
-
-        // doing the same for a meta data service
-        File file = new File("src/test/resources/service.metadata.xml");
-        FileInputStream fileInputStream = new FileInputStream(file);
-        byte[] fileContents = new byte[(int)file.length()];
-        fileInputStream.read(fileContents);
-
-        OMElement contentElement = GovernanceUtils.buildOMElement(fileContents);
-
-        service = serviceManager.newService(contentElement);
-        serviceManager.addService(service);
-
-        service.setQName(new QName("http://doc.x.ge/yong", "almdo"));
-        serviceManager.updateService(service);
-
-        exactServiceCopy = serviceManager.getService(service.getId());
-        qname = exactServiceCopy.getQName();
-
-        assertEquals(new QName("http://doc.x.ge/yong", "almdo"), qname);
-        assertEquals(RegistryUtils.getRelativePathToOriginal(registry.getRegistryContext().getServicePath(),
-                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                "/ge/x/doc/yong/almdo", exactServiceCopy.getPath());
-                
     }
 
     public void testServiceDelete() throws Exception {

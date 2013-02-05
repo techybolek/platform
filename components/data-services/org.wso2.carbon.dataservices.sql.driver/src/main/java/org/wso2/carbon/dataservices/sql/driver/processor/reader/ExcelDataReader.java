@@ -22,13 +22,17 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.wso2.carbon.dataservices.sql.driver.TConnection;
 import org.wso2.carbon.dataservices.sql.driver.TExcelConnection;
+import org.wso2.carbon.dataservices.sql.driver.parser.Constants;
+import org.wso2.carbon.dataservices.sql.driver.query.ColumnInfo;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 
 public class ExcelDataReader extends AbstractFixedDataReader {
 
@@ -41,9 +45,8 @@ public class ExcelDataReader extends AbstractFixedDataReader {
         int noOfSheets = workbook.getNumberOfSheets();
         for (int i = 0; i < noOfSheets; i++) {
             Sheet sheet = workbook.getSheetAt(i);
-
             String sheetName = sheet.getSheetName();
-            Map<String, Integer> headers = this.extractColumnHeaders(sheet);
+            ColumnInfo[] headers = this.extractColumnHeaders(sheet);
             DataTable dataTable = new FixedDataTable(sheetName, headers);
 
             Iterator<Row> rowItr = sheet.rowIterator();
@@ -56,8 +59,8 @@ public class ExcelDataReader extends AbstractFixedDataReader {
                     while (cellItr.hasNext()) {
                         Cell cell = cellItr.next();
                         DataCell dataCell =
-                                new DataCell(cellIndex, cell.getCellType(), extractCellValue(cell));
-                        dataRow.addCell(dataCell);
+                                new DataCell(cellIndex + 1, cell.getCellType(), extractCellValue(cell));
+                        dataRow.addCell(dataCell.getColumnId(), dataCell);
                         cellIndex++;
                     }
                     dataTable.addRow(dataRow);
@@ -92,11 +95,22 @@ public class ExcelDataReader extends AbstractFixedDataReader {
      * Extracts out the columns in the given excel sheet
      *
      * @param sheet Sheet instance corresponding to the desired Excel sheet
-     * @return Map containing the column indexes and names
+     * @return Array containing the column header data
      * @throws java.sql.SQLException SQLException
      */
-    private Map<String, Integer> extractColumnHeaders(Sheet sheet) throws SQLException {
-        Map<String, Integer> headers = new HashMap<String, Integer>();
+    private ColumnInfo[] extractColumnHeaders(Sheet sheet) throws SQLException {
+        List<ColumnInfo> headers = new ArrayList<ColumnInfo>();
+
+        /* If hasHeader property is set to false, populate header map with column names following
+         * the format 'COLUMN' + 'i' where i corresponds to the column id */
+        if (!((TConnection)getConnection()).hasHeader()) {
+            int maxColumns = ((TConnection)getConnection()).getMaxColumns();
+            for (int i = 0; i < maxColumns; i++) {
+                headers.add(new ColumnInfo(i + 1, Constants.COLUMN + (i + 1), sheet.getSheetName(),
+                        -1, i + 1));
+            }
+            return headers.toArray(new ColumnInfo[headers.size()]);
+        }
         // Retrieving the first row of the sheet as the header row.
         Row row = sheet.getRow(0);
         if (row != null) {
@@ -107,11 +121,15 @@ public class ExcelDataReader extends AbstractFixedDataReader {
                     int cellType = cell.getCellType();
                     switch (cellType) {
                         case Cell.CELL_TYPE_STRING:
-                            headers.put(cell.getStringCellValue(), cell.getColumnIndex());
+                            headers.add(new ColumnInfo(cell.getColumnIndex() + 1,
+                                    cell.getStringCellValue(), sheet.getSheetName(), Types.VARCHAR,
+                                    cell.getColumnIndex() + 1));
                             break;
                         case Cell.CELL_TYPE_NUMERIC:
-                            headers.put(String.valueOf(cell.getNumericCellValue()),
-                                    cell.getColumnIndex());
+                            headers.add(new ColumnInfo(cell.getColumnIndex() + 1,
+                                    String.valueOf(cell.getNumericCellValue()),
+                                    sheet.getSheetName(), Types.INTEGER,
+                                    cell.getColumnIndex() + 1));
                             break;
                         default:
                             throw new SQLException("Invalid column type");
@@ -119,7 +137,7 @@ public class ExcelDataReader extends AbstractFixedDataReader {
                 }
             }
         }
-        return headers;
+        return headers.toArray(new ColumnInfo[headers.size()]);
     }
 
 }

@@ -18,6 +18,7 @@
 package org.wso2.carbon.identity.authenticator.krb5.ui;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,18 +34,19 @@ import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.ui.DefaultCarbonAuthenticator;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.identity.authenticator.krb5.stub.types.Krb5AuthenticatorStub;
+//import org.wso2.carbon.identity.authenticator.krb5.stub.types.Krb5AuthenticatorStub;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Map;
 
 public class Krb5UIAuthenticator extends AbstractCarbonUIAuthenticator{
 
 	private static final Log log = LogFactory.getLog(Krb5UIAuthenticator.class);
-	private static final int DEFAULT_PRIORITY_LEVEL = 10;
+	private static final int DEFAULT_PRIORITY_LEVEL = 2;
 	private static final String AUTHENTICATOR_NAME = "Krb5UIAuthenticator";
 
 	public boolean authenticate(Object object) throws AuthenticationException {
@@ -72,7 +74,17 @@ public class Krb5UIAuthenticator extends AbstractCarbonUIAuthenticator{
 		return DEFAULT_PRIORITY_LEVEL;
 	}
 
-	public String getAuthenticatorName() {
+    @Override
+    public String doAuthentication(Object o, boolean b, ServiceClient serviceClient, HttpServletRequest httpServletRequest) throws AuthenticationException {
+        return null;
+    }
+
+    @Override
+    public void handleRememberMe(Map map, HttpServletRequest httpServletRequest) throws AuthenticationException {
+
+    }
+
+    public String getAuthenticatorName() {
 		return AUTHENTICATOR_NAME;
 	}
 
@@ -107,8 +119,10 @@ public class Krb5UIAuthenticator extends AbstractCarbonUIAuthenticator{
 			Krb5AuthenticatorClient proxy = new Krb5AuthenticatorClient(configContext,
 					backendServerURL, cookie, session);
 
+            log.info("KRB User Name :" + userName);
 			String userNameWithDomain = userName;
 			String domainName = (String) request.getAttribute(RegistryConstants.TENANT_DOMAIN);
+            log.info("KRB Domain Name :" + domainName);
 			if (domainName != null) {
 				userNameWithDomain += "@" + domainName;
 			}
@@ -122,7 +136,22 @@ public class Krb5UIAuthenticator extends AbstractCarbonUIAuthenticator{
 		}
 	}
 
-	public void unauthenticate(Object object) throws Exception {
+    @Override
+    public boolean canHandle(HttpServletRequest httpServletRequest) {
+        return true;
+    }
+
+    @Override
+    public void authenticate(HttpServletRequest httpServletRequest) throws AuthenticationException {
+
+    }
+
+    @Override
+    public void authenticateWithCookie(HttpServletRequest httpServletRequest) throws AuthenticationException {
+
+    }
+
+    public void unauthenticate(Object object) throws Exception {
 		HttpSession session = ((HttpServletRequest) object).getSession();
 		ServletContext servletContext = session.getServletContext();
 		ConfigurationContext configContext = (ConfigurationContext) servletContext

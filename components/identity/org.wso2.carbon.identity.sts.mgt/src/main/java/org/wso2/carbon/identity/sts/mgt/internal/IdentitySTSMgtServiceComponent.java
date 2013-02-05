@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.identity.provider.IdentityProviderUtil;
 import org.wso2.carbon.identity.sts.mgt.STSObserver;
 import org.wso2.carbon.identity.sts.mgt.admin.STSConfigAdmin;
@@ -30,16 +31,13 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.jdbc.utils.Transaction;
 import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.security.SecurityConstants;
 import org.wso2.carbon.security.SecurityScenario;
 import org.wso2.carbon.security.SecurityScenarioDatabase;
 import org.wso2.carbon.security.config.SecurityConfigAdmin;
 import org.wso2.carbon.security.util.XmlConfiguration;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.utils.ConfigurationContextService;
-import org.wso2.carbon.utils.PreAxisConfigurationPopulationObserver;
 
 import java.net.URL;
 import java.util.Iterator;
@@ -65,6 +63,11 @@ import java.util.Iterator;
  * interface="org.wso2.carbon.security.config.SecurityConfigAdmin" cardinality="1..1"
  * policy="dynamic" bind="setSecurityConfigAdminService"
  * unbind="unsetSecurityConfigAdminService"
+ * @scr.reference name="cache.invalidation.service"
+ * interface="org.wso2.carbon.caching.core.CacheInvalidator"
+ * cardinality="0..1" policy="dynamic"
+ * bind="setCacheInvalidator"
+ * unbind="unsetCacheInvalidator"
  */
 public class IdentitySTSMgtServiceComponent {
 
@@ -77,6 +80,8 @@ public class IdentitySTSMgtServiceComponent {
     private static BundleContext bundleContext;
 
     private static RealmService realmService;
+
+    private static CacheInvalidator cacheInvalidator;
 
     public IdentitySTSMgtServiceComponent() {
     }
@@ -212,6 +217,17 @@ public class IdentitySTSMgtServiceComponent {
         }
     }
 
+    protected void setCacheInvalidator(CacheInvalidator invalidator) {
+        cacheInvalidator = invalidator;
+    }
+
+    protected void unsetCacheInvalidator(CacheInvalidator invalidator) {
+        cacheInvalidator = null;
+    }
+
+    public static CacheInvalidator getCacheInvalidator() {
+        return cacheInvalidator;
+    }
     /**
      * @throws Exception
      */

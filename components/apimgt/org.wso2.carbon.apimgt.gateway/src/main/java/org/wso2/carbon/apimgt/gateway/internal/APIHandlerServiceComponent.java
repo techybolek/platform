@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.gateway.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
+import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
@@ -35,16 +37,23 @@ public class APIHandlerServiceComponent {
     
     private static final Log log = LogFactory.getLog(APIHandlerServiceComponent.class);
 
+    private APIKeyValidatorClientPool clientPool;
+    private ThriftKeyValidatorClientPool thriftClientPool;
+
     protected void activate(ComponentContext context) {
         if (log.isDebugEnabled()) {
             log.debug("API handlers component activated");
         }
+        clientPool = APIKeyValidatorClientPool.getInstance();
+        thriftClientPool = ThriftKeyValidatorClientPool.getInstance();
     }
 
     protected void deactivate(ComponentContext context) {
         if (log.isDebugEnabled()) {
             log.debug("API handlers component deactivated");
         }
+        clientPool.cleanup();
+        thriftClientPool.cleanup();
     }
 
     protected void setConfigurationContextService(ConfigurationContextService cfgCtxService) {

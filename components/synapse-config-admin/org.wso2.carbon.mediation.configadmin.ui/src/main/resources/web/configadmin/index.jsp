@@ -165,13 +165,22 @@
     <%
         } else if ("updateFailed".equals(status)) {
     %>
-        <script type="text/javascript">
-            jQuery(document).ready(function() {
-                CARBON.showErrorDialog('<%=bundle.getString("failed.to.update.configuration")%>');
-            });
-        </script>
+    <script type="text/javascript">
+        jQuery(document).ready(function() {
+            CARBON.showErrorDialog('<%=bundle.getString("failed.to.update.configuration")%>');
+        });
+    </script>
     <%
-        } else if ("deleted".equals(status)) {
+    }
+    else if ("session".equals(status)) {
+    %>
+    <script type="text/javascript">
+        jQuery(document).ready(function() {
+            CARBON.showErrorDialog('<%=bundle.getString("failed.to.update.configuration.session")%>');
+        });
+    </script>
+    <%
+    } else if ("deleted".equals(status)) {
     %>
         <script type="text/javascript">
             jQuery(document).ready(function() {

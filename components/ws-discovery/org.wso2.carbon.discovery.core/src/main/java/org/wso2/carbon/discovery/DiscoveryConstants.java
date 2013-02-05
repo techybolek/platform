@@ -25,6 +25,7 @@ public class DiscoveryConstants {
 
     public static final String WS_DISCOVERY_NAMESPACE = "http://docs.oasis-open.org/ws-dd/ns/discovery/2009/01";
     public static final String WS_DISCOVERY_NS_PREFIX = "wsd";
+    public static final String EPR_ADDRESS_PREFIX = "urn:uuid:";
 
     // QName definitions for parsing SOAP payloads
     public static final QName HELLO = new QName(WS_DISCOVERY_NAMESPACE, "Hello", WS_DISCOVERY_NS_PREFIX);
@@ -95,4 +96,11 @@ public class DiscoveryConstants {
 
     // Policy file names
     public static final String DISCOVERY_CLIENT_POLICY = "wsd-client-policy.xml";
+
+    //Constants used to create SOAP header
+    public static final String DISCOVERY_HEADER_ELEMENT_NAMESPACE = "http://www.wso2.org/ws/discovery";
+    public static final String DISCOVERY_HEADER_ELEMENT_NAMESPACE_PREFIX = "mns";
+    public static final String DISCOVERY_HEADER_SERVICE_NAME = "serviceName";
+    public static final String DISCOVERY_HEADER_WSDL_URI = "wsdlURI";
+
 }

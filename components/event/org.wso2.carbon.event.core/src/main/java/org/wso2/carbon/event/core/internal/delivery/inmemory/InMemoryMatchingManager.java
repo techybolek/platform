@@ -51,7 +51,11 @@ public class InMemoryMatchingManager implements MatchingManager {
     public List<Subscription> getMatchingSubscriptions(String topicName) {
         InMemorySubscriptionStorage inMemorySubscriptionStorage =
                 this.tenantIDInMemorySubscriptionStorageMap.get(CarbonContext.getCurrentContext().getTenantId());
-        return inMemorySubscriptionStorage.getMatchingSubscriptions(topicName);
+        if(inMemorySubscriptionStorage != null) {
+            return inMemorySubscriptionStorage.getMatchingSubscriptions(topicName);
+        } else {
+            return new ArrayList<Subscription>();
+        }
     }
 
     public void unSubscribe(String subscriptionID) throws EventBrokerException {

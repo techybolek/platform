@@ -23,6 +23,13 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%
     String endpointName = request.getParameter("endpointName");
+    String dynamicPageNumberStr = request.getParameter("dynamicPageNumber");
+
+    int dynamicEnpointPageNumber = 0;
+    if(dynamicPageNumberStr!=null){
+        dynamicEnpointPageNumber = Integer.parseInt(dynamicPageNumberStr);
+    }
+    int numberOfDynamicPages = 0;
 
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     ConfigurationContext configContext =
@@ -34,8 +41,18 @@
     try {
         client = new EndpointAdminClient(cookie, serverURL, configContext);
         client.deleteDynamicEndpoint(endpointName);
-        dynamicEndpoints = client.getDynamicEndpoints();
+        dynamicEndpoints = client.getDynamicEndpoints(dynamicEnpointPageNumber, EndpointAdminClient.ENDPOINT_PER_PAGE);
+        if (dynamicEndpoints != null && dynamicEndpoints.length == 0 && dynamicEnpointPageNumber != 0) {
+            dynamicEnpointPageNumber--;
+            dynamicEndpoints = client.getDynamicEndpoints(dynamicEnpointPageNumber, EndpointAdminClient.ENDPOINT_PER_PAGE);
+        }
 
+        int dynamicEpCount = client.getDynamicEndpointCount();
+        if (dynamicEpCount % EndpointAdminClient.ENDPOINT_PER_PAGE == 0) {
+            numberOfDynamicPages = dynamicEpCount / EndpointAdminClient.ENDPOINT_PER_PAGE;
+        } else {
+            numberOfDynamicPages = dynamicEpCount / EndpointAdminClient.ENDPOINT_PER_PAGE + 1;
+        }
     } catch (Exception e) {
         CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request, e);
         return;
@@ -58,7 +75,12 @@
     </script>
     <p><fmt:message key="endpoints.dynamic.text"/></p>
     <br/>
-
+    <carbon:paginator pageNumber="<%=dynamicEnpointPageNumber%>"
+                      numberOfPages="<%=numberOfDynamicPages%>"
+                      page="index.jsp" pageNumberParameterName="dynamicPageNumber"
+                      resourceBundle="org.wso2.carbon.endpoint.ui.i18n.Resources"
+                      prevKey="prev" nextKey="next"
+                      parameters="<%=""%>"/>
     <br/>
     <table class="styledLeft" cellspacing="1" id="dynamicEndpointsTable">
         <thead>
@@ -108,7 +130,11 @@
         </tbody>
     </table>
     <br/>
-
+    <carbon:paginator pageNumber="<%=dynamicEnpointPageNumber%>" numberOfPages="<%=numberOfDynamicPages%>"
+                          page="index.jsp" pageNumberParameterName="dynamicPageNumber"
+                          resourceBundle="org.wso2.carbon.endpoint.ui.i18n.Resources"
+                          prevKey="prev" nextKey="next"
+                          parameters="<%=""%>"/>
     <%
         }
     %>

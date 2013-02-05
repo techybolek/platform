@@ -21,7 +21,8 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>source-requestprocessor-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -46,7 +47,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.sourcerequestprocessor.server</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server

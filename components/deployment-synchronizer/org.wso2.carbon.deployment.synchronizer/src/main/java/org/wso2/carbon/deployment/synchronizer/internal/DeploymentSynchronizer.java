@@ -20,9 +20,12 @@ package org.wso2.carbon.deployment.synchronizer.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.deployment.synchronizer.ArtifactRepository;
 import org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException;
 
+import java.io.File;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -108,7 +111,7 @@ public class DeploymentSynchronizer {
                     scheduleSynchronizationTask(filePath, task, period, period);
         } catch (DeploymentSynchronizerException e) {
             log.error("Error while performing the initial sync-up on the repository at: " +
-                    filePath + ". Auto sync tasks will not be engaged.", e);
+                      filePath + ". Auto sync tasks will not be engaged.", e);
         }
     }
 
@@ -129,10 +132,34 @@ public class DeploymentSynchronizer {
      * @throws DeploymentSynchronizerException If an error occurs while committing the artifacts
      */
     public synchronized boolean commit() throws DeploymentSynchronizerException {
+        if (log.isDebugEnabled()) {
+            log.debug("Started commit from " + filePath);
+        }
         boolean result = artifactRepository.commit(filePath);
         lastCommitTime = System.currentTimeMillis();
+        if (log.isDebugEnabled()) {
+            log.debug("Commit completed at " + new Date(lastCommitTime) + ". Status: " + result);
+        }
         return result;
     }
+
+    /**
+     * Commit the artifacts from the given path in the file system repository to the remote repository
+     *
+     * @throws DeploymentSynchronizerException If an error occurs while committing the artifacts
+     */
+    public synchronized boolean commit(String filePath) throws DeploymentSynchronizerException {
+        if (log.isDebugEnabled()) {
+            log.debug("Started commit from " + filePath);
+        }
+        boolean result = artifactRepository.commit(filePath);
+        lastCommitTime = System.currentTimeMillis();
+        if (log.isDebugEnabled()) {
+            log.debug("Commit completed at " + new Date(lastCommitTime) + ". Status: " + result);
+        }
+        return result;
+    }
+
 
     /**
      * Checkout the artifacts stored in the repository to the file system. If the artifacts
@@ -141,8 +168,50 @@ public class DeploymentSynchronizer {
      * @throws DeploymentSynchronizerException If an error occurs while checking out or updating the resources
      */
     public synchronized boolean checkout() throws DeploymentSynchronizerException {
+        if (log.isDebugEnabled()) {
+            log.debug("Started checkout to " + filePath);
+        }
         boolean result = artifactRepository.checkout(filePath);
         lastCheckoutTime = System.currentTimeMillis();
+        if (log.isDebugEnabled()) {
+            log.debug("Checkout completed at " + new Date(lastCheckoutTime) + ". Status: " + result);
+        }
+        return result;
+    }
+
+        /**
+     * Checkout the artifacts stored in the repository to the file system. If the artifacts
+     * have already been checked out, an update will be executed instead.
+     *
+     * @throws DeploymentSynchronizerException If an error occurs while checking out or updating the resources
+     */
+    public synchronized boolean checkout(String filePath, int depth) throws DeploymentSynchronizerException {
+        if (log.isDebugEnabled()) {
+            log.debug("Started checkout to " + filePath + " with depth: " + depth);
+        }
+        boolean result = artifactRepository.checkout(filePath, depth);
+        lastCheckoutTime = System.currentTimeMillis();
+        if (log.isDebugEnabled()) {
+            log.debug("Checkout completed at " + new Date(lastCheckoutTime) + ". Status: " + result);
+        }
+        return result;
+    }
+
+        /**
+     * Checkout the artifacts stored in the repository to the file system. If the artifacts
+     * have already been checked out, an update will be executed instead.
+     *
+     * @throws DeploymentSynchronizerException If an error occurs while checking out or updating the resources
+     */
+    public synchronized boolean update(String rootPath, String filePath, int depth) throws DeploymentSynchronizerException {
+        if (log.isDebugEnabled()) {
+            log.debug("Started to update " + filePath);
+        }
+        boolean result = artifactRepository.update(rootPath, filePath, depth);
+        lastCheckoutTime = System.currentTimeMillis();
+        if (log.isDebugEnabled()) {
+            log.debug("Update completed at " + new Date(lastCheckoutTime) + ". Status: " + result);
+        }
         return result;
     }
 
@@ -215,17 +284,41 @@ public class DeploymentSynchronizer {
     }
 
     public void doInitialSyncUp() throws DeploymentSynchronizerException {
+        log.info("Doing initial sync up...");
         if (autoCommit) {
             if (lastCheckoutTime == -1L) {
+                log.info("Checking out...");
                 checkout();
             }
+            log.info("Committing...");
             commit();
         }
 
         if (autoCheckout && lastCheckoutTime == -1L) {
+            log.info("Checking out...");
             checkout();
         }
     }
+
+    public boolean syncGhostMetaArtifacts() throws DeploymentSynchronizerException{
+        log.info("Doing ghost meta artifacts sync up...");
+        boolean hasFailed = false;
+        if (autoCheckout && lastCheckoutTime == -1L) {
+            log.info("Checking out...");
+            // checkout with empty depth
+            checkout(filePath, 2);
+            // update modules and its metafiles
+            update(filePath, filePath + File.separator +
+                             CarbonConstants.MODULES_DEPLOYMENT_DIR, 3);
+            update(filePath, filePath + File.separator +
+                             CarbonConstants.MODULE_METAFILE_HOTDEPLOYMENT_DIR, 3);
+            // then update only the ghost meta files
+            hasFailed = update(filePath, filePath + File.separator +
+                                         CarbonConstants.GHOST_METAFILE_DIR, 3);
+        }
+        return hasFailed;
+    }
+
 
     private boolean checkoutRequested() {
         return !useEventing || checkoutRequested.getAndSet(false);

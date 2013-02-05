@@ -27,10 +27,12 @@
 <%@ page import="java.lang.Exception" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PaginatedPolicySetDTO" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PolicyDTO" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.AttributeValueTreeNodeDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.AttributeTreeNodeDTO" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.HashMap" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PolicyAttributeDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PolicyEditorAttributeDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.AttributeTreeNodeDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
 <jsp:useBean id="entitlementPolicyBean" type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
              class="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean" scope="session"/>
 <jsp:setProperty name="entitlementPolicyBean" property="*" />
@@ -46,10 +48,13 @@
     String globalPolicyCombiningAlgorithm = null;
     String [] policyCombiningAlgorithms = null;
     PolicyDTO[] policies = null;
-    String[] policyTypes = new String[] {"Policy", "PolicySet"};
+    String[] policyTypes = new String[] {"Policy", "PolicySet", "Active" , "Promoted"};
     String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
     globalPolicyCombiningAlgorithm = request.getParameter("globalAlgorithmName");
+    session.removeAttribute("publishAllPolicies");
+    session.removeAttribute("selectedPolicies");
+    session.removeAttribute(EntitlementPolicyConstants.ENTITLEMENT_PUBLISHER_MODULE);
 
     int numberOfPages = 0;
     String pageNumber = request.getParameter("pageNumber");
@@ -69,6 +74,8 @@
     String policySearchString = request.getParameter("policySearchString");
     if (policySearchString == null) {
         policySearchString = "";
+    } else {
+        policySearchString = policySearchString.trim();
     }
 
     String paginationValue = "policyTypeFilter=" + policyTypeFilter +
@@ -84,55 +91,72 @@
             globalPolicyCombiningAlgorithm = client.getGlobalPolicyAlgorithm();              
         }
 
-        PolicyAttributeDTO[] policyAttributeDTOs =  client.getPolicyAttributeValues();
-        Map<String, String> targetFunctionMap = new HashMap<String, String>();
-        Map<String, String> ruleFunctionMap = new HashMap<String, String>();
-        Map<String, String> categoryMap = new HashMap<String, String>();
+        PolicyEditorAttributeDTO[] policyAttributeDTOs =  client.getPolicyAttributeValues();
+        if(policyAttributeDTOs != null){
 
-        for(PolicyAttributeDTO policyAttributeDTO : policyAttributeDTOs){
+            Map<String, String> targetFunctionMap = new HashMap<String, String>();
+            Map<String, String> ruleFunctionMap = new HashMap<String, String>();
+            Map<String, String> categoryMap = new HashMap<String, String>();
+            Map<String, String> attributeIdMap = new HashMap<String, String>();
+            Map<String, String> attributeIdDataTypeMap = new HashMap<String, String>();
 
-            AttributeValueTreeNodeDTO[] nodeDTOs =  policyAttributeDTO.getNodeDTOs();
-            for(AttributeValueTreeNodeDTO nodeDTO : nodeDTOs){
-                entitlementPolicyBean.putAttributeValueNodeMap(nodeDTO.getCategoryId(), nodeDTO);
-                entitlementPolicyBean.addDefaultAttributeId(nodeDTO.getCategoryId(),
-                                                            nodeDTO.getDefaultAttributeId());
-                entitlementPolicyBean.addDefaultDataType(nodeDTO.getCategoryId(), 
-                                                            nodeDTO.getDefaultAttributeDataType());
-            }
+            for(PolicyEditorAttributeDTO policyAttributeDTO : policyAttributeDTOs){
 
-            String[] targetFunctionArray = policyAttributeDTO.getSupportedTargetFunctions();
-            if(targetFunctionArray != null && targetFunctionArray.length > 1){
-                for(int i = 0; i < targetFunctionArray.length-1; i = i+2){
-                    targetFunctionMap.put(targetFunctionArray[i], targetFunctionArray[i+1]);
+                AttributeTreeNodeDTO[] nodeDTOs =  policyAttributeDTO.getNodeDTOs();
+                if(nodeDTOs != null){
+                    for(AttributeTreeNodeDTO nodeDTO : nodeDTOs){
+                        entitlementPolicyBean.putAttributeValueNodeMap(nodeDTO.getCategoryId(), nodeDTO);
+                        entitlementPolicyBean.addDefaultAttributeId(nodeDTO.getCategoryId(),
+                                                                    nodeDTO.getDefaultAttributeId());
+                        entitlementPolicyBean.addDefaultDataType(nodeDTO.getCategoryId(),
+                                                                    nodeDTO.getDefaultAttributeDataType());
+                        // This basic editor is always assume there is category called Subject
+                        if("Subject".equals(nodeDTO.getCategoryId())){
+                            String[] attributeIdArray = nodeDTO.getSupportedAttributeIds();
+                            if(attributeIdArray != null && attributeIdArray.length > 1){
+                                for(int i = 0; i < attributeIdArray.length-1; i = i+2){
+                                    attributeIdMap.put(attributeIdArray[i], attributeIdArray[i+1]);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                String[] targetFunctionArray = policyAttributeDTO.getSupportedTargetFunctions();
+                if(targetFunctionArray != null && targetFunctionArray.length > 1){
+                    for(int i = 0; i < targetFunctionArray.length-1; i = i+2){
+                        targetFunctionMap.put(targetFunctionArray[i], targetFunctionArray[i+1]);
+                    }
+                }
+
+                String[] ruleFunctionArray = policyAttributeDTO.getSupportedRuleFunctions();
+                if(ruleFunctionArray != null && ruleFunctionArray.length > 1){
+                    for(int i = 0; i < ruleFunctionArray.length-1; i = i+2){
+                        ruleFunctionMap.put(ruleFunctionArray[i], ruleFunctionArray[i+1]);
+                    }
+                }
+
+                String[] categoryArray = policyAttributeDTO.getSupportedCategories();
+                if(categoryArray != null && categoryArray.length > 1){
+                    for(int i = 0; i < categoryArray.length -1; i = i+2){
+                        categoryMap.put(categoryArray[i], categoryArray[i+1]);
+                    }
+                }
+
+                String[] attributeIdDataTypeArray = policyAttributeDTO.getSupportedCategories();
+                if(attributeIdDataTypeArray != null && attributeIdDataTypeArray.length > 1){
+                    for(int i = 0; i < attributeIdDataTypeArray.length -1; i = i+2){
+                        attributeIdDataTypeMap.put(attributeIdDataTypeArray[i], attributeIdDataTypeArray[i+1]);
+                    }
                 }
             }
 
-            String[] ruleFunctionArray = policyAttributeDTO.getSupportedRuleFunctions();
-            if(ruleFunctionArray != null && ruleFunctionArray.length > 1){
-                for(int i = 0; i < ruleFunctionArray.length-1; i = i+2){
-                    ruleFunctionMap.put(ruleFunctionArray[i], ruleFunctionArray[i+1]);
-                }
-            }
-
-            String[] categoryArray = policyAttributeDTO.getSupportedCategories();
-            if(categoryArray != null && targetFunctionArray.length > 1){
-                for(int i = 0; i < categoryArray.length -1; i = i+2){
-                    categoryMap.put(categoryArray[i], categoryArray[i+1]);
-                }
-            }
-
-            String[] preFunctions = policyAttributeDTO.getSupportedPreFunctions();
-            if(preFunctions != null && preFunctions.length > 0){
-                for(String preFunction : preFunctions){
-                    entitlementPolicyBean.addPreFunction(preFunction);
-                }
-            }
+            entitlementPolicyBean.setTargetFunctionMap(targetFunctionMap);
+            entitlementPolicyBean.setRuleFunctionMap(ruleFunctionMap);
+            entitlementPolicyBean.setCategoryMap(categoryMap);
+            entitlementPolicyBean.setAttributeIdMap(attributeIdMap);
+            entitlementPolicyBean.setAttributeIdDataTypeMap(attributeIdDataTypeMap);
         }
-
-        entitlementPolicyBean.setTargetFunctionMap(targetFunctionMap);
-        entitlementPolicyBean.setRuleFunctionMap(ruleFunctionMap);
-        entitlementPolicyBean.setCategoryMap(categoryMap);
-
         policies = paginatedPolicySetDTO.getPolicySet();
         numberOfPages = paginatedPolicySetDTO.getNumberOfPages();
 
@@ -176,28 +200,28 @@
 
     }
 
-    function clearCache() {
-        CARBON.showConfirmationDialog("<fmt:message key='cache.clear.message'/>",
-                function() {
-                    location.href = "clear-cache.jsp";
-                }, null);
-    }
-
-    function clearAttributeCache() {
-        CARBON.showConfirmationDialog("<fmt:message key='attribute.cache.clear.message'/>",
-                function() {
-                    location.href = "clear-attribute-cache.jsp";
-                }, null);
-    }
-
     function edit(policy) {
         location.href = "edit-policy.jsp?policyid=" + policy;
     }
+
     function enable(policy) {
         location.href = "enable-disable-policy.jsp?policyid=" + policy +"&action=enable";
     }
+    
     function disable(policy) {
         location.href = "enable-disable-policy.jsp?policyid=" + policy +"&action=disable";
+    }
+
+    function promote(policy) {
+        location.href = "enable-disable-policy.jsp?policyid=" + policy +"&action=promote";
+    }
+
+    function dePromote(policy) {
+        location.href = "enable-disable-policy.jsp?policyid=" + policy +"&action=depromote";
+    }
+
+    function syncPromote(policy) {
+        location.href = "enable-disable-policy.jsp?policyid=" + policy +"&action=sync";
     }
 
     function setPolicyCombineAlgorithm() {
@@ -231,6 +255,44 @@
                 document.policyForm.submit();
             });
         }
+    }
+
+    function publishPolicies(){
+
+        var selected = false;
+        if (document.policyForm.policies[0] != null) { // there is more than 1 policy
+            for (var j = 0; j < document.policyForm.policies.length; j++) {
+                selected = document.policyForm.policies[j].checked;
+                if (selected) break;
+            }
+        } else if (document.policyForm.policies != null) { // only 1 policy
+            selected = document.policyForm.policies.checked;
+        }
+        if (!selected) {
+            CARBON.showInfoDialog('<fmt:message key="select.policies.to.be.published"/>');
+            return;
+        }
+        if (allPolicesSelected) {
+            CARBON.showConfirmationDialog("<fmt:message key="publish.all.policies.prompt"/>",function() {
+                document.policyForm.action = "policy-publish.jsp";
+                document.policyForm.submit();
+            });
+        } else {
+            CARBON.showConfirmationDialog("<fmt:message key="publish.services.on.page.prompt"/>",function() {
+                document.policyForm.action = "policy-publish.jsp";
+                document.policyForm.submit();
+            });
+        }
+    }
+
+    function publishAllPolicies() {
+        CARBON.showConfirmationDialog("<fmt:message key="publish.all.policies.prompt"/>",function() {
+            location.href = "policy-publish.jsp?publishAllPolicies=true";
+        });                
+    }
+
+      function publishPolicy(policy) {
+        location.href = "policy-publish.jsp?policyid=" + policy;
     }
 
     function selectAllInThisPage(isSelected) {
@@ -267,7 +329,7 @@
                 if (document.policyForm.policies[j].checked) {
                     isSelected = true;
                 }
-            }                                                attribute_test
+            }                           
         } else if (document.policyForm.policies != null) { // only 1 service
             if (document.policyForm.policies.checked) {
                 isSelected = true;
@@ -277,11 +339,17 @@
     }
 
     function searchServices() {
+
+        jQuery('#searchTable > tbody:last').append('<tr><td><input type="hidden" name="policyOrder" id="policyOrder" value="' + orderRuleElement() +'"/></td></tr>') ;
         document.searchForm.submit();
     }
 
     function orderPolicies(){
-        location.href = 'update-policy-order.jsp?policyOrder=' + orderRuleElement() ;        
+//        location.href = 'update-policy-order.jsp?policyOrder=' + orderRuleElement() ;
+        jQuery('#searchTable > tbody:last').append('<tr><td><input type="hidden" name="policyOrder" id="policyOrder" value="' + orderRuleElement() +'"/></td></tr>') ;
+        document.searchForm.action="update-policy-order.jsp";
+        document.searchForm.submit();
+
     }
 
     function getSelectedPolicyType() {
@@ -363,14 +431,14 @@
 </script>
 
 <div id="middle">
-    <h2><fmt:message key='user.ent'/></h2>
+    <h2><fmt:message key='policy.administration'/></h2>
     <div id="workArea">
 
     <table style="border:none; margin-bottom:10px">
         <tr>
             <td>
                 <div style="height:30px;">
-                    <a href="javascript:document.location.href='policy-editor.jsp'" class="icon-link"
+                    <a href="javascript:document.location.href='basic-policy-editor.jsp'" class="icon-link"
                        style="background-image:url(../admin/images/add.gif);"><fmt:message key='add.new.ent.policy'/></a>
                 </div>
             </td>
@@ -384,18 +452,6 @@
                 <div style="height:30px;">
                     <a href="javascript:document.location.href='import-policy.jsp'" class="icon-link"
                        style="background-image:url(images/import.gif);"><fmt:message key='import.new.ent.policy'/></a>
-                </div>
-            </td>
-            <td>
-                <div style="height:30px;">
-                    <a href="#" class="icon-link" onclick="clearCache();return false;"
-                       style="background-image:url(images/cleanCache.png);"><fmt:message key='ent.clear.cache'/></a>
-                </div>
-            </td>
-            <td>
-                <div style="height:30px;">
-                    <a href="#" class="icon-link" onclick="clearAttributeCache();return false;"
-                       style="background-image:url(images/cleanCache.png);"><fmt:message key='ent.clear.attribute.cache'/></a>
                 </div>
             </td>
         </tr>
@@ -437,7 +493,8 @@
     </table>
 
     <form action="index.jsp" name="searchForm">
-        <table class="styledLeft" style="border:0; !important margin-top:10px;margin-bottom:10px;">
+        <table id="searchTable" name="searchTable" class="styledLeft" style="border:0;
+                                                !important margin-top:10px;margin-bottom:10px;">
             <tr>
             <td>
                 <table style="border:0; !important">
@@ -496,11 +553,20 @@
         <tr>
             <td>
                 <a style="cursor: pointer;" onclick="selectAllInThisPage(true);return false;" href="#"><fmt:message key="selectAllInPage"/></a>
-                &nbsp;<b>|</b>&nbsp;</td><td><a style="cursor: pointer;" onclick="selectAllInThisPage(false);return false;" href="#"><fmt:message key="selectNone"/></a>
+               &nbsp; | &nbsp;</td><td><a style="cursor: pointer;" onclick="selectAllInThisPage(false);return false;" href="#"><fmt:message key="selectNone"/></a>
             </td>
             <td width="20%">&nbsp;</td>
             <td>
-                <a onclick="deleteServices();return false;" id="delete1" href="#"><fmt:message key="delete"/></a>
+                <a onclick="deleteServices();return false;"  href="#"  class="icon-link"
+                   style="background-image: url(images/delete.gif);" ><fmt:message key="delete"/></a>
+            </td>
+            <td>
+                <a onclick="publishPolicies();return false;"  href="#" class="icon-link"
+                   style="background-image: url(images/publish.gif);" ><fmt:message key="publish.selected"/></a>
+            </td>
+            <td>
+                <a onclick="publishAllPolicies();return false;"  class="icon-link" href="#"
+                   style="background-image: url(images/publish-all.gif);" ><fmt:message key="publish.all.policies"/></a>
             </td>
             <td width="20%">&nbsp;</td>            
             <td style="border:0; !important">
@@ -572,6 +638,22 @@
                     <% if(edit){%> onclick="enable('<%=policies[i].getPolicyId()%>');return false;"  <%}%>
                     href="#" style="background-image: url(images/enable.gif);" class="icon-link">
                     <fmt:message key='enable.policy'/></a>
+                    <%} %>
+                    <% if (policies[i].getPromoteStatus() == 2) { %>
+                    <a title="<fmt:message key='not.promote.policy'/>"
+                    <% if(edit){%> onclick="dePromote('<%=policies[i].getPolicyId()%>');return false;" <%}%>
+                    href="#" style="background-image: url(images/delete.gif);" class="icon-link">
+                    <fmt:message key='not.promote.policy'/></a>
+                    <% } else if(policies[i].getPromoteStatus() == 1) { %>
+                    <a title="<fmt:message key='sync.policy'/>"
+                    <% if(edit){%> onclick="promote('<%=policies[i].getPolicyId()%>');return false;"  <%}%>
+                    href="#" style="background-image: url(images/sync.png);" class="icon-link">
+                    <fmt:message key='sync.policy'/></a>
+                    <%} else { %>
+                    <a title="<fmt:message key='promote.policy'/>"
+                    <% if(edit){%> onclick="promote('<%=policies[i].getPolicyId()%>');return false;"  <%}%>
+                    href="#" style="background-image: url(images/publish-pdp.gif);" class="icon-link">
+                    <fmt:message key='promote.policy'/></a>
                     <%} %>
                 </td>
             </tr>

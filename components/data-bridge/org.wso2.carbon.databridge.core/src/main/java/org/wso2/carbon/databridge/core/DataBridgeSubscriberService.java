@@ -31,5 +31,16 @@ public interface DataBridgeSubscriberService extends StreamDefinitionStore {
      */
     public void subscribe(AgentCallback agentCallback);
 
+    /**
+     * CEP/BAM can subscribe for Raw Event Streams
+     *
+     * @param agentCallback callbacks of the subscribers
+     */
+    public void subscribe(RawDataAgentCallback agentCallback);
+
     public List<AgentCallback> getSubscribers();
+
+    public List<RawDataAgentCallback> getRawDataSubscribers();
+
+
 }

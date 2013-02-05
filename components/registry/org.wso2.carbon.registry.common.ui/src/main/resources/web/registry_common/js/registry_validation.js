@@ -9,6 +9,26 @@ function validateEmpty(fld,fldName) {
     return error;
 }
 
+function validateRegex(regexStr, fldEleArr, fldName) {
+    var regex = new RegExp(regexStr);
+    var actual = "";
+    for (var i=0; i<fldEleArr.size(); ++i) {
+        if (i != 0) {
+            actual += ":";
+        }
+        var val = (!fldEleArr[i] ||  fldEleArr[i].value == null || fldEleArr[i].value == undefined)
+            ? "" : fldEleArr[i].value;
+        actual += val.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+    }
+
+    if (!regex.test(actual)) {
+        return fldName + " " + org_wso2_carbon_registry_common_ui_jsi18n["invalid.regex"] + ": " +
+            regexStr  + "<br />";
+    } else {
+        return "";
+    }
+}
+
 function validateUrl(fld,fldName) {
 
 	var error = "";
@@ -90,7 +110,7 @@ function validateToFromDate(from, to) {
 function validateDate(fld,fldName){
     var error = "";
     var allowed= /^((0[1-9]|1[0-2])\/([0-2][0-9]|3[0-1])\/[1-2][0-9][0-9][0-9])$/;
-    if (allowed.test(fld.value)) {
+    if (fld.value.length == 0 || allowed.test(fld.value)) {
 //        fld.style.background = 'White';
     }
     else {

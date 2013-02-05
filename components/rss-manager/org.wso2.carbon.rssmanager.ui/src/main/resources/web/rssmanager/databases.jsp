@@ -67,7 +67,7 @@
                     <tr>
                         <th><fmt:message key="rss.manager.db.name"/></th>
                         <th><fmt:message key="rss.manager.instance.name"/></th>
-                        <th><fmt:message key="rss.manager.tenant.domain"/></th>
+                        <%--<th><fmt:message key="rss.manager.tenant.domain"/></th>--%>
                         <th><fmt:message key="rss.manager.db.url"/></th>
                         <th><fmt:message key="rss.manager.actions"/></th>
                     </tr>
@@ -83,8 +83,8 @@
                         </td>
                         <td><%=database.getRssInstanceName()%>
                         </td>
-                        <td><%=database.getRssTenantDomain()%>
-                        </td>
+                        <%--<td><%=database.getRssTenantDomain()%>--%>
+                        <%--</td>--%>
                         <td><%=database.getUrl()%>
                         </td>
                         <%

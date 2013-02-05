@@ -81,6 +81,29 @@ public class ApplicationAdminClient {
             handleException(bundle.getString("cannot.delete.artifact"), e);
         }
     }
+    public String[] getAllFaultyApps() throws AxisFault {
+        try {
+            return stub.listAllFaultyApplications();
+        } catch (java.lang.Exception e) {
+            handleException(bundle.getString("cannot.get.service.data"), e);
+        }
+        return null;
+    }
+    public String getFaultException(String faultyAppName) throws AxisFault{
+        try {
+            return stub.getFaultException(faultyAppName);
+        } catch (java.lang.Exception e) {
+            handleException(bundle.getString("cannot.get.service.data"), e);
+        }
+        return null;
+    }
+    public void deleteFaultyApp(String[] faultyAppName) throws AxisFault{
+        try {
+            stub.deleteFaultyApplication(faultyAppName);
+        } catch (java.lang.Exception e) {
+            handleException(bundle.getString("cannot.get.service.data"), e);
+        }
+    }
 
 //    public void deleteServiceGroup(String sgName) throws AxisFault {
 //        try {

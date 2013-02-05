@@ -1,5 +1,0 @@
-
-                <%
-                    // include the footer
-                    include('footer.jag');
-                %>

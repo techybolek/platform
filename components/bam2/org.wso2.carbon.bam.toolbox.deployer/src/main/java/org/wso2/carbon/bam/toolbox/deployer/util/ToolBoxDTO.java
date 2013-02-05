@@ -28,7 +28,7 @@ public class ToolBoxDTO {
     private ArrayList<AnalyzerScriptDTO> analtytics;
     private ArrayList<DashBoardTabDTO> dashboardTabs;
     private ArrayList<JasperTabDTO> jasperTabs;
-    private ArrayList<String> evenStreamDefs;
+    private ArrayList<StreamDefnDTO> dataStreamDefs;
     private String scriptsParentDirectory;
     private String gagetsParentDirectory;
     private String jasperParentDirectory;
@@ -43,7 +43,7 @@ public class ToolBoxDTO {
         analtytics = new ArrayList<AnalyzerScriptDTO>();
         dashboardTabs = new ArrayList<DashBoardTabDTO>();
         jasperTabs = new ArrayList<JasperTabDTO>();
-        evenStreamDefs = new ArrayList<String>();
+        dataStreamDefs = new ArrayList<StreamDefnDTO>();
         datasource = "";
     }
 
@@ -145,12 +145,15 @@ public class ToolBoxDTO {
         return dsConfiguration;
     }
 
-    public ArrayList<String> getEvenStreamDefs() {
-        return evenStreamDefs;
+    public ArrayList<StreamDefnDTO> getDataStreamDefs() {
+        return dataStreamDefs;
     }
 
-    public void setEvenStreamDefs(ArrayList<String> evenStreamDefs) {
-        this.evenStreamDefs = evenStreamDefs;
+    public void setDataStreamDefs(ArrayList<String> dataStreamDefNames) {
+        this.dataStreamDefs = new ArrayList<StreamDefnDTO>();
+        for (String defn : dataStreamDefNames) {
+            this.dataStreamDefs.add(new StreamDefnDTO(defn));
+        }
     }
 
     public String getStreamDefnParentDirectory() {
@@ -188,6 +191,43 @@ public class ToolBoxDTO {
         }
         if (!found) {
             throw new BAMComponentNotFoundException("Specified analytics script: " + scriptName + " is not found!!");
+        }
+    }
+
+    public ArrayList<String> getStreamDefnNames() {
+        ArrayList<String> names = new ArrayList<String>();
+        for (StreamDefnDTO aStreamDefn : dataStreamDefs) {
+            names.add(aStreamDefn.getFileName());
+        }
+        return names;
+    }
+
+    public void setCredentialsForStreamDefn(String streamDefnName, String username, String password)
+            throws BAMToolboxDeploymentException, BAMComponentNotFoundException {
+        boolean found = false;
+        if (null != streamDefnName && !streamDefnName.isEmpty()) {
+            for (StreamDefnDTO aStreamDefn : dataStreamDefs) {
+                if (aStreamDefn.getFileName().equalsIgnoreCase(streamDefnName)) {
+                    aStreamDefn.setUsername(username);
+                    aStreamDefn.setPassword(password);
+                    found = true;
+                    break;
+                }
+            }
+        } else {
+            throw new BAMToolboxDeploymentException("Stream definition name is not specified...!!");
+        }
+        if (!found) {
+            throw new BAMComponentNotFoundException("Specified stream definition: " + streamDefnName + " is not found!!");
+        }
+    }
+
+    public void removeStreamDefn(String streamDefnFileName){
+        for (int i=0; i<this.dataStreamDefs.size(); i++){
+            if(this.dataStreamDefs.get(i).getFileName().equalsIgnoreCase(streamDefnFileName)){
+                this.dataStreamDefs.remove(i);
+                break;
+            }
         }
     }
 }

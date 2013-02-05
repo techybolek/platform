@@ -18,15 +18,18 @@
  */
 package org.wso2.carbon.dataservices.sql.driver.query.update;
 
-import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataCell;
+import com.google.gdata.data.spreadsheet.ListEntry;
+import com.google.gdata.data.spreadsheet.ListFeed;
+import com.google.gdata.data.spreadsheet.WorksheetEntry;
+import com.google.gdata.util.ServiceException;
+import org.wso2.carbon.dataservices.sql.driver.TDriverUtil;
 import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataRow;
-import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataTable;
-import org.wso2.carbon.dataservices.sql.driver.processor.reader.FixedDataTable;
+import org.wso2.carbon.dataservices.sql.driver.query.ColumnInfo;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 import java.util.Map;
 
 public class GSpreadUpdateQuery extends UpdateQuery {
@@ -37,39 +40,51 @@ public class GSpreadUpdateQuery extends UpdateQuery {
 
     @Override
     public ResultSet executeQuery() throws SQLException {
+        this.executeSQL();
         return null;
     }
 
     @Override
     public int executeUpdate() throws SQLException {
-        return 0;
+        return this.executeSQL();
     }
 
     @Override
     public boolean execute() throws SQLException {
-        return false;
+        return (this.executeSQL() > 0);
     }
 
     private int executeSQL() throws SQLException {
+        int count = 0;
         Map<Integer, DataRow> result;
-        FixedDataTable table = new FixedDataTable(getTargetTableName(), 
-        		getTargetTable().getHeaders());
         if (getCondition().getLhs() == null && getCondition().getRhs() == null) {
             result = getTargetTable().getRows();
         } else {
             result = getCondition().process(getTargetTable());
         }
-        table.setData(result);
+        WorksheetEntry currentWorkSheet =
+                TDriverUtil.getCurrentWorkSheetEntry(getConnection(), getTargetTableName());
+        if (currentWorkSheet == null) {
+            throw new SQLException("WorkSheet '" + getTargetTableName() + "' does not exist");
+        }
 
+        ListFeed listFeed = TDriverUtil.getListFeed(getConnection(), currentWorkSheet);
         for (Map.Entry<Integer, DataRow> row : result.entrySet()) {
-            List<DataCell> cells = row.getValue().getCells();
-            for (DataCell cell : cells) {
-                if (cell.getColumnId() == this.extractColumnId(cell.getColumnName())) {
-                    //cell.setCellValue();
-                }
+            ListEntry listEntry = listFeed.getEntries().get(row.getKey() - 1);
+            for (ColumnInfo column : getTargetColumns()) {
+                listEntry.getCustomElements().setValueLocal(column.getName(),
+                        column.getValue().toString());
+            }
+            try {
+                listEntry.update();
+                count++;
+            } catch (IOException e) {
+                throw new SQLException("Error occurred while updating the record ", e);
+            } catch (ServiceException e) {
+                throw new SQLException("Error occurred while updating the record", e);
             }
         }
-        return 0;
+        return count;
     }
 
     

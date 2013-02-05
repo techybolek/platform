@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.um.ws.api.stub.RemoteAuthorizationManagerServiceStub;
+import org.wso2.carbon.um.ws.api.stub.RemoteUserStoreManagerServiceStub;
 import org.wso2.carbon.utils.CarbonUtils;
 
 /**
@@ -42,7 +43,8 @@ class RemoteAuthorizationManagerClient {
 
     private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
 
-    private RemoteAuthorizationManagerServiceStub clientStub;
+    private RemoteAuthorizationManagerServiceStub authorizationManager;
+    private RemoteUserStoreManagerServiceStub userStoreManager;
     private String username;
     private String password;
     private String cookie;
@@ -59,18 +61,23 @@ class RemoteAuthorizationManagerClient {
         }
 
         try {
-            clientStub = new RemoteAuthorizationManagerServiceStub(null, serviceURL +
+            authorizationManager = new RemoteAuthorizationManagerServiceStub(null, serviceURL +
                     "RemoteAuthorizationManagerService");
-            ServiceClient client = clientStub._getServiceClient();
-            Options options = client.getOptions();
-            options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
-            options.setProperty(HTTPConstants.SO_TIMEOUT, TIMEOUT_IN_MILLIS);
-            options.setProperty(HTTPConstants.CONNECTION_TIMEOUT, TIMEOUT_IN_MILLIS);
-            options.setCallTransportCleanup(true);
-            options.setManageSession(true);
+            userStoreManager = new RemoteUserStoreManagerServiceStub(null, serviceURL +
+                    "RemoteUserStoreManagerService");
+            for (ServiceClient client : new ServiceClient[] {
+                    authorizationManager._getServiceClient(),
+                    userStoreManager._getServiceClient()}) {
+                Options options = client.getOptions();
+                options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
+                options.setProperty(HTTPConstants.SO_TIMEOUT, TIMEOUT_IN_MILLIS);
+                options.setProperty(HTTPConstants.CONNECTION_TIMEOUT, TIMEOUT_IN_MILLIS);
+                options.setCallTransportCleanup(true);
+                options.setManageSession(true);
+            }
         } catch (AxisFault axisFault) {
-            throw new APIManagementException("Error while initializing the API key " +
-                    "validation stub", axisFault);
+            throw new APIManagementException("Error while initializing the user management stubs",
+                    axisFault);
         }
     }
 
@@ -85,21 +92,49 @@ class RemoteAuthorizationManagerClient {
      */
     public boolean isUserAuthorized(String user, String permission) throws APIManagementException {
         CarbonUtils.setBasicAccessSecurityHeaders(username, password,
-                true, clientStub._getServiceClient());
+                true, authorizationManager._getServiceClient());
         if (cookie != null) {
-            clientStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
+            authorizationManager._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
         }
 
         try {
-            boolean authorized = clientStub.isUserAuthorized(user, permission,
+            boolean authorized = authorizationManager.isUserAuthorized(user, permission,
                     CarbonConstants.UI_PERMISSION_ACTION);
-            ServiceContext serviceContext = clientStub.
+            ServiceContext serviceContext = authorizationManager.
                     _getServiceClient().getLastOperationContext().getServiceContext();
             cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
             return authorized;
         } catch (Exception e) {
             throw new APIManagementException("Error while accessing backend services for " +
                     "user permission validation", e);
+        }
+    }
+
+    /**
+     * Query the remote user manager and retrieve the list of role names associated for the given
+     * user name. This is used when authorization for certain actions are appropriately delegated
+     * to other components (ex:- Lifecycle Management).
+     *
+     * @param user Username
+     * @return the list of roles to which the user belongs to.
+     * @throws APIManagementException If and error occurs while accessing the admin service
+     */
+    public String[] getRolesOfUser(String user) throws APIManagementException {
+        CarbonUtils.setBasicAccessSecurityHeaders(username, password,
+                true, userStoreManager._getServiceClient());
+        if (cookie != null) {
+            userStoreManager._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
+        }
+
+        try {
+            String[] roles = userStoreManager.getRoleListOfUser(user);
+            ServiceContext serviceContext = userStoreManager.
+                    _getServiceClient().getLastOperationContext().getServiceContext();
+            cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
+            return roles;
+        } catch (Exception e) {
+            throw new APIManagementException("Error while accessing backend services for " +
+                    "user role list", e);
         }
     }
 }

@@ -1,49 +1,44 @@
 package org.wso2.carbon.event.core.internal.builder;
 
-import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.core.EventBroker;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class EventAxis2ConfigurationContextObserver extends AbstractAxis2ConfigurationContextObserver {
+	
     private static Log log = LogFactory.getLog(EventAxis2ConfigurationContextObserver.class);
 
     private EventBroker eventBroker;
 
-    private List<String> loadedTenants;
+    private Set<Integer> loadedTenants;
 
     public EventAxis2ConfigurationContextObserver() {
-        this.loadedTenants = new ArrayList<String>();
+        this.loadedTenants = new HashSet<Integer>();
     }
 
-    public void createdConfigurationContext(ConfigurationContext configurationContext) {
-        String tenantDomain = SuperTenantCarbonContext.getCurrentContext(
-                configurationContext).getTenantDomain();
-        int tenantID = SuperTenantCarbonContext.getCurrentContext(configurationContext).getTenantId();
+    @Override
+    public void creatingConfigurationContext(int tenantId) {
         try {
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantID);
-            SuperTenantCarbonContext.getCurrentContext().getTenantDomain(true);
-
-            if (!loadedTenants.contains(tenantDomain.trim())) {
-                eventBroker.initializeTenant();
-                loadedTenants.add(tenantDomain.trim());
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId, true);
+            if (!this.loadedTenants.contains(tenantId)) {
+                this.eventBroker.initializeTenant();
+                this.loadedTenants.add(tenantId);
             }
-
         } catch (Exception e) {
             log.error("Error in setting tenant information", e);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
-
     }
 
     public void setEventBroker(EventBroker eventBroker) {
         this.eventBroker = eventBroker;
     }
+    
 }

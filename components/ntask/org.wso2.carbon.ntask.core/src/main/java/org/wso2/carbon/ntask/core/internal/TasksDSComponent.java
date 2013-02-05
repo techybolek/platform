@@ -15,6 +15,11 @@
  */
 package org.wso2.carbon.ntask.core.internal;
 
+import java.io.File;
+import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -24,12 +29,17 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.wso2.carbon.coordination.core.services.CoordinationService;
 import org.wso2.carbon.core.ServerStartupHandler;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.securevault.SecretCallbackHandlerService;
 import org.wso2.carbon.ntask.core.TaskStartupHandler;
+import org.wso2.carbon.ntask.core.impl.QuartzCachedThreadPool;
 import org.wso2.carbon.ntask.core.impl.TaskAxis2ConfigurationContextObserver;
+import org.wso2.carbon.ntask.core.impl.clustered.ClusterGroupCommunicator;
 import org.wso2.carbon.ntask.core.service.TaskService;
+import org.wso2.carbon.ntask.core.service.TaskService.TaskServerMode;
 import org.wso2.carbon.ntask.core.service.impl.TaskServiceImpl;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 /**
@@ -45,9 +55,15 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  * @scr.reference name="config.context.service"
  * interface="org.wso2.carbon.utils.ConfigurationContextService" cardinality="1..1" policy="dynamic" 
  * bind="setConfigurationContextService" unbind="unsetConfigurationContextService"
+ * @scr.reference name="secret.callback.handler.service"
+ * interface="org.wso2.carbon.securevault.SecretCallbackHandlerService"
+ * cardinality="1..1" policy="dynamic"
+ * bind="setSecretCallbackHandlerService" unbind="unsetSecretCallbackHandlerService"
  */
 public class TasksDSComponent {
 	
+	private static final String QUARTZ_PROPERTIES_FILE_NAME = "quartz.properties";
+
 	private final Log log = LogFactory.getLog(TasksDSComponent.class);
 	
 	private static RegistryService registryService;
@@ -60,32 +76,64 @@ public class TasksDSComponent {
 	
 	private static ConfigurationContextService configCtxService;
 	
-	private TaskService taskService;
+	private static SecretCallbackHandlerService secretCallbackHandlerService;
+	
+	private static TaskService taskService;
+	
+	private static ExecutorService executor = Executors.newCachedThreadPool();
 		
 	protected void activate(ComponentContext ctx) {
 		try {
-			TasksDSComponent.scheduler = new StdSchedulerFactory().getScheduler();
+			if (executor.isShutdown()) {
+				executor = Executors.newCachedThreadPool(); 
+			}
+			String quartzConfigFilePath = CarbonUtils.getCarbonConfigDirPath() + 
+			        File.separator + "etc" + File.separator + QUARTZ_PROPERTIES_FILE_NAME;
+			StdSchedulerFactory fac;
+			if (new File(quartzConfigFilePath).exists()) {
+				fac = new StdSchedulerFactory(quartzConfigFilePath);
+			} else {
+				fac = new StdSchedulerFactory(this.getStandardQuartzProps());
+			}			
+			TasksDSComponent.scheduler = fac.getScheduler();
 			TasksDSComponent.getScheduler().start();
-			if (this.getTaskService() == null) {
-				this.taskService = new TaskServiceImpl();
+			if (getTaskService() == null) {
+				taskService = new TaskServiceImpl();
 			}
 			BundleContext bundleContext = ctx.getBundleContext();
 			bundleContext.registerService(ServerStartupHandler.class.getName(),
-                    new TaskStartupHandler(this.taskService), null);
-			bundleContext.registerService(TaskService.class.getName(), 
-					this.getTaskService(), null);
+                    new TaskStartupHandler(taskService), null);
+			bundleContext.registerService(TaskService.class.getName(), getTaskService(), null);
 			bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(),
-                    new TaskAxis2ConfigurationContextObserver(this.getTaskService()), null);
+                    new TaskAxis2ConfigurationContextObserver(getTaskService()), null);
 			if (log.isDebugEnabled()) {
 				log.debug("Task service started");
+			}
+			if (getTaskService().getServerConfiguration().getTaskServerMode() == 
+				TaskServerMode.CLUSTERED) {
+				if (!getCoordinationService().isEnabled()) {
+					throw new RuntimeException("Coordination service must be enabled to " +
+							"run in task server " + TaskServerMode.CLUSTERED + " mode");
+				}
+				ClusterGroupCommunicator.getInstance().checkServers();
 			}
 		} catch (Exception e) {
 			log.error("Error in intializing Tasks component", e);
 		}
 	}
 	
+	private Properties getStandardQuartzProps() {
+		Properties result = new Properties();
+		result.put("org.quartz.scheduler.skipUpdateCheck", "true");
+		result.put("org.quartz.threadPool.class", QuartzCachedThreadPool.class.getName());
+		return result;
+	}
+	
+	public static void executeTask(Runnable runnable) {
+		executor.submit(runnable);
+	}
+	
 	protected void deactivate(ComponentContext ctx) {
-		this.taskService = null;
 		if (TasksDSComponent.getScheduler() != null) {
 			try {
 			    TasksDSComponent.getScheduler().shutdown();
@@ -93,9 +141,11 @@ public class TasksDSComponent {
 				log.error(e);
 			}
 		}
+		executor.shutdown();
+		taskService = null;
 	}
 	
-	public TaskService getTaskService() {
+	public static TaskService getTaskService() {
 		return taskService;
 	}
 	
@@ -149,6 +199,20 @@ public class TasksDSComponent {
 	
     public static ConfigurationContextService getConfigurationContextService() {
     	return TasksDSComponent.configCtxService;
+    }
+    
+    public static SecretCallbackHandlerService getSecretCallbackHandlerService() {
+    	return TasksDSComponent.secretCallbackHandlerService;
+    }
+    
+    protected void setSecretCallbackHandlerService(
+            SecretCallbackHandlerService secretCallbackHandlerService) {
+    	TasksDSComponent.secretCallbackHandlerService = secretCallbackHandlerService;
+    }
+
+    protected void unsetSecretCallbackHandlerService(
+            SecretCallbackHandlerService secretCallbackHandlerService) {
+    	TasksDSComponent.secretCallbackHandlerService = null;
     }
     
 }

@@ -96,4 +96,6 @@ public class PassThroughConstants {
 	
 	public static final String CONF_LOCATION = "conf.location";
 	
+	public static final String LOCATION = "Location";
+	
 }

@@ -1,9 +1,8 @@
 package org.wso2.carbon.databridge.receiver.restapi;
 
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
-import org.wso2.carbon.databridge.commons.exception.NoStreamDefinitionExistException;
 import org.wso2.carbon.databridge.commons.exception.SessionTimeoutException;
 import org.wso2.carbon.databridge.commons.exception.UndefinedEventTypeException;
 import org.wso2.carbon.databridge.commons.utils.EventConverterUtils;
@@ -45,12 +44,15 @@ public class StreamService {
 
         try {
             DataBridgeReceiverService dataBridgeReceiverService =
-                    (DataBridgeReceiverService) SuperTenantCarbonContext.getCurrentContext()
+                    (DataBridgeReceiverService) PrivilegedCarbonContext.getCurrentContext()
                             .getOSGiService(DataBridgeReceiverService.class);
 
             final String streamId =
                     dataBridgeReceiverService.findStreamId(RESTUtils.getSessionId(request), streamName
                             , version);
+            if(streamId==null){
+                throw new WebApplicationException(new RuntimeException("No stream definitions exist for "+streamName+" "+version+", to process "+requestBody));
+            }
             dataBridgeReceiverService.publish(requestBody, RESTUtils.getSessionId(request),
                     new EventConverter() {
                         @Override
@@ -63,8 +65,6 @@ public class StreamService {
         } catch (UndefinedEventTypeException e) {
             throw new WebApplicationException(e);
         } catch (SessionTimeoutException e) {
-            throw new WebApplicationException(e);
-        } catch (NoStreamDefinitionExistException e) {
             throw new WebApplicationException(e);
         } catch (AuthenticationException e) {
             throw new WebApplicationException(e);

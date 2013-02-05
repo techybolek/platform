@@ -18,8 +18,6 @@
  */
 package org.wso2.carbon.rssmanager.common;
 
-import javax.naming.Name;
-
 /**
  * Contains the constants associated with the component.
  */
@@ -42,6 +40,7 @@ public final class RSSManagerConstants {
     /* Driver Names of supported database types */
     public static final String MYSQL_DRIVER = "com.mysql.jdbc.Driver";
     public static final String ORACLE_DRIVER = "oracle.jdbc.driver.OracleDriver";
+    public static final String MYSQL_XA_DRIVER = "com.mysql.jdbc.jdbc2.optional.MysqlXADataSource";
 
     /* Database permissions */
     public static final String SELECT_PRIV = "Select_priv";
@@ -81,28 +80,41 @@ public final class RSSManagerConstants {
     public static final String MAX_USER_CONNECTIONS = "max_user_connections";
     public static final String MAX_UPDATES = "max_updates";
 
-    public static final String DATA_SOURCE = "dataSource";
-    public static final String URL = "url";
-    public static final String USER_NAME = "username";
-    public static final String PASSWORD = "password";
-    public static final String DRIVER_NAME = "driverClassName";
-    public static final String MAX_ACTIVE = "maxActive";
-    public static final String MAX_WAIT = "maxWait";
-    public static final String MIN_IDLE = "minIdle";
-    public static final String MAX_IDLE = "maxIdle";
-    public static final String VALIDATION_QUERY = "validationQuery";
-    public static final String DIALECT_FLAG = "dialectFlag";
-    public static final String TEST_WHILE_IDLE = "testWhileIdle";
-    public static final String TIME_BETWEEN_EVICTION_RUNS_MILLIS = "timeBetweenEvictionRunsMillis";
-    public static final String MIN_EVIC_TABLE_IDLE_TIME_MILLIS = "minEvictableIdleTimeMillis";
-    public static final String NUM_TESTS_PEREVICTION_RUN = "numTestsPerEvictionRun";
-    public static final int DEFAULT_MAX_ACTIVE = 40;
-    public static final int DEFAULT_MAX_WAIT = 1000 * 60;
-    public static final int DEFAULT_MIN_IDLE = 5;
-    public static final int DEFAULT_MAX_IDLE = 6;
-
     public static final String STANDARD_TRANSACTION_MANAGER_JNDI_NAME = "java:comp/TransactionManager";
     public static final String STANDARD_USER_TRANSACTION_JNDI_NAME = "java:comp/UserTransaction";
     public static final String RSS_MANAGER_SYNC_GROUP_NAME = "_RSS_MANAGER_GROUP";
     public static final String RDBMS_DATA_SOURCE_TYPE = "RDBMS";
+
+    public static final class RSS_DS_PROPERTIES {
+
+        private RSS_DS_PROPERTIES() {
+            throw new AssertionError();
+        }
+
+        public static final String URL = "url";
+        public static final String SERVER_NAME = "serverName";
+        public static final String DATABASE_NAME = "databaseName";
+        public static final String PORT = "port";
+        public static final String USER = "user";
+        public static final String USERNAME = "username";
+        public static final String PASSWORD = "password";
+        public static final String DRIVER_NAME = "driverClassName";
+        public static final String MAX_ACTIVE = "maxActive";
+        public static final String MAX_WAIT = "maxWait";
+        public static final String MIN_IDLE = "minIdle";
+        public static final String MAX_IDLE = "maxIdle";
+        public static final String VALIDATION_QUERY = "validationQuery";
+        public static final String DIALECT_FLAG = "dialectFlag";
+        public static final String TEST_WHILE_IDLE = "testWhileIdle";
+        public static final String TIME_BETWEEN_EVICTION_RUNS_MILLIS = "timeBetweenEvictionRunsMillis";
+        public static final String MIN_EVIC_TABLE_IDLE_TIME_MILLIS = "minEvictableIdleTimeMillis";
+        public static final String NUM_TESTS_PER_EVICTION_RUN = "numTestsPerEvictionRun";
+        public static final int DEFAULT_MAX_ACTIVE = 40;
+        public static final int DEFAULT_MAX_WAIT = 1000 * 60;
+        public static final int DEFAULT_MIN_IDLE = 5;
+        public static final int DEFAULT_MAX_IDLE = 6;
+
+
+    }
+
 }

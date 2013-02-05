@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>platform-parent</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -48,7 +48,7 @@
                  <module>application-deployers</module>
                  <module>bam</module>
                  <module>bam-data-publishers</module>
-                 <!--<module>business-processes</module>-->
+                 <module>business-processes</module>
                  <module>business-messaging</module>
                  <module>caching</module>
                  <module>captcha-mgt</module>
@@ -59,7 +59,7 @@
                  <module>data-sources</module>
                  <module>deployment-synchronizer</module>
                  <module>doc-request-processor</module>
-                 <module>ec2-client</module>
+                 <module>ec2-client/4.0.0</module>
                  <module>ejb-services</module>
                  <module>email-verification</module>
                 <module>endpoint</module>
@@ -123,7 +123,7 @@
                 <module>remote-usermgt</module>
                 <module>gadgets</module>
                 <module>webapp-mgt</module>
-				<module>jaggery</module>
+				<module>jaggery/0.9.0-ALPHA1</module>
 				<module>mashup</module>
                 <module>messagebox</module>
 		<module>qpid</module>
@@ -134,7 +134,7 @@
 		<module>cep</module>
 		<module>cassandra</module>
                 <module>stratos</module>
-                <module>csg</module>
+				<!--<module>cg</module>-->
                 <module>dbconsole</module>
                 <module>rss-manager</module>
                 <module>coordination</module>
@@ -903,16 +903,16 @@
                 <artifactId>org.wso2.carbon.claim.mgt.stub</artifactId>
                 <version>${carbon.platform.version}</version>
             </dependency>
-            <dependency>
+			<dependency>
                 <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.cloud.csg.agent.stub</artifactId>
+				<artifactId>org.wso2.carbon.cloud.gateway.agent.stub</artifactId>
                 <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.cloud.csg.stub</artifactId>
+				<artifactId>org.wso2.carbon.cloud.gateway.stub</artifactId>
                 <version>${carbon.platform.version}</version>
-                </dependency>
+			</dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.cluster.mgt.admin.stub</artifactId>
@@ -1492,17 +1492,12 @@
                 <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
-	    <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.server.admin</artifactId>
-                <version>${carbon.platform.version}</version>
-           </dependency>
         </dependencies>
     </dependencyManagement>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <wso2carbon.version>4.0.0-SNAPSHOT</wso2carbon.version>
+        <wso2carbon.version>4.0.0</wso2carbon.version>
         <axis2.wso2.version>1.6.1.wso2v5</axis2.wso2.version>
         <axis2.version>1.6.1-wso2v5</axis2.version>
         <axis2.osgi.version.range>[1.6.1.wso2v1, 1.7.0)</axis2.osgi.version.range>
@@ -1526,7 +1521,7 @@
         <xercesImpl.version>2.8.1</xercesImpl.version>
         <xercesImpl.wso2.version>2.8.1.wso2v1</xercesImpl.wso2.version>
         <uddi4j.version>1.0.1</uddi4j.version>
-        <wsdl-validator.version>1.2.0-SNAPSHOT.wso2v1</wsdl-validator.version>
+        <wsdl-validator.version>1.2.0.wso2v1</wsdl-validator.version>
         <wsdl4j.version>1.6.2</wsdl4j.version>
         <jetty.version>6.1.5</jetty.version>
         <hsqldb.version>1.8.0</hsqldb.version>
@@ -1551,7 +1546,6 @@
         <validateutility.version>0.95</validateutility.version>
         <derby.version>10.4.2.0</derby.version>
         <axis2-transports.version>1.1.0-wso2v4</axis2-transports.version>
-        <wso2eventing.version>SNAPSHOT</wso2eventing.version>
         <derby.wso2.version>${version.wso2.derby}</derby.wso2.version><!-- derby orbit version need to be updated -->
         <commons-fileupload.wso2.version>1.2.2.wso2v1</commons-fileupload.wso2.version>
         <geronimo-stax-api.wso2.version>1.0.1.wso2v1</geronimo-stax-api.wso2.version>
@@ -1562,7 +1556,7 @@
         <sandesha2.version>1.6.1-wso2v1</sandesha2.version>
         <jasperreports.wso2.version>3.7.1.wso2v1</jasperreports.wso2.version>
         <wso2throttle.version>3.3.0</wso2throttle.version>
-        <wso2xfer.version>SNAPSHOT</wso2xfer.version>
+        <wso2xfer.version>3.2.0</wso2xfer.version>
         <jxl.wso2.version>2.6.8.wso2v1</jxl.wso2.version>
 	<wso2.h2.orbit.version>1.2.140.wso2v3</wso2.h2.orbit.version>
 	<commons-io.wso2.version>2.0.0.wso2v1</commons-io.wso2.version>
@@ -1572,7 +1566,7 @@
 	<sun-xacml.wso2.version>2.0.1.wso2v1</sun-xacml.wso2.version>
 	<opensaml.wso2.version>1.1.0.wso2v1</opensaml.wso2.version>
 	<opensaml2.wso2.version>2.4.1.wso2v1</opensaml2.wso2.version>
-	<openid4java.wso2.version>0.9.6.wso2v2</openid4java.wso2.version>
+	<openid4java.wso2.version>0.9.6.wso2v1</openid4java.wso2.version>
 	<httpcomponents-httpclient.wso2.version>4.1.1-wso2v1</httpcomponents-httpclient.wso2.version>
 	<httpcomponents-httpcore.wso2.version>4.1.0-wso2v1</httpcomponents-httpcore.wso2.version>
 	<scxml.version>0.9.0.wso2v1</scxml.version>
@@ -1592,7 +1586,7 @@
         <quartz2.orbit.version>2.1.1.wso2v1</quartz2.orbit.version>
         <mvel2.orbit.version>2.0.19.wso2v1</mvel2.orbit.version>
         <antlr-runtime.orbit.version>3.2.0.wso2v1</antlr-runtime.orbit.version>
-        <siddhi.orbit.version>1.0.0-SNAPSHOT.wso2v1</siddhi.orbit.version>
+        <siddhi.orbit.version>1.0.0.wso2v1</siddhi.orbit.version>
         <cxf.orbit.version>2.6.1.wso2v1</cxf.orbit.version>
         <gson.version>2.1</gson.version>
         <jclouds.version>1.5.0-beta.5</jclouds.version>

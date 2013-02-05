@@ -22,12 +22,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>governance</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.governance.custom.lifecycles.checklist</artifactId>
     <packaging>bundle</packaging>
+    <version>4.0.5</version>
     <name>WSO2 Carbon - Governance - Custom Lifecycle Checklist BE</name>
 
     <build>
@@ -77,6 +79,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.core</artifactId>
+            <version>4.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -85,6 +88,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.governance.api</artifactId>
+            <version>4.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>

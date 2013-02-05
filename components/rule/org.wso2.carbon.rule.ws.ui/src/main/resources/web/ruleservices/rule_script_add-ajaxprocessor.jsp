@@ -28,12 +28,12 @@
     String scriptSourceType = request.getParameter("scriptSourceType");
 
     if(scriptValue != null && !scriptValue.equals("")){
-        Map<String, String> scriptList = (Map<String, String>) request.getSession().getAttribute("ruleScript");
+        Map<String, String> scriptList = (Map<String, String>) session.getAttribute(RuleServiceAdminClient.SCRIPTS);
         if(scriptList == null){
             scriptList = new HashMap<String, String>();
         }
         scriptList.put(scriptValue, scriptSourceType);
-        request.getSession().setAttribute("ruleScript", scriptList);
+        session.setAttribute(RuleServiceAdminClient.SCRIPTS, scriptList);
 
 
 }

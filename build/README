@@ -1,9 +1,9 @@
 Stratos local setup
 ==================
 
-stratos-setup.pl can be called with options to setup stratos for the local machine. Just execute stratos-setup.pl with no option to see all
+ stratos-setup.pl can be called with options to setup stratos for the local machine. Just execute stratos-setup.pl with no option to see all
 available options.
-The scripts work by reading a main configuration file named stratos_config_min.xml which contain minimum configuration for each services.
+The scripts work by reading a main configuration file named stratos_config_min.xml which contain minimum configuration for each services. 
 
 stratos_config_min.xml contain minimal setup of configration to get you running. If you need more control use stratos_config_full.xml to configure stratos.
 First change the configuration file and then execute stratos_setup.pl with the options.
@@ -81,6 +81,7 @@ Options:
 -p : service list to enable
 -t : directory where changed configuration files are stored
 -s : whether to enable sso
+
 
 
 Usage

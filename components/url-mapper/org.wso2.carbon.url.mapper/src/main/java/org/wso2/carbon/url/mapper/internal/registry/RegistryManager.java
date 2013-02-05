@@ -15,11 +15,6 @@
  */
 package org.wso2.carbon.url.mapper.internal.registry;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.axis2.description.AxisEndpoint;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.catalina.Host;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,7 +24,9 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.url.mapper.data.MappingData;
 import org.wso2.carbon.url.mapper.internal.util.DataHolder;
 import org.wso2.carbon.url.mapper.internal.util.UrlMapperConstants;
-import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Registry manager to store and retrieve properties to registry.
@@ -49,7 +46,7 @@ public class RegistryManager {
 	 *            The webapp to be deployed in the virtual host
 	 * @throws Exception
 	 */
-	public void addHostToRegistry(String hostName, String webApp, String tenantDomain)
+	public void addHostToRegistry(String hostName, String webApp, String tenantDomain, String appName)
 			throws Exception {
 		try {
 			registryService.beginTransaction();
@@ -57,6 +54,7 @@ public class RegistryManager {
 			hostResource.addProperty(UrlMapperConstants.HostProperties.HOST_NAME, hostName);
 			hostResource.addProperty(UrlMapperConstants.HostProperties.WEB_APP, webApp);
 			hostResource.addProperty(UrlMapperConstants.HostProperties.TENANT_DOMAIN, tenantDomain);
+            hostResource.addProperty(UrlMapperConstants.HostProperties.APP_NAME, appName);
 			registryService
 					.put(UrlMapperConstants.HostProperties.HOSTINFO + hostName, hostResource);
 			registryService.commitTransaction();
@@ -119,7 +117,7 @@ public class RegistryManager {
 	 *            The webapp to be deployed in the virtual host
 	 * @throws Exception
 	 */
-	public void addEprToRegistry(String hostName, String webApp, String tenantDomain)
+	public void addEprToRegistry(String hostName, String webApp, String tenantDomain, String appName)
 			throws Exception {
 
 		try {
@@ -128,6 +126,7 @@ public class RegistryManager {
 			hostResource.addProperty(UrlMapperConstants.HostProperties.HOST_NAME, hostName);
 			hostResource.addProperty(UrlMapperConstants.HostProperties.SERVICE_EPR, webApp);
 			hostResource.addProperty(UrlMapperConstants.HostProperties.TENANT_DOMAIN, tenantDomain);
+            hostResource.addProperty(UrlMapperConstants.HostProperties.APP_NAME, appName);
 			registryService
 					.put(UrlMapperConstants.HostProperties.HOSTINFO + hostName, hostResource);
 			registryService.commitTransaction();
@@ -273,6 +272,14 @@ public class RegistryManager {
 		}
 		return null;
 	}
+    
+    public String getAppNameFromRegistry(String hostName) throws Exception{
+        Resource resource = getMappingFromRegistry(hostName);
+        if (resource != null) {
+            return resource.getProperty(UrlMapperConstants.HostProperties.APP_NAME);
+        }
+        return null;
+    }
 
 	private Collection getHostsFromRegistry() throws Exception {
 		if (registryService.resourceExists(UrlMapperConstants.HostProperties.HOSTINFO)) {

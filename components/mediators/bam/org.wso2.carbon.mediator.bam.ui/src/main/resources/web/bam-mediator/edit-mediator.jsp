@@ -149,18 +149,12 @@
                     <fmt:message key="server.profile"/><span class="required">*</span>
                 </td>
                 <td>
-                    <table>
-                        <tr>
-                            <td>
-                                <select name="serverProfileList" id="serverProfileList" onchange="onServerProfileSelected('<%=SERVER_PROFILE_LOCATION%>')">
-                                    <option>- Select Server Profile -</option>
-                                </select>
-                                <script type="text/javascript">
-                                    loadServerProfiles("<%=SERVER_PROFILE_LOCATION%>", "<%=serverProfilePath%>");
-                                </script>
-                            </td>
-                        </tr>
-                    </table>
+                    <select name="serverProfileList" id="serverProfileList" onchange="onServerProfileSelected('<%=SERVER_PROFILE_LOCATION%>')">
+                        <option>- Select Server Profile -</option>
+                    </select>
+                    <script type="text/javascript">
+                        loadServerProfiles("<%=SERVER_PROFILE_LOCATION%>", "<%=serverProfilePath%>");
+                    </script>
                 </td>
             </tr>
             <tr>
@@ -171,7 +165,9 @@
                 </td>
             </tr>
             <tr>
-                <td><fmt:message key="stream.name"/></td>
+                <td>
+                    <fmt:message key="stream.name"/><span class="required">*</span>
+                </td>
                 <td>
                     <select name="streamNameList" id="streamNameList" disabled="disabled" onchange="selectStreamVersionList('<%=SERVER_PROFILE_LOCATION%>')">
                         <option>- Select Stream Name -</option>
@@ -184,7 +180,9 @@
                 </td>
             </tr>
             <tr>
-                <td><fmt:message key="stream.version"/></td>
+                <td>
+                    <fmt:message key="stream.version"/><span class="required">*</span>
+                </td>
                 <td>
                     <select name="streamVersionList" id="streamVersionList" disabled="disabled">
                         <option>- Select Stream Version -</option>

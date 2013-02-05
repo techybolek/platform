@@ -6,30 +6,48 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>identity</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.identity.scim.common</artifactId>
+    <version>4.0.7</version>
     <name>WSO2 Carbon - SCIM - Common Component</name>
     <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.server.admin</artifactId>
+            <artifactId>org.wso2.carbon.user.core</artifactId>
+            <version>4.0.6</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.user.core</artifactId>
-            <version>4.0.1</version>
+            <artifactId>org.wso2.carbon.core</artifactId>
+            <version>4.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.utils</artifactId>
+            <version>4.0.6</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.charon</groupId>
             <artifactId>org.wso2.charon.core</artifactId>
+            <version>1.0.1-wso2v1</version>
+        </dependency>
+        <!--<dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.caching.core</artifactId>
+            <version>4.0.2</version>
+        </dependency>-->
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.identity.core</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -80,8 +98,9 @@
                             org.wso2.carbon.identity.scim.common.*,
                         </Export-Package>
                         <Import-Package>
-                            org.wso2.carbon.server.admin.privilegedaction.*;version="0.0.0",
                             org.wso2.charon.core.*,
+                            org.wso2.carbon.identity.core.*,
+                            org.wso2.carbon.core.*,
                             org.apache.commons.logging.*,
                             org.apache.commons.httpclient.*,
                             *;resolution:=optional

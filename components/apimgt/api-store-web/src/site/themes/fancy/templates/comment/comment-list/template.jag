@@ -8,13 +8,16 @@
     %>
     <div class="comment">
         <hr />
-        <div>Posted by <strong><%=comment.username%></strong> on <%=new Date(comment.createdTime).toLocaleString()%></div>
+        <div><%=i18n.localize("postComment")%> <strong><%=comment.username%></strong> <%=i18n.localize("onText")%> <span class="dateFull"><%=comment.createdTime%></span></div>
         <div class="comment-text"><%=comment.comment%></div>
     </div>
     <% }
     } else {
     %>
-    <p>No comments yet</p>
+    <p><%=i18n.localize("noCommentMsg")%></p>
     <% } %>
 </div>
+<script type="text/javascript">
+jagg.printDate();
+</script>
 <% }); %>

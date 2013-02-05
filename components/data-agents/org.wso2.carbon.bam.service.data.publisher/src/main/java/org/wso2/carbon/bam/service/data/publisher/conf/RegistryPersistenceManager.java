@@ -18,22 +18,28 @@ package org.wso2.carbon.bam.service.data.publisher.conf;
 
 import org.wso2.carbon.bam.data.publisher.util.BAMDataPublisherConstants;
 import org.wso2.carbon.bam.service.data.publisher.publish.ServiceAgentUtil;
+import org.wso2.carbon.bam.service.data.publisher.publish.StreamDefinitionCreatorUtil;
 import org.wso2.carbon.bam.service.data.publisher.util.ActivityPublisherConstants;
 import org.wso2.carbon.bam.service.data.publisher.util.CommonConstants;
 import org.wso2.carbon.bam.service.data.publisher.util.ServiceStatisticsPublisherConstants;
+import org.wso2.carbon.bam.service.data.publisher.util.StatisticsType;
 import org.wso2.carbon.bam.service.data.publisher.util.TenantEventConfigData;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 public class RegistryPersistenceManager {
 
     private static RegistryService registryService;
-    private static EventingConfigData eventingConfigData = new EventingConfigData();
+    private static EventConfigNStreamDef eventingConfigData = new EventConfigNStreamDef();
     public static final String EMPTY_STRING = "";
 
     public static void setRegistryService(RegistryService registryServiceParam) {
@@ -70,6 +76,7 @@ public class RegistryPersistenceManager {
     public EventingConfigData load() {
         EventingConfigData eventingConfigData = new EventingConfigData();
         // First set it to defaults, but do not persist
+        eventingConfigData.setPublishingEnable(ServiceAgentUtil.getPublishingEnabled());
         eventingConfigData.setServiceStatsEnable(false);
         eventingConfigData.setMsgDumpingEnable(false);
         eventingConfigData.setUrl(EMPTY_STRING);
@@ -103,6 +110,15 @@ public class RegistryPersistenceManager {
             String nickName = getConfigurationProperty(CommonConstants.SERVICE_COMMON_REG_PATH,
                                                        BAMDataPublisherConstants.NICK_NAME);
 
+            String activityStreamName = getConfigurationProperty(CommonConstants.SERVICE_COMMON_REG_PATH,
+                                                                 BAMDataPublisherConstants.ACTIVIY_STREAM_NAME);
+            String activityVersion = getConfigurationProperty(CommonConstants.SERVICE_COMMON_REG_PATH,
+                                                              BAMDataPublisherConstants.ACTIVITY_VERSION);
+            String activityDescription = getConfigurationProperty(CommonConstants.SERVICE_COMMON_REG_PATH,
+                                                                  BAMDataPublisherConstants.ACTIVITY_DESCRIPTION);
+            String activityNickName = getConfigurationProperty(CommonConstants.SERVICE_COMMON_REG_PATH,
+                                                               BAMDataPublisherConstants.ACTIVITY_NICK_NAME);
+
             Properties properties = getAllConfigProperties(CommonConstants.SERVICE_PROPERTIES_REG_PATH);
 
             if (serviceStatsStatus != null && activityStatus != null && bamUrl != null && bamUserName != null &&
@@ -118,12 +134,28 @@ public class RegistryPersistenceManager {
                 eventingConfigData.setDescription(description);
                 eventingConfigData.setNickName(nickName);
 
+                if (activityStreamName != null) {
+                    eventingConfigData.setActivityStreamName(activityStreamName);
+                }
+
+                if (activityVersion != null) {
+                    eventingConfigData.setActivityStreamVersion(activityVersion);
+                }
+
+                if (activityDescription != null) {
+                    eventingConfigData.setActivityStreamDescription(activityDescription);
+                }
+
+                if (activityNickName != null) {
+                    eventingConfigData.setActivityStreamNickName(activityNickName);
+                }
+
                 if (properties != null) {
                     List<Property> propertyDTOList = new ArrayList<Property>();
                     String[] keys = properties.keySet().toArray(new String[properties.size()]);
                     for (int i = keys.length - 1; i >= 0; i--) {
                         String key = keys[i];
-                                                         Property propertyDTO = new Property();
+                        Property propertyDTO = new Property();
                         propertyDTO.setKey(key);
                         propertyDTO.setValue(((List<String>) properties.get(key)).get(0));
                         propertyDTOList.add(propertyDTO);
@@ -131,10 +163,34 @@ public class RegistryPersistenceManager {
 
                     eventingConfigData.setProperties(propertyDTOList.toArray(new Property[propertyDTOList.size()]));
                 }
+                StatisticsType statisticsType = ServiceAgentUtil.findTheStatisticType(eventingConfigData);
+
+                // Handle the case with both stats and activity enabled
+                EventConfigNStreamDef eventConfigNStreamDef = null;
+                if (statisticsType.equals(StatisticsType.ACTIVITY_SERVICE_STATS)) {
+                    StreamDefinition activityStreamDefinition = StreamDefinitionCreatorUtil.
+                            getStreamDefinition(eventingConfigData, StatisticsType.ACTIVITY_STATS);
+                    StreamDefinition statisticsStreamDefinition = StreamDefinitionCreatorUtil.
+                            getStreamDefinition(eventingConfigData, StatisticsType.SERVICE_STATS);
+                    eventConfigNStreamDef = fillEventingConfigData(
+                            eventingConfigData);
+                    eventConfigNStreamDef.setStreamDefinition(statisticsStreamDefinition);
+                    eventConfigNStreamDef.setActivityStreamDefinition(activityStreamDefinition);
+                } else if (statisticsType.equals(StatisticsType.SERVICE_STATS)){
+                    StreamDefinition streamDefinition = StreamDefinitionCreatorUtil.getStreamDefinition(
+                            eventingConfigData, StatisticsType.SERVICE_STATS);
+                    eventConfigNStreamDef = fillEventingConfigData(eventingConfigData);
+                    eventConfigNStreamDef.setStreamDefinition(streamDefinition);
+                } else if (statisticsType.equals(StatisticsType.ACTIVITY_STATS)){
+                    StreamDefinition streamDefinition = StreamDefinitionCreatorUtil.getStreamDefinition(
+                            eventingConfigData, StatisticsType.ACTIVITY_STATS);
+                    eventConfigNStreamDef = fillEventingConfigData(eventingConfigData);
+                    eventConfigNStreamDef.setActivityStreamDefinition(streamDefinition);
+                }
 
                 int tenantId = CarbonContext.getCurrentContext().getTenantId();
-                Map<Integer, EventingConfigData> tenantEventConfigData = TenantEventConfigData.getTenantSpecificEventingConfigData();
-                tenantEventConfigData.put(tenantId, eventingConfigData);
+                Map<Integer, EventConfigNStreamDef> tenantEventConfigData = TenantEventConfigData.getTenantSpecificEventingConfigData();
+                tenantEventConfigData.put(tenantId, eventConfigNStreamDef);
 
             } else { // Registry does not have eventing config. Set to defaults.
                 update(eventingConfigData);
@@ -143,6 +199,26 @@ public class RegistryPersistenceManager {
             // If something went wrong, then we have the default, or whatever loaded so far
         }
         return eventingConfigData;
+    }
+
+    public EventConfigNStreamDef fillEventingConfigData(EventingConfigData eventingConfigData) {
+        EventConfigNStreamDef eventConfigNStreamDef = new EventConfigNStreamDef();
+        eventConfigNStreamDef.setDescription(eventingConfigData.getDescription());
+        eventConfigNStreamDef.setMsgDumpingEnable(eventingConfigData.isMsgDumpingEnable());
+        eventConfigNStreamDef.setNickName(eventingConfigData.getNickName());
+        eventConfigNStreamDef.setPassword(eventingConfigData.getPassword());
+        eventConfigNStreamDef.setProperties(eventingConfigData.getProperties());
+        eventConfigNStreamDef.setServiceStatsEnable(eventingConfigData.isServiceStatsEnable());
+        eventConfigNStreamDef.setStreamName(eventingConfigData.getStreamName());
+        eventConfigNStreamDef.setUrl(eventingConfigData.getUrl());
+        eventConfigNStreamDef.setUserName(eventingConfigData.getUserName());
+        eventConfigNStreamDef.setVersion(eventingConfigData.getVersion());
+        eventConfigNStreamDef.setActivityStreamName(eventingConfigData.getActivityStreamName());
+        eventConfigNStreamDef.setActivityStreamDescription(eventingConfigData.getActivityStreamDescription());
+        eventConfigNStreamDef.setActivityStreamNickName(eventingConfigData.getActivityStreamNickName());
+        eventConfigNStreamDef.setActivityStreamVersion(eventingConfigData.getActivityStreamVersion());
+        return eventConfigNStreamDef;
+
     }
 
 
@@ -172,10 +248,12 @@ public class RegistryPersistenceManager {
 
     /**
      * Updates all properties of a resource
+     *
      * @param properties
      * @param registryPath
      */
-    public void updateAllProperties(Properties properties, String registryPath) throws RegistryException {
+    public void updateAllProperties(Properties properties, String registryPath)
+            throws RegistryException {
         Registry registry = registryService.getConfigSystemRegistry(CarbonContext.getCurrentContext().getTenantId());
 
         // Always creating a new resource because properties should be replaced and overridden
@@ -195,9 +273,34 @@ public class RegistryPersistenceManager {
      */
     public void update(EventingConfigData eventingConfigData) throws RegistryException {
 
+        StatisticsType statisticsType = ServiceAgentUtil.findTheStatisticType(eventingConfigData);
+        EventConfigNStreamDef eventConfigNStreamDef = null;
+        if (statisticsType != null) {
+            if (statisticsType.equals(StatisticsType.ACTIVITY_SERVICE_STATS)) {
+                StreamDefinition streamDefinition = StreamDefinitionCreatorUtil.getStreamDefinition(
+                    eventingConfigData, StatisticsType.SERVICE_STATS);
+                eventConfigNStreamDef = fillEventingConfigData(eventingConfigData);
+                eventConfigNStreamDef.setStreamDefinition(streamDefinition);
+
+                streamDefinition = StreamDefinitionCreatorUtil.getStreamDefinition(
+                    eventingConfigData, StatisticsType.ACTIVITY_STATS);
+                eventConfigNStreamDef.setActivityStreamDefinition(streamDefinition);
+            } else if (statisticsType.equals(StatisticsType.SERVICE_STATS)) {
+                StreamDefinition streamDefinition = StreamDefinitionCreatorUtil.getStreamDefinition(
+                    eventingConfigData, StatisticsType.SERVICE_STATS);
+                eventConfigNStreamDef = fillEventingConfigData(eventingConfigData);
+                eventConfigNStreamDef.setStreamDefinition(streamDefinition);
+            } else if (statisticsType.equals(StatisticsType.ACTIVITY_STATS)) {
+                StreamDefinition streamDefinition = StreamDefinitionCreatorUtil.getStreamDefinition(
+                    eventingConfigData, StatisticsType.ACTIVITY_STATS);
+                eventConfigNStreamDef = fillEventingConfigData(eventingConfigData);
+                eventConfigNStreamDef.setActivityStreamDefinition(streamDefinition);
+            }
+        }
+
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        Map<Integer, EventingConfigData> tenantEventConfigData = TenantEventConfigData.getTenantSpecificEventingConfigData();
-        tenantEventConfigData.put(tenantId, eventingConfigData);
+        Map<Integer, EventConfigNStreamDef> tenantEventConfigData = TenantEventConfigData.getTenantSpecificEventingConfigData();
+        tenantEventConfigData.put(tenantId, eventConfigNStreamDef);
 
         updateConfigurationProperty(ServiceStatisticsPublisherConstants.ENABLE_SERVICE_STATS_EVENTING,
                                     eventingConfigData.isServiceStatsEnable(),
@@ -221,6 +324,15 @@ public class RegistryPersistenceManager {
         updateConfigurationProperty(BAMDataPublisherConstants.DESCRIPTION, eventingConfigData.getDescription(),
                                     CommonConstants.SERVICE_COMMON_REG_PATH);
 
+        updateConfigurationProperty(BAMDataPublisherConstants.ACTIVIY_STREAM_NAME, eventingConfigData.getActivityStreamName(),
+                                    CommonConstants.SERVICE_COMMON_REG_PATH);
+        updateConfigurationProperty(BAMDataPublisherConstants.ACTIVITY_VERSION, eventingConfigData.getActivityStreamVersion(),
+                                    CommonConstants.SERVICE_COMMON_REG_PATH);
+        updateConfigurationProperty(BAMDataPublisherConstants.ACTIVITY_NICK_NAME, eventingConfigData.getActivityStreamNickName(),
+                                    CommonConstants.SERVICE_COMMON_REG_PATH);
+        updateConfigurationProperty(BAMDataPublisherConstants.ACTIVITY_DESCRIPTION, eventingConfigData.getActivityStreamDescription(),
+                                    CommonConstants.SERVICE_COMMON_REG_PATH);
+
         Property[] propertiesDTO = eventingConfigData.getProperties();
         if (propertiesDTO != null) {
             Properties properties = new Properties();
@@ -231,12 +343,17 @@ public class RegistryPersistenceManager {
                 properties.put(property.getKey(), valueList);
             }
             updateAllProperties(properties, CommonConstants.SERVICE_PROPERTIES_REG_PATH);
-        }else {
+        } else {
             updateAllProperties(null, CommonConstants.SERVICE_PROPERTIES_REG_PATH);
         }
         ServiceAgentUtil.removeExistingEventPublisherConfigValue(eventingConfigData.getUrl() + "_"
                                                                  + eventingConfigData.getUserName() + "_"
-                                                                 + eventingConfigData.getPassword());
+                                                                 + eventingConfigData.getPassword()
+                                                                 + "_" + StatisticsType.ACTIVITY_STATS.name());
+        ServiceAgentUtil.removeExistingEventPublisherConfigValue(eventingConfigData.getUrl() + "_"
+                                                                 + eventingConfigData.getUserName() + "_"
+                                                                 + eventingConfigData.getPassword()
+                                                                 + "_" + StatisticsType.SERVICE_STATS.name());
 
     }
 
@@ -263,6 +380,7 @@ public class RegistryPersistenceManager {
 
     /**
      * Fetches all properties for any registry resource
+     *
      * @param registryPath
      * @return properties
      * @throws RegistryException
@@ -270,7 +388,7 @@ public class RegistryPersistenceManager {
     public Properties getAllConfigProperties(String registryPath) throws RegistryException {
         Registry registry = registryService.getConfigSystemRegistry(CarbonContext.getCurrentContext().getTenantId());
         Properties properties = null;
-        Properties filterProperties= null;
+        Properties filterProperties = null;
 //        Properties reverseProperties = null;
         if (registry.resourceExists(registryPath)) {
             Resource resource = registry.get(registryPath);
@@ -279,8 +397,8 @@ public class RegistryPersistenceManager {
                 filterProperties = new Properties();
                 for (Map.Entry<Object, Object> keyValuePair : properties.entrySet()) {
                     //When using mounted registry it keeps some properties starting with "registry." we don't need it.
-                    if(!keyValuePair.getKey().toString().startsWith(BAMDataPublisherConstants.PREFIX_FOR_REGISTRY_HIDDEN_PROPERTIES)){
-                        filterProperties.put(keyValuePair.getKey(),keyValuePair.getValue());
+                    if (!keyValuePair.getKey().toString().startsWith(BAMDataPublisherConstants.PREFIX_FOR_REGISTRY_HIDDEN_PROPERTIES)) {
+                        filterProperties.put(keyValuePair.getKey(), keyValuePair.getValue());
                     }
                 }
 

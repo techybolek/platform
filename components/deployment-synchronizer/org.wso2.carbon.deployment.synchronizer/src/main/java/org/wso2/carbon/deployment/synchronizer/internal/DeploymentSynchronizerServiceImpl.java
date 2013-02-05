@@ -22,6 +22,8 @@ import org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException;
 import org.wso2.carbon.deployment.synchronizer.internal.repository.CarbonRepositoryUtils;
 import org.wso2.carbon.deployment.synchronizer.internal.util.DeploymentSynchronizerConfiguration;
 import org.wso2.carbon.deployment.synchronizer.services.DeploymentSynchronizerService;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class DeploymentSynchronizerServiceImpl implements DeploymentSynchronizerService,
@@ -71,7 +73,16 @@ public class DeploymentSynchronizerServiceImpl implements DeploymentSynchronizer
                 if(synchronizer == null){
                     return false;
                 }
-                synchronizer.doInitialSyncUp();
+
+                if (GhostDeployerUtils.isGhostOn() && GhostDeployerUtils.isPartialUpdateEnabled() &&
+                        CarbonUtils.isWorkerNode() && tenantId > 0) {
+                    synchronizer.syncGhostMetaArtifacts();
+                } else {
+                    synchronizer.doInitialSyncUp();
+                }
+            } else if (GhostDeployerUtils.isGhostOn() && GhostDeployerUtils.isPartialUpdateEnabled() &&
+                    CarbonUtils.isWorkerNode() && tenantId > 0) {
+                return synchronizer.syncGhostMetaArtifacts();
             }
             return synchronizer.checkout();
         } catch (DeploymentSynchronizerException e) {
@@ -111,9 +122,27 @@ public class DeploymentSynchronizerServiceImpl implements DeploymentSynchronizer
         return synchronizer.checkout();
     }
 
+    @Override
+    public boolean checkout(String filePath, int depth) throws DeploymentSynchronizerException {
+        DeploymentSynchronizer synchronizer = getSynchronizer(filePath);
+        return synchronizer.checkout(filePath, depth);
+    }
+
+    @Override
+    public boolean update(String rootPath, String filePath, int depth) throws DeploymentSynchronizerException {
+        DeploymentSynchronizer synchronizer = getSynchronizer(rootPath);
+        return synchronizer.update(rootPath, filePath, depth);
+    }
+
     public boolean commit(String filePath) throws DeploymentSynchronizerException {
         DeploymentSynchronizer synchronizer = getSynchronizer(filePath);
         return synchronizer.commit();
+    }
+
+    @Override
+    public boolean commit(String rootPath, String filePath) throws DeploymentSynchronizerException {
+        DeploymentSynchronizer synchronizer = getSynchronizer(rootPath);
+        return synchronizer.commit(filePath);
     }
 
     private DeploymentSynchronizer getSynchronizer(String filePath)

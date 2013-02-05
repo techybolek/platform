@@ -22,11 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>cassandra-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.cassandra.dataaccess.feature</artifactId>
+    <version>4.0.5</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Cassandra Data Access Feature</name>
     <url>http://wso2.org</url>
@@ -36,15 +38,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cassandra.dataaccess</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.core.server.feature</artifactId>
-            <type>zip</type>
+            <version>${carbon.platform.patch.version.403}</version>
         </dependency>
          <dependency>
-            <groupId>org.hectorclient</groupId>
+            <groupId>org.hectorclient.wso2</groupId>
             <artifactId>hector-core</artifactId>
+             <version>1.1.0.wso2v1</version>
         </dependency>
     </dependencies>
 
@@ -63,7 +62,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.cassandra.dataaccess</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
@@ -71,8 +70,8 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cassandra.dataaccess</bundleDef>
-                                <bundleDef>org.hectorclient:hector-core</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cassandra.dataaccess:${carbon.platform.patch.version.403}</bundleDef>
+                                <bundleDef>org.hectorclient.wso2:hector-core</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
@@ -108,4 +107,8 @@
             </plugin>
         </plugins>
     </build>
+
+    <properties>
+        <carbon.platform.patch.version.403>4.0.3</carbon.platform.patch.version.403>
+    </properties>
 </project>

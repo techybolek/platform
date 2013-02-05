@@ -15,10 +15,13 @@
  */
 package org.wso2.carbon.identity.mgt.internal;
 
+import org.apache.axis2.engine.AxisObserver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.identity.mgt.AccountRecoveryProcessor;
 import org.wso2.carbon.identity.mgt.IdentityMgtEventListener;
 import org.wso2.carbon.identity.mgt.IdentityMgtException;
@@ -32,15 +35,15 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.ClaimManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.api.ClaimMapping;
-import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.listener.UserOperationEventListener;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.ConfigurationContextService;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * 
@@ -52,9 +55,11 @@ import java.util.List;
  * @scr.reference name="realm.service"
  * interface="org.wso2.carbon.user.core.service.RealmService"cardinality="1..1"
  * policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
- * @scr.reference name="configuration.context.service"
- * interface="org.wso2.carbon.utils.ConfigurationContextService" cardinality="1..1"
- * policy="dynamic" bind="setConfigurationContextService" unbind="unsetConfigurationContextService"
+ * @scr.reference name="cache.invalidation.service"
+ *                interface="org.wso2.carbon.caching.core.CacheInvalidator"
+ *                cardinality="0..1" policy="dynamic"
+ *                bind="setCacheInvalidator"
+ *                unbind="removeCacheInvalidator"
  */
 
 public class IdentityMgtServiceComponent {
@@ -69,12 +74,19 @@ public class IdentityMgtServiceComponent {
 
     private static ConfigurationContextService configurationContextService;
 
+    private static CacheInvalidator cacheInvalidator;
+
     private ServiceRegistration serviceRegistration = null;
     
     private static IdentityMgtEventListener listener = null;
 
     protected void activate(ComponentContext context) {
 
+        // Publish the OSGi service
+        Properties props = new Properties();
+        props.put(CarbonConstants.AXIS2_CONFIG_SERVICE, AxisObserver.class.getName());
+        context.getBundleContext().registerService(AxisObserver.class.getName(),
+                                                new IdentityMgtDeploymentInterceptor(), props);
         init();
         listener = new IdentityMgtEventListener();
         serviceRegistration =
@@ -135,7 +147,18 @@ public class IdentityMgtServiceComponent {
         return configurationContextService;
     }
 
+    protected void setCacheInvalidator(CacheInvalidator invalidator) {
+        cacheInvalidator = invalidator;
+    }
 
+    protected void removeCacheInvalidator(CacheInvalidator invalidator) {
+        cacheInvalidator = null;
+    }
+
+    public static CacheInvalidator getCacheInvalidator() {
+    	return cacheInvalidator;
+    }
+    
     private static void init(){
 
         Registry registry;
@@ -151,12 +174,14 @@ public class IdentityMgtServiceComponent {
         } catch (RegistryException e) {
             log.error("Error while creating registry collection for org.wso2.carbon.identity.mgt component");
         }
+        processLockUsers();
     }
 
     private static void modifyClaims(){
 
         try{
             ClaimManager manger =  realmService.getBootstrapRealm().getClaimManager();
+            
             ClaimMapping mapping1 = manger.getClaimMapping(UserCoreConstants.
                                                                     ClaimTypeURIs.ACCOUNT_STATUS);
             mapping1.getClaim().setDisplayOrder(1);
@@ -165,14 +190,14 @@ public class IdentityMgtServiceComponent {
 
             ClaimMapping mapping2 = manger.
                             getClaimMapping(IdentityMgtConstants.DEFAULT_CHALLENGE_QUESTION_URI01);
-            mapping2.getClaim().setSupportedByDefault(true);
-            mapping2.getClaim().setRequired(true);
+            mapping2.getClaim().setSupportedByDefault(false);
+            mapping2.getClaim().setRequired(false);
             manger.updateClaimMapping(mapping2);
 
             ClaimMapping mapping3 = manger.
                             getClaimMapping(IdentityMgtConstants.DEFAULT_CHALLENGE_QUESTION_URI02);
-            mapping3.getClaim().setSupportedByDefault(true);
-            mapping3.getClaim().setRequired(true);
+            mapping3.getClaim().setSupportedByDefault(false);
+            mapping3.getClaim().setRequired(false);
             manger.updateClaimMapping(mapping3);
 
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
@@ -209,7 +234,7 @@ public class IdentityMgtServiceComponent {
         }
     }
 
-    private void processLockUsers() {
+    private static void processLockUsers() {
 
         try{
             UserStoreManager manager = realmService.getBootstrapRealm().getUserStoreManager();
@@ -217,8 +242,8 @@ public class IdentityMgtServiceComponent {
                                                             UserCoreConstants.USER_LOCKED, null);
 
             for(String user : users){
-                String userName = UserCoreUtil.getTenantLessUsername(user);
-                String tenantDomain = UserCoreUtil.getTenantDomain(realmService, user);
+                String userName = MultitenantUtils.getTenantAwareUsername(user);
+                String tenantDomain = MultitenantUtils.getTenantDomain(user);
                 Utils.lockUserAccount(userName, Utils.getTenantId(tenantDomain));
             }
         } catch (Exception e) {

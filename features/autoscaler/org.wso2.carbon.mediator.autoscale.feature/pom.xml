@@ -22,10 +22,12 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>autoscaler-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
+    <version>4.0.6</version>
     <artifactId>org.wso2.carbon.mediator.autoscale.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Autoscaler Feature</name>
@@ -33,21 +35,21 @@
     <description>This feature contains the required bundles for autoscaling functionality</description>
 
     <dependencies>
-	<dependency>
+	      <!--dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.load.balance.agent.stub</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-	<dependency>
+            <version>${wso2carbon.version}</version>
+        </dependency-->
+	      <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.load.balance.autoscaler.service.stub</artifactId>
-            <version>${project.version}</version>
+            <artifactId>org.wso2.carbon.load.balance.cartridge.autoscaler.service.stub</artifactId>
+            <version>1.0.0</version>
         </dependency>
-	<dependency>
-	    <groupId>org.wso2.carbon</groupId>
-	    <artifactId>org.wso2.carbon.mediator.autoscale</artifactId>
-	    <version>${project.version}</version>	
-	</dependency>
+	      <dependency>
+	          <groupId>org.wso2.carbon</groupId>
+	          <artifactId>org.wso2.carbon.mediator.autoscale</artifactId>
+	          <version>${project.version}</version>	
+	      </dependency>
     </dependencies>
 
     <build>
@@ -65,7 +67,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.mediator.autoscale</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
@@ -75,13 +77,14 @@
                             <bundles>
                                 <!--bundleDef>org.wso2.carbon:org.wso2.carbon.load.balance.agent.stub</bundleDef>
                                 -->
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.load.balance.autoscaler.service.stub</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.load.balance.cartridge.autoscaler.service.stub</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.autoscale</bundleDef>
                                 <bundleDef>org.slf4j:slf4j-api:1.6.4</bundleDef>
                                 <bundleDef>org.slf4j:slf4j-log4j12:1.6.4</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.apache.synapse.wso2:${synapse.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.lb.common:4.0.6</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

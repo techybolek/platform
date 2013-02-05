@@ -89,7 +89,7 @@ public abstract class BaseConfiguration {
 
         httpParameters = retrieveHttpParameters();
 
-        bufferFactory = new BufferFactory(1024 * 8, new HeapByteBufferAllocator(), 512);
+        bufferFactory = new BufferFactory(iOBufferSize, new HeapByteBufferAllocator(), 512);
     }
 
     public int getIOThreadsPerReactor() {

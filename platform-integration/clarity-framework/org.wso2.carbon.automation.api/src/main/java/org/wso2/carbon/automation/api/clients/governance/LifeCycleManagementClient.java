@@ -76,4 +76,19 @@ public class LifeCycleManagementClient {
             throws LifeCycleManagementServiceExceptionException, RemoteException {
         return lifeCycleManagementServiceStub.isLifecycleNameInUse(lifeCycleName);
     }
+
+    public boolean parseConfiguration(String configuration)
+            throws RemoteException, LifeCycleManagementServiceExceptionException {
+        try {
+            return lifeCycleManagementServiceStub.parseConfiguration(configuration);
+        } catch (RemoteException e) {
+            log.error("Cannot parse the configuration : " + e.getMessage());
+            throw new RemoteException("Cannot parse the configuration : ", e);
+        } catch (LifeCycleManagementServiceExceptionException e) {
+            log.error("Cannot parse the configuration : " + e.getMessage());
+            throw new LifeCycleManagementServiceExceptionException(
+                    "Cannot parse the configuration : ", e);
+        }
+    }
+
 }

@@ -1,10 +1,10 @@
 <%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.InputDTO" %>
 <%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.InputMapMappingDTO" %>
+<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.InputMapPropertyDTO" %>
 <%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.InputTupleMappingDTO" %>
+<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.InputTuplePropertyDTO" %>
 <%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.InputXMLMappingDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.MapPropertyDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.TuplePropertyDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.XMLPropertyDTO" %>
+<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.InputXMLPropertyDTO" %>
 <%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.XpathDefinitionDTO" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="java.util.HashSet" %>
@@ -16,8 +16,8 @@
     String mappingType = request.getParameter("mappingType");
     String tableIndex = request.getParameter("tableIndex");
     String brokerName = request.getParameter("brokerName");
-//    String eventClassName = request.getParameter("eventClassName");
-    String eventClassName = null; //not allowed via ui
+    String queryEventType = request.getParameter("queryEventType");
+//    String queryEventType = null; //not allowed via ui
 
     if (topic != null) {
         topic = topic.trim();
@@ -26,8 +26,8 @@
         mappingStream = mappingStream.trim();
     }
 
-    if (eventClassName != null && eventClassName.trim().equals("")) {
-        eventClassName = null;
+    if (queryEventType != null && queryEventType.trim().equals("")) {
+        queryEventType = null;
     }
 
     HashSet XMLPropertySet = (HashSet) session.getAttribute("inputXMLPropertyHashSet");
@@ -63,14 +63,14 @@
     if (mappingType.equals("xml")) {
         InputXMLMappingDTO mapping = new InputXMLMappingDTO();
         mapping.setStream(mappingStream);
-        mapping.setMappingClass(eventClassName);
+        mapping.setQueryEventType(queryEventType);
         if (nsPrefixesSet != null) {
             XpathDefinitionDTO[] xpathDefinitions = new XpathDefinitionDTO[nsPrefixesSet.size()];
             nsPrefixesSet.toArray(xpathDefinitions);
             mapping.setXpathDefinition(xpathDefinitions);
         }
         if (XMLPropertySet != null && XMLPropertySet.size() > 0) {
-            XMLPropertyDTO[] properties = new XMLPropertyDTO[XMLPropertySet.size()];
+            InputXMLPropertyDTO[] properties = new InputXMLPropertyDTO[XMLPropertySet.size()];
             XMLPropertySet.toArray(properties);
             mapping.setProperties(properties);
         }
@@ -81,9 +81,9 @@
 
         InputMapMappingDTO mapping = new InputMapMappingDTO();
         mapping.setStream(mappingStream);
-        mapping.setMappingClass(eventClassName);
+        mapping.setQueryEventType(queryEventType);
         if (mapPropertyList != null && mapPropertyList.size() > 0) {
-            MapPropertyDTO[] properties = new MapPropertyDTO[mapPropertyList.size()];
+            InputMapPropertyDTO[] properties = new InputMapPropertyDTO[mapPropertyList.size()];
             mapPropertyList.toArray(properties);
             mapping.setProperties(properties);
         }
@@ -94,9 +94,9 @@
 
         InputTupleMappingDTO mapping = new InputTupleMappingDTO();
         mapping.setStream(mappingStream);
-        mapping.setMappingClass(eventClassName);
+        mapping.setQueryEventType(queryEventType);
         if (tuplePropertyList != null && tuplePropertyList.size() > 0) {
-            TuplePropertyDTO[] properties = new TuplePropertyDTO[tuplePropertyList.size()];
+            InputTuplePropertyDTO[] properties = new InputTuplePropertyDTO[tuplePropertyList.size()];
             tuplePropertyList.toArray(properties);
             mapping.setProperties(properties);
         }

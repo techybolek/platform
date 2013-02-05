@@ -23,6 +23,7 @@ var login = function (username, password) {
     }
     cookie = result.sessionId;
     cookie = cookie.split(';')[0];
+    session.put("userRoles", result.userRoles);
     return {
         error:false,
         cookie:cookie
@@ -33,6 +34,7 @@ var logout = function () {
     //TODO : implement logout
     /*session.put("username", null);
      session.put("cookie", null);*/
+    session.remove("userRoles");
     return {
         error:false
     };

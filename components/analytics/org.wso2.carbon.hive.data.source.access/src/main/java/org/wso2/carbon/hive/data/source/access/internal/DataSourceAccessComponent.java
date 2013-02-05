@@ -6,14 +6,14 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.hive.data.source.access.util.DataSourceAccessUtil;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
-import org.wso2.carbon.rssmanager.core.service.RSSManagerService;
+import org.wso2.carbon.user.core.service.RealmService;
 
 /**
  * @scr.component name="data.source.access.component" immediate="true"
  * @scr.reference name="datasources.service" interface="org.wso2.carbon.ndatasource.core.DataSourceService"
  * cardinality="1..1" policy="dynamic" bind="setDataSourceService" unbind="unsetDataSourceService"
- * @scr.reference name="rss.service" interface="org.wso2.carbon.rssmanager.core.service.RSSManagerService"
- * cardinality="1..1" policy="dynamic" bind="setRSSManagerService" unbind="unsetRSSManagerService"
+ * @scr.reference name="user.realmservice.default" interface="org.wso2.carbon.user.core.service.RealmService"
+ * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
  */
 
 public class DataSourceAccessComponent {
@@ -49,21 +49,23 @@ public class DataSourceAccessComponent {
         DataSourceAccessUtil.setCarbonDataSourceService(null);
     }
 
-    protected void setRSSManagerService(RSSManagerService rssManagerService) {
+
+
+    protected void setRealmService(RealmService realmService) {
         if (log.isDebugEnabled()) {
-            log.debug("Setting the RSS Manager Service");
+            log.debug("Setting the Realm Service");
         }
 
-        DataSourceAccessUtil.setRSSManagerService(rssManagerService);
+        DataSourceAccessUtil.setRealmService(realmService);
     }
 
-    protected void unsetRSSManagerService(RSSManagerService rssManagerService) {
+    protected void unsetRealmService(RealmService realmService) {
         if (log.isDebugEnabled()) {
-            log.debug("Unetting the RSS Manager Service");
+            log.debug("Unsetting the Realm Service");
         }
 
-        DataSourceAccessUtil.setRSSManagerService(null);
+        DataSourceAccessUtil.setRealmService(null);
     }
 
-    
+
 }

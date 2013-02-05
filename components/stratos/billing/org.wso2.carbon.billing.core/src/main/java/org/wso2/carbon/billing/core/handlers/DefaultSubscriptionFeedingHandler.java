@@ -60,9 +60,8 @@ public class DefaultSubscriptionFeedingHandler implements BillingHandler {
      */
     private void feedSubscriptions(BillingEngineContext handlerContext) throws BillingException {
         // get the subscriptions right here..
-        String filter = handlerContext.getTaskConfiguration().getSubscriptionFilter();
         Customer customer = handlerContext.getCustomer();
-        List<Subscription> subscriptions = getFilteredActiveSubscriptions(filter, customer);
+        List<Subscription> subscriptions = getFilteredActiveSubscriptions(null, customer);
         // prepare the handler context
         handlerContext.setSubscriptions(subscriptions);
         String infoMsg = "Subscription feeding phase completed. ";

@@ -18,6 +18,7 @@
 package org.wso2.carbon.identity.entitlement.ui.client;
 
 import java.lang.Exception;
+import java.rmi.RemoteException;
 import java.util.List;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
@@ -37,6 +38,7 @@ import org.wso2.carbon.identity.entitlement.stub.dto.*;
 public class EntitlementPolicyAdminServiceClient {
 
     private EntitlementPolicyAdminServiceStub stub;
+
     private static final Log log = LogFactory.getLog(EntitlementPolicyAdminServiceClient.class);
 
     /**
@@ -215,33 +217,6 @@ public class EntitlementPolicyAdminServiceClient {
         }
     }
     
-    /**
-     * Clears the decision cache maintained by the PDP.
-     * @throws AxisFault
-     */
-    public void clearDecisionCache() throws AxisFault {
-
-        try {
-            stub.clearDecisionCache();
-        } catch (Exception e) {
-            String message = e.getMessage();
-            handleException(message, e);            
-        }
-    }
-
-    /**
-     * Clears the attribute cache maintained by the PDP.
-     * @throws AxisFault
-     */
-    public void clearAttributeCache() throws AxisFault {
-
-        try {
-            stub.clearAllAttributeCaches();
-        } catch (Exception e) {
-            String message = e.getMessage();
-            handleException(message, e);
-        }
-    }
 
     /**
      * Pre-defined Attributes related with XACML Policy is fetched from registry.
@@ -317,37 +292,12 @@ public class EntitlementPolicyAdminServiceClient {
         return upload.parseRequest(requestContext);
     }
 
-   /**
-    * Gets user or role entitled resources
-    * @param subjectName user or role name
-    * @param resourceName resource name
-    * @param subjectId  attribute id of the subject, user or role
-    * @param action action name 
-    * @param enableChildSearch whether search is done for the child resources under the given resource name
-    * @param useApplicablePolices whether search is done only for applicable policies in given search parameters
-    * @throws org.apache.axis2.AxisFault  throws
-    * @return entitled resources as String array
-    */
-    public EntitledResultSetDTO getEntitledAttributes(String subjectName, String resourceName,
-                                                      String subjectId, String action, boolean enableChildSearch,
-                                                      boolean useApplicablePolices)
-            throws AxisFault {
-        try {
-           return  stub.getEntitledAttributes(subjectName, resourceName, subjectId, action,
-                                              enableChildSearch, useApplicablePolices);
-        } catch (Exception e) {
-           handleException(e.getMessage(), e);
-        }
-
-        return null;
-    }
-
     /**
      * Gets attribute value tree for given attribute type
      * @return attribute value tree
      * @throws AxisFault throws
      */
-    public PolicyAttributeDTO[] getPolicyAttributeValues()
+    public PolicyEditorAttributeDTO[] getPolicyAttributeValues()
             throws AxisFault {
         try {
            return  stub.getPolicyAttributeValues();
@@ -358,6 +308,20 @@ public class EntitlementPolicyAdminServiceClient {
         return null;
     }
 
+    /**
+     * Reorder policies
+     *
+     * @param policyDTOs policies as PolicyDTO arrays
+     * @throws AxisFault throws
+     */
+    public void reOderPolicies(PolicyDTO[] policyDTOs)
+            throws AxisFault {
+        try {
+           stub.reOderPolicies(policyDTOs);
+        } catch (Exception e) {
+           handleException(e.getMessage(), e);
+        }
+    }
     /**
      * Logs and wraps the given exception.
      * 

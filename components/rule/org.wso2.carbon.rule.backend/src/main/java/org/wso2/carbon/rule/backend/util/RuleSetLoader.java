@@ -18,6 +18,8 @@
 */
 package org.wso2.carbon.rule.backend.util;
 
+
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.rule.backend.util.ds.RuleServiceValueHolder;
 import org.wso2.carbon.rule.common.Rule;
@@ -30,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+
 
 public class RuleSetLoader {
 
@@ -52,7 +55,7 @@ public class RuleSetLoader {
 
         } else if (rule.getSourceType().equals(Constants.RULE_SOURCE_TYPE_FILE)) {
             ruleInputStream = classLoader.getResourceAsStream(
-                    Constants.RULE_SOURCE_FILE_DIRECTORY + File.separator + rule.getValue());
+                    Constants.RULE_SOURCE_FILE_DIRECTORY + "/" + rule.getValue());
         } else if (rule.getSourceType().equals(Constants.RULE_SOURCE_TYPE_URL)) {
             String url = rule.getValue();
             try {
@@ -75,15 +78,14 @@ public class RuleSetLoader {
     private static InputStream getRegistryAsStream(String type, String key) throws RegistryException {
         RuleServiceValueHolder ruleServiceValueHolder = RuleServiceValueHolder.getInstance();
         InputStream inputStream = null;
-
+        int tenantID = CarbonContext.getCurrentContext().getTenantId();
 
         if (type.equals(Constants.RULE_SOURCE_REGISTRY_TYPE_CONFIGURATION)) {
-
-            inputStream = ruleServiceValueHolder.getRegistryService()
-                    .getConfigSystemRegistry().get(key).getContentStream();
+            inputStream =
+                    ruleServiceValueHolder.getRegistryService().getConfigSystemRegistry(tenantID).get(key).getContentStream();
         } else if (type.equals(Constants.RULE_SOURCE_REGISTRY_TYPE_GOVERNANCE)) {
-            inputStream = ruleServiceValueHolder.getRegistryService()
-                    .getGovernanceSystemRegistry().get(key).getContentStream();
+            inputStream =
+                    ruleServiceValueHolder.getRegistryService().getGovernanceSystemRegistry(tenantID).get(key).getContentStream();
 
         }
 

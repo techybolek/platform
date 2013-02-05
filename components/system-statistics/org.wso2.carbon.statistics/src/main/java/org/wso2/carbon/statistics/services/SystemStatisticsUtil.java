@@ -16,6 +16,7 @@
 package org.wso2.carbon.statistics.services;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
@@ -35,25 +36,24 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class SystemStatisticsUtil {
 
-     public SystemStatistics getSystemStatistics(AxisConfiguration axisConfig) throws AxisFault{
-        SystemStatistics systemStatistics = new SystemStatistics();
-        systemStatistics.update(axisConfig);
+     public SystemStatistics getSystemStatistics(MessageContext context) throws AxisFault{
+        SystemStatistics systemStatistics = new SystemStatistics(context);
+        return systemStatistics;
+    }
+
+    public SystemStatistics getSystemStatistics(AxisConfiguration axisConfiguration) throws AxisFault{
+        SystemStatistics systemStatistics = new SystemStatistics(axisConfiguration);
         return systemStatistics;
     }
 
     public ServiceStatistics getServiceStatistics(AxisService axisService) throws AxisFault {
         ServiceStatistics serviceStatistics = new ServiceStatistics();
         serviceStatistics.setAvgResponseTime(getAvgServiceResponseTime(axisService));
-        serviceStatistics.setCurrentInvocationResponseTime(getResponseTime(axisService));
         serviceStatistics.setTotalFaultCount(getServiceFaultCount(axisService));
         serviceStatistics.setMaxResponseTime(getMaxServiceResponseTime(axisService));
         serviceStatistics.setMinResponseTime(getMinServiceResponseTime(axisService));
         serviceStatistics.setTotalRequestCount(getServiceRequestCount(axisService));
         serviceStatistics.setTotalResponseCount(getServiceResponseCount(axisService));
-
-        serviceStatistics.setCurrentInvocationRequestCount(getCurrentRequestCount(axisService));
-        serviceStatistics.setCurrentInvocationResponseCount(getCurrentResponseCount(axisService));
-        serviceStatistics.setCurrentInvocationFaultCount(getCurrentFaultCount(axisService));
         return serviceStatistics;
     }
 
@@ -61,16 +61,11 @@ public class SystemStatisticsUtil {
     public OperationStatistics getOperationStatistics(AxisOperation axisOp) throws AxisFault {
         OperationStatistics operationStatistics = new OperationStatistics();
         operationStatistics.setAvgResponseTime(getAvgOperationResponseTime(axisOp));
-        operationStatistics.setCurrentInvocationResponseTime(getResponseTime(axisOp));
         operationStatistics.setTotalFaultCount(getOperationFaultCount(axisOp));
         operationStatistics.setMaxResponseTime(getMaxOperationResponseTime(axisOp));
         operationStatistics.setMinResponseTime(getMinOperationResponseTime(axisOp));
         operationStatistics.setTotalRequestCount(getOperationRequestCount(axisOp));
         operationStatistics.setTotalResponseCount(getOperationResponseCount(axisOp));
-
-        operationStatistics.setCurrentInvocationRequestCount(getCurrentRequestCount(axisOp));
-        operationStatistics.setCurrentInvocationResponseCount(getCurrentResponseCount(axisOp));
-        operationStatistics.setCurrentInvocationFaultCount(getCurrentFaultCount(axisOp));
 
         return operationStatistics;
     }
@@ -94,41 +89,6 @@ public class SystemStatisticsUtil {
         return ((AtomicInteger) globalCounter.getValue()).get();
     }
 
-    private int getCurrentRequestCount(AxisService axisService) {
-        Parameter requestCountParameter = axisService.getParameter(
-                StatisticsConstants.CURRENT_IN_OPERATION_AND_SERVICE_COUNTER);
-        if (requestCountParameter != null) {
-            Object value = requestCountParameter.getValue();
-            if (value instanceof Integer) {
-                return (Integer) value;
-            }
-        }
-        return 0;
-    }
-
-    private int getCurrentFaultCount(AxisService axisService) {
-        Parameter faultCountParameter = axisService.getParameter(
-                StatisticsConstants.CURRENT_OPERATION_AND_SERVICE_FAULT_COUNTER);
-        if (faultCountParameter != null) {
-            Object value = faultCountParameter.getValue();
-            if (value instanceof Integer) {
-                return (Integer) value;
-            }
-        }
-        return 0;
-    }
-
-    private int getCurrentResponseCount(AxisService axisService) {
-        Parameter responseCountParameter = axisService.getParameter(
-                StatisticsConstants.CURRENT_OUT_OPERATION_AND_SERVICE_COUNTER);
-        if (responseCountParameter != null) {
-            Object value = responseCountParameter.getValue();
-            if (value instanceof Integer) {
-                return (Integer) value;
-            }
-        }
-        return 0;
-    }
 
     private long getResponseTime(AxisService axisService) {
         Parameter responseTimeParameter = axisService.getParameter(
@@ -142,41 +102,7 @@ public class SystemStatisticsUtil {
         return 0;
     }
 
-    private int getCurrentFaultCount(AxisOperation axisOp) {
-        Parameter faultCountParameter = axisOp.getParameter(
-                StatisticsConstants.CURRENT_OPERATION_AND_SERVICE_FAULT_COUNTER);
-        if (faultCountParameter != null) {
-            Object value = faultCountParameter.getValue();
-            if (value instanceof Integer) {
-                return (Integer) value;
-            }
-        }
-        return 0;
-    }
 
-    private int getCurrentResponseCount(AxisOperation axisOp) {
-        Parameter responseCountParameter = axisOp.getParameter(
-                StatisticsConstants.CURRENT_OUT_OPERATION_AND_SERVICE_COUNTER);
-        if (responseCountParameter != null) {
-            Object value = responseCountParameter.getValue();
-            if (value instanceof Integer) {
-                return (Integer) value;
-            }
-        }
-        return 0;
-    }
-
-    private int getCurrentRequestCount(AxisOperation axisOp) {
-        Parameter requestCountParameter = axisOp.getParameter(
-                StatisticsConstants.CURRENT_IN_OPERATION_AND_SERVICE_COUNTER);
-        if (requestCountParameter != null) {
-            Object value = requestCountParameter.getValue();
-            if (value instanceof Integer) {
-                return (Integer) value;
-            }
-        }
-        return 0;
-    }
 
     private long getResponseTime(AxisOperation axisOp) {
         Parameter responseTimeParameter = axisOp.getParameter(
@@ -359,11 +285,11 @@ public class SystemStatisticsUtil {
         return avg;
     }
 
-    public int getCurrentSystemResponseCount(AxisConfiguration axisConfig) {
-        Parameter currentSystemResponseCount =
-                axisConfig.getParameter(StatisticsConstants.GLOBAL_CURRENT_RESPONSE_COUNTER);
+    public int getCurrentSystemResponseCount(MessageContext messageContext) {
+        Object currentSystemResponseCount =
+                messageContext.getProperty(StatisticsConstants.GLOBAL_CURRENT_RESPONSE_COUNTER);
         if (currentSystemResponseCount != null) {
-            Object value = currentSystemResponseCount.getValue();
+            Object value = currentSystemResponseCount;
             if (value instanceof Integer) {
                 return ((Integer) value);
             }
@@ -371,11 +297,12 @@ public class SystemStatisticsUtil {
         return 0;
     }
 
-    public long getCurrentSystemResponseTime(AxisConfiguration axisConfig) {
-        Parameter currentSystemResponseTime =
-                axisConfig.getParameter(StatisticsConstants.GLOBAL_CURRENT_INVOCATION_RESPONSE_TIME);
+    public long getCurrentSystemResponseTime(MessageContext messageContext) {
+
+        Object currentSystemResponseTime =
+                messageContext.getProperty(StatisticsConstants.GLOBAL_CURRENT_INVOCATION_RESPONSE_TIME);
         if (currentSystemResponseTime != null) {
-            Object value = currentSystemResponseTime.getValue();
+            Object value = currentSystemResponseTime;
             if (value instanceof Long) {
                 return ((Long) value);
             }
@@ -383,11 +310,11 @@ public class SystemStatisticsUtil {
         return 0;
     }
 
-    public int getCurrentSystemRequestCount(AxisConfiguration axisConfig) {
-        Parameter currentSystemRequestCount =
-                axisConfig.getParameter(StatisticsConstants.GLOBAL_CURRENT_REQUEST_COUNTER);
+    public int getCurrentSystemRequestCount(MessageContext messageContext) {
+        Object currentSystemRequestCount =
+                messageContext.getProperty(StatisticsConstants.GLOBAL_CURRENT_REQUEST_COUNTER);
         if (currentSystemRequestCount != null) {
-            Object value = currentSystemRequestCount.getValue();
+            Object value = currentSystemRequestCount;
             if (value instanceof Integer) {
                 return ((Integer) value);
             }
@@ -395,11 +322,11 @@ public class SystemStatisticsUtil {
         return 0;
     }
 
-    public int getCurrentSystemFaultCount(AxisConfiguration axisConfig) {
-        Parameter currentSystemFaultCount =
-                axisConfig.getParameter(StatisticsConstants.GLOBAL_CURRENT_FAULT_COUNTER);
+    public int getCurrentSystemFaultCount(MessageContext messageContext) {
+        Object currentSystemFaultCount =
+                messageContext.getProperty(StatisticsConstants.GLOBAL_CURRENT_FAULT_COUNTER);
         if (currentSystemFaultCount != null) {
-            Object value = currentSystemFaultCount.getValue();
+            Object value = currentSystemFaultCount;
             if (value instanceof Integer) {
                 return ((Integer) value);
             }

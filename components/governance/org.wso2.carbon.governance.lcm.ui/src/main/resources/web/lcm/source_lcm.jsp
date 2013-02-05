@@ -120,6 +120,9 @@
                     "                                    <script type=\"text/javascript\"></script>\n" +
                     "                                </server>\n" +
                     "                            </js>\n" +
+                    "                        </data>\n" +
+                    "                        <data name=\"transitionApproval\">\n" +
+                    "                            <approval forEvent=\"Promote\" roles=\"\" votes=\"2\"/>\n" +
                     "                        </data>-->\n" +
                     "                    </datamodel>\n" +
                     "                    <transition event=\"Promote\" target=\"Tested\"/>                  \n" +
@@ -204,7 +207,9 @@
                         <input class="button registryNonWriteOperation" type="button" disabled="disabled" value="<fmt:message key="save"/>"/>
                         <input class="button" type="button" value="<fmt:message key="cancel"/>" onclick="javascript: cancelSequence(); return false;"/>
                         <% } else { %>
-                        <input class="button" type="button" value="<fmt:message key="back"/>" onclick="javascript: cancelSequence(); return false;"/>
+                        <input class="button registryWriteOperation" type="button" onclick="saveLC('<%=request.getParameter("lifecycleName")%>', <%=Boolean.toString(isNew)%>,'false')" value="<fmt:message key="save"/>"/>
+                        <input class="button registryNonWriteOperation" type="button" disabled="disabled" value="<fmt:message key="save"/>"/>
+                        <input class="button" type="button" value="<fmt:message key="cancel"/>" onclick="javascript: cancelSequence(); return false;"/>
                         <% } %>
                     </td>
                 </tr>

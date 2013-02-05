@@ -177,11 +177,11 @@
                 </td>
                 <td>
                     <input type="radio" id="keyGroupStatic"
-                           onclick="javascript:displayElement('mediator.script.key.dynamic', false); javascript:displayElement('mediator.script.key.static', true); displayElement('mediator.script.key.namespace.editor', false);"
+                           onclick="javascript:displayElement('mediator.script.key.dynamic', false); javascript:displayElement('mediator.script.key.static', true); document.getElementById('mediator.script.key.static_val').value=''; displayElement('mediator.script.key.namespace.editor', false);"
                            name="keygroup" <%=!isKeyDynamic ? "checked=\"checked\" value=\"StaticKey\"" : "value=\"StaticKey\""%>/>
                     <fmt:message key="mediator.script.key.static"/>
                     <input type="radio" id="keyGroupDynamic"
-                           onclick="javascript:displayElement('mediator.script.key.dynamic', true); displayElement('mediator.script.key.namespace.editor', true); displayElement('mediator.script.key.static', false);"
+                           onclick="javascript:displayElement('mediator.script.key.dynamic', true); displayElement('mediator.script.key.namespace.editor', true); document.getElementById('mediator.script.key.dynamic_val').value = ''; displayElement('mediator.script.key.static', false);"
                            name="keygroup" <%=isKeyDynamic ? "checked=\"checked\" value=\"DynamicKey\"" : "value=\"DynamicKey\""%>
                     "/>
                     <fmt:message key="mediator.script.key.dynamic"/>

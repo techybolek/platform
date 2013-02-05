@@ -112,24 +112,55 @@ public class HumanTaskClient {
         return workItems.toArray(new WorkItem[workItems.size()]);
     }
 
+    private static class RoleDetails {
+        private FlaggedName[] roleNames;
+        private String everyoneRole;
+
+        private RoleDetails(FlaggedName[] roleNames, String everyoneRole) {
+            this.roleNames = roleNames;
+            this.everyoneRole = everyoneRole;
+        }
+
+        public FlaggedName[] getRoleNames() {
+            return roleNames;
+        }
+
+        public String getEveryoneRole() {
+            return everyoneRole;
+        }
+    }
+
     public String[] getRoles(HttpSession session) throws RemoteException,
             GetAllRolesNamesUserAdminExceptionException,
             GetUserStoreInfoUserAdminExceptionException,
             GetRolesOfCurrentUserUserAdminExceptionException {
-        //TODO: This operations needs to make use of the cache for good reasons.
 
-        FlaggedName[] allRolesNames = umStub.getRolesOfCurrentUser();
-        String adminRole = umStub.getUserStoreInfo().getAdminRole();
+        FlaggedName[] allRolesNames;
+        String everyOneRole;
+        Object roleDetails = null;
+        if (session!= null) {
+            roleDetails = session.getAttribute("roleDetails");
+        }
+        if (roleDetails != null) {
+            allRolesNames = ((RoleDetails)roleDetails).getRoleNames();
+            everyOneRole = ((RoleDetails)roleDetails).getEveryoneRole();
+        } else {
+            allRolesNames = umStub.getRolesOfCurrentUser();
+            String adminRole = umStub.getUserStoreInfo().getAdminRole();
 
-        for (FlaggedName role : allRolesNames) {
-            String name = role.getItemName();
-            if (name.equals(adminRole)) {
-                allRolesNames = umStub.getAllRolesNames();
-                break;
+            for (FlaggedName role : allRolesNames) {
+                String name = role.getItemName();
+                if (name.equals(adminRole)) {
+                    allRolesNames = umStub.getAllRolesNames();
+                    break;
+                }
+            }
+            everyOneRole = umStub.getUserStoreInfo().getEveryOneRole();
+            if (session!= null) {
+                session.setAttribute("roleDetails", new RoleDetails(allRolesNames, everyOneRole));
             }
         }
 
-        String everyOneRole = umStub.getUserStoreInfo().getEveryOneRole();
         List<String> roles = new LinkedList<String>();
         for (FlaggedName role : allRolesNames) {
             String name = role.getItemName();
@@ -150,6 +181,7 @@ public class HumanTaskClient {
             throws RemoteException, IllegalArgumentFault, IllegalOperationFault, IllegalAccessFault,
             IllegalStateFault {
         try {
+            htStub.start(new URI(id));
             htStub.complete(new URI(id), "<WorkResponse>true</WorkResponse>");
         } catch (URI.MalformedURIException e) {
             log.error("Invalid task identifier", e);

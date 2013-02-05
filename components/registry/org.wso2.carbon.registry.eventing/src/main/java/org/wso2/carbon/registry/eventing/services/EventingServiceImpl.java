@@ -23,16 +23,14 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.core.exception.EventBrokerException;
 import org.wso2.carbon.event.core.subscription.EventDispatcher;
 import org.wso2.carbon.event.core.subscription.Subscription;
 import org.wso2.carbon.registry.common.eventing.RegistryEvent;
-import org.wso2.carbon.registry.common.utils.CommonUtil;
 import org.wso2.carbon.registry.common.utils.RegistryUtil;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.internal.RegistryCoreServiceComponent;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.eventing.RegistryEventDispatcher;
 import org.wso2.carbon.registry.eventing.RegistryEventingConstants;
@@ -205,7 +203,7 @@ public class EventingServiceImpl implements EventingService, SubscriptionEmailVe
 
     private void requestEmailVerification(Subscription subscription,
                                           String userName, String remoteURL) {
-        int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
+        int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
         if (executor == null) {
             setupExecutorService();
         }
@@ -334,13 +332,24 @@ public class EventingServiceImpl implements EventingService, SubscriptionEmailVe
 
         @SuppressWarnings("unchecked")
         public void run() {
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantId, true);
+            PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId, true);
             if (Utils.getEmailVerificationSubscriber() == null) {
                 return;
             }
-            String email = subscription.getEventSinkURL().toLowerCase();
-            if (email.startsWith("digest:")) {
-                email = email.substring("digest:".length() + 4);
+            String eventUrl = subscription.getEventSinkURL();
+            String lowerCasedEventUrl=eventUrl.toLowerCase();
+
+            String email = "";
+            if (lowerCasedEventUrl.startsWith("digest:")&& lowerCasedEventUrl.contains("mailto")) {
+                // extracting the mailto: address form eventsink url like digest://h/mailto:email
+                email = eventUrl.substring("digest:".length() +4);
+            }    // user verification for emails.
+            else if(lowerCasedEventUrl.contains("mailto:")) {
+                email = eventUrl;
+            }
+            // we are not requesting verifications for user and roles.
+            else{
+                return;
             }
             email = email.substring("mailto:".length());
             Map<String,String> data = new HashMap<String, String>();
@@ -374,12 +383,12 @@ public class EventingServiceImpl implements EventingService, SubscriptionEmailVe
                 // Setup the Carbon Context so that downstream logic can make use of it.
                 // At present, the Event Component makes use of the information stored on the Carbon
                 // Context when publishing events.
-                SuperTenantCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.startTenantFlow();
                 try {
-                    SuperTenantCarbonContext context =
-                            SuperTenantCarbonContext.getCurrentContext();
+                    PrivilegedCarbonContext context =
+                            PrivilegedCarbonContext.getCurrentContext();
                     int tenantId = event.getTenantId();
-                    if (tenantId > -1) {
+                    if (tenantId != -1) {
                         context.setTenantId(tenantId, true);
                     }
                     RegistryEvent.RegistrySession registrySessionDetails =
@@ -412,7 +421,7 @@ public class EventingServiceImpl implements EventingService, SubscriptionEmailVe
                         Utils.getRegistryEventBrokerService().publish(event, event.getTopic());
                     }
                 } finally {
-                    SuperTenantCarbonContext.endTenantFlow();
+                    PrivilegedCarbonContext.endTenantFlow();
                 }
             } catch (EventBrokerException e) {
                 log.error("Unable to send notification", e);

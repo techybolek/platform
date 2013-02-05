@@ -91,7 +91,7 @@
                 qname = new QName(SynapseConstants.SYNAPSE_NAMESPACE, "icClass");
                 dbReportMediator.addDataSourceProperty(qname, param);
             }
-            param = request.getParameter("data_source");
+            param = request.getParameter("ext_data_source");
             if (param != null && !param.equals("")) {
                 qname = new QName(SynapseConstants.SYNAPSE_NAMESPACE, "dsName");
                 dbReportMediator.addDataSourceProperty(qname, param);
@@ -121,7 +121,7 @@
             }
         }
     } else {
-        param = request.getParameter("dsName_hidden");
+        param = request.getParameter("data_source");
         if (param != null && !param.equals("")) {
             qname = new QName(SynapseConstants.SYNAPSE_NAMESPACE, "dsName");
             dbReportMediator.addDataSourceProperty(qname, param);

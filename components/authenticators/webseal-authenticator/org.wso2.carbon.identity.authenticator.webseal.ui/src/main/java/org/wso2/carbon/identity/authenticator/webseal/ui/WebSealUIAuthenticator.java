@@ -17,46 +17,58 @@
 */
 package org.wso2.carbon.identity.authenticator.webseal.ui;
 
-import java.rmi.RemoteException;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import org.apache.axiom.om.util.Base64;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.common.AuthenticationException;
 import org.wso2.carbon.core.security.AuthenticatorsConfiguration;
-import org.wso2.carbon.identity.authenticator.webseal.stub.client.WebSealAuthenticatorStub;
+import org.wso2.carbon.identity.authenticator.webseal.ui.client.WebSealAuthenticatorClient;
 import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.ui.DefaultCarbonAuthenticator;
+import org.wso2.carbon.utils.ServerConstants;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.net.URLDecoder;
+
+/**
+ * Webseal UI authenticator.
+ */
 public class WebSealUIAuthenticator extends DefaultCarbonAuthenticator {
 
     public static final String WEBSEAL_USER = "iv-user";
     protected static final Log log = LogFactory.getLog(WebSealUIAuthenticator.class);
     private static final int DEFAULT_PRIORITY_LEVEL = 10;
-    private static final String AUTHENTICATOR_NAME = "WebSealUIAuthenticator";
+    public static final String AUTHENTICATOR_NAME = "WebSealUIAuthenticator";
 
-    public boolean isHandle(Object object) {
-        if (!(object instanceof HttpServletRequest)) {
-            return false;
-        }
-        HttpServletRequest request = (HttpServletRequest) object;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean canHandle(HttpServletRequest request) {
+
         String ivuser = request.getHeader(WEBSEAL_USER);
-        if (ivuser != null) {
-            return true;
+
+
+        if(log.isDebugEnabled()){
+            if(ivuser == null){
+                log.debug("iv-user header is null. WebSealUIAuthenticator can not process this request");
+            } else {
+                log.debug("iv-user header is : " + ivuser);
+            }
         }
-        return false;
+        return ivuser != null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public int getPriority() {
         AuthenticatorsConfiguration authenticatorsConfiguration = AuthenticatorsConfiguration.getInstance();
         AuthenticatorsConfiguration.AuthenticatorConfig authenticatorConfig =
@@ -66,7 +78,10 @@ public class WebSealUIAuthenticator extends DefaultCarbonAuthenticator {
         }
         return DEFAULT_PRIORITY_LEVEL;
     }
-
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String getAuthenticatorName() {
         return AUTHENTICATOR_NAME;
     }
@@ -74,65 +89,72 @@ public class WebSealUIAuthenticator extends DefaultCarbonAuthenticator {
     /**
      * {@inheritDoc}
      */
-    public boolean authenticate(Object object) throws AuthenticationException {
-        HttpServletRequest request = (HttpServletRequest) object;
-        String credentials = request.getHeader("Authorization");
-        String websealuser = null;
-        String password = null;
-        String username;
+    @Override
+    public void authenticate(HttpServletRequest request) throws AuthenticationException {
 
-        username = request.getHeader(WEBSEAL_USER);
+        String credentials = request.getHeader("Authorization");
+        String userName = request.getHeader(WEBSEAL_USER);
 
         if (credentials != null) {
             credentials = credentials.trim();
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Empty Authorization header");
+                log.debug("Authorization header is empty");
             }
-            return false;
+            throw new AuthenticationException("Autherization header is empty");
         }
+        String rememberMe = request.getParameter("rememberMe");
 
-        if (credentials != null && credentials.startsWith("Basic ")) {
-            credentials = new String(Base64.decode(credentials.substring(6)));
-            int i = credentials.indexOf(':');
-            if (i == -1) {
-                websealuser = credentials;
-            } else {
-                websealuser = credentials.substring(0, i);
-            }
-
-            if (i != -1) {
-                password = credentials.substring(i + 1);
-                if (password != null && password.equals("")) {
-                    password = null;
-                }
-            }
-        }
-
-        try {
-            return authenticate(request, websealuser, password, username);
-        } catch (RemoteException e) {
-            throw new AuthenticationException(e.getMessage(), e);
-        }
+        handleSecurity(credentials, rememberMe != null ,request);
+        request.setAttribute("username", userName);
     }
 
-    private boolean authenticate(HttpServletRequest request, String websealUser, String password,
-            String userName) throws RemoteException {
+    @Override
+    public String doAuthentication(Object credentialsObj, boolean isRememberMe, ServiceClient serviceClient,
+                                   HttpServletRequest request) throws AuthenticationException {
+        String websealUser = null;
+        String password = null;
+        String credentials = (String)credentialsObj;
+
         try {
+            if (credentials != null && credentials.startsWith("Basic ")) {
+                credentials = new String(Base64.decode(credentials.substring(6)));
+                int i = credentials.indexOf(':');
+                if (i == -1) {
+                    websealUser = credentials;
+                } else {
+                    websealUser = credentials.substring(0, i);
+                }
+
+                if (i != -1) {
+                    password = credentials.substring(i + 1);
+                    if (password != null && password.trim().equals("")) {
+                        password = null;
+                    }
+                }
+            }
+
+            String userName = request.getHeader(WEBSEAL_USER);
 
             if (websealUser == null || password == null) {
                 if (log.isDebugEnabled()) {
                     if (websealUser == null) {
                         log.debug("No valid webseal user name provided");
+                    } else {
+                        log.debug("WebSeal user name is : " + websealUser);
                     }
                     if (password == null) {
                         log.debug("No valid webseal user password provided");
                     }
-                    if (password == null) {
-                        log.debug("No valid webseal authneticated user name provided");
+                    if (userName == null) {
+                        log.debug("No valid webseal authenticated user name provided");
                     }
                 }
-                return false;
+                throw new AuthenticationException("Invalid credentials");
+            }
+
+            if (userName != null) {
+                 userName = URLDecoder.decode(userName, "UTF-8");
             }
 
             ServletContext servletContext = request.getSession().getServletContext();
@@ -156,24 +178,24 @@ public class WebSealUIAuthenticator extends DefaultCarbonAuthenticator {
             // value will be displayed in the server URL text box. Usability
             // improvement.
             session.setAttribute(CarbonConstants.SERVER_URL, backendServerURL);
+            String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_AUTH_TOKEN);            
 
-            boolean isLogged = false;
-
-            String serviceEPR = backendServerURL + "WebSealAuthenticator";
-            WebSealAuthenticatorStub stub = new WebSealAuthenticatorStub(configContext, serviceEPR);
-            ServiceClient client = stub._getServiceClient();
-            Options options = client.getOptions();
-            options.setManageSession(true);
-
-            return isLogged;
-
-        } catch (AxisFault axisFault) {
-            throw axisFault;
+            WebSealAuthenticatorClient client = new WebSealAuthenticatorClient(configContext,
+                    backendServerURL,cookie, session);
+            if(client.login(websealUser, password, userName)){
+                return userName;
+            }else{
+                throw new AuthenticationException("Cannot login user "+userName);
+            }
+        } catch (AuthenticationException e) {
+            throw e;
         } catch (Exception e) {
-            throw new AxisFault("Exception occured", e);
+            log.error("Error when sign-in for the user : " + websealUser, e);
+            throw new AuthenticationException("Error when sign-in for the user : " + websealUser, e);
         }
     }
 
+    @Override
     public boolean isDisabled() {
         AuthenticatorsConfiguration authenticatorsConfiguration = AuthenticatorsConfiguration.getInstance();
         AuthenticatorsConfiguration.AuthenticatorConfig authenticatorConfig =
@@ -181,10 +203,28 @@ public class WebSealUIAuthenticator extends DefaultCarbonAuthenticator {
         if (authenticatorConfig != null) {
             return authenticatorConfig.isDisabled();
         }
-        return false;
+        return true;
     }
 
-    public boolean reAuthenticateOnSessionExpire(Object object) throws AuthenticationException {
-        return false;
+   @Override
+    public void unauthenticate(Object o) throws Exception {
+
+        HttpServletRequest request = (HttpServletRequest) o;
+        HttpSession session = request.getSession();
+        ServletContext servletContext = session.getServletContext();
+        ConfigurationContext configContext = (ConfigurationContext) servletContext
+                .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+
+        String backendServerURL = CarbonUIUtil.getServerURL(servletContext, session);
+        try {
+            String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_AUTH_TOKEN);
+            WebSealAuthenticatorClient client = new WebSealAuthenticatorClient(configContext,
+                                                                backendServerURL, cookie, session);
+            client.logout(session);
+        } catch (AuthenticationException e) {
+            String msg = "Error occurred while logging out";
+            log.error(msg, e);
+            throw new Exception(msg, e);
+        }    
     }
 }

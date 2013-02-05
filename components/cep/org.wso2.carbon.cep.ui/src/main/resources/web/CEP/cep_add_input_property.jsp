@@ -1,6 +1,6 @@
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.MapPropertyDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.TuplePropertyDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.XMLPropertyDTO" %>
+<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.InputMapPropertyDTO" %>
+<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.InputTuplePropertyDTO" %>
+<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.InputXMLPropertyDTO" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.HashSet" %>
 <%@ page import="java.util.List" %>
@@ -8,7 +8,8 @@
     String format = request.getParameter("format");
     String propName = request.getParameter("propName");
     String propType = request.getParameter("propType");
-    String propValue = request.getParameter("propValue");
+    String propValue1 = request.getParameter("propValue1");
+    String propValue2 = request.getParameter("propValue2");
 
     if (propName != null) {
         propName = propName.trim();
@@ -18,17 +19,20 @@
         propType = propType.trim();
     }
 
-    if (propValue != null) {
-        propValue = propValue.trim();
+    if (propValue1 != null) {
+        propValue1 = propValue1.trim();
+    }
+
+    if (propValue2 != null) {
+        propValue2 = propValue2.trim();
     }
 
     if (format.equals("xml")) {
 
-        XMLPropertyDTO property = new XMLPropertyDTO();
+        InputXMLPropertyDTO property = new InputXMLPropertyDTO();
         property.setName(propName);
         property.setType(propType);
-        property.setXpath(propValue); //is Xpath
-        property.setInputProperty(true);
+        property.setXpath(propValue1); //is Xpath
 
         HashSet propertyHashSet = (HashSet) session.getAttribute("inputXMLPropertyHashSet");
         if (propertyHashSet == null) {
@@ -41,10 +45,10 @@
 
     } else  if (format.equals("map")) {
 
-        MapPropertyDTO property = new MapPropertyDTO();
+        InputMapPropertyDTO property = new InputMapPropertyDTO();
         property.setName(propName);
+        property.setInputName(propValue1);
         property.setType(propType);
-        property.setInputProperty(true);
 
         List propertyList = (List) session.getAttribute("inputMapPropertyList");
         if (propertyList == null) {
@@ -57,11 +61,11 @@
 
     } else { //tuple
 
-        TuplePropertyDTO property = new TuplePropertyDTO();
+        InputTuplePropertyDTO property = new InputTuplePropertyDTO();
         property.setName(propName);
+        property.setInputName(propValue1);
+        property.setInputDataType(propValue2);
         property.setType(propType);
-        property.setDataType(propValue); //is DataType
-        property.setInputProperty(true);
 
         List propertyList = (List) session.getAttribute("inputTuplePropertyList");
         if (propertyList == null) {

@@ -31,7 +31,7 @@ public class ConfigReaderXpathExt {
 
     static {
         try {
-            appFactoryConfig = AppFactoryUtil.loadAppFactoryConfiguration();
+            appFactoryConfig = AppFactoryUtil.getAppfactoryConfiguration();
         } catch (AppFactoryException e) {
             log.error("Error loading appfactory configuration");
         }

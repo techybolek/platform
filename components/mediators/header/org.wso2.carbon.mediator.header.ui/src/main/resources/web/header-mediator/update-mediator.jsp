@@ -61,12 +61,15 @@
         if ("expression".equals(actionType)) {
             XPathFactory xPathFactory = XPathFactory.getInstance();
             headerMediator.setExpression(xPathFactory.createSynapseXPath("mediator.header.val_ex", request, session));
+            headerMediator.setXml(null);//value and expression does not include inline xml definition
         } else if ("value".equals(actionType)) {
             headerMediator.setValue(request.getParameter("mediator.header.val_ex"));
+            headerMediator.setXml(null);//value and expression does not include inline xml definition
         } else if ("inlineXML".equals(actionType)) {
             String xml = request.getParameter("mediator.header.inlinexmltext");
             OMElement elem = SequenceEditorHelper.parseStringToElement(xml);
             headerMediator.setXml(elem);
+            headerMediator.setQName(null);//inline xml definition does not require a header name setup
         }
     } else if ("remove".equals(action)) {
         headerMediator.setAction(HeaderMediator.ACTION_REMOVE);

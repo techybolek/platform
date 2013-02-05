@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.hosting.mgt.utils.AppsWrapper;
@@ -42,6 +43,7 @@ public class ApplicationManagementService extends AbstractAdmin{
         if (!appsDir.exists() && !appsDir.mkdirs()) {
             log.warn("Could not create directory " + appsDir.getAbsolutePath());
         }
+
         for (FileUploadData uploadData : fileUploadDataList) {
             String fileName = uploadData.getFileName();
             File destFile = new File(appsDir, fileName);
@@ -62,6 +64,7 @@ public class ApplicationManagementService extends AbstractAdmin{
                     log.warn("Could not close file " + destFile.getAbsolutePath());
                 }
             }
+            log.info("Files are successfully uploaded !" );
         }
         return true;
     }
@@ -78,7 +81,7 @@ public class ApplicationManagementService extends AbstractAdmin{
     }
 
     /**
-     * Retrieve and display the applications from the directory relevant to tenant
+     * Retrieve and display the applications
      */
     private String[] listApplications(String cartridge) {
         String appPath = getAppDeploymentDirPath(cartridge);
@@ -92,16 +95,9 @@ public class ApplicationManagementService extends AbstractAdmin{
                 }
             };
             children = appDirectory.list(filter);
-            if(children.length == 0){
-                children = null;
-            }else {
-                for(int i = 0; i < children.length; i++){
-                    children[i] = children[i].substring(0, children[i].indexOf(".zip"));
-                }
-            }
         }else {
             children = null;
-        }   
+        }
         return children;
 
     }

@@ -80,7 +80,7 @@ public class BuilderMediator extends AbstractMediator {
 
                 DataSource dataSource = dh.getDataSource();
 
-                //Ask the data source to stream, if it has not alredy cached the request
+                //Ask the data source to stream, if it has not already cached the request
                 if (dataSource instanceof StreamingOnRequestDataSource) {
                     ((StreamingOnRequestDataSource) dataSource).setLastUse(true);
                 }
@@ -109,7 +109,7 @@ public class BuilderMediator extends AbstractMediator {
                         element = messageBuilder.getDocument(contentType, messageContext, in);
                     }
                 } catch (Exception e) {
-                    synLog.auditWarn("Error buidling message with content type :" + contentType);
+                    synLog.auditWarn("Error building message with content type :" + contentType);
                 }
 
                 if (element != null) {
@@ -129,7 +129,7 @@ public class BuilderMediator extends AbstractMediator {
                     }
                 } else {
                     synLog.auditWarn("Error occurred while trying to build the message, " +
-                            "trying to send the message throgh");
+                            "trying to send the message through");
                 }
 
                 //now we have undone thing done  by Relay
@@ -142,6 +142,10 @@ public class BuilderMediator extends AbstractMediator {
                     synLog.traceOrDebug("not wrapped binary content, there is nothing to be done");
                 }
             }
+        } else if (envelope.getBody().getFirstElement() == null) {
+            // set the formatter map to the message context
+            messageContext.setProperty(MessageBuilder.RELAY_FORMATTERS_MAP,
+                    messageBuilder.getFormatters());
         }
         return true;
     }

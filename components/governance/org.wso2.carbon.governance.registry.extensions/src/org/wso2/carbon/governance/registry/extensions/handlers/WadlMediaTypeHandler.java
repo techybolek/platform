@@ -18,17 +18,12 @@ package org.wso2.carbon.governance.registry.extensions.handlers;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.om.xpath.AXIOMXPath;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jaxen.JaxenException;
-import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
-import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.api.schema.SchemaManager;
+import org.wso2.carbon.governance.api.schema.dataobjects.Schema;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
-import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.governance.registry.extensions.handlers.utils.HandlerConstants;
-import org.wso2.carbon.governance.registry.extensions.handlers.utils.ResourceProcessor;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -36,8 +31,8 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.internal.RegistryCoreServiceComponent;
 import org.wso2.carbon.registry.core.jdbc.handlers.Handler;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
+import org.wso2.carbon.registry.core.session.CurrentSession;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
-import org.wso2.carbon.registry.extensions.handlers.utils.EndpointUtils;
 import org.wso2.carbon.registry.extensions.utils.CommonConstants;
 import org.wso2.carbon.registry.extensions.utils.CommonUtil;
 
@@ -47,35 +42,33 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.StringReader;
 import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
 
 public class WadlMediaTypeHandler extends Handler {
 
     private static final Log log = LogFactory.getLog(WadlMediaTypeHandler.class);
     private Registry registry;
+    private Registry governanceUserRegistry;
 
-    public void put(RequestContext requestContext) throws RegistryException{
+    public void put(RequestContext requestContext) throws RegistryException {
         if (!CommonUtil.isUpdateLockAvailable()) {
             return;
         }
         CommonUtil.acquireUpdateLock();
-        String originalWadlPath = null;
 
+        Resource resource = requestContext.getResource();
+        String resourcePath = requestContext.getResourcePath().getPath();
+        registry = requestContext.getRegistry();
+        governanceUserRegistry = RegistryCoreServiceComponent.getRegistryService().
+                getGovernanceUserRegistry(CurrentSession.getUser(),
+                        CurrentSession.getTenantId());
         try {
-            registry = requestContext.getRegistry();
-            Resource resource = requestContext.getResource();
-            originalWadlPath = requestContext.getResourcePath().getPath();
-            registry.put(originalWadlPath, resource);
-
             OMElement wadlElement;
-            Object resourceContent = resource.getContent();
-
             String wadlContent;
+            Object resourceContent = resource.getContent();
             if (resourceContent instanceof String) {
                 wadlContent = (String) resourceContent;
             } else {
-                wadlContent = RegistryUtils.decodeBytes((byte[]) resourceContent);
+                wadlContent = new String((byte[]) resourceContent);
             }
 
             try {
@@ -85,55 +78,69 @@ public class WadlMediaTypeHandler extends Handler {
                 wadlElement = builder.getDocumentElement();
             } catch (XMLStreamException e) {
                 String msg = "Error in reading the WADL content of the Process. " +
-                        "The requested path to store the Process: " + originalWadlPath + ".";
+                        "The requested path to store the Process: " + resourcePath + ".";
                 log.error(msg);
                 throw new RegistryException(msg, e);
             }
 
+            registry.put(resourcePath, resource);
+            CommonUtil.releaseUpdateLock();
+
             String wadlNamespace = wadlElement.getNamespace().getNamespaceURI();
-            Registry governanceSystemRegistry =
-                    RegistryCoreServiceComponent.getRegistryService().getGovernanceSystemRegistry();
             String wadlName = RegistryUtils.getResourceName(requestContext.getResourcePath().getPath());
 
-            GenericArtifactManager genericArtifactManager =
-                    new GenericArtifactManager(governanceSystemRegistry, "wadl");
-            GenericArtifact wadlArtifact = genericArtifactManager.newGovernanceArtifact(
-                    new QName(wadlName));
-            wadlArtifact.addAttribute("overview_name", wadlName);
-            wadlArtifact.addAttribute("overview_namespace", wadlNamespace);
-            genericArtifactManager.addGenericArtifact(wadlArtifact);
-
-            AXIOMXPath expression;
-
-            expression = new AXIOMXPath("/ns:application/ns:resources");
-            expression.addNamespace("ns", wadlNamespace);
-            List elements = expression.selectNodes(wadlElement);
-            for (int i = 0; i < elements .size(); i++) {
-                OMElement element = (OMElement) elements .get(i);
-                String base = element.getAttributeValue(new QName("base"));
-                String endpointPath = saveEndpoint(base);
-
-                ServiceManager serviceManager = new ServiceManager(governanceSystemRegistry);
-                Service service = serviceManager.newService(new QName(wadlNamespace, getServiceName(base)));
-                serviceManager.addService(service);
-                String servicePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                        GovernanceUtils.getArtifactPath(governanceSystemRegistry, service.getId());
-                addDependency(servicePath, endpointPath);
-
-                String wadlPath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                        GovernanceUtils.getArtifactPath(governanceSystemRegistry, wadlArtifact.getId());
-                addDependency(servicePath, wadlPath);
-                addDependency(wadlPath, endpointPath);
-
-                saveResources(element, wadlPath, base);
+            OMElement grammarsElement = wadlElement.
+                    getFirstChildWithName(new QName(wadlNamespace, "grammars"));
+            if(grammarsElement != null){
+                Iterator<OMElement> grammarElements = grammarsElement.
+                        getChildrenWithName(new QName(wadlNamespace, "include"));
+                while (grammarElements.hasNext()){
+                    String importUrl = grammarElements.next().getAttributeValue(new QName("href"));
+                    if(importUrl.endsWith(".xsd")) {
+                        String schemaPath = saveSchema(importUrl);
+                        addDependency(resource.getPath(),
+                                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + schemaPath);
+                    }
+                }
             }
 
+            String servicePath = saveService(new QName(wadlNamespace, getServiceName(wadlName)));
+            addDependency(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + servicePath, resource.getPath());
+
             requestContext.setProcessingComplete(true);
-        } catch (JaxenException e) {
-            String msg = "Error while parsing the WADL content of " + RegistryUtils.getResourceName(originalWadlPath);
+        } catch (Exception e) {
+            String msg = "Error while parsing the WADL content of " +
+                    RegistryUtils.getResourceName(resourcePath);
+            log.error(msg);
             throw new RegistryException(msg, e);
         } finally {
             CommonUtil.releaseUpdateLock();
+        }
+    }
+
+    private String saveService(QName qName) throws RegistryException {
+        try {
+            ServiceManager serviceManager = new ServiceManager(governanceUserRegistry);
+            Service service = serviceManager.newService(qName);
+            serviceManager.addService(service);
+            return service.getPath();
+        } catch (RegistryException e) {
+            String msg = "Adding service for WADL failed :" + qName.getLocalPart();
+            log.error(msg);
+            throw new RegistryException(msg, e);
+        }
+    }
+
+    private String saveSchema(String schemaUrl) throws RegistryException {
+        try {
+            SchemaManager schemaManager = new SchemaManager(governanceUserRegistry);
+            Schema schema = schemaManager.newSchema(schemaUrl);
+            schemaManager.addSchema(schema);
+            return schema.getPath();
+        } catch (RegistryException e) {
+            String msg = "Schema import failed :" + schemaUrl;
+            log.error(msg);
+            throw new RegistryException(msg, e);
         }
     }
 
@@ -143,52 +150,7 @@ public class WadlMediaTypeHandler extends Handler {
     }
 
     private String getServiceName(String url){
-        if(url.endsWith("/")){
-            return url.replaceAll(".*/(.*)/$","$1");
-        }
-        return url.replaceAll(".*/(.*)$", "$1");
-    }
-
-    public void saveResources(OMElement resourcesElement, String wadlPath, String basePath) throws JaxenException, RegistryException {
-        Iterator<OMElement> resources = resourcesElement.getChildrenWithLocalName("resource");
-
-        ResourceProcessor processor = new ResourceProcessor(registry);
-        while (resources.hasNext()){
-            String resourcePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + processor.addResource(resources.next(), basePath);
-            addDependency(wadlPath, resourcePath);
-        }
-    }
-
-    private String saveEndpoint(String url) throws RegistryException {
-        String urlToPath = EndpointUtils.deriveEndpointFromUrl(url);
-
-        String endpointAbsoluteBasePath = RegistryUtils.getAbsolutePath(registry.getRegistryContext(),
-                org.wso2.carbon.registry.core.RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                        HandlerConstants.ENDPOINT_DEFAULT_LOCATION);
-
-        if(urlToPath.startsWith(RegistryConstants.PATH_SEPARATOR)){
-            urlToPath = urlToPath.replaceFirst(RegistryConstants.PATH_SEPARATOR,"");
-        }
-
-        String endpointAbsolutePath = endpointAbsoluteBasePath + urlToPath;
-        return saveEndpointValues(url, endpointAbsolutePath);
-    }
-
-    private String saveEndpointValues(String url, String endpointAbsolutePath) throws RegistryException {
-        Resource resource;
-        if (registry.resourceExists(endpointAbsolutePath)) {
-            resource = registry.get(endpointAbsolutePath);
-            if(!url.getBytes().equals(resource.getContent())){
-                throw new RegistryException("Failed to add the endpoint: Found another " +
-                        "endpoint in the same location with different content");
-            }
-            return resource.getPath();
-        }
-
-        resource = registry.newResource();
-        resource.setContent(RegistryUtils.encodeString(url));
-        resource.setMediaType(CommonConstants.ENDPOINT_MEDIA_TYPE);
-        resource.setUUID(UUID.randomUUID().toString());
-        return  registry.put(endpointAbsolutePath, resource);
+        String wadlName = url.replaceAll(".*/(.*)/l$","$1");
+        return wadlName.substring(0, wadlName.lastIndexOf("."));
     }
 }

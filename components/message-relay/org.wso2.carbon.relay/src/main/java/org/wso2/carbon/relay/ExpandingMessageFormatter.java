@@ -111,18 +111,13 @@ public class ExpandingMessageFormatter extends SOAPMessageFormatter {
                         throw new AxisFault(msg);
                     }
                 } else {
-                    if (messageContext.isDoingREST()) {
-                        writeAsREST(messageContext, format, outputStream, preserve);
+                    // try to get the formatters from the map set by the builder mediator or
+                    // SkipAdminHandler
+                    MessageFormatter formatter = getMessageFormatter(messageContext);
+                    if (formatter != null) {
+                        formatter.writeTo(messageContext, format, outputStream, preserve);
                     } else {
-                        // try to get the formatters from the map set by the builder mediator or
-                        // SkipAdminHandler
-                        MessageFormatter formatter = getMessageFormatter(messageContext);
-                        if (formatter != null) {
-                            formatter.writeTo(messageContext, format,
-                                    outputStream, preserve);
-                        } else {
-                            super.writeTo(messageContext, format, outputStream, preserve);
-                        }
+                        super.writeTo(messageContext, format, outputStream, preserve);
                     }
                 }
             }

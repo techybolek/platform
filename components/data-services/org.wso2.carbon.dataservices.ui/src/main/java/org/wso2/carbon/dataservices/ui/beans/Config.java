@@ -106,6 +106,9 @@ public class Config extends DataServiceConfigurationElement {
             dataSourceType = DataSourceTypes.CARBON;
         } else if (DBConstants.WebDatasource.WEB_CONFIG.equals(propertyName)) {
             dataSourceType = DataSourceTypes.WEB;
+        } else if (CustomDataSource.DATA_SOURCE_QUERY_CLASS.equals(propertyName) || 
+        		CustomDataSource.DATA_SOURCE_TABULAR_CLASS.equals(propertyName)) {
+            dataSourceType = DataSourceTypes.CUSTOM;
         }
     }
 
@@ -186,7 +189,9 @@ public class Config extends DataServiceConfigurationElement {
                  propEl.addAttribute("svns:secretAlias", (String)property.getValue(), null);
                  confEl.addChild(propEl);
             } else {
-            	confEl.addChild(property.buildXML());
+            	if (property.buildXML() != null) {
+            		confEl.addChild(property.buildXML());
+            	}
             }
         }
         return confEl;

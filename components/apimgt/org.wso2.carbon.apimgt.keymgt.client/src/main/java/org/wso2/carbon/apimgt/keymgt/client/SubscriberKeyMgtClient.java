@@ -33,11 +33,12 @@ import java.net.URL;
 
 public class SubscriberKeyMgtClient {
 
-    private static Log log = LogFactory.getLog(SubscriberKeyMgtClient.class);       
+    private static Log log = LogFactory.getLog(SubscriberKeyMgtClient.class);
 
     private APIKeyMgtSubscriberServiceStub subscriberServiceStub;
 
-    public SubscriberKeyMgtClient(String backendServerURL, String username, String password) throws Exception {
+    public SubscriberKeyMgtClient(String backendServerURL, String username, String password)
+            throws Exception {
         try {
             AuthenticationAdminStub authenticationAdminStub = new AuthenticationAdminStub(null, backendServerURL + "AuthenticationAdmin");
             ServiceClient authAdminServiceClient = authenticationAdminStub._getServiceClient();
@@ -49,7 +50,7 @@ public class SubscriberKeyMgtClient {
 
             if (log.isDebugEnabled()) {
                 log.debug("Authentication Successful with AuthenticationAdmin. " +
-                        "Authenticated Cookie ID : " + authenticatedCookie);
+                          "Authenticated Cookie ID : " + authenticatedCookie);
             }
 
             subscriberServiceStub = new APIKeyMgtSubscriberServiceStub(
@@ -58,20 +59,33 @@ public class SubscriberKeyMgtClient {
             Options options = client.getOptions();
             options.setManageSession(true);
             options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING,
-                    authenticatedCookie);
-        } catch (Exception e){
+                                authenticatedCookie);
+        } catch (Exception e) {
             String errorMsg = "Error when instantiating SubscriberKeyMgtClient.";
             log.error(errorMsg, e);
             throw e;
         }
     }
-    
-    public String getAccessKey(String userId, APIInfoDTO apiInfoDTO, 
+
+    public String getAccessKey(String userId, APIInfoDTO apiInfoDTO,
                                String applicationName, String keyType) throws Exception {
         return subscriberServiceStub.getAccessToken(userId, apiInfoDTO, applicationName, keyType);
     }
 
-    public ApplicationKeysDTO getApplicationAccessKey(String userId, String applicationName, String keyType) throws Exception {
+    public ApplicationKeysDTO getApplicationAccessKey(String userId, String applicationName,
+                                                      String keyType) throws Exception {
         return subscriberServiceStub.getApplicationAccessToken(userId, applicationName, keyType);
     }
+
+    public String regenerateApplicationAccessKey(String keyType, String oldAccessToken)
+            throws Exception {
+        return subscriberServiceStub.renewAccessToken(keyType, oldAccessToken);
+
+    }
+
+    public void revokeAccessToken(String token,String consumerKey,String authUser) throws Exception {
+       subscriberServiceStub.revokeAccessToken(token,consumerKey,authUser);
+
+    }
+
 }

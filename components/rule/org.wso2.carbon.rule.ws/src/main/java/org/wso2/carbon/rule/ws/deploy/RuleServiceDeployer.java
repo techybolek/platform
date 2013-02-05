@@ -29,6 +29,8 @@ import org.apache.axis2.util.XMLUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.rule.common.Input;
 import org.wso2.carbon.rule.common.Operation;
 import org.wso2.carbon.rule.common.Output;
@@ -81,6 +83,7 @@ public class RuleServiceDeployer extends AbstractDeployer {
      */
     public void deploy(DeploymentFileData deploymentFileData) throws DeploymentException {
 
+        PrivilegedCarbonContext.getCurrentContext().setUsername(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
         AxisConfiguration axisConfiguration = this.configurationContext.getAxisConfiguration();
         File file = deploymentFileData.getFile();
 

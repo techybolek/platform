@@ -24,7 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.analytics.hive.stub.HiveScriptStoreServiceHiveScriptStoreException;
 import org.wso2.carbon.analytics.hive.stub.HiveScriptStoreServiceStub;
-import org.wso2.carbon.analytics.hive.ui.client.HiveExecutionClient;
 
 import java.rmi.RemoteException;
 
@@ -62,5 +61,9 @@ public class HiveScriptStoreClient {
 
     public String getCronExpression(String scriptName) throws HiveScriptStoreServiceHiveScriptStoreException, RemoteException {
        return stub.getCronExpression(scriptName);
+    }
+
+    public boolean isTaskRunning(String scriptName) throws HiveScriptStoreServiceHiveScriptStoreException, RemoteException {
+      return stub.isTaskExecuting(scriptName);
     }
 }

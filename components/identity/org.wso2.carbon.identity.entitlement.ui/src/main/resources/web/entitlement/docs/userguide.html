@@ -23,15 +23,82 @@
 
 <body style="font-family: Times New Roman,Times,serif; font-size: 12pt;">
 <h1>Entitlement Management</h1>
+<p>This user guide describes various configuration and management options available with entitlement management.</p>
 
-<p><img alt="" src="../images/entitlement.png"/></p>
+<p>Use the left had Entitlement menu to configure various options such as Administration, Configuration, Tryit, Publish
+and Search.</p>
+
+<p><img alt="" src="../images/ent-options.png"/></p>
 <p>Figure 1: Entitlement Management</p>
 
-<p><img alt="" src="../images/basic-policy-editor.png"/></p>
-<p>Figure 2: Basic Policy Creation Wizard UI</p>
 
-<p><img alt="" src="../images/evaluation-request.png"/></p>
-<p>Figure 3: Evaluation Request Creation UI</p>
+<h3>Policy Administration</h3>
+<p>Administration provides various policy administration operations.</p>
+<ol>
+    <li>Add New Entitlement Policy - use to add a new policy.</li>
+    <li>Add New Policy Set - use to add a set of new policies.</li>
+    <li>Import New Entitlement Policy - use to import a policy using either via file system or registry.</li>
+</ol>
+<p>Users can combine the policy using the options available in 'Policy Combining Algorithm'. The defined policies
+can be search using the Search Policy option. Selected policies can be published either one by one or as the whole set
+using 'Publish' and 'PublishAll'. The selected policies also can be deleted using 'Delete' option.</p>
+<p><img alt="" src="../images/policy-admin.png"/></p>
+<p>Figure 2: Policy administration</p>
+
+
+<h4>Create Entitlement Policy</h4>
+<p>This editor can be used to create a new entitlement policy. Users can view the advance view or row XML coniguration
+using 'Use Advance View' and 'Use XML View' options.</p>
+<p><img alt="" src="../images/add-new-policy.png"/></p>
+<p>Figure 3: Basic Policy Creation Wizard UI</p>
+
+<h4>Create Entitlement Policy Set</h4>
+<p>This editor can be used to create a set of policy set.</p>
+<p><img alt="" src="../images/policy-set.png"/></p>
+<p>Figure 4: Creating a policy set</p>
+
+<h4>Import New Entitlement Policy</h4>
+<p>This can be used to import an already existing policy in the file system of in the registry. Select the option from the
+    drop down menu 'Import Entitlement Policy From' to import from file system of registry.</p>
+<p><img alt="" src="../images/import-policy.png"/></p>
+<p>Figure 5: Import a policy set from file system or registry</p>
+
+<h3>PDP Configurations</h3>
+<p>This editor provides the UI requires to configure the PDP.</p>
+<p><img alt="" src="../images/pdp-config.png"/></p>
+<p>Figure 6: PDP configurations</p>
+
+<h3>Evaluate Entitlement Policy</h3>
+<p>You can evaluate the defined entitlement policy using this editor. You can define the request using the
+ling 'Create Request Using Editor'.</p>
+<p><img alt="" src="../images/try-pdp.png"/></p>
+<p>Figure 8: Evaluate the defined entitlement policy</p>
+
+<h3>Policy Publisher</h3>
+<p>The defined policy can be published using policy publisher. If there is no subscriber defined use 'Add Subscriber'
+to define a subscriber.</p>
+<p><img alt="" src="../images/policy-pub.png"/></p>
+<p>Figure 9: Publishing a policy</p>
+
+<!--<h4></h4>-->
+<!--<p></p>-->
+<!--<p><img alt="" src="../images/"/></p>-->
+<!--<p>Figure 10: </p>-->
+
+
+<h3>Advanced Search</h3>
+<p>This UI can be used to locate defined policy. Following options can be configured in the search query.</p>
+<ol>
+    <li>Search by - search either by user or role.</li>
+    <li>User/Role name - name of the user or role.</li>
+    <li>Subject Id - the id of the policy.</li>
+    <li>Action - the action of the resource.</li>
+    <li>Resource - the name of the resource</li>
+    <li>Enable search through child resources - enable this if you want to search through child resources.</li>
+</ol>
+<p><img alt="" src="../images/advance-search.png"/></p>
+<p>Figure 10: </p>
+
 
 <p>The Entitlement Management component of the WSO2 Carbon facilitates the management
 and control of policies defined in XACML. The key functionalities of this component includes:</p>

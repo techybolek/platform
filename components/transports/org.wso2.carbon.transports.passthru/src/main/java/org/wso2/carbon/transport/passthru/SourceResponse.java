@@ -25,7 +25,6 @@ import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HTTP;
 import org.wso2.carbon.transport.passthru.config.SourceConfiguration;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,7 +66,9 @@ public class SourceResponse {
     public void connect(Pipe pipe) {
         this.pipe = pipe;
                 
-        SourceContext.get(request.getConnection()).setWriter(pipe);
+        if(request != null && pipe != null){
+        	SourceContext.get(request.getConnection()).setWriter(pipe);
+        }
     }
 
     /**
@@ -77,6 +78,7 @@ public class SourceResponse {
      * @throws org.apache.http.HttpException if an error occurs
      */
     public void start(NHttpServerConnection conn) throws IOException, HttpException {
+    	
         // create the response
         response = sourceConfiguration.getResponseFactory().newHttpResponse(
                 request.getVersion(), HttpStatus.SC_OK,
@@ -142,7 +144,8 @@ public class SourceResponse {
         int bytes = 0;
         if (pipe != null) {
             bytes = pipe.consume(encoder);
-        } else {
+        }
+        else {
             encoder.complete();
         }
         // Update connection state
@@ -155,14 +158,14 @@ public class SourceResponse {
             if (!this.connStrategy.keepAlive(response, conn.getContext())) {
                 SourceContext.updateState(conn, ProtocolState.CLOSING);
 
-                sourceConfiguration.getSourceConnections().releaseConnection(conn);
-                conn.close();
+                sourceConfiguration.getSourceConnections().closeConnection(conn);
+                
             } else if (SourceContext.get(conn).isShutDown()) {
                 // we need to shut down if the shutdown flag is set
                 SourceContext.updateState(conn, ProtocolState.CLOSING);
 
-                sourceConfiguration.getSourceConnections().releaseConnection(conn);
-                conn.close();
+                sourceConfiguration.getSourceConnections().closeConnection(conn);
+                
             } else {
                 // Reset connection state
                 sourceConfiguration.getSourceConnections().releaseConnection(conn);

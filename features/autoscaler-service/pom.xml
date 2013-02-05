@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-features</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -29,7 +29,7 @@
     <name>Autoscaler Service Module</name>
     <url>http://wso2.org</url>
     <modules>
-        <module>org.wso2.carbon.autoscaler.service.feature</module>
+        <module>org.wso2.carbon.autoscaler.service.feature/4.0.0</module>
     </modules>
 </project>
 

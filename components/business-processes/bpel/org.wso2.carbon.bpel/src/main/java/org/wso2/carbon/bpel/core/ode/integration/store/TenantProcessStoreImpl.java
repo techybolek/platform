@@ -20,7 +20,11 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.dd.*;
+import org.apache.ode.bpel.dd.DeployDocument;
+import org.apache.ode.bpel.dd.TBAMServerProfiles;
+import org.apache.ode.bpel.dd.TDeployment;
+import org.apache.ode.bpel.dd.TProvide;
+import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
@@ -31,6 +35,7 @@ import org.wso2.carbon.application.deployer.AppDeployerUtils;
 import org.wso2.carbon.bpel.common.config.EndpointConfiguration;
 import org.wso2.carbon.bpel.core.BPELConstants;
 import org.wso2.carbon.bpel.core.internal.BPELServiceComponent;
+import org.wso2.carbon.bpel.core.ode.integration.BPELServerImpl;
 import org.wso2.carbon.bpel.core.ode.integration.config.bam.BAMServerProfile;
 import org.wso2.carbon.bpel.core.ode.integration.config.bam.BAMServerProfileBuilder;
 import org.wso2.carbon.bpel.core.ode.integration.store.clustering.BPELProcessStateChangedCommand;
@@ -38,7 +43,7 @@ import org.wso2.carbon.bpel.core.ode.integration.store.repository.BPELPackageInf
 import org.wso2.carbon.bpel.core.ode.integration.store.repository.BPELPackageRepository;
 import org.wso2.carbon.bpel.core.ode.integration.store.repository.BPELPackageRepositoryUtils;
 import org.wso2.carbon.bpel.skeleton.ode.integration.mgt.services.ProcessManagementException;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.config.RegistryContext;
@@ -50,9 +55,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.namespace.QName;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -101,6 +103,10 @@ public class TenantProcessStoreImpl implements TenantProcessStore {
     private final Map<String, BAMServerProfile> bamProfiles =
             new ConcurrentHashMap<String, BAMServerProfile>();
 
+    private final Map<String, Object> dataPublisherMap =
+            new ConcurrentHashMap<String, Object>();
+
+
     public TenantProcessStoreImpl(ConfigurationContext configContext, ProcessStoreImpl parent)
             throws RegistryException {
         tenantConfigContext = configContext;
@@ -111,7 +117,7 @@ public class TenantProcessStoreImpl implements TenantProcessStore {
     }
 
     public void init() throws Exception {
-        SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantId, true);
+        PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId, true);
 
         bpelDURepo = new File(parentProcessStore.getLocalDeploymentUnitRepo(), tenantId.toString());
         if (!bpelDURepo.exists() && !bpelDURepo.mkdirs()) {
@@ -178,7 +184,7 @@ public class TenantProcessStoreImpl implements TenantProcessStore {
      * @throws RegistryException
      */
     public void deploy(File bpelArchive) throws Exception {
-        SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantId, true);
+        PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId, true);
 
         log.info("Deploying BPEL archive: " + bpelArchive.getAbsolutePath());
 
@@ -284,7 +290,7 @@ public class TenantProcessStoreImpl implements TenantProcessStore {
      */
     public void undeploy(String bpelPackageName)
             throws RegistryException {
-        SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantId, true);
+        PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId, true);
 
         if (log.isDebugEnabled()) {
             log.debug("Undeploying BPEL package " + bpelPackageName + " ....");
@@ -297,7 +303,15 @@ public class TenantProcessStoreImpl implements TenantProcessStore {
             final String warningMsg = "Cannot find BPEL package with name " + bpelPackageName +
                     " in the repository. If the bpel package is undeployed through the management" +
                     " console or if this node is a member of a cluster, please ignore this warning.";
-            log.warn(warningMsg);
+
+            if(isConfigRegistryReadOnly()) {
+                // This is for the deployment synchronizer scenarios where package un-deployment on a worker node
+                // has to remove the deployed bpel package from the memory and remove associated services
+                handleUndeployOnSlaveNode(bpelPackageName);
+
+            } else {
+                log.warn(warningMsg);
+            }
             return;
         }
 
@@ -352,6 +366,86 @@ public class TenantProcessStoreImpl implements TenantProcessStore {
 //        parentProcessStore.sendProcessDeploymentNotificationsToCluster(
 //                new BPELPackageUndeployedCommand(versionsOfThePackage, bpelPackageName, tenantId),
 //                configurationContext);
+    }
+
+    /**
+     *  Undeployment scenario in a worker node( Slave ) in the clustered setup
+     *  When the BPELDeployer get called for undeploying the bpel package, following has already taken place.
+     *  The package information stored in the registry as well as the zip archive is deleted
+     *  Process, Instance information have been removed from the ODE database
+     *  However, on the slave node, the bpel process and the web services associated with the bpel process
+     *  is still in memory. We need to unload the bpel process and the associated web services
+     * @param packageList List of BPEL packages derived using the regex
+     * @return
+     *
+     */
+    private int handleUndeployOnSlaveNode( String bpelPackageName) {
+        List<String> packageList = findMatchingProcessByPackageName(bpelPackageName);
+        if(packageList.size() < 1) {
+            log.debug("Handling un-deploy operation on salve (worker) node : package list is empty");
+            return -1;
+        }
+
+        for(String packageName : packageList) {
+            //location for extracted BPEL package
+            String bpelPackageLocation = parentProcessStore.getLocalDeploymentUnitRepo().getAbsolutePath() + File.separator + tenantId + File.separator +
+                    packageName;
+            File bpelPackage = new File(bpelPackageLocation);
+            //removing extracted bpel package at repository/bpel/tenantID/
+            deleteBpelPackageFromRepo(bpelPackage);
+
+            for (QName pid : getProcessesInPackage(packageName)) {
+                ProcessConfigurationImpl processConf =
+                        (ProcessConfigurationImpl) getProcessConfiguration(pid);
+                // This property is read when we removing the axis service for this process.
+                // So that we can decide whether we should persist service QOS configs
+                processConf.setUndeploying(true);
+            }
+        }
+
+        Collection<QName> undeployedProcesses = new ArrayList<QName>();
+
+        for (String nameWithVersion : packageList) {
+            undeploySpecificVersionOfBPELPackage(nameWithVersion, undeployedProcesses);
+        }
+
+        BPELServerImpl instance = BPELServerImpl.getInstance();
+        BpelServerImpl odeBpelServer = instance.getODEBPELServer();
+
+        for (QName pid : undeployedProcesses) {
+            odeBpelServer.unregister(pid);
+            ProcessConf pConf = parentProcessStore.getProcessConfiguration(pid);
+            if(pConf != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Cancelling all cron scheduled jobs for process " + pid);
+                }
+                odeBpelServer.getContexts().cronScheduler.cancelProcessCronJobs(
+                        pid, true);
+            }
+            log.info("Process " + pid + " un-deployed.");
+        }
+
+        parentProcessStore.updateProcessAndDUMapsForSalve(tenantId, bpelPackageName, undeployedProcesses);
+        return 0;
+    }
+
+
+
+
+    private List<String> findMatchingProcessByPackageName(String packageName) {
+        List<String> stringList = new ArrayList<String>();
+        Set<String> strings = processesInDeploymentUnit.keySet();
+        String regexPattern = packageName + "-(\\d*)";
+        Pattern pattern = Pattern.compile(regexPattern);
+        Iterator<String> iterator = strings.iterator();
+        while (iterator.hasNext()) {
+            String next = iterator.next();
+            Matcher matcher= pattern.matcher(next);
+            if(matcher.matches()) {
+                stringList.add(next);
+            }
+        }
+        return stringList;
     }
 
     private void deleteBpelPackageFromRepo(File bpelPackage) {
@@ -596,6 +690,8 @@ public class TenantProcessStoreImpl implements TenantProcessStore {
             processConf.setAbsolutePathForBpelArchive(deploymentContext.getBpelArchive().getAbsolutePath());
             processIds.add(processId);
             processConfs.add(processConf);
+
+            readBAMServerProfiles(processDD, du);
         }
 
         deploymentUnits.put(du.getName(), du);
@@ -604,6 +700,8 @@ public class TenantProcessStoreImpl implements TenantProcessStore {
             processConfigMap.put(processConf.getProcessId(), processConf);
             deploymentContext.addProcessId(processConf.getProcessId());
         }
+
+
         try {
             parentProcessStore.onBPELPackageDeployment(
                     tenantId,
@@ -703,32 +801,31 @@ public class TenantProcessStoreImpl implements TenantProcessStore {
             processIds.add(pConfDAO.getPID());
             // if the deployment descriptor is updated at runtime, first load the updated data in
             // registry and use them with the specific process
-            //repository.readPropertiesOfUpdatedDeploymentInfo(pConf, bpelPackageName);
+            repository.readPropertiesOfUpdatedDeploymentInfo(pConf, bpelPackageName);
+            readBAMServerProfiles(processDD, du);
 
-            readModifiedDDFromFile(pConf);
-
-            TBAMServerProfiles bamServerProfiles = processDD.getBamServerProfiles();
-            if (bamServerProfiles != null) {
-                for (TBAMServerProfiles.Profile bamServerProfile :
-                        bamServerProfiles.getProfileList()) {
-                    String location = bamServerProfile.getLocation();
-                    if ((!location.startsWith(UnifiedEndpointConstants.VIRTUAL_CONF_REG) ||
-                            !location.startsWith(UnifiedEndpointConstants.VIRTUAL_GOV_REG) ||
-                            !location.startsWith(UnifiedEndpointConstants.VIRTUAL_REG)) &&
-                            location.startsWith(UnifiedEndpointConstants.VIRTUAL_FILE)) {
-                        if (EndpointConfiguration.isAbsoutePath(location)) {
-                            location = UnifiedEndpointConstants.VIRTUAL_FILE + location;
-                        } else {
-                            location = EndpointConfiguration.getAbsolutePath(
-                                    du.getDeployDir().getAbsolutePath(), location);
-                        }
-                    }
-                    BAMServerProfileBuilder builder =
-                            new BAMServerProfileBuilder(location);
-                    BAMServerProfile profile = builder.build();
-                    addBAMServerProfile(profile.getName(), profile);
-                }
-            }
+//            TBAMServerProfiles bamServerProfiles = processDD.getBamServerProfiles();
+//            if (bamServerProfiles != null) {
+//                for (TBAMServerProfiles.Profile bamServerProfile :
+//                        bamServerProfiles.getProfileList()) {
+//                    String location = bamServerProfile.getLocation();
+//                    if ((!location.startsWith(UnifiedEndpointConstants.VIRTUAL_CONF_REG) ||
+//                            !location.startsWith(UnifiedEndpointConstants.VIRTUAL_GOV_REG) ||
+//                            !location.startsWith(UnifiedEndpointConstants.VIRTUAL_REG)) &&
+//                            location.startsWith(UnifiedEndpointConstants.VIRTUAL_FILE)) {
+//                        if (EndpointConfiguration.isAbsoutePath(location)) {
+//                            location = UnifiedEndpointConstants.VIRTUAL_FILE + location;
+//                        } else {
+//                            location = EndpointConfiguration.getAbsolutePath(
+//                                    du.getDeployDir().getAbsolutePath(), location);
+//                        }
+//                    }
+//                    BAMServerProfileBuilder builder =
+//                            new BAMServerProfileBuilder(location);
+//                    BAMServerProfile profile = builder.build();
+//                    addBAMServerProfile(profile.getName(), profile);
+//                }
+//            }
 
             processConfigMap.put(pConf.getProcessId(), pConf);
             loaded.add(pConf);
@@ -739,54 +836,34 @@ public class TenantProcessStoreImpl implements TenantProcessStore {
         parentProcessStore.onBPELPackageReload(tenantId, du.getName(), loaded);
     }
 
-    private void readModifiedDDFromFile(ProcessConfigurationImpl pConf) {
-        String bpelMetafilesLocation = tenantConfigContext.getAxisConfiguration().getRepository().getPath()
-                + BPELConstants.BPEL_METAFILES_DIRECTORY;
+    private void readBAMServerProfiles(TDeployment.Process processDD, DeploymentUnitDir du){
+        TBAMServerProfiles bamServerProfiles = processDD.getBamServerProfiles();
+        if (bamServerProfiles != null) {
+            for (TBAMServerProfiles.Profile bamServerProfile :
+                    bamServerProfiles.getProfileList()) {
+                String location = bamServerProfile.getLocation();
 
-        DeployDocument _dd = null;
-        String encodedPath = null;
-        try {
-            encodedPath = URLEncoder.encode(pConf.getProcessId().toString(), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new ContextException("Couldn't encode path for file: "
-                    + pConf.getProcessId().toString(), e);
-        }
-        String ddFilePath = bpelMetafilesLocation + File.separator + encodedPath + ".xml";
-        File deployDescDest = new File(ddFilePath);
-        try {
-
-            _dd = DeployDocument.Factory.parse(deployDescDest);
-        } catch (FileNotFoundException e) {
-            log.debug("Deployment Descriptor for " + encodedPath + " not updated at runtime.");
-        } catch (Exception e) {
-            throw new ContextException("Couldn't read deployment descriptor at location "
-                    + deployDescDest.getAbsolutePath(), e);
-        }
-
-
-        if (_dd != null) {
-            TDeployment.Process process = _dd.getDeploy().getProcessArray(0);
-
-            pConf.setIsTransient(process.getInMemory());
-            pConf.setState(ProcessState.ACTIVE);
-            if (process.getRetired()) {
-                pConf.setState(ProcessState.RETIRED);
-            } else if (!process.getActive()) {
-                pConf.setState(ProcessState.DISABLED);
+                if (location.startsWith(UnifiedEndpointConstants.VIRTUAL_FILE)) {
+                    if (!EndpointConfiguration.isAbsoutePath(
+                            location.substring(UnifiedEndpointConstants.VIRTUAL_FILE.length()))) {
+                        location = EndpointConfiguration.getAbsolutePath(
+                                du.getDeployDir().getAbsolutePath(),
+                                location.substring(UnifiedEndpointConstants.VIRTUAL_FILE.length()));
+                    }
+                } else if((!location.startsWith(UnifiedEndpointConstants.VIRTUAL_CONF_REG) &&
+                        !location.startsWith(UnifiedEndpointConstants.VIRTUAL_GOV_REG) &&
+                        !location.startsWith(UnifiedEndpointConstants.VIRTUAL_REG))) {
+                    if(EndpointConfiguration.isAbsoutePath(location)){
+                        location = UnifiedEndpointConstants.VIRTUAL_FILE + location;
+                    }else {
+                        location = EndpointConfiguration.getAbsolutePath(du.getDeployDir().getAbsolutePath(), location);
+                        location = UnifiedEndpointConstants.VIRTUAL_FILE + location;
+                    }
+                }
+                BAMServerProfileBuilder builder = new BAMServerProfileBuilder(location, tenantId);
+                BAMServerProfile profile = builder.build();
+                addBAMServerProfile(profile.getName(), profile);
             }
-
-            TProcessEvents processEvents = process.getProcessEvents();
-
-
-            if (processEvents.getGenerate() != null) {
-                TProcessEvents.Generate.Enum value = processEvents.getGenerate();
-                pConf.setGenerateType(value);
-            }
-            pConf.setProcessEventsList(processEvents);
-
-            List<TCleanup> tCleanups = process.getCleanupList();
-            pConf.setProcessCleanupConfImpl(tCleanups);
-
         }
     }
 
@@ -949,5 +1026,17 @@ public class TenantProcessStoreImpl implements TenantProcessStore {
 
     public BAMServerProfile getBAMServerProfile(String name) {
         return bamProfiles.get(name);
+    }
+
+    public synchronized void addDataPublisher(String processName, Object publisher) {
+        dataPublisherMap.put(processName, publisher);
+    }
+
+    public Object getDataPublisher(String processName) {
+        return dataPublisherMap.get(processName);
+    }
+
+    public Map getDataPublisherMap(){
+        return dataPublisherMap;
     }
 }

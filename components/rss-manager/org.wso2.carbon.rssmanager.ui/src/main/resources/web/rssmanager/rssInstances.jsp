@@ -30,7 +30,7 @@
 
 <fmt:bundle basename="org.wso2.carbon.rssmanager.ui.i18n.Resources">
     <carbon:breadcrumb
-            label="Database Instances"
+            label="RSS Instances"
             resourceBundle="org.wso2.carbon.rssmanager.ui.i18n.Resources"
             topPage="false"
             request="<%=request%>"/>

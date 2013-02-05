@@ -21,22 +21,24 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage"%>
 <%@ page import="java.util.ResourceBundle" %>
 <%@page import="java.lang.Exception"%>
-<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.AttributeValueTreeNodeDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.AttributeTreeNodeDTO" %>
 <%@ page import="java.io.IOException" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
 <%@ page import="java.util.Set" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
 <jsp:useBean id="entitlementPolicyBean" type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
              class="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean" scope="session"/>
 <jsp:setProperty name="entitlementPolicyBean" property="*" />
 <%!
-    public void printChildrenTree(AttributeValueTreeNodeDTO node, JspWriter out) throws IOException {
+    public void printChildrenTree(AttributeTreeNodeDTO node, JspWriter out) throws IOException {
         if(node != null){
-            AttributeValueTreeNodeDTO[] children = node.getChildNodes();
+            AttributeTreeNodeDTO[] children = node.getChildNodes();
             if(children != null  && children.length > 0){
                 out.write("<li><a class='plus' onclick='treeColapse(this)'>&nbsp;</a> " +
                           "<a class='treeNode' onclick='selectMe(this)'>" + node.getName() + "</a>");
                 out.write("<ul style='display:none'>");
-                for(AttributeValueTreeNodeDTO child : children){
+                for(AttributeTreeNodeDTO child : children){
                     printChildrenTree(child, out);
                 }
                 out.write("</ul>");
@@ -48,7 +50,7 @@
         }
     }
 
-    public void printChildren(AttributeValueTreeNodeDTO node, String parentNodeName, JspWriter out) throws IOException {
+    public void printChildren(AttributeTreeNodeDTO node, String parentNodeName, JspWriter out) throws IOException {
         if(node != null){
             String nodeName;
             if(parentNodeName != null && parentNodeName.trim().length() > 0){
@@ -58,9 +60,9 @@
             }
 
             out.write("<li><a class='treeNode' onclick='selectMe(this)'>" + nodeName + "</a></li>") ;
-            AttributeValueTreeNodeDTO[] children = node.getChildNodes();
+            AttributeTreeNodeDTO[] children = node.getChildNodes();
             if(children != null  && children.length > 0){
-                for(AttributeValueTreeNodeDTO child : children){
+                for(AttributeTreeNodeDTO child : children){
                     printChildren(child, nodeName, out);
                 }
             }
@@ -71,8 +73,8 @@
 
 <%
     String forwardTo;
-    Set<AttributeValueTreeNodeDTO> nodeDTO = null;
-    AttributeValueTreeNodeDTO selectedTree = null;
+    Set<AttributeTreeNodeDTO> nodeDTO = null;
+    AttributeTreeNodeDTO selectedTree = null;
     String selectedFinderModule;
     String attributeType;
 
@@ -82,6 +84,8 @@
 
     String ruleId = (String)request.getParameter("ruleId");
     selectedFinderModule = (String) request.getParameter("finderModule");
+    String selectedAttributeId = (String) request.getParameter("selectedAttributeId");
+    String selectedAttributeDataType = (String) request.getParameter("selectedAttributeDataType");
     if(selectedFinderModule == null || selectedFinderModule.trim().length() < 1){
         selectedFinderModule = EntitlementPolicyConstants.DEFAULT_META_DATA_MODULE_NAME;
     }
@@ -223,7 +227,7 @@
                                 <%=EntitlementPolicyConstants.COMBO_BOX_DEFAULT_VALUE%></option>
                         <%
                             if (nodeDTO != null && nodeDTO.size() > 0) {
-                                for (AttributeValueTreeNodeDTO node : nodeDTO) {
+                                for (AttributeTreeNodeDTO node : nodeDTO) {
                                     if(selectedFinderModule.equals(node.getModuleName())){
                                         selectedTree = node;
                         %>
@@ -253,9 +257,15 @@
                         <select type="hidden" id="selectedAttributeDataType" name="selectedAttributeDataType" class="text-box-big">
                         <%
                             for (String attributeDataType : selectedTree.getAttributeDataTypes()) {
+                                if(selectedAttributeDataType != null && selectedAttributeDataType.equals(attributeDataType)){
                         %>
-                              <option value="<%=attributeDataType%>"><%=attributeDataType%></option>
+                                <option value="<%=attributeDataType%>" selected="selected"><%=attributeDataType%></option>
                         <%
+                                } else {
+                        %>
+                                <option value="<%=attributeDataType%>"><%=attributeDataType%></option>
+                        <%
+                                }
                             }
                         %>
                         </select>
@@ -267,6 +277,11 @@
 
                 <%
                     if(selectedTree != null && selectedTree.getSupportedAttributeIds() != null){
+                        String[] attributeIdArray = selectedTree.getSupportedAttributeIds();
+                        List<String> attributeIdList = new ArrayList<String>();
+                        for(int i = 0; i < attributeIdArray.length-1; i = i+2){
+                            attributeIdList.add(attributeIdArray[i+1]);
+                        }
                 %>
                 <tr>
                     <td>
@@ -276,10 +291,16 @@
                     <td>
                         <select id="selectedAttributeId" name="selectedAttributeId" class="text-box-big">
                         <%
-                            for (String attributeId : selectedTree.getSupportedAttributeIds()) {
+                            for (String attributeId : attributeIdList) {
+                                if(selectedAttributeId !=null && selectedAttributeId.equals(attributeId)){
                         %>
-                              <option value="<%=attributeId%>"><%=attributeId%></option>
+                                    <option value="<%=attributeId%>" selected="selected"><%=attributeId%></option>                        
                         <%
+                                } else {
+                        %>
+                                    <option value="<%=attributeId%>"><%=attributeId%></option>
+                        <%
+                                }
                             }
                         %>
                         </select>
@@ -318,16 +339,16 @@
                                 <ul>
                             <%
                                 if(selectedTree.getHierarchicalTree()){
-                                    AttributeValueTreeNodeDTO[] childNodes = selectedTree.getChildNodes();
+                                    AttributeTreeNodeDTO[] childNodes = selectedTree.getChildNodes();
                                     if(childNodes != null && childNodes.length > 0){
-                                        for(AttributeValueTreeNodeDTO childNode : childNodes){
+                                        for(AttributeTreeNodeDTO childNode : childNodes){
                                             printChildrenTree(childNode , out);
                                         }
                                     }
                                 } else {
-                                    AttributeValueTreeNodeDTO[] childNodes = selectedTree.getChildNodes();
+                                    AttributeTreeNodeDTO[] childNodes = selectedTree.getChildNodes();
                                     if(childNodes != null && childNodes.length > 0){
-                                        for(AttributeValueTreeNodeDTO childNode : childNodes){
+                                        for(AttributeTreeNodeDTO childNode : childNodes){
                                             printChildren(childNode, selectedTree.getName(), out);
                                         }
                                     }

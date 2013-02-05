@@ -120,12 +120,39 @@ public class SourceConnections {
         lock.lock();
         try {
             SourceContext.get(conn).reset();
-
-            freeConnections.remove(conn);
-            busyConnections.remove(conn);
+            
+            if(!busyConnections.remove(conn)){
+            	freeConnections.remove(conn);
+            }
 
             try {
                 conn.shutdown();
+            } catch (IOException ignored) {
+            }
+        } finally {
+            lock.unlock();
+        }
+    }    
+    
+    /**
+     * Close a connection gracefully.
+     *
+     * @param conn the connection that needs to be closed.
+     */
+    public void closeConnection(NHttpServerConnection conn) {
+        if (log.isDebugEnabled()) {
+            log.debug("Shutting down connection forcefully " + conn);
+        }
+        lock.lock();
+        try {
+            SourceContext.get(conn).reset();
+            
+            if(!busyConnections.remove(conn)){
+            	freeConnections.remove(conn);
+            }
+
+            try {
+            	conn.close();
             } catch (IOException ignored) {
             }
         } finally {

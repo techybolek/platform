@@ -7,7 +7,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-            <a href="/store" class="brand"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/logo.png"))%>" alt="API Store"></a>
+             <a onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/site/pages/index.jag")%>',e:event})" href="<%=jagg.getMappedUrl("/site/pages/index.jag")%>" class="brand"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/logo.png"))%>" alt="API Store"></a>
           <div class="pull-right">
             <% jagg.includeBlock("user/login", null); %>
           </div>
@@ -22,6 +22,12 @@
                     <a title="<%=link.tooltip%>" href="<%=link.url%>"<%=(link.classes ? ' class="' + link.classes + '"' : "")%>><%=link.title%></a>
                 </li>
                 <% } %>
+                <li class="dropdown tryit-menu-item">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Tools <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/rest-client.jag")%>">RESTClient</a></li>
+                    </ul>
+                </li>
             </ul>
           </div><!--/.nav-collapse -->
         </div>

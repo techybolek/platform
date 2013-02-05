@@ -1,22 +1,24 @@
 <%
 include("/jagg/jagg.jag");
+include("header.jag");
 var site = require("/site/conf/site.json");
 
+var i18n = require("i18n");
+var localeResourcesBasePath="/site/conf/locales/jaggery/";
+i18n.init(request,localeResourcesBasePath);
+
 (function () {
-    var subs, result, mod,isCreatePermitted;
+    var isCreatePermitted;
     var user = jagg.getUser();
     if (!user) {
-        response.sendRedirect(jagg.getAbsoluteUrl("/site/pages/login.jag"));
-        return;
+    response.sendRedirect(jagg.getAbsoluteUrl("/site/pages/login.jag"));
+    return;
     }
     isCreatePermitted = jagg.getCreatePermitted().permitted;
-    if(!isCreatePermitted){
+    if (!isCreatePermitted) {
     response.sendRedirect(jagg.getAbsoluteUrl("/site/pages/index.jag"));
     return;
     }
-    mod = jagg.module("subscription");
-    result = mod.getSubscribersOfProvider(user.username);
-    subs = result.subscribers;
 
     jagg.render({
         "name":"page/base",
@@ -30,10 +32,7 @@ var site = require("/site/conf/site.json");
                     "name":"layout/extended",
                     "inputs":{
                         "middle":{
-                            "name":"users-keys",
-                            "inputs":{
-                                "subscribers":subs
-                            }
+                            "name":"users-keys"
                         }
                     }
                 }

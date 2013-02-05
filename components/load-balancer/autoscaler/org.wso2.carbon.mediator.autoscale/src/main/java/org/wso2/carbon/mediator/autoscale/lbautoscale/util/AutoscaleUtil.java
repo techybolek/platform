@@ -207,7 +207,7 @@ public final class AutoscaleUtil {
             // return tenant id if domain name is not null
             if (domainName != null) {
                 try {
-                    return ConfigHolder.getRealmService().getTenantManager().getTenantId(domainName);
+                    return AutoscalerTaskDSHolder.getInstance().getRealmService().getTenantManager().getTenantId(domainName);
                 } catch (org.wso2.carbon.user.api.UserStoreException e) {
                     log.error("An error occurred while obtaining the tenant id.", e);
                 }
@@ -236,9 +236,12 @@ public final class AutoscaleUtil {
     @SuppressWarnings("unchecked")
     public static Map<String, Map<String, AppDomainContext>> getAppDomainContexts(ConfigurationContext configCtx,
  LoadBalancerConfiguration lbConfig) {
-        Map<String, Map<String, AppDomainContext>> appDomainContexts = (Map<String, Map<String, AppDomainContext>>) configCtx.getPropertyNonReplicable(AutoscaleConstants.APP_DOMAIN_CONTEXTS);
+        Map<String, Map<String, AppDomainContext>> appDomainContexts = 
+        	(Map<String, Map<String, AppDomainContext>>) configCtx.getPropertyNonReplicable(AutoscaleConstants.APP_DOMAIN_CONTEXTS);
         if (appDomainContexts == null) {
             appDomainContexts = new HashMap<String, Map<String, AppDomainContext>>();
+        }
+        
             ClusteringAgent clusteringAgent = configCtx.getAxisConfiguration().getClusteringAgent();
 
             for (String domain : lbConfig.getServiceDomains()) {
@@ -250,14 +253,20 @@ public final class AutoscaleUtil {
                                                    " has not been defined");
                     }
 
-                    AppDomainContext appCtxt = new AppDomainContext(lbConfig.getServiceConfig(domain,
-                                                                                              subDomain));
+                    if(appDomainContexts.get(domain) == null || 
+                    		(appDomainContexts.get(domain) != null && appDomainContexts.get(domain).get(subDomain) == null)){
+                    	
+                    	AppDomainContext appCtxt = new AppDomainContext(lbConfig.getServiceConfig(domain,
+                                subDomain));
 
-                    addAppDomainContext(appDomainContexts, domain, subDomain, appCtxt);
+                    	addAppDomainContext(appDomainContexts, domain, subDomain, appCtxt);
+                    	
+                    }
+                    
                 }
 
             }
-        }
+//        }
         configCtx.setNonReplicableProperty(AutoscaleConstants.APP_DOMAIN_CONTEXTS,
                                            appDomainContexts);
 

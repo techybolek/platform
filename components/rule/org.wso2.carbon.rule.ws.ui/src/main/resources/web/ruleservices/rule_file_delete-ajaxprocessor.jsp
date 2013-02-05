@@ -31,24 +31,9 @@
 
             ruleServiceAdminClient.deleteRuleFile(ruleService,filename, session);
         }
-        Map<String, String> scriptList = (Map<String, String>) request.getSession().getAttribute("ruleScript");
+        Map<String, String> scriptList = (Map<String, String>) session.getAttribute(RuleServiceAdminClient.SCRIPTS);
         scriptList.remove(filename);
-        request.getSession().setAttribute("ruleScript", scriptList);
+        session.setAttribute(RuleServiceAdminClient.SCRIPTS, scriptList);
 
-       /* String[] ruleFileNames = ruleServiceAdminClient.getRuleFileList(ruleService,request.getSession());
-        List<String> fileNames = null;
-        if( ruleFileNames != null && ruleFileNames.length >0 ){
-
-            fileNames = new ArrayList<String>();
-            fileNames =  Arrays.asList(ruleFileNames);//(ArrayList<String>) request.getSession().getAttribute("ruleScript"); // String filePath = (String) request.getSession().getAttribute("ruleScript");
-            if(scriptList == null){
-
-                scriptList = new HashMap<String, String>();
-            }
-            for(String name : fileNames){
-                scriptList.put(name, "file");
-
-            }
-        }*/
     }
 %>

@@ -30,7 +30,20 @@
 <!-- This page is included to display messages which are set to request scope or session scope -->
 
 <jsp:include page="../dialog/display_messages.jsp"/>
-
+<!--[if IE 7]>
+<style>
+.paginator-ie7-fix table{
+	width:380px;;
+}
+.paginator-ie7-fix table td{
+padding-right:10px;
+}
+.paginator-ie7-fix td b{
+display:inline-block;
+padding:0 10px;
+}
+</style>
+<![endif]-->
 <%
     response.setHeader("Cache-Control", "no-cache");
 
@@ -64,6 +77,7 @@
     }
     boolean isAuthorizedToManage =
             CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/modify/service");
+    boolean hasProxy = false;
     try {
         client = new ServiceAdminClient(cookie, backendServerURL, configContext, request.getLocale());
         servicesInfo = client.getAllServices(serviceTypeFilter,
@@ -231,6 +245,12 @@
     function searchServices() {
         document.searchForm.submit();
     }
+    function editPS(serviceName) {
+        window.location.href='../proxyservices/index.jsp?header=Modify' + '&serviceName='+serviceName+'&startwiz=true';
+    }
+    function editProxySourceView(serviceName) {
+        window.location.href='../proxyservices/index.jsp?header=Modify' + '&serviceName='+serviceName+'&startwiz=false&sourceView=true';
+    }
 </script>
 
 <div id="middle">
@@ -327,7 +347,7 @@
         String parameters = "serviceTypeFilter=" + serviceTypeFilter +
                 "&serviceSearchString=" + serviceSearchString;
 %>
-
+<div class="paginator-ie7-fix">
 <carbon:paginator pageNumber="<%=pageNumberInt%>" numberOfPages="<%=numberOfPages%>"
                   page="index.jsp" pageNumberParameterName="pageNumber"
                   resourceBundle="org.wso2.carbon.service.mgt.ui.i18n.Resources"
@@ -348,6 +368,7 @@
                           addRemoveKey="delete"
                           numberOfPages="<%=numberOfPages%>"/>
 <% } %>
+</div>	<!-- paginator-ie7-fix -->
 <p>&nbsp;</p>
 
 <form action="delete_service_groups.jsp" name="servicesForm" method="post">
@@ -358,15 +379,15 @@
             <%
                 if (loggedIn && hasDownloadableServices) {
             %>
-            <th colspan="8"><fmt:message key="services"/></th>
+            <th colspan="10"><fmt:message key="services"/></th>
             <%
             } else if (loggedIn) {
             %>
-            <th colspan="7"><fmt:message key="services"/></th>
+            <th colspan="9"><fmt:message key="services"/></th>
             <%
             } else {
             %>
-            <th colspan="6"><fmt:message key="services"/></th>
+            <th colspan="8"><fmt:message key="services"/></th>
             <% } %>
         </tr>
         </thead>
@@ -421,7 +442,7 @@
                 </nobr>
             </td>
             <% if(isAuthorizedToManage) { %>
-            <td width="20px" style="text-align:left;">
+            <td style="text-align:left;" width="10px">
                 <nobr>
                 <%= service.getSecurityScenarioId() != null ?
                 "<a href='../securityconfig/index.jsp?serviceName=" + serviceName + "'  class='icon-link' style='background-image:url(images/secured.gif);' " +
@@ -449,6 +470,7 @@
                 <% } %>
             </td>
             <td width="100px">
+				<div style="text-align:center">
                 <% if (!service.getDisableTryit() && service.getActive()) {%>
                 <nobr>
                     <a href="<%=service.getTryitURL()%>" class="icon-link"
@@ -457,6 +479,7 @@
                     </a>
                 </nobr>
                 <% } %>
+				</div>
             </td>
             <% if (loggedIn && hasDownloadableServices) { %>
             <td width="100px">
@@ -469,20 +492,43 @@
                        target="_self">
                         <fmt:message key="download"/>
                     </a>
-                </nobr>
+                </nobr>        
                 <% } else { %>
-                &nbsp;
-                <% }
-                } %>
+                        &nbsp;
+                <% } %>
             </td>
+            <% } %>
+            <% if (service.getServiceType().equalsIgnoreCase("proxy")) { %>
+            <% hasProxy = true; %>
+            <td>
+                <a title="Edit '<%=service.getName()%>' in the design view" href="#" onclick="editPS('<%=service.getName()%>');return false;">
+                    <img src="../proxyservices/images/design-view.gif" alt="" border="0"> Design View</a>
+            </td>
+            <td>
+                <a title="Edit '<%=service.getName()%>' in the source view editor" 
+                    style="background-image: url(../proxyservices/images/source-view.gif);" 
+                    class="icon-link" onclick="editProxySourceView('<%=service.getName()%>')" href="#">Source View</a>
+            </td>
+            <% } else {%>
+            <td colspan="2"></td>
+            <% } %>
         </tr>
         <%
             } // for services
         %>
         </tbody>
     </table>
+    <script>
+    if (<%=hasProxy%> == false) {
+        jQuery('#sgTable tr th').attr('colspan', parseInt(jQuery('#sgTable tr th').attr('colspan')) - 2);
+        $("#sgTable tr").each(function(){
+            $(this).find("td:last").remove();
+        });
+    }
+    </script>
 </form>
 <p>&nbsp;</p>
+<div class="paginator-ie7-fix">
 <%
     if (loggedIn && isAuthorizedToManage) {
 %>
@@ -510,6 +556,8 @@
 <%
     }
 %>
+</div><!-- paginator-ie7-fix end -->
+
 </div>
 </div>
-</fmt:bundle>
+</fmt:bundle>   

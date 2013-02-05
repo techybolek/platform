@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.usage.publisher;
 
+import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
 
@@ -27,5 +28,7 @@ public interface APIMgtUsageDataPublisher {
     public void publishEvent(RequestPublisherDTO requestPublisherDTO);
 
     public void publishEvent(ResponsePublisherDTO responsePublisherDTO);
+
+    public void publishEvent(FaultPublisherDTO faultPublisherDTO);
 
 }

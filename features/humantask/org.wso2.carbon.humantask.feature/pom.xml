@@ -22,10 +22,12 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
     	<artifactId>humantask-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
+    <version>4.0.6</version>
     <artifactId>org.wso2.carbon.humantask.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - HumanTask Feature</name>
@@ -36,13 +38,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.humantask.server.feature</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.platform.patch.version.406}</version>
             <type>zip</type>
 	</dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.humantask.ui.feature</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.platform.patch.version.405}</version>
             <type>zip</type>
 	</dependency>
     </dependencies>
@@ -62,13 +64,13 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.humantask</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:${carbon.platform.patch.version.405}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.humantask.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.humantask.ui.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.humantask.ui.feature:${carbon.platform.patch.version.405}</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>
@@ -76,4 +78,9 @@
             </plugin>
         </plugins>
     </build>
+    
+    <properties>
+       <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
+       <carbon.platform.patch.version.406>4.0.6</carbon.platform.patch.version.406>
+    </properties>
 </project>

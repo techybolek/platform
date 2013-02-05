@@ -24,35 +24,41 @@ import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SliceQuery;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.siddhi.core.event.management.PersistenceManagementEvent;
 import org.wso2.siddhi.core.persistence.ByteSerializer;
 import org.wso2.siddhi.core.persistence.PersistenceObject;
 import org.wso2.siddhi.core.persistence.PersistenceStore;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CasandraPersistenceStore implements PersistenceStore {
     private static final Log log = LogFactory.getLog(CasandraPersistenceStore.class);
     private StringSerializer sser = new StringSerializer();
     private BytesArraySerializer bser = new BytesArraySerializer();
+    private ConcurrentHashMap<String, Boolean> tenantSet = new ConcurrentHashMap<String, Boolean>();
 
     private Keyspace keyspace;
 
+    public static final String CLUSTER_NAME = "SiddhiPersistenceCluster";
+    public static final String KEY_SPACE_NAME = "SiddhiSnapshots";
     private static final String COLUMN_FAMILY_NAME = "Snapshots";
     private static final String INDEX_COLUMN_FAMILY_NAME = "SnapshotsIndex";
 //    private static final String INDEX_KEY = "IndexKey";
 
     private static Date timeAt1970 = new Date(10000);
+    private Cluster cluster;
 
 
     public CasandraPersistenceStore(String cassadraUrl, String username, String password) {
@@ -61,38 +67,40 @@ public class CasandraPersistenceStore implements PersistenceStore {
         Map<String, String> credentials = new HashMap<String, String>();
         credentials.put("username", username);
         credentials.put("password", password);
-        Cluster cluster = HFactory.createCluster("TestCluster", new CassandraHostConfigurator(cassadraUrl), credentials);
-
+        cluster = HFactory.getOrCreateCluster(CLUSTER_NAME, new CassandraHostConfigurator(cassadraUrl), credentials);
         init(cluster);
 
     }
 
     private void init(Cluster cluster) {
-        if (cluster.describeKeyspace("SiddhiSnapshots") == null) {
-            log.info("Adding  keyspace SiddhiSnapshots");
-            cluster.addKeyspace(HFactory.createKeyspaceDefinition("SiddhiSnapshots"));
-            keyspace = HFactory.createKeyspace("SiddhiSnapshots", cluster);
-            cluster.addColumnFamily(HFactory.createColumnFamilyDefinition(keyspace.getKeyspaceName(), COLUMN_FAMILY_NAME));
-            cluster.addColumnFamily(HFactory.createColumnFamilyDefinition(keyspace.getKeyspaceName(), INDEX_COLUMN_FAMILY_NAME));
-
+        KeyspaceDefinition KeyspaceDef = cluster.describeKeyspace(KEY_SPACE_NAME);
+        if (KeyspaceDef == null) {
+            log.info("Adding  keyspace " + KEY_SPACE_NAME);
+            cluster.addKeyspace(HFactory.createKeyspaceDefinition(KEY_SPACE_NAME));
+            keyspace = HFactory.createKeyspace(KEY_SPACE_NAME, cluster);
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("keyspace SiddhiSnapshots exists");
+                log.debug("keyspace " + KEY_SPACE_NAME + " exists");
             }
-            keyspace = HFactory.createKeyspace("SiddhiSnapshots", cluster);
+            keyspace = HFactory.createKeyspace(KEY_SPACE_NAME, cluster);
+            for (ColumnFamilyDefinition columnFamilyDefinition : KeyspaceDef.getCfDefs()) {
+                tenantSet.putIfAbsent(columnFamilyDefinition.getName().split("_")[1], true);
+            }
         }
     }
 
     public CasandraPersistenceStore(Cluster cluster) {
+        this.cluster = cluster;
         init(cluster);
     }
 
     @Override
     public void save(PersistenceManagementEvent persistenceManagementEvent, String nodeID,
                      PersistenceObject persistenceObject) {
+        String tenantId = initTenantId();
         Mutator<String> mutator = HFactory.createMutator(keyspace, sser);
-        mutator.insert(persistenceManagementEvent.getRevision(), COLUMN_FAMILY_NAME, HFactory.createColumn(nodeID, ByteSerializer.OToB(persistenceObject), sser, bser));
-        mutator.insert(persistenceManagementEvent.getExecutionPlanIdentifier(), INDEX_COLUMN_FAMILY_NAME,
+        mutator.insert(persistenceManagementEvent.getRevision(), new StringBuilder().append(COLUMN_FAMILY_NAME).append("_").append(tenantId).toString(), HFactory.createColumn(nodeID, ByteSerializer.OToB(persistenceObject), sser, bser));
+        mutator.insert(persistenceManagementEvent.getExecutionPlanIdentifier(), new StringBuilder().append(INDEX_COLUMN_FAMILY_NAME).append("_").append(tenantId).toString(),
                        HFactory.createColumn(persistenceManagementEvent.getRevision(), String.valueOf(System.currentTimeMillis()), sser, sser));
         mutator.execute();
     }
@@ -101,12 +109,12 @@ public class CasandraPersistenceStore implements PersistenceStore {
     public PersistenceObject load(PersistenceManagementEvent persistenceManagementEvent,
                                   String nodeId) {
 
-        List<NodeSnapshot> list = new ArrayList<NodeSnapshot>();
+        String tenantId = initTenantId();
 
         ColumnSlice<String, byte[]> cs;
 
         SliceQuery<String, String, byte[]> q = HFactory.createSliceQuery(keyspace, sser, sser, bser);
-        q.setColumnFamily(COLUMN_FAMILY_NAME).setKey(persistenceManagementEvent.getRevision()).setRange("", "", false, 1000).setColumnNames(nodeId);
+        q.setColumnFamily(COLUMN_FAMILY_NAME + "_" + tenantId).setKey(persistenceManagementEvent.getRevision()).setRange("", "", false, 1000).setColumnNames(nodeId);
 
         QueryResult<ColumnSlice<String, byte[]>> r = q.execute();
 
@@ -118,17 +126,20 @@ public class CasandraPersistenceStore implements PersistenceStore {
         }
 //        return list;
         return persistenceObject;
-
     }
+
 
     @Override
     public String getLastRevision(String executionPlanIdentifier) {
+
+        String tenantId = initTenantId();
+
         ColumnSlice<String, byte[]> cs;
         String rangeStart = new StringBuffer(String.valueOf(timeAt1970.getTime())).append("_").toString();
         boolean firstLoop = true;
         while (true) {
             SliceQuery<String, String, byte[]> q = HFactory.createSliceQuery(keyspace, sser, sser, bser);
-            q.setColumnFamily(INDEX_COLUMN_FAMILY_NAME).setKey(executionPlanIdentifier)
+            q.setColumnFamily(INDEX_COLUMN_FAMILY_NAME + "_" + tenantId).setKey(executionPlanIdentifier)
                     .setRange(rangeStart, String.valueOf(Long.MAX_VALUE), false, 1000);
 
             QueryResult<ColumnSlice<String, byte[]>> r = q.execute();
@@ -150,6 +161,16 @@ public class CasandraPersistenceStore implements PersistenceStore {
         }
         log.info("found revision " + rangeStart);
         return rangeStart;
+    }
+
+    private synchronized String initTenantId() {
+        String tenantId = String.valueOf(CarbonContext.getCurrentContext().getTenantId()).replaceAll("-","M");
+        if (tenantSet.get(tenantId) == null) {
+            cluster.addColumnFamily(HFactory.createColumnFamilyDefinition(keyspace.getKeyspaceName(), COLUMN_FAMILY_NAME + "_" + tenantId),true);
+            cluster.addColumnFamily(HFactory.createColumnFamilyDefinition(keyspace.getKeyspaceName(), INDEX_COLUMN_FAMILY_NAME + "_" + tenantId),true);
+            tenantSet.put(tenantId, true);
+        }
+        return tenantId;
     }
 
 

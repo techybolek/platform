@@ -39,7 +39,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ws.commons.schema.utils.NamespaceMap;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.dataservices.common.DBConstants;
 import org.wso2.carbon.dataservices.common.DBConstants.DBSFields;
 import org.wso2.carbon.dataservices.core.description.operation.Operation;
@@ -52,6 +53,8 @@ import org.wso2.carbon.dataservices.core.internal.DataServicesDSComponent;
 import org.wso2.carbon.dataservices.core.jmx.DataServiceInstance;
 import org.wso2.carbon.dataservices.core.jmx.DataServiceInstanceMBean;
 import org.wso2.carbon.ndatasource.common.DataSourceConstants;
+import org.wso2.carbon.ndatasource.common.DataSourceException;
+import org.wso2.carbon.ndatasource.core.DataSourceManager;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -122,23 +125,18 @@ public class DBDeployer extends AbstractDeployer {
 	 */
 	public void deploy(DeploymentFileData deploymentFileData)
 			throws DeploymentException {
-		/* set the thread local variable to hold the tenant id */
 		try {
-            int tenantId = SuperTenantCarbonContext.getCurrentContext(this.configCtx).getTenantId();
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantId);
             RealmService realmService = DataServicesDSComponent.getRealmService();
             if (realmService != null) {
                 try {
-					SuperTenantCarbonContext.getCurrentContext().setUserRealm(
+                	PrivilegedCarbonContext.getCurrentContext().setUserRealm(
                             realmService.getBootstrapRealm());
 				} catch (UserStoreException e) {
 					throw new DeploymentException(e);
 				}
             }
-            SuperTenantCarbonContext.getCurrentContext().setUsername(
+            PrivilegedCarbonContext.getCurrentContext().setUsername(
                     CarbonConstants.REGISTRY_SYSTEM_USERNAME);
-		    DBUtils.setDeploymentTimeTenantId(tenantId);
 		} catch (Error e) {
 			/* during unit tests, this may occur */
 			log.warn("Init error at DBDeployer.deploy()", e);
@@ -193,6 +191,7 @@ public class DBDeployer extends AbstractDeployer {
 			    log.debug(Messages.getMessage(DeploymentErrorMsgs.DEPLOYING_WS,
 			    		deploymentFileData.getName(), deploymentFileData.getAbsolutePath()));
 		    }
+            super.deploy(deploymentFileData);
 			/* finished deploying successfully */
 			successfullyDeployed = true;
 
@@ -236,15 +235,6 @@ public class DBDeployer extends AbstractDeployer {
                     log.error("Cannot register faulty service with Carbon", e);
                 }
 			}
-
-            // Since simpleHTTP server is used to run unit tests, when executing static code block in CarbonContextHolder
-            // the CARBON_HOME(i.e CarbonUtils.getCarbonConfigDirPath() + File.separator + "cache.xml")  will set to null.
-            // This try-catch block is used to handle it.
-           try {
-               SuperTenantCarbonContext.endTenantFlow();
-           } catch (Throwable e) {
-                //ignore
-           }
 		}
 	}
 
@@ -302,9 +292,40 @@ public class DBDeployer extends AbstractDeployer {
 		configCtx.setProperty(DBConstants.DB_SERVICE_REPO, this.repoDir);
 		configCtx.setProperty(DBConstants.DB_SERVICE_EXTENSION, this.extension);
 		configCtx.setProperty(DBConstants.DB_SERVICE_DEPLOYER, this);
+		
+		/* retrieve tenant id */
+		int tid;
+        try {
+        	tid = PrivilegedCarbonContext.getCurrentContext(this.configCtx).getTenantId();
+        } catch (ExceptionInInitializerError e) { 
+        	/* workaround for unit test failures */
+        	tid = MultitenantConstants.SUPER_TENANT_ID;
+        }
+		
+        try {
+        	/* load tenant registry */
+        	DataServicesDSComponent.getTenantRegistryLoader().loadTenantRegistry(tid);
+        } catch (Exception e) {
+        	/*ignore*/
+        }
 
 		/* transaction manager looked up and cached for later use, rather than always doing the JNDI lookup */
         this.doExtractTransactionManager();
+        
+        /* data sources component tenant initialized, this is done here as a precaution to
+         * make sure that the tenant's data sources are initialized before the data services
+         * are deployed, this uncertainty comes because we cannot predict the order which
+         * the Axis2ConfigurationContext observers will be called */
+        try {
+			DataSourceManager.getInstance().initTenant(tid);
+		} catch (DataSourceException e) {
+			log.error("Error in intializing Carbon data sources for tenant: " + 
+					tid + " from data services");
+		} catch (NoClassDefFoundError e) {
+			//workaround for unit test failures
+		} catch (NoSuchMethodError e) {
+			//workaround for unit test failures
+		}
 	}
 
     private void doExtractTransactionManager() {
@@ -381,11 +402,6 @@ public class DBDeployer extends AbstractDeployer {
 	 */
 	public void undeploy(String servicePath) throws DeploymentException {
 		try {
-            //set the thread local variable to hold the tenant id
-            int tenantId = SuperTenantCarbonContext.getCurrentContext(this.configCtx).getTenantId();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantId);
-            DBUtils.setDeploymentTimeTenantId(tenantId);
-
 			DataService dataService = this.getDataServiceByServicePath(servicePath);
 			if (dataService == null) {
 				/* must be a faulty service */
@@ -602,7 +618,6 @@ public class DBDeployer extends AbstractDeployer {
 			faultMessage.setElementQName(new QName(DBConstants.WSO2_DS_NAMESPACE,
 	                DBConstants.DS_FAULT_ELEMENT));
 			axisOperation.setFaultMessages(faultMessage);
-
 			createAxisBindingMessage(soap11BindingOperation, faultMessage,
 	                WSDLConstants.MESSAGE_LABEL_FAULT_VALUE, true);
 			createAxisBindingMessage(soap12BindingOperation, faultMessage,

@@ -277,9 +277,15 @@ function dbreportMediatorValidate() {
                 return false;
             }
         } else {
-            field = document.getElementById('data_source');
+            field = document.getElementById('init_ctx');
             if (field && field.value == "") {
-                CARBON.showErrorDialog(dbreportMediatorJsi18n["dbreport.dataSource.required"]);
+                CARBON.showErrorDialog(dblookMediatorJsi18n["dblookup.initCtx.required"]);
+                return false;
+            }
+
+            field = document.getElementById('ext_data_source');
+            if (field && field.value == "") {
+                CARBON.showErrorDialog(dblookMediatorJsi18n["dblookup.dataSource.required"]);
                 return false;
             }
         }
@@ -300,7 +306,7 @@ function dbreportMediatorValidate() {
         }
         return validateProperties() && validateStmts();
     } else {
-        field = document.getElementById('dsName_hidden');
+        field = document.getElementById('data_source');
         if (field && field.value == "") {
             CARBON.showErrorDialog(dbreportMediatorJsi18n["dbreport.dataSource.required"]);
             return false;

@@ -24,7 +24,7 @@ import org.wso2.carbon.dataservices.common.DBConstants;
 import org.wso2.carbon.dataservices.common.DBConstants.ResultTypes;
 import org.wso2.carbon.dataservices.core.DBUtils;
 import org.wso2.carbon.dataservices.core.DataServiceFault;
-import org.wso2.carbon.dataservices.core.description.config.CarbonDataSourceConfig;
+import org.wso2.carbon.dataservices.core.description.config.SQLCarbonDataSourceConfig;
 import org.wso2.carbon.dataservices.core.description.config.Config;
 import org.wso2.carbon.dataservices.core.description.operation.Operation;
 import org.wso2.carbon.dataservices.core.description.query.Query;
@@ -51,6 +51,10 @@ import java.util.*;
  * table wise. Second constructor for creating DS object for whole database.
  */
 public class DSGenerator {
+
+	private static final String AUTOINCREMENT_COLUMN = "IS_AUTOINCREMENT";
+
+	private static final String IDENTITY_COLUMN = "Identity";
 
 	private static Log log = LogFactory.getLog(DSGenerator.class);
 
@@ -221,6 +225,7 @@ public class DSGenerator {
 			this.addInsertOperation(dataService, schema, metaData, dbName,
 					tableName);
 		} catch (Exception e) {
+			e.printStackTrace();
 			String defError = "Insert operation not created";
 			this.addError(defError);
 			log.warn(defError, e);
@@ -356,7 +361,7 @@ public class DSGenerator {
 			throws DataServiceFault {
 		Map<String, String> properties = new HashMap<String, String>();
 		properties.put(DBConstants.CarbonDatasource.NAME, carbonSourceId);
-		Config config = new CarbonDataSourceConfig(dataServiceObject,
+		Config config = new SQLCarbonDataSourceConfig(dataServiceObject,
 				DBConstants.DataServiceGenerator.CONFIG_ID, properties);
 		dataServiceObject.addConfig(config);
 	}
@@ -394,6 +399,26 @@ public class DSGenerator {
         return columnNames;
     }
 
+    private boolean isAutoIncrementField(ResultSet columnNames) throws SQLException {
+    	try {
+			Boolean autoIncr = columnNames.getBoolean(AUTOINCREMENT_COLUMN);
+			if (autoIncr != null) {
+				return autoIncr;
+			}
+		} catch (SQLException ignore) {
+			// ignore
+		}
+		try {
+			Boolean identity = columnNames.getBoolean(IDENTITY_COLUMN);
+			if (identity != null) {
+				return identity;
+			}
+		} catch (SQLException ignore) {
+			// ignore
+		}		
+		return false;
+    }
+    
 	/**
 	 * Insert Operation.
 	 */
@@ -406,7 +431,10 @@ public class DSGenerator {
 		List<String> paramList = new ArrayList<String>();
         ResultSet columnNames = getColumnNames (metaData, schema,dbName, tableName, null);
 
-		while (columnNames.next()){
+		while (columnNames.next()) {
+			if (this.isAutoIncrementField(columnNames)) {
+				continue;
+			}
 			String name = columnNames.getString(DBConstants.DataServiceGenerator.COLUMN_NAME);
 			WithParam withParam = new WithParam(name, name, name, DBConstants.DataServiceGenerator.QUERY_PARAM);
 			paramMap.put(name, withParam);
@@ -608,7 +636,7 @@ public class DSGenerator {
 			throws IllegalArgumentException, DataServiceFault, SQLException {
 		/* get the query */
 		DynamicSqlUtils sqlStatement = new DynamicSqlUtils();
-		String query = sqlStatement.getUpdateStatement(tableName, pList,
+		String query = sqlStatement.getUpdateStatement(tableName, schema, pList,
 				tablePrimaryKey);
 		Result result = null;
 		Map<String, String> advanceProp = new HashMap<String, String>();
@@ -622,7 +650,7 @@ public class DSGenerator {
 			DatabaseMetaData metaData, String dbName, String schema)
 			throws IllegalArgumentException, DataServiceFault, SQLException {
 		DynamicSqlUtils sqlStatement = new DynamicSqlUtils();
-		String query = sqlStatement.getDeleteStatement(tableName,
+		String query = sqlStatement.getDeleteStatement(tableName, schema,
 				tablePrimaryKey);
 		Result result = null;
 		Map<String, String> advanceProp = new HashMap<String, String>();
@@ -637,7 +665,7 @@ public class DSGenerator {
 			throws IllegalArgumentException, DataServiceFault, SQLException {
 		/* get the query */
 		DynamicSqlUtils sqlStatementCreator = new DynamicSqlUtils();
-		String query = sqlStatementCreator.getInsertStatement(tableName, param);
+		String query = sqlStatementCreator.getInsertStatement(tableName, schema, param);
 		Result result = null;
 		Map<String, String> advanceProp = new HashMap<String, String>();
 		return new SQLQuery(dataServiceObject, queryId, DBConstants.DataServiceGenerator.CONFIG_ID, false,
@@ -650,7 +678,7 @@ public class DSGenerator {
 			DatabaseMetaData metaData, String dbName, String schema,String colomNames)
 			throws IllegalArgumentException, DataServiceFault, SQLException {
 		DynamicSqlUtils sqlStatement = new DynamicSqlUtils();
-		String query = sqlStatement.getSelectAll(tableName,colomNames);
+		String query = sqlStatement.getSelectAll(tableName, schema, colomNames);
 		Result result = this.getResult(dataServiceObject, metaData, dbName,
 				schema, tableName);
 		Map<String, String> advanceProp = new HashMap<String, String>();
@@ -665,7 +693,7 @@ public class DSGenerator {
 			String dbName, String schema, String colomNames) throws IllegalArgumentException,
 			DataServiceFault, SQLException {
 		DynamicSqlUtils sqlStatement = new DynamicSqlUtils();
-		String query = sqlStatement.getSelectByKey(tableName, tablePrimaryKey,colomNames);
+		String query = sqlStatement.getSelectByKey(tableName, schema, tablePrimaryKey,colomNames);
 		Result result = this.getResult(dataServiceObject, metaData, dbName,
 				schema, tableName);
 		Map<String, String> advanceProp = new HashMap<String, String>();

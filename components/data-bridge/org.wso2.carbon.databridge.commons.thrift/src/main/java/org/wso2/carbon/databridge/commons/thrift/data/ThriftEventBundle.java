@@ -5,14 +5,7 @@
  */
 package org.wso2.carbon.databridge.commons.thrift.data;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Collections;
-import java.util.BitSet;
+import java.util.*;
 
 public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBundle, ThriftEventBundle._Fields>, java.io.Serializable, Cloneable {
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("ThriftEventBundle");
@@ -24,6 +17,7 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
   private static final org.apache.thrift.protocol.TField DOUBLE_ATTRIBUTE_LIST_FIELD_DESC = new org.apache.thrift.protocol.TField("doubleAttributeList", org.apache.thrift.protocol.TType.LIST, (short)5);
   private static final org.apache.thrift.protocol.TField BOOL_ATTRIBUTE_LIST_FIELD_DESC = new org.apache.thrift.protocol.TField("boolAttributeList", org.apache.thrift.protocol.TType.LIST, (short)6);
   private static final org.apache.thrift.protocol.TField STRING_ATTRIBUTE_LIST_FIELD_DESC = new org.apache.thrift.protocol.TField("stringAttributeList", org.apache.thrift.protocol.TType.LIST, (short)7);
+  private static final org.apache.thrift.protocol.TField ARBITRARY_DATA_MAP_MAP_FIELD_DESC = new org.apache.thrift.protocol.TField("arbitraryDataMapMap", org.apache.thrift.protocol.TType.MAP, (short)8);
 
   public String sessionId; // required
   public int eventNum; // required
@@ -32,6 +26,7 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
   public List<Double> doubleAttributeList; // required
   public List<Boolean> boolAttributeList; // required
   public List<String> stringAttributeList; // required
+  public Map<Integer,Map<String,String>> arbitraryDataMapMap; // required
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -41,7 +36,8 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
     LONG_ATTRIBUTE_LIST((short)4, "longAttributeList"),
     DOUBLE_ATTRIBUTE_LIST((short)5, "doubleAttributeList"),
     BOOL_ATTRIBUTE_LIST((short)6, "boolAttributeList"),
-    STRING_ATTRIBUTE_LIST((short)7, "stringAttributeList");
+    STRING_ATTRIBUTE_LIST((short)7, "stringAttributeList"),
+    ARBITRARY_DATA_MAP_MAP((short)8, "arbitraryDataMapMap");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -70,6 +66,8 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
           return BOOL_ATTRIBUTE_LIST;
         case 7: // STRING_ATTRIBUTE_LIST
           return STRING_ATTRIBUTE_LIST;
+        case 8: // ARBITRARY_DATA_MAP_MAP
+          return ARBITRARY_DATA_MAP_MAP;
         default:
           return null;
       }
@@ -135,6 +133,12 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
     tmpMap.put(_Fields.STRING_ATTRIBUTE_LIST, new org.apache.thrift.meta_data.FieldMetaData("stringAttributeList", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
         new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
             new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING))));
+    tmpMap.put(_Fields.ARBITRARY_DATA_MAP_MAP, new org.apache.thrift.meta_data.FieldMetaData("arbitraryDataMapMap", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+        new org.apache.thrift.meta_data.MapMetaData(org.apache.thrift.protocol.TType.MAP, 
+            new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32), 
+            new org.apache.thrift.meta_data.MapMetaData(org.apache.thrift.protocol.TType.MAP, 
+                new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING), 
+                new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)))));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(ThriftEventBundle.class, metaDataMap);
   }
@@ -187,6 +191,32 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
       }
       this.stringAttributeList = __this__stringAttributeList;
     }
+    if (other.isSetArbitraryDataMapMap()) {
+      Map<Integer,Map<String,String>> __this__arbitraryDataMapMap = new HashMap<Integer,Map<String,String>>();
+      for (Map.Entry<Integer, Map<String,String>> other_element : other.arbitraryDataMapMap.entrySet()) {
+
+        Integer other_element_key = other_element.getKey();
+        Map<String,String> other_element_value = other_element.getValue();
+
+        Integer __this__arbitraryDataMapMap_copy_key = other_element_key;
+
+        Map<String,String> __this__arbitraryDataMapMap_copy_value = new HashMap<String,String>();
+        for (Map.Entry<String, String> other_element_value_element : other_element_value.entrySet()) {
+
+          String other_element_value_element_key = other_element_value_element.getKey();
+          String other_element_value_element_value = other_element_value_element.getValue();
+
+          String __this__arbitraryDataMapMap_copy_value_copy_key = other_element_value_element_key;
+
+          String __this__arbitraryDataMapMap_copy_value_copy_value = other_element_value_element_value;
+
+          __this__arbitraryDataMapMap_copy_value.put(__this__arbitraryDataMapMap_copy_value_copy_key, __this__arbitraryDataMapMap_copy_value_copy_value);
+        }
+
+        __this__arbitraryDataMapMap.put(__this__arbitraryDataMapMap_copy_key, __this__arbitraryDataMapMap_copy_value);
+      }
+      this.arbitraryDataMapMap = __this__arbitraryDataMapMap;
+    }
   }
 
   public ThriftEventBundle deepCopy() {
@@ -203,6 +233,7 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
     this.doubleAttributeList = null;
     this.boolAttributeList = null;
     this.stringAttributeList = null;
+    this.arbitraryDataMapMap = null;
   }
 
   public String getSessionId() {
@@ -447,6 +478,41 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
     }
   }
 
+  public int getArbitraryDataMapMapSize() {
+    return (this.arbitraryDataMapMap == null) ? 0 : this.arbitraryDataMapMap.size();
+  }
+
+  public void putToArbitraryDataMapMap(int key, Map<String,String> val) {
+    if (this.arbitraryDataMapMap == null) {
+      this.arbitraryDataMapMap = new HashMap<Integer,Map<String,String>>();
+    }
+    this.arbitraryDataMapMap.put(key, val);
+  }
+
+  public Map<Integer,Map<String,String>> getArbitraryDataMapMap() {
+    return this.arbitraryDataMapMap;
+  }
+
+  public ThriftEventBundle setArbitraryDataMapMap(Map<Integer,Map<String,String>> arbitraryDataMapMap) {
+    this.arbitraryDataMapMap = arbitraryDataMapMap;
+    return this;
+  }
+
+  public void unsetArbitraryDataMapMap() {
+    this.arbitraryDataMapMap = null;
+  }
+
+  /** Returns true if field arbitraryDataMapMap is set (has been assigned a value) and false otherwise */
+  public boolean isSetArbitraryDataMapMap() {
+    return this.arbitraryDataMapMap != null;
+  }
+
+  public void setArbitraryDataMapMapIsSet(boolean value) {
+    if (!value) {
+      this.arbitraryDataMapMap = null;
+    }
+  }
+
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case SESSION_ID:
@@ -505,6 +571,14 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
       }
       break;
 
+    case ARBITRARY_DATA_MAP_MAP:
+      if (value == null) {
+        unsetArbitraryDataMapMap();
+      } else {
+        setArbitraryDataMapMap((Map<Integer,Map<String,String>>)value);
+      }
+      break;
+
     }
   }
 
@@ -531,6 +605,9 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
     case STRING_ATTRIBUTE_LIST:
       return getStringAttributeList();
 
+    case ARBITRARY_DATA_MAP_MAP:
+      return getArbitraryDataMapMap();
+
     }
     throw new IllegalStateException();
   }
@@ -556,6 +633,8 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
       return isSetBoolAttributeList();
     case STRING_ATTRIBUTE_LIST:
       return isSetStringAttributeList();
+    case ARBITRARY_DATA_MAP_MAP:
+      return isSetArbitraryDataMapMap();
     }
     throw new IllegalStateException();
   }
@@ -633,6 +712,15 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
       if (!(this_present_stringAttributeList && that_present_stringAttributeList))
         return false;
       if (!this.stringAttributeList.equals(that.stringAttributeList))
+        return false;
+    }
+
+    boolean this_present_arbitraryDataMapMap = true && this.isSetArbitraryDataMapMap();
+    boolean that_present_arbitraryDataMapMap = true && that.isSetArbitraryDataMapMap();
+    if (this_present_arbitraryDataMapMap || that_present_arbitraryDataMapMap) {
+      if (!(this_present_arbitraryDataMapMap && that_present_arbitraryDataMapMap))
+        return false;
+      if (!this.arbitraryDataMapMap.equals(that.arbitraryDataMapMap))
         return false;
     }
 
@@ -718,6 +806,16 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
     }
     if (isSetStringAttributeList()) {
       lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.stringAttributeList, typedOther.stringAttributeList);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetArbitraryDataMapMap()).compareTo(typedOther.isSetArbitraryDataMapMap());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetArbitraryDataMapMap()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.arbitraryDataMapMap, typedOther.arbitraryDataMapMap);
       if (lastComparison != 0) {
         return lastComparison;
       }
@@ -839,6 +937,37 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
           }
           break;
+        case 8: // ARBITRARY_DATA_MAP_MAP
+          if (field.type == org.apache.thrift.protocol.TType.MAP) {
+            {
+              org.apache.thrift.protocol.TMap _map15 = iprot.readMapBegin();
+              this.arbitraryDataMapMap = new HashMap<Integer,Map<String,String>>(2*_map15.size);
+              for (int _i16 = 0; _i16 < _map15.size; ++_i16)
+              {
+                int _key17; // required
+                Map<String,String> _val18; // required
+                _key17 = iprot.readI32();
+                {
+                  org.apache.thrift.protocol.TMap _map19 = iprot.readMapBegin();
+                  _val18 = new HashMap<String,String>(2*_map19.size);
+                  for (int _i20 = 0; _i20 < _map19.size; ++_i20)
+                  {
+                    String _key21; // required
+                    String _val22; // required
+                    _key21 = iprot.readString();
+                    _val22 = iprot.readString();
+                    _val18.put(_key21, _val22);
+                  }
+                  iprot.readMapEnd();
+                }
+                this.arbitraryDataMapMap.put(_key17, _val18);
+              }
+              iprot.readMapEnd();
+            }
+          } else { 
+            org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
+          }
+          break;
         default:
           org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
       }
@@ -871,9 +1000,9 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
         oprot.writeFieldBegin(INT_ATTRIBUTE_LIST_FIELD_DESC);
         {
           oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I32, this.intAttributeList.size()));
-          for (int _iter15 : this.intAttributeList)
+          for (int _iter23 : this.intAttributeList)
           {
-            oprot.writeI32(_iter15);
+            oprot.writeI32(_iter23);
           }
           oprot.writeListEnd();
         }
@@ -885,9 +1014,9 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
         oprot.writeFieldBegin(LONG_ATTRIBUTE_LIST_FIELD_DESC);
         {
           oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.I64, this.longAttributeList.size()));
-          for (long _iter16 : this.longAttributeList)
+          for (long _iter24 : this.longAttributeList)
           {
-            oprot.writeI64(_iter16);
+            oprot.writeI64(_iter24);
           }
           oprot.writeListEnd();
         }
@@ -899,9 +1028,9 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
         oprot.writeFieldBegin(DOUBLE_ATTRIBUTE_LIST_FIELD_DESC);
         {
           oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.DOUBLE, this.doubleAttributeList.size()));
-          for (double _iter17 : this.doubleAttributeList)
+          for (double _iter25 : this.doubleAttributeList)
           {
-            oprot.writeDouble(_iter17);
+            oprot.writeDouble(_iter25);
           }
           oprot.writeListEnd();
         }
@@ -913,9 +1042,9 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
         oprot.writeFieldBegin(BOOL_ATTRIBUTE_LIST_FIELD_DESC);
         {
           oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.BOOL, this.boolAttributeList.size()));
-          for (boolean _iter18 : this.boolAttributeList)
+          for (boolean _iter26 : this.boolAttributeList)
           {
-            oprot.writeBool(_iter18);
+            oprot.writeBool(_iter26);
           }
           oprot.writeListEnd();
         }
@@ -927,11 +1056,34 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
         oprot.writeFieldBegin(STRING_ATTRIBUTE_LIST_FIELD_DESC);
         {
           oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRING, this.stringAttributeList.size()));
-          for (String _iter19 : this.stringAttributeList)
+          for (String _iter27 : this.stringAttributeList)
           {
-            oprot.writeString(_iter19);
+            oprot.writeString(_iter27);
           }
           oprot.writeListEnd();
+        }
+        oprot.writeFieldEnd();
+      }
+    }
+    if (this.arbitraryDataMapMap != null) {
+      if (isSetArbitraryDataMapMap()) {
+        oprot.writeFieldBegin(ARBITRARY_DATA_MAP_MAP_FIELD_DESC);
+        {
+          oprot.writeMapBegin(new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.I32, org.apache.thrift.protocol.TType.MAP, this.arbitraryDataMapMap.size()));
+          for (Map.Entry<Integer, Map<String,String>> _iter28 : this.arbitraryDataMapMap.entrySet())
+          {
+            oprot.writeI32(_iter28.getKey());
+            {
+              oprot.writeMapBegin(new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.STRING, _iter28.getValue().size()));
+              for (Map.Entry<String, String> _iter29 : _iter28.getValue().entrySet())
+              {
+                oprot.writeString(_iter29.getKey());
+                oprot.writeString(_iter29.getValue());
+              }
+              oprot.writeMapEnd();
+            }
+          }
+          oprot.writeMapEnd();
         }
         oprot.writeFieldEnd();
       }
@@ -1007,6 +1159,16 @@ public class ThriftEventBundle implements org.apache.thrift.TBase<ThriftEventBun
         sb.append("null");
       } else {
         sb.append(this.stringAttributeList);
+      }
+      first = false;
+    }
+    if (isSetArbitraryDataMapMap()) {
+      if (!first) sb.append(", ");
+      sb.append("arbitraryDataMapMap:");
+      if (this.arbitraryDataMapMap == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.arbitraryDataMapMap);
       }
       first = false;
     }

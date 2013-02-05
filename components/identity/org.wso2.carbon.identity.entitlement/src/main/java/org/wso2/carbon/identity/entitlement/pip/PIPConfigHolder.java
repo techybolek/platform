@@ -18,12 +18,11 @@
 
 package org.wso2.carbon.identity.entitlement.pip;
 
-import org.wso2.carbon.identity.entitlement.policy.PolicyMetaDataFinderModule;
+import org.wso2.carbon.identity.entitlement.pap.PolicyEditorDataFinderModule;
+import org.wso2.carbon.identity.entitlement.policy.publisher.PolicyPublisherModule;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * PIPConfigHolder keeps track of the configuration found in pip-config.xml
@@ -50,12 +49,16 @@ public class PIPConfigHolder {
     private List<PIPResourceFinder> resourceFinders  = new ArrayList<PIPResourceFinder>();
 
     /**
-     * Will be fired by PolicyMetaDataFinder, whenever it wants to retrieve an attribute values to build the
+     * Will be fired by PolicyEditorDataFinder, whenever it wants to retrieve an attribute values to build the
      * XACML policy
      */
-    private List<PolicyMetaDataFinderModule> policyMetaDataFinderModules  =
-                                                        new ArrayList<PolicyMetaDataFinderModule>();
+    private List<PolicyEditorDataFinderModule> policyMetaDataFinderModules  =
+                                                        new ArrayList<PolicyEditorDataFinderModule>();
 
+    /**
+     * Will be fired by PolicyPublisher, whenever it wants to publish a policy
+     */
+    private List<PolicyPublisherModule> policyPublisherModules = new ArrayList<PolicyPublisherModule>();
 
     public List<PIPExtension> getExtensions() {
         return extensions;
@@ -81,12 +84,20 @@ public class PIPConfigHolder {
         this.resourceFinders = resourceFinders;
     }
 
-    public List<PolicyMetaDataFinderModule> getPolicyMetaDataFinderModules() {
+    public List<PolicyEditorDataFinderModule> getPolicyMetaDataFinderModules() {
         return policyMetaDataFinderModules;
     }
 
     public void setPolicyMetaDataFinderModules(
-            List<PolicyMetaDataFinderModule> policyMetaDataFinderModules) {
+            List<PolicyEditorDataFinderModule> policyMetaDataFinderModules) {
         this.policyMetaDataFinderModules = policyMetaDataFinderModules;
+    }
+
+    public List<PolicyPublisherModule> getPolicyPublisherModules() {
+        return policyPublisherModules;
+    }
+
+    public void setPolicyPublisherModules(List<PolicyPublisherModule> policyPublisherModules) {
+        this.policyPublisherModules = policyPublisherModules;
     }
 }

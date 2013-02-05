@@ -259,6 +259,7 @@ function initMiscFields() {
 function submitAdvSearchForm(pageNumber) {		
     sessionAwareFunction(function() {
         document.getElementById('advancedSearchFormDiv').style.display = "none";
+	var resourceName = document.getElementById('#_resourceName');
         var reasonDiv = $('advSearchReason');
         var reason = "";
         var searchResuts = $('searchResuts');
@@ -270,6 +271,7 @@ function submitAdvSearchForm(pageNumber) {
 
         var cFromDate, cToDate,
                 uFromDate, uToDate;
+	
        
         for (var i = 0; i < rows.length; i++) {
             if ((rows[i].id == "cfromDate") && rows[i].value != "") {
@@ -288,7 +290,17 @@ function submitAdvSearchForm(pageNumber) {
                 uToDate = rows[i];
                 reason += validateDate(rows[i], org_wso2_carbon_registry_search_ui_jsi18n["to"]);
             }
-            else if ((rows[i].id == "#_resourceName") && trim(rows[i].value) != "") reason += validateIllegalNoPercent(rows[i], org_wso2_carbon_registry_search_ui_jsi18n["resource.name"]);
+
+            else if ((rows[i].id == "#_resourceName") && trim(rows[i].value) != "")
+	    {
+		if(rows[i].value.indexOf("/") >= 0 || rows[i].value.indexOf("_system") >= 0 )
+		{
+			//reason += "invalid search term";
+			reason += org_wso2_carbon_registry_search_ui_jsi18n["invalid.search.term"];
+		}
+
+		reason += validateIllegalNoPercent(rows[i], org_wso2_carbon_registry_search_ui_jsi18n["resource.name"]);
+	    }
             else if ((rows[i].id == "#_content") && trim(rows[i].value) != "") reason += validateIllegalContentSearchString(rows[i], org_wso2_carbon_registry_search_ui_jsi18n["content.name"]);
             else if ((rows[i].id == "#_author") && rows[i].value != "") reason += validateForInput(rows[i], org_wso2_carbon_registry_search_ui_jsi18n["created.by"]);
             else if ((rows[i].id == "#_updater") && rows[i].value != "") reason += validateForInput(rows[i], org_wso2_carbon_registry_search_ui_jsi18n["updated.by"]);

@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.throttling.agent.ThrottlingAgent;
@@ -74,6 +75,7 @@ public class ThrottlingAgentServiceComponent {
             throttlingAgent.setRealmService(realmService);
             throttlingAgent.setRegistryService(registryService);
             throttlingAgent.setStratosConfiguration(stratosConfiguration);
+
             try {
                 // Throttling agent initialization require registry service.
                 throttlingAgent.init();
@@ -83,15 +85,23 @@ public class ThrottlingAgentServiceComponent {
                 throw new RuntimeException(errMessage, e);
             }
 
-            // Register the Tomcat Valve
-            ArrayList<CarbonTomcatValve> valves = new ArrayList<CarbonTomcatValve>();
-            valves.add(new WebAppRequestListener(throttlingAgent));
-            TomcatValveContainer.addValves(valves);
-            registerAxis2ConfigurationContextObserver(bundleContext, throttlingAgent.getThrottlingInfoCache());
+            if("true".equals(ServerConfiguration.getInstance().getFirstProperty("EnableMetering"))){
+                // Register the Tomcat Valve
+                ArrayList<CarbonTomcatValve> valves = new ArrayList<CarbonTomcatValve>();
+                valves.add(new WebAppRequestListener(throttlingAgent));
+                TomcatValveContainer.addValves(valves);
+
+                registerAxis2ConfigurationContextObserver(bundleContext, throttlingAgent.getThrottlingInfoCache());
+            }else{
+                log.debug("WebAppRequestListener valve was not added because metering is disabled in the configuration");
+                log.debug("Axis2ConfigurationContextObserver was not registered because metering is disabled");
+            }
+
             registerThrottlingAgent(bundleContext);
-            log.debug("******* Multitenancy Throttling Agent bundle is activated ******* ");
+
+            log.debug("Multitenancy Throttling Agent bundle is activated.");
         } catch (Throwable e) {
-            log.error("******* Multitenancy Throttling Agent bundle failed activating ****", e);
+            log.error("Multitenancy Throttling Agent bundle failed activating.", e);
         }
 
     }
@@ -144,22 +154,26 @@ public class ThrottlingAgentServiceComponent {
 
     protected void setConfigurationContextService(ConfigurationContextService contextService) {
         ThrottlingAgentServiceComponent.contextService = contextService;
-        try {
+        
+        //this module is not necessary when we have the WebAppRequestListerner.
+        //It takes care of webapps and services. But this is not working for ESb
+        //When a solution for ESB is found, this module can be engaged again
+        /*try {
             contextService.getServerConfigContext().getAxisConfiguration().engageModule(
                     "usagethrottling");
         } catch (AxisFault e) {
             log.error("Failed to engage usage throttling module", e);
-        }
+        }*/
     }
 
     protected void unsetConfigurationContextService(ConfigurationContextService contextService) {
-        try {
+        /*try {
             AxisConfiguration axisConfig =
                     contextService.getServerConfigContext().getAxisConfiguration();
             axisConfig.disengageModule(axisConfig.getModule("usagethrottling"));
         } catch (AxisFault e) {
             log.error("Failed to disengage usage throttling module", e);
-        }
+        }*/
         ThrottlingAgentServiceComponent.contextService = null;
         throttlingAgent.setConfigurationContextService(null);
     }

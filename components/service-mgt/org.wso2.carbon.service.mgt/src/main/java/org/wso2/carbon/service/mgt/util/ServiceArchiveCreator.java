@@ -143,6 +143,7 @@ public final class ServiceArchiveCreator {
                         value.equals("data_service") ||
                         value.equals("jaxws") ||
                         value.equals("proxy") ||
+						 value.equals("js_service") ||
                         value.equals("bpel") ||
                         value.equals("bpelmgt"))) {
                     String message = "WSO2 Carbon does not "

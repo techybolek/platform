@@ -59,7 +59,7 @@ public class SAMLSSOConfigAdmin {
         serviceProviderDO.setDoSingleLogout(serviceProviderDTO.isDoSingleLogout());
         serviceProviderDO.setLogoutURL(serviceProviderDTO.getLogoutURL());
         serviceProviderDO.setDoSignAssertions(serviceProviderDTO.isDoSignAssertions());
-        if(serviceProviderDTO.getRequestedClaims().length != 0){
+        if(serviceProviderDTO.getRequestedClaims() != null && serviceProviderDTO.getRequestedClaims().length != 0){
         	serviceProviderDO.setAttributeConsumingServiceIndex(Integer.toString(IdentityUtil.getRandomInteger()));
         	serviceProviderDO.setRequestedClaims(serviceProviderDTO.getRequestedClaims());
         }
@@ -92,12 +92,19 @@ public class SAMLSSOConfigAdmin {
                 SAMLSSOServiceProviderDO providerDO = providersSet[i];
 
                 SAMLSSOServiceProviderDTO providerDTO = new SAMLSSOServiceProviderDTO();
+
                 providerDTO.setIssuer(providerDO.getIssuer());
                 providerDTO.setAssertionConsumerUrl(providerDO.getAssertionConsumerUrl());
                 providerDTO.setCertAlias(providerDO.getCertAlias());
                 providerDTO.setAttributeConsumingServiceIndex(providerDO.getAttributeConsumingServiceIndex());
+
+                providerDTO.setUseFullyQualifiedUsername(providerDO.isUseFullyQualifiedUsername());
+                providerDTO.setDoSignAssertions(providerDO.isDoSignAssertions());
+
+                providerDTO.setDoSingleLogout(providerDO.isDoSingleLogout());
+                providerDTO.setLogoutURL(providerDO.getLogoutURL());
+
                 providerDTO.setRequestedClaims(providerDO.getRequestedClaims());
-                
                 serviceProviders[i] = providerDTO;
             }
         } catch (IdentityException e) {

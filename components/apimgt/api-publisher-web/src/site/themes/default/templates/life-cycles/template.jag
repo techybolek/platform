@@ -54,26 +54,26 @@ var initOf_requireResubscription = 'true';
      <input type="hidden" name="version" id="version" value="<%=api.version%>"/>
      <input type="hidden" name="provider" id="provider" value="<%=api.provider%>"/>
      <div class="control-group">
-                <label class="control-label" for="editStatus" name="state">State:</label>
+                <label class="control-label" for="editStatus" name="state"><%=i18n.localize("state")%>:</label>
                 <div class="controls">
                     <select id="editStatus" name="status" onChange="getSelectedValue('<%=api.status%>')">
-                        <option value="CREATED"<%=(api.status == "CREATED" ? ' selected="selected"' : '')%>>CREATED</option>
-                        <option value="PUBLISHED"<%=(api.status == "PUBLISHED" ? ' selected="selected"' : '')%>>PUBLISHED</option>
-                        <option value="DEPRECATED"<%=(api.status == "DEPRECATED" ? ' selected="selected"' : '')%>>DEPRECATED</option>
-                        <option value="RETIRED"<%=(api.status == "RETIRED" ? ' selected="selected"' : '')%>>RETIRED</option>
-                        <option value="BLOCKED"<%=(api.status == "BLOCKED" ? ' selected="selected"' : '')%>>BLOCKED</option>
+                        <option value="CREATED"<%=(api.status == "CREATED" ? ' selected="selected"' : '')%>><%=i18n.localize("created")%></option>
+                        <option value="PUBLISHED"<%=(api.status == "PUBLISHED" ? ' selected="selected"' : '')%>><%=i18n.localize("published")%></option>
+                        <option value="DEPRECATED"<%=(api.status == "DEPRECATED" ? ' selected="selected"' : '')%>><%=i18n.localize("deprecated")%></option>
+                        <option value="RETIRED"<%=(api.status == "RETIRED" ? ' selected="selected"' : '')%>><%=i18n.localize("retired")%></option>
+                        <option value="BLOCKED"<%=(api.status == "BLOCKED" ? ' selected="selected"' : '')%>><%=i18n.localize("blocked")%></option>
                     </select>
                  </div> <br/>
-                 <div class="controls">
-                    <label class="checkbox">
-                        <input type="checkbox" id="publishToGateway" name="publishToGateway" onChange="checkValue('#publishToGateway')" checked="true" value="true"> Propagate Changes to API Gateway
+                 <div class="controls publishCheckBoxes">
+                    <label class="checkbox" id="publishToGatewayDiv"  style="display:none;">
+                        <input type="checkbox" id="publishToGateway" name="publishToGateway" onChange="checkValue('#publishToGateway')" checked="true" value="true"><%=i18n.localize("propagateChangesToGateway")%>
                     </label>
                      <label class="checkbox" id="deprecateOldVersionsDiv" style="display:none;">
-                        <input type="checkbox" id="deprecateOldVersions" name="deprecateOldVersions" onChange="checkValue('#deprecateOldVersions')" value="false"> Deprecate Old Versions
+                        <input type="checkbox" id="deprecateOldVersions" name="deprecateOldVersions" onChange="checkValue('#deprecateOldVersions')" value="false"><%=i18n.localize("deprecateOldVersions")%>
                      </label>
 
                      <label class="checkbox" id="requireResubscriptionDiv" style="display:none;">
-                        <input type="checkbox" id="requireResubscription" name="requireResubscription" onChange="checkValue('#requireResubscription')"  checked="true" value="true"> Require Re-Subscription
+                        <input type="checkbox" id="requireResubscription" name="requireResubscription" onChange="checkValue('#requireResubscription')"  checked="true" value="true"><%=i18n.localize("requireReSubscription")%>
                      </label>
                  </div>
 
@@ -81,19 +81,22 @@ var initOf_requireResubscription = 'true';
 
       </div>
        <div class="form-actions">
-                <input type="submit" id="updateStateButton" disabled="disabled" class="btn btn-primary" value="Update"/>
-                <input type="reset" id="cancelEdit" class="btn btn-primary" value="Reset">
+                <input type="submit" id="updateStateButton" disabled="disabled" class="btn btn-primary" value="<%=i18n.localize("update")%>"/>
+                <input type="button" id="resetState" disabled="disabled" class="btn" value="<%=i18n.localize("reset")%>" />
        </div>
+       <div class="alert alert-success" id="statusUpdateMsg" style="display:none;">
+        <%=i18n.localize("lifecycleSuccessMsg")%>
+      </div>
 </form>
-<h4>Life-Cycle History</h4><br/>
+<h4><%=i18n.localize("lifecycleHistory")%></h4><br/>
 <%if(lcs!=null){
         var length = lcs.length;
         if (length == 0) {
         %>
-        <span class="label label-info">No Life-cycles history data can be found for this API.</span>
+        <span class="label label-info"><%=i18n.localize("noLifecycleMsg")%></span>
  <%}%>
 
-        <table class="lifeCycleTable">
+        <table class="lifeCycleTable" id="lifeCycleTable">
   <thead>
          </thead>
        <tbody>
@@ -102,9 +105,9 @@ var initOf_requireResubscription = 'true';
         var path = jagg.getMappedUrl("/site/pages/user.jag") + "?uname=" + lc.username;
         %>
         <tr>
-        <td><i class="icon-info-sign"></i> <b><%=lc.date%></b></td><td>&nbsp;&nbsp;&nbsp;<i class="icon-user"></i><a href="<%=path%>"><%=lc.username%></a></td><td>&nbsp;&nbsp;&nbsp;
-        <%if(lc.oldStatus==""){%>created the API. <%}else{%>
-        changed api status from '<%=lc.oldStatus%>' to '<%=lc.newStatus%>'.
+        <td><i class="icon-info-sign"></i> <b><span class="dateFull"><%=lc.date%></span></b> </td><td>&nbsp;&nbsp;&nbsp; <i class="icon-user"></i><a href="<%=path%>"><%=lc.username%></a>
+        <%if(lc.oldStatus==""){%><%=i18n.localize("createAPIMsg")%> <%}else{%>
+        <%=i18n.localize("changeAPIStatusMsg")%>  '<%=lc.oldStatus%>' to '<%=lc.newStatus%>'.
         <%}%>
         </td>
         </tr>
@@ -115,48 +118,73 @@ var initOf_requireResubscription = 'true';
 </div></div>
 
 <script type="text/javascript">
+function hideMsg() {
+    $('#statusUpdateMsg').hide("fast");
+}
+
 $(document).ready(function() {
+$('#editStatus option').each(  //when refreshed page the default is not selected. This part is to fix that.
+        function(index){
+            if($(this).val() == '<%=api.status%>'){
+                $(this).attr('selected','selected');
+            }
+        }
+        );
  var v = $("#editStatusForm").validate({
         submitHandler: function(form) {
             $(form).ajaxSubmit({
                 success:function(responseText, statusText, xhr, $form)  {
                   if(!responseText.error){
-                      var current = window.location.pathname;
-                      if (current.indexOf(".jag") >= 0) {
-                      location.href = "item-info.jag?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>";
-                      }else{
-                      location.href = "site/pages/item-info.jag?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>";
-                      }
-                      $("#editStatusAPIForm")[0].reset();
+                      var lastLcChange = responseText.lcs[responseText.lcs.length-1];
+                      $('#lifeCycleTable').append($('<tr>'+
+                              '<td><i class="icon-info-sign"></i> <b>'+jagg.getDate(lastLcChange.date)+'</b> </td>'+
+                              '<td>&nbsp;&nbsp;&nbsp; <i class="icon-user"></i>'+
+                                '<a href="/publisher/user?uname='+lastLcChange.username+'">'+lastLcChange.username+'</a> change the API status from \''+lastLcChange.oldStatus+' \' to \''+lastLcChange.newStatus+'\''+
+                              '</td>'+
+                        '</tr>'));
+                        $('#statusUpdateMsg').show();
+                        initOf_state  = lastLcChange.newStatus;
+                        $('#status').html(lastLcChange.newStatus);
+                        $('#inUpdated').html(jagg.getDate(lastLcChange.date));
+                        toggleUpdateBtn();
+                        var t = setTimeout("hideMsg()", 3000);
+
                   }else{
+                        if(responseText.message == "AuthenticateError"){
+                         jagg.showLogin();
+                        }else{
                         jagg.message({content:responseText.message,type:"error"});
+                        }
                   }
                 }, dataType: 'json'
             });
         }
     });
 
-
+    $('#resetState').click(function(){
+        $('#editStatus').val(initOf_state);
+        $('#updateStateButton').attr("disabled","disabled");
+        $('#resetState').attr("disabled","disabled");
+        $('.publishCheckBoxes label').hide();
+    });
+    toggleUpdateBtn();
  });
- var toggleUpdateBtn = function enableUpdateBtn(){
+ var toggleUpdateBtn = function(){
      var initPreserved = true;
      if($('#editStatus').val() != initOf_state) initPreserved = false;
-     if($('#publishToGateway').val() != initOf_publishToGateway) initPreserved = false;
-     if($('#deprecateOldVersions').val() != initOf_deprecateOldVersions) initPreserved = false;
-     if($('#requireResubscription').val() != initOf_requireResubscription) initPreserved = false;
      if (initPreserved) {
          $('#updateStateButton').attr("disabled","disabled");
+         $('#resetState').attr("disabled","disabled");
+         $('.publishCheckBoxes label').hide(); // hide all check boxes
      } else {
          $('#updateStateButton').removeAttr("disabled");
+         $('#resetState').removeAttr("disabled");
+         $('#publishToGatewayDiv').show();
      }
-     console.info(initPreserved);
      return;
 
  };
 $('#editStatus').change(toggleUpdateBtn);
-$('#publishToGateway').change(toggleUpdateBtn);
-$('#deprecateOldVersions').change(toggleUpdateBtn);
-$('#requireResubscription').change(toggleUpdateBtn);
 
  </script>
 <% }}); %>

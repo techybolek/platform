@@ -41,19 +41,31 @@ function displayElement(elementId, isDisplay) {
 
 function calloutMediatorValidate() {
     var target;
-    var source
-    var serviceUrl = document.getElementById("mediator.callout.svcURL");
-    if (serviceUrl && serviceUrl.value == "") {
+    var source;
+    var isEnvelope = false;
+    var serviceURL;
+    var serviceUrlGroup = document.getElementById("serviceURL");
+    if (serviceUrlGroup && serviceUrlGroup.checked) {
+        serviceURL = document.getElementById("mediator.callout.serviceurl.url.value");
+    } else {
+        serviceURL = document.getElementById("mediator.callout.serviceurl.key.value");
+    }
+
+    if (serviceURL && serviceURL.value == "") {
         CARBON.showErrorDialog(calloutMediatorJsi18n["callout.service.required"]);
         return false;
     }
+
     var sourceGroup = document.getElementById("sourceGroupXPath");
-    if (sourceGroup && sourceGroup.checked) {
+    var sourceGroupEnvelope = document.getElementById("sourceGroupEnvelope");
+    if (sourceGroupEnvelope && sourceGroupEnvelope.checked) {
+        isEnvelope = true;
+    } else if (sourceGroup && sourceGroup.checked) {
         source = document.getElementById("mediator.callout.source.xpath_val");
     } else {
         source = document.getElementById("mediator.callout.source.key_val");
     }
-    if (source && source.value == "") {
+    if (source && source.value == "" && isEnvelope == false) {
         CARBON.showErrorDialog(calloutMediatorJsi18n["callout.source.required"]);
         return false;
     }
@@ -68,6 +80,27 @@ function calloutMediatorValidate() {
         CARBON.showErrorDialog(calloutMediatorJsi18n["callout.target.required"]);
         return false;
     }
+
+    var secElement = document.getElementById("wsSecurity");
+    if (secElement && secElement.checked) {
+        var useDifferentPoliciesElement = document.getElementById("wsSecurityUseDifferentPolicies");
+        if (useDifferentPoliciesElement && useDifferentPoliciesElement.checked) {
+            outboundPolicy = document.getElementById("wsSecOutboundPolicyKeyID");
+            inboundPolicy = document.getElementById("wsSecInboundPolicyKeyID");
+            if ((outboundPolicy && outboundPolicy.value == "") && (inboundPolicy && inboundPolicy.value == "")) {
+                CARBON.showErrorDialog(calloutMediatorJsi18n["callout.policy.required"]);
+                return false;
+            }
+
+        } else {
+            policy = document.getElementById("wsSecPolicyKeyID");
+            if (policy && policy.value == "") {
+                CARBON.showErrorDialog(calloutMediatorJsi18n["callout.policy.required"]);
+                return false;
+            }
+        }
+    }
+
     return true;
 }
 
@@ -90,3 +123,32 @@ function createNamespaceEditor(elementId, id, prefix, uri) {
     }
 }
 
+function showHideWSSecRows() {
+    if (document.getElementById('wsSecurity').checked == true) {
+        document.getElementById('tr_ws_sec_policy_key').style.display = '';
+        document.getElementById('tr_ws_use_different_policies').style.display = '';
+
+        if (document.getElementById('wsSecurityUseDifferentPolicies').checked == true) {
+            document.getElementById('tr_ws_sec_policy_key').style.display = "none";
+            document.getElementById('tr_ws_sec_inbound_policy_key').style.display = '';
+            document.getElementById('tr_ws_sec_outbound_policy_key').style.display = '';
+        }
+    } else {
+        document.getElementById('tr_ws_sec_policy_key').style.display = "none";
+        document.getElementById('tr_ws_use_different_policies').style.display = "none";
+        document.getElementById('tr_ws_sec_outbound_policy_key').style.display = "none";
+        document.getElementById('tr_ws_sec_inbound_policy_key').style.display = "none";
+    }
+}
+
+function showHideInOutWSSecRows() {
+    if (document.getElementById('wsSecurityUseDifferentPolicies').checked == true) {
+        document.getElementById('tr_ws_sec_policy_key').style.display = "none";
+        document.getElementById('tr_ws_sec_inbound_policy_key').style.display = '';
+        document.getElementById('tr_ws_sec_outbound_policy_key').style.display = '';
+    } else {
+        document.getElementById('tr_ws_sec_policy_key').style.display = '';
+        document.getElementById('tr_ws_sec_outbound_policy_key').style.display = "none";
+        document.getElementById('tr_ws_sec_inbound_policy_key').style.display = "none";
+    }
+}

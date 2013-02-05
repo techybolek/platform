@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.registry.common.utils.artifact.manager.ArtifactManager;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -53,6 +54,7 @@ public class WSDLMediaTypeHandler extends Handler {
 
     protected String policyLocation = "/policy/";     // location will always has a leading '/' and trailing '/'
     private OMElement policyLocationConfiguration;
+    private boolean disableSymlinkCreation = true;
 
     public boolean getCreateService() {
         return createService;
@@ -70,6 +72,14 @@ public class WSDLMediaTypeHandler extends Handler {
         return wsdlLocationConfiguration;
     }
 
+    public boolean isDisableSymlinkCreation() {
+        return disableSymlinkCreation;
+    }
+
+    public void setDisableSymlinkCreation(String disableSymlinkCreation) {
+        this.disableSymlinkCreation = Boolean.toString(true).equals(disableSymlinkCreation);
+    }
+
     public void setWsdlLocationConfiguration(OMElement locationConfiguration) throws RegistryException {
         Iterator confElements = locationConfiguration.getChildElements();
         while (confElements.hasNext()) {
@@ -85,16 +95,6 @@ public class WSDLMediaTypeHandler extends Handler {
             }
         }
         WSDLProcessor.setCommonWSDLLocation(wsdlLocation);
-        AuthorizationUtils.addAuthorizeRoleListener(
-                RegistryConstants.ADD_WSDL_AUTHORIZE_ROLE_LISTENER_EXECUTION_ORDER_ID, 
-                WSDLProcessor.getChrootedWSDLLocation(RegistryContext.getBaseInstance()),
-                UserMgtConstants.UI_ADMIN_PERMISSION_ROOT + "manage/resources/govern/metadata/add",
-                UserMgtConstants.EXECUTE_ACTION);
-        AuthorizationUtils.addAuthorizeRoleListener(
-                RegistryConstants.LIST_WSDL_AUTHORIZE_ROLE_LISTENER_EXECUTION_ORDER_ID,
-                WSDLProcessor.getChrootedWSDLLocation(RegistryContext.getBaseInstance()),
-                UserMgtConstants.UI_ADMIN_PERMISSION_ROOT + "manage/resources/govern/metadata/list",
-                UserMgtConstants.EXECUTE_ACTION, new String[]{ActionConstants.GET});
         this.wsdlLocationConfiguration = locationConfiguration;
     }
 
@@ -203,6 +203,8 @@ public class WSDLMediaTypeHandler extends Handler {
                     metadata.removeProperty(RegistryConstants.REMOTE_MOUNT_OPERATION);
                     registry.put(path, metadata);
                     requestContext.setProcessingComplete(true);
+                    ArtifactManager.getArtifactManager().getTenantArtifactRepository().
+                                    addArtifact(path);
                     return;
                 }
 
@@ -349,6 +351,8 @@ public class WSDLMediaTypeHandler extends Handler {
                         requestContext.setActualPath(wsdlPath);
                     }
                     requestContext.setProcessingComplete(true);
+                    ArtifactManager.getArtifactManager().getTenantArtifactRepository().
+                            addArtifact(path);
                     return;
                 }
             } catch (IOException e) {
@@ -539,7 +543,7 @@ public class WSDLMediaTypeHandler extends Handler {
                                        Resource metadata, String sourceURL)
             throws RegistryException {
         return wsdlProcessor.addWSDLToRegistry(requestContext, sourceURL, metadata, false, true,
-                disableWSDLValidation);
+                disableWSDLValidation,disableSymlinkCreation);
     }
 
     public void setDisableWSDLValidation(String disableWSDLValidation) {

@@ -18,11 +18,12 @@ package org.wso2.carbon.reporting.core.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.reporting.core.utils.CommonUtil;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
 
 /**
@@ -41,14 +42,12 @@ public class ReportingComponent {
 
     protected void activate(ComponentContext componentContext) {
         try {
-            JRxmlFileBundleListener JRxmlFileBundleListener = new JRxmlFileBundleListener();
-            componentContext.getBundleContext().addBundleListener(JRxmlFileBundleListener);
-            Bundle[] bundles = componentContext.getBundleContext().getBundles();
-            for (Bundle bundle : bundles) {
-                if (bundle.getState() == Bundle.ACTIVE) {
-                    JRxmlFileBundleListener.addJrXmlToRegistry(bundle);
-                }
-            }
+
+            ReportingAxis2ConfigurationContextObserver observer =
+                    new ReportingAxis2ConfigurationContextObserver();
+            componentContext.getBundleContext().
+                    registerService(Axis2ConfigurationContextObserver.class.getName(), observer, null);
+            CommonUtil.addJrxmlConfigs(registryServiceInstance.getSystemRegistry());
         } catch (Throwable e) {
             log.error(e.getMessage(), e);
         }

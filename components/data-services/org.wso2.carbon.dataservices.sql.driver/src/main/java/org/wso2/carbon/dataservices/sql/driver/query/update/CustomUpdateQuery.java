@@ -18,15 +18,15 @@
  */
 package org.wso2.carbon.dataservices.sql.driver.query.update;
 
+import org.wso2.carbon.dataservices.sql.driver.TCustomConnection;
+import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataRow;
+import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataTable;
+import org.wso2.carbon.dataservices.sql.driver.query.ColumnInfo;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
-
-import org.wso2.carbon.dataservices.sql.driver.TCustomConnection;
-import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataRow;
-import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataTable;
-import org.wso2.carbon.dataservices.sql.driver.query.ParamInfo;
 
 /**
  * This class represents a select query for custom data sources.
@@ -63,11 +63,11 @@ public class CustomUpdateQuery extends UpdateQuery {
         DataRow row;
         for (Map.Entry<Integer, DataRow> entry : result.entrySet()) {
         	row = entry.getValue();
-    		for (ParamInfo column : this.getTargetColumns()) {
+    		for (ColumnInfo column : this.getTargetColumns()) {
     			if (column == null) {
     				continue;
     			}
-    			row.getCell(table.getHeaders().get(column.getName())).setCellValue(
+    			row.getCell(table.getHeader(column.getName()).getId()).setCellValue(
     					this.findParam(column.getOrdinal()).getValue());
     		}
     		table.updateRows(row);

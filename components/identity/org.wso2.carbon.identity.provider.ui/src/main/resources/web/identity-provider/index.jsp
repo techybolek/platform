@@ -18,11 +18,12 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
-<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
-<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="org.wso2.carbon.base.MultitenantConstants" %>
+<%@ page import="org.wso2.carbon.identity.provider.ui.client.IdentityProviderClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
-<%@page import="org.wso2.carbon.identity.provider.ui.client.IdentityProviderClient" %>
+<%@page import="org.wso2.carbon.ui.CarbonUIUtil" %>
+<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 
 <script type="text/javascript" src="global-params.js"></script>
 
@@ -30,11 +31,11 @@
     String backendServerURL;
     ConfigurationContext configContext;
     String cookie;
-    IdentityProviderClient client = null;
-    String[] openIDs = null;
-    String loggedinUser = null;
-    String infoCardDownloadLink = null;
-    String openIDInfoCardDownloadLink = null;
+    IdentityProviderClient client;
+    String[] openIDs;
+    String primaryOpenID;
+    String loggedInUser;
+
     String domain;
 
     backendServerURL = CarbonUIUtil.getServerURL(config
@@ -45,18 +46,19 @@
             .getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
     client = new IdentityProviderClient(cookie, backendServerURL,
             configContext);
-    loggedinUser = (String) session.getAttribute("logged-user");
-    domain = (String)session.getAttribute(CarbonConstants.TENANT_DOMAIN);
+    loggedInUser = (String) session.getAttribute("logged-user");
+    domain = (String)session.getAttribute(MultitenantConstants.TENANT_DOMAIN);
     String tenantUser = null;
 
     try {    	
     	
-    	tenantUser = loggedinUser;
+    	tenantUser = loggedInUser;
     	
-    	if (domain!=null){
-    		tenantUser = loggedinUser + "@" + domain;
+    	if (!domain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)){
+    		tenantUser = loggedInUser + "@" + domain;
     	}    	
         openIDs = client.getAllOpenIDs(tenantUser);
+        primaryOpenID = client.getOpenID(tenantUser);
     } catch (Exception e) {
         CarbonUIMessage.sendCarbonUIMessage(e.getMessage(),
                 CarbonUIMessage.ERROR, request, e);
@@ -113,9 +115,13 @@
                         </a>
                     </td>
                     <td width="50%">
+                    <% if(!openIDs[i].equals(primaryOpenID)) {%>
                         <a title="<fmt:message key='remove.openid'/>"
                            onclick="remove('<%=openIDs[i]%>','<%=i%>');return false;"
                            href="#" style="background-image: url(images/delete.gif);" class="icon-link"><fmt:message key='delete'/></a>
+                    <% } else {%>      
+                        <fmt:message key='openid.primary'/>
+                    <% } %> 
                     </td>
                 </tr>
                 <%

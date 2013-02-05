@@ -25,9 +25,9 @@
                                               <a id="userMenu"><%=outputs.user.username%><b class="caret"></b></a>
                                               <ul id="userInfoMenu" class="dropdown-menu">
                                                 <li class="userInfoSection">
-                                                    Logged in as <h4><%=outputs.user.username%></h4>
+                                                    <%=i18n.localize("logged")%> <h4><%=outputs.user.username%></h4>
                                                 </li>
-                                                <li class="logout-link-special"><button class="btn btn-danger" onclick="logout()">Logout</button></li>
+                                                <li class="logout-link-special"><button class="btn btn-danger" onclick="location.href='<%=jagg.getAbsoluteUrl("/site/pages/logout.jag")%>';"> <%=i18n.localize("logout")%></button></li>
                                               </ul>
                                             </li>
                                           </ul>

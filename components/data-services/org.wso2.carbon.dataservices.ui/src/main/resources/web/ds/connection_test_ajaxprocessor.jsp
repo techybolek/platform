@@ -28,9 +28,8 @@
 	String jdbcUrl = request.getParameter("jdbcUrl");
 	String userName = request.getParameter("userName");
 	String password = request.getParameter("password");
-    String protectedTokens = request.getParameter("protectedTokens");
-    String passwordProvider = request.getParameter("passwordProvider");
-
+    String passwordAlias = request.getParameter("passwordAlias");
+   
 	String backendServerURL = CarbonUIUtil
 			.getServerURL(config.getServletContext(), session);
 	ConfigurationContext configContext = (ConfigurationContext) config.getServletContext()
@@ -40,7 +39,7 @@
 			configContext);
 	String message = "";
 	try {
-		message = client.testJDBCConnection(driverClass, jdbcUrl, userName, password,protectedTokens,passwordProvider);
+		message = client.testJDBCConnection(driverClass, jdbcUrl, userName, password, passwordAlias);
 		response.setContentType("text/xml; charset=UTF-8");
 		// Set standard HTTP/1.1 no-cache headers.
 		response.setHeader("Cache-Control",

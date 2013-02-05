@@ -5,56 +5,47 @@ ${buildNumber}
 
 Welcome to the WSO2 Application Server ${appserver.version} release
 
-WSO2 Application Server is an Enterprise ready application server based on the award-winning WSO2 Carbon framework. Being the
-successor of the WSO2 Web Services Application Server(WSAS), WSO2 Application Server(AS) now supports
-web application deployment and management in addition to its award winning web services management capabilities.
-Coupled with WSO2 Carbon Authentication/Authorization feature, now users can manage their applications that ranges
-from web services, business processes to web applications in a unified manner within the Application Server management console
-itself. WSO2 Application Server uses Apache Tomcat, the widely used servlet container as its underlying web application contaner.
+ The WSO2 Application Server is an enterprise-ready cloud-enabled application server, powered by Apache Tomcat and also integrates Apache Axis2 and Apache CXF frameworks. It provides first class support for standard Web applications, JAX-WS/RS applications and Jaggery scripting applications. Coupled with features of WSO2 Carbon, users can now manage their applications including JAX-WS and JAX-RS to web applications in a unified manner within the management console itself.
 
-Application Server provides a comprehensive Web services server platform, using Axis2 as its Web services framework
-and provide many value additions on top of Axis2. It can expose services using both SOAP and REST models and supports
-a comprehensive set of WS-* specifications such as WS-Security, WS-Trust, WS-SecureConversation, WS-Reliable Messaging,
-WS-Addressing, WS-Policy, WS-SecurityPolicy, etc.
+ Application Server also provides a comprehensive Web services server platform, using Axis2 and CXF as its Web services runtimes and provide many value additions on top of service runtime. It can expose services using both SOAP and REST models and supports a comprehensive set of WS-* specifications such as WS-Security, WS-Trust, WS-SecureConversation, WS-Reliable Messaging, WS-Addressing, WS-Policy, WS-SecurityPolicy, etc. WSO2 Application Server also has inbuilt support for Mashup services and WSO2 Data services. WSO2 Application Server can be installed on on-premise or any public/private cloud infrastructure and provide unified management console and lifestyle management features which are independent from underlying deployment option.
+
+WSO2 Application Server is a part of WSO2 Stratos cloud platform (PaaS) and hosted offering of WSO2 Application Server as a service  can be accessed from here https://appserver.stratoslive.wso2.com.
+
 
 New Features In This Release
 ----------------------------
 
-1. Inbuilt Data Services support
-2. Server Roles Management feature
-3. Improved JAX-WS Support
-4. Improved SOAP Tracer
-5. Improvements in Service listing page
-    -- Two lists for Services and Service Groups
-    -- Security Indicators within service list
-6. Improved Samples and documentation
-7. Improved Class loading for Web apps and Web Services
-8. Embedded Tomcat 7.0.14 support
-9. Servlet API 3.0 support
+* This is a patch release of WSO2 AS on top of new WSO2 Carbon platform version 4.0.5.
 
 Key Features
 ------------
-* Web Application deployment and management within the App Server
-* Application Server tooling - Application Server related artifacts can be easily generated using WSO2 Carbon Studio
-* JAX-WS support - Deploy any JAX-WS annotated service and engage WS-* protocols through the management console.
-* JMX & Web interface based monitoring and management
-* WS-* & REST support
+* Full JAX-WS 2.2 and JAX-RS 2.0 Specification support
+* Integration of Jaggery - server side scripting framework
+* Unified Application listing and management UI for WebApps, JAX-WS/RS, Jaggery
+* Inbuilt Mashup services support
+* Multi Tenant support for standalone deployment
+* 100% Apache Tomcat compliance runtime
+   - Added support for server descriptor file (server.xml) for embedded tomcat
+   - Added support for WebApp specific context descriptor file (context.xml) for webapps
+* Lazy loading for applications and services
+* Tooling - Application Server related artifacts can be easily generated using WSO2 Developer Studio
+* Clustering support for High Availability &amp; High Scalability
 * Full support for WS-Security, WS-Trust, WS-Policy and WS-Secure Conversation
-* Data services support - Expose you enterprise data as a services in a jiffy
-* Clustering support for High Availability & High Scalability
-* GUI, command line & IDE based tools for Web service development
+* JMX &amp; Web interface based monitoring and management
+* WS-* &amp; REST support
+* GUI, command line &amp; IDE based tools for Web service development
 * Equinox P2 based provisioning support
-* WSDL2Java/Java2WSDL/WSDL 1.1 & Try it(invoke any remote Web service)
+* WSDL2Java/Java2WSDL/WSDL 1.1 &amp; try it(invoke any remote Web service)
 
 Issues Fixed in This Release
 ----------------------------
 
 * Application Server related components of the WSO2 Carbon Platform -
-       https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&requestId=${fixed.isssues.filter.id}
+       https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&requestId=10811
 
 Installation & Running
 ----------------------
-1. extract the downloaded zip file
+1. Extract the downloaded zip file
 2. Run the wso2server.sh or wso2server.bat file in the bin directory
 3. Once the server starts, point your Web browser to
    https://localhost:9443/carbon/
@@ -67,18 +58,15 @@ System Requirements
 1. Minimum memory - 1 GB
 2. Processor      - Pentium 800MHz or equivalent at minimum
 3. The Management Console requires full Javascript enablement of the Web browser
-   NOTE:
-     On Windows Server 2003, it is not allowed to go below the medium security
-     level in Internet Explorer 6.x.
 
 For more details see the Installation guide or,
-http://wso2.org/wiki/display/carbon/System+Requirements
+http://docs.wso2.org/wiki/display/AS501/Installation+Prerequisites
 
 Known Issues in This Release
 ----------------------------
 
 * Application Server related components of the WSO2 Carbon Platform -
-       https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&requestId=${known.isssues.filter.id}
+       https://wso2.org/jira/secure/IssueNavigator.jspa?mode=hide&requestId=10812
 
 Including External Dependencies
 --------------------------------
@@ -88,87 +76,129 @@ http://wso2.org/library/knowledgebase/add-external-jar-libraries-wso2-carbon-bas
 Application Server Binary Distribution Directory Structure
 --------------------------------------------
 
-    CARBON_HOME
-        |-- bin <folder>
-        |-- dbscripts <folder>
-        |-- lib <folder>
-        |-- repository <folder>
-        |   |-- components <folder>
-        |   |-- conf <folder>
-        |   |-- data <folder>
-        |   |-- database <folder>
-        |   |-- deployment <folder>
-        |   |-- lib <folder>
-        |   |-- logs <folder>
-        |   |-- resources <folder>
-        |       `-- security <folder>
-        |   `-- tenants <folder>
-        |-- samples <folder>
-        |-- tmp <folder>
+     CARBON_HOME
+        |-- bin <directory>
+        |-- dbscripts <directory>
+        |-- lib <directory>
+        |-- repository <directory>
+        |   |-- carbonapps <directory>
+        |   |-- components <directory>
+        |   |-- conf <directory>
+        |   |-- data <directory>
+        |   |-- database <directory>
+        |   |-- deployment <directory>
+        |   |-- logs <directory>
+        |   |-- resources <directory>
+        |   |   `-- security <directory>
+        |   `-- tenants <directory>
+        |-- tmp <directory>
+	    |-- webapp-mode <directory>
         |-- LICENSE.txt <file>
         |-- README.txt <file>
         |-- INSTALL.txt <file>
         `-- release-notes.html <file>
 
-
     - bin
-      Contains various .sh scripts and .bat scripts
+      Contains various scripts .sh & .bat scripts.
 
     - dbscripts
       Contains the database creation & seed data population SQL scripts for
-      various supported databases
+      various supported databases.
 
     - lib
       Contains the basic set of libraries required to startup Application Server
       in standalone mode
 
     - repository
+      The repository where Carbon artifacts & Axis2 services and
+      modules deployed in WSO2 Carbon are stored.
+      In addition to this other custom deployers such as
+      dataservices and axis1services are also stored.
 
-        - components
-          Contains all OSGi related libraries and configurations
+        - carbonapps
+          Carbon Application hot deployment directory.
+
+    	- components
+          Contains all OSGi related libraries and configurations.
 
         - conf
           Contains server configuration files. Ex: axis2.xml, carbon.xml
 
         - data
-          Contains internal LDAP related data
+          Contains internal LDAP related data.
 
         - database
-          Contains the WSO2 Registry & User Manager database
+          Contains the WSO2 Registry & User Manager database.
 
         - deployment
-          Contains server side and client side Axis2 repositories. All deployment artifacts should
-          go into this directory
-
-        - lib
-          Used as the client class path for all samples
+          Contains server side and client side Axis2 repositories.
+	      All deployment artifacts should go into this directory.
 
         - logs
-          Contains all log files created during execution
+          Contains all log files created during execution.
 
         - resources
-          Contains additional resources that may be required
+          Contains additional resources that may be required.
 
-    - samples
-      Contains some sample applications that demonstrate the functionality
-      and capabilities of WSO2 Application Server
+	- tenants
+	  Directory will contain relevant tenant artifacts
+	  in the case of a multitenant deployment.
 
     - tmp
       Used for storing temporary files, and is pointed to by the
-      java.io.tmpdir System property
+      java.io.tmpdir System property.
+
+    - webapp-mode
+      The user has the option of running WSO2 Carbon in webapp mode (hosted as a web-app in an application server).
+      This directory contains files required to run Carbon in webapp mode.
 
     - LICENSE.txt
-      Apache License 2.0 under which WSO2 Application Server is distributed.
+      Apache License 2.0 under which WSO2 Carbon is distributed.
 
     - README.txt
       This document.
 
     - INSTALL.txt
-      This document will contain information on installing WSO2 Application Server
+      This document contains information on installing WSO2 Application Server.
 
     - release-notes.html
       Release information for WSO2 Application Server ${appserver.version}
 
+Secure sensitive information in carbon configuration files
+----------------------------------------------------------
+
+There are sensitive information such as passwords in the carbon configuration.
+You can secure them by using secure vault. Please go through following steps to
+secure them with default mode.
+
+1. Configure secure vault with default configurations by running ciphertool
+	script from bin directory.
+
+> ciphertool.sh -Dconfigure   (in UNIX)
+
+This script would do following configurations that you need to do by manually
+
+(i) Replaces sensitive elements in configuration files,  that have been defined in
+		 cipher-tool.properties, with alias token values.
+(ii) Encrypts plain text password which is defined in cipher-text.properties file.
+(iii) Updates secret-conf.properties file with default keystore and callback class.
+
+cipher-tool.properties, cipher-text.properties and secret-conf.properties files
+			can be found at repository/conf/security directory.
+
+2. Start server by running wso2server script from bin directory
+
+> wso2server.sh   (in UNIX)
+
+By default mode, it would ask you to enter the master password
+(By default, master password is the password of carbon keystore and private key)
+
+3. Change any password by running ciphertool script from bin directory.
+
+> ciphertool -Dchange  (in UNIX)
+
+For more details see
+http://docs.wso2.org/wiki/display/Carbon402/WSO2+Carbon+Secure+Vault
 
 Training
 --------
@@ -223,8 +253,8 @@ Apache Santuario : http://santuario.apache.org/
 Bouncycastle     : http://www.bouncycastle.org/
 
 
-For further details, see the WSO2 Carbon documentation at
-http://wso2.com/products/carbon/
+For further details, see the WSO2 Application Server documentation at
+http://docs.wso2.org/wiki/application-server-documentation
 
 ---------------------------------------------------------------------------
 (c) Copyright 2012 WSO2 Inc.

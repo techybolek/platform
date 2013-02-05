@@ -43,6 +43,8 @@ import org.apache.synapse.deployers.SynapseArtifactDeploymentStore;
 import org.apache.synapse.endpoints.Endpoint;
 import org.apache.synapse.endpoints.Template;
 import org.apache.synapse.eventing.SynapseEventSource;
+import org.apache.synapse.libraries.imports.SynapseImport;
+import org.apache.synapse.libraries.model.Library;
 import org.apache.synapse.mediators.base.SequenceMediator;
 import org.apache.synapse.mediators.template.TemplateMediator;
 import org.apache.synapse.message.processors.MessageProcessor;
@@ -52,7 +54,7 @@ import org.apache.synapse.task.TaskDescriptionRepository;
 import org.apache.synapse.task.TaskScheduler;
 import org.osgi.framework.ServiceRegistration;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.configadmin.util.ConfigHolder;
 import org.wso2.carbon.mediation.dependency.mgt.services.ConfigurationTrackingService;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
@@ -63,6 +65,7 @@ import org.wso2.carbon.mediation.initializer.persistence.MediationPersistenceMan
 import org.wso2.carbon.mediation.initializer.services.SynapseConfigurationService;
 import org.wso2.carbon.mediation.initializer.services.SynapseEnvironmentService;
 import org.wso2.carbon.mediation.initializer.services.SynapseRegistrationsService;
+import org.wso2.carbon.proxyadmin.observer.ProxyServiceParameterObserver;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import javax.xml.stream.XMLStreamException;
@@ -180,11 +183,11 @@ public class ConfigurationUpdater {
             executor.destroy();
         }
 
-        for(MessageStore ms : currentConfig.getMessageStores().values()) {
+        for (MessageStore ms : currentConfig.getMessageStores().values()) {
             ms.destroy();
         }
 
-        for(MessageProcessor mp : currentConfig.getMessageProcessors().values()) {
+        for (MessageProcessor mp : currentConfig.getMessageProcessors().values()) {
             mp.destroy();
         }
 
@@ -287,7 +290,10 @@ public class ConfigurationUpdater {
 
         for (ProxyService proxyService : newConfig.getProxyServices()) {
             try {
-                proxyService.buildAxisService(newConfig, axisCfg);
+                AxisService axisService = proxyService.buildAxisService(newConfig, axisCfg);
+                ProxyServiceParameterObserver paramObserver =
+                        new ProxyServiceParameterObserver(axisService);
+                axisService.addParameterObserver(paramObserver);
                 if (log.isDebugEnabled()) {
                     log.debug("Deployed Proxy service : " + proxyService.getName());
                 }
@@ -334,7 +340,7 @@ public class ConfigurationUpdater {
             log.error("Error while initializing mediation persistence", e);
         }
     }
-    
+
     private void addToDeploymentStore(String parent, String fileName, String artifactName, SynapseConfiguration config) {
         if (fileName != null) {
             File file = new File(serverContextInformation.getServerConfigurationInformation().
@@ -356,8 +362,7 @@ public class ConfigurationUpdater {
             if (oldEndpoint != null) {
                 newEndpoint.setFileName(oldEndpoint.getFileName());
                 addToDeploymentStore(MultiXMLConfigurationBuilder.ENDPOINTS_DIR, oldEndpoint.getFileName(), name, newConfig);
-            }
-            else{
+            } else {
                 newEndpoint.setFileName(name + XML);
                 addToDeploymentStore(MultiXMLConfigurationBuilder.ENDPOINTS_DIR, newEndpoint.getFileName(), name, newConfig);
             }
@@ -382,22 +387,20 @@ public class ConfigurationUpdater {
             if (oldProxy != null) {
                 proxy.setFileName(oldProxy.getFileName());
                 addToDeploymentStore(MultiXMLConfigurationBuilder.PROXY_SERVICES_DIR, oldProxy.getFileName(), proxy.getName(), newConfig);
-            }
-            else{
+            } else {
                 proxy.setFileName(proxy.getName() + XML);
                 addToDeploymentStore(MultiXMLConfigurationBuilder.SEQUENCES_DIR, proxy.getFileName(), proxy.getName(), newConfig);
             }
         }
 
-        Map<String,Entry> localEntries = newConfig.getDefinedEntries();
+        Map<String, Entry> localEntries = newConfig.getDefinedEntries();
         for (String name : localEntries.keySet()) {
             Entry newEntry = localEntries.get(name);
             Entry oldEntry = currentConfig.getDefinedEntries().get(name);
             if (oldEntry != null) {
                 newEntry.setFileName(oldEntry.getFileName());
                 addToDeploymentStore(MultiXMLConfigurationBuilder.LOCAL_ENTRY_DIR, oldEntry.getFileName(), name, newConfig);
-            }
-            else{
+            } else {
                 newEntry.setFileName(name + XML);
                 addToDeploymentStore(MultiXMLConfigurationBuilder.LOCAL_ENTRY_DIR, newEntry.getFileName(), name, newConfig);
             }
@@ -409,8 +412,7 @@ public class ConfigurationUpdater {
             if (oldTask != null) {
                 task.setFileName(oldTask.getFileName());
                 addToDeploymentStore(MultiXMLConfigurationBuilder.TASKS_DIR, oldTask.getFileName(), task.getName(), newConfig);
-            }
-            else{
+            } else {
                 task.setFileName(task.getName() + XML);
                 addToDeploymentStore(MultiXMLConfigurationBuilder.TASKS_DIR, task.getFileName(), task.getName(), newConfig);
             }
@@ -422,8 +424,7 @@ public class ConfigurationUpdater {
             if (oldEventSource != null) {
                 eventSource.setFileName(oldEventSource.getFileName());
                 addToDeploymentStore(MultiXMLConfigurationBuilder.EVENTS_DIR, oldEventSource.getFileName(), eventSource.getName(), newConfig);
-            }
-            else{
+            } else {
                 eventSource.setFileName(eventSource.getName() + XML);
                 addToDeploymentStore(MultiXMLConfigurationBuilder.EVENTS_DIR, eventSource.getFileName(), eventSource.getName(), newConfig);
             }
@@ -435,8 +436,7 @@ public class ConfigurationUpdater {
             if (oldExec != null) {
                 exec.setFileName(oldExec.getFileName());
                 addToDeploymentStore(MultiXMLConfigurationBuilder.EXECUTORS_DIR, oldExec.getFileName(), exec.getName(), newConfig);
-            }
-            else{
+            } else {
                 exec.setFileName(exec.getName() + XML);
                 addToDeploymentStore(MultiXMLConfigurationBuilder.EXECUTORS_DIR, exec.getFileName(), exec.getName(), newConfig);
             }
@@ -444,13 +444,12 @@ public class ConfigurationUpdater {
 
         Collection<MessageStore> messageStores = newConfig.getMessageStores().values();
 
-        for(MessageStore store : messageStores) {
+        for (MessageStore store : messageStores) {
             MessageStore oldStore = currentConfig.getMessageStore(store.getName());
             if (oldStore != null) {
                 store.setFileName(oldStore.getFileName());
                 addToDeploymentStore(MultiXMLConfigurationBuilder.MESSAGE_STORE_DIR, oldStore.getFileName(), store.getName(), newConfig);
-            }
-            else{
+            } else {
                 store.setFileName(store.getName() + XML);
                 addToDeploymentStore(MultiXMLConfigurationBuilder.MESSAGE_STORE_DIR, store.getFileName(), store.getName(), newConfig);
             }
@@ -458,14 +457,13 @@ public class ConfigurationUpdater {
 
         Collection<MessageProcessor> messageProcessors = newConfig.getMessageProcessors().values();
 
-        for(MessageProcessor processor : messageProcessors) {
+        for (MessageProcessor processor : messageProcessors) {
             MessageProcessor oldProcessor =
                     currentConfig.getMessageProcessors().get(processor.getName());
-            if(oldProcessor != null) {
+            if (oldProcessor != null) {
                 processor.setFileName(oldProcessor.getFileName());
                 addToDeploymentStore(MultiXMLConfigurationBuilder.MESSAGE_PROCESSOR_DIR, oldProcessor.getFileName(), processor.getName(), newConfig);
-            }
-            else{
+            } else {
                 processor.setFileName(processor.getName() + XML);
                 addToDeploymentStore(MultiXMLConfigurationBuilder.MESSAGE_PROCESSOR_DIR, processor.getFileName(), processor.getName(), newConfig);
             }
@@ -477,9 +475,8 @@ public class ConfigurationUpdater {
             if (oldSequenceTempl != null) {
                 sequenceTemplates.get(name).setFileName(oldSequenceTempl.getFileName());
                 addToDeploymentStore(MultiXMLConfigurationBuilder.TEMPLATES_DIR, oldSequenceTempl.getFileName(), name, newConfig);
-            }
-            else{
-                TemplateMediator newSeqTemplate =  sequenceTemplates.get(name);
+            } else {
+                TemplateMediator newSeqTemplate = sequenceTemplates.get(name);
                 newSeqTemplate.setFileName(name + XML);
                 addToDeploymentStore(MultiXMLConfigurationBuilder.TEMPLATES_DIR, newSeqTemplate.getFileName(), name, newConfig);
             }
@@ -491,9 +488,8 @@ public class ConfigurationUpdater {
             if (oldEndpointTempl != null) {
                 endpointTemplates.get(name).setFileName(oldEndpointTempl.getFileName());
                 addToDeploymentStore(MultiXMLConfigurationBuilder.TEMPLATES_DIR, oldEndpointTempl.getFileName(), name, newConfig);
-            }
-            else{
-                Template newTemplate =  endpointTemplates.get(name);
+            } else {
+                Template newTemplate = endpointTemplates.get(name);
                 newTemplate.setFileName(name + XML);
                 addToDeploymentStore(MultiXMLConfigurationBuilder.TEMPLATES_DIR, newTemplate.getFileName(), name, newConfig);
             }
@@ -504,12 +500,36 @@ public class ConfigurationUpdater {
             API oldAPI = currentConfig.getAPI(api.getName());
             if (oldAPI != null) {
                 api.setFileName(oldAPI.getFileName());
-	        addToDeploymentStore(MultiXMLConfigurationBuilder.REST_API_DIR, api.getFileName(), api.getName(), newConfig);
-            }
-            else{
+                addToDeploymentStore(MultiXMLConfigurationBuilder.REST_API_DIR, api.getFileName(), api.getName(), newConfig);
+            } else {
                 api.setFileName(api.getName() + XML);
-	        addToDeploymentStore(MultiXMLConfigurationBuilder.REST_API_DIR, api.getFileName(), api.getName(), newConfig);
+                addToDeploymentStore(MultiXMLConfigurationBuilder.REST_API_DIR, api.getFileName(), api.getName(), newConfig);
             }
+        }
+
+        Map<String, SynapseImport> imports = newConfig.getSynapseImports();
+        for (String name : imports.keySet()) {
+            SynapseImport oldImport = currentConfig.getSynapseImports().get(name);
+            if (oldImport != null) {
+                imports.get(name).setFileName(oldImport.getFileName());
+                addToDeploymentStore(MultiXMLConfigurationBuilder.SYNAPSE_IMPORTS_DIR, oldImport.getFileName(), name, newConfig);
+            } else {
+                SynapseImport newImport = imports.get(name);
+                newImport.setFileName(name + XML);
+                addToDeploymentStore(MultiXMLConfigurationBuilder.SYNAPSE_IMPORTS_DIR, newImport.getFileName(), name, newConfig);
+            }
+        }
+
+        //fix for persistence issue in mediation library (connector .zip files)
+        Map<String, Library> libraryMap = currentConfig.getSynapseLibraries();
+        for (String name : libraryMap.keySet()) {
+            newConfig.getSynapseLibraries().put(name, libraryMap.get(name));
+            String fileName = libraryMap.get(name).getFileName();
+            SynapseArtifactDeploymentStore store = newConfig.getArtifactDeploymentStore();
+            if (!store.containsFileName(fileName)) {
+                store.addArtifact(fileName, name);
+            }
+            store.addRestoredArtifact(fileName);
         }
 
         if (Boolean.valueOf(currentConfig.getProperty(
@@ -523,8 +543,9 @@ public class ConfigurationUpdater {
         AxisService service = axisCfg.getServiceForActivation(serviceName);
         if (service != null) {
             try {
+                //See https://wso2.org/jira/browse/ESBJAVA-1358
                 service.getParent().addParameter(CarbonConstants.KEEP_SERVICE_HISTORY_PARAM,
-                            "true");
+                        "true");
                 axisCfg.removeService(serviceName);
             } catch (AxisFault axisFault) {
                 handleException("Error while removing the service: " + serviceName, axisFault);
@@ -534,7 +555,7 @@ public class ConfigurationUpdater {
 
     private void publishConfiguration(SynapseConfiguration synCfg, Axis2SynapseEnvironment synEnv) {
 
-        int tenantId = SuperTenantCarbonContext.getCurrentContext(configurationContext).getTenantId();
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();
 
         SynapseRegistrationsService registrationsService =
                 ConfigHolder.getInstance().getSynapseRegistrationService(tenantId);

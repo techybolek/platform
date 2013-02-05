@@ -20,6 +20,7 @@ package org.wso2.carbon.governance.list.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
+import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifactImpl;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 
@@ -37,7 +38,9 @@ public class GovernanceArtifactFilter {
         if (referenceArtifact == null) {
             return true;
         }
-        String[] keys = referenceArtifact.getAttributeKeys();
+        String[] keys = ((GovernanceArtifactImpl) referenceArtifact).getAttributeKeys();
+        boolean defaultNameMatched = false;
+        boolean defaultNamespaceMatched = false;
 
         for (String key : keys) {
             if ("operation".equals(key)) {
@@ -48,20 +51,27 @@ public class GovernanceArtifactFilter {
                 // we ignore the count.
                 continue;
             }
-            String serviceName = referenceArtifact.getAttribute("overview_name");
-            if (serviceName.equals(GovernanceConstants.DEFAULT_SERVICE_NAME)) {
-                continue;
-            }
             String[] referenceValues = referenceArtifact.getAttributes(key);
             if (referenceValues == null) {
                 continue;
             }
+            else {
+               if(!defaultNameMatched && "overview_name".equals(key) && GovernanceConstants.DEFAULT_SERVICE_NAME.
+                                         equalsIgnoreCase(referenceArtifact.getAttribute("overview_name"))) {
+                    defaultNameMatched = true;
+                    continue;
+               }
+
+               if(!defaultNamespaceMatched && "overview_namespace".equals(key) && GovernanceConstants.DEFAULT_NAMESPACE.
+                                              equals(referenceArtifact.getAttribute("overview_namespace"))){
+                   defaultNamespaceMatched = true;
+                   continue;
+               }
+            }
             // all the valid keys should be satisfied..
             boolean satisfied = false; // either one of value should be satisfied.
             String[] realValues = service.getAttributes(key);
-            if (realValues == null) {
-                return false;
-            } else {
+            if (realValues != null) {
                 for (String referenceValue : referenceValues) {
                     for (String realValue : realValues) {
                         if (realValue.toLowerCase().contains(referenceValue.toLowerCase())) {
@@ -82,17 +92,19 @@ public class GovernanceArtifactFilter {
                     }
                     if (satisfied) {
                         break;
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            String msg = "key: " + key + " is not satisfied by the service: " +
+                                         service.getQName() + ".";
+                            log.debug(msg);
+                        }
+                        return false;
                     }
                 }
+            } else {
+              return false;
             }
-            if (!satisfied) {
-                if (log.isDebugEnabled()) {
-                    String msg = "key: " + key + " is not satisfied by the service: " +
-                            service.getQName() + ".";
-                    log.debug(msg);
-                }
-                return false;
-            }
+
         }
         return true;
     }

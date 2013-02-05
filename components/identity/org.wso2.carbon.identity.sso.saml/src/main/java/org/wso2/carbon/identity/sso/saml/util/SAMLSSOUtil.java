@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
@@ -40,6 +42,7 @@ import org.apache.xml.security.c14n.Canonicalizer;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.saml2.core.Issuer;
+import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.RequestAbstractType;
 import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.core.impl.AuthnRequestImpl;
@@ -51,6 +54,7 @@ import org.opensaml.xml.io.Marshaller;
 import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.io.Unmarshaller;
 import org.opensaml.xml.io.UnmarshallerFactory;
+import org.opensaml.xml.security.SecurityException;
 import org.opensaml.xml.security.x509.X509Credential;
 import org.opensaml.xml.signature.KeyInfo;
 import org.opensaml.xml.signature.Signature;
@@ -58,6 +62,7 @@ import org.opensaml.xml.signature.SignatureValidator;
 import org.opensaml.xml.signature.Signer;
 import org.opensaml.xml.signature.X509Certificate;
 import org.opensaml.xml.signature.X509Data;
+import org.opensaml.xml.util.Base64;
 import org.opensaml.xml.validation.ValidationException;
 import org.osgi.framework.BundleContext;
 import org.w3c.dom.Document;
@@ -79,11 +84,14 @@ import org.wso2.carbon.identity.sso.saml.SSOServiceProviderConfigManager;
 import org.wso2.carbon.identity.sso.saml.builders.X509CredentialImpl;
 import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOAuthnReqDTO;
 import org.wso2.carbon.identity.sso.saml.exception.IdentitySAML2SSOException;
+import org.wso2.carbon.identity.sso.saml.validators.SAML2HTTPRedirectDeflateSignatureValidator;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class SAMLSSOUtil {
 
@@ -191,18 +199,25 @@ public class SAMLSSOUtil {
 	}
 
 	/**
-	 * Encoding the response
+	 * Compressing and Encoding the response
 	 * 
 	 * @param xmlString
-	 * @return encoded String
+	 *            String to be encoded
+	 * @return compressed and encoded String
 	 */
 	public static String encode(String xmlString) throws Exception {
-		xmlString =
-		            xmlString.replaceAll("&", "&amp;").replaceAll("\"", "&quot;")
-		                     .replaceAll("'", "&apos;").replaceAll("<", "&lt;")
-		                     .replaceAll(">", "&gt;").replace("\n", "");
-
-		return xmlString;
+		Deflater deflater = new Deflater(Deflater.DEFLATED, true);
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		DeflaterOutputStream deflaterOutputStream =
+		                                            new DeflaterOutputStream(byteArrayOutputStream,
+		                                                                     deflater);
+		deflaterOutputStream.write(xmlString.getBytes());
+		deflaterOutputStream.close();
+		// Encoding the compressed message
+		String encodedRequestMessage =
+		                               Base64.encodeBytes(byteArrayOutputStream.toByteArray(),
+		                                                  Base64.DONT_BREAK_LINES);
+		return encodedRequestMessage.trim();
 	}
 
 	/**
@@ -245,6 +260,9 @@ public class SAMLSSOUtil {
 				}
 				iis.close();
 				String decodedStr = new String(baos.toByteArray());
+				if(log.isDebugEnabled()) {
+					log.debug("Request message " + decodedStr);
+				}
 				return decodedStr;
 			}
 		} catch (IOException e) {
@@ -276,6 +294,15 @@ public class SAMLSSOUtil {
 		}
 	}
 
+	/**
+	 * Sign the SAML Response message
+	 * 
+	 * @param response
+	 * @param signatureAlgorithm
+	 * @param cred
+	 * @return
+	 * @throws IdentityException
+	 */
 	public static Response setSignature(Response response, String signatureAlgorithm,
 	                                    X509Credential cred) throws IdentityException {
 		doBootstrap();
@@ -318,10 +345,17 @@ public class SAMLSSOUtil {
 			return response;
 
 		} catch (Exception e) {
-			throw new IdentityException("Error When signing the assertion.", e);
+			throw new IdentityException("Error while signing the SAML Response message.", e);
 		}
 	}
 
+	/**
+	 * Builds SAML Elements
+	 * 
+	 * @param objectQName
+	 * @return
+	 * @throws IdentityException
+	 */
 	private static XMLObject buildXMLObject(QName objectQName) throws IdentityException {
 		XMLObjectBuilder builder =
 		                           org.opensaml.xml.Configuration.getBuilderFactory()
@@ -376,7 +410,7 @@ public class SAMLSSOUtil {
 	public static X509CredentialImpl getX509CredentialImplForTenant(String domainName, String alias)
 	                                                                                                throws IdentitySAML2SSOException {
 
-		int tenantID = 0;
+		int tenantID = -1234;
 		RealmService realmService = SAMLSSOUtil.getRealmService();
 
 		// get the tenantID
@@ -398,10 +432,9 @@ public class SAMLSSOUtil {
 		KeyStore keyStore;
 
 		try {
-			if (tenantID != 0) { // for non zero tenants, load private key from
-				                 // their generated key store
+			if (tenantID != -1234) {// for tenants, load private key from their generated key store
 				keyStore = keyStoreManager.getKeyStore(generateKSNameFromDomainName(domainName));
-			} else { // for tenant zero, load the default pub. cert using the
+			} else { // for super tenant, load the default pub. cert using the
 				     // config. in carbon.xml
 				keyStore = keyStoreManager.getPrimaryKeyStore();
 			}
@@ -419,34 +452,97 @@ public class SAMLSSOUtil {
 	}
 
 	/**
-	 * Validate the signature of the SAML assertion represented as a String
+	 * Validates the request message's signature. Validates the signature of
+	 * both HTTP POST Binding and HTTP Redirect Binding.
 	 * 
-	 * @param assertion
-	 *            SAML Assertion String
-	 * @param alias
-	 *            alias of the cert against which the signature should be
-	 *            validated.
-	 * @param domainName
-	 *            domain name
-	 * @return true, if signature is valid.
+	 * @param authnReqDTO
+	 * @return
 	 */
-	public static boolean validateAssertionSignature(String assertion, String alias,
-	                                                 String domainName) {
-		boolean isSignatureValid = false;
-		try {
-			RequestAbstractType request =
-			                              (RequestAbstractType) SAMLSSOUtil.unmarshall(SAMLSSOUtil.decode(assertion));
-			isSignatureValid = validateAssertionSignature(request, alias, domainName);
-		} catch (IdentityException ignore) {
-			log.warn("Signature Validation failed for the SAML Assertion : Failed to unmarshall the SAML Assertion");
+	public static boolean validateAuthnRequestSignature(SAMLSSOAuthnReqDTO authnReqDTO) {
+		log.debug("Validating SAML Request signature");
+
+		String domainName = MultitenantUtils.getTenantDomain(authnReqDTO.getUsername());
+		if (authnReqDTO.isStratosDeployment()) {
+			domainName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 		}
-		return isSignatureValid;
+		String alias = authnReqDTO.getCertAlias();
+		RequestAbstractType request = null;
+		try {
+			String decodedReq = SAMLSSOUtil.decode(authnReqDTO.getRequestMessageString());
+			request = (RequestAbstractType) SAMLSSOUtil.unmarshall(decodedReq);
+		} catch (IdentityException e) {
+			log.warn("Signature Validation failed for the SAMLRequest : Failed to unmarshall the SAML Assertion");
+			log.debug(e);
+		}
+
+		if (authnReqDTO.getQueryString() != null) {
+			// DEFLATE signature in Redirect Binding
+			validateDeflateSignature(authnReqDTO.getQueryString(), authnReqDTO.getIssuer(), alias,
+			                         domainName);
+		} else {
+			// XML signature in SAML Request message for POST Binding
+			return validateXMLSignature(request, alias, domainName);
+		}
+		return false;
+	}
+	
+	/**
+	 * Validates the signature of the LogoutRequest message.
+	 * TODO : for stratos deployment, super tenant key should be used
+	 * 
+	 * @param logoutRequest
+	 * @param alias
+	 * @param subject
+	 * @param httpRequest
+	 * @param isHTTPRedirectBinding
+	 * @return
+	 */
+	public static boolean validateLogoutRequestSignature(LogoutRequest logoutRequest, String alias,
+	                                                     String subject, String queryString) {
+		String domainName = MultitenantUtils.getTenantDomain(subject);
+		/*
+		 * if (isStratosDeployment) {
+		 * domainName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+		 * }
+		 */
+		if (queryString != null) {
+			validateDeflateSignature(queryString, logoutRequest.getIssuer().getValue(), alias,
+			                         domainName);
+		} else {
+			validateXMLSignature(logoutRequest, alias, domainName);
+		}
+		return false;
+	}
+
+	/**
+	 * Signature validation for HTTP Redirect Binding
+	 * 
+	 * @param authnReqDTO
+	 * @param samlRequest
+	 * @param alias
+	 * @param domainName
+	 * @return
+	 */
+	private static boolean validateDeflateSignature(String queryString, String issuer,
+	                                                String alias, String domainName) {
+		try {
+			SAML2HTTPRedirectDeflateSignatureValidator.validateSignature(queryString, issuer,
+			                                                             alias, domainName);
+		} catch (SecurityException e) {
+			log.error("Error validating deflate signature", e);
+			return false;
+		} catch (IdentitySAML2SSOException e) {
+			log.warn("Signature validation failed for the SAML Message : Failed to construct the X509CredentialImpl for the alias " +
+			         alias);
+			return false;
+		}
+		return true;
 	}
 
 	/**
 	 * Validate the signature of an assertion
 	 * 
-	 * @param assertion
+	 * @param request
 	 *            SAML Assertion, this could be either a SAML Request or a
 	 *            LogoutRequest
 	 * @param alias
@@ -455,23 +551,25 @@ public class SAMLSSOUtil {
 	 *            domain name of the subject
 	 * @return true, if the signature is valid.
 	 */
-	public static boolean validateAssertionSignature(RequestAbstractType assertion, String alias,
-	                                                 String domainName) {
+	private static boolean validateXMLSignature(RequestAbstractType request, String alias,
+	                                            String domainName) {
 		boolean isSignatureValid = false;
 
-		if (assertion.getSignature() != null) {
+		if (request.getSignature() != null) {
 			try {
 				SignatureValidator validator =
 				                               new SignatureValidator(
 				                                                      SAMLSSOUtil.getX509CredentialImplForTenant(domainName,
 				                                                                                                 alias));
-				validator.validate(assertion.getSignature());
+				validator.validate(request.getSignature());
 				isSignatureValid = true;
 			} catch (IdentitySAML2SSOException ignore) {
-				log.warn("Signature validation failed for the SAML Assertion : Failed to construct the X509CredentialImpl for the alias " +
+				log.warn("Signature validation failed for the SAML Message : Failed to construct the X509CredentialImpl for the alias " +
 				         alias);
+				log.debug(ignore);
 			} catch (ValidationException ignore) {
 				log.warn("Signature Validation Failed for the SAML Assertion : Signature is invalid.");
+				log.debug(ignore);
 			}
 		}
 		return isSignatureValid;
@@ -486,7 +584,7 @@ public class SAMLSSOUtil {
 	 */
 	public static Map<String, String> getAttributes(SAMLSSOAuthnReqDTO authnReqDTO) throws IdentityException {
 		AuthnRequestImpl request =
-		                           (AuthnRequestImpl) SAMLSSOUtil.unmarshall(SAMLSSOUtil.decode(authnReqDTO.getAssertionString()));
+		                           (AuthnRequestImpl) SAMLSSOUtil.unmarshall(SAMLSSOUtil.decode(authnReqDTO.getRequestMessageString()));
 
 		if (request.getAttributeConsumingServiceIndex() == null) {
 			return null; // not requesting for attributes

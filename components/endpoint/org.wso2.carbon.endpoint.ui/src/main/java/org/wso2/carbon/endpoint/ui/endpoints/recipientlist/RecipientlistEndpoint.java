@@ -116,4 +116,8 @@ public class RecipientlistEndpoint extends ListEndpoint {
     public void build(Template template, DefinitionFactory factory) {
     }
 
+    @Override
+    public boolean isRetryAvailable() {
+        return false;
+    }
 }

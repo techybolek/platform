@@ -9,6 +9,10 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="java.util.ResourceBundle" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PolicyDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PaginatedPolicySetDTO" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Arrays" %>
+<%@ page import="java.util.ArrayList" %>
 <!--
  ~ Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  ~
@@ -31,6 +35,17 @@
 <%
     String forwardTo = null;
     String policyOrder = request.getParameter("policyOrder");
+    String policyTypeFilter = request.getParameter("policyTypeFilter");
+    String policySearchString = request.getParameter("policySearchString");
+    String pageNumber = request.getParameter("pageNumber");
+    if (pageNumber == null) {
+        pageNumber = "0";
+    }
+    int pageNumberInt = 0;
+    try {
+        pageNumberInt = Integer.parseInt(pageNumber);
+    } catch (NumberFormatException ignored) {
+    }
 
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     ConfigurationContext configContext =
@@ -42,28 +57,44 @@
     try {
         EntitlementPolicyAdminServiceClient client =
                 new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);
-            if(policyOrder != null && !policyOrder.equals("")){
+            if(policyOrder != null && policyOrder.trim().length() > 0){
                 String[] policyIds = policyOrder.split(EntitlementPolicyConstants.ATTRIBUTE_SEPARATOR);
                 boolean authorize = true;
-                for (String policyId : policyIds) {
-                    PolicyDTO policyDTO = client.getLightPolicy(policyId);
-                    if (!policyDTO.getPolicyEditable()) {
-                        authorize = false;
-                        break;
+                PaginatedPolicySetDTO paginatedPolicySetDTO = client.getAllPolicies(policyTypeFilter,
+                                                                    policySearchString, pageNumberInt);
+                PolicyDTO[] policyDTOs = paginatedPolicySetDTO.getPolicySet();
+                if(policyDTOs != null){
+                    List<PolicyDTO>  orderedArray = new ArrayList<PolicyDTO>();
+                    for(PolicyDTO dto : policyDTOs){
+                        if (!dto.getPolicyEditable()) {
+                            authorize = false;
+                            break;
+                        }
                     }
-                }
-                if(authorize){
-                    for(int i = 0; i < policyIds.length; i ++){
-                        PolicyDTO policyDTO = client.getMetaDataPolicy(policyIds[i]);
-                        policyDTO.setPolicyOrder(policyIds.length - i);
-                        client.updatePolicy(policyDTO);
+
+                    if(authorize){
+                        for(int i = 0; i < policyIds.length; i ++){
+                            PolicyDTO policyDTO = null;
+                            for(PolicyDTO dto : policyDTOs){
+                                if (policyIds[i].equals(dto.getPolicyId())) {
+                                    policyDTO = dto;
+                                    break;
+                                }
+                            }
+                            if(policyDTO != null){
+                                policyDTO.setPolicyOrder(policyIds.length - i);
+                                orderedArray.add(policyDTO);
+                            }
+                        }
+                        client.reOderPolicies(orderedArray.toArray(new PolicyDTO[orderedArray.size()]));
+                    } else {
+                        String message = resourceBundle.getString("cannot.order.policies");
+                        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.WARNING, request);
                     }
-                } else {
-                    String message = resourceBundle.getString("cannot.order.policies");
-                    CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.WARNING, request);
                 }
             }
-        forwardTo = "index.jsp";
+            forwardTo = "index.jsp?policyTypeFilter" + policyTypeFilter +
+                                                        "&policySearchString=" +policySearchString;
     } catch (Exception e) {
     	String message = resourceBundle.getString("error.while.ordering.policy");
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);

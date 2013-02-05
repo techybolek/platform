@@ -27,22 +27,22 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class FixedDataRow implements DataRow {
 
-	private Map<String, Object> values;
+	private Map<String, String> values;
 	
-	public FixedDataRow(Map<String, Object> values) {
-		this.values = new ConcurrentHashMap<String, Object>(values);
+	public FixedDataRow(Map<String, String> values) {
+		this.values = new ConcurrentHashMap<String, String>(values);
 	}
 	
-	public Map<String, Object> getValues() {
+	public Map<String, String> getValues() {
 		return values;
 	}
 
 	@Override
-	public Object getValueAt(String column) {
+	public String getValueAt(String column) {
 		return this.getValues().get(column);
 	}
 	
-	public void update(Map<String, Object> values) {
+	public void update(Map<String, String> values) {
 		this.getValues().putAll(values);
 	}
 	

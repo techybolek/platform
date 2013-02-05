@@ -1,10 +1,10 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax2471="http://data.mapper.url.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://mapper.url.carbon.wso2.org" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax2469="http://exception.internal.mapper.url.carbon.wso2.org/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://mapper.url.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://mapper.url.carbon.wso2.org" xmlns:ax2482="http://exception.internal.mapper.url.carbon.wso2.org/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:ax2484="http://data.mapper.url.carbon.wso2.org/xsd" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://mapper.url.carbon.wso2.org">
     <wsdl:documentation>UrlMapperAdminService</wsdl:documentation>
     <wsdl:types>
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://data.mapper.url.carbon.wso2.org/xsd">
             <xs:complexType name="PaginatedMappingData">
                 <xs:sequence>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="mappingData" nillable="true" type="ax2471:MappingData" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="mappingData" nillable="true" type="ax2484:MappingData" />
                     <xs:element minOccurs="0" name="numberOfPages" type="xs:int" />
                 </xs:sequence>
             </xs:complexType>
@@ -22,13 +22,13 @@
                 <xs:sequence />
             </xs:complexType>
         </xs:schema>
-        <xs:schema xmlns:ax2470="http://exception.internal.mapper.url.carbon.wso2.org/xsd" xmlns:ax2472="http://data.mapper.url.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://mapper.url.carbon.wso2.org">
+        <xs:schema xmlns:ax2483="http://exception.internal.mapper.url.carbon.wso2.org/xsd" xmlns:ax2485="http://data.mapper.url.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://mapper.url.carbon.wso2.org">
             <xs:import namespace="http://exception.internal.mapper.url.carbon.wso2.org/xsd" />
             <xs:import namespace="http://data.mapper.url.carbon.wso2.org/xsd" />
             <xs:element name="UrlMapperAdminServiceUrlMapperException">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="UrlMapperException" nillable="true" type="ax2470:UrlMapperException" />
+                        <xs:element minOccurs="0" name="UrlMapperException" nillable="true" type="ax2482:UrlMapperException" />
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -71,7 +71,7 @@
             <xs:element name="getPaginatedMappingsResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2471:PaginatedMappingData" />
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2484:PaginatedMappingData" />
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -135,7 +135,7 @@
             <xs:element name="getAllMappingsResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2471:MappingData" />
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2484:MappingData" />
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -182,6 +182,7 @@
                     <xs:sequence>
                         <xs:element minOccurs="0" name="hostName" nillable="true" type="xs:string" />
                         <xs:element minOccurs="0" name="uri" nillable="true" type="xs:string" />
+                        <xs:element minOccurs="0" name="appType" nillable="true" type="xs:string" />
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -190,6 +191,7 @@
                     <xs:sequence>
                         <xs:element minOccurs="0" name="hostName" nillable="true" type="xs:string" />
                         <xs:element minOccurs="0" name="url" nillable="true" type="xs:string" />
+                        <xs:element minOccurs="0" name="appType" nillable="true" type="xs:string" />
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -755,13 +757,13 @@
     </wsdl:binding>
     <wsdl:service name="UrlMapperAdminService">
         <wsdl:port name="UrlMapperAdminServiceHttpsSoap11Endpoint" binding="ns:UrlMapperAdminServiceSoap11Binding">
-            <soap:address location="https://192.168.1.5:9443/services/UrlMapperAdminService.UrlMapperAdminServiceHttpsSoap11Endpoint/" />
+            <soap:address location="https://10.100.3.56:9443/services/UrlMapperAdminService.UrlMapperAdminServiceHttpsSoap11Endpoint/" />
         </wsdl:port>
         <wsdl:port name="UrlMapperAdminServiceHttpsSoap12Endpoint" binding="ns:UrlMapperAdminServiceSoap12Binding">
-            <soap12:address location="https://192.168.1.5:9443/services/UrlMapperAdminService.UrlMapperAdminServiceHttpsSoap12Endpoint/" />
+            <soap12:address location="https://10.100.3.56:9443/services/UrlMapperAdminService.UrlMapperAdminServiceHttpsSoap12Endpoint/" />
         </wsdl:port>
         <wsdl:port name="UrlMapperAdminServiceHttpsEndpoint" binding="ns:UrlMapperAdminServiceHttpBinding">
-            <http:address location="https://192.168.1.5:9443/services/UrlMapperAdminService.UrlMapperAdminServiceHttpsEndpoint/" />
+            <http:address location="https://10.100.3.56:9443/services/UrlMapperAdminService.UrlMapperAdminServiceHttpsEndpoint/" />
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

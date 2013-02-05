@@ -20,14 +20,19 @@ package org.wso2.carbon.xkms.mgt.ui;
 public class XKMSMgtConstants {
 
     public static final java.lang.String SERVER_AUTHENTICATION_CODE = "authen.code";
+    public static final java.lang.String CONFIRM_SERVER_AUTHENTICATION_CODE = "confirm.authen.code";
     public static final java.lang.String KEY_STORE_LOCATION = "keystore.location";
     public static final java.lang.String KEY_STORE_PASSWORD = "keystore.password";
-    public static final java.lang.String SERVER_CERT_ALIACE = "server.cert.aliase";
+    public static final java.lang.String CONFIRM_KEY_STORE_PASSWORD = "confirm.keystore.password";
+    public static final java.lang.String SERVER_CERT_ALIAS = "server.cert.alias";
     public static final java.lang.String SERVER_KEY_PASSWORD = "server.key.password";
-    public static final java.lang.String ISSUER_CERT_ALIACE = "issuer.cert.aliase";
+    public static final java.lang.String CONFIRM_SERVER_KEY_PASSWORD = "confirm.server.key.password";
+    public static final java.lang.String ISSUER_CERT_ALIAS = "issuer.cert.alias";
     public static final java.lang.String ISSUER_KEY_PASSWORD = "issuer.key.password";
+    public static final java.lang.String CONFIRM_ISSUER_KEY_PASSWORD = "confirm.issuer.key.password";
     public static final java.lang.String DEFAULT_EXPIRY_INTERVAL = "default.expriy.interval";
     public static final java.lang.String DEFAULT_PRIVATE_KEY_PASSWORD = "default.private.key.password";
+    public static final java.lang.String CONFIRM_DEFAULT_PRIVATE_KEY_PASSWORD = "confirm.default.private.key.password";
     public static final java.lang.String ENABLE_PERSISTENCE = "persistence.enabled";
 
 }

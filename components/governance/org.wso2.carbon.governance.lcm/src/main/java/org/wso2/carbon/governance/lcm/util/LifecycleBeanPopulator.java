@@ -22,14 +22,17 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.scxml.io.SCXMLParser;
 import org.wso2.carbon.governance.lcm.beans.*;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.xml.sax.InputSource;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+import java.io.CharArrayReader;
 import java.util.Iterator;
 
 public class LifecycleBeanPopulator {
@@ -159,7 +162,7 @@ public class LifecycleBeanPopulator {
 
     public static boolean deserializeLifecycleBean(OMElement configurationElement,Registry registry) throws Exception{
         CommonUtil.validateOMContent(configurationElement,
-                CommonUtil.getAspectSchemaValidator(CommonUtil.getAspectSchemaLocation()));
+                CommonUtil.getLifecycleSchemaValidator(CommonUtil.getLifecycleSchemaLocation()));
 
         try {
             OMElement scxmlElement = null;
@@ -201,6 +204,16 @@ public class LifecycleBeanPopulator {
             scxmlElement = lifecycleElement.getFirstElement();
 
             CommonUtil.validateOMContent(scxmlElement);
+            CommonUtil.validateLifeCycle(scxmlElement);
+
+//            Validating whether this complies to the scxml specification.
+            SCXMLParser.parse(new InputSource(
+                    new CharArrayReader((scxmlElement.toString()).toCharArray())), null);
+
+//            Validating whether the data model is correct
+            if(!CommonUtil.validateSCXMLDataModel(scxmlElement)){
+                throw new RegistryException("Failed to validate the data model. Invalid forEvent found");
+            }
 
         } catch (RegistryException e) {
             throw e;

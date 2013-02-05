@@ -27,6 +27,7 @@ import org.apache.synapse.config.xml.XMLConfigurationSerializer;
 import org.wso2.carbon.mediation.initializer.RegistryBasedSynapseConfigSerializer;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -252,17 +253,18 @@ public class MediationPersistenceManager {
      * @param itemType Type of the configuration item
      */
     public void saveItemToRegistry(String name, int itemType) {
-        if (!initialized || !acceptRequests) {
-            log.warn("Mediation persistence manager is either not initialized or not in the " +
-                    "'accepting' mode. Ignoring the save request.");
-            return;
-        }
 
         if (registry == null) {
             if (log.isDebugEnabled()) {
                 log.debug("Registry persistence is disabled for mediation configuration. " +
                         "Ignoring the persistence request for " + name);
             }
+            return;
+        }
+
+        if (!initialized || !acceptRequests) {
+            log.warn("Mediation persistence manager is either not initialized or not in the " +
+                    "'accepting' mode. Ignoring the save request.");
             return;
         }
 
@@ -289,17 +291,18 @@ public class MediationPersistenceManager {
      * @param itemType Type of the configuration item
      */
     public void deleteItemFromRegistry(String name, int itemType) {
-        if (!initialized || !acceptRequests) {
-            log.warn("Mediation persistence manager is either not initialized or not in the " +
-                    "'accepting' mode. Ignoring the delete request.");
-            return;
-        }
 
         if (registry == null) {
             if (log.isDebugEnabled()) {
                 log.debug("Registry persistence is disabled for mediation configuration. " +
                         "Ignoring the persistence request for " + name);
             }
+            return;
+        }
+
+        if (!initialized || !acceptRequests) {
+            log.warn("Mediation persistence manager is either not initialized or not in the " +
+                    "'accepting' mode. Ignoring the delete request.");
             return;
         }
 
@@ -388,6 +391,9 @@ public class MediationPersistenceManager {
                 log.debug("Starting the mediation persistence worker thread");
             }
 
+            if(CarbonUtils.isWorkerNode()){
+                log.info("This is a worker node, Mediation persistance manager will be disabled.");
+            }
             while (proceed) {
                 PersistenceRequest request;
 
@@ -406,7 +412,10 @@ public class MediationPersistenceManager {
                     // Simply go to the next iteration
                     continue;
                 }
-
+                if(CarbonUtils.isWorkerNode()){
+                    log.debug("Ignoring persist request because this is a worker node");
+                    continue;
+                }
                 try {
                     //SynapseConfiguration config = synapseConfiguration;
                     if (request.registryOnly && registry != null) {

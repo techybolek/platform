@@ -180,7 +180,10 @@
         <form id="uploadBar" name="uploadBar" enctype="multipart/form-data"
               action="../../fileupload/bamToolboxDeploy" method="POST">
 
+         <%   boolean checked = false;
+             if(null != toolBoxes && toolBoxes.length>0){%>
             <table class="styledLeft">
+
                 <thead>
                 <tr>
                     <th colspan="4">
@@ -192,7 +195,7 @@
 
 
                 <% int count = 1;
-                    boolean checked = false;
+
                     if (null != toolBoxes) {
                         for (BasicToolBox aToolbox : toolBoxes) {
                             String isDisabled = "";
@@ -243,6 +246,9 @@
 
                 </tbody>
             </table>
+            <%
+                }
+            %>
             <br />
 
 

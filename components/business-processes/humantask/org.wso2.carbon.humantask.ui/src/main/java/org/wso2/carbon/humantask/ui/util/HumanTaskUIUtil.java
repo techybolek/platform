@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.humantask.stub.mgt.types.TaskInfoType;
+import org.wso2.carbon.humantask.stub.mgt.types.Task_type0;
 import org.wso2.carbon.humantask.stub.ui.task.client.api.types.*;
 import org.wso2.carbon.humantask.ui.constants.HumanTaskUIConstants;
 import org.wso2.carbon.utils.xml.XMLPrettyPrinter;
@@ -326,5 +327,17 @@ public final class HumanTaskUIUtil {
         }
 
         return "";
+    }
+
+    public static boolean isErroneous(Task_type0[] taskDefinitionsInPackage) {
+
+        boolean isErroneous = false;
+        for (Task_type0 task : taskDefinitionsInPackage) {
+            if (task.getErroneous()) {
+                isErroneous = true;
+                break;
+            }
+        }
+        return isErroneous;
     }
 }

@@ -121,8 +121,8 @@ public class CarbonTomcatSessionManager extends StandardManager {
             return;
         }
 
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        if (tenantId != MultitenantConstants.SUPER_TENANT_ID && tenantId != ownerTenantId) {
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if(tenantId != MultitenantConstants.SUPER_TENANT_ID && tenantId != ownerTenantId) {
             throw new SecurityException("Illegal access attempt by  tenant[" + tenantId +
                                         "] to sessions owned by tenant[" + ownerTenantId + "]");
         }

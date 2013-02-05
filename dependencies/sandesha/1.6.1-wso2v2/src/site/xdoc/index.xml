@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements. See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership. The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License. You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied. See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+    <properties>
+        <title>Welcome to Sandesha2 home page</title>
+    </properties>
+    <body>
+        <h1>Welcome to Apache Sandesha2</h1>
+        <p>Apache Sandesha2&#x2122; is an Axis2 module that implements the <a
+        href="http://www.ibm.com/developerworks/webservices/library/specification/ws-rm/" target="_blank">WS-ReliableMessaging
+        specification</a> published by IBM, Microsoft, BEA and TIBCO.
+        By using Sandesha2 you can add reliable
+        messaging capability to the web services hosted using Axis2. Sandesha2 can
+        also be used with Axis2 client to interact with already hosted web services
+        in a reliable manner. Please see sandesha2 user guide for more information on
+        using Sandesha2. Read Sandesha2 Architecture guide to see how Sandesha2 work
+        internally.</p>
+        <p>Apache Sandesha2, Sandesha2, Apache, the Apache feather logo, and the Apache Sandesha2 project logo are trademarks of The Apache Software Foundation.</p>
+    </body>
+</document>

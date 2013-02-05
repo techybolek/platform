@@ -36,12 +36,13 @@
     	EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);
         if(policyFromRegistry != null && !policyFromRegistry.trim().equals("")){
             client.importPolicyFromRegistry(policyFromRegistry.trim());
+            String message = resourceBundle.getString("imported.successfuly");
+            CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
+            forwardTo="index.jsp?region=region1&item=policy_menu";            
         } else {
-            client.importPolicy(request);
+            CarbonUIMessage.sendCarbonUIMessage("Registry path can not be empty", CarbonUIMessage.ERROR, request);
+            forwardTo = "import-policy.jsp";
         }
-        String message = resourceBundle.getString("imported.successfuly");
-        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
-        forwardTo="index.jsp?region=region1&item=policy_menu";
     } catch (Exception e) {
         CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request);
         forwardTo = "import-policy.jsp";

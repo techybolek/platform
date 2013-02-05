@@ -22,13 +22,15 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.caching.core.identity.IdentityCacheEntry;
-import org.wso2.carbon.caching.core.identity.IdentityCacheKey;
 import org.wso2.carbon.identity.mgt.beans.UserMgtBean;
 import org.wso2.carbon.identity.mgt.cache.LoginAttemptCache;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.identity.mgt.util.Utils;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreException;
@@ -37,6 +39,7 @@ import org.wso2.carbon.user.core.common.AbstractUserOperationEventListener;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.jdbc.JDBCRealmConstants;
 import org.wso2.carbon.utils.ServerConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -51,7 +54,7 @@ import java.util.*;
  */
 public class IdentityMgtEventListener extends AbstractUserOperationEventListener {
 
-    private LoginAttemptCache cache = LoginAttemptCache.getCacheInstance();
+    private LoginAttemptCache cache = LoginAttemptCache.getInstance();
 
     private static final Log log = LogFactory.getLog(IdentityMgtEventListener.class);
     
@@ -85,7 +88,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
             }
 
             String  allowTemporaryPasswordProperty = realmConfig.
-                                    getUserStoreProperty(IdentityMgtConstants.MAX_FAILED_ATTEMPT);
+                                    getUserStoreProperty(IdentityMgtConstants.TEMPORARY_PASSWORD_ARE_ALLOWED);
             if(allowTemporaryPasswordProperty != null){
                 allowTemporaryPassword = Boolean.parseBoolean(allowTemporaryPasswordProperty);
             }
@@ -94,6 +97,11 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
         } catch (Exception e) {
             maxLoginAttempts = IdentityMgtConstants.DEFAULT_MAX_FAILED_LOGIN_ATTEMPT;
         }     
+    }
+
+    @Override
+    public int getExecutionOrderId() {
+        return 1000;   
     }
 
     @Override
@@ -113,16 +121,17 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
             return true;
         }
 
-        int failedAttempts =  cache.getValueFromCache(userName, tenantId);
+        int failedAttempts =  cache.getValueFromCache(userName);
 
         if(failedAttempts < 0){
-            log.warn("User account is locked");
+            log.warn("User account is locked for user : " + userName);
             return false;
         }
 
-        if(failedAttempts == (maxLoginAttempts-1)){
+        if(failedAttempts == (maxLoginAttempts - 1)){
             if(log.isDebugEnabled()){
-                log.debug("User has exceed the max failed login attempts. User account would be locked");
+                log.debug("User, " + userName +  " has exceed the max failed login attempts. " +
+                        "User account would be locked");
             }
             try {
                 Utils.persistAccountStatus(userName, tenantId, UserCoreConstants.USER_LOCKED);
@@ -143,15 +152,13 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
             log.debug("Post authenticator is called in IdentityMgtEventListener");
         }
 
-        int tenantId = userStoreManager.getTenantId();
-        
         if(authenticated){
-            cache.clearCacheEntry(userName, tenantId);
+            cache.clearCacheEntry(userName);
         } else {
-            cache.addToCache(userName, tenantId);
+            cache.addToCache(userName);
         }
 
-        return true;
+        return authenticated;
     }
 
 
@@ -203,7 +210,8 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 
 
     @Override
-    public boolean doPostAddUser(String userName, UserStoreManager userStoreManager)
+    public boolean doPostAddUser(String userName, Object credential, String[] roleList,
+                Map<String, String> claims, String profile, UserStoreManager userStoreManager)
                                                                     throws UserStoreException {
         UserMgtBean bean = new UserMgtBean();
         bean.setUserId(userName);
@@ -264,11 +272,13 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
         } else if(UserCoreConstants.ClaimTypeURIs.ACCOUNT_STATUS.equals(claimURI)){
 
             if(isLoggedInUser(userName)){
-                throw new UserStoreException("You are not authorized to change account status");
+                throw new UserStoreException("You can not change your own account status");
             }
 
             if(UserCoreConstants.USER_LOCKED.equals(claimValue)){
                 Utils.lockUserAccount(userName, userStoreManager.getTenantId());
+            } else {
+                Utils.unlockUserAccount(userName, userStoreManager.getTenantId());
             }
             return true;
 
@@ -280,12 +290,12 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
                 if(isNewAnswer(userName, claimURI, claimValue, userStoreManager)){
                     if(claimValue != null){
                         claimValue = claimValue.trim();
-                        String question = claimValue.substring(0,claimValue.indexOf(","));
-                        String answer = claimValue.substring(claimValue.indexOf(",")+ 1);
+                        String question = claimValue.substring(0,claimValue.indexOf(Utils.getChallengeSeparator()));
+                        String answer = claimValue.substring(claimValue.indexOf(Utils.getChallengeSeparator())+ 1);
                         if(question != null && answer != null){
                             question = question.trim();
                             answer = answer.trim();
-                            claimValue =question + "," + doHash(answer.toLowerCase());
+                            claimValue =question + Utils.getChallengeSeparator() + doHash(answer.toLowerCase());
                             ((AbstractUserStoreManager) userStoreManager).
                                     doSetUserClaimValue(userName, claimURI, claimValue, profileName);
                         }
@@ -311,10 +321,6 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 
         if(claims.containsKey(UserCoreConstants.ClaimTypeURIs.ACCOUNT_STATUS)){
 
-            if(isLoggedInUser(userName)){
-                throw new UserStoreException("You are not authorized to change account status");
-            }
-
             if(UserCoreConstants.USER_LOCKED.
                         equals(claims.get(UserCoreConstants.ClaimTypeURIs.ACCOUNT_STATUS))){
                 Utils.lockUserAccount(userName, userStoreManager.getTenantId());
@@ -326,6 +332,29 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
         processUserChallenges(userName, claims, false, userStoreManager);
         return true;
 
+    }
+
+    @Override
+    public boolean doPostDeleteUser(String userName, UserStoreManager userStoreManager)
+                                                                        throws UserStoreException {
+
+        UserRegistry registry = null;
+        try{
+            registry = IdentityMgtServiceComponent.getRegistryService().
+                    getConfigSystemRegistry(userStoreManager.getTenantId());
+            String identityKeyMgtPath = IdentityMgtConstants.IDENTITY_MANAGEMENT_KEYS +
+                    RegistryConstants.PATH_SEPARATOR + userStoreManager.getTenantId() +
+                    RegistryConstants.PATH_SEPARATOR + userName;
+
+            if (registry.resourceExists(identityKeyMgtPath)) {
+                registry.delete(identityKeyMgtPath);
+            }
+        } catch (RegistryException e) {
+            log.error("Error while deleting recovery data for user : " + userName + " in tenant : "
+                                                        + userStoreManager.getTenantId(), e);
+        }
+
+        return true;
     }
 
     private boolean isLoggedInUser(String userName){
@@ -362,14 +391,14 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
                     }
                     challengeValue = challengeValue.trim();
                     String question = challengeValue.
-                        substring(0,challengeValue.indexOf(","));
+                        substring(0,challengeValue.indexOf(Utils.getChallengeSeparator()));
                     String answer = challengeValue.
-                        substring(challengeValue.indexOf(",")+ 1);
+                        substring(challengeValue.indexOf(Utils.getChallengeSeparator())+ 1);
                     if(question != null && answer != null){
                         question = question.trim();
                         answer = answer.trim();
                         challengeMap.put(question, answer);
-                        claims.put(challenge, question + "," + doHash(answer.toLowerCase()));
+                        claims.put(challenge, question + Utils.getChallengeSeparator() + doHash(answer.toLowerCase()));
                     } else {
                         claims.remove(challenge);
                     }
@@ -382,7 +411,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
                     if("".equals(value)){
                         value = entry.getKey() + "=" + doHash(entry.getValue().toLowerCase());
                     } else {
-                        value = value + "," + entry.getKey() + "=" + doHash(entry.getValue().toLowerCase());
+                        value = value + Utils.getChallengeSeparator() + entry.getKey() + "=" + doHash(entry.getValue().toLowerCase());
                     }
                 }
     
@@ -400,7 +429,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
                     if("".equals(selectedUriString)){
                         selectedUriString = uri;
                     } else {
-                        selectedUriString = selectedUriString + "," + uri;
+                        selectedUriString = selectedUriString + Utils.getChallengeSeparator() + uri;
                     }
                 }
 

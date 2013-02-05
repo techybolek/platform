@@ -88,7 +88,7 @@
                                     <tr>
                                         <td><%=transports[i]%></td>
                                         <td><input id="trp__<%=transports[i]%>" name="trp__<%=transports[i]%>" type="checkbox"
-                                                   value="<%=transports[i]%>" checked="true"/> </td>
+                                                   value="<%=transports[i]%>" <%if(transports[i].startsWith("http")){%>checked="true"<%}%>/> </td>
                                     </tr>
                                     <%
                                         }

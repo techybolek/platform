@@ -21,6 +21,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.api.clients.utils.AuthenticateStub;
+import org.wso2.carbon.registry.info.stub.RegistryExceptionException;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceExceptionException;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceResourceServiceExceptionException;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceStub;
@@ -42,8 +43,8 @@ public class ResourceAdminServiceClient {
     private static final String MEDIA_TYPE_POLICY = "application/policy+xml";
     private static final String MEDIA_TYPE_GOVERNANCE_ARCHIVE = "application/vnd.wso2.governance-archive";
 
-    public ResourceAdminServiceClient(String backEndUrl, String sessionCookie) throws AxisFault {
-        String endPoint = backEndUrl + serviceName;
+    public ResourceAdminServiceClient(String serviceUrl, String sessionCookie) throws AxisFault {
+        String endPoint = serviceUrl + serviceName;
         resourceAdminServiceStub = new ResourceAdminServiceStub(endPoint);
         AuthenticateStub.authenticateStub(sessionCookie, resourceAdminServiceStub);
     }
@@ -63,18 +64,13 @@ public class ResourceAdminServiceClient {
             log.debug("Destination Path :" + destinationPath);
             log.debug("Media Type :" + mediaType);
         }
-
-        return resourceAdminServiceStub.addResource(destinationPath, mediaType, description, dh, null);
-
+        return resourceAdminServiceStub.addResource(destinationPath, mediaType, description, dh, null, null);
     }
 
     public ResourceData[] getResource(String destinationPath)
             throws ResourceAdminServiceExceptionException, RemoteException {
         ResourceData[] rs;
-
-
         rs = resourceAdminServiceStub.getResourceData(new String[]{destinationPath});
-
         return rs;
     }
 
@@ -111,7 +107,7 @@ public class ResourceAdminServiceClient {
         String fileName;
         fileName = dh.getName().substring(dh.getName().lastIndexOf('/') + 1);
         log.debug(fileName);
-        resourceAdminServiceStub.addResource("/" + fileName, MEDIA_TYPE_WSDL, description, dh, null);
+        resourceAdminServiceStub.addResource("/" + fileName, MEDIA_TYPE_WSDL, description, dh, null, null);
     }
 
     public void addWSDL(String resourceName, String description,
@@ -119,7 +115,7 @@ public class ResourceAdminServiceClient {
             throws ResourceAdminServiceExceptionException, RemoteException {
 
         resourceAdminServiceStub.importResource("/", resourceName, MEDIA_TYPE_WSDL,
-                                                description, fetchURL, null);
+                                                description, fetchURL, null, null);
     }
 
     public void addSchema(String description, DataHandler dh)
@@ -127,7 +123,7 @@ public class ResourceAdminServiceClient {
         String fileName;
         fileName = dh.getName().substring(dh.getName().lastIndexOf('/') + 1);
         resourceAdminServiceStub.addResource("/" + fileName, MEDIA_TYPE_SCHEMA,
-                                             description, dh, null);
+                                             description, dh, null, null);
     }
 
     public void addSchema(String resourceName, String description,
@@ -135,7 +131,7 @@ public class ResourceAdminServiceClient {
                                                   RemoteException {
 
         resourceAdminServiceStub.importResource("/", resourceName, MEDIA_TYPE_SCHEMA,
-                                                description, fetchURL, null);
+                                                description, fetchURL, null, null);
 
     }
 
@@ -144,7 +140,7 @@ public class ResourceAdminServiceClient {
         String fileName;
         fileName = dh.getName().substring(dh.getName().lastIndexOf('/') + 1);
         resourceAdminServiceStub.addResource("/" + fileName, MEDIA_TYPE_POLICY,
-                                             description, dh, null);
+                                             description, dh, null, null);
     }
 
     public void addPolicy(String resourceName, String description,
@@ -152,7 +148,7 @@ public class ResourceAdminServiceClient {
             throws ResourceAdminServiceExceptionException, RemoteException {
 
         resourceAdminServiceStub.importResource("/", resourceName, MEDIA_TYPE_POLICY,
-                                                description, fetchURL, null);
+                                                description, fetchURL, null, null);
     }
 
     public void uploadArtifact(String description, DataHandler dh)
@@ -160,13 +156,13 @@ public class ResourceAdminServiceClient {
         String fileName;
         fileName = dh.getName().substring(dh.getName().lastIndexOf('/') + 1);
         resourceAdminServiceStub.addResource("/" + fileName, MEDIA_TYPE_GOVERNANCE_ARCHIVE,
-                                             description, dh, null);
+                                             description, dh, null, null);
     }
 
-    public void addCollection(String parentPath, String collectionName,
-                              String mediaType, String description)
+    public String addCollection(String parentPath, String collectionName,
+                                String mediaType, String description)
             throws ResourceAdminServiceExceptionException, RemoteException {
-        resourceAdminServiceStub.addCollection(parentPath, collectionName, mediaType, description);
+        return resourceAdminServiceStub.addCollection(parentPath, collectionName, mediaType, description);
     }
 
 
@@ -212,6 +208,7 @@ public class ResourceAdminServiceClient {
             throws RemoteException, ResourceAdminServiceExceptionException {
 
         return resourceAdminServiceStub.getContentBean(resourcePath);
+
     }
 
     public ResourceData[] getResourceData(String resourcePath)
@@ -439,4 +436,73 @@ public class ResourceAdminServiceClient {
             throw new ResourceAdminServiceExceptionException("List extensions error ", e);
         }
     }
+
+
+    public void setDescription(String path, String description)
+            throws RemoteException, RegistryExceptionException {
+        try {
+            resourceAdminServiceStub.setDescription(path, description);
+        } catch (RemoteException e) {
+            String msg = "Unable set description for the path - " + path;
+            log.error(msg, e);
+            throw new RemoteException("List extensions error ", e);
+
+        } catch (ResourceAdminServiceExceptionException e) {
+            String msg = "Unable set description for the path - " + path;
+            log.error(msg, e);
+            throw new RegistryExceptionException(msg, e);
+        }
+    }
+
+
+    public ContentDownloadBean getContentDownloadBean(String path)
+            throws RemoteException, RegistryExceptionException {
+        try {
+            return resourceAdminServiceStub.getContentDownloadBean(path);
+        } catch (RemoteException e) {
+            String msg = "Unable to retrieve content download bean - " + path;
+            log.error(msg, e);
+            throw new RemoteException(msg, e);
+
+        } catch (ResourceAdminServiceExceptionException e) {
+            String msg = "Unable to retrieve content download bean - " + path;
+            log.error(msg, e);
+            throw new RegistryExceptionException(msg, e);
+        }
+    }
+
+
+    public boolean importResource(String parentPath, String resourceName, String mediaType,
+                                  String description, String fetchURL, String symLink)
+            throws RemoteException, RegistryExceptionException {
+        try {
+            return resourceAdminServiceStub.importResource(parentPath, resourceName, mediaType, description, fetchURL, symLink, null);
+        } catch (RemoteException e) {
+            String msg = "Unable to import resource";
+            log.error(msg, e);
+            throw new RemoteException(msg, e);
+
+        } catch (ResourceAdminServiceExceptionException e) {
+            String msg = "Unable to import resource";
+            log.error(msg, e);
+            throw new RegistryExceptionException(msg, e);
+        }
+    }
+
+    public ResourceTreeEntryBean getResourceTreeEntryBean(String resourcePath)
+            throws RemoteException, RegistryExceptionException {
+        try {
+            return resourceAdminServiceStub.getResourceTreeEntry(resourcePath);
+        } catch (RemoteException e) {
+            String msg = "Unable get resource tree entry";
+            log.error(msg, e);
+            throw new RemoteException(msg, e);
+
+        } catch (ResourceAdminServiceExceptionException e) {
+            String msg = "Unable get resource tree entry";
+            log.error(msg, e);
+            throw new RegistryExceptionException(msg, e);
+        }
+    }
+
 }

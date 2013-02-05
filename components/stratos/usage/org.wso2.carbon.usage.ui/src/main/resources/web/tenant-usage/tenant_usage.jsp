@@ -72,7 +72,7 @@
 <h2><fmt:message key="tenant.usage.report"/> for the Month - <%=yearMonth%> (Tenant: <%=tenantName%>
     )</h2>
 
-<div id="report_ui">
+<%--<div id="report_ui">
     <carbon:report
             component="org.wso2.carbon.usage"
             template="usage_report"
@@ -81,7 +81,7 @@
             excelReport="true"
             reportDataSession="usage_data"
                />
-</div>
+</div>--%>
 <div id="workArea">
 
 <form id="usageForm" action="tenant_usage.jsp" method="post">
@@ -166,7 +166,7 @@
     }
 %>
 
-<tr>
+<%--<tr>
     <td colspan="4" class="middle-header"><fmt:message key="registry.bandwidth.usage"/></td>
 </tr>
 <tr>
@@ -180,7 +180,7 @@
     String totRegOutBandwidth = UsageUtil.getOutgoingBandwidth(usage.getTotalRegistryBandwidth());
     String totRegBandwidth = UsageUtil.getTotalBandwidth(usage.getTotalRegistryBandwidth());
     BandwidthStatistics[] regBWStats = usage.getRegistryBandwidthStatistics();
-    if (regBWStats != null) {
+    if (regBWStats != null && regBWStats.length > 0 && regBWStats[0] != null) {
         for (BandwidthStatistics stat : regBWStats) {
             String regInBandwidth = UsageUtil.getIncomingBandwidth(stat);
             String regOutBandwidth = UsageUtil.getOutgoingBandwidth(stat);
@@ -221,7 +221,7 @@
                style="width:200px" value="<%=totRegBandwidth%>"/>
     </td>
 </tr>
-
+--%>
 
 <tr>
     <td colspan="4" class="middle-header"><fmt:message key="service.bandwidth.usage"/></td>
@@ -237,7 +237,7 @@
     String totSvcOutBandwidth = UsageUtil.getOutgoingBandwidth(usage.getTotalServiceBandwidth());
     String totSvcBandwidth = UsageUtil.getTotalBandwidth(usage.getTotalServiceBandwidth());
     BandwidthStatistics[] svcBWStats = usage.getServiceBandwidthStatistics();
-    if (svcBWStats != null) {
+    if (svcBWStats != null && svcBWStats.length > 0 && svcBWStats[0] != null) {
         for (BandwidthStatistics stat : svcBWStats) {
             String svcInBandwidth = UsageUtil.getIncomingBandwidth(stat);
             String svcOutBandwidth = UsageUtil.getOutgoingBandwidth(stat);
@@ -294,7 +294,7 @@
     String totWebappOutBandwidth = UsageUtil.getOutgoingBandwidth(usage.getTotalWebappBandwidth());
     String totWebappBandwidth = UsageUtil.getTotalBandwidth(usage.getTotalWebappBandwidth());
     BandwidthStatistics[] webappBWStats = usage.getWebappBandwidthStatistics();
-    if (webappBWStats != null) {
+    if (webappBWStats != null && webappBWStats.length > 0 && webappBWStats[0] != null) {
         for (BandwidthStatistics stat : webappBWStats) {
             String webappInBandwidth = UsageUtil.getIncomingBandwidth(stat);
             String webappOutBandwidth = UsageUtil.getOutgoingBandwidth(stat);
@@ -351,7 +351,7 @@
     long totSvcRespCount = usage.getTotalRequestStatistics().getResponseCount();
     long totSvcFaultCount = usage.getTotalRequestStatistics().getFaultCount();
     RequestStatistics[] svcStats = usage.getRequestStatistics();
-    if (svcStats != null) {
+    if (svcStats != null && svcStats.length > 0 && svcStats[0] != null) {
         for (RequestStatistics stat : svcStats) {
             long svcReqCount = stat.getRequestCount();
             long svcResCount = stat.getResponseCount();

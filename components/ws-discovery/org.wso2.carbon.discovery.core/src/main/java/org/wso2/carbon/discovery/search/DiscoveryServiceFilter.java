@@ -19,12 +19,20 @@
 
 package org.wso2.carbon.discovery.search;
 
+import org.apache.axis2.engine.AxisConfiguration;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.context.RegistryType;
+import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
+import org.wso2.carbon.discovery.DiscoveryConstants;
+import org.wso2.carbon.discovery.messages.Probe;
+import org.wso2.carbon.discovery.util.ConfigHolder;
+import org.wso2.carbon.discovery.util.Util;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.ServiceFilter;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
-import org.wso2.carbon.governance.api.exception.GovernanceException;
-import org.wso2.carbon.discovery.DiscoveryConstants;
-import org.wso2.carbon.discovery.util.Util;
-import org.wso2.carbon.discovery.messages.Probe;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.namespace.QName;
 import java.net.URI;
@@ -51,7 +59,7 @@ public class DiscoveryServiceFilter implements ServiceFilter {
         QName[] existingTypes = null;
         URI[] existingScopes = null;
 
-        if (skipInactiveServices && !service.isActive()) {
+        if(service.getAttachedEndpoints().length == 0 || (skipInactiveServices && !service.isActive())) {
             return false;
         }
 
@@ -122,5 +130,18 @@ public class DiscoveryServiceFilter implements ServiceFilter {
             return new NoneScopeMatchStrategy();
         }
         return null;
+    }
+
+    private static Registry getRegistry() {
+        String domain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        if (domain != MultitenantConstants.SUPER_TENANT_DOMAIN_NAME) {
+            AxisConfiguration axisConfig = TenantAxisUtils.getTenantAxisConfiguration(domain,
+                    ConfigHolder.getInstance().getServerConfigurationContext());
+            return (Registry) PrivilegedCarbonContext.getCurrentContext(axisConfig).
+                    getRegistry(RegistryType.SYSTEM_GOVERNANCE);
+        }
+
+        return (Registry) PrivilegedCarbonContext.getCurrentContext().
+                getRegistry(RegistryType.SYSTEM_GOVERNANCE);
     }
 }

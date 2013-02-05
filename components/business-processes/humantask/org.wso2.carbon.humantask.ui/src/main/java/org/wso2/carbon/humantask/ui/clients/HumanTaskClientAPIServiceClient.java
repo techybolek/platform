@@ -125,8 +125,8 @@ public class HumanTaskClientAPIServiceClient {
                                                                             IllegalAccessFault, URI.MalformedURIException {
         String errorMsg = "Error occurred while performing addAttachment operation.";
         try {
-            log.warn("Some of the attributes(like accessType) defined in the Service WSDLs are ignored and nulls are " +
-                     "passed from to the service call");
+            //TODO : "Some of the attributes(like accessType) defined in the Service WSDLs are ignored and nulls are " +
+                     //"passed from to the service call");
             return stub.addAttachment(new URI(taskID), attachmentName, "dummyAccessType", contentType, attachmentID);
         } catch (RemoteException e) {
             log.error(errorMsg, e);

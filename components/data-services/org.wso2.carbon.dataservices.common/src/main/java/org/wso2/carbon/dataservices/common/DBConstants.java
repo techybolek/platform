@@ -79,6 +79,7 @@ public final class DBConstants {
     public static final int UDT_ATTRIBUTE_INITIAL_INDEX = 0;
     public static final String SECUREVAULT_NAMESPACE = "http://org.wso2.securevault/configuration";
     public static final String DATA_SERVICE_RESPONSE_WRAPPER_ELEMENT = "DATA_SERVICE_RESPONSE";
+    public static final String SQL_DRIVER_CLASS_NAME = "org.wso2.carbon.dataservices.sql.driver.TDriver";
         
     /**
      * Codes to be used as fault codes.
@@ -255,6 +256,8 @@ public final class DBConstants {
         public static final String WEB = "WEB_CONFIG";
         public static final String CASSANDRA = "Cassandra";
         public static final String CUSTOM = "CUSTOM";
+        public static final String CUSTOM_TABULAR = "CUSTOM_TABULAR";
+        public static final String CUSTOM_QUERY = "CUSTOM_QUERY";
     }
 
     /**
@@ -473,6 +476,7 @@ public final class DBConstants {
         public static final String STARTING_ROW = "startingrow";
         public static final String MAX_ROW_COUNT = "maxrowcount";
         public static final String HAS_HEADER = "hasheader";
+        public static final String SHEET_NAME = "sheetName";
     }
 
     /**
@@ -561,13 +565,18 @@ public final class DBConstants {
     /**
      * Constants related to custom data sources.
      */
-    public static final class CustomDatasource {
+    public static final class CustomDataSource {
 
-        private CustomDatasource() {
+        private CustomDataSource() {
             throw new AssertionError();
         }
-
-        public static final String DATA_SOURCE_CLASS = "custom_datasource_class";
+    	/**
+    	 * The data source id is a unique name to identify the custom data source,
+    	 * this property will be set in the parameters to the "init" method.
+    	 */
+    	public static final String DATASOURCE_ID = "__DATASOURCE_ID__";
+        public static final String DATA_SOURCE_TABULAR_CLASS = "custom_tabular_datasource_class";
+        public static final String DATA_SOURCE_QUERY_CLASS = "custom_query_datasource_class";
         public static final String DATA_SOURCE_PROPS = "custom_datasource_props";
     }
 
@@ -661,6 +670,7 @@ public final class DBConstants {
         public static final String RETURN_GENERATED_KEYS = "returnGeneratedKeys";
         public static final String KEY_COLUMNS = "keyColumns";
         public static final String EXPORT = "export";
+        public static final String OPTIONAL = "optional";
         public static final String EXPORT_TYPE = "exportType";
         public static final String INPUT_NAMESPACE = "inputNamespace";
         public static final String NAMESPACE = "namespace";
@@ -809,7 +819,7 @@ public final class DBConstants {
      * SQL query types that are non-stored procedures.
      */
     public static final String[] SQL_NORMAL_QUERY_TYPES = {"SELECT", "INSERT",
-            "UPDATE", "DELETE", "CREATE", "ALTER"};
+            "UPDATE", "DELETE", "CREATE", "ALTER", "DROP"};
 
     /**
      * JDBC URL prefixes used to identify the RDBMS engine from the driver.
@@ -830,6 +840,22 @@ public final class DBConstants {
         public static final String SYBASE = "jdbc:sybase";
         public static final String H2 = "jdbc:h2";
         public static final String INFORMIX = "jdbc:informix-sqli";
+    }
+    
+    /**
+     * Data Services SQL Driver URL prefixes used to specify Excel and GSpread URLs
+     */
+    public static final class DSSQLDriverPrefixes {
+    	
+    	private DSSQLDriverPrefixes() {
+            throw new AssertionError();
+        }
+    	
+    	public static final String JDBC_PREFIX = "jdbc";
+        public static final String EXCEL_PREFIX = "jdbc:wso2:excel";
+        public static final String GSPRED_PREFIX = "jdbc:wso2:gspread";
+        public static final String PROVIDER_PREFIX = "wso2";
+        public static final String FILE_PATH = "filePath";
     }
 
     /**

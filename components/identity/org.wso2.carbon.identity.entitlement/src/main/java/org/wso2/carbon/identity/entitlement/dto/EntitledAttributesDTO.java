@@ -29,6 +29,12 @@ public class EntitledAttributesDTO {
 
     private String environment;
 
+    private boolean allActions;
+
+    private boolean allResources;
+
+    private AttributeDTO[] attributeDTOs;    
+
 	public String getResourceName() {
 		return resourceName;
 	}
@@ -41,7 +47,24 @@ public class EntitledAttributesDTO {
 		return action;
 	}
 
-	public void setAction(String action) {
+    public boolean isAllActions() {
+        return allActions;
+    }
+
+    public void setAllActions(boolean allActions) {
+        this.allActions = allActions;
+    }
+
+    public boolean isAllResources() {
+        return allResources;
+    }
+
+    public void setAllResources(boolean allResources) {
+        this.allResources = allResources;
+    }
+
+    public void setAction(String action) {
+
 		this.action = action;
 	}
 
@@ -53,26 +76,28 @@ public class EntitledAttributesDTO {
         this.environment = environment;
     }
 
+    public AttributeDTO[] getAttributeDTOs() {
+        return attributeDTOs;
+    }
+
+    public void setAttributeDTOs(AttributeDTO[] attributeDTOs) {
+        this.attributeDTOs = attributeDTOs;
+    }
+    
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof EntitledAttributesDTO)) {
-            return false;
-        }
+        if (this == o) return true;
+        if (!(o instanceof EntitledAttributesDTO)) return false;
 
-        EntitledAttributesDTO dto = (EntitledAttributesDTO) o;
+        EntitledAttributesDTO that = (EntitledAttributesDTO) o;
 
-        if (action != null ? !action.equals(dto.action) : dto.action != null) {
+        if (allActions != that.allActions) return false;
+        if (allResources != that.allResources) return false;
+        if (action != null ? !action.equals(that.action) : that.action != null) return false;
+        if (environment != null ? !environment.equals(that.environment) : that.environment != null)
             return false;
-        }
-        if (environment != null ? !environment.equals(dto.environment) : dto.environment != null) {
+        if (resourceName != null ? !resourceName.equals(that.resourceName) : that.resourceName != null)
             return false;
-        }
-        if (resourceName != null ? !resourceName.equals(dto.resourceName) : dto.resourceName != null) {
-            return false;
-        }
 
         return true;
     }
@@ -82,6 +107,8 @@ public class EntitledAttributesDTO {
         int result = resourceName != null ? resourceName.hashCode() : 0;
         result = 31 * result + (action != null ? action.hashCode() : 0);
         result = 31 * result + (environment != null ? environment.hashCode() : 0);
+        result = 31 * result + (allActions ? 1 : 0);
+        result = 31 * result + (allResources ? 1 : 0);
         return result;
     }
 }

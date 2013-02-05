@@ -1,9 +1,0 @@
-<%
-include("/services/subscriberUtil.jag");
-function getPurchases() {
-    return getDataJSON(getPurchasedFunc(), null, "Error while getting purchased services");
-}
-
-
-
-%>

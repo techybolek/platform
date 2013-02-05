@@ -39,12 +39,22 @@
     ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
     String[] appList = null;
+    String[] faultyAppList = null;
+    int numberOfFaultyApps = 0;
+    int numberOfApp = 0;
     ApplicationAdminClient client = null;
 
     try {
         client = new ApplicationAdminClient(cookie,
                                             backendServerURL, configContext, request.getLocale());
         appList = client.getAllApps();
+        faultyAppList = client.getAllFaultyApps();
+        if(faultyAppList != null){
+            numberOfFaultyApps = faultyAppList.length;
+        }
+        if(appList != null){
+            numberOfApp = appList.length;
+        }
     } catch (Exception e) {
         response.setStatus(500);
         CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
@@ -98,6 +108,27 @@
         <h2><fmt:message key="carbonapps.list.headertext"/></h2>
 
         <div id="workArea">
+            <%
+                if (numberOfApp > 0) {
+            %>
+            <%=numberOfApp %> <fmt:message key="running.carapps"/>.&nbsp;
+            <%
+                }
+            %>
+            <%
+                if (numberOfFaultyApps > 0) {
+            %>
+            <u>
+                <a href="faulty_carapps.jsp">
+                    <font color="red"><%= numberOfFaultyApps%>
+                        <fmt:message key="faulty.carapps"/>
+                    </font>
+                </a>
+            </u>
+            <%
+                }
+            %>
+            <p>&nbsp;</p>
             <form action="" name="applicationsForm" method="post">
                 <%
                     if (appList != null && appList.length > 0) {

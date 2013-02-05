@@ -15,7 +15,6 @@
  */
 package org.wso2.carbon.usage.api;
 
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,20 +23,13 @@ import org.wso2.carbon.stratos.common.util.CommonUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.usage.beans.*;
-import org.wso2.carbon.usage.meteringqueryds.stub.beans.xsd.BandwidthStat;
-import org.wso2.carbon.usage.meteringqueryds.stub.beans.xsd.RegBandwidthStat;
-import org.wso2.carbon.usage.meteringqueryds.stub.beans.xsd.ServiceRequestStat;
-import org.wso2.carbon.usage.meteringqueryds.stub.MeteringQueryDSStub;
-import org.wso2.carbon.usage.meteringqueryds.stub.beans.xsd.InstanceUsageStat;
+import org.wso2.carbon.usage.util.DataAccessObject;
 import org.wso2.carbon.usage.util.Util;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 
 public class TenantUsageRetriever {
     private static final Log log = LogFactory.getLog(TenantUsageRetriever.class);
@@ -49,7 +41,7 @@ public class TenantUsageRetriever {
     public static final int WEBAPP_BANDWIDTH_INDEX = 2;
 
     private RegistryService registryService;
-    private MeteringQueryDSStub meteringStub;
+    private DataAccessObject dao;
 
     public TenantUsageRetriever(RegistryService registryService, ConfigurationContext configContext)
             throws Exception {
@@ -57,44 +49,30 @@ public class TenantUsageRetriever {
         // we are loading the essentials from the constructors in order to restrict the users
         // to use the usage retrievers.
         this.registryService = registryService;
-
-        if (configContext != null) {
-            try {
-                this.meteringStub = new MeteringQueryDSStub(configContext, METERING_ENDPOINT);
-            } catch (AxisFault e) {
-                String msg = "Error in creating BAM metering stub.";
-                log.error(msg, e);
-                throw new Exception(msg, e);
-            }
-        } else {
-            //We can't do any useful functionality with TenantUsageRetriever
-            String msg = "Unable to create TenantUsageRetriever";
-            log.error(msg);
-            throw new Exception(msg);
-        }
+        this.dao = new DataAccessObject();
     }
 
 
     public TenantDataCapacity getDataCapacity(int tenantId, Calendar startDate, Calendar endDate,
                                               boolean currentMonth) throws Exception {
+        TenantDataCapacity dataCapacity = null;
 
-        RegBandwidthStat[] stats;
-        if (currentMonth) {
-            stats = meteringStub.getDailyRegistryBandwidthUsageStats(tenantId, startDate, endDate);
+        if(currentMonth){
+            dataCapacity = dao.getTenantDataCapacity(tenantId);
         } else {
-            stats = meteringStub.getRegistryBandwidthUsageStats(tenantId, startDate, endDate);
+            //we don't have a way to see the registry usage of last months yet
         }
 
-        TenantDataCapacity capacity = new TenantDataCapacity();
+        return dataCapacity;
 
-        //We will be sure that there will be only one record
-        if ((stats != null) && (stats[0] != null)) {
-            capacity.setRegistryContentCapacity(stats[0].getRegistryBandwidth());
-            capacity.setRegistryContentHistoryCapacity(stats[0].getRegistryHistoryBandwidth());
-        }
-        return capacity;
     }
 
+    /**
+     * This returns the number of users in a given tenant
+     * @param tenantId Tenant ID
+     * @return Number of users
+     * @throws RegistryException
+     */
     public int getCurrentUserCount(int tenantId) throws RegistryException {
         UserRealm userRealm = registryService.getUserRealm(tenantId);
         int usersCount;
@@ -111,16 +89,38 @@ public class TenantUsageRetriever {
 
     public BandwidthStatistics[][] getBandwidthStatistics(int tenantId, Calendar startDate,
                                                           Calendar endDate, boolean currentMonth) throws Exception {
-
-        BandwidthStat[] stats;
+        //return the bandwidth usage of a user for a given period
+        BandwidthStatistics[] stats;
         if (currentMonth) {
-            stats = meteringStub.getHourlyBandwidthStats(tenantId, startDate, endDate);
+            //get from daily usage stats
+            List<BandwidthStatistics> bwsList = new ArrayList<BandwidthStatistics>();
+            bwsList = dao.getDailyBandwidthStats(tenantId, startDate, endDate);
+            
+            //next we'll get from the houlry stats to get the stats which are not yet
+            //summarized to the daily stats table
+            Calendar startHour = Calendar.getInstance();
+            startHour.set(Calendar.HOUR, 0);
+            startHour.set(Calendar.MINUTE, 0);
+            startHour.set(Calendar.SECOND, 0);
+            
+            Calendar endHour = Calendar.getInstance();
+            
+            bwsList.addAll(dao.getHourlyBandwidthStats(tenantId, startHour, endHour));
+            stats = convertBWListToArray(bwsList);
+            
         } else {
-            stats = meteringStub.getBandwidthStats(tenantId, startDate, endDate);
+            //get from monthly usage stats
+            Calendar monthCal = (Calendar) endDate.clone();
+            monthCal.set(Calendar.DATE, 0);
+            monthCal.set(Calendar.HOUR, 0);
+            monthCal.set(Calendar.MINUTE, 0);
+            monthCal.set(Calendar.SECOND, 0);
+
+            stats = convertBWListToArray(dao.getMonthlyBandwidthStats(tenantId, monthCal));
         }
 
-        // store the statistics in a temporary map. This is because, we are getting the server name 
-        // from the URL and there might be two distinct URL gives same server name. 
+        // store the statistics in a temporary map. This is because, we are getting the server name
+        // from the URL and there might be two distinct URL gives same server name.
         // For example, http://esb.a.b/ and http://esb.c.d/ both will give the server name as "esb"
         // Hence, the value should be accumulated value
         HashMap<String, BandwidthStatistics> regBwMap = new HashMap<String, BandwidthStatistics>();
@@ -128,21 +128,25 @@ public class TenantUsageRetriever {
         HashMap<String, BandwidthStatistics> webappBwMap = new HashMap<String, BandwidthStatistics>();
 
         if (stats != null) {
-            for (BandwidthStat stat : stats) {
+            for (BandwidthStatistics stat : stats) {
                 //Proceed only if incoming bandwidth or outgoing bandwidth is not zero
-                if ((stat.getIncomingBandwidth() == 0) && (stat.getOutgoingBandwidth() == 0)) {
+                if (stat.getIncomingBandwidth() == 0 && stat.getOutgoingBandwidth() == 0) {
                     continue;
                 }
 
+                //TODO: fix the extractServiceUrl method properly
                 String serverName = extractServiceNameFromUrl(stat.getServerUrl());
-                String bandwidthName = stat.getBandwidthName();
+                String bandwidthName = stat.getKey();
 
                 HashMap<String, BandwidthStatistics> bwMap;
-                if (bandwidthName.equals(UsageConstants.REGISTRY_BANDWIDTH)) {
+                if (bandwidthName.equals(UsageConstants.REGISTRY_INCOMING_BW) ||
+                        bandwidthName.equals(UsageConstants.REGISTRY_OUTGOING_BW)) {
                     bwMap = regBwMap;
-                } else if (bandwidthName.equals(UsageConstants.SERVICE_BANDWIDTH)) {
+                } else if (bandwidthName.equals(UsageConstants.SERVICE_INCOMING_BW) ||
+                        bandwidthName.equals(UsageConstants.SERVICE_OUTGOING_BW)) {
                     bwMap = svcBwMap;
-                } else if (bandwidthName.equals(UsageConstants.WEBAPP_BANDWIDTH)) {
+                } else if (bandwidthName.equals(UsageConstants.WEBAPP_INCOMING_BW) ||
+                        bandwidthName.equals(UsageConstants.WEBAPP_OUTGOING_BW)) {
                     bwMap = webappBwMap;
                 } else {
                     log.warn("Unable to identify bandwidth name " + bandwidthName);
@@ -178,30 +182,49 @@ public class TenantUsageRetriever {
 
     public RequestStatistics[] getRequestStatistics(int tenantId, Calendar startDate,
                                                     Calendar endDate, boolean currentMonth) throws Exception {
-
-        ServiceRequestStat[] stats;
+        RequestStatistics[] stats;
         if (currentMonth) {
-            //Read from hourly table. Monthly table will not get updated until end of month
-            stats = meteringStub.getHourlyServiceRequestStats(tenantId, startDate, endDate);
+            //get from daily usage stats
+            List<RequestStatistics> rsList = new ArrayList<RequestStatistics>();
+            rsList = dao.getDailyRequestStats(tenantId, startDate, endDate);
+
+            //next we'll get from the houlry stats to get the stats which are not yet
+            //summarized to the daily stats table
+            Calendar startHour = Calendar.getInstance();
+            startHour.set(Calendar.HOUR, 0);
+            startHour.set(Calendar.MINUTE, 0);
+            startHour.set(Calendar.SECOND, 0);
+
+            Calendar endHour = Calendar.getInstance();
+
+            rsList.addAll(dao.getHourlyRequestStats(tenantId, startHour, endHour));
+
+            stats = convertRSListToArray(rsList);
         } else {
-            //Not a current month; Read from Monthly table. 
-            stats = meteringStub.getServiceRequestStats(tenantId, startDate, endDate);
+            //get from monthly usage stats
+            Calendar monthCal = (Calendar) endDate.clone();
+            monthCal.set(Calendar.DATE, 0);
+            monthCal.set(Calendar.HOUR, 0);
+            monthCal.set(Calendar.MINUTE, 0);
+            monthCal.set(Calendar.SECOND, 0);
+
+            stats = convertRSListToArray(dao.getMonthlyRequestStats(tenantId, monthCal));
         }
 
-        // store the statistics in a temporary map. This is because, we are getting the server name 
-        // from the URL and there might be two distinct URL gives same server name. 
+        // store the statistics in a temporary map. This is because, we are getting the server name
+        // from the URL and there might be two distinct URL gives same server name.
         // For example, http://esb.a.b/ and http://esb.c.d/ both will give the server name as "esb"
         // Hence, the value should be accumulated value
         HashMap<String, RequestStatistics> tempReqStatMap = new HashMap<String, RequestStatistics>();
 
         if (stats != null) {
-            for (ServiceRequestStat stat : stats) {
+            for (RequestStatistics stat : stats) {
                 //Proceed only if request count is not zero
-                if (stat.getReqCount() == 0) {
+                if (stat.getRequestCount() == 0) {
                     continue;
                 }
 
-                String serverName = extractServiceNameFromUrl(stat.getServerUrl());
+                String serverName = extractServiceNameFromUrl(stat.getKey());
 
                 //find whether the map already has this key; If not, insert a new one
                 RequestStatistics reqStat = tempReqStatMap.get(serverName);
@@ -211,8 +234,8 @@ public class TenantUsageRetriever {
                 }
 
                 // Update the service specific statistics
-                reqStat.setRequestCount(reqStat.getRequestCount() + stat.getReqCount());
-                reqStat.setResponseCount(reqStat.getResponseCount() + stat.getResCount());
+                reqStat.setRequestCount(reqStat.getRequestCount() + stat.getRequestCount());
+                reqStat.setResponseCount(reqStat.getResponseCount() + stat.getResponseCount());
                 reqStat.setFaultCount(reqStat.getFaultCount() + stat.getFaultCount());
             }
         }
@@ -220,6 +243,7 @@ public class TenantUsageRetriever {
         //Convert to array and return it
         Collection<RequestStatistics> values = tempReqStatMap.values();
         return values.toArray(new RequestStatistics[values.size()]);
+
     }
 
     public TenantUsage getTenantUsage(int tenantId, String yearMonth) throws Exception {
@@ -266,14 +290,16 @@ public class TenantUsageRetriever {
         long totalReq = 0;
         long totalRes = 0;
         long totalFault = 0;
-        for (RequestStatistics stat : reqStats) {
-            totalReq += stat.getRequestCount();
-            totalRes += stat.getResponseCount();
-            totalFault += stat.getFaultCount();
+        if(reqStats!=null){
+            for (RequestStatistics stat : reqStats) {
+                totalReq += stat.getRequestCount();
+                totalRes += stat.getResponseCount();
+                totalFault += stat.getFaultCount();
+            }
+            totalReqStat.setRequestCount(totalReq);
+            totalReqStat.setResponseCount(totalRes);
+            totalReqStat.setFaultCount(totalFault);
         }
-        totalReqStat.setRequestCount(totalReq);
-        totalReqStat.setResponseCount(totalRes);
-        totalReqStat.setFaultCount(totalFault);
         tenantUsage.setTotalRequestStatistics(totalReqStat);
 
         //get Bandwidth statistics
@@ -371,7 +397,10 @@ public class TenantUsageRetriever {
      * @throws Exception when back end error occurs
      */
     public InstanceUsageStatics[] getInstanceUsages() throws Exception {
-        InstanceUsageStat[] instanceData = meteringStub.getInstanceUsageStats();
+
+        //TODO: implement
+        return null;
+        /*InstanceUsageStat[] instanceData = meteringStub.getInstanceUsageStats();
         if (instanceData == null || instanceData.length == 0) {
             return null;
         }
@@ -388,5 +417,19 @@ public class TenantUsageRetriever {
             elementID = elementID + 1;
         }
         return returnValue;
+        */
+    }
+    
+    
+    private BandwidthStatistics[] convertBWListToArray(List<BandwidthStatistics> bwsList) {
+        BandwidthStatistics[] bwsArray = new BandwidthStatistics[bwsList.size()];
+        bwsArray = bwsList.toArray(bwsArray);
+        return bwsArray;
+    }
+    
+    private RequestStatistics[] convertRSListToArray(List<RequestStatistics> rsList) {
+        RequestStatistics[] rsArray = new RequestStatistics[rsList.size()];
+        rsArray = rsList.toArray(rsArray);
+        return rsArray;
     }
 }

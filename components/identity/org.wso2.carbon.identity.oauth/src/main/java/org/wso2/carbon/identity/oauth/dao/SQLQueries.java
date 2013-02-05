@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -37,7 +37,7 @@ public class SQLQueries {
         public static final String GET_APPS_OF_USER = "SELECT CONSUMER_KEY, CONSUMER_SECRET, APP_NAME, OAUTH_VERSION, CALLBACK_URL FROM " +
                 "IDN_OAUTH_CONSUMER_APPS WHERE USERNAME=? AND TENANT_ID=?";
 
-        public static final String GET_APP_INFO = "SELECT CONSUMER_SECRET, APP_NAME, OAUTH_VERSION, CALLBACK_URL FROM " +
+        public static final String GET_APP_INFO = "SELECT CONSUMER_SECRET, APP_NAME, OAUTH_VERSION, CALLBACK_URL, USERNAME FROM " +
                 "IDN_OAUTH_CONSUMER_APPS WHERE CONSUMER_KEY=? ";
 
         public static final String UPDATE_CONSUMER_APP = "UPDATE IDN_OAUTH_CONSUMER_APPS SET CALLBACK_URL=? " +
@@ -83,6 +83,9 @@ public class SQLQueries {
                 "WHERE ACCESS_TOKEN=?";
 
         public static final String GET_CONSUMER_KEY_FOR_TOKEN = "SELECT CONSUMER_KEY, SCOPE FROM IDN_OAUTH1A_REQUEST_TOKEN WHERE REQUEST_TOKEN=?";
+
+        // Get the username corresponding to the given consumer key and secret
+        public static final String GET_USERNAME_FOR_KEY_AND_SECRET = "SELECT USERNAME FROM IDN_OAUTH_CONSUMER_APPS WHERE CONSUMER_KEY=? AND CONSUMER_SECRET=?";
         
     }
 }

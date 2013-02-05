@@ -22,9 +22,11 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>caching-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
+    <version>4.0.2</version>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.caching.feature</artifactId>
     <packaging>pom</packaging>
@@ -42,7 +44,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.caching.ui.feature</artifactId>
-            <version>${project.version}</version>
+            <version>4.0.0</version>
             <type>zip</type>
 	    </dependency>
     </dependencies>
@@ -62,7 +64,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.caching</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>
@@ -73,7 +75,7 @@
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.caching.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.caching.ui.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.caching.ui.feature:4.0.0</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

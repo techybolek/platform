@@ -28,11 +28,18 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.WaitBeforeShutdownObserver;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class Utils {
     private static final Log log = LogFactory.getLog(Utils.class);
 
     private static RegistryService registryService;
+    private static List<WaitBeforeShutdownObserver> waitBeforeShutdownObserver =
+            new LinkedList<WaitBeforeShutdownObserver>();
 
     private static String defaultEventingServiceURL;
 
@@ -48,6 +55,21 @@ public class Utils {
 
     public static synchronized RegistryService getRegistryService() {
         return registryService;
+    }
+
+    public static WaitBeforeShutdownObserver[] getWaitBeforeShutdownObservers() {
+        return waitBeforeShutdownObserver.toArray(
+                new WaitBeforeShutdownObserver[waitBeforeShutdownObserver.size()]);
+    }
+
+    public static void setWaitBeforeShutdownObserver(WaitBeforeShutdownObserver service) {
+        CarbonUtils.checkSecurity();
+        waitBeforeShutdownObserver.add(service);
+    }
+
+    public static void clearWaitBeforeShutdownObserver() {
+        CarbonUtils.checkSecurity();
+        waitBeforeShutdownObserver = new LinkedList<WaitBeforeShutdownObserver>();
     }
 
     public static Registry getRegistry() throws RegistryException {

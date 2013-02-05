@@ -22,11 +22,12 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>usage-feature</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
+        <version>2.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
+    <version>2.0.5</version>
     <artifactId>org.wso2.carbon.stratos.usage.agent.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Stratos - Usage Agent Feature</name>
@@ -56,7 +57,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.stratos.usage.agent</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:console</propertyDef>
@@ -64,11 +65,8 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.usage.agent</bundleDef>
-				<!--bundleDef>org.wso2.carbon:org.wso2.carbon.redirector.servlet.stub:${wso2carbon.version}</bundleDef-->
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.usage.agent:2.0.5</bundleDef>
                             </bundles>
-                            <!--includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.ui.feature:${wso2carbon.version}</includedFeatureDef-->
                         </configuration>
                     </execution>
                 </executions>

@@ -42,6 +42,13 @@ public interface PIPResourceFinder {
     public void init(Properties properties) throws Exception;
 
     /**
+     * gets name of this module
+     *
+     * @return name as String
+     */
+    public String getModuleName();
+    
+    /**
 	 * Will be fired by CarbonResourceFinder whenever it wants to find a child resources
      *
      * @param parentResourceId  parent resource value

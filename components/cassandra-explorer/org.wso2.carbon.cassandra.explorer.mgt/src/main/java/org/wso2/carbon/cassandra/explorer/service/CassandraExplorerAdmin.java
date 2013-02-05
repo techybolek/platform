@@ -58,6 +58,9 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
     public int getNoOfRows(String keyspaceName, String columnFamily)
             throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
+        if(cluster == null){
+            throw new CassandraExplorerException("No connection to Cluster available");
+        }
         Keyspace keyspace = ConnectionManager.getKeyspace(cluster, keyspaceName);
 
         RangeSlicesQuery<String, String, String> rangeSlicesQuery =
@@ -65,9 +68,14 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
                                                 stringSerializer);
         rangeSlicesQuery.setColumnFamily(columnFamily);
         rangeSlicesQuery.setKeys("", "");
-        rangeSlicesQuery.setRowCount(Integer.MAX_VALUE);
+        rangeSlicesQuery.setRowCount(ConnectionManager.getMaxResultCount());
         rangeSlicesQuery.setReturnKeysOnly();
-        QueryResult<OrderedRows<String, String, String>> result = rangeSlicesQuery.execute();
+        QueryResult<OrderedRows<String, String, String>> result;
+        try{
+            result = rangeSlicesQuery.execute();
+        }catch (HectorException exception){
+            throw new CassandraExplorerException(exception.getMessage(),exception);
+        }
         return result.get().getCount();
     }
 
@@ -81,9 +89,12 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
      * @throws CassandraExplorerException
      */
     public org.wso2.carbon.cassandra.explorer.data.Row[] getRowPaginateSlice
-            (String keyspaceName, String columnFamily, int startingNo, int limit)
+    (String keyspaceName, String columnFamily, int startingNo, int limit)
             throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
+        if(cluster == null){
+            throw new CassandraExplorerException("No connection to Cluster available");
+        }
         Keyspace keyspace = ConnectionManager.getKeyspace(cluster, keyspaceName);
 
         RangeSlicesQuery<String, String, String> rangeSlicesQuery =
@@ -97,14 +108,24 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
         ArrayList<org.wso2.carbon.cassandra.explorer.data.Row> rowlist =
                 new ArrayList<org.wso2.carbon.cassandra.explorer.data.Row>();
 
-        QueryResult<OrderedRows<String, String, String>> result = rangeSlicesQuery.execute();
+        QueryResult<OrderedRows<String, String, String>> result;
+        try{
+            result = rangeSlicesQuery.execute();
+        }catch (HectorException exception){
+            throw new CassandraExplorerException(exception.getMessage(),exception);
+        }
         String endKey = "";
         if (result.get().peekLast() != null) {
             endKey = result.get().peekLast().getKey();
         }
         rangeSlicesQuery.setRowCount(limit);
         rangeSlicesQuery.setKeys(endKey, "");
-        result = rangeSlicesQuery.execute();
+
+        try{
+            result = rangeSlicesQuery.execute();
+        }catch (HectorException exception){
+            throw new CassandraExplorerException(exception.getMessage(),exception);
+        }
 
         for (Row cassandraRow : result.get().getList()) {
             org.wso2.carbon.cassandra.explorer.data.Row row =
@@ -137,6 +158,9 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
                                                                     int startingNo, int limit)
             throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
+        if(cluster == null){
+            throw new CassandraExplorerException("No connection to Cluster available");
+        }
         Keyspace keyspace = ConnectionManager.getKeyspace(cluster, keyspaceName);
 
         RangeSlicesQuery<String, String, String> rangeSlicesQuery =
@@ -145,12 +169,17 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
         rangeSlicesQuery.setColumnFamily(columnFamily);
         rangeSlicesQuery.setKeys("", "");
         rangeSlicesQuery.setRange("", "", false, 3);
-        rangeSlicesQuery.setRowCount(Integer.MAX_VALUE);
+        rangeSlicesQuery.setRowCount(ConnectionManager.getMaxResultCount());
 
         ArrayList<org.wso2.carbon.cassandra.explorer.data.Row> rowlist =
                 new ArrayList<org.wso2.carbon.cassandra.explorer.data.Row>();
 
-        QueryResult<OrderedRows<String, String, String>> result = rangeSlicesQuery.execute();
+        QueryResult<OrderedRows<String, String, String>> result;
+        try{
+            result = rangeSlicesQuery.execute();
+        }catch (HectorException exception){
+            throw new CassandraExplorerException(exception.getMessage(),exception);
+        }
         for (Row cassandraRow : result.get().getList()) {
             org.wso2.carbon.cassandra.explorer.data.Row row =
                     new org.wso2.carbon.cassandra.explorer.data.Row();
@@ -194,6 +223,9 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
             , String searchKey)
             throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
+        if(cluster == null){
+            throw new CassandraExplorerException("No connection to Cluster available");
+        }
         Keyspace keyspace = ConnectionManager.getKeyspace(cluster, keyspaceName);
 
         RangeSlicesQuery<String, String, String> rangeSlicesQuery =
@@ -202,11 +234,16 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
         rangeSlicesQuery.setColumnFamily(columnFamily);
         rangeSlicesQuery.setKeys("", "");
         rangeSlicesQuery.setReturnKeysOnly();
-        rangeSlicesQuery.setRowCount(Integer.MAX_VALUE);
+        rangeSlicesQuery.setRowCount(ConnectionManager.getMaxResultCount());
 
         ArrayList<org.wso2.carbon.cassandra.explorer.data.Row> rowlist =
                 new ArrayList<org.wso2.carbon.cassandra.explorer.data.Row>();
-        QueryResult<OrderedRows<String, String, String>> result = rangeSlicesQuery.execute();
+        QueryResult<OrderedRows<String, String, String>> result;
+        try{
+            result = rangeSlicesQuery.execute();
+        }catch (HectorException exception){
+            throw new CassandraExplorerException(exception.getMessage(),exception);
+        }
 
         for (Row cassandraRow : result.get().getList()) {
             org.wso2.carbon.cassandra.explorer.data.Row row =
@@ -223,6 +260,9 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
                                   String rowName, String searchKey, int startingNo, int limit)
             throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
+        if(cluster == null){
+            throw new CassandraExplorerException("No connection to Cluster available");
+        }
         Keyspace keyspace = ConnectionManager.getKeyspace(cluster, keyspaceName);
 
         SliceQuery<String, String, String> sliceQuery =
@@ -230,8 +270,13 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
                                           stringSerializer);
         sliceQuery.setColumnFamily(columnFamily);
         sliceQuery.setKey(rowName);
-        sliceQuery.setRange("", "", false, Integer.MAX_VALUE);
-        QueryResult<ColumnSlice<String, String>> result = sliceQuery.execute();
+        sliceQuery.setRange("", "", false, ConnectionManager.getMaxResultCount());
+        QueryResult<ColumnSlice<String, String>> result ;
+        try{
+            result = sliceQuery.execute();
+        }catch (HectorException exception){
+            throw new CassandraExplorerException(exception.getMessage(),exception);
+        }
 
         List<HColumn<String, String>> hColumnsList;
         ArrayList<Column> columnsList = new ArrayList<Column>();
@@ -263,6 +308,9 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
                                           String rowName, String searchKey)
             throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
+        if(cluster == null){
+            throw new CassandraExplorerException("No connection to Cluster available");
+        }
         Keyspace keyspace = ConnectionManager.getKeyspace(cluster, keyspaceName);
 
         SliceQuery<String, String, String> sliceQuery =
@@ -270,9 +318,13 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
                                           stringSerializer);
         sliceQuery.setColumnFamily(columnFamily);
         sliceQuery.setKey(rowName);
-        sliceQuery.setRange("", "", false, Integer.MAX_VALUE);
-        QueryResult<ColumnSlice<String, String>> result = sliceQuery.execute();
-
+        sliceQuery.setRange("", "", false, ConnectionManager.getMaxResultCount());
+        QueryResult<ColumnSlice<String, String>> result ;
+        try{
+            result = sliceQuery.execute();
+        }catch (HectorException exception){
+            throw new CassandraExplorerException(exception.getMessage(),exception);
+        }
         List<HColumn<String, String>> hColumnsList;
         ArrayList<Column> columnsList = new ArrayList<Column>();
         hColumnsList = result.get().getColumns();
@@ -290,6 +342,9 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
                                            int startingNo, int limit)
             throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
+        if(cluster == null){
+            throw new CassandraExplorerException("No connection to Cluster available");
+        }
         Keyspace keyspace = ConnectionManager.getKeyspace(cluster, keyspaceName);
         //get the results up to the startingNo
         SliceQuery<String, String, String> sliceQuery =
@@ -301,7 +356,11 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
         QueryResult<ColumnSlice<String, String>> result;
         if (startingNo != 0) {
             sliceQuery.setRange("", "", false, startingNo + 1);
-            result = sliceQuery.execute();
+            try{
+                result = sliceQuery.execute();
+            }catch (HectorException exception){
+                throw new CassandraExplorerException(exception.getMessage(),exception);
+            }
             List<HColumn<String, String>> tmpHColumnsList = result.get().getColumns();
 
             //TODO handle if results are empty
@@ -312,7 +371,11 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
         } else {
             sliceQuery.setRange("", "", false, limit);
         }
-        result = sliceQuery.execute();
+        try{
+            result = sliceQuery.execute();
+        }catch (HectorException exception){
+            throw new CassandraExplorerException(exception.getMessage(),exception);
+        }
 
         List<HColumn<String, String>> hColumnsList;
         ArrayList<Column> columnsList = new ArrayList<Column>();
@@ -332,6 +395,9 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
     public int getNoOfColumns(String keyspaceName, String columnFamily, String rowName)
             throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
+        if(cluster == null){
+            throw new CassandraExplorerException("No connection to Cluster available");
+        }
         Keyspace keyspace = ConnectionManager.getKeyspace(cluster, keyspaceName);
 
         SliceQuery<String, String, String> sliceQuery =
@@ -339,8 +405,13 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
                                           stringSerializer);
         sliceQuery.setColumnFamily(columnFamily);
         sliceQuery.setKey(rowName);
-        sliceQuery.setRange("", "", false, Integer.MAX_VALUE);
-        QueryResult<ColumnSlice<String, String>> result = sliceQuery.execute();
+        sliceQuery.setRange("", "", false, ConnectionManager.getMaxResultCount());
+        QueryResult<ColumnSlice<String, String>> result ;
+        try{
+            result = sliceQuery.execute();
+        }catch (HectorException exception){
+            throw new CassandraExplorerException(exception.getMessage(),exception);
+        }
 
         List<HColumn<String, String>> hColumnsList;
         hColumnsList = result.get().getColumns();
@@ -370,6 +441,9 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
 
     public String[] getKeyspaces() throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
+        if(cluster == null){
+            throw new CassandraExplorerException("No connection to Cluster available");
+        }
         Iterator<KeyspaceDefinition> keyspaceItr = null;
         try {
             keyspaceItr = cluster.describeKeyspaces().iterator();
@@ -387,6 +461,9 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
 
     public String[] getColumnFamilies(String keySpace) throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
+        if(cluster == null){
+            throw new CassandraExplorerException("No connection to Cluster available");
+        }
         Iterator<ColumnFamilyDefinition> keyspaceItr = cluster.describeKeyspace(keySpace).getCfDefs()
                 .iterator();
         ArrayList<String> columnFamiliyNamesList = new ArrayList();
@@ -395,6 +472,11 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
         }
         String[] keySpaceNameArray = new String[columnFamiliyNamesList.size()];
         return columnFamiliyNamesList.toArray(keySpaceNameArray);
+    }
+
+    //Setting Maximum row result count
+    public void setMaxRowCount(int maxRowCount){
+        ConnectionManager.setMaxResultCount(maxRowCount);
     }
 
     private String cleanNonXmlChars(String value) {

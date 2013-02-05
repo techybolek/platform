@@ -15,20 +15,25 @@
     var allStatsUrl=jagg.getAbsoluteUrl("/site/pages/all-statistics.jag");
     var allStatsMappedUrl=jagg.getMappedUrl("/site/pages/all-statistics.jag");
 
+    var revokeUrl=jagg.getAbsoluteUrl("/site/pages/tokens.jag");
+    var revokeMappedUrl=jagg.getMappedUrl("/site/pages/tokens.jag");	
+	
+	
     var  mod,isPermitted;
     isPermitted=jagg.getCreatePermitted().permitted;
 %>
 
 <div class="sidebar-nav well">
     <ul class="nav nav-list">
-       <li class="nav-header">APIs</li>
-        <li <%if(reqUrl.equals(site.context)||reqUrl.equals(site.context+"/")||reqUrl.indexOf(listUrl)>=0 || reqUrl.indexOf(listMappedUrl)>=0||reqUrl.indexOf(infoUrl)>=0 || reqUrl.indexOf(infoMappedUrl)>=0|| reqUrl.indexOf(userUrl)>=0||reqUrl.indexOf(userMappedUrl)>=0){%>class="active"<% } %>><a href="<%=listMappedUrl%>?page=1"  onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?page=1',e:event})">Browse</a></li>
-        <%if(isPermitted){%><li <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(addMappedUrl)>=0){%>class="active"<% } %>><a href="<%=addMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=addMappedUrl%>',e:event})">Add</a></li><%}%>
-        <li <% if(reqUrl.indexOf(allStatsUrl)>=0 || reqUrl.indexOf(allStatsMappedUrl)>=0){%>class="active"<% } %>><a href="<%=allStatsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})">All Statistics</a></li>
+       <li class="nav-header"><%=i18n.localize("apis")%></li>
+        <li <%if(reqUrl.equals(site.context)||reqUrl.equals(site.context+"/")||reqUrl.indexOf(listUrl)>=0 || reqUrl.indexOf(listMappedUrl)>=0||reqUrl.indexOf(infoUrl)>=0 || reqUrl.indexOf(infoMappedUrl)>=0|| reqUrl.indexOf(userUrl)>=0||reqUrl.indexOf(userMappedUrl)>=0){%>class="active"<% } %>><a href="<%=listMappedUrl%>?page=1"  onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?page=1',e:event})"><%=i18n.localize("browse")%></a></li>
+        <%if(isPermitted){%><li <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(addMappedUrl)>=0){%>class="active"<% } %>><a href="<%=addMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=addMappedUrl%>',e:event})"><%=i18n.localize("add")%></a></li><%}%>
+        <li <% if(reqUrl.indexOf(allStatsUrl)>=0 || reqUrl.indexOf(allStatsMappedUrl)>=0){%>class="active"<% } %>><a href="<%=allStatsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("allStats")%></a></li>
         <%if(isPermitted){%>
-        <li class="nav-header">My APIs</li>
-        <li <% if(reqUrl.indexOf(subsUrl)>=0||reqUrl.indexOf(subsMappedUrl)>=0){%>class="active"<% } %>><a href="<%=subsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>',e:event})">Users/Keys</a></li>
-        <li <% if(reqUrl.indexOf(statsUrl)>=0||reqUrl.indexOf(statsMappedUrl)>=0){%>class="active"<% } %>><a href="<%=statsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>',e:event})">Statistics</a></li>
+        <li class="nav-header"><%=i18n.localize("myAPIs")%></li>
+        <li <% if(reqUrl.indexOf(subsUrl)>=0||reqUrl.indexOf(subsMappedUrl)>=0){%>class="active"<% } %>><a href="<%=subsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>',e:event})"><%=i18n.localize("subscriptions")%></a></li>
+        <li <% if(reqUrl.indexOf(revokeUrl)>=0 ||reqUrl.indexOf(revokeMappedUrl)>=0){%>class="active"<% } %>><a href="<%=revokeMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=revokeMappedUrl%>',e:event})"><%=i18n.localize("revokeTokens")%></a></li>    
+		<li <% if(reqUrl.indexOf(statsUrl)>=0||reqUrl.indexOf(statsMappedUrl)>=0){%>class="active"<% } %>><a href="<%=statsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>',e:event})"><%=i18n.localize("statistics")%></a></li>
         <%}%>
      </ul>
 </div>

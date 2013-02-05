@@ -100,15 +100,15 @@ public  class QueueManagementBeans {
             return queueDetailsList;
 
         } catch (MalformedObjectNameException e) {
-            throw new QueueManagerException("Cannot access topic subscriber information",e);
+            throw new QueueManagerException("Cannot access mBean operations to get queue list",e);
         } catch (ReflectionException e) {
-            throw new QueueManagerException("Cannot access topic subscriber information",e);
+            throw new QueueManagerException("Cannot access mBean operations to get queue list",e);
         } catch (MBeanException e) {
-            throw new QueueManagerException("Cannot access topic subscriber information",e);
+            throw new QueueManagerException("Cannot access mBean operations to get queue list",e);
         } catch (InstanceNotFoundException e) {
-            throw new QueueManagerException("Cannot access topic subscriber information for node",e);
+            throw new QueueManagerException("Cannot access mBean operations to get queue list",e);
         } catch (AttributeNotFoundException e) {
-             throw new QueueManagerException("Attribute not found",e);
+             throw new QueueManagerException("Cannot access mBean operations to get queue list",e);
         }
     }
     public int getMessageCount(String queueName) throws QueueManagerException
@@ -117,8 +117,9 @@ public  class QueueManagementBeans {
         MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
         try
         {
-         ObjectName objectName =
-                     new ObjectName("org.wso2.andes:type=ClusterManagementInformation,name=ClusterManagementInformation");
+            ObjectName objectName =
+                    new ObjectName("org.wso2.andes:type=QueueManagementInformation,name=QueueManagementInformation");
+
          String operationName = "getMessageCount";
          Object [] parameters = new Object[]{queueName};
          String [] signature = new String[]{String.class.getName()};
@@ -135,13 +136,13 @@ public  class QueueManagementBeans {
          return messageCount;
 
         } catch (MalformedObjectNameException e){
-           throw new QueueManagerException("Cannot access topic subscriber information");
+           throw new QueueManagerException("Cannot access mBean operations for message count:"+queueName,e);
         } catch (ReflectionException e) {
-           throw new QueueManagerException("Cannot access topic subscriber information");
+           throw new QueueManagerException("Cannot access mBean operations for message count:"+queueName,e);
         } catch (MBeanException e) {
-            throw new QueueManagerException("Cannot access topic subscriber information");
+            throw new QueueManagerException("Cannot access mBean operations for message count:"+queueName,e);
         } catch (InstanceNotFoundException e) {
-            throw new QueueManagerException("Cannot access topic subscriber information for node");
+            throw new QueueManagerException("Cannot access mBean operations for message count:"+queueName,e);
         }
     }
 

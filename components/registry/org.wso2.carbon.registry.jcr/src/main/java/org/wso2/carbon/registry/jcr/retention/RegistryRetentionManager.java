@@ -62,7 +62,6 @@ public class RegistryRetentionManager implements RetentionManager {
         try {
             TCKTestDataLoader.loadRetentionPolicies(session);
         } catch (RepositoryException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     }
 

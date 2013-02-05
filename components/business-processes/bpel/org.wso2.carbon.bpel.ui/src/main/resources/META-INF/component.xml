@@ -152,19 +152,34 @@
         </Mapping>
     </FileUploadConfig>
 
+    <!--<servlets>-->
+		<!--<servlet id="SVG Servlet">-->
+			<!--<servlet-name>SVG Servlet</servlet-name>-->
+			<!--<url-pattern>/carbon/bpel/svg</url-pattern>-->
+			<!--<display-name>SVG Servlet</display-name>-->
+			<!--<servlet-class>org.wso2.carbon.bpel.ui.bpel2svg.latest.internal.frontend.SVGServlet</servlet-class>-->
+		<!--</servlet>-->
+		<!--<servlet id="ChangeSettings Servlet">-->
+			<!--<servlet-name>ChangeSettings Servlet</servlet-name>-->
+			<!--<url-pattern>/carbon/bpel/changesettings</url-pattern>-->
+			<!--<display-name>ChangeSettings Servlet</display-name>-->
+			<!--<servlet-class>org.wso2.carbon.bpel.ui.bpel2svg.latest.internal.frontend.ChangeSettings</servlet-class>-->
+		<!--</servlet>-->
+	<!--</servlets>-->
+
     <servlets>
-		<servlet id="SVG Servlet">
-			<servlet-name>SVG Servlet</servlet-name>
-			<url-pattern>/carbon/bpel/svg</url-pattern>
-			<display-name>SVG Servlet</display-name>
-			<servlet-class>org.wso2.carbon.bpel.ui.bpel2svg.latest.internal.frontend.SVGServlet</servlet-class>
-		</servlet>
-		<servlet id="ChangeSettings Servlet">
-			<servlet-name>ChangeSettings Servlet</servlet-name>
-			<url-pattern>/carbon/bpel/changesettings</url-pattern>
-			<display-name>ChangeSettings Servlet</display-name>
-			<servlet-class>org.wso2.carbon.bpel.ui.bpel2svg.latest.internal.frontend.ChangeSettings</servlet-class>
-		</servlet>
-	</servlets>
+        <servlet id="PNGGenarateServlet">
+            <servlet-name>PNGGenarateServlet</servlet-name>
+            <url-pattern>/carbon/png</url-pattern>
+            <display-name>PNGGenarateServlet</display-name>
+            <servlet-class>org.wso2.carbon.bpel.ui.bpel2svg.PNGGenarateServlet</servlet-class>
+        </servlet>
+        <servlet id="SVGGenerateServlet">
+            <servlet-name>SVGGenerateServlet</servlet-name>
+            <url-pattern>/carbon/svg</url-pattern>
+            <display-name>SVGGenerateServlet</display-name>
+            <servlet-class>org.wso2.carbon.bpel.ui.bpel2svg.SVGGenerateServlet</servlet-class>
+        </servlet>
+    </servlets>
 </component>
                            

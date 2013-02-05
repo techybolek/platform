@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.oauth;
 
+import org.apache.axis2.Constants;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
@@ -23,6 +24,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
@@ -35,13 +37,15 @@ import java.util.Map;
  * through the APIManagerConfiguration.
  */
 public class OAuthAuthenticator implements Authenticator {
-    
+
     protected APIKeyValidator keyValidator;
-    
+
     private String securityHeader = HttpHeaders.AUTHORIZATION;
     private String consumerKeyHeaderSegment = "Bearer";
     private String oauthHeaderSplitter = ",";
     private String consumerKeySegmentDelimiter = " ";
+    private String securityContextHeader;
+    private boolean removeOAuthHeadersFromOutMessage=false;
 
     public void init(SynapseEnvironment env) {
         this.keyValidator = new APIKeyValidator(env.getSynapseConfiguration().getAxisConfiguration());
@@ -59,27 +63,70 @@ public class OAuthAuthenticator implements Authenticator {
         if (headers != null) {
             apiKey = extractCustomerKeyFromAuthHeader(headers);
         }
+        if(removeOAuthHeadersFromOutMessage){
+            headers.remove(securityHeader);
+        }
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        String fullRequestPath = (String)synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
 
-        if (apiKey == null || apiContext == null || apiVersion == null) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
-                    "Required OAuth credentials not provided");
+        String requestPath = fullRequestPath.substring((apiContext + apiVersion).length() + 1, fullRequestPath.length());
+        String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
+                getProperty(Constants.Configuration.HTTP_METHOD);
+
+        //If the matching resource does not require authentication
+        String authenticationScheme = keyValidator.getResourceAuthenticationScheme(apiContext, apiVersion, requestPath, httpMethod);
+        APIKeyValidationInfoDTO info;
+        if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){
+
+            String clientIP = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().getProperty(APIConstants.REMOTE_ADDR);
+
+            //Create a dummy AuthenticationContext object with hard coded values for
+            // Tier and KeyType. This is because we cannot determine the Tier nor Key
+            // Type without subscription information..
+            AuthenticationContext authContext = new AuthenticationContext();
+            authContext.setAuthenticated(true);
+            authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
+            //Requests are throttled by the ApiKey that is set here. In an unauthenticated scenario,
+            //we will use the client's IP address for throttling.
+            authContext.setApiKey(clientIP);
+            authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+            //This name is hardcoded as anonymous because there is no associated user token
+            authContext.setUsername("anonymous");
+            authContext.setCallerToken(null);
+            authContext.setApplicationName(null);
+            APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
+            return true;
+        } else if (APIConstants.NO_MATCHING_AUTH_SCHEME.equals(authenticationScheme)) {
+            info = new APIKeyValidationInfoDTO();
+            info.setAuthorized(false);
+            info.setValidationStatus(900906);
+        } else {
+            if (apiKey == null || apiContext == null || apiVersion == null) {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
+                                               "Required OAuth credentials not provided");
+            }
+            info = keyValidator.getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme);
+            synCtx.setProperty("APPLICATION_NAME", info.getApplicationName());
+            synCtx.setProperty("END_USER_NAME", info.getEndUserName());
         }
 
-        APIKeyValidationInfoDTO info = keyValidator.getKeyValidationInfo(apiContext, apiKey, apiVersion);
         if (info.isAuthorized()) {
             AuthenticationContext authContext = new AuthenticationContext();
             authContext.setAuthenticated(true);
             authContext.setTier(info.getTier());
             authContext.setApiKey(apiKey);
             authContext.setKeyType(info.getType());
-            authContext.setUsername(info.getUsername());
-            APISecurityUtils.setAuthenticationContext(synCtx, authContext);
+            authContext.setUsername(info.getSubscriber());
+            authContext.setCallerToken(info.getEndUserToken());
+            authContext.setApplicationId(info.getApplicationId());
+            authContext.setApplicationName(info.getApplicationName());
+            authContext.setApplicationTier(info.getApplicationTier());
+            APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
             return true;
         } else {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                    "Authentication failure for API: " + apiContext + ", version: " + apiVersion +
+            throw new APISecurityException(info.getValidationStatus(),
+                    "Access failure for API: " + apiContext + ", version: " + apiVersion +
                             " with key: " + apiKey);
         }
     }
@@ -88,18 +135,19 @@ public class OAuthAuthenticator implements Authenticator {
      * Extracts the customer API key from the OAuth Authentication header. If the required
      * security header is present in the provided map, it will be removed from the map
      * after processing.
-     * 
+     *
      * @param headersMap Map of HTTP headers
      * @return extracted customer key value or null if the required header is not present
      */
     public String extractCustomerKeyFromAuthHeader(Map headersMap) {
-        // Remove the OAuth authorization header from the message
-        // It shouldn't go beyond this point
-        String authHeader = (String) headersMap.remove(securityHeader);
+
+        //From 1.0.7 version of this component onwards remove the OAuth authorization header from
+        // the message is configurable. So we dont need to remove headers at this point.
+        String authHeader = (String) headersMap.get(securityHeader);
         if (authHeader == null) {
             return null;
         }
-        
+
         if (authHeader.startsWith("OAuth ") || authHeader.startsWith("oauth ")) {
             authHeader = authHeader.substring(authHeader.indexOf("o"));
         }
@@ -110,17 +158,20 @@ public class OAuthAuthenticator implements Authenticator {
                 String[] elements = headers[i].split(consumerKeySegmentDelimiter);
                 if (elements != null && elements.length > 1) {
                     int j = 0;
+                    boolean isConsumerKeyHeaderAvailable = false;
                     for (String element : elements) {
-                        if (!"".equals(element.trim()) &&
-                                consumerKeyHeaderSegment.equals(elements[j].trim())){
-                            return removeLeadingAndTrailing(elements[j + 1].trim());
+                        if (!"".equals(element.trim())) {
+                            if (consumerKeyHeaderSegment.equals(elements[j].trim())) {
+                                isConsumerKeyHeaderAvailable = true;
+                            } else if (isConsumerKeyHeaderAvailable) {
+                                return removeLeadingAndTrailing(elements[j].trim());
+                            }
                         }
                         j++;
                     }
                 }
             }
         }
-
         return null;
     }
 
@@ -132,7 +183,7 @@ public class OAuthAuthenticator implements Authenticator {
         }
         return result.trim();
     }
-    
+
     protected void initOAuthParams() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         String value = config.getFirstProperty(
@@ -157,6 +208,12 @@ public class OAuthAuthenticator implements Authenticator {
                 APISecurityConstants.API_SECURITY_CONSUMER_KEY_SEGMENT_DELIMITER);
         if (value != null) {
             consumerKeySegmentDelimiter = value;
+        }
+
+        value = config.getFirstProperty(
+                APISecurityConstants.API_SECURITY_CONTEXT_HEADER);
+        if (value != null) {
+            securityContextHeader = value;
         }
     }
 

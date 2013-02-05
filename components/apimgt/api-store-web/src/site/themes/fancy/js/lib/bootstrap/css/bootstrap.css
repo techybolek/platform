@@ -973,6 +973,10 @@ select:focus {
   width: 530px;
 }
 
+.input-address {
+  width: 350px;
+}
+
 input[class*="span"],
 select[class*="span"],
 textarea[class*="span"],

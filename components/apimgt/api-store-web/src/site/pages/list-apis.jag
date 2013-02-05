@@ -1,25 +1,12 @@
 <%
 include("/jagg/jagg.jag");
+include("header.jag");
 var site = require("/site/conf/site.json");
-
+var i18n = require("i18n");
+var localeResourcesBasePath="/site/conf/locales/jaggery/";
+i18n.init(request,localeResourcesBasePath);
+        
 (function () {
-    var apis, result, mod,
-            tag = request.getParameter("tag"),
-            query = request.getParameter("query");
-    if (tag) {
-        mod = jagg.module("api");
-        result = mod.getAPIsByTag(tag);
-        apis = result.apis;
-    } else if(query) {
-        mod = jagg.module("search");
-        result = mod.searchAPIs(query);
-        apis = result.apis;
-    } else {
-        mod = jagg.module("api");
-        result = mod.getAllPublishedAPIs();
-        apis = result.apis;
-    }
-
 
     jagg.render({
         "name":"page/base",
@@ -32,10 +19,8 @@ var site = require("/site/conf/site.json");
                     "inputs":{
                         "title":null,
                         "middle":{
-                            "name":"api/listing",
-                            "inputs":{
-                                "apis":apis
-                            }
+                            "name":"api/listing"
+
                         }
                     }
                 }

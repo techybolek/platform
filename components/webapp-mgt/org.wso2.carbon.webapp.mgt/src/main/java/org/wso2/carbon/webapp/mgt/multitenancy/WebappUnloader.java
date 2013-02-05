@@ -23,9 +23,11 @@ import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.ArtifactUnloader;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.utils.deployment.GhostDeployer;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.webapp.mgt.DataHolder;
 import org.wso2.carbon.webapp.mgt.TomcatGenericWebappsDeployer;
 import org.wso2.carbon.webapp.mgt.WebApplication;
@@ -67,52 +69,68 @@ public class WebappUnloader implements ArtifactUnloader {
                                        String tenantDomain) {
         WebApplicationsHolder webApplicationsHolder = (WebApplicationsHolder)
                 configCtx.getProperty(CarbonConstants.WEB_APPLICATIONS_HOLDER);
+        int tenantId = MultitenantUtils.getTenantId(configCtx);
 
-        if (webApplicationsHolder != null) {
-            for (WebApplication webApplication :
-                    webApplicationsHolder.getStartedWebapps().values()) {
-                if (!GhostWebappDeployerUtils.isGhostWebApp(webApplication)) {
-                    Long lastUsageTime = Long.parseLong((String) webApplication.
-                            getProperty(CarbonConstants.WEB_APP_LAST_USED_TIME));
-                    if (lastUsageTime != null && isInactive(lastUsageTime)) {
-                        GhostDeployer ghostDeployer = GhostWebappDeployerUtils.
-                                getGhostDeployer(configCtx.getAxisConfiguration());
+        try {
+            if (tenantId > 0) {
+                PrivilegedCarbonContext.startTenantFlow();
+            }
+            PrivilegedCarbonContext privilegedCarbonContext =
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            privilegedCarbonContext.setTenantId(tenantId);
+            privilegedCarbonContext.setTenantDomain(tenantDomain);
 
-                        DeploymentFileData webappFileData = ghostDeployer.
-                                getFileData(webApplication.getWebappFile().getPath());
-                        log.info("Unloading actual webapp : " + webApplication.getWebappFile().
-                                getName() + " and adding Ghost webapp. Tenant Domain: " +
-                                 tenantDomain);
-                        // Adding this parameter to keep track of this webapp in GhostWebappDeployerValve
-                        webApplication.setProperty(CarbonConstants.IS_ARTIFACT_BEING_UNLOADED, "true");
-                        Map<String, WebApplication> transitGhostList =
-                                    GhostWebappDeployerUtils.getTransitGhostWebAppsMap(configCtx);
-                            transitGhostList.put(webApplication.getContextName(), webApplication);
-                        try {
-                            TomcatGenericWebappsDeployer tomcatWebappDeployer = webApplication.
-                                    getTomcatGenericWebappsDeployer();
-                            tomcatWebappDeployer.undeploy(webApplication.getWebappFile());
-                            File ghostFile = GhostWebappDeployerUtils.
-                                    getGhostFile(webappFileData.getAbsolutePath(),
-                                                 configCtx.getAxisConfiguration());
-                            if (ghostFile.exists()) {
-                                WebApplication ghostWebapp = GhostWebappDeployerUtils.
-                                        createGhostWebApp(ghostFile, webappFileData.getFile(),
-                                                webApplication.getTomcatGenericWebappsDeployer(),
-                                                configCtx.getAxisConfiguration());
+            if (webApplicationsHolder != null) {
+                for (WebApplication webApplication :
+                        webApplicationsHolder.getStartedWebapps().values()) {
+                    if (!GhostWebappDeployerUtils.isGhostWebApp(webApplication)) {
+                        Long lastUsageTime = Long.parseLong((String) webApplication.
+                                getProperty(CarbonConstants.WEB_APP_LAST_USED_TIME));
+                        if (lastUsageTime != null && isInactive(lastUsageTime)) {
+                            GhostDeployer ghostDeployer = GhostWebappDeployerUtils.
+                                    getGhostDeployer(configCtx.getAxisConfiguration());
 
-                                webApplicationsHolder.getStartedWebapps().
-                                        put(webappFileData.getName(), ghostWebapp);
-                                webApplicationsHolder.getFaultyWebapps().
-                                        remove(webappFileData.getName());
-                                transitGhostList.remove(ghostWebapp.getContextName());
+                            DeploymentFileData webappFileData = ghostDeployer.
+                                    getFileData(webApplication.getWebappFile().getPath());
+                            log.info("Unloading actual webapp : " + webApplication.getWebappFile().
+                                    getName() + " and adding Ghost webapp. Tenant Domain: " +
+                                     tenantDomain);
+                            // Adding this parameter to keep track of this webapp in GhostWebappDeployerValve
+                            webApplication.setProperty(CarbonConstants.IS_ARTIFACT_BEING_UNLOADED,
+                                                       "true");
+                            Map<String, WebApplication> transitGhostList =
+                                        GhostWebappDeployerUtils.getTransitGhostWebAppsMap(configCtx);
+                                transitGhostList.put(webApplication.getContextName(), webApplication);
+                            try {
+                                TomcatGenericWebappsDeployer tomcatWebappDeployer = webApplication.
+                                        getTomcatGenericWebappsDeployer();
+                                tomcatWebappDeployer.undeploy(webApplication.getWebappFile());
+                                File ghostFile = GhostWebappDeployerUtils.
+                                        getGhostFile(webappFileData.getAbsolutePath(),
+                                                     configCtx.getAxisConfiguration());
+                                if (ghostFile.exists()) {
+                                    WebApplication ghostWebapp = GhostWebappDeployerUtils.
+                                            createGhostWebApp(ghostFile, webappFileData.getFile(),
+                                                    webApplication.getTomcatGenericWebappsDeployer(),
+                                                    configCtx);
+
+                                    webApplicationsHolder.getStartedWebapps().
+                                            put(webappFileData.getName(), ghostWebapp);
+                                    webApplicationsHolder.getFaultyWebapps().
+                                            remove(webappFileData.getName());
+                                    transitGhostList.remove(ghostWebapp.getContextName());
+                                }
+                            } catch (Exception e) {
+                                log.error("Error while unloading webapp : "
+                                          + webApplication.getWebappFile().getName(), e);
                             }
-                        } catch (Exception e) {
-                            log.error("Error while unloading webapp : "
-                                      + webApplication.getWebappFile().getName(), e);
                         }
                     }
                 }
+            }
+        } finally {
+            if (tenantId > 0) {
+                PrivilegedCarbonContext.endTenantFlow();
             }
         }
     }

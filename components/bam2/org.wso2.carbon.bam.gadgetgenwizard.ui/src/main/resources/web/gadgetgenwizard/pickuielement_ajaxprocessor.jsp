@@ -1,12 +1,7 @@
-<%@ page import="java.util.Map" %>
+<%@ page import="org.wso2.carbon.bam.gadgetgenwizard.ui.GGWUIUtils" %>
 <%
 
-    Map parameterMap = request.getParameterMap();
-    for (Object o : parameterMap.keySet()) {
-        String param = (String) o;
-        Object value = parameterMap.get(param);
-        session.setAttribute(param, value);
-    }
+    GGWUIUtils.overwriteSessionAttributes(request, session);
 
 %>
 <script type="text/javascript" src="../gadgetgenwizard/js/jquery.jqplot.min.js"></script>
@@ -19,12 +14,12 @@
 
         var sqlResultJSON = null;
 
-        var supportedUIElements = {"Bar Graph" : "bar", "Table" : "table"};
+
 
         //get sql results
 
         $.post("execute_sql_ajaxprocessor.jsp", null, function(html) {
-            var success = !(html.toLowerCase().match(/error/));
+            var success = !(html.toLowerCase().match(/error executing query/));
             if (success) {
                 sqlResultJSON = JSON.parse(html);
             } else {
@@ -33,12 +28,27 @@
         });
 
         $("#select-uielement").html(function() {
+
+            var supportedUIElements = {};
+            supportedUIElements[jsi18n["bar.graph"]] = "bar";
+            supportedUIElements[jsi18n["table"]] = "table";
+
             var html = "";
             $.each(supportedUIElements, function(key, val) {
                 html += "<option value=\"" + val +"\">"+ key + "</option>";
             });
             return html;
         });
+
+        $("#tabletitle").html(jsi18n["table.title"] + "<span style=\"color: red; \">*</span>");
+        $("#charttitle").html(jsi18n["chart.title"]);
+        $("#ylabel").html(jsi18n["y.axis.label"]);
+        $("#ycol").html(jsi18n["y.axis.col"] + "<span style=\"color: red; \">*</span>");
+        $("#xlabel").html(jsi18n["x.axis.label"]);
+        $("#xcol").html(jsi18n["x.axis.col"] + "<span style=\"color: red; \">*</span>");
+        $("#pickuilbl").html(jsi18n["pick.ui.ele"]);
+        $("#preview").val(jsi18n["preview"]);
+        $("#preview-area").html(jsi18n["preview.area"]);
 
         $("#preview").click(function () {
             if ($("#select-uielement").val() == "bar") {
@@ -60,7 +70,8 @@
             // hiding all ui element divs
             $(".uielements").hide();
 
-
+            // clear preview div
+            $("#preview-area").html(jsi18n["preview.area"]);
 
             if ($("#select-uielement").val() == "bar") {
                 $("#bar-chart-options").show('fast', function() {
@@ -70,11 +81,13 @@
                     });
                     $("#bar-chart-options [name$=\"column\"]").html(optionHTML);
                     $("#bar-chart-options .bar").change(genBarGraphPreview);
+                    $("#bar-chart-options .bar").bind('input', genBarGraphPreview);
                 });
 
             } else if ($("#select-uielement").val() == "table"){
                 $("#table-options").show();
                 $("#table-options .table").change(genTablePreview);
+                $("#table-options .table").bind('input', genTablePreview);
                 genTablePreview();
             }
         }
@@ -172,12 +185,12 @@
             <table>
                 <tbody>
                 <tr>
-                    <td>Pick UI Element
+                    <td id="pickuilbl">
                     </td>
                     <td><select name="uielement" id="select-uielement" style="width:200px">
                     </select>
                     </td>
-                    <td><input id="preview" type="button" value="Preview"></td>
+                    <td><input id="preview" type="button"></td>
 
                 </tr>
                 <tr>
@@ -186,25 +199,25 @@
                             <table>
                                 <tbody>
                                 <tr>
-                                    <td>Chart Title<span style="color: red; ">*</span>
+                                    <td id="charttitle">
                                     </td>
                                     <td><input type="text" class="bar" name="bar-title" value="" style="width:150px"></td>
                                 </tr>
                                 <tr>
-                                    <td>Y-Axis Label<span style="color: red; ">*</span></td>
+                                    <td id="ylabel"></td>
                                     <td><input class="bar" type="text" name="bar-ylabel" value="" style="width:150px"></td>
                                 </tr>
                                 <tr>
-                                    <td>Y-Axis Column<span style="color: red; ">*</span></td>
-                                    <td><select class="bar" name="bar-ycolumn" style="width:150px"></select></td>
+                                    <td id="ycol"></td>
+                                    <td><select class="bar validate" name="bar-ycolumn" style="width:150px"></select></td>
                                 </tr>
                                 <tr>
-                                    <td>X-Axis Label<span style="color: red; ">*</span></td>
+                                    <td id="xlabel"></td>
                                     <td><input type="text" class="bar" name="bar-xlabel" value="" style="width:150px"></td>
                                 </tr>
                                 <tr>
-                                    <td>X-Axis Column<span style="color: red; ">*</span></td>
-                                    <td><select class="bar" name="bar-xcolumn" style="width:150px"></select></td>
+                                    <td id="xcol"></td>
+                                    <td><select class="bar validate" name="bar-xcolumn" style="width:150px"></select></td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -213,9 +226,9 @@
                             <table>
                                 <tbody>
                                 <tr>
-                                    <td>Table Title<span style="color: red; ">*</span>
+                                    <td id=tabletitle>
                                     </td>
-                                    <td><input type="text" class="table" name="table-title" value="Product vs Total Amount" style="width:150px"></td>
+                                    <td><input type="text" class="table" name="table-title" value="" style="width:150px"></td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -226,7 +239,7 @@
             </table>
         </td>
         <td align="center" style="border:1px solid #000 !important">
-            <div id="preview-area" style="text-align:center;width:325px;height:250px">Preview Area</div>
+            <div id="preview-area" style="text-align:center;width:325px;height:250px"></div>
         </td>
         <input type="hidden" name="page" id="page" value="3"/>
     </tr>

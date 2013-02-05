@@ -554,8 +554,8 @@ function isRemainPropertyExpressions() {
 
 function onFragmentTypeSelectionChange(id, i) {
     var fragmentType = getSelectedValue(id);
-    if (fragmentType != null) {
-        if (fragmentType == 'full' || fragmentType == 'port' ) {
+    if (fragmentType != null ) {
+        if (fragmentType == 'full'|| fragmentType == 'port' ) {
             var actionItem = document.getElementById('actionAppend' + i);
             actionItem.style.display = "none";
             actionItem = document.getElementById('actionPrepend' + i);

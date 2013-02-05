@@ -25,15 +25,16 @@ import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.databridge.commons.thrift.service.general.ThriftEventTransmissionService;
 import org.wso2.carbon.databridge.commons.thrift.service.secure.ThriftSecureEventTransmissionService;
 import org.wso2.carbon.databridge.commons.thrift.utils.CommonThriftConstants;
+import org.wso2.carbon.databridge.commons.thrift.utils.HostAddressFinder;
 import org.wso2.carbon.databridge.core.DataBridgeReceiverService;
 import org.wso2.carbon.databridge.core.exception.DataBridgeException;
 import org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiverFactory;
 import org.wso2.carbon.databridge.receiver.thrift.conf.ThriftDataReceiverConfiguration;
 import org.wso2.carbon.databridge.receiver.thrift.internal.utils.ThriftDataReceiverBuilder;
-import org.wso2.carbon.databridge.receiver.thrift.service.ThriftSecureEventTransmissionServlet;
-import org.wso2.carbon.databridge.receiver.thrift.service.ThriftEventTransmissionServlet;
 import org.wso2.carbon.databridge.receiver.thrift.service.ThriftEventTransmissionServiceImpl;
+import org.wso2.carbon.databridge.receiver.thrift.service.ThriftEventTransmissionServlet;
 import org.wso2.carbon.databridge.receiver.thrift.service.ThriftSecureEventTransmissionServiceImpl;
+import org.wso2.carbon.databridge.receiver.thrift.service.ThriftSecureEventTransmissionServlet;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
@@ -85,11 +86,10 @@ public class ThriftDataReceiverDS {
                 try {
                     hostName = new URL(serverUrl).getHost();
                 } catch (MalformedURLException e) {
-                    log.warn("The server url :" + serverUrl + " is malformed URL hence hostname is assigned as 'localhost'");
-                    hostName = "localhost";
+                    hostName = HostAddressFinder.findAddress("localhost");
+                    log.warn("The server url :" + serverUrl + " is malformed URL hence hostname is assigned as '"+hostName+"'");
                 }
                 dataReceiver.start(hostName);
-                log.info("Successfully deployed Agent Server ");
 
 
                 ThriftEventTransmissionService.Processor<ThriftEventTransmissionServiceImpl> processor = new ThriftEventTransmissionService.Processor<ThriftEventTransmissionServiceImpl>(
@@ -123,6 +123,7 @@ public class ThriftDataReceiverDS {
 
 
     protected void deactivate(ComponentContext context) {
+        log.info("Thrift server shutting down...");
         dataReceiver.stop();
         if (log.isDebugEnabled()) {
             log.debug("Successfully stopped agent server");

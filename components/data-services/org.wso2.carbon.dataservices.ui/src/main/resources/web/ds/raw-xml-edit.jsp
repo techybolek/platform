@@ -100,7 +100,7 @@ try{
                 <tr>
                     <td class="buttonRow">
             <input class="button" type="submit" name="save" value="Save"/>
-            <input class="button" type="reset" name="cancel" value="Cancel" onclick="javascript:location.href='../service-mgt/index.jsp?ordinal=1';"/>
+            <input class="button" type="reset" name="cancel" value="Cancel" onclick="javascript:location.href='../service-mgt/service_info.jsp?serviceName=<%=serviceName %>';"/>
 	</td>
          </tr>
        </table>

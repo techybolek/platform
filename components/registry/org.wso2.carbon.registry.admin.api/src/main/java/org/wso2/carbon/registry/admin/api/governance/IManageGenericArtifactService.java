@@ -21,6 +21,8 @@ package org.wso2.carbon.registry.admin.api.governance;
 
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
+import java.lang.String;
+
 /**
  * This provides functionality to manage generic artifacts
  * on the registry.
@@ -58,15 +60,26 @@ public interface IManageGenericArtifactService<ArtifactsBean> {
     ArtifactsBean listArtifacts(String key, String criteria);
 
     /**
+     * Method to list the artifacts by name.
+     *
+     * @param key the identifier of the artifact.
+     * @param name the artifact name.
+     * @return an ArtifactsBean object with artifacts matching to the criteria.
+     * @throws Exception if the operation failed.
+     */
+    ArtifactsBean listArtifactsByName(String key, final String name);
+
+    /**
      * Method to edit the artifacts.
      *
+     * @param path the path of the artifact.
      * @param key the identifier of the artifact.
      * @param payload the information payload of the artifact.
      * @param lifecycleAttribute the name of the lifecycle attribute.
      * @return the location on the repository where lifecycle configurations are stored.
      * @throws Exception if the operation failed.
      */
-    String editArtifact(String key, String payload, String lifecycleAttribute) throws RegistryException;
+    String editArtifact(String path, String key, String payload, String lifecycleAttribute) throws RegistryException;
 
     /**
      * Method to obtain the content of an Artifact..
@@ -95,4 +108,14 @@ public interface IManageGenericArtifactService<ArtifactsBean> {
      * @throws Exception if the operation failed.
      */
     boolean setArtifactUIConfiguration(String key, String content) throws RegistryException;
+
+    /**
+     * Get all the states from the LC
+     *
+     * @param LCName
+     * @return
+     */
+    String[] getAllLifeCycleState(String LCName);
+
+
 }

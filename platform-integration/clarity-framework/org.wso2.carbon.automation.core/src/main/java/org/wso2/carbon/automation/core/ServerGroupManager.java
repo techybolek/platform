@@ -23,14 +23,13 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
+import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.automation.api.clients.authenticators.AuthenticatorClient;
 import org.wso2.carbon.automation.api.clients.server.admin.ServerAdminClient;
-import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
-import org.wso2.carbon.base.ServerConfigurationException;
-import org.wso2.carbon.utils.FileManipulator;
 import org.wso2.carbon.automation.core.utils.ClientConnectionUtil;
 import org.wso2.carbon.automation.core.utils.UserInfo;
 import org.wso2.carbon.automation.core.utils.UserListCsvReader;
+import org.wso2.carbon.automation.core.utils.coreutils.PlatformUtil;
 import org.wso2.carbon.automation.core.utils.dbutils.DatabaseFactory;
 import org.wso2.carbon.automation.core.utils.dbutils.DatabaseManager;
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
@@ -39,6 +38,9 @@ import org.wso2.carbon.automation.core.utils.frameworkutils.FrameworkFactory;
 import org.wso2.carbon.automation.core.utils.frameworkutils.FrameworkProperties;
 import org.wso2.carbon.automation.core.utils.productutils.PackageCreator;
 import org.wso2.carbon.automation.core.utils.serverutils.ServerManager;
+import org.wso2.carbon.automation.core.utils.serverutils.ServerUtils;
+import org.wso2.carbon.base.ServerConfigurationException;
+import org.wso2.carbon.utils.FileManipulator;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -52,9 +54,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.wso2.carbon.automation.core.utils.coreutils.PlatformUtil;
-import org.wso2.carbon.automation.core.utils.serverutils.ServerUtils;
-
 import static org.testng.Assert.assertFalse;
 
 public class ServerGroupManager {
@@ -62,7 +61,7 @@ public class ServerGroupManager {
 
     private static final long TIMEOUT = 60 * 1000;
     private static HashMap<String, ServerManager> servers = new HashMap<String, ServerManager>();
-    private ServerUtils serverUtils = new ServerUtils();
+    private static ServerUtils serverUtils = new ServerUtils();
     private String carbonZip;
     private int portOffset;
     private EnvironmentBuilder environmentBuilder = new EnvironmentBuilder();
@@ -83,6 +82,10 @@ public class ServerGroupManager {
         }
         String carbonHome = serverUtils.setUpCarbonHome(carbonZip);
         copySecurityVerificationService(carbonHome);
+        assert frameworkProperties != null;
+        if (!frameworkProperties.getDataSource().get_dbDriverName().contains("h2")) {
+            copyJdbcDriverToLib(carbonHome, productName, frameworkProperties.getDataSource().get_dbDriverName());
+        }
         serverUtils.startServerUsingCarbonHome(carbonHome, portOffset, frameworkProperties);
 
         return carbonHome;
@@ -205,9 +208,7 @@ public class ServerGroupManager {
             String value = dbConfig.getAttributeValue(new QName("name"));
             if (currentDBConfig.getText().trim().equals(value)) {
                 return dbConfig;
-
             }
-
         }
         Assert.fail("Database Configuration not Found in registry.xml ");
         return null;
@@ -336,6 +337,43 @@ public class ServerGroupManager {
 
     protected void stopServer(FrameworkProperties properties) throws Exception {
         serverUtils.shutdown(portOffset, properties);
-//        CodeCoverageUtils.generateReports();
+       /* CodeCoverageUtils.generateReports();*/
+    }
+
+    public static ServerUtils getServerUtils() {
+        return serverUtils;
+    }
+
+    private void copyJdbcDriverToLib(String carbonHome, String productName, String jdbcDriver)
+            throws IOException {
+        String lib = carbonHome + File.separator + "repository" + File.separator + "components" + File.separator
+                     + "lib";
+        String driverName = null;
+        String driverFolder = ProductConstant.getResourceLocations(productName) + File.separator + "jar" + File.separator;
+        File folder = new File(driverFolder);
+        File[] listOfFiles = folder.listFiles();
+        if (listOfFiles != null && listOfFiles.length > 0) {
+
+            for (File listOfFile : listOfFiles) {
+
+                if (listOfFile.isFile() &&
+                    (listOfFile.getName().endsWith(".jar") || listOfFile.getName().endsWith(".JAR"))) {
+                    String fileName = listOfFile.getName();
+                    if (jdbcDriver.contains("mysql") && fileName.contains("mysql-connector-java")) {
+                        driverName = fileName;
+                        break;
+                    }
+                }
+            }
+
+            if (driverName != null) {
+                File jar = new File(driverFolder + driverName);
+                FileManager.copyJarFile(jar, lib);
+                log.info("Copping JDBC Driver " + driverName + " to component/lib");
+            } else {
+                log.warn("JDBC Driver not found on resource location according to driver name in property file");
+            }
+
+        }
     }
 }

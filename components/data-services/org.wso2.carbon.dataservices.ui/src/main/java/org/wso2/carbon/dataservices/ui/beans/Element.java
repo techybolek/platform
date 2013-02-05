@@ -35,10 +35,11 @@ public class Element extends DataServiceConfigurationElement{
     private String exportType;
     private String namespace;
     private String arrayName;
+    private String optional;
     
 	public Element(String dataSourceType, String dataSourceValue, String name,
 			String requiredRoles, String xsdType, String export,
-			String exportType, String namespace, String arrayName) {
+			String exportType, String namespace, String arrayName, String optional) {
         super(requiredRoles, xsdType);
         this.dataSourceType = dataSourceType;
         this.dataSourceValue = dataSourceValue;
@@ -47,6 +48,7 @@ public class Element extends DataServiceConfigurationElement{
         this.exportType = exportType;
         this.namespace = namespace;
         this.arrayName = arrayName;
+        this.optional = optional;
     }
     
 	public Element() { 
@@ -83,6 +85,9 @@ public class Element extends DataServiceConfigurationElement{
         }
         if (this.getArrayName() != null && this.getArrayName().trim().length() > 0) {
             elementEl.addAttribute("arrayName", this.getArrayName().trim(), null);
+        }
+        if (this.getOptional() != null && this.getOptional().trim().equals("true")) {
+            elementEl.addAttribute("optional", this.getOptional().trim(), null);
         }
         return elementEl;
     }
@@ -151,6 +156,14 @@ public class Element extends DataServiceConfigurationElement{
 
     public void setArrayName(String arrayName) {
         this.arrayName = arrayName;
+    }
+
+    public String getOptional() {
+        return this.optional;
+    }
+
+    public void setOptional(String optional) {
+        this.optional = optional;
     }
 
     public boolean equals(Object o) {

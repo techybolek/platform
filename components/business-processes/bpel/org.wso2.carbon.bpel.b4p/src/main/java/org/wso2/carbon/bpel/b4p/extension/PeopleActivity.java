@@ -615,8 +615,8 @@ public class PeopleActivity {
             }
         }
 
-        log.warn("Here we return a one level list, so the client doesn't knows which " +
-                "attachment ids are bind to which message exchanges");
+        //TODO log.warn("Here we return a one level list, so the client doesn't knows which " +
+        //        "attachment ids are bind to which message exchanges");
         return attachmentIDs;
     }
 

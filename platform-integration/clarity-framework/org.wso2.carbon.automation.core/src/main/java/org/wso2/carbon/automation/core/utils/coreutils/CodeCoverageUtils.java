@@ -22,15 +22,17 @@ import com.vladium.emma.Command;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.automation.core.utils.fileutils.ArchiveExtractor;
 import org.wso2.carbon.utils.ArchiveManipulator;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.FileManipulator;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -56,8 +58,7 @@ public final class CodeCoverageUtils {
             if (System.getProperty("emma.properties") == null) {
                 for (File file : new File(emmaHome).listFiles()) {
                     if (file.getName().startsWith("org.wso2.carbon.automation.core")) {
-                        ArchiveManipulator archiveManipulator = new ArchiveManipulator();
-                        archiveManipulator.extract(file.getAbsolutePath(), emmaHome);
+                        new ArchiveExtractor().extractFile(file.getAbsolutePath(), emmaHome);
                     }
                 }
                 System.setProperty("emma.properties",
@@ -72,6 +73,8 @@ public final class CodeCoverageUtils {
                 System.setProperty("emma.rt.control.port", "44444");
             }
         } catch (IOException e) {
+            log.error("Cannot initialize Emma", e);
+        } catch (Exception e) {
             log.error("Cannot initialize Emma", e);
         }
     }
@@ -176,13 +179,15 @@ public final class CodeCoverageUtils {
         if (jarFilePath.lastIndexOf(fileSeparator) != -1) {
             jarFileName = jarFilePath.substring(jarFilePath.lastIndexOf(fileSeparator) + 1);
         }
-        ArchiveManipulator archiveManipulator;
-        String tempExtractedDir;
+        ArchiveManipulator archiveManipulator = null;
+        String tempExtractedDir = null;
         try {
             archiveManipulator = new ArchiveManipulator();
             tempExtractedDir = System.getProperty("basedir") + File.separator + "target" +
                                File.separator + jarFileName.substring(0, jarFileName.lastIndexOf('.'));
-            archiveManipulator.extract(jarFilePath, tempExtractedDir);
+            new ArchiveExtractor().extractFile(jarFilePath, tempExtractedDir);
+        } catch (Exception e) {
+            log.error("Could not extract the file", e);
         } finally {
             jarFile.close();
         }
@@ -240,21 +245,55 @@ public final class CodeCoverageUtils {
         if (emmaHome == null) {
             return;
         }
+
         String basedir = System.getProperty("basedir");
         String coverageEm = new File(basedir + File.separator + "" +
                                      "target" + File.separator + "coverage.em").getAbsolutePath();
+        try {
+            Thread.sleep(15000); //wait for coverage data dump
+        } catch (InterruptedException e) {
+            log.info("Report generation fails");
+        }
 
-        // Recursively find all coverage.ec files, and generate the report
-        Collection<File> ecFiles = FileUtils.listFiles(new File(basedir), new String[]{"ec"}, true);
+        // find all coverage.ec files, and generate the report
+        File[] coverageDataFiles = getCoverageDataFiles();
+
+
+//        Collection<File> ecFiles = FileUtils.listFiles(new File(basedir), new String[]{"ec"}, true);
         StringBuilder ecFilesString = new StringBuilder();
-        for (File ecFile : ecFiles) {
+
+        for (File ecFile : coverageDataFiles) {
             ecFilesString.append(ecFile.getAbsolutePath()).append(",");
+
         }
         Command cmd = Command.create("report", "emmarun",
                                      new String[]{"-r", "html", "-in",
                                                   coverageEm + "," + ecFilesString});
         cmd.run();
         log.info("Generated Emma reports");
+    }
+
+    private static File[] getCoverageDataFiles() {
+        return new File(CarbonUtils.getCarbonHome()).listFiles(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".ec");
+            }
+        });
+    }
+
+    public static boolean renameCoverageDataFile() {
+        String carbonHome = CarbonUtils.getCarbonHome();
+        //get all .ec fies and then find coverage.ec, after that rename those files
+        File[] coverageDataFiles = getCoverageDataFiles();
+
+        for (int i = 0, coverageDataFilesLength = coverageDataFiles.length; i < coverageDataFilesLength; i++) {
+            File coverageDatafile = coverageDataFiles[i];
+            if (coverageDatafile.getName().equals("coverage.ec")) {
+                return coverageDatafile.renameTo(new File(carbonHome + File.separator + "coverage" +
+                                                          System.currentTimeMillis() + ".ec"));
+            }
+        }
+        return false;
     }
 }
 

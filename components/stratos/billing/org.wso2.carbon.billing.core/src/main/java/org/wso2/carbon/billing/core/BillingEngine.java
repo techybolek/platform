@@ -189,7 +189,7 @@ public class BillingEngine {
             beginTransaction();
             subscriptionId =
                     dataAccessObject.addSubscription(subscription,
-                            billingTaskConfig.getSubscriptionFilter());
+                            subscription.getSubscriptionPlan());
             commitTransaction();
         } catch(Exception e){
             String msg = "Error occurred while adding subscription: " + subscription.getSubscriptionPlan()+
@@ -209,6 +209,22 @@ public class BillingEngine {
             commitTransaction();
         } catch(Exception e){
             String msg = "Error occurred while adding payment record (transaction id): " + payment.getDescription() +
+                            " " + e.getMessage();
+            log.error(msg, e);
+            rollbackTransaction();
+            throw new BillingException(msg, e);
+        }
+        return paymentId;
+    }
+
+    public int addRegistrationPayment(Payment payment, String usagePlan) throws BillingException {
+        int paymentId = 0;
+        try {
+            beginTransaction();
+            paymentId = dataAccessObject.addRegistrationPayment(payment, usagePlan);
+            commitTransaction();
+        } catch(Exception e){
+            String msg = "Error occurred while adding registration payment record (transaction id): " + payment.getDescription() +
                             " " + e.getMessage();
             log.error(msg, e);
             rollbackTransaction();
@@ -255,7 +271,7 @@ public class BillingEngine {
             beginTransaction();
             subscriptions =
                     dataAccessObject.getFilteredActiveSubscriptionsForCustomer(
-                            billingTaskConfig.getSubscriptionFilter(), customer);
+                            null, customer);
             commitTransaction();
         } catch(Exception e){
             String msg = "Error occurred while getting active subscriptions for customer: " + customer.getId() +

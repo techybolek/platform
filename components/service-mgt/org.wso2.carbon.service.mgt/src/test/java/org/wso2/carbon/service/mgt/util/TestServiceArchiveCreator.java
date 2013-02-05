@@ -17,12 +17,12 @@
 */
 package org.wso2.carbon.service.mgt.util;
 
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.service.mgt.BaseTestCase;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.utils.WSO2Constants;
 import org.wso2.carbon.core.util.ParameterUtil;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.engine.AxisConfiguration;
@@ -64,9 +64,9 @@ public class TestServiceArchiveCreator extends BaseTestCase {
         createAxisService();
         createModule();
 
-        SuperTenantCarbonContext.getCurrentContext(axisCon).setRegistry(
+        PrivilegedCarbonContext.getCurrentContext(axisCon).setRegistry(
                 RegistryType.SYSTEM_CONFIGURATION, registry);
-        SuperTenantCarbonContext.getCurrentContext(axisCon).setRegistry(
+        PrivilegedCarbonContext.getCurrentContext(axisCon).setRegistry(
                 RegistryType.SYSTEM_CONFIGURATION, governanceRegistry);
             
         // The following line of code is kept for backward compatibility. Remove this once we

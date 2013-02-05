@@ -65,11 +65,12 @@
         }
     }
 
+    String successUrl;
     String paypalUrl = CommonUtil.getStratosConfig().getPaypalUrl();
     String adminConsoleURL = CarbonUIUtil.getAdminConsoleURL(request);
     adminConsoleURL = adminConsoleURL.substring(0, adminConsoleURL.indexOf("carbon"));
-    String successUrl = adminConsoleURL + "carbon/payment/registration_payment.jsp";
-    String cancelUrl = adminConsoleURL + "carbon/login.jsp";
+     successUrl = adminConsoleURL + "carbon/payment/registration_payment.jsp";
+    String cancelUrl = adminConsoleURL + "carbon/admin/login.jsp";
 %>
 
 <script type="text/javascript">

@@ -941,6 +941,7 @@ function createVersion(resourcePath, viewMode, consumerID, targetDivID) {
                 CARBON.showInfoDialog(org_wso2_carbon_registry_resource_ui_jsi18n["check.point.created"]);
                 document.getElementById('checkpointDiv').style.display = "";
                 document.getElementById('checkpointWhileUpload').style.display = "none";
+                listComment(resourcePath);
             },
             onFailure: function() {
                 CARBON.showWarningDialog(transport.responseText);
@@ -2563,6 +2564,12 @@ function showGovernanceResourceTree(textBoxId, onOKCallback) {
      }
      showResourceTreeWithLoadFunction(true, textBoxId, onOKCallback, "/_system/governance", "true");
  }
+function showGovernanceResourceTreeWithCustomPath(textBoxId, path, onOKCallback) {
+    if (!onOKCallback) {
+        onOKCallback = "none";
+    }
+    showResourceTreeWithLoadFunction(true, textBoxId, onOKCallback, path, "true");
+}
 
  function showGovernanceCollectionTree(textBoxId, onOKCallback) {
      if (!onOKCallback) {
@@ -3457,14 +3464,33 @@ function updateMediaType(resourcePath, mediaType) {
             {
                 method:'post',
                 parameters:{resourcePath:resourcePath, mediaType:mediaType},
-                onSuccess:function () {
+                onSuccess:function (transport) {
                     $('toggleSaveMediaType_view').innerHTML = mediaType;
+			var returnValue = transport.responseText;
+            		if (returnValue.search(/----XmlToArtifactChange----/) != -1){
+				window.location.replace("../resources/resource.jsp?region=region3&item=resource_browser_menu&path=/");
+			}
                 },
                 onFailure:function () {
                     CARBON.showWarningDialog(transport.responseText);
                     return false;
                 }
             });
+    }, org_wso2_carbon_registry_resource_ui_jsi18n["session.timed.out"]);
+}
+
+function downloadWithDependencies(path, hasAssociations) {
+    sessionAwareFunction(function() {
+        if (hasAssociations.toString().trim() == "true") {
+            CARBON.showConfirmationDialog(org_wso2_carbon_registry_resource_ui_jsi18n["download.with.all.dependencies"], function() {
+                location.href =  path + '&withDependencies=true';
+
+            }, function() {
+                location.href = path ;
+            });
+        } else {
+            location.href = path ;
+        }
     }, org_wso2_carbon_registry_resource_ui_jsi18n["session.timed.out"]);
 }
 

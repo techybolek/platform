@@ -22,9 +22,10 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
    	<artifactId>throttle-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
-
+    <version>4.0.2</version>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.throttle.server.feature</artifactId>
     <packaging>pom</packaging>
@@ -36,6 +37,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.throttle</artifactId>
+	    <version>4.0.2</version>
         </dependency>
     </dependencies>
 
@@ -54,7 +56,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.throttle.server</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
@@ -62,10 +64,10 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.throttle</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.throttle:4.0.2</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:4.0.2</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

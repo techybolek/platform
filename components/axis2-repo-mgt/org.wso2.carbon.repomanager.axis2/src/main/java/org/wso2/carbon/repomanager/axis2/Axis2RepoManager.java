@@ -131,16 +131,17 @@ public class Axis2RepoManager extends AbstractAdmin {
 
         File[] folderItems = folder.listFiles();
         for (File file : folderItems) {
-            if (file.isDirectory() && !(file.getName().equalsIgnoreCase(LIB_DIR))) {
+            if (file.isDirectory() && !(file.getName().equalsIgnoreCase(LIB_DIR)) && !isMetaDataFile(file)) {
                 dirs.put(new JSONObject().put(DIRECTORY_NAME_LABEL, file.getName()));
                 traverseServiceDir(dirs.getJSONObject(dirs.length() - 1), file);
-            } else if (file.isFile()) {
+            } else if (file.isFile() && !isMetaDataFile(file)) {
                 files.put(new JSONObject().put(FILE_NAME_LABEL, file.getName()));
             }
         }
 
         obj.put(DIRECTORIES_LABEL, dirs);
         obj.put(FILES_LIST_LABEL, files);
+
     }
 
     /**
@@ -150,6 +151,7 @@ public class Axis2RepoManager extends AbstractAdmin {
      * @throws JSONException Thrown if an error occurs when manipulating the JSON array
      */
     private void traverseServiceDir(JSONObject obj, File folder) throws JSONException {
+       	
         JSONArray dirs = new JSONArray();
 
         FileFilter fileFilter = new FileFilter() {
@@ -331,5 +333,21 @@ public class Axis2RepoManager extends AbstractAdmin {
 
         return handler;
     }
+    
+	/**
+	 * Make sure current directory or file is not a meta-data file of a
+	 * application such as SVN, IDES etc. This will return true if the file or
+	 * directory start with "." e.g - .svn, .git, .project
+	 * 
+	 * @param file
+	 * @return
+	 */
+	private boolean isMetaDataFile(File file) {
+		if (file.getName().startsWith(".")) {
+			return true;
+		}
+		return false;
+
+	}
 
 }

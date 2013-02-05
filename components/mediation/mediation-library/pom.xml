@@ -22,7 +22,7 @@
 <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>mediation</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -31,10 +31,9 @@
     <name>WSO2 Carbon - Mediation Template Libray Module</name>
     <url>http://wso2.org</url>
     <modules>
-        <module>org.wso2.carbon.mediation.library.ui</module>
-        <module>org.wso2.carbon.mediation.library</module>
+        <module>org.wso2.carbon.mediation.library.ui/4.0.0</module>
+        <module>org.wso2.carbon.mediation.library/4.0.0</module>
         <module>connectors</module>
-        <module>connector-template-utils/org.wso2.carbon.mediation.library.connectors.connector-archetype</module>
     </modules>
 
     <dependencyManagement>

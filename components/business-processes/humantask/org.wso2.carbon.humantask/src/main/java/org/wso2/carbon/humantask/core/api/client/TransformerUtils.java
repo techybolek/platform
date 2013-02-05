@@ -666,7 +666,7 @@ public final class TransformerUtils {
                     OrganizationalEntityDAO.OrganizationalEntityType.USER);
             dao.setAttachedBy((OrganizationalEntity) orgEntityDAO);
 
-            log.warn("AccessType is not supported by Attachment-Mgt DTOs. So using a dummy value: " + HumanTaskConstants.DEFAULT_ATTACHMENT_ACCESS_TYPE);
+            //TODO : "AccessType is not supported by Attachment-Mgt DTOs. So using a dummy value: " + HumanTaskConstants.DEFAULT_ATTACHMENT_ACCESS_TYPE);
             dao.setAccessType(HumanTaskConstants.DEFAULT_ATTACHMENT_ACCESS_TYPE);
 
             return dao;

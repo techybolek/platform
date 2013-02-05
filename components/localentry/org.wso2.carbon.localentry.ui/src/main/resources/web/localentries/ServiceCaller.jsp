@@ -50,6 +50,7 @@
 
     String name = req.getParameter("Name").trim();
     String value = req.getParameter("Value");
+    String description = req.getParameter("eventDescription").trim();
     String entryCheck = req.getParameter("pageName");
     String entry = null;
     StringBuilder serviceCallXML = new StringBuilder();
@@ -73,14 +74,22 @@
         sourceUrlCheck = true;
     }
 
-    serviceCallXML.append("<ns1:localEntry key=\"");
+    serviceCallXML.append("<localEntry key=\"");
     if (sourceUrlCheck) {
-        serviceCallXML.append(name).append("\"" + " ").append(entry).append(" xmlns:ns1=\"")
-                .append(SYNAPSE_NS).append("\">").append("</ns1:localEntry>");
+        serviceCallXML.append(name).append("\"" + " ").append(entry).append(" xmlns=\"")
+                .append(SYNAPSE_NS).append("\">");
     } else {
-        serviceCallXML.append(name).append("\"" + " ").append(entry).append(" xmlns:ns1=\"")
-                .append(SYNAPSE_NS).append("\">").append(value).append("</ns1:localEntry>");
+        serviceCallXML.append(name).append("\"" + " ").append(entry).append(" xmlns=\"")
+                .append(SYNAPSE_NS).append("\">").append(value);
     }
+
+        if(description!=null){
+           serviceCallXML.append("<description>"+description+"</description>");
+        }
+
+
+        serviceCallXML.append("</localEntry>");
+
     return serviceCallXML.toString().trim();
 }
 

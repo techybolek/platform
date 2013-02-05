@@ -98,6 +98,10 @@ public class TenantServiceClient {
         return stub.retrievePaginatedTenants(pageNumber);
     }
     
+    public PaginatedTenantInfoBean retrievePaginatedPartialSearchTenants(String domain,int pageNumber) throws Exception {
+        return stub.retrievePaginatedPartialSearchTenants(domain,pageNumber);
+    }
+    
     public TenantInfoBean getTenant(String domainName) throws Exception {
         return stub.getTenant(domainName);
     }

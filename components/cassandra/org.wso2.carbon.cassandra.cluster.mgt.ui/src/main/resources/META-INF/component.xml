@@ -34,15 +34,28 @@
             <require-super-tenant>true</require-super-tenant>
         </menu>
         <menu>
-            <id>cassandra_cluster_ring_menu</id>
-            <i18n-key>cassandra.cluster.tools.cluster.menu.text</i18n-key>
+            <id>cassandra_cluster_operation_menu</id>
+            <i18n-key>cassandra.cluster.tools.cluster.menu.operation.text</i18n-key>
             <i18n-bundle>org.wso2.carbon.cassandra.cluster.mgt.ui.i18n.Resources</i18n-bundle>
             <parent-menu>cassandra_cluster_tool_menu</parent-menu>
-            <link>../cassandraTools/cassandra_cluster.jsp</link>
+            <link>../cassandraTools/cassandra_operation.jsp</link>
             <region>region1</region>
             <order>51</order>
             <style-class>manage</style-class>
-            <icon></icon>
+            <icon>../cassandraTools/images/operation.png</icon>
+            <require-permission>/permission/admin/manage/cassandra/ring</require-permission>
+            <require-super-tenant>true</require-super-tenant>
+        </menu>
+        <menu>
+            <id>cassandra_cluster_ring_menu</id>
+            <i18n-key>cassandra.cluster.tools.cluster.menu.stats.text</i18n-key>
+            <i18n-bundle>org.wso2.carbon.cassandra.cluster.mgt.ui.i18n.Resources</i18n-bundle>
+            <parent-menu>cassandra_cluster_tool_menu</parent-menu>
+            <link>../cassandraTools/cassandra_stats.jsp</link>
+            <region>region1</region>
+            <order>54</order>
+            <style-class>manage</style-class>
+            <icon>../cassandraTools/images/stats.jpg</icon>
             <require-permission>/permission/admin/manage/cassandra/ring</require-permission>
             <require-super-tenant>true</require-super-tenant>
         </menu>

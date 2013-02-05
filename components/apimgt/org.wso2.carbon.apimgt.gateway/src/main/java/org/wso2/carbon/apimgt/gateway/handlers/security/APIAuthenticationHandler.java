@@ -27,15 +27,16 @@ import org.apache.http.HttpStatus;
 import org.apache.synapse.*;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.core.axis2.Axis2Sender;
 import org.apache.synapse.rest.AbstractHandler;
-import org.apache.synapse.transport.nhttp.NhttpConstants;
+import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Authentication handler for REST APIs exposed in the API gateway. This handler will
@@ -46,12 +47,12 @@ import java.util.Map;
  * Once the custom error handler has been invoked, this implementation will further try to
  * respond to the client with a 401 Unauthorized response. If this is not required, the users
  * must drop the message in their custom error handler itself.
- *
+ * <p/>
  * If no authentication errors are encountered, this will add some AuthenticationContext
  * information to the request and let it through to the next handler in the chain.
  */
 public class APIAuthenticationHandler extends AbstractHandler implements ManagedLifecycle {
-    
+
     private static final Log log = LogFactory.getLog(APIAuthenticationHandler.class);
 
     private volatile Authenticator authenticator;
@@ -80,10 +81,16 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     public boolean handleRequest(MessageContext messageContext) {
         try {
+
+
             if (authenticator.authenticate(messageContext)) {
                 return true;
             }
         } catch (APISecurityException e) {
+
+            if (log.isDebugEnabled()) {
+                logMessageDetails(messageContext);
+            }
             log.error("API authentication failure", e);
             handleAuthFailure(messageContext, e);
         }
@@ -96,9 +103,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     private void handleAuthFailure(MessageContext messageContext, APISecurityException e) {
         messageContext.setProperty(SynapseConstants.ERROR_CODE, e.getErrorCode());
-        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, "Authentication failure");
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE,
+                APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
         messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION, e);
-        
+
         Mediator sequence = messageContext.getSequence(APISecurityConstants.API_AUTH_FAILURE_HANDLER);
         // Invoke the custom error handler specified by the user
         if (sequence != null && !sequence.mediate(messageContext)) {
@@ -106,41 +114,41 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             // logic from getting executed
             return;
         }
-        
+
         // By default we send a 401 response back
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
-        
+
+        int status;
         if (e.getErrorCode() == APISecurityConstants.API_AUTH_GENERAL_ERROR) {
-            axis2MC.setProperty(NhttpConstants.HTTP_SC, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
+        } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_INCORRECT_API_RESOURCE) {
+            status = HttpStatus.SC_FORBIDDEN;
         } else {
-            axis2MC.setProperty(NhttpConstants.HTTP_SC, HttpStatus.SC_UNAUTHORIZED);
-            Map<String,String> headers = new HashMap<String,String>();
+            status = HttpStatus.SC_UNAUTHORIZED;
+            Map<String, String> headers = new HashMap<String, String>();
             headers.put(HttpHeaders.WWW_AUTHENTICATE, authenticator.getChallengeString());
             axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
         }
-        messageContext.setResponse(true);
-        messageContext.setProperty("RESPONSE", "true");
-        messageContext.setTo(null);
+
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
             Utils.setFaultPayload(messageContext, getFaultPayload(e));
         } else {
             Utils.setSOAPFault(messageContext, "Client", "Authentication Failure", e.getMessage());
         }
-        axis2MC.removeProperty("NO_ENTITY_BODY");
-        Axis2Sender.sendBack(messageContext);
+        Utils.sendFault(messageContext, status);
     }
 
     private OMElement getFaultPayload(APISecurityException e) {
         OMFactory fac = OMAbstractFactory.getOMFactory();
-        OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS, 
+        OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,
                 APISecurityConstants.API_SECURITY_NS_PREFIX);
         OMElement payload = fac.createOMElement("fault", ns);
 
         OMElement errorCode = fac.createOMElement("code", ns);
         errorCode.setText(String.valueOf(e.getErrorCode()));
         OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText("Authentication Failure");
+        errorMessage.setText(APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
         OMElement errorDetail = fac.createOMElement("description", ns);
         errorDetail.setText(e.getMessage());
 
@@ -148,5 +156,43 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         payload.addChild(errorMessage);
         payload.addChild(errorDetail);
         return payload;
+    }
+
+    private void logMessageDetails(MessageContext messageContext) {
+        //TODO: Hardcoded const should be moved to a common place which is visible to org.wso2.carbon.apimgt.gateway.handlers
+        String applicationName = (String) messageContext.getProperty("APPLICATION_NAME");
+        String endUserName = (String) messageContext.getProperty("END_USER_NAME");
+        Date incomingReqTime = new Date();
+        org.apache.axis2.context.MessageContext axisMC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        String logMessage = "API call failed reason=API_authentication_failure"; //"app-name=" + applicationName + " " + "user-name=" + endUserName;
+        String logID = axisMC.getOptions().getMessageId();
+        if (applicationName != null) {
+            logMessage = " belonging to appName=" + applicationName;
+        }
+        if (endUserName != null) {
+            logMessage = logMessage + " userName=" + endUserName;
+        }
+        if (logID != null) {
+            logMessage = logMessage + " transactionId=" + logID;
+        }
+        String userAgent = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("User-Agent");
+        if (userAgent != null) {
+            logMessage = logMessage + " with userAgent=" + userAgent;
+        }
+        String requestURI = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
+        if (requestURI != null) {
+            logMessage = logMessage + " for requestURI=" + requestURI;
+        }
+        long reqIncomingTimestamp = Long.parseLong((String) ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext().getProperty("wso2statistics.request.received.time"));
+        incomingReqTime = new Date(reqIncomingTimestamp);
+        if (incomingReqTime != null) {
+            logMessage = logMessage + " at time=" + incomingReqTime;
+        }
+        String remoteIP = (String) axisMC.getProperty("REMOTE_ADDR");
+        if (remoteIP != null) {
+            logMessage = logMessage + " from clientIP=" + remoteIP;
+        }
+        log.debug("Call to API Gateway " + logMessage);
     }
 }

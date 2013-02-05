@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.statistics.StatisticsCollector;
@@ -127,7 +128,8 @@ public class RegistryJMXServiceComponent {
             if (registryXML.exists()) {
                 try {
                     FileInputStream fileInputStream = new FileInputStream(registryXML);
-                    StAXOMBuilder builder = new StAXOMBuilder(fileInputStream);
+                    StAXOMBuilder builder = new StAXOMBuilder(
+                            CarbonUtils.replaceSystemVariablesInXml(fileInputStream));
                     OMElement configElement = builder.getDocumentElement();
                     OMElement jmx = configElement.getFirstChildWithName(new QName("jmx"));
                     if (jmx != null) {
@@ -147,6 +149,8 @@ public class RegistryJMXServiceComponent {
                     log.error("Unable to parse registry.xml", e);
                 } catch (IOException e) {
                     log.error("Unable to read registry.xml", e);
+                } catch (CarbonException e) {
+                    log.error("An error occurred during system variable replacement", e);
                 }
             }
         }

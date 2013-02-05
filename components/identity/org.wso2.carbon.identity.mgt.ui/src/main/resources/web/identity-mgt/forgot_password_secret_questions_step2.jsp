@@ -31,9 +31,6 @@
         request="<%=request%>"/>
 
 <fmt:bundle basename="org.wso2.carbon.identity.mgt.ui.i18n.Resources">
-
-    <link href="css/forgot-password.css" rel="stylesheet" type="text/css" media="all"/>
-
     <%
         String userName = request.getParameter("userName");
         String userKey = request.getParameter("userKey");
@@ -54,21 +51,18 @@
                                                             bean.getKey().trim().length() > 0) {
                 userKey = bean.getKey();
             }  else {
-%>
-    <div>
-        Answer is wrong
-    </div>
-<%              return;
-            }
-        } catch (Exception e) {
-            CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR,
-                request);
     %>
             <script type="text/javascript">
-                location.href = "index.jsp";
+                location.href = "fail_password_reset.jsp";
             </script>
     <%
-            return;
+            }
+        } catch (Exception e) {
+    %>
+            <script type="text/javascript">
+                location.href = "fail_password_reset.jsp";
+            </script>
+    <%
         }
     %>
 
@@ -79,18 +73,18 @@
     </script>
     
     <div id="middle">
-        <h2>
-            We need secret information from you to recover your password
-        </h2>
+        <h2><fmt:message key="secret.information"/></h2>
     </div>
 
-
-    <form action="forgot_password_secret_questions_final_ajaxprocessor.jsp"
+<%
+    if(currentChallenge != null){
+%>
+    <form action="forgot_password_secret_questions_final.jsp"
                                                             id="userChallenge"  method="post">
     <table>
         <tbody>
         <tr>
-            <td>Question :</td>
+            <td><fmt:message key="secret.question"/></td>
             <td><%=currentChallenge.getQuestion()%></td>
         </tr>
         <tr>
@@ -100,7 +94,7 @@
             </td>
         </tr>
         <tr>
-            <td>Answer  :</td>
+            <td><fmt:message key="secret.answer"/></td>
             <td>
                 <input type="text" tabindex="2" name="answer" id="answer" />
             </td>
@@ -120,5 +114,14 @@
         </tbody>
     </table>
     </form>
+<%
+    } else {
+%>
+    <script type="text/javascript">
+        location.href = "fail _password_reset.jsp";
+    </script>    
+<%
+    }
+%>
 </fmt:bundle>
 

@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -27,6 +27,7 @@ import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.OAuthConstants;
 import org.wso2.carbon.identity.oauth.OAuthUtil;
+import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -158,7 +159,7 @@ public class OAuthAppDAO {
         return oauthAppsOfUser;
     }
 
-    public OAuthAppDO getAppInformation(String consumerKey) throws IdentityOAuthAdminException {
+    public OAuthAppDO getAppInformation(String consumerKey) throws IdentityOAuthAdminException, InvalidOAuthClientException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rSet = null;
@@ -171,7 +172,15 @@ public class OAuthAppDAO {
 
             rSet = prepStmt.executeQuery();
             List<OAuthAppDO> oauthApps = new ArrayList<OAuthAppDO>();
+            /**
+             * We need to determine whether the result set has more than 1 row. Meaning, we found an application for
+             * the given consumer key. There can be situations where a user passed a key which doesn't yet have an
+             * associated application. We need to barf with a meaningful error message for this case
+             */
+            boolean rSetHasRows = false;
             while (rSet.next()) {
+                // There is at least one application associated with a given key
+                rSetHasRows = true;
                 if (rSet.getString(3) != null && rSet.getString(3).length() > 0) {
                     oauthApp = new OAuthAppDO();
                     oauthApp.setOauthConsumerKey(consumerKey);
@@ -179,8 +188,19 @@ public class OAuthAppDAO {
                     oauthApp.setApplicationName(rSet.getString(2));
                     oauthApp.setOauthVersion(rSet.getString(3));
                     oauthApp.setCallbackUrl(rSet.getString(4));
+                    oauthApp.setUserName(rSet.getString(5));
                     oauthApps.add(oauthApp);
                 }
+            }
+            if (!rSetHasRows) {
+         /**
+                 * We come here because user submitted a key that doesn't have any associated application with it.
+                 * We're throwing an error here because we cannot continue without this info. Otherwise it'll throw
+                 * a null values not supported error when it tries to cache this info
+                 */
+                String message = "Cannot find an application associated with the given consumer key : " + consumerKey;
+                log.debug(message);
+                throw new InvalidOAuthClientException(message);
             }
         } catch (IdentityException e) {
             String errorMsg = "Error when getting an Identity Persistence Store instance.";

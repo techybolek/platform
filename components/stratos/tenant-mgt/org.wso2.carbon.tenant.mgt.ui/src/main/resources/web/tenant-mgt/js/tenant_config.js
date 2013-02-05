@@ -92,7 +92,7 @@ function addTenant(isUpdating, isPublicCloud) {
         CARBON.showErrorDialog(reason);
         return;
     }
-
+    document.getElementById("isUpdating").value=isUpdating;
     addTenantForm.submit();
 }
 function showSuccessRegisterMessage() {

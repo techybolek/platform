@@ -28,18 +28,17 @@ import junit.framework.TestCase;
 
 public class LoadBalancerConfigurationTest extends TestCase {
     
-    private LoadBalancerConfiguration lbConfig = new LoadBalancerConfiguration();
-    private LoadBalancerConfiguration lbConfig1 = new LoadBalancerConfiguration();
+    private LoadBalancerConfiguration lbConfig ;
+    private LoadBalancerConfiguration lbConfig1;
     
     
     @Override
     protected void setUp() throws Exception {
 
+        LoadBalancerConfiguration.setInstance(null);
         File f = new File("src/test/resources/loadbalancer.conf");
-        lbConfig.init(f.getAbsolutePath());
-        
-        f = new File("src/test/resources/loadbalancer1.conf");
-        lbConfig1.init(f.getAbsolutePath());
+        System.setProperty("loadbalancer.conf", f.getAbsolutePath());
+        lbConfig = LoadBalancerConfiguration.getInstance();
     }
     
     public final void testCreateLoadBalancerConfig() {
@@ -62,9 +61,10 @@ public class LoadBalancerConfigurationTest extends TestCase {
 
         assertEquals(1, asServiceConfig.getInstancesPerScaleUp());
         assertEquals(5, asServiceConfig.getMaxAppInstances());
-        assertEquals(3, asServiceConfig.getMinAppInstances());
+        assertEquals(0, asServiceConfig.getMinAppInstances());
         assertEquals(60000, asServiceConfig.getMessageExpiryTime());
-        assertEquals(400, asServiceConfig.getQueueLengthPerNode());
+        assertEquals(400, asServiceConfig.getMaxRequestsPerSecond());
+        assertEquals(0.65, asServiceConfig.getAlarmingUpperRate());
         assertEquals(10, asServiceConfig.getRoundsToAverage());
         assertEquals("worker", asServiceConfig.getSubDomain());
 
@@ -93,12 +93,21 @@ public class LoadBalancerConfigurationTest extends TestCase {
         
         /* tests relevant to loadbalancer1.conf file */
         
+        File f = new File("src/test/resources/loadbalancer2.conf");
+        System.setProperty("loadbalancer.conf", f.getAbsolutePath());
+        
+        LoadBalancerConfiguration.setInstance(null);
+        lbConfig1 = LoadBalancerConfiguration.getInstance();
+        
         for (HostContext ctx : lbConfig1.getHostContextMap().values()) {
 
             if (ctx.getHostName().equals("appserver.cloud-test.wso2.com")) {
 
                 assertEquals("nirmal", ctx.getSubDomainFromTenantId(30));
-                assertEquals(1, ctx.getTenantDomainContexts().size());
+                assertEquals("wso2.as1.domain", ctx.getDomainFromTenantId(5));
+                assertEquals("wso2.as.domain", ctx.getDomainFromTenantId(8));
+                assertEquals("wso2.as.domain", ctx.getDomainFromTenantId(2));
+                assertEquals(4, ctx.getTenantDomainContexts().size());
                 
             } else if (ctx.getHostName().equals("esb.cloud-test.wso2.com")) {
                 
@@ -108,8 +117,9 @@ public class LoadBalancerConfigurationTest extends TestCase {
 
     }
 
-    public final void testGetServiceDomains() {
+    public final void testGetServiceDomains() throws Exception {
 
+        setUp();
         String[] serviceDomains = lbConfig.getServiceDomains();
         assertEquals(4, serviceDomains.length);
         
@@ -135,8 +145,9 @@ public class LoadBalancerConfigurationTest extends TestCase {
         
     }
     
-    public final void testGetServiceSubDomains() {
+    public final void testGetServiceSubDomains() throws Exception {
 
+        setUp();
         String[] serviceSubDomains = lbConfig.getServiceSubDomains("wso2.as3.domain");
         assertEquals(2, serviceSubDomains.length);
         

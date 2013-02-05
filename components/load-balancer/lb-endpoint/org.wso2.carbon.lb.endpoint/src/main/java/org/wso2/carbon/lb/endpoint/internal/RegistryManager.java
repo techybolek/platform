@@ -22,18 +22,14 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 public class RegistryManager {
     UserRegistry governanceRegistry = ConfigHolder.getInstance().getGovernanceRegistry();
     /**
-     *   the path in which URL mapping gets stored in registry
+     *
      */
     public static final String HOSTINFO = "hostinfo/";
-
     /**
-     *   webapp parameter in hostinfo
+     *
      */
     public static final String WEB_APP = "web.app";
 
-    /**
-     * service parameter in hostinfo
-     */
     public static final String SERVICE_EPR = "service.epr";
 
 

@@ -18,8 +18,9 @@ package org.wso2.carbon.webapp.mgt;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.ApplicationContext;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
+import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 import org.wso2.carbon.tomcat.ext.valves.CarbonTomcatValve;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -40,10 +41,9 @@ public class TenantLazyLoaderValve implements CarbonTomcatValve {
         String requestedHostName = request.getServerName();
 
         //getting actual uri when accessing a virtual host through url mapping from the Map
-        ApplicationContext appContext = ApplicationContext.getCurrentApplicationContext();
-        String uriOfVirtualHost = appContext.getApplicationFromUrlMapping(requestedHostName);
+        String uriOfVirtualHost = URLMappingHolder.getInstance().getApplicationFromUrlMapping(requestedHostName);
         //getting the host name of first request from registry if & only if the request contains url-mapper suffix
-        if(TomcatUtil.isVirtualHostRequest(requestedHostName)) {
+        if(TomcatUtil.isVirtualHostRequest(requestedHostName) && uriOfVirtualHost == null) {
             uriOfVirtualHost = DataHolder.getHotUpdateService().
                     getApplicationContextForHost(requestedHostName);
         }

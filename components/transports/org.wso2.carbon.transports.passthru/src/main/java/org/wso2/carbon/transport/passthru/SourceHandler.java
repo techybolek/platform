@@ -86,6 +86,7 @@ public class SourceHandler implements NHttpServiceHandler {
             
             if (!SourceContext.assertState(conn, ProtocolState.REQUEST_READY)) {
                 handleInvalidState(conn, "Request received");
+                return;
             }
             // we have received a message over this connection. So we must inform the pool
             sourceConfiguration.getSourceConnections().useConnection(conn);
@@ -129,6 +130,7 @@ public class SourceHandler implements NHttpServiceHandler {
             if (protocolState != ProtocolState.REQUEST_HEAD
                     && protocolState != ProtocolState.REQUEST_BODY) {
                 handleInvalidState(conn, "Request message body data received");
+                return;
             }
 
             SourceContext.updateState(conn, ProtocolState.REQUEST_BODY);
@@ -162,6 +164,7 @@ public class SourceHandler implements NHttpServiceHandler {
 
             if (protocolState != ProtocolState.REQUEST_DONE) {
                 handleInvalidState(conn, "Writing a response");
+                return;
             }
 
             // because the duplex nature of http core we can reach hear without a actual response
@@ -193,6 +196,7 @@ public class SourceHandler implements NHttpServiceHandler {
         HttpContext context = conn.getContext();
     	try {
             ProtocolState protocolState = SourceContext.getState(conn);
+            
             if (protocolState != ProtocolState.RESPONSE_HEAD
                     && protocolState != ProtocolState.RESPONSE_BODY) {
                 log.warn("Illegal incoming connection state: "
@@ -200,6 +204,8 @@ public class SourceHandler implements NHttpServiceHandler {
                         "are happening for the same request");
 
                 handleInvalidState(conn, "Trying to write response body");
+                
+                return;
             }
 
             SourceContext.updateState(conn, ProtocolState.RESPONSE_BODY);
@@ -269,6 +275,11 @@ public class SourceHandler implements NHttpServiceHandler {
     }
 
     private void logIOException(IOException e) {
+    	// this check feels like crazy! But weird things happened, when load testing.
+    	if(e == null){
+    		return;
+    	}
+    	
         if (e instanceof ConnectionClosedException || (e.getMessage() != null &&
                 e.getMessage().toLowerCase().contains("connection reset by peer") ||
                 e.getMessage().toLowerCase().contains("forcibly closed"))) {
@@ -379,6 +390,7 @@ public class SourceHandler implements NHttpServiceHandler {
     private void handleInvalidState(NHttpServerConnection conn, String action) {
         log.warn(action + " while the handler is in an inconsistent state " +
                 SourceContext.getState(conn));
+        
         SourceContext.updateState(conn, ProtocolState.CLOSED);
         sourceConfiguration.getSourceConnections().shutDownConnection(conn);
     }

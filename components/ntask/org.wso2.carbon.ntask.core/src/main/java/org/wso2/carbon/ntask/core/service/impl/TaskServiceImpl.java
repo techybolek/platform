@@ -15,34 +15,32 @@
  */
 package org.wso2.carbon.ntask.core.service.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.File;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.coordination.core.services.CoordinationService;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
-import org.wso2.carbon.registry.api.Collection;
-import org.wso2.carbon.registry.api.Resource;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
+import org.w3c.dom.Document;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.common.TaskException.Code;
 import org.wso2.carbon.ntask.core.TaskManager;
-import org.wso2.carbon.ntask.core.TaskRepository;
+import org.wso2.carbon.ntask.core.TaskManagerFactory;
+import org.wso2.carbon.ntask.core.TaskManagerId;
 import org.wso2.carbon.ntask.core.TaskUtils;
-import org.wso2.carbon.ntask.core.impl.ClusteredTaskManager;
-import org.wso2.carbon.ntask.core.impl.RegistryBasedTaskRepository;
-import org.wso2.carbon.ntask.core.impl.StandaloneTaskManager;
+import org.wso2.carbon.ntask.core.impl.clustered.ClusterGroupCommunicator;
+import org.wso2.carbon.ntask.core.impl.clustered.ClusteredTaskManagerFactory;
+import org.wso2.carbon.ntask.core.impl.remote.RemoteTaskManager;
+import org.wso2.carbon.ntask.core.impl.remote.RemoteTaskManagerFactory;
+import org.wso2.carbon.ntask.core.impl.standalone.StandaloneTaskManagerFactory;
 import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
 import org.wso2.carbon.ntask.core.service.TaskService;
-import org.wso2.carbon.user.api.Tenant;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.CarbonUtils;
 
 /**
  * This class represents the TaskService implementation.
@@ -52,215 +50,225 @@ public class TaskServiceImpl implements TaskService {
 
 	private static final Log log = LogFactory.getLog(TaskServiceImpl.class);
 	
-	/**
-	 * The map is used to keep a task manager for each tenant, 
-	 * keyed by the tenant id + task type, task types are for example,
-	 * ESB tasks, DSS tasks etc..
-	 */
-	private Map<TaskManagerId, TaskManager> taskManagerMap;
-	
 	private Set<String> registeredTaskTypes;
-	
-	private RegistryTaskAvailabilityManager taskAvailabilityManager;
-	
+		
 	private boolean serverInit;
+	
+	private TaskManagerFactory taskManagerFactory;
+	
+	private TaskServiceConfiguration taskServerConfiguration;
 	
 	public TaskServiceImpl() throws TaskException {
 		this.registeredTaskTypes = new HashSet<String>();
-		this.taskManagerMap = new HashMap<TaskManagerId, TaskManager>();
-		this.taskAvailabilityManager = new RegistryTaskAvailabilityManager();
+		this.taskServerConfiguration = new TaskServiceConfigurationImpl(
+				this.loadTaskServiceXMLConfig());
+		switch (this.getServerConfiguration().getTaskServerMode()) {
+		case CLUSTERED:
+			this.taskManagerFactory = new ClusteredTaskManagerFactory();
+			break;
+		case REMOTE:
+			this.taskManagerFactory = new RemoteTaskManagerFactory();
+		    break;
+		case STANDALONE:
+			this.taskManagerFactory = new StandaloneTaskManagerFactory();
+			break;
+		}
 	}
 	
+	private TaskServiceXMLConfiguration loadTaskServiceXMLConfig() throws TaskException {
+		String path = CarbonUtils.getCarbonConfigDirPath() + File.separator + "etc" + 
+		        File.separator + "tasks-config.xml";
+		File file = new File(path);
+		if (!file.exists()) {
+			return null;
+		}
+		Document doc = TaskUtils.convertToDocument(file);
+		TaskUtils.secureResolveDocument(doc);
+		JAXBContext ctx;
+		try {
+			ctx = JAXBContext.newInstance(TaskServiceXMLConfiguration.class);
+			TaskServiceXMLConfiguration taskConfig = (TaskServiceXMLConfiguration) ctx.
+	        createUnmarshaller().unmarshal(doc);
+	        return taskConfig;
+		} catch (JAXBException e) {
+			throw new TaskException(e.getMessage(), Code.CONFIG_ERROR, e);
+		}
+		
+	}
+
 	public boolean isServerInit() {
 		return serverInit;
 	}
 
+	public TaskManagerFactory getTaskManagerFactory() {
+		return taskManagerFactory;
+	}
+	
+	@Override
 	public Set<String> getRegisteredTaskTypes() {
 		return registeredTaskTypes;
 	}
 	
-	private Map<TaskManagerId, TaskManager> getTaskManagerMap() throws TaskException {
-		return taskManagerMap;
-	}
-	
-	private void initTaskManagers() throws TaskException {
+	private void initTaskManagersForType(String taskType) throws TaskException {
 		if (log.isDebugEnabled()) {
-			log.debug("Initializing all task managers...");
+			log.debug("Initializing task managers [" + taskType + "]");
 		}
-		List<Integer> tenants = this.getAllTenantIds();
-		for (int tid : tenants) {
-			this.initTaskManagersForTenant(tid);
-		}
-	}
-	
-	private void initTaskManagersForTenant(int tid) throws TaskException {
-		try {
-			SuperTenantCarbonContext.startTenantFlow();
-			SuperTenantCarbonContext.getCurrentContext().setTenantId(tid);
-			List<String> taskTypes = this.getTaskTypesForTenant(tid);
-			TaskManagerId tmId;
-			TaskManager taskManager;
-			for (String taskType : taskTypes) {
-				tmId = new TaskManagerId(tid, taskType);
-				if (this.getTaskManagerMap().containsKey(tmId)) {
-					continue;
-				}
-				taskManager = this.createTaskManager(tmId, true);
-				this.getTaskManagerMap().put(tmId, taskManager);
-			}
-		} finally {
-			SuperTenantCarbonContext.endTenantFlow();
+		List<TaskManager> startupTms = this.getTaskManagerFactory().
+		        getStartupSchedulingTaskManagersForType(taskType);
+		for (TaskManager tm : startupTms) {
+			tm.scheduleAllTasks();
 		}
 	}
 	
-	private RegistryTaskAvailabilityManager getTaskAvailabilityManager() {
-		return taskAvailabilityManager;
-	}
-	
-	private List<String> getTaskTypesForTenant(int tid) throws TaskException {
-		List<String> types = new ArrayList<String>();
-		types.addAll(this.getRegisteredTaskTypes());
-		Registry registry = TaskUtils.getGovRegistryForTenant(tid);
-		try {
-			Resource tmpRes = registry.get(
-					RegistryBasedTaskRepository.REG_TASK_REPO_BASE_PATH);
-			if (tmpRes == null || !(tmpRes instanceof Collection)) {
-				return new ArrayList<String>();
-			}
-			Collection typeCollection = (Collection) tmpRes;
-			String[] children = typeCollection.getChildren();
-			for (String path : children) {
-				types.add(path.substring(path.lastIndexOf('/') + 1));
-			}
-			return types;
-		} catch (ResourceNotFoundException e) {
-			return types;
-		} catch (Exception e) {
-			throw new TaskException("Error in getting task type for tenant: " + tid,
-					Code.UNKNOWN, e);
-		}
-	}
-	
-	private List<Integer> getAllTenantIds() throws TaskException {
-		try {
-			Tenant[] tenants = TasksDSComponent.getRealmService().getTenantManager().
-					getAllTenants();
-			List<Integer> tids = new ArrayList<Integer>();
-			for (Tenant tenant : tenants) {
-				tids.add(tenant.getId());
-			}
-			tids.add(MultitenantConstants.SUPER_TENANT_ID);
-			return tids;
-		} catch (UserStoreException e) {
-			throw new TaskException("Error in listing all the tenants", Code.CONFIG_ERROR, e);
-		}
-	}
-	
-	private TaskManager createTaskManager(TaskManagerId taskManagerId, boolean isStartup) 
-			throws TaskException {
-		TaskRepository taskRepo = new RegistryBasedTaskRepository(taskManagerId.getTenantId(), 
-				taskManagerId.getTaskType(), this.getTaskAvailabilityManager());
-		CoordinationService coordinationService = TasksDSComponent.getCoordinationService();
-		TaskManager taskManager;
-		/* if coordination service is enabled, we can handle distributed tasks in a cluster */
-		if (coordinationService.isEnabled()) {
-			taskManager = new ClusteredTaskManager(taskRepo, isStartup);
-		} else {
-			/* if coordination service is not configured, 
-			 * fallback to standalone task implementation */
-			taskManager = new StandaloneTaskManager(taskRepo);
-		}
-		/* if only if this tenant has any tasks, schedule all the tasks */
-		if (this.getTaskAvailabilityManager().checkTasksAvailable(taskManagerId.getTenantId())) {
-		    taskManager.scheduleAllTasks();
-		    if (log.isDebugEnabled()) {
-		        log.debug("Scheduling all tasks in creating a task manager for tenant: " + 
-		                taskManagerId.getTenantId());
-		    }
-		} else {
-			if (log.isDebugEnabled()) {
-			    log.debug("No tasks available to schedule in creating a task manager for tenant: " + 
-			            taskManagerId.getTenantId());
-			}
-		}
-		return taskManager;
-	}
-
 	@Override
-	public synchronized TaskManager getTaskManager(String taskType) throws TaskException {
-		int tid = SuperTenantCarbonContext.getCurrentContext().getTenantId();
-		TaskManagerId taskManagerId = new TaskManagerId(tid, taskType);
-		if (!this.getTaskManagerMap().containsKey(taskManagerId)) {
-			this.getTaskManagerMap().put(taskManagerId, 
-					this.createTaskManager(taskManagerId, false));
-		}
-		return this.getTaskManagerMap().get(taskManagerId);
+	public TaskManager getTaskManager(String taskType) throws TaskException {
+		int tid = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+		return this.getTaskManagerFactory().getTaskManager(new TaskManagerId(tid, taskType));
 	}
-
-	/**
-	 * This class represents an identifier for a task manager.
-	 */
-	private class TaskManagerId {
-
-		private int tenantId;
-		
-		private String taskType;
-		
-		public TaskManagerId(int tenantId, String taskType) {
-			this.tenantId = tenantId;
-			this.taskType = taskType;
-		}
-		
-		public int getTenantId() {
-			return tenantId;
-		}
-		
-		public String getTaskType() {
-			return taskType;
-		}
-		
-		@Override
-		public int hashCode() {
-			return (this.getTaskType() + ":" + this.getTenantId()).hashCode();
-		}
-		
-		@Override
-		public boolean equals(Object rhs) {
-			return this.hashCode() == rhs.hashCode();
-		}
-		
-		@Override
-		public String toString() {
-			return this.getTaskType() + ":" + this.getTenantId();
-		}
-		
-	}
-
+	
 	@Override
-	public void newTenantArrived(int tid) throws TaskException {
-		this.initTaskManagersForTenant(tid);
+	public List<TaskManager> getAllTenantTaskManagersForType(
+			String taskType) throws TaskException {
+		return this.getTaskManagerFactory().getAllTenantTaskManagersForType(taskType);
 	}
 
 	@Override
 	public synchronized void registerTaskType(String taskType) throws TaskException {
 		this.registeredTaskTypes.add(taskType);
-		/* the task manager must be initialized again,
-		 * to create any missing ones */
+		/* cluster task communicator should be notified to initialize itself,
+		 * i.e. creating necessary groups */
+		if (this.getServerConfiguration().getTaskServerMode() == TaskServerMode.CLUSTERED) {
+			ClusterGroupCommunicator.getInstance().newTaskTypeAdded(taskType);
+		}
+		/* if server has finished initializing, lets initialize the
+		 * task managers for this type */
 		if (this.isServerInit()) {
-		    this.initTaskManagers();
+		    this.initTaskManagersForType(taskType);
 		}
 	}
 
 	@Override
 	public synchronized void serverInitialized() {
 		try {
-			this.initTaskManagers();
+			for (String taskType : this.getRegisteredTaskTypes()) {
+				this.initTaskManagersForType(taskType);
+			}
 			this.serverInit = true;
 		} catch (TaskException e) {
 			String msg = "Error initializing task managers: " + e.getMessage();
 			log.error(msg, e);
 			throw new RuntimeException(msg, e);
 		}
+	}
+
+	@Override
+	public TaskServiceConfiguration getServerConfiguration() {
+		return taskServerConfiguration;
+	}
+	
+	private class TaskServiceConfigurationImpl implements TaskServiceConfiguration {
+
+		private TaskServerMode taskServerMode;
+		
+		private int taskServerCount = -1;
+		
+		private String taskClientDispatchAddress;
+		
+		private String remoteServerAddress;
+		
+		private String remoteServerUsername;
+		
+		private String remoteServerPassword;
+
+		public TaskServiceConfigurationImpl(TaskServiceXMLConfiguration taskXMLConfig) {
+			this.processXMLConfig(taskXMLConfig);
+			this.processSystemProps();
+		}
+		
+		private void processXMLConfig(TaskServiceXMLConfiguration taskXMLConfig) {
+			if (taskXMLConfig == null) {
+				return;
+			}
+			this.taskClientDispatchAddress = taskXMLConfig.getTaskClientDispatchAddress();
+			this.remoteServerAddress = taskXMLConfig.getRemoteServerAddress();
+			this.remoteServerUsername = taskXMLConfig.getRemoteServerUsername();
+			this.remoteServerPassword = taskXMLConfig.getRemoteServerPassword();
+			this.taskServerMode = taskXMLConfig.getTaskServerMode();
+			this.taskServerCount = taskXMLConfig.getTaskServerCount();
+		}
+		
+		private void processSystemProps() {
+			this.taskClientDispatchAddress = returnSystemPropValueIfValid(
+					this.taskClientDispatchAddress,
+					RemoteTaskManager.TASK_CLIENT_DISPATCH_ADDRESS);
+			this.remoteServerAddress = returnSystemPropValueIfValid(
+					this.remoteServerAddress,
+					RemoteTaskManager.REMOTE_TASK_SERVER_ADDRESS);
+			this.remoteServerUsername = returnSystemPropValueIfValid(
+					this.remoteServerUsername,
+					RemoteTaskManager.REMOTE_TASK_SERVER_USERNAME);
+			this.remoteServerPassword = returnSystemPropValueIfValid(
+					this.remoteServerPassword,
+					RemoteTaskManager.REMOTE_TASK_SERVER_PASSWORD);
+			if (this.taskServerMode == null) {
+				if (this.getRemoteServerAddress() != null) {
+					this.taskServerMode = TaskServerMode.REMOTE;
+				} else if (TasksDSComponent.getCoordinationService().isEnabled()) {
+					this.taskServerMode = TaskServerMode.CLUSTERED;
+				} else {
+					this.taskServerMode = TaskServerMode.STANDALONE;
+				}
+			}
+			if (this.taskServerCount == -1) {
+			    String taskServerCountStr = System.getProperty(
+					    ClusterGroupCommunicator.TASK_SERVER_COUNT_SYS_PROP);
+			    if (taskServerCountStr != null) {
+				    this.taskServerCount = Integer.parseInt(taskServerCountStr);
+			    } else {
+				    this.taskServerCount = -1;
+			    }
+			}
+		}
+		
+		private String returnSystemPropValueIfValid(String originalValue, String sysPropName) {
+			String sysPropValue = System.getProperty(sysPropName);
+			if (sysPropValue != null) {
+				return sysPropValue;
+			} else {
+				return originalValue;
+			}
+		}
+		
+		@Override
+		public String getTaskClientDispatchAddress() {
+			return taskClientDispatchAddress;
+		}
+		
+		@Override
+		public TaskServerMode getTaskServerMode() {
+			return taskServerMode;
+		}
+
+		@Override
+		public String getRemoteServerAddress() {
+			return remoteServerAddress;
+		}
+
+		@Override
+		public String getRemoteServerUsername() {
+			return remoteServerUsername;
+		}
+
+		@Override
+		public String getRemoteServerPassword() {
+			return remoteServerPassword;
+		}
+
+		@Override
+		public int getTaskServerCount() {
+			return taskServerCount;
+		}
+		
 	}
 	
 }

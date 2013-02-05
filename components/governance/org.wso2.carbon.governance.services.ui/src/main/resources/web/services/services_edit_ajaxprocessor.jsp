@@ -248,6 +248,13 @@
             var serviceName = document.getElementById('id_Overview_Name');
             var namespaceValue = document.getElementById('id_Overview_Namespace');
 
+            var selectArray = document.getElementsByTagName("select");
+            for (var j = 0; j < selectArray.length; j++) {
+                var disabledAttribute = selectArray[j].getAttribute("disabled");
+                if (disabledAttribute != null) {
+                    selectArray[j].removeAttribute("disabled")
+                }
+            }
             document.getElementsByName('newname')[0].value = serviceName.value;
             document.getElementsByName('newnamespace')[0].value = namespaceValue.value;
 

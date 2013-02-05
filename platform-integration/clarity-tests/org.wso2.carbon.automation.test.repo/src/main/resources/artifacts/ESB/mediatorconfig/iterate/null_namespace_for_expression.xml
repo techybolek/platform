@@ -3,7 +3,7 @@
     <registry provider="org.wso2.carbon.mediation.registry.WSO2Registry">
         <parameter name="cachableDuration">15000</parameter>
     </registry>
-    <sequence name="aggregateMessages">
+    <sequence name="aggregateMessages1">
         <aggregate id="iterate1">
             <completeCondition>
                 <messageCount min="-1" max="-1" />
@@ -15,7 +15,7 @@
             </onComplete>
         </aggregate>
     </sequence>
-    <sequence name="iterateMessages">
+    <sequence name="iterateMessages1">
         <iterate id="iterate1" expression="//m1:getQuote/m1:request"
                  preservePayload="true" attachPath="//m0:getQuote" xmlns:m0="http://services.samples">
             <target>
@@ -39,10 +39,10 @@
     </sequence>
     <sequence name="main">
         <in>
-            <sequence key="iterateMessages" />
+            <sequence key="iterateMessages1" />
         </in>
         <out>
-            <sequence key="aggregateMessages" />
+            <sequence key="aggregateMessages1" />
         </out>
         <description>The main sequence for the message mediation</description>
     </sequence>

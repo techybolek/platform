@@ -56,7 +56,7 @@ public class LoadbalanceFailoverClient {
 
     public LoadbalanceFailoverClient() {
         String repositoryPath = "samples" + File.separator + "axis2Client" +
-                                File.separator + "client_repo";
+                File.separator + "client_repo";
 
         File repository = new File(repositoryPath);
         log.info("Using the Axis2 repository path: " + repository.getAbsolutePath());
@@ -120,6 +120,157 @@ public class LoadbalanceFailoverClient {
         }
 
         return testString;
+    }
+
+    /**
+     * This method is used to send a single request to the load balancing service
+     * @param proxyURL will be the location where load balancing proxy or sequence is defined.
+     * @param serviceURL will be the URL for LBService
+     * @return the response
+     * @throws AxisFault
+     */
+    public String sendLoadBalanceRequest(String proxyURL,String serviceURL) throws AxisFault {
+
+        OMFactory fac = OMAbstractFactory.getOMFactory();
+        OMElement value = fac.createOMElement("Value", null);
+        value.setText("Sample string");
+
+        Options options = new Options();
+        if (proxyURL != null && !"null".equals(proxyURL)) {
+            options.setTo(new EndpointReference(proxyURL));
+        }
+
+        options.setAction("urn:sampleOperation");
+
+        long timeout = Integer.parseInt(getProperty("timeout", "10000000"));
+        System.out.println("timeout=" + timeout);
+        options.setTimeOutInMilliSeconds(timeout);
+
+        if (serviceURL != null && !"null".equals(serviceURL)) {
+            // set addressing, transport and proxy url
+            serviceClient.engageModule("addressing");
+            options.setTo(new EndpointReference(serviceURL));
+        }
+
+        serviceClient.setOptions(options);
+
+        serviceClient.getOptions().setManageSession(true);
+        OMElement responseElement = serviceClient.sendReceive(value);
+        String response = responseElement.getText();
+
+        return response;
+    }
+
+    /**
+     * This method is used to send a single request to the load balancing service
+     * @param proxyURL will be the location where load balancing proxy or sequence is defined.
+     * @param serviceURL will be the URL for LBService
+     * @return the response
+     * @throws AxisFault
+     */
+    public String sendLoadBalanceRequest(String proxyURL,String serviceURL,String clientTimeoutInMilliSeconds) throws AxisFault {
+
+        OMFactory fac = OMAbstractFactory.getOMFactory();
+        OMElement value = fac.createOMElement("Value", null);
+        value.setText("Sample string");
+
+        Options options = new Options();
+        if (proxyURL != null && !"null".equals(proxyURL)) {
+            options.setTo(new EndpointReference(proxyURL));
+        }
+
+        options.setAction("urn:sampleOperation");
+
+        long timeout = Integer.parseInt(getProperty("timeout", clientTimeoutInMilliSeconds));
+        System.out.println("timeout=" + timeout);
+        options.setTimeOutInMilliSeconds(timeout);
+
+        if (serviceURL != null && !"null".equals(serviceURL)) {
+            // set addressing, transport and proxy url
+            serviceClient.engageModule("addressing");
+            options.setTo(new EndpointReference(serviceURL));
+        }
+
+        serviceClient.setOptions(options);
+
+        serviceClient.getOptions().setManageSession(true);
+        OMElement responseElement = serviceClient.sendReceive(value);
+        String response = responseElement.getText();
+
+        return response;
+    }
+
+    /**
+     * This method is used to send a single request to the load balancing service which will invoke a sleep in the service
+     * @param proxyURL will be the location where load balancing proxy or sequence is defined.
+     * @param sleepTimeInMilliSeconds
+     * @param clientTimeoutInMilliSeconds
+     * @return
+     * @throws AxisFault
+     */
+    public String sendSleepRequest(String proxyURL,String sleepTimeInMilliSeconds, String clientTimeoutInMilliSeconds) throws AxisFault {
+        OMFactory fac = OMAbstractFactory.getOMFactory();
+        OMNamespace omNs = fac.createOMNamespace("http://services.samples", "ns");
+        OMElement sleepOperation = fac.createOMElement("sleepOperation", omNs);
+        OMElement load = fac.createOMElement("load",null);
+        load.setText(sleepTimeInMilliSeconds);
+        sleepOperation.addChild(load);
+
+
+
+        Options options = new Options();
+        if (proxyURL != null && !"null".equals(proxyURL)) {
+            options.setTo(new EndpointReference(proxyURL));
+        }
+
+        options.setAction("urn:sleepOperation");
+
+        long timeout = Integer.parseInt(getProperty("timeout", clientTimeoutInMilliSeconds));
+        System.out.println("timeout=" + timeout);
+        options.setTimeOutInMilliSeconds(timeout);
+
+        serviceClient.setOptions(options);
+
+        serviceClient.getOptions().setManageSession(true);
+         OMElement responseElement = serviceClient.sendReceive(sleepOperation);
+        String response = responseElement.getText();
+
+        return response;
+    }
+
+    /**
+     * This method is used to send a single request to the load balancing service. No service endpoint is needed
+     * @param URL will be the location where load balancing proxy or sequence is defined.     * 
+     * @return the response
+     * @throws AxisFault
+     */
+    public String sendLoadBalanceFailoverRequest(String URL) throws AxisFault {
+
+        OMFactory fac = OMAbstractFactory.getOMFactory();
+        OMElement value = fac.createOMElement("Value", null);
+        value.setText("Sample string");
+
+        Options options = new Options();
+        options.setTo(new EndpointReference(URL));
+
+        options.setAction("urn:sampleOperation");
+
+
+        long timeout = Integer.parseInt(getProperty("timeout", "10000000"));
+        System.out.println("timeout=" + timeout);
+        options.setTimeOutInMilliSeconds(timeout);
+
+        // set addressing, transport and proxy url
+        serviceClient.engageModule("addressing");
+        options.setTo(new EndpointReference("http://localhost:8280"));
+
+        serviceClient.setOptions(options);
+
+        serviceClient.getOptions().setManageSession(true);
+        OMElement responseElement = serviceClient.sendReceive(value);
+        String response = responseElement.getText();
+
+        return response;
     }
 
     /**
@@ -267,14 +418,14 @@ public class LoadbalanceFailoverClient {
                             responseEnvelope.getBody().getFirstChildWithName(new QName("Value"));
                     System.out.println(
                             "Request: " + i + " with Session ID: " +
-                            (httpSession ? cookie : sessionNumber) + " ---- " +
-                            "Response : with  " + (httpSession && receivedCookie != null ?
-                                                   (receivedSetCookie != null ? receivedSetCookie : receivedCookie) : " ") + " " +
-                            vElement.getText());
+                                    (httpSession ? cookie : sessionNumber) + " ---- " +
+                                    "Response : with  " + (httpSession && receivedCookie != null ?
+                                    (receivedSetCookie != null ? receivedSetCookie : receivedCookie) : " ") + " " +
+                                    vElement.getText());
                 } catch (AxisFault axisFault) {
                     System.out.println("Request with session id " +
-                                       (httpSession ? cookie : sessionNumber) + " " +
-                                       "- Get a Fault : " + axisFault.getMessage());
+                            (httpSession ? cookie : sessionNumber) + " " +
+                            "- Get a Fault : " + axisFault.getMessage());
                 }
             }
 

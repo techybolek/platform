@@ -22,14 +22,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>registry.task-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.registry.task.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Registry Task Feature</name>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.2</version>
     <url>http://wso2.org</url>
     <description>
         Ability to associate a profile with a user account on carbon, which will be stored on the
@@ -60,7 +61,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.registry.task</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.registry.core:${registry.core.feature.version}</importFeatureDef>
                             </importFeatures>

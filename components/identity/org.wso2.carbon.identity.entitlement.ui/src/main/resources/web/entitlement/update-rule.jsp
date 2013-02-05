@@ -26,6 +26,15 @@
     int targetRowIndex = -1;
     int ruleRowIndex = -1;
     int targetRuleRowIndex = -1;
+    int dynamicRowIndex = -1;
+    int obligationRowIndex = -1;
+
+    int maxTargetRows = 0;
+    int maxTargetRuleRows = 0;
+    int maxRuleRows = 0;
+    int maxObligationRuleRows = 0;
+    int maxObligationRows = 0;
+
     String categoryType = null;
     RuleDTO ruleDTO = new RuleDTO();
     BasicTargetDTO targetDTO = new BasicTargetDTO();
@@ -34,25 +43,69 @@
     String targetRowIndexString = CharacterEncoder.getSafeText(request.getParameter("targetRowIndex"));
     String ruleRowIndexString = CharacterEncoder.getSafeText(request.getParameter("ruleRowIndex"));
     String targetRuleRowIndexString = CharacterEncoder.getSafeText(request.getParameter("targetRuleRowIndex"));
-    if(targetRowIndexString != null && targetRowIndexString.trim().length() > 0){
-        targetRowIndex = Integer.parseInt(targetRowIndexString);
-    }
-    if(ruleRowIndexString != null && ruleRowIndexString.trim().length() > 0){
-        ruleRowIndex = Integer.parseInt(ruleRowIndexString);
-    }
-    if(targetRuleRowIndexString != null && targetRuleRowIndexString.trim().length() > 0){
-        targetRuleRowIndex = Integer.parseInt(targetRuleRowIndexString);
+    String dynamicRowIndexString = CharacterEncoder.getSafeText(request.getParameter("dynamicRowIndex"));
+    String obligationRowIndexString = CharacterEncoder.getSafeText(request.getParameter("obligationRowIndex"));
+
+    String maxTargetRowsString = CharacterEncoder.getSafeText(request.getParameter("maxTargetRows"));
+    String maxTargetRuleRowsString = CharacterEncoder.getSafeText(request.getParameter("maxTargetRuleRows"));
+    String maxRuleRowsString = CharacterEncoder.getSafeText(request.getParameter("maxRuleRows"));
+    String maxObligationRuleRowsString = CharacterEncoder.getSafeText(request.getParameter("maxObligationRuleRows"));
+    String maxObligationRowsString = CharacterEncoder.getSafeText(request.getParameter("maxObligationRows"));
+
+    try{
+        if(maxTargetRowsString != null && maxTargetRowsString.trim().length() > 0){
+            maxTargetRows = Integer.parseInt(maxTargetRowsString);
+        }
+        if(maxTargetRuleRowsString != null && maxTargetRuleRowsString.trim().length() > 0){
+            maxTargetRuleRows = Integer.parseInt(maxTargetRuleRowsString);
+        }
+        if(maxRuleRowsString != null && maxRuleRowsString.trim().length() > 0){
+            maxRuleRows = Integer.parseInt(maxRuleRowsString);
+        }
+        if(maxObligationRuleRowsString != null && maxObligationRuleRowsString.trim().length() > 0){
+            maxObligationRuleRows = Integer.parseInt(maxObligationRuleRowsString);
+        }
+        if(maxObligationRowsString != null && maxObligationRowsString.trim().length() > 0){
+            maxObligationRows = Integer.parseInt(maxObligationRowsString);
+        }
+
+        if(targetRowIndexString != null && targetRowIndexString.trim().length() > 0){
+            targetRowIndex = Integer.parseInt(targetRowIndexString);
+        }
+        if(ruleRowIndexString != null && ruleRowIndexString.trim().length() > 0){
+            ruleRowIndex = Integer.parseInt(ruleRowIndexString);
+        }
+        if(targetRuleRowIndexString != null && targetRuleRowIndexString.trim().length() > 0){
+            targetRuleRowIndex = Integer.parseInt(targetRuleRowIndexString);
+        }
+        if(dynamicRowIndexString != null && dynamicRowIndexString.trim().length() > 0){
+            dynamicRowIndex = Integer.parseInt(dynamicRowIndexString);
+        }
+        if(obligationRowIndexString != null && obligationRowIndexString.trim().length() > 0){
+            obligationRowIndex = Integer.parseInt(obligationRowIndexString);
+        }
+    } catch (Exception e){
+        //if number format exceptions.. just ignore
     }
 
-    while(true){
+    String ruleElementOrder = request.getParameter("ruleElementOrder");
+    String updateRule = request.getParameter("updateRule");
+    String nextPage = request.getParameter("nextPage");
+    String ruleId = request.getParameter("ruleId");
+    String ruleEffect = request.getParameter("ruleEffect");
+    String ruleDescription = request.getParameter("ruleDescription");
+    String completedRule = request.getParameter("completedRule");
+    String editRule = request.getParameter("editRule");
+
+    for(rowNumber = 0; rowNumber < maxTargetRows + 1; rowNumber ++){
 
         RowDTO  rowDTO = new RowDTO();
         String targetCategory = CharacterEncoder.getSafeText(request.
                 getParameter("targetCategory_" + rowNumber));
-        if(targetCategory != null){
+        if(targetCategory != null && targetCategory.trim().length() > 0){
             rowDTO.setCategory(targetCategory);
         } else {
-            break;
+            continue;
         }
 
         String targetPreFunction = CharacterEncoder.getSafeText(request.
@@ -71,6 +124,8 @@
                 getParameter("targetAttributeValue_" + rowNumber));
         if(targetAttributeValue != null && targetAttributeValue.trim().length() > 0){
             rowDTO.setAttributeValue(targetAttributeValue);
+        } else {
+            continue;
         }
 
         String targetAttributeId = CharacterEncoder.getSafeText(request.
@@ -97,21 +152,10 @@
         }
 
         targetDTO.addRowDTO(rowDTO);
-        rowNumber ++;
     }
 
     // set target element to entitlement bean
     entitlementPolicyBean.setTargetDTO(targetDTO);
-
-    String ruleElementOrder = request.getParameter("ruleElementOrder");
-    String updateRule = request.getParameter("updateRule");
-    String nextPage = request.getParameter("nextPage");
-    String ruleId = request.getParameter("ruleId");
-    String ruleEffect = request.getParameter("ruleEffect");
-    String ruleDescription = request.getParameter("ruleDescription");
-
-    String completedRule = request.getParameter("completedRule");
-    String editRule = request.getParameter("editRule");
 
     if(ruleId != null && !ruleId.trim().equals("") && !ruleId.trim().equals("null") && editRule == null ) {
 
@@ -125,18 +169,16 @@
         }
 
         BasicTargetDTO ruleTargetDTO = new BasicTargetDTO();
-        rowNumber = 0;
 
-        while(true){
+        for(rowNumber = 0; rowNumber < maxTargetRuleRows + 1; rowNumber ++){
 
             RowDTO  rowDTO = new RowDTO();
-
             String targetCategory = CharacterEncoder.getSafeText(request.
                     getParameter("ruleTargetCategory_" + rowNumber));
-            if(targetCategory != null){
+            if(targetCategory != null && targetCategory.trim().length() > 0){
                 rowDTO.setCategory(targetCategory);
             } else {
-                break;
+                continue;
             }
 
             String targetPreFunction = CharacterEncoder.getSafeText(request.
@@ -155,6 +197,8 @@
                     getParameter("ruleTargetAttributeValue_" + rowNumber));
             if(targetAttributeValue != null && targetAttributeValue.trim ().length() > 0){
                 rowDTO.setAttributeValue(targetAttributeValue);
+            } else {
+                continue;
             }
 
             String targetAttributeId = CharacterEncoder.getSafeText(request.
@@ -181,21 +225,20 @@
             }
 
             ruleTargetDTO.addRowDTO(rowDTO);
-            rowNumber ++;
         }
 
-        rowNumber = 0;
+        // rule's target
+        ruleDTO.setTargetDTO(ruleTargetDTO);
 
-        while(true){
+        for(rowNumber = 0; rowNumber < maxRuleRows + 1; rowNumber ++){
 
             RowDTO rowDTO = new RowDTO();
-
             String ruleCategory = CharacterEncoder.getSafeText(request.
                     getParameter("ruleCategory_" + rowNumber));
-            if(ruleCategory != null){
+            if(ruleCategory != null && ruleCategory.trim().length() > 0){
                 rowDTO.setCategory(ruleCategory);
             } else {
-                break;
+                continue;
             }
 
             String rulePreFunction = CharacterEncoder.getSafeText(request.
@@ -214,6 +257,8 @@
                     getParameter("ruleAttributeValue_" + rowNumber));
             if(ruleAttributeValue != null  && ruleAttributeValue.trim().length() > 0){
                 rowDTO.setAttributeValue(ruleAttributeValue);
+            } else {
+                continue;
             }
 
             String ruleAttributeId = CharacterEncoder.getSafeText(request.
@@ -240,12 +285,152 @@
             }
 
             ruleDTO.addRowDTO(rowDTO);
-            rowNumber ++;
         }
 
-        ruleDTO.setTargetDTO(ruleTargetDTO);
+        for(rowNumber = 0; rowNumber < maxObligationRuleRows + 1; rowNumber ++){
+
+            ObligationDTO dto = new ObligationDTO();
+            String obligationType = CharacterEncoder.getSafeText(request.
+                    getParameter("obligationRuleType_" + rowNumber));
+            if(obligationType != null){
+                dto.setType(obligationType);
+            }
+
+            String obligationId = CharacterEncoder.getSafeText(request.
+                    getParameter("obligationRuleId_" + rowNumber));
+            if(obligationId != null && obligationId.trim().length() > 0){
+                dto.setObligationId(obligationId);
+            } else {
+                continue;
+            }
+
+            String obligationAttributeValue = CharacterEncoder.getSafeText(request.
+                    getParameter("obligationRuleAttributeValue_" + rowNumber));
+            if(obligationAttributeValue != null){
+                dto.setAttributeValue(obligationAttributeValue);
+            }
+
+            String obligationAttributeId = CharacterEncoder.getSafeText(request.
+                    getParameter("obligationRuleAttributeId_" + rowNumber));
+            if(obligationAttributeId != null){
+                dto.setResultAttributeId(obligationAttributeId);
+            }
+
+            dto.setEffect(ruleEffect);
+
+            if(obligationRowIndex == rowNumber){
+                categoryType = null;          // TODO
+                dto.setNotCompleted(true);
+            }
+
+            // Set rule's obligation
+            ruleDTO.addObligationDTO(dto);
+        }
+
+        // Set rule
         entitlementPolicyBean.setRuleDTO(ruleDTO);
     }
+
+    for(rowNumber = 0; rowNumber < maxObligationRows + 1; rowNumber ++){
+
+        ObligationDTO dto = new ObligationDTO();
+        String obligationType = CharacterEncoder.getSafeText(request.
+                getParameter("obligationType_" + rowNumber));
+        if(obligationType != null){
+            dto.setType(obligationType);
+        }
+        String obligationId = CharacterEncoder.getSafeText(request.
+                getParameter("obligationId_" + rowNumber));
+        if(obligationId != null && obligationId.trim().length() > 0){
+            dto.setObligationId(obligationId);
+        } else {
+            continue;
+        }
+
+        String obligationAttributeValue = CharacterEncoder.getSafeText(request.
+                getParameter("obligationAttributeValue_" + rowNumber));
+        if(obligationAttributeValue != null){
+            dto.setAttributeValue(obligationAttributeValue);
+        }
+
+        String obligationAttributeId = CharacterEncoder.getSafeText(request.
+                getParameter("obligationAttributeId_" + rowNumber));
+        if(obligationAttributeId != null){
+            dto.setResultAttributeId(obligationAttributeId);
+        }
+
+        String obligationEffect = CharacterEncoder.getSafeText(request.
+                getParameter("obligationEffect_" + rowNumber));
+        if(obligationEffect != null){
+            dto.setEffect(obligationEffect);
+        }
+
+        if(obligationRowIndex == rowNumber){
+            categoryType = null;          // TODO
+            dto.setNotCompleted(true);
+        }
+
+        // Set obligations
+        entitlementPolicyBean.addObligationDTO(dto);
+    }
+
+//    rowNumber = 0;
+//    while(true){
+//
+//        ExtendAttributeDTO dto = new ExtendAttributeDTO();
+//        String dynamicId = CharacterEncoder.getSafeText(request.
+//                getParameter("dynamicId_" + rowNumber));
+//        if(dynamicId != null){
+//            dto.setId(dynamicId);
+//        } else {
+//            break;
+//        }
+//
+//        String dynamicSelector = CharacterEncoder.getSafeText(request.
+//                getParameter("dynamicSelector_" + rowNumber));
+//        if(dynamicSelector != null){
+//            dto.setSelector(dynamicSelector);
+//        }
+//
+//        String dynamicFunction = CharacterEncoder.getSafeText(request.
+//                getParameter("dynamicFunction_" + rowNumber));
+//        if(dynamicFunction != null){
+//            dto.setFunction(dynamicFunction);
+//        }
+//
+//        String dynamicCategory = CharacterEncoder.getSafeText(request.
+//                getParameter("dynamicCategory_" + rowNumber));
+//        if(dynamicCategory != null){
+//            dto.setCategory(dynamicCategory);
+//        }
+//
+//        String dynamicAttributeValue = CharacterEncoder.getSafeText(request.
+//                getParameter("dynamicAttributeValue_" + rowNumber));
+//        if(dynamicAttributeValue != null  && dynamicAttributeValue.trim().length() > 0){
+//            dto.setAttributeValue(dynamicAttributeValue);
+//        }
+//
+//        String dynamicAttributeId = CharacterEncoder.getSafeText(request.
+//                getParameter("dynamicAttributeId_" + rowNumber));
+//        if(dynamicAttributeId != null){
+//            dto.setAttributeId(dynamicAttributeId);
+//        }
+//
+//        String dynamicAttributeTypes = CharacterEncoder.getSafeText(request.
+//                getParameter("dynamicAttributeTypes_0" + rowNumber));
+//        if(dynamicAttributeTypes != null){
+//            dto.setDataType(dynamicAttributeTypes);
+//        }
+//
+//        if(dynamicRowIndex == rowNumber){
+//            categoryType = null;          // TODO
+//            dto.setNotCompleted(true);
+//        }
+//
+//        // Set extend attributes
+//        entitlementPolicyBean.addExtendAttributeDTO(dto);
+//        rowNumber ++;
+//    }
 
     String forwardTo;
 
@@ -263,7 +448,7 @@
     } else {
         forwardTo = nextPage + ".jsp?ruleId=" + ruleId;
         if(categoryType != null && categoryType.trim().length() > 0){
-            forwardTo = forwardTo + "&attributeType=" + categoryType;
+            forwardTo = forwardTo + "&attributeType=" + categoryType +"&";
         }
     }
 

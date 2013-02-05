@@ -22,12 +22,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>axis2-transport-features</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.transports.hl7.feature</artifactId>
     <packaging>pom</packaging>
+    <version>4.0.2</version>
     <name>WSO2 Carbon - Axis2 Transport HL7 Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the Axis2 HL7 transport core feature</description>
@@ -70,7 +72,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.transports.hl7</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>

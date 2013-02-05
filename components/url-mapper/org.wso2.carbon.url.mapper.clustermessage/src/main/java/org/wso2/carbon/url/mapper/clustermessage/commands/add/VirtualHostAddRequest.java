@@ -25,8 +25,8 @@ import org.apache.catalina.Context;
 import org.apache.catalina.Host;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.ApplicationContext;
 import org.wso2.carbon.tomcat.CarbonTomcatException;
+import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 import org.wso2.carbon.url.mapper.clustermessage.util.DataHolder;
 import org.wso2.carbon.url.mapper.clustermessage.util.VirtualHostClusterUtil;
 
@@ -52,13 +52,13 @@ public class VirtualHostAddRequest extends ClusteringMessage{
 
     @Override
     public void execute(ConfigurationContext configurationContext) throws ClusteringFault {
-       ApplicationContext.getCurrentApplicationContext().
+        URLMappingHolder.getInstance().
                putUrlMappingForApplication(hostName, uri);
        Host host = VirtualHostClusterUtil.addHostToEngine(this.hostName);
         try {
             Context context = DataHolder.getInstance().getCarbonTomcatService().addWebApp(host, "/", this.webappPath);
             log.info("Deployed webapp on host: " + context);
-            ApplicationContext.getCurrentApplicationContext().putUrlMappingForApplication(hostName, uri);
+            URLMappingHolder.getInstance().putUrlMappingForApplication(hostName, uri);
         } catch (CarbonTomcatException e) {
             log.error("error while adding web app to virtual host through cluster", e);
         }

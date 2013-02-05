@@ -9,6 +9,7 @@ public class FrameworkProperties {
     private EnvironmentSettings environmentSettings;
     private EnvironmentVariables environmentVariables;
     private ProductVariables productVariables;
+    private WorkerVariables workerVariables;
     private Selenium selenium;
     private Ravana ravana;
     private DashboardVariables dashboardVariables;
@@ -42,10 +43,17 @@ public class FrameworkProperties {
         return productVariables;
     }
 
+    public WorkerVariables getWorkerVariables() {
+        return workerVariables;
+    }
+
     public void setProductVariables(ProductVariables productVariables) {
         this.productVariables = productVariables;
     }
 
+    public void setWorkerVariables(WorkerVariables workerVariables) {
+        this.workerVariables = workerVariables;
+    }
 
     public Ravana getRavana() {
         return ravana;
@@ -68,6 +76,10 @@ public class FrameworkProperties {
         return dashboardVariable;
     }
 
+    public CoverageSettings getCoverageSettings() {
+        return coverageSettings;
+    }
+
     public void setCoverageSettings(CoverageSettings coverage) {
         this.coverageSettings = coverage;
     }
@@ -82,6 +94,24 @@ public class FrameworkProperties {
         this.environmentSettings = environmentSettings;
         this.environmentVariables = environmentVariables;
         this.productVariables = productVariables;
+        this.selenium = selenium;
+        this.ravana = ravana;
+        this.dashboardVariables = dbVariables;
+        this.coverageSettings = coverage;
+    }
+
+    public void setFrameworkProperties(DataSource dataSource,
+                                       EnvironmentSettings environmentSettings,
+                                       EnvironmentVariables environmentVariables,
+                                       ProductVariables productVariables,
+                                       WorkerVariables workerVariables, Selenium selenium,
+                                       Ravana ravana, DashboardVariables dbVariables,
+                                       CoverageSettings coverage) {
+        this.dataSource = dataSource;
+        this.environmentSettings = environmentSettings;
+        this.environmentVariables = environmentVariables;
+        this.productVariables = productVariables;
+        this.workerVariables = workerVariables;
         this.selenium = selenium;
         this.ravana = ravana;
         this.dashboardVariables = dbVariables;

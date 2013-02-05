@@ -37,29 +37,30 @@ import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.core.axis2.ProxyService;
 import org.apache.synapse.util.PolicyInfo;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
-import org.wso2.carbon.core.persistence.ServicePersistenceManager;
-import org.wso2.carbon.mediation.initializer.persistence.MediationPersistenceManager;
-import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.RegistryResources;
+import org.wso2.carbon.core.persistence.ServicePersistenceManager;
+import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
+import org.wso2.carbon.mediation.initializer.persistence.MediationPersistenceManager;
 import org.wso2.carbon.mediation.initializer.services.SynapseEnvironmentService;
 import org.wso2.carbon.proxyadmin.ProxyAdminException;
 import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.security.SecurityConstants;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayInputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Proxy observer observe the Proxy service in runtime and update the synapse Configuration
@@ -105,8 +106,8 @@ public class ProxyObserver implements AxisObserver {
     public void serviceUpdate(AxisEvent event, AxisService axisService) {
         //set tenantIDs for tenant-aware logging
         //better solution may be to improve tenant aware loggers without introducing this
-        int tenantId = SuperTenantCarbonContext.getCurrentContext(axisService).getTenantId();
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(tenantId);
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisService).getTenantId();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
 
         Parameter serviceTypeParam = axisService.getParameter(
                 SynapseConstants.SERVICE_TYPE_PARAM_NAME);
@@ -162,31 +163,36 @@ public class ProxyObserver implements AxisObserver {
 
             Parameter keepServiceHistoryParam = axisService.getParameter(
                     CarbonConstants.KEEP_SERVICE_HISTORY_PARAM);
+            Parameter originator = axisService.getParameter("originator");
             boolean keepHistory = keepServiceHistoryParam != null
                     && JavaUtils.isTrue(keepServiceHistoryParam.getValue());
+            //Only remove proxy config from storage if service remove request coming from
+            // Service listing UI. This check will prevent proxy xml deleting from file system
+            //during hot update
+            if (originator != null && "ServiceAdmin".equals(originator.getValue().toString())) {
+                if (!keepHistory) {
+                    ProxyService proxySvc = getSynapseConfiguration().getProxyService(axisService.getName());
+                    if (proxySvc != null) {
+                        getSynapseConfiguration().removeProxyService(axisService.getName());
+                        MediationPersistenceManager pm = getMediationPersistenceManager();
+                        pm.deleteItem(proxySvc.getName(), proxySvc.getFileName(),
+                                ServiceBusConstants.ITEM_TYPE_PROXY_SERVICE);
+                        log.info("Deleted the proxy service : " + proxySvc.getName());
 
-            if (!keepHistory) {
-                ProxyService proxySvc = getSynapseConfiguration().getProxyService(axisService.getName());
-                if (proxySvc != null) {
-                    getSynapseConfiguration().removeProxyService(axisService.getName());
-                    MediationPersistenceManager pm = getMediationPersistenceManager();
-                    pm.deleteItem(proxySvc.getName(), proxySvc.getFileName(),
-                            ServiceBusConstants.ITEM_TYPE_PROXY_SERVICE);
-                    log.info("Deleted the proxy service : " + proxySvc.getName());
-
-                } else if (log.isDebugEnabled()) {
-                    log.debug("Proxy Service representing the service " + axisService.getName()
-                            + " of type proxy is not found in the SynapseConfiguration");
-                }
-            } else {
-                try {
-                    ServicePersistenceManager spm = new ServicePersistenceManager(
-                            getSynapseConfiguration().getAxisConfiguration());
-                    for (Parameter p : axisService.getParameters()) {
-                        spm.removeServiceParameter(axisService, p);
+                    } else if (log.isDebugEnabled()) {
+                        log.debug("Proxy Service representing the service " + axisService.getName()
+                                + " of type proxy is not found in the SynapseConfiguration");
                     }
-                } catch (Exception e) {
-                    log.warn("Error while removing service parameter information from registry", e);
+                } else {
+                    try {
+                        ServicePersistenceManager spm = new ServicePersistenceManager(
+                                getSynapseConfiguration().getAxisConfiguration());
+                        for (Parameter p : axisService.getParameters()) {
+                            spm.removeServiceParameter(axisService, p);
+                        }
+                    } catch (Exception e) {
+                        log.warn("Error while removing service parameter information from registry", e);
+                    }
                 }
             }
         }
@@ -270,6 +276,8 @@ public class ProxyObserver implements AxisObserver {
             ProxyService proxy = config.getProxyService(service.getName());
             if (module.getModule() instanceof Rampart) {
                 proxy.setWsSecEnabled(false);
+                proxy.getParameterMap().remove(SecurityConstants.SECURITY_POLICY_PATH);
+                proxy.getParameterMap().remove("disableREST");
             } else if (module.getModule() instanceof SandeshaModule) {
                 proxy.setWsRMEnabled(false);
             }

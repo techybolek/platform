@@ -23,12 +23,22 @@
                  class="org.wso2.carbon.bam.service.data.publisher.modules.ActivityInHandler">
             <order phaseFirst="true" phase="OpPhase"/>
         </handler>
+        <handler name="StatisticInHandler"
+                 class="org.wso2.carbon.bam.service.data.publisher.modules.StatisticsInHandler">
+            <!-- this is because we need to run flowComplete after the flowComplete of InOnlyMEPHandler. During execution of the flowComplete's, handlers are invoked in the opposite order -->
+            <order phase="MsgInObservation" before="InOnlyMEPHandler"/>
+        </handler>
     </InFlow>
 
     <InFaultFlow>
         <handler name="ActivityInHandler"
                  class="org.wso2.carbon.bam.service.data.publisher.modules.ActivityInHandler">
             <order phaseFirst="true" phase="OpPhase"/>
+        </handler>
+        <handler name="StatisticInHandler"
+                 class="org.wso2.carbon.bam.service.data.publisher.modules.StatisticsInHandler">
+            <!-- this is because we need to run flowComplete after the flowComplete of InOnlyMEPHandler. During execution of the flowComplete's, handlers are invoked in the opposite order -->
+            <order phase="MsgInObservation" before="InOnlyMEPHandler"/>
         </handler>
     </InFaultFlow>
 
@@ -38,8 +48,8 @@
                  class="org.wso2.carbon.bam.service.data.publisher.modules.ActivityOutHandler">
             <order phase="OpPhase" phaseLast="true"/>
         </handler>
-        <handler name="StatisticHandler"
-                 class="org.wso2.carbon.bam.service.data.publisher.modules.StatisticsHandler">
+        <handler name="StatisticOutHandler"
+                 class="org.wso2.carbon.bam.service.data.publisher.modules.StatisticsOutHandler">
             <order phase="MsgOutObservation" phaseLast="true"/>
         </handler>
     </OutFlow>
@@ -49,8 +59,8 @@
                  class="org.wso2.carbon.bam.service.data.publisher.modules.ActivityOutHandler">
             <order phase="OperationOutFaultPhase" phaseLast="true"/>
         </handler>
-        <handler name="StatisticHandler"
-                 class="org.wso2.carbon.bam.service.data.publisher.modules.StatisticsHandler">
+        <handler name="StatisticOutHandler"
+                 class="org.wso2.carbon.bam.service.data.publisher.modules.StatisticsOutHandler">
             <order phase="MsgOutObservation" phaseLast="true"/>
         </handler>
     </OutFaultFlow>

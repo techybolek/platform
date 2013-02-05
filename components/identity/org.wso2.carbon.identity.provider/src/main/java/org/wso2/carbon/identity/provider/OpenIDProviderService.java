@@ -19,7 +19,6 @@ package org.wso2.carbon.identity.provider;
 
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,8 +44,6 @@ import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.base.IdentityConstants.ServerConfig;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.IdentityClaimManager;
-import org.wso2.carbon.identity.core.dao.OpenIDRememberMeDAO;
-import org.wso2.carbon.identity.core.dao.OpenIDUserRPDAO;
 import org.wso2.carbon.identity.core.model.OpenIDRememberMeDO;
 import org.wso2.carbon.identity.core.model.OpenIDUserRPDO;
 import org.wso2.carbon.identity.core.model.XMPPSettingsDO;
@@ -62,79 +59,100 @@ import org.wso2.carbon.identity.provider.dto.OpenIDRememberMeDTO;
 import org.wso2.carbon.identity.provider.dto.OpenIDUserProfileDTO;
 import org.wso2.carbon.identity.provider.dto.OpenIDUserRPDTO;
 import org.wso2.carbon.identity.provider.openid.OpenIDProvider;
+import org.wso2.carbon.identity.provider.openid.OpenIDRememberMeTokenManager;
+import org.wso2.carbon.identity.provider.openid.OpenIDServerConstants;
 import org.wso2.carbon.identity.provider.openid.OpenIDUtil;
+import org.wso2.carbon.identity.provider.openid.dao.OpenIDUserRPDAO;
 import org.wso2.carbon.identity.provider.openid.extensions.OpenIDExtension;
 import org.wso2.carbon.identity.provider.openid.handlers.OpenIDAuthenticationRequest;
 import org.wso2.carbon.identity.provider.openid.handlers.OpenIDExtensionFactory;
 import org.wso2.carbon.identity.provider.xmpp.MPAuthenticationProvider;
+import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.claim.Claim;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+/**
+ * The OpenID Provider service class. 
+ * 
+ * @author WSO2Inc
+ *
+ */
 public class OpenIDProviderService {
-
-	private static final String OPENID_LOGGEDIN_USER = "OPENID_LOGGEDIN_USER";
-	private static final String DISABLE_DUMB_MODE = "DisableOpenIDDumbMode";
 
 	protected Log log = LogFactory.getLog(OpenIDProviderService.class);
 
 	/**
+	 * Authenticates users with their OpenID Identifier and password
+	 * 
 	 * @param openID
 	 * @param password
 	 * @return
 	 * @throws Exception
 	 */
 	public boolean authenticateWithOpenID(String openID, String password) throws Exception {
+
 		String userName = OpenIDUtil.getUserName(openID);
-		boolean authenticationStatus = true;
-		boolean isAutheticated = false;
-		String domainName = null;
-		String tenantUser = null;
+		String domainName = MultitenantUtils.getDomainNameFromOpenId(openID);
+		String tenantUser = MultitenantUtils.getTenantAwareUsername(userName);
+		boolean isAutheticated =
+		                         IdentityTenantUtil.getRealm(domainName, userName)
+		                                           .getUserStoreManager()
+		                                           .authenticate(tenantUser, password);
+		boolean useMultiFactAuthn =
+		                            Boolean.parseBoolean(IdentityUtil.getProperty(IdentityConstants.ServerConfig.OPENID_USE_MULTIFACTOR_AUTHENTICATION));
+		boolean multiFactAuthnStatus = true;
 
-		IdentityPersistenceManager persistenceManager =
-		                                                IdentityPersistenceManager.getPersistanceManager();
-		domainName = MultitenantUtils.getDomainNameFromOpenId(openID);
-		tenantUser = MultitenantUtils.getTenantAwareUsername(userName);
-
-		XMPPSettingsDO xmppSettingsDO =
-		                                persistenceManager.getXmppSettings(IdentityTenantUtil.getRegistry(domainName,
-		                                                                                                  userName),
-		                                                                   tenantUser);
-		isAutheticated =
-		                 IdentityTenantUtil.getRealm(domainName, userName).getUserStoreManager()
-		                                   .authenticate(tenantUser, password);
-
-		// attempts to do multi-factor authentication, if the user has enabled
-		// it.
-		if (xmppSettingsDO != null && xmppSettingsDO.isXmppEnabled() && isAutheticated) {
-			MPAuthenticationProvider mpAuthenticationProvider =
-			                                                    new MPAuthenticationProvider(
-			                                                                                 xmppSettingsDO);
-			authenticationStatus = mpAuthenticationProvider.authenticate();
-			if (log.isDebugEnabled()) {
+		if (useMultiFactAuthn) { 
+			multiFactAuthnStatus =
+			                       authenticateWithXMPP(tenantUser, tenantUser, tenantUser,
+			                                            isAutheticated);
+			if (log.isDebugEnabled() && multiFactAuthnStatus) {
 				log.debug("XMPP Multifactor Authentication was completed Successfully.");
 			}
 		}
 
-		if (authenticationStatus && isAutheticated) {
+		if (multiFactAuthnStatus && isAutheticated) {
 			MessageContext msgContext = MessageContext.getCurrentMessageContext();
 			HttpServletRequest request =
 			                             (HttpServletRequest) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
 			HttpSession httpSession = request.getSession(false);
 			if (httpSession != null) {
-				httpSession.setAttribute(OPENID_LOGGEDIN_USER, userName);
-
+				httpSession.setAttribute(OpenIDServerConstants.OPENID_LOGGEDIN_USER, userName);
 			}
 		}
 
-		// combining the results of OpenID authentication. and XMPP based
-		// multi-factor authentication and returning it.
-		return authenticationStatus && isAutheticated;
+		return multiFactAuthnStatus && isAutheticated;
 	}
 
 	/**
+	 * Authenticate the user with XMPP
+	 * 
+	 * @param userName
+	 * @param tenantUser
+	 * @param domainName
+	 * @param isAutheticated
+	 * @return
+	 * @throws IdentityException
+	 */
+	private boolean authenticateWithXMPP(String userName, String tenantUser, String domainName,
+	                                     boolean isAutheticated) throws IdentityException {
+
+		IdentityPersistenceManager manager = IdentityPersistenceManager.getPersistanceManager();
+		Registry registry = IdentityTenantUtil.getRegistry(domainName, userName);
+		XMPPSettingsDO xmppSettingsDO = manager.getXmppSettings(registry, tenantUser);
+
+		if (xmppSettingsDO != null && xmppSettingsDO.isXmppEnabled() && isAutheticated) {
+			MPAuthenticationProvider mpAuthnProvider = new MPAuthenticationProvider(xmppSettingsDO);
+			return mpAuthnProvider.authenticate();
+		}
+		return true;
+	}
+
+	/**
+	 * Authenticates with the remember me token given in previous authentication.
 	 * 
 	 * @param openID
 	 * @param password
@@ -148,8 +166,6 @@ public class OpenIDProviderService {
 	                                                                                            throws Exception {
 		String userName = OpenIDUtil.getUserName(openID);
 		boolean isAutheticated = false;
-		String domainName = null;
-		String tenantUser = null;
 		String hmac = null;
 		OpenIDRememberMeDTO dto = new OpenIDRememberMeDTO();
 		dto.setAuthenticated(false);
@@ -165,29 +181,23 @@ public class OpenIDProviderService {
 			}
 		}
 
-		OpenIDRememberMeDO rememberMe = null;
-		OpenIDRememberMeDAO dao = null;
-		String token = null;
-		tenantUser = MultitenantUtils.getTenantAwareUsername(userName);
-
-		rememberMe = new OpenIDRememberMeDO();
+		OpenIDRememberMeDO rememberMe = new OpenIDRememberMeDO();
 		rememberMe.setOpenID(openID);
-		rememberMe.setUserName(tenantUser);
+		rememberMe.setUserName(userName);
 
-		domainName = MultitenantUtils.getDomainNameFromOpenId(openID);
-		dao = new OpenIDRememberMeDAO(IdentityTenantUtil.getRegistry(domainName, null));
+		OpenIDRememberMeTokenManager tokenManager = new OpenIDRememberMeTokenManager();
+		String token = null;
 
 		if (ipaddress != null && cookie != null && !"null".equals(cookie)) {
 			hmac = IdentityUtil.getHMAC(ipaddress, cookie);
-			token = dao.getToken(rememberMe);
+			token = tokenManager.getToken(rememberMe);
 			if (token == null || !token.equals(hmac)) {
 				return dto;
 			}
-
 			cookie = IdentityUtil.generateUUID();
 			hmac = IdentityUtil.getHMAC(ipaddress, cookie);
 			rememberMe.setToken(hmac);
-			dao.updateToken(rememberMe);
+			tokenManager.updateToken(rememberMe);
 			dto.setNewCookieValue(cookie);
 			dto.setAuthenticated(true);
 
@@ -197,18 +207,16 @@ public class OpenIDProviderService {
 			HttpSession httpSession = request.getSession(false);
 
 			if (httpSession != null) {
-				httpSession.setAttribute(OPENID_LOGGEDIN_USER, userName);
+				httpSession.setAttribute(OpenIDServerConstants.OPENID_LOGGEDIN_USER, userName);
 			}
-
 			return dto;
 		}
 
 		if (ipaddress != null && (cookie == null || "null".equals(cookie)) && isAutheticated) {
-
 			cookie = IdentityUtil.generateUUID();
 			hmac = IdentityUtil.getHMAC(ipaddress, cookie);
 			rememberMe.setToken(hmac);
-			dao.updateToken(rememberMe);
+			tokenManager.updateToken(rememberMe);
 			dto.setNewCookieValue(cookie);
 			dto.setAuthenticated(true);
 
@@ -218,12 +226,10 @@ public class OpenIDProviderService {
 			HttpSession httpSession = request.getSession(false);
 
 			if (httpSession != null) {
-				httpSession.setAttribute(OPENID_LOGGEDIN_USER, userName);
+				httpSession.setAttribute(OpenIDServerConstants.OPENID_LOGGEDIN_USER, userName);
 			}
-
 			return dto;
 		}
-
 		return dto;
 	}
 
@@ -234,10 +240,9 @@ public class OpenIDProviderService {
 	 */
 	public OpenIDProviderInfoDTO getOpenIDProviderInfo(String userName, String openid)
 	                                                                                  throws Exception {
-		OpenIDProviderInfoDTO providerInfo = null;
+		OpenIDProviderInfoDTO providerInfo = new OpenIDProviderInfoDTO();
 		String domain = null;
 		UserRealm realm = null;
-		providerInfo = new OpenIDProviderInfoDTO();
 
 		try {
 			domain = MultitenantUtils.getDomainNameFromOpenId(openid);
@@ -299,22 +304,23 @@ public class OpenIDProviderService {
 	}
 
 	/**
+	 * The verify method used by the OpenID Provider when using the OpenID Dumb
+	 * Mode
+	 * 
 	 * @param params
 	 * @return
 	 * @throws Exception
 	 */
 	public String verify(OpenIDParameterDTO[] params) throws Exception {
-		Message message = null;
-		ParameterList paramList = null;
-		
-		String disableDumbMode = IdentityUtil.getProperty(DISABLE_DUMB_MODE);
-		
-		if ("true".equalsIgnoreCase(disableDumbMode)){
+		String disableDumbMode =
+		                         IdentityUtil.getProperty(IdentityConstants.ServerConfig.OPENID_DISABLE_DUMB_MODE);
+
+		if ("true".equalsIgnoreCase(disableDumbMode)) {
 			throw new AxisFault("OpenID relying parties with dumb mode not supported");
 		}
 
-		paramList = getParameterList(params);
-		message = OpenIDProvider.getInstance().getManager().verify(paramList);
+		ParameterList paramList = getParameterList(params);
+		Message message = OpenIDProvider.getInstance().getManager().verify(paramList);
 		return message.keyValueFormEncoding();
 	}
 
@@ -488,20 +494,15 @@ public class OpenIDProviderService {
 		try {
 			userName = OpenIDUtil.getUserName(openId);
 			tenatUser = MultitenantUtils.getTenantAwareUsername(userName);
-
 			domainName = MultitenantUtils.getDomainNameFromOpenId(openId);
-
 			realm = IdentityTenantUtil.getRealm(domainName, userName);
 			reader = realm.getUserStoreManager();
 			String[] profileNames = reader.getProfileNames(tenatUser);
 			OpenIDUserProfileDTO[] profileDtoSet = new OpenIDUserProfileDTO[profileNames.length];
 
-			ParameterList paramList = null;
-			AuthRequest authReq = null;
 			List<String> claimList = null;
-
-			paramList = getParameterList(requredClaims);
-			authReq =
+			ParameterList paramList = getParameterList(requredClaims);
+			AuthRequest authReq =
 			          AuthRequest.createAuthRequest(paramList, OpenIDProvider.getInstance()
 			                                                                 .getManager()
 			                                                                 .getRealmVerifier());
@@ -533,39 +534,20 @@ public class OpenIDProviderService {
 
 		String userName = OpenIDUtil.getUserName(rpdto.getOpenID());
 		String domainName = MultitenantUtils.getDomainNameFromOpenId(rpdto.getOpenID());
-		OpenIDUserRPDO rpdo = null;
-		OpenIDUserRPDAO dao;
+		OpenIDUserRPDO rpdo = new OpenIDUserRPDO();
+		OpenIDUserRPDAO dao = new OpenIDUserRPDAO();
 
 		try {
+			rpdo.setUserName(userName);
+			rpdo.setRpUrl(rpdto.getRpUrl());
+			rpdo.setTrustedAlways(rpdto.isTrustedAlways());
+			rpdo.setDefaultProfileName(rpdto.getDefaultProfileName());
 
-			dao = new OpenIDUserRPDAO(IdentityTenantUtil.getRegistry(domainName, null));
-			rpdo = dao.getOpenIDUserRP(userName, rpdto.getRpUrl());
+			MessageDigest sha = MessageDigest.getInstance("SHA-1");
+			byte[] digest = sha.digest((userName + ":" + rpdto.getRpUrl()).getBytes());
+			rpdo.setUuid(new String(Hex.encodeHex(digest)));
 
-			if (rpdo == null) { // new RP DO
-				rpdo = new OpenIDUserRPDO();
-				rpdo.setUserName(userName);
-				rpdo.setRpUrl(rpdto.getRpUrl());
-				rpdo.setVisitCount(0);
-				rpdo.setTrustedAlways(rpdto.isTrustedAlways());
-				rpdo.setLastVisit(new Date());
-				rpdo.setVisitCount(rpdo.getVisitCount() + 1);
-				rpdo.setDefaultProfileName(rpdto.getDefaultProfileName());
-
-				MessageDigest sha = MessageDigest.getInstance("SHA-1");
-				byte[] digest = sha.digest((userName + ":" + rpdto.getRpUrl()).getBytes());
-				rpdo.setUuid(new String(Hex.encodeHex(digest)));
-
-				dao.create(rpdo);
-
-			} else {
-				rpdo.setTrustedAlways(rpdto.isTrustedAlways());
-				rpdo.setLastVisit(new Date());
-				rpdo.setVisitCount(rpdo.getVisitCount() + 1);
-				rpdo.setDefaultProfileName(rpdto.getDefaultProfileName());
-
-				dao.update(rpdo);
-			}
-
+			dao.createOrUpdate(rpdo);
 		} catch (IdentityException e) {
 			throw new Exception("Error while using DAO for " + domainName, e);
 		}
@@ -586,7 +568,7 @@ public class OpenIDProviderService {
 		OpenIDUserRPDAO dao;
 
 		try {
-			dao = new OpenIDUserRPDAO(IdentityTenantUtil.getRegistry(domainName, null));
+			dao = new OpenIDUserRPDAO();
 			rpdos = dao.getOpenIDUserRPs(openID);
 			if (rpdos == null) {
 				return null;
@@ -620,7 +602,7 @@ public class OpenIDProviderService {
 		OpenIDUserRPDAO dao;
 
 		try {
-			dao = new OpenIDUserRPDAO(IdentityTenantUtil.getRegistry(domainName, null));
+			dao = new OpenIDUserRPDAO();
 			rpdo = dao.getOpenIDUserRP(userName, rpUrl);
 			if (rpdo == null) {
 				return null;
@@ -708,7 +690,7 @@ public class OpenIDProviderService {
 		                             (HttpServletRequest) msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
 		HttpSession httpSession = request.getSession(false);
 		if (httpSession != null) {
-			String userName = (String) httpSession.getAttribute(OPENID_LOGGEDIN_USER);
+			String userName = (String) httpSession.getAttribute(OpenIDServerConstants.OPENID_LOGGEDIN_USER);
 			if (!username.equals(userName)) {
 				throw new IdentityProviderException("Unauthorised action by user " + username +
 				                                    " to access " + operation);

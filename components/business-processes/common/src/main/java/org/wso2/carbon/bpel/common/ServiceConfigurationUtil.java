@@ -95,8 +95,8 @@ public class ServiceConfigurationUtil {
 
         String serviceDescriptionLocation = endpointConfig.getServiceDescriptionLocation();
 
-        if (!serviceDescriptionLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_GOV_REG) ||
-            !serviceDescriptionLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_CONF_REG) ||
+        if (!serviceDescriptionLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_GOV_REG) &&
+            !serviceDescriptionLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_CONF_REG) &&
             !serviceDescriptionLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_REG)) {
             if (serviceDescriptionLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_FILE)) {
                 serviceDescriptionLocation = serviceDescriptionLocation.substring(UnifiedEndpointConstants.VIRTUAL_FILE.

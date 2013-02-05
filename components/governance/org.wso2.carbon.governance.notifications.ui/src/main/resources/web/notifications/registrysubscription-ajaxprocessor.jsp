@@ -27,6 +27,8 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.registry.resource.ui.clients.ResourceServiceClient" %>
 <%@ page import="org.wso2.carbon.registry.resource.stub.beans.xsd.ResourceTreeEntryBean" %>
+<%@ page import="org.wso2.carbon.utils.multitenancy.MultitenantConstants" %>
+<%@ page import="org.wso2.carbon.context.CarbonContext" %>
 
 <%
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
@@ -41,13 +43,17 @@
     boolean isCollection=true;
     ResourceServiceClient resourceServiceClient=null;
     ResourceTreeEntryBean resourceTreeEntryBean = null;
-
+    boolean isSuperTenant = false;
     resourceServiceClient = new ResourceServiceClient(config, session);
     String path = request.getParameter("path");
 
     if (resourceServiceClient.getResourceTreeEntry(path) != null) {
         isCollection = resourceServiceClient.getResourceTreeEntry(path).getCollection();
     }
+
+     if(CarbonContext.getCurrentContext().getTenantId() == MultitenantConstants.SUPER_TENANT_ID) {
+         isSuperTenant = true;
+     }
 
     try{
         InfoAdminServiceClient client = new InfoAdminServiceClient(cookie, config, session);
@@ -118,8 +124,10 @@
                     <option value="3"><fmt:message key="soap"/></option>
                     <option value="4"><fmt:message key="username"/></option>
                     <option value="5"><fmt:message key="role"/></option>
+                   <% if(isSuperTenant) {%>
                     <option value="6"><fmt:message key="management.console"/></option>
                     <option value="7"><fmt:message key="jmx"/></option>
+                    <%}%>
                 </select>
             </td>
         </tr>

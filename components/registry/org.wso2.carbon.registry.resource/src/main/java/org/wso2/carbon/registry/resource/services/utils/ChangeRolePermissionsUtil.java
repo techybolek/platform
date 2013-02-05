@@ -18,17 +18,16 @@ package org.wso2.carbon.registry.resource.services.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.registry.common.eventing.RegistryEvent;
 import org.wso2.carbon.registry.core.ActionConstants;
-import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.AccessControlConstants;
+import org.wso2.carbon.user.api.RealmConfiguration;
+import org.wso2.carbon.user.core.AuthorizationManager;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.AuthorizationManager;
-import org.wso2.carbon.user.api.RealmConfiguration;
-import org.wso2.carbon.registry.core.utils.AccessControlConstants;
-import org.wso2.carbon.registry.common.eventing.RegistryEvent;
 
 public class ChangeRolePermissionsUtil {
 
@@ -48,6 +47,13 @@ public class ChangeRolePermissionsUtil {
             String msg = "Couldn't get access control admin for changing authorizations. Caused by: " + e.getMessage();
             log.error(msg, e);
             throw new RegistryException(msg, e);
+        }
+
+        if (!realm.getAuthorizationManager().isUserAuthorized(userRegistry.getUserName(),resourcePath,
+                AccessControlConstants.AUTHORIZE)) {
+            String msg = userRegistry.getUserName()+" is not allowed to authorize resource " + resourcePath;
+            log.error(msg);
+            throw new RegistryException(msg);
         }
 
         try {

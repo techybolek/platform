@@ -26,16 +26,19 @@
 <%@ page import="java.util.List" %>
 <%@ page import="org.wso2.carbon.rssmanager.ui.stub.types.DatabasePrivilegeTemplate" %>
 
+<script type="text/javascript" src="global-params.js"></script>
+<script type="text/javascript" src="js/uiValidator.js"></script>
+
 <fmt:bundle basename="org.wso2.carbon.rssmanager.ui.i18n.Resources">
     <carbon:breadcrumb
-            label="Database Instances"
+            label="Database Privilege Templates"
             resourceBundle="org.wso2.carbon.rssmanager.ui.i18n.Resources"
-            topPage="false"
+            topPage="true"
             request="<%=request%>"/>
-    <script type="text/javascript" src="js/uiValidator.js"></script>
     <%
-        RSSManagerClient client = null;
         String templateName;
+        RSSManagerClient client = null;
+        List<DatabasePrivilegeTemplate> templates;
         try {
             String backendServerUrl = CarbonUIUtil.getServerURL(config.getServletContext(), session);
             ConfigurationContext configContext =
@@ -47,19 +50,18 @@
         } catch (Exception e) {
             CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request, e);
         }
-        
-        List<DatabasePrivilegeTemplate> templates;
-        if (client != null) {
-            try {
-                templates = client.getDatabasePrivilegesTemplates();
     %>
     <div id="middle">
         <h2><fmt:message key="rss.manager.database.privilege.templates"/></h2>
+
         <div id="workArea">
             <form method="post" action="#" name="dataForm">
                 <table class="styledLeft" id="privilegeTemplateTable">
                     <%
-                        if (templates.size() > 0) {
+                        if (client != null) {
+                            try {
+                                templates = client.getDatabasePrivilegesTemplates();
+                                if (templates.size() > 0) {
                     %>
                     <thead>
                     <tr>
@@ -90,16 +92,14 @@
                         </td>
                     </tr>
                     <%
-                                }
                             }
-                        } else{ %>
+                        }
+                    } else { %>
                     <tr>
                         <td colspan="2">No templates created yet...</td>
                     </tr>
                     <% } %>
                     </tbody>
-
-
                 </table>
                 <%
                         } catch (Exception e) {
@@ -112,7 +112,7 @@
                 <a class="icon-link"
                    style="background-image:url(../admin/images/add.gif);"
                    href="createDatabasePrivilegeTemplate.jsp"><fmt:message
-                        key="rss.manager.add.new.database.privilege.template"/></a>
+                        key="rss.manager.add.database.privilege.template"/></a>
 
                 <div style="clear:both"></div>
             </form>

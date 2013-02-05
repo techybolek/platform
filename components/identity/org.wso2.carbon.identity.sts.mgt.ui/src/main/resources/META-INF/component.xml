@@ -17,18 +17,6 @@
  -->
 <component xmlns="http://products.wso2.org/carbon">
 	<menus>
-		<menu>         
-            <id>sts_menu</id>
-            <i18n-key>sts</i18n-key>
-            <i18n-bundle>org.wso2.carbon.identity.sts.mgt.ui.i18n.Resources</i18n-bundle>
-            <parent-menu>manage_menu</parent-menu>
-            <link>../identity-sts/index.jsp</link>
-            <region>region1</region>
-            <order>30</order>
-            <style-class>manage</style-class>
-            <icon>../identity-sts/images/cardIssuer.gif</icon>
-            <require-permission>/permission/admin/manage</require-permission>           
-        </menu>
          <menu>         
             <id>generic_sts_menu</id>
             <i18n-key>carbon.sts</i18n-key>

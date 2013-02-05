@@ -35,6 +35,12 @@ public final class AutoscaleConstants {
      * (in milliseconds)
      */
     public static final int SERVER_START_UP_CHECK_TIME = 30000;
+    
+    /**
+     * We'll check whether an instance is left the cluster in every this much of time.
+     * (in milliseconds)
+     */
+    public static final int INSTANCE_REMOVAL_CHECK_TIME = 5000;
 
     /**
      * Name of the EC2 instance tag which if set on an instance, the autoscaler will not

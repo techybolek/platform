@@ -21,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.core.exception.EventBrokerException;
 import org.wso2.carbon.event.core.subscription.Subscription;
 import org.wso2.carbon.registry.admin.api.jmx.ISubscriptionsService;
@@ -89,9 +89,9 @@ public class RegistryMgtUIInfoServiceComponent {
 
             public String subscribe(String endpoint, boolean isRestEndpoint, String path,
                                     String eventName) {
-                SuperTenantCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.startTenantFlow();
                 try {
-                    SuperTenantCarbonContext.getCurrentContext().setTenantId(
+                    PrivilegedCarbonContext.getCurrentContext().setTenantId(
                             MultitenantConstants.SUPER_TENANT_ID);
                     UserRegistry registry = Utils.getRegistryService().getRegistry(
                             CarbonConstants.REGISTRY_SYSTEM_USERNAME);
@@ -109,19 +109,19 @@ public class RegistryMgtUIInfoServiceComponent {
                 } catch (RegistryException e) {
                     log.error("An error occurred while subscribing", e);
                 } finally {
-                    SuperTenantCarbonContext.endTenantFlow();
+                    PrivilegedCarbonContext.endTenantFlow();
                 }
                 return "";
             }
 
             public void unsubscribe(String id) {
-                SuperTenantCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.startTenantFlow();
                 try {
-                    SuperTenantCarbonContext.getCurrentContext().setTenantId(
+                    PrivilegedCarbonContext.getCurrentContext().setTenantId(
                             MultitenantConstants.SUPER_TENANT_ID);
                     Utils.getRegistryEventingService().unsubscribe(id);
                 } finally {
-                    SuperTenantCarbonContext.endTenantFlow();
+                    PrivilegedCarbonContext.endTenantFlow();
                 }
             }
 
@@ -146,9 +146,9 @@ public class RegistryMgtUIInfoServiceComponent {
 
             public String[] getList() {
                 List<String> output = new LinkedList<String>();
-                SuperTenantCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.startTenantFlow();
                 try {
-                    SuperTenantCarbonContext.getCurrentContext().setTenantId(
+                    PrivilegedCarbonContext.getCurrentContext().setTenantId(
                             MultitenantConstants.SUPER_TENANT_ID);
                     List<Subscription> subscriptions =
                             Utils.getRegistryEventingService().getAllSubscriptions();
@@ -159,7 +159,7 @@ public class RegistryMgtUIInfoServiceComponent {
                 } catch (EventBrokerException e) {
                     log.error("Unable to retrieve subscriptions", e);
                 } finally {
-                    SuperTenantCarbonContext.endTenantFlow();
+                    PrivilegedCarbonContext.endTenantFlow();
                 }
                 return output.toArray(new String[output.size()]);
             }

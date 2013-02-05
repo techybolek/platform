@@ -19,12 +19,14 @@
 package org.wso2.carbon.automation.api.clients.module.mgt;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.ServiceClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.api.clients.server.admin.ServerAdminClient;
 import org.wso2.carbon.automation.api.clients.utils.AuthenticateStub;
 import org.wso2.carbon.module.mgt.stub.ModuleAdminServiceModuleMgtExceptionException;
 import org.wso2.carbon.module.mgt.stub.ModuleAdminServiceStub;
+import org.wso2.carbon.module.mgt.stub.types.ModuleMetaData;
 import org.wso2.carbon.module.mgt.stub.types.ModuleUploadData;
 import org.wso2.carbon.server.admin.stub.Exception;
 
@@ -62,6 +64,17 @@ public class ModuleAdminServiceClient {
         } catch (InterruptedException ignored) {
         }
 
+    }
+
+    public ServiceClient getServiceClient() {
+        ServiceClient serverClient;
+        serverClient = moduleAdminServiceStub._getServiceClient();
+        return serverClient;
+    }
+
+    public ModuleMetaData[] getModuleList() throws RemoteException {
+        ModuleMetaData[] moduleMetaDatas = moduleAdminServiceStub.listModules();
+        return moduleMetaDatas;
     }
 
     public void deleteModule(String moduleId)

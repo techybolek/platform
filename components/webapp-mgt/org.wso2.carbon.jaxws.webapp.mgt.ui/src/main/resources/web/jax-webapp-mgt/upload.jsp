@@ -121,7 +121,7 @@
                                    value=" <fmt:message key="upload"/> "
                                    onclick="validate();"/>
                             <input type="button" class="button"
-                                   onclick="location.href='../jax-webapp-mgt/index.jsp'"
+                                   onclick="location.href='../webapp-list/index.jsp'"
                                    value=" <fmt:message key="cancel"/> "/>
                         </td>
                     </tr>

@@ -22,6 +22,7 @@ import java.util.Arrays;
 public class PaginatedPolicySetDTO {
 
     private PolicyDTO[] policySet;
+    
     private int numberOfPages;
 
     public PolicyDTO[] getPolicySet() {

@@ -31,6 +31,12 @@ public class UserInfo {
         this.domainName = domainName;
     }
 
+    public UserInfo(String userName, String password, String domainName) {
+        this.userName = userName;
+        this.password = password;
+        this.domainName = domainName;
+    }
+
     public String getUserId() {
         return id;
     }
@@ -51,6 +57,15 @@ public class UserInfo {
     public String getPassword() {
         return password;
     }
+
+    public String getUserNameWithoutDomain() {
+        String userNameWithDomain = this.userName;
+        if (!(userName.indexOf('@') == -1)) {
+            return userNameWithDomain.substring(0, userNameWithDomain.lastIndexOf('@'));
+        }
+        return userName;
+    }
+
 
     public void setUserPassword(String password) {
         this.password = password;

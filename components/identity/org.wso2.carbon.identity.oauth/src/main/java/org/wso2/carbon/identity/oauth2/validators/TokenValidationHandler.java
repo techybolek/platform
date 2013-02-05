@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -20,7 +20,10 @@ package org.wso2.carbon.identity.oauth2.validators;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
+import org.wso2.carbon.identity.oauth2.dto.AuthorizationContextToken;
+import org.wso2.carbon.identity.oauth2.authcontext.AuthorizationContextTokenGenerator;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
 
@@ -40,12 +43,54 @@ public class TokenValidationHandler {
 
     private static TokenValidationHandler instance = new TokenValidationHandler();
 
+    AuthorizationContextTokenGenerator tokenGenerator = null;
+
     private TokenValidationHandler() {
-        tokenValidators.put(BearerTokenValidator.TOKEN_TYPE, new BearerTokenValidator());
+        if(instance == null){
+            synchronized (this) {
+                if(instance == null){
+                    tokenValidators.put(BearerTokenValidator.TOKEN_TYPE, new BearerTokenValidator());
+                    // setting up the JWT if required
+                    if (OAuthServerConfiguration.getInstance().isAuthContextTokGenEnabled()) {
+                        try {
+                            Class clazz = this.getClass().getClassLoader().loadClass(OAuthServerConfiguration.getInstance().
+                                    getTokenGeneratorImplClass());
+                            tokenGenerator = (AuthorizationContextTokenGenerator)clazz.newInstance();
+                            tokenGenerator.init();
+                            if (log.isDebugEnabled()) {
+                                log.debug("An instance of " + OAuthServerConfiguration.getInstance().getTokenGeneratorImplClass() +
+                                    " is created for OAuthServerConfiguration.");
+                            }
+                        } catch (ClassNotFoundException e){
+                            String errorMsg = "Class not found: " +
+                                    OAuthServerConfiguration.getInstance().getTokenGeneratorImplClass();
+                            log.error(errorMsg,e);
+                        } catch (InstantiationException e) {
+                            String errorMsg = "Error while instantiating: " +
+                                    OAuthServerConfiguration.getInstance().getTokenGeneratorImplClass();
+                            log.error(errorMsg, e);
+                        } catch (IllegalAccessException e) {
+                            String errorMsg = "Illegal access to: " +
+                                    OAuthServerConfiguration.getInstance().getTokenGeneratorImplClass();
+                            log.error(errorMsg, e);
+                        } catch (IdentityOAuth2Exception e){
+                            String errorMsg = "Error while initializing: " +
+                                    OAuthServerConfiguration.getInstance().getTokenGeneratorImplClass();
+                            log.error(errorMsg, e);
+                        }
+
+                    }
+                }
+            }
+        }
     }
 
     public static TokenValidationHandler getInstance() {
         return instance;
+    }
+    
+    public void addTokenValidator(String type, OAuth2TokenValidator handler) {
+        tokenValidators.put(type, handler);
     }
 
     public OAuth2TokenValidationResponseDTO validate(OAuth2TokenValidationRequestDTO requestDTO)
@@ -63,6 +108,18 @@ public class TokenValidationHandler {
             return tokenValidationRespDTO;
         }
 
-        return tokenValidator.validate(requestDTO);
+        OAuth2TokenValidationResponseDTO tokenRespDTO = tokenValidator.validate(requestDTO);
+
+        if(tokenRespDTO.isValid()){
+            if(tokenGenerator != null){
+                AuthorizationContextToken token = tokenGenerator.generateToken(requestDTO, tokenRespDTO);
+                tokenRespDTO.setAuthorizationContextToken(token);
+                if (log.isDebugEnabled()) {
+                    log.debug(tokenGenerator.getClass().getName() + "generated token set to response : " + token.getTokenString());
+                }
+            }
+        }
+
+        return tokenRespDTO;
     }
 }

@@ -15,10 +15,10 @@
  */
 package org.wso2.carbon.broker.core.internal.brokers.jms;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.axiom.om.OMElement;
 import org.wso2.carbon.broker.core.BrokerConfiguration;
 import org.wso2.carbon.broker.core.BrokerListener;
 import org.wso2.carbon.broker.core.BrokerTypeDto;
@@ -27,6 +27,7 @@ import org.wso2.carbon.broker.core.internal.BrokerType;
 
 import javax.jms.*;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -37,6 +38,7 @@ public abstract class JMSBrokerType implements BrokerType {
     private static final Log log = LogFactory.getLog(JMSBrokerType.class);
     private BrokerTypeDto brokerTypeDto = null;
     private Map<String, Map<String, SubscriptionDetails>> brokerSubscriptionsMap;
+    private ConcurrentHashMap<BrokerConfiguration, ConcurrentHashMap<String, JMSConnection>> jmsConnectionMap = new ConcurrentHashMap<BrokerConfiguration, ConcurrentHashMap<String, JMSConnection>>();
 
 
     public BrokerTypeDto getBrokerTypeDto() {
@@ -51,10 +53,11 @@ public abstract class JMSBrokerType implements BrokerType {
      * @param brokerConfiguration - broker configuration details
      * @throws BrokerEventProcessingException
      */
-    public void subscribe(String topicName, BrokerListener brokerListener,
-                          BrokerConfiguration brokerConfiguration,
-                          AxisConfiguration axisConfiguration)
+    public String subscribe(String topicName, BrokerListener brokerListener,
+                            BrokerConfiguration brokerConfiguration,
+                            AxisConfiguration axisConfiguration)
             throws BrokerEventProcessingException {
+        String subscriptionId = UUID.randomUUID().toString();
         // create connection
         TopicConnection topicConnection = getTopicConnection(brokerConfiguration);
         // create session, subscriber, message listener and listen on that topic
@@ -66,17 +69,18 @@ public abstract class JMSBrokerType implements BrokerType {
             subscriber.setMessageListener(messageListener);
             topicConnection.start();
 
-            Map<String, SubscriptionDetails> topicSubscriptionsMap =
+            Map<String, SubscriptionDetails> subscriptionIdSubscriptionsMap =
                     this.brokerSubscriptionsMap.get(brokerConfiguration.getName());
-            if (topicSubscriptionsMap == null) {
-                topicSubscriptionsMap = new ConcurrentHashMap<String, SubscriptionDetails>();
-                this.brokerSubscriptionsMap.put(brokerConfiguration.getName(), topicSubscriptionsMap);
+            if (subscriptionIdSubscriptionsMap == null) {
+                subscriptionIdSubscriptionsMap = new ConcurrentHashMap<String, SubscriptionDetails>();
+                this.brokerSubscriptionsMap.put(brokerConfiguration.getName(), subscriptionIdSubscriptionsMap);
             }
 
             SubscriptionDetails subscriptionDetails =
                     new SubscriptionDetails(topicConnection, session, subscriber);
-            topicSubscriptionsMap.put(topicName, subscriptionDetails);
+            subscriptionIdSubscriptionsMap.put(subscriptionId, subscriptionDetails);
 
+            return subscriptionId;
         } catch (JMSException e) {
             String error = "Failed to subscribe to topic:" + topicName;
             log.error(error, e);
@@ -92,7 +96,7 @@ public abstract class JMSBrokerType implements BrokerType {
      * @throws BrokerEventProcessingException - jndi look up failed
      */
     protected abstract TopicConnection getTopicConnection(BrokerConfiguration brokerConfiguration)
-            throws BrokerEventProcessingException ;
+            throws BrokerEventProcessingException;
 
 
     /**
@@ -107,68 +111,98 @@ public abstract class JMSBrokerType implements BrokerType {
                         BrokerConfiguration brokerConfiguration)
             throws BrokerEventProcessingException {
 
-        // create topic connection
-        TopicConnection topicConnection = getTopicConnection(brokerConfiguration);
-        // create session, producer, message and send message to given destination(topic)
-        // OMElement message text is published here.
-        Session session = null;
-        try {
-            session = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
 
-            Topic topic = session.createTopic(topicName);
-            MessageProducer producer = session.createProducer(topic);
+        ConcurrentHashMap<String, JMSConnection> producerMap = jmsConnectionMap.get(brokerConfiguration);
+        if (null == producerMap) {
+            producerMap = new ConcurrentHashMap<String, JMSConnection>();
+            jmsConnectionMap.putIfAbsent(brokerConfiguration, producerMap);
+        }
+        JMSConnection jmsConnection = producerMap.get(topicName);
+        if (null == jmsConnection) {
+            try {
+                // create topic connection
+                TopicConnection topicConnection = getTopicConnection(brokerConfiguration);
+                // create session, producer, message and send message to given destination(topic)
+                // OMElement message text is published here.
+                Session session  = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+
+                Topic topic = session.createTopic(topicName);
+                MessageProducer messageProducer = session.createProducer(topic);
+                jmsConnection =new JMSConnection(topicConnection,session, messageProducer);
+                producerMap.putIfAbsent(topicName, jmsConnection);
+            } catch (JMSException e) {
+                String error = "Failed to publish to topic:" + topicName;
+                log.error(error, e);
+                throw new BrokerEventProcessingException(error, e);
+            }
+
+        }
+
+
+        try {
+            Session session = jmsConnection.getSession();
             Message jmsMessage = null;
-            if (message instanceof OMElement){
+            if (message instanceof OMElement) {
                 jmsMessage = session.createTextMessage(message.toString());
-            } else if (message instanceof Map){
+            } else if (message instanceof String) {
+                jmsMessage = session.createTextMessage((String) message);
+            } else if (message instanceof Map) {
                 MapMessage mapMessage = session.createMapMessage();
                 Map sourceMessage = (Map) message;
-                for (Object key : sourceMessage.keySet()){
-                    mapMessage.setObject((String)key, sourceMessage.get(key));
+                for (Object key : sourceMessage.keySet()) {
+                    mapMessage.setObject((String) key, sourceMessage.get(key));
                 }
                 jmsMessage = mapMessage;
             }
-            producer.send(jmsMessage);
+            jmsConnection.getMessageProducer().send(jmsMessage);
         } catch (JMSException e) {
+            producerMap.remove(topicName);
             String error = "Failed to publish to topic:" + topicName;
             log.error(error, e);
+            try {
+                if (jmsConnection.getSession() != null) {
+                    jmsConnection.getSession().close();
+                }
+                if (jmsConnection.getTopicConnection() != null) {
+                    jmsConnection.getTopicConnection().close();
+                }
+            } catch (JMSException e1) {
+                log.warn("Failed to reallocate resources.", e1);
+            }
             throw new BrokerEventProcessingException(error, e);
 
-        } finally {
-            // close used resources.
-            try {
-                if (session != null) {
-                    session.close();
-                }
-                if (topicConnection != null) {
-                    topicConnection.close();
-                }
-            } catch (JMSException e) {
-                log.warn("Failed to reallocate resources.", e);
-            }
         }
     }
 
+    @Override
+    public void testConnection(BrokerConfiguration brokerConfiguration) throws BrokerEventProcessingException {
+        String testMessage = " <brokerConfigurationTest>\n" +
+                "   <message>This is a test message.</message>\n" +
+                "   </brokerConfigurationTest>";
+        publish("test", testMessage, brokerConfiguration);
+    }
+
+
     public void unsubscribe(String topicName,
                             BrokerConfiguration brokerConfiguration,
-                            AxisConfiguration axisConfiguration) throws BrokerEventProcessingException {
-        Map<String, SubscriptionDetails> topicSubscriptionsMap =
+                            AxisConfiguration axisConfiguration, String subscriptionId) throws BrokerEventProcessingException {
+        Map<String, SubscriptionDetails> subscriptionIdSubscriptionsMap =
                 this.brokerSubscriptionsMap.get(brokerConfiguration.getName());
-        if (topicSubscriptionsMap == null) {
+        if (subscriptionIdSubscriptionsMap == null) {
             throw new BrokerEventProcessingException("There is no subscription for broker "
                     + brokerConfiguration.getName());
         }
 
-        SubscriptionDetails subscriptionDetails = topicSubscriptionsMap.remove(topicName);
+        SubscriptionDetails subscriptionDetails = subscriptionIdSubscriptionsMap.remove(subscriptionId);
         if (subscriptionDetails == null) {
-            throw new BrokerEventProcessingException("There is no subscriptions for this topic" + topicName);
+            throw new BrokerEventProcessingException("There is no subscriptions for topic" + topicName + " with subscriptionId " + subscriptionId);
         }
 
         try {
             subscriptionDetails.close();
         } catch (JMSException e) {
             throw new BrokerEventProcessingException("Can not unsubscribe from the broker with" +
-                    "configuration " + brokerConfiguration.getName(),e);
+                    "configuration " + brokerConfiguration.getName(), e);
         }
 
     }
@@ -184,5 +218,29 @@ public abstract class JMSBrokerType implements BrokerType {
 
     protected void setBrokerTypeDto(BrokerTypeDto brokerTypeDto) {
         this.brokerTypeDto = brokerTypeDto;
+    }
+
+    class JMSConnection {
+        private TopicConnection topicConnection;
+        private  Session session;
+        private  MessageProducer messageProducer;
+
+        JMSConnection(TopicConnection topicConnection, Session session, MessageProducer messageProducer) {
+            this.topicConnection = topicConnection;
+            this.session = session;
+            this.messageProducer = messageProducer;
+        }
+
+        public Session getSession() {
+            return session;
+        }
+
+        public MessageProducer getMessageProducer() {
+            return messageProducer;
+        }
+
+        public TopicConnection getTopicConnection() {
+            return topicConnection;
+        }
     }
 }

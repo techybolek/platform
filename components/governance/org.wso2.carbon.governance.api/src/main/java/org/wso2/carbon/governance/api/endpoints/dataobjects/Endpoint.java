@@ -15,117 +15,14 @@
  */
 package org.wso2.carbon.governance.api.endpoints.dataobjects;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
-import org.wso2.carbon.governance.api.exception.GovernanceException;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.utils.RegistryUtils;
 
-import javax.xml.namespace.QName;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-
-/**
- * This represents an endpoint artifact stored on the Registry. Endpoint artifacts are created as a
- * result of importing or uploading a WSDL, or when a service is created..
- */
-public class Endpoint extends GovernanceArtifact {
-
-    private static final Log log = LogFactory.getLog(Endpoint.class);
-    private String url;
-
-    /**
-     * Constructor accepting resource path, identifier and a registry instance.
-     * This constructor should be used only when the endpoint already saved in the registry.
-     *
-     * @param id       the resource identifier.
-     * @param registry the registry instance.
-     *
-     * @throws GovernanceException if the construction fails.
-     */
-    public Endpoint(String id, Registry registry) throws GovernanceException {
-        super(id);
-        associateRegistry(registry);
-        loadEndpointDetails();
-    }
-
-    /**
-     * Constructor accepting resource identifier and the endpoint URL.
-     *
-     * @param id  the resource identifier.
-     * @param url the endpoint URL.
-     */
-    public Endpoint(String url, String id) {
-        super(id);
-        this.url = url;
-    }
+public interface Endpoint extends GovernanceArtifact {
 
     /**
      * Method to obtain the endpoint URL.
      *
      * @return the endpoint URL.
      */
-    public String getUrl() {
-        return url;
-    }
-
-    public QName getQName() {
-        return new QName(url);
-    }
-
-    /**
-     * Method to load the endpoint details into this artifact.
-     *
-     * @throws GovernanceException if the operation failed.
-     */
-    public void loadEndpointDetails() throws GovernanceException {
-        checkRegistryResourceAssociation();
-        Registry registry = getAssociatedRegistry();
-        String path = getPath();
-        String id = getId();
-        Resource resource;
-        try {
-            resource = registry.get(path);
-            Object contentObj = resource.getContent();
-            if (contentObj instanceof String) {
-                url = (String) contentObj;
-            } else {
-                byte[] content = (byte[]) contentObj;
-                url = RegistryUtils.decodeBytes(content);
-            }
-
-        } catch (RegistryException e) {
-            String msg =
-                    "Error in getting the content for the artifact. artifact id: " + id + ", " +
-                            "path: " + path + ".";
-            log.error(msg, e);
-            throw new GovernanceException(msg, e);
-        }
-
-        // and then iterate all the properties and add.
-        Properties properties = resource.getProperties();
-        if (properties != null) {
-            Set keySet = properties.keySet();
-            if (keySet != null) {
-                for (Object keyObj : keySet) {
-                    String key = (String) keyObj;
-//                    if (key.equals(GovernanceConstants.ARTIFACT_ID_PROP_KEY)) {
-                        // it is not a property.
-//                        continue;
-//                    }
-                    List values = (List) properties.get(key);
-                    if (values != null) {
-                        for (Object valueObj : values) {
-                            String value = (String) valueObj;
-                            addAttribute(key, value);
-                        }
-                    }
-                }
-            }
-        }
-    }
+    String getUrl();
 }

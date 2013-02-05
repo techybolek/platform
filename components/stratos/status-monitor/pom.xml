@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>stratos-components</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
+        <version>2.0.0</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -33,10 +33,10 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.status.monitor.core</module>
-        <module>org.wso2.carbon.status.monitor.agent</module>
-        <module>org.wso2.carbon.status.monitor</module>
-        <module>org.wso2.carbon.status.monitor.ui</module>
+        <module>org.wso2.carbon.status.monitor.core/2.0.0</module>
+        <module>org.wso2.carbon.status.monitor.agent/2.0.0</module>
+        <module>org.wso2.carbon.status.monitor/2.0.0</module>
+        <module>org.wso2.carbon.status.monitor.ui/2.0.0</module>
     </modules>
 </project>
 

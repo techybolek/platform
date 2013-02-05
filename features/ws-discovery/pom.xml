@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-features</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -32,13 +32,13 @@
     <url>http://wso2.org</url>
 
             <modules>
-                <module>org.wso2.carbon.discovery.core.feature</module>
-                <module>org.wso2.carbon.discovery.proxy.feature</module>
-                <module>org.wso2.carbon.discovery.client.feature</module>
-                <module>org.wso2.carbon.discovery.mediation.ext.feature</module>
-                <module>org.wso2.carbon.discovery.ui.feature</module>
-                <module>org.wso2.carbon.discovery.admin.ui.feature</module>
-                <module>org.wso2.carbon.discovery.feature</module>
+                <module>org.wso2.carbon.discovery.core.feature/4.0.0</module>
+                <module>org.wso2.carbon.discovery.proxy.feature/4.0.0</module>
+                <module>org.wso2.carbon.discovery.client.feature/4.0.0</module>
+                <module>org.wso2.carbon.discovery.mediation.ext.feature/4.0.0</module>
+                <module>org.wso2.carbon.discovery.ui.feature/4.0.0</module>
+                <module>org.wso2.carbon.discovery.admin.ui.feature/4.0.0</module>
+                <module>org.wso2.carbon.discovery.feature/4.0.0</module>
             </modules>
 
     <dependencyManagement>

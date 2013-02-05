@@ -27,12 +27,13 @@ public class SAMLSSOReqValidationResponseDTO {
     private String assertionConsumerURL;
     private String response;
     private String id;
-    private SingleLogoutRequestDTO[] logoutRespDTO;
     private String logoutResponse;
     private String loginPageURL;
     private String rpSessionId;
-    private String assertionString;
-
+    private String requestMessageString;
+    private String queryString;
+	private SingleLogoutRequestDTO[] logoutRespDTO;
+    
     public boolean isValid() {
         return isValid;
     }
@@ -129,11 +130,33 @@ public class SAMLSSOReqValidationResponseDTO {
         this.rpSessionId = rpSessionId;
     }
 
-    public String getAssertionString() {
-        return assertionString;
+    /**
+     * 
+     * @return
+     */
+    public String getRequestMessageString() {
+        return requestMessageString;
     }
 
-    public void setAssertionString(String assertionString) {
-        this.assertionString = assertionString;
+    /**
+     * 
+     * @param requestMessageString
+     */
+    public void setRequestMessageString(String requestMessageString) {
+        this.requestMessageString = requestMessageString;
+    }
+
+	/**
+     * @return the queryString
+     */
+    public String getQueryString() {
+	    return queryString;
+    }
+
+	/**
+     * @param queryString the queryString to set
+     */
+    public void setQueryString(String queryString) {
+	    this.queryString = queryString;
     }
 }

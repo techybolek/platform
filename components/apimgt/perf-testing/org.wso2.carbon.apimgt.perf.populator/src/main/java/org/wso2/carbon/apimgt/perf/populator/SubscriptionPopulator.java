@@ -1,149 +1,218 @@
 package org.wso2.carbon.apimgt.perf.populator;
 
+import java.lang.Class;
+import java.lang.ClassNotFoundException;
+import java.lang.String;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class SubscriptionPopulator {
+    
+    public static final String DRIVER = "com.mysql.jdbc.Driver";
+    public static final String URL = "jdbc:mysql://localhost:3306/wso2am2";
+    public static final String USER = "root";
+    public static final String PASS = "root123";
 
 	public static void main(String[] args) {
 
-		/*String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-		String DB_URL = "jdbc:mysql://localhost:3306/am2    ";
-		//String DB_URL = "jdbc:h2:~/am";
-		String USER = "root";
-		String PASS = "root123";*/
+        try {
+            Class.forName(DRIVER);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return;
+        }
+        
+        for (int i = 0; i < 1000; i++) {
+            String userId = "developer" + (i + 1);
+            System.out.println("Adding metadata for user: " + userId);
+            int subscriberId = addSubscriber(userId);
+            int applicationId = addApplication("Application" + (i + 1), subscriberId);
+            addSubscription(applicationId, i + 1);
+            addSubscription(applicationId, i + 1 + 1000);
+            addKey(userId, applicationId);
+        }
 
-        String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-        String DB_URL = "jdbc:mysql://localhost:3306/newam";
-        String USER = "root";
-        String PASS = "root123";
-
-		Connection conn = null;
-		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
-			conn.setAutoCommit(false);
-
-			String INSERT_APPLICATIONS_SQL = "INSERT INTO AM_APPLICATION (NAME,SUBSCRIBER_ID) VALUES (?,?)";
-            String INSERT_API_SQL = "INSERT INTO AM_API (API_PROVIDER, API_NAME, API_VERSION, CONTEXT) VALUES (?,?,?,?)";
-			String INSERT_SUBSCRIPTIONS_SQL = "INSERT INTO AM_SUBSCRIPTION ( TIER_ID , API_ID , APPLICATION_ID) VALUES (?,?,?)";
-			String INSERT_OAUTH2_ACCESS_TOKEN_SQL = "INSERT INTO IDENTITY_OAUTH2_ACCESS_TOKEN ( ACCESS_TOKEN ,AUTHZ_USER , CONSUMER_KEY , REFRESH_TOKEN ,TIME_CREATED , TOKEN_SCOPE , TOKEN_STATE ,VALIDITY_PERIOD ) "
-					+ "VALUES (?,NULL,?,NULL,NULL,'PRODUCTION','ACTIVE',-1)";
-			String INSERT_SUBSCRIPTION_KEY_MAPPING_SQL = "INSERT INTO AM_SUBSCRIPTION_KEY_MAPPING (SUBSCRIPTION_ID, ACCESS_TOKEN, KEY_TYPE) VALUES (?,?,?)";
-			String INSERT_CONSUMER_APPLICATION_SQL = "INSERT INTO IDENTITY_OAUTH_CONSUMER_APPLICATIONS ( APP_NAME , CALLBACK_URL , CONSUMER_KEY , CONSUMER_SECRET ,OAUTH_VERSION"
-					+ " , TENANT_ID , USERNAME ) VALUES (NULL,NULL,?,?,'2.0',0,'admin')";
-			String INSERT_SUBSCRIBER_SQL = "INSERT INTO AM_SUBSCRIBER  (USER_ID ,TENANT_ID,DATE_SUBSCRIBED ) VALUES(?,?,NOW())";
-
-			PreparedStatement psApplications = conn.prepareStatement(
-					INSERT_APPLICATIONS_SQL,
-					PreparedStatement.RETURN_GENERATED_KEYS);
-			PreparedStatement psSubscriptions = conn.prepareStatement(
-					INSERT_SUBSCRIPTIONS_SQL,
-					PreparedStatement.RETURN_GENERATED_KEYS);
-			PreparedStatement psAPIs = conn.prepareStatement(
-                    INSERT_API_SQL,
-                    PreparedStatement.RETURN_GENERATED_KEYS);
-            PreparedStatement psOAuth2AccessTokenSQL = conn
-					.prepareStatement(INSERT_OAUTH2_ACCESS_TOKEN_SQL);
-			PreparedStatement psSubscriptionKeyMappingSQL = conn
-					.prepareStatement(INSERT_SUBSCRIPTION_KEY_MAPPING_SQL);
-			PreparedStatement psConsumerApplicationSQL = conn
-					.prepareStatement(INSERT_CONSUMER_APPLICATION_SQL);
-			PreparedStatement psSubscriberSQL = conn
-					.prepareStatement(INSERT_SUBSCRIBER_SQL);
-
-			String applicationNamePrefix = "app";
-
-			// Add Subscriber
-			psSubscriberSQL.setString(1, "perf1");
-			psSubscriberSQL.setInt(2, 0);
-			psSubscriberSQL.executeUpdate();
-			ResultSet rs = psSubscriberSQL.getGeneratedKeys();
-			int subscriberId = 0;
-            int id;
-			if (rs.next()) {
-				subscriberId = rs.getInt(1);
-
-			}
-			rs.close();
-
-            psAPIs.setString(1, "admin");
-            psAPIs.setString(2, "StockTicker");
-            psAPIs.setString(3, "1.0.0");
-            psAPIs.setString(4, "/ticker");
-            psAPIs.executeUpdate();
-            rs = psAPIs.getGeneratedKeys();
-            int apiId = -1;
-            if (rs.next()) {
-                apiId = rs.getInt(1);
+        int userIndex = 0;
+        for (int i = 0; i < 1000; i++) {
+            for (int j = 0; j < 100; j++) {
+                String userId = "enduser" + (userIndex + 1);
+                System.out.println("Adding key for end user: " + userId);
+                addUserKey("developer" + (i+1) + "_key", userId);
+                userIndex++;
             }
-            rs.close();
-
-			int loopCount = 100000;
-			String applicationName;
-			for (int i = 0; i < loopCount; i++) {
-
-				applicationName = applicationNamePrefix + i;
-				// Add Application
-				psApplications.setString(1, applicationName);
-				psApplications.setInt(2, Integer.valueOf(subscriberId));
-				psApplications.executeUpdate();
-				rs = psApplications.getGeneratedKeys();
-				int applicationId = 0;
-				if (rs.next()) {
-					applicationId = rs.getInt(1);
-				}
-				rs.close();
-
-				// Add Subscription
-				psSubscriptions.setString(1, "Unlimited");
-				psSubscriptions.setInt(2, apiId);
-				psSubscriptions.setInt(3, Integer.valueOf(applicationId));
-				psSubscriptions.executeUpdate();
-				rs = psSubscriptions.getGeneratedKeys();
-				int subscriptionId = 0;
-				if (rs.next()) {
-					subscriptionId = rs.getInt(1);
-				}
-				rs.close();
-
-				// Add Key Context Mapping
-				String accessKey = "9nEQnijLZ0Gi0gZ6a3pZIC" + i;
-
-				// Add Subscription Key Mapping
-				psSubscriptionKeyMappingSQL.setInt(1,
-						Integer.valueOf(subscriptionId));
-				psSubscriptionKeyMappingSQL.setString(2, accessKey);
-				psSubscriptionKeyMappingSQL.setString(3, "PRODUCTION");
-				psSubscriptionKeyMappingSQL.executeUpdate();
-
-				// Add Consumer Application
-				psConsumerApplicationSQL.setString(1, applicationName);
-				psConsumerApplicationSQL.setString(2, applicationName);
-				psConsumerApplicationSQL.executeUpdate();
-
-				// Add OAuth2 access token
-				psOAuth2AccessTokenSQL.setString(1, accessKey);
-				psOAuth2AccessTokenSQL.setString(2, applicationName);
-				psOAuth2AccessTokenSQL.executeUpdate();
-
-				psApplications.clearParameters();
-				psSubscriptions.clearParameters();
-				psOAuth2AccessTokenSQL.clearParameters();
-				psSubscriptionKeyMappingSQL.clearParameters();
-				psConsumerApplicationSQL.clearParameters();
-				conn.commit();
-                System.out.println("Iteration: " + i + " completed");
-			}
-
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+        }
 	}
+    
+    public static void addUserKey(String consumerKey, String userId) {
+        String INSERT_TOKEN_SQL = "INSERT" +
+                " INTO IDN_OAUTH2_ACCESS_TOKEN (ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE, AUTHZ_USER) " +
+                " VALUES (?,?,?,?,?)";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DriverManager.getConnection(URL, USER, PASS);
+            stmt = conn.prepareStatement(INSERT_TOKEN_SQL);
+            stmt.setString(1, userId + "_token");
+            stmt.setString(2, consumerKey);
+            stmt.setString(3, "ACTIVE");
+            stmt.setString(4, "PRODUCTION");
+            stmt.setString(5, userId);
+            stmt.execute();
+        } catch (SQLException e)  {
+            e.printStackTrace();
+        } finally {
+            closeConnection(conn, stmt, rs);
+        }
+    }
+
+    public static void addKey(String userId, int applicationId) {
+        String INSERT_CONSUMER_APP_SQL = "INSERT INTO IDN_OAUTH_CONSUMER_APPS " +
+                "(CONSUMER_KEY, CONSUMER_SECRET, USERNAME, TENANT_ID, OAUTH_VERSION) VALUES (?,?,?,?,?) ";
+        String INSERT_TOKEN_SQL = "INSERT" +
+                " INTO IDN_OAUTH2_ACCESS_TOKEN (ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE, AUTHZ_USER) " +
+                " VALUES (?,?,?,?,?)";
+        String INSERT_MAPPING_SQL = "INSERT " +
+                "INTO AM_APPLICATION_KEY_MAPPING (APPLICATION_ID, CONSUMER_KEY, KEY_TYPE) " +
+                "VALUES (?,?,?)";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DriverManager.getConnection(URL, USER, PASS);
+            //conn.setAutoCommit(false);
+            stmt = conn.prepareStatement(INSERT_CONSUMER_APP_SQL);
+            stmt.setString(1, userId + "_key");
+            stmt.setString(2, userId + "_secret");
+            stmt.setString(3, userId);
+            stmt.setInt(4, -1234);
+            stmt.setString(5, "OAuth-1.0a");
+            stmt.execute();
+
+            stmt = conn.prepareStatement(INSERT_TOKEN_SQL);
+            stmt.setString(1, userId + "_token");
+            stmt.setString(2, userId + "_key");
+            stmt.setString(3, "ACTIVE");
+            stmt.setString(4, "PRODUCTION");
+            stmt.setString(5, userId);
+            stmt.execute();
+
+            stmt = conn.prepareStatement(INSERT_MAPPING_SQL);
+            stmt.setInt(1, applicationId);
+            stmt.setString(2, userId + "_key");
+            stmt.setString(3, "PRODUCTION");
+            stmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection(conn, stmt, rs);
+        }
+    }
+
+    public static int addSubscription(int applicationId, int apiId) {
+        int subscriptionId = -1;
+        String INSERT_SUBSCRIPTIONS_SQL = "INSERT INTO AM_SUBSCRIPTION ( TIER_ID , API_ID , APPLICATION_ID) VALUES (?,?,?)";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DriverManager.getConnection(URL, USER, PASS);
+            stmt = conn.prepareStatement(INSERT_SUBSCRIPTIONS_SQL, new String[]{"SUBSCRIPTION_ID"});
+            stmt.setString(1, "Unlimited");
+            stmt.setInt(2, apiId);
+            stmt.setInt(3, applicationId);
+            stmt.execute();
+            rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                subscriptionId = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection(conn, stmt, rs);
+        }
+        return subscriptionId;
+    }
+    
+    public static int addApplication(String name, int subscriberId) {
+        int applicationId = -1;
+        String INSERT_APPLICATIONS_SQL = "INSERT INTO AM_APPLICATION (NAME,SUBSCRIBER_ID) VALUES (?,?)";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DriverManager.getConnection(URL, USER, PASS);
+            stmt = conn.prepareStatement(INSERT_APPLICATIONS_SQL, new String[]{"APPLICATION_ID"});
+            stmt.setString(1, name);
+            stmt.setInt(2, subscriberId);
+            stmt.execute();
+            rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                applicationId = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection(conn, stmt, rs);
+        }
+        return applicationId;
+    }
+    
+    public static int addSubscriber(String userId) {
+        int subscriberId = -1;
+        String INSERT_SUBSCRIBER_SQL = "INSERT INTO AM_SUBSCRIBER (USER_ID,TENANT_ID,DATE_SUBSCRIBED) VALUES(?,?,NOW())";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DriverManager.getConnection(URL, USER, PASS);
+            stmt = conn.prepareStatement(INSERT_SUBSCRIBER_SQL, new String[]{"SUBSCRIBER_ID"});
+            stmt.setString(1, userId);
+            stmt.setInt(2, -1234);
+            stmt.execute();
+            rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                subscriberId = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection(conn, stmt, rs);
+        }
+        return subscriberId;
+    }
+    
+    private static void closeConnection(Connection conn, Statement stmt, ResultSet rs) {
+        if (rs != null) {
+            try {
+                rs.close();
+            } catch (SQLException e) {
+                
+            }
+        }
+        if (stmt != null) {
+            try {
+                stmt.close();
+            } catch (SQLException e) {
+                
+            }
+        }
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                
+            }
+        }
+    }
 
 }

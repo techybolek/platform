@@ -31,7 +31,6 @@ import org.wso2.carbon.message.store.persistence.jms.util.JMSUtil;
 import javax.jms.*;
 import javax.jms.Queue;
 import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -106,6 +105,8 @@ public class JMSMessageStore extends AbstractMessageStore {
 
     private AtomicBoolean cleaning = new AtomicBoolean(false);
 
+    private int consumerReceiveTimeOut;
+
     @Override
     public void init(SynapseEnvironment se) {
         super.init(se);
@@ -178,16 +179,25 @@ public class JMSMessageStore extends AbstractMessageStore {
         MessageConsumer consumer = null;
         boolean error = false;
 
-        ClassLoader originalCl = getContextClassLoader();
-        setContextClassLoader(this.getClass().getClassLoader());
+        ClassLoader originalCl = null;
+    	
+    	if (properties.get(JMSMessageStoreConstants.VENDER_CLASS_LOADER_ENABLE) == null
+				|| Boolean.parseBoolean((String)properties.get(JMSMessageStoreConstants.VENDER_CLASS_LOADER_ENABLE))) {	originalCl = getContextClassLoader();
+			setContextClassLoader(this.getClass().getClassLoader());
+
+		}
 
         try {
             con = getWriteConnection();
             session = JMSUtil.createSession(con,jmsSpec11);
             Destination destination = getDestination(session);
             consumer = JMSUtil.createConsumer(session,destination,jmsSpec11);
-
-            Object msg = consumer.receive(1000);
+            Object msg = consumer.receive(consumerReceiveTimeOut);
+            if (null == msg) {
+                log.error("Error while removing messages from the store: " + name + " message did not received within " +consumerReceiveTimeOut+ " milliseconds");
+                error = true;
+                throw new SynapseException("JMS Message Store Exception, Unable to remove message from the queue within "+consumerReceiveTimeOut+" milli seconds " );
+            }
             if (msg instanceof ObjectMessage) {
                 JMSPersistentMessage jmsMeg = (JMSPersistentMessage) ((ObjectMessage) msg).getObject();
                 smsg = jmsPersistentMessageHelper.createMessageContext(jmsMeg);
@@ -203,7 +213,9 @@ public class JMSMessageStore extends AbstractMessageStore {
         }
 
         size.decrementAndGet();
-        setContextClassLoader(originalCl);
+        if(originalCl !=null){
+        	setContextClassLoader(originalCl);
+        }
         return smsg;
     }
 
@@ -212,9 +224,15 @@ public class JMSMessageStore extends AbstractMessageStore {
         Session session = null;
         QueueBrowser browser = null;
         boolean error = false;
+        ClassLoader originalCl = null;
+    	
+    	if (properties.get(JMSMessageStoreConstants.VENDER_CLASS_LOADER_ENABLE) == null
+				|| Boolean.parseBoolean((String)properties.get(JMSMessageStoreConstants.VENDER_CLASS_LOADER_ENABLE))) {	originalCl = getContextClassLoader();
+			originalCl = getContextClassLoader();
+			setContextClassLoader(this.getClass().getClassLoader());
 
-        ClassLoader originalClassLoader = getContextClassLoader();
-        setContextClassLoader(this.getClass().getClassLoader());
+		}
+		
         MessageContext messageContext = null;
 
         try {
@@ -246,7 +264,9 @@ public class JMSMessageStore extends AbstractMessageStore {
         }
 
 
-        setContextClassLoader(originalClassLoader);
+        if(originalCl !=null){
+        	setContextClassLoader(originalCl);
+        }
         return messageContext;
     }
 
@@ -275,8 +295,13 @@ public class JMSMessageStore extends AbstractMessageStore {
                     "Restart the system to re sync the message count" ,e);
         }
 
-        ClassLoader  originalClassLoader = getContextClassLoader();
-        setContextClassLoader(this.getClass().getClassLoader());
+        ClassLoader originalCl = null;
+    	
+    	if (properties.get(JMSMessageStoreConstants.VENDER_CLASS_LOADER_ENABLE) == null
+				|| Boolean.parseBoolean((String)properties.get(JMSMessageStoreConstants.VENDER_CLASS_LOADER_ENABLE))) {	originalCl = getContextClassLoader();
+			setContextClassLoader(this.getClass().getClassLoader());
+
+		}
 
         try {
             con = getWriteConnection();
@@ -305,7 +330,9 @@ public class JMSMessageStore extends AbstractMessageStore {
             size.set(size.get()-count);
             cleanupJMSResources(con, session, consumer, error, ConnectionType.WRITE_CONNECTION);
         }
-        setContextClassLoader(originalClassLoader);
+        if(originalCl !=null){
+        	setContextClassLoader(originalCl);
+        }
     }
 
     public MessageContext remove(String messageId) {
@@ -325,8 +352,13 @@ public class JMSMessageStore extends AbstractMessageStore {
         QueueBrowser browser = null;
         boolean error = false;
 
-        ClassLoader originalCl = getContextClassLoader();
-        setContextClassLoader(this.getClass().getClassLoader());
+        ClassLoader originalCl = null;
+    	
+    	if (properties.get(JMSMessageStoreConstants.VENDER_CLASS_LOADER_ENABLE) == null
+				|| Boolean.parseBoolean((String)properties.get(JMSMessageStoreConstants.VENDER_CLASS_LOADER_ENABLE))) {	originalCl = getContextClassLoader();
+			setContextClassLoader(this.getClass().getClassLoader());
+
+		}
         MessageContext messageContext = null;
 
         try {
@@ -366,7 +398,9 @@ public class JMSMessageStore extends AbstractMessageStore {
         }
 
 
-        setContextClassLoader(originalCl);
+        if(originalCl !=null){
+        	setContextClassLoader(originalCl);
+        }
         return messageContext;
     }
 
@@ -377,8 +411,13 @@ public class JMSMessageStore extends AbstractMessageStore {
         QueueBrowser browser = null;
         boolean error = false;
 
-        ClassLoader originalCL = getContextClassLoader();
-        setContextClassLoader(this.getClass().getClassLoader());
+        ClassLoader originalCl = null;
+    	
+    	if (properties.get(JMSMessageStoreConstants.VENDER_CLASS_LOADER_ENABLE) == null
+				|| Boolean.parseBoolean((String)properties.get(JMSMessageStoreConstants.VENDER_CLASS_LOADER_ENABLE))) {	originalCl = getContextClassLoader();
+			setContextClassLoader(this.getClass().getClassLoader());
+
+		}
 
         try {
             con = getReadConnection();
@@ -407,7 +446,9 @@ public class JMSMessageStore extends AbstractMessageStore {
             cleanupJMSResources(con, session, browser, error, ConnectionType.READ_CONNECTION);
         }
 
-        setContextClassLoader(originalCL);
+        if(originalCl !=null){
+        	setContextClassLoader(originalCl);
+        }
 
         return list;
     }
@@ -422,9 +463,14 @@ public class JMSMessageStore extends AbstractMessageStore {
         QueueBrowser browser = null;
         boolean error = false;
 
-        ClassLoader originalCl = getContextClassLoader();
-        setContextClassLoader(this.getClass().getClassLoader());
+        ClassLoader originalCl = null;
+        	
+    	if (properties.get(JMSMessageStoreConstants.VENDER_CLASS_LOADER_ENABLE) == null
+				|| Boolean.parseBoolean((String)properties.get(JMSMessageStoreConstants.VENDER_CLASS_LOADER_ENABLE))) {	originalCl = getContextClassLoader();
+			setContextClassLoader(this.getClass().getClassLoader());
 
+		}
+       
         MessageContext messageContext = null;
 
         try {
@@ -457,7 +503,9 @@ public class JMSMessageStore extends AbstractMessageStore {
             cleanupJMSResources(con, session, browser, error, ConnectionType.READ_CONNECTION);
         }
 
-        setContextClassLoader(originalCl);
+        if(originalCl !=null){
+        	setContextClassLoader(originalCl);
+        }
         return messageContext;
     }
 
@@ -551,6 +599,8 @@ public class JMSMessageStore extends AbstractMessageStore {
 
         } catch (NamingException e) {
             log.error("Naming Exception", e);
+        } catch (Exception e) {
+            log.error("Unable to initialize JMS message store : " + e.getMessage(), e);
         }
     }
 
@@ -610,6 +660,18 @@ public class JMSMessageStore extends AbstractMessageStore {
                     jmsSpec11 = false;
                 }
 
+            }
+            String consumerReceiveTimeOut = (String) parameters.get(JMSMessageStoreConstants.CONSUMER_RECEIVE_TIMEOUT);
+            if(null != consumerReceiveTimeOut){
+                try {
+                    this.consumerReceiveTimeOut =  Integer.parseInt(consumerReceiveTimeOut);
+                } catch (NumberFormatException e) {
+                    log.error("Error in parsing the consumer receive time out value and , it is set to 60 secs");
+                    this.consumerReceiveTimeOut = 60000;
+                }
+            }else {
+                log.warn("Consumer Receiving time out is not passed in, Setting to default value of 60 secs");
+                this.consumerReceiveTimeOut = 60000;
             }
 
         } else {
@@ -724,6 +786,9 @@ public class JMSMessageStore extends AbstractMessageStore {
         } catch (JMSException e) {
             log.error("JMS error while updating size of the store: " + name, e);
             error = true;
+        } catch (Exception e) {
+            log.error("Exception occurred while initializing the JMS message store: " + name, e);
+            error = true;
         } finally {
             cleanupJMSResources(con, session, browser, error, ConnectionType.READ_CONNECTION);
         }
@@ -731,7 +796,9 @@ public class JMSMessageStore extends AbstractMessageStore {
         this.size.set(count);
         log.debug("Updated JMS Message Store Size :" + size);
 
-        this.setContextClassLoader(originalCL);
+        if(originalCL !=null){
+        	setContextClassLoader(originalCL);
+        }
 
     }
 
@@ -761,6 +828,9 @@ public class JMSMessageStore extends AbstractMessageStore {
 
     @Override
     public int size() {
+        //always syncing because in worker manager separation, manager node should see
+        //proper numbers always
+        syncSize();
         if(size.get() < 0) {
             size.set(0);
         }

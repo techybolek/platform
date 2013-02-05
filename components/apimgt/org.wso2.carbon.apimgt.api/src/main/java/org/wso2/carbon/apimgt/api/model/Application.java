@@ -32,6 +32,7 @@ public class Application {
     private Subscriber subscriber;
     private Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
     private List<APIKey> keys = new ArrayList<APIKey>();
+    private String tier;
 
     public Application(String name, Subscriber subscriber) {
         this.name = name;
@@ -75,6 +76,14 @@ public class Application {
 
     public void addKey(APIKey key) {
         keys.add(key);
+    }
+
+    public String getTier() {
+        return tier;
+    }
+
+    public void setTier(String tier) {
+        this.tier = tier;
     }
 
     @Override

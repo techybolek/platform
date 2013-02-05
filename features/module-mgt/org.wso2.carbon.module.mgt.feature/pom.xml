@@ -22,12 +22,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>module-mgt-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.module.mgt.feature</artifactId>
     <packaging>pom</packaging>
+    <version>4.0.2</version>
     <name>WSO2 Carbon - Module Management Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for Module Management functionality</description>
@@ -42,7 +44,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.module.mgt.ui.feature</artifactId>
-            <version>${project.version}</version>
+            <version>4.0.1</version>
             <type>zip</type>
 	    </dependency>
     </dependencies>
@@ -62,18 +64,18 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.module.mgt</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>
                                 </properties>
                             </adviceFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:${project.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.module.mgt.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.module.mgt.ui.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.module.mgt.server.feature:${project.version}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.module.mgt.ui.feature:4.0.1</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

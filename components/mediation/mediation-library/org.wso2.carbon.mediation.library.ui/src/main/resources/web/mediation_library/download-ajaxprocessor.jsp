@@ -19,6 +19,7 @@
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.application.mgt.ui.ApplicationAdminClient" %>
+<%@ page import="org.wso2.carbon.mediation.library.ui.LibraryAdminClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 
@@ -29,8 +30,8 @@
 
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
 
-    ApplicationAdminClient client =
-            new ApplicationAdminClient(cookie, backendServerURL, configContext, request.getLocale());
+    LibraryAdminClient client =
+            new LibraryAdminClient(cookie, backendServerURL, configContext, request.getLocale());
 
     String cappName = request.getParameter("cappName");
 

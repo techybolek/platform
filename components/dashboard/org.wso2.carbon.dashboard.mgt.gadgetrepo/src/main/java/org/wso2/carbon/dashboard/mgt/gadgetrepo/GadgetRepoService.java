@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-    package org.wso2.carbon.dashboard.mgt.gadgetrepo;
+package org.wso2.carbon.dashboard.mgt.gadgetrepo;
 
 import org.apache.axiom.om.util.Base64;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.dashboard.DashboardService;
 import org.wso2.carbon.dashboard.common.DashboardConstants;
@@ -29,6 +30,7 @@ import org.wso2.carbon.dashboard.common.bean.Gadget;
 import org.wso2.carbon.dashboard.mgt.gadgetrepo.common.CommentSortById;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.social.api.activity.Activity;
 import org.wso2.carbon.registry.social.api.activity.ActivityManager;
@@ -776,8 +778,8 @@ public class GadgetRepoService extends AbstractAdmin {
         String gadgetRootPath = DashboardConstants.SYSTEM_GADGETREPO_REGISTRY_ROOT;
         String gadgetRepoPath = gadgetRootPath + DashboardConstants.GADGETS_COL;
         String nextGadgetIdPath = gadgetRootPath
-                                  + DashboardConstants.GADGETS_COL
-                                  + DashboardConstants.NEXT_GADGET_ID_PATH;
+                + DashboardConstants.GADGETS_COL
+                + DashboardConstants.NEXT_GADGET_ID_PATH;
 
         // getting the gadget data
         try {
@@ -1225,7 +1227,7 @@ public class GadgetRepoService extends AbstractAdmin {
 
         String configRegistryPath = "/registry/resource" + RegistryConstants.CONFIG_REGISTRY_BASE_PATH;
         String regGadgetPath = DashboardConstants.GS_REGISTRY_ROOT + DashboardConstants.GADGET_PATH +
-                               gName + RegistryConstants.PATH_SEPARATOR;
+                gName + RegistryConstants.PATH_SEPARATOR;
 
         String gadgetPath = configRegistryPath + regGadgetPath;
         String thumbPath = configRegistryPath + regGadgetPath;
@@ -1308,7 +1310,7 @@ public class GadgetRepoService extends AbstractAdmin {
      * Add gadget to registry from given registry file
      * Set the media type of file
      *
-     * @param regPath       registry path to file
+     * @param regPath registry path to file
      * @return gadget path
      * @throws GadgetRepoException
      */
@@ -1343,7 +1345,7 @@ public class GadgetRepoService extends AbstractAdmin {
     public Boolean addGadgetEntryToRepo(String gName, String gUrl, String gDesc,
                                         DataHandler gScreen, String screenMediaType, DataHandler gadgetContent) {
         Registry registry = null;
-        String thumbRegistryPath = null ;
+        String thumbRegistryPath = null;
 
         try {
             if (gUrl != null && !"".equals(gUrl)) {
@@ -1422,7 +1424,7 @@ public class GadgetRepoService extends AbstractAdmin {
             if (gScreen != null) {
                 thumbRegistryPath = addGadgetThumbToRegistry(gScreen, screenMediaType, gName.replace(" ", ""));
             }
-            if(thumbRegistryPath != null){
+            if (thumbRegistryPath != null) {
                 gadget.setProperty(DashboardConstants.GADGET_THUMB_URL, thumbRegistryPath);
             }
 
@@ -1454,7 +1456,7 @@ public class GadgetRepoService extends AbstractAdmin {
         } catch (Exception e) {
             log.error("Failed to save the new gadget : " + e);
             if (registry != null) {
-                try                                                 {
+                try {
                     registry.rollbackTransaction();
                 } catch (Exception ex) {
                     log.error(ex);
@@ -1543,61 +1545,63 @@ public class GadgetRepoService extends AbstractAdmin {
         }
 
         Gadget[] gadgetList = new Gadget[rsList.size()];
-        int j=0;
+        int j = 0;
         Resource tempRes;
         Gadget tempGadget;
 
         try {
             registry = getConfigSystemRegistry();
             for (int i = 0; i < rsList.size(); i++) {
-                tempRes=  rsList.get(i);
-                String gadgetName=tempRes.getProperty(DashboardConstants.GADGET_NAME);
-                if(gadgetName!=null){
+                tempRes = rsList.get(i);
+                String gadgetName = tempRes.getProperty(DashboardConstants.GADGET_NAME);
+                if (gadgetName != null) {
 
-                if(gadgetName.matches("(?i).*"+name+".*")){
+                    if (gadgetName.matches("(?i).*" + name + ".*")) {
 
-                tempGadget = new Gadget();
-                if (tempRes.getProperty(DashboardConstants.GADGET_URL) != null) {
-                tempGadget.setGadgetName(tempRes
-                            .getProperty(DashboardConstants.GADGET_NAME));
+                        tempGadget = new Gadget();
+                        if (tempRes.getProperty(DashboardConstants.GADGET_URL) != null) {
+                            tempGadget.setGadgetName(tempRes
+                                    .getProperty(DashboardConstants.GADGET_NAME));
 
-                    tempGadget.setGadgetUrl(tempRes
-                            .getProperty(DashboardConstants.GADGET_URL));
+                            tempGadget.setGadgetUrl(tempRes
+                                    .getProperty(DashboardConstants.GADGET_URL));
 
-                    if (tempRes.getProperty(DashboardConstants.GADGET_DESC) != null) {
-                        tempGadget.setGadgetDesc(tempRes
-                                .getProperty(DashboardConstants.GADGET_DESC));
-                    } else {
-                        tempGadget.setGadgetDesc("");
+                            if (tempRes.getProperty(DashboardConstants.GADGET_DESC) != null) {
+                                tempGadget.setGadgetDesc(tempRes
+                                        .getProperty(DashboardConstants.GADGET_DESC));
+                            } else {
+                                tempGadget.setGadgetDesc("");
+                            }
+
+                            if (tempRes.getProperty(DashboardConstants.USER_CONTER) != null)
+                                tempGadget.setUserCount(tempRes
+                                        .getProperty(DashboardConstants.USER_CONTER));
+
+                            if (tempRes.getProperty(DashboardConstants.DEFAULT_GADGET) != null)
+                                tempGadget
+                                        .setDefaultGadget(tempRes
+                                                .getProperty(DashboardConstants.DEFAULT_GADGET));
+
+                            if (tempRes
+                                    .getProperty(DashboardConstants.UNSIGNED_USER_GADGET) != null)
+                                tempGadget
+                                        .setUnsignedUserGadget(tempRes
+                                                .getProperty(DashboardConstants.UNSIGNED_USER_GADGET));
+
+                            if (tempRes.getProperty(DashboardConstants.GADGET_THUMB_URL) != null) {
+                                tempGadget.setThumbUrl(tempRes.getProperty(DashboardConstants.GADGET_THUMB_URL));
+                            }
+
+                            tempGadget.setGadgetPath(tempRes.getPath());
+
+                            tempGadget.setRating(registry.getAverageRating(tempRes
+                                    .getPath()));
+
+                            gadgetList[j] = tempGadget;
+                            j++;
+                        }
                     }
-
-                    if (tempRes.getProperty(DashboardConstants.USER_CONTER) != null)
-                        tempGadget.setUserCount(tempRes
-                                .getProperty(DashboardConstants.USER_CONTER));
-
-                    if (tempRes.getProperty(DashboardConstants.DEFAULT_GADGET) != null)
-                        tempGadget
-                                .setDefaultGadget(tempRes
-                                        .getProperty(DashboardConstants.DEFAULT_GADGET));
-
-                    if (tempRes
-                            .getProperty(DashboardConstants.UNSIGNED_USER_GADGET) != null)
-                        tempGadget
-                                .setUnsignedUserGadget(tempRes
-                                        .getProperty(DashboardConstants.UNSIGNED_USER_GADGET));
-
-                    if (tempRes.getProperty(DashboardConstants.GADGET_THUMB_URL) != null) {
-                        tempGadget.setThumbUrl(tempRes.getProperty(DashboardConstants.GADGET_THUMB_URL));
-                    }
-
-                    tempGadget.setGadgetPath(tempRes.getPath());
-
-                    tempGadget.setRating(registry.getAverageRating(tempRes
-                            .getPath()));
-
-                    gadgetList[j] = tempGadget;
-                    j++;
-                } }}
+                }
 
             }
 
@@ -1616,9 +1620,9 @@ public class GadgetRepoService extends AbstractAdmin {
         try {
             Registry registry = getConfigSystemRegistry();
             String regGadgetThumbPath = DashboardConstants.GS_REGISTRY_ROOT +
-                                        DashboardConstants.GADGET_PATH + gadgetName +
-                                        DashboardConstants.GADGET_THUMB_PATH +
-                                        gadgetName + DashboardConstants.GADGET_THUMB;
+                    DashboardConstants.GADGET_PATH + gadgetName +
+                    DashboardConstants.GADGET_THUMB_PATH +
+                    gadgetName + DashboardConstants.GADGET_THUMB;
 
             // Create a new registry resource for the gadget thumbnail
             Resource thumb = registry.newResource();
@@ -1629,12 +1633,22 @@ public class GadgetRepoService extends AbstractAdmin {
             registry.put(regGadgetThumbPath, thumb);
 
             String thumbPath = "/registry/resource" + RegistryConstants.CONFIG_REGISTRY_BASE_PATH +
-                               regGadgetThumbPath;
+                    regGadgetThumbPath;
 
             return thumbPath;
 
         } catch (Exception e) {
             log.error("Backend server error : Could not add gadget thumbnail to registry : ", e);
+            return null;
+        }
+    }
+
+    protected Registry getConfigSystemRegistry() {
+        try {
+            return  GadgetRepoContext.getRegistryService()
+                    .getConfigSystemRegistry(CarbonContext.getCurrentContext().getTenantId());
+        } catch (RegistryException e) {
+            log.error(e.getMessage(), e);
             return null;
         }
     }

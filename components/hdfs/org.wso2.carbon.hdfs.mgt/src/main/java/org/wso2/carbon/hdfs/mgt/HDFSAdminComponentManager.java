@@ -33,7 +33,7 @@ import org.wso2.carbon.hadoop.security.HadoopCarbonSecurity;
 import org.wso2.carbon.identity.authenticator.krb5.Krb5AuthenticatorConstants;
 
 /**
- * Todo Doc
+ * HDFS Admin component manager
  */
 public class HDFSAdminComponentManager {
      private static Log log = LogFactory.getLog(HDFSAdminComponentManager.class);

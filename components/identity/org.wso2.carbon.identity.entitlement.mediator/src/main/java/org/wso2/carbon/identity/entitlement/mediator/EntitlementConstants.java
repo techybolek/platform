@@ -31,21 +31,19 @@ public class EntitlementConstants {
     public static final QName ELEMENT_ENTITLEMENT = new QName(XMLConfigConstants.SYNAPSE_NAMESPACE,
             "entitlementService");
 
-    public static final QName ATTR_NAME_SERVICE_EPR = new QName("remoteServiceUrl");
+    public static final QName ATTR_SERVER_URL = new QName("remoteServiceUrl");
 
-    public static final QName ATTR_NAME_USER = new QName("remoteServiceUserName");
+    public static final QName ATTR_USER_NAME = new QName("remoteServiceUserName");
 
     public static final QName ATTR_NAME_PASSWORD = new QName("remoteServicePassword");
 
     public static final QName ATTR_CALLBACK_CLASS = new QName("callbackClass");
 
-    public static final QName ATTR_DECISION_CACHING = new QName("decisionCaching");
+    public static final QName ATTR_CACHE_TYPE = new QName("cacheType");
 
-    public static final QName ATTR_DECISION_CACHING_INTERVAL = new QName("decisionCachingInterval");
+    public static final QName ATTR_INVALIDATION_INTERVAL = new QName("invalidationInterval");
 
-    public static final QName ATTR_MAX_DECISION_CACHING_ENTRIES = new QName("maxCacheEntries");
-
-    public static final QName ATTR_BASIC_AUTH = new QName("basicAuth");
+    public static final QName ATTR_MAX_CACHE_ENTRIES = new QName("maxCacheEntries");
 
     public static final QName ATTR_THRIFT_HOST =  new QName("thriftHost");
 
@@ -53,36 +51,30 @@ public class EntitlementConstants {
 
     public static final QName ATTR_REUSE_SESSION =  new QName("reuseSession");
 
-    public static final QName ATTR_CLIENT_CLASS =  new QName("clientClass");    
-
-    public static final String SERVICE_EPR = "remoteServiceUrl";
+    public static final QName ATTR_CLIENT =  new QName("client");
 
     public static final String SERVER_URL = "serverUrl";
 
-    public static final String USER = "remoteServiceUserName";
+    public static final String USERNAME = "userName";
 
-    public static final String PASSWORD = "remoteServicePassword";
-
-    public static final String CALLBACK_CLASS = "callbackClass";
-
-    public static final String DECISION_CACHING = "decisionCaching";
-
-    public static final String DECISION_CACHING_INTERVAL = "decisionCachingInterval";
-
-    public static final String DECISION_MAX_CACHING_ENTRIES = "maxCacheEntries";
-
-    public static final String BASIC_AUTH = "basicAuth";
-
-    public static final String CONTEXT = "context";
+    public static final String PASSWORD = "password";
 
     public static final String THRIFT_HOST = "thriftHost";
 
     public static final String THRIFT_PORT = "thriftPort";
 
-    public static final String CLIENT_CLASS= "clientClass";
+    public static final String CLIENT= "client";
 
     public static final String REUSE_SESSION = "reuseSession";
 
-    public static final int THRIFT_TIME_OUT = 30000;
+    public static final String JSON = "json";
+
+    public static final String SOAP = "soap";
+
+    public static final String THRIFT = "thrift";
+
+    public static final String BASIC_AUTH = "basicAuth";
+
+    public static final String WS_XACML = "wsXacml";
 
 }

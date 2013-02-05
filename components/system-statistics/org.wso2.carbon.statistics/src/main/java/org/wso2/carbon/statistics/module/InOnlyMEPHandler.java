@@ -90,7 +90,6 @@ public class InOnlyMEPHandler extends AbstractHandler {
                                     axisOperation.getParameter(StatisticsConstants.IN_OPERATION_COUNTER);
                             if (operationParameter != null) {
                                 ((AtomicInteger) operationParameter.getValue()).incrementAndGet();
-                                updateCurrentInvocationOperationStatistic(msgContext);
                             } else {
                                 log.error(StatisticsConstants.IN_OPERATION_COUNTER +
                                           " has not been set for operation " +
@@ -120,21 +119,6 @@ public class InOnlyMEPHandler extends AbstractHandler {
         }
     }
 
-    private void updateCurrentInvocationOperationStatistic(MessageContext msgContext) {
-        //Set request count 1
-        Parameter currentOperationAndServiceRequestCounterParam = new Parameter();
-        currentOperationAndServiceRequestCounterParam.setName(
-                StatisticsConstants.CURRENT_IN_OPERATION_AND_SERVICE_COUNTER);
-        currentOperationAndServiceRequestCounterParam.setValue(1);
-        try {
-            msgContext.getAxisOperation().addParameter(currentOperationAndServiceRequestCounterParam);
-            msgContext.getAxisService().addParameter(currentOperationAndServiceRequestCounterParam);
-
-        } catch (AxisFault axisFault) {
-            log.error("Error occurred while adding a parameter", axisFault);
-        }
-    }
-
     /**
      * This method is used to update current request statistic
      *
@@ -142,13 +126,13 @@ public class InOnlyMEPHandler extends AbstractHandler {
      */
     private void updateCurrentInvocationGlobalStatistics(MessageContext msgContext) {
         //Set request count 1
-        Parameter globalCurrentRequestCounterParam = new Parameter();
-        globalCurrentRequestCounterParam.setName(StatisticsConstants.GLOBAL_CURRENT_REQUEST_COUNTER);
-        globalCurrentRequestCounterParam.setValue(1);
-        try {
-            msgContext.getConfigurationContext().getAxisConfiguration().addParameter(globalCurrentRequestCounterParam);
-        } catch (AxisFault axisFault) {
-            log.error("Error occurred while adding a parameter", axisFault);
-        }
+        msgContext.setProperty(StatisticsConstants.GLOBAL_CURRENT_REQUEST_COUNTER,1);
+
+        //Set response count 0
+        msgContext.setProperty(StatisticsConstants.GLOBAL_CURRENT_RESPONSE_COUNTER,0);
+
+        //Set fault count 0
+        msgContext.setProperty(StatisticsConstants.GLOBAL_CURRENT_FAULT_COUNTER,0);
+
     }
 }

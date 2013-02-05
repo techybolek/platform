@@ -8,6 +8,9 @@
         <maxWait>60000</maxWait>
         <minIdle>5</minIdle>
     </Database>
+    <APIConsumerAuthentication>
+        <EnableTokenGeneration>false</EnableTokenGeneration>
+    </APIConsumerAuthentication>
     <APIUsageTracking>
         <Enabled>false</Enabled>
         <ThriftPort>7612</ThriftPort>

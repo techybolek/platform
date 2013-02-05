@@ -20,14 +20,20 @@ import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.deployers.SynapseArtifactDeploymentStore;
 import org.apache.synapse.endpoints.Endpoint;
+import org.apache.synapse.mediators.base.SequenceMediator;
+import org.apache.synapse.mediators.builtin.SendMediator;
+import org.apache.synapse.mediators.filters.InMediator;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.lb.endpoint.EndpointDeployer;
 import org.wso2.carbon.lb.endpoint.LoadBalanceEndpointException;
+import org.wso2.carbon.lb.endpoint.TenantAwareLoadBalanceEndpointException;
+import org.wso2.carbon.lb.endpoint.endpoint.TenantAwareLoadBalanceEndpoint;
 import org.wso2.carbon.lb.endpoint.util.ConfigHolder;
 import org.wso2.carbon.mediation.dependency.mgt.services.DependencyManagementService;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
@@ -40,6 +46,7 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.lb.common.service.LoadBalancerConfigurationService;
 
 import java.io.File;
 import java.util.Map;
@@ -74,6 +81,10 @@ import java.util.Set;
  * interface="org.wso2.carbon.user.core.service.RealmService"
  * cardinality="1..1" policy="dynamic" bind="setRealmService"
  * unbind="unsetRealmService"
+ * @scr.reference name="org.wso2.carbon.lb.common"
+ * interface="org.wso2.carbon.lb.common.service.LoadBalancerConfigurationService"
+ * cardinality="1..1" policy="dynamic" bind="setLoadBalancerConfigurationService"
+ * unbind="unsetLoadBalancerConfigurationService"
  */
 @SuppressWarnings({"UnusedDeclaration", "JavaDoc"})
 public class LoadBalanceEndpointServiceComponent {
@@ -85,11 +96,62 @@ public class LoadBalanceEndpointServiceComponent {
     protected void activate(ComponentContext ctxt) {
         try {
             SynapseEnvironmentService synEnvService =
-                    ConfigHolder.getInstance().getSynapseEnvironmentService(
-                            MultitenantConstants.SUPER_TENANT_ID);
+                                                      ConfigHolder.getInstance()
+                                                                  .getSynapseEnvironmentService(MultitenantConstants.SUPER_TENANT_ID);
 
             registerDeployer(ConfigHolder.getInstance().getAxisConfiguration(),
-                    synEnvService.getSynapseEnvironment());
+                             synEnvService.getSynapseEnvironment());
+
+            SynapseEnvironment synapseEnv = synEnvService.getSynapseEnvironment();
+
+            /* Registering Tenant Aware Load Balance Endpoint */
+
+            // get the main sequence mediator
+            SequenceMediator mainSequence =
+                                            (SequenceMediator) synapseEnv.getSynapseConfiguration()
+                                                                         .getSequence("main");
+
+            boolean successfullyRegistered = false;
+            
+            // iterate through its child mediators
+            for (Mediator child : mainSequence.getList()) {
+
+                // find the InMediator
+                if (child instanceof InMediator) {
+                    
+                    for(Mediator inChild : ((InMediator)child).getList()){
+                        
+                        // find the SendMediator
+                        if (inChild instanceof SendMediator) {
+                            
+                            SendMediator sendMediator = (SendMediator) inChild;
+                            
+                            /* add Tenant Aware LB endpoint */
+                            
+                            TenantAwareLoadBalanceEndpoint tenantAwareEp = new TenantAwareLoadBalanceEndpoint();
+
+                            tenantAwareEp.init(synapseEnv);
+                            
+                            sendMediator.setEndpoint(tenantAwareEp);
+                            
+                            successfullyRegistered = true;
+
+                            if (log.isDebugEnabled()) {
+                                log.debug("Added Tenant Aware Endpoint: " +
+                                          sendMediator.getEndpoint().getName() + "" +
+                                          " to Send Mediator.");
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if(!successfullyRegistered){
+                String msg = "Failed to register Tenant Aware Load Balance Endpoint in Send Mediator.";
+                log.fatal(msg);
+                throw new TenantAwareLoadBalanceEndpointException(msg);
+            }
+
             if (log.isDebugEnabled()) {
                 log.debug("Endpoint Admin bundle is activated ");
             }
@@ -290,5 +352,13 @@ public class LoadBalanceEndpointServiceComponent {
 
     protected void unsetRealmService(RealmService realmService) {
         ConfigHolder.getInstance().setRealmService(null);
+    }
+    
+    protected void setLoadBalancerConfigurationService(LoadBalancerConfigurationService lbConfigSer){
+        ConfigHolder.getInstance().setLbConfigService(lbConfigSer);
+    }
+    
+    protected void unsetLoadBalancerConfigurationService(LoadBalancerConfigurationService lbConfigSer){
+        ConfigHolder.getInstance().setLbConfigService(null);
     }
 }

@@ -73,4 +73,12 @@ public interface IListMetadataService<ServiceBean, WSDLBean, PolicyBean, SchemaB
      * @throws RegistryException if the operation failed.
      */
     SchemaBean listschema()throws RegistryException;
+
+    /**
+     * Get all the states from the LC
+     *
+     * @param LCName
+     * @return
+     */
+    String[] getAllLifeCycleState(String LCName);
 }

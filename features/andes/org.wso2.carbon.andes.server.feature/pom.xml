@@ -22,9 +22,11 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>andes-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
+    <version>4.0.7</version>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.andes.server.feature</artifactId>
     <packaging>pom</packaging>
@@ -35,47 +37,42 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.andes</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>4.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.andes.authentication</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>4.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.andes.authorization</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>4.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.andes.commons</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>4.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.andes.cluster.mgt</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>4.0.7</version>
         </dependency>
 	 <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.andes.core</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>4.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.andes.admin</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>4.0.7</version>
         </dependency>
-        <!--dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.qp.messagestore.jdbc</artifactId>
-            <version>${wso2carbon.version}</version>
-        </dependency-->
         <dependency>
             <groupId>org.wso2.andes.wso2</groupId>
             <artifactId>andes</artifactId>
-            <version>0.13.wso2v1</version>
+            <version>0.13.wso2v6</version>
         </dependency>
         <dependency>
             <groupId>commons-cli.wso2</groupId>
@@ -115,6 +112,7 @@
 	<dependency>
             <groupId>org.apache.zookeeper.wso2</groupId>
             <artifactId>apache-zookeeper</artifactId>
+            <version>3.4.4.wso2v1</version>
         </dependency>
     </dependencies>
     <build>
@@ -159,7 +157,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.andes.server</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server
@@ -183,12 +181,11 @@
                                 </bundleDef>
                                 <bundleDef>commons-digester.wso2:commons-digester</bundleDef>
                                 <bundleDef>commons-beanutils.wso2:commons-beanutils</bundleDef>
-                                <!--<bundleDef>org.apache.geronimo.specs.wso2:geronimo-jms_1.1_spec</bundleDef>-->
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.andes.cluster.mgt</bundleDef>
 				<bundleDef>org.apache.zookeeper.wso2:apache-zookeeper</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}
+                                <importFeatureDef>org.wso2.carbon.core.server:4.0.5
                                 </importFeatureDef>
                             </importFeatures>
                         </configuration>
@@ -219,7 +216,6 @@
     </build>
 
     <properties>
-        <qpid.version>0.13</qpid.version>
         <commons-cli.version>1.2.0</commons-cli.version>
         <commons-configuration.version>1.6.0</commons-configuration.version>
         <commons-digester.version>1.8.1</commons-digester.version>

@@ -30,10 +30,21 @@ public class BamServerConfig {
 
     private String username;
     private String password;
+    private String urlSet;
     private String ip;
     private String authenticationPort;
     private String receiverPort;
     private boolean security = true;
+    private boolean loadbalancer = false;
+
+    public boolean isLoadbalanced() {
+        return loadbalancer;
+    }
+
+    public void setLoadbalanced(boolean loadbalancer) {
+        this.loadbalancer = loadbalancer;
+    }
+
     private List<StreamConfiguration> streamConfigurations = new ArrayList<StreamConfiguration>();
 
     public String getUsername(){
@@ -50,6 +61,14 @@ public class BamServerConfig {
 
     public void setPassword(String password){
         this.password = password;
+    }
+
+    public String getUrlSet() {
+        return urlSet;
+    }
+
+    public void setUrlSet(String urlSet) {
+        this.urlSet = urlSet;
     }
 
     public String getIp(){

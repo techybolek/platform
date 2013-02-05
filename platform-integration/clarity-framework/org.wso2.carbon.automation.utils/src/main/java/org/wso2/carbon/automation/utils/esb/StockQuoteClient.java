@@ -32,11 +32,14 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.rampart.RampartMessageData;
+import org.wso2.carbon.automation.core.ProductConstant;
 
 import javax.xml.namespace.QName;
 import java.io.File;
@@ -48,23 +51,26 @@ public class StockQuoteClient {
     private static final Log log = LogFactory.getLog(StockQuoteClient.class);
 
     private ConfigurationContext cfgCtx;
-    private ServiceClient serviceClient;
 
+    private ServiceClient serviceClient;
+    private MultiThreadedHttpConnectionManager httpConnectionManager;
+    private HttpClient httpClient;
     private List<Header> httpHeaders = new ArrayList<Header>();
 
     public StockQuoteClient() {
-        String repositoryPath =
-                "samples" + File.separator + "axis2Client" + File.separator +
-                "client_repo";
+        String repositoryPath = ProductConstant.getModuleClientPath();
 
         File repository = new File(repositoryPath);
         log.info("Using the Axis2 repository path: " + repository.getAbsolutePath());
-
+        httpConnectionManager = new MultiThreadedHttpConnectionManager();
+        httpClient = new HttpClient(httpConnectionManager);
         try {
             cfgCtx =
                     ConfigurationContextFactory.createConfigurationContextFromFileSystem(repository.getCanonicalPath(),
                                                                                          null);
             serviceClient = new ServiceClient(cfgCtx, null);
+            serviceClient.getOptions().setProperty(HTTPConstants.REUSE_HTTP_CLIENT, Constants.VALUE_TRUE);
+            serviceClient.getOptions().setProperty(HTTPConstants.CACHED_HTTP_CLIENT, httpClient);
             log.info("Sample client initialized successfully...");
         } catch (Exception e) {
             log.error("Error while initializing the StockQuoteClient", e);
@@ -83,10 +89,26 @@ public class StockQuoteClient {
         return serviceClient.sendReceive(createStandardRequest(symbol));
     }
 
+    public OMElement sendSimpleStockQuoteRequest_REST(String trpUrl, String addUrl, String symbol)
+            throws AxisFault {
+
+        Options options = getRESTEnabledOptions(trpUrl, addUrl);
+        serviceClient.setOptions(options);
+        return serviceClient.sendReceive(createStandardRequest(symbol));
+    }
+
     public OMElement sendSimpleQuoteRequest(String trpUrl, String addUrl, String symbol)
             throws AxisFault {
 
         Options options = getOptions(trpUrl, addUrl, "getSimpleQuote");
+        serviceClient.setOptions(options);
+        return serviceClient.sendReceive(createStandardSimpleRequest(symbol));
+    }
+
+    public OMElement sendSimpleQuoteRequest_REST(String trpUrl, String addUrl, String symbol)
+            throws AxisFault {
+
+        Options options = getRESTEnabledOptions(trpUrl, addUrl, "getSimpleQuote");
         serviceClient.setOptions(options);
         return serviceClient.sendReceive(createStandardSimpleRequest(symbol));
     }
@@ -100,6 +122,7 @@ public class StockQuoteClient {
                 .setSoapVersionURI(org.apache.axiom.soap.SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI);
         return serviceClient.sendReceive(createStandardRequest(symbol));
     }
+
 
     public OMElement sendSimpleStockQuoteSoap12(String trpUrl, String addUrl, String symbol)
             throws AxisFault {
@@ -115,6 +138,15 @@ public class StockQuoteClient {
             throws AxisFault {
 
         Options options = getOptions(trpUrl, addUrl);
+        serviceClient.setOptions(options);
+        return serviceClient.sendReceive(payload);
+    }
+
+    public OMElement sendSimpleStockQuoteRequest_REST(String trpUrl, String addUrl,
+                                                      OMElement payload)
+            throws AxisFault {
+
+        Options options = getRESTEnabledOptions(trpUrl, addUrl);
         serviceClient.setOptions(options);
         return serviceClient.sendReceive(payload);
     }
@@ -143,10 +175,36 @@ public class StockQuoteClient {
         return serviceClient.sendReceive(createCustomQuoteRequest(symbol));
     }
 
+    public OMElement send(String trpUrl, String addUrl, String action, OMElement payload)
+            throws AxisFault {
+
+        Options options = getOptions(trpUrl, addUrl, action);
+        serviceClient.setOptions(options);
+        return serviceClient.sendReceive(payload);
+    }
+
+
+    public OMElement sendCustomQuoteRequest_REST(String trpUrl, String addUrl, String symbol)
+            throws AxisFault {
+
+        Options options = getRESTEnabledOptions(trpUrl, addUrl);
+        serviceClient.setOptions(options);
+        return serviceClient.sendReceive(createCustomQuoteRequest(symbol));
+    }
+
     public OMElement sendMultipleQuoteRequest(String trpUrl, String addUrl, String symbol, int n)
             throws AxisFault {
 
         Options options = getOptions(trpUrl, addUrl);
+        serviceClient.setOptions(options);
+        return serviceClient.sendReceive(createMultipleQuoteRequest(symbol, n));
+    }
+
+    public OMElement sendMultipleQuoteRequest_REST(String trpUrl, String addUrl, String symbol,
+                                                   int n)
+            throws AxisFault {
+
+        Options options = getRESTEnabledOptions(trpUrl, addUrl);
         serviceClient.setOptions(options);
         return serviceClient.sendReceive(createMultipleQuoteRequest(symbol, n));
     }
@@ -156,6 +214,30 @@ public class StockQuoteClient {
 
         Options options = new Options();
 
+        options.setSoapVersionURI(originalOptions.getSoapVersionURI());
+
+
+        if (trpUrl != null && !"null".equals(trpUrl)) {
+            options.setProperty(Constants.Configuration.TRANSPORT_URL, trpUrl);
+        }
+
+        if (addUrl != null && !"null".equals(addUrl)) {
+            serviceClient.engageModule("addressing");
+            options.setTo(new EndpointReference(addUrl));
+        }
+
+        options.setAction("urn:getQuote");
+        if (httpHeaders.size() > 0) {
+            options.setProperty(HTTPConstants.HTTP_HEADERS, httpHeaders);
+        }
+        return options;
+    }
+
+    private Options getRESTEnabledOptions(String trpUrl, String addUrl) throws AxisFault {
+        Options originalOptions = serviceClient.getOptions();
+
+        Options options = new Options();
+        options.setProperty("enableREST", "true");
         options.setSoapVersionURI(originalOptions.getSoapVersionURI());
 
 
@@ -194,13 +276,37 @@ public class StockQuoteClient {
         return options;
     }
 
+    private Options getRESTEnabledOptions(String trpUrl, String addUrl, String operation)
+            throws AxisFault {
+        Options options = new Options();
+        options.setProperty("enableREST", "true");
+        if (trpUrl != null && !"null".equals(trpUrl)) {
+            options.setProperty(Constants.Configuration.TRANSPORT_URL, trpUrl);
+        }
+
+        if (addUrl != null && !"null".equals(addUrl)) {
+            serviceClient.engageModule("addressing");
+            options.setTo(new EndpointReference(addUrl));
+        }
+
+        options.setAction("urn:" + operation);
+        if (httpHeaders.size() > 0) {
+            options.setProperty(HTTPConstants.HTTP_HEADERS, httpHeaders);
+        }
+        return options;
+    }
+
     public void destroy() {
         try {
             serviceClient.cleanup();
+
+            cfgCtx.cleanupContexts();
+            cfgCtx.terminate();
         } catch (AxisFault axisFault) {
             log.error("Error while cleaning up the service client", axisFault);
         }
-        cfgCtx.cleanupContexts();
+        httpConnectionManager.closeIdleConnections(0);
+        httpConnectionManager.shutdown();
         serviceClient = null;
         cfgCtx = null;
     }
@@ -266,7 +372,7 @@ public class StockQuoteClient {
         return PolicyEngine.getPolicy(builder.getDocumentElement());
     }
 
-    public ServiceClient getServiceClient(){
+    public ServiceClient getServiceClient() {
         return this.serviceClient;
     }
 

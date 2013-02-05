@@ -21,12 +21,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-service-stubs</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.bam.toolbox.deployer.stub</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.1</version>
     <name>WSO2 Carbon - BAM Toolbox Deployer Management stub</name>
     <packaging>bundle</packaging>
     <url>http://wso2.org</url>
@@ -47,9 +48,9 @@
                         <configuration>
                             <tasks>
                                 <path id="wsdl2java.classpath">
-				    <pathelement location="${settings.localRepository}/org/apache/ws/commons/axiom/wso2/axiom/${orbit.version.axiom}/axiom-${orbit.version.axiom}.jar"/>
-                                    <pathelement location="${settings.localRepository}/org/apache/axis2/wso2/axis2-client/${orbit.version.axis2}/axis2-client-${orbit.version.axis2}.jar"/>
-                                    <pathelement location="${settings.localRepository}/org/apache/axis2/wso2/axis2/${orbit.version.axis2}/axis2-${orbit.version.axis2}.jar"/>
+			 <pathelement location="${settings.localRepository}/org/apache/ws/commons/axiom/wso2/axiom/1.2.11.wso2v3/axiom-1.2.11.wso2v3.jar"/>
+                                    <pathelement location="${settings.localRepository}/org/apache/axis2/wso2/axis2-client/1.6.1.wso2v6/axis2-client-1.6.1.wso2v6.jar"/>
+                                    <pathelement location="${settings.localRepository}/org/apache/axis2/wso2/axis2/1.6.1.wso2v6/axis2-1.6.1.wso2v6.jar"/>
                                 </path>
                                 <java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
                                     <arg line="-uri src/main/resources/BAMToolboxDepolyerService.wsdl -uw
@@ -111,6 +112,7 @@
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2</artifactId>
+	    <version>1.6.1.wso2v6</version>
         </dependency>
     </dependencies>
 

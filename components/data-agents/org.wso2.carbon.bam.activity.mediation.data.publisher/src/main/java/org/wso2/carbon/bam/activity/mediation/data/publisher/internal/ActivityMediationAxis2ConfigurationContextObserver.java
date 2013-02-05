@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.bam.activity.mediation.data.publisher.conf.ActivityConfigData;
 import org.wso2.carbon.bam.activity.mediation.data.publisher.conf.RegistryPersistenceManager;
 import org.wso2.carbon.bam.activity.mediation.data.publisher.util.TenantActivityConfigData;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
 import java.util.Map;
@@ -44,7 +44,7 @@ public class ActivityMediationAxis2ConfigurationContextObserver extends
 
 
     private void setMediationStatConfigDataSpecificForTenant(AxisConfiguration axisConfiguration) {
-        int tenantID = SuperTenantCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+        int tenantID = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
         Map<Integer, ActivityConfigData> mediationStatConfigMap = TenantActivityConfigData.
                 getTenantSpecificEventingConfigData();
         RegistryPersistenceManager persistenceManager = new RegistryPersistenceManager();

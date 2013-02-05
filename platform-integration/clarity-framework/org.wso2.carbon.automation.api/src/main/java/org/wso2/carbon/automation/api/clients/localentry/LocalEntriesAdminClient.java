@@ -32,33 +32,55 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
+import java.rmi.RemoteException;
 
 public class LocalEntriesAdminClient {
 
-    String backendUrl = null;
-    String SessionCookie = null;
-
-    LocalEntryAdminServiceStub localEntryAdminServiceStub;
-
     private static final Log log = LogFactory.getLog(LocalEntriesAdminClient.class);
 
-    public LocalEntriesAdminClient(String backendUrl, String sessionCookie) {
-        this.backendUrl = backendUrl;
-        this.SessionCookie = sessionCookie;
+    private LocalEntryAdminServiceStub localEntryAdminServiceStub;
+    private final String serviceName = "LocalEntryAdmin";
+
+    /**
+     * creation of  LocalEntriesAdminClient using sessionCokkie
+     *
+     * @param backendUrl
+     * @param sessionCookie
+     * @throws AxisFault
+     */
+    public LocalEntriesAdminClient(String backendUrl, String sessionCookie) throws AxisFault {
+        String endPoint = backendUrl + serviceName;
+        localEntryAdminServiceStub = new LocalEntryAdminServiceStub(endPoint);
+        AuthenticateStub.authenticateStub(sessionCookie, localEntryAdminServiceStub);
     }
 
-    private LocalEntryAdminServiceStub setPackageManagementStub() throws AxisFault {
-        final String localEntriesServiceUrl = backendUrl + "LocalEntryAdmin";
-        LocalEntryAdminServiceStub localEntryAdminService = null;
-        localEntryAdminService = new LocalEntryAdminServiceStub(localEntriesServiceUrl);
-        AuthenticateStub.authenticateStub(SessionCookie, localEntryAdminService);
-        return localEntryAdminService;
+    /**
+     * Creation of LocalEntriesAdminClient using userName and password
+     *
+     * @param backendUrl
+     * @param userName
+     * @param password
+     * @throws AxisFault
+     */
+
+    public LocalEntriesAdminClient(String backendUrl, String userName, String password)
+            throws AxisFault {
+        String endPoint = backendUrl + serviceName;
+        localEntryAdminServiceStub = new LocalEntryAdminServiceStub(endPoint);
+        AuthenticateStub.authenticateStub(userName, password, localEntryAdminServiceStub);
     }
 
-
+    /**
+     * Add Local entry by DataHandler
+     *
+     * @param dh
+     * @return
+     * @throws IOException
+     * @throws LocalEntryAdminException
+     * @throws XMLStreamException
+     */
     public boolean addLocalEntery(DataHandler dh)
             throws IOException, LocalEntryAdminException, XMLStreamException {
-        localEntryAdminServiceStub = this.setPackageManagementStub();
         XMLStreamReader parser =
                 XMLInputFactory.newInstance().createXMLStreamReader(dh.getInputStream());
         StAXOMBuilder builder = new StAXOMBuilder(parser);
@@ -66,4 +88,59 @@ public class LocalEntriesAdminClient {
         return (localEntryAdminServiceStub.addEntry(localEntryElem.toString()));
     }
 
+    /**
+     * Add local entry by OMElement
+     *
+     * @param localEntry
+     * @return
+     * @throws LocalEntryAdminException
+     * @throws RemoteException
+     */
+    public boolean addLocalEntry(OMElement localEntry)
+            throws LocalEntryAdminException, RemoteException {
+        return (localEntryAdminServiceStub.addEntry(localEntry.toString()));
+    }
+
+    /**
+     * Delete local entry
+     *
+     * @param localEntryKey
+     * @return
+     * @throws LocalEntryAdminException
+     * @throws RemoteException
+     */
+    public boolean deleteLocalEntry(String localEntryKey)
+            throws LocalEntryAdminException, RemoteException {
+        return (localEntryAdminServiceStub.deleteEntry(localEntryKey));
+    }
+
+    /**
+     * @return
+     * @throws LocalEntryAdminException
+     * @throws RemoteException
+     */
+    public String getEntryNamesString()
+            throws LocalEntryAdminException, RemoteException {
+        return localEntryAdminServiceStub.getEntryNamesString();
+    }
+
+    /**
+     * @return
+     * @throws LocalEntryAdminException
+     * @throws RemoteException
+     */
+    public int getEntryDataCount()
+            throws LocalEntryAdminException, RemoteException {
+        return localEntryAdminServiceStub.getEntryDataCount();
+    }
+
+    /**
+     *
+     * @return
+     * @throws LocalEntryAdminException
+     * @throws RemoteException
+     */
+    public String[] getEntryNames() throws LocalEntryAdminException, RemoteException {
+        return localEntryAdminServiceStub.getEntryNames();
+    }
 }

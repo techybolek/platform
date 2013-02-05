@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.deployment.synchronizer;
 
-public class DeploymentSynchronizerException extends Exception {
+public class DeploymentSynchronizerException extends RuntimeException{
 
     public DeploymentSynchronizerException(String message) {
         super(message);

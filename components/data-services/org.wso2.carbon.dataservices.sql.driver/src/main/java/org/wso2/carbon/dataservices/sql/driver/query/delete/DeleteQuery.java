@@ -18,7 +18,6 @@
  */
 package org.wso2.carbon.dataservices.sql.driver.query.delete;
 
-import org.wso2.carbon.dataservices.sql.driver.parser.Constants;
 import org.wso2.carbon.dataservices.sql.driver.parser.ParserUtil;
 import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataReaderFactory;
 import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataRow;
@@ -46,17 +45,11 @@ public abstract class DeleteQuery extends ConditionalQuery {
     }
 
     private String extractTargetTableName(Queue<String> tokens) throws SQLException {
-        //Dropping DELETE keyword
-        if (!Constants.DELETE.equalsIgnoreCase(tokens.peek())) {
-            throw new SQLException("Syntax Error : 'DELETE' keyword is missing");
-        }
+        /* Dropping DELETE keyword */
         tokens.poll();
-        //Dropping FROM keyword
-        if (!Constants.FROM.equalsIgnoreCase(tokens.peek())) {
-            throw new SQLException("Syntax Error : 'FROM' keyword is missing");
-        }
+        /* Dropping FROM keyword */
         tokens.poll();
-        //Dropping TABLE identifier
+        /* Dropping TABLE identifier */
         tokens.poll();
         if (!ParserUtil.isStringLiteral(tokens.peek())) {
             throw new SQLException("Syntax Error : String literal is expected");
@@ -68,10 +61,7 @@ public abstract class DeleteQuery extends ConditionalQuery {
         if (tokens.isEmpty()) {
             return;
         }
-        if (!Constants.WHERE.equalsIgnoreCase(tokens.peek())) {
-            throw new SQLException("Syntax Error : 'WHERE' keyword is missing");
-        }
-        //Dropping WHERE keyword
+        /* Dropping WHERE keyword */
         tokens.poll();
         this.processConditions(tokens, getCondition());
     }

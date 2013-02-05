@@ -59,10 +59,12 @@
 <%
     String userName = "";
     String password = "";
+    String urlSet = "";
     String ip = "";
     String authenticationPort = "";
     String receiverPort = "";
     String security = "true";
+    String loadbalancer = "false";
     String serverProfileLocation = "";
     String serverProfileName = "";
     String action = "";
@@ -91,6 +93,11 @@
         password = tmpPassword;
     }
 
+    String tmpUrlSet = request.getParameter("urlSet");
+    if(tmpUrlSet != null && !tmpUrlSet.equals("")){
+        urlSet = tmpUrlSet;
+    }
+
     String tmpIp = request.getParameter("txtIp");
     if(tmpIp != null && !tmpIp.equals("")){
         ip = tmpIp;
@@ -109,6 +116,11 @@
     String tmpSecurity = request.getParameter("security");
     if(tmpSecurity !=null && !tmpSecurity.equals("")){
         security = tmpSecurity;
+    }
+    
+    String tmpLoadbalancer = request.getParameter("loadbalancer");
+    if(tmpLoadbalancer != null && !tmpLoadbalancer.equals("")){
+        loadbalancer = tmpLoadbalancer;
     }
 
     String tmpStreamTable = request.getParameter("hfStreamTableData");
@@ -156,6 +168,20 @@
                 }
             }
 
+            function onLoadBalancingChanged(){
+                var loadBalancingEnabled = document.getElementById("loadbalancer");
+                if(document.getElementById("isLoadBalanced").checked){
+                    loadBalancingEnabled.value = "true";
+                    jQuery(".transportSingleUrlTr").hide();
+                    jQuery(".transportMultipleUrlsTr").show();
+                } else {
+                    loadBalancingEnabled.value = "false";
+                    jQuery(".transportSingleUrlTr").show();
+                    jQuery(".transportMultipleUrlsTr").hide();
+                }
+                onSecurityChanged();
+            }
+
             function onReceiverPortBlur(){
                 var receiverPortInput = document.getElementById("receiverPort");
                 var authPortInput = document.getElementById("authPort");
@@ -193,10 +219,12 @@
 
             var commonParameterString = "txtUsername=" + "<%=request.getParameter("txtUsername")%>" + "&"
                                                 + "txtPassword=" + "<%=request.getParameter("txtPassword")%>" + "&"
+                                                + "urlSet=" + "<%=request.getParameter("urlSet")%>" + "&"
                                                 + "txtIp=" + "<%=request.getParameter("txtIp")%>" + "&"
                                                 + "authPort=" + "<%=request.getParameter("authPort")%>" + "&"
                                                 + "receiverPort=" + "<%=request.getParameter("receiverPort")%>" + "&"
                                                 + "security=" + "<%=request.getParameter("security")%>" + "&"
+                                                + "loadbalancer=" + "<%=request.getParameter("loadbalancer")%>" + "&"
                                                 + "hfStreamTableData=" + "<%=request.getParameter("hfStreamTableData")%>" + "&"
                                                 + "txtServerProfileLocation=" + "<%=request.getParameter("txtServerProfileLocation")%>";
 
@@ -210,10 +238,6 @@
 
             function reloadPage(){
                 window.location.href = "configure_server_profiles.jsp?" + commonParameterString + "&hfAction=load";
-            }
-
-            function stayInPage(){
-                window.location.href = "configure_server_profiles.jsp?" + commonParameterString + "&hfAction=stay";
             }
 
             function showHideDiv(divId) {
@@ -278,10 +302,22 @@
                                    "         </tr> " +
                                    "         </table> " +
                                    "         </td> " +
+
+                                   "<td>" +
+                                   "<select id=\"propertyType_" + sId + "\">" +
+                                   "<option value=\"STRING\" selected=\"selected\" >STRING</option>" +
+                                   "<option value=\"INTEGER\">INTEGER</option>" +
+                                   "<option value=\"BOOLEAN\">BOOLEAN</option>" +
+                                   "<option value=\"DOUBLE\">DOUBLE</option>" +
+                                   "<option value=\"FLOAT\">FLOAT</option>" +
+                                   "<option value=\"LONG\">LONG</option>" +
+                                   "</select>" +
+                                   "</td>" +
+
                                    "<td> " +
                                    "<a onClick='javaScript:removePropertyColumn(\"" + sId + "\")' style='background-image: url(../admin/images/delete.gif);'class='icon-link addIcon'>Remove Property</a> " +
                                    "</td> " +
-                                   "</tr>;"
+                                   "</tr>;" ;
 
                 jQuery("#propertyTable").append(tableContent);
                 updatePropertyTableData();
@@ -344,12 +380,13 @@
             }
 
             function updatePropertyTableData(){
-                var tableData = "", inputs, numOfInputs;
+                var tableData = "", inputs, lists, numOfInputs;
                 inputs = document.getElementById("propertyTable").getElementsByTagName("input");
+                lists = document.getElementById("propertyTable").getElementsByTagName("select");
                 numOfInputs = inputs.length;
                 for(var i=0; i<numOfInputs; i=i+4){
                     if(inputs[i].value != "" && inputs[i+3].value != ""){
-                        tableData = tableData + inputs[i].value + "::" + inputs[i+3].value;
+                        tableData = tableData + inputs[i].value + "::" + inputs[i+3].value + "::" + lists[i/4].value;
                         if(inputs[i+1].checked){
                             tableData = tableData + "::" + "value";
                         } else {
@@ -417,12 +454,13 @@
                 }
 
                 for(var i=0; i<numOfProperties; i=i+1){
-                    if(propertyDataArray[i].split("::").length == 3){
+                    if(propertyDataArray[i].split("::").length == 4){
                         jQuery("#propertyTable").find("tr").find("input")[4*i].value = propertyDataArray[i].split("::")[0];
                         jQuery("#propertyTable").find("tr").find("input")[4*i+3].value = propertyDataArray[i].split("::")[1];
-                        if(propertyDataArray[i].split("::")[2] == "value"){
+                        jQuery("#propertyTable").find("tr").find("select")[i].value = propertyDataArray[i].split("::")[2];
+                        if(propertyDataArray[i].split("::")[3] == "value"){
                             jQuery("#propertyTable").find("tr").find("input")[4*i+1].checked = true;
-                        } else if(propertyDataArray[i].split("::")[2] == "expression"){
+                        } else if(propertyDataArray[i].split("::")[3] == "expression"){
                             jQuery("#propertyTable").find("tr").find("input")[4*i+2].checked = true;
                         }
                     }
@@ -457,6 +495,7 @@
                 document.getElementById("hfPropertyTableData").value = "";
                 jQuery("#propertyTable").find("tr").find("input")[0].value = "";
                 jQuery("#propertyTable").find("tr").find("input")[3].value = "";
+                jQuery("#propertyTable").find("tr").find("select")[0].value = "STRING";
                 jQuery("#propertyTable").find("tr").find("input")[1].checked = true;
                 var tableRowNumber = jQuery("#propertyTable").find("tr").length;
                 var isFirstRow = true;
@@ -516,6 +555,33 @@
                 updateStreamTableData();
                 document.getElementById('hfAction').value='save';
             }
+
+            function testServer(){
+                var serverIp = document.getElementById('txtIp').value;
+                var authPort = document.getElementById('authPort').value;
+
+                if(!(serverIp != null && serverIp != "")){
+                    CARBON.showInfoDialog("Please enter the IP address.");
+                } else if(!(authPort != null && authPort != "")){
+                    CARBON.showInfoDialog("Please enter the Authentication Port.");
+                } else{
+                    jQuery.ajax({
+                                    type:"GET",
+                                    url:"../bam-mediator-config/dropdown_ajaxprocessor.jsp",
+                                    data:{action:"testServer", ip:serverIp, port:authPort},
+                                    success:function(data){
+                                        if(data != null && data != ""){
+                                            var result = data.replace(/\n+/g, '');
+                                            if(result == "true"){
+                                                CARBON.showInfoDialog("Successfully connected to BAM Server.");
+                                            } else if(result == "false"){
+                                                CARBON.showErrorDialog("BAM Server cannot be connected!")
+                                            }
+                                        }
+                                    }
+                                });
+                }
+            }
         </script>
 
 
@@ -529,7 +595,7 @@
         %>
 
             <script>
-                CARBON.showConfirmationDialog("Are you sure you want to overwrite the existing Server Profile Configuration?", saveOverwrite, stayInPage, true);
+                CARBON.showConfirmationDialog("Are you sure you want to overwrite the existing Server Profile Configuration?", saveOverwrite, reloadPage, true);
             </script>
 
         <%
@@ -539,7 +605,7 @@
         %>
 
             <script>
-                CARBON.showConfirmationDialog("Are you sure you want to remove the existing Server Profile Configuration?", removeOverwrite, stayInPage, true);
+                CARBON.showConfirmationDialog("Are you sure you want to remove the existing Server Profile Configuration?", removeOverwrite, reloadPage, true);
             </script>
 
         <%
@@ -554,13 +620,35 @@
 
                 userName = bamServerConfig.getUsername();
                 password = bamServerProfileUtils.decryptPassword(bamServerConfig.getPassword());
-                ip = bamServerConfig.getIp();
-                authenticationPort = bamServerConfig.getAuthenticationPort();
-                receiverPort = bamServerConfig.getReceiverPort();
+                if(bamServerProfileUtils.isNotNullOrEmpty(bamServerConfig.getUrlSet())){
+                    urlSet = bamServerConfig.getUrlSet();
+                } else {
+                    urlSet = "";
+                }
+                if(bamServerProfileUtils.isNotNullOrEmpty(bamServerConfig.getIp())){
+                    ip = bamServerConfig.getIp();
+                } else {
+                    ip = "";
+                }
+                if(bamServerProfileUtils.isNotNullOrEmpty(bamServerConfig.getAuthenticationPort())){
+                    authenticationPort = bamServerConfig.getAuthenticationPort();
+                } else {
+                    authenticationPort = "";
+                }
+                if(bamServerProfileUtils.isNotNullOrEmpty(bamServerConfig.getReceiverPort())){
+                    receiverPort = bamServerConfig.getReceiverPort();
+                } else {
+                    receiverPort = "";
+                }
                 if(bamServerConfig.isSecure()){
                     security = "true";
                 } else {
                     security = "false";
+                }
+                if(bamServerConfig.isLoadbalanced()){
+                    loadbalancer = "true";
+                } else {
+                    loadbalancer = "false";
                 }
             }
             else {
@@ -584,41 +672,57 @@
         }
     }
 
-    else if("stay".equals(action)){  // staying in the existing page
+    /*else if("stay".equals(action)){  // staying in the existing page
 
-    }
+    }*/
 
     else if("remove".equals(action) && !"".equals(serverProfileLocation) && "true".equals(force)){  // staying in the existing page
         bamServerProfileUtils.removeResource(serverProfileLocation);
+
+        %>
+
+        <script type="text/javascript">
+            CARBON.showInfoDialog("Server Profile was successfully deleted.");
+        </script>
+
+        <%
     }
 
     else if("save".equals(action) && !"".equals(serverProfileLocation)){ // Saving a configuration
-        if("true".equals(force)){
-            bamServerProfileUtils.addResource(ip, authenticationPort, receiverPort, userName, password, "true".equals(security),
+        if("true".equals(force)){ // Saving after confirmation
+            bamServerProfileUtils.addResource(urlSet, ip, authenticationPort, receiverPort, userName, password, "true".equals(security), "true".equals(loadbalancer),
                                               streamTable, serverProfileLocation);
+            %>
+
+            <script type="text/javascript">
+                CARBON.showInfoDialog("Server Profile was successfully saved.", reloadPage);
+            </script>
+
+            <%
         }
-        else if (!"true".equals(force)){
+        else if (!"true".equals(force)){ // Trying to save without confirmation
             if(!bamServerProfileUtils.resourceAlreadyExists(serverProfileLocation)){
-                bamServerProfileUtils.addResource(ip, authenticationPort, receiverPort, userName, password, "true".equals(security),
+                bamServerProfileUtils.addResource(urlSet, ip, authenticationPort, receiverPort, userName, password, "true".equals(security), "true".equals(loadbalancer),
                                                   streamTable, serverProfileLocation);
+                %>
+
+                <script type="text/javascript">
+                    CARBON.showInfoDialog("Server Profile was successfully saved.", reloadPage);
+                </script>
+
+                <%
             }
             else {
                 %>
 
                     <script type="text/javascript">
-                        CARBON.showErrorDialog("Resource already exists!");
+                        CARBON.showErrorDialog("Resource already exists!", reloadPage);
                     </script>
 
                 <%
             }
         }
-        %>
 
-            <script type="text/javascript">
-                reloadPage();
-            </script>
-
-        <%
     }
 
 %>
@@ -702,7 +806,27 @@
                     </h3>
                 </td>
             </tr>
+
             <tr>
+                <td style="width:250px;" >
+                    <fmt:message key="enable.loadbalancer"/>
+                </td>
+                <td>
+                    <input type="checkbox" id="isLoadBalanced" name="isLoadBalanced" onchange="onLoadBalancingChanged()"/>
+                    <input type="hidden" id="loadbalancer" name="loadbalancer" value="<%=loadbalancer%>"/>
+                </td>
+            </tr>
+
+            <tr style="display: none;" class="transportMultipleUrlsTr">
+                <td>
+                    <fmt:message key="url.set"/><span class="required">*</span>
+                </td>
+                <td>
+                    <input type="text" name="urlSet" id="urlSet" value="<%=urlSet%>"/>
+                </td>
+            </tr>
+
+            <tr class="transportSingleUrlTr">
                 <td>
                     <fmt:message key="protocol"/><span class="required">*</span>
                 </td>
@@ -715,7 +839,7 @@
                     </script>
                 </td>
             </tr>
-            <tr>
+            <tr class="transportSingleUrlTr">
                 <td>
                     <fmt:message key="enable.security"/>
                 </td>
@@ -729,7 +853,7 @@
                     </script>
                 </td>
             </tr>
-            <tr>
+            <tr class="transportSingleUrlTr">
                 <td>
                     <fmt:message key="ip"/><span class="required">*</span>
                 </td>
@@ -737,7 +861,7 @@
                     <input type="text" name="txtIp" id="txtIp" value="<%=ip%>"/>
                 </td>
             </tr>
-            <tr id="receiverPortTr" style="display: none;">
+            <tr id="receiverPortTr" style="display: none;" class="transportSingleUrlTr">
                 <td>
                     <fmt:message key="receiver.port"/><span class="required">*</span>
                 </td>
@@ -750,14 +874,22 @@
                     document.getElementById("receiverPortTr").style.display = "";
                 }
             </script>
-            <tr>
+            <tr class="transportSingleUrlTr">
                 <td>
                     <fmt:message key="authentication.port"/><span class="required">*</span>
                 </td>
                 <td>
                     <input type="text" name="authPort" id="authPort" value="<%=authenticationPort%>"/>
+                    <input type="button" value="Test Server" onclick="testServer()"/>
                 </td>
             </tr>
+            <script type="text/javascript">
+                document.getElementById("isLoadBalanced").checked = false;
+                if(document.getElementById("loadbalancer").value == "true"){
+                    document.getElementById("isLoadBalanced").checked = "checked";
+                    onLoadBalancingChanged();
+                }
+            </script>
             <tr>
                 <td colspan="2">
                     <h3>
@@ -917,11 +1049,14 @@
                                 <table id="propertyTable" width="100%" class="styledLeft" style="margin-left: 0px;">
                                     <thead>
                                     <tr>
-                                        <th width="40%">
+                                        <th width="30%">
                                             <fmt:message key="property.name"/>
                                         </th>
-                                        <th width="40%">
+                                        <th width="30%">
                                             <fmt:message key="property.value"/>
+                                        </th>
+                                        <th width="30%">
+                                            <fmt:message key="property.type"/>
                                         </th>
                                         <th></th>
                                     </tr>
@@ -951,6 +1086,17 @@
                                                     </td>
                                                 </tr>
                                             </table>
+                                        </td>
+
+                                        <td>
+                                            <select id="propertyType_1">
+                                                <option value="STRING" selected="selected" >STRING</option>
+                                                <option value="INTEGER">INTEGER</option>
+                                                <option value="BOOLEAN">BOOLEAN</option>
+                                                <option value="DOUBLE">DOUBLE</option>
+                                                <option value="FLOAT">FLOAT</option>
+                                                <option value="LONG">LONG</option>
+                                            </select>
                                         </td>
 
                                         <td>

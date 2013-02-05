@@ -1,12 +1,22 @@
 package org.wso2.carbon.governance.list.util.beans;
 
 public class ArtifactInfoBean {
+
     private String name;
-    private String nameSpace;
-    private String computedPath;
+
+    private String namespace;
+
+    private String path;
+
+    private String lifeCycleName;
+
+    private String lifeCycleState;
+
+    private boolean canDelete;
+
     private String version;
-    private String lifecycleName;
-    private String lifecycleState;
+
+    public ArtifactInfoBean() {}
 
     public String getName() {
         return name;
@@ -16,20 +26,44 @@ public class ArtifactInfoBean {
         this.name = name;
     }
 
-    public String getNameSpace() {
-        return nameSpace;
+    public String getNamespace() {
+        return namespace;
     }
 
-    public void setNameSpace(String nameSpace) {
-        this.nameSpace = nameSpace;
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 
-    public String getComputedPath() {
-        return computedPath;
+    public String getPath() {
+        return path;
     }
 
-    public void setComputedPath(String computedPath) {
-        this.computedPath = computedPath;
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getLifeCycleName() {
+        return lifeCycleName;
+    }
+
+    public void setLifeCycleName(String lifeCycleName) {
+        this.lifeCycleName = lifeCycleName;
+    }
+
+    public String getLifeCycleState() {
+        return lifeCycleState;
+    }
+
+    public void setLifeCycleState(String lifeCycleState) {
+        this.lifeCycleState = lifeCycleState;
+    }
+
+    public boolean getCanDelete() {
+        return canDelete;
+    }
+
+    public void setCanDelete(boolean canDelete) {
+        this.canDelete = canDelete;
     }
 
     public String getVersion() {
@@ -40,19 +74,4 @@ public class ArtifactInfoBean {
         this.version = version;
     }
 
-    public String getLifecycleName() {
-        return lifecycleName;
-    }
-
-    public void setLifecycleName(String lifecycleName) {
-        this.lifecycleName = lifecycleName;
-    }
-
-    public String getLifecycleState() {
-        return lifecycleState;
-    }
-
-    public void setLifecycleState(String lifecycleState) {
-        this.lifecycleState = lifecycleState;
-    }
 }

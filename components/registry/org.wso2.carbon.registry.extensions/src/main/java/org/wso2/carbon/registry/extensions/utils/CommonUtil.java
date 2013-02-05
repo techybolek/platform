@@ -19,16 +19,16 @@ package org.wso2.carbon.registry.extensions.utils;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
-import org.apache.axis2.util.URLProcessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.registry.core.*;
+import org.wso2.carbon.registry.core.Association;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 import org.wso2.carbon.registry.core.session.CurrentSession;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.extensions.beans.ServiceDocumentsBean;
 import org.wso2.carbon.registry.extensions.handlers.utils.EndpointUtils;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -37,7 +37,6 @@ import javax.xml.namespace.QName;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
-import javax.wsdl.Import;
 
 public class CommonUtil {
 
@@ -83,7 +82,7 @@ public class CommonUtil {
      */
     public static String derivePathFragmentFromNamespace(String namespace) {
         String packageName;
-        if (namespace == null || (packageName = URLProcessor.makePackageName(namespace)) == null) {
+        if (namespace == null || (packageName = URLProcessor.deriveRegistryPath(namespace)) == null) {
             return "//";
         }
         String pathFragment = RegistryConstants.PATH_SEPARATOR + packageName.replace(".",
@@ -228,41 +227,31 @@ public class CommonUtil {
     }
 
     public static void setEndpointEntries(OMElement element, OMElement[] endPointsList) {
-        List<String> addedEndpoints = new ArrayList<String>();
 
         OMElement endPoints = element.getFirstChildWithName(new QName("endpoints"));
-
 
         if (endPointsList != null) {
             if (endPoints != null) {
                 Iterator it = endPoints.getChildElements();
                 while (it.hasNext()) {
                     OMElement omElement = (OMElement) it.next();
-                    addedEndpoints.add(omElement.getText());
+                    omElement.detach();
                 }
                 for (OMElement endPoint : endPointsList) {
-                    if (!addedEndpoints.contains(endPoint.getText())) {
-                        endPoints.addChild(endPoint);
-                        addedEndpoints.add(endPoint.getText());
-                    }
+                    endPoints.addChild(endPoint);
                 }
                 return;
             }
             endPoints = element.getFirstChildWithName(new QName(CommonConstants.SERVICE_ELEMENT_NAMESPACE, "endpoints"));
 
-
             if (endPoints != null) {
-                addedEndpoints.clear();
                 Iterator it = endPoints.getChildElements();
                 while (it.hasNext()) {
                     OMElement omElement = (OMElement) it.next();
-                    addedEndpoints.add(omElement.getText());
+                    omElement.detach();
                 }
                 for (OMElement endPoint : endPointsList) {
-                    if (!addedEndpoints.contains(endPoint.getText())) {
-                        endPoints.addChild(endPoint);
-                        addedEndpoints.add(endPoint.getText());
-                    }
+                    endPoints.addChild(endPoint);
                 }
             }
         }
@@ -602,6 +591,25 @@ public class CommonUtil {
     }
 
     // handling the possibility that handlers are not called within each other. 
+    private static ThreadLocal<Boolean> scmTaskInProgress = new ThreadLocal<Boolean>() {
+        protected Boolean initialValue() {
+            return false;
+        }
+    };
+
+    public static boolean isSCMLockAvailable() {
+        return !scmTaskInProgress.get();
+    }
+
+    public static void acquireSCMLock() {
+        scmTaskInProgress.set(true);
+    }
+
+    public static void releaseSCMLock() {
+        scmTaskInProgress.set(false);
+    }
+
+    // handling the possibility that handlers are not called within each other.
     private static ThreadLocal<Boolean> updateInProgress = new ThreadLocal<Boolean>() {
         protected Boolean initialValue() {
             return false;

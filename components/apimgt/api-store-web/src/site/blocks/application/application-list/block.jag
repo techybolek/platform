@@ -16,8 +16,13 @@ jagg.block("application/application-list", {
         result = jagg.module("application").getApplications(user.username);
         applications = result.applications;
 
+        var tiers, tierResults;
+        tierResults = jagg.module("tiers").getTiers();
+        tiers = tierResults.tiers;
+
         return {
-            "applications":applications
+            "applications":applications,
+            "tiers":tiers
         };
     }
 });

@@ -18,6 +18,7 @@ function addAspect() {
             },
 
             onSuccess : function() {
+                reloadLifecycleHistoryView(path);
                 lifecyleOperationStarted = false;
                 refreshLifecyclesSection(path);
                 refreshPropertiesSection(path);
@@ -50,6 +51,7 @@ function removeAspect() {
                     aspect : aspect
                 },
                 onSuccess: function(transport) {
+                    reloadLifecycleHistoryView(path);
                     lifecyleOperationStarted = false;
                     if (transport) {
                         refreshLifecyclesSection(path);
@@ -74,24 +76,39 @@ function loadCustomUI(path, aspect, action, mediaType, customUI, callBack) {
             return;
         }
 
-        if (action != "itemClick") {
+        if (action != "itemClick" && action != "voteClick") {
             document.getElementById(action).disabled = true;
         }
 
         lifecyleOperationStarted = true;
-        var items = [];
-        if (document.getElementById('itemcount') != null) {
-            var itemcount = document.getElementById('itemcount').value;
-            for (var i = 0; i < itemcount; i++) {
-                if (document.getElementById('option' + i.toString()).checked) {
-                    items[i] = 'true';
-                } else {
-                    items[i] = 'false';
-                }
-            }
+        if (action != "voteClick") {
+	        var items = [];
+	        if (document.getElementById('itemcount') != null) {
+	            var itemcount = document.getElementById('itemcount').value;
+	            for (var i = 0; i < itemcount; i++) {
+	                if (document.getElementById('option' + i.toString()).checked) {
+	                    items[i] = 'true';
+	                } else {
+	                    items[i] = 'false';
+	                }
+	            }
+	        }
+	        itemsGlobal = items;
         }
-
-        itemsGlobal = items;
+        if (action == "voteClick") {
+	        var votes = [];
+	        if (document.getElementById('approvalCount') != null) {
+	            var approvalCount = document.getElementById('approvalCount').value;
+	            for (var i = 0; i < approvalCount; i++) {
+	                if (document.getElementById('vote' + i.toString()).checked) {
+	                	votes[i] = 'true';
+	                } else {
+	                	votes[i] = 'false';
+	                }
+	            }
+	        }
+	        itemsGlobal = votes;
+        }
 
         if (jQuery.trim(customUI) != "") {
 
@@ -153,8 +170,9 @@ function invokeAspect(path, aspect, action, callBack, parameterString,customUIAc
                 parameterString : parameterString
             },
             onSuccess : function() {
+                reloadLifecycleHistoryView(path);
                  lifecyleOperationStarted = false;
-                if (action != "itemClick") {
+                 if (action != "itemClick" && action != "voteClick") {
                     document.getElementById(action).disabled = false;
                     var message = org_wso2_carbon_governance_custom_lifecycles_checklist_ui_jsi18n["lifecycle.operation.successful"]
                         + " : " + action;
@@ -173,11 +191,15 @@ function invokeAspect(path, aspect, action, callBack, parameterString,customUIAc
                             refreshLifecyclesSection(path, action);
                         });
                     }
+                }else{
+                    refreshLifecyclesSection(path,action);
                 }
             },
             onFailure : function(transport) {
                 document.getElementById(action).disabled = false;
-                document.getElementById(customUIAction).disabled = false;
+                if (customUIAction != "") {
+                    document.getElementById(customUIAction).disabled = false;
+                }
                 showRegistryError(org_wso2_carbon_governance_custom_lifecycles_checklist_ui_jsi18n["failed.to.invoke.aspect"] + ' ' + transport.responseText);
                 lifecyleOperationStarted = false;
             }
@@ -255,4 +277,16 @@ function refreshPropertiesSection(path) {
 
 function removeCarriageReturns(newPath) {
 	return newPath.replace('\n', '', 'g');
+}
+
+function reloadLifecycleHistoryView(path) {
+    sessionAwareFunction(function () {
+        jQuery.ajax({
+            url:'../history/lifecyclesHistory_ajaxprocessor.jsp',
+            data:{path:path},
+            success:function (data) {
+                jQuery('#lifecyclesHistoryDiv').html(data);
+            }
+        });
+    }, org_wso2_carbon_governance_custom_lifecycles_checklist_ui_jsi18n["session.timed.out"]);
 }

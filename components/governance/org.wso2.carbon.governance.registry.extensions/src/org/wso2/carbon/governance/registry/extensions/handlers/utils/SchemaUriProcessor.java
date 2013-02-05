@@ -27,11 +27,11 @@ import org.apache.ws.commons.schema.XmlSchemaObjectCollection;
 import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.registry.extensions.internal.GovernanceRegistryExtensionsComponent;
 import org.wso2.carbon.registry.core.*;
-import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.internal.RegistryCoreServiceComponent;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
+import org.wso2.carbon.registry.core.session.CurrentSession;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.extensions.handlers.utils.SchemaInfo;
 import org.wso2.carbon.registry.extensions.handlers.utils.WSDLUtils;
@@ -53,7 +53,7 @@ import java.util.*;
 public class SchemaUriProcessor {
     private Registry registry;
     private Registry systemRegistry;
-    private Registry systemGovernanceRegistry;
+    private Registry governanceUserRegistry;
     private List<String> processedSchemas;
     private List<String> visitedSchemas;
     private Map<String, SchemaInfo> schemas;
@@ -74,7 +74,9 @@ public class SchemaUriProcessor {
         this.registry = requestContext.getRegistry();
         try {
             this.systemRegistry = CommonUtil.getUnchrootedSystemRegistry(requestContext);
-            this.systemGovernanceRegistry = RegistryCoreServiceComponent.getRegistryService().getGovernanceSystemRegistry();
+            int tenantId = CurrentSession.getTenantId();
+            String userName = CurrentSession.getUser();
+            this.governanceUserRegistry = GovernanceRegistryExtensionsComponent.getRegistryService().getGovernanceUserRegistry(userName, tenantId);
         } catch (RegistryException ignore) {
             this.systemRegistry = null;
         }
@@ -97,7 +99,6 @@ public class SchemaUriProcessor {
     public String importSchemaToRegistry(RequestContext requestContext,
                                          String resourcePath,
                                          String commonLocation,
-                                         boolean processIncludes,
                                          String sourceURL) throws RegistryException {
         resourceName = resourcePath.substring(resourcePath.lastIndexOf(RegistryConstants.PATH_SEPARATOR) + 1);
 
@@ -125,7 +126,7 @@ public class SchemaUriProcessor {
         updateSchemaInternalsAndAssociations();
 
         Resource metaResource = requestContext.getResource();
-        String path = saveSchemaToRegistry(requestContext, resourcePath, metaResource); // should depend on the central location / relative location flag
+        String path = saveSchemaToRegistry(resourcePath, metaResource); // should depend on the central location / relative location flag
         persistAssociations(path);
         return path;
     }
@@ -134,7 +135,6 @@ public class SchemaUriProcessor {
     public void evaluateSchemas(
             Types types,
             String wsdlDocumentBaseURI,
-            boolean evaluateImports,
             ArrayList<String> dependencies) throws RegistryException {
         baseURI = wsdlDocumentBaseURI;
         /* evaluating schemas found under wsdl:types tag in a wsdl */
@@ -325,6 +325,8 @@ public class SchemaUriProcessor {
     /**
      * Update the schema's internal import location according to the new registry URLs.
      * Furthermore, fill the associations arraylist according to the detectored associations.
+     *
+     * @throws RegistryException if the operation fails
      */
     private void updateSchemaInternalsAndAssociations() throws RegistryException {
         for (SchemaInfo schemaInfo: schemas.values()) {
@@ -365,27 +367,28 @@ public class SchemaUriProcessor {
         }
     }
 
-    public String saveSchemasToRegistry(RequestContext requestContext, String commonSchemaLocation,
+    public String saveSchemasToRegistry(String commonSchemaLocation,
                                         Resource metaResource)
             throws RegistryException {
         updateSchemaPaths(commonSchemaLocation);
         updateSchemaInternalsAndAssociations();
-        String path = saveSchemaToRegistry(requestContext, null, metaResource);
+        String path = saveSchemaToRegistry(null, metaResource);
         persistAssociations(path);
         return path;
     }
-    public String saveSchemasToRegistry(RequestContext requestContext, String commonSchemaLocation,
+
+    public String saveSchemasToRegistry(String commonSchemaLocation,
                                         Resource metaResource,String version,List dependencies)
             throws RegistryException {
         updateSchemaPaths(commonSchemaLocation,version,dependencies);
         updateSchemaInternalsAndAssociations();
-        String path = saveSchemaToRegistry(requestContext, null, metaResource);
+        String path = saveSchemaToRegistry(null, metaResource);
         persistAssociations(path);
         return path;
     }
 
     @SuppressWarnings("unchecked")
-    private String saveSchemaToRegistry(RequestContext requestContext, String resourcePath,
+    private String saveSchemaToRegistry(String resourcePath,
                                         Resource metaResource)
             throws RegistryException {
         String path = resourcePath;
@@ -471,8 +474,7 @@ public class SchemaUriProcessor {
                     i++;
                 }
             }
-            boolean newSchemaUpload = !registry.resourceExists(schemaPath);
-            saveToRepositorySafely(requestContext, schemaInfo.getOriginalURL(), schemaPath,
+            saveToRepositorySafely(schemaInfo.getOriginalURL(), schemaPath,
                     xsdResource, schemaInfo.isMasterSchema());
 
             if (schemaInfo.isMasterSchema()) {
@@ -486,7 +488,9 @@ public class SchemaUriProcessor {
      * Save associations to the registry if they do not exist.
      * Execution time could be improved if registry provides a better way to check existing associations.
      *
-     * @throws org.wso2.carbon.registry.core.exceptions.RegistryException
+     * @param schemaPath path of the schema
+     *
+     * @throws org.wso2.carbon.registry.core.exceptions.RegistryException if the operation fails
      */
     private void persistAssociations(String schemaPath) throws RegistryException {
         // until registry provides a functionality to check existing associations, this method will consume a LOT of time
@@ -525,15 +529,14 @@ public class SchemaUriProcessor {
     /**
      * Saves the resource iff the resource is not already existing in the repository
      *
-     * @param context RequestContext
      * @param url url of the resource
      * @param path: resource path
      * @param resource: resource object
      * @param isMasterSchema Whether master schema or not
      *
-     * @throws org.wso2.carbon.registry.core.exceptions.RegistryException
+     * @throws org.wso2.carbon.registry.core.exceptions.RegistryException if the operation fails
      */
-    private void saveToRepositorySafely(RequestContext context, String url, String path,
+    private void saveToRepositorySafely(String url, String path,
                                         Resource resource, boolean isMasterSchema) throws RegistryException {
 
         String schemaId = resource.getUUID();
@@ -551,7 +554,7 @@ public class SchemaUriProcessor {
             log.debug("A Resource already exists at given location. Overwriting resource content.");
         }
 
-        addSchemaToRegistry(context, path, url, resource, registry, isMasterSchema);
+        addSchemaToRegistry(path, url, resource, registry, isMasterSchema);
 
 //        if (!(resource instanceof Collection) &&
 //           ((ResourceImpl) resource).isVersionableChange()) {
@@ -567,7 +570,6 @@ public class SchemaUriProcessor {
     /**
      * Method that gets called instructing a schema to be added the registry.
      *
-     * @param context  the request context for this request.
      * @param path     the path to add the resource to.
      * @param url      the path from which the resource was imported from.
      * @param resource the resource to be added.
@@ -576,10 +578,10 @@ public class SchemaUriProcessor {
      *
      * @throws org.wso2.carbon.registry.core.exceptions.RegistryException if the operation failed.
      */
-    protected void addSchemaToRegistry(RequestContext context, String path, String url,
+    protected void addSchemaToRegistry(String path, String url,
                                        Resource resource, Registry registry, boolean isMasterSchema) throws RegistryException {
         String source = getSource(path);
-        GenericArtifactManager genericArtifactManager = new GenericArtifactManager(systemGovernanceRegistry, "uri");
+        GenericArtifactManager genericArtifactManager = new GenericArtifactManager(governanceUserRegistry, "uri");
 
         if(!registry.resourceExists(path)){
             GenericArtifact xsd = genericArtifactManager.newGovernanceArtifact(new QName(source));
@@ -626,11 +628,6 @@ public class SchemaUriProcessor {
 
     public static String getSource(String uri){
         return uri.split("/")[uri.split("/").length -1];
-    }
-
-    private String getChrootedSchemaLocation(RegistryContext registryContext) {
-        return RegistryUtils.getAbsolutePath(registryContext,
-                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + HandlerConstants.XSD_LOCATION);
     }
 
 }

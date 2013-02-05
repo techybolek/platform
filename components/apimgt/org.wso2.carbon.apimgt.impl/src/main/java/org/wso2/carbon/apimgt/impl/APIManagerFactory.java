@@ -29,34 +29,34 @@ import java.util.Map;
 public class APIManagerFactory {
 
     private static final Log log = LogFactory.getLog(APIManagerFactory.class);
-    
+
     private static final String ANONYMOUS_USER = "__wso2.am.anon__";
-    
+
     private static final APIManagerFactory instance = new APIManagerFactory();
-    
+
     private APIManagerCache<APIProvider> providers = new APIManagerCache<APIProvider>(50);
     private APIManagerCache<APIConsumer> consumers = new APIManagerCache<APIConsumer>(500);
-    
+
     private APIManagerFactory() {
-        
+
     }
-    
+
     public static APIManagerFactory getInstance() {
         return instance;
     }
-    
+
     private APIProvider newProvider(String username) throws APIManagementException {
         return new UserAwareAPIProvider(username);
     }
 
     private APIConsumer newConsumer(String username) throws APIManagementException {
         if (username.equals(ANONYMOUS_USER)) {
-            return new UserAwareAPIConsumer();
-        } else {
-            return new UserAwareAPIConsumer(username);
+            username = null;
         }
+        return new UserAwareAPIConsumer(username);
+
     }
-    
+
     public APIProvider getAPIProvider(String username) throws APIManagementException {
         APIProvider provider = providers.get(username);
         if (provider == null) {
@@ -124,7 +124,7 @@ public class APIManagerFactory {
             }
         }
     }
-    
+
     private class APIManagerCache<T> extends LRUCache<String,T> {
 
         public APIManagerCache(int maxEntries) {

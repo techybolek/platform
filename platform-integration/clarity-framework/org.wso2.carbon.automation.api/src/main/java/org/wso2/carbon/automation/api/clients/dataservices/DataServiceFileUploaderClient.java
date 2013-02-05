@@ -34,7 +34,7 @@ public class DataServiceFileUploaderClient {
     private DataServiceFileUploaderStub dataServiceFileUploaderStub;
 
     public DataServiceFileUploaderClient(String backEndUrl, String sessionCookie) throws AxisFault {
-        String endPoint = backEndUrl + serviceName;
+        String endPoint = backEndUrl  + serviceName;
         dataServiceFileUploaderStub = new DataServiceFileUploaderStub(endPoint);
         AuthenticateStub.authenticateStub(sessionCookie, dataServiceFileUploaderStub);
     }

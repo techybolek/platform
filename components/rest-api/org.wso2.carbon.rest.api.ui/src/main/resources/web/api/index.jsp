@@ -15,6 +15,8 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
+<%@page import="org.wso2.carbon.rest.api.stub.types.carbon.APIData"%>
+<%@page import="org.wso2.carbon.rest.api.ui.util.RestAPIConstants"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
@@ -40,22 +42,33 @@
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
     RestApiAdminClient client;
     
-    String[] apiNames = null;
-
-    //ServiceMetaData[] serviceData;
+    String serviceContextPath = configContext.getServiceContextPath();
     
-    int numberOfPages;
-    String pageNumber = request.getParameter("pageNumber");
-    if (pageNumber == null) {
-        pageNumber = "0";
-    }
-    int pageNumberInt = 0;
-    try {
-        pageNumberInt = Integer.parseInt(pageNumber);
-    } catch (NumberFormatException ignored) {
-    }
-    //ServiceMetaDataWrapper servicesInfo;
+    String serverContext = "";
+    APIData[] apis = null;
 
+    int pageNumber;
+    int numberOfPages;
+    
+    String pageNumberStr = request.getParameter("pageNumber");
+    if (pageNumberStr == null) {
+        pageNumber = 0;
+    }
+    else{
+    	try {
+    		pageNumber = Integer.parseInt(pageNumberStr);
+        } catch (NumberFormatException e) {
+        	response.setStatus(500);
+            CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, 
+            		"pageNumber parameter is not an integer", e);
+            session.setAttribute(CarbonUIMessage.ID, uiMsg);
+		    %>
+		    <jsp:include page="../admin/error.jsp"/>
+		    <%
+            return;
+        }
+    }
+    
     String serviceTypeFilter = request.getParameter("serviceTypeFilter");
     if (serviceTypeFilter == null) {
         serviceTypeFilter = "ALL";
@@ -68,7 +81,17 @@
             CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/mediation");
     try {
         client = new RestApiAdminClient(configContext, backendServerURL, cookie, request.getLocale());
-        apiNames = client.getApiNames();
+        
+        serverContext = client.getServerContext();
+        int apiCount = client.getAPICount();
+        if(apiCount % RestAPIConstants.APIS_PER_PAGE == 0){
+        	numberOfPages = apiCount / RestAPIConstants.APIS_PER_PAGE;
+        }
+        else{
+        	numberOfPages = (apiCount / RestAPIConstants.APIS_PER_PAGE) + 1;
+        }
+        
+        apis = client.getAPIsForListing(pageNumber, RestAPIConstants.APIS_PER_PAGE);
     } catch (Exception e) {
         response.setStatus(500);
         CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
@@ -96,7 +119,7 @@
         request="<%=request%>"/>
 
 <%
-    if (apiNames == null) {
+    if (apis == null) {
 %>
         <fmt:bundle basename="org.wso2.carbon.rest.api.ui.i18n.Resources">
             <div id="middle">
@@ -183,7 +206,7 @@
 </a>
 <p>&nbsp;</p>
 <%
-    if (apiNames != null) {
+    if (apis != null) {
         /*String parameters = "serviceTypeFilter=" + serviceTypeFilter +
                 "&serviceSearchString=" + serviceSearchString;*/
 %> 
@@ -196,23 +219,29 @@
 
 <form action="delete_service_groups.jsp" name="servicesForm" method="post">
     <input type="hidden" name="pageNumber" value="<%= pageNumber%>"/>
+    <carbon:paginator pageNumber="<%=pageNumber%>"
+                      numberOfPages="<%=numberOfPages%>"
+                      page="index.jsp"
+                      pageNumberParameterName="pageNumber"
+                      resourceBundle="org.wso2.carbon.rest.api.ui.i18n.Resources"
+                      prevKey="prev" nextKey="next"
+                      parameters="<%=""%>"/>
     <table class="styledLeft" id="sgTable" width="100%">
         <thead>
         <tr>
-        	<th><fmt:message key="apis.table.header"/></th>
+        	<th><fmt:message key="api.name"/></th>
+        	<th><fmt:message key="api.invocation.url"/></th>
         	<th colspan="2"><fmt:message key="apis.table.action.header"/></th>
         </tr>
         </thead>
         <tbody>
 
         <%
-            List<String> names = Arrays.asList(apiNames);
-            Collections.sort(names);
             int position = 0;
-            for (String apiName : names) {
+            for (APIData apiData : apis) {
                 String bgColor = ((position % 2) == 1) ? "#EEEFFB" : "white";
                 position++;
-                if (apiName == null) {
+                if (apiData == null) {
                     continue;
                 }
         %>
@@ -220,20 +249,25 @@
         <tr bgcolor="<%=bgColor%>">
                     <% if (loggedIn) {%>
                     <% } %>
-            <td width="200px">
+            <td width="100px">
                 <nobr>
-                    <%=apiName%>
+                    <%=apiData.getName()%>
+                </nobr>
+            </td>
+            <td width="100px">
+                <nobr>
+                    <%=serverContext + apiData.getContext()%>
                 </nobr>
             </td>
             <td width="20px" style="text-align:left;border-left:none;border-right:none;width:100px;">
                 <div class="inlineDiv">
-                    <a style="background-image:url(../admin/images/edit.gif);" class="icon-link" href="manageAPI.jsp?mode=edit&amp;apiName=<%=apiName%>">Edit</a>
+                    <a style="background-image:url(../admin/images/edit.gif);" class="icon-link" href="manageAPI.jsp?mode=edit&amp;apiName=<%=apiData.getName()%>">Edit</a>
                 </div>
             </td>
             <td width="20px" style="text-align:left;border-left:none;width:100px;">
                 <div class="inlineDiv">
                     <a style="background-image:url(../admin/images/delete.gif);" class="icon-link" href="#"
-                    	onclick="deleteApi('<%=apiName%>')">Delete</a>
+                    	onclick="deleteApi('<%=apiData.getName()%>')">Delete</a>
                 </div>
             </td>
         </tr>
@@ -242,6 +276,13 @@
         %>
         </tbody>
     </table>
+    <carbon:paginator pageNumber="<%=pageNumber%>"
+                      numberOfPages="<%=numberOfPages%>"
+                      page="index.jsp"
+                      pageNumberParameterName="pageNumber"
+                      resourceBundle="org.wso2.carbon.rest.api.ui.i18n.Resources"
+                      prevKey="prev" nextKey="next"
+                      parameters="<%=""%>"/>
 </form>
 <p>&nbsp;</p>
 <%

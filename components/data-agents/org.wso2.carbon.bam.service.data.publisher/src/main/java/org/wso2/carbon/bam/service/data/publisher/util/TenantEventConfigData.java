@@ -16,20 +16,20 @@
 package org.wso2.carbon.bam.service.data.publisher.util;
 
 
-import org.wso2.carbon.bam.service.data.publisher.conf.EventingConfigData;
+import org.wso2.carbon.bam.service.data.publisher.conf.EventConfigNStreamDef;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class TenantEventConfigData {
 
-    private volatile static Map<Integer, EventingConfigData> tenantEventingConfigDataMap;
+    private volatile static Map<Integer, EventConfigNStreamDef> tenantEventingConfigDataMap;
 
-    public static Map<Integer, EventingConfigData> getTenantSpecificEventingConfigData() {
+    public static Map<Integer, EventConfigNStreamDef> getTenantSpecificEventingConfigData() {
         if (tenantEventingConfigDataMap == null) {
             synchronized (TenantEventConfigData.class) {
                 if (tenantEventingConfigDataMap == null) {
-                    tenantEventingConfigDataMap = new HashMap<Integer, EventingConfigData>();
+                    tenantEventingConfigDataMap = new HashMap<Integer, EventConfigNStreamDef>();
                 }
             }
         }

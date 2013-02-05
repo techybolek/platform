@@ -114,4 +114,5 @@ public class RegistryUtil {
     public static String getResourcePathFromVersionPath(String path) {
          return path.substring(0,path.indexOf(";version:")) ;
     }
+
 }

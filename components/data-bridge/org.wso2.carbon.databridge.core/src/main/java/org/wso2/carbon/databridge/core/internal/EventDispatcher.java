@@ -25,23 +25,16 @@ import org.wso2.carbon.databridge.commons.Credentials;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
 import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
-import org.wso2.carbon.databridge.commons.exception.UndefinedEventTypeException;
 import org.wso2.carbon.databridge.commons.utils.EventDefinitionConverterUtils;
-import org.wso2.carbon.databridge.core.AgentCallback;
-import org.wso2.carbon.databridge.core.EventConverter;
-import org.wso2.carbon.databridge.core.StreamTypeHolder;
+import org.wso2.carbon.databridge.core.*;
+import org.wso2.carbon.databridge.core.Utils.AgentSession;
+import org.wso2.carbon.databridge.core.Utils.EventComposite;
 import org.wso2.carbon.databridge.core.conf.DataBridgeConfiguration;
 import org.wso2.carbon.databridge.core.definitionstore.AbstractStreamDefinitionStore;
-import org.wso2.carbon.databridge.core.exception.StreamDefinitionNotFoundException;
 import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
-import org.wso2.carbon.databridge.core.internal.authentication.session.AgentSession;
 import org.wso2.carbon.databridge.core.internal.queue.EventQueue;
-import org.wso2.carbon.databridge.core.internal.utils.EventComposite;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -49,10 +42,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class EventDispatcher {
 
-    public static final String HACK_DOMAIN_CONSTANT = "-1234";
     private List<AgentCallback> subscribers = new ArrayList<AgentCallback>();
+    private List<RawDataAgentCallback> rawDataSubscribers = new ArrayList<RawDataAgentCallback>();
     private AbstractStreamDefinitionStore streamDefinitionStore;
-    private Map<String, StreamTypeHolder> streamTypeCache = new ConcurrentHashMap<String, StreamTypeHolder>();
+    private Map<String, StreamTypeHolder> domainNameStreamTypeHolderCache = new ConcurrentHashMap<String, StreamTypeHolder>();
     private EventQueue eventQueue;
 
     private static final Log log = LogFactory.getLog(EventDispatcher.class);
@@ -60,12 +53,21 @@ public class EventDispatcher {
 
     public EventDispatcher(AbstractStreamDefinitionStore streamDefinitionStore,
                            DataBridgeConfiguration dataBridgeConfiguration) {
-        this.eventQueue = new EventQueue(subscribers, dataBridgeConfiguration);
+        this.eventQueue = new EventQueue(subscribers, rawDataSubscribers, dataBridgeConfiguration);
         this.streamDefinitionStore = streamDefinitionStore;
     }
 
     public void addCallback(AgentCallback agentCallback) {
         subscribers.add(agentCallback);
+    }
+
+    /**
+     * Add thrift subscribers
+     *
+     * @param agentCallback
+     */
+    public void addCallback(RawDataAgentCallback agentCallback) {
+        rawDataSubscribers.add(agentCallback);
     }
 
     public String defineStream(String streamDefinition, AgentSession agentSession)
@@ -76,15 +78,17 @@ public class EventDispatcher {
             StreamDefinition newStreamDefinition = EventDefinitionConverterUtils.convertFromJson(streamDefinition);
 
             StreamDefinition existingStreamDefinition;
-            try {
-                existingStreamDefinition = streamDefinitionStore.getStreamDefinition(agentSession.getCredentials(), newStreamDefinition.getName(), newStreamDefinition.getVersion());
+            existingStreamDefinition = streamDefinitionStore.getStreamDefinition(agentSession.getCredentials(), newStreamDefinition.getName(), newStreamDefinition.getVersion());
+            if (null == existingStreamDefinition) {
+                streamDefinitionStore.saveStreamDefinition(agentSession.getCredentials(), newStreamDefinition);
+                updateDomainNameStreamTypeHolderCache(newStreamDefinition, agentSession.getCredentials());
+            } else {
                 if (!existingStreamDefinition.equals(newStreamDefinition)) {
                     throw new DifferentStreamDefinitionAlreadyDefinedException("Similar event stream for " + newStreamDefinition + " with the same name and version already exist: " + streamDefinitionStore.getStreamDefinition(agentSession.getCredentials(), newStreamDefinition.getName(), newStreamDefinition.getVersion()));
                 }
                 newStreamDefinition = existingStreamDefinition;
-            } catch (StreamDefinitionNotFoundException e) {
-                streamDefinitionStore.saveStreamDefinition(agentSession.getCredentials(), newStreamDefinition);
-                updateStreamTypeCache(agentSession.getDomainName(), newStreamDefinition);
+                //to load the stream definitions to cache
+                getStreamDefinitionHolder(agentSession.getCredentials());
             }
 
             for (AgentCallback agentCallback : subscribers) {
@@ -94,118 +98,101 @@ public class EventDispatcher {
         }
     }
 
-    private void updateStreamTypeCache(String domainName,
-                                            StreamDefinition streamDefinition) {
-        StreamTypeHolder streamTypeHolder;
-        // this will occur only outside of carbon (ex: Siddhi)
-//        if (domainName == null) {
-//            domainName = HACK_DOMAIN_CONSTANT;
-//        }
-
-        synchronized (EventDispatcher.class) {
-            if (streamTypeCache.containsKey(domainName)) {
-                streamTypeHolder = streamTypeCache.get(domainName);
-            } else {
-                streamTypeHolder = new StreamTypeHolder(domainName);
-            }
-
-            updateStreamTypeHolder(streamTypeHolder, streamDefinition);
-            if (log.isTraceEnabled()) {
-                String logMsg = "Event Stream Type getting updated : ";
-                logMsg += "Event stream holder for domain name : " + domainName + " : \n ";
-                logMsg += "Correlation Data Type Map : " + streamTypeHolder.getCorrelationDataTypeMap() + "\n";
-                logMsg += "Payload Data Type Map : " + streamTypeHolder.getPayloadDataTypeMap() + "\n";
-                logMsg += "Meta Data Type Map : " + streamTypeHolder.getMetaDataTypeMap() + "\n";
-                log.trace(logMsg);
-            }
-
-
-            streamTypeCache.put(domainName, streamTypeHolder);
-        }
-    }
-
 
     public void publish(Object eventBundle, AgentSession agentSession,
-                        EventConverter eventConverter)
-            throws UndefinedEventTypeException {
-        try {
-            eventQueue.publish(new EventComposite(eventBundle, getStreamDefinitionHolder(agentSession.getCredentials()), agentSession,eventConverter));
-        } catch (StreamDefinitionNotFoundException e) {
-            throw new UndefinedEventTypeException("No event stream definition exist " + e.getErrorMessage());
-        }
+                        EventConverter eventConverter) {
+        eventQueue.publish(new EventComposite(eventBundle, getStreamDefinitionHolder(agentSession.getCredentials()), agentSession, eventConverter));
     }
 
-    private StreamTypeHolder getStreamDefinitionHolder(Credentials credentials)
-            throws StreamDefinitionNotFoundException {
+    private StreamTypeHolder getStreamDefinitionHolder(Credentials credentials) {
         // this will occur only outside of carbon (ex: Siddhi)
 
-//        String domainName = (credentials.getDomainName() == null) ? HACK_DOMAIN_CONSTANT : credentials.getDomainName();
-
-        StreamTypeHolder streamTypeHolder = streamTypeCache.get(credentials.getDomainName());
-
-        if (log.isTraceEnabled()) {
-            log.trace("Retrieving Event Stream Type Cache : " + streamTypeCache);
-        }
+        StreamTypeHolder streamTypeHolder = domainNameStreamTypeHolderCache.get(credentials.getDomainName());
 
         if (streamTypeHolder != null) {
             if (log.isDebugEnabled()) {
                 String logMsg = "Event stream holder for domain name : " + credentials.getDomainName() + " : \n ";
-                logMsg += "Correlation Data Type Map : " + streamTypeHolder.getCorrelationDataTypeMap() + "\n";
-                logMsg += "Payload Data Type Map : " + streamTypeHolder.getPayloadDataTypeMap() + "\n";
-                logMsg += "Meta Data Type Map : " + streamTypeHolder.getMetaDataTypeMap() + "\n";
+                logMsg += "Meta, Correlation & Payload Data Type Map : ";
+                for (Map.Entry entry : streamTypeHolder.getAttributeCompositeMap().entrySet()) {
+                    logMsg += "StreamID=" + entry.getKey() + " :  ";
+                    logMsg += "Meta= " + Arrays.deepToString(((AttributeComposite) entry.getValue()).getAttributeTypes()[0]) + " :  ";
+                    logMsg += "Correlation= " + Arrays.deepToString(((AttributeComposite) entry.getValue()).getAttributeTypes()[1]) + " :  ";
+                    logMsg += "Payload= " + Arrays.deepToString(((AttributeComposite) entry.getValue()).getAttributeTypes()[2]) + "\n";
+                }
                 log.debug(logMsg);
             }
             return streamTypeHolder;
         } else {
-            synchronized (EventDispatcher.class) {
-                streamTypeHolder = new StreamTypeHolder(credentials.getDomainName());
-                Collection<StreamDefinition> allStreamDefinitions =
-                        streamDefinitionStore.getAllStreamDefinitions(credentials);
-                for (StreamDefinition streamDefinition : allStreamDefinitions) {
-                    updateStreamTypeHolder(streamTypeHolder, streamDefinition);
-                    updateStreamTypeCache(credentials.getDomainName(), streamDefinition);
+            return initDomainNameStreamTypeHolderCache(credentials);
+        }
+    }
+
+    private synchronized void updateDomainNameStreamTypeHolderCache(StreamDefinition streamDefinition, Credentials credentials) {
+        StreamTypeHolder streamTypeHolder = getStreamDefinitionHolder(credentials);
+        streamTypeHolder.putDataType(streamDefinition.getStreamId(),
+                EventDefinitionConverterUtils.generateAttributeTypeArray(streamDefinition.getMetaData()),
+                EventDefinitionConverterUtils.generateAttributeTypeArray(streamDefinition.getCorrelationData()),
+                EventDefinitionConverterUtils.generateAttributeTypeArray(streamDefinition.getPayloadData()));
+    }
+
+    private synchronized StreamTypeHolder initDomainNameStreamTypeHolderCache(Credentials credentials) {
+        StreamTypeHolder streamTypeHolder = domainNameStreamTypeHolderCache.get(credentials.getDomainName());
+        if (null == streamTypeHolder) {
+            streamTypeHolder = new StreamTypeHolder(credentials.getDomainName());
+            Collection<StreamDefinition> allStreamDefinitions =
+                    streamDefinitionStore.getAllStreamDefinitions(credentials);
+            if (null != allStreamDefinitions) {
+                for (StreamDefinition aStreamDefinition : allStreamDefinitions) {
+                    streamTypeHolder.putDataType(aStreamDefinition.getStreamId(),
+                            EventDefinitionConverterUtils.generateAttributeTypeArray(aStreamDefinition.getMetaData()),
+                            EventDefinitionConverterUtils.generateAttributeTypeArray(aStreamDefinition.getCorrelationData()),
+                            EventDefinitionConverterUtils.generateAttributeTypeArray(aStreamDefinition.getPayloadData()));
                 }
             }
-        }
-
-        if (log.isDebugEnabled()) {
-        String logMsg = "Event stream holder for domain name : " + credentials.getDomainName() + " : \n ";
-            logMsg += "Correlation Data Type Map : " + streamTypeHolder.getCorrelationDataTypeMap() + "\n";
-            logMsg += "Payload Data Type Map : " + streamTypeHolder.getPayloadDataTypeMap() + "\n";
-            logMsg += "Meta Data Type Map : " + streamTypeHolder.getMetaDataTypeMap() + "\n";
-            log.debug(logMsg);
+            domainNameStreamTypeHolderCache.put(credentials.getDomainName(), streamTypeHolder);
         }
         return streamTypeHolder;
     }
 
-    private void updateStreamTypeHolder(StreamTypeHolder streamTypeHolder,
-                                             StreamDefinition streamDefinition) {
-        streamTypeHolder.setMetaDataType(streamDefinition.getStreamId(), EventDefinitionConverterUtils
-                .generateAttributeTypeArray(streamDefinition.getMetaData()));
-        streamTypeHolder.setCorrelationDataType(streamDefinition.getStreamId(), EventDefinitionConverterUtils
-                .generateAttributeTypeArray(streamDefinition.getCorrelationData()));
-        streamTypeHolder.setPayloadDataType(streamDefinition.getStreamId(), EventDefinitionConverterUtils
-                .generateAttributeTypeArray(streamDefinition.getPayloadData()));
-    }
 
     public List<AgentCallback> getSubscribers() {
         return subscribers;
     }
 
-    public String findStreamId(Credentials credentials, String streamName,
-                                    String streamVersion)
-            throws StreamDefinitionNotFoundException, StreamDefinitionStoreException {
-        try {
-            return streamDefinitionStore.getStreamId(credentials, streamName, streamVersion);
-        } catch (StreamDefinitionNotFoundException e) {
-            throw new StreamDefinitionNotFoundException("No event stream definition exist " + e.getErrorMessage());
-        }
-
+    public List<RawDataAgentCallback> getRawDataSubscribers() {
+        return rawDataSubscribers;
     }
 
-    private static class StreamTypeCache {
+    public String findStreamId(Credentials credentials, String streamName,
+                               String streamVersion)
+            throws StreamDefinitionStoreException {
+        return streamDefinitionStore.getStreamId(credentials, streamName, streamVersion);
+    }
 
+    public boolean deleteStream(Credentials credentials, String streamId) {
+        removeStramDefinitionFromStreamTypeHolder(credentials, streamId);
+        return streamDefinitionStore.deleteStreamDefinition(credentials, streamId);
+    }
 
+    public boolean deleteStream(Credentials credentials, String streamName, String streamVersion) {
+        String streamId;
+        try {
+            streamId = streamDefinitionStore.getStreamId(credentials, streamName, streamVersion);
+        } catch (Exception e) {
+            log.warn("Error when deleting stream definition of " + streamName + " " + streamVersion, e);
+            return false;
+        }
+        if (streamId == null) {
+            return false;
+        }
+        removeStramDefinitionFromStreamTypeHolder(credentials, streamId);
+        return streamDefinitionStore.deleteStreamDefinition(credentials, streamId);
+    }
 
+    private synchronized void removeStramDefinitionFromStreamTypeHolder(Credentials credentials, String streamId) {
+        StreamTypeHolder streamTypeHolder = domainNameStreamTypeHolderCache.get(credentials.getDomainName());
+        if (streamTypeHolder != null) {
+            streamTypeHolder.getAttributeCompositeMap().remove(streamId);
+        }
     }
 }

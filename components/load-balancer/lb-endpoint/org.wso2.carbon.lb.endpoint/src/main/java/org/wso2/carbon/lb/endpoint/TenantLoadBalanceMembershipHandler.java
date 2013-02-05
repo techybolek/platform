@@ -5,7 +5,6 @@ import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.Member;
 import org.apache.axis2.clustering.management.GroupManagementAgent;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
@@ -13,9 +12,7 @@ import org.apache.synapse.core.LoadBalanceMembershipHandler;
 import org.apache.synapse.endpoints.algorithms.AlgorithmContext;
 import org.apache.synapse.endpoints.algorithms.LoadbalanceAlgorithm;
 import org.wso2.carbon.lb.common.conf.util.HostContext;
-import org.wso2.carbon.lb.common.conf.util.TenantDomainContext;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -34,6 +31,9 @@ public class TenantLoadBalanceMembershipHandler implements LoadBalanceMembership
     private static Map<String, HostContext> hostContextsMap =
             new HashMap<String, HostContext>();
     private ClusteringAgent clusteringAgent;
+    
+    private boolean isClusteringEnabled;
+    private String endpointName;
 
     public TenantLoadBalanceMembershipHandler(Map<String, HostContext> hostContexts,
                                               LoadbalanceAlgorithm algorithm,
@@ -42,22 +42,35 @@ public class TenantLoadBalanceMembershipHandler implements LoadBalanceMembership
                                               String endpointName) {
 
         lbAlgo = algorithm;
+        this.isClusteringEnabled = isClusteringEnabled;
+        this.endpointName = endpointName;
+        this.configCtx = configCtx;
         
         for (HostContext host : hostContexts.values()) {
-
-            String hostName = host.getHostName();
-
-            AlgorithmContext algorithmContext =
-                                                new AlgorithmContext(isClusteringEnabled,
-                                                                     configCtx, endpointName + "." +
-                                                                                hostName);
-
-            host.setAlgorithm(algorithm.clone());
-            host.setAlgorithmContext(algorithmContext);
-
-            hostContextsMap.put(hostName, host);
+            
+            addHostContext(host);
 
         }
+    }
+    
+    /**
+     * This will be used to add new {@link HostContext}s.
+     * @param host {@link HostContext}
+     */
+    public void addHostContext(HostContext host){
+        
+        String hostName = host.getHostName();
+
+        AlgorithmContext algorithmContext =
+                                            new AlgorithmContext(isClusteringEnabled,
+                                                                 configCtx, endpointName + "." +
+                                                                            hostName);
+
+        host.setAlgorithm(lbAlgo.clone());
+        host.setAlgorithmContext(algorithmContext);
+
+        hostContextsMap.put(hostName, host);
+        
     }
 
     public void init(Properties props, LoadbalanceAlgorithm algorithm) {
@@ -95,6 +108,12 @@ public class TenantLoadBalanceMembershipHandler implements LoadBalanceMembership
 
     public Member getNextApplicationMember(String host, int tenantId) {
         HostContext hostContext = getHostContext(host);
+        
+        if(hostContext == null){
+            String msg = "Invalid host name : " + host;
+            log.error(msg);
+            throw new SynapseException(msg);
+        }
 
         // here we have to pass tenant id to get domain from hostContext
         String domain = hostContext.getDomainFromTenantId(tenantId);
@@ -116,15 +135,13 @@ public class TenantLoadBalanceMembershipHandler implements LoadBalanceMembership
         return algorithm.getNextApplicationMember(context);
     }
 
-    private HostContext getHostContext(String host) {
+    public HostContext getHostContext(String host) {
         HostContext hostContext = hostContextsMap.get(host);
         if (hostContext == null) {
             int indexOfDot;
             if ((indexOfDot = host.indexOf(".")) != -1) {
                 hostContext = getHostContext(host.substring(indexOfDot + 1));
-            } else {
-                throw new SynapseException("Domain not found for host" + host);
-            }
+            } 
         }
         return hostContext;
     }
@@ -135,6 +152,10 @@ public class TenantLoadBalanceMembershipHandler implements LoadBalanceMembership
 
     public Properties getProperties() {
         return null;
+    }
+    
+    public ClusteringAgent getClusteringAgent() {
+        return clusteringAgent;
     }
 
 //    /**

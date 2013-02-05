@@ -20,7 +20,7 @@ package org.wso2.carbon.dataservices.core.engine;
 
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.databinding.types.NCName;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.dataservices.common.DBConstants;
 import org.wso2.carbon.dataservices.common.DBConstants.DBSFields;
 import org.wso2.carbon.dataservices.common.DBConstants.FaultCodes;
@@ -98,7 +98,7 @@ public class CallQuery extends OutputElement {
 				}
 			}
 		} else if ("TENANT_ID".equals(propName)) {
-			return String.valueOf(SuperTenantCarbonContext.getCurrentContext().getTenantId());
+			return String.valueOf(PrivilegedCarbonContext.getCurrentContext().getTenantId());
 		} else if ("USER_ROLES".equals(propName)) {
 			MessageContext context = MessageContext.getCurrentMessageContext();
 			if (context != null) {

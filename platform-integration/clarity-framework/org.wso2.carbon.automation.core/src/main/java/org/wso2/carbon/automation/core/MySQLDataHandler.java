@@ -75,6 +75,4 @@ public class MySQLDataHandler {
     public static void main(String[] args) {
         new MySQLDataHandler().writeResultData();
     }
-
-
 }

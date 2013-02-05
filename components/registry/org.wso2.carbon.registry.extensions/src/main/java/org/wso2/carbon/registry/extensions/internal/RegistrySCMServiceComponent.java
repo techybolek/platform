@@ -25,16 +25,23 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.CarbonException;
+import org.wso2.carbon.registry.common.utils.CommonUtil;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.jdbc.handlers.HandlerLifecycleManager;
 import org.wso2.carbon.registry.core.jdbc.handlers.filters.URLMatcher;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.session.CurrentSession;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.extensions.handlers.scm.ExternalContentHandler;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.securevault.SecretResolver;
+import org.wso2.securevault.SecretResolverFactory;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -84,9 +91,12 @@ public class RegistrySCMServiceComponent {
             File registryXML = new File(configPath);
             if (registryXML.exists()) {
                 try {
+                    CurrentSession.setCallerTenantId(MultitenantConstants.SUPER_TENANT_ID);
                     FileInputStream fileInputStream = new FileInputStream(registryXML);
-                    StAXOMBuilder builder = new StAXOMBuilder(fileInputStream);
+                    StAXOMBuilder builder = new StAXOMBuilder(
+                            CarbonUtils.replaceSystemVariablesInXml(fileInputStream));
                     OMElement configElement = builder.getDocumentElement();
+                    SecretResolver secretResolver = SecretResolverFactory.create(configElement, false);
                     OMElement scm = configElement.getFirstChildWithName(new QName("scm"));
                     if (scm != null) {
                         ScheduledExecutorService executorService =
@@ -108,9 +118,9 @@ public class RegistrySCMServiceComponent {
                             String mountPoint =
                                     connection.getAttributeValue(new QName("mountPoint"));
                             String username =
-                                    connection.getAttributeValue(new QName("username"));
+                                    connection.getFirstChildWithName(new QName("username")).getText();
                             String password =
-                                    connection.getAttributeValue(new QName("password"));
+                                    connection.getFirstChildWithName(new QName("password")).getText();
                             int updateFrequency = DEFAULT_UPDATE_FREQUENCY;
                             try {
                                 updateFrequency = Integer.parseInt(
@@ -144,16 +154,21 @@ public class RegistrySCMServiceComponent {
                             RegistryContext registryContext = registry.getRegistryContext();
                             registryContext.registerNoCachePath(mountPoint);
                             registryContext.getHandlerManager().addHandler(null,
-                                    urlMatcher, externalContentHandler);
+                                    urlMatcher, externalContentHandler,
+                                    HandlerLifecycleManager.TENANT_SPECIFIC_SYSTEM_HANDLER_PHASE);
                             executorService.scheduleWithFixedDelay(new SCMUpdateTask(directory,
                                     checkOutURL, checkInURL, readOnly, externalContentHandler,
-                                    username, password), 0, updateFrequency, TimeUnit.MINUTES);
+                                    username, CommonUtil.getResolvedPassword(secretResolver,"scm",password)), 0, updateFrequency, TimeUnit.MINUTES);
                         }
                     }
                 } catch (XMLStreamException e) {
                     log.error("Unable to parse registry.xml", e);
                 } catch (IOException e) {
                     log.error("Unable to read registry.xml", e);
+                } catch (CarbonException e) {
+                    log.error("An error occurred during system variable replacement", e);
+                } finally {
+                    CurrentSession.removeCallerTenantId();
                 }
             }
         }

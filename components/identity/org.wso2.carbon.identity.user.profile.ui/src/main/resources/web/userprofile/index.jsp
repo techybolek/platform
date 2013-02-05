@@ -118,7 +118,7 @@
         %>
         <div id="workArea">   
             <script type="text/javascript">
-              function remove(username,profile) {
+              function removeProfile(username,profile) {
                  if(profile == "default"){
                 	 CARBON.showWarningDialog("<fmt:message key='cannot.remove.default.profile'/>", null, null);
                 	 return;
@@ -160,10 +160,10 @@
 				<%} %>
 				<td width="50%">
 				<%
-                    if (readOnlyUserStore == false) {
+                    if (readOnlyUserStore == false && !"default".equals(profileName)) {
                 %>
 				<a title="<fmt:message key='remove.profile'/>"
-                                   onclick="remove('<%=username%>','<%=profileName%>');return false;"
+                                   onclick="removeProfile('<%=username%>','<%=profileName%>');return false;"
                                    href="#" style="background-image: url(../userprofile/images/delete.gif);" class="icon-link">
                                     <fmt:message key='delete'/></a>
                 <%

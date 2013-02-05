@@ -32,6 +32,7 @@ import org.wso2.carbon.event.core.topic.TopicManager;
 import org.wso2.carbon.event.core.util.EventBrokerConstants;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.context.CarbonContext;
 
 import java.util.Calendar;
 import java.util.List;
@@ -185,7 +186,7 @@ public class CarbonEventBroker implements EventBroker {
                         topicName,
                         this.delivaryManager,
                         deliveryMode,
-                        MultitenantConstants.SUPER_TENANT_ID);
+                        CarbonContext.getCurrentContext().getTenantId());
         this.executor.execute(eventPublisher);
     }
 

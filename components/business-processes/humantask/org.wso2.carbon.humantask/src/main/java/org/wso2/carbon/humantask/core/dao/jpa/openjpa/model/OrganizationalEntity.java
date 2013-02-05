@@ -27,7 +27,7 @@ import java.util.List;
  * Domain object for organizational entity representation.
  */
 @Entity
-@Table(name = "ORG_ENTITY")
+@Table(name = "HT_ORG_ENTITY")
 public class OrganizationalEntity extends OpenJPAEntity implements OrganizationalEntityDAO {
 
     @Id

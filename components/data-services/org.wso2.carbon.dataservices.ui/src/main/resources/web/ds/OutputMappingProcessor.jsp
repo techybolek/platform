@@ -54,48 +54,35 @@
     public void setElementValues(List<Element> elList, String elName,
                                  String dsType, String dsValue, String elementNs,
                                  String reqRoles, String exportName, String expType, String xsdType,
-                                 String dataServiceOMElementName, String arrayName, HttpServletRequest request) {
-        boolean isElemntNameExist = false;
-        if (!dataServiceOMElementName.equals(elName)) {
-            //check new element name already exist in the element list
-            for (Element element : elList) {
-               if (element.getName().equals(dataServiceOMElementName)) {
-                   isElemntNameExist = true;
-                   break;
-               }
-            }
-        }
-        if (!isElemntNameExist) {
-            for (Element element : elList) {
-                if (element.getName().equals(elName)) {
-                    element.setName(dataServiceOMElementName);
-                    element.setDataSourceType(dsType);
-                    element.setDataSourceValue(dsValue);
-                    element.setNamespace(elementNs);
-                    element.setArrayName(arrayName);
-                    //if (!reqRoles.equals("")) {
-                        element.setRequiredRoles(reqRoles);
-                    //}
-                    if (!exportName.equals("")) {
-                        element.setExport(exportName);
-                    }
-                    if (!expType.equals("")) {
-                        element.setExportType(expType);
-                    }
-                    element.setxsdType(xsdType);
-                    break;
+                                 String dataServiceOMElementName, String arrayName,
+                                 HttpServletRequest request, String optional) {
+        for (Element element : elList) {
+            if (element.getName().equals(elName)) {
+                element.setName(dataServiceOMElementName);
+                element.setDataSourceType(dsType);
+                element.setDataSourceValue(dsValue);
+                element.setNamespace(elementNs);
+                element.setArrayName(arrayName);
+                element.setOptional(optional);
+                //if (!reqRoles.equals("")) {
+                    element.setRequiredRoles(reqRoles);
+                //}
+                if (!exportName.equals("")) {
+                    element.setExport(exportName);
                 }
+                if (!expType.equals("")) {
+                    element.setExportType(expType);
+                }
+                element.setxsdType(xsdType);
+                break;
             }
-        } else {
-                String message = "Element name "+ dataServiceOMElementName + " already exist.";
-                CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
         }
     }
 
     public void setAttributeValues(List<Attribute> attributeList, String attributeName,
                                    String dsType, String dsValue, String reqRoles, String exportName,
                                    String expType, String xsdType, String dataServiceOMElementName,
-                                   String arrayName, HttpServletRequest request) {
+                                   String arrayName, HttpServletRequest request, String optional) {
         boolean isAttributeNameExist = false;
         if (!dataServiceOMElementName.equals(attributeName)) {
             //check new attribute name already exist in the attribute list
@@ -114,6 +101,7 @@
                     attribute.setName(dataServiceOMElementName);
                     attribute.setDataSourceType(dsType);
                     attribute.setDataSourceValue(dsValue);
+                    attribute.setOptional(optional);
                     //if (!reqRoles.equals("")) {
                         attribute.setRequiredRoles(reqRoles);
                     //}
@@ -207,6 +195,8 @@
     complexPath = (complexPath == null) ? "" : complexPath;
     String editMappingType = request.getParameter("mappingType");
     String useColumnNumbers = request.getParameter("useColumnNumbers");
+    String optional = request.getParameter("optional");
+    optional = (optional == null) ? "false" : "true";
     String forwardTo = "";
     String parameterType = request.getParameter("paramType");
     String arrayName = "";
@@ -308,11 +298,11 @@
                                     ComplexElement rootLevel = res.getChild(complexPath);
                                     setElementValues(rootLevel.getElements(), edit, datasourceType,
                                             dataSourceValue, elementNamespace, requiredRoles, exportName,
-                                            exportType, xsdType, dataServiceOMElementName, arrayName, request);
+                                            exportType, xsdType, dataServiceOMElementName, arrayName, request, optional);
                                 } else {
                                     setElementValues(res.getElements(), edit, datasourceType,
                                             dataSourceValue, elementNamespace, requiredRoles, exportName,
-                                            exportType, xsdType, dataServiceOMElementName, arrayName, request);
+                                            exportType, xsdType, dataServiceOMElementName, arrayName, request, optional);
                                 }
                             }
                             if (editFlag) {
@@ -320,6 +310,7 @@
                                 element.setDataSourceValue(dataSourceValue);
                                 element.setNamespace(elementNamespace);
                                 element.setName(dataServiceOMElementName);
+                                element.setOptional(optional);
 
                                 if (!"".equals(arrayName)) {
                                     element.setArrayName(arrayName);
@@ -336,24 +327,9 @@
                                 element.setxsdType(xsdType);
                                 if (!complexPath.equals("")) {
                                     ComplexElement rootLevel = res.getChild(complexPath);
-                                    if (!rootLevel.getElements().contains(element)) {
-                                        rootLevel.addElement(element);
-                                    } else {
-                                        String message = "Element name "+ dataServiceOMElementName +
-                                                " already exist.";
-                                        CarbonUIMessage.sendCarbonUIMessage(
-                                                message, CarbonUIMessage.ERROR, request);
-                                    }
+                                    rootLevel.addElement(element);
                                 } else {
-                                    if (!elementsList.contains(element)) {
-                                         elementsList.add(element);
-                                    } else {
-                                        String message = "Element name "+ dataServiceOMElementName +
-                                                " already exist.";
-                                        CarbonUIMessage.sendCarbonUIMessage(
-                                                message, CarbonUIMessage.ERROR, request);
-                                    }
-
+                                    elementsList.add(element);
                                     res.setElements(elementsList);
                                 }
                             }
@@ -379,6 +355,7 @@
                             element.setDataSourceValue(dataSourceValue);
                             element.setNamespace(elementNamespace);
                             element.setName(dataServiceOMElementName);
+                            element.setOptional(optional);
                             //if (!requiredRoles.equals("")) {
                                 element.setRequiredRoles(requiredRoles);
                             //}
@@ -604,11 +581,11 @@
                                     ComplexElement rootLevel = res.getChild(complexPath);
                                     setAttributeValues(rootLevel.getAttributes(), edit, datasourceType,
                                             dataSourceValue, requiredRoles, exportName,
-                                            exportType, xsdType, dataServiceOMElementName, arrayName, request);
+                                            exportType, xsdType, dataServiceOMElementName, arrayName, request, optional);
                                 } else {
                                     setAttributeValues(res.getAttributes(), edit, datasourceType,
                                             dataSourceValue, requiredRoles, exportName,
-                                            exportType, xsdType, dataServiceOMElementName, arrayName, request);
+                                            exportType, xsdType, dataServiceOMElementName, arrayName, request, optional);
                                 }
                             }
                             if (editMappingType != null && (!editMappingType.equals("")) && !editMappingType.equals(dataServiceOMType)) {
@@ -624,6 +601,7 @@
                                     attr.setRequiredRoles(requiredRoles);
                                 //}
                                 attr.setxsdType(xsdType);
+                                attr.setOptional(optional);
                                 if (!exportName.equals("")) {
                                     attr.setExport(exportName);
                                 }
@@ -675,6 +653,7 @@
                                 attr.setRequiredRoles(requiredRoles);
                             //}
                             attr.setxsdType(xsdType);
+                            attr.setOptional(optional);
                             if (!exportName.equals("")) {
                                 attr.setExport(exportName);
                             }
@@ -835,12 +814,12 @@
     if ((document.getElementById('flag').value == 'save') || (document.getElementById('flag').value == 'saverdf')) {
         location.href = "addQuery.jsp?queryId=<%=queryId%>&useColumnNumbers=<%=useColumnNumbers%>";
     } else if (document.getElementById('flag').value == 'add' || document.getElementById('flag').value == 'edit') {
-        location.href = "addOutputMapping.jsp?complexPath=<%=complexPath%>&queryId=<%=queryId%>&complexMappingId=<%=dataServiceOMType%>&useColumnNumbers=<%=useColumnNumbers%>&arrayName=<%=arrayName%>";
+        location.href = "addOutputMapping.jsp?complexPath=<%=complexPath%>&queryId=<%=queryId%>&complexMappingId=<%=dataServiceOMType%>&useColumnNumbers=<%=useColumnNumbers%>&arrayName=<%=arrayName%>&optional=<%=optional%>";
     } else if (document.getElementById('flag').value == 'addrdf' || document.getElementById('flag').value == 'editrdf') {
         location.href = "addRDFOutputMapping.jsp?queryId=<%=queryId%>&useColumnNumbers=<%=useColumnNumbers%>";
     } else if (document.getElementById('flag').value == 'error') {
         location.href = '<%=forwardTo%>';
     } else if (document.getElementById('complexElementName').value != null) {
-        location.href = "addOutputMapping.jsp?isComplexElement=true&complexPath=<%=complexPath%>&queryId=<%=queryId%>&complexElementId=<%=complexElementName%>&useColumnNumbers=<%=useColumnNumbers%>&arrayName=<%=arrayName%>";
+        location.href = "addOutputMapping.jsp?isComplexElement=true&complexPath=<%=complexPath%>&queryId=<%=queryId%>&complexElementId=<%=complexElementName%>&useColumnNumbers=<%=useColumnNumbers%>&arrayName=<%=arrayName%>&optional=<%=optional%>%>";
     }
 </script>

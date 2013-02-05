@@ -19,8 +19,8 @@
 package org.wso2.carbon.dataservices.core.engine;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Represents a collection of InternalParam objects.
@@ -30,9 +30,16 @@ public class InternalParamCollection {
 	private Map<Integer, InternalParam> data;
 	
 	public InternalParamCollection() {
-		data = new HashMap<Integer, InternalParam>();
+		/* A tree map is used here to sort the entries by the keys, which is required 
+		 * when getParams() is called. The computation complexity of this, which is log(n) 
+		 * compared to hash map, which is log(1) will not be much of a difference for smaller 
+		 * number of entries, and can even be faster even if the size if small enough */
+		this.data = new TreeMap<Integer, InternalParam>();
 	}
 	
+	/**
+	 * Returns the parameters sorted by the parameter ordinal.
+	 */
 	public Collection<InternalParam> getParams() {
 		return data.values();
 	}

@@ -47,6 +47,7 @@ public class ServiceHolder {
         return configurationContextService;
     }
 
+
     public static void setConfigurationContextService(
             ConfigurationContextService configurationContextService) {
         ServiceHolder.configurationContextService = configurationContextService;

@@ -26,6 +26,7 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.indexing.utils.IndexingUtils;
+import org.wso2.carbon.utils.WaitBeforeShutdownObserver;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.Arrays;
@@ -43,9 +44,20 @@ public class ResourceSubmitter implements Runnable {
     private static Log log = LogFactory.getLog(ResourceSubmitter.class);
 
     private IndexingManager indexingManager;
+    private boolean taskComplete = false;
+    private boolean isShutdown = false;
 
     protected ResourceSubmitter(IndexingManager indexingManager) {
         this.indexingManager = indexingManager;
+        Utils.setWaitBeforeShutdownObserver(new WaitBeforeShutdownObserver() {
+            public void startingShutdown() {
+                isShutdown = true;
+            }
+
+            public boolean isTaskComplete() {
+                return taskComplete;
+            }
+        });
     }
 
     /**
@@ -57,7 +69,9 @@ public class ResourceSubmitter implements Runnable {
     @SuppressWarnings({"REC_CATCH_EXCEPTION"})
     public void run() {
         try {
-            if (Thread.currentThread().isInterrupted()) {
+            if (isShutdown || Thread.currentThread().isInterrupted()) {
+                // interruption can happen due to shutdown or some other reason.
+                taskComplete = true;
                 return; // To be compatible with shutdownNow() method on the executor service
             }
             UserRegistry registry = indexingManager.getRegistry();

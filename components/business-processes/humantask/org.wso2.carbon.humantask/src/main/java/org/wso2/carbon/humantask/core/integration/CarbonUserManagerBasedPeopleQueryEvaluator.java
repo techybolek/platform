@@ -14,7 +14,6 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -208,10 +207,9 @@ public class CarbonUserManagerBasedPeopleQueryEvaluator implements PeopleQueryEv
     }
 
     private UserRealm getUserRealm() {
-        int tenantId = CarbonContextHolder.getThreadLocalCarbonContextHolder().getTenantId();
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
 
         try {
-            // TODO - add null check for the user realm.
             return this.registryService.getUserRealm(tenantId);
         } catch (RegistryException e) {
             throw new HumanTaskRuntimeException("Error occurred while retrieving " +

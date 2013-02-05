@@ -122,7 +122,8 @@ public class RegistryTopicManager implements TopicManager {
                 userRegistry.put(resourcePath, collection);
 
                 // Grant this user (owner) rights to update permission on newly created topic
-                UserRealm userRealm = CarbonContext.getCurrentContext().getUserRealm();
+                UserRealm userRealm = EventBrokerHolder.getInstance().getRealmService().getTenantUserRealm(
+                                                                     CarbonContext.getCurrentContext().getTenantId());
 
                 userRealm.getAuthorizationManager().authorizeUser(
                         loggedInUser, resourcePath, EventBrokerConstants.EB_PERMISSION_CHANGE_PERMISSION);
@@ -346,7 +347,7 @@ public class RegistryTopicManager implements TopicManager {
     }
 
     private boolean validateTopicName(String topicName) {
-      return Pattern.matches("[[a-zA-Z]+[^(\\x00-\\x80)]+[0-9_\\-/#*.?&\\s]+]+",topicName);
+        return Pattern.matches("[[a-zA-Z]+[^(\\x00-\\x80)]+[0-9_\\-/#*.?&\\s()]+]+",topicName);
     }
 
     /**

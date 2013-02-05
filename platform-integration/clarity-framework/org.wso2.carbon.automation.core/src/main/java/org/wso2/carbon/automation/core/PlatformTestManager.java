@@ -25,19 +25,14 @@ import org.testng.ITestListener;
 import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
 import org.wso2.carbon.automation.core.utils.UnknownArtifactTypeException;
+import org.wso2.carbon.automation.core.utils.coreutils.PlatformUtil;
+import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
 import org.wso2.carbon.automation.core.utils.reportutills.CustomTestNgReportSetter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class PlatformTestManager implements ITestListener {
-
     private static ArtifactManager artifactManager;
-    // IRuntime runtime;
-    String className;
-    List<String> classList = new ArrayList<String>();
     private static final Log log = LogFactory.getLog(PlatformTestManager.class);
-
+    private static boolean builderEnabled;
 
     /**
      * Invoked each time before a test will be invoked.
@@ -48,8 +43,8 @@ public class PlatformTestManager implements ITestListener {
      * @see org.testng.ITestResult#STARTED
      */
     public void onTestStart(ITestResult result) {
-
-        log.info("Running the test method " + result.getMethod().getMethodName());
+        log.info("Running the test method --- " + result.getTestClass().getName()+"." +result.getMethod().getMethodName() + " ----");
+        PlatformUtil.setKeyStoreProperties(); //set carbon keyStore properties
     }
 
     /**
@@ -70,7 +65,9 @@ public class PlatformTestManager implements ITestListener {
      * @see org.testng.ITestResult#FAILURE
      */
     public void onTestFailure(ITestResult result) {
+        log.error("On Test failure..");
         log.error(result.getThrowable());
+        log.info("--------------Tests Failed "+result.getTestClass().getName()+"." +result.getMethod().getMethodName()+"--------");
     }
 
     /**
@@ -81,7 +78,7 @@ public class PlatformTestManager implements ITestListener {
      */
     public void onTestSkipped(ITestResult result) {
         log.warn("On Test Skipped");
-
+        log.info("--------------Test Skipped "+result.getTestName()+"--------");
     }
 
     /**
@@ -93,6 +90,7 @@ public class PlatformTestManager implements ITestListener {
      * @see org.testng.ITestResult#SUCCESS_PERCENTAGE_FAILURE
      */
     public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
+        log.info("--------------Some tests Failed "+result.getTestName()+"--------");
     }
 
     /**
@@ -101,17 +99,24 @@ public class PlatformTestManager implements ITestListener {
      */
 
     public void onStart(ITestContext context) {
-        String currentTestClassName = context.getCurrentXmlTest().getClasses().get(0).getName();
-
-        log.info("Before executing the test class :" + currentTestClassName);
-        if (currentTestClassName != null) {
-            try {
-                artifactManager = ArtifactManager.getInstance();
-                artifactManager.deployArtifacts(context.getCurrentXmlTest().getClasses().get(0).getName());
-            } catch (Exception e) {
-                log.error("Artifact Deployment Error ", e);
-                CustomTestNgReportSetter reportSetter = new CustomTestNgReportSetter();
-                reportSetter.createReport(context, e);
+        log.info("--------------Start executing test class "+context.getCurrentXmlTest().getName()+
+                 " on suite"+ context.getSuite().getName()+"--------");
+        EnvironmentBuilder environmentBuilder = new EnvironmentBuilder();
+        PlatformUtil.setKeyStoreProperties(); //set keyStore properties
+        builderEnabled =
+                environmentBuilder.getFrameworkSettings().getEnvironmentSettings().is_builderEnabled();
+        if (!builderEnabled) {
+            String currentTestClassName = context.getCurrentXmlTest().getClasses().get(0).getName();
+            log.info("Before executing the test class :###########" + currentTestClassName + "############");
+            if (currentTestClassName != null) {
+                try {
+                    artifactManager = ArtifactManager.getInstance();
+                    artifactManager.deployArtifacts(context.getCurrentXmlTest().getClasses().get(0).getName());
+                } catch (Exception e) {
+                    log.error("Artifact Deployment Error ", e);
+                    CustomTestNgReportSetter reportSetter = new CustomTestNgReportSetter();
+                    reportSetter.createReport(context, e);
+                }
             }
         }
     }
@@ -121,17 +126,21 @@ public class PlatformTestManager implements ITestListener {
      * Configuration methods have been called.
      */
     public void onFinish(ITestContext context) {
-        try {
-            assert artifactManager != null : "Artifact Manger is null";
-            artifactManager.cleanArtifacts(context.getCurrentXmlTest().getClasses().get(0).getName());
-        } catch (UnknownArtifactTypeException e) { /*cannot throw the exception */
-            log.error("Unknown Artifact type to be cleared ", e);
-            CustomTestNgReportSetter reportSetter = new CustomTestNgReportSetter();
-            reportSetter.createReport(context, e);
-        } catch (Exception e) {
-            log.error("Artifact Cleaning Error ", e);
-            CustomTestNgReportSetter reportSetter = new CustomTestNgReportSetter();
-            reportSetter.createReport(context, e);
+        log.info("--------------Finishing executing test class "+context.getCurrentXmlTest().getName()+
+                 " on suite"+ context.getSuite().getName()+"--------");
+        if (!builderEnabled) {
+            try {
+                assert artifactManager != null : "Artifact Manger is null";
+                artifactManager.cleanArtifacts(context.getCurrentXmlTest().getClasses().get(0).getName());
+            } catch (UnknownArtifactTypeException e) { /*cannot throw the exception */
+                log.error("Unknown Artifact type to be cleared ", e);
+                CustomTestNgReportSetter reportSetter = new CustomTestNgReportSetter();
+                reportSetter.createReport(context, e);
+            } catch (Exception e) {
+                log.error("Artifact Cleaning Error ", e);
+                CustomTestNgReportSetter reportSetter = new CustomTestNgReportSetter();
+                reportSetter.createReport(context, e);
+            }
         }
     }
 

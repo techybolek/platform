@@ -1,20 +1,24 @@
 package org.wso2.carbon.hive.data.source.access.util;
 
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.metastore.HiveContext;
 import org.apache.hadoop.hive.metastore.hooks.JDOConnectionURLHook;
 import org.apache.hadoop.mapred.lib.db.DBConfiguration;
 import org.w3c.dom.Element;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.analytics.hive.multitenancy.HiveRSSMetastoreManager;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.ndatasource.core.utils.DataSourceUtils;
 import org.wso2.carbon.ndatasource.rdbms.RDBMSConfiguration;
 import org.wso2.carbon.ndatasource.rdbms.RDBMSDataSourceReader;
-import org.wso2.carbon.rssmanager.core.RSSManagerException;
-import org.wso2.carbon.rssmanager.core.entity.DatabaseMetaData;
-import org.wso2.carbon.rssmanager.core.service.RSSManagerService;
+import org.wso2.carbon.rssmanager.ui.stub.RSSAdminStub;
+import org.wso2.carbon.user.api.Tenant;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +29,10 @@ public class DataSourceAccessUtil implements JDOConnectionURLHook {
 
     private static DataSourceService carbonDataSourceService;
 
-    private static RSSManagerService rssManagerService;
+    private static RSSAdminStub rssAdminStub;
+
+     private static Log log = LogFactory.getLog(DataSourceAccessUtil.class);
+    private static RealmService realmService;
 
     public static DataSourceService getCarbonDataSourceService() {
         return carbonDataSourceService;
@@ -36,23 +43,25 @@ public class DataSourceAccessUtil implements JDOConnectionURLHook {
         carbonDataSourceService = dataSourceService;
     }
 
-    public static void setRSSManagerService(RSSManagerService rssMgrService) {
-        rssManagerService = rssMgrService;
+
+    public static void setRealmService(RealmService realmSvc) {
+        realmService = realmSvc;
     }
 
-    public static RSSManagerService getRSSManagerService() {
-        return rssManagerService;
+    public static RealmService getRealmService() {
+        return realmService;
     }
 
     public static Map<String, String> getDataSourceProperties(String dataSourceName) {
 
         int tenantId = HiveContext.getCurrentContext().getTenantId();
+        //int tenantId = 0;
 
         Map<String, String> dataSourceProperties = new HashMap<String, String>();
         try {
 
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantId);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
 
             Element element = (Element) carbonDataSourceService.getDataSource(dataSourceName).
                     getDSMInfo().getDefinition().getDsXMLConfiguration();
@@ -64,38 +73,31 @@ public class DataSourceAccessUtil implements JDOConnectionURLHook {
         } catch (DataSourceException e) {
             e.printStackTrace();
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
         return dataSourceProperties;
     }
 
     public static String getMetaStoreConnectionURL(int tenantId) {
-
-        try {
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantId);
-
-            DatabaseMetaData[] databaseEntries = rssManagerService.getDatabases();
-            for (DatabaseMetaData databaseEntry : databaseEntries) {
-                if (databaseEntry.getName().contains(HIVE_METASTORE_DB)) {
-                    return databaseEntry.getUrl();
-                }
+        if (isMultiTenantMode()) {
+              HiveRSSMetastoreManager rssMetastoreManager =  HiveRSSMetastoreManager.getInstance();
+            try {
+                rssMetastoreManager.prepareRSSMetaStore(realmService.getTenantManager().getDomain(tenantId), tenantId);
+            } catch (UserStoreException ignored) {
+                log.error("Error occured while checking the rss database for tenant id: "+tenantId);
             }
-
-        } catch (RSSManagerException e) {
-            e.printStackTrace();
-        } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            return rssMetastoreManager.getMetaDataStoreConnectionURL(tenantId);
         }
-
         return null;
 
     }
 
     public String getJdoConnectionUrl(Configuration configuration) throws Exception {
-
         int tenantId = configuration.getInt("hive.current.tenant", -1234);
-        return getMetaStoreConnectionURL(tenantId);
+        if(log.isDebugEnabled())log.debug("%%%%%%%%%%%%%% Tenant id in JDO connection :"+tenantId +"%%%%%%%%%%%%%%");
+        String metaUrl =  getMetaStoreConnectionURL(tenantId);
+        if(log.isDebugEnabled())log.debug("%%%%%%%%%%%%%% Meta Store URL :"+metaUrl+" %%%%%%%%%%%%%%%%%%%%%%%%%%%");
+        return metaUrl;
 
     }
 
@@ -131,4 +133,19 @@ public class DataSourceAccessUtil implements JDOConnectionURLHook {
             }
         }
     }
+
+    private static boolean isMultiTenantMode() {
+        RealmService realmService = DataSourceAccessUtil.getRealmService();
+
+        Tenant[] tenants;
+        try {
+            tenants = realmService.getTenantManager().getAllTenants();
+        } catch (UserStoreException e) {
+            return false;
+        }
+
+        return tenants != null && tenants.length > 0;
+
+    }
+
 }

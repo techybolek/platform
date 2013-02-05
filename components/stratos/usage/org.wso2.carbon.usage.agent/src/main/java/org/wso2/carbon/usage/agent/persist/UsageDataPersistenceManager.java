@@ -66,10 +66,16 @@ public class UsageDataPersistenceManager {
 
 
     public void scheduleBandwidthUsageDataRetrievalTask() {
-        scheduler.scheduleWithFixedDelay(new BandwidthUsageDataRetrievalTask(configuration),
-                configuration.getUsageTasksStartupDelayInMilliSeconds(),
-                configuration.getUsageTasksExecutionIntervalInMilliSeconds(),
-                TimeUnit.MILLISECONDS);
+        //we will schedule the usage data retrieval task only if interval is not -1
+        if(configuration.getUsageTasksExecutionIntervalInMilliSeconds()>0){
+            scheduler.scheduleWithFixedDelay(new BandwidthUsageDataRetrievalTask(configuration),
+                    configuration.getUsageTasksStartupDelayInMilliSeconds(),
+                    configuration.getUsageTasksExecutionIntervalInMilliSeconds(),
+                    TimeUnit.MILLISECONDS);
+            log.debug("Bandwidth Usage data retrieval task was scheduled");
+        }else {
+            log.debug("Bandwidth Usage data retrieval task was disabled");
+        }
     }
 
     class UsageDataPersistenceThreadFactory implements ThreadFactory {

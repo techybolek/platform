@@ -34,14 +34,17 @@ import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.core.axis2.Axis2Sender;
 import org.apache.synapse.rest.AbstractHandler;
+import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.throttle.*;
+
+import java.util.Date;
+import java.util.TreeMap;
 
 /**
  * This API handler is responsible for evaluating authenticated user requests against their
@@ -66,6 +69,8 @@ public class APIThrottleHandler extends AbstractHandler {
 
     private RoleBasedAccessRateController roleBasedAccessController;
 
+    private RoleBasedAccessRateController applicationRoleBasedAccessController;
+
     /** The property key that used when the ConcurrentAccessController
      look up from ConfigurationContext */
     private String key;
@@ -82,6 +87,7 @@ public class APIThrottleHandler extends AbstractHandler {
     public APIThrottleHandler() {
         this.accessController = new AccessRateController();
         this.roleBasedAccessController = new RoleBasedAccessRateController();
+        this.applicationRoleBasedAccessController = new RoleBasedAccessRateController();
     }
 
     public boolean handleRequest(MessageContext messageContext) {
@@ -97,26 +103,25 @@ public class APIThrottleHandler extends AbstractHandler {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
         ConfigurationContext cc = axis2MC.getConfigurationContext();
-        if (throttle == null) {
-            synchronized (this) {
-                if (throttle == null) {
-                    ClusteringAgent clusteringAgent = cc.getAxisConfiguration().getClusteringAgent();
-                    isClusteringEnable = (clusteringAgent != null &&
-                            clusteringAgent.getStateManager() != null);
-
-                    if (!isResponse) {
-                        //check the availability of the ConcurrentAccessController
-                        //if this is a clustered environment
-                        if (isClusteringEnable) {
-                            concurrentAccessController = (ConcurrentAccessController) cc.getProperty(key);
-                        }
-                        initThrottle(messageContext, cc);
-                    } else {
-                        // if the message flow path is OUT , then must lookup from ConfigurationContext -
-                        // never create ,just get the existing one
-                        concurrentAccessController = (ConcurrentAccessController) cc.getProperty(key);
-                    }
+        synchronized (this) {
+            if ((throttle == null && !isResponse) || (isResponse && concurrentAccessController == null)) {
+                ClusteringAgent clusteringAgent = cc.getAxisConfiguration().getClusteringAgent();
+                if (clusteringAgent != null && clusteringAgent.getStateManager() != null) {
+                    isClusteringEnable = true;
                 }
+            }
+
+            if (!isResponse) {
+                //check the availability of the ConcurrentAccessController
+                //if this is a clustered environment
+                if (isClusteringEnable) {
+                    concurrentAccessController = (ConcurrentAccessController) cc.getProperty(key);
+                }
+                initThrottle(messageContext, cc);
+            } else {
+                // if the message flow path is OUT , then must lookup from ConfigurationContext -
+                // never create ,just get the existing one
+                concurrentAccessController = (ConcurrentAccessController) cc.getProperty(key);
             }
         }
 
@@ -149,6 +154,14 @@ public class APIThrottleHandler extends AbstractHandler {
     }
 
     private void handleThrottleOut(MessageContext messageContext) {
+        //TODO: Hardcoded const should be moved to a common place which is visible to org.wso2.carbon.apimgt.gateway.handlers
+        String applicationName = (String) messageContext.getProperty("APPLICATION_NAME");
+
+        String apiURL = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
+        if(log.isDebugEnabled()){
+        logMessageDetails(messageContext);
+        }
+        //log.debug("Message throttled out for application-name:" + applicationName + ", api-url:" + apiURL + ".");
         messageContext.setProperty(SynapseConstants.ERROR_CODE, 900800);
         messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, "Message throttled out");
 
@@ -160,22 +173,14 @@ public class APIThrottleHandler extends AbstractHandler {
             return;
         }
 
-        // By default we send a 401 response back
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-
-        axis2MC.setProperty(NhttpConstants.HTTP_SC, HttpStatus.SC_SERVICE_UNAVAILABLE);
-        messageContext.setResponse(true);
-        messageContext.setProperty("RESPONSE", "true");
-        messageContext.setTo(null);
+        // By default we send a 503 response back
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
             Utils.setFaultPayload(messageContext, getFaultPayload());
         } else {
             Utils.setSOAPFault(messageContext, "Server", "Message Throttled Out",
                     "You have exceeded your quota");
         }
-        axis2MC.removeProperty("NO_ENTITY_BODY");
-        Axis2Sender.sendBack(messageContext);
+        Utils.sendFault(messageContext, HttpStatus.SC_SERVICE_UNAVAILABLE);
     }
 
     private OMElement getFaultPayload() {
@@ -232,17 +237,22 @@ public class APIThrottleHandler extends AbstractHandler {
         String callerId = null;
         boolean canAccess = true;
         //remote ip of the caller
-        String remoteIP = (String) axisMC.getPropertyNonReplicable(
-                org.apache.axis2.context.MessageContext.REMOTE_ADDR);
-        //domain name of the caller
+        String remoteIP = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("X-Forwarded-For");
+        if(remoteIP!=null){
+        if (remoteIP.indexOf(",") > 0) {
+            remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
+        }
+        }else {
+            remoteIP = (String) axisMC.getProperty("REMOTE_ADDR");
+        } //domain name of the caller
         String domainName = (String) axisMC.getPropertyNonReplicable(NhttpConstants.REMOTE_HOST);
 
         //Using remote caller domain name , If there is a throttle configuration for
         // this domain name ,then throttling will occur according to that configuration
         if (domainName != null) {
             // do the domain based throttling
-            if (log.isDebugEnabled()) {
-                log.debug("The Domain Name of the caller is :" + domainName);
+            if (log.isTraceEnabled()) {
+                log.trace("The Domain Name of the caller is :" + domainName);
             }
             // loads the DomainBasedThrottleContext
             ThrottleContext context
@@ -375,16 +385,24 @@ public class APIThrottleHandler extends AbstractHandler {
         if (!synCtx.isResponse()) {
             // gets the remote caller role name
             AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
-            String consumerKey;
+            String accessToken;
             String roleID;
+            String applicationId;
+            String applicationTier;
+            
             if (authContext != null) {
-                consumerKey = authContext.getApiKey();
+                //Although the method says getApiKey, what is actually returned is the Bearer header (accessToken)
+                accessToken = authContext.getApiKey();
                 roleID = authContext.getTier();
-                if (consumerKey == null || roleID == null) {
+                applicationTier = authContext.getApplicationTier();
+                applicationId = authContext.getApplicationId();
+
+                if (accessToken == null || roleID == null) {
                     log.warn("No consumer key or role information found on the request - " +
                             "Throttling not applied");
                     return true;
-                } else if (APIConstants.UNLIMITED_TIER.equals(roleID)) {
+                } else if (APIConstants.UNLIMITED_TIER.equals(roleID) &&
+                           APIConstants.UNLIMITED_TIER.equals(applicationTier)) {
                     return true;
                 }
             } else {
@@ -405,7 +423,69 @@ public class APIThrottleHandler extends AbstractHandler {
             //Loads the ThrottleConfiguration
             ThrottleConfiguration config = context.getThrottleConfiguration();
             if (config != null) {
-                //check for configuration for this caller
+
+                String applicationRoleId = null;
+                //If an application level tier has been specified and it is not 'Unlimited'
+                if(applicationTier != null && !APIConstants.UNLIMITED_TIER.equals(applicationTier)){
+                    //Get the configuration role of the application
+                    applicationRoleId = config.getConfigurationKeyOfCaller(applicationTier);
+                }
+
+                AccessInformation info = null;
+                //If application level throttling is applied
+                if(applicationRoleId != null){
+
+                    ThrottleContext applicationThrottleContext =
+                            ApplicationThrottleController.getApplicationThrottleContext(synCtx, cc, applicationId);
+                    if (isClusteringEnable) {
+                        applicationThrottleContext.setConfigurationContext(cc);
+                        applicationThrottleContext.setThrottleId(id);
+                    }
+                    //First throttle by application
+                    try {
+                        info = applicationRoleBasedAccessController.canAccess(applicationThrottleContext, applicationId, applicationRoleId);
+                        if(log.isDebugEnabled()){
+                            log.debug("Throttle by Application " + applicationId);
+                            log.debug("Allowed = " + info != null ? info.isAccessAllowed() : "false");
+                        }
+                    } catch (ThrottleException e) {
+                        log.warn("Exception occurred while performing role " +
+                                "based throttling", e);
+                        canAccess = false;
+                    }
+
+                    //check for the permission for access
+                    if (info != null && !info.isAccessAllowed()) {
+
+                        //In the case of both of concurrency throttling and
+                        //rate based throttling have enabled ,
+                        //if the access rate less than maximum concurrent access ,
+                        //then it is possible to occur death situation.To avoid that reset,
+                        //if the access has denied by rate based throttling
+                        if (cac != null) {
+                            cac.incrementAndGet();
+                            // set back if this is a clustered env
+                            if (isClusteringEnable) {
+                                cc.setProperty(key, cac);
+                                //replicate the current state of ConcurrentAccessController
+                                try {
+                                    Replicator.replicate(cc, new String[]{key});
+                                } catch (ClusteringFault clusteringFault) {
+                                    log.error("Error during replicating states", clusteringFault);
+                                }
+                            }
+                        }
+                        canAccess = false;
+                        return canAccess;
+                    }
+                }
+
+                //If API Level throttling tier is Unlimited
+                if (APIConstants.UNLIMITED_TIER.equals(roleID)) {
+                    return true;
+                }
+
+                //check for configuration role of the caller
                 String consumerRoleID = config.getConfigurationKeyOfCaller(roleID);
                 if (consumerRoleID != null) {
                     // If this is a clustered env.
@@ -414,10 +494,14 @@ public class APIThrottleHandler extends AbstractHandler {
                         context.setThrottleId(id);
                     }
 
-                    AccessInformation info = null;
                     try {
-                        info = roleBasedAccessController.canAccess(context, consumerKey,
-                                consumerRoleID);
+                        //If the application has not been subscribed to the Unlimited Tier and
+                        //if application level throttling has passed
+                        if(!APIConstants.UNLIMITED_TIER.equals(roleID) &&
+                           (info == null || info.isAccessAllowed())){
+                             //Throttle by access token
+                             info = roleBasedAccessController.canAccess(context, accessToken, consumerRoleID);
+                        }
                     } catch (ThrottleException e) {
                         log.warn("Exception occurred while performing role " +
                                 "based throttling", e);
@@ -465,17 +549,21 @@ public class APIThrottleHandler extends AbstractHandler {
             handleException("Cannot find throttling policy using key: " + policyKey);
             return;
         }
-
+        Object entryValue = null;
         boolean reCreate = false;
-        // if the key refers to a dynamic resource
+
         if (entry.isDynamic()) {
-            if ((!entry.isCached() || entry.isExpired()) && version != entry.getVersion()) {
-                reCreate = true;
+            if ((!entry.isCached()) || (entry.isExpired()) || throttle == null) {
+                entryValue = synCtx.getEntry(this.policyKey);
+                if (this.version != entry.getVersion()) {
+                    reCreate = true;
+                }
             }
+        } else if (this.throttle == null) {
+            entryValue = synCtx.getEntry(this.policyKey);
         }
 
         if (reCreate || throttle == null) {
-            Object entryValue = synCtx.getEntry(policyKey);
             if (entryValue == null || !(entryValue instanceof OMElement)) {
                 handleException("Unable to load throttling policy using key: " + policyKey);
                 return;
@@ -539,4 +627,50 @@ public class APIThrottleHandler extends AbstractHandler {
         log.error(msg);
         throw new SynapseException(msg);
     }
+
+    private void logMessageDetails(MessageContext messageContext) {
+        //TODO: Hardcoded const should be moved to a common place which is visible to org.wso2.carbon.apimgt.gateway.handlers
+        String applicationName = (String) messageContext.getProperty("APPLICATION_NAME");
+        String endUserName = (String) messageContext.getProperty("END_USER_NAME");
+        Date incomingReqTime = new Date();
+        //Do not change this log format since its using by some external apps
+        org.apache.axis2.context.MessageContext axisMC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        String logMessage = "";
+        if (applicationName != null) {
+            logMessage = " belonging to appName=" + applicationName;
+        }
+        if (endUserName != null) {
+            logMessage = logMessage + " userName=" + endUserName;
+        }
+        String logID = axisMC.getOptions().getMessageId();
+        if (logID != null) {
+            logMessage = logMessage + " transactionId=" + logID;
+        }
+        try{
+        String userAgent = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("User-Agent");
+        if (userAgent != null) {
+            logMessage = logMessage + " with userAgent=" + userAgent;
+        }
+        }catch (Exception e){
+            log.debug("Error while getting User Agent for request");
+        }
+        String requestURI = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
+        long reqIncomingTimestamp = Long.parseLong((String) ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext().getProperty("wso2statistics.request.received.time"));
+        incomingReqTime = new Date(reqIncomingTimestamp);
+        if (incomingReqTime != null) {
+            logMessage = logMessage + " at requestTime=" + incomingReqTime;
+        }
+        //If gateway is fronted by hardware load balancer client ip should retrieve from x forward for header
+        String remoteIP = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("X-Forwarded-For");
+        if(remoteIP==null){
+            remoteIP = (String) axisMC.getProperty("REMOTE_ADDR");
+        }
+        //null check before add it to log message
+        if (remoteIP != null) {
+            logMessage = logMessage + " from clientIP=" + remoteIP;
+        }
+     log.debug("Message throttled out Details:" + logMessage);
+    }
+
 }

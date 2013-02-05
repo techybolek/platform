@@ -33,7 +33,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.w3c.dom.Element;
 import org.wso2.carbon.bpel.b4p.extension.BPEL4PeopleConstants;
-import org.wso2.carbon.businessprocesses.common.Constants;
+import org.wso2.carbon.bpel.common.constants.Constants;
 
 import javax.wsdl.*;
 import javax.wsdl.extensions.ElementExtensible;

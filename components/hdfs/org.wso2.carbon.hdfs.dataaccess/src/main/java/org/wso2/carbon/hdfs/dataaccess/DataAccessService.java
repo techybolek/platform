@@ -29,14 +29,18 @@ import java.io.IOException;
  * Data Access connector
  */
 public class DataAccessService {
-    private static Log log = LogFactory.getLog(DataAccessService.class) ;
-     private final DataAccessComponentManager dataAccessComponentManager = DataAccessComponentManager.getInstance();
+    private static Log log = LogFactory.getLog(DataAccessService.class);
+    private final DataAccessComponentManager dataAccessComponentManager = DataAccessComponentManager.getInstance();
 
-
-    public void DataAccessService(){
+    public void DataAccessService() {
 
     }
 
+    /**
+     * Create connection to HDFS cluster with current user credentials.
+     * @return file system connection.
+     * @throws IOException
+     */
     public FileSystem mountCurrentUserFileSystem() throws IOException {
         //get the current login user from carbon and
         //get the user file sytem connection object form a list if possible
@@ -52,26 +56,29 @@ public class DataAccessService {
         }
 
         Configuration configuration = dataAccessComponentManager.getClusterConfiguration();
-        configuration.set("userName",userName);
+        configuration.set("userName", userName);
         //SharedKeyAdminClient sharedKeyAdminClient = new SharedKeyAdminClient();
         //configuration.set("userPassword",sharedKeyAdminClient.getSharedKey());
 
         FileSystem fileSystem = FileSystem.get(configuration);
         return fileSystem;
     }
+
     /**
      * Create connection with HDFS cluster
+     *
      * @param fsConfiguration
      * @return
      * @throws IOException
      */
     public FileSystem mountFileSystem(Configuration fsConfiguration) throws IOException {
-                  FileSystem fileSystem = FileSystem.get(fsConfiguration);
+        FileSystem fileSystem = FileSystem.get(fsConfiguration);
         return fileSystem;
     }
 
     /**
      * Close the HDFS file system connecion with HDFS cluster
+     *
      * @param fileSystem
      * @throws IOException
      */
@@ -79,6 +86,10 @@ public class DataAccessService {
         fileSystem.close();
     }
 
+    /**
+     * Close all file system connections.
+     * @throws IOException
+     */
     public void unmountAllFileSystems() throws IOException {
         FileSystem.closeAll();
     }

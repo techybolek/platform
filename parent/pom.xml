@@ -6,7 +6,7 @@
     <groupId>org.wso2.carbon</groupId>
     <artifactId>platform-parent</artifactId>
     <packaging>pom</packaging>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.0</version>
     <name>WSO2 Carbon - Platform Parent Pom</name>
     <description>Platform Parent pom hold the properties, plugins which are required to build carbon components, carbon features and products</description>
     <url>http://wso2.org</url>
@@ -46,13 +46,7 @@
             <id>wso2-maven2-repository-2</id>
             <url>http://dist.wso2.org/snapshots/maven2</url>
         </pluginRepository>
-        <pluginRepository>
-            <id>repository.dev.java.net-maven2</id>
-            <name>Java.net Repository for Maven</name>
-            <url>http://download.java.net/maven/2/</url>
-            <layout>default</layout>
-        </pluginRepository>
-    </pluginRepositories>
+     </pluginRepositories>
 
     <build>
         <extensions>
@@ -144,14 +138,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Carbon platform version comes here-->
-        <carbon.platform.version>4.0.0-SNAPSHOT</carbon.platform.version>
-        <carbon.platform.package.export.version>4.0.0.SNAPSHOT
+        <carbon.platform.version>4.0.0</carbon.platform.version>
+        <carbon.platform.package.export.version>4.0.0
         </carbon.platform.package.export.version>
-        <carbon.platform.package.import.version.range>[4.0.0.SNAPSHOT, 4.1.0)
+        <carbon.platform.package.import.version.range>[4.0.0, 4.1.0)
         </carbon.platform.package.import.version.range>
 
         <!-- Stratos Version -->
-        <stratos.version>2.0.0-SNAPSHOT</stratos.version>
+        <stratos.version>2.0.0</stratos.version>
 
         <!-- Equinox dependency versions -->
         <version.equinox.osgi>3.5.0.v20090520</version.equinox.osgi>
@@ -160,14 +154,14 @@
         <version.equinox.simpleconfigurator>1.0.100.v20090520-1905
         </version.equinox.simpleconfigurator>
 
-        <carbon.p2.plugin.version>1.5-SNAPSHOT</carbon.p2.plugin.version>
+        <carbon.p2.plugin.version>1.5</carbon.p2.plugin.version>
 
         <axis2.osgi.version>1.6.1.wso2v5</axis2.osgi.version>
         <axis2.osgi.version.range>[1.6.1.wso2v1, 1.7.0)</axis2.osgi.version.range>
         <axiom.osgi.version>1.2.11.wso2v2</axiom.osgi.version>
         <axiom.osgi.version.range>[1.2.11.wso2v2, 1.3.0)</axiom.osgi.version.range>
-        <neethi.osgi.version>2.0.4.wso2v3</neethi.osgi.version>
-        <neethi.osgi.version.range>[2.0.4.wso2v3, 3.1.0)</neethi.osgi.version.range>
+        <neethi.osgi.version>2.0.4.wso2v4</neethi.osgi.version>
+        <neethi.osgi.version.range>[2.0.4.wso2v4, 3.1.0)</neethi.osgi.version.range>
         <xmlsec.version>1.4.2-patched</xmlsec.version>
 
         <!-- H2 Database Engine -->
@@ -185,10 +179,10 @@
         <exp.pkg.version.abdera>1.0.0.wso2v2</exp.pkg.version.abdera>
         <imp.pkg.version.abdera>[1.0.0.wso2v2, 2)</imp.pkg.version.abdera>
 
-        <!-- Apache Neethi -->
-        <orbit.version.neethi>2.0.4.wso2v3</orbit.version.neethi>
-        <exp.pkg.version.neethi>2.0.4.wso2v3</exp.pkg.version.neethi>
-        <imp.pkg.version.neethi>[2.0.4.wso2v3, 3.0.0)</imp.pkg.version.neethi>
+        <!-- Apache  -->
+        <orbit.version.neethi>2.0.4.wso2v4</orbit.version.neethi>
+        <exp.pkg.version.neethi>2.0.4.wso2v4</exp.pkg.version.neethi>
+        <imp.pkg.version.neethi>[2.0.4.wso2v4, 3.0.0)</imp.pkg.version.neethi>
 
         <!-- Apache Axiom -->
         <orbit.version.axiom>1.2.11.wso2v2</orbit.version.axiom>
@@ -238,8 +232,8 @@
         <orbit.version.apacheds>1.5.7.wso2v2</orbit.version.apacheds>
         <orbit.version.wss4j>1.5.11.wso2v3</orbit.version.wss4j>
         <orbit.version.geronimo-jms_1.1_spec>1.1.0.wso2v1</orbit.version.geronimo-jms_1.1_spec>
-	<orbit.version.httpcore>4.1.0-wso2v1</orbit.version.httpcore>
-        <orbit.version.wsdl4j>1.6.2.wso2v3</orbit.version.wsdl4j>
+		<orbit.version.httpcore>4.1.0-wso2v1</orbit.version.httpcore>
+        <orbit.version.wsdl4j>1.6.2.wso2v4</orbit.version.wsdl4j>
         <orbit.version.poi>3.5.0.wso2v1</orbit.version.poi>
         <orbit.version.commons.httpclient>3.1.0.wso2v2</orbit.version.commons.httpclient>
         <orbit.version.commons.pool>1.5.6.wso2v1</orbit.version.commons.pool>
@@ -268,10 +262,10 @@
         <bouncycastle.version>132</bouncycastle.version>
 
         <!--Apache ODE-->
-        <orbit.version.ode>1.3.5-SNAPSHOT.wso2v2</orbit.version.ode>
+        <orbit.version.ode>1.3.5.wso2v5</orbit.version.ode>
 
         <!--BPS specific-->
-        <saxon-he.wso2.version>9.4.wso2v1-SNAPSHOT</saxon-he.wso2.version>
+        <saxon-he.wso2.version>9.4.0.wso2v1</saxon-he.wso2.version>
 
         <!--Apache Geronimo-->
         <version.geronimo.specs.geronimo-jpa_2.0_spec>1.0
@@ -309,7 +303,7 @@
 	<securevault.version>1.0.0</securevault.version>
 
         <!-- WSO2 XACML (balana) version  -->
-	<balana.version>1.0.0-SNAPSHOT</balana.version>	
+	<balana.version>1.0.0-wso2v1</balana.version>	
 
 	<version.commons.logging>1.1.1</version.commons.logging>
 
@@ -325,7 +319,11 @@
         <jboss-transaction-api.version>1.0.0.Final</jboss-transaction-api.version>
 	
 	<!--WSO2 Charon-->
-	<version.charon>1.0.0-SNAPSHOT</version.charon>
+	<version.charon>1.0.0-wso2v1</version.charon>
 	<exp.pkg.version.charon>1.0.0.wso2v1</exp.pkg.version.charon>
+	
+	<!-- XML Schema -->
+	<orbit.version.xmlschema>1.4.7.wso2v2</orbit.version.xmlschema>
+
     </properties>
 </project>

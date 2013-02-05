@@ -35,8 +35,20 @@ public abstract class AbstractDataReceiver implements DataBridgeReceiverService 
 
     @Override
     public String findStreamId(String sessionId, String streamName, String streamVersion)
-            throws NoStreamDefinitionExistException, SessionTimeoutException {
+            throws SessionTimeoutException {
         return getDatabridgeReceiver().findStreamId(sessionId, streamName, streamVersion);
+    }
+
+    @Override
+    public boolean deleteStream(String sessionId, String streamId)
+            throws SessionTimeoutException {
+        return getDatabridgeReceiver().deleteStream(sessionId, streamId);
+    }
+
+    @Override
+    public boolean deleteStream(String sessionId, String streamName, String streamVersion)
+            throws SessionTimeoutException {
+        return getDatabridgeReceiver().deleteStream(sessionId, streamName, streamVersion);
     }
 
     @Override

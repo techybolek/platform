@@ -73,7 +73,8 @@ public class OAuthServiceClient {
 	 */
 	public boolean validateAuthenticationRequest(Parameters params) throws Exception {
 		try {
-			return stub.validateAuthenticationRequest(params);
+		    stub.validateAuthenticationRequest(params);
+		    return true;
 		} catch (RemoteException e) {
 			log.error("Error while validating OAuth consumer credentials with 3-legged OAuth");
 			throw new Exception(

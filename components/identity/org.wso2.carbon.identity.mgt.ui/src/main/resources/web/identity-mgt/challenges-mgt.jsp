@@ -28,9 +28,9 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Arrays" %>
 <%@ page import="org.wso2.carbon.identity.mgt.stub.dto.ChallengeQuestionDTO" %>
-<%@ page import="org.wso2.carbon.identity.mgt.ui.IdentityManagementClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.identity.mgt.ui.IdentityManagementAdminClient" %>
 <script type="text/javascript" src="extensions/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
 
@@ -41,7 +41,8 @@
     String editRowId =  CharacterEncoder.getSafeText(request.getParameter("editRowId"));
     String addRowId = CharacterEncoder.getSafeText(request.getParameter("addRowId"));
     String setName = CharacterEncoder.getSafeText(request.getParameter("setName"));
-    challenges = (List<ChallengeQuestionDTO>) session.getAttribute(IdentityManagementClient.CHALLENGE_QUESTION);
+    challenges = (List<ChallengeQuestionDTO>) session.
+                                    getAttribute(IdentityManagementAdminClient.CHALLENGE_QUESTION);
 
     if(challenges == null){
         try {
@@ -52,14 +53,14 @@
             ConfigurationContext configContext = (ConfigurationContext) config
                     .getServletContext()
                     .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
-            IdentityManagementClient client =
-                    new IdentityManagementClient(cookie, backendServerURL, configContext) ;
+            IdentityManagementAdminClient client =
+                    new IdentityManagementAdminClient(cookie, backendServerURL, configContext) ;
 
             ChallengeQuestionDTO[] questionDTOs = client.getChallengeQuestions();
 
             if(questionDTOs != null && questionDTOs.length > 0){
                 challenges = new ArrayList<ChallengeQuestionDTO>(Arrays.asList(questionDTOs));
-                session.setAttribute(IdentityManagementClient.CHALLENGE_QUESTION, challenges);
+                session.setAttribute(IdentityManagementAdminClient.CHALLENGE_QUESTION, challenges);
             }
         } catch (Exception e) {
             CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR,
@@ -100,7 +101,7 @@
 
     }
 
-    session.setAttribute(IdentityManagementClient.CHALLENGE_QUESTION, challenges);
+    session.setAttribute(IdentityManagementAdminClient.CHALLENGE_QUESTION, challenges);
 %>
         
 <fmt:bundle basename="org.wso2.carbon.userstore.ui.i18n.Resources">
@@ -201,8 +202,7 @@
                              %>
                             <tr>
                                 <td width="60%">
-                                      <input type="text" name="question<%=i+1%>" id="question<%=i+1%>"
-                                             size="60" readonly="readonly" value="<%=challenges.get(i).getQuestion()%>"/>
+                                      <%=challenges.get(i).getQuestion()%>
                                 </td>
                                 <td width="40%">
                                     <a onclick="removeRow('<%=i%>')" style='background-image:url(images/delete.gif);' type="button" class="icon-link">Delete</a>
@@ -226,18 +226,21 @@
                                     }
                                 }
                             %>
+                            
                             </tbody>
                         </table>
                     </td>
 
                 </tr>
+                
             </table>
             <tr>
-                <td class="buttonRow">
-                <input type="submit"  value="Submit"  class="button"/>
-                <input type="button" value="Cancel" onclick="cancelForm();"  class="button"/>
-                </td>
-            </tr>
+                		<td class="buttonRow">
+                					<input type="submit"  value="Submit"  class="button"/>
+                					<input type="button" value="Cancel" onclick="cancelForm();"  class="button"/>
+                				</td>
+            				</tr>
+            
         </div>
         </form>
     </div>

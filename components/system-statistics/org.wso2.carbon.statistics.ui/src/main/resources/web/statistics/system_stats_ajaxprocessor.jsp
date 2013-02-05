@@ -18,14 +18,12 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
-<%@ page import="org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext" %>
 <%@ page import="org.wso2.carbon.statistics.stub.types.carbon.SystemStatistics" %>
 <%@ page import="org.wso2.carbon.statistics.ui.StatisticsAdminClient" %>
 <%@ page import="org.wso2.carbon.statistics.ui.Utils" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@ page import="org.wso2.carbon.utils.multitenancy.CarbonContextHolder" %>
 
 <%
     response.setHeader("Cache-Control", "no-cache");

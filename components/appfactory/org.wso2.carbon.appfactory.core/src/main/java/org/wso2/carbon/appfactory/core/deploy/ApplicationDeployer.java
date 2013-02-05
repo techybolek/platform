@@ -23,12 +23,21 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
 import org.wso2.carbon.appfactory.common.AppFactoryConstants;
 import org.wso2.carbon.appfactory.common.AppFactoryException;
 import org.wso2.carbon.appfactory.core.ArtifactStorage;
 import org.wso2.carbon.appfactory.core.internal.ServiceHolder;
 import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
+import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.webapp.mgt.stub.types.carbon.WebappUploadData;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
@@ -47,7 +56,6 @@ import java.net.URL;
 public class ApplicationDeployer {
 
     private static final Log log = LogFactory.getLog(ApplicationDeployer.class);
-    private static final String NOTIFICATION_EPR = "https://localhost:9443/services/EventNotificationService";
     private static final String EVENT = "deployment";
 
     /**
@@ -72,6 +80,7 @@ public class ApplicationDeployer {
 
         ArtifactStorage storage = ServiceHolder.getArtifactStorage();
         File file = storage.retrieveArtifact(applicationId, version, revision);
+        DataHandler dataHandler = new DataHandler(new FileDataSource(file));
 
         String key =
                      new StringBuilder(AppFactoryConstants.DEPLOYMENT_STAGES).append(".")
@@ -89,6 +98,23 @@ public class ApplicationDeployer {
 
         ArtifactDeploymentStatusBean[] artifactDeploymentStatuses =
                                                                    new ArtifactDeploymentStatusBean[deploymentServerUrls.length];
+        String applicationType;
+        //   todo resolve cyclic dependency to utilities and use it
+        try {
+            RegistryService registryService = ServiceHolder.getInstance().getRegistryService();
+            UserRegistry userRegistry = registryService.getGovernanceSystemRegistry();
+            Resource resource = userRegistry.get(AppFactoryConstants.REGISTRY_APPLICATION_PATH +
+                                                 File.separator + applicationId + File.separator + "appinfo");
+            GovernanceUtils.loadGovernanceArtifacts(userRegistry);
+            GenericArtifactManager artifactManager = new GenericArtifactManager(userRegistry, "application");
+            GenericArtifact artifact = artifactManager.getGenericArtifact(resource.getUUID());
+            applicationType = artifact.getAttribute("application_type");
+        } catch (RegistryException e) {
+            String errorMsg =
+                    String.format("Unable to find the application type for applicaiton id: %s", applicationId);
+            log.error(errorMsg, e);
+            throw new AppFactoryException(errorMsg, e);
+        }
 
         for (int i = 0; i < deploymentServerUrls.length; i++) {
             try {
@@ -99,34 +125,58 @@ public class ApplicationDeployer {
                                                             new ArtifactUploadClient(
                                                                                      deploymentServerUrls[i]);
 
-                UploadedFileItem uploadedFileItem = new UploadedFileItem();
-                DataHandler dataHandler = new DataHandler(new FileDataSource(file));
-                uploadedFileItem.setDataHandler(dataHandler);
-                uploadedFileItem.setFileName(file.getName());
-                uploadedFileItem.setFileType("jar");
-                UploadedFileItem[] uploadedFileItems = { uploadedFileItem };
+                if (AppFactoryConstants.FILE_TYPE_CAR.equals(applicationType)) {
+                    UploadedFileItem uploadedFileItem = new UploadedFileItem();
+                    uploadedFileItem.setDataHandler(dataHandler);
+                    uploadedFileItem.setFileName(file.getName());
+                    uploadedFileItem.setFileType("jar");
+                    UploadedFileItem[] uploadedFileItems = {uploadedFileItem};
 
-                if (artifactUploadClient.authenticate(getAdminUsername(applicationId),
-                                                      getServerAdminPassword(),
-                                                      deploymentServerIp)) {
+                    if (artifactUploadClient.authenticate(getAdminUsername(applicationId),
+                                                          getServerAdminPassword(),
+                                                          deploymentServerIp)) {
 
-                    artifactUploadClient.uploadCarbonApp(uploadedFileItems);
-                    log.debug(file.getName() + " is successfully uploaded.");
-                } else {
-                    handleException("Failed to login to " + deploymentServerIp +
-                                    " to deploy the artifact:" + file.getName());
+                        artifactUploadClient.uploadCarbonApp(uploadedFileItems);
+                        log.debug(file.getName() + " is successfully uploaded.");
+                        artifactDeploymentStatuses[i] =
+                                new ArtifactDeploymentStatusBean(
+                                        applicationId,
+                                        stage,
+                                        version,
+                                        revision,
+                                        deploymentServerUrls[i],
+                                        "success",
+                                        null);
+                    } else {
+                        handleException("Failed to login to " + deploymentServerIp +
+                                        " to deploy the artifact:" + file.getName());
+                    }
+
+                } else if (AppFactoryConstants.FILE_TYPE_WAR.equals(applicationType)) {
+                    WebappUploadData webappUploadData = new WebappUploadData();
+                    webappUploadData.setDataHandler(dataHandler);
+                    webappUploadData.setFileName(file.getName());
+                    WebappUploadData[] webappUploadDataItems = {webappUploadData};
+                    if (artifactUploadClient.authenticate(getAdminUsername(applicationId),
+                                                          getServerAdminPassword(),
+                                                          deploymentServerIp)) {
+
+                        artifactUploadClient.uploadWebApp(webappUploadDataItems);
+                        log.debug(file.getName() + " is successfully uploaded.");
+                        artifactDeploymentStatuses[i] =
+                                new ArtifactDeploymentStatusBean(
+                                        applicationId,
+                                        stage,
+                                        version,
+                                        revision,
+                                        deploymentServerUrls[i],
+                                        "success",
+                                        null);
+                    } else {
+                        handleException("Failed to login to " + deploymentServerIp +
+                                        " to deploy the artifact:" + file.getName());
+                    }
                 }
-
-                artifactDeploymentStatuses[i] =
-                                                new ArtifactDeploymentStatusBean(
-                                                                                 applicationId,
-                                                                                 stage,
-                                                                                 version,
-                                                                                 revision,
-                                                                                 deploymentServerUrls[i],
-                                                                                 "success",
-                                                                                 null);
-
             } catch (Exception e) {
 
                 artifactDeploymentStatuses[i] =
@@ -206,10 +256,10 @@ public class ApplicationDeployer {
                 } catch (InterruptedException ignored) {
                 }
                 try {
-                    //Create a service client
-                    ServiceClient client = new ServiceClient();
+                    AppFactoryConfiguration configuration = ServiceHolder.getAppFactoryConfiguration();
+                    final String NOTIFICATION_EPR = configuration.getFirstProperty(AppFactoryConstants.APPFACTORY_SERVER_URL) + "EventNotificationService";
 
-                    //Set the endpoint address
+                    ServiceClient client = new ServiceClient();
                     client.getOptions().setTo(new EndpointReference(NOTIFICATION_EPR));
                     CarbonUtils.setBasicAccessSecurityHeaders(getAdminUsername(), getServerAdminPassword(), false, client);
 
@@ -237,5 +287,65 @@ public class ApplicationDeployer {
                          "</ser:event></ser:publishEvent>";
         return new StAXOMBuilder(new ByteArrayInputStream(payload.getBytes())).getDocumentElement();
     }
+
+    /**
+     * Deleting an application from given environment
+     *
+     * @param stage
+     *              Stage to identify the environment
+     * @param applicationId
+     *              Application ID which needs to delete
+     * @return
+     *              boolean
+     * @throws AppFactoryException
+     *              An error
+     */
+    public boolean unDeployArtifact(String stage, String applicationId)
+            throws AppFactoryException {
+
+        log.info("Deleting application: " + applicationId + ", from: " + stage + " stage");
+
+        String key =
+                new StringBuilder(AppFactoryConstants.DEPLOYMENT_STAGES).append(".")
+                        .append(stage)
+                        .append(".")
+                        .append(AppFactoryConstants.DEPLOYMENT_URL)
+                        .toString();
+
+        String[] deploymentServerUrls =
+                ServiceHolder.getAppFactoryConfiguration()
+                        .getProperties(key);
+
+        if (deploymentServerUrls.length == 0) {
+            handleException("No deployment paths are configured for stage:" + stage);
+        }
+
+        for (int i = 0; i < deploymentServerUrls.length; i++) {
+            try {
+                String deploymentServerIp =
+                        getDeploymentHostFromUrl(deploymentServerUrls[i]);
+
+                ApplicationDeleteClient applicationDeleteClient = new
+                        ApplicationDeleteClient(deploymentServerUrls[i]);
+
+                if (applicationDeleteClient.authenticate(getAdminUsername(applicationId),
+                        getServerAdminPassword(),
+                        deploymentServerIp)) {
+
+                    applicationDeleteClient.deleteCarbonApp(applicationId);
+                    log.debug(applicationId + " is successfully undeployed.");
+                } else {
+                    handleException("Failed to login to " + deploymentServerIp +
+                            " to undeploy the artifact:" + applicationId);
+                }
+
+            } catch (Exception e) {
+
+            }
+        }
+
+        return true;
+    }
+
 
 }

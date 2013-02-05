@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 20012, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) , WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.bpel.bam.publisher.ConfigurationContextObserverImpl;
-import org.wso2.carbon.bpel.bam.publisher.TenantBamAgentHolder;
+import org.wso2.carbon.bpel.bam.publisher.Axis2ConfigurationContextObserverImpl;
 import org.wso2.carbon.bpel.core.BPELEngineService;
 import org.wso2.carbon.bpel.core.ode.integration.BPELServer;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -43,10 +42,10 @@ public class BAMPublisherServiceComponent {
 
     protected void activate(ComponentContext ctx) {
         this.bundleContext = ctx.getBundleContext();
-        registerAxis2ConfigurationContextObserver();
         if(log.isDebugEnabled()) {
             log.debug("BPEL BAM publisher bundle is activated.");
         }
+        registerAxis2ConfigurationContextObserver();
     }
 
 
@@ -72,20 +71,18 @@ public class BAMPublisherServiceComponent {
         BPELBamPublisherContentHolder.getInstance().setRegistryService(registryService);
     }
 
+    private void registerAxis2ConfigurationContextObserver() {
+        this.bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(),
+                new Axis2ConfigurationContextObserverImpl(),
+                null);
+    }
+
     protected void unsetRegistryService(RegistryService registrySvc) {
         if (log.isDebugEnabled()) {
             log.debug("RegistryService unbound from the BPEL component");
         }
         BPELBamPublisherContentHolder.getInstance().setRegistryService(null);
     }
-
-    private void registerAxis2ConfigurationContextObserver(){
-        this.bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(),
-                                           new ConfigurationContextObserverImpl(),
-                                           null);
-    }
-
-
 
     public static BPELServer getBPELServer() {
         return BPELBamPublisherContentHolder.getInstance().getBpelServer();
@@ -96,7 +93,6 @@ public class BAMPublisherServiceComponent {
     }
 
     protected void deactivate(ComponentContext componentContext) throws Exception {
-        TenantBamAgentHolder.getInstance().removeAgent();
         if (log.isDebugEnabled()) {
             log.debug("Stopping the BPEL BAM publisher component");
         }

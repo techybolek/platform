@@ -26,6 +26,7 @@ import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.components.crypto.CredentialException;
 import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.components.crypto.X509NameTokenizer;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
@@ -92,20 +93,22 @@ public class ServerCrypto implements Crypto {
             IOException {
 
         try {
-        	
-			String tenantId = (String) prop.get(PROP_ID_TENANT_ID);
 
-			if (tenantId == null || tenantId.trim().length() == 0) {
-				registry = SecurityServiceHolder.getRegistryService().getGovernanceSystemRegistry(
-						MultitenantConstants.SUPER_TENANT_ID);
+            int tenantId;
+
+			String tenantIdString = (String) prop.get(PROP_ID_TENANT_ID);
+
+			if (tenantIdString == null || tenantIdString.trim().length() == 0) {
+                tenantId = CarbonContext.getCurrentContext().getTenantId();
 			} else {
-				registry = SecurityServiceHolder.getRegistryService().getGovernanceSystemRegistry(
-						new Integer(tenantId));
-			}
+                tenantId = new Integer(tenantIdString);
+            }
+
+            registry = SecurityServiceHolder.getRegistryService().getGovernanceSystemRegistry(tenantId);
 
             this.properties = prop;
             
-            KeyStoreManager keyMan = KeyStoreManager.getInstance(Integer.parseInt(tenantId));
+            KeyStoreManager keyMan = KeyStoreManager.getInstance(tenantId);
             String ksId = this.properties.getProperty(PROP_ID_PRIVATE_STORE);
             if(ksId != null){
                 this.keystore = keyMan.getKeyStore(ksId);
@@ -139,8 +142,12 @@ public class ServerCrypto implements Crypto {
             cacerts.load(cacertsIs, cacertsPasswd.toCharArray());
 
         } catch (GeneralSecurityException e) {
-            log.error("", e);
-            throw new CredentialException(3, "secError00", e);
+            log.warn("Unable load to cacerts from the JDK.");
+			if (trustStores != null && trustStores.size() > 0) {
+				cacerts = this.trustStores.get(0);
+			} else {
+				throw new CredentialException(3, "secError00", e);
+			}
         } finally {
             cacertsIs.close();
         }

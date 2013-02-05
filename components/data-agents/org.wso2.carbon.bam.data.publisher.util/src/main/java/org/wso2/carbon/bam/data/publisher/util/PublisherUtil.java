@@ -19,69 +19,104 @@
 package org.wso2.carbon.bam.data.publisher.util;
 
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PublisherUtil {
 
+    private static final String PORTS_OFFSET = "Ports.Offset";
+    private static final int CARBON_SERVER_DEFAULT_PORT = 9763;
+
     private static Log log = LogFactory.getLog(PublisherUtil.class);
+    private static final String UNKNOWN_HOST = "UNKNOWN_HOST";
+
+    private static String hostAddressAndPort = null;
+    public static final String CLOUD_DEPLOYMENT_PROP = "IsCloudDeployment";
+    public static final String HOST_NAME = "HostName";
 
 
+    public static String getHostAddress() {
 
-    public static PublisherConfiguration readConfigurationFromAgentConfig() {
-
-        PublisherConfiguration publisherConfiguration = new PublisherConfiguration();
-
-        String publisherConfigPath = CarbonUtils.getCarbonConfigDirPath() + "/" +
-                                     BAMDataPublisherConstants.AGENT_CONFIG;
-        try {
-            OMElement publisherOMElement = new StAXOMBuilder(new FileInputStream(publisherConfigPath)).
-                    getDocumentElement();
-
-            OMElement threadPoolElement = publisherOMElement.getFirstChildWithName(new QName(
-                    BAMDataPublisherConstants.PUBLISHER_CONFIG_THREAD_POOL_ELEMENT));
-            OMElement taskQueueSize = threadPoolElement.getFirstChildWithName(new QName(
-                    BAMDataPublisherConstants.PUBLISHER_CONFIG_TASK_QUEUE_SIZE_ELEMENT));
-            OMElement corePoolSize = threadPoolElement.getFirstChildWithName(new QName(
-                    BAMDataPublisherConstants.PUBLISHER_CONFIG_CORE_POOL_SIZE_ELEMENT));
-            OMElement maxPoolSize = threadPoolElement.getFirstChildWithName(new QName(
-                    BAMDataPublisherConstants.PUBLISHER_CONFIG_MAX_POOL_SIZE_ELEMENT));
-
-            OMElement eventQueueSize = publisherOMElement.getFirstChildWithName(new QName(
-                    BAMDataPublisherConstants.PUBLISHER_CONFIG_EVENT_QUEUE_SIZE_ELEMENT));
-
-            OMElement connectionPoolElement =  publisherOMElement.getFirstChildWithName(new QName(
-                    BAMDataPublisherConstants.PUBLISHER_CONFIG_CONNECTION_POOL_ELEMENT));
-            OMElement maxIdleConnections = connectionPoolElement.getFirstChildWithName(new QName(
-                    BAMDataPublisherConstants.PUBLISHER_CONFIG_MAX_IDLE_SIZE_ELEMENT));
-            OMElement evictionTimePeriod = connectionPoolElement.getFirstChildWithName(new QName(
-                    BAMDataPublisherConstants.PUBLISHER_CONFIG_TIME_GAP_EVICTION_RUN_ELEMENT));
-            OMElement minIdleTimeInPool = connectionPoolElement.getFirstChildWithName(new QName(
-                    BAMDataPublisherConstants.PUBLISHER_CONFIG_MIN_IDLE_TIME_ELEMENT));
-
-
-            publisherConfiguration.setEventQueueSize(Integer.parseInt(eventQueueSize.getText()));
-            publisherConfiguration.setTaskQueueSize(Integer.parseInt(taskQueueSize.getText()));
-            publisherConfiguration.setCorePoolSize(Integer.parseInt(corePoolSize.getText()));
-            publisherConfiguration.setMaxPoolSize(Integer.parseInt(maxPoolSize.getText()));
-
-            publisherConfiguration.setMaxIdleConnections(Integer.parseInt(maxIdleConnections.getText()));
-            publisherConfiguration.setEvictionTimePeriod(Long.parseLong(evictionTimePeriod.getText()));
-            publisherConfiguration.setMinIdleTimeInPool(Long.parseLong(minIdleTimeInPool.getText()));
-
-        } catch (XMLStreamException e) {
-            log.error("Invalid configuration in publisher.xml", e);
-        } catch (FileNotFoundException e) {
-            log.error(publisherConfigPath + " file not found. Using default configurations");
+        if (hostAddressAndPort != null) {
+            return hostAddressAndPort;
         }
-        return publisherConfiguration;
+        String hostAddress =   ServerConfiguration.getInstance().getFirstProperty(HOST_NAME);
+        if(null == hostAddress){
+        hostAddress = getLocalAddress().getHostName();
+        if (hostAddress == null) {
+            hostAddress = UNKNOWN_HOST;
+        }
+        int portsOffset = Integer.parseInt(CarbonUtils.getServerConfiguration().getFirstProperty(
+                PORTS_OFFSET));
+        int portValue = CARBON_SERVER_DEFAULT_PORT + portsOffset;
+        hostAddressAndPort = hostAddress +  ":" + portValue;
+        return hostAddressAndPort;
+        }else {
+            return hostAddress.trim();
+        }
     }
+
+    private static InetAddress getLocalAddress(){
+        Enumeration<NetworkInterface> ifaces = null;
+        try {
+            ifaces = NetworkInterface.getNetworkInterfaces();
+        } catch (SocketException e) {
+            log.error("Failed to get host address", e);
+        }
+        if (ifaces != null) {
+            while (ifaces.hasMoreElements()) {
+                NetworkInterface iface = ifaces.nextElement();
+                Enumeration<InetAddress> addresses = iface.getInetAddresses();
+
+                while (addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
+                        return addr;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static int getTenantId(MessageContext msgContext) {
+
+        int tenantID = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (tenantID == MultitenantConstants.INVALID_TENANT_ID) {
+            AxisConfiguration axisConfiguration = msgContext.getConfigurationContext().getAxisConfiguration();
+            tenantID = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+        }
+        return tenantID;
+    }
+
+     public static ArrayList<String> getReceiverGroups(String urls) {
+        ArrayList<String> matchList = new ArrayList<String>();
+        Pattern regex = Pattern.compile("\\{.*?\\}");
+        Matcher regexMatcher = regex.matcher(urls);
+        while (regexMatcher.find()) {
+            matchList.add(regexMatcher.group().replace("{", "").replace("}", ""));
+        }
+        if (matchList.size() == 0) {
+            matchList.add(urls.replace("{", "").replace("}", ""));
+        }
+        return matchList;
+    }
+
+
 }

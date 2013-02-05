@@ -13,7 +13,7 @@
  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  ~ See the License for the specific language governing permissions and
  ~ limitations under the License.
--->     
+-->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -22,13 +22,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>cassandra-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.cassandra.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Cassandra Feature</name>
+    <version>4.0.5</version>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for Cassandra Management functionality</description>
 
@@ -36,27 +38,33 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cassandra.mgt.feature</artifactId>
-            <version>${wso2carbon.version.cassandra.feature}</version>
+            <version>${carbon.platform.patch.version.405}</version>
             <type>zip</type>
 	    </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cassandra.mgt.ui.feature</artifactId>
-            <version>${wso2carbon.version.cassandra.feature}</version>
+            <version>${carbon.platform.patch.version.402}</version>
             <type>zip</type>
 	    </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cassandra.server.feature</artifactId>
-            <version>${wso2carbon.version.cassandra.feature}</version>
+            <version>${carbon.platform.patch.version.405}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cassandra.dataaccess.feature</artifactId>
-            <version>${wso2carbon.version.cassandra.feature}</version>
+            <version>${carbon.platform.patch.version.405}</version>
             <type>zip</type>
         </dependency>
+        <dependency>
+            <groupId>org.apache.cassandra.wso2</groupId>
+            <artifactId>apache-cassandra</artifactId>
+            <version>1.1.3.wso2v2</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -74,15 +82,15 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.cassandra</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:${project.version}</importFeatureDef>
                             </importFeatures>
-                            <includedFeatures>                                    
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cassandra.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cassandra.dataaccess.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cassandra.mgt.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cassandra.mgt.ui.feature</includedFeatureDef>
+                            <includedFeatures>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cassandra.server.feature:4.0.5</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cassandra.dataaccess.feature:4.0.5</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cassandra.mgt.feature:4.0.5</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cassandra.mgt.ui.feature:4.0.2</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>
@@ -90,5 +98,12 @@
             </plugin>
         </plugins>
     </build>
-    
+
+    <properties>
+        <carbon.platform.patch.version.401>4.0.1</carbon.platform.patch.version.401>
+        <carbon.platform.patch.version.402>4.0.2</carbon.platform.patch.version.402>
+        <carbon.platform.patch.version.403>4.0.3</carbon.platform.patch.version.403>
+        <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>    
+</properties>
+
 </project>

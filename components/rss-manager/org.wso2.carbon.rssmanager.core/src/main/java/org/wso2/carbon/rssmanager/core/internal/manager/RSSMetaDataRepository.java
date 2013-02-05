@@ -19,19 +19,19 @@
 package org.wso2.carbon.rssmanager.core.internal.manager;
 
 import org.apache.commons.collections.keyvalue.MultiKey;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.coordination.common.CoordinationException;
 import org.wso2.carbon.coordination.core.sync.Group;
 import org.wso2.carbon.coordination.core.sync.GroupEventListener;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.RSSManagerException;
-import org.wso2.carbon.rssmanager.core.internal.RSSManagerServiceComponent;
-import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAO;
-import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAOFactory;
 import org.wso2.carbon.rssmanager.core.entity.Database;
 import org.wso2.carbon.rssmanager.core.entity.DatabasePrivilegeTemplate;
 import org.wso2.carbon.rssmanager.core.entity.DatabaseUser;
 import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
+import org.wso2.carbon.rssmanager.core.internal.RSSManagerServiceComponent;
+import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAO;
+import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAOFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -150,8 +150,8 @@ public class RSSMetaDataRepository implements GroupEventListener {
             return;
         }
         try {
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(this.getTenantId());
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(this.getTenantId());
             this.syncGroup =
                     RSSManagerServiceComponent.getCoodrinationService().createGroup(
                             RSSManagerConstants.RSS_MANAGER_SYNC_GROUP_NAME);
@@ -160,7 +160,7 @@ public class RSSMetaDataRepository implements GroupEventListener {
             String msg = "Error occurred while creating RSS Manager sync group: " + e.getMessage();
             throw new RSSManagerException(msg, e);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -180,27 +180,22 @@ public class RSSMetaDataRepository implements GroupEventListener {
         return syncGroup;
     }
 
-    @Override
     public void onLeaderChange(String s) {
 
     }
 
-    @Override
     public void onMemberArrival(String s) {
 
     }
 
-    @Override
     public void onMemberDeparture(String s) {
 
     }
 
-    @Override
     public void onGroupMessage(byte[] bytes) {
 
     }
 
-    @Override
     public byte[] onPeerMessage(byte[] bytes) throws CoordinationException {
         throw new CoordinationException("RSS Manager does not handle group RPC",
                 CoordinationException.ExceptionCode.GENERIC_ERROR);

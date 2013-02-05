@@ -6,13 +6,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>data-bridge-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
+    <version>4.0.7</version>
     <artifactId>org.wso2.carbon.databridge.agent.thrift.server.feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - Data Bridge Thrift Agent Server Feature</name>
+    <name>WSO2 Carbon - Data Bridge - Thrift Agent Server Feature</name>
     <url>http://wso2.org</url>
     <description>Server feature of the Data Bridge Thrift Agent</description>
 
@@ -20,24 +22,35 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.databridge.agent.thrift</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-pool.wso2</groupId>
             <artifactId>commons-pool</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.wso2</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.1.1-wso2v1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.wso2</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.1.0-wso2v1</version>
+        </dependency>
     </dependencies>
 
 	<build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <!-- inherited version -->
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<!-- inherited version -->
+				<configuration>
+					<encoding>UTF-8</encoding>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -63,7 +76,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+			</plugin>
 			<plugin>
 				<groupId>org.wso2.maven</groupId>
 				<artifactId>carbon-p2-plugin</artifactId>
@@ -85,17 +98,19 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.databridge.agent.thrift
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.databridge.agent.thrift:${project.version}
                                 </bundleDef>
-                                <bundleDef>commons-pool.wso2:commons-pool</bundleDef>
+                                <bundleDef>commons-pool.wso2:commons-pool:1.5.6.wso2v1</bundleDef>
+                                <bundleDef>org.apache.httpcomponents.wso2:httpclient</bundleDef>
+                                <bundleDef>org.apache.httpcomponents.wso2:httpcore</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.databridge.commons.server:${wso2carbon.version.databridge}
+                                    org.wso2.carbon.databridge.commons.server:${project.version}
                                 </importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.databridge.commons.thrift.server:${wso2carbon.version.databridge}
+                                    org.wso2.carbon.databridge.commons.thrift.server:${project.version}
                                 </importFeatureDef>
                             </importFeatures>
                         </configuration>
@@ -104,4 +119,6 @@
             </plugin>
         </plugins>
     </build>
+
+
 </project>

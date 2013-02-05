@@ -22,14 +22,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>ws-api-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.registry.ws.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Registry WS API Feature</name>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.4</version>
     <url>http://wso2.org</url>
     <description>
         This contains the core bundles required by Registry Web Service API. The Registry WS-API
@@ -41,10 +42,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.ws.api</artifactId>
+	     <version>4.0.4</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.ws.client</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -67,7 +70,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.registry.ws</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>

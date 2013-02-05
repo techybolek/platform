@@ -17,17 +17,39 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security.service;
 
 import net.sf.jsr107cache.Cache;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.initializer.AbstractServiceBusAdmin;
 
 public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
     public void invalidateKeys(APIKeyMapping[] mappings) {
-        Cache cache = SuperTenantCarbonContext.getCurrentContext(getAxisConfig()).getCache();
+        Cache cache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("keyCache");
         for (APIKeyMapping mapping : mappings) {
             String cacheKey = mapping.getKey() + ":" + mapping.getContext() + ":" + mapping.getApiVersion();
             cache.remove(cacheKey);
         }
     }
 
+    public void invalidateOAuthKeys(String consumerKey, String authorizedUser) {
+        Cache cache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("keyCache");
+        String cacheKey = consumerKey + ":" + authorizedUser;
+        cache.remove(cacheKey);
+
+    }
+
+    /**
+     * This method is to invalidate an access token which is already in gateway cache.
+     * @param accessToken The access token to be remove from the cache
+     */
+    public void invalidateKey(String accessToken) {
+        Cache cache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("keyCache");
+        for (int i = 0; i < cache.keySet().size(); i++) {
+            String cacheAccessKey = cache.keySet().toArray()[i].toString().split(":")[0];
+            if (cacheAccessKey.equals(accessToken)) {
+                cache.remove(cache.keySet().toArray()[i]);
+            }
+
+        }
+    }
 }

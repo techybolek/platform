@@ -35,8 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.dataservices.common.DBConstants;
 import org.wso2.carbon.dataservices.common.DBConstants.DBSFields;
 import org.wso2.carbon.dataservices.common.DBConstants.RDBMSEngines;
@@ -45,6 +44,7 @@ import org.wso2.carbon.dataservices.core.description.config.Config;
 import org.wso2.carbon.dataservices.core.engine.DataService;
 import org.wso2.carbon.dataservices.core.engine.ExternalParam;
 import org.wso2.carbon.dataservices.core.engine.ExternalParamCollection;
+import org.wso2.carbon.dataservices.core.engine.InternalParam;
 import org.wso2.carbon.dataservices.core.engine.ParamValue;
 import org.wso2.carbon.dataservices.core.internal.DataServicesDSComponent;
 import org.wso2.carbon.ndatasource.core.utils.DataSourceUtils;
@@ -52,6 +52,7 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -68,6 +69,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.sql.*;
 import java.sql.Date;
 import java.text.ParseException;
@@ -115,16 +117,6 @@ public class DBUtils {
     private static ThreadLocal<Integer> batchRequestNumber = new ThreadLocal<Integer>() {
         protected synchronized Integer initialValue() {
             return 0;
-        }
-    };
-
-    /**
-     * thread local variable to track the current tenant id in service deployment
-     */
-    private static ThreadLocal<Integer> deploymentTimeTenantId = new ThreadLocal<Integer>() {
-        protected synchronized Integer initialValue() {
-            /* default is super tenant id */
-            return MultitenantConstants.SUPER_TENANT_ID;
         }
     };
 
@@ -293,8 +285,8 @@ public class DBUtils {
     	RealmService realmService = DataServicesDSComponent.getRealmService();
         RegistryService registryService = DataServicesDSComponent.getRegistryService();
         username = MultitenantUtils.getTenantAwareUsername(username);
-        String tenantDomain = SuperTenantCarbonContext.getCurrentContext().getTenantDomain();
-        int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
+        String tenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain();
+        int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
         username = MultitenantUtils.getTenantAwareUsername(username);
         try {
             if (tenantId < MultitenantConstants.SUPER_TENANT_ID) {
@@ -326,7 +318,7 @@ public class DBUtils {
     	try {
             RegistryService registryService = DataServicesDSComponent.getRegistryService();
             UserRealm realm = registryService.getUserRealm(
-            		SuperTenantCarbonContext.getCurrentContext().getTenantId());
+            		PrivilegedCarbonContext.getCurrentContext().getTenantId());
     		username = MultitenantUtils.getTenantAwareUsername(username);
     		return realm.getUserStoreManager().authenticate(username, password);
     	} catch (Exception e) {
@@ -668,14 +660,6 @@ public class DBUtils {
         }
     }
 
-    public static void setDeploymentTimeTenantId(int tenantId) {
-        deploymentTimeTenantId.set(tenantId);
-    }
-
-    public static int getDeploymentTimeTenantId() {
-        return deploymentTimeTenantId.get();
-    }
-
     /**
      * Returns the best effort way of finding the current tenant id,
      * even if this is not in a current message request, i.e. deploying services.
@@ -686,11 +670,18 @@ public class DBUtils {
      * @return The tenant id
      */
     public static int getCurrentTenantId() {
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        if (tenantId == -1) {
-            tenantId = getDeploymentTimeTenantId();
-        }
-        return tenantId;
+    	try {
+	    	int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+	    	if (tenantId == -1) {
+	            tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+	        }
+	    	return tenantId;
+    	} catch (NoClassDefFoundError e) { // Workaround for Unit Test failure 
+    		return MultitenantConstants.SUPER_TENANT_ID;
+    	} catch (ExceptionInInitializerError e) {
+    		return MultitenantConstants.SUPER_TENANT_ID;
+    	}
+        
     }
 
     /**
@@ -950,5 +941,80 @@ public class DBUtils {
 		doc.addChild(wrapperElement);
 		return doc.getOMDocumentElement();
 	}
+	
+	public static void populateStandardCustomDSProps(Map<String, String> dsProps, 
+			DataService dataService, Config config) {
+		String dsInfo = dataService.getTenantId() + "#"
+				+ dataService.getName() + "#" + config.getConfigId();
+		dsProps.put(DBConstants.CustomDataSource.DATASOURCE_ID, UUID.nameUUIDFromBytes(
+				dsInfo.getBytes(Charset.forName(DBConstants.DEFAULT_CHAR_SET_TYPE))).toString());
+		if (log.isDebugEnabled()) {
+			log.debug("Custom Inline Data Source; ID: " + dsInfo + 
+					" UUID:" + dsProps.get(DBConstants.CustomDataSource.DATASOURCE_ID));
+		}
+	}
+	
+	/**
+	 * Convert the input parameter values to its types object values.
+	 * @param params The input params
+	 * @return The typed object values
+	 * @throws DataServiceFault
+	 */
+	public static Object[] convertInputParamValues(List<InternalParam> params) 
+	            throws DataServiceFault {
+		Object[] result = new Object[params.size()];
+		InternalParam param;
+		for (int i = 0; i < result.length; i++) {
+			param = params.get(i);
+			result[i] = convertInputParamValue(param.getValue().getValueAsString(), 
+					param.getSqlType());
+		}
+		return result;
+	}
+	
+	/**
+	 * Convert the string input param value to its typed object value.
+	 * @param value The string value of the input param
+	 * @param type The type of the input value, defined at DBConstants.DataTypes.
+	 * @return The typed object value of the input param 
+	 */
+	public static Object convertInputParamValue(String value, String type) throws DataServiceFault {
+		try {
+			if (DBConstants.DataTypes.INTEGER.equals(type)) {
+				return Integer.parseInt(value);
+			} else if (DBConstants.DataTypes.LONG.equals(type)) {
+				return Long.parseLong(value);
+			} else if (DBConstants.DataTypes.FLOAT.equals(type)) {
+				return Float.parseFloat(value);
+			} else if (DBConstants.DataTypes.DOUBLE.equals(type)) {
+				return Double.parseDouble(value);
+			} else if (DBConstants.DataTypes.BOOLEAN.equals(type)) {
+				return Boolean.parseBoolean(value);
+			} else if (DBConstants.DataTypes.DATE.equals(type)) {
+				return new java.util.Date(DBUtils.getDate(value).getTime());
+			} else if (DBConstants.DataTypes.TIME.equals(type)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTimeInMillis(DBUtils.getTime(value).getTime());
+				return cal;
+			} else if (DBConstants.DataTypes.TIMESTAMP.equals(type)) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTimeInMillis(DBUtils.getTimestamp(value).getTime());
+				return cal;
+			} else {
+				return value;
+			}
+		} catch (Exception e) {
+			throw new DataServiceFault(e);
+		}
+	}
+	
+    public static String getTenantDomainFromId(int tid) {
+    	try {
+			return DataServicesDSComponent.getRealmService().getTenantManager()
+					.getTenant(tid).getDomain();
+		} catch (UserStoreException e) {
+			throw new RuntimeException(e);
+		}
+    }
 
 }

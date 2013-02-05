@@ -40,7 +40,13 @@ public class ServiceConfigManager {
 						"cloudService"));
 				while (properties.hasNext()) {
 					OMElement element = properties.next();
-					serviceNames.add(element.getAttributeValue(new QName("name")));
+                    Iterator<OMElement> child = element.getChildElements();
+                    while (child.hasNext()) {
+                        OMElement element1 = (OMElement) child.next();
+                        if("key".equalsIgnoreCase(element1.getLocalName())) {
+                            serviceNames.add(element1.getText());
+                        }
+                    }
 				}
 			} catch (Exception e) {
 				String msg = "Error in loading Stratos Configurations File: " + configFileName

@@ -22,13 +22,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>service-mgt</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.service.mgt</artifactId>
     <packaging>bundle</packaging>
+    <version>4.0.5</version>
     <name>WSO2 Carbon - Service Management BE</name>
     <description>org.wso2.carbon.service.mgt provides the service mgt fuctionalities</description>
     <url>http://wso2.org</url>
@@ -37,11 +39,27 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
+            <version>4.0.2</version>
+        </dependency>
+	<dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.caching.core</artifactId>
+            <version>4.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.utils</artifactId>
+            <version>4.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.user.core</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.security.mgt</artifactId>
-            <version>${project.version}</version>
+            <version>4.0.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.rampart.wso2</groupId>
@@ -56,6 +74,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.core</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -123,7 +142,7 @@
                             org.wso2.carbon.service.mgt.multitenancy
                         </Export-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
-                        <Require-CarbonUIComponents>${project.artifactId}.ui-${project.version}</Require-CarbonUIComponents>
+                        <Require-CarbonUIComponents>${project.artifactId}.ui-${project.parent.version}</Require-CarbonUIComponents>
                     </instructions>
                 </configuration>
             </plugin>

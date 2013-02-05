@@ -161,7 +161,7 @@
                                    onclick="return validateTaskInputs();"/>
                             <input class="button" type="button"
                                    value="<fmt:message key="dataservices.task.cancel.button.text"/>"
-                                   onclick="document.location.href='tasks.jsp?ordinal=0';"/>
+                                   onclick="document.location.href='tasks.jsp?region=region1&item=ds_task_menu&ordinal=0';"/>
                         </td>
                     </tr>
                     </tbody>

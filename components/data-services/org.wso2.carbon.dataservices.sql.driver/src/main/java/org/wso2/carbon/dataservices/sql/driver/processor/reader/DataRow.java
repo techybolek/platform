@@ -18,18 +18,18 @@
  */
 package org.wso2.carbon.dataservices.sql.driver.processor.reader;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DataRow {
 
     private int rowId;
 
-    private List<DataCell> cells;
+    private Map<Integer, DataCell> cells;
 
     public DataRow(int rowId) {
         this.rowId = rowId;
-        this.cells = new ArrayList<DataCell>();
+        this.cells = new HashMap<Integer, DataCell>();
     }
 
     public int getRowId() {
@@ -40,20 +40,21 @@ public class DataRow {
         this.rowId = rowId;
     }
 
-    public List<DataCell> getCells() {
+    public Map<Integer, DataCell> getCells() {
         return cells;
     }
 
-    public void setCells(List<DataCell> cells) {
+    public void setCells(Map<Integer, DataCell> cells) {
         this.cells = cells;
     }
 
-    public void addCell(DataCell cell) {
-        this.getCells().add(cell);
+    public void addCell(int cellId, DataCell cell) {
+        this.getCells().put(cellId, cell);
     }
 
     public DataCell getCell(int id) {
         return getCells().get(id);
     }
+
 
 }

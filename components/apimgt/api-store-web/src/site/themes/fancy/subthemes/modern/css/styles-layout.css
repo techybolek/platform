@@ -11,6 +11,11 @@ h3{
     color:#666;
     padding:5px 0 10px;
 }
+h6{
+    color:#333;
+    font-weight:bold;
+    font-size:13px;
+}
 .header-menu div.navbar-inner {
     /*background: transparent url(../images/whiteBack.png) repeat center top;*/
     background:white;
@@ -105,6 +110,7 @@ h3{
     white-space: nowrap;
     color: #555;
     margin-bottom:5px;
+    cursor:default;
 }
 .row-fluid div.tabs-section{
     margin:10px 10px 30px 0;
@@ -431,6 +437,7 @@ footer{
 }
 .thumbnail-custom div.thumbnail{
     width:140px;
+    height: 162px;
 }
 .application-api {
     padding: 9px 15px;
@@ -486,4 +493,9 @@ tr.application-api td.api-key-cell{
     padding-left:10px;
     padding-bottom:10px;
     color:#fff;
+}
+#searchAPIHelp{
+    background: none repeat scroll 0 0 white;
+    border: 1px solid;
+    padding: 5px;
 }

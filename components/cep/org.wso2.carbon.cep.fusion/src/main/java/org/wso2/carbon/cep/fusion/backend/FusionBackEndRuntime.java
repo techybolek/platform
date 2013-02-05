@@ -29,11 +29,10 @@ import org.wso2.carbon.cep.core.Expression;
 import org.wso2.carbon.cep.core.backend.CEPBackEndRuntime;
 import org.wso2.carbon.cep.core.exception.CEPConfigurationException;
 import org.wso2.carbon.cep.core.exception.CEPEventProcessingException;
+import org.wso2.carbon.cep.core.internal.ds.CEPServiceValueHolder;
+import org.wso2.carbon.cep.core.listener.CEPEventListener;
 import org.wso2.carbon.cep.core.mapping.input.Input;
 import org.wso2.carbon.cep.core.mapping.input.mapping.InputMapping;
-import org.wso2.carbon.cep.core.internal.ds.CEPServiceValueHolder;
-import org.wso2.carbon.cep.core.internal.util.CEPConstants;
-import org.wso2.carbon.cep.core.listener.CEPEventListener;
 import org.wso2.carbon.cep.fusion.listener.FusionEventListener;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
@@ -65,7 +64,8 @@ public class FusionBackEndRuntime implements CEPBackEndRuntime {
     private Map<String, List<String>> knowledgePackagesMap;
 
 
-    public FusionBackEndRuntime(KnowledgeBuilder knowledgeBuilder, KnowledgeBase knowledgeBase, int tenantId) {
+    public FusionBackEndRuntime(KnowledgeBuilder knowledgeBuilder, KnowledgeBase knowledgeBase,
+                                int tenantId) {
         this.knowledgeBuilder = knowledgeBuilder;
         this.knowledgeBase = knowledgeBase;
         this.statefulKnowledgeSession = knowledgeBase.newStatefulKnowledgeSession();
@@ -77,12 +77,13 @@ public class FusionBackEndRuntime implements CEPBackEndRuntime {
      * get the cep entry point and insert the event. the entry point should have given
      * in the cep file it self
      *
-     * @param event   - object representing the event data
+     * @param event        - object representing the event data
      * @param inputMapping - Mapping to the topic which publish data
-     *                details of the input stream to add events. eg. entry points in drools fusion.
+     *                     details of the input stream to add events. eg. entry points in drools fusion.
      * @throws CEPEventProcessingException
      */
-    public void insertEvent(Object event, InputMapping inputMapping) throws CEPEventProcessingException {
+    public void insertEvent(Object event, InputMapping inputMapping)
+            throws CEPEventProcessingException {
 
         String entryPoint = inputMapping.getStream();
         if (entryPoint != null) {
@@ -112,25 +113,9 @@ public class FusionBackEndRuntime implements CEPBackEndRuntime {
     public void addQuery(String queryName, Expression expression, CEPEventListener cepEventListener)
             throws CEPConfigurationException {
 
-        InputStream inputStream = null;
-        if (expression.getType().equals(CEPConstants.CEP_CONF_EXPRESSION_INLINE)) {
-            inputStream = new ByteArrayInputStream(expression.getText().getBytes());
-        } else if (expression.getType().equals(CEPConstants.CEP_CONF_EXPRESSION_REGISTRY)) {
-            try {
-                inputStream = new ByteArrayInputStream(readSourceTextFromRegistry(expression.getText().trim()).getBytes());
-            } catch (RegistryException e) {
-                String errorMessage = "Error in reading query from registry";
-                log.error(errorMessage, e);
-                throw new CEPConfigurationException(errorMessage, e);
-            }
-        } else {
-            String errorMessage = "In valid expression type " + expression.getType();
-            log.error(errorMessage);
-            throw new CEPConfigurationException(errorMessage);
-        }
-
+        InputStream inputStream = new ByteArrayInputStream(expression.getText().getBytes());
         knowledgeBuilder.add(ResourceFactory.newInputStreamResource(inputStream),
-                ResourceType.DRL);
+                             ResourceType.DRL);
         if (knowledgeBuilder.hasErrors()) {
             String errorMessage = "Error during creating rule set: " + knowledgeBuilder.getErrors().toString();
             log.error(errorMessage);
@@ -140,7 +125,7 @@ public class FusionBackEndRuntime implements CEPBackEndRuntime {
 
         List<String> packages = new ArrayList<String>();
         for (Iterator<KnowledgePackage> packageIter =
-                     knowledgeBuilder.getKnowledgePackages().iterator(); packageIter.hasNext();){
+                     knowledgeBuilder.getKnowledgePackages().iterator(); packageIter.hasNext(); ) {
             packages.add(packageIter.next().getName());
         }
 
@@ -148,7 +133,7 @@ public class FusionBackEndRuntime implements CEPBackEndRuntime {
 
         if (cepEventListener != null) {
             FusionEventListener fusionEventListener = new FusionEventListener(cepEventListener);
-            if (expression.getListenerName() != null){
+            if (expression.getListenerName() != null) {
                 statefulKnowledgeSession.setGlobal(expression.getListenerName(), fusionEventListener);
             } else {
                 statefulKnowledgeSession.setGlobal(FUSION_LISTENER_NAME, fusionEventListener);
@@ -156,13 +141,12 @@ public class FusionBackEndRuntime implements CEPBackEndRuntime {
         }
 
 
-
     }
 
     public void removeQuery(String queryName) throws CEPConfigurationException {
         // remove the query packages from knowledge base
         List<String> knowledgePackages = this.knowledgePackagesMap.remove(queryName);
-        for (String knowledgePackage : knowledgePackages){
+        for (String knowledgePackage : knowledgePackages) {
             this.knowledgeBase.removeKnowledgePackage(knowledgePackage);
         }
     }
@@ -191,6 +175,11 @@ public class FusionBackEndRuntime implements CEPBackEndRuntime {
 
     @Override
     public void init() {
+        //todo Implement
+    }
+
+    @Override
+    public void shutdown() {
         //todo Implement
     }
 

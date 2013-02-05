@@ -16,10 +16,6 @@
  ~ under the License.
  -->
 <%@ page import="java.util.ResourceBundle" %>
-<%@ page import="org.apache.axiom.om.impl.builder.StAXOMBuilder" %>
-<%@ page import="java.io.ByteArrayInputStream" %>
-<%@ page import="javax.xml.stream.XMLStreamException" %>
-<%@ page import="org.apache.axiom.om.OMElement" %>
 <%@ page import="org.wso2.carbon.proxyadmin.stub.types.carbon.ProxyData" %>
 <%
     ResourceBundle bundle = ResourceBundle.getBundle("org.wso2.carbon.proxyadmin.ui.i18n.Resources",
@@ -39,44 +35,17 @@
             session.setAttribute("epMode", "anon");
             ProxyData pd = (ProxyData) session.getAttribute("proxy");
             session.setAttribute("proxy", pd);
+            forwardTo = "../endpoints/anonymousEndpoint.jsp?serviceName=" + pd.getName() + "&toppage=false";
             if (bundle.getString("create").equals(anonEpAction)) {
                 // going to add a new EP
-                forwardTo = "../endpoints/index.jsp";
                 // remove anonEpXML attribute from session if exists
                 if (session.getAttribute("anonEpXML") != null) {
                     session.removeAttribute("anonEpXML");
                 }
-                forwardTo = forwardTo + "?serviceName=" + pd.getName() + "&toppage=false";
             } else if (bundle.getString("anon.edit").equals(anonEpAction)) {
                 // going to modify the existing EP
                 String anonEpXML = pd.getEndpointXML();
                 if (anonEpXML != null && !"".equals(anonEpXML)) {
-                    try {
-                        StAXOMBuilder builder = new StAXOMBuilder(new ByteArrayInputStream(anonEpXML.getBytes()));
-                        OMElement elem = builder.getDocumentElement();
-                        if ((elem = elem.getFirstElement()) != null) {
-                            String localName = elem.getLocalName();
-                            if ("address".equals(localName)) {
-                                // current one is an address EP
-                                forwardTo = "../endpoints/addressEndpoint.jsp";
-                            } else if ("wsdl".equals(localName)) {
-                                // current one is an wsdl EP
-                                forwardTo = "../endpoints/WSDLEndpoint.jsp";
-                            } else if ("failover".equals(localName)) {
-                                // current one is an failover EP
-                                forwardTo = "../endpoints/failOverEndpoint.jsp";
-                            } else if ("loadbalance".equals(localName)) {
-                                // current one is an loadBalance EP
-                                forwardTo = "../endpoints/loadBalanceEndpoint.jsp";
-                            } else if ("default".equals(localName)) {
-                                // current one is an loadBalance EP
-                                forwardTo = "../endpoints/defaultEndpoint.jsp";
-                            }
-                        }
-                    } catch (XMLStreamException e) {
-                        // todo - handle error
-                    }
-                    forwardTo = forwardTo + "?serviceName=" + pd.getName() + "&toppage=false";
                     session.setAttribute("anonEpXML", anonEpXML);
                 }
             }

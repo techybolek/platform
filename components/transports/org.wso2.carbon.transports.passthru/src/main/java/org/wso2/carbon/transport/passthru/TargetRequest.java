@@ -160,7 +160,10 @@ public class TargetRequest {
      * @return number of bytes written
      */
     public int write(NHttpClientConnection conn, ContentEncoder encoder) throws IOException {
-        int bytes = pipe.consume(encoder);
+    	int bytes=0;
+    	if(pipe != null){
+    		bytes = pipe.consume(encoder);
+    	}
 
         if (encoder.isCompleted()) {
             targetConfiguration.getMetrics().

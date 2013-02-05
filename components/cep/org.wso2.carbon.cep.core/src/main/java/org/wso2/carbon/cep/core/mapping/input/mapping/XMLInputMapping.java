@@ -24,7 +24,7 @@ import org.jaxen.JaxenException;
 import org.wso2.carbon.cep.core.XpathDefinition;
 import org.wso2.carbon.cep.core.exception.CEPEventProcessingException;
 import org.wso2.carbon.cep.core.internal.process.ReflectionBasedObjectSupplier;
-import org.wso2.carbon.cep.core.mapping.property.XMLProperty;
+import org.wso2.carbon.cep.core.mapping.input.property.XMLInputProperty;
 import org.wso2.carbon.databridge.commons.Event;
 
 import java.lang.reflect.Method;
@@ -37,13 +37,13 @@ public class XMLInputMapping extends InputMapping {
 
     private List<XpathDefinition> xpathDefinitionList;
 
-    private List<XMLProperty> properties;
+    private List<XMLInputProperty> properties;
 
 
     public XMLInputMapping() {
         this.writeMethodMap = new HashMap<String, Method>();
         this.xpathDefinitionList = new ArrayList<XpathDefinition>();
-        this.properties = new ArrayList<XMLProperty>();
+        this.properties = new ArrayList<XMLInputProperty>();
         mappingClass=Map.class;
     }
 
@@ -55,7 +55,7 @@ public class XMLInputMapping extends InputMapping {
         this.writeMethodMap.put(name, writeMethod);
     }
 
-    public void addProperty(XMLProperty property) {
+    public void addProperty(XMLInputProperty property) {
         this.properties.add(property);
     }
 
@@ -66,7 +66,7 @@ public class XMLInputMapping extends InputMapping {
     @Override
     protected Map convertToEventMap(Object event) throws CEPEventProcessingException {
         Map<String, Object> mapEvent = new HashMap<String, Object>();
-        for (XMLProperty property : this.properties) {
+        for (XMLInputProperty property : this.properties) {
             Object propertyValue = getValue((OMElement) event,
                                             property.getXpath(),
                                             property.getType(),
@@ -79,7 +79,7 @@ public class XMLInputMapping extends InputMapping {
     @Override
     protected Object convertToEventObject(Object event, Object resultEvent)
             throws CEPEventProcessingException {
-        for (XMLProperty property : this.properties) {
+        for (XMLInputProperty property : this.properties) {
             Object propertyValue = getValue((OMElement) event,
                                             property.getXpath(),
                                             property.getType(),
@@ -99,7 +99,7 @@ public class XMLInputMapping extends InputMapping {
 
 
         for (int i = 0, properties1Size = properties.size(); i < properties1Size; i++) {
-            XMLProperty property = properties.get(i);
+            XMLInputProperty property = properties.get(i);
             eventData[i] = getValue((OMElement) event,
                                     property.getXpath(),
                                     property.getType(),
@@ -152,13 +152,43 @@ public class XMLInputMapping extends InputMapping {
         this.xpathDefinitionList = xpathDefinitionList;
     }
 
-    public List<XMLProperty> getProperties() {
+    public List<XMLInputProperty> getProperties() {
         return properties;
     }
 
-    public void setProperties(List<XMLProperty> properties) {
+    public void setProperties(List<XMLInputProperty> properties) {
         this.properties = properties;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof XMLInputMapping)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
 
+        XMLInputMapping that = (XMLInputMapping) o;
+
+        if (properties != null ? !properties.equals(that.properties) : that.properties != null) {
+            return false;
+        }
+        if (xpathDefinitionList != null ? !xpathDefinitionList.equals(that.xpathDefinitionList) : that.xpathDefinitionList != null) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (xpathDefinitionList != null ? xpathDefinitionList.hashCode() : 0);
+        result = 31 * result + (properties != null ? properties.hashCode() : 0);
+        return result;
+    }
 }

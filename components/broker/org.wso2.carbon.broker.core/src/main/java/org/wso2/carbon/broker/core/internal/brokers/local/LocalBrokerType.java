@@ -17,6 +17,8 @@
 package org.wso2.carbon.broker.core.internal.brokers.local;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.util.StAXUtils;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.wso2.carbon.broker.core.BrokerConfiguration;
@@ -31,8 +33,13 @@ import org.wso2.carbon.event.core.EventBroker;
 import org.wso2.carbon.event.core.Message;
 import org.wso2.carbon.event.core.exception.EventBrokerException;
 
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import java.io.ByteArrayInputStream;
+import java.util.UUID;
+
 public final class LocalBrokerType implements BrokerType {
-    
+
     private BrokerTypeDto brokerTypeDto = null;
 
     private static LocalBrokerType localBrokerType = new LocalBrokerType();
@@ -42,24 +49,26 @@ public final class LocalBrokerType implements BrokerType {
         this.brokerTypeDto.setName(BrokerConstants.BROKER_TYPE_LOCAL);
     }
 
-    public static LocalBrokerType getInstance(){
+    public static LocalBrokerType getInstance() {
         return localBrokerType;
     }
 
-    public void subscribe(String topicName,
-                          BrokerListener brokerListener,
-                          BrokerConfiguration brokerConfiguration,
-                          AxisConfiguration axisConfiguration)
-                                            throws BrokerEventProcessingException {
+    public String subscribe(String topicName,
+                            BrokerListener brokerListener,
+                            BrokerConfiguration brokerConfiguration,
+                            AxisConfiguration axisConfiguration)
+            throws BrokerEventProcessingException {
         // When publishing we only need to register the axis2 service 
         // no subscribing
-       try {
-            Axis2Util.registerAxis2Service(topicName, brokerListener, 
-                                              brokerConfiguration, axisConfiguration);
+        String subscriptionId = UUID.randomUUID().toString();
+        try {
+            Axis2Util.registerAxis2Service(topicName, brokerListener,
+                    brokerConfiguration, axisConfiguration, subscriptionId);
         } catch (AxisFault axisFault) {
             throw new BrokerEventProcessingException("Can not create " +
                     "the axis2 service to receive events", axisFault);
         }
+        return subscriptionId;
 
     }
 
@@ -70,11 +79,25 @@ public final class LocalBrokerType implements BrokerType {
 
         EventBroker eventBroker = BrokerServiceValueHolder.getEventBroker();
         Message eventMessage = new Message();
-        eventMessage.setMessage(((OMElement)message));
+        eventMessage.setMessage(((OMElement) message));
         try {
             eventBroker.publishRobust(eventMessage, topicName);
         } catch (EventBrokerException e) {
             throw new BrokerEventProcessingException("Can not publish the to local broker ", e);
+        }
+    }
+
+    @Override
+    public void testConnection(BrokerConfiguration brokerConfiguration) throws BrokerEventProcessingException {
+        String testMessage = " <brokerConfigurationTest>\n" +
+                "   <message>This is a test message.</message>\n" +
+                "   </brokerConfigurationTest>";
+        try {
+            XMLStreamReader reader1 = StAXUtils.createXMLStreamReader(new ByteArrayInputStream(testMessage.getBytes()));
+            StAXOMBuilder builder1 = new StAXOMBuilder(reader1);
+            publish("test", builder1.getDocumentElement(), brokerConfiguration);
+        } catch (XMLStreamException e) {
+            //ignored as this will not happen
         }
     }
 
@@ -84,10 +107,10 @@ public final class LocalBrokerType implements BrokerType {
 
     public void unsubscribe(String topicName,
                             BrokerConfiguration brokerConfiguration,
-                            AxisConfiguration axisConfiguration)
-                                                       throws BrokerEventProcessingException {
+                            AxisConfiguration axisConfiguration, String subscriptionId)
+            throws BrokerEventProcessingException {
         try {
-            Axis2Util.removeOperation(topicName, brokerConfiguration, axisConfiguration);
+            Axis2Util.removeOperation(topicName, brokerConfiguration, axisConfiguration, subscriptionId);
         } catch (AxisFault axisFault) {
             throw new BrokerEventProcessingException("Can not remove operation ", axisFault);
         }

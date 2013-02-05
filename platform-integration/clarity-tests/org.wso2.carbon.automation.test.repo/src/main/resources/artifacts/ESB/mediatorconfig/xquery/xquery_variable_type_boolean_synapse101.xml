@@ -10,7 +10,7 @@
             <inSequence>
                 <property name="body" expression="$body/child::*[position()=1]"/>
                 <log level="full"/>
-                <xquery xmlns:m="http://services.samples" key="new-xquery-req"
+                <xquery xmlns:m="http://services.samples" key="xquery-req"
                         target="//m:getQuote/m:request/m:symbols">
                     <variable name="symbol" type="BOOLEAN" value="true"/>
                 </xquery>
@@ -39,7 +39,7 @@
         <publishWSDL uri="file:repository/samples/resources/proxy/sample_proxy_1.wsdl"/>
     </proxy>
 
-    <localEntry key="new-xquery-req">
+    <localEntry key="xquery-req">
         <x xmlns="">
 
             declare variable $symbol as xs:boolean external;

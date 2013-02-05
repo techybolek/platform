@@ -78,8 +78,6 @@ public class HumanTaskCleanupSchedulerServiceComponent {
 
     protected void unsetTaskService(TaskService taskService) {
 
-        TaskCleanupSchedulerUtil.deleteTaskCleanupScheduledJob();
-
         if (log.isDebugEnabled()) {
             log.debug("Unsetting the Task Service for Humantask Cleanup component");
         }

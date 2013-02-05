@@ -59,10 +59,6 @@ public class RemoteAuthorizationManager {
     }
 
     public boolean isUserAuthorized(String user, String permission) throws APIManagementException {
-        return queryRemoteAuthorizationManager(user, permission);
-    }
-    
-    private boolean queryRemoteAuthorizationManager(String user, String permission) throws APIManagementException {
         RemoteAuthorizationManagerClient client = null;
         try {
             client = (RemoteAuthorizationManagerClient) clientPool.borrowObject();
@@ -70,6 +66,24 @@ public class RemoteAuthorizationManager {
 
         } catch (Exception e) {
             throw new APIManagementException("Error while accessing backend services for API key validation", e);
+        } finally {
+            try {
+                if (client != null) {
+                    clientPool.returnObject(client);
+                }
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    public String[] getRolesOfUser(String user) throws APIManagementException {
+        RemoteAuthorizationManagerClient client = null;
+        try {
+            client = (RemoteAuthorizationManagerClient) clientPool.borrowObject();
+            return client.getRolesOfUser(user);
+
+        } catch (Exception e) {
+            throw new APIManagementException("Error while retrieving role list of user", e);
         } finally {
             try {
                 if (client != null) {

@@ -24,9 +24,12 @@ import me.prettyprint.hector.api.factory.HFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * The default implementation for <code>DataAccessService</code>.
@@ -38,7 +41,6 @@ public class DataAccessServiceImpl implements DataAccessService {
 
     private static final String USERNAME_KEY = "username";
     private static final String PASSWORD_KEY = "password";
-//    private static final String DEFAULT_HOST = "localhost:" + CassandraHost.DEFAULT_PORT;
     private static final String LOCAL_HOST_NAME = "localhost";
 
     private final DataAccessComponentManager dataAccessComponentManager = DataAccessComponentManager.getInstance();
@@ -63,10 +65,12 @@ public class DataAccessServiceImpl implements DataAccessService {
         String username = clusterInformation.getUsername();
         String clusterName = clusterInformation.getClusterName();
 
+        if (clusterName == null) {
+            clusterName = MultitenantUtils.getTenantDomain(username);
+        }
         //destroyCluster(clusterName);
         //destroyAllClusters();
         Cluster cluster = clusterRepository.getCluster(username, clusterName);
-
 
         if (cluster == null) {
 
@@ -84,10 +88,11 @@ public class DataAccessServiceImpl implements DataAccessService {
                 if (configurator == null) {
                     configurator = createCassandraHostConfigurator();
                 }
-
+                String clusterUUID = UUID.randomUUID().toString();
+                clusterName = clusterName + username + clusterUUID;
                 cluster = HFactory.createCluster(clusterName, configurator, credentials);
-
                 clusterRepository.putCluster(username, clusterName, cluster);
+
             }
         }
         return cluster;
@@ -95,45 +100,41 @@ public class DataAccessServiceImpl implements DataAccessService {
 
     public Cluster getCluster(ClusterInformation clusterInformation, boolean resetConnection) {
 
-            if (clusterInformation == null) {
-                throw new DataAccessComponentException("Provided Cluster information instance is null", log);
-            }
+        if (clusterInformation == null) {
+            throw new DataAccessComponentException("Provided Cluster information instance is null", log);
+        }
 
-            String username = clusterInformation.getUsername();
-            String clusterName = clusterInformation.getClusterName();
-            //String cluterPassword = clusterInformation.getPassword();
-
+        String username = clusterInformation.getUsername();
+        String clusterName = clusterInformation.getClusterName();
+        //String cluterPassword = clusterInformation.getPassword();
 //            if(resetConnection){
 //                destroyClustersOfCurrentTenant();
 //                //destroyCluster(clusterName);
 //                //destroyAllClusters();
 //            }
-            Cluster cluster = clusterRepository.getCluster(username, clusterName);
-
-
-            if (cluster == null) {
-
-                synchronized (lock) {
-                    cluster = clusterRepository.getCluster(username, clusterName);
-                    if (cluster != null) {
-                        return cluster;
-                    }
-
-                    Map<String, String> credentials = new HashMap<String, String>();
-                    credentials.put(USERNAME_KEY, username);
-                    credentials.put(PASSWORD_KEY, clusterInformation.getPassword());
-
-                    CassandraHostConfigurator configurator = clusterInformation.getCassandraHostConfigurator();
-                    if (configurator == null) {
-                        configurator = createCassandraHostConfigurator();
-                    }
-
-                    cluster = HFactory.createCluster(clusterName, configurator, credentials);
-                    clusterRepository.putCluster(username, clusterName, cluster);
+        Cluster cluster = clusterRepository.getCluster(username, clusterName);
+        if (cluster == null) {
+            synchronized (lock) {
+                cluster = clusterRepository.getCluster(username, clusterName);
+                if (cluster != null) {
+                    return cluster;
                 }
+                Map<String, String> credentials = new HashMap<String, String>();
+                credentials.put(USERNAME_KEY, username);
+                credentials.put(PASSWORD_KEY, clusterInformation.getPassword());
+
+                CassandraHostConfigurator configurator = clusterInformation.getCassandraHostConfigurator();
+                if (configurator == null) {
+                    configurator = createCassandraHostConfigurator();
+                }
+                String clusterUUID = UUID.randomUUID().toString();
+                clusterName = clusterName + username + clusterUUID;
+                cluster = HFactory.createCluster(clusterName, configurator, credentials);
+                clusterRepository.putCluster(username, clusterName, cluster);
             }
-            return cluster;
         }
+        return cluster;
+    }
 
     /**
      * Returns a Cassandra cluster for the current carbon user
@@ -145,29 +146,31 @@ public class DataAccessServiceImpl implements DataAccessService {
         String userName = carbonContext.getUsername();
 
         String tenantDomain = carbonContext.getTenantDomain();
-        if (tenantDomain != null && !"".equals(tenantDomain)) {
+        String superTenantDomainName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if (tenantDomain != null && !superTenantDomainName.equals(tenantDomain)) {
             userName += "@" + tenantDomain;
         }
-
         ClusterConfiguration configuration =
                 dataAccessComponentManager.getClusterConfiguration();
 
         ClusterInformation clusterInformation = new ClusterInformation(userName, sharedKey);
-        clusterInformation.setClusterName(configuration.getClusterName());
+        //clusterInformation.setClusterName(configuration.getClusterName());
+        //set tenant user name as the cluster name
+        clusterInformation.setClusterName(userName);
         clusterInformation.setCassandraHostConfigurator(createCassandraHostConfigurator());
 
         return getCluster(clusterInformation);
     }
 
-     public Cluster getClusterForCurrentUser(String sharedKey, boolean resetConnection) {
+    public Cluster getClusterForCurrentUser(String sharedKey, boolean resetConnection) {
         CarbonContext carbonContext = CarbonContext.getCurrentContext();
         String userName = carbonContext.getUsername();
 
         String tenantDomain = carbonContext.getTenantDomain();
-        if (tenantDomain != null && !"".equals(tenantDomain)) {
+        String superTenantDomainName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if (tenantDomain != null && !superTenantDomainName.equals(tenantDomain)) {
             userName += "@" + tenantDomain;
         }
-
         ClusterConfiguration configuration =
                 dataAccessComponentManager.getClusterConfiguration();
 
@@ -175,7 +178,7 @@ public class DataAccessServiceImpl implements DataAccessService {
         clusterInformation.setClusterName(configuration.getClusterName());
         clusterInformation.setCassandraHostConfigurator(createCassandraHostConfigurator());
 
-        return getCluster(clusterInformation,resetConnection);
+        return getCluster(clusterInformation, resetConnection);
     }
 
     /**
@@ -192,7 +195,7 @@ public class DataAccessServiceImpl implements DataAccessService {
      * @see DataAccessService#destroyClustersOfCurrentTenant()
      */
     public void destroyClustersOfCurrentTenant() {
-        clusterRepository.removeMyClusters();
+        clusterRepository.removeMyClusters(CarbonContext.getCurrentContext().getUsername());
     }
 
     /**

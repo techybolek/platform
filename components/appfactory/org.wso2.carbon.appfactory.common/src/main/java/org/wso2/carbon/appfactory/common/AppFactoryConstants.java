@@ -29,20 +29,22 @@ public class AppFactoryConstants {
     public static final String DEPLOYMENT_STAGES = "ApplicationDeployment.DeploymentStage";
     public static final String DEPLOYMENT_URL = "DeploymentServerURL";
 
-    public static final String ENDPOINT_DEPLOY_TO_STAGE = "WebServiceEndPoints.DeployToStage";
+    public static final String APPFACTORY_SERVER_URL = "ServerUrls.AppFactory";
+    public static final String BPS_SERVER_URL = "ServerUrls.BPS";
+    public static final String GREG_SERVER_URL = "ServerUrls.Greg";
 
-    public static final String SCM_ADMIN_NAME = "RepositoryMGTConfig.SCMServerAdminUserName";
-    public static final String SCM_ADMIN_PASSWORD = "RepositoryMGTConfig.SCMServerAdminPassword";
-    public static final String SCM_SERVER_URL = "RepositoryMGTConfig.SCMServerURL";
-    public static final String SCM_READ_WRITE_ROLE = "RepositoryMGTConfig.ReadWriteRole";
+    public static final String SCM_ADMIN_NAME = "RepositoryProviderConfig.svn.Property.SCMServerAdminUserName";
+    public static final String SCM_ADMIN_PASSWORD = "RepositoryProviderConfig.svn.Property.SCMServerAdminPassword";
+    public static final String SCM_SERVER_URL = "RepositoryProviderConfig.svn.Property.BaseURL";
+    public static final String SCM_READ_WRITE_ROLE = "RepositoryProviderConfig.svn.Property.ReadWriteRole";
+    public static final String REPOSITORY_PROVIDER_CONFIG = "RepositoryProviderConfig";
 
-
-    public static final String DEFAULT_APPLICATION_USER_ROLE = "ApplicationMgt.DefaultApplicationUserRole";
+    public static final String DEFAULT_APPLICATION_USER_ROLE = "DefaultUserRole";
     public static final String PERMISSION = "Permission";
-    public static final String REVISION_CONTROLLER_SERVICE_EPR = "WebServiceEndPoints.RevisionControllerService";
 
     public static final String REGISTRY_GOVERNANCE_PATH = "/_system/governance";
     public static final String REGISTRY_APPLICATION_PATH = "/repository/applications";
+    public static final String APPLICATION_ARTIFACT_NAME =  "appinfo";
 
     public static final String APPLICATION_ID = "applicationId";
     public static final String APPLICATION_REVISION = "revision";
@@ -51,5 +53,17 @@ public class AppFactoryConstants {
     public static final String APPLICATION_BUILD = "build";
 
     public static final String TRUNK = "trunk";
-    public static final String BRANCH = "branch";
+    public static final String BRANCH = "branches";
+    public static final String TAG = "tags";
+
+    public static final String FILE_TYPE_CAR = "car";
+    public static final String FILE_TYPE_WAR = "war";
+
+    public static final String SCM_READ_WRITE_PERMISSION = "RepositoryProviderConfig.svn.Property.ReadWritePermission";
+
+    /**
+     * Defines the property name for maven archetype generation parameters
+     */
+    public static final String CAPP_MAVEN_ARCHETYPE_PROP_NAME = "MavenArchetype.CApp.Properties";
+    public static final String WEBAPP_MAVEN_ARCHETYPE_PROP_NAME = "MavenArchetype.WebApp.Properties";
 }

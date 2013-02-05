@@ -137,6 +137,9 @@ public class AddServicesService extends RegistryAbstractAdmin implements IManage
                             }
                         }
                     }
+                    if ("true".equals(newResource.getProperty("registry.WSDLImport"))) {
+                    	newResource.removeProperty("registry.WSDLImport");                    	
+                    }
 
                     newResource.setDescription(oldResource.getDescription());
                     registry.put(service.getPath(), newResource);

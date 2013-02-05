@@ -31,7 +31,7 @@ import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
 import org.wso2.carbon.databridge.core.internal.EventDispatcher;
 import org.wso2.carbon.databridge.core.internal.authentication.AuthenticationHandler;
 import org.wso2.carbon.databridge.core.internal.authentication.Authenticator;
-import org.wso2.carbon.databridge.core.internal.authentication.session.AgentSession;
+import org.wso2.carbon.databridge.core.Utils.AgentSession;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +58,7 @@ public class DataBridge implements DataBridgeSubscriberService, DataBridgeReceiv
 
     public DataBridge(AuthenticationHandler authenticationHandler,
                       AbstractStreamDefinitionStore streamDefinitionStore) {
-        DataBridgeConfiguration dataBridgeConfiguration =new DataBridgeConfiguration();
+        DataBridgeConfiguration dataBridgeConfiguration = new DataBridgeConfiguration();
         this.eventDispatcher = new EventDispatcher(streamDefinitionStore, dataBridgeConfiguration);
         this.streamDefinitionStore = streamDefinitionStore;
         authenticator = new Authenticator(authenticationHandler, dataBridgeConfiguration);
@@ -88,7 +88,7 @@ public class DataBridge implements DataBridgeSubscriberService, DataBridgeReceiv
     }
 
     public String findStreamId(String sessionId, String streamName, String streamVersion)
-            throws NoStreamDefinitionExistException, SessionTimeoutException {
+            throws SessionTimeoutException {
         AgentSession agentSession = authenticator.getSession(sessionId);
         if (agentSession.getCredentials() == null) {
             if (log.isDebugEnabled()) {
@@ -99,12 +99,35 @@ public class DataBridge implements DataBridgeSubscriberService, DataBridgeReceiv
         try {
             return eventDispatcher.findStreamId(agentSession.getCredentials(), streamName,
                     streamVersion);
-        } catch (StreamDefinitionNotFoundException e) {
-            throw new NoStreamDefinitionExistException(e.getErrorMessage(), e);
         } catch (StreamDefinitionStoreException e) {
-            throw new NoStreamDefinitionExistException(e.getErrorMessage(), e);
+            log.warn("Cannot find streamId for " + streamName + " " + streamVersion, e);
+            return null;
         }
 
+    }
+
+    public boolean deleteStream(String sessionId, String streamId)
+            throws SessionTimeoutException {
+        AgentSession agentSession = authenticator.getSession(sessionId);
+        if (agentSession.getCredentials() == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("session " + sessionId + " expired ");
+            }
+            throw new SessionTimeoutException(sessionId + " expired");
+        }
+        return eventDispatcher.deleteStream(agentSession.getCredentials(), streamId);
+    }
+
+    public boolean deleteStream(String sessionId, String streamName, String streamVersion)
+            throws SessionTimeoutException {
+        AgentSession agentSession = authenticator.getSession(sessionId);
+        if (agentSession.getCredentials() == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("session " + sessionId + " expired ");
+            }
+            throw new SessionTimeoutException(sessionId + " expired");
+        }
+        return eventDispatcher.deleteStream(agentSession.getCredentials(), streamName, streamVersion);
     }
 
 
@@ -145,6 +168,15 @@ public class DataBridge implements DataBridgeSubscriberService, DataBridgeReceiv
      * @param agentCallback callbacks of the subscribers
      */
     public void subscribe(AgentCallback agentCallback) {
+        eventDispatcher.addCallback(agentCallback);
+    }
+
+    /**
+     * CEP/BAM can subscribe for Raw Event Streams
+     *
+     * @param agentCallback callbacks of the subscribers
+     */
+    public void subscribe(RawDataAgentCallback agentCallback) {
         eventDispatcher.addCallback(agentCallback);
     }
 
@@ -191,7 +223,7 @@ public class DataBridge implements DataBridgeSubscriberService, DataBridgeReceiv
     // Stream store operations
     @Override
     public StreamDefinition getStreamDefinition(Credentials credentials, String streamName,
-                                                     String streamVersion)
+                                                String streamVersion)
             throws StreamDefinitionNotFoundException, StreamDefinitionStoreException {
         return streamDefinitionStore.getStreamDefinition(credentials, streamName, streamVersion);
 
@@ -217,7 +249,6 @@ public class DataBridge implements DataBridgeSubscriberService, DataBridgeReceiv
     }
 
 
-
     @Override
     public void saveStreamDefinition(Credentials credentials, StreamDefinition streamDefinition)
             throws DifferentStreamDefinitionAlreadyDefinedException, StreamDefinitionStoreException {
@@ -233,6 +264,10 @@ public class DataBridge implements DataBridgeSubscriberService, DataBridgeReceiv
 
     public List<AgentCallback> getSubscribers() {
         return eventDispatcher.getSubscribers();
+    }
+
+    public List<RawDataAgentCallback> getRawDataSubscribers(){
+        return eventDispatcher.getRawDataSubscribers();
     }
 
 

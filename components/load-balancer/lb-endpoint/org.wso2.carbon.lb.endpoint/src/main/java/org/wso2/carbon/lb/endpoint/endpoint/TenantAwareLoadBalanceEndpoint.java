@@ -1,10 +1,16 @@
 package org.wso2.carbon.lb.endpoint.endpoint;
 
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.Member;
+import org.apache.axis2.clustering.management.GroupManagementAgent;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,42 +30,30 @@ import org.apache.synapse.endpoints.dispatch.HttpSessionDispatcher;
 import org.apache.synapse.endpoints.dispatch.SALSessions;
 import org.apache.synapse.endpoints.dispatch.SessionInformation;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration;
 import org.wso2.carbon.lb.common.conf.util.HostContext;
 import org.wso2.carbon.lb.common.conf.util.TenantDomainContext;
 import org.wso2.carbon.lb.endpoint.SubDomainAwareGroupManagementAgent;
+import org.wso2.carbon.lb.endpoint.TenantAwareLoadBalanceEndpointException;
 import org.wso2.carbon.lb.endpoint.TenantLoadBalanceMembershipHandler;
 import org.wso2.carbon.lb.endpoint.cache.URLMappingCache;
 import org.wso2.carbon.lb.endpoint.internal.RegistryManager;
 import org.wso2.carbon.lb.endpoint.util.ConfigHolder;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-//import org.wso2.carbon.lb.endpoint.util.TenantDomainRangeContext;
 
 public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints.DynamicLoadbalanceEndpoint implements Serializable {
 
     private static final long serialVersionUID = 1577351815951789938L;
     private static final Log log = LogFactory.getLog(TenantAwareLoadBalanceEndpoint.class);
-    private String algorithm;
-    private String configuration;
-    private String failOver;
-
     /**
      * Axis2 based membership handler which handles members in multiple clustering domains
      */
     private TenantLoadBalanceMembershipHandler tlbMembershipHandler;
-
+  
     /**
-     * Key - host, Value - list of {@link TenantDomainRangeContext}
+     * Key - host name 
+     * Value - {@link HostContext}
      */
-//    private Map<String, List<TenantDomainRangeContext>> hostDomainMap;
-    
-    
     private Map<String, HostContext> hostContexts = new HashMap<String, HostContext>();
     
     private LoadBalancerConfiguration lbConfig;
@@ -75,20 +69,24 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
     private URLMappingCache mappingCache;
     
     private int sizeOfCache;
+    
+    private boolean initialized;
+    
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
         try {
 
-            String configURL = System.getProperty("loadbalancer.conf");
-            lbConfig = new LoadBalancerConfiguration();
-            lbConfig.init(configURL);
-//            hostDomainMap = lbConfig.getHostDomainMap();
+            lbConfig = ConfigHolder.getInstance().getLbConfig();
             hostContexts = lbConfig.getHostContextMap();
             sizeOfCache = lbConfig.getLoadBalancerConfig().getSizeOfCache();
             mappingCache = new URLMappingCache(sizeOfCache);
+            setSessionTimeout(lbConfig.getLoadBalancerConfig().getSessionTimeOut());
+            setFailover(lbConfig.getLoadBalancerConfig().getFailOver());
 
         } catch (Exception e) {
-            log.error("Error While reading Load Balancer configuration file" + e.toString());
+            String msg = "Failed while reading Load Balancer configuration";
+            log.error(msg, e);
+            throw new TenantAwareLoadBalanceEndpointException(msg, e);
         }
 
 
@@ -98,8 +96,11 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
             algorithm =
                     LoadbalanceAlgorithmFactory.
                             createLoadbalanceAlgorithm(payload, null);
+            
         } catch (Exception e) {
-            log.error("Error While creating Load balance algorithm" + e.toString());
+            String msg = "Error While creating Load balance algorithm";
+            log.error(msg, e);
+            throw new SynapseException(msg, e);
         }
 
         if (!initialized) {
@@ -123,12 +124,24 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                         String subDomain = tenantCtxt.getSubDomain();
 
                         if (clusteringAgent.getGroupManagementAgent(domain, subDomain) == null) {
-                            clusteringAgent.addGroupManagementAgent(new SubDomainAwareGroupManagementAgent(
-                                                                                                           subDomain),
+                            String gmAgentClass = lbConfig.getLoadBalancerConfig().getGroupManagementAgentClass();
+                            GroupManagementAgent groupManagementAgent;
+                            if (gmAgentClass != null) {
+                                try {
+                                    groupManagementAgent = (GroupManagementAgent) Class.forName(gmAgentClass).newInstance();
+                                } catch (Exception e) {
+                                    String msg = "Cannot instantiate GroupManagementAgent. Class: " + gmAgentClass;
+                                    log.error(msg, e);
+                                    throw new TenantAwareLoadBalanceEndpointException(msg, e);
+                                }
+                            } else {
+                                groupManagementAgent = new SubDomainAwareGroupManagementAgent(subDomain);
+                            }
+                            clusteringAgent.addGroupManagementAgent(groupManagementAgent,
                                                                     domain, subDomain);
                             if (log.isDebugEnabled()) {
-                                log.debug("Group management agent added to cluster domain " +
-                                          domain);
+                                log.debug("Group management agent added to cluster domain: " +
+                                          domain + " and sub domain: " + subDomain);
                             }
                         }
                     }
@@ -139,6 +152,9 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                                                                               algorithm, cfgCtx,
                                                                               isClusteringEnabled,
                                                                               getName());
+                
+                // set TenantLoadBalanceMembershipHandler for future reference
+                ConfigHolder.getInstance().setTenantLoadBalanceMembershipHandler(tlbMembershipHandler);
             }
 
             // Initialize the SAL Sessions if already has not been initialized.
@@ -149,24 +165,9 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
             setSessionAffinity(true);
             setDispatcher(new HttpSessionDispatcher());
             initialized = true;
-            log.info("===== Tenant Aware Load Balance Endpoint initialized =====");
+            log.info("Tenant Aware Load Balance Endpoint is initialized.");
         }
-    }
-
-    public void setConfiguration(String paramEle) {
-        this.configuration = paramEle;
-        System.out.print(paramEle.toString());
-        CarbonUtils.getCarbonHome();
-    }
-
-    public void setAlgorithm(String paramEle) {
-        this.algorithm = paramEle;
-        System.out.print(paramEle.toString());
-    }
-
-    public void setFailOver(String paramEle) {
-        this.failOver = paramEle;
-        System.out.print(paramEle.toString());
+        
     }
 
     //TODO remove following hard coded element
@@ -227,9 +228,14 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
         if (tlbMembershipHandler.getConfigurationContext() == null) {
             tlbMembershipHandler.setConfigurationContext(configCtx);
         }
-
+        
+        if(tlbMembershipHandler.getClusteringAgent() == null) {
+            tlbMembershipHandler.setConfigurationContext(configCtx);
+        }
+        
         TenantDynamicLoadBalanceFaultHandlerImpl faultHandler = new TenantDynamicLoadBalanceFaultHandlerImpl();
         faultHandler.setHost(targetHost);
+        
         if (sessionInformation != null && currentMember != null) {
             //send message on current session
             sessionInformation.updateExpiryTime();
@@ -265,8 +271,9 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                     sendToApplicationMember(synCtx,currentMember,faultHandler,true);
                 }
             } else {
-                tenantId = getTenantId(synCtx.getTo().toString());
+                tenantId = getTenantId(synCtx);
                 currentMember = tlbMembershipHandler.getNextApplicationMember(targetHost, tenantId);
+                
                 if (currentMember == null) {
                     String msg = "No application members available";
                     log.error(msg);
@@ -299,6 +306,7 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
             int domainNameEndIndex = url.indexOf('/', domainNameStartIndex);
             String domainName = url.substring(domainNameStartIndex,
                     domainNameEndIndex == -1 ? url.length() : domainNameEndIndex);
+            
             // return tenant id if domain name is not null
             if (domainName != null) {
                 try {
@@ -310,6 +318,26 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
         }
         // return 0 if the domain name is null
         return 0;
+    }
+    
+    private int getTenantId(MessageContext synCtx){
+    	String url = synCtx.getTo().toString();
+    	int tenantId = getTenantId(url);
+    	// tenantId = 0 because domain name was null. May be this is the SSO response 
+    	if(tenantId == 0 && url.contains(MultitenantConstants.TENANT_DOMAIN+"=")){
+    		// OK,this is the SAML SSO response from the IS
+    		// e.g url = https://localhost:9444/acs?teantDomain=domain
+    		String domainName = url.split("=").clone()[1];
+    		// return tenant id if domain name is not null
+            if (domainName != null) {
+                try {
+                    return ConfigHolder.getInstance().getRealmService().getTenantManager().getTenantId(domainName);
+                } catch (org.wso2.carbon.user.api.UserStoreException e) {
+                    log.error("An error occurred while obtaining the tenant id.", e);
+                }
+            }
+    	}
+    	return tenantId;
     }
 
     /**
@@ -370,8 +398,6 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
             if (currentMember == null) {
                 return;
             }
-            currentMember.suspend(10000);     // TODO: Make this configurable.
-            log.info("Suspended member " + currentMember + " for 10s");
 
             // Prevent infinite retrying to failed members
             callCount.set(callCount.get() + 1);
@@ -385,20 +411,27 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
             }
             Integer errorCode = (Integer) synCtx.getProperty(SynapseConstants.ERROR_CODE);
             if (errorCode != null) {
+                if (errorCode.equals(NhttpConstants.CONNECTION_FAILED)) {
+                    currentMember.suspend(10000);     // TODO: Make this configurable.
+                    log.info("Suspended member " + currentMember + " for 10s due to connection failure to that member");
+                }
                 if (errorCode.equals(NhttpConstants.CONNECTION_FAILED) ||
                         errorCode.equals(NhttpConstants.CONNECT_CANCEL) ||
                         errorCode.equals(NhttpConstants.CONNECT_TIMEOUT)) {
+                    
+                    synCtx.getFaultStack().pop();
                     // Try to resend to another member
                     Member newMember = tlbMembershipHandler.getNextApplicationMember(host, getTenantId(synCtx.toString()));
-                    if (newMember == null) {
-                        String msg = "No application members available";
+                    if (newMember == null || newMember.isSuspended()) {
+                        String msg = "No application members available having host name : "+host+
+                                " and tenant id : "+getTenantId(synCtx.toString()+" and which is not suspended.");
                         log.error(msg);
                         throw new SynapseException(msg);
                     }
                     log.info("Failed over to " + newMember);
                     synCtx.setTo(to);
                     if (isSessionAffinityBasedLB()) {
-                        //We are sending the this message on a new session,
+                        // We are sending this message on a new session,
                         // hence we need to remove previous session information
                         Set pros = synCtx.getPropertyKeySet();
                         if (pros != null) {
@@ -413,6 +446,10 @@ public class TenantAwareLoadBalanceEndpoint extends org.apache.synapse.endpoints
                 } else if (errorCode.equals(NhttpConstants.SND_IO_ERROR_SENDING) ||
                         errorCode.equals(NhttpConstants.CONNECTION_CLOSED)) {
                     // TODO: Envelope is consumed
+                    String msg = "Error sending request! Connection to host "+host+
+                            " might be closed. Error code: "+errorCode;
+                    log.error(msg);
+                    throw new SynapseException(msg);
                 }
             }
             // We cannot failover since we are using binary relay

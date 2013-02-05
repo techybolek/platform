@@ -15,6 +15,7 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
+<%@page import="org.wso2.carbon.ndatasource.ui.NDataSourceClientConstants"%>
 <%@page import="org.wso2.carbon.ndatasource.ui.config.DSXMLConfiguration"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -36,6 +37,12 @@
 
 <script type="text/javascript" src="global-params.js"></script>
 <script type="text/javascript" src="dscommon.js"></script>
+<!--Yahoo includes for dom event handling-->
+<script src="../yui/build/yahoo-dom-event/yahoo-dom-event.js" type="text/javascript"></script>
+
+<!--EditArea javascript syntax hylighter -->
+<script language="javascript" type="text/javascript" src="../editarea/edit_area_full.js"></script>
+<script type="text/javascript" src="../ajax/js/prototype.js"></script>
 <fmt:bundle basename="org.wso2.carbon.ndatasource.ui.i18n.Resources">
 <%
 	String dsProvider = "default"; 	
@@ -46,7 +53,7 @@
 	String dataSourceName = request.getParameter("dsName");
 	String description = request.getParameter("description");
 	boolean editMode = (("true".equals(request.getParameter("edit"))) ? true : false );
-	String type = null;
+	String type = "RDBMS";
 	boolean isSystem = false;
 	String dataSourceclassName = null;
 	String dsproviderPropertiesEditMode = null;
@@ -260,7 +267,7 @@ function addDataSourceProperties() {
 function populateDataSourceProperties() {
 	//edit mode
 	var str = '<%=givenDataSourceProps%>'; 
-	if (str == 'null') {
+	if (str == 'null' && document.getElementById('dsproviderProperties') != null) {
 		str = document.getElementById('dsproviderProperties').value;
 	}
 	if (str != '' && str != 'null') {
@@ -277,7 +284,7 @@ function populateDataSourceProperties() {
 function populateJNDIProperties() {
 	//edit mode
 	var str = '<%=givenJNDIProps%>'; 
-	if (str == 'null') {
+	if (str == 'null' && document.getElementById('jndiProperties') != null) {
 		str = document.getElementById('jndiProperties').value;
 	}
 	if (str != '' && str != 'null') {
@@ -352,20 +359,26 @@ function changeDataSourceProvider (obj, document) {
 	var selectedDSProvider =  obj[obj.selectedIndex].value;
 	var dsName = document.getElementById("dsName").value;
 	var description = document.getElementById("description").value;
+	var editMode = document.getElementById("editMode").value
 	var query = 'dsProvider='+selectedDSProvider;
 	
-	if (dsName != null || !dsName.equals("")) {
+	if (dsName != null && dsName != "") {
 		query = query + '&dsName='+dsName;
 	}
-	if (description != null || !description.equals("")){
+	if (description != null && description != ""){
 		query = query + '&description='+description;
+	}
+	if (editMode != null && editMode == "true") {
+		query = query + '&edit='+editMode;
 	}
 	location.href = 'newdatasource.jsp?'+query;	
 }
 
-function dsSave(namemsg, invalidnamemsg, drivermsg, urlmsg, form) {
+function dsSave(namemsg, invalidnamemsg, drivermsg, urlmsg, customdsmsg, form) {
+	
+	document.getElementById('configContent').value = editAreaLoader.getValue("configuration");
 
-    if (!isDSValid(namemsg, invalidnamemsg, drivermsg, urlmsg)) {
+    if (!isDSValid(namemsg, invalidnamemsg, drivermsg, urlmsg, customdsmsg)) {
         return false;
     }
     
@@ -380,6 +393,60 @@ function dsSave(namemsg, invalidnamemsg, drivermsg, urlmsg, form) {
     form.submit();
     return true;
 }
+
+function showConfigEditor() {
+	document.getElementById("rdbmsConfigUI").style.display = 'none';
+	document.getElementById("configEditor").style.display = "";
+	document.getElementById("showConfigTR").style.display = 'none';
+}
+
+function changeConfigView(obj, document) {
+	var selectedDsType =  obj[obj.selectedIndex].value;
+	if (selectedDsType == 'rdbms') {
+		document.getElementById("rdbmsConfigUI").style.display = '';
+		document.getElementById("configEditor").style.display = 'none';
+		document.getElementById("customDSTypeRow").style.display = 'none';
+		document.getElementById("configView").value = "false";
+		document.getElementById("dsType").value = "RDBMS";
+	} else {
+		editAreaLoader.init({
+	        id : "configuration"        // textarea id
+	        ,syntax: "xml"            // syntax to be uses for highgliting
+	        ,start_highlight: true        // to display with highlight mode on start-up
+	        ,allow_resize: "both"
+	        ,min_height:250
+	    });
+		document.getElementById("rdbmsConfigUI").style.display = 'none';
+		document.getElementById("configEditor").style.display = "";
+		document.getElementById("customDSTypeRow").style.display = "";
+		document.getElementById("configView").value = "true";
+		document.getElementById("dsType").value = "Custom";
+	}
+}
+
+function loadConfigView() {
+	var editMode = document.getElementById("editMode").value;
+	var dsType = document.getElementById("dsType").value;
+	if (editMode == 'false' || dsType == 'RDBMS') {
+		document.getElementById("configEditor").style.display = 'none';
+		document.getElementById("rdbmsConfigUI").style.display = '';
+		document.getElementById("customDSTypeRow").style.display = 'none';
+		document.getElementById("configView").value = "false";
+	} else {
+		editAreaLoader.init({
+	        id : "configuration"        // textarea id
+	        ,syntax: "xml"            // syntax to be uses for highgliting
+	        ,start_highlight: true        // to display with highlight mode on start-up
+	        ,allow_resize: "both"
+	        ,min_height:250
+	    });
+		document.getElementById("rdbmsConfigUI").style.display = 'none';
+		document.getElementById("configEditor").style.display = "";
+		document.getElementById("customDSTypeRow").style.display = "";
+		document.getElementById("configView").value = "true";
+	}
+}
+
 
 </script>
 <form method="post" name="dscreationform" id="dscreationform"
@@ -399,7 +466,7 @@ function dsSave(namemsg, invalidnamemsg, drivermsg, urlmsg, form) {
 </h2>
 
 <div id="workArea">
-<table class="styledLeft noBorders" cellspacing="0" cellpadding="0" border="0">
+<table class="styledLeft noBorders" cellspacing="0" cellpadding="0" border="0" style="border-bottom:none">
 <thead>
     <tr>
         <th colspan="3">
@@ -417,10 +484,38 @@ function dsSave(namemsg, invalidnamemsg, drivermsg, urlmsg, form) {
 </thead>
 <tbody>
 <tr>
-    <td style="width:170px;"><fmt:message key="name"/><span class='required'>*</span></td>
+<td style="width:170px;"><fmt:message key="dsType"/><span class='required'>*</span></td>
+	<td align="left">
+		 <select id="dsTypeSelector" name="dsTypeSelector"
+                        onchange="changeConfigView(this,document)">
+                    <% if (type.equals(NDataSourceClientConstants.RDBMS_DTAASOURCE_TYPE) 
+                    		|| !editMode) { %>
+	                    <option value="rdbms" selected="selected">RDBMS</option>
+	                    <option value="Custom">Custom</option>
+                    <% } else { %>
+	                    <option value="rdbms">RDBMS</option>
+	                    <option value="Custom" selected="selected">Custom</option>
+                    <% } %>
+         </select>
+		<input type="hidden" id="dsType" name="dsType" value="<%=type %>"/>
+		<input type="hidden" id="configView" name="configView"/>
+    </td>
+</tr>
+<tr id="customDSTypeRow" style="display:none">
+	<td style="width:170px;"><fmt:message key="customDSType"/><span class='required'>*</span></td>
+	<td>
+		<%if(!editMode) { %>
+			<input id="customDsType" name="customDsType"/>
+		<%} else { %>
+			<input id="customDsType" name="customDsType" value="<%=type %>"/>
+		<%} %>
+	</td>
+</tr>
+<tr>
+	<td style="width:170px;"><fmt:message key="name"/><span class='required'>*</span></td>
     <td align="left">
     	 <input type="hidden" id="isSystem" name="isSystem" value="<%=isSystem %>"/>
-    	<%if (editMode) { %>
+    	 <%if (editMode) { %>
             <input id="dsName" name=dsName class="longInput" value="<%=dataSourceName %>" readonly>
         <%} else { %>
         	<input id="dsName" name=dsName class="longInput" value="<%=dataSourceName %>">
@@ -434,6 +529,10 @@ function dsSave(namemsg, invalidnamemsg, drivermsg, urlmsg, form) {
         <input id="description" name="description" class="longInput" value="<%=description %>" />
     </td>
 </tr>
+</tbody>
+</table>
+<table id="rdbmsConfigUI" class="styledLeft noBorders" cellspacing="0" cellpadding="0" border="0" style="border-top:none;display:none">
+<tbody>
 <tr>
     <td style="width:170px;"><fmt:message key="datasource.provider"/><span class='required'>*</span></td>
     <td align="left">
@@ -451,7 +550,6 @@ function dsSave(namemsg, invalidnamemsg, drivermsg, urlmsg, form) {
                    	<% } %>
          </select>
          <input type="hidden" id="dsProviderType" name="dsProviderType" value="<%=dsProvider %>" />
-         <input type="hidden" id="dsType" name="dsType" value="<%=type %>" />
          <input type="hidden" id="dsproviderProperties" name="dsproviderProperties" class="longInput"/>
          <input type="hidden" id="dsproviderPropertiesHidden" name="dsproviderPropertiesHidden" class="longInput" value="<%=dsproviderPropertiesEditMode %>"/>
     </td>
@@ -988,14 +1086,77 @@ function dsSave(namemsg, invalidnamemsg, drivermsg, urlmsg, form) {
         </table>
     </td>
 </tr>
+</tbody>
+</table>
+<table id="configEditor" class="styledLeft noBorders" cellspacing="0" cellpadding="0" border="0" style="border-top:none;display:none;">
+	<tr>
+    <td style="width:170px"><fmt:message key="configuration"/></td>
+    <td align="left">
+        <textarea id="configuration" name="configuration" 
+        style="background-color:lavender; width:99%;height:470px;*height:500px;
+                      font-family:verdana;
+                      font-size:11px;
+                      color: darkblue;
+                      border:solid 1px #9fc2d5;
+                      overflow-x:auto;
+                      overflow-y:auto"><%if (dataSourceDefinition != null) { %><%=NDataSourceHelper.prettifyXML((dataSourceDefinition.getDsXMLConfiguration().trim())) %>
+        <%} %></textarea>
+        <textarea id="configContent" name="configContent" style="display:none"></textarea>
+    </td>
+</tr>
+</table>
+<table class="styledLeft noBorders" cellspacing="0" cellpadding="0" border="0">
 <tr>    
    <td class="buttonRow" colspan="3">
-   		<input class="button" id="testConnectionButton" name="testConnectionButton" type="button" value="Test Connection" onclick="testConnection('<fmt:message key="ds.name.cannotfound.msg"/>','<fmt:message key="ds.name.invalid.msg"/>',
-   		'<fmt:message key="ds.driver.cannotfound.msg"/>','<fmt:message key="ds.url.cannotfound.msg"/>','<fmt:message key="ds.testquery.cannotfound.msg"/>','<fmt:message key="ds.healthy.connection"/>')"/>
+   		<%if(type.equals("RDBMS")) { %>
+   		<div id="connectionTestMsgDiv" style="display: none;"></div>
+   		<input class="button" id="testConnectionButton" name="testConnectionButton" type="button" value="Test Connection" onclick="var val = isDSValid('<fmt:message key="ds.name.cannotfound.msg"/>','<fmt:message key="ds.name.invalid.msg"/>',
+   		'<fmt:message key="ds.driver.cannotfound.msg"/>','<fmt:message key="ds.url.cannotfound.msg"/>'); if (val) {testConnection()};return false;"/>
+   		<script type="text/javascript">
+            function displayMsg(msg) {
+            	var successMsg  =  new RegExp("true");
+            	if (msg.search(successMsg)==-1) //if match failed
+            	{
+            		CARBON.showErrorDialog(msg);
+            	} else {
+            		CARBON.showInfoDialog("Connection is healthy");
+            	}
+
+            }
+
+            function testConnection() {
+            	if (document.getElementById("jndiPropertyTable") != null) {
+                	extractJndiProps();
+                } 
+                if (document.getElementById("dsPropertyTable") != null) {
+                	extractDataSourceProps();
+                }
+            	var query = document.getElementById('dsName').value;
+            	var dsProvider = document.getElementById('dsProviderType').value;
+            	var datasourceType = document.getElementById('dsType').value;
+            	var datasourceCustomType = document.getElementById('customDsType').value;
+            	if (dsProvider == 'default') {
+            		var driver = document.getElementById('driver').value;
+            		var url = document.getElementById('url').value;
+            		var username = document.getElementById('username').value;
+            		var password = document.getElementById('password').value;
+            	} else {
+            		var dsclassname = document.getElementById('dsclassname').value;
+            		var dsproviderProperties = document.getElementById('dsproviderProperties').value;
+            	}
+            	dsProvider = escape(dsProvider);
+                var url = 'validateconnection-ajaxprocessor.jsp?&dsName=' + document.getElementById('dsName').value+'&driver='+driver+
+           	'&url='+url+'&username='+username+'&password='+password+'&dsType=' + datasourceType+'&customDsType='+datasourceCustomType+'&dsProviderType='+dsProvider+
+    	'&dsclassname='+dsclassname+'&dsclassname='+dsclassname+'&dsproviderProperties='+dsproviderProperties;
+                jQuery('#connectionTestMsgDiv').load(url, displayMsg);
+                return false;
+            }
+        </script>
+   		<%} %>
         <%if (!isSystem) { %>
         <input class="button" type="button"
                value="<fmt:message key="save"/>"
-               onclick="var val = ValidateProperties(); if (val) {dsSave('<fmt:message key="ds.name.cannotfound.msg"/>','<fmt:message key="ds.name.invalid.msg"/>','<fmt:message key="ds.driver.cannotfound.msg"/>','<fmt:message key="ds.url.cannotfound.msg"/>',document.dscreationform)}; return false;"/>
+               onclick="var val = ValidateProperties(); if (val) {dsSave('<fmt:message key="ds.name.cannotfound.msg"/>','<fmt:message key="ds.name.invalid.msg"/>','<fmt:message key="ds.driver.cannotfound.msg"/>','<fmt:message key="ds.url.cannotfound.msg"/>','<fmt:message key="custom.ds.type.name.cannotfound.msg"/>',document.dscreationform)}; return false;"/>
         
         <input class="button" type="reset" value="<fmt:message key="cancel"/>"
                onclick="document.location.href='index.jsp'"/>
@@ -1005,12 +1166,13 @@ function dsSave(namemsg, invalidnamemsg, drivermsg, urlmsg, form) {
         <%} %>
     </td>
 </tr>
-
 </table>
 <script type="text/javascript">
+	document.getElementById('configuration').innerHTML = format_xml(document.getElementById('configuration').value);
 	populateDataSourceProperties();
 	populateJNDIProperties();
 	disableForm();
+	loadConfigView();
 </script>
 </div>
 </div>

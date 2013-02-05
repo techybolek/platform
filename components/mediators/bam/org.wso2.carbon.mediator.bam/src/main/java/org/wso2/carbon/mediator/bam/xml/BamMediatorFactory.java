@@ -30,6 +30,7 @@ import org.wso2.carbon.mediator.bam.config.BamServerConfig;
 import org.wso2.carbon.mediator.bam.config.BamServerConfigBuilder;
 import org.wso2.carbon.mediator.bam.config.CryptographyManager;
 import org.wso2.carbon.mediator.bam.config.RegistryManager;
+import org.wso2.carbon.mediator.bam.config.stream.StreamConfiguration;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -43,24 +44,18 @@ import java.util.Properties;
 public class BamMediatorFactory extends AbstractMediatorFactory {
     private static final Log log = LogFactory.getLog(BamMediatorFactory.class);
     public static final QName BAM_Q = new QName(SynapseConstants.SYNAPSE_NAMESPACE, "bam");
-
     public static final String SERVER_PROFILE_LOCATION = "bamServerProfiles";
 
     public Mediator createSpecificMediator(OMElement omElement, Properties properties) {
         BamMediator bam = new BamMediator();
-
         BamServerConfigBuilder bamServerConfigBuilder = new BamServerConfigBuilder();
         String resourceString;
-
         String serverProfilePath = SERVER_PROFILE_LOCATION + "/" + this.getServerProfileName(omElement);
         String streamName = this.getStreamName(omElement);
         String streamVersion = this.getStreamVersion(omElement);
         if(isNotNullOrEmpty(serverProfilePath) && isNotNullOrEmpty(streamName) && isNotNullOrEmpty(streamVersion)){
             bam.setServerProfile(serverProfilePath);
-            bam.getStream().setStreamName(streamName);
-            bam.getStream().setStreamVersion(streamVersion);
         }
-
         RegistryManager registryManager = new RegistryManager();
         if(registryManager.resourceAlreadyExists(serverProfilePath)){
             resourceString = registryManager.getResourceString(serverProfilePath);
@@ -85,7 +80,6 @@ public class BamMediatorFactory extends AbstractMediatorFactory {
     private String getServerProfileName(OMElement omElement){
         OMElement serverProfileElement = omElement.getFirstChildWithName(
                 new QName(SynapseConstants.SYNAPSE_NAMESPACE, "serverProfile"));
-
         if(serverProfileElement != null){
             OMAttribute serverProfileAttr = serverProfileElement.getAttribute(new QName("name"));
             if(serverProfileAttr != null){
@@ -102,11 +96,9 @@ public class BamMediatorFactory extends AbstractMediatorFactory {
 
         OMElement serverProfileElement = omElement.getFirstChildWithName(
                 new QName(SynapseConstants.SYNAPSE_NAMESPACE, "serverProfile"));
-
         if(serverProfileElement != null){
             OMElement streamConfigElement = serverProfileElement.getFirstChildWithName(
                     new QName(SynapseConstants.SYNAPSE_NAMESPACE, "streamConfig"));
-
             if(streamConfigElement != null){
                 OMAttribute streamNameAttr = streamConfigElement.getAttribute(new QName("name"));
                 if(streamNameAttr != null){
@@ -118,7 +110,6 @@ public class BamMediatorFactory extends AbstractMediatorFactory {
             }
             return null;
         }
-
         return null;
     }
 
@@ -126,11 +117,9 @@ public class BamMediatorFactory extends AbstractMediatorFactory {
 
         OMElement serverProfileElement = omElement.getFirstChildWithName(
                 new QName(SynapseConstants.SYNAPSE_NAMESPACE, "serverProfile"));
-
         if(serverProfileElement != null){
             OMElement streamConfigElement = serverProfileElement.getFirstChildWithName(
                     new QName(SynapseConstants.SYNAPSE_NAMESPACE, "streamConfig"));
-
             if(streamConfigElement != null){
                 OMAttribute streamVersionAttr = streamConfigElement.getAttribute(new QName("version"));
                 if(streamVersionAttr != null){
@@ -142,23 +131,17 @@ public class BamMediatorFactory extends AbstractMediatorFactory {
             }
             return null;
         }
-
         return null;
     }
 
     private void updateBamMediator(BamServerConfigBuilder bamServerConfigBuilder, BamMediator bamMediator, String streamName, String streamVersion){
         BamServerConfig bamServerConfig=  bamServerConfigBuilder.getBamServerConfig();
         CryptographyManager cryptographyManager = new CryptographyManager();
-        bamMediator.getStream().setStreamNickName(bamServerConfig.getAUniqueStreamConfiguration(streamName, streamVersion).getNickname());
-        bamMediator.getStream().setStreamDescription(bamServerConfig.getAUniqueStreamConfiguration(streamName, streamVersion).getDescription());
-        bamMediator.getStream().setUserName(bamServerConfig.getUsername());
-        bamMediator.getStream().setPassword(cryptographyManager.base64DecodeAndDecrypt(bamServerConfig.getPassword()));
-        bamMediator.getStream().setServerIp(bamServerConfig.getIp());
-        bamMediator.getStream().setSecurity(bamServerConfig.isSecure());
-        bamMediator.getStream().setAuthenticationPort(bamServerConfig.getAuthenticationPort());
-        bamMediator.getStream().setReceiverPort(bamServerConfig.getReceiverPort());
-        bamMediator.getStream().setProperties(bamServerConfig.getAUniqueStreamConfiguration(streamName, streamVersion).getProperties());
-        bamMediator.getStream().setStreamEntries(bamServerConfig.getAUniqueStreamConfiguration(streamName, streamVersion).getEntries());
+        bamServerConfig.setPassword(cryptographyManager.base64DecodeAndDecrypt(bamServerConfig.getPassword()));
+        StreamConfiguration streamConfiguration = bamServerConfig.getAUniqueStreamConfiguration(streamName, streamVersion);
+        bamMediator.getStream().setBamServerConfig(bamServerConfig);
+        bamMediator.getStream().setStreamConfiguration(streamConfiguration);
+
     }
 
     private boolean isNotNullOrEmpty(String string){

@@ -40,6 +40,7 @@ public final class APIMgtDBUtil {
     private static final Log log = LogFactory.getLog(APIMgtDBUtil.class);
 
     private static volatile DataSource dataSource = null;
+    private static final String DB_CHECK_SQL = "SELECT * FROM AM_SUBSCRIBER";
     
     private static final String DB_CONFIG = "Database.";
     private static final String DB_DRIVER = DB_CONFIG + "Driver";
@@ -54,7 +55,7 @@ public final class APIMgtDBUtil {
      *
      * @throws APIManagementException if an error occurs while loading DB configuration
      */
-    public static void initialize() throws APIManagementException {
+    public static void initialize() throws Exception {
         if (dataSource != null) {
             return;
         }
@@ -94,6 +95,30 @@ public final class APIMgtDBUtil {
                     basicDataSource.setPassword(password);
                     dataSource = basicDataSource;
                 }
+            }
+            setupAPIManagerDatabase();
+        }
+    }
+
+    /**
+     * Creates the APIManager Database if not created already.
+     *
+     * @throws Exception if an error occurs while creating the APIManagerDatabase.
+     */
+    private static void setupAPIManagerDatabase() throws Exception {
+
+        String value = System.getProperty("setup");
+        if (value != null) {
+            LocalDatabaseCreator databaseCreator = new LocalDatabaseCreator(dataSource);
+            try {
+                if (!databaseCreator.isDatabaseStructureCreated(DB_CHECK_SQL)) {
+                    databaseCreator.createRegistryDatabase();
+                } else {
+                    log.info("APIManager database already exists. Not creating a new database.");
+                }
+            } catch (Exception e) {
+                String msg = "Error in creating the APIManager database";
+                throw new Exception(msg, e);
             }
         }
     }

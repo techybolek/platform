@@ -43,13 +43,15 @@
         client = new ReportTemplateClient(configContext, serverURL, cookie);
         allReports = client.getAllTemplateFiles();
     } catch (Exception e) {
-      %>
-      <script type="text/javascript">
-          CARBON.showErrorDialog('<%=e.getMessage()%>', function(){
-           location.href = "../reporting_custom/select-report.jsp";
-          });
-      </script>
-<%    }
+        if (null != e.getMessage()) {
+%>
+<script type="text/javascript">
+    CARBON.showErrorDialog('<%=e.getMessage()%>', function() {
+        location.href = "../reporting_custom/select-report.jsp";
+    });
+</script>
+<% }
+}
 %>
 <script>
     <% if(null != allReports && allReports.length > 0){ %>
@@ -127,7 +129,7 @@
         var reportName = document.getElementById("reportName").value;
         if (reportName == '') {
             msg = 'Please enter a report name.\n';
-                CARBON.showErrorDialog(msg);
+            CARBON.showErrorDialog(msg);
             return false;
         }
         reportIndex = reportIndex.substring(0, reportIndex.length - 1);
@@ -195,7 +197,8 @@
                                 %>
                                 <td><input name="reportName"
                                            id="reportName" value="<%=tempReportName%>"
-                                            onkeyup="nextButtonValidate()" onmousemove="nextButtonValidate()" onfocus="nextButtonValidate()" onblur="nextButtonValidate()"/>
+                                           onkeyup="nextButtonValidate()" onmousemove="nextButtonValidate()"
+                                           onfocus="nextButtonValidate()" onblur="nextButtonValidate()"/>
                                 </td>
                             </tr>
                             <% if (null != allReports && allReports.length > 0) {%>
@@ -210,7 +213,7 @@
                             %>
 
                             <script type="text/javascript">
-                                CARBON.showErrorDialog('No reports available. Please add a report and continue.', function(){
+                                CARBON.showErrorDialog('No reports available. Please add a report and continue.', function() {
                                     location.href = "../reporting_custom/select-report.jsp";
                                 });
                             </script>

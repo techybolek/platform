@@ -42,6 +42,12 @@ public class AddSymbolicLinkUtil {
             linkResourcePath = parentPath + RegistryConstants.PATH_SEPARATOR + name;
         }
 
+        if (RegistryConstants.ROOT_PATH.equals(targetPath)) {
+            String msg = "Unable to create symbolic link to root.";
+            log.error(msg);
+            throw new RegistryException(msg);
+        }
+
         try {
             userRegistry.createLink(linkResourcePath, targetPath);
 

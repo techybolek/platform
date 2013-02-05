@@ -19,7 +19,6 @@
 package org.wso2.carbon.automation.core.utils.axis2serverutils;
 
 import org.apache.axis2.AxisFault;
-
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.deployment.DeploymentEngine;
@@ -42,24 +41,27 @@ public class SampleAxis2Server implements BackendServer {
     public static final String SIMPLE_STOCK_QUOTE_SERVICE = "SimpleStockQuoteService";
     public static final String SECURE_STOCK_QUOTE_SERVICE = "SecureStockQuoteService";
     public static final String LB_SERVICE_1 = "LBService1";
+    public static final String LB_SERVICE_2 = "LBService2";
+    public static final String LB_SERVICE_3 = "LBService3";
+    public static final String SIMPLE_AXIS2_SERVICE = "Axis2Service";
+    public static final String STUDENT_REST_SERVICE = "StudentService";
 
     private static final Log log = LogFactory.getLog(SampleAxis2Server.class);
 
     private ConfigurationContext cfgCtx;
     private ListenerManager listenerManager;
     private boolean started;
+    String repositoryPath = null;
 
     public SampleAxis2Server() {
         this("test_axis2_server_9000.xml");
+        repositoryPath = System.getProperty(ServerConstants.CARBON_HOME) + File.separator +
+                         "samples" + File.separator + "axis2Server" + File.separator + "repository";
     }
 
     public SampleAxis2Server(String axis2xmlFile) {
-//        String repositoryPath = "samples" + File.separator + "axis2Server" +
-//                                File.separator + "repository";
-
-        String repositoryPath = System.getProperty(ServerConstants.CARBON_HOME) + File.separator +
-                                "samples" + File.separator + "axis2Server" + File.separator + "repository";
-
+        repositoryPath = System.getProperty(ServerConstants.CARBON_HOME) + File.separator +
+                         "samples" + File.separator + "axis2Server" + File.separator + "repository";
         File repository = new File(repositoryPath);
         log.info("Using the Axis2 repository path: " + repository.getAbsolutePath());
 
@@ -93,19 +95,34 @@ public class SampleAxis2Server implements BackendServer {
     public void stop() {
         log.info("Stopping sample Axis2 server");
         try {
-
             listenerManager.stop();
-            listenerManager.destroy();
+            cfgCtx.cleanupContexts();
 
         } catch (AxisFault axisFault) {
             log.error("Error while shutting down the listener manager", axisFault);
         }
-        cfgCtx.cleanupContexts();
         started = false;
     }
 
     public boolean isStarted() {
-        return started;
+        return !listenerManager.isStopped();
+    }
+
+    public void hotDeployArtifact(String artifact) throws IOException {
+        File fOrig = new File(artifact);
+        File fDest = new File(repositoryPath + File.separator + "services" + File.separator);
+        FileUtils.copyFile(fOrig, fDest);
+        /*  File file = new File("Location of the file");
+                         ClassLoader clsLoader = new URLClassLoader(new URL[]{file.toURL()});
+    InputStream in = new FileInputStream("location of service.xml");
+    AxisService service = DeploymentEngine..buildService(in, clsLoader,cfgCtx);*/
+
+
+    }
+
+    public void hotUndeployArtifact(String artifact) {
+        File fOrig = new File(artifact);
+        FileUtils.deleteQuietly(fOrig);
     }
 
     public void deployService(Object service) throws IOException {
@@ -113,6 +130,7 @@ public class SampleAxis2Server implements BackendServer {
         File file = copyResourceToFileSystem(artifactName, artifactName);
         AxisServiceGroup serviceGroup = DeploymentEngine.loadServiceGroup(file, cfgCtx);
         cfgCtx.getAxisConfiguration().addServiceGroup(serviceGroup);
+
     }
 
     private File copyResourceToFileSystem(String resourceName, String fileName) throws IOException {

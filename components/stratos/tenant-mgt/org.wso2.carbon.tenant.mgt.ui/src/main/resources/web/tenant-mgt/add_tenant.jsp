@@ -16,11 +16,10 @@
 ~ under the License.
 -->
 <%@ page import="org.wso2.carbon.stratos.common.util.CommonUtil" %>
-<%@ page import="org.wso2.carbon.registry.common.ui.UIException" %>
 <%@ page import="org.wso2.carbon.tenant.mgt.stub.beans.xsd.TenantInfoBean" %>
-<%@ page import="org.wso2.carbon.stratos.common.constants.StratosConstants" %>
 <%@ page import="org.wso2.carbon.tenant.mgt.ui.utils.TenantMgtUtil" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.base.ServerConfiguration" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -39,6 +38,7 @@
     String error1 = "Tenant with the domain : " + domainName + " doesn't exist.";
     boolean isUpdating = false;
     boolean isPublicCloud = CommonUtil.isPublicCloudSetup();
+    String isCloudDeployment =  ServerConfiguration.getInstance().getFirstProperty("IsCloudDeployment");
     String email = "";
     if (domainName != null && !domainName.equals("")) {
         try {
@@ -51,9 +51,8 @@
             isActive = infoBean.getActive();
             usagePlan = infoBean.getUsagePlan();
             isUpdating = true;
-
             session.setAttribute("isActivatedTenant", isActive);
-        } catch (UIException e) {
+        } catch (Exception e) {
             CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
             request.setAttribute(CarbonUIMessage.ID, uiMsg);
 %>
@@ -97,7 +96,7 @@
 
 <div id="activityReason" style="display: none;"></div>
 <form id="addTenantForm" action="submit_tenant_ajaxprocessor.jsp" method="post">
-
+    <input type="hidden" name="isUpdating" id="isUpdating" value="false">
     <table class="styledLeft">
         <thead>
         <tr>
@@ -146,7 +145,6 @@
 
                     %>
 
-
                     <tr>
                         <td colspan="3" class="middle-header"><fmt:message
                                 key="usage.plan.information"/></td>
@@ -164,10 +162,9 @@
                                 if (!CommonUtil.getStratosConfig().getUsagePlanURL().equals("")) {
                             %>
                             <a href=<%=CommonUtil.getStratosConfig().getUsagePlanURL()%>
-                                    target=<%=CommonUtil.getStratosConfig().getUsagePlanURL()%>>
+                                       target=<%=CommonUtil.getStratosConfig().getUsagePlanURL()%>>
                                 <b>More info</b></a>
                             <% } %>
-
                         </td>
                         <td>
                             <% if (usagePlan.length() > 2) {
@@ -309,7 +306,7 @@
         </tr>
             <% }%>
 
-        <tr id="buttonRow">
+        <tr id="buttonRow2">
             <td class="buttonRow">
                 <input class="button" type="button" name="activateButton" id="activateButton"
                        onclick="return activateDeactivate('<%=domainName%>','<%=isActive%>');"
@@ -320,7 +317,7 @@
             <input type="hidden" name="activatingDomain" id="activatingDomain" value="<%=domainName%>"/>
 
         </tr>
-        </thead>
+        </tbody>
     </table>
     <%
         }
@@ -353,22 +350,35 @@
 
                               var charge;
                               var name;
-                              for (var i = 0; i < packageInfo.length; i++) {
-                                  charge = packageInfo[i].subscriptionCharge;
-                                  name = packageInfo[i].name;
-                                  if (name == '<%=usagePlan%>') {
-                                      option = document.createElement("option");
-                                      option.value = name;
-                                      option.selected = name;
-                                      option.innerHTML = name;
-                                      document.getElementById('usage-plan-name').appendChild(option);
+                              var isCloud = <%= isCloudDeployment %>;
 
-                                  }
-                                  else {
-                                      option = document.createElement("option");
-                                      option.value = name;
-                                      option.innerHTML = name
-                                      document.getElementById('usage-plan-name').appendChild(option);
+                              if (!isCloud) {
+                                  String
+                                  demoOption = "Demo"
+                                  option = document.createElement("option");
+                                  option.value = demoOption;
+                                  option.selected = demoOption;
+                                  option.innerHTML = demoOption;
+                                  document.getElementById('usage-plan-name').appendChild(option);
+
+                              } else {
+                                  for (var i = 0; i < packageInfo.length; i++) {
+                                      charge = packageInfo[i].subscriptionCharge;
+                                      name = packageInfo[i].name;
+                                      if (name == '<%=usagePlan%>') {
+                                          option = document.createElement("option");
+                                          option.value = name;
+                                          option.selected = name;
+                                          option.innerHTML = name;
+                                          document.getElementById('usage-plan-name').appendChild(option);
+
+                                      }
+                                      else {
+                                          option = document.createElement("option");
+                                          option.value = name;
+                                          option.innerHTML = name
+                                          document.getElementById('usage-plan-name').appendChild(option);
+                                      }
                                   }
                               }
                           }

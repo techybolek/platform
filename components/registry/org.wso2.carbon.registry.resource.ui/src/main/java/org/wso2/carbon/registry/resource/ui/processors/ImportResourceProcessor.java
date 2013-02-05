@@ -22,6 +22,7 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.registry.common.ui.UIException;
 import org.wso2.carbon.registry.core.utils.MediaTypesUtils;
+import org.wso2.carbon.registry.resource.ui.Utils;
 import org.wso2.carbon.registry.resource.ui.clients.ResourceServiceClient;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.utils.ServerConstants;
@@ -46,7 +47,8 @@ public class ImportResourceProcessor {
 
         String parentPath = request.getParameter("parentPath");
         String resourceName = request.getParameter("resourceName");
-        String mediaType = MediaTypesUtils.getMimeTypeFromHumanReadableMediaType(request.getParameter("mediaType"));
+        String mediaType = MediaTypesUtils.getMimeTypeFromHumanReadableMediaType(
+                request.getParameter("mediaType"));
         String description = request.getParameter("description");
         String fetchURL = request.getParameter("fetchURL");
         String isAsync = request.getParameter("isAsync");
@@ -94,9 +96,9 @@ public class ImportResourceProcessor {
             ResourceServiceClient client =
                     new ResourceServiceClient(cookie, config, request.getSession());
             if (JavaUtils.isTrueExplicitly(isAsync)) {
-                client.importResource(parentPath, resourceName, mediaType, description, fetchURL, symlinkLocation, true);
+                client.importResource(parentPath, resourceName, mediaType, description, fetchURL, symlinkLocation, Utils.getProperties(request), true);
             } else {
-                client.importResource(parentPath, resourceName, mediaType, description, fetchURL, symlinkLocation, false);
+                client.importResource(parentPath, resourceName, mediaType, description, fetchURL, symlinkLocation, Utils.getProperties(request), false);
             }
         } catch (Exception e) {
             // having additional details will make the error message long

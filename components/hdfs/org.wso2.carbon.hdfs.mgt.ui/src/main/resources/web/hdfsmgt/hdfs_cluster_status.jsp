@@ -20,7 +20,7 @@
     <div id="middle">
         <h2>Hadoop File System Status </h2>
         <div id="hadoopStatus">
-            TO DO hadoop Heart Beat.
+            <%--TO DO hadoop Heart Beat.--%>
         </div>
 
     </div>

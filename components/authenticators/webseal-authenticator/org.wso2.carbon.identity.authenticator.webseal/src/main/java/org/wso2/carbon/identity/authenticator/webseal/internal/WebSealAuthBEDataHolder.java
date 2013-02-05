@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.authenticator.webseal.internal;
 
+import org.osgi.framework.BundleContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -25,11 +26,13 @@ import org.wso2.carbon.user.core.service.RealmService;
  * This class is used as the singleton dataholder for WebSeal authenticator BE comp.
  */
 public class WebSealAuthBEDataHolder {
+
     private static WebSealAuthBEDataHolder instance = new WebSealAuthBEDataHolder();
 
     private RegistryService registryService;
     private RealmService realmService;
-
+    private BundleContext bundleContext;
+    
     private WebSealAuthBEDataHolder(){
     }
 
@@ -51,5 +54,13 @@ public class WebSealAuthBEDataHolder {
 
     public void setRealmService(RealmService realmService) {
         this.realmService = realmService;
+    }
+
+    public BundleContext getBundleContext() {
+        return bundleContext;
+    }
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 }

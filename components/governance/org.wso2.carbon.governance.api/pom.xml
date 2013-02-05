@@ -19,11 +19,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>governance</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.governance.api</artifactId>
+    <version>4.0.8</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Governance</name>
     <description>Governance API.</description>
@@ -43,6 +45,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.caching.core</artifactId>
+            <version>4.0.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -53,14 +56,27 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
+            <version>4.0.3</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.core</artifactId>
+            <version>4.0.4</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.utils</artifactId>
+            <version>4.0.3</version>
+        </dependency>
+ 	<dependency>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.core</artifactId>
+            <version>4.0.3</version>
+        </dependency>
+       <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.user.api</artifactId>
+            <version>4.0.3</version>
         </dependency>
         <dependency>
                 <groupId>eclipse</groupId>
@@ -77,6 +93,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.extensions</artifactId>
+	    <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.juddi.wso2</groupId>
@@ -90,6 +107,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.common</artifactId>
+	    <version>4.0.2</version>
 		<scope>test</scope>
         </dependency>
             <dependency>
@@ -160,6 +178,8 @@
                     <testFailureIgnore>false</testFailureIgnore>
                     <excludes>
                         <exclude>**/BaseTestCase.java</exclude>
+                        <exclude>**/ServiceTest.java</exclude>
+                        <exclude>**/EndpointTest.java</exclude>
                     </excludes>
                     <!--<includes>-->
                         <!--<include>**/*WSDLTest.java</include>-->

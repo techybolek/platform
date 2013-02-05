@@ -30,9 +30,6 @@ public final class PresentationSubject extends PresentationElement implements Pr
 
     @Override
     public void setValue(String value) {
-        if(value.length() > 254) {
-            throw new IllegalArgumentException("Presentation subjects length is greater than 254.");
-        }
         super.setValue(value);
     }
 }

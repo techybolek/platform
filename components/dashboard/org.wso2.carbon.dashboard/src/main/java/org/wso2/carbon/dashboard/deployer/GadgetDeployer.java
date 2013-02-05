@@ -31,7 +31,7 @@ import org.wso2.carbon.application.deployer.AppDeployerUtils;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.dashboard.DashboardContext;
 import org.wso2.carbon.dashboard.common.DashboardConstants;
 import org.wso2.carbon.registry.core.*;
@@ -66,7 +66,7 @@ public class GadgetDeployer extends AbstractDeployer {
 
     public void init(ConfigurationContext configurationContext) {
 
-        tenantID = SuperTenantCarbonContext.getCurrentContext(configurationContext).getTenantId();
+        tenantID = PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();
 
         String artifactPath = CarbonUtils.getCarbonRepository() + "gadgets";
         File artifactsDir = new File(artifactPath);
@@ -333,7 +333,7 @@ public class GadgetDeployer extends AbstractDeployer {
         UserRegistry registry = null;
         try {
             // registry = (UserRegistry) DashboardContext.getRegistry(tenantId);
-            // int tID = SuperTenantCarbonContext.getCurrentContext().getTenantId();
+            // int tID = PrivilegedCarbonContext.getCurrentContext().getTenantId();
             registry = (UserRegistry) DashboardContext.getRegistry(tenantId);
 
         } catch (Exception e) {

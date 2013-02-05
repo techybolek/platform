@@ -276,7 +276,8 @@
                         if(CarbonUIUtil.isContextRegistered(config, "/urlmapper/")){ %>
                          
                               <td colspan="2"><nobr>
-                            <a class="icon-link" style="background-image: url(images/url-rewrite.png);" href="../urlmapper/index.jsp?carbonEndpoint=<%=carbonEndpoint%>"
+                            <a class="icon-link" style="background-image: url(images/url-rewrite.png);"
+    href="../urlmapper/index.jsp?carbonEndpoint=<%=carbonEndpoint%>&apptype=service"
                             >
                                 URL Mappings
                             </a></nobr>

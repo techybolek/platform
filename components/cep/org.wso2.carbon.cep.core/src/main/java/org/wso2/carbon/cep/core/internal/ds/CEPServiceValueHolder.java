@@ -16,10 +16,11 @@
 
 package org.wso2.carbon.cep.core.internal.ds;
 
-import org.apache.axiom.om.OMElement;
 import org.wso2.carbon.broker.core.BrokerService;
 import org.wso2.carbon.brokermanager.core.BrokerManagerService;
 import org.wso2.carbon.cep.core.internal.CEPService;
+import org.wso2.carbon.cep.core.internal.util.NotDeployedBucketElement;
+import org.wso2.carbon.cep.statistics.CEPStatisticsManagerInterface;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -45,7 +46,9 @@ public class CEPServiceValueHolder {
 
     private CEPService cepService;
 
-    private List<OMElement> unDeployedBuckets = new ArrayList<OMElement>();
+    private CEPStatisticsManagerInterface cepStatisticsManager;
+
+    private List<NotDeployedBucketElement> notDeployedBucketElements = new ArrayList<NotDeployedBucketElement>();
 
     private CEPServiceValueHolder() {
 
@@ -110,11 +113,20 @@ public class CEPServiceValueHolder {
         this.cepService = cepService;
     }
 
-    public List<OMElement> getUnDeployedBuckets() {
-        return this.unDeployedBuckets;
+    public List<NotDeployedBucketElement> getNotDeployedBucketElements() {
+        return this.notDeployedBucketElements;
     }
 
-    public void setUnDeployedBuckets(List<OMElement> unDeployedBuckets) {
-        this.unDeployedBuckets = unDeployedBuckets;
+    public void setNotDeployedBucketElements(
+            List<NotDeployedBucketElement> notDeployedBucketElements) {
+        this.notDeployedBucketElements = notDeployedBucketElements;
+    }
+
+    public CEPStatisticsManagerInterface getCepStatisticsManager() {
+        return cepStatisticsManager;
+    }
+
+    public void setCepStatisticsManager(CEPStatisticsManagerInterface cepStatisticsManager) {
+        this.cepStatisticsManager = cepStatisticsManager;
     }
 }

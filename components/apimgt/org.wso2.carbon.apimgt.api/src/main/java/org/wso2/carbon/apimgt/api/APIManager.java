@@ -21,7 +21,9 @@ package org.wso2.carbon.apimgt.api;
 import org.wso2.carbon.apimgt.api.model.*;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -31,9 +33,15 @@ import java.util.Set;
 public interface APIManager {
 
     /**
-     * Returns a list of all existing APIs by all providers
+     * Returns a list of all existing APIs by all providers. The API objects returned by this
+     * method may be partially initialized (due to performance reasons). Each API instance
+     * is guaranteed to have the API name, version, provider name, context, status and icon URL.
+     * All other fields may not be initialized. Therefore, the objects returned by this method
+     * must not be used to access any metadata item related to an API, other than the ones listed
+     * above. For that purpose a fully initialized API object instance should be acquired by
+     * calling the getAPI(APIIdentifier) method.
      *
-     * @return a List of API objects, possibly empty
+     * @return a List of API objects (partially initialized), possibly empty
      * @throws APIManagementException on error
      */
     public List<API> getAllAPIs() throws APIManagementException;
@@ -83,7 +91,18 @@ public interface APIManager {
      * @return List<Documentation>
      * @throws APIManagementException if failed to get Documentations
      */
-    public List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException;
+    public List<Documentation> getAllDocumentation(APIIdentifier apiId)
+            throws APIManagementException;
+
+    /**
+     * Returns a list of documentation attached to a particular API
+     *
+     * @param apiId APIIdentifier
+     * @return List<Documentation>
+     * @throws APIManagementException if failed to get Documentations
+     */
+    public List<Documentation> getAllDocumentation(APIIdentifier apiId,String loggedUserName)
+            throws APIManagementException;
 
     /**
      * Returns the specified document attached to the given API
@@ -153,25 +172,23 @@ public interface APIManager {
     public Set<API> getSubscriberAPIs(Subscriber subscriber) throws APIManagementException;
 
     /**
-     * Associates the given icon image with the specified API
-     * 
-     * @param identifier an ID representing an API
-     * @param in InputStream for an image
-     * @param contentType Content type (media type) for the image
+     * Associates the given icon image with the specified path.
+     *
+     * @param resourcePath a String representing the relative path of a resource.
+     * @param icon         to be saved
      * @return a String URL pointing to the image that was added
      * @throws APIManagementException if an error occurs while adding the icon image
      */
-    public String addIcon(APIIdentifier identifier, InputStream in,
-                        String contentType) throws APIManagementException;
+    public String addIcon(String resourcePath, Icon icon) throws APIManagementException;
 
     /**
      * Retrieves the icon image associated with a particular API as a stream.
      *
      * @param identifier ID representing the API
-     * @return an InputStream for an image or null of an image does not exist
+     * @return an Icon containing image content and content type information
      * @throws APIManagementException if an error occurs while retrieving the image
      */
-    public InputStream getIcon(APIIdentifier identifier) throws APIManagementException;
+    public Icon getIcon(APIIdentifier identifier) throws APIManagementException;
 
     /**
      * Cleans up any resources acquired by this APIManager instance. It is recommended
@@ -180,5 +197,54 @@ public interface APIManager {
      * @throws APIManagementException if an error occurs while cleaning up
      */
     public void cleanup() throws APIManagementException;
+
+
+    /**
+     * Check whether an application access token is already persist in database.
+     *
+     * @param accessToken
+     * @return
+     * @throws APIManagementException
+     */
+    public boolean isApplicationTokenExists(String accessToken) throws APIManagementException;
+
+    /**
+     * Check whether an application access token is already revoked.
+     *
+     * @param accessToken
+     * @return
+     * @throws APIManagementException
+     */
+    public boolean isApplicationTokenRevoked(String accessToken) throws APIManagementException;
+
+    /**
+     * Return information related to a specific access token
+     *
+     * @param accessToken AccessToken
+     * @return
+     * @throws APIManagementException
+     */
+    public APIKey getAccessTokenData(String accessToken) throws APIManagementException;
+    /**
+    /**
+     * Return information related to access token by a searchTerm and searchType       *
+     *
+     *
+     * @param searchType
+     * @param searchTerm
+     * @return
+     * @throws APIManagementException
+     */
+    public Map<Integer, APIKey> searchAccessToken(String searchType, String searchTerm)
+            throws APIManagementException;
+
+    /**
+     * Return subscribed APIs per access token
+     *
+     * @param accessToken
+     * @return
+     * @throws APIManagementException
+     */
+    public Set<APIIdentifier> getAPIByAccessToken(String accessToken) throws APIManagementException;
 
 }

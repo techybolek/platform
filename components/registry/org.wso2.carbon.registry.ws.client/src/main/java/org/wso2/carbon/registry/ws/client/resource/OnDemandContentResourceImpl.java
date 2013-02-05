@@ -4,6 +4,8 @@ import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 
+import java.io.InputStream;
+
 public class OnDemandContentResourceImpl extends ResourceImpl {
 	
 	private String pathWithVersion;
@@ -30,10 +32,19 @@ public class OnDemandContentResourceImpl extends ResourceImpl {
 
 	private WSRegistryServiceClient client;
 
-	@Override
+    @Override
+    public InputStream getContentStream() throws RegistryException {
+        // If there is no content, try to fetch it.
+        if (content == null && !contentModified) {
+            getContent();
+        }
+        return super.getContentStream();
+    }
+
+    @Override
 	public Object getContent() throws RegistryException {
 		try {
-			if (content == null) { // fetch data only if it hasn't been fetched previously
+			if (content == null && !contentModified) { // fetch data only if it hasn't been fetched previously
 				content = getClient().getContent(getPathWithVersion());
 			}
 			return content;

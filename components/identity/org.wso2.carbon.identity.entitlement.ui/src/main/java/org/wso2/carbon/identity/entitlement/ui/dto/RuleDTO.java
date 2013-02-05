@@ -26,16 +26,19 @@ import java.util.List;
  */
 public class RuleDTO {
 
-
     private String ruleId;
 
     private String ruleEffect;
 
     private String ruleDescription;
 
-    private BasicTargetDTO targetDTO;
+    private BasicTargetDTO targetDTO = new BasicTargetDTO();
 
     private List<RowDTO> rowDTOList = new ArrayList<RowDTO>();
+
+    private List<ExtendAttributeDTO> attributeDTOs = new ArrayList<ExtendAttributeDTO>();
+
+    private List<ObligationDTO> obligationDTOs = new ArrayList<ObligationDTO>();
 
     private boolean completedRule;
 
@@ -89,5 +92,29 @@ public class RuleDTO {
 
     public void setCompletedRule(boolean completedRule) {
         this.completedRule = completedRule;
+    }
+
+    public List<ExtendAttributeDTO> getAttributeDTOs() {
+        return attributeDTOs;
+    }
+
+    public void setAttributeDTOs(List<ExtendAttributeDTO> attributeDTOs) {
+        this.attributeDTOs = attributeDTOs;
+    }
+
+    public void addAttributeDTO(ExtendAttributeDTO attributeDTO) {
+        this.attributeDTOs.add(attributeDTO);
+    }
+
+    public List<ObligationDTO> getObligationDTOs() {
+        return obligationDTOs;
+    }
+
+    public void setObligationDTOs(List<ObligationDTO> obligationDTOs) {
+        this.obligationDTOs = obligationDTOs;
+    }
+
+    public void addObligationDTO(ObligationDTO obligationDTO) {
+        this.obligationDTOs.add(obligationDTO);
     }
 }

@@ -50,4 +50,6 @@ public final class BPEL4PeopleConstants {
     public static final String NON_RECOVERABLE_ERROR = "nonRecoverableError";
     public static final QName B4P_FAULT = new QName(BPEL4PeopleConstants.B4P_NAMESPACE,
             BPEL4PeopleConstants.NON_RECOVERABLE_ERROR);
+
+    public static final String MESSAGE_TRACE = "org.wso2.carbon.bpel.messagetrace";
 }

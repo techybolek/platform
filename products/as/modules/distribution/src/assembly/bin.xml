@@ -116,6 +116,30 @@
 			 <exclude>**/freshometer/**</exclude>
 			 </excludes>
         </fileSet>
+
+	<!--  copying samples -->
+        <fileSet>
+            <directory>../samples/dataServiceSamples</directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/samples/dataServiceSamples</outputDirectory>
+            <excludes>
+                <exclude>**/**.sh</exclude>
+                <exclude>**/pom.xml</exclude>
+                <exclude>**/build.xml</exclude>
+                <exclude>**/CSVSampleService.dbs</exclude>
+                <exclude>**/ExcelSampleService.dbs</exclude>
+            </excludes>
+        </fileSet>
+
+        <!-- copy executables in samples with execute permissions -->
+        <fileSet>
+            <directory>../samples/dataServiceSamples</directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/samples/dataServiceSamples</outputDirectory>
+            <includes>
+                <include>**/**.sh</include>
+            </includes>
+            <fileMode>755</fileMode>
+        </fileSet>
+
 		
 		
 		 <!--  copying mashup samples -->
@@ -191,7 +215,6 @@
                 <exclude>**/version.xml</exclude>
             </excludes>
         </fileSet>
-		
 		<fileSet>
             <directory>../samples/mashupSamples</directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/samples/mashupSamples</outputDirectory>
@@ -207,26 +230,6 @@
 			 <exclude>**/version/**</exclude>
 			 <exclude>**/yahooGeoCode/**</exclude>
 			 </excludes>
-        </fileSet>
-
-        <!-- Copying dataservices samples -->
-        <fileSet>
-            <directory>../samples/dataServiceSamples</directory>
-            <outputDirectory>${pom.artifactId}-${pom.version}/samples/dataServiceSamples</outputDirectory>
-            <excludes>
-                <exclude>**/**.sh</exclude>
-                <exclude>**/pom.xml</exclude>
-            </excludes>
-        </fileSet>
-
-        <!-- Copying executables with execute permissions -->
-        <fileSet>
-            <directory>../samples/dataServiceSamples</directory>
-            <outputDirectory>${pom.artifactId}-${pom.version}/samples/dataServiceSamples</outputDirectory>
-            <includes>
-                <include>**/**.sh</include>
-            </includes>
-            <fileMode>755</fileMode>
         </fileSet>
 
         <!--  copying JAX-WS/JAX-RS samples and Axis2Module with pom.xml files-->
@@ -319,6 +322,26 @@
 		<include>**/cloud-services-desc.xml</include>
             </includes>
         </fileSet>
+
+        <fileSet>
+            <directory>
+                ../p2-profile-gen/target/wso2carbon-core-${wso2carbon.version}/repository/conf/etc/
+            </directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/etc</outputDirectory>
+            <includes>
+                <include>**/bam.xml</include>
+            </includes>
+        </fileSet>
+	
+ 	<fileSet>
+            <directory>
+                ../p2-profile-gen/target/wso2carbon-core-${wso2carbon.version}/repository/conf/data-bridge/
+            </directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/data-bridge/</outputDirectory>
+            <includes>
+                <include>**/thrift-agent-config.xml</include>
+            </includes>
+        </fileSet>
    
 
        <!--copying Kerberos conf files-->
@@ -376,6 +399,13 @@
                 <include>**/**.png</include>
             </includes>
         </fileSet>
+        <fileSet>
+            <directory>src/resources/reports</directory>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/resources/reports</outputDirectory>
+            <includes>
+                <include>**/**.jrxml</include>
+            </includes>
+        </fileSet>
     </fileSets>
 
     <dependencySets>
@@ -403,14 +433,6 @@
             </source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/</outputDirectory>
         </file>
-          <!-- Including url-mapping-config.xml file -->
-        <file>
-            <source>
-                ../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/etc/url-mapping-config.xml
-            </source>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/etc/
-            </outputDirectory>
-        </file>  
         <!-- Including logging-config.xml file -->
         <file>
             <source>
@@ -426,15 +448,12 @@
             </source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/
             </outputDirectory>
-        </file>  
+        </file> 
 	<!-- Including coordination-client-config.xml file -->
 	<file>
-            <source>
-		../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/etc/coordination-client-config.xml
-	    </source>
-            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/etc/
-	    </outputDirectory>
-        </file>         
+            <source>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/etc/coordination-client-config.xml</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/etc</outputDirectory>
+        </file>          
         <file>
             <source>INSTALL.txt</source>
             <outputDirectory>${pom.artifactId}-${pom.version}</outputDirectory>
@@ -495,12 +514,6 @@
             <fileMode>644</fileMode>
         </file>
         <file>
-            <source>../samples/README</source>
-            <outputDirectory>${pom.artifactId}-${pom.version}/samples/</outputDirectory>
-            <filtered>true</filtered>
-            <fileMode>644</fileMode>
-        </file>
-        <file>
             <source>repository/conf/sec.policy</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/</outputDirectory>
             <filtered>false</filtered>
@@ -511,6 +524,48 @@
             <outputDirectory>${pom.artifactId}-${pom.version}/tmp/</outputDirectory>
             <filtered>true</filtered>
 			<fileMode>644</fileMode>
+        </file>
+        <file>
+            <source>../samples/README</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/samples/</outputDirectory>
+            <filtered>true</filtered>
+            <fileMode>644</fileMode>
+        </file>
+		 <file>
+            <source>../samples/mashupSamples/version/version.resources/version.xml</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/samples/mashupSamples/version/version.resources</outputDirectory>
+            <filtered>true</filtered>
+        </file>
+        <!-- Copying additional resources used by data services samples -->
+	<file>
+            <source>src/resources/dataService/dbs/csv/CSVSampleService.dbs</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/samples/dataServiceSamples/dbs/csv
+            </outputDirectory>
+        </file>
+        <file>
+            <source>src/resources/dataService/dbs/excel/ExcelSampleService.dbs</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/samples/dataServiceSamples/dbs/excel
+            </outputDirectory>
+        </file>
+        <file>
+            <source>src/resources/dataService/build.xml</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/samples/dataServiceSamples
+            </outputDirectory>
+        </file>
+        <file>
+            <source>src/resources/dataService/clients/build.xml</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/samples/dataServiceSamples/clients
+            </outputDirectory>
+        </file>
+        <file>
+            <source>src/resources/dataService/OSSLicenseManager/build.xml</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/samples/dataServiceSamples/OSSLicenseManager
+            </outputDirectory>
+        </file>
+        <file>
+            <source>src/resources/dataService/OSSLicenseManager/flexui/source/build.xml</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/samples/dataServiceSamples/OSSLicenseManager/flexui/source
+            </outputDirectory>
         </file>
     </files>
 </assembly>

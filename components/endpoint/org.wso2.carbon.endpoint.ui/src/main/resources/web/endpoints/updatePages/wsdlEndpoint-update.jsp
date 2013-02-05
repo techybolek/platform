@@ -68,6 +68,8 @@
     }
     if (description != null && !"".equals(description)) {
         wsdlEndpoint.setDescription(description);
+    } else {
+        wsdlEndpoint.setDescription("");
     }
     if (uriWsdl != null && !"".equals(uriWsdl)) {
         wsdlEndpoint.setUri(uriWsdl);
@@ -107,6 +109,8 @@
             wsdlEndpoint.setTimeoutAct("discard");
         } else if (action.equals("executeFaultSequence")) {
             wsdlEndpoint.setTimeoutAct("fault");
+        } else {
+            wsdlEndpoint.setTimeoutAct("100");
         }
     }
     if (actionDuration != null) {
@@ -114,24 +118,38 @@
     }
     if (wsAddressing != null) {
         wsdlEndpoint.setWsadd(true);
+    } else {
+        wsdlEndpoint.setWsadd(false);
     }
     if (useSeprateListner != null) {
         wsdlEndpoint.setSepList(true);
+    } else {
+        wsdlEndpoint.setSepList(false);
     }
     if (wsSecurity != null) {
         wsdlEndpoint.setWssec(true);
+    } else {
+        wsdlEndpoint.setWssec(false);
     }
     if (secPolicy != null) {
         wsdlEndpoint.setSecPolKey(secPolicy);
+    } else {
+        wsdlEndpoint.setSecPolKey(null);
     }
     if (wsRM != null) {
         wsdlEndpoint.setWsrm(true);
+    } else {
+        wsdlEndpoint.setWsrm(false);
     }
     if (rmPolicy != null) {
         wsdlEndpoint.setRmPolKey(rmPolicy);
+    } else {
+        wsdlEndpoint.setRmPolKey(null);
     }
     if (properties != null) {
         wsdlEndpoint.setProperties(properties);
+    } else {
+        wsdlEndpoint.setProperties(null);
     }
 
     OMElement endpointElement = wsdlEndpoint.serialize(null);

@@ -92,7 +92,7 @@ public class BasicClusterRepository implements ClusterRepository {
     /**
      * Remove all the clusters created by the current user
      */
-    public void removeMyClusters() {
+    public void removeMyClusters(String owner) {
         removeClusters(CarbonContext.getCurrentContext().getUsername());
     }
 

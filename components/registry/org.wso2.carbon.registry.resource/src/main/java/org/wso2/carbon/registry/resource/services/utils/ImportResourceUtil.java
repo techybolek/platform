@@ -36,7 +36,8 @@ public class ImportResourceUtil {
                 String description,
                 String fetchURL,
                 String symlinkLocation,
-                UserRegistry userRegistry) throws Exception {
+                UserRegistry userRegistry,
+                String[][] properties) throws Exception {
 
         String resourcePath;
         if (RegistryConstants.ROOT_PATH.equals(parentPath)) {
@@ -58,7 +59,14 @@ public class ImportResourceUtil {
                 metadataResource.setProperty(RegistryConstants.SYMLINK_PROPERTY_NAME, symlinkLocation);
             }
 
-            userRegistry.importResource(resourcePath, fetchURL, metadataResource);
+            String path = userRegistry.importResource(resourcePath, fetchURL, metadataResource);
+            if (properties != null && properties.length > 0) {
+                Resource resource = userRegistry.get(path);
+                for (String[] p : properties) {
+                    resource.setProperty(p[0], p[1]);
+                }
+                userRegistry.put(path, resource);
+            }
             metadataResource.discard();
 
         } catch (RegistryException e) {

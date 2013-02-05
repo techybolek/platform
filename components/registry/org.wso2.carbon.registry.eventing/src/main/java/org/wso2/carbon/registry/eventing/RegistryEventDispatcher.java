@@ -230,24 +230,57 @@ public class RegistryEventDispatcher extends WSEventDispatcher {
         if (endpoint.toLowerCase().startsWith("digest://")) {
             String digestType = endpoint.substring(9, 10);
             endpoint = endpoint.substring(11);
-            OMElement payload = event.getMessage();
-            if (payload != null && payload.getFirstElement() != null) {
-                String[] temp = subscription.getTopicName().split(RegistryEvent.TOPIC_SEPARATOR);
-                String eventName = "";
-                if (temp[0].equals("")) {
-                    eventName = temp[3];
-                } else {
-                    eventName = temp[2];
+
+            if(endpoint.toLowerCase().contains("user://")){
+                try {
+                    String username = endpoint.substring(7);
+                    if (Utils.getRegistryService() != null) {
+                        UserRegistry registry = Utils.getRegistryService().getConfigSystemRegistry();
+                        if (registry != null && registry.getUserRealm() != null &&
+                            registry.getUserRealm().getUserStoreManager() != null) {
+                            UserStoreManager reader = registry.getUserRealm().getUserStoreManager();
+                            endpoint = "mailto:" + reader.getUserClaimValue(username,
+                                                                            UserCoreConstants.ClaimTypeURIs.EMAIL_ADDRESS,
+                                                                            UserCoreConstants.DEFAULT_PROFILE);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Failed Sending Notification to: " + endpoint);
+                    return;
                 }
-
-                String path = topic.substring(RegistryEventingConstants.TOPIC_PREFIX.length() + eventName.length(),
-                        topic.lastIndexOf("/"));
-
-                String time = ((OMElement) payload.getFirstElement().getNextOMSibling()).getText();
-                String message = time + ": [" + eventName + "] at path " + path + ":\n    " +
-                        payload.getFirstElement().getText();
-                getDigestQueue(digestType).add(
-                        new DigestEntry(message, endpoint, System.currentTimeMillis()));
+                this.addToEmailDigestQueue(event,topic,endpoint,digestType,subscription.getTopicName());
+                return;
+            }
+            else if(endpoint.toLowerCase().contains("role://")){
+                List<String> emails = new LinkedList<String>();
+                try {
+                    String roleName = endpoint.substring(7);
+                    if (Utils.getRegistryService() != null) {
+                        UserRegistry registry = Utils.getRegistryService().getConfigSystemRegistry();
+                        if (registry != null && registry.getUserRealm() != null &&
+                            registry.getUserRealm().getUserStoreManager() != null) {
+                            UserStoreManager reader = registry.getUserRealm().getUserStoreManager();
+                            for (String username : reader.getUserListOfRole(roleName)) {
+                                String temp = reader.getUserClaimValue(username,
+                                                                       UserCoreConstants.ClaimTypeURIs.EMAIL_ADDRESS,
+                                                                       UserCoreConstants.DEFAULT_PROFILE);
+                                if (temp != null && temp.length() > 0) {
+                                    emails.add("mailto:" + temp);
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Failed Sending Notification to: " + endpoint);
+                    return;
+                }
+                for (String email : emails) {
+                    log.debug("Sending Notification to: " + email);
+                    this.addToEmailDigestQueue(event, topic, email, digestType,subscription.getTopicName());
+                }
+                return;
+            }else {
+                this.addToEmailDigestQueue(event,topic,endpoint,digestType,subscription.getTopicName());
                 return;
             }
         }
@@ -504,5 +537,28 @@ public class RegistryEventDispatcher extends WSEventDispatcher {
 
     public String getEndpoint() {
         return Utils.getDefaultEventingServiceURL();
+    }
+
+    private void addToEmailDigestQueue(Message event, String topic, String endpoint, String digestType,
+                                       String topicName){
+        OMElement payload = event.getMessage();
+        if (payload != null && payload.getFirstElement() != null) {
+            String[] temp = topicName.split(RegistryEvent.TOPIC_SEPARATOR);
+            String eventName = "";
+            if (temp[0].equals("")) {
+                eventName = temp[3];
+            } else {
+                eventName = temp[2];
+            }
+
+            String path = topic.substring(RegistryEventingConstants.TOPIC_PREFIX.length() + eventName.length(),
+                                          topic.lastIndexOf("/"));
+
+            String time = ((OMElement) payload.getFirstElement().getNextOMSibling()).getText();
+            String message = time + ": [" + eventName + "] at path " + path + ":\n    " +
+                             payload.getFirstElement().getText();
+            getDigestQueue(digestType).add(
+                    new DigestEntry(message, endpoint, System.currentTimeMillis()));
+        }
     }
 }

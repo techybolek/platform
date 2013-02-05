@@ -54,8 +54,18 @@ public class DummyDataBridge implements DataBridgeReceiverService {
 
     @Override
     public String findStreamId(String sessionId, String streamName, String streamVersion)
-            throws NoStreamDefinitionExistException, SessionTimeoutException {
+            throws SessionTimeoutException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public boolean deleteStream(String sessionId, String streamId) throws SessionTimeoutException {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public boolean deleteStream( String sessionId,String streamName,String streamVersion) throws SessionTimeoutException {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override

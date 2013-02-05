@@ -1,6 +1,9 @@
 var jagg = jagg || {};
 
 (function () {
+    var option = { resGetPath:requestURL+'/site/conf/locales/js/i18nResources.json'};
+    i18n.init(option);
+
     jagg.post = function () {
         var args = Array.prototype.slice.call(arguments);
         args[0] = this.site.context + args[0];
@@ -114,5 +117,17 @@ var jagg = jagg || {};
         $(".remove-rating", elem).click(function () {
             removeCallback($(".dynamic-rating", elem).data("rating-meta", data));
         });
+    };
+
+    jagg.printDate = function(){
+
+        $('.dateFull').each(function(){
+            var timeStamp = parseInt($(this).html());
+            $(this).html(new Date(timeStamp).toLocaleString());
+        });
+    };
+    jagg.getDate = function(timestamp){
+         timestamp = parseInt(timestamp);
+         return new Date(timestamp).toLocaleString();
     };
 }());

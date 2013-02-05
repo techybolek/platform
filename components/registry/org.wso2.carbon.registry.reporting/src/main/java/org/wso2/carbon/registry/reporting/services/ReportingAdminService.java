@@ -18,6 +18,8 @@
  */
 package org.wso2.carbon.registry.reporting.services;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.ntask.common.TaskException;
@@ -47,7 +49,7 @@ public class ReportingAdminService extends RegistryAbstractAdmin implements
 
     public static final String REPORTING_CONFIG_PATH =
             "/repository/components/org.wso2.carbon.registry.reporting/configurations/";
-
+    private static Log log = LogFactory.getLog(ReportingAdminService.class);
     public byte[] getReportBytes(ReportConfigurationBean configuration)
             throws Exception {
         return Utils.getReportContentStream(
@@ -89,55 +91,64 @@ public class ReportingAdminService extends RegistryAbstractAdmin implements
         Registry registry = getConfigSystemRegistry();
         Resource resource = registry.newResource();
         resource.setMediaType("application/vnd.wso2.registry-report");
-        if (configuration.getCronExpression() != null) {
-            resource.setProperty("cronExpression", configuration.getCronExpression());
-        } else {
-            resource.setProperty("cronExpression", "");
+        if (configuration.getName().equals(null) || configuration.getName().equals(""))
+    	{
+        	String msg = "Report name either null or empty";
+        	throw new RegistryException(msg);
         }
-        if (configuration.getReportClass() != null) {
-            resource.setProperty("class", configuration.getReportClass());
-        } else {
-            resource.setProperty("class", "");
+        else 
+        {
+	        if (configuration.getCronExpression() != null) {
+	            resource.setProperty("cronExpression", configuration.getCronExpression());
+	        } else {
+	            resource.setProperty("cronExpression", "");
+	        }
+	        if (configuration.getReportClass() != null) {
+	            resource.setProperty("class", configuration.getReportClass());
+	        } else {
+	            resource.setProperty("class", "");
+	        }
+	        if (configuration.getResourcePath() != null) {
+	            resource.setProperty("resourcePath", configuration.getResourcePath());
+	        } else {
+	            resource.setProperty("resourcePath", "");
+	        }
+	        if (configuration.getTemplate() != null) {
+	            resource.setProperty("template", configuration.getTemplate());
+	        } else {
+	            resource.setProperty("template", "");
+	        }
+	        if (configuration.getType() != null) {
+	            resource.setProperty("type", configuration.getType());
+	        } else {
+	            resource.setProperty("type", "");
+	        }
+	        if (configuration.getRegistryURL() != null) {
+	            resource.setProperty("registry.url", configuration.getRegistryURL());
+	        } else {
+	            resource.setProperty("registry.url", "");
+	        }
+	        if (configuration.getUsername() != null) {
+	            resource.setProperty("registry.username", configuration.getUsername());
+	        } else {
+	            resource.setProperty("registry.username", "");
+	        }
+	        if (configuration.getPassword() != null) {
+	            resource.setProperty("registry.password",
+	                    CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(
+	                            configuration.getPassword().getBytes()));
+	        } else {
+	            resource.setProperty("registry.password",
+	                    CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(
+	                            "".getBytes()));
+	        }
+	        for (Map.Entry<String, String> e :
+	                CommonUtil.attributeArrayToMap(configuration.getAttributes()).entrySet()) {
+	            resource.setProperty("attribute." + e.getKey(), e.getValue());
+	        }
+	        registry.put(REPORTING_CONFIG_PATH + configuration.getName(), resource);
         }
-        if (configuration.getResourcePath() != null) {
-            resource.setProperty("resourcePath", configuration.getResourcePath());
-        } else {
-            resource.setProperty("resourcePath", "");
-        }
-        if (configuration.getTemplate() != null) {
-            resource.setProperty("template", configuration.getTemplate());
-        } else {
-            resource.setProperty("template", "");
-        }
-        if (configuration.getType() != null) {
-            resource.setProperty("type", configuration.getType());
-        } else {
-            resource.setProperty("type", "");
-        }
-        if (configuration.getRegistryURL() != null) {
-            resource.setProperty("registry.url", configuration.getRegistryURL());
-        } else {
-            resource.setProperty("registry.url", "");
-        }
-        if (configuration.getUsername() != null) {
-            resource.setProperty("registry.username", configuration.getUsername());
-        } else {
-            resource.setProperty("registry.username", "");
-        }
-        if (configuration.getPassword() != null) {
-            resource.setProperty("registry.password",
-                    CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(
-                            configuration.getPassword().getBytes()));
-        } else {
-            resource.setProperty("registry.password",
-                    CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(
-                            "".getBytes()));
-        }
-        for (Map.Entry<String, String> e :
-                CommonUtil.attributeArrayToMap(configuration.getAttributes()).entrySet()) {
-            resource.setProperty("attribute." + e.getKey(), e.getValue());
-        }
-        registry.put(REPORTING_CONFIG_PATH + configuration.getName(), resource);
+        
     }
 
     public ReportConfigurationBean[] getSavedReports()
@@ -149,6 +160,15 @@ public class ReportingAdminService extends RegistryAbstractAdmin implements
             String[] children = collection.getChildren();
             for (String child : children) {
                 ReportConfigurationBean bean = getConfigurationBean(child);
+                Registry rootRegistry1 = getRootRegistry();
+                if (!rootRegistry1.resourceExists(bean.getTemplate())) {
+                    log.warn("Report template " + bean.getTemplate() + " doesn't exist");
+                }
+                try {
+                    RegistryUtils.loadClass(bean.getReportClass());
+                } catch (ClassNotFoundException e) {
+                    log.warn("Report class not found " + bean.getReportClass());
+                }
                 output.add(bean);
             }
         }
@@ -167,12 +187,42 @@ public class ReportingAdminService extends RegistryAbstractAdmin implements
                 RegistryConstants.PATH_SEPARATOR + name);
     }
 
-    public void copySavedReport(String name, String newName)
-            throws RegistryException {
-        getConfigSystemRegistry().copy(REPORTING_CONFIG_PATH + RegistryConstants.PATH_SEPARATOR +
-                name, REPORTING_CONFIG_PATH + RegistryConstants.PATH_SEPARATOR + newName);
+    public void copySavedReport(String name, String newName) throws RegistryException{
+    	boolean reportExist = isReportExist(newName);
+    	if (!reportExist)
+    	{
+    		getConfigSystemRegistry().copy(REPORTING_CONFIG_PATH + RegistryConstants.PATH_SEPARATOR +
+    				name, REPORTING_CONFIG_PATH + RegistryConstants.PATH_SEPARATOR + newName);
+    	}
+    	else
+    	{
+    		String msg = "Report name already exist in the registry";
+        	throw new RegistryException(msg);
+    	}
     }
 
+    private boolean isReportExist(String newName) throws RegistryException{
+    	ReportConfigurationBean retrievedBean[];
+    	try {
+			retrievedBean = getSavedReports();
+		} catch (CryptoException e) {
+			throw new RegistryException(e.getMessage());
+		} catch (TaskException e) {
+			throw new RegistryException(e.getMessage());
+		}
+        boolean returnVal = false;
+        if (retrievedBean != null) 
+        {
+            for (ReportConfigurationBean reportConfigurationBean : retrievedBean) {
+                if (reportConfigurationBean.getName().equals(newName)) {
+                    returnVal = true;
+                    break;
+                }
+            }
+        }
+        return returnVal;
+    }
+    
     private ReportConfigurationBean getConfigurationBean(String path)
             throws RegistryException, CryptoException, TaskException {
         Registry registry = getConfigSystemRegistry();

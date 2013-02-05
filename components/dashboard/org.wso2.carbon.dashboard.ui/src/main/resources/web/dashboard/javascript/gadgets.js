@@ -279,9 +279,9 @@ gadgets.StaticLayoutManager.inherits(gadgets.LayoutManager);
  * @param {Array} gadgetIdToChromeIdMap Gadget id to chrome id map
  */
 gadgets.StaticLayoutManager.prototype.setGadgetChromeIds =
-function(gadgetChromeIds) {
-    this.gadgetChromeIds_ = gadgetChromeIds;
-};
+    function(gadgetChromeIds) {
+        this.gadgetChromeIds_ = gadgetChromeIds;
+    };
 
 gadgets.StaticLayoutManager.prototype.getGadgetChrome = function(gadget) {
     var chromeId = this.gadgetChromeIds_[gadget.id];
@@ -306,18 +306,18 @@ gadgets.FloatLeftLayoutManager = function(layoutRootId) {
 gadgets.FloatLeftLayoutManager.inherits(gadgets.LayoutManager);
 
 gadgets.FloatLeftLayoutManager.prototype.getGadgetChrome =
-function(gadget) {
-    var layoutRoot = document.getElementById(this.layoutRootId_);
-    if (layoutRoot) {
-        var chrome = document.createElement('div');
-        chrome.className = 'gadgets-gadget-chrome';
-        chrome.style.cssFloat = 'left'
-        layoutRoot.appendChild(chrome);
-        return chrome;
-    } else {
-        return null;
-    }
-};
+    function(gadget) {
+        var layoutRoot = document.getElementById(this.layoutRootId_);
+        if (layoutRoot) {
+            var chrome = document.createElement('div');
+            chrome.className = 'gadgets-gadget-chrome';
+            chrome.style.cssFloat = 'left'
+            layoutRoot.appendChild(chrome);
+            return chrome;
+        } else {
+            return null;
+        }
+    };
 
 
 // ------
@@ -453,11 +453,11 @@ gadgets.IfrGadget.prototype.cssClassGadget = 'gadgets-gadget';
 gadgets.IfrGadget.prototype.cssClassTitleBar = 'gadgets-gadget-title-bar';
 gadgets.IfrGadget.prototype.cssClassTitle = 'gadgets-gadget-title';
 gadgets.IfrGadget.prototype.cssClassTitleButtonBar =
-'gadgets-gadget-title-button-bar';
+    'gadgets-gadget-title-button-bar';
 gadgets.IfrGadget.prototype.cssClassGadgetUserPrefsDialog =
-'gadgets-gadget-user-prefs-dialog';
+    'gadgets-gadget-user-prefs-dialog';
 gadgets.IfrGadget.prototype.cssClassGadgetUserPrefsDialogActionBar =
-'gadgets-gadget-user-prefs-dialog-action-bar';
+    'gadgets-gadget-user-prefs-dialog-action-bar';
 gadgets.IfrGadget.prototype.cssClassTitleButton = 'gadgets-gadget-title-button';
 gadgets.IfrGadget.prototype.cssClassGadgetContent = 'gadgets-gadget-content';
 gadgets.IfrGadget.prototype.rpcToken = (0x7FFFFFFF * Math.random()) | 0;
@@ -466,42 +466,42 @@ gadgets.IfrGadget.prototype.rpcRelay = 'carbon/dashboard/rpc_relay.html';
 gadgets.IfrGadget.prototype.getTitleBarContent = function(continuation) {
 
     var titleHTML = '<table width="100%" id="' + this.cssClassTitleBar + '-' + this.id +
-                    '" class="' + this.cssClassTitleBar +
-                    '"><tr><td style="*padding-left: 5px;" width="100%" id="' +
-                    this.getIframeId() + '_title" class="' +
-                    this.cssClassTitle + '">' + (this.title ? this.title : 'Title') +
-                    '</td>' ;
+        '" class="' + this.cssClassTitleBar +
+        '"><tr><td style="*padding-left: 5px;" width="100%" id="' +
+        this.getIframeId() + '_title" class="' +
+        this.cssClassTitle + '">' + (this.title ? this.title : 'Title') +
+        '</td>' ;
 
     if (dashboardName == null || !isReadOnly) {
         // We only display these buttons in read-write mode in GS and embeded dashboard
         titleHTML +=
-        '<td width="19px"><a href="javascript:;" class="gadgets-gadget-title-button" title="settings"><img id="' + this.id + '" class="opts" src="images/gadget-settings.gif" /></a></td><td width="19px"><a style="background-image: url(images/gadget-toggle-up.gif);" onclick="gadgets.container.getGadget(' +
-        this.id + ').handleToggle(this);return false;" class="' +
-        this.cssClassTitleButton +
-        '" title="toggle"></a></td><td width="19px"><a id="' + this.getMaximizeButtonId() +
-        '" style="background-image: url(images/maximize.gif);" onclick="gadgets.container.getGadget(' +
-        this.id + ').handleMaximize();return false;" class="' +
-        this.cssClassTitleButton +
-        '" title="maximize"></a><a id="' + this.getMinimizeButtonId() +
-        '" style="background-image: url(images/minimize.gif); display:none;" onclick="gadgets.container.getGadget(' +
-        this.id + ').handleMinimize();return false;" class="' +
-        this.cssClassTitleButton +
-        '" title="minimize"></a></td><td width="19px"><a style="background-image: url(images/gadget-close.gif);"  onclick="gadgets.container.getGadget(' +
-        this.id + ').handleRemove();return false;" class="' + this.cssClassTitleButton +
-        '" title="remove"></a></td>';
+            '<td width="19px"><a href="javascript:;" class="gadgets-gadget-title-button" title="settings"><img id="' + this.id + '" class="opts" src="images/gadget-settings.gif" /></a></td><td width="19px"><a style="background-image: url(images/gadget-toggle-up.gif);" onclick="gadgets.container.getGadget(' +
+                this.id + ').handleToggle(this);return false;" class="' +
+                this.cssClassTitleButton +
+                '" title="toggle"></a></td><td width="19px"><a id="' + this.getMaximizeButtonId() +
+                '" style="background-image: url(images/maximize.gif);" onclick="gadgets.container.getGadget(' +
+                this.id + ').handleMaximize();return false;" class="' +
+                this.cssClassTitleButton +
+                '" title="maximize"></a><a id="' + this.getMinimizeButtonId() +
+                '" style="background-image: url(images/minimize.gif); display:none;" onclick="gadgets.container.getGadget(' +
+                this.id + ').handleMinimize();return false;" class="' +
+                this.cssClassTitleButton +
+                '" title="minimize"></a></td><td width="19px"><a style="background-image: url(images/gadget-close.gif);"  onclick="gadgets.container.getGadget(' +
+                this.id + ').handleRemove();return false;" class="' + this.cssClassTitleButton +
+                '" title="remove"></a></td>';
 
     } else if(dashboardName != null && isReadOnly) {
         // In read-only mode we only display minimize and maximize buttons
         titleHTML +=
-        '<td width="19px"><a id="' + this.getMaximizeButtonId() +
-        '" style="background-image: url(images/maximize.gif);" onclick="gadgets.container.getGadget(' +
-        this.id + ').handleMaximize();return false;" class="' +
-        this.cssClassTitleButton +
-        '" title="maximize"></a><a id="' + this.getMinimizeButtonId() +
-        '" style="background-image: url(images/minimize.gif); display:none;" onclick="gadgets.container.getGadget(' +
-        this.id + ').handleMinimize();return false;" class="' +
-        this.cssClassTitleButton +
-        '" title="minimize"></a></td></tr>'
+            '<td width="19px"><a id="' + this.getMaximizeButtonId() +
+                '" style="background-image: url(images/maximize.gif);" onclick="gadgets.container.getGadget(' +
+                this.id + ').handleMaximize();return false;" class="' +
+                this.cssClassTitleButton +
+                '" title="maximize"></a><a id="' + this.getMinimizeButtonId() +
+                '" style="background-image: url(images/minimize.gif); display:none;" onclick="gadgets.container.getGadget(' +
+                this.id + ').handleMinimize();return false;" class="' +
+                this.cssClassTitleButton +
+                '" title="minimize"></a></td></tr>'
     }
 
     titleHTML += '</table>';
@@ -511,7 +511,7 @@ gadgets.IfrGadget.prototype.getTitleBarContent = function(continuation) {
 
 gadgets.IfrGadget.prototype.getUserPrefsDialogContent = function(continuation) {
     continuation('<div id="' + this.getUserPrefsDialogId() + '" class="' +
-                 this.cssClassGadgetUserPrefsDialog + '"></div>');
+        this.cssClassGadgetUserPrefsDialog + '"></div>');
 
 };
 
@@ -528,12 +528,12 @@ gadgets.IfrGadget.prototype.getMainContent = function(continuation) {
     gadgets.rpc.setRelayUrl(iframeId, this.serverBase_ + this.rpcRelay);
     gadgets.rpc.setAuthToken(iframeId, this.rpcToken);
     continuation('<div class="' + this.cssClassGadgetContent + '"><iframe id="' +
-                 iframeId + '" name="' + iframeId + '" class="' + this.cssClassGadget +
-                 '" src="' + this.getIframeUrl() +
-                 '" frameborder="no" scrolling="no"' +
-                 (this.height ? ' height="' + this.height + '"' : '') +
-                 (this.width ? ' width="' + this.width + '"' : '') +
-                 '></iframe></div>');
+        iframeId + '" name="' + iframeId + '" class="' + this.cssClassGadget +
+        '" src="' + this.getIframeUrl() +
+        '" frameborder="no" scrolling="no"' +
+        (this.height ? ' height="' + this.height + '"' : '') +
+        (this.width ? ' width="' + this.width + '"' : '') +
+        '></iframe></div>');
 };
 
 gadgets.IfrGadget.prototype.getIframeId = function() {
@@ -546,24 +546,24 @@ gadgets.IfrGadget.prototype.getUserPrefsDialogId = function() {
 
 gadgets.IfrGadget.prototype.getIframeUrl = function() {
     return this.serverBase_ + 'ifr?' +
-           'container=' + this.CONTAINER +
-           '&mid=' + this.id +
-           '&nocache=' + gadgets.container.nocache_ +
-           '&country=' + gadgets.container.country_ +
-           '&lang=' + gadgets.container.language_ +
-           '&view=' + gadgets.container.view_ +
-           (this.specVersion ? '&v=' + this.specVersion : '') +
-           (gadgets.container.parentUrl_ ?
+        'container=' + this.CONTAINER +
+        '&mid=' + this.id +
+        '&nocache=' + gadgets.container.nocache_ +
+        '&country=' + gadgets.container.country_ +
+        '&lang=' + gadgets.container.language_ +
+        '&view=' + gadgets.container.view_ +
+        (this.specVersion ? '&v=' + this.specVersion : '') +
+        (gadgets.container.parentUrl_ ?
             '&parent=' + encodeURIComponent(gadgets.container.parentUrl_) : '') +
-           (this.debug ? '&debug=1' : '') +
-           this.getAdditionalParams() +
-           this.getUserPrefsParams() +
-           (this.secureToken ? '&st=' + this.secureToken : '') +
-           '&url=' + encodeURIComponent(this.specUrl) +
-           '#rpctoken=' + this.rpcToken +
-           (this.viewParams ?
+        (this.debug ? '&debug=1' : '') +
+        this.getAdditionalParams() +
+        this.getUserPrefsParams() +
+        (this.secureToken ? '&st=' + this.secureToken : '') +
+        '&url=' + encodeURIComponent(this.specUrl) +
+        '#rpctoken=' + this.rpcToken +
+        (this.viewParams ?
             '&view-params=' + encodeURIComponent(JSON.stringify(this.viewParams)) : '') +
-           (this.hashData ? '&' + this.hashData : '');
+        (this.hashData ? '&' + this.hashData : '');
 };
 
 gadgets.IfrGadget.prototype.getUserPrefsParams = function() {
@@ -572,7 +572,7 @@ gadgets.IfrGadget.prototype.getUserPrefsParams = function() {
         for (var name in this.getUserPrefs()) {
             var value = this.getUserPref(name);
             params += '&up_' + encodeURIComponent(name) + '=' +
-                      encodeURIComponent(value);
+                encodeURIComponent(value);
         }
     }
     return params;
@@ -603,7 +603,7 @@ gadgets.IfrGadget.prototype.removeGadget = function(rmId) {
     // Refresh the gadget container page
     if (response) {
         //Ajaxifing the gadget removeing
-        $('#gadget-chrome_' + rmId).remove();
+        jQuery('#gadget-chrome_' + rmId).remove();
         if (document.getElementById("maximizedGadget").style.display == 'block') {
             window.location.href = "index.jsp?tab=" + currentActiveTab + '&name=' + dashboardName;
         }
@@ -661,9 +661,9 @@ gadgets.IfrGadget.prototype.handleMaximize = function() {
     var titlebarHeight = document.getElementById(this.getTitleBarId()).offsetHeight;
 
     document.getElementById(this.getId()).style.height =
-    document.getElementById("maximizedGadget").style.height;
+        document.getElementById("maximizedGadget").style.height;
     document.getElementById(this.getIframeId()).style.height =
-    (document.getElementById("maximizedGadget").offsetHeight - titlebarHeight - 7) + "px";
+        (document.getElementById("maximizedGadget").offsetHeight - titlebarHeight - 7) + "px";
 
     // Set the container view to canvas
     gadgets.container.setView("canvas");
@@ -701,7 +701,7 @@ gadgets.IfrGadget.prototype.handleMinimize = function() {
 };
 
 gadgets.IfrGadget.prototype.handleOpenUserPrefsDialog = function() {
-    $.Menu.closeAll();
+    jQuery.Menu.closeAll();
     if (this.userPrefsDialogContentLoaded) {
         this.showUserPrefsDialog();
 
@@ -726,52 +726,52 @@ gadgets.IfrGadget.prototype.handleOpenUserPrefsDialog = function() {
             if (dataType == "hidden") {
                 // Hidden field
                 hiddenContent +=
-                '<input type="hidden" value="' + defaultValue +
-                '" name="m_' + this.id + '_up_' + name + '" id="m_' + this.id + '_' +
-                numFields +
-                '"/>';
+                    '<input type="hidden" value="' + defaultValue +
+                        '" name="m_' + this.id + '_up_' + name + '" id="m_' + this.id + '_' +
+                        numFields +
+                        '"/>';
 
             } else {
                 content +=
-                '<tr><td class="m_fieldname_' + this.id + '">' + userPrefs[name].displayName +
-                '</td><td colspan="2">';
+                    '<tr><td class="m_fieldname_' + this.id + '">' + userPrefs[name].displayName +
+                        '</td><td colspan="2">';
 
 
                 if (dataType == "enum") {
                     // Enumeration
                     content += '<select class="c_enum_' + this.id + '" name="m_' + this.id +
-                               '_up_' + name + '" id="m_' + this.id + '_' + numFields + '">';
+                        '_up_' + name + '" id="m_' + this.id + '_' + numFields + '">';
                     var orderedEnumVals = userPrefs[name].orderedEnumValues;
                     for (var y = 0; y < orderedEnumVals.length; y++) {
                         if (defaultValue == orderedEnumVals[y].value) {
                             content +=
-                            '<option value="' + orderedEnumVals[y].value + '" selected="">' +
-                            orderedEnumVals[y].displayValue +
-                            '</option>';
+                                '<option value="' + orderedEnumVals[y].value + '" selected="">' +
+                                    orderedEnumVals[y].displayValue +
+                                    '</option>';
                         }
                         else
                         {
                             content +=
-                            '<option value="' + orderedEnumVals[y].value + '">' +
-                            orderedEnumVals[y].displayValue +
-                            '</option>';
+                                '<option value="' + orderedEnumVals[y].value + '">' +
+                                    orderedEnumVals[y].displayValue +
+                                    '</option>';
                         }
                     }
                     content += '</select>';
                 } else if (dataType == "string") {
                     // String
                     content +=
-                    '<input type="text" class="c_textbox_"' + this.id + ' value="' + defaultValue +
-                    '" name="m_' + this.id + '_up_' + name + '" id="m_' + this.id + '_' +
-                    numFields +
-                    '" maxlen="200"/>';
+                        '<input type="text" class="c_textbox_"' + this.id + ' value="' + defaultValue +
+                            '" name="m_' + this.id + '_up_' + name + '" id="m_' + this.id + '_' +
+                            numFields +
+                            '" maxlen="200"/>';
                 } else if (dataType == "bool") {
                     // Boolean
                     content +=
-                    '<input type="checkbox" value="' + defaultValue +
-                    '" checked="' + defaultValue +
-                    '" class="c_checkbox_' + this.id + '" name="m_' + this.id + '_up_' + name + '" id="m_' + this.id + '_' +
-                    numFields + '" onClick="this.value=this.checked ? \'true\':\'false\';"/>';
+                        '<input type="checkbox" value="' + defaultValue +
+                            '" checked="' + defaultValue +
+                            '" class="c_checkbox_' + this.id + '" name="m_' + this.id + '_up_' + name + '" id="m_' + this.id + '_' +
+                            numFields + '" onClick="this.value=this.checked ? \'true\':\'false\';"/>';
                 }
 
                 content += '</td></tr>';
@@ -781,9 +781,9 @@ gadgets.IfrGadget.prototype.handleOpenUserPrefsDialog = function() {
         }
 
         content += '</tbody></table>' +
-                   '<input type="hidden" value="' + numFields + '" id="m_' + this.id +
-                   '_numfields"/>' + hiddenContent +
-                   '</div>';
+            '<input type="hidden" value="' + numFields + '" id="m_' + this.id +
+            '_numfields"/>' + hiddenContent +
+            '</div>';
 
         this.userPrefsDialogContentLoaded = true;
         this.buildUserPrefsDialog(content);
@@ -792,7 +792,7 @@ gadgets.IfrGadget.prototype.handleOpenUserPrefsDialog = function() {
 };
 
 gadgets.IfrGadget.prototype.copyGadget = function() {
-    $.Menu.closeAll();
+    jQuery.Menu.closeAll();
     if (document.getElementById("maximizedGadget").style.display == 'block') {
         gadgets.container.getGadget(this.id).handleMinimize();
     }
@@ -801,7 +801,7 @@ gadgets.IfrGadget.prototype.copyGadget = function() {
 }
 
 gadgets.IfrGadget.prototype.moveGadgetToTab = function(tabIdToMove) {
-    $.Menu.closeAll();
+    jQuery.Menu.closeAll();
     dashboardService.moveGadgetToTab(userId, tabIdToMove, dashboardName, this.id);
     makeActive(tabIdToMove);
 }
@@ -809,18 +809,18 @@ gadgets.IfrGadget.prototype.moveGadgetToTab = function(tabIdToMove) {
 gadgets.IfrGadget.prototype.buildUserPrefsDialog = function(content) {
     var userPrefsDialog = document.getElementById(this.getUserPrefsDialogId());
     userPrefsDialog.innerHTML = content +
-                                '<div class="' + this.cssClassGadgetUserPrefsDialogActionBar +
-                                '"><input type="button" value="Save" class="button" onclick="gadgets.container.getGadget(' +
-                                this.id +
-                                ').handleSaveUserPrefs()"> <input type="button" value="Cancel" class="button" onclick="gadgets.container.getGadget(' +
-                                this.id + ').handleCancelUserPrefs()"></div>';
+        '<div class="' + this.cssClassGadgetUserPrefsDialogActionBar +
+        '"><input type="button" value="Save" class="button" onclick="gadgets.container.getGadget(' +
+        this.id +
+        ').handleSaveUserPrefs()"> <input type="button" value="Cancel" class="button" onclick="gadgets.container.getGadget(' +
+        this.id + ').handleCancelUserPrefs()"></div>';
     userPrefsDialog.childNodes[0].style.display = '';
 };
 
 gadgets.IfrGadget.prototype.showUserPrefsDialog = function(opt_show) {
     var userPrefsDialog = document.getElementById(this.getUserPrefsDialogId());
     userPrefsDialog.style.display = (opt_show || opt_show == undefined)
-            ? '' : 'none';
+        ? '' : 'none';
 }
 
 gadgets.IfrGadget.prototype.hideUserPrefsDialog = function() {
@@ -832,7 +832,7 @@ gadgets.IfrGadget.prototype.handleSaveUserPrefs = function() {
 
     var prefs = {};
     var numFields = document.getElementById('m_' + this.id +
-                                            '_numfields').value;
+        '_numfields').value;
     for (var i = 0; i < numFields; i++) {
         var input = document.getElementById('m_' + this.id + '_' + i);
         if (input != null) {
@@ -850,12 +850,12 @@ gadgets.IfrGadget.prototype.handleSaveUserPrefs = function() {
 };
 
 gadgets.IfrGadget.prototype.handleABoutGadget = function() {
-    $.Menu.closeAll();
+    jQuery.Menu.closeAll();
     var message = 'Gadget Name : ' + this.title + '<br/>' + 'Author : ' + this.author + '<br/>' + 'Gadget URL : ' + '<a href="' + this.specUrl + '">' + this.specUrl + '</a><br />'
 
-   //Including the info dialog box inline to fix an IE issue
+    //Including the info dialog box inline to fix an IE issue
     var strDialog = "<div id='dialog' title='WSO2 Carbon'><div id='messagebox-info' style='width:600px;'><p>" +
-                    message + "</p></div></div>";
+        message + "</p></div></div>";
     jQuery("#dcontainer").html(strDialog);
 
     jQuery("#dialog").dialog({
@@ -904,7 +904,7 @@ gadgets.Container = function() {
 
     // Disable gadget caching in debug mode.
     if(debugMode){
-      this.nocache_ = 1;   
+        this.nocache_ = 1;
     }
 
     // signed max int
@@ -928,7 +928,7 @@ gadgets.Container.prototype.userPrefStore = new gadgets.DefaultUserPrefStore();
 gadgets.Container.prototype.gadgetService = new gadgets.GadgetService();
 
 gadgets.Container.prototype.layoutManager =
-new gadgets.StaticLayoutManager();
+    new gadgets.StaticLayoutManager();
 
 gadgets.Container.prototype.setParentUrl = function(url) {
     this.parentUrl_ = url;

@@ -49,6 +49,12 @@ $(document).ready(function() {
     });
     var v = $("#addAPIForm").validate({
         submitHandler: function(form) {
+            //Adding custom validation for the resource url UI
+            if(validateResourceTable() != ""){
+                return;
+            }
+
+
             $('#saveMessage').show();
             $('#saveButtons').hide();
             $(form).ajaxSubmit({
@@ -96,7 +102,31 @@ function getContextValue() {
         if (context.charAt(0) != "/") {
             context = "/" + context;
         }
-        $('#contextForUrl').html(context + "/" + version);
-        $('#contextForUrlDefault').html(context + "/" + version);
+        $('.contextForUrl').html(context + "/" + version);
     }
+}
+
+function showHideRoles(){
+	var visibility = $('#visibility').find(":selected").val();
+	if(visibility == "public"){
+		$('#roles').hide();
+		$('#rolesHelp').hide();
+		$('#rolesLabel').hide();
+	}
+	else{
+		$('#roles').show();
+		$('#rolesHelp').show();
+		$('#rolesLabel').show();
+	}
+}
+
+function showUTProductionURL(){
+	var endpointType = $('#endpointType').find(":selected").val();
+	if(endpointType == "secured"){
+		$('#credentials').show();
+	}
+	else{
+		$('#credentials').hide();
+	}
+	
 }

@@ -22,11 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>hadoop.hdfs-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.hdfs.mgt.feature</artifactId>
+    <version>4.0.5</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - HDFS Management Feature</name>
     <url>http://wso2.org</url>
@@ -36,18 +38,20 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.hdfs.mgt</artifactId>
+            <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.hdfs.dataaccess.feature</artifactId>
-	    <version>${wso2carbon.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.core.server.feature</artifactId>
-            <type>zip</type>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.wso2.carbon</groupId>-->
+            <!--<artifactId>org.wso2.carbon.hdfs.dataaccess.feature</artifactId>-->
+            <!--<version>${project.version}</version>-->
+            <!--<type>zip</type>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.wso2.carbon</groupId>-->
+            <!--<artifactId>org.wso2.carbon.core.server.feature</artifactId>-->
+            <!--<version>${project.version}</version>-->
+            <!--<type>zip</type>-->
+        <!--</dependency>-->
     </dependencies>
 
     <build>
@@ -65,7 +69,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.hdfs.mgt</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
@@ -78,9 +82,9 @@
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
                             </importFeatures>
-                            <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.hdfs.dataaccess.feature</includedFeatureDef>
-                            </includedFeatures>
+                            <!--<includedFeatures>-->
+                                <!--<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.hdfs.dataaccess.feature:${project.version}</includedFeatureDef>-->
+                            <!--</includedFeatures>-->
                         </configuration>
                     </execution>
                 </executions>

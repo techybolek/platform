@@ -19,6 +19,7 @@ package org.wso2.carbon.cep.core.mapping.output.mapping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.cep.core.exception.CEPEventProcessingException;
+import org.wso2.carbon.cep.core.mapping.output.property.MapOutputProperty;
 import org.wso2.carbon.databridge.commons.Event;
 
 import java.util.HashMap;
@@ -27,7 +28,7 @@ import java.util.Map;
 
 public class MapOutputMapping extends OutputMapping {
     private static final Log log = LogFactory.getLog(OutputMapping.class);
-    private List<String> propertyList;
+    private List<MapOutputProperty> propertyList;
 
     @Override
     public Object convert(Object event) {
@@ -42,23 +43,23 @@ public class MapOutputMapping extends OutputMapping {
     private Map buildMapEvent(Object event) throws CEPEventProcessingException {
         Map<String,Object> map=new HashMap<String, Object>();
         if (event instanceof Event) {
-           for(String property:propertyList){
-               map.put(property,getPropertyValue(event,property));
+           for(MapOutputProperty outputProperty : propertyList){
+               map.put(outputProperty.getName(),getPropertyValue(event, outputProperty.getValueOf()));
            }
         } else if(event instanceof Map){
-            for(String property:propertyList){
-                map.put(property,((Map)event).get(property));
+            for(MapOutputProperty outputProperty : propertyList){
+                map.put(outputProperty.getName(),((Map)event).get(outputProperty.getValueOf()));
             }
         }
 
         return map;
     }
 
-    public void setPropertyList(List<String> propertyList) {
+    public void setPropertyList(List<MapOutputProperty> propertyList) {
         this.propertyList = propertyList;
     }
 
-    public List<String> getPropertyList() {
+    public List<MapOutputProperty> getPropertyList() {
         return propertyList;
     }
 }

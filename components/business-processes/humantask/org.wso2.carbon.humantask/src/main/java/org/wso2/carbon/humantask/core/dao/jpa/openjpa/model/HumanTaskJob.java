@@ -24,7 +24,7 @@ import javax.persistence.*;
  * Human task Job.
  */
 @Entity
-@Table(name = "HTJOB")
+@Table(name = "HT_JOB")
 public class HumanTaskJob extends OpenJPAEntity implements HumanTaskJobDAO {
 
     @Id
@@ -34,19 +34,25 @@ public class HumanTaskJob extends OpenJPAEntity implements HumanTaskJobDAO {
     @Column(name = "NODEID")
     private String nodeId;
 
-    @Column(name = "NAME")
+    @Column(name = "JOB_NAME")
     private String name;
 
-    @Column(name = "TIME", nullable = false)
+    @Column(name = "JOB_TIME", nullable = false)
     private Long time = 0L;
 
-    @Column(name = "SCHEDULED", nullable = false)
+    @Column(name = "SCHEDULED", nullable = false, length = 1)
+    private String scheduledStr = "N";
+
+    @Transient
     private boolean scheduled;
 
-    @Column(name = "TRANSACTED", nullable = false)
+    @Column(name = "TRANSACTED", nullable = false, length = 1)
+    private String transactedStr = "N";
+
+    @Transient
     private boolean transacted;
 
-    @Column(name = "DETAILS", length = 4096)
+    @Column(name = "JOB_DETAILS", length = 4000)
     private String details;
 
     //    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH})
@@ -54,7 +60,7 @@ public class HumanTaskJob extends OpenJPAEntity implements HumanTaskJobDAO {
     @Column(name = "TASKID", nullable = false)
     private Long taskId;
 
-    @Column(name = "TYPE", nullable = false)
+    @Column(name = "JOB_TYPE", nullable = false)
     private String type;
 
     /**
@@ -105,6 +111,11 @@ public class HumanTaskJob extends OpenJPAEntity implements HumanTaskJobDAO {
 
     public void setScheduled(boolean scheduled) {
         this.scheduled = scheduled;
+        if (scheduled) {
+            this.scheduledStr = "Y";
+        } else {
+            this.scheduledStr = "N";
+        }
     }
 
     public boolean isTransacted() {
@@ -113,6 +124,27 @@ public class HumanTaskJob extends OpenJPAEntity implements HumanTaskJobDAO {
 
     public void setTransacted(boolean transacted) {
         this.transacted = transacted;
+        if (transacted) {
+            this.transactedStr = "Y";
+        } else {
+            this.transactedStr = "N";
+        }
+    }
+
+    public String getScheduledStr() {
+        return scheduled ? "Y" : "N";
+    }
+
+    public void setScheduledStr(String scheduledStr) {
+        this.scheduled = "Y".equalsIgnoreCase(scheduledStr);
+    }
+
+    public String getTransactedStr() {
+        return transacted ? "Y" : "N";
+    }
+
+    public void setTransactedStr(String transactedStr) {
+        this.transacted = "Y".equalsIgnoreCase(transactedStr);
     }
 
     public String getDetails() {

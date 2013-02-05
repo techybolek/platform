@@ -17,12 +17,12 @@
  -->
 <%@ page import="org.apache.axiom.om.OMElement" %>
 <%@ page import="org.wso2.carbon.governance.generic.ui.clients.ManageGenericArtifactServiceClient" %>
-<%@ page import="org.wso2.carbon.governance.services.ui.utils.AddServiceUIGenerator" %>
+<%@ page import="org.wso2.carbon.governance.generic.ui.utils.GenericUIGenerator" %>
 <%
 ManageGenericArtifactServiceClient client = new ManageGenericArtifactServiceClient(config,session);
 String dataName = request.getParameter("dataName");
 String dataNamespace = request.getParameter("dataNamespace");
-AddServiceUIGenerator uigen = new AddServiceUIGenerator(dataName, dataNamespace);
+GenericUIGenerator uigen = new GenericUIGenerator(dataName, dataNamespace);
 OMElement head = uigen.getUIConfiguration(client.getArtifactUIConfiguration(
         request.getParameter("key")),request,config,session);
 OMElement criteria = uigen.getDataFromUI(head,request);

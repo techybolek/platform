@@ -38,6 +38,8 @@ public class RuleElementDTO {
 
     private NewTargetElementDTO newTargetElementDTO;
 
+    private List<ObligationElementDTO> obligationElementDTOs = new ArrayList<ObligationElementDTO>();
+
     public ConditionElementDT0 getConditionElementDT0() {
         return conditionElementDT0;
     }
@@ -84,5 +86,17 @@ public class RuleElementDTO {
 
     public void setNewTargetElementDTO(NewTargetElementDTO newTargetElementDTO) {
         this.newTargetElementDTO = newTargetElementDTO;
+    }
+
+    public List<ObligationElementDTO> getObligationElementDTOs() {
+        return obligationElementDTOs;
+    }
+
+    public void setObligationElementDTOs(List<ObligationElementDTO> obligationElementDTOs) {
+        this.obligationElementDTOs = obligationElementDTOs;
+    }
+
+    public void addObligationElementDTO(ObligationElementDTO obligationElementDTO) {
+        this.obligationElementDTOs.add(obligationElementDTO);
     }
 }

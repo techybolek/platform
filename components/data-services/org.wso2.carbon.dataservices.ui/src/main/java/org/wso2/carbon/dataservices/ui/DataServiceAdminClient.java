@@ -58,6 +58,14 @@ public class DataServiceAdminClient {
         return stub.getCarbonDataSourceNames();
 	}
     
+    public String getCarbonDataSourceType(String dsName) throws RemoteException{
+    	return stub.getCarbonDataSourceType(dsName);
+    }
+    
+    public String[] getCarbonDataSourceNamesForTypes(String[] types) throws RemoteException{
+    	return stub.getCarbonDataSourceNamesForTypes(types);
+    }
+    
     public void saveDataService(String serviceName, String serviceGroup, String serviceContents)
             throws AxisFault {
     	try {
@@ -80,11 +88,11 @@ public class DataServiceAdminClient {
      * @return a string representing success or the failure of the JDBC connection
      */
     public String testJDBCConnection(String driverClass, String jdbcURL, String username,
-            String password, String protectedTokens, String passwordProvider) throws AxisFault {
+            String password, String passwordAlias) throws AxisFault {
     	String response = "";
     	try {
 			response = stub.testJDBCConnection(driverClass, jdbcURL, username, password,
-                    protectedTokens, passwordProvider);
+					passwordAlias);
 		} catch (RemoteException e) {
 			throw new AxisFault("Error connecting to " + jdbcURL +
                     ". Message from the service is : ", e);
@@ -95,11 +103,11 @@ public class DataServiceAdminClient {
 	public String testGSpreadConnection(String userName,
             String password,
             String visibility,
-            String documentURL,String protectedTokens,String passwordProvider)throws AxisFault {
+            String documentURL,String passwordAlias)throws AxisFault {
     	String response = "";
     	try {
 			response = stub.testGSpreadConnection(userName, password, visibility, documentURL,
-                    protectedTokens, passwordProvider);
+					passwordAlias);
 		} catch (RemoteException e) {
 			throw new AxisFault("Error connecting to " + documentURL +
                     ". Message from the service is : ", e);

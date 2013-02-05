@@ -23,7 +23,7 @@ import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.mediation.dependency.mgt.services.ConfigurationTrackingService;
 import org.wso2.carbon.mediation.initializer.ServiceBusInitializer;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.initializer.configurations.ConfigurationManager;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
 import org.wso2.carbon.mediation.initializer.CarbonSynapseController;
@@ -72,14 +72,14 @@ public class TenantServiceBusInitializer extends AbstractAxis2ConfigurationConte
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
         ServerContextInformation contextInfo;
         String tenantDomain =
-                SuperTenantCarbonContext.getCurrentContext(configurationContext).getTenantDomain();
+                PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantDomain();
         
         log.info("Intializing the ESB Configuration for the tenant domain : " + tenantDomain);
 
         try {
             // first check which configuration should be active
             org.wso2.carbon.registry.core.Registry registry =
-                    (org.wso2.carbon.registry.core.Registry) SuperTenantCarbonContext
+                    (org.wso2.carbon.registry.core.Registry) PrivilegedCarbonContext
                             .getCurrentContext(configurationContext).
                                     getRegistry(RegistryType.SYSTEM_CONFIGURATION);
 
@@ -141,7 +141,7 @@ public class TenantServiceBusInitializer extends AbstractAxis2ConfigurationConte
             configurationContext.setProperty(
                     ConfigurationManager.CONFIGURATION_MANAGER, manger);
 
-            int tenantId = SuperTenantCarbonContext.getCurrentContext(configurationContext).getTenantId();
+            int tenantId = PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();
             // populate the SynapseEnv service and SynapseConfig OSGI Services so that other
             // components get to know about the availability of the new synapse configuration            
             Properties props = new Properties();
@@ -194,7 +194,7 @@ public class TenantServiceBusInitializer extends AbstractAxis2ConfigurationConte
 
     public void terminatingConfigurationContext(ConfigurationContext configurationContext) {
         String tenantDomain =
-                SuperTenantCarbonContext.getCurrentContext(configurationContext).getTenantDomain();
+                PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantDomain();
 
         log.info("Shutting down the persistence manager for the tenant: " + tenantDomain);
 
@@ -205,7 +205,7 @@ public class TenantServiceBusInitializer extends AbstractAxis2ConfigurationConte
         }
 
         // unregister the service so that components get to know about the tenant termination
-        int tenantId = SuperTenantCarbonContext.getCurrentContext(configurationContext).getTenantId();
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();
         ServiceRegistration tenantRegistration = ConfigurationHolder.getInstance().
                 getSynapseRegistration(tenantId);
 
@@ -223,7 +223,7 @@ public class TenantServiceBusInitializer extends AbstractAxis2ConfigurationConte
         ServerConfiguration serverConf = ServerConfiguration.getInstance();
         String persistence = serverConf.getFirstProperty(ServiceBusConstants.PERSISTENCE);
         org.wso2.carbon.registry.core.Registry configRegistry =
-                (org.wso2.carbon.registry.core.Registry) SuperTenantCarbonContext
+                (org.wso2.carbon.registry.core.Registry) PrivilegedCarbonContext
                         .getCurrentContext(configurationContext).
                                 getRegistry(RegistryType.SYSTEM_CONFIGURATION);
 
@@ -234,8 +234,8 @@ public class TenantServiceBusInitializer extends AbstractAxis2ConfigurationConte
             // Check registry persistence is disabled or not
             String regPersistence = serverConf.getFirstProperty(
                     ServiceBusConstants.REGISTRY_PERSISTENCE);
-            UserRegistry registry = ServiceBusConstants.DISABLED.equals(regPersistence) ?
-                    null : (UserRegistry) configRegistry;
+            UserRegistry registry = ServiceBusConstants.ENABLED.equals(regPersistence) ?
+                    (UserRegistry) configRegistry : null;
 
             // Check the worker interval is set or not
             String interval = serverConf.getFirstProperty(ServiceBusConstants.WORKER_INTERVAL);
@@ -272,9 +272,8 @@ public class TenantServiceBusInitializer extends AbstractAxis2ConfigurationConte
         }
 
         // for now we override the default configuration location with the value in registry
-        String repoPath = configurationContext.getAxisConfiguration().getRepository().getPath();
-        configurationInformation.setSynapseXMLLocation(repoPath + File.separator +
-                ServiceBusConstants.SYNAPSE_CONFIGS + File.separator + configurationName);
+        configurationInformation.setSynapseXMLLocation(
+                configurationInformation.getSynapseXMLLocation() + File.separator + configurationName);
 
 
         configurationInformation.setCreateNewInstance(false);

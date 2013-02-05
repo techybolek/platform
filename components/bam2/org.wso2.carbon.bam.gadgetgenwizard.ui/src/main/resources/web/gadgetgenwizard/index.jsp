@@ -36,6 +36,16 @@
         src="../dialog/js/jqueryui/tabs/jquery-ui-1.6.custom.min.js"></script>
 <script type="text/javascript" src="../dialog/js/jqueryui/tabs/jquery.cookie.js"></script>
 <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="../gadgetgenwizard/js/excanvas.min.js"></script><![endif]-->
+<script type="text/javascript" src="../gadgetgenwizard/js/validate.js"></script>
+
+<!--link media="all" type="text/css" rel="stylesheet" href="css/registration.css"/-->
+<fmt:bundle basename="org.wso2.carbon.bam.gadgetgenwizard.ui.i18n.Resources">
+    <carbon:breadcrumb label="main.gadgetgenwizard"
+                       resourceBundle="org.wso2.carbon.bam.gadgetgenwizard.ui.i18n.Resources"
+                       topPage="false" request="<%=request%>"/>
+      <carbon:jsi18n
+		resourceBundle="org.wso2.carbon.bam.gadgetgenwizard.ui.i18n.JSResources"
+		request="<%=request%>" />
 
 <script type="text/javascript">
 
@@ -46,9 +56,17 @@
             $("#back").attr("disabled", true);
         }
 
+        // init
+        changeHeading(parseInt($("#page").val()));
+        sendAjaxRequest("datasource_ajaxprocessor.jsp");
+
         $("#generate").hide();
 
         $("#generate").click(function() {
+            if (!validate()) {
+                CARBON.showErrorDialog(jsi18n["invalid.details"]);
+                return;
+            }
             $.post("generate_gadget_ajaxprocessor.jsp", $("form").serialize(), function(html) {
                 var success = !(html.toLowerCase().match(/error/));
                 if (success) {
@@ -76,27 +94,56 @@
         });
 
         $("#next").click(function() {
-            var jdbcurl = $("[name=jdbcurl]").val();
-            var username = $("[name=username]").val();
-            var password = $("[name=password]").val();
-            var driver = $("[name=driver]").val();
+//            var jdbcurl = $("[name=jdbcurl]").val();
+//            var username = $("[name=username]").val();
+//            var password = $("[name=password]").val();
+//            var driver = $("[name=driver]").val();
+
+            if (!validate()) {
+                CARBON.showErrorDialog(jsi18n["invalid.details"]);
+                return;
+            }
 
             var nextURL = "";
             if ($("#page").val() == "1") {
-               nextURL = "sqlinput_ajaxprocessor.jsp";
+                $.post("validate_db_conn_ajaxprocessor.jsp", $("form").serialize(), function(html) {
+                    var success = !(html.toLowerCase().match(/error/));
+                    if (success) {
+                        nextURL = "sqlinput_ajaxprocessor.jsp";
+                        sendAjaxRequest(nextURL);
+                    } else {
+                        CARBON.showErrorDialog(jsi18n["no.next.step.invalid.jdbc"] + html);
+                    }
+                });
+
             } else if ($("#page").val() == "2") {
-               nextURL = "pickuielement_ajaxprocessor.jsp";
+                $.post("execute_sql_ajaxprocessor.jsp", $("form").serialize(), function(html) {
+                var success = !(html.toLowerCase().match(/error executing query/));
+
+                if (success) {
+                    nextURL = "pickuielement_ajaxprocessor.jsp";
+                    sendAjaxRequest(nextURL);
+                } else {
+                    CARBON.showErrorDialog(jsi18n["no.next.step.invalid.sql"] + html);
+                }
+                })
+
             } else if ($("#page").val() == "3") {
                nextURL = "gadget_details_ajaxprocessor.jsp";
+                sendAjaxRequest(nextURL);
             }
 
-           sendAjaxRequest(nextURL);
+
 
         });
 
         $("#validate").click(function() {
+            if (!validate()) {
+                CARBON.showErrorDialog(jsi18n["invalid.details"]);
+                return;
+            }
             $.post("validate_db_conn_ajaxprocessor.jsp", $("form").serialize(), function(html) {
-                var success = !(html.toLowerCase().match(/error/));
+               var success = !(html.toLowerCase().match(/error executing query/));
                 if (success) {
                     CARBON.showInfoDialog(html);
                 } else {
@@ -105,6 +152,40 @@
             });
 
         });
+
+
+
+        $("#execute-sql").click(function() {
+            if (!validate()) {
+                CARBON.showErrorDialog("Please enter data in required fields");
+                return;
+            }
+            $.post("execute_sql_ajaxprocessor.jsp", $("form").serialize(), function(html) {
+                var success = !(html.toLowerCase().match(/error/));
+                function getaoColumns(columnNames) {
+                    var json = [];
+                    for (var i = 0; i < columnNames.length; i++) {
+                        var columnName = columnNames[i];
+                        json.push({ sTitle : columnName});
+                    }
+                    return json;
+                }
+                if (success) {
+                    var respJson = JSON.parse(html);
+
+                    $("#query-results-holder").html("<table id=\"query-results\"></table>");
+                    $("#query-results").dataTable({
+                        "aaData" : respJson.Rows,
+                        "aoColumns" : getaoColumns(respJson.ColumnNames)
+                    });
+                    $("#query-results-holder").show();
+                } else {
+                    CARBON.showErrorDialog(html);
+                }
+            })
+        });
+
+
 
         function changeBackBtnState() {
             if ($("#page").val() == "1") {
@@ -170,9 +251,11 @@
             });
         }
 
-        var wizardPgTitle = ["Data Source", "SQL Queries", "UI Elements", "Gadget Details", "Done!"];
+
 
         function changeHeading(pageNo) {
+            var wizardPgTitle = [jsi18n["data.source.heading"], jsi18n["sql.query.heading"],
+                jsi18n["ui.elements.heading"], jsi18n["gadget.details.heading"], jsi18n["done.heading"]];
             var stepTitle = "Step " + pageNo + " of 5 : ";
             $("#page-title").html(wizardPgTitle[pageNo - 1]);
             $("#step-title").html(stepTitle + wizardPgTitle[pageNo - 1]);
@@ -183,28 +266,17 @@
     });
 </script>
 
-<!--link media="all" type="text/css" rel="stylesheet" href="css/registration.css"/-->
-<fmt:bundle basename="org.wso2.carbon.bam.analyzer.ui.i18n.Resources">
-    <carbon:breadcrumb label="main.analyzer"
-                       resourceBundle="org.wso2.carbon.bam.analyzer.ui.i18n.Resources"
-                       topPage="false" request="<%=request%>"/>
 
-<%
 
-    String jdbcurl = (session.getAttribute("jdbcurl") != null) ? ((String[]) session.getAttribute("jdbcurl")) [0] : "";
-    String driver = (session.getAttribute("driver") != null) ? ((String[]) session.getAttribute("driver")) [0] : "";
-    String username = (session.getAttribute("username") != null) ? ((String[]) session.getAttribute("username")) [0] : "";
-    String password = (session.getAttribute("password") != null) ? ((String[]) session.getAttribute("password")) [0] : "";
 
-%>
 
     <div id="middle">
         <h2>Gadget Generator Wizard</h2>
 
         <div id="workArea">
-            <h3 id="step-title">Step 1 of 5 : Enter Data Source</h3>
+            <h3 id="step-title"></h3>
 
-                <form method="post">
+            <form method="post">
                 <table class="styledLeft" id="userAdd" width="60%">
                     <thead>
                     <tr>
@@ -216,48 +288,23 @@
                         <td class="formRaw">
                             <div id="change-area">
 
-                                <table class="normal">
-                                    <tbody>
-                                    <tr>
-                                        <td>JDBC URL<font color="red">*</font>
-                                        </td>
-                                        <td><input type="text" name="jdbcurl" value="<%=jdbcurl%>" style="width:150px"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Driver Class Name<font color="red">*</font></td>
-                                        <td><input type="text" name="driver" value="<%=driver%>" style="width:150px"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td>User Name<font color="red">*</font></td>
-                                        <td><input type="text" name="username" value="<%=username%>" style="width:150px"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Password<font color="red">*</font></td>
-                                        <td><input type="password" name="password" value="<%=password%>" style="width:150px"></td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="button" class="button" value="Validate Connection" id="validate"/></td>
-                                    </tr>
-                                    <input type="hidden" name="page" id="page" value="1">
-                                    </tbody>
-                                </table>
+
                             </div>
 
                         </td>
                     </tr>
                     <tr>
                         <td class="buttonRow">
-                            <input type="button" class="button" id="back" value="< Back">
-                            <input type="button" class="button" id="next" value="Next >">
-                            <input type="button" class="button" id="generate" value="Generate!">
+                            <input type="button" class="button" id="back" value="< <fmt:message key="back.label"/>">
+                            <input type="button" class="button" id="next" value="<fmt:message key="next.label"/> >">
+                            <input type="button" class="button" id="generate" value="<fmt:message key="generate.label"/>">
 
                         </td>
                     </tr>
                     </tbody>
                 </table>
-                    </form>
+            </form>
         </div>
-
 
     </div>
 </fmt:bundle>

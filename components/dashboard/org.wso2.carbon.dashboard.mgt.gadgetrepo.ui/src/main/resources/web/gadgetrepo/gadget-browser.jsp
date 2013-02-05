@@ -315,8 +315,7 @@
                                     <h3 class="gadget-subtitle"><fmt:message key="gadget.repository" /></h3>
                                     <input type="text" size="20" name="gadgetSearch"
                                            id="gadgetSearch" alt="Search Gadget Repository"
-                                           onkeypress="searchGadget.disabled=false;" onkeydown="if (event.keyCode == 13) document.getElementById('searchGadget').click()" />  <input type="button" class="button" disabled="true" onclick="searchGad()"
-                                           value="Search" id="searchGadget"  />
+                                            onkeydown="if (event.keyCode == 13) document.getElementById('searchGadget').click()" />  <input type="button" class="button" onclick="searchGad()" value="Search" id="searchGadget"  />
 
                                 </td>
                                 <td class="gadget-ropo-cell-2">

@@ -18,15 +18,12 @@ package org.wso2.carbon.registry.relations.services.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.axis2.context.MessageContext;
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -63,10 +60,17 @@ public class CommonUtil {
         if (assoList.size() == 0) {
             return new Association[0];
         }
-        Arrays.sort(assoList.toArray(new Association[assoList.size()]), new Comparator<Association>() {
-            public int compare(Association o1, Association o2) {
-             return    o1.getDestinationPath().compareTo(o2.getDestinationPath());
-            }
+        Arrays.sort(assoList.toArray(new Association[assoList.size()]),
+                new Comparator<Association>() {
+                    public int compare(Association o1, Association o2) {
+                        int result = RegistryUtils.getResourceName(o1.getDestinationPath()).
+                                compareToIgnoreCase(
+                                        RegistryUtils.getResourceName(o2.getDestinationPath()));
+                        if (result != 0) {
+                            return result;
+                        }
+                        return o1.getDestinationPath().compareTo(o2.getDestinationPath());
+                    }
         });
         return assoList.toArray(new Association[assoList.size()]);
     }

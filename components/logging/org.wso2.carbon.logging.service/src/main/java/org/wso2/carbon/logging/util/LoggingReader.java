@@ -94,7 +94,7 @@ public class LoggingReader {
 			// If data is not accessible through syslog and if its
 			// Super-tenant/Stand-alone, access local log files.
 			if (isSuperTenantUser()) {
-				logIndex = getLocalLogInfo();
+				logIndex = getLocalLogInfo(tenantDomain, serviceName);
 			} else {
 				return null;
 			}
@@ -335,7 +335,7 @@ public class LoggingReader {
 					if (!isStratosService()) { // stand-alone apps.
 						serverurl = syslogServerURL + LoggingConstants.URL_SEPARATOR + tenantId
 								+ LoggingConstants.URL_SEPARATOR
-								+ ServerConfiguration.getInstance().getFirstProperty("Name")
+								+ ServerConfiguration.getInstance().getFirstProperty("ServerKey")
 								+ LoggingConstants.URL_SEPARATOR;
 					}
 				} catch (LogViewerException e) {
@@ -345,7 +345,7 @@ public class LoggingReader {
 						// logs.
 				serverurl = syslogServerURL + LoggingConstants.URL_SEPARATOR + tenantId
 						+ LoggingConstants.URL_SEPARATOR
-						+ ServerConfiguration.getInstance().getFirstProperty("Name")
+						+ ServerConfiguration.getInstance().getFirstProperty("ServerKey")
 						+ LoggingConstants.URL_SEPARATOR;
 			}
 
@@ -367,7 +367,7 @@ public class LoggingReader {
 				serverurl = syslogServerURL + LoggingConstants.URL_SEPARATOR
 						+ CarbonContext.getCurrentContext().getTenantId()
 						+ LoggingConstants.URL_SEPARATOR
-						+ ServerConfiguration.getInstance().getFirstProperty("Name")
+						+ ServerConfiguration.getInstance().getFirstProperty("ServerKey")
 						+ LoggingConstants.URL_SEPARATOR;
 			}
 		}
@@ -377,13 +377,13 @@ public class LoggingReader {
 	}
 
 	public boolean isStratosService() throws LogViewerException {
-		String serviceName = ServerConfiguration.getInstance().getFirstProperty("Name");
+		String serviceName = ServerConfiguration.getInstance().getFirstProperty("ServerKey");
 		return ServiceConfigManager.isStratosService(serviceName);
 	}
 
 	public boolean isManager() {
 		if (LoggingConstants.WSO2_STRATOS_MANAGER.equals(ServerConfiguration.getInstance()
-				.getFirstProperty("Name"))) {
+				.getFirstProperty("ServerKey"))) {
 			return true;
 		} else {
 			return false;
@@ -758,6 +758,7 @@ public class LoggingReader {
 	}
 
 	private InputStream getLocalInputStream(String logFile) throws FileNotFoundException {
+		logFile = logFile.substring(logFile.lastIndexOf(System.getProperty("file.separator"))+1);
 		String fileName = CarbonUtils.getCarbonLogsPath() + LoggingConstants.URL_SEPARATOR
 				+ logFile;
 		InputStream is = new BufferedInputStream(new FileInputStream(fileName));
@@ -787,32 +788,40 @@ public class LoggingReader {
 	/*
 	 * get logs from the local file system.
 	 */
-	public LogInfo[] getLocalLogInfo() {
-		String folderPath = CarbonUtils.getCarbonLogsPath();
+	public LogInfo[] getLocalLogInfo(String domain, String serverKey) {
+        String folderPath = CarbonUtils.getCarbonLogsPath();
 		LogInfo log = null;
-		ArrayList<LogInfo> logs = new ArrayList<LogInfo>();
-		File folder = new File(folderPath);
-		FileFilter fileFilter = new WildcardFileFilter(
-				LoggingConstants.RegexPatterns.LOCAL_CARBON_LOG_PATTERN);
-		File[] listOfFiles = folder.listFiles(fileFilter);
-		for (File file : listOfFiles) {
-			String filename = file.getName();
-			String fileDates[] = filename
-					.split(LoggingConstants.RegexPatterns.LOG_FILE_DATE_SEPARATOR);
-			String filePath = CarbonUtils.getCarbonLogsPath() + LoggingConstants.URL_SEPARATOR
-					+ filename;
-			File logfile = new File(filePath);
-			if (fileDates.length == 2) {
-				log = new LogInfo(filename, fileDates[1], getFileSize(logfile));
-			} else {
-				log = new LogInfo(filename, LoggingConstants.RegexPatterns.CURRENT_LOG,
-						getFileSize(logfile));
-			}
-			if (log != null) {
-				logs.add(log);
-			}
-		}
-		return getSortedLogInfo(logs.toArray(new LogInfo[logs.size()]));
+        if((((domain.equals("") || domain == null) && isSuperTenantUser()) ||
+                domain.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) &&
+           (serverKey == null || serverKey.equals("") || serverKey.equalsIgnoreCase(getCurrentServerName()))) {
+
+            ArrayList<LogInfo> logs = new ArrayList<LogInfo>();
+            File folder = new File(folderPath);
+            FileFilter fileFilter = new WildcardFileFilter(
+                    LoggingConstants.RegexPatterns.LOCAL_CARBON_LOG_PATTERN);
+            File[] listOfFiles = folder.listFiles(fileFilter);
+            for (File file : listOfFiles) {
+                String filename = file.getName();
+                String fileDates[] = filename
+                        .split(LoggingConstants.RegexPatterns.LOG_FILE_DATE_SEPARATOR);
+                String filePath = CarbonUtils.getCarbonLogsPath() + LoggingConstants.URL_SEPARATOR
+                        + filename;
+                File logfile = new File(filePath);
+                if (fileDates.length == 2) {
+                    log = new LogInfo(filename, fileDates[1], getFileSize(logfile));
+                } else {
+                    log = new LogInfo(filename, LoggingConstants.RegexPatterns.CURRENT_LOG,
+                            getFileSize(logfile));
+                }
+                if (log != null) {
+                    logs.add(log);
+                }
+            }
+            return getSortedLogInfo(logs.toArray(new LogInfo[logs.size()]));
+        } else {
+            return null;
+        }
+
 	}
 
 	private String getFileSize(File file) {
@@ -991,4 +1000,9 @@ public class LoggingReader {
 		}
 		return tenantId;
 	}
+
+    private String getCurrentServerName() {
+        String serverName = ServerConfiguration.getInstance().getFirstProperty("ServerKey");
+        return serverName;
+    }
 }

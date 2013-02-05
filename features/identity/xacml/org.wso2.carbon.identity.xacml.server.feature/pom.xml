@@ -21,11 +21,13 @@
 	<parent>
 		<groupId>org.wso2.carbon</groupId>
 		<artifactId>xacml-feature</artifactId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>org.wso2.carbon.identity.xacml.server.feature</artifactId>
+	<version>4.0.5</version>
 	<packaging>pom</packaging>
 	<name>Identity XACML Server Feature</name>
 	<url>http://wso2.org</url>
@@ -34,11 +36,13 @@
      <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.identity.entitlement</artifactId>           
+            <artifactId>org.wso2.carbon.identity.entitlement</artifactId> 
+	    <version>4.0.5</version>          
         </dependency>
         <dependency>
             <groupId>org.wso2.balana</groupId>
-            <artifactId>org.wso2.balana</artifactId>		
+            <artifactId>org.wso2.balana</artifactId>	
+	    <version>1.0.0-wso2v4</version>	
         </dependency>
 	<dependency>
             <groupId>libthrift.wso2</groupId>
@@ -51,10 +55,12 @@
 	<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.authentication</artifactId>
+	    <version>4.0.1</version>
         </dependency>
 	<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.thrift.authentication</artifactId>
+	    <version>4.0.1</version>
         </dependency>
     </dependencies>
 
@@ -93,10 +99,10 @@
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>
-                                    org.wso2.carbon.identity.core.server:${wso2carbon.version}
+                                    org.wso2.carbon.identity.core.server:4.0.2
                                 </importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.claim.mgt.server:${wso2carbon.version}
+                                    org.wso2.carbon.claim.mgt.server:4.0.1
                                 </importFeatureDef>
                             </importFeatures>
                         </configuration>

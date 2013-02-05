@@ -34,20 +34,19 @@
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
 		try {
-			EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);
+			EntitlementAdminServiceClient client = new EntitlementAdminServiceClient(cookie, serverURL, configContext);
 			client.clearDecisionCache();
-			forwardTo = "index.jsp?region=region1&item=policy_menu";
+			forwardTo = "pdp-manage.jsp?region=region1&item=policy_menu";
 		} catch (Exception e) {
 			String message = resourceBundle.getString("cache.clear.error");
 			CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.ERROR, request);
-			forwardTo = "index.jsp?region=region1&item=policy_menu";
+			forwardTo = "pdp-manage.jsp?region=region1&item=policy_menu";
 		}
 
 %>
 
-<%@page
-	import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementPolicyAdminServiceClient"%>
 <%@page import="java.util.ResourceBundle"%>
+<%@ page import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementAdminServiceClient" %>
 <script
 	type="text/javascript">
     function forward() {

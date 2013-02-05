@@ -64,16 +64,20 @@ public class EndpointTemplateAdminClient {
         List<String> templateNames = new ArrayList<String>();
 
         EndpointTemplateInfo[] definedTempalates = getEndpointTemplates(0, getEndpointTemplatesCount());
-        for (EndpointTemplateInfo definedTempalate : definedTempalates) {
-            if(definedTempalate.getTemplateName() != null){
-                templateNames.add(definedTempalate.getTemplateName());
+        if (definedTempalates != null) {
+            for (EndpointTemplateInfo definedTempalate : definedTempalates) {
+                if (definedTempalate.getTemplateName() != null) {
+                    templateNames.add(definedTempalate.getTemplateName());
+                }
             }
         }
 
         EndpointTemplateInfo[] dynamicTempalates = getDynamicEndpointTemplates(0, getDynamicEndpointTemplatesCount());
-        for (EndpointTemplateInfo dynTempalate : dynamicTempalates) {
-            if(dynTempalate.getTemplateName() != null){
-                templateNames.add(dynTempalate.getTemplateName());
+        if (dynamicTempalates != null) {
+            for (EndpointTemplateInfo dynTempalate : dynamicTempalates) {
+                if (dynTempalate.getTemplateName() != null) {
+                    templateNames.add(dynTempalate.getTemplateName());
+                }
             }
         }
         return templateNames.toArray(new String[0]);

@@ -37,15 +37,15 @@ public abstract class Query {
     private Queue<String> processedTokens;
 
     private ParamInfo[] parameters;
-
+    
     public Query(Statement stmt) throws SQLException {
         this.stmt = stmt;
         this.connection = stmt.getConnection();
         this.processedTokens = ((TPreparedStatement) getStatement()).getProcessedTokens();
         this.parameters = ((TPreparedStatement) getStatement()).getParameters();
         List<String> tokens = new ArrayList<String>(processedTokens);
-        this.processedTokens = mergeParameterValues(tokens.toArray(new String[tokens.size()]),
-                parameters);
+        this.processedTokens =
+                this.mergeParameterValues(tokens.toArray(new String[tokens.size()]), parameters);
     }
 
     public abstract ResultSet executeQuery() throws SQLException;

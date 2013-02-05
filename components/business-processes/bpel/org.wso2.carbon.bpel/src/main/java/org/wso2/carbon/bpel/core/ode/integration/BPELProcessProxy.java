@@ -38,8 +38,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.wso2.carbon.bpel.core.ode.integration.axis2.WSDLAwareMessage;
 import org.wso2.carbon.bpel.core.ode.integration.utils.SOAPUtils;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.transaction.TransactionManager;
@@ -128,7 +128,7 @@ public class BPELProcessProxy {
 
     public final void onAxisServiceInvoke(final BPELMessageContext bpelMessageContext)
             throws AxisFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(SuperTenantCarbonContext.
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(PrivilegedCarbonContext.
                 getCurrentContext().getTenantId());
 
         boolean success = true;

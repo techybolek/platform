@@ -40,7 +40,7 @@
         attrKeys.addAll(Arrays.asList(barChartKeys));
     }
 
-    WSMap wsMap = GGWUIUtils.constructWSMap(session, attrKeys);
+    WSMap wsMap = GGWUIUtils.constructWSMap(session, attrKeys, request);
 
     String responseHTML;
     try {

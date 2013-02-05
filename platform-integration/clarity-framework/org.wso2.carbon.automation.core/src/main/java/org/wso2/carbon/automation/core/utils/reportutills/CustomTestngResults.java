@@ -20,6 +20,7 @@ package org.wso2.carbon.automation.core.utils.reportutills;
 
 import org.testng.IClass;
 import org.testng.ISuite;
+import org.testng.ITestContext;
 import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
 
@@ -95,6 +96,14 @@ public class CustomTestngResults {
 
             public String getTestName() {
                 return suite.getName();  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public String getInstanceName() {
+                return null;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public ITestContext getTestContext() {
+                return null;  //To change body of implemented methods use File | Settings | File Templates.
             }
 
             public int compareTo(ITestResult o) {

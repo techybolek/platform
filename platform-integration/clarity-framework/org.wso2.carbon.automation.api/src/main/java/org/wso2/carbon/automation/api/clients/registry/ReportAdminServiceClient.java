@@ -112,4 +112,54 @@ public class ReportAdminServiceClient {
             throw new Exception(msg, e);
         }
     }
+
+    public String[] getAttributeNames(String className) throws Exception {
+        try {
+        	return reportingAdminServiceStub.getAttributeNames(className);
+        } catch (Exception e) {
+            String msg = "Unable to get attribute names";
+            log.error(msg);
+            throw new Exception(msg, e);
+        }
+    }
+    
+    public String[] getMandatoryAttributeNames(String className) throws Exception{
+        try {
+        	return reportingAdminServiceStub.getMandatoryAttributeNames(className);
+        } catch (Exception e) {
+            String msg = "Unable to get mandatory attribute names";
+            log.error(msg);
+            throw new Exception(msg, e);
+        }
+    }
+    
+    public void copySavedReport(String saved, String copy) throws Exception{
+        try {
+        	reportingAdminServiceStub.copySavedReport(saved, copy);
+        } catch (Exception e) {
+            String msg = "Unable to copy the report";
+            log.error(msg);
+            throw new Exception(msg, e);
+        }
+    }
+    
+    public void scheduleReport(ReportConfigurationBean configuration) throws Exception{
+        try {
+        	reportingAdminServiceStub.scheduleReport(configuration);
+        } catch (Exception e) {
+            String msg = "Unable to schedule the report" ;
+            log.error(msg);
+            throw new Exception(msg, e);
+        }
+    }
+    
+    public void stopScheduledReport(String reportName) throws Exception{
+        try {
+        	reportingAdminServiceStub.stopScheduledReport(reportName);
+        } catch (Exception e) {
+            String msg = "Unable to stop the scheduled report";
+            log.error(msg);
+            throw new Exception(msg, e);
+        }
+    }
 }

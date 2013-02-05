@@ -55,7 +55,38 @@ public class OpenIDConstants {
 	public static final String SERVICE_NAME_MEX_OPENID = "mex-openid-ut";
 	public static final String SERVICE_NAME_MEX_IC_OPENID = "mex-openid-ic";
 	public static final String SERVICE_NAME_STS_IC_OPENID = "sts-openid-ic";
+	
+	// session attributes
+	public static class SessionAttribute {
+		public static final String OPENID = "openId";
+		public static final String USERNAME = "userName";
+		public static final String OPENID_ADMIN_CLIENT = "openid_admin_client";
+		public static final String PROFILE = "profile";
+		public static final String SELECTED_PROFILE = "selectedProfile";
+		public static final String DEFAULT_PROFILE = "default";
+		public static final String ACTION = "_action";
+		public static final String USER_APPROVED = "userApproved";
+		public static final String USER_APPROVED_ALWAYS = "userApprovedAlways";
+		public static final String HAS_APPROVED_ALWAYS = "hasApprovedAlways";
+		public static final String AUTHENTICATED_OPENID = "authenticatedOpenID";
+		public static final String IS_OPENID_AUTHENTICATED = "isOpenIDAuthenticated";
+	}
+	
+	// request parameters
+	public static class RequestParameter {
+		public static final String LOGOU_URL = "logoutUrl";
+		public static final String OPENID = "openId";
+		public static final String USERNAME = "userName";
+		public static final String REMEMBER = "remember";
+		public static final String PASSWORD = "password";
+	}
 
+	// cookies 
+	public static class Cookie {
+		public static final String OPENID_TOKEN = "openidtoken";
+		public static final String OPENID_REMEMBER_ME = "openidrememberme";
+	}
+	
 	public static class PapeAttributes {
 		public final static String AUTH_POLICIES = "auth_policies";
 		public final static String NIST_AUTH_LEVEL = "nist_auth_level";

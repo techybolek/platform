@@ -103,23 +103,14 @@ public class UsageAgentConfiguration {
     }
 
     public int getUsageTasksNumberOfRecordsPerExecution() {
-        if (usageTasksNumberOfRecordsPerExecution < 0) {
-            return DEFAULT_NUMBER_OF_RECORDS_PER_RUN;
-        }
         return usageTasksNumberOfRecordsPerExecution;
     }
 
     public int getUsageTasksExecutionIntervalInMilliSeconds() {
-        if (usageTasksExecutionIntervalInMilliSeconds < 0) {
-            return DEFAULT_EXECUTION_INTERVAL_IN_MILLISECONDS;
-        }
         return usageTasksExecutionIntervalInMilliSeconds;
     }
 
     public int getUsageTasksStartupDelayInMilliSeconds() {
-        if (usageTasksStartupDelayInMilliSeconds < 0) {
-            return DEFAULT_STARTUP_DELAY_IN_MILLISECONDS;
-        }
         return usageTasksStartupDelayInMilliSeconds;
     }
 }

@@ -20,13 +20,17 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.endpoints.EndpointManager;
 import org.wso2.carbon.governance.api.endpoints.dataobjects.Endpoint;
@@ -36,16 +40,16 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.api.wsdls.WsdlManager;
 import org.wso2.carbon.governance.api.wsdls.dataobjects.Wsdl;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.user.api.AuthorizationManager;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.xml.stream.XMLStreamException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -93,10 +97,15 @@ public final class APIUtil {
             api.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
             api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
             api.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
-
+            api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
+            api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
+            api.setEndpointSecured(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED)));
+            api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
+            api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            
             Set<Tier> availableTier = new HashSet<Tier>();
             String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-            Map<String,Tier> definedTiers = getTiers();
+            Map<String, Tier> definedTiers = getTiers();
             if (tiers != null && !"".equals(tiers)) {
                 String[] tierNames = tiers.split("\\|\\|");
                 for (String tierName : tierNames) {
@@ -112,25 +121,48 @@ public final class APIUtil {
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setLatest(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
 
+
             Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
-            String[] templates = artifact.getAttributes(APIConstants.API_URI_TEMPLATES);
-            if (!(templates == null)) {
-                for (String template : templates) {
+            List<String> uriTemplateNames = new ArrayList<String>();
+
+
+            HashMap<String,String> urlPatternsSet;
+            urlPatternsSet = ApiMgtDAO.getURITemplatesPerAPIAsString(api.getId());
+            Set<String> urlPatternsKeySet = urlPatternsSet.keySet();
+            for (String urlPattern : urlPatternsKeySet) {
                     URITemplate uriTemplate = new URITemplate();
-                    String[] s = template.split(":");
-                    if (s.length == 2) {
-                        String[] methods = s[0].split(" ");
-                        for (String method : methods) {
-                            uriTemplate.addMethod(method);
+                    String uTemplate = urlPattern.split("::")[0];
+                    String method = urlPattern.split("::")[1];
+                    String authType = urlPattern.split("::")[2];
+
+                    uriTemplate.setHTTPVerb(method);
+                    uriTemplate.setAuthType(authType);
+                    uriTemplate.setHttpVerbs(method);
+                    uriTemplate.setAuthTypes(authType);
+                    uriTemplate.setUriTemplate(uTemplate);
+                    uriTemplate.setResourceURI(api.getUrl());
+                    uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
+
+                    //Checking for duplicate uri template names
+                    if (uriTemplateNames.contains(uTemplate)) {
+                        for (URITemplate tmp : uriTemplates) {
+                            if (uTemplate.equals(tmp.getUriTemplate())) {
+                                tmp.setHttpVerbs(method);
+                                tmp.setAuthTypes(authType);
+                                break;
+                            }
                         }
-                        uriTemplate.setUriTemplate(s[1]);
-                        uriTemplate.setResourceURI(api.getUrl());
-                        uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
+
+                    } else {
                         uriTemplates.add(uriTemplate);
                     }
+
+                    uriTemplateNames.add(uTemplate);
+
+
                 }
-                api.setUriTemplates(uriTemplates);
-            }
+            api.setUriTemplates(uriTemplates);
+
 
             Set<String> tags = new HashSet<String>();
             org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
@@ -145,6 +177,27 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         } catch (RegistryException e) {
             String msg = "Failed to get LastAccess time or Rating";
+            throw new APIManagementException(msg, e);
+        }
+        return api;
+    }
+
+    public static API getAPI(GovernanceArtifact artifact)
+            throws APIManagementException {
+
+        API api;
+        try {
+            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            api = new API(new APIIdentifier(providerName, apiName, apiVersion));
+            api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
+            api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+            api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+            api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
+            api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
+        } catch (GovernanceException e) {
+            String msg = "Failed to get API from artifact ";
             throw new APIManagementException(msg, e);
         }
         return api;
@@ -197,10 +250,16 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_WADL, api.getWadlUrl());
             artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, api.getThumbnailUrl());
             artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, apiStatus);
-            artifact.setAttribute(APIConstants.API_OVERVIEW_TEC_OWNER,api.getTechnicalOwner());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL ,api.getTechnicalOwnerEmail());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER ,api.getBusinessOwner());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL,api.getBusinessOwnerEmail());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TEC_OWNER, api.getTechnicalOwner());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL, api.getTechnicalOwnerEmail());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER, api.getBusinessOwner());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL, api.getBusinessOwnerEmail());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBILITY, api.getVisibility());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES, api.getVisibleRoles());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED,Boolean.toString(api.isEndpointSecured()));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME, api.getEndpointUTUsername());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD, api.getEndpointUTPassword());
+            
             String tiers = "";
             for (Tier tier : api.getAvailableTiers()) {
                 tiers += tier.getName() + "||";
@@ -209,15 +268,27 @@ public final class APIUtil {
                 tiers = tiers.substring(0, tiers.length() - 2);
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
             }
-            if (APIConstants.PUBLISHED.equals(apiStatus)){
+            if (APIConstants.PUBLISHED.equals(apiStatus)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_IS_LATEST, "true");
             }
+            String[] keys = artifact.getAttributeKeys();
+            for (String key : keys) {
+                if (key.contains("URITemplate")) {
+                    artifact.removeAttribute(key);
+                }
+            }
 
-            artifact.removeAttribute(APIConstants.API_URI_TEMPLATES);
             Set<URITemplate> uriTemplateSet = api.getUriTemplates();
+            int i = 0;
             for (URITemplate uriTemplate : uriTemplateSet) {
-                artifact.addAttribute(APIConstants.API_URI_TEMPLATES,
-                        uriTemplate.getMethodsAsString() + ":" + uriTemplate.getUriTemplate());
+                artifact.addAttribute(APIConstants.API_URI_PATTERN + i,
+                        uriTemplate.getUriTemplate());
+                artifact.addAttribute(APIConstants.API_URI_HTTP_METHOD + i,
+                        uriTemplate.getHTTPVerb());
+                artifact.addAttribute(APIConstants.API_URI_AUTH_TYPE + i,
+                        uriTemplate.getAuthType());
+                i++;
+
             }
 
         } catch (GovernanceException e) {
@@ -260,16 +331,28 @@ public final class APIUtil {
             documentation = new Documentation(type, artifact.getAttribute(APIConstants.DOC_NAME));
             documentation.setSummary(artifact.getAttribute(APIConstants.DOC_SUMMARY));
 
-            Documentation.DocumentSourceType docSourceType = artifact.getAttribute(APIConstants.DOC_SOURCE_TYPE).equals("URL") ? Documentation.DocumentSourceType.URL : Documentation.DocumentSourceType.INLINE;
+            Documentation.DocumentSourceType docSourceType = Documentation.DocumentSourceType.INLINE;
+            String artifactAttribute = artifact.getAttribute(APIConstants.DOC_SOURCE_TYPE);
+
+            if (artifactAttribute.equals(Documentation.DocumentSourceType.URL.name())) {
+                docSourceType = Documentation.DocumentSourceType.URL;
+            } else if (artifactAttribute.equals(Documentation.DocumentSourceType.FILE.name())) {
+                docSourceType = Documentation.DocumentSourceType.FILE;
+            }
 
             documentation.setSourceType(docSourceType);
-
             if (artifact.getAttribute(APIConstants.DOC_SOURCE_TYPE).equals("URL")) {
                 documentation.setSourceUrl(artifact.getAttribute(APIConstants.DOC_SOURCE_URL));
             }
 
+            if (docSourceType == Documentation.DocumentSourceType.FILE) {
+                documentation.setFilePath(artifact.getAttribute(APIConstants.DOC_FILE_PATH));
+            }
 
-            //documentation.setSourceType();
+            if(documentation.getType() == DocumentationType.OTHER){
+                documentation.setOtherTypeName(artifact.getAttribute(APIConstants.DOC_OTHER_TYPE_NAME));
+            }
+
         } catch (GovernanceException e) {
             throw new APIManagementException("Failed to get documentation from artifact", e);
         }
@@ -288,7 +371,34 @@ public final class APIUtil {
     }
 
     /**
+     * Utility method for creating storage path for an icon.
+     *
+     * @param identifier APIIdentifier
+     * @return Icon storage path.
+     */
+    public static String getIconPath(APIIdentifier identifier) {
+        String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
+        return artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
+    }
+
+    /**
+     * Utility method to generate the path for a file.
+     *
+     * @param identifier APIIdentifier
+     * @return Generated path.
+     * @fileName File name.
+     */
+    public static String getDocumentationFilePath(APIIdentifier identifier, String fileName) {
+        String contentPath = APIUtil.getAPIDocPath(identifier) + APIConstants.DOCUMENT_FILE_DIR +
+                RegistryConstants.PATH_SEPARATOR + fileName;
+        return contentPath;
+    }
+
+    /**
      * Utility method to get api path from APIIdentifier
+     *
      * @param identifier APIIdentifier
      * @return API path
      */
@@ -301,21 +411,23 @@ public final class APIUtil {
 
     /**
      * Utility method to get API provider path
+     *
      * @param identifier APIIdentifier
      * @return API provider path
      */
-    public static String getAPIProviderPath(APIIdentifier identifier){
-     return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
+    public static String getAPIProviderPath(APIIdentifier identifier) {
+        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
                 + identifier.getProviderName();
     }
 
     /**
      * Utility method to get documentation path
-     * @param apiId   APIIdentifier
-     * @return  Doc path
+     *
+     * @param apiId APIIdentifier
+     * @return Doc path
      */
     public static String getAPIDocPath(APIIdentifier apiId) {
-        return  APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 apiId.getApiName() + RegistryConstants.PATH_SEPARATOR +
                 apiId.getVersion() + RegistryConstants.PATH_SEPARATOR +
@@ -324,8 +436,9 @@ public final class APIUtil {
 
     /**
      * This utility method used to create documentation artifact content
-     * @param artifact GovernanceArtifact
-     * @param apiId APIIdentifier
+     *
+     * @param artifact      GovernanceArtifact
+     * @param apiId         APIIdentifier
      * @param documentation Documentation
      * @return GenericArtifact
      * @throws APIManagementException if failed to get GovernanceArtifact from Documentation
@@ -348,9 +461,16 @@ public final class APIUtil {
                 case URL:
                     sourceType = Documentation.DocumentSourceType.URL;
                     break;
+                case FILE: {
+                    sourceType = Documentation.DocumentSourceType.FILE;
+                    setFilePermission(documentation.getFilePath());
+                }
+                break;
             }
             artifact.setAttribute(APIConstants.DOC_SOURCE_TYPE, sourceType.name());
             artifact.setAttribute(APIConstants.DOC_SOURCE_URL, documentation.getSourceUrl());
+            artifact.setAttribute(APIConstants.DOC_FILE_PATH, documentation.getFilePath());
+            artifact.setAttribute(APIConstants.DOC_OTHER_TYPE_NAME,documentation.getOtherTypeName());
             String basePath = apiId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                     apiId.getApiName() + RegistryConstants.PATH_SEPARATOR +
                     apiId.getVersion();
@@ -367,7 +487,7 @@ public final class APIUtil {
      * this method used to initialized the ArtifactManager
      *
      * @param registry Registry
-     * @param key , key name of the key
+     * @param key      , key name of the key
      * @return GenericArtifactManager
      * @throws APIManagementException if failed to initialized GenericArtifactManager
      */
@@ -376,6 +496,7 @@ public final class APIUtil {
         GenericArtifactManager artifactManager;
 
         try {
+            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
             artifactManager = new GenericArtifactManager(registry, key);
         } catch (RegistryException e) {
             String msg = "Failed to initialize GenericArtifactManager";
@@ -393,12 +514,12 @@ public final class APIUtil {
      * @return Path of the created resource
      * @throws APIManagementException If an error occurs while adding the WSDL
      */
-    public  static String  createWSDL(String wsdlUrl, Registry registry) throws APIManagementException {
+    public static String createWSDL(String wsdlUrl, Registry registry) throws APIManagementException {
         try {
             WsdlManager wsdlManager = new WsdlManager(registry);
             Wsdl wsdl = wsdlManager.newWsdl(wsdlUrl);
             wsdlManager.addWsdl(wsdl);
-            return  GovernanceUtils.getArtifactPath(registry,wsdl.getId());
+            return GovernanceUtils.getArtifactPath(registry, wsdl.getId());
         } catch (RegistryException e) {
             String msg = "Failed to add WSDL " + wsdlUrl + " to the registry";
             log.error(msg, e);
@@ -410,7 +531,7 @@ public final class APIUtil {
      * Create an Endpoint
      *
      * @param endpointUrl Endpoint url
-     * @param registry Registry space to save the endpoint
+     * @param registry    Registry space to save the endpoint
      * @return Path of the created resource
      * @throws APIManagementException If an error occurs while adding the endpoint
      */
@@ -419,10 +540,10 @@ public final class APIUtil {
             EndpointManager endpointManager = new EndpointManager(registry);
             Endpoint endpoint = endpointManager.newEndpoint(endpointUrl);
             endpointManager.addEndpoint(endpoint);
-            return GovernanceUtils.getArtifactPath(registry,endpoint.getId());
+            return GovernanceUtils.getArtifactPath(registry, endpoint.getId());
         } catch (RegistryException e) {
-            String msg = "Failed to import endpoint "+ endpointUrl +" to registry ";
-            log.error(msg ,e);
+            String msg = "Failed to import endpoint " + endpointUrl + " to registry ";
+            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
@@ -434,8 +555,8 @@ public final class APIUtil {
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String,Tier> getTiers() throws APIManagementException {
-        Map<String,Tier> tiers = new TreeMap<String,Tier>();
+    public static Map<String, Tier> getTiers() throws APIManagementException {
+        Map<String, Tier> tiers = new TreeMap<String, Tier>();
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry();
@@ -450,9 +571,17 @@ public final class APIUtil {
                     OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
                     Tier tier = new Tier(id.getText());
                     tier.setPolicyContent(policy.toString().getBytes());
-                    String desc = resource.getProperty(APIConstants.TIER_DESCRIPTION_PREFIX + id.getText());
+                    // String desc = resource.getProperty(APIConstants.TIER_DESCRIPTION_PREFIX + id.getText());
+                    String desc;
+                    try {
+                        desc = APIDescriptionGenUtil.generateDescriptionFromPolicy(policy);
+                    } catch (APIManagementException ex) {
+                        desc = APIConstants.TIER_DESC_NOT_AVAILABLE;
+                    }
                     tier.setDescription(desc);
-                    tiers.put(tier.getName(), tier);
+                    if (!tier.getName().equalsIgnoreCase("Unauthenticated")) {
+                        tiers.put(tier.getName(), tier);
+                    }
                 }
             }
 
@@ -478,7 +607,7 @@ public final class APIUtil {
     /**
      * Checks whether the specified user has the specified permission.
      *
-     * @param username A username
+     * @param username   A username
      * @param permission A valid Carbon permission
      * @throws APIManagementException If the user does not have the specified permission or if an error occurs
      */
@@ -500,7 +629,7 @@ public final class APIUtil {
      * Checks whether the specified user has the specified permission without throwing
      * any exceptions.
      *
-     * @param username A username
+     * @param username   A username
      * @param permission A valid Carbon permission
      * @return true if the user has the specified permission and false otherwise
      */
@@ -511,5 +640,235 @@ public final class APIUtil {
         } catch (APIManagementException e) {
             return false;
         }
+    }
+
+    /**
+     * Retrieves the role list of a user
+     *
+     * @param username   A username
+     * @throws APIManagementException If an error occurs
+     */
+    public static String[] getListOfRoles(String username) throws APIManagementException {
+        if (username == null) {
+            throw new APIManagementException("Attempt to execute privileged operation as" +
+                    " the anonymous user");
+        }
+
+        RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
+        return authorizationManager.getRolesOfUser(username);
+    }
+
+    /**
+     * Retrieves the list of user roles without throwing any exceptions.
+     *
+     * @param username   A username
+     * @return the list of roles to which the user belongs to.
+     */
+    public static String[] getListOfRolesQuietly(String username) {
+        try {
+            return getListOfRoles(username);
+        } catch (APIManagementException e) {
+            return new String[0];
+        }
+    }
+
+    /**
+     * Sets permission for uploaded file resource.
+     *
+     * @param filePath Registry path for the uploaded file
+     * @throws APIManagementException
+     */
+
+    private static void setFilePermission(String filePath) throws APIManagementException {
+        try {
+            filePath = filePath.replaceFirst("/registry/resource/", "");
+            AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
+                    getRealmService().getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).
+                    getAuthorizationManager();
+            if (!accessControlAdmin.isRoleAuthorized(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
+                    filePath, ActionConstants.GET)) {
+                accessControlAdmin.authorizeRole(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
+                        filePath, ActionConstants.GET);
+            }
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error while setting up permissions for file location", e);
+        }
+    }
+
+      /**
+        * This method used to get API from governance artifact specific to copyAPI
+        *
+        * @param artifact API artifact
+        * @param registry Registry
+        * @return API
+        * @throws APIManagementException if failed to get API from artifact
+        */
+       public static API getAPI(GovernanceArtifact artifact, Registry registry,APIIdentifier oldId)
+               throws APIManagementException {
+
+           API api;
+           try {
+               String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+               String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+               String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+               api = new API(new APIIdentifier(providerName, apiName, apiVersion));
+               // set rating
+               String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+               BigDecimal bigDecimal = new BigDecimal(registry.getAverageRating(artifactPath));
+               BigDecimal res = bigDecimal.setScale(1, RoundingMode.HALF_UP);
+               api.setRating(res.floatValue());
+               //set description
+               api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
+               //set last access time
+               api.setLastUpdated(registry.get(artifactPath).getLastModified());
+               // set url
+               api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
+               api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
+               api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
+               api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
+               api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
+               api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
+               api.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
+               api.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
+               api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+               api.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+               api.setEndpointSecured(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED)));
+               api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
+               api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+               
+               Set<Tier> availableTier = new HashSet<Tier>();
+               String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+               Map<String, Tier> definedTiers = getTiers();
+               if (tiers != null && !"".equals(tiers)) {
+                   String[] tierNames = tiers.split("\\|\\|");
+                   for (String tierName : tierNames) {
+                       Tier definedTier = definedTiers.get(tierName);
+                       if (definedTier != null) {
+                           availableTier.add(definedTier);
+                       } else {
+                           log.warn("Unknown tier: " + tierName + " found on API: " + apiName);
+                       }
+                   }
+               }
+               api.addAvailableTiers(availableTier);
+               api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+               api.setLatest(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
+               ArrayList<URITemplate> urlPatternsList;
+
+               urlPatternsList = ApiMgtDAO.getAllURITemplates(api.getContext(), oldId.getVersion());
+               Set<URITemplate> uriTemplates = new HashSet<URITemplate>(urlPatternsList);
+
+               for (URITemplate uriTemplate : uriTemplates) {
+                   uriTemplate.setResourceURI(api.getUrl());
+                   uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
+
+               }
+               api.setUriTemplates(uriTemplates);
+
+               Set<String> tags = new HashSet<String>();
+               org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
+               for (Tag tag1 : tag) {
+                   tags.add(tag1.getTagName());
+               }
+               api.addTags(tags);
+               api.setLastUpdated(registry.get(artifactPath).getLastModified());
+
+           } catch (GovernanceException e) {
+               String msg = "Failed to get API fro artifact ";
+               throw new APIManagementException(msg, e);
+           } catch (RegistryException e) {
+               String msg = "Failed to get LastAccess time or Rating";
+               throw new APIManagementException(msg, e);
+           }
+           return api;
+       }
+    
+    public static boolean checkAccessTokenPartitioningEnabled() {
+        APIManagerConfiguration configuration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                        getAPIManagerConfiguration();
+        String enabledStr = configuration.getFirstProperty
+                (APIConstants.API_KEY_MANAGER_ENABLE_ACCESS_TOKEN_PARTITIONING);
+        return enabledStr != null && Boolean.parseBoolean(enabledStr);
+    }
+    
+    public static boolean checkUserNameAssertionEnabled() {
+        APIManagerConfiguration configuration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                        getAPIManagerConfiguration();
+        String enabledStr = configuration.getFirstProperty
+                (APIConstants.API_KEY_MANAGER_ENABLE_ASSERTIONS_USERNAME);
+        return enabledStr != null && Boolean.parseBoolean(enabledStr);
+    }
+
+    public static String[] getAvailableKeyStoreTables() throws APIManagementException {
+        String[] keyStoreTables = new String[0];
+        Map<String, String>  domainMappings = getAvailableUserStoreDomainMappings();
+        if (domainMappings != null) {
+            keyStoreTables = new String[domainMappings.size()];
+            int i = 0;
+            for (Map.Entry<String, String> e : domainMappings.entrySet()) {
+                String value = e.getValue();
+                keyStoreTables[i] = APIConstants.ACCESS_TOKEN_STORE_TABLE + "_" + value.trim();
+                i++;
+            }
+        }
+        return keyStoreTables;
+    }
+
+    public static Map<String, String> getAvailableUserStoreDomainMappings() throws
+            APIManagementException {
+        Map<String, String> userStoreDomainMap = new HashMap<String, String>();
+        APIManagerConfiguration configuration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                        getAPIManagerConfiguration();
+        String domainsStr = configuration.getFirstProperty
+                (APIConstants.API_KEY_MANAGER_ACCESS_TOKEN_PARTITIONING_DOMAINS);
+        if (domainsStr != null) {
+            String[] userStoreDomainsArr = domainsStr.split(",");
+            for (String anUserStoreDomainsArr : userStoreDomainsArr) {
+                String[] mapping = anUserStoreDomainsArr.trim().split(":"); //A:foo.com , B:bar.com
+                if (mapping.length < 2) {
+                    throw new APIManagementException("Domain mapping has not defined");
+                }
+                userStoreDomainMap.put(mapping[1].trim(), mapping[0].trim()); //key=domain & value=mapping
+            }
+        }
+        return userStoreDomainMap;
+    }
+    
+    public static String getAccessTokenStoreTableFromUserId(String userId) 
+            throws APIManagementException {
+        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
+        String userStore;
+         if(userId != null) {
+            String[] strArr = userId.split("/");
+            if (strArr != null && strArr.length > 1) {
+                userStore = strArr[0];
+                Map<String, String> availableDomainMappings = getAvailableUserStoreDomainMappings();
+                if (availableDomainMappings != null &&
+                        availableDomainMappings.containsKey(userStore)) {
+                    accessTokenStoreTable = accessTokenStoreTable + "_" +
+                            availableDomainMappings.get(userStore);
+                }
+            }
+         }
+        return accessTokenStoreTable;
+    }
+
+    public static String getAccessTokenStoreTableFromAccessToken(String apiKey)
+            throws APIManagementException {
+        String userId = getUserIdFromAccessToken(apiKey); //i.e: 'foo.com/admin' or 'admin'
+        return getAccessTokenStoreTableFromUserId(userId);
+    }
+
+    public static String getUserIdFromAccessToken(String apiKey) {
+        String userId = null;
+        String decodedKey = new String(Base64.decodeBase64(apiKey.getBytes()));
+        String[] tmpArr = decodedKey.split(":");
+        if (tmpArr != null) {
+            userId = tmpArr[1];
+        }
+        return userId;
     }
 }

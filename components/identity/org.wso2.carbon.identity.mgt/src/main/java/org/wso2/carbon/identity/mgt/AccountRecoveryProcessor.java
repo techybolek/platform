@@ -25,6 +25,8 @@ import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.identity.mgt.util.ClaimsMgtUtil;
 import org.wso2.carbon.identity.mgt.util.PasswordUtil;
 import org.wso2.carbon.identity.mgt.util.Utils;
+import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -82,8 +84,9 @@ public class AccountRecoveryProcessor {
         String domainName = userMgtBean.getTenantDomain();
         String email;
         String secretKey;
+        boolean recoveryData = true;
 
-        if(tenantId == 0){
+        if(tenantId != MultitenantConstants.SUPER_TENANT_ID && tenantId < 1){
             tenantId = Utils.getTenantId(domainName);
         }
 
@@ -121,11 +124,15 @@ public class AccountRecoveryProcessor {
                     userMgtBean.setUserPassword(temporaryPassword);
                 }
                 PasswordUtil.updatePassword(userMgtBean);
+                recoveryData = false;
+            } else if(IdentityMgtConstants.NOTIFY_ACCOUNT_UNLOCK.equals(recoveryType) ||
+                    IdentityMgtConstants.RECOVERY_TYPE_ACCOUNT_ID.equals(recoveryType)){
+                recoveryData = false;    
             }
         }
 
-        Map<String, String> dataToStore = populateDataMap(userMgtBean);
-        return emailProcessor.processEmail(dataToStore);
+        Map<String, String> dataToStore = populateDataMap(userMgtBean, tenantId);
+        return emailProcessor.processEmail(dataToStore, recoveryData);
     }
 
     /**
@@ -160,16 +167,17 @@ public class AccountRecoveryProcessor {
      * populates data to writes to the registry
      *
      * @param userMgtBean  bean class that contains user and tenant Information
+     * @param tenantId tenant id
      * @return Map
      */
-    private  Map<String, String> populateDataMap(UserMgtBean userMgtBean) {
+    private  Map<String, String> populateDataMap(UserMgtBean userMgtBean, int tenantId) {
 
         Map<String, String> dataToStore = new HashMap<String, String>();
 
         dataToStore.put(IdentityMgtConstants.EMAIL_ADDRESS, userMgtBean.getEmail());
         try {
             dataToStore.put(IdentityMgtConstants.FIRST_NAME, ClaimsMgtUtil.
-                    getFirstName(userMgtBean.getUserId(), Utils.getTenantId(userMgtBean.getTenantDomain())));
+                    getFirstName(userMgtBean.getUserId(), tenantId));
         } catch (IdentityMgtException e) {
             log.warn("FirstName of the user can not be retrieved.", e);
             dataToStore.put(IdentityMgtConstants.FIRST_NAME, userMgtBean.getUserId());

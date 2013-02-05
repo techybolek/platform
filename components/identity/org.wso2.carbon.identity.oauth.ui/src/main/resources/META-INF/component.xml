@@ -1,5 +1,5 @@
 <!--
- ~ Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ ~ Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  ~
  ~ WSO2 Inc. licenses this file to you under the Apache License,
  ~ Version 2.0 (the "License"); you may not use this file except
@@ -28,12 +28,30 @@
             <style-class>manage</style-class>
             <icon>../oauth/images/oauth.gif</icon>
             <require-permission>/permission/admin/manage</require-permission>
-            <skip-authentication>
-                <skip-link>../oauth/oauth-error.jsp</skip-link>
-                <skip-link>../oauth/oauth-login.jsp</skip-link>
-                <skip-link>../oauth/oauth-login-finish.jsp</skip-link>
-                <skip-link>../oauth/oauth2-authn-finish.jsp</skip-link>
-            </skip-authentication>
+            <require-not-logged-in>false</require-not-logged-in>
+        </menu>
+        <menu>
+            <id>my_oauth_apps_menu</id>
+            <i18n-key>identity.my.authorized.apps</i18n-key>
+            <i18n-bundle>org.wso2.carbon.identity.oauth.ui.i18n.Resources</i18n-bundle>
+            <parent-menu>my_identity_menu</parent-menu>
+            <link>../oauth/my-oauth-apps-index.jsp</link>
+            <region>region5</region>
+            <order>9</order>
+            <style-class>manage</style-class>
+            <icon>../oauth/images/my-oauth-apps.png</icon>
+            <require-permission>/permission/admin/login</require-permission>
+            <require-not-logged-in>false</require-not-logged-in>
         </menu>
 	</menus>
+    <framework-configuration>
+        <bypass>
+            <authentication>
+                <link>../oauth/oauth-error.jsp</link>
+                <link>../oauth/oauth-login.jsp</link>
+                <link>../oauth/oauth-login-finish.jsp</link>
+                <link>../oauth/oauth2-authn-finish.jsp</link>
+            </authentication>
+        </bypass>
+    </framework-configuration>
 </component>

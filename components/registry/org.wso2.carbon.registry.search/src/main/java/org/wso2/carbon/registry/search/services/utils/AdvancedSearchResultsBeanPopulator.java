@@ -18,10 +18,8 @@ package org.wso2.carbon.registry.search.services.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.Collection;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -31,6 +29,7 @@ import org.wso2.carbon.registry.search.beans.AdvancedSearchResultsBean;
 import org.wso2.carbon.registry.search.beans.CustomSearchParameterBean;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class AdvancedSearchResultsBeanPopulator {
 
@@ -47,53 +46,110 @@ public class AdvancedSearchResultsBeanPopulator {
             String[] childPaths =
                     getQueryResult(configSystemRegistry, registry, propertyNameValues.getParameterValues());
 
-            String[][] tempPropValues = propertyNameValues.getParameterValues();
+            String[][] parameterValues = propertyNameValues.getParameterValues();
+            String resourcePathPattern = null;
 
-            for (int i = 0; i < tempPropValues.length; i++) {
-                if (tempPropValues[i][0].equals("resourcePath")) {
-                    String s = tempPropValues[i][1];
-                    if (childPaths == null || childPaths.length == 0 && tempPropValues[i][0].indexOf("%") == -1) {
-                        tempPropValues[i][1] = tempPropValues[i][1] + "%";
-                        String[] s2 = getQueryResult(configSystemRegistry, registry, tempPropValues);
-                        tempPropValues[i][1] = tempPropValues[i][1] + "/%";
-                        String[] s1 = getQueryResult(configSystemRegistry, registry, tempPropValues);
-
-                        if (s2 != null && s2.length > 0) {
-                            Set<String> result = new HashSet<String>();
-                            result.addAll(Arrays.asList(s2));
-                            if (s1 != null && s1.length > 0) {
-                                result.removeAll(Arrays.asList(s1));
-                            }
-                            childPaths = result.toArray(new String[result.size()]);
-                        }
-                    }
+            for (String[] parameterValue : parameterValues) {
+                if(parameterValue[0].equals("resourcePath") && parameterValue[1] != null &&
+                        parameterValue[1].length() > 0){
+                    resourcePathPattern = "^(" + parameterValue[1].replace("%",".*").replace("$","\\$") + ")$";
                     break;
                 }
             }
-            int resultSize = childPaths.length;
+
+            boolean onlyAssociation = true;
+            String associationType = null;
+            String associationDestination = null;
+
+            for (String[] parameterValue : parameterValues) {
+                if(!parameterValue[0].equals("content") &&
+                        !parameterValue[0].equals("associationType") && !parameterValue[0].equals("associationDest") &&
+                        !parameterValue[0].equals("leftOp") && !parameterValue[0].equals("rightOp")
+                        && parameterValue[1] != null && parameterValue[1].length() > 0){
+                    onlyAssociation = false;
+                }
+                if(parameterValue[0].equals("associationType")
+                        && parameterValue[1] != null && parameterValue[1].length() > 0){
+                    associationType = parameterValue[1];
+                }
+                if(parameterValue[0].equals("associationDest")
+                        && parameterValue[1] != null && parameterValue[1].length() > 0){
+                    associationDestination = parameterValue[1];
+                }
+            }
+
+            if(onlyAssociation){
+                for (String[] parameterValue : parameterValues) {
+                    if(parameterValue[0].equals("resourcePath")){
+                        parameterValue[1] = "%";
+                        break;
+                    }
+                }
+                childPaths = getQueryResult(configSystemRegistry,registry,parameterValues);
+            }
 
             List<ResourceData> resourceDataList = new ArrayList<ResourceData>();
-            for (int i = 0; i < resultSize; i++) {
 
+            for (String childPath : childPaths) {
+                if(resourcePathPattern != null && !Pattern.compile(resourcePathPattern).matcher(childPath.substring(childPath.lastIndexOf(
+                        RegistryConstants.PATH_SEPARATOR) + 1)).find()){
+                    continue;
+                }
+
+                boolean doContinue = true;
+                boolean doContinueDest = true;
+
+                if (associationDestination != null) {
+                    Association[] destinationAssociations = registry
+                            .getAllAssociations(childPath);
+                    for (Association association : destinationAssociations) {
+                        if (association.getDestinationPath().contains(
+                                associationDestination))
+                        {
+//                                && association.getDestinationPath().equals(
+//                                childPath)) {
+                            doContinueDest = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (associationType != null) {
+                    Association[] typeAssociations = registry.getAssociations(
+                            childPath, associationType);
+                    for (Association association : typeAssociations) {
+                        if (association.getSourcePath().equals(childPath)) {
+                            doContinue =false;
+                            break;
+                        }
+                    }
+                }
+
+                if((associationType != null && doContinue) || (associationDestination != null && doContinueDest)){
+                    continue;
+                }
                 try {
-                    Resource child = registry.get(childPaths[i]);
+                    Resource child = registry.get(childPath);
 
-                    if("true".equals(child.getProperty("registry.absent"))) {
+                    if ("true".equals(child.getProperty("registry.absent"))) {
                         continue;
                     }
                     ResourceData resourceData = new ResourceData();
-                    resourceData.setResourcePath(childPaths[i]);
+                    resourceData.setResourcePath(childPath);
 
-                    if (childPaths[i] != null) {
-                        if (RegistryConstants.ROOT_PATH.equals(childPaths[i])) {
+                    if (childPath != null) {
+                        if (RegistryConstants.ROOT_PATH.equals(childPath)) {
                             resourceData.setName("root");
                         } else {
-                            String[] parts = childPaths[i].split(RegistryConstants.PATH_SEPARATOR);
+                            String[] parts = childPath.split(RegistryConstants.PATH_SEPARATOR);
                             resourceData.setName(parts[parts.length - 1]);
                         }
                     }
 
-
+                    String actualPath = child.getProperty("registry.actualpath");
+                    if (actualPath != null && registry.resourceExists(actualPath)) {
+                        child = registry.get(actualPath);
+                    }
                     resourceData.setResourceType(child instanceof Collection ?
                             "collection" : "resource");
                     resourceData.setAuthorUserName(child.getAuthorUserName());
@@ -114,6 +170,7 @@ public class AdvancedSearchResultsBeanPopulator {
 
             }
 
+            SearchUtils.sortResourceDataList(resourceDataList);
             advancedSearchResultsBean.setResourceDataList(resourceDataList.toArray(new ResourceData[resourceDataList.size()]));
 
         } catch (RegistryException e) {
@@ -135,56 +192,59 @@ public class AdvancedSearchResultsBeanPopulator {
 
         Map<String, String> customValues = new HashMap<String, String>();
 
-        for (int i = 0; i < propertyNameValues.length; i++) {
-            if (propertyNameValues[i][0].equals("resourcePath")) {
-                query.setResourceName(propertyNameValues[i][1]);
-            } else if (propertyNameValues[i][0].equals("author")) {
-                query.setAuthorName(propertyNameValues[i][1]);
-            } else if (propertyNameValues[i][0].equals("updater")) {
-                query.setUpdaterName(propertyNameValues[i][1]);
-            } else if (propertyNameValues[i][0].equals("createdAfter")) {
-                query.setCreatedAfter(CommonUtil.computeDate(propertyNameValues[i][1]));
-            } else if (propertyNameValues[i][0].equals("createdBefore")) {
-                query.setCreatedBefore(addOneDay(CommonUtil.computeDate(propertyNameValues[i][1])));
-            } else if (propertyNameValues[i][0].equals("updatedAfter")) {
-                query.setUpdatedAfter(CommonUtil.computeDate(propertyNameValues[i][1]));
-            } else if (propertyNameValues[i][0].equals("updatedBefore")) {
-                query.setUpdatedBefore(addOneDay(CommonUtil.computeDate(propertyNameValues[i][1])));
-            } else if (propertyNameValues[i][0].equals("commentWords")) {
-                query.setCommentWords(propertyNameValues[i][1]);
-            } else if (propertyNameValues[i][0].equals("associationType")) {
-                query.setAssociationType(propertyNameValues[i][1]);
-            } else if (propertyNameValues[i][0].equals("associationDest")) {
-                query.setAssociationDest(propertyNameValues[i][1]);
-            } else if (propertyNameValues[i][0].equals("tags")) {
-                query.setTags(propertyNameValues[i][1]);
-            } else if (propertyNameValues[i][0].equals("propertyName")) {
-                query.setPropertyName(propertyNameValues[i][1]);
-            } else if (propertyNameValues[i][0].equals("leftPropertyValue")) {
-                query.setLeftPropertyValue(propertyNameValues[i][1]);
-            } else if (propertyNameValues[i][0].equals("rightPropertyValue")) {
-                query.setRightPropertyValue(propertyNameValues[i][1]);   
-            } else if (propertyNameValues[i][0].equals("authorNameNegate")) {
-                query.setAuthorNameNegate(propertyNameValues[i][1]);
-            } else if (propertyNameValues[i][0].equals("updaterNameNegate")) {
-                query.setUpdaterNameNegate(propertyNameValues[i][1]);
-            } else if (propertyNameValues[i][0].equals("createdRangeNegate")) {
-                query.setCreatedRangeNegate(propertyNameValues[i][1]);
-            } else if (propertyNameValues[i][0].equals("updatedRangeNegate")) {
-                query.setUpdatedRangeNegate(propertyNameValues[i][1]);
-            } else if (propertyNameValues[i][0].equals("leftOp")) {
-                query.setLeftOp(propertyNameValues[i][1]);
-            } else if (propertyNameValues[i][0].equals("rightOp")) {
-                query.setRightOp(propertyNameValues[i][1]);    
-            } else if (propertyNameValues[i][0].equals("content")) {
-                query.setContent(propertyNameValues[i][1]);
-            } else if (propertyNameValues[i][0].equals("mediaType")) {
-                query.setMediaType(propertyNameValues[i][1]);
-            } else if (propertyNameValues[i][0].equals("mediaTypeNegate")) {
-                query.setMediaTypeNegate(propertyNameValues[i][1]);
+        for (String[] propertyNameValue : propertyNameValues) {
+            if (propertyNameValue[0].equals("resourcePath")) {
+                query.setResourceName(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("author")) {
+                query.setAuthorName(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("updater")) {
+                query.setUpdaterName(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("createdAfter")) {
+                query.setCreatedAfter(CommonUtil.computeDate(propertyNameValue[1]));
+            } else if (propertyNameValue[0].equals("createdBefore")) {
+                query.setCreatedBefore(addOneDay(CommonUtil.computeDate(propertyNameValue[1])));
+            } else if (propertyNameValue[0].equals("updatedAfter")) {
+                query.setUpdatedAfter(CommonUtil.computeDate(propertyNameValue[1]));
+            } else if (propertyNameValue[0].equals("updatedBefore")) {
+                query.setUpdatedBefore(addOneDay(CommonUtil.computeDate(propertyNameValue[1])));
+            } else if (propertyNameValue[0].equals("commentWords")) {
+                query.setCommentWords(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("associationType")) {
+                query.setAssociationType(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("associationDest")) {
+                query.setAssociationDest(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("tags")) {
+                query.setTags(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("propertyName")) {
+                query.setPropertyName(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("leftPropertyValue")) {
+                query.setLeftPropertyValue(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("rightPropertyValue")) {
+                query.setRightPropertyValue(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("propertyValue")) {
+                query.setRightPropertyValue(propertyNameValue[1]);
+                query.setRightOp("eq");
+            } else if (propertyNameValue[0].equals("authorNameNegate")) {
+                query.setAuthorNameNegate(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("updaterNameNegate")) {
+                query.setUpdaterNameNegate(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("createdRangeNegate")) {
+                query.setCreatedRangeNegate(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("updatedRangeNegate")) {
+                query.setUpdatedRangeNegate(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("leftOp")) {
+                query.setLeftOp(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("rightOp")) {
+                query.setRightOp(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("content")) {
+                query.setContent(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("mediaType")) {
+                query.setMediaType(propertyNameValue[1]);
+            } else if (propertyNameValue[0].equals("mediaTypeNegate")) {
+                query.setMediaTypeNegate(propertyNameValue[1]);
             } else {
 
-                customValues.put(propertyNameValues[i][0], propertyNameValues[i][1]);
+                customValues.put(propertyNameValue[0], propertyNameValue[1]);
             }
         }        
 
@@ -193,7 +253,7 @@ public class AdvancedSearchResultsBeanPopulator {
 
         for (Map.Entry<String, String> entry : customValues.entrySet()) {
             if (!entry.getValue().equals("")) {
-                Map<String, String> temp = new HashMap();
+                Map<String, String> temp = new HashMap<String, String>();
                 temp.put(entry.getKey(), entry.getValue());
 
                 query.setCustomSearchValues(temp);

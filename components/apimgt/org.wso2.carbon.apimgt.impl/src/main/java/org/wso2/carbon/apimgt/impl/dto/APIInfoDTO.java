@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
+import java.util.Set;
+
 /**
  * This class represent the API info DTO.
  */
@@ -27,6 +29,8 @@ public class APIInfoDTO {
    private String apiName;
    private String version;
    private String context;
+
+   private Set<ResourceInfoDTO> resources;
 
     public String getProviderId() {
         return providerId;
@@ -58,6 +62,14 @@ public class APIInfoDTO {
 
     public void setContext(String context) {
         this.context = context;
+    }
+
+    public Set<ResourceInfoDTO> getResources() {
+        return resources;
+    }
+
+    public void setResources(Set<ResourceInfoDTO> resources) {
+        this.resources = resources;
     }
 
     /**

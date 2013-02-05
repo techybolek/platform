@@ -24,7 +24,7 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.mediators.Value;
 import org.apache.synapse.util.xpath.SynapseXPath;
 import org.jaxen.JaxenException;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.core.EventBroker;
 import org.wso2.carbon.event.core.Message;
 import org.wso2.carbon.event.core.exception.EventBrokerException;
@@ -88,19 +88,19 @@ public class EventMediator extends AbstractMediator {
                     }
                 }
 
-                int tenantID = SuperTenantCarbonContext.getCurrentContext(
+                int tenantID = PrivilegedCarbonContext.getCurrentContext(
                         mc.getConfigurationContext()).getTenantId();
                 try {
-                    SuperTenantCarbonContext.startTenantFlow();
-                    SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantID);
-                    SuperTenantCarbonContext.getCurrentContext().getTenantDomain(true);
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantID);
+                    PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
                     broker.publish(message, topicValue);
                 } catch (EventBrokerException e) {
                     handleException("Error publishing the event to the broker", e, synCtx);
                 } catch (Exception e) {
                     log.error("Error in setting tenant information", e);
                 } finally {
-                    SuperTenantCarbonContext.endTenantFlow();
+                    PrivilegedCarbonContext.endTenantFlow();
                 }
             }
         }

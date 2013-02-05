@@ -53,16 +53,23 @@ public class APIManagerOAuthCallbackHandler extends AbstractOAuthCallbackHandler
             }
             if (OAuthCallback.OAuthCallbackType.SCOPE_VALIDATION_TOKEN.equals(
                     oauthCallback.getCallbackType())){
-                ApiMgtDAO dao = new ApiMgtDAO();
-                try {
-                    String scope = dao.getTokenScope(oauthCallback.getClient());
-                    oauthCallback.setApprovedScope(new String[]{ scope });
-                    oauthCallback.setValidScope(true);
-                } catch (APIManagementException e) {
-                    String msg = "Error while looking up token scope";
-                    log.error(msg, e);
-                    throw new UnsupportedCallbackException(oauthCallback, msg);
+                String[] scopes = oauthCallback.getRequestedScope();
+                String scope = null;
+                if(scopes != null && scopes.length > 0){
+                    scope = scopes[0];
+                }else{
+                    ApiMgtDAO dao = new ApiMgtDAO();
+                    try {
+                        scope = dao.getTokenScope(oauthCallback.getClient());
+                    } catch (APIManagementException e) {
+                        String msg = "Error while looking up token scope";
+                        log.error(msg, e);
+                        throw new UnsupportedCallbackException(oauthCallback, msg);
+                    }
+
                 }
+                oauthCallback.setApprovedScope(new String[]{ scope.toUpperCase() });
+                oauthCallback.setValidScope(true);
             }
         }
     }

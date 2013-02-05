@@ -26,7 +26,6 @@
 <jsp:include page="../resources/resources-i18n-ajaxprocessor.jsp"/>
 <script type="text/javascript" src="../ajax/js/prototype.js"></script>
 <link rel="stylesheet" type="text/css" href="../resources/css/registry.css"/>
-<script type="text/javascript" src="js/expression_utils.js"></script>
 
 <script type="text/javascript">
     var allInputsSelected = false;
@@ -328,8 +327,10 @@
                     <td class="leftCol-small labelField" for="bucketDescription"><fmt:message
                             key="bucket.description"/></td>
                     <td>
-                        <textArea class="expandedTextarea" id="bucketDescription"
-                                  cols="60"  <%=!isEditing ? "" : " readonly=\"true\""%> ><%=description%></textArea>
+                        <textArea class="expandedTextarea"
+                                  id="bucketDescription"
+                                  cols="60"  <%=!isEditing ? "" : " readonly=\"true\""%>
+                                ><%=description%></textArea>
 
                     </td>
                 </tr>
@@ -337,7 +338,7 @@
                     <td class="leftCol-small labelField" for="engineProviders"><fmt:message
                             key="cep.runtime"/><span
                             class="required">*</span>
-                    <td><select name="engineProviders"
+                    <td><select name="engineProviders" onchange="setBackendRuntimeConfigurations()"
                                 id="engineProviders" <%=!isEditing ? "" : "disabled=\"true\""%> >
                         <%
                             CEPEngineProviderInfoDTO[] engineProviders = stub.getEngineProvidersInfo();
@@ -357,7 +358,8 @@
                 <%
                     if (engineProviders != null && engineProviders.length > 0) {
                 %>
-                <tr >
+
+                <tr name="SiddhiCEPRuntime"   <%=( engineProvider.contains("SiddhiCEPRuntime") ||engineProvider.equals("") ) ? "" : "style=\"display:none\""%>>
                     <td class="heading_A" colspan="2"><fmt:message
                             key="engine.provider.configuration"/></td>
                 </tr>
@@ -365,12 +367,12 @@
                     for (int i = 0; i < engineProviders.length; i++) {
                         CEPEngineProviderInfoDTO engineProviderInfo = engineProviders[i];
                         String totalConfName = "";
-                        if (engineProviderInfo.getConfigNames() != null) {
+                        if (engineProviderInfo.getConfigNames() != null && engineProviderInfo.getConfigNames().length >0) {
                             for (int k = 0; k < engineProviderInfo.getConfigNames().length; k++) {
                                 String configName = engineProviderInfo.getConfigNames()[k];
                                 totalConfName = totalConfName + "::" + configName;
                 %>
-                <tr name="providerConfig<%= "::"+engineProviderInfo.getProviderName()%>">
+                <tr name="SiddhiCEPRuntime" <%=(engineProvider.contains("SiddhiCEPRuntime") ||engineProvider.equals("")) ? "" : "style=\"display:none\""%>>
                     <td class="leftCol-small labelField"
                         for="providerConfig<%="::"+engineProviderInfo.getProviderName()+"::"+configName%>">
                         <%
@@ -378,6 +380,11 @@
                         %>
                         <fmt:message
                                 key="siddhi.persistence.snapshot.time.interval.minutes"/>
+                        <%
+                        } else if (configName != null && "siddhi.enable.distributed.processing".equals(configName)) {
+                        %>
+                        <fmt:message
+                                key="siddhi.enable.distributed.processing"/>
                         <%
                         } else {
                         %>
@@ -406,7 +413,7 @@
                         }
                     }
                 %>
-                <tr name="providerConfig<%= "::"+engineProviderInfo.getProviderName()%>">
+                <tr name="SiddhiCEPRuntime" <%=(engineProvider.contains("SiddhiCEPRuntime") ||engineProvider.equals("")) ? "" : "style=\"display:none\""%>>
                     <td></td>
                     <td>
                         <input type="hidden"
@@ -480,7 +487,8 @@
                    input.getInputMapMappingDTO() != null ? input.getInputMapMappingDTO().getStream() :
                    input.getInputXMLMappingDTO() != null ? input.getInputXMLMappingDTO().getStream() : ""%>
             </td>
-            <td><%=input.getBrokerName()%></td>
+            <td><%=input.getBrokerName()%>
+            </td>
         </tr>
 
         <%
@@ -525,245 +533,260 @@
 
 <table id="addInputTable" class="styledLeft noBorders spacer-bot"
        style="width:100%; margin-bottom:10px; margin-top:10px; display:none;">
-    <thead>
-    <tr>
-        <th colspan="2"><fmt:message key="input.topics.add"/></th>
-    </tr>
-    </thead>
-    <tbody>
+<thead>
+<tr>
+    <th colspan="2"><fmt:message key="input.topics.add"/></th>
+</tr>
+</thead>
+<tbody>
 
-    <tr>
-        <td class="leftCol-small"><fmt:message key="input"/><font color="red"> *</font></td>
-        <td><input type="text" id="inputTopic"></td>
-            <%-- <td><select id="inputTopics" onchange="selectInputTopic()">
-                <option value="InputTopic03">InputTopic03</option>
-                <option value="InputTopic04">InputTopic04</option>
-                <option value="InputTopic05">InputTopic05</option>
-            </select>
-            </td>--%>
-    </tr>
-    <tr>
-        <td class="leftCol-small"><fmt:message key="broker.name"/></td>
-        <td><select name="inputBrokerName" id="inputBrokerName" onchange="selectInputBrokerName()">
-            <%
-                String[] brokerNames = stub.getBrokerNames();
-                if (brokerNames != null && brokerNames.length > 0) {
-                    for (String brokerName : brokerNames) {
-            %>
-            <option value="<%=brokerName%>"><%=brokerName%>
-            </option>
-            <%
-                    }
+<tr>
+    <td class="leftCol-small"><fmt:message key="topic.name"/><font color="red"> *</font></td>
+    <td><input type="text" id="inputTopic"></td>
+        <%-- <td><select id="inputTopics" onchange="selectInputTopic()">
+            <option value="InputTopic03">InputTopic03</option>
+            <option value="InputTopic04">InputTopic04</option>
+            <option value="InputTopic05">InputTopic05</option>
+        </select>
+        </td>--%>
+</tr>
+<tr>
+    <td class="leftCol-small"><fmt:message key="broker.name"/></td>
+    <td><select name="inputBrokerName" id="inputBrokerName" onchange="selectInputBrokerName()">
+        <%
+            String[] brokerNames = stub.getBrokerNames();
+            if (brokerNames != null && brokerNames.length > 0) {
+                for (String brokerName : brokerNames) {
+        %>
+        <option value="<%=brokerName%>"><%=brokerName%>
+        </option>
+        <%
                 }
-            %>
+            }
+        %>
+    </select>
+    </td>
+</tr>
+<tr>
+    <td colspan="2" class="middle-header">
+        <fmt:message key="input.mapping.stream"/>
+    </td>
+</tr>
+<tr>
+    <td class="leftCol-small"><fmt:message key="stream"/><span class="required">*</span></td>
+    <td><input type="text" id="mappingStream"></td>
+</tr>
+<tr>
+    <td class="leftCol-small"><fmt:message key="query.event.type"/></td>
+    <td>
+        <select name="eventClassName" id="eventClassName" onchange="setEventClass()">
+            <option value="Map"><fmt:message key="map"/></option>
+            <option value="Tuple"><fmt:message key="tuple"/></option>
+            <option value="Class"><fmt:message key="class"/></option>
         </select>
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2" class="middle-header">
-            <fmt:message key="input.mapping.stream"/>
-        </td>
-    </tr>
-    <tr>
-        <td class="leftCol-small"><fmt:message key="stream"/><span class="required">*</span></td>
-        <td><input type="text" id="mappingStream"></td>
-    </tr>
-        <%--<tr>--%>
-        <%--<td class="leftCol-small"><fmt:message key="event.class.name"/></td>--%>
-        <%--<td><input type="text" id="eventClassName"></td>--%>
-        <%--</tr>--%>
-    <tr>
-        <td class="leftCol-small"><fmt:message key="input.mapping.type"/></td>
-        <td><select name="inputMappingType" id="inputMappingType" onchange="setInputMapping()">
-            <option value="xml"><fmt:message key="input.mapping.type.xml"/></option>
-            <option value="tuple"><fmt:message key="input.mapping.type.tuple"/></option>
-            <option value="map"><fmt:message key="input.mapping.type.map"/></option>
-        </select>
-        </td>
-    </tr>
-    <tr name="inputXMLMapping">
-        <td colspan="2" class="middle-header">
-            <fmt:message key="xpath_definition"/>
-        </td>
-    </tr>
-    <tr name="inputXMLMapping">
-        <td colspan="2">
+        <input name="inputEventClass" type="text" id="inputEventClass"
+               style="width:25%;display:none">
+    </td>
+</tr>
+<tr>
+    <td class="leftCol-small"><fmt:message key="input.mapping.type"/></td>
+    <td><select name="inputMappingType" id="inputMappingType" onchange="setInputMapping()">
+        <option value="xml"><fmt:message key="input.mapping.type.xml"/></option>
+        <option value="tuple"><fmt:message key="input.mapping.type.tuple"/></option>
+        <option value="map"><fmt:message key="input.mapping.type.map"/></option>
+    </select>
+    </td>
+</tr>
+<tr name="inputXMLMapping">
+    <td colspan="2" class="middle-header">
+        <fmt:message key="xpath_definition"/>
+    </td>
+</tr>
+<tr name="inputXMLMapping">
+    <td colspan="2">
 
-            <div id="noXpathDiv" class="noDataDiv-plain">
-                No XPath prefixes Defined
-            </div>
-                <%-- <a style="background-image: url(../admin/images/add.gif);"
-              class="icon-link" onclick="showAddNSPrefix()"><fmt:message key="prefix.add"/></a>--%>
+        <div id="noXpathDiv" class="noDataDiv-plain">
+            No XPath prefixes Defined
+        </div>
+            <%-- <a style="background-image: url(../admin/images/add.gif);"
+          class="icon-link" onclick="showAddNSPrefix()"><fmt:message key="prefix.add"/></a>--%>
 
-            <table class="styledLeft" id="xpathNamespacesTable" style="width:100%;display:none;">
-                <thead>
-                <th class="leftCol-med"><fmt:message key="prefix"/></th>
-                <th class="leftCol-med"><fmt:message key="namespace"/></th>
-                <th><fmt:message key="actions"/></th>
-                </thead>
-            </table>
+        <table class="styledLeft" id="xpathNamespacesTable" style="width:100%;display:none;">
+            <thead>
+            <th class="leftCol-med"><fmt:message key="prefix"/></th>
+            <th class="leftCol-med"><fmt:message key="namespace"/></th>
+            <th><fmt:message key="actions"/></th>
+            </thead>
+        </table>
 
-            <table id="addNamespaceTable" class="normal">
-                <tbody>
-                <tr>
-                    <td class="leftCol-small"><fmt:message key="prefix"/>:</td>
-                    <td><input type="text" id="NSPrefix"/></td>
-                    <td><fmt:message key="namespace"/>: <input type="text" id="NSValue"/></td>
-                    <td><input type="button" class="button" value="<fmt:message key="add"/>"
-                               onclick="addNSPrefix()"/>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+        <table id="addNamespaceTable" class="normal">
+            <tbody>
+            <tr>
+                <td class="leftCol-small"><fmt:message key="prefix"/>:</td>
+                <td><input type="text" id="NSPrefix"/></td>
+                <td><fmt:message key="namespace"/>: <input type="text" id="NSValue"/></td>
+                <td><input type="button" class="button" value="<fmt:message key="add"/>"
+                           onclick="addNSPrefix()"/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
 
-        </td>
-    </tr>
-    <tr name="inputXMLMapping">
-        <td colspan="2" class="middle-header">
-            <fmt:message key="property"/>
-        </td>
-    </tr>
-    <tr name="inputXMLMapping">
-        <td colspan="2">
-            <div id="noInputXMLPropertyDiv" class="noDataDiv-plain">
-                No Properties Defined
-            </div>
+    </td>
+</tr>
+<tr name="inputXMLMapping">
+    <td colspan="2" class="middle-header">
+        <fmt:message key="property"/>
+    </td>
+</tr>
+<tr name="inputXMLMapping">
+    <td colspan="2">
+        <div id="noInputXMLPropertyDiv" class="noDataDiv-plain">
+            No Properties Defined
+        </div>
 
-            <table class="styledLeft" id="inputXMLPropertyTable" style="width:100%;display:none">
-                <thead>
-                <th class="leftCol-med"><fmt:message key="property.name"/></th>
-                <th class="leftCol-med"><fmt:message key="property.xpath"/></th>
-                <th class="leftCol-med"><fmt:message key="property.type"/></th>
-                <th><fmt:message key="actions"/></th>
-                </thead>
-            </table>
+        <table class="styledLeft" id="inputXMLPropertyTable" style="width:100%;display:none">
+            <thead>
+            <th class="leftCol-med"><fmt:message key="property.name"/></th>
+            <th class="leftCol-med"><fmt:message key="property.xpath"/></th>
+            <th class="leftCol-med"><fmt:message key="property.type"/></th>
+            <th><fmt:message key="actions"/></th>
+            </thead>
+        </table>
 
-            <table id="addXMLInputPropertyTable" class="normal">
-                <tbody>
-                <tr>
-                    <td class="leftCol-small"><fmt:message key="property.name"/>:</td>
-                    <td><input type="text" id="inputXMLPropName"/></td>
-                    <td><fmt:message key="property.xpath"/>: <input type="text"
-                                                                    id="inputXMLPropValue"/></td>
-                    <td><fmt:message key="property.type"/>:
-                        <select id="inputXMLPropertyTypes">
-                            <option value="java.lang.Integer">Integer</option>
-                            <option value="java.lang.Long">Long</option>
-                            <option value="java.lang.Double">Double</option>
-                            <option value="java.lang.String">String</option>
-                        </select>
-                    </td>
-                    <td><input type="button" class="button" value="<fmt:message key="add"/>"
-                               onclick="addXMLInputProperty()"/>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+        <table id="addXMLInputPropertyTable" class="normal">
+            <tbody>
+            <tr>
+                <td class="leftCol-small"><fmt:message key="property.name"/>:</td>
+                <td><input type="text" id="inputXMLPropName"/></td>
+                <td><fmt:message key="property.xpath"/>: <input type="text"
+                                                                id="inputXMLPropValue"/></td>
+                <td><fmt:message key="property.type"/>:
+                    <select id="inputXMLPropertyTypes">
+                        <option value="java.lang.Integer">Integer</option>
+                        <option value="java.lang.Long">Long</option>
+                        <option value="java.lang.Double">Double</option>
+                        <option value="java.lang.String">String</option>
+                    </select>
+                </td>
+                <td><input type="button" class="button" value="<fmt:message key="add"/>"
+                           onclick="addXMLInputProperty()"/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
 
-        </td>
-    </tr>
-    <tr name="inputTupleMapping" style="display: none">
-        <td colspan="2" class="middle-header">
-            <fmt:message key="property"/>
-        </td>
-    </tr>
-    <tr name="inputTupleMapping" style="display: none">
-        <td colspan="2">
-            <div id="noInputTuplePropertyDiv" class="noDataDiv-plain">
-                No Properties Defined
-            </div>
+    </td>
+</tr>
+<tr name="inputTupleMapping" style="display: none">
+    <td colspan="2" class="middle-header">
+        <fmt:message key="property"/>
+    </td>
+</tr>
+<tr name="inputTupleMapping" style="display: none">
+    <td colspan="2">
+        <div id="noInputTuplePropertyDiv" class="noDataDiv-plain">
+            No Properties Defined
+        </div>
 
-            <table class="styledLeft" id="inputTuplePropertyTable" style="width:100%;display:none">
-                <thead>
-                <th class="leftCol-med"><fmt:message key="property.name"/></th>
-                <th class="leftCol-med"><fmt:message key="property.data.type"/></th>
-                <th class="leftCol-med"><fmt:message key="property.type"/></th>
-                <th><fmt:message key="actions"/></th>
-                </thead>
-            </table>
+        <table class="styledLeft" id="inputTuplePropertyTable" style="width:100%;display:none">
+            <thead>
+            <th class="leftCol-med"><fmt:message key="property.name"/></th>
+            <th class="leftCol-med"><fmt:message key="property.input.name"/></th>
+            <th class="leftCol-med"><fmt:message key="property.input.data.type"/></th>
+            <th class="leftCol-med"><fmt:message key="property.type"/></th>
+            <th><fmt:message key="actions"/></th>
+            </thead>
+        </table>
 
-            <table id="addTupleInputPropertyTable" class="normal">
-                <tbody>
-                <tr>
-                    <td class="leftCol-small"><fmt:message key="property.name"/>:</td>
-                    <td><input type="text" id="inputTuplePropName"/></td>
-                    <td><fmt:message key="property.data.type"/>:
-                        <select id="inputTuplePropertyDataTypes">
-                            <option value="metaData"><fmt:message
-                                    key="property.data.type.meta"/></option>
-                            <option value="correlationData"><fmt:message
-                                    key="property.data.type.correlation"/></option>
-                            <option value="payloadData"><fmt:message
-                                    key="property.data.type.payload"/></option>
-                        </select>
-                    </td>
-                    <td><fmt:message key="property.type"/>:
-                        <select id="inputTuplePropertyTypes">
-                            <option value="java.lang.Integer">Integer</option>
-                            <option value="java.lang.Long">Long</option>
-                            <option value="java.lang.Double">Double</option>
-                            <option value="java.lang.String">String</option>
-                        </select>
-                    </td>
-                    <td><input type="button" class="button" value="<fmt:message key="add"/>"
-                               onclick="addTupleInputProperty()"/>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+        <table id="addTupleInputPropertyTable" class="normal">
+            <tbody>
+            <tr>
+                <td class="col-small"><fmt:message key="property.name"/>:</td>
+                <td><input type="text" id="inputTuplePropName"/></td>
+                <td class="col-small"><fmt:message key="property.input.name"/>:</td>
+                <td><input type="text" id="inputTuplePropInputName"/></td>
+                <td><fmt:message key="property.input.data.type"/>:</td>
+                <td>
+                    <select id="inputTuplePropertyDataTypes">
+                        <option value="metaData"><fmt:message
+                                key="property.data.type.meta"/></option>
+                        <option value="correlationData"><fmt:message
+                                key="property.data.type.correlation"/></option>
+                        <option value="payloadData"><fmt:message
+                                key="property.data.type.payload"/></option>
+                    </select>
+                </td>
+                <td><fmt:message key="property.type"/>:
+                    <select id="inputTuplePropertyTypes">
+                        <option value="java.lang.Integer">Integer</option>
+                        <option value="java.lang.Long">Long</option>
+                        <option value="java.lang.Double">Double</option>
+                        <option value="java.lang.String">String</option>
+                    </select>
+                </td>
+                <td><input type="button" class="button" value="<fmt:message key="add"/>"
+                           onclick="addTupleInputProperty()"/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
 
-        </td>
-    </tr>
-    <tr name="inputMapMapping" style="display: none">
-        <td colspan="2" class="middle-header">
-            <fmt:message key="property"/>
-        </td>
-    </tr>
-    <tr name="inputMapMapping" style="display: none">
-        <td colspan="2">
-            <div id="noInputMapPropertyDiv" class="noDataDiv-plain">
-                No Properties Defined
-            </div>
+    </td>
+</tr>
+<tr name="inputMapMapping" style="display: none">
+    <td colspan="2" class="middle-header">
+        <fmt:message key="property"/>
+    </td>
+</tr>
+<tr name="inputMapMapping" style="display: none">
+    <td colspan="2">
+        <div id="noInputMapPropertyDiv" class="noDataDiv-plain">
+            No Properties Defined
+        </div>
 
-            <table class="styledLeft" id="inputMapPropertyTable" style="width:100%;display:none">
-                <thead>
-                <th class="leftCol-med"><fmt:message key="property.name"/></th>
-                <th class="leftCol-med"><fmt:message key="property.type"/></th>
-                <th><fmt:message key="actions"/></th>
-                </thead>
-            </table>
+        <table class="styledLeft" id="inputMapPropertyTable" style="width:100%;display:none">
+            <thead>
+            <th class="leftCol-med"><fmt:message key="property.name"/></th>
+            <th class="leftCol-med"><fmt:message key="property.input.name"/></th>
+            <th class="leftCol-med"><fmt:message key="property.type"/></th>
+            <th><fmt:message key="actions"/></th>
+            </thead>
+        </table>
 
-            <table id="addMapInputPropertyTable" class="normal">
-                <tbody>
-                <tr>
-                    <td class="leftCol-small"><fmt:message key="property.name"/>:</td>
-                    <td><input type="text" id="inputMapPropName"/></td>
-                    <td><fmt:message key="property.type"/>:
-                        <select id="inputMapPropertyTypes">
-                            <option value="java.lang.Integer">Integer</option>
-                            <option value="java.lang.Long">Long</option>
-                            <option value="java.lang.Double">Double</option>
-                            <option value="java.lang.Float">Float</option>
-                            <option value="java.lang.String">String</option>
-                        </select>
-                    </td>
-                    <td><input type="button" class="button" value="<fmt:message key="add"/>"
-                               onclick="addMapInputProperty()"/>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+        <table id="addMapInputPropertyTable" class="normal">
+            <tbody>
+            <tr>
+                <td class="col-small"><fmt:message key="property.name"/>:</td>
+                <td><input type="text" id="inputMapPropName"/></td>
+                <td class="col-small"><fmt:message key="property.input.name"/>:</td>
+                <td><input type="text" id="inputMapPropInputName"/></td>
+                <td><fmt:message key="property.type"/>:
+                    <select id="inputMapPropertyTypes">
+                        <option value="java.lang.Integer">Integer</option>
+                        <option value="java.lang.Long">Long</option>
+                        <option value="java.lang.Double">Double</option>
+                        <option value="java.lang.Float">Float</option>
+                        <option value="java.lang.String">String</option>
+                    </select>
+                </td>
+                <td><input type="button" class="button" value="<fmt:message key="add"/>"
+                           onclick="addMapInputProperty()"/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
 
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2" class="buttonRow">
-            <input type="button" value="<fmt:message key="add.Input"/>"
-                   onclick="addNewInputToList()" class="button"
-                <%--style="margin-left:10px;"--%>/>
-        </td>
-    </tr>
-    </tbody>
+    </td>
+</tr>
+<tr>
+    <td colspan="2" class="buttonRow">
+        <input type="button" value="<fmt:message key="add.Input"/>"
+               onclick="addNewInputToList()" class="button"
+            <%--style="margin-left:10px;"--%>/>
+    </td>
+</tr>
+</tbody>
 
 </table>
 <div style="clear:both"></div>
@@ -829,8 +852,10 @@
                 <a href="cep_query.jsp?index=<%=queryIndex%>"><%=query.getName()%>
                 </a>
             </td>
-            <td><%=query.getOutput()!=null?query.getOutput().getTopic():""%></td>
-            <td><%=query.getOutput()!=null?query.getOutput().getBrokerName():""%></td>
+            <td><%=query.getOutput() != null ? query.getOutput().getTopic() : ""%>
+            </td>
+            <td><%=query.getOutput() != null ? query.getOutput().getBrokerName() : ""%>
+            </td>
                 <%--<td>--%>
                 <%--&lt;%&ndash; <a class="icon-link" style="background-image:url(../admin/images/delete.gif)"--%>
                 <%--onclick="removeQuery(this)">Delete</a>&ndash;%&gt;--%>
@@ -894,50 +919,7 @@
     <td class="leftCol-small"><fmt:message key="query.name"/><span class="required">*</span></td>
     <td><input type="text" id="queryName"></td>
 </tr>
-
-<%
-    boolean inline = true;
-    boolean registry = false;
-    String inlineDisplay = inline ? "" : "display:none;";
-    String registryDisplay = registry ? "" : "display:none;";
-    String key = "testRegistryKey";
-%>
-<tr>
-    <td><fmt:message key="query.as"/><span class="required">*</span>
-    </td>
-    <td>
-        <%
-            if (inline) {
-        %>
-        <input type="radio" name="expressionType"
-               id="expressioninlinedRd"
-               value="inline"
-               onclick="setExpressionType('inline');"
-               checked="checked"/>
-        <fmt:message key="inlined"/>
-        <input type="radio" name="expressionType"
-               id="expressionRegistryRd"
-               value="registry"
-               onclick="setExpressionType('registry');"/>
-        <fmt:message key="reg.key"/>
-        <% } else { %>
-        <input type="radio" name="expressionType"
-               id="expressioninlinedRd"
-               value="inline"
-               onclick="setExpressionType('inline');"/>
-        <fmt:message key="inlined"/>
-        <input type="radio" name="expressionType"
-               id="expressionRegistryRd"
-               value="registry"
-               checked="checked"
-               onclick="setExpressionType('registry');"/>
-        <fmt:message key="reg.key"/>
-        <%
-            }
-        %>
-    </td>
-</tr>
-<tr id="expressionInlined" style="<%=inlineDisplay%>">
+<tr id="expressionInlined">
     <td style="vertical-align:top !important;"><fmt:message key="query.expression"/><span
             class="required">*</span>
     </td>
@@ -945,19 +927,6 @@
         <textarea id="querySource"
                   style="border:solid 1px rgb(204, 204, 204); width: 99%; height: 275px; margin-top: 5px;"
                   name="querySource" rows="30"></textarea>
-    </td>
-</tr>
-<tr id="expressionRegistry" style="<%=registryDisplay%>">
-    <td class="leftCol-small"><fmt:message key="query.expression.key"/></td>
-    <td>
-        <input class="longInput" type="text" name="expressionKey"
-               id="expressionKey"
-               value="<%=registry?key.trim():""%>"/>
-
-        <a href="#registryBrowserLink"
-           class="registry-picker-icon-link"
-           onclick="showRegistryBrowser('expressionKey','/_system/config')"><fmt:message
-                key="registry.config"/></a>
     </td>
 </tr>
 <tr>
@@ -989,7 +958,7 @@
     <td class="leftCol-small"><fmt:message key="output.mapping"/></td>
     <td><select name="outputBrokerName" id="outputMapping" onchange="setOutputMapping()">
         <option value="xml"><fmt:message key="xml.mapping"/></option>
-        <option value="element"><fmt:message key="element.mapping"/></option>
+        <option value="text"><fmt:message key="text.mapping"/></option>
         <option value="tuple"><fmt:message key="tuple.mapping"/></option>
         <option value="map"><fmt:message key="map.mapping"/></option>
     </select>
@@ -1012,56 +981,21 @@
         </p>
     </td>
 </tr>
-<tr name="outputElementMapping" style="display: none">
+<tr name="outputTextMapping" style="display: none">
     <td colspan="2" class="middle-header">
-        <fmt:message key="element.mapping"/>
+        <fmt:message key="text.mapping"/>
     </td>
 </tr>
-<tr name="outputElementMapping" style="display: none">
+<tr name="outputTextMapping" style="display: none">
     <td colspan="2">
-        <table>
-            <tbody>
-            <td class="leftCol-small"><fmt:message key="element.mapping.xmlDocumentElement"/></td>
-            <td><input type="text" id="documentElement"></td>
-            <td><fmt:message key="element.mapping.namespace"/></td>
-            <td><input type="text" id="namespace"></td>
-            </tbody>
-        </table>
-        <h4><fmt:message key="property"/></h4>
-        <table class="styledLeft" id="outputElementPropertyTable" style="display:none">
-            <thead>
-            <th class="leftCol-med"><fmt:message key="property.name"/></th>
-            <th class="leftCol-med"><fmt:message key="xml.field.name"/></th>
-            <th class="leftCol-med"><fmt:message key="xml.field.type"/></th>
-            <th><fmt:message key="actions"/></th>
-            </thead>
-        </table>
-        <div class="noDataDiv-plain" id="noOutputElementPropertyDiv">
-            No XPath prefixes Defined
-        </div>
-        <table id="addPropertyTable" class="normal">
-            <tbody>
-            <tr>
-                <td class="leftCol-small"><fmt:message key="property.name"/> :</td>
-                <td>
-                    <input type="text"
-                           id="xmlPropName"/>
-                </td>
-                <td><fmt:message key="property.xmlFName"/> : <input type="text"
-                                                                    id="xmlFieldName"/>
-                </td>
-                <td><fmt:message key="property.xmlFType"/> :
-                    <select id="outputPropertyTypes">
-                        <option value="attribute">Attribute</option>
-                        <option value="element">Element</option>
-                    </select>
-                </td>
-                <td><input type="button" class="button" value="<fmt:message key="add"/>"
-                           onclick="addOutputElementProperty()"/>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+        <p><fmt:message key="text.mapping.text"/></P>
+
+        <p>
+            <textarea id="textSourceText"
+                      style="border:solid 1px rgb(204, 204, 204); width: 99%;
+                                     height: 150px; margin-top: 5px;"
+                      name="textSource" rows="30"></textarea>
+        </p>
     </td>
 </tr>
 <tr name="outputTupleMapping" style="display: none">
@@ -1076,6 +1010,8 @@
         <table class="styledLeft" id="outputMetaDataTable" style="display:none">
             <thead>
             <th class="leftCol-med"><fmt:message key="property.name"/></th>
+            <th class="leftCol-med"><fmt:message key="property.value.of"/></th>
+            <th class="leftCol-med"><fmt:message key="property.type"/></th>
             <th><fmt:message key="actions"/></th>
             </thead>
         </table>
@@ -1085,9 +1021,23 @@
         <table id="addMetaData" class="normal">
             <tbody>
             <tr>
-                <td class="leftCol-small"><fmt:message key="property.name"/> :</td>
+                <td class="col-small"><fmt:message key="property.name"/> :</td>
                 <td>
                     <input type="text" id="outputMetaDataPropName"/>
+                </td>
+                <td class="col-small"><fmt:message key="property.value.of"/> :</td>
+                <td>
+                    <input type="text" id="outputMetaDataPropValueOf"/>
+                </td>
+                <td><fmt:message key="property.type"/>:
+                    <select id="outputMetaDataPropType">
+                        <option value="java.lang.Integer">Integer</option>
+                        <option value="java.lang.Long">Long</option>
+                        <option value="java.lang.Double">Double</option>
+                        <option value="java.lang.Float">Float</option>
+                        <option value="java.lang.String">String</option>
+                        <option value="java.lang.Boolean">Boolean</option>
+                    </select>
                 </td>
                 <td><input type="button" class="button" value="<fmt:message key="add"/>"
                            onclick="addOutputTupleProperty('Meta')"/>
@@ -1104,6 +1054,8 @@
         <table class="styledLeft" id="outputCorrelationDataTable" style="display:none">
             <thead>
             <th class="leftCol-med"><fmt:message key="property.name"/></th>
+            <th class="leftCol-med"><fmt:message key="property.value.of"/></th>
+            <th class="leftCol-med"><fmt:message key="property.type"/></th>
             <th><fmt:message key="actions"/></th>
             </thead>
         </table>
@@ -1113,9 +1065,23 @@
         <table id="addCorrelationData" class="normal">
             <tbody>
             <tr>
-                <td class="leftCol-small"><fmt:message key="property.name"/> :</td>
+                <td class="col-small"><fmt:message key="property.name"/> :</td>
                 <td>
                     <input type="text" id="outputCorrelationDataPropName"/>
+                </td>
+                <td class="col-small"><fmt:message key="property.value.of"/> :</td>
+                <td>
+                    <input type="text" id="outputCorrelationDataPropValueOf"/>
+                </td>
+                <td><fmt:message key="property.type"/>:
+                    <select id="outputCorrelationDataPropType">
+                        <option value="java.lang.Integer">Integer</option>
+                        <option value="java.lang.Long">Long</option>
+                        <option value="java.lang.Double">Double</option>
+                        <option value="java.lang.Float">Float</option>
+                        <option value="java.lang.String">String</option>
+                        <option value="java.lang.Boolean">Boolean</option>
+                    </select>
                 </td>
                 <td><input type="button" class="button" value="<fmt:message key="add"/>"
                            onclick="addOutputTupleProperty('Correlation')"/>
@@ -1132,6 +1098,8 @@
         <table class="styledLeft" id="outputPayloadDataTable" style="display:none">
             <thead>
             <th class="leftCol-med"><fmt:message key="property.name"/></th>
+            <th class="leftCol-med"><fmt:message key="property.value.of"/></th>
+            <th class="leftCol-med"><fmt:message key="property.type"/></th>
             <th><fmt:message key="actions"/></th>
             </thead>
         </table>
@@ -1141,9 +1109,23 @@
         <table id="addPayloadData" class="normal">
             <tbody>
             <tr>
-                <td class="leftCol-small"><fmt:message key="property.name"/> :</td>
+                <td class="col-small"><fmt:message key="property.name"/> :</td>
                 <td>
                     <input type="text" id="outputPayloadDataPropName"/>
+                </td>
+                <td class="col-small"><fmt:message key="property.value.of"/> :</td>
+                <td>
+                    <input type="text" id="outputPayloadDataPropValueOf"/>
+                </td>
+                <td><fmt:message key="property.type"/>:
+                    <select id="outputPayloadDataPropType">
+                        <option value="java.lang.Integer">Integer</option>
+                        <option value="java.lang.Long">Long</option>
+                        <option value="java.lang.Double">Double</option>
+                        <option value="java.lang.Float">Float</option>
+                        <option value="java.lang.String">String</option>
+                        <option value="java.lang.Boolean">Boolean</option>
+                    </select>
                 </td>
                 <td><input type="button" class="button" value="<fmt:message key="add"/>"
                            onclick="addOutputTupleProperty('Payload')"/>
@@ -1164,6 +1146,7 @@
         <table class="styledLeft" id="outputMapPropertiesTable" style="display:none">
             <thead>
             <th class="leftCol-med"><fmt:message key="property.name"/></th>
+            <th class="leftCol-med"><fmt:message key="property.value.of"/></th>
             <th><fmt:message key="actions"/></th>
             </thead>
         </table>
@@ -1173,9 +1156,13 @@
         <table id="addOutputMapProperties" class="normal">
             <tbody>
             <tr>
-                <td class="leftCol-small"><fmt:message key="property.name"/> :</td>
+                <td class="col-small"><fmt:message key="property.name"/> :</td>
                 <td>
                     <input type="text" id="outputMapPropName"/>
+                </td>
+                <td class="col-small"><fmt:message key="property.value.of"/> :</td>
+                <td>
+                    <input type="text" id="outputMapPropValueOf"/>
                 </td>
                 <td><input type="button" class="button" value="<fmt:message key="add"/>"
                            onclick="addOutputMapProperty()"/>

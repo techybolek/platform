@@ -19,13 +19,12 @@ package org.wso2.carbon.registry.servlet.internal;
 import org.apache.abdera.protocol.server.servlet.AbderaServlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.wso2.carbon.registry.app.ResourceServlet;
 import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.uddi.servlet.JUDDIRegistryServlet;
+import org.wso2.carbon.registry.core.servlet.UDDIServlet;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.util.Dictionary;
@@ -38,20 +37,23 @@ import java.util.Hashtable;
  * policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
  * @scr.reference name="http.service" interface="org.osgi.service.http.HttpService"
  * cardinality="1..1" policy="dynamic"  bind="setHttpService" unbind="unsetHttpService"
+ * @scr.reference name="registry.uddi" interface="org.wso2.carbon.registry.core.servlet.UDDIServlet"
+ * cardinality="0..1" policy="dynamic"  bind="setJUDDIRegistryServlet"
+ * unbind="unsetJUDDIRegistryServlet"
  */
 public class RegistryAtomServiceComponent {
 
     private static Log log = LogFactory.getLog(RegistryAtomServiceComponent.class);
 
-    private static final String ENABLE = "enable";
-    private static final String UDDI_SYSTEM_PROPERTY = "uddi";
-
     private RegistryService registryService = null;
     private HttpService httpService = null;
+    private UDDIServlet juddiRegistryServlet = null;
+    private boolean juddiRegistryServletRegistered = false;
+    private HttpContext defaultHttpContext = null;
 
     protected void activate(ComponentContext context) {
         try {
-            registerServlet(context.getBundleContext());
+            registerServlet();
             log.debug("******* Registry APP bundle is activated ******* ");
         } catch (Throwable e) {
             log.error("******* Failed to activate Registry APP bundle ******* ", e);
@@ -62,21 +64,20 @@ public class RegistryAtomServiceComponent {
         httpService.unregister("/registry/atom");
         httpService.unregister("/registry/tags");
         httpService.unregister("/registry/resource");
-        if (ENABLE.equals(System.getProperty(UDDI_SYSTEM_PROPERTY))) {
+        if (juddiRegistryServletRegistered) {
             httpService.unregister("/juddiv3");
+            juddiRegistryServletRegistered = false;
         }
         log.debug("******* Registry APP bundle is deactivated ******* ");
     }
 
-    public void registerServlet(BundleContext bundleContext) throws Exception {
+    private void registerServlet() throws Exception {
 
         if (registryService == null) {
             String msg = "Unable to Register Servlet. Registry Service Not Found.";
             log.error(msg);
             throw new Exception(msg);
         }
-
-        HttpContext defaultHttpContext = httpService.createDefaultHttpContext();
 
         if (!CarbonUtils.isRemoteRegistry()) {
 
@@ -85,10 +86,19 @@ public class RegistryAtomServiceComponent {
             httpService.registerServlet("/registry/atom", new AbderaServlet(), servletParam, defaultHttpContext);
             httpService.registerServlet("/registry/tags", new AbderaServlet(), servletParam, defaultHttpContext);
         }
-        if (ENABLE.equals(System.getProperty(UDDI_SYSTEM_PROPERTY))) {
-            httpService.registerServlet("/juddiv3", new JUDDIRegistryServlet(), null, defaultHttpContext);
-        }
+        registerJUDDIServlet();
         httpService.registerServlet("/registry/resource", new ResourceServlet(), null, defaultHttpContext);
+    }
+
+    private void registerJUDDIServlet() {
+        if (juddiRegistryServlet != null && httpService != null) {
+            try {
+                httpService.registerServlet("/juddiv3", juddiRegistryServlet, null, defaultHttpContext);
+            } catch (Exception e) {
+                log.error("Unable to register jUDDI servlet", e);
+            }
+            juddiRegistryServletRegistered = true;
+        }
     }
 
     protected void setRegistryService(RegistryService registryService) {
@@ -101,9 +111,19 @@ public class RegistryAtomServiceComponent {
 
     protected void setHttpService(HttpService httpService) {
         this.httpService = httpService;
+        this.defaultHttpContext = httpService.createDefaultHttpContext();
     }
 
     protected void unsetHttpService(HttpService httpService) {
         this.httpService = null;
+    }
+
+    protected void setJUDDIRegistryServlet(UDDIServlet juddiRegistryServlet) {
+        this.juddiRegistryServlet = juddiRegistryServlet;
+        registerJUDDIServlet();
+    }
+
+    protected void unsetJUDDIRegistryServlet(UDDIServlet juddiRegistryServlet) {
+        this.juddiRegistryServlet = null;
     }
 }

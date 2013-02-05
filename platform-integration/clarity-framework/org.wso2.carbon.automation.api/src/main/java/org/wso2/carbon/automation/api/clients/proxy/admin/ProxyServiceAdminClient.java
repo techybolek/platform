@@ -432,7 +432,7 @@ public class ProxyServiceAdminClient {
             }
 
             OMElement enableSec = elem.getFirstChildWithName(new QName(XMLConfigConstants.SYNAPSE_NAMESPACE,
-                                                                       "enableSec"));
+                    "enableSec"));
             if (enableSec != null) {
                 pd.setEnableSecurity(true);
             }
@@ -442,7 +442,29 @@ public class ProxyServiceAdminClient {
             Assert.fail(bundle.getString("unable.to.build.the.design.view.from.the.given.xml"));
         }
         return pd;
+
     }
 
+    /**
+     *
+     * @param data - Proxy Configuration element
+     * @throws ProxyServiceAdminProxyAdminException
+     * @throws RemoteException
+     */
+    public void updateProxy(OMElement data) throws ProxyServiceAdminProxyAdminException, RemoteException {
+        ProxyData proxyData = getProxyData(data.toString());
+        proxyServiceAdminStub.modifyProxy(proxyData);
+        log.info("Proxy Updated");
+    }
 
+    /**
+     *
+     * @param proxyData
+     * @throws ProxyServiceAdminProxyAdminException
+     * @throws RemoteException
+     */
+    public void updateProxy(ProxyData proxyData) throws ProxyServiceAdminProxyAdminException, RemoteException {
+        proxyServiceAdminStub.modifyProxy(proxyData);
+        log.info("Proxy Updated");
+    }
 }

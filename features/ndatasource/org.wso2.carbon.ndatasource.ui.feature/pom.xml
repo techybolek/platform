@@ -1,15 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   
-  <parent>
+ 	 <parent>
 		<artifactId>ndatasource-feature</artifactId>
 		<groupId>org.wso2.carbon</groupId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>4.0.0</version>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
   
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.wso2.carbon</groupId>
   <artifactId>org.wso2.carbon.ndatasource.ui.feature</artifactId>
-  <version>4.0.0-SNAPSHOT</version>
+  <version>4.0.5</version>
   <packaging>pom</packaging>
   <name>WSO2 Carbon - New Datasource Management UI Feature</name>
   <description>This feature contains the bundles required for Front-end Datasource Management functionality</description>
@@ -18,6 +19,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ndatasource.ui</artifactId>
+	    <version>${project.version}</version>
         </dependency>
          <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -41,7 +43,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.ndatasource.ui</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:console</propertyDef>
@@ -53,7 +55,7 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.ndatasource.stub</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.ui:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.ui:4.0.5</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

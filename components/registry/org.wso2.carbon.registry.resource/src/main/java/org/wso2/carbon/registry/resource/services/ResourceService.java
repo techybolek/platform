@@ -29,10 +29,7 @@ import org.wso2.carbon.registry.resource.beans.*;
 import org.wso2.carbon.registry.resource.services.utils.*;
 
 import javax.activation.DataHandler;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.OutputStream;
+import java.io.*;
 
 public class ResourceService extends RegistryAbstractAdmin implements IResourceService<MetadataBean, CollectionContentBean, ResourceData, ContentBean, PermissionBean, VersionsBean, ResourceTreeEntryBean, ContentDownloadBean> {
 
@@ -135,14 +132,15 @@ public class ResourceService extends RegistryAbstractAdmin implements IResourceS
             String mediaType,
             String description,
             String fetchURL,
-            String symlinkLocation) throws Exception {
+            String symlinkLocation,
+            String[][] properties) throws Exception {
         UserRegistry registry = (UserRegistry) getRootRegistry(CommonUtil.getRegistryService());
         if (RegistryUtils.isRegistryReadOnly(registry.getRegistryContext())) {
             return false;
         }
         ImportResourceUtil.
                 importResource(parentPath, resourceName, mediaType, description, fetchURL,
-                        symlinkLocation, registry);
+                        symlinkLocation, registry, properties);
         return true;
     }
 
@@ -235,13 +233,14 @@ public class ResourceService extends RegistryAbstractAdmin implements IResourceS
     }
 
     public boolean addResource(String path, String mediaType, String description, DataHandler content,
-                            String symlinkLocation)
+                            String symlinkLocation, String[][] properties)
             throws Exception {
         UserRegistry registry = (UserRegistry) getRootRegistry(CommonUtil.getRegistryService());
         if (RegistryUtils.isRegistryReadOnly(registry.getRegistryContext())) {
             return false;
         }
-        AddResourceUtil.addResource(path, mediaType, description, content, symlinkLocation, registry);
+        AddResourceUtil.addResource(path, mediaType, description, content, symlinkLocation,
+                registry, properties);
         return true;
     }
 
@@ -392,4 +391,15 @@ public class ResourceService extends RegistryAbstractAdmin implements IResourceS
         DeleteVersionUtil.process(path, snapshotID, registry);
         return true;
     }
+
+    public ContentDownloadBean getZipWithDependencies(String path) throws Exception {
+        UserRegistry registry = (UserRegistry) getRootRegistry();
+        return ContentUtil.getContentWithDependencies(path,registry);
+    }
+
+    public boolean hasAssociations(String path,String type) throws Exception {
+        UserRegistry registry = (UserRegistry) getRootRegistry();
+        return ContentUtil.hasAssociations(path,type,registry);
+    }
+
 }

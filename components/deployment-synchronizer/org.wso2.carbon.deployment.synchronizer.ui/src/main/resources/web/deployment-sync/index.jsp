@@ -162,6 +162,7 @@
         DeploymentSyncAdminClient client = null;
         
         try {
+        	boolean valid = true;
             String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
             ConfigurationContext configContext =
                     (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
@@ -170,7 +171,7 @@
                     configContext, backendServerURL, cookie, request.getLocale());
 
             boolean submitted = Boolean.parseBoolean(request.getParameter("submitted"));
-            boolean valid = true;
+            
 
             if (submitted) {
                 String action = request.getParameter("action");
@@ -208,7 +209,7 @@
                     }
                     
                     if(valid){
-                    	client.enableSynchronizer(newConfig);
+                    	client.enableSynchronizer(newConfig);	                    		
                     }
                     else{
                     	synchronizerConfiguration = newConfig;
@@ -233,7 +234,7 @@
                     			valid = false;
                     			%>
                                 <script type="text/javascript">
-                                	CARBON.showInfoDialog("Please enter value for " + "<fmt:message key="<%=parameters[i].getName()%>"/>");
+                                CARBON.showInfoDialog("Please enter value for " + "<fmt:message key="<%=parameters[i].getName()%>"/>");
             			        </script>
                                 <%
                                 break;
@@ -277,11 +278,19 @@
             disableFields = synchronizerConfiguration.getServerBasedConfiguration();
             
         } catch (Exception e) {
-            CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request, e);
+        	session.setAttribute("depSyncErrorMessage", e.getMessage());
+            //CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request, e);
     %>
-        <script type="text/javascript">
-               location.href = "../admin/error.jsp";
-        </script>
+        	<script type="text/javascript">
+	        	jQuery.ajax({
+	                type: "GET",
+	                url: "displayerror-ajaxprocessor.jsp",
+	                data: {},
+	                success: function(data) {
+	                	CARBON.showErrorDialog(data);
+	                }
+	            });
+            </script>
     <%
             synchronizerConfiguration = new DeploymentSynchronizerConfiguration();
         }

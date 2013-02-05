@@ -32,6 +32,7 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Collections" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 
 
 <%
@@ -133,10 +134,35 @@
             return 0;
         }
     }
+
+	class ApproveItem extends CheckListItem {
+		private int currentVote;
+		private int requiredVote;
+		
+		public int getCurrentVote() {
+			return currentVote;
+		}
+		
+		public void setCurrentVote(int currentVote) {
+			this.currentVote = currentVote;
+		}
+		
+		public int getRequiredVote() {
+			return requiredVote;
+		}
+		
+		public void setRequiredVote(int requiredVote) {
+			this.requiredVote = requiredVote;
+		}			
+	}
+
     String path = RegistryUtil.getPath(request);
 
     // lifecycle portlet is not displayed for root or items under system. 
-    if (path.equals(RegistryConstants.ROOT_PATH) || path.startsWith("/system"))
+    if (path.equals(RegistryConstants.ROOT_PATH) || path.equals(RegistryConstants.SYSTEM_COLLECTION_BASE_PATH)
+            || path.equals(RegistryConstants.CONFIG_REGISTRY_BASE_PATH)
+            || path.equals(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+            || path.equals(RegistryConstants.LOCAL_REPOSITORY_BASE_PATH))
         return;
 
     LifecycleBean bean;
@@ -157,6 +183,11 @@
         roleNames =  bean.getRolesOfUser();
         if (lifecycleProps == null) {
             lifecycleProps = new Property[0];
+        }
+        
+        Property[] lifecycleVotes = bean.getLifecycleApproval();
+        if (lifecycleVotes == null) {
+        	lifecycleVotes = new Property[0];
         }
 
 //    List<String> lifecycleProps = propertiesBean.getLifecycleProperties();
@@ -401,7 +432,7 @@
                     if (checkListItems.size() > 0) {
                 %>
                 <tr>
-                    <th><fmt:message key="checklist.header"/>:</th>
+                    <th><fmt:message key="checklist.header"/> : </th>
                     <td style="border:0"></td>
                 </tr>
                 <% } %>
@@ -456,6 +487,130 @@
                 </tbody>
             </table>
         </div>
+        
+        <% 
+        	ArrayList<ApproveItem> approveListItems = new ArrayList<ApproveItem>();
+        	if (lifecycleVotes != null && lifecycleVotes.length > 0) { %>
+
+		<%
+		
+		List<String> approvePermissionList = new ArrayList();
+		
+		for (Property property : lifecycleVotes) {
+		    String prefix = "registry.custom_lifecycle.votes.";
+		    String permissionSuffix = ".vote.permission";
+		    String propName = property.getKey();
+		    String[] propValues = property.getValues();
+		
+		    if(propName.startsWith(prefix) && propName.endsWith(permissionSuffix)){
+		        for (String role : roleNames) {
+		            for (String propValue : propValues) {
+		                String key = propName.replace(prefix,"").replace(permissionSuffix,"");
+		                if(propValue.equals(role)){
+		                	approvePermissionList.add(key);
+		                }else if(propValue.startsWith(prefix) && propValue.endsWith(permissionSuffix)){
+		                	approvePermissionList.add(key);
+		                }
+		            }
+		        }
+		    }
+		}
+
+		for (Property property : lifecycleVotes) {
+		    String prefix = "registry.custom_lifecycle.votes.";
+		    String suffix = ".vote";
+		    ApproveItem approveItem = new ApproveItem();
+		
+		    String propName = property.getKey();
+		    String[] propValues = property.getValues();
+		
+		    approveItem.setVisible("false");
+		
+		    if ((propName.startsWith(prefix) && propName.endsWith(suffix))) {
+		        if (propValues != null && propValues.length > 2) {
+		            for (String param : propValues) {
+		                if ((param.startsWith("status:"))) {
+		                	approveItem.setLifeCycleStatus(param.substring(7));
+		                }
+		                if ((param.startsWith("name:"))) {
+		                	approveItem.setName(param.substring(5));
+		                }
+		                if ((param.startsWith("uservote:"))) {
+		                	approveItem.setValue(param.substring(9));
+		                }
+		                if ((param.startsWith("votes:"))) {
+		                	approveItem.setRequiredVote(Integer.parseInt(param.substring(6)));
+		                }
+		                if ((param.startsWith("current:"))) {
+		                	approveItem.setCurrentVote(Integer.parseInt(param.substring(8)));
+		                }
+		            }
+		        }
+		        String key = propName.replace(prefix,"").replace(suffix,"");
+		        if(approvePermissionList.contains(key)){
+		        	approveItem.setVisible("true");
+		        }
+		    }
+		    if (approveItem.matchLifeCycleStatus(lifeCycleState)) {
+		    	approveListItems.add(approveItem);
+		    }
+		}		
+		%>
+		 <div>
+	            <table cellpadding="0" cellspacing="5" border="0">
+	                <tbody>
+		                <tr>
+		                    <th><fmt:message key="lifecycle.approvals"/> : </th>
+		                </tr>
+		 			</tbody>
+	            </table>
+	        </div>
+		 <div>
+            <table style="margin-bottom: 15px;" class="styledLeft" id="myTable">
+                <tbody>
+				<%
+				int count  = 0;
+				 for (ApproveItem approvelItem : approveListItems) {
+				%>
+					<% if ((count % 2) == 0) { %>
+	                	<tr class="tableEvenRow">
+	                 <% } else { %>
+	                	<tr class="tableOddRow">
+	                <% } %>
+	                <td>
+	                <%
+	                   if (approvelItem.getValue().equalsIgnoreCase("true")) {
+	                %>
+	                	<input type="checkbox" class="registryWriteOperation" id="vote<%=count%>" value="true" onclick="loadCustomUI('<%=bean.getPathWithVersion()%>', '<%=lifecycleName%>', 'voteClick','<%=bean.getMediaType()%>','','')"  checked="checked"
+	                	<% if ("false".equals(approvelItem.getVisible())) {%> disabled="disabled" <%} %>
+	                	 >
+	                 	<b><%=approvelItem.getName()%>
+	                 <%} else {%>
+	                	<input type="checkbox" class="registryWriteOperation" id="vote<%=count%>" value="true" onclick="loadCustomUI('<%=bean.getPathWithVersion()%>', '<%=lifecycleName%>', 'voteClick','<%=bean.getMediaType()%>','','')"
+	                	<% if ("false".equals(approvelItem.getVisible())) {%> disabled="disabled" <%} %>
+	                	>
+						<b><%=approvelItem.getName()%>   
+	                <%}%> 
+					</b> <% if(approvelItem.getRequiredVote()- approvelItem.getCurrentVote() >= 0) { %>
+							<span id="remainVote" style="padding-left:10px"> <fmt:message key="lifecycle.approvalsoutof"><fmt:param value="<%=approvelItem.getCurrentVote()%>"/><fmt:param value="<%=approvelItem.getRequiredVote()%>"/></fmt:message> </span>
+						 <% } else { %>
+						 	<span id="remainVote" style="padding-left:10px"><fmt:message key="lifecycle.votereched"><fmt:param value="<%=approvelItem.getCurrentVote()%>"/></fmt:message></span>
+						 <% } %>
+					<br>
+					
+				<% 
+					count++;
+				 } 
+				 %>
+				 <input type="hidden" id="approvalCount" value="<%=count%>">
+				</td>
+                </tr>
+ 				</tbody>
+            </table>
+     	</div>
+	
+	<% } %>
+        
     </td>
 </tr>
 <%
@@ -498,7 +653,7 @@
                                     for (String propValue : propValues) {
                                     }
                                     if (propValues != null && propValues.length == 2) {
-                                        if (propValues[0].contains("function()")) {
+                                        if (propValues[0].contains("function()")||propValues[0].contains("function "+propValues[1]+"()")) {
                                             lifecycleScript = propValues[0];
                                             if (!customUILink.equals("")) {
                                                 lifecycleScriptCommand = "'" + propValues[1] + "'";
@@ -522,11 +677,24 @@
 
 
             %>
-            <%=lifecycleScript%>
-            <input class="button registryWriteOperation" type="button" id="<%=action%>"
+            <%=StringEscapeUtils.unescapeXml(lifecycleScript)%>
+            <%
+            boolean actionDisable = false;
+            if (!approveListItems.isEmpty()) {
+            	for (ApproveItem approvelItem : approveListItems) {
+            		if(approvelItem.getName().equals(action) && (approvelItem.getRequiredVote()-approvelItem.getCurrentVote() > 0)){
+            			actionDisable = true;
+            		}
+            	}
+            }
+            
+            %>
+            
+            <input class="button registryWriteOperation" type="button" id="<%=action%>" <%if(actionDisable){ %> disabled="disabled" <%} %>
                    value="<fmt:message key="action.lifecycle"><fmt:param value="<%=action%>"/></fmt:message>"
                    onclick="loadCustomUI('<%=bean.getPathWithVersion()%>', '<%=lifecycle%>', '<%=action%>','<%=bean.getMediaType()%>'
-                           ,'<%=customUILink%>'<% if (!lifecycleScriptCommand.equals("")) {%>, <%=lifecycleScriptCommand%><%}%>)"/>
+                           ,'<%=customUILink%>'<% if (!lifecycleScriptCommand.equals("")) {%>,
+                           <%=lifecycleScriptCommand%><%}%>);reloadLifecycleHistoryView('<%=path%>')"/>
             <input class="button registryNonWriteOperation" type="button" disabled="disabled"
                    value="<fmt:message key="action.lifecycle"><fmt:param value="<%=action%>"/></fmt:message>"/>
             <% }

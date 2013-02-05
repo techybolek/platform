@@ -16,8 +16,6 @@
 
 package org.wso2.carbon.analytics.hive.ui.cron;
 
-import org.wso2.carbon.analytics.hive.ui.cron.CronBuilderConstants;
-
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

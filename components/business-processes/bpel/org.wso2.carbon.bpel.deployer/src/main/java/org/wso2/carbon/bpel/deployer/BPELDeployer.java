@@ -27,6 +27,8 @@ import org.wso2.carbon.bpel.core.BPELConstants;
 import org.wso2.carbon.bpel.core.ode.integration.BPELServer;
 import org.wso2.carbon.bpel.core.ode.integration.store.TenantProcessStore;
 import org.wso2.carbon.bpel.deployer.internal.BPELDeployerServiceComponent;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -45,6 +47,8 @@ public class BPELDeployer extends AbstractDeployer {
     private TenantProcessStore tenantProcessStore;
 
     public void init(ConfigurationContext configurationContext) {
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(CarbonContext.
+                getCurrentContext().getTenantId());
         log.info("Initializing BPEL Deployer for tenant "
                 + MultitenantUtils.getTenantId(configurationContext) + ".");
 

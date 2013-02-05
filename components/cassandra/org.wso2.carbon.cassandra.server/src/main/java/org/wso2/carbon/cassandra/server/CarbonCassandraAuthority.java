@@ -26,7 +26,6 @@ import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.EnumSet;
@@ -184,26 +183,26 @@ public class CarbonCassandraAuthority implements IAuthority {
                                                 String tenantLessUsername,
                                                 String resourcePath) {
         try {
-            if(authorizationManager.isUserAuthorized(tenantLessUsername,resourcePath,ACTION_READ) && authorizationManager.isUserAuthorized(tenantLessUsername,resourcePath,ACTION_WRITE)){
-                  return  Permission.ALL;
-              }
-//            if (userStoreManager.isExistingRole(tenantLessUsername)) {
-//                authorizationManager.authorizeRole(tenantLessUsername, resourcePath, ACTION_WRITE);
-//                authorizationManager.authorizeRole(tenantLessUsername, resourcePath, ACTION_READ);
-//            } else {
-//                // TODO this code should be done by user manager component
-//                org.wso2.carbon.user.api.Permission[] permissions = new org.wso2.carbon.user.api.Permission[2];
-//                permissions[0] = new org.wso2.carbon.user.api.Permission(resourcePath, ACTION_WRITE);
-//                permissions[1] = new org.wso2.carbon.user.api.Permission(resourcePath, ACTION_READ);
-//
-//                userStoreManager.addRole(tenantLessUsername, new String[]{tenantLessUsername}, permissions);
-//            }
+//            if(authorizationManager.isUserAuthorized(tenantLessUsername,resourcePath,ACTION_READ) && authorizationManager.isUserAuthorized(tenantLessUsername,resourcePath,ACTION_WRITE)){
+//                  return  Permission.ALL;
+//              }
+            if (userStoreManager.isExistingRole(tenantLessUsername)) {
+                authorizationManager.authorizeRole(tenantLessUsername, resourcePath, ACTION_WRITE);
+                authorizationManager.authorizeRole(tenantLessUsername, resourcePath, ACTION_READ);
+            } else {
+                // TODO this code should be done by user manager component
+                org.wso2.carbon.user.core.Permission[] permissions = new org.wso2.carbon.user.core.Permission[2];
+                permissions[0] = new org.wso2.carbon.user.core.Permission(resourcePath, ACTION_WRITE);
+                permissions[1] = new org.wso2.carbon.user.core.Permission(resourcePath, ACTION_READ);
+
+                userStoreManager.addRole(tenantLessUsername, new String[]{tenantLessUsername}, permissions);
+            }
         } catch (UserStoreException e) {
             log.error("Authorization failure for user " + tenantLessUsername +
                     " for performing add resource" + resourcePath);
             return Permission.NONE;
         }
-        return Permission.NONE;
+        return Permission.ALL;
     }
 
     public void validateConfiguration() throws ConfigurationException {

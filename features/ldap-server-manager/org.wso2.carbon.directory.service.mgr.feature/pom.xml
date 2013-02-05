@@ -22,7 +22,8 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>ldap-server-manager</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -30,19 +31,20 @@
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Service Principle Management Feature</name>
     <url>http://wso2.org</url>
+	<version>4.0.3</version>
     <description>This feature contains the bundles required to manage service principles.</description>
 
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.directory.service.mgr.server.feature</artifactId>
-            <version>${project.version}</version>
+            <version>4.0.0</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.directory.service.mgr.ui.feature</artifactId>
-            <version>${project.version}</version>
+            <version>4.0.3</version>
             <type>zip</type>
         </dependency>
     </dependencies>
@@ -62,13 +64,13 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.directory.service.mgr</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core:${wso2carbon.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.directory.service.mgr.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.directory.service.mgr.ui.feature</includedFeatureDef>                                
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.directory.service.mgr.server.feature:4.0.0</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.directory.service.mgr.ui.feature:4.0.3</includedFeatureDef>                                
                             </includedFeatures>
                         </configuration>
                     </execution>

@@ -46,4 +46,11 @@ public class MediationDataPublisherConstants {
 
 
     public static final String ENABLE_MEDIATION_STATS = "EnableMediationStats";
+
+    public static final String CLOUD_DEPLOYMENT_PROP = "IsCloudDeployment";
+
+    public static final String SERVER_CONFIG_BAM_URL = "BamServerURL";
+
+    public static final String DEFAULT_BAM_SERVER_URL = "tcp://127.0.0.1:7611";
+
 }

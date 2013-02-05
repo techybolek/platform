@@ -1,44 +1,14 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://wso2.org/carbon/cep/admin/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax219="http://exception.internal.admin.cep.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ax221="http://internal.admin.cep.carbon.wso2.org/xsd" xmlns:ax223="http://exception.core.cep.carbon.wso2.org/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:tns="http://wso2.org/carbon/cep/admin" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://wso2.org/carbon/cep/admin">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://wso2.org/carbon/cep/admin/xsd" xmlns:ax217="http://internal.admin.cep.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax219="http://exception.core.cep.carbon.wso2.org/xsd" xmlns:ax215="http://exception.internal.admin.cep.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:tns="http://wso2.org/carbon/cep/admin" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://wso2.org/carbon/cep/admin">
     <wsdl:documentation>CEPAdminService</wsdl:documentation>
     <wsdl:types>
-        <xs:schema xmlns:ax220="http://exception.internal.admin.cep.carbon.wso2.org/xsd" xmlns:ax222="http://internal.admin.cep.carbon.wso2.org/xsd" xmlns:ax224="http://exception.core.cep.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://wso2.org/carbon/cep/admin/xsd">
+        <xs:schema xmlns:ax216="http://exception.internal.admin.cep.carbon.wso2.org/xsd" xmlns:ax220="http://exception.core.cep.carbon.wso2.org/xsd" xmlns:ax218="http://internal.admin.cep.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://wso2.org/carbon/cep/admin/xsd">
             <xs:import namespace="http://exception.internal.admin.cep.carbon.wso2.org/xsd" />
             <xs:import namespace="http://internal.admin.cep.carbon.wso2.org/xsd" />
             <xs:import namespace="http://exception.core.cep.carbon.wso2.org/xsd" />
             <xs:element name="CEPAdminServiceCEPAdminException">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="CEPAdminException" nillable="true" type="ax220:CEPAdminException" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="removeQuery">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="bucketName" nillable="true" type="xs:string" />
-                        <xs:element minOccurs="0" name="queryName" nillable="true" type="xs:string" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="removeQueryResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:boolean" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="removeInput">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="bucketName" nillable="true" type="xs:string" />
-                        <xs:element minOccurs="0" name="inputTopic" nillable="true" type="xs:string" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="removeInputResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:boolean" />
+                        <xs:element minOccurs="0" name="CEPAdminException" nillable="true" type="ax215:CEPAdminException" />
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -50,34 +20,6 @@
                 </xs:complexType>
             </xs:element>
             <xs:element name="removeBucketResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:boolean" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="removeAllQueries">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="bucketName" nillable="true" type="xs:string" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="removeAllQueriesResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:boolean" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="removeAllInputs">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="bucketName" nillable="true" type="xs:string" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="removeAllInputsResponse">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="return" type="xs:boolean" />
@@ -104,7 +46,7 @@
             <xs:element name="getEngineProvidersInfoResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax221:CEPEngineProviderInfoDTO" />
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax217:CEPEngineProviderInfoDTO" />
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -118,7 +60,7 @@
             <xs:element name="getBucketResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax221:BucketDTO" />
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax217:BucketDTO" />
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -134,70 +76,10 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="getAllQueryCount">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="bucketName" nillable="true" type="xs:string" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getAllQueryCountResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:int" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getAllQueries">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="bucketName" nillable="true" type="xs:string" />
-                        <xs:element minOccurs="0" name="startingIndex" type="xs:int" />
-                        <xs:element minOccurs="0" name="maxQueryCount" type="xs:int" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getAllQueriesResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax221:QueryDTO" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getAllInputs">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="bucketName" nillable="true" type="xs:string" />
-                        <xs:element minOccurs="0" name="startingIndex" type="xs:int" />
-                        <xs:element minOccurs="0" name="maxQueryCount" type="xs:int" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getAllInputsResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax221:InputDTO" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getAllInputCount">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="bucketName" nillable="true" type="xs:string" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getAllInputCountResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:int" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
             <xs:element name="CEPAdminServiceCEPConfigurationException">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="CEPConfigurationException" nillable="true" type="ax223:CEPConfigurationException" />
+                        <xs:element minOccurs="0" name="CEPConfigurationException" nillable="true" type="ax220:CEPConfigurationException" />
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -206,13 +88,14 @@
                     <xs:sequence>
                         <xs:element minOccurs="0" name="startingIndex" type="xs:int" />
                         <xs:element minOccurs="0" name="maxBucketCount" type="xs:int" />
+                        <xs:element minOccurs="0" name="searchString" nillable="true" type="xs:string" />
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="getAllBucketNamesResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax221:BucketBasicInfoDTO" />
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax217:BucketBasicInfoDTO" />
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -228,25 +111,10 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="editQuery">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="bucketName" nillable="true" type="xs:string" />
-                        <xs:element minOccurs="0" name="queryDTO" nillable="true" type="ax221:QueryDTO" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="editQueryResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:boolean" />
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
             <xs:element name="editBucket">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="bucketDTO" nillable="true" type="ax221:BucketDTO" />
+                        <xs:element minOccurs="0" name="bucketDTO" nillable="true" type="ax217:BucketDTO" />
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -260,7 +128,7 @@
             <xs:element name="addBucket">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="bucketDTO" nillable="true" type="ax221:BucketDTO" />
+                        <xs:element minOccurs="0" name="bucketDTO" nillable="true" type="ax217:BucketDTO" />
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -283,10 +151,10 @@
                 <xs:sequence>
                     <xs:element minOccurs="0" name="description" nillable="true" type="xs:string" />
                     <xs:element minOccurs="0" name="engineProvider" nillable="true" type="xs:string" />
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="engineProviderConfigProperty" nillable="true" type="ax221:CEPEngineProviderConfigPropertyDTO" />
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="inputs" nillable="true" type="ax221:InputDTO" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="engineProviderConfigProperty" nillable="true" type="ax217:CEPEngineProviderConfigPropertyDTO" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="inputs" nillable="true" type="ax217:InputDTO" />
                     <xs:element minOccurs="0" name="name" nillable="true" type="xs:string" />
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="queries" nillable="true" type="ax221:QueryDTO" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="queries" nillable="true" type="ax217:QueryDTO" />
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="CEPEngineProviderConfigPropertyDTO">
@@ -298,56 +166,53 @@
             <xs:complexType name="InputDTO">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="brokerName" nillable="true" type="xs:string" />
-                    <xs:element minOccurs="0" name="inputMapMappingDTO" nillable="true" type="ax221:InputMapMappingDTO" />
-                    <xs:element minOccurs="0" name="inputTupleMappingDTO" nillable="true" type="ax221:InputTupleMappingDTO" />
-                    <xs:element minOccurs="0" name="inputXMLMappingDTO" nillable="true" type="ax221:InputXMLMappingDTO" />
+                    <xs:element minOccurs="0" name="inputMapMappingDTO" nillable="true" type="ax217:InputMapMappingDTO" />
+                    <xs:element minOccurs="0" name="inputTupleMappingDTO" nillable="true" type="ax217:InputTupleMappingDTO" />
+                    <xs:element minOccurs="0" name="inputXMLMappingDTO" nillable="true" type="ax217:InputXMLMappingDTO" />
                     <xs:element minOccurs="0" name="topic" nillable="true" type="xs:string" />
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="InputMapMappingDTO">
                 <xs:sequence>
-                    <xs:element minOccurs="0" name="mappingClass" nillable="true" type="xs:string" />
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="ax221:MapPropertyDTO" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="ax217:InputMapPropertyDTO" />
+                    <xs:element minOccurs="0" name="queryEventType" nillable="true" type="xs:string" />
                     <xs:element minOccurs="0" name="stream" nillable="true" type="xs:string" />
                 </xs:sequence>
             </xs:complexType>
-            <xs:complexType name="MapPropertyDTO">
+            <xs:complexType name="InputMapPropertyDTO">
                 <xs:sequence>
-                    <xs:element minOccurs="0" name="inputProperty" type="xs:boolean" />
+                    <xs:element minOccurs="0" name="inputName" nillable="true" type="xs:string" />
                     <xs:element minOccurs="0" name="name" nillable="true" type="xs:string" />
                     <xs:element minOccurs="0" name="type" nillable="true" type="xs:string" />
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="InputTupleMappingDTO">
                 <xs:sequence>
-                    <xs:element minOccurs="0" name="mappingClass" nillable="true" type="xs:string" />
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="ax221:TuplePropertyDTO" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="ax217:InputTuplePropertyDTO" />
+                    <xs:element minOccurs="0" name="queryEventType" nillable="true" type="xs:string" />
                     <xs:element minOccurs="0" name="stream" nillable="true" type="xs:string" />
                 </xs:sequence>
             </xs:complexType>
-            <xs:complexType name="TuplePropertyDTO">
+            <xs:complexType name="InputTuplePropertyDTO">
                 <xs:sequence>
-                    <xs:element minOccurs="0" name="dataType" nillable="true" type="xs:string" />
-                    <xs:element minOccurs="0" name="inputProperty" type="xs:boolean" />
+                    <xs:element minOccurs="0" name="inputDataType" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="0" name="inputName" nillable="true" type="xs:string" />
                     <xs:element minOccurs="0" name="name" nillable="true" type="xs:string" />
                     <xs:element minOccurs="0" name="type" nillable="true" type="xs:string" />
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="InputXMLMappingDTO">
                 <xs:sequence>
-                    <xs:element minOccurs="0" name="mappingClass" nillable="true" type="xs:string" />
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="ax221:XMLPropertyDTO" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="ax217:InputXMLPropertyDTO" />
+                    <xs:element minOccurs="0" name="queryEventType" nillable="true" type="xs:string" />
                     <xs:element minOccurs="0" name="stream" nillable="true" type="xs:string" />
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="xpathDefinition" nillable="true" type="ax221:XpathDefinitionDTO" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="xpathDefinition" nillable="true" type="ax217:XpathDefinitionDTO" />
                 </xs:sequence>
             </xs:complexType>
-            <xs:complexType name="XMLPropertyDTO">
+            <xs:complexType name="InputXMLPropertyDTO">
                 <xs:sequence>
-                    <xs:element minOccurs="0" name="inputProperty" type="xs:boolean" />
                     <xs:element minOccurs="0" name="name" nillable="true" type="xs:string" />
                     <xs:element minOccurs="0" name="type" nillable="true" type="xs:string" />
-                    <xs:element minOccurs="0" name="xmlFieldName" nillable="true" type="xs:string" />
-                    <xs:element minOccurs="0" name="xmlFieldType" nillable="true" type="xs:string" />
                     <xs:element minOccurs="0" name="xpath" nillable="true" type="xs:string" />
                 </xs:sequence>
             </xs:complexType>
@@ -359,9 +224,9 @@
             </xs:complexType>
             <xs:complexType name="QueryDTO">
                 <xs:sequence>
-                    <xs:element minOccurs="0" name="expression" nillable="true" type="ax221:ExpressionDTO" />
+                    <xs:element minOccurs="0" name="expression" nillable="true" type="ax217:ExpressionDTO" />
                     <xs:element minOccurs="0" name="name" nillable="true" type="xs:string" />
-                    <xs:element minOccurs="0" name="output" nillable="true" type="ax221:OutputDTO" />
+                    <xs:element minOccurs="0" name="output" nillable="true" type="ax217:OutputDTO" />
                     <xs:element minOccurs="0" name="queryIndex" type="xs:int" />
                 </xs:sequence>
             </xs:complexType>
@@ -374,31 +239,41 @@
             <xs:complexType name="OutputDTO">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="brokerName" nillable="true" type="xs:string" />
-                    <xs:element minOccurs="0" name="outputElementMapping" nillable="true" type="ax221:OutputElementMappingDTO" />
-                    <xs:element minOccurs="0" name="outputMapMapping" nillable="true" type="ax221:OutputMapMappingDTO" />
-                    <xs:element minOccurs="0" name="outputTupleMapping" nillable="true" type="ax221:OutputTupleMappingDTO" />
-                    <xs:element minOccurs="0" name="outputXmlMapping" nillable="true" type="ax221:OutputXMLMappingDTO" />
+                    <xs:element minOccurs="0" name="outputMapMapping" nillable="true" type="ax217:OutputMapMappingDTO" />
+                    <xs:element minOccurs="0" name="outputTextMapping" nillable="true" type="ax217:OutputTextMappingDTO" />
+                    <xs:element minOccurs="0" name="outputTupleMapping" nillable="true" type="ax217:OutputTupleMappingDTO" />
+                    <xs:element minOccurs="0" name="outputXmlMapping" nillable="true" type="ax217:OutputXMLMappingDTO" />
                     <xs:element minOccurs="0" name="topic" nillable="true" type="xs:string" />
-                </xs:sequence>
-            </xs:complexType>
-            <xs:complexType name="OutputElementMappingDTO">
-                <xs:sequence>
-                    <xs:element minOccurs="0" name="documentElement" nillable="true" type="xs:string" />
-                    <xs:element minOccurs="0" name="namespace" nillable="true" type="xs:string" />
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="ax221:XMLPropertyDTO" />
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="OutputMapMappingDTO">
                 <xs:sequence>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="xs:string" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="mapProperties" nillable="true" type="ax217:OutputMapPropertyDTO" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="OutputMapPropertyDTO">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="name" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="0" name="valueOf" nillable="true" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="OutputTextMappingDTO">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="mappingText" nillable="true" type="xs:string" />
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="OutputTupleMappingDTO">
                 <xs:sequence>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="correlationDataProperties" nillable="true" type="xs:string" />
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="metaDataProperties" nillable="true" type="xs:string" />
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="payloadDataProperties" nillable="true" type="xs:string" />
-                    <xs:element minOccurs="0" name="streamId" nillable="true" type="xs:string" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="correlationDataProperties" nillable="true" type="ax217:OutputTuplePropertyDTO" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="metaDataProperties" nillable="true" type="ax217:OutputTuplePropertyDTO" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="payloadDataProperties" nillable="true" type="ax217:OutputTuplePropertyDTO" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="OutputTuplePropertyDTO">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="name" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="0" name="type" nillable="true" type="xs:string" />
+                    <xs:element minOccurs="0" name="valueOf" nillable="true" type="xs:string" />
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="OutputXMLMappingDTO">
@@ -444,41 +319,11 @@
     <wsdl:message name="CEPAdminServiceCEPAdminException">
         <wsdl:part name="parameters" element="ns:CEPAdminServiceCEPAdminException" />
     </wsdl:message>
-    <wsdl:message name="removeAllQueriesRequest">
-        <wsdl:part name="parameters" element="ns:removeAllQueries" />
-    </wsdl:message>
-    <wsdl:message name="removeAllQueriesResponse">
-        <wsdl:part name="parameters" element="ns:removeAllQueriesResponse" />
-    </wsdl:message>
-    <wsdl:message name="getAllQueryCountRequest">
-        <wsdl:part name="parameters" element="ns:getAllQueryCount" />
-    </wsdl:message>
-    <wsdl:message name="getAllQueryCountResponse">
-        <wsdl:part name="parameters" element="ns:getAllQueryCountResponse" />
-    </wsdl:message>
     <wsdl:message name="removeAllBucketsRequest">
         <wsdl:part name="parameters" element="ns:removeAllBuckets" />
     </wsdl:message>
     <wsdl:message name="removeAllBucketsResponse">
         <wsdl:part name="parameters" element="ns:removeAllBucketsResponse" />
-    </wsdl:message>
-    <wsdl:message name="getAllQueriesRequest">
-        <wsdl:part name="parameters" element="ns:getAllQueries" />
-    </wsdl:message>
-    <wsdl:message name="getAllQueriesResponse">
-        <wsdl:part name="parameters" element="ns:getAllQueriesResponse" />
-    </wsdl:message>
-    <wsdl:message name="getAllInputCountRequest">
-        <wsdl:part name="parameters" element="ns:getAllInputCount" />
-    </wsdl:message>
-    <wsdl:message name="getAllInputCountResponse">
-        <wsdl:part name="parameters" element="ns:getAllInputCountResponse" />
-    </wsdl:message>
-    <wsdl:message name="editQueryRequest">
-        <wsdl:part name="parameters" element="ns:editQuery" />
-    </wsdl:message>
-    <wsdl:message name="editQueryResponse">
-        <wsdl:part name="parameters" element="ns:editQueryResponse" />
     </wsdl:message>
     <wsdl:message name="getBrokerNamesRequest">
         <wsdl:part name="parameters" element="ns:getBrokerNames" />
@@ -492,41 +337,17 @@
     <wsdl:message name="addBucketResponse">
         <wsdl:part name="parameters" element="ns:addBucketResponse" />
     </wsdl:message>
-    <wsdl:message name="removeQueryRequest">
-        <wsdl:part name="parameters" element="ns:removeQuery" />
-    </wsdl:message>
-    <wsdl:message name="removeQueryResponse">
-        <wsdl:part name="parameters" element="ns:removeQueryResponse" />
-    </wsdl:message>
     <wsdl:message name="getBucketRequest">
         <wsdl:part name="parameters" element="ns:getBucket" />
     </wsdl:message>
     <wsdl:message name="getBucketResponse">
         <wsdl:part name="parameters" element="ns:getBucketResponse" />
     </wsdl:message>
-    <wsdl:message name="removeInputRequest">
-        <wsdl:part name="parameters" element="ns:removeInput" />
-    </wsdl:message>
-    <wsdl:message name="removeInputResponse">
-        <wsdl:part name="parameters" element="ns:removeInputResponse" />
-    </wsdl:message>
-    <wsdl:message name="getAllInputsRequest">
-        <wsdl:part name="parameters" element="ns:getAllInputs" />
-    </wsdl:message>
-    <wsdl:message name="getAllInputsResponse">
-        <wsdl:part name="parameters" element="ns:getAllInputsResponse" />
-    </wsdl:message>
     <wsdl:message name="removeBucketRequest">
         <wsdl:part name="parameters" element="ns:removeBucket" />
     </wsdl:message>
     <wsdl:message name="removeBucketResponse">
         <wsdl:part name="parameters" element="ns:removeBucketResponse" />
-    </wsdl:message>
-    <wsdl:message name="removeAllInputsRequest">
-        <wsdl:part name="parameters" element="ns:removeAllInputs" />
-    </wsdl:message>
-    <wsdl:message name="removeAllInputsResponse">
-        <wsdl:part name="parameters" element="ns:removeAllInputsResponse" />
     </wsdl:message>
     <wsdl:message name="getAllBucketCountRequest">
         <wsdl:part name="parameters" element="ns:getAllBucketCount" />
@@ -551,35 +372,10 @@
             <wsdl:output message="tns:getEngineProvidersInfoResponse" wsaw:Action="urn:getEngineProvidersInfoResponse" />
             <wsdl:fault message="tns:CEPAdminServiceCEPAdminException" name="CEPAdminServiceCEPAdminException" wsaw:Action="urn:getEngineProvidersInfoCEPAdminServiceCEPAdminException" />
         </wsdl:operation>
-        <wsdl:operation name="removeAllQueries">
-            <wsdl:input message="tns:removeAllQueriesRequest" wsaw:Action="urn:removeAllQueries" />
-            <wsdl:output message="tns:removeAllQueriesResponse" wsaw:Action="urn:removeAllQueriesResponse" />
-            <wsdl:fault message="tns:CEPAdminServiceCEPAdminException" name="CEPAdminServiceCEPAdminException" wsaw:Action="urn:removeAllQueriesCEPAdminServiceCEPAdminException" />
-        </wsdl:operation>
-        <wsdl:operation name="getAllQueryCount">
-            <wsdl:input message="tns:getAllQueryCountRequest" wsaw:Action="urn:getAllQueryCount" />
-            <wsdl:output message="tns:getAllQueryCountResponse" wsaw:Action="urn:getAllQueryCountResponse" />
-            <wsdl:fault message="tns:CEPAdminServiceCEPAdminException" name="CEPAdminServiceCEPAdminException" wsaw:Action="urn:getAllQueryCountCEPAdminServiceCEPAdminException" />
-        </wsdl:operation>
         <wsdl:operation name="removeAllBuckets">
             <wsdl:input message="tns:removeAllBucketsRequest" wsaw:Action="urn:removeAllBuckets" />
             <wsdl:output message="tns:removeAllBucketsResponse" wsaw:Action="urn:removeAllBucketsResponse" />
             <wsdl:fault message="tns:CEPAdminServiceCEPAdminException" name="CEPAdminServiceCEPAdminException" wsaw:Action="urn:removeAllBucketsCEPAdminServiceCEPAdminException" />
-        </wsdl:operation>
-        <wsdl:operation name="getAllQueries">
-            <wsdl:input message="tns:getAllQueriesRequest" wsaw:Action="urn:getAllQueries" />
-            <wsdl:output message="tns:getAllQueriesResponse" wsaw:Action="urn:getAllQueriesResponse" />
-            <wsdl:fault message="tns:CEPAdminServiceCEPAdminException" name="CEPAdminServiceCEPAdminException" wsaw:Action="urn:getAllQueriesCEPAdminServiceCEPAdminException" />
-        </wsdl:operation>
-        <wsdl:operation name="getAllInputCount">
-            <wsdl:input message="tns:getAllInputCountRequest" wsaw:Action="urn:getAllInputCount" />
-            <wsdl:output message="tns:getAllInputCountResponse" wsaw:Action="urn:getAllInputCountResponse" />
-            <wsdl:fault message="tns:CEPAdminServiceCEPAdminException" name="CEPAdminServiceCEPAdminException" wsaw:Action="urn:getAllInputCountCEPAdminServiceCEPAdminException" />
-        </wsdl:operation>
-        <wsdl:operation name="editQuery">
-            <wsdl:input message="tns:editQueryRequest" wsaw:Action="urn:editQuery" />
-            <wsdl:output message="tns:editQueryResponse" wsaw:Action="urn:editQueryResponse" />
-            <wsdl:fault message="tns:CEPAdminServiceCEPAdminException" name="CEPAdminServiceCEPAdminException" wsaw:Action="urn:editQueryCEPAdminServiceCEPAdminException" />
         </wsdl:operation>
         <wsdl:operation name="getBrokerNames">
             <wsdl:input message="tns:getBrokerNamesRequest" wsaw:Action="urn:getBrokerNames" />
@@ -591,35 +387,15 @@
             <wsdl:output message="tns:addBucketResponse" wsaw:Action="urn:addBucketResponse" />
             <wsdl:fault message="tns:CEPAdminServiceCEPAdminException" name="CEPAdminServiceCEPAdminException" wsaw:Action="urn:addBucketCEPAdminServiceCEPAdminException" />
         </wsdl:operation>
-        <wsdl:operation name="removeQuery">
-            <wsdl:input message="tns:removeQueryRequest" wsaw:Action="urn:removeQuery" />
-            <wsdl:output message="tns:removeQueryResponse" wsaw:Action="urn:removeQueryResponse" />
-            <wsdl:fault message="tns:CEPAdminServiceCEPAdminException" name="CEPAdminServiceCEPAdminException" wsaw:Action="urn:removeQueryCEPAdminServiceCEPAdminException" />
-        </wsdl:operation>
         <wsdl:operation name="getBucket">
             <wsdl:input message="tns:getBucketRequest" wsaw:Action="urn:getBucket" />
             <wsdl:output message="tns:getBucketResponse" wsaw:Action="urn:getBucketResponse" />
             <wsdl:fault message="tns:CEPAdminServiceCEPAdminException" name="CEPAdminServiceCEPAdminException" wsaw:Action="urn:getBucketCEPAdminServiceCEPAdminException" />
         </wsdl:operation>
-        <wsdl:operation name="removeInput">
-            <wsdl:input message="tns:removeInputRequest" wsaw:Action="urn:removeInput" />
-            <wsdl:output message="tns:removeInputResponse" wsaw:Action="urn:removeInputResponse" />
-            <wsdl:fault message="tns:CEPAdminServiceCEPAdminException" name="CEPAdminServiceCEPAdminException" wsaw:Action="urn:removeInputCEPAdminServiceCEPAdminException" />
-        </wsdl:operation>
-        <wsdl:operation name="getAllInputs">
-            <wsdl:input message="tns:getAllInputsRequest" wsaw:Action="urn:getAllInputs" />
-            <wsdl:output message="tns:getAllInputsResponse" wsaw:Action="urn:getAllInputsResponse" />
-            <wsdl:fault message="tns:CEPAdminServiceCEPAdminException" name="CEPAdminServiceCEPAdminException" wsaw:Action="urn:getAllInputsCEPAdminServiceCEPAdminException" />
-        </wsdl:operation>
         <wsdl:operation name="removeBucket">
             <wsdl:input message="tns:removeBucketRequest" wsaw:Action="urn:removeBucket" />
             <wsdl:output message="tns:removeBucketResponse" wsaw:Action="urn:removeBucketResponse" />
             <wsdl:fault message="tns:CEPAdminServiceCEPAdminException" name="CEPAdminServiceCEPAdminException" wsaw:Action="urn:removeBucketCEPAdminServiceCEPAdminException" />
-        </wsdl:operation>
-        <wsdl:operation name="removeAllInputs">
-            <wsdl:input message="tns:removeAllInputsRequest" wsaw:Action="urn:removeAllInputs" />
-            <wsdl:output message="tns:removeAllInputsResponse" wsaw:Action="urn:removeAllInputsResponse" />
-            <wsdl:fault message="tns:CEPAdminServiceCEPAdminException" name="CEPAdminServiceCEPAdminException" wsaw:Action="urn:removeAllInputsCEPAdminServiceCEPAdminException" />
         </wsdl:operation>
         <wsdl:operation name="getAllBucketCount">
             <wsdl:input message="tns:getAllBucketCountRequest" wsaw:Action="urn:getAllBucketCount" />
@@ -658,68 +434,8 @@
                 <soap:fault use="literal" name="CEPAdminServiceCEPAdminException" />
             </wsdl:fault>
         </wsdl:operation>
-        <wsdl:operation name="removeAllQueries">
-            <soap:operation soapAction="urn:removeAllQueries" style="document" />
-            <wsdl:input>
-                <soap:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
         <wsdl:operation name="removeAllBuckets">
             <soap:operation soapAction="urn:removeAllBuckets" style="document" />
-            <wsdl:input>
-                <soap:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="getAllQueryCount">
-            <soap:operation soapAction="urn:getAllQueryCount" style="document" />
-            <wsdl:input>
-                <soap:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="getAllQueries">
-            <soap:operation soapAction="urn:getAllQueries" style="document" />
-            <wsdl:input>
-                <soap:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="getAllInputCount">
-            <soap:operation soapAction="urn:getAllInputCount" style="document" />
-            <wsdl:input>
-                <soap:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="editQuery">
-            <soap:operation soapAction="urn:editQuery" style="document" />
             <wsdl:input>
                 <soap:body use="literal" />
             </wsdl:input>
@@ -754,30 +470,6 @@
                 <soap:fault use="literal" name="CEPAdminServiceCEPAdminException" />
             </wsdl:fault>
         </wsdl:operation>
-        <wsdl:operation name="removeQuery">
-            <soap:operation soapAction="urn:removeQuery" style="document" />
-            <wsdl:input>
-                <soap:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="removeInput">
-            <soap:operation soapAction="urn:removeInput" style="document" />
-            <wsdl:input>
-                <soap:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
         <wsdl:operation name="getBucket">
             <soap:operation soapAction="urn:getBucket" style="document" />
             <wsdl:input>
@@ -792,30 +484,6 @@
         </wsdl:operation>
         <wsdl:operation name="removeBucket">
             <soap:operation soapAction="urn:removeBucket" style="document" />
-            <wsdl:input>
-                <soap:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="getAllInputs">
-            <soap:operation soapAction="urn:getAllInputs" style="document" />
-            <wsdl:input>
-                <soap:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="removeAllInputs">
-            <soap:operation soapAction="urn:removeAllInputs" style="document" />
             <wsdl:input>
                 <soap:body use="literal" />
             </wsdl:input>
@@ -877,68 +545,8 @@
                 <soap12:fault use="literal" name="CEPAdminServiceCEPAdminException" />
             </wsdl:fault>
         </wsdl:operation>
-        <wsdl:operation name="removeAllQueries">
-            <soap12:operation soapAction="urn:removeAllQueries" style="document" />
-            <wsdl:input>
-                <soap12:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap12:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
         <wsdl:operation name="removeAllBuckets">
             <soap12:operation soapAction="urn:removeAllBuckets" style="document" />
-            <wsdl:input>
-                <soap12:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap12:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="getAllQueryCount">
-            <soap12:operation soapAction="urn:getAllQueryCount" style="document" />
-            <wsdl:input>
-                <soap12:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap12:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="getAllQueries">
-            <soap12:operation soapAction="urn:getAllQueries" style="document" />
-            <wsdl:input>
-                <soap12:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap12:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="getAllInputCount">
-            <soap12:operation soapAction="urn:getAllInputCount" style="document" />
-            <wsdl:input>
-                <soap12:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap12:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="editQuery">
-            <soap12:operation soapAction="urn:editQuery" style="document" />
             <wsdl:input>
                 <soap12:body use="literal" />
             </wsdl:input>
@@ -973,30 +581,6 @@
                 <soap12:fault use="literal" name="CEPAdminServiceCEPAdminException" />
             </wsdl:fault>
         </wsdl:operation>
-        <wsdl:operation name="removeQuery">
-            <soap12:operation soapAction="urn:removeQuery" style="document" />
-            <wsdl:input>
-                <soap12:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap12:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="removeInput">
-            <soap12:operation soapAction="urn:removeInput" style="document" />
-            <wsdl:input>
-                <soap12:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap12:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
         <wsdl:operation name="getBucket">
             <soap12:operation soapAction="urn:getBucket" style="document" />
             <wsdl:input>
@@ -1011,30 +595,6 @@
         </wsdl:operation>
         <wsdl:operation name="removeBucket">
             <soap12:operation soapAction="urn:removeBucket" style="document" />
-            <wsdl:input>
-                <soap12:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap12:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="getAllInputs">
-            <soap12:operation soapAction="urn:getAllInputs" style="document" />
-            <wsdl:input>
-                <soap12:body use="literal" />
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal" />
-            </wsdl:output>
-            <wsdl:fault name="CEPAdminServiceCEPAdminException">
-                <soap12:fault use="literal" name="CEPAdminServiceCEPAdminException" />
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="removeAllInputs">
-            <soap12:operation soapAction="urn:removeAllInputs" style="document" />
             <wsdl:input>
                 <soap12:body use="literal" />
             </wsdl:input>
@@ -1090,53 +650,8 @@
                 <mime:content type="text/xml" part="parameters" />
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="removeAllQueries">
-            <http:operation location="removeAllQueries" />
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:output>
-        </wsdl:operation>
         <wsdl:operation name="removeAllBuckets">
             <http:operation location="removeAllBuckets" />
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getAllQueryCount">
-            <http:operation location="getAllQueryCount" />
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getAllQueries">
-            <http:operation location="getAllQueries" />
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getAllInputCount">
-            <http:operation location="getAllInputCount" />
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="editQuery">
-            <http:operation location="editQuery" />
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters" />
             </wsdl:input>
@@ -1162,24 +677,6 @@
                 <mime:content type="text/xml" part="parameters" />
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="removeQuery">
-            <http:operation location="removeQuery" />
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="removeInput">
-            <http:operation location="removeInput" />
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:output>
-        </wsdl:operation>
         <wsdl:operation name="getBucket">
             <http:operation location="getBucket" />
             <wsdl:input>
@@ -1191,24 +688,6 @@
         </wsdl:operation>
         <wsdl:operation name="removeBucket">
             <http:operation location="removeBucket" />
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getAllInputs">
-            <http:operation location="getAllInputs" />
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters" />
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="removeAllInputs">
-            <http:operation location="removeAllInputs" />
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters" />
             </wsdl:input>
@@ -1237,13 +716,13 @@
     </wsdl:binding>
     <wsdl:service name="CEPAdminService">
         <wsdl:port name="CEPAdminServiceHttpsSoap11Endpoint" binding="tns:CEPAdminServiceSoap11Binding">
-            <soap:address location="https://10.150.3.56:9443/services/CEPAdminService.CEPAdminServiceHttpsSoap11Endpoint/" />
+            <soap:address location="https://10.100.3.156:9443/services/CEPAdminService.CEPAdminServiceHttpsSoap11Endpoint/" />
         </wsdl:port>
         <wsdl:port name="CEPAdminServiceHttpsSoap12Endpoint" binding="tns:CEPAdminServiceSoap12Binding">
-            <soap12:address location="https://10.150.3.56:9443/services/CEPAdminService.CEPAdminServiceHttpsSoap12Endpoint/" />
+            <soap12:address location="https://10.100.3.156:9443/services/CEPAdminService.CEPAdminServiceHttpsSoap12Endpoint/" />
         </wsdl:port>
         <wsdl:port name="CEPAdminServiceHttpsEndpoint" binding="tns:CEPAdminServiceHttpBinding">
-            <http:address location="https://10.150.3.56:9443/services/CEPAdminService.CEPAdminServiceHttpsEndpoint/" />
+            <http:address location="https://10.100.3.156:9443/services/CEPAdminService.CEPAdminServiceHttpsEndpoint/" />
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

@@ -43,6 +43,7 @@ public class XSDMediaTypeHandler extends Handler {
     private String location = "/schema/";        // location will always has a leading '/' and trailing '/'
     private String locationTag = "location";
     private boolean disableSchemaValidation = false;
+    private boolean disableSymlinkCreation = true;
 
     public OMElement getLocationConfiguration() {
         return locationConfiguration;
@@ -62,17 +63,15 @@ public class XSDMediaTypeHandler extends Handler {
                 }
             }
         }
-        AuthorizationUtils.addAuthorizeRoleListener(
-                RegistryConstants.ADD_SCHEMA_AUTHORIZE_ROLE_LISTENER_EXECUTION_ORDER_ID,
-                getChrootedLocation(RegistryContext.getBaseInstance()),
-                UserMgtConstants.UI_ADMIN_PERMISSION_ROOT + "manage/resources/govern/metadata/add",
-                UserMgtConstants.EXECUTE_ACTION);
-        AuthorizationUtils.addAuthorizeRoleListener(
-                RegistryConstants.LIST_SCHEMA_AUTHORIZE_ROLE_LISTENER_EXECUTION_ORDER_ID,
-                getChrootedLocation(RegistryContext.getBaseInstance()),
-                UserMgtConstants.UI_ADMIN_PERMISSION_ROOT + "manage/resources/govern/metadata/list",
-                UserMgtConstants.EXECUTE_ACTION, new String[]{ActionConstants.GET});
         this.locationConfiguration = locationConfiguration;
+    }
+
+    public boolean isDisableSymlinkCreation() {
+        return disableSymlinkCreation;
+    }
+
+    public void setDisableSymlinkCreation(String disableSymlinkCreation) {
+        this.disableSymlinkCreation = Boolean.toString(true).equals(disableSymlinkCreation);
     }
 
     private OMElement locationConfiguration;
@@ -237,7 +236,7 @@ public class XSDMediaTypeHandler extends Handler {
 
             registryPath = schemaProcessor
                     .putSchemaToRegistry(requestContext, resourcePath,
-                            getChrootedLocation(requestContext.getRegistryContext()), true);
+                            getChrootedLocation(requestContext.getRegistryContext()), true,disableSymlinkCreation);
         } finally {
             deleteTempFiles(tempFiles);
         }
@@ -434,7 +433,7 @@ public class XSDMediaTypeHandler extends Handler {
 
         return schemaProcessor
                 .importSchemaToRegistry(requestContext, resourcePath,
-                        getChrootedLocation(requestContext.getRegistryContext()), true);
+                        getChrootedLocation(requestContext.getRegistryContext()), true,disableSymlinkCreation);
     }
 
     /**

@@ -16,6 +16,9 @@
 
 package org.wso2.carbon.attachment.mgt.test;
 
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.attachment.mgt.configuration.AttachmentServerConfiguration;
@@ -23,6 +26,8 @@ import org.wso2.carbon.attachment.mgt.core.dao.DAOManagerImpl;
 import org.wso2.carbon.attachment.mgt.core.datasource.impl.JDBCManager;
 import org.wso2.carbon.attachment.mgt.core.exceptions.AttachmentMgtException;
 import org.wso2.carbon.attachment.mgt.server.AbstractAttachmentServer;
+import org.wso2.carbon.attachment.mgt.server.internal.AttachmentServerHolder;
+import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.ServerConstants;
 
 import java.io.File;
@@ -47,12 +52,15 @@ public class MockAttachmentServer extends AbstractAttachmentServer {
     private static final String DATABASE_CONFIG_FILE_PATH = "src" + File.separator + "test" + File
             .separator + "resources" + File.separator + "dbConfig.xml";
 
+
+
     private static final String CARBON_CONFIG_DIR_PATH = "src" + File.separator + "test" + File
             .separator + "resources";
 
     @Override
     public void init() {
         System.setProperty(ServerConstants.CARBON_CONFIG_DIR_PATH, CARBON_CONFIG_DIR_PATH);
+
         loadAttachmentServerConfig();
         initDataSourceManager();
         initDAOManager();
@@ -61,11 +69,11 @@ public class MockAttachmentServer extends AbstractAttachmentServer {
     @Override
     public void shutdown() {
         //shutdownDAOManager();
-        log.warn("Here, ideally the DAO manager should be shut down (shutdownDAOManager). But it fails test cases due" +
-                 " to some reason which need to be fixed properly.");
+        //TODO log.warn("Here, ideally the DAO manager should be shut down (shutdownDAOManager). But it fails test cases due" +
+        //         " to some reason which need to be fixed properly.");
         //shutdownDataSourceManager();
-        log.warn("Here, ideally the data-source manager should be shut down (shutdownDataSourceManager). But it fails" +
-                 " test cases due to some reason which need to be fixed properly.");
+        //TODO  log.warn("Here, ideally the data-source manager should be shut down (shutdownDataSourceManager). But it fails" +
+        //         " test cases due to some reason which need to be fixed properly.");
         unloadAttachmentServerConfig();
     }
 

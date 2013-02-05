@@ -61,9 +61,9 @@ public final class EventDefinitionConverterUtils {
             throws MalformedStreamDefinitionException {
         try {
             StreamDefinition tempStreamDefinition = gson.fromJson(streamDefinition.
-                    replaceAll("(?i)int", "INT").replaceAll("(?i)long", "LONG").
-                    replaceAll("(?i)float", "FLOAT").replaceAll("(?i)double", "DOUBLE").
-                    replaceAll("(?i)bool", "BOOL").replaceAll("(?i)string", "STRING"), StreamDefinition.class);
+                    replaceAll("('|\")(?i)int('|\")", "'INT'").replaceAll("('|\")(?i)long('|\")", "'LONG'").
+                    replaceAll("('|\")(?i)float('|\")", "'FLOAT'").replaceAll("('|\")(?i)double('|\")", "'DOUBLE'").
+                    replaceAll("('|\")(?i)bool('|\")", "'BOOL'").replaceAll("('|\")(?i)string('|\")", "'STRING'"), StreamDefinition.class);
 
             String name = tempStreamDefinition.getName();
             String version = tempStreamDefinition.getVersion();
@@ -85,9 +85,18 @@ public final class EventDefinitionConverterUtils {
             }
 
             newStreamDefinition.setTags(tempStreamDefinition.getTags());
-            newStreamDefinition.setMetaData(tempStreamDefinition.getMetaData());
-            newStreamDefinition.setCorrelationData(tempStreamDefinition.getCorrelationData());
-            newStreamDefinition.setPayloadData(tempStreamDefinition.getPayloadData());
+            List<Attribute> metaList=tempStreamDefinition.getMetaData();
+            if(metaList!=null&&metaList.size()>0){
+                newStreamDefinition.setMetaData(metaList);
+            }
+            List<Attribute> correlationList=tempStreamDefinition.getCorrelationData();
+            if(correlationList!=null&&correlationList.size()>0){
+                newStreamDefinition.setCorrelationData(correlationList);
+            }
+            List<Attribute> payloadList=tempStreamDefinition.getPayloadData();
+            if(payloadList!=null&&payloadList.size()>0){
+                newStreamDefinition.setPayloadData(payloadList);
+            }
 
             newStreamDefinition.setNickName(tempStreamDefinition.getNickName());
             newStreamDefinition.setDescription(tempStreamDefinition.getDescription());

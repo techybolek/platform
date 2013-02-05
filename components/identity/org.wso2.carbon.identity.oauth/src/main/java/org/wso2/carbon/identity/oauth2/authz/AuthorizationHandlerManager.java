@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -106,16 +106,25 @@ public class AuthorizationHandlerManager {
         }
 
         boolean scopeValidationStatus = authzHandler.validateScope(authzReqMsgCtx);
-        if(!scopeValidationStatus){
-            log.warn("Scope validation failed for user : " + authzReqDTO.getUsername() +
-                    ", for the scope : " +
-                    OAuth2Util.buildScopeString(authzReqDTO.getScopes()));
-            handleErrorRequest(authorizeRespDTO, OAuth2ErrorCodes.INVALID_SCOPE,
-                    "Invalid Scope!");
-            authorizeRespDTO.setCallbackURI(authzReqDTO.getCallbackUrl());
-            authorizeRespDTO.setAuthenticated(true);
-            return authorizeRespDTO;
-        }
+		if (!scopeValidationStatus) {
+			log.warn("Scope validation failed for user : "
+					+ authzReqDTO.getUsername() + ", for the scope : "
+					+ OAuth2Util.buildScopeString(authzReqDTO.getScopes()));
+			handleErrorRequest(authorizeRespDTO,
+					OAuth2ErrorCodes.INVALID_SCOPE, "Invalid Scope!");
+			authorizeRespDTO.setCallbackURI(authzReqDTO.getCallbackUrl());
+			authorizeRespDTO.setAuthenticated(true);
+			return authorizeRespDTO;
+		} else {
+			// We are here because the call-back handler has approved the scope.
+			// If call-back handler set the approved scope - then we respect that. If not we take
+			// the approved scope as the provided scope.
+			if (authzReqMsgCtx.getApprovedScope() == null
+					|| authzReqMsgCtx.getApprovedScope().length == 0) {
+				authzReqMsgCtx
+						.setApprovedScope(authzReqMsgCtx.getAuthorizationReqDTO().getScopes());
+			}
+		}
 
         authorizeRespDTO = authzHandler.issue(authzReqMsgCtx);
         return authorizeRespDTO;

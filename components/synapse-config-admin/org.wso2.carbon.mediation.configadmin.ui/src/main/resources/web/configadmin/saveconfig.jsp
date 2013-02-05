@@ -83,6 +83,12 @@
                     }
                 }
             }
+} else {
+%>
+    <script type="text/javascript">
+        window.location.href = 'index.jsp?status=session&rand=<%=date.getTime()%>';
+    </script>
+    <%
         }
     } catch (Throwable t) {
 %>

@@ -19,42 +19,37 @@ package org.wso2.carbon.governance.registry.extensions.handlers;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.xni.parser.XMLInputSource;
-import org.wso2.carbon.governance.registry.extensions.handlers.utils.SchemaUriProcessor;
 import org.wso2.carbon.governance.registry.extensions.handlers.utils.HandlerConstants;
+import org.wso2.carbon.governance.registry.extensions.handlers.utils.SchemaUriProcessor;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.jdbc.handlers.Handler;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.extensions.handlers.utils.SchemaValidator;
 import org.wso2.carbon.registry.extensions.utils.CommonUtil;
 import org.wso2.carbon.registry.extensions.utils.WSDLValidationInfo;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class SchemaUriHandler extends Handler {
+public class SchemaUriHandler {
     private static final Log log = LogFactory.getLog(SchemaUriHandler.class);
-    private boolean disableSchemaValidation = false;
 
     public void importResource(RequestContext requestContext, String sourceURL) throws RegistryException {
         if (!CommonUtil.isUpdateLockAvailable()) {
             return;
         }
         CommonUtil.acquireUpdateLock();
+        log.debug("Processing Schema URI started");
         try {
             String resourcePath = requestContext.getResourcePath().getCompletePath();
 
-            WSDLValidationInfo validationInfo = null;
+            WSDLValidationInfo validationInfo;
             try {
-                if (!disableSchemaValidation) {
-                    validationInfo =
-                            SchemaValidator.validate(new XMLInputSource(null, sourceURL, null));
-                }
+                validationInfo =
+                        SchemaValidator.validate(new XMLInputSource(null, sourceURL, null));
             } catch (Exception e) {
                 throw new RegistryException("Exception occured while validating the schema.", e);
             }
@@ -66,21 +61,10 @@ public class SchemaUriHandler extends Handler {
                     Collections.<String>emptyList(), requestContext);
 
             requestContext.setActualPath(savedName);
+            log.debug("Processing Schema URI finished");
             requestContext.setProcessingComplete(true);
         } finally {
             CommonUtil.releaseUpdateLock();
-        }
-    }
-
-    /**
-     * creates the parent directory structure for a given resource at a temp location in the file system.
-     *
-     * @param file
-     * @throws java.io.IOException
-     */
-    private void makeDirs(File file) throws IOException {
-        if (file != null && !file.exists() && !file.mkdirs()) {
-            log.warn("Failed to create directories at path: " + file.getAbsolutePath());
         }
     }
 
@@ -103,6 +87,7 @@ public class SchemaUriHandler extends Handler {
      * @param requestContext the request context for the import operation
      * @param resourcePath   the path of the resource
      * @param validationInfo the validation information
+     * @param sourceURL url of the source
      * @return the path at which the schema was uploaded to
      * @throws org.wso2.carbon.registry.core.exceptions.RegistryException if the operation failed.
      */
@@ -113,7 +98,7 @@ public class SchemaUriHandler extends Handler {
 
         return schemaProcessor
                 .importSchemaToRegistry(requestContext, resourcePath,
-                        getChrootedLocation(requestContext.getRegistryContext()), true, sourceURL);
+                        getChrootedLocation(requestContext.getRegistryContext()), sourceURL);
     }
 
     /**
@@ -134,10 +119,6 @@ public class SchemaUriHandler extends Handler {
     private String getChrootedLocation(RegistryContext registryContext) {
         return RegistryUtils.getAbsolutePath(registryContext,
                 RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + HandlerConstants.XSD_LOCATION);
-    }
-
-    public void setDisableSchemaValidation(String disableSchemaValidation) {
-        this.disableSchemaValidation = Boolean.toString(true).equals(disableSchemaValidation);
     }
 
 }

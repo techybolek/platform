@@ -20,9 +20,9 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.TestAPIKeyValidator;
 
 public class TestAuthenticator extends OAuthAuthenticator {
 
-    public TestAuthenticator(TestAPIKeyValidator testAPIKeyValidator) {
+    public TestAuthenticator() { //TestAPIKeyValidator testAPIKeyValidator
         super();
-        this.keyValidator = testAPIKeyValidator;
+       // this.keyValidator = testAPIKeyValidator;
     }
 
     @Override

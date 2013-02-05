@@ -6,12 +6,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>data-bridge-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.databridge.commons.thrift.server.feature</artifactId>
     <packaging>pom</packaging>
+    <version>4.0.7</version>
     <name>WSO2 Carbon - Data Bridge - Thrift Commons Server Feature</name>
     <url>http://wso2.org</url>
 
@@ -19,16 +21,24 @@
         <dependency>
             <groupId>libthrift.wso2</groupId>
             <artifactId>libthrift</artifactId>
+            <version>0.7.0.wso2v2</version>
         </dependency>
 
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.databridge.commons.thrift</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>slf4j.wso2</groupId>
-            <artifactId>slf4j</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
 
     </dependencies>
@@ -36,33 +46,36 @@
     <build>
         <plugins>
             <plugin>
-				<groupId>org.wso2.maven</groupId>
-				<artifactId>carbon-p2-plugin</artifactId>
-				<version>${carbon.p2.plugin.version}</version>
-				<executions>
-					<execution>
-						<id>p2-feature-generation</id>
+                <groupId>org.wso2.maven</groupId>
+                <artifactId>carbon-p2-plugin</artifactId>
+                <version>${carbon.p2.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>p2-feature-generation</id>
                         <phase>package</phase>
                         <goals>
                             <goal>p2-feature-gen</goal>
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.databridge.commons.thrift.server</id>
-							<propertiesFile>../feature.properties</propertiesFile>
+                            <propertiesFile>../feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
-									<propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
-									<propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>
+                                    <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
+                                    <propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.databridge.commons.thrift</bundleDef>
-                                <bundleDef>libthrift.wso2:libthrift</bundleDef>
-                                <bundleDef>slf4j.wso2:slf4j</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.databridge.commons.thrift:${project.version}</bundleDef>
+                                <bundleDef>libthrift.wso2:libthrift:0.7.0.wso2v2</bundleDef>
+                                <bundleDef>org.slf4j:slf4j-log4j12</bundleDef>
+                                <bundleDef>org.slf4j:slf4j-api</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.databridge.commons.server:${wso2carbon.version.databridge}</importFeatureDef>
+                                <importFeatureDef>
+                                    org.wso2.carbon.databridge.commons.server:${project.version}
+                                </importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>
@@ -71,6 +84,9 @@
         </plugins>
     </build>
 
+    <properties>
+        <slf4j.version>1.6.1</slf4j.version>
+        <carbon.patch.release.version405>4.0.5</carbon.patch.release.version405>
+    </properties>
 
-    
 </project>

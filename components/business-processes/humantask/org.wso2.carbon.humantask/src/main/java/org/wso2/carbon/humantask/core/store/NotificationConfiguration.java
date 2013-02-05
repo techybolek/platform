@@ -23,7 +23,11 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.wso2.carbon.bpel.common.config.EndpointConfiguration;
-import org.wso2.carbon.humantask.*;
+import org.wso2.carbon.humantask.HumanInteractionsDocument;
+import org.wso2.carbon.humantask.TDeadlines;
+import org.wso2.carbon.humantask.TNotification;
+import org.wso2.carbon.humantask.TPresentationElements;
+import org.wso2.carbon.humantask.TPriorityExpr;
 import org.wso2.carbon.humantask.core.deployment.HumanTaskDeploymentException;
 import org.wso2.carbon.humantask.core.deployment.config.THTDeploymentConfig;
 import org.wso2.carbon.humantask.core.deployment.config.TPublish;
@@ -55,23 +59,30 @@ public class NotificationConfiguration extends HumanTaskBaseConfiguration {
                                      File humanTaskDefinitionFile)
             throws HumanTaskDeploymentException {
         super(humanInteractionsDocument, targetNamespace, humanTaskArtifactName, tenantAxisConfig,
-                false, packageName,humanTaskDefinitionFile);
+              false, packageName, humanTaskDefinitionFile);
 
         this.notificationDefinition = notification;
         this.notificationDeploymentConfiguration = notificationDeploymentConfiguration;
 
-        Definition notificationWSDL = findWSDLDefinition(wsdls, getPortType(), getOperation());
-        if (notificationWSDL == null) {
-            log.warn("Cannot find WSDL definition for notification: " + notification.getName());
+        try {
+            Definition notificationWSDL = findWSDLDefinition(wsdls, getPortType(), getOperation());
+            if (notificationWSDL == null) {
+                throw new HumanTaskDeploymentException("Cannot find WSDL definition " +
+                                                       "for notification: " + notification.getName());
+            }
+            setWSDL(notificationWSDL);
+
+            HumanTaskNamespaceContext nsContext = new HumanTaskNamespaceContext();
+            populateNamespace(notification.getDomNode().getNodeType() == Node.ELEMENT_NODE ?
+                              (Element) notification.getDomNode() : null, nsContext);
+            setNamespaceContext(nsContext);
+
+            initEndpointConfigs();
+        } catch (HumanTaskDeploymentException depEx) {
+            this.setErroneous(true);
+            this.setDeploymentError(depEx.getMessage());
+            log.error(depEx);
         }
-        setWSDL(notificationWSDL);
-
-        HumanTaskNamespaceContext nsContext = new HumanTaskNamespaceContext();
-        populateNamespace(notification.getDomNode().getNodeType() == Node.ELEMENT_NODE ?
-                (Element) notification.getDomNode() : null, nsContext);
-        setNamespaceContext(nsContext);
-
-        initEndpointConfigs();
     }
 
     private void initEndpointConfigs() throws HumanTaskDeploymentException {

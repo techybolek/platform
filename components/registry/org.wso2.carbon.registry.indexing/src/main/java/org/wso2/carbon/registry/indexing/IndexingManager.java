@@ -53,6 +53,8 @@ public class IndexingManager {
     private ScheduledExecutorService indexingExecutor;
     private Date lastAccessTime;
 
+    private volatile Pattern[] patterns = null;
+
     private IndexingManager() {
         try {
             registry = Utils.getRegistryService().getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
@@ -110,7 +112,9 @@ public class IndexingManager {
     }
 
     public boolean canIndex(String path) {
-        Pattern[] patterns = registryConfig.getExclusionPatterns();
+        if (patterns == null) {
+            patterns = registryConfig.getExclusionPatterns();
+        }
         for (Pattern pattern : patterns) {
             if (pattern.matcher(path).matches()) {
                 return false;

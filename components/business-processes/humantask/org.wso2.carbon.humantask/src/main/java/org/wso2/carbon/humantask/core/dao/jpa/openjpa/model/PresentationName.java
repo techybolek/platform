@@ -30,9 +30,6 @@ public final class PresentationName extends PresentationElement implements Prese
 
     @Override
     public void setValue(String value) {
-        if (value.length() > 64) {
-            throw new IllegalArgumentException("Presentation Names length is greater than 64.");
-        }
         super.setValue(value);
     }
 }

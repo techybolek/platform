@@ -45,4 +45,24 @@
         <session-timeout>600</session-timeout>
     </session-config>
 
+    <!-- This application uses BASIC authentication -->
+        <login-config>
+                <auth-method>BASIC</auth-method>
+                <realm-name>Editor Login</realm-name>
+        </login-config>
+
+        <!-- Define a constraint to force SSL on all pages in the application -->
+        <security-constraint>
+
+                <web-resource-collection>
+                        <web-resource-name>Entire Application</web-resource-name>
+                        <url-pattern>/*</url-pattern>
+                </web-resource-collection>
+
+                <user-data-constraint>
+                        <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+                </user-data-constraint>
+
+        </security-constraint>
+
 </web-app>

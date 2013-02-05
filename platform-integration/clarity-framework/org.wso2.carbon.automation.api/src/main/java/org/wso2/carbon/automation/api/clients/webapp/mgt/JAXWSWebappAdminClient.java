@@ -61,10 +61,10 @@ public class JAXWSWebappAdminClient {
     }
 
     public WebappsWrapper getPagedWebappsSummary(String webappSearchString,
-                                                 String webappState,
+                                                 String webappState, String webappType,
                                                  int pageNumber) throws AxisFault {
         try {
-            return webappAdminStub.getPagedWebappsSummary(webappSearchString, webappState, pageNumber);
+            return webappAdminStub.getPagedWebappsSummary(webappSearchString, webappState, webappType, pageNumber);
         } catch (RemoteException e) {
             handleException("cannot.get.webapp.data", e);
         }
@@ -121,10 +121,10 @@ public class JAXWSWebappAdminClient {
         }
     }
 
-    public WebappsWrapper getPagedFaultyWebappsSummary(String webappSearchString,
+    public WebappsWrapper getPagedFaultyWebappsSummary(String webappSearchString,String webappType,
                                                        int pageNumber) throws AxisFault {
         try {
-            return webappAdminStub.getPagedFaultyWebappsSummary(webappSearchString, pageNumber);
+            return webappAdminStub.getPagedFaultyWebappsSummary(webappSearchString, webappType, pageNumber);
         } catch (RemoteException e) {
             handleException("cannot.get.webapp.data", e);
         }
@@ -265,11 +265,11 @@ public class JAXWSWebappAdminClient {
         }
     }
 
-    public void downloadWarFileHandler(String fileName, HttpServletResponse response)
+    public void downloadWarFileHandler(String fileName,String webappType, HttpServletResponse response)
             throws AxisFault {
         try {
             ServletOutputStream out = response.getOutputStream();
-            DataHandler handler = webappAdminStub.downloadWarFileHandler(fileName);
+            DataHandler handler = webappAdminStub.downloadWarFileHandler(fileName, webappType);
             if (handler != null) {
                 response.setHeader("Content-Disposition", "fileName=" + fileName);
                 response.setContentType(handler.getContentType());

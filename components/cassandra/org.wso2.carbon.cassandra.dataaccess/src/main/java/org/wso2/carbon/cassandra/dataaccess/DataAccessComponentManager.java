@@ -115,7 +115,7 @@ public class DataAccessComponentManager {
                 if (inputStream != null) {
                     inputStream.close();
                 }
-            } catch (IOException ingored) {
+            } catch (IOException ignored) {
             }
         }
     }

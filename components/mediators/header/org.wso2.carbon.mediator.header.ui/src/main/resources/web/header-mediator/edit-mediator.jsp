@@ -93,7 +93,7 @@
             </tr>
             <tr>
                 <td width="20%"><fmt:message key="mediator.header.action"/> :</td>
-                <td width="80%">
+                <td width="80%" colspan="2">
                     <input type="radio" id="set" name="mediator.header.action" value="set"
                                         onclick="javascript: displayElement('mediator.header.value_row', true); displayElement('mediator.header.inlinexmltext_row', true);"
                         <%=headerMediator.getAction() == HeaderMediator.ACTION_SET ? "checked=\"checked\"": "" %>/>
@@ -138,7 +138,7 @@
                            <%=(type == 3) ? "checked=\"checked\"": "" %>/>
                     <fmt:message key="mediator.header.inlinexml"/><font style="color: red; font-size: 8pt;"> *</font>
                 </td>
-                <td width="80%">
+                <td width="80%" colspan="2">
                     <textarea rows="8" cols="50" id="mediator.header.inlinexmltext" name="mediator.header.inlinexmltext"  style="<%=(type == 3) ? "": "display:none;"%> " ><%=xml%></textarea>
                 </td>
             </tr>

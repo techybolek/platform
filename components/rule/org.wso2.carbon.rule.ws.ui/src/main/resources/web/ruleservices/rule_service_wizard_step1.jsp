@@ -25,12 +25,13 @@
     RuleService ruleService =
             ruleServiceAdminClient.getRuleServiceDescription(request);
 
+
     String serviceName = "";
     String description = "";
     String serviceScope = "";
     //serviceName = (ruleService.getName() == null) ? "" : ruleService.getName();
        // description = (ruleService.getDescription() == null) ? "" : ruleService.getDescription();
-    if(!ruleService.isEditable()){
+      if(!ruleService.isEditable()){
         serviceName = (ruleService.getName() == null) ? "" : ruleService.getName();
         description = (ruleService.getDescription() == null) ? "" : ruleService.getDescription();
         serviceScope = (ruleService.getScope() == null) ? "" : ruleService.getScope();

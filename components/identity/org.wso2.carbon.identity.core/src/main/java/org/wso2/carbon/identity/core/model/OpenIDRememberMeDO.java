@@ -17,12 +17,15 @@
 */
 package org.wso2.carbon.identity.core.model;
 
+import java.sql.Timestamp;
+
 public class OpenIDRememberMeDO {
 
     private String userName;
     private String openID;
     private String token;
-
+    private Timestamp timestamp;
+    
     public String getUserName() {
         return userName;
     }
@@ -40,5 +43,11 @@ public class OpenIDRememberMeDO {
     }
     public void setToken(String token) {
         this.token = token;
+    }
+	public Timestamp getTimestamp() {
+	    return timestamp;
+    }
+	public void setTimestamp(Timestamp timestamp) {
+	    this.timestamp = timestamp;
     }
 }

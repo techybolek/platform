@@ -29,6 +29,8 @@ public class APIMGTConfigReaderService {
     private String bamServerPassword;
     private boolean enabled;
     private String publisherClass;
+    private boolean googleAnalyticsTrackingEnabled;
+    private String googleAnalyticsTrackingID;
 
     public APIMGTConfigReaderService(APIManagerConfiguration config) {
         String enabledStr = config.getFirstProperty(APIMgtUsagePublisherConstants.API_USAGE_ENABLED);
@@ -38,6 +40,9 @@ public class APIMGTConfigReaderService {
         bamServerUser = config.getFirstProperty(APIMgtUsagePublisherConstants.API_USAGE_BAM_SERVER_USER);
         bamServerPassword = config.getFirstProperty(APIMgtUsagePublisherConstants.API_USAGE_BAM_SERVER_PASSWORD);
         publisherClass = config.getFirstProperty(APIMgtUsagePublisherConstants.API_USAGE_PUBLISHER_CLASS);
+        String googleAnalyticsEnabledStr = config.getFirstProperty(APIMgtUsagePublisherConstants.API_GOOGLE_ANALYTICS_TRACKING_ENABLED);
+        googleAnalyticsTrackingEnabled = googleAnalyticsEnabledStr != null && JavaUtils.isTrueExplicitly(googleAnalyticsEnabledStr);
+        googleAnalyticsTrackingID = config.getFirstProperty(APIMgtUsagePublisherConstants.API_GOOGLE_ANALYTICS_TRACKING_ID);
     }
 
     public String getBamServerThriftPort() {
@@ -60,8 +65,16 @@ public class APIMGTConfigReaderService {
         return enabled;
     }
 
-     public String getPublisherClass() {
+    public String getPublisherClass() {
         return publisherClass;
+    }
+     
+    public String getGoogleAnalyticsTrackingID() {
+ 		return googleAnalyticsTrackingID;
+ 	}
+    
+    public boolean isGoogleAnalyticsTrackingEnabled() {
+    	return googleAnalyticsTrackingEnabled;
     }
 
 }

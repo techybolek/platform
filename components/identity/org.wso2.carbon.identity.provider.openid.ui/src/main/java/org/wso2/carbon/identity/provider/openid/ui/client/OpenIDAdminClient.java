@@ -41,9 +41,10 @@ import java.util.Map;
 public class OpenIDAdminClient {
 
 	public final static String OPENID_ADMIN_COOKIE = "OPENID_ADMIN_COOKIE";
+	public final static String OPENID_PROVIDER_SERVICE = "OpenIDProviderService";
 	private OpenIDProviderServiceStub stub;
 	private String newCookieValue;
-    private boolean isUserApprovalBypassEnabled;
+	private boolean isUserApprovalBypassEnabled;
 	private static Log log = LogFactory.getLog(OpenIDHandler.class);
 
 	public String getNewCookieValue() {
@@ -56,7 +57,6 @@ public class OpenIDAdminClient {
 
 	public OpenIDAdminClient(ConfigurationContext context, String backendServerURL, String cookie)
                                                                               throws AxisFault {
-
 		if (backendServerURL.indexOf("${carbon.context}") != -1) {
 			String contextPath = null;
 			contextPath = context.getContextRoot();
@@ -65,8 +65,7 @@ public class OpenIDAdminClient {
 			}
 			backendServerURL = backendServerURL.replace("${carbon.context}", contextPath);
 		}
-
-		String serviceURL = backendServerURL + "OpenIDProviderService";
+		String serviceURL = backendServerURL + OPENID_PROVIDER_SERVICE;
 		stub = new OpenIDProviderServiceStub(context, serviceURL);
 		stub._getServiceClient().getOptions().setTimeOutInMilliSeconds(120 * 1000);
 		if (cookie != null) {
@@ -80,11 +79,31 @@ public class OpenIDAdminClient {
         }
 	}
 
+	/**
+	 * Returns info such as OpenID server URL, OpenID Identifier pattern etc
+	 * 
+	 * @param userName
+	 * @param openID
+	 * @return
+	 * @throws Exception
+	 */
 	public OpenIDProviderInfoDTO getOpenIDProviderInfo(String userName, String openID)
 	                                                                                  throws Exception {
 		return stub.getOpenIDProviderInfo(userName, openID);
 	}
 
+	
+	/**
+	 * Authenticates the OpenID User with the password
+	 * 
+	 * @param openId
+	 * @param password
+	 * @param session
+	 * @param request
+	 * @param response
+	 * @param useRememberMe
+	 * @return
+	 */
 	public boolean authenticateWithOpenID(String openId, String password, HttpSession session,
 	                                      HttpServletRequest request, HttpServletResponse response,
 	                                      boolean useRememberMe) {
@@ -170,10 +189,24 @@ public class OpenIDAdminClient {
 		return stub.getOpenIDAuthResponse(authRequest);
 	}
 
+	/**
+	 * Gets association response strings from the backend.
+	 * 
+	 * @param params
+	 * @return
+	 * @throws Exception
+	 */
 	public String getOpenIDAssociationResponse(OpenIDParameterDTO[] params) throws Exception {
 		return stub.getOpenIDAssociationResponse(params);
 	}
 
+	/**
+	 * Verifies the Response message in OpenID Dumb Mode
+	 * 
+	 * @param params
+	 * @return
+	 * @throws Exception
+	 */
 	public String verify(OpenIDParameterDTO[] params) throws Exception {
 		return stub.verify(params);
 	}

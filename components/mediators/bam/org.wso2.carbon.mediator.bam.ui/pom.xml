@@ -19,12 +19,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>bam-mediator</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.mediator.bam.ui</artifactId>
+    <version>4.0.5</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - BAM Mediator UI</name>
     <url>http://wso2.org</url>
@@ -50,6 +52,8 @@
                             !javax.xml.namespace,
                             javax.xml.namespace; version=0.0.0,
                             org.apache.axiom.om; version=0.0.0,
+                            org.wso2.carbon.mediator.service; version=0.0.0,
+                            org.wso2.carbon.mediator.service.ui; version=0.0.0,
                             org.wso2.carbon.mediator.bam.config.stub.*;version="${carbon.platform.package.import.version.range}",
                             *;resolution:=optional
                         </Import-Package>
@@ -82,7 +86,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediator.bam.config</artifactId>
-            <version>${wso2carbon.bam-mediator-config}</version>
+            <version>${carbon.platform.patch.version.405}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -100,7 +104,7 @@
     </dependencies>
 
     <properties>
-        <wso2carbon.bam-mediator-config>${wso2carbon.version}</wso2carbon.bam-mediator-config>
+        <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
         <wso2carbon.bam-mediator-config-stub>${wso2carbon.version}</wso2carbon.bam-mediator-config-stub>
     </properties>
 

@@ -23,7 +23,13 @@ import org.wso2.carbon.dataservices.common.DBConstants;
 import org.wso2.carbon.dataservices.common.DBConstants.*;
 import org.wso2.carbon.dataservices.core.DBUtils;
 import org.wso2.carbon.dataservices.core.DataServiceFault;
+import org.wso2.carbon.dataservices.core.custom.datasource.CustomQueryDataSourceReader;
+import org.wso2.carbon.dataservices.core.custom.datasource.CustomTabularDataSourceReader;
 import org.wso2.carbon.dataservices.core.engine.DataService;
+import org.wso2.carbon.dataservices.core.internal.DataServicesDSComponent;
+import org.wso2.carbon.ndatasource.core.CarbonDataSource;
+import org.wso2.carbon.ndatasource.core.DataSourceService;
+import org.wso2.carbon.ndatasource.rdbms.RDBMSDataSourceConstants;
 
 import javax.xml.namespace.QName;
 import java.util.Map;
@@ -59,8 +65,10 @@ public class ConfigFactory {
 			return getCarbonDataSourceConfig(dataService, configId, properties);
 		} else if (DataSourceTypes.WEB.equals(configType)) {
             return getWebConfig(dataService, configId, properties);
-        } else if (DataSourceTypes.CUSTOM.equals(configType)) {
-            return getCustomConfig(dataService, configId, properties);
+        } else if (DataSourceTypes.CUSTOM_TABULAR.equals(configType)) {
+            return getCustomTabularConfig(dataService, configId, properties);
+        } else if (DataSourceTypes.CUSTOM_QUERY.equals(configType)) {
+            return getCustomQueryConfig(dataService, configId, properties);
         }
 		
 		return null;
@@ -84,7 +92,6 @@ public class ConfigFactory {
 		return config;
 	}
 	
-	//added new method to get RDFConfig
 	private static RDFConfig getRDFConfig(DataService dataService, String configId, 
 			Map<String, String> properties) throws DataServiceFault {
 		RDFConfig config = new RDFConfig(dataService, configId, properties);
@@ -109,10 +116,16 @@ public class ConfigFactory {
         return config;
     }
     
-    private static CustomConfig getCustomConfig(DataService dataService, String configId,
+    private static TabularDataBasedConfig getCustomTabularConfig(DataService dataService, String configId,
             Map<String, String> properties) throws DataServiceFault {
-       CustomConfig config = new CustomConfig(dataService, configId, properties);
-       return config;
+        TabularDataBasedConfig config = new TabularDataBasedConfig(dataService, configId, properties);
+        return config;
+    }
+    
+    private static InlineCustomQueryBasedDSConfig getCustomQueryConfig(DataService dataService, String configId,
+            Map<String, String> properties) throws DataServiceFault {
+    	InlineCustomQueryBasedDSConfig config = new InlineCustomQueryBasedDSConfig(dataService, configId, properties);
+        return config;
     }
 
 	private static GSpreadConfig getGSpreadConfig(DataService dataService, String configId, 
@@ -121,11 +134,30 @@ public class ConfigFactory {
 		return config;
 	}
 	
-	private static CarbonDataSourceConfig getCarbonDataSourceConfig(DataService dataService, 
+	private static Config getCarbonDataSourceConfig(DataService dataService, 
 			String configId, Map<String, String> properties) throws DataServiceFault {
-		CarbonDataSourceConfig config = new CarbonDataSourceConfig(dataService, configId, 
-				properties);
-		return config;
+		DataSourceService dataSourceService = DataServicesDSComponent.getDataSourceService();
+		try {
+			String name = properties.get(DBConstants.CarbonDatasource.NAME);
+		    CarbonDataSource cds = dataSourceService.getDataSource(name);
+		    if (cds == null) {
+		    	throw new DataServiceFault("The Carbon data source '" + name + "' cannot be found");
+		    }
+		    String dsType = cds.getDSMInfo().getDefinition().getType();
+		    if (RDBMSDataSourceConstants.RDBMS_DATASOURCE_TYPE.equals(dsType) ||
+		    		CustomTabularDataSourceReader.DATA_SOURCE_TYPE.equals(dsType)) {
+		    	return new SQLCarbonDataSourceConfig(dataService, configId, properties);
+		    } else if (CustomQueryDataSourceReader.DATA_SOURCE_TYPE.equals(dsType)) {
+		    	return new CustomQueryCarbonDataSourceConfig(dataService, configId, properties);
+		    } else {
+		    	throw new DataServiceFault("Unsupported Carbon data source type '" + dsType + "'");
+		    }
+		} catch (DataServiceFault e) {
+			throw e;
+		} catch (Exception e) {
+			throw new DataServiceFault(e, "Error in creating Carbon data source: " + 
+					e.getMessage());
+		}
 	}
 	
 	private static String getConfigId(OMElement configEl) {
@@ -157,8 +189,10 @@ public class ConfigFactory {
 		    return DataSourceTypes.CARBON;
 		} else if (properties.get(DBConstants.WebDatasource.WEB_CONFIG) != null) {
             return DataSourceTypes.WEB;
-        } else if (properties.get(DBConstants.CustomDatasource.DATA_SOURCE_CLASS) != null) {
-            return DataSourceTypes.CUSTOM;
+        } else if (properties.get(DBConstants.CustomDataSource.DATA_SOURCE_TABULAR_CLASS) != null) {
+            return DataSourceTypes.CUSTOM_TABULAR;
+        } else if (properties.get(DBConstants.CustomDataSource.DATA_SOURCE_QUERY_CLASS) != null) {
+            return DataSourceTypes.CUSTOM_QUERY;
         }
 		throw new DataServiceFault("Cannot create config with properties: " + properties);
 	}

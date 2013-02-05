@@ -51,6 +51,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Date;
@@ -61,7 +62,7 @@ import java.util.List;
  * The task model object. Represents the task data.
  */
 @Entity
-@Table(name = "TASK")
+@Table(name = "HT_TASK")
 public class Task extends OpenJPAEntity implements TaskDAO {
 
     @Id
@@ -79,11 +80,11 @@ public class Task extends OpenJPAEntity implements TaskDAO {
      * When setting the task name, we convert QName to string. When getting name, caller must
      * convert name back to a QName.
      */
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "TASK_NAME", nullable = false)
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "TYPE", nullable = false)
+    @Column(name = "TASK_TYPE", nullable = false)
     private TaskType type;
 
     @Enumerated(EnumType.STRING)
@@ -190,13 +191,19 @@ public class Task extends OpenJPAEntity implements TaskDAO {
     /**
      * Skippable flag.
      */
-    @Column(name = "SKIPABLE")
+    @Column(name = "SKIPABLE", length = 1)
+    private String skipableStr = "N";
+
+    @Transient
     private Boolean skipable;
 
     /**
      * Escalated flag.
      */
-    @Column(name = "ESCALATED")
+    @Column(name = "ESCALATED", length = 1)
+    private String escalatedStr = "N";
+
+    @Transient
     private Boolean escalated;
 
     /**
@@ -480,12 +487,34 @@ public class Task extends OpenJPAEntity implements TaskDAO {
 
     @Override
     public Boolean isEscalated() {
-        return escalated;
+        return "Y".equalsIgnoreCase(escalatedStr);
     }
 
     @Override
     public void setEscalated(Boolean escalated) {
         this.escalated = escalated;
+        if( escalated) {
+            this.escalatedStr = "Y";
+        } else {
+            this.escalatedStr = "N";
+        }
+    }
+
+    public String getSkipableStr() {
+        return skipable ? "Y" : "N";
+    }
+
+    public void setSkipableStr(String skipableStr) {
+        this.skipableStr = skipableStr;
+        this.skipable = "Y".equalsIgnoreCase(skipableStr);
+    }
+
+    public String getEscalatedStr() {
+        return escalated ? "Y" : "N";
+    }
+
+    public void setEscalatedStr(String escalatedStr) {
+        this.escalatedStr = escalatedStr;
     }
 
     @Override
@@ -731,7 +760,7 @@ public class Task extends OpenJPAEntity implements TaskDAO {
 
     @Override
     public Boolean isSkipable() {
-        return this.skipable;
+        return "Y".equalsIgnoreCase(skipableStr);
     }
 
     @Override
@@ -742,6 +771,11 @@ public class Task extends OpenJPAEntity implements TaskDAO {
     @Override
     public void setSkipable(Boolean skipable) {
         this.skipable = skipable;
+        if( skipable) {
+            this.skipableStr = "Y";
+        } else {
+            this.skipableStr = "N";
+        }
     }
 
     @Override

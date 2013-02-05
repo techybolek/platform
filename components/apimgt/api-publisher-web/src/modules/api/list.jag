@@ -29,7 +29,12 @@ var getAPI = function (api) {
             bizOwnerMail:result[16],
             techOwner:result[17],
             techOwnerMail:result[18],
-            wadl:result[19]
+            wadl:result[19],
+            visibility:result[20],
+            roles:result[21],
+            epUsername:result[22],
+            epPassword:result[23],
+            endpointTypeSecured:result[24]
         };
         return {
             error:false,

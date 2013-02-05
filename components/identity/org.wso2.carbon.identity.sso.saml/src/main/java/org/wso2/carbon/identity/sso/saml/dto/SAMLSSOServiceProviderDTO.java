@@ -28,6 +28,7 @@ public class SAMLSSOServiceProviderDTO {
     private boolean useFullyQualifiedUsername;
     private boolean doSingleLogout;
     private boolean doSignAssertions;
+    private boolean doSignResponse;
     private String[] requestedClaims;
 
     public String getIssuer() {
@@ -78,10 +79,18 @@ public class SAMLSSOServiceProviderDTO {
         this.logoutURL = logoutURL;
     }
 
+    /**
+     * 
+     * @return
+     */
     public boolean isDoSignAssertions() {
         return doSignAssertions;
     }
 
+    /**
+     * 
+     * @param doSignAssertions
+     */
     public void setDoSignAssertions(boolean doSignAssertions) {
         this.doSignAssertions = doSignAssertions;
     }
@@ -106,6 +115,20 @@ public class SAMLSSOServiceProviderDTO {
      */
     public void setRequestedClaims(String[] requestedClaims) {
 	    this.requestedClaims = requestedClaims;
+    }
+
+	/**
+     * @return the doSignResponse
+     */
+    public boolean isDoSignResponse() {
+	    return doSignResponse;
+    }
+
+	/**
+     * @param doSignResponse the doSignResponse to set
+     */
+    public void setDoSignResponse(boolean doSignResponse) {
+	    this.doSignResponse = doSignResponse;
     }
 
 }

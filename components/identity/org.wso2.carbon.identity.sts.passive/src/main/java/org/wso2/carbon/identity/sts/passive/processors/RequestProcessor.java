@@ -42,10 +42,12 @@ import org.wso2.carbon.identity.sts.passive.ResponseToken;
 import org.wso2.carbon.identity.sts.passive.internal.IdentityPassiveSTSServiceComponent;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.security.keystore.KeyStoreAdmin;
 import org.wso2.carbon.security.keystore.service.KeyStoreData;
 import org.wso2.carbon.security.util.RampartConfigUtil;
 import org.wso2.carbon.security.util.ServerCrypto;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -61,13 +63,17 @@ public abstract class RequestProcessor {
 
     private static final Log log = LogFactory.getLog(RequestProcessor.class);
 
-    protected OMElement getRST(String appliesTo, String attrs) throws Exception {
+    protected OMElement getRST(String appliesTo, String attrs, String dialect) throws Exception {
         OMFactory factory = null;
         OMElement element = null;
         OMElement claims = null;
         STSClient client = null;
         String[] attributes = null;
         String requestType;
+
+        if(dialect == null){
+            dialect = UserCoreConstants.DEFAULT_CARBON_DIALECT;
+        }
 
         if (attrs != null) {
             attributes = attrs.split(",");
@@ -86,7 +92,7 @@ public abstract class RequestProcessor {
 
         if (attributes != null && attributes.length > 0) {
             claims = TrustUtil.createClaims(RahasConstants.VERSION_05_12, element,
-                                            "http://wso2.org");
+                                            dialect);
             for (int i = 0; i < attributes.length; i++) {
                 addClaimType(claims, attributes[i]);
             }
@@ -180,6 +186,9 @@ public abstract class RequestProcessor {
                     iterator = properties.entrySet().iterator();
                     while (iterator.hasNext()) {
                         Entry entry = (Entry) iterator.next();
+                        if(RegistryUtils.isHiddenProperty(entry.getKey().toString())){
+                            continue;
+                        }
                         stsSamlConfig.addTrustedServiceEndpointAddress((String) entry.getKey(),
                                                                        (String) ((List) entry.getValue()).get(0));
                     }

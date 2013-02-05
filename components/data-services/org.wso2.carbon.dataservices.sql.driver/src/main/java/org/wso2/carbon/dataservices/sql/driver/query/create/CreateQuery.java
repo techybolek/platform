@@ -53,6 +53,10 @@ public abstract class CreateQuery extends Query {
 
     private List<ColumnInfo> extractColumns(Queue<String> tokens,
                                             List<ColumnInfo> columns) throws SQLException {
+        if (tokens.isEmpty()) {
+            /* Returns when a user creates a sheet without defining any columns */
+            return columns;
+        }
         if (!Constants.COLUMN.equals(tokens.peek())) {
              throw new SQLException("Unable to extract columns");
         }

@@ -41,6 +41,23 @@ function addComment(path) {
     }, org_wso2_carbon_registry_info_ui_jsi18n["session.timed.out"]);
 }
 
+function listComment(path){
+    sessionAwareFunction(function() {
+        new Ajax.Request('../info/comment-ajaxprocessor.jsp', {
+            method: 'post',
+            parameters: {path: path, list: "true"},
+            onSuccess: function(transport) {
+                $('commentsList').innerHTML = transport.responseText;
+                alternateTableRows('commentsTable', 'tableEvenRow', 'tableOddRow');
+            },
+
+            onFailure: function(transport) {
+                showRegistryError(transport.responseText);
+            }
+        });
+    }, org_wso2_carbon_registry_info_ui_jsi18n["session.timed.out"]);
+}
+
 function applyTag(e) {
     var reason="";
 

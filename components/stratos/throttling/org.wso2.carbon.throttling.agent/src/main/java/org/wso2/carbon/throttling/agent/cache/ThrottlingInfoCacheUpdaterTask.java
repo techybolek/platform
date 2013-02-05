@@ -40,6 +40,7 @@ public class ThrottlingInfoCacheUpdaterTask implements Runnable {
     }
 
     public void run() {
+        log.info("Running throttling info cache updater task");
         Set<Integer> activeTenants = cache.getActiveTenants();
         for (Integer tenant : activeTenants) {
             String tenantValidationInfoResourcePath =
@@ -55,6 +56,9 @@ public class ThrottlingInfoCacheUpdaterTask implements Runnable {
                         String blocked =
                                 tenantValidationInfoResource.getProperty(MeteringAccessValidationUtils
                                         .generateIsBlockedPropertyKey(action));
+                        if(log.isDebugEnabled()){
+                            log.debug("Action: " + action + " blocked: " + blocked + " tenant: " + tenant);
+                        }
 
                         String blockMessage =
                                 tenantValidationInfoResource.getProperty(MeteringAccessValidationUtils

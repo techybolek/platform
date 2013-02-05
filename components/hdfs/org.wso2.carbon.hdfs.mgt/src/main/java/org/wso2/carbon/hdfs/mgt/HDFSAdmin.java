@@ -32,14 +32,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Todo Doc
+ * HDFS file system access service
  */
 public class HDFSAdmin extends AbstractAdmin {
 
     //private Configuration configuration = new Configuration(false);
     //set FS default user home directory.
     private static final String USER_HOME = "/user";
-
 
     /**
      * Mgt service return file and folder list of the give HDFS path
@@ -68,7 +67,7 @@ public class HDFSAdmin extends AbstractAdmin {
             //hdfsFS = dataAccessService.mountFileSystem(getClusterConfiguration());
             hdfsFS = dataAccessService.mountCurrentUserFileSystem();
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         FileStatus[] fileStatus = null;
         //FolderInformation[] folderInfo;
@@ -92,7 +91,7 @@ public class HDFSAdmin extends AbstractAdmin {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         System.out.println(folderInfo.toString());
         return folderInfo.toArray(new FolderInformation[folderInfo.size()]);
@@ -106,7 +105,7 @@ public class HDFSAdmin extends AbstractAdmin {
             //hdfsFS = dataAccessService.mountFileSystem(getClusterConfiguration());
             hdfsFS = dataAccessService.mountCurrentUserFileSystem();
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
         Path[] srcs = new Path[0];
@@ -114,7 +113,7 @@ public class HDFSAdmin extends AbstractAdmin {
             try {
                 srcs = FileUtil.stat2Paths(hdfsFS.globStatus(new Path(srcPath)), new Path(srcPath));
             } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             }
         }
         try {
@@ -123,7 +122,7 @@ public class HDFSAdmin extends AbstractAdmin {
                                       + "destination should be a directory.");
             }
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         Configuration configuration = new Configuration();
         configuration.set("io.file.buffer.size", Integer.toString(4096));
@@ -131,7 +130,7 @@ public class HDFSAdmin extends AbstractAdmin {
             try {
                 FileUtil.copy(hdfsFS,srcs[i], hdfsFS, new Path(dstPath), false, configuration);
             } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             }
         }
     }
@@ -151,7 +150,7 @@ public class HDFSAdmin extends AbstractAdmin {
             //hdfsFS = dataAccessService.mountFileSystem(getClusterConfiguration());
             hdfsFS = dataAccessService.mountCurrentUserFileSystem();
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
         try {
@@ -163,12 +162,10 @@ public class HDFSAdmin extends AbstractAdmin {
             //return hdfsFS.delete(new Path("filePath"),false);
             return hdfsFS.delete(new Path(filePath));
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
-
         return false;
     }
-
 
     /**
      * Delete the HDFS folder in the given path
@@ -186,7 +183,7 @@ public class HDFSAdmin extends AbstractAdmin {
             //hdfsFS = dataAccessService.mountFileSystem(getClusterConfiguration());
             hdfsFS = dataAccessService.mountCurrentUserFileSystem();
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
         try {
@@ -196,7 +193,7 @@ public class HDFSAdmin extends AbstractAdmin {
             //return hdfsFS.delete(new Path("folderPath"),true);
             return hdfsFS.delete(new Path(folderPath));
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
         return false;
@@ -220,7 +217,7 @@ public class HDFSAdmin extends AbstractAdmin {
             hdfsFS = dataAccessService.mountCurrentUserFileSystem();
             return hdfsFS.rename(new Path(srcPath), new Path(dstPath));
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
         return false;
@@ -245,7 +242,7 @@ public class HDFSAdmin extends AbstractAdmin {
             hdfsFS = dataAccessService.mountCurrentUserFileSystem();
             return hdfsFS.rename(new Path(srcPath), new Path(dstPath));
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
         return false;
@@ -260,7 +257,7 @@ public class HDFSAdmin extends AbstractAdmin {
             return hdfsFS.rename(new Path(srcPath), new Path(dstPath));
 
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
         return false;
@@ -275,7 +272,7 @@ public class HDFSAdmin extends AbstractAdmin {
             return hdfsFS.mkdirs(new Path(folderPath));
 
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         return false;
     }
@@ -294,7 +291,7 @@ public class HDFSAdmin extends AbstractAdmin {
                 return true;
             }
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         return false;
     }
@@ -334,7 +331,7 @@ public class HDFSAdmin extends AbstractAdmin {
             return hdfsFS.getFileStatus(new Path(fsPath)).getPermission().toString();
 
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
         return null;
@@ -350,7 +347,7 @@ public class HDFSAdmin extends AbstractAdmin {
             hdfsFS.setPermission(new Path(fsPath), new FsPermission(fsPermission));
 
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
     }
 
@@ -364,7 +361,7 @@ public class HDFSAdmin extends AbstractAdmin {
             hdfsFS.setOwner(new Path(fsPath), null, group);  //TO DO: validate the group / role
 
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
     }
@@ -378,9 +375,8 @@ public class HDFSAdmin extends AbstractAdmin {
             hdfsFS.setOwner(new Path(fsPath), owner, null);  //TO DO: validate the group / role
 
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
-
     }
 
 }

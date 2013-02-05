@@ -100,6 +100,11 @@ public class ServiceUnloader implements ArtifactUnloader {
                         // we can't delete the configs in the registry. so keep history..
                         existingSG.addParameter(CarbonConstants.KEEP_SERVICE_HISTORY_PARAM, "true");
                         axisConfig.removeServiceGroup(existingSG.getServiceGroupName());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Successfully removed actual Service Group : " +
+                                    existingSG.getServiceGroupName() + " Tenant Domain: " +
+                                    tenantDomain);
+                        }
                         // Create the Ghost service group using the file name
                         File ghostFile = GhostDeployerUtils.getGhostFile(service.getFileName()
                                                                                  .getPath(), axisConfig);
@@ -112,6 +117,11 @@ public class ServiceUnloader implements ArtifactUnloader {
                             // remove the service group from transit map
                             GhostDeployerUtils.removeServiceGroupFromTransitMap(ghostServiceGroup,
                                                                          axisConfig);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Successfully added Ghost Service Group : " +
+                                        ghostServiceGroup.getServiceGroupName() + " Tenant Domain: " +
+                                        tenantDomain);
+                            }
                         }
                     }
                 }

@@ -31,7 +31,7 @@ public final class LoggingConstants {
     public static final String USERNAME_KEY = "username";
 	public static final String PASSWORD_KEY = "password";
 	public static final String DEFUALT_CLUSTER_NAME = "TestCluster";
-    public static final String WSO2_STRATOS_MANAGER="WSO2 Stratos Manager";
+    public static final String WSO2_STRATOS_MANAGER="manager";
 
     public static final String LOG_FILE_PATTERN = "log.file.pattern";
     public static final String LOG_CONSOLE_PATTERN = "log.console.pattern";
@@ -117,10 +117,18 @@ public final class LoggingConstants {
     	public static final String CLUSTER ="cluster";
     	public static final String PUBLISHER_PASSWORD = "publisherPassword";
     	public static final String ARCHIVED_HOST = "archivedHost";
-    	public static final String ARCHIVED_USER = "archivedUser";
+        public static final String CONSISTENCY_LEVEL = "cassandraConsistencyLevel";
+        public static final String AUTO_DISCOVERY_ENABLE = "enable";
+        public static final String AUTO_DISCOVERY_DELAY = "delay";
+        public static final String RETRY_DOWNED_HOSTS = "retryDownedHosts";
+        public static final String RETRY_DOWNED_HOSTS_ENABLE = "enable";
+        public static final String RETRY_DOWNED_HOSTS_QUEUE = "queueSize";
+        public static final String AUTO_DISCOVERY = "cassandraAutoDiscovery";
+        public static final String ARCHIVED_USER = "archivedUser";
     	public static final String ARCHIVED_PASSWORD = "archivedPassword";
     	public static final String ARCHIVED_PORT = "archivedPort";
     	public static final String ARCHIVED_REALM = "archivedRealm";
+    	public static final String ARCHIVED_HDFS_PATH = "archivedHDFSPath";
     	public static final String HIVE_QUERY = "hiveQuery";
     }
     public static final class AppenderProperties {

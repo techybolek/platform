@@ -49,8 +49,19 @@ public class DeploymentSynchronizerAdmin extends AbstractAdmin {
         int tenantId = MultitenantUtils.getTenantId(getConfigContext());
         try {
             CarbonRepositoryUtils.persistConfiguration(config, tenantId);
-            DeploymentSynchronizer synchronizer = CarbonRepositoryUtils.
-                    newCarbonRepositorySynchronizer(tenantId);
+            DeploymentSynchronizer synchronizer = null;
+
+            try{
+                //Attempt to create a new Repository Synchronizer.
+                synchronizer = CarbonRepositoryUtils.
+                        newCarbonRepositorySynchronizer(tenantId);
+            }catch (DeploymentSynchronizerException e){
+                //If creation fails, disable dep-sync and persist configuration
+                config.setEnabled(false);
+                CarbonRepositoryUtils.persistConfiguration(config, tenantId);
+                throw e;
+            }
+
             if (synchronizer != null) {
                 synchronizer.start();
             } else {
@@ -58,7 +69,7 @@ public class DeploymentSynchronizerAdmin extends AbstractAdmin {
                 log.warn(msg);
                 throw new DeploymentSynchronizerException(msg);
             }
-        } catch (RegistryException e) {
+        }   catch (RegistryException e) {
             handleException("Error while enabling deployment synchronizer", e);
         }
     }

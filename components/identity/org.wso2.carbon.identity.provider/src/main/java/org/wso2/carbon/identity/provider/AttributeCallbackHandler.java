@@ -41,6 +41,7 @@ import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.claim.Claim;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.namespace.QName;
 import java.util.*;
@@ -57,17 +58,26 @@ public class AttributeCallbackHandler implements SAMLCallbackHandler {
         OMElement claimElem = null;
         String userIdentifier = null;
         IdentityAttributeService[] attributeCallbackServices = null;
-
+        
         try {
             if (callback instanceof SAMLAttributeCallback) {
                 attrCallback = (SAMLAttributeCallback) callback;
                 data = attrCallback.getData();
                 claimElem = data.getClaimElem();
                 userIdentifier = data.getPrincipal().getName();
-                loadClaims(userIdentifier);
+                loadClaims(claimElem, userIdentifier);
                 processClaimData(data, claimElem);
                 populateClaimValues(userIdentifier, attrCallback);
 
+                attributeCallbackServices = IdentityAttributeServiceStore.getAttributeServices();
+                for (int i = 0; i < attributeCallbackServices.length; i++) {
+                    try {
+                        attributeCallbackServices[i].handle(attrCallback);
+                    } catch (Exception e) {
+                        log.error("Error occuerd while calling attribute callback", e);
+                    }
+                }
+                
                 if (RahasConstants.TOK_TYPE_SAML_20.equals(data.getTokenType())) {
                     if (attrCallback.getSAML2Attributes() == null
                             || attrCallback.getSAML2Attributes().length == 0) {
@@ -81,15 +91,6 @@ public class AttributeCallbackHandler implements SAMLCallbackHandler {
                                 "https://rahas.apache.org/saml/attrns", null, -1, Arrays
                                         .asList(new String[]{"Colombo/Rahas"}));
                         attrCallback.addAttributes(attribute);
-                    }
-                }
-
-                attributeCallbackServices = IdentityAttributeServiceStore.getAttributeServices();
-                for (int i = 0; i < attributeCallbackServices.length; i++) {
-                    try {
-                        attributeCallbackServices[i].handle(attrCallback);
-                    } catch (Exception e) {
-                        log.error("Error occuerd while calling attribute callback", e);
                     }
                 }
             }
@@ -120,7 +121,47 @@ public class AttributeCallbackHandler implements SAMLCallbackHandler {
         return attribute;
     }
 
+    /**
+     * This method loads claim according to the claim dialect that is defined in the request
+     * 
+     * @param claimsElement
+     * @param userIdentifier
+     * @throws IdentityProviderException
+     */
+    private void loadClaims(OMElement claimsElement, String userIdentifier) throws IdentityProviderException {
+        IdentityClaimManager claimManager = null;
+        Claim[] claims = null;
+        String claimDialect = null;
+
+        if(claimsElement.getNamespace() != null){
+            claimDialect = claimsElement.
+                getAttributeValue(new QName(claimsElement.getNamespace().getNamespaceURI(), "Dialect"));
+        }
+
+        if(claimDialect == null || claimDialect.trim().length() == 0){
+            claimDialect = UserCoreConstants.DEFAULT_CARBON_DIALECT;    
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Loading claims");
+        }
+
+        try {
+            claimManager = IdentityClaimManager.getInstance();
+            claims = claimManager.getAllSupportedClaims(claimDialect,
+                    IdentityTenantUtil.getRealm(null, userIdentifier));
+            for (int i = 0; i < claims.length; i++) {
+                Claim temp = claims[i];
+                supportedClaims.put(temp.getClaimUri(), temp);
+            }
+        } catch (IdentityException e) {
+            log.error("Error while loading claims", e);
+            throw new IdentityProviderException("Error while loading claims", e);
+        }
+    }
+
     protected void loadClaims(String userIdentifier) throws IdentityProviderException {
+
         IdentityClaimManager claimManager = null;
         Claim[] claims = null;
 
@@ -227,7 +268,8 @@ public class AttributeCallbackHandler implements SAMLCallbackHandler {
         Map<String, String> mapValues = null;
 
         try {
-            mapValues = connector.getUserClaimValues(userId, claimList.toArray(claimArray), null);
+            mapValues = connector.getUserClaimValues(MultitenantUtils.getTenantAwareUsername(userId),
+                                                                claimList.toArray(claimArray), null);
             ite = requestedClaims.values().iterator();
             while (ite.hasNext()) {
                 SAMLAttribute attribute = null;
@@ -236,13 +278,16 @@ public class AttributeCallbackHandler implements SAMLCallbackHandler {
                 claimData.setValue(mapValues.get(claimData.getUri()));
                 if (claimData.getValue() != null) {
                     if (RahasConstants.TOK_TYPE_SAML_20.equals(rahasData.getTokenType())) {
-                        saml2Attribute = getSAML2Attribute(claimData.getUri(), claimData.getValue(), claimData.getUri());
+                        saml2Attribute = getSAML2Attribute(claimData.getUri(),
+                                claimData.getValue(), claimData.getUri());
                         callback.addAttributes(saml2Attribute);
                     } else {
-                        attribute = new SAMLAttribute(supportedClaims.get(claimData.getUri())
-                                .getDisplayTag(), claimData.getUri(), null, -1, Arrays
-                                .asList(new String[]{claimData.getValue()}));
-                        callback.addAttributes(attribute);
+                        if (supportedClaims.get(claimData.getUri()) != null) {
+                            attribute = new SAMLAttribute(supportedClaims.get(claimData.getUri())
+                                    .getDisplayTag(), claimData.getUri(), null, -1,
+                                    Arrays.asList(new String[] { claimData.getValue() }));
+                            callback.addAttributes(attribute);
+                        }
                     }
                 }
             }

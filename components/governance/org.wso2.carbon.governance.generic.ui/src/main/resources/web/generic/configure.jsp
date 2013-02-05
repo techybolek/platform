@@ -125,7 +125,7 @@
 <div id="middle">
     <h2><fmt:message key="configure.artifacts"><fmt:param value="<%=request.getParameter("pluralLabel")%>"/></fmt:message></h2>
     <div id="workArea">
-        <form id="generic.config.form" method="post" action="../generic/configure_ajaxprocessor.jsp">
+        <form id="generic.config.form" method="post" action="configure_rxt.jsp">
             <input type="hidden" name="add_edit_region" value="<%=request.getParameter("add_edit_region")%>"/>
                 <input type="hidden" name="add_edit_item" value="<%=request.getParameter("add_edit_item")%>"/>
                 <input type="hidden" name="region" value="<%=request.getParameter("region")%>"/>

@@ -22,11 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>appfactory</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.appfactory.config.reader.xpath.ext</artifactId>
+    <version>1.0.2</version>
     <packaging>bundle</packaging>
     <name>WSO2 Appfactory - Config Reader XPath Ext</name>
     <description>Appfactory Config Reader XPath Ext for WSO2 Appfactory</description>
@@ -71,7 +73,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.appfactory.common</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -80,6 +82,5 @@
             <version>1.2.11.wso2v2</version>
             <scope>provided</scope>
         </dependency>
-
     </dependencies>
 </project>

@@ -18,15 +18,16 @@
  */
 package org.wso2.carbon.governance.lcm.listener;
 
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
-import org.wso2.carbon.core.services.callback.*;
-import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.services.callback.LoginEvent;
+import org.wso2.carbon.core.services.callback.LoginListener;
+import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.core.Registry;
 
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
 public class LifecycleLoader implements LoginListener {
     
@@ -40,14 +41,14 @@ public class LifecycleLoader implements LoginListener {
                 return;
             }
             initializedTenants.add(loginEvent.getTenantId());
-            SuperTenantCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.startTenantFlow();
             try {
-                SuperTenantCarbonContext.getCurrentContext().setTenantId(loginEvent.getTenantId());
-                SuperTenantCarbonContext.getCurrentContext().setUsername(loginEvent.getUsername());
+                PrivilegedCarbonContext.getCurrentContext().setTenantId(loginEvent.getTenantId());
+                PrivilegedCarbonContext.getCurrentContext().setUsername(loginEvent.getUsername());
                 CommonUtil.addDefaultLifecyclesIfNotAvailable(configRegistry,
-                        CommonUtil.getRootSystemRegistry());
+                        CommonUtil.getRootSystemRegistry(loginEvent.getTenantId()));
             } finally {
-                SuperTenantCarbonContext.endTenantFlow();
+                PrivilegedCarbonContext.endTenantFlow();
             }
         } catch (Exception e) {
             String msg = "Error in adding the default lifecycles";

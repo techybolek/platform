@@ -2,7 +2,6 @@
     <registry provider="org.wso2.carbon.mediation.registry.WSO2Registry">
         <parameter name="cachableDuration">15000</parameter>
     </registry>
-    <endpoint key ="conf:/endpoints/registry_endpoint.xml"/>
 
     <sequence name="logCategoryTestSequence">
         <in>
@@ -10,9 +9,7 @@
                 <property name="trace_custom" value="*****IN-LOGGING AT TRACE LEVEL-CUSTOM LEVEL*****"/>
             </log>
             <send>
-                <endpoint>
-                    <address uri="http://localhost:9000/services/SimpleStockQuoteService"/>
-                </endpoint>
+                <endpoint key="conf:/endpoints/registry_endpoint.xml"/>
             </send>
         </in>
         <out>

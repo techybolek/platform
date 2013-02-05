@@ -64,7 +64,7 @@ public class PasswordUtil {
             UserStoreManager userStoreManager = IdentityMgtServiceComponent.
                                     getRealmService().getTenantUserRealm(tenant).getUserStoreManager();
 
-            userStoreManager.updateCredential(userName, password, null);
+            userStoreManager.updateCredentialByAdmin(userName, password);
             if(log.isDebugEnabled()){
                 String msg = "Password is updated for  user: " + userName;
                 if (tenantDomain != null && tenantDomain.trim().length() > 0) {

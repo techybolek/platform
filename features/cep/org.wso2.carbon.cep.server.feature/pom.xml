@@ -22,13 +22,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>cep-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.cep.server.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - CEP Server Feature</name>
+    <version>4.0.5</version>
     <url>http://wso2.org</url>
     <description>
         This feature contains the bundles required for Back-end CEP functionality
@@ -37,21 +39,37 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cep.core</artifactId>
+            <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cep.admin</artifactId>
-            <version>${wso2carbon.version.cep}</version>
+            <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cep.siddhi</artifactId>
-            <version>${wso2carbon.version.cep}</version>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.siddhi</groupId>
-            <artifactId>siddhi</artifactId>
-            <version>1.0.0-SNAPSHOT.wso2v1</version>
+            <artifactId>siddhi-api</artifactId>
+            <version>1.0.1-wso2v1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-core</artifactId>
+            <version>1.0.1-wso2v1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-query</artifactId>
+            <version>1.0.1-wso2v1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hazelcast.wso2</groupId>
+            <artifactId>hazelcast</artifactId>
+            <version>2.2.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>joda-time.wso2</groupId>
@@ -61,16 +79,27 @@
         <dependency>
             <groupId>antlr.wso2</groupId>
             <artifactId>antlr</artifactId>
-            <version>2.7.7.wso2v1</version>
+            <version>3.2.0.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>org.antlr.wso2</groupId>
             <artifactId>antlr-runtime</artifactId>
-            <version>3.1.1.wso2v1</version>
+            <version>3.2.0.wso2v1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava.wso2</groupId>
+            <artifactId>guava</artifactId>
+            <version>12.0.0.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.brokermanager.server.feature</artifactId>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.cep.statistics.server.feature</artifactId>
+            <version>4.0.2</version>
             <type>zip</type>
         </dependency>
         <dependency>
@@ -120,7 +149,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.cep.server</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server
@@ -130,23 +159,30 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cep.core</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cep.admin</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cep.siddhi</bundleDef>
-                                <bundleDef>org.wso2.siddhi:siddhi</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cep.core:${carbon.platform.patch.version.405}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cep.admin:${carbon.platform.patch.version.405}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cep.siddhi:${carbon.platform.patch.version.402}</bundleDef>
+                                <bundleDef>org.wso2.siddhi:siddhi-api</bundleDef>
+                                <bundleDef>org.wso2.siddhi:siddhi-core</bundleDef>
+                                <bundleDef>org.wso2.siddhi:siddhi-query</bundleDef>
+                                <bundleDef>com.hazelcast.wso2:hazelcast</bundleDef>
+                                <bundleDef>com.google.guava.wso2:guava</bundleDef>
                                 <bundleDef>joda-time.wso2:joda-time</bundleDef>
                                 <bundleDef>antlr.wso2:antlr</bundleDef>
                                 <bundleDef>org.antlr.wso2:antlr-runtime</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>
-                                    org.wso2.carbon.core.server:${wso2carbon.version}
+                                    org.wso2.carbon.core.server:${carbon.platform.patch.version.402}
                                 </importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.brokermanager.server:${wso2carbon.version}
+                                    org.wso2.carbon.brokermanager.server:${carbon.platform.patch.version.402}
                                 </importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.broker.server:${wso2carbon.version}
+                                    org.wso2.carbon.broker.server:${carbon.platform.patch.version.402}
+                                </importFeatureDef>
+                                <importFeatureDef>
+                                    org.wso2.carbon.cep.statistics.server:${carbon.platform.patch.version.402}
                                 </importFeatureDef>
                             </importFeatures>
                         </configuration>
@@ -154,5 +190,11 @@
                 </executions>
             </plugin>
         </plugins>
+
     </build>
+
+    <properties>
+        <carbon.platform.patch.version.402>4.0.2</carbon.platform.patch.version.402>
+        <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
+    </properties>
 </project>

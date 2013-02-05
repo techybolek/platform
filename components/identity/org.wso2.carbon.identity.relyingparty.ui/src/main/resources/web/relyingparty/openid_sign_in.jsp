@@ -200,24 +200,6 @@
                     </form>
                 </div>
             </td>
-            <td style="width:50%">
-                <div id="loginbox" class="identity-box" style="height:160px;">
-                    <strong><fmt:message key='signin.with.infocard'/></strong>
-
-                    <h2></h2>
-                    <%
-                        String openIdAssociateLink = "openid_associate_infocard_signin.jsp";
-                        if (cssLocation != null) {
-                            openIdAssociateLink = openIdAssociateLink + "?forwardPage=" +
-                                    URLEncoder.encode(forwardPage, "UTF-8") +
-                                    "&css=" + URLEncoder.encode(cssLocation, "UTF-8") + "&title=" +
-                                    URLEncoder.encode(pageTitle, "UTF-8");
-                        }
-                    %>
-                    <a href="<%=openIdAssociateLink%>"><img
-                            src="images/infocard-logo.png" border="0"></a>
-                </div>
-            </td>
         </tr>
     </table>
 

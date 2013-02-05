@@ -1,27 +1,14 @@
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.BucketDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.ExpressionDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.InputDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.MapPropertyDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.OutputDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.OutputElementMappingDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.OutputMapMappingDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.OutputTupleMappingDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.OutputXMLMappingDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.QueryDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.TuplePropertyDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.XMLPropertyDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.XpathDefinitionDTO" %>
+<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.*" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="java.util.HashMap" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.CEPEngineProviderConfigPropertyDTO" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jstl/fmt" %>
 <fmt:bundle basename="org.wso2.carbon.cep.ui.i18n.Resources">
 <link type="text/css" href="../dialog/js/jqueryui/tabs/ui.all.css" rel="stylesheet"/>
+<link type="text/css" href="../CEP/css/buckets.css" rel="stylesheet"/>
 <script type="text/javascript" src="../dialog/js/jqueryui/tabs/jquery-1.2.6.min.js"></script>
 <script type="text/javascript"
         src="../dialog/js/jqueryui/tabs/jquery-ui-1.6.custom.min.js"></script>
 <script type="text/javascript" src="../dialog/js/jqueryui/tabs/jquery.cookie.js"></script>
-<script type="text/javascript" src="js/expression_utils.js"></script>
 <script type="text/javascript">
     jQuery(document).ready(function () {
         initSections('');
@@ -177,11 +164,22 @@
 %>
 
 <div id="workArea">
-<div class="sectionSeperator togglebleTitle"><fmt:message key="bucket.info"/></div>
-<div class="sectionSub">
-    <table class="carbonFormTable">
+<table class="styledLeft noBorders spacer-bot" style="width:100%">
+<thead>
         <tr>
-            <td class="leftCol-med labelField"><fmt:message key="bucket.name"/></td>
+    <th><fmt:message key="bucket.info"/></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="formRaw">
+<table class="normal" align="" style="width:100%">
+    <tbody>
+    <tr>
+
+        <td class="leftCol-small labelField" for="bucketName"><fmt:message
+                key="bucket.name"/><span
+                class="required">*</span></td>
             <td><input id="bucketName" type="text" readonly="true" value="<%=bucketName%>"/>
             </td>
         </tr>
@@ -217,6 +215,11 @@
                 <fmt:message
                         key="siddhi.persistence.snapshot.time.interval.minutes"/>
                 <%
+                } else if (engineProviderConfigProperties[k].getNames() != null && "siddhi.enable.distributed.processing".equals(engineProviderConfigProperties[k].getNames())) {
+                %>
+                <fmt:message
+                        key="siddhi.enable.distributed.processing"/>
+                <%
                 } else {
                 %>
                 <%=engineProviderConfigProperties[k].getNames()%>
@@ -227,7 +230,7 @@
             <td>
                 <input id="providerConfig<%="::"+engineProvider+"::"+engineProviderConfigProperties[k].getNames()%>"
                        type="text" readonly="true"
-                       value="<%=engineProviderConfigProperties[k].getValues().equals("")?"":engineProviderConfigProperties[k].getValues().substring(1,engineProviderConfigProperties[k].getValues().length()-1)%>"/>
+                       value="<%=engineProviderConfigProperties[k].getValues()%>"/>
             </td>
         </tr>
         <%
@@ -235,136 +238,150 @@
 
             }
         %>
+    </tbody>
     </table>
-</div>
+
 <div class="sectionSeperator togglebleTitle"><fmt:message key="inputs"/></div>
 <div class="sectionSub">
-    <table class="carbonFormTable">
+<table class="normal" style="width:100%">
 
         <%
             if (inputs != null) {
                 for (InputDTO input : inputs) {
                     XpathDefinitionDTO[] xpathDefinitions = null;
-                    XMLPropertyDTO[] xmlProperties = null;
-                    TuplePropertyDTO[] tupleProperties = null;
-                    MapPropertyDTO[] mapProperties = null;
+                    InputXMLPropertyDTO[] xmlProperties = null;
+                    InputTuplePropertyDTO[] tupleProperties = null;
+                    InputMapPropertyDTO[] mapProperties = null;
                     String stream = "";
+                    String queryEventType = "";
                     if (input.getInputXMLMappingDTO() != null) {
                         inputMapping = XML;
                         xpathDefinitions = input.getInputXMLMappingDTO().getXpathDefinition();
                         xmlProperties = input.getInputXMLMappingDTO().getProperties();
                         stream = input.getInputXMLMappingDTO().getStream();
+                        queryEventType = input.getInputXMLMappingDTO().getQueryEventType();
                     }
                     if (input.getInputTupleMappingDTO() != null) {
                         inputMapping = TUPLE;
                         tupleProperties = input.getInputTupleMappingDTO().getProperties();
                         stream = input.getInputTupleMappingDTO().getStream();
+                        queryEventType = input.getInputTupleMappingDTO().getQueryEventType();
+
                     }
                     if (input.getInputMapMappingDTO() != null) {
                         inputMapping = MAP;
                         mapProperties = input.getInputMapMappingDTO().getProperties();
                         stream = input.getInputMapMappingDTO().getStream();
+                        queryEventType = input.getInputMapMappingDTO().getQueryEventType();
+
                     }
 
         %>
         <tr>
             <td>
-                <div class="sectionSeperator togglebleTitle"><fmt:message key="input"/></div>
+                <div class="sectionSeperator togglebleTitle"><%=input.getTopic()%>&nbsp;<fmt:message key="input"/></div>
                 <div class="sectionSub">
-                    <table class="carbonFormTable">
-                        <tr>
-                            <td class="leftCol-med labelField"><fmt:message key="input.topic"/></td>
-                            <td><input type="text" readonly="true" id="inputTopic"
-                                       value="<%=input.getTopic()%>"></td>
-                        </tr>
-                        <tr>
-                            <td class="leftCol-med labelField"><fmt:message key="broker.name"/></td>
-                            <td><input type="text" readonly="true" id="inputBrokerName"
-                                       value="<%=input.getBrokerName()%>"></td>
-                        </tr>
+    <table class="normal" style="width:100%">
+        <tr>
+            <td class="leftCol-small labelField"><fmt:message key="input.topic"/></td>
+            <td><input type="text" readonly="true" id="inputTopic"
+                       value="<%=input.getTopic()%>"></td>
+        </tr>
+        <tr>
+            <td class="leftCol-small labelField"><fmt:message key="broker.name"/></td>
+            <td><input type="text" readonly="true" id="inputBrokerName"
+                       value="<%=input.getBrokerName()%>"></td>
+        </tr>
 
-                        <tr>
-                            <td colspan="2">
-                                <div class="heading_A"><fmt:message
-                                        key="input.mapping.stream"/></div>
-                            </td>
-                        <tr>
-                            <td class="leftCol-med labelField"><fmt:message key="stream"/></td>
-                            <td><input type="text" readonly="true" id="mappingStream"
-                                       value="<%=stream%>">
-                            </td>
-                        </tr>
-                        <%if (inputMapping == XML) {%>
-                        <tr>
+        <tr>
+            <td colspan="2">
+                <div class="heading_A"><fmt:message
+                        key="input.mapping.stream"/></div>
+            </td>
+        </tr>
+        <tr>
+            <td class="leftCol-med labelField"><fmt:message key="stream"/></td>
+            <td><input type="text" readonly="true" id="mappingStream"
+                       value="<%=stream%>">
+            </td>
+        </tr>
+        <tr>
+            <td class="leftCol-small labelField"><fmt:message key="query.event.type"/></td>
+            <td><input type="text" readonly="true" id="eventClassName"
+                       value="<%=queryEventType%>">
+            </td>
+        </tr>
+        <%if (inputMapping == XML) {%>
+        <tr>
 
-                            <td colspan="2">
-                                <div class="heading_B"><fmt:message key="xml.mapping"/></div>
-                            </td>
+            <td colspan="2">
+                <div class="heading_B"><fmt:message key="xml.mapping"/></div>
+            </td>
 
-                        </tr>
-                        <tr>
-                            <td colspan="2"><fmt:message key="xpath_definition"/></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                <table style="width:100%" class="styledLeft">
-                                    <thead>
-                                    <th class="leftCol-med"><fmt:message key="prefix"/></th>
-                                    <th class="leftCol-med"><fmt:message key="namespace"/></th>
-                                    </thead>
-                                    <tbody>
-                                    <% if (xpathDefinitions != null) {
-                                        for (XpathDefinitionDTO xpathDefinition : xpathDefinitions) {
-                                    %>
-                                    <tr>
-                                        <td><%=xpathDefinition.getPrefix()%>
-                                        </td>
-                                        <td><%=xpathDefinition.getNamespace()%>
-                                        </td>
-                                    </tr>
-                                    <%
-                                            }
-                                        }
-                                    %>
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="middle-header"><fmt:message
-                                    key="property"/></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                <table class="styledLeft" style="width:100%">
-                                    <thead>
-                                    <th class="leftCol-med"><fmt:message
-                                            key="property.name"/></th>
-                                    <th class="leftCol-med"><fmt:message
-                                            key="property.xpath"/></th>
-                                    <th class="leftCol-med"><fmt:message
-                                            key="property.type"/></th>
-                                    </thead>
-                                    <tbody>
-                                    <% if (xmlProperties != null) {
-                                        for (XMLPropertyDTO property : xmlProperties) {
-                                    %>
-                                    <tr>
-                                        <td><%=property.getName()%>
-                                        </td>
-                                        <td><%=property.getXpath()%>
-                                        </td>
-                                        <td><%=property.getType()%>
-                                        </td>
-                                    </tr>
-                                    <%
-                                            }
-                                        }
-                                    %>
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
+        </tr>
+        <tr>
+            <td colspan="2"><fmt:message key="xpath_definition"/></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <table style="width:100%" class="styledLeft">
+                    <thead>
+                    <th class="leftCol-small"><fmt:message key="prefix"/></th>
+                    <th class="leftCol-small"><fmt:message key="namespace"/></th>
+                    </thead>
+                    <tbody>
+                    <% if (xpathDefinitions != null) {
+                        for (XpathDefinitionDTO xpathDefinition : xpathDefinitions) {
+                    %>
+                    <tr>
+                        <td><%=xpathDefinition.getPrefix()%>
+                        </td>
+                        <td><%=xpathDefinition.getNamespace()%>
+                        </td>
+                    </tr>
+                    <%
+                            }
+                        }
+                    %>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2"><fmt:message
+                    key="property"/></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <table class="styledLeft" style="width:100%">
+                    <thead>
+                    <th class="leftCol-small"><fmt:message
+                            key="property.name"/></th>
+                    <th class="leftCol-small"><fmt:message
+                            key="property.xpath"/></th>
+                    <th class="leftCol-small"><fmt:message
+                            key="property.type"/></th>
+                    </thead>
+                    <tbody>
+                    <% if (xmlProperties != null) {
+                        for (InputXMLPropertyDTO property : xmlProperties) {
+                    %>
+                    <tr>
+                        <td><%=property.getName()%>
+                        </td>
+                        <td><%=property.getXpath()%>
+                        </td>
+                        <td><%=property.getType()%>
+                        </td>
+                    </tr>
+                    <%
+                            }
+                        }
+                    %>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
 
                         <%
                             }
@@ -383,30 +400,34 @@
                             <td colspan="2">
                                 <table class="styledLeft" style="width:100%">
                                     <thead>
-                                    <th class="leftCol-med"><fmt:message
-                                            key="property.name"/></th>
-                                    <th class="leftCol-med"><fmt:message
-                                            key="property.data.type"/></th>
-                                    <th class="leftCol-med"><fmt:message
-                                            key="property.type"/></th>
-                                    </thead>
-                                    <tbody>
-                                    <% if (tupleProperties != null) {
-                                        for (TuplePropertyDTO property : tupleProperties) {
-                                    %>
-                                    <tr>
-                                        <td><%=property.getName()%>
-                                        </td>
-                                        <td><%=property.getDataType()%>
-                                        </td>
-                                        <td><%=property.getType()%>
-                                        </td>
-                                    </tr>
-                                    <%
-                                            }
-                                        }
-                                    %>
-                                    </tbody>
+                    <th class="leftCol-small"><fmt:message
+                            key="property.name"/></th>
+                    <th class="leftCol-small"><fmt:message
+                            key="property.input.name"/></th>
+                    <th class="leftCol-small"><fmt:message
+                            key="property.input.data.type"/></th>
+                    <th class="leftCol-small"><fmt:message
+                            key="property.type"/></th>
+                    </thead>
+                    <tbody>
+                    <% if (tupleProperties != null) {
+                        for (InputTuplePropertyDTO property : tupleProperties) {
+                    %>
+                    <tr>
+                        <td><%=property.getName()%>
+                        </td>
+                        <td><%=property.getInputName()%>
+                        </td>
+                        <td><%=property.getInputDataType()%>
+                        </td>
+                        <td><%=property.getType()%>
+                        </td>
+                    </tr>
+                    <%
+                            }
+                        }
+                    %>
+                    </tbody>
 
                                 </table>
                             </td>
@@ -428,17 +449,21 @@
                             <td colspan="2">
                                 <table class="styledLeft" style="width:100%">
                                     <thead>
-                                    <th class="leftCol-med"><fmt:message
-                                            key="property.name"/></th>
-                                    <th class="leftCol-med"><fmt:message
+                    <th class="leftCol-small"><fmt:message
+                            key="property.name"/></th>
+                    <th class="leftCol-small"><fmt:message
+                            key="property.input.name"/></th>
+                    <th class="leftCol-small"><fmt:message
                                             key="property.type"/></th>
                                     </thead>
                                     <tbody>
                                     <% if (mapProperties != null) {
-                                        for (MapPropertyDTO property : mapProperties) {
+                                        for (InputMapPropertyDTO property : mapProperties) {
                                     %>
                                     <tr>
                                         <td><%=property.getName()%>
+                                        </td>
+                                        <td><%=property.getInputName()%>
                                         </td>
                                         <td><%=property.getType()%>
                                         </td>
@@ -465,7 +490,7 @@
 </div>
 <div class="sectionSeperator togglebleTitle"><fmt:message key="queries"/></div>
 <div class="sectionSub">
-<table class="carbonFormTable">
+<table class="normal" style="width:100%">
 
         <%
     if (queryHashMap != null) {
@@ -473,80 +498,42 @@
         for (QueryDTO query : queryHashMap.values()) {
             ExpressionDTO expression = null;
             OutputDTO output = null;
-            OutputElementMappingDTO elementMapping = null;
             OutputXMLMappingDTO xmlMapping = null;
+            OutputTextMappingDTO textMapping = null;
             OutputTupleMappingDTO tupleMapping = null;
             OutputMapMappingDTO mapMapping = null;
-            boolean inline;
             expression = query.getExpression();
             output = query.getOutput();
             if (output != null) {
-                elementMapping = output.getOutputElementMapping();
                 xmlMapping = output.getOutputXmlMapping();
+                textMapping = output.getOutputTextMapping();
                 tupleMapping = output.getOutputTupleMapping();
                 mapMapping = output.getOutputMapMapping();
             }
-            if (expression.getType().equals("registry")) {
-                inline = false;
-            } else {
-                inline = true;
-            }
-            String inlineDisplay = inline ? "" : "display:none;";
-            String registryDisplay = inline ? "display:none;" : "";
-            String key = expression.getText();
 %>
 <tr>
 <td>
 
-<div class="sectionSeperator togglebleTitle"><fmt:message key="query"/></div>
+<div class="sectionSeperator togglebleTitle"><%=query.getName()%>&nbsp;<fmt:message key="query"/></div>
 <div class="sectionSub">
-<table class="carbonFormTable">
+<table class="normal" style="width:100%" >
 
 <tr>
 
-    <td class="leftCol-med labelField"><fmt:message key="query.name"/></td>
+    <td class="leftCol-small labelField"><fmt:message key="query.name"/></td>
     <td><input class="longInput" type="text" id="queryName" readonly="true"
                value="<%=query.getName()%>"></td>
 
 </tr>
-<tr>
-    <td class="leftCol-med labelField"><fmt:message key="query.as"/></td>
-    <td>
-        <input type="radio" checked="true" value="inline"
-               name="expressionType"
-               id="expressioninlinedRd" disabled="disabled" <%if (inline){%>
-               checked="checked"<%}%>>
-        <label for="expressioninlinedRd"><fmt:message
-                key="inlined"/></label>
 
-        <input type="radio" value="registry" name="expressionType"
-               id="expressionRegistryRd"
-               disabled="disabled"  <%if (!inline){%>
-               checked="checked"<%}%>>
-        <label for="expressionRegistryRd"><fmt:message
-                key="reg.key"/></label>
-    </td>
-</tr>
-
-<tr id="expressionInlined" style="<%=inlineDisplay%>">
-    <td class="leftCol-med labelField"><fmt:message key="query.expression"/></td>
+<tr id="expressionInlined">
+    <td class="leftCol-small labelField"><fmt:message key="query.expression"/></td>
     <td>
-        <textarea id="querySource" name="querySource" class="expandedTextarea"
+        <textarea id="querySource" name="querySource" class="expandedTextarea" cols="70"
                   readonly="true"><%=expression.getText()%>
         </textarea>
     </td>
 </tr>
-<tr id="expressionRegistry" style="<%=registryDisplay%>">
-    <td class="leftCol-med labelField"><fmt:message
-            key="query.expression.key"/></td>
-    <td>
-        <input class="longInput" type="text" name="expressionKey"
-               readonly="true"
-               id="expressionKey"
-               value="<%=inline?"":key.trim()%>"/>
-    </td>
-</tr>
-
 
 <% if (output != null && output.getTopic().length() > 0) { %>
 
@@ -558,99 +545,19 @@
 </tr>
 
 <tr>
-    <td class="leftCol-med labelField"><fmt:message key="output.topic"/></td>
+    <td class="leftCol-small labelField"><fmt:message key="output.topic"/></td>
     <td><input type="text" id="newTopic" readonly="true" value="<%=output.getTopic()%>">
     </td>
 </tr>
 <tr>
-    <td class="leftCol-med labelField"><fmt:message key="broker.name"/></td>
+    <td class="leftCol-small labelField"><fmt:message key="broker.name"/></td>
     <td><input type="text" id="outputBrokerName" readonly="true"
                value="<%=output.getBrokerName()%>">
     </td>
 </tr>
 
 
-<%if (elementMapping != null) { %>
-
-<tr>
-    <td colspan="2">
-        <div class="heading_B"><fmt:message key="element.mapping"/></div>
-    </td>
-</tr>
-<tr>
-    <td colspan="2">
-        <table style="width:100%">
-            <tr>
-                <td>
-                    <table>
-                        <tr>
-                            <td class="leftCol-small labelField">
-                                <fmt:message key="element.mapping.xmlDocumentElement"/></td>
-                            <td><input type="text" readonly="true" id="documentElement"
-                                       value="<%=elementMapping!=null?elementMapping.getDocumentElement():""%>">
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-                <td>
-                    <table>
-                        <tr>
-                            <td class="leftCol-small labelField"><fmt:message key="element.mapping.namespace"/></td>
-                            <td><input type="text" readonly="true" id="namespace"
-                                       value="<%=elementMapping!=null?elementMapping.getNamespace():""%>">
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-
-    </td>
-</tr>
-<tr>
-    <td colspan="2">
-        <fmt:message key="property"/>
-    </td>
-</tr>
-<tr>
-    <td colspan="2">
-        <table class="styledLeft" id="propertyTable" style="width:100%">
-            <thead>
-            <th class="leftCol-med"><fmt:message key="property.name"/></th>
-            <th class="leftCol-med"><fmt:message
-                    key="property.xmlFName"/></th>
-            <th class="leftCol-med"><fmt:message
-                    key="property.xmlFType"/></th>
-            </thead>
-            <%
-                if (elementMapping != null && elementMapping.getProperties() != null) {
-            %>
-            <tbody>
-            <%
-                XMLPropertyDTO[] properties = elementMapping.getProperties();
-                for (XMLPropertyDTO property : properties) {
-            %>
-            <tr>
-                <td><%=property.getName()%>
-                </td>
-                <td><%=property.getXmlFieldName()%>
-                </td>
-                <td><%=property.getXmlFieldType()%>
-                </td>
-            </tr>
-            <%
-                }
-            %>
-            </tbody>
-            <%
-                }
-            %>
-        </table>
-    </td>
-</tr>
-
 <%
-    }
     if (xmlMapping != null) {
 %>
 
@@ -665,6 +572,25 @@
         <textarea class="expandedTextarea" id="xmlSource"
                   name="xmlSource"
                   readonly="true"><%=xmlMapping.getMappingXMLText()%>
+        </textarea>
+    </td>
+</tr>
+<%
+    }
+    if (textMapping != null) {
+%>
+
+<tr>
+    <td colspan="2">
+        <div class="heading_B"><fmt:message key="text.mapping"/></div>
+    </td>
+</tr>
+<tr>
+    <td class="leftCol-med labelField"><fmt:message key="text.mapping.text"/></td>
+    <td>
+        <textarea class="expandedTextarea" id="textSource"
+                  name="textSource"
+                  readonly="true"><%=textMapping.getMappingText()%>
         </textarea>
     </td>
 </tr>
@@ -687,19 +613,21 @@
     <td colspan="2">
         <table class="styledLeft" style="width:100%">
             <thead>
-            <th class="leftCol-med"><fmt:message key="property.name"/></th>
+            <th class="leftCol-small"><fmt:message key="property.name"/></th>
+            <th class="leftCol-small"><fmt:message key="property.value.of"/></th>
+            <th class="leftCol-small"><fmt:message key="property.type"/></th>
             </thead>
             <%
                 if (tupleMapping != null && tupleMapping.getMetaDataProperties() != null) {
             %>
             <tbody>
             <%
-                for (String property : tupleMapping.getMetaDataProperties()) {
+                for (OutputTuplePropertyDTO property : tupleMapping.getMetaDataProperties()) {
             %>
             <tr>
-                <td><%=property%>
-                </td>
-
+                <td><%=property.getName()%> </td>
+                <td><%=property.getValueOf()%> </td>
+                <td><%=property.getType()%> </td>
             </tr>
             <%
                 }
@@ -720,19 +648,21 @@
     <td colspan="2">
         <table class="styledLeft" style="width:100%">
             <thead>
-            <th class="leftCol-med"><fmt:message key="property.name"/></th>
+            <th class="leftCol-small"><fmt:message key="property.name"/></th>
+            <th class="leftCol-small"><fmt:message key="property.value.of"/></th>
+            <th class="leftCol-small"><fmt:message key="property.type"/></th>
             </thead>
             <%
                 if (tupleMapping != null && tupleMapping.getCorrelationDataProperties() != null) {
             %>
             <tbody>
             <%
-                for (String property : tupleMapping.getCorrelationDataProperties()) {
+                for (OutputTuplePropertyDTO property : tupleMapping.getCorrelationDataProperties()) {
             %>
             <tr>
-                <td><%=property%>
-                </td>
-
+                <td><%=property.getName()%> </td>
+                <td><%=property.getValueOf()%> </td>
+                <td><%=property.getType()%> </td>
             </tr>
             <%
                 }
@@ -753,19 +683,21 @@
     <td colspan="2">
         <table class="styledLeft" style="width:100%">
             <thead>
-            <th class="leftCol-med"><fmt:message key="property.name"/></th>
+            <th class="leftCol-small"><fmt:message key="property.name"/></th>
+            <th class="leftCol-small"><fmt:message key="property.value.of"/></th>
+            <th class="leftCol-small"><fmt:message key="property.type"/></th>
             </thead>
             <%
                 if (tupleMapping != null && tupleMapping.getPayloadDataProperties() != null) {
             %>
             <tbody>
             <%
-                for (String property : tupleMapping.getPayloadDataProperties()) {
+                for (OutputTuplePropertyDTO property : tupleMapping.getPayloadDataProperties()) {
             %>
             <tr>
-                <td><%=property%>
-                </td>
-
+                <td><%=property.getName()%> </td>
+                <td><%=property.getValueOf()%> </td>
+                <td><%=property.getType()%> </td>
             </tr>
             <%
                 }
@@ -776,7 +708,8 @@
             %>
         </table>
     </td>
-</tr><%
+</tr>
+<%
     }
     if (mapMapping != null) {
 %>
@@ -790,19 +723,19 @@
     <td colspan="2">
         <table class="styledLeft" style="width:100%">
             <thead>
-            <th class="leftCol-med"><fmt:message key="property.name"/></th>
+            <th class="leftCol-small"><fmt:message key="property.name"/></th>
+            <th class="leftCol-small"><fmt:message key="property.value.of"/></th>
             </thead>
             <%
-                if (mapMapping != null && mapMapping.getProperties() != null) {
+                if (mapMapping != null && mapMapping.getMapProperties() != null) {
             %>
             <tbody>
             <%
-                for (String property : mapMapping.getProperties()) {
+                for (OutputMapPropertyDTO property : mapMapping.getMapProperties()) {
             %>
             <tr>
-                <td><%=property%>
-                </td>
-
+                <td><%=property.getName()%></td>
+                <td><%=property.getValueOf()%></td>
             </tr>
             <%
                 }
@@ -848,5 +781,5 @@
     <input class="button" type="button" value=" &lt;Back"
            onclick="javascript:location.href='cep_deployed_buckets.jsp'"/>
 </div>
-</div>
+
 </fmt:bundle>

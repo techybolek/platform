@@ -88,7 +88,7 @@ public class Database {
                 log.error(errMsg, e);
                 throw new HumanTaskServerException(errMsg, e);
             }
-            if (!humantaskDBCreator.isDatabaseStructureCreated("SELECT * FROM HTJOB")) {
+            if (!humantaskDBCreator.isDatabaseStructureCreated("SELECT * FROM HT_JOB")) {
                 try {
                     //TODO rename following method
                     humantaskDBCreator.createRegistryDatabase();

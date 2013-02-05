@@ -24,11 +24,8 @@ import org.wso2.carbon.automation.core.ProductConstant;
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -36,7 +33,6 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -47,8 +43,23 @@ public class UserListCsvReader {
     private static CSVReader reader;
     private static ArrayList<UserInfo> userList;
     private static boolean stratosTestStatus;
+    private static EnvironmentBuilder env;
 
     static {
+        try {
+            env= new EnvironmentBuilder();
+            reader = createReader();
+        } catch (UnsupportedEncodingException e) {
+            log.error("Configuration file not found");
+        }
+        try {
+            userList = csvUserReader();
+        } catch (IOException ignored) {
+        }
+    }
+    public UserListCsvReader()
+    {
+        env= new EnvironmentBuilder();
         try {
             reader = createReader();
         } catch (UnsupportedEncodingException e) {
@@ -65,19 +76,27 @@ public class UserListCsvReader {
     */
     private static CSVReader createReader() throws UnsupportedEncodingException {
         log.debug("inside create reader");
-        EnvironmentBuilder env = new EnvironmentBuilder();
-        stratosTestStatus = env.getFrameworkSettings().getEnvironmentSettings().is_runningOnStratos();
-        CSVReader reader;
 
+        stratosTestStatus = env.getFrameworkSettings().getEnvironmentSettings().is_runningOnStratos();
+        boolean isAIntegration = env.getFrameworkSettings().getEnvironmentSettings().is_builderEnabled();
+        CSVReader reader;
         try {
-            if (stratosTestStatus) {
-                reader = new CSVReader(new BufferedReader(
-                        new InputStreamReader(UserListCsvReader.class.getResourceAsStream("/tenantList.csv"), "UTF-8")));
+            if (isAIntegration) {
+                if (stratosTestStatus) {
+                    reader = new CSVReader(new BufferedReader(
+                            new InputStreamReader(UserListCsvReader.class.getResourceAsStream("/tenantList.csv"), "UTF-8")));
+                } else {
+                    reader = new CSVReader(new BufferedReader(
+                            new InputStreamReader(UserListCsvReader.class.getResourceAsStream("/userList.csv"), "UTF-8")));
+                }
             } else {
-                reader = new CSVReader(new BufferedReader(
-                        new InputStreamReader(UserListCsvReader.class.getResourceAsStream("/userList.csv"), "UTF-8")));
+                if (stratosTestStatus) {
+                    reader = new CSVReader(new BufferedReader(new FileReader(ProductConstant.SYSTEM_TEST_TENANT_FILE)));
+                } else {
+                    reader = new CSVReader(new BufferedReader(new FileReader(ProductConstant.SYSTEM_TEST_USER_FILE)));
+                }
             }
-        } catch (UnsupportedEncodingException e) {
+        } catch (FileNotFoundException e) {
             log.error("User list not found" + e);
             throw new UnsupportedEncodingException("Unsupported Encoding " + e);
         }

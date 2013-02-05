@@ -22,11 +22,23 @@
 			<transport>https</transport>
 		</transports>
 		<schema schemaNamespace="http://org.apache.axis2/xsd" elementFormDefaultQualified="true" />
-		<description>To administer Identity Entitlement related functionality. </description>
+		<description>To administer Identity Entitlement Policy related functionality. </description>
 		<parameter name="ServiceClass">
 			org.wso2.carbon.identity.entitlement.EntitlementPolicyAdminService
 		</parameter>
 	    <parameter name="AuthorizationAction" locked="true">/permission/admin/configure</parameter>        
+	</service>
+
+	<service name="EntitlementAdminService" scope="transportsession">
+		<transports>
+			<transport>https</transport>
+		</transports>
+		<schema schemaNamespace="http://org.apache.axis2/xsd" elementFormDefaultQualified="true" />
+		<description>To administer Identity Entitlement PDP related functionality. </description>
+		<parameter name="ServiceClass">
+			org.wso2.carbon.identity.entitlement.EntitlementAdminService
+		</parameter>
+	    <parameter name="AuthorizationAction" locked="true">/permission/admin/configure</parameter>
 	</service>
 
 	<service name="EntitlementService" scope="transportsession">
@@ -40,6 +52,18 @@
 		</parameter>
 	    <parameter name="AuthorizationAction" locked="true">/permission/admin/manage</parameter>
 	</service>
+
+    <service name="ws-xacml" scope="application">
+        <transports>
+            <transport>https</transport>
+        </transports>
+        <operation name="XACMLAuthzDecisionQuery" mep="http://www.w3.org/2006/01/wsdl/in-out">
+            <actionMapping>XACMLAuthzDecisionQuery</actionMapping>
+            <messageReceiver class="org.wso2.carbon.identity.entitlement.wsxacml.WSXACMLMessageReceiver"/>
+        </operation>
+        <parameter name="XACMLHandlerImplClass">org.wso2.carbon.identity.entitlement.EntitlementService</parameter>
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage</parameter>
+    </service>
 	<parameter name="adminService" locked="true">true</parameter>
  	<parameter name="hiddenService" locked="true">true</parameter>
 </serviceGroup>

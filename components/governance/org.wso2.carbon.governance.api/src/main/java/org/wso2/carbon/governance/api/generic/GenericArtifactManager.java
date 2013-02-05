@@ -23,6 +23,7 @@ import org.wso2.carbon.governance.api.common.GovernanceArtifactManager;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
 import org.wso2.carbon.governance.api.util.GovernanceArtifactConfiguration;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Association;
@@ -32,6 +33,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Manager class for a generic governance artifact.
@@ -43,6 +45,7 @@ public class GenericArtifactManager {
     private String artifactNamespaceAttribute;
     private String artifactElementNamespace;
     private GovernanceArtifactManager manager;
+    private String mediaType;
 
     /**
      * Constructor accepting an instance of the registry, and also details on the type of manager.
@@ -70,6 +73,7 @@ public class GenericArtifactManager {
         this.artifactNameAttribute = artifactNameAttribute;
         this.artifactNamespaceAttribute = artifactNamespaceAttribute;
         this.artifactElementNamespace = artifactElementNamespace;
+        this.mediaType = mediaType;
     }
 
     /**
@@ -89,6 +93,7 @@ public class GenericArtifactManager {
                     this.artifactNameAttribute, this.artifactNamespaceAttribute,
                     configuration.getArtifactElementRoot(), this.artifactElementNamespace,
                     configuration.getPathExpression(), configuration.getRelationshipDefinitions());
+            this.mediaType = configuration.getMediaType();
         } catch (RegistryException e) {
             throw new GovernanceException("Unable to obtain governance artifact configuration", e);
         }
@@ -103,8 +108,23 @@ public class GenericArtifactManager {
      * @throws GovernanceException if the operation failed.
      */
     public GenericArtifact newGovernanceArtifact(QName qName) throws GovernanceException {
-        GenericArtifact genericArtifact = new GenericArtifact(manager.newGovernanceArtifact()) {};
+        GenericArtifactImpl genericArtifact =
+                new GenericArtifactImpl(manager.newGovernanceArtifact(), mediaType) {};
         genericArtifact.setQName(qName);
+        return genericArtifact;
+    }
+
+    /**
+     * Creates a new artifact from the given qualified name.
+     *
+     * @param qName the qualified name of this artifact.
+     *
+     * @return the artifact added.
+     * @throws GovernanceException if the operation failed.
+     */
+    public GenericArtifact newGovernanceArtifact(QName qName, byte[] content) throws GovernanceException {
+        GenericArtifact genericArtifact = newGovernanceArtifact(qName);
+        genericArtifact.setContent(content);
         return genericArtifact;
     }
 
@@ -118,8 +138,8 @@ public class GenericArtifactManager {
      */
     public GenericArtifact newGovernanceArtifact(OMElement content)
             throws GovernanceException {
-        GenericArtifact genericArtifact =
-                new GenericArtifact(manager.newGovernanceArtifact(content)) {};
+        GenericArtifactImpl genericArtifact =
+                new GenericArtifactImpl(manager.newGovernanceArtifact(content), mediaType) {};
         String name = GovernanceUtils.getAttributeValue(content,
                 artifactNameAttribute, artifactElementNamespace);
         String namespace = (artifactNamespaceAttribute != null) ?
@@ -135,8 +155,10 @@ public class GenericArtifactManager {
     }
 
     /**
-     * Adds the given artifact to the registry.
-     *
+     * Adds the given artifact to the registry. Please do not use this method to update an
+     * existing artifact use the update method instead. If this method is used to update an existing
+     * artifact, all existing properties (such as lifecycle details) will be removed from the
+     * existing artifact.
      *
      * @param artifact the artifact.
      *
@@ -170,7 +192,7 @@ public class GenericArtifactManager {
         if (governanceArtifact == null) {
             return null;
         }
-        return new GenericArtifact(governanceArtifact) {};
+        return new GenericArtifactImpl(governanceArtifact, mediaType) {};
     }
 
     /**
@@ -220,7 +242,9 @@ public class GenericArtifactManager {
         List<GenericArtifact> artifacts =
                 new ArrayList<GenericArtifact>(governanceArtifacts.length);
         for (GovernanceArtifact governanceArtifact : governanceArtifacts) {
-            artifacts.add(new GenericArtifact(governanceArtifact) {});
+            if(governanceArtifact != null) {
+                artifacts.add(new GenericArtifactImpl(governanceArtifact, mediaType) {});
+            }
         }
         return artifacts.toArray(new GenericArtifact[artifacts.size()]);
     }
@@ -235,4 +259,39 @@ public class GenericArtifactManager {
         return manager.getAllGovernanceArtifactIds();
     }
 
+    public void validateArtifact(GenericArtifact artifact, List<Map> validatationAttributes)
+            throws RegistryException{
+        Map<String, Object> map;
+        for (int i=0; i<validatationAttributes.size(); ++i) {
+            map = validatationAttributes.get(i);
+            String value = "";
+            String prop = (String)map.get("properties");
+            List<String> keys = (List<String>)map.get("keys");
+
+            if (prop != null && "unbounded".equals(prop)) {
+                //assume there are only 1 key
+                String[] values = artifact.getAttributes((String)keys.get(0));
+                if (values != null) {
+                    for (int j=0; j<values.length; ++j) {
+                        if (!values[j].matches((String)map.get("regexp"))) {
+                            //return an exception to stop adding artifact
+                            throw new RegistryException((String)map.get("name") + " doesn't match regex: " +
+                                    (String)map.get("Regexp"));
+                        }
+                    }
+                }
+            } else {
+                for (int j=0; j<keys.size(); ++j) {
+                    String v = artifact.getAttribute(keys.get(j));
+                    if (j != 0) value += ":";
+                    value += (v == null ? "" : v);
+                }
+                if (!value.matches((String)map.get("regexp"))) {
+                    //return an exception to stop adding artifact
+                    throw new RegistryException((String)map.get("name") + " doesn't match regex: " +
+                            (String)map.get("Regexp"));
+                }
+            }
+        }
+    }
 }

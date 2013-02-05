@@ -23,8 +23,8 @@
         </transports>
         <parameter name="ServiceClass" locked="false">org.wso2.carbon.cassandra.sharedkey.SharedKeyPublisher</parameter>
     </service>
-    
-    <!--<parameter name="adminService" locked="ture">true</parameter>-->
+
+    <parameter name="adminService" locked="ture">true</parameter>
     <parameter name="hiddenService" locked="ture">true</parameter>
-    
+    <parameter name="AuthorizationAction" locked="false">/permission/admin/login</parameter>
 </serviceGroup>

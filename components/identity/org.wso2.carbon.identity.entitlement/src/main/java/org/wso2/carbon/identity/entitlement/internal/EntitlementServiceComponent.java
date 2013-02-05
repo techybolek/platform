@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.identity.entitlement.internal;
 
+import org.apache.axis2.databinding.types.UnsignedByte;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.server.TServer;
@@ -23,16 +24,21 @@ import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.transport.TSSLTransportFactory;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TTransportException;
+import org.jboss.marshalling.util.ByteReadField;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.base.ServerConfigurationException;
+import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.entitlement.thrift.EntitlementService;
 import org.wso2.carbon.identity.entitlement.thrift.ThriftConfigConstants;
 import org.wso2.carbon.identity.entitlement.thrift.ThriftEntitlementServiceImpl;
 import org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.NetworkUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -55,6 +61,11 @@ import java.util.concurrent.Executors;
  * @scr.reference name="org.wso2.carbon.identity.thrift.authentication.internal.ThriftAuthenticationServiceComponent"
  * interface="org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService"
  * cardinality="1..1" policy="dynamic" bind="setThriftAuthenticationService"  unbind="unsetThriftAuthenticationService"
+ * @scr.reference name="cache.invalidation.service"
+ *                interface="org.wso2.carbon.caching.core.CacheInvalidator"
+ *                cardinality="0..1" policy="dynamic"
+ *                bind="setCacheInvalidator"
+ *                unbind="removeCacheInvalidator"
  */
 public class EntitlementServiceComponent {
 
@@ -64,6 +75,8 @@ public class EntitlementServiceComponent {
     private static RealmService realmservice;
 
     private ThriftAuthenticatorService thriftAuthenticationService;
+
+    private static CacheInvalidator cacheInvalidator;
 
     private ExecutorService executor = Executors.newFixedThreadPool(2);
 
@@ -89,10 +102,11 @@ public class EntitlementServiceComponent {
             entitlementConfig = new EntitlementConfigHolder();
             EntitlementExtensionBuilder builder = new EntitlementExtensionBuilder();
             builder.setBundleContext(ctxt.getBundleContext());
-            builder.buildPIPConfig(entitlementConfig);
-            builder.buildCachingConfig(entitlementConfig);
-            builder.buildPAPConfig(entitlementConfig);
-            builder.buildPolicySchema(entitlementConfig);
+            builder.buildEntitlementConfig(entitlementConfig);
+            
+            // Start loading schema.
+            new Thread(new SchemaBuilder(entitlementConfig)).start();
+            
             //TODO: Read from identit.xml, the configurations to be used in thrift based entitlement service.
             //initialize thrift authenticator
             ThriftEntitlementServiceImpl.init(thriftAuthenticationService);
@@ -225,6 +239,15 @@ public class EntitlementServiceComponent {
         return registryService;
     }
 
+    public static Registry getGovernanceRegistry(int tenantId){
+        try {
+            return registryService.getGovernanceSystemRegistry(tenantId);
+        } catch (RegistryException e) {
+            // ignore
+        }        
+        return null;
+    }
+
     private void startThriftServices() throws Exception {
         startThriftEntitlementService();
     }
@@ -258,8 +281,9 @@ public class EntitlementServiceComponent {
                 TServerSocket serverTransport =
                         TSSLTransportFactory.getServerSocket(receivePort,
                                                              clientTimeOut,
-                                                             InetAddress.getLocalHost(),
+                                                             getHostAddress(NetworkUtils.getLocalHostname()),
                                                              transportParam);
+
 
                 EntitlementService.Processor processor = new EntitlementService.Processor(
                         new ThriftEntitlementServiceImpl());
@@ -315,7 +339,7 @@ public class EntitlementServiceComponent {
     /**
      * Thread that starts thrift server
      */
-    private class ServerRunnable implements Runnable {
+    private static class ServerRunnable implements Runnable {
         TServer server;
 
         public ServerRunnable(TServer server) {
@@ -327,4 +351,37 @@ public class EntitlementServiceComponent {
         }
     }
 
+    /**
+     * Get INetAddress by host name or  IP Address
+     * @param host name or host IP String
+     * @return InetAddress
+     * @throws UnknownHostException
+     */
+    private InetAddress getHostAddress(String host) throws UnknownHostException{
+        String[] splittedString = host.split("\\.");
+        if(splittedString.length == 1){
+            return InetAddress.getByName(splittedString[0]);
+        }
+        byte[] byteAddress = new byte[4];
+        for(int i=0;i<splittedString.length;i++){
+            if(Integer.parseInt(splittedString[i]) > 127){
+                byteAddress[i] = new Integer(Integer.parseInt(splittedString[i]) - 256).byteValue();
+            } else {
+                byteAddress[i] = Byte.parseByte(splittedString[i]);
+            }
+        }
+        return InetAddress.getByAddress(byteAddress);
+    }
+
+    protected void setCacheInvalidator(CacheInvalidator invalidator) {
+        cacheInvalidator = invalidator;
+    }
+
+    protected void removeCacheInvalidator(CacheInvalidator invalidator) {
+        cacheInvalidator = null;
+    }
+
+    public static CacheInvalidator getCacheInvalidator() {
+    	return cacheInvalidator;
+    }    
 }

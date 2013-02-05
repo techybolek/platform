@@ -22,12 +22,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
     	<artifactId>repomanager-axis2-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.repomanager.axis2.feature</artifactId>
     <packaging>pom</packaging>
+    <version>4.0.5</version>
     <name>WSO2 Carbon - Axis2 Repository Management Feature</name>
     <url>http://wso2.org</url>
     <description>
@@ -39,7 +41,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.repomanager.axis2.server.feature</artifactId>
-            <version>${project.version}</version>
+            <version>4.0.1</version>
             <type>zip</type>
 	    </dependency>
         <dependency>
@@ -65,13 +67,13 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.repomanager.axis2</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:4.0.5</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.repomanager.axis2.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.repomanager.axis2.ui.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.repomanager.axis2.server.feature:4.0.1</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.repomanager.axis2.ui.feature:4.0.5</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

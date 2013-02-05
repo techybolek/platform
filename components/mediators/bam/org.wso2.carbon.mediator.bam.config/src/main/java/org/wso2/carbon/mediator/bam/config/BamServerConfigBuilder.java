@@ -63,29 +63,37 @@ public class BamServerConfigBuilder {
         OMElement connectionElement = bamServerConfig.getFirstChildWithName(
                 new QName(SynapseConstants.SYNAPSE_NAMESPACE, "connection"));
         if(connectionElement != null){
+            OMAttribute loadbalancerAttr = connectionElement.getAttribute(new QName("loadbalancer"));
             OMAttribute secureAttr = connectionElement.getAttribute(new QName("secure"));
+            OMAttribute urlSet = connectionElement.getAttribute(new QName("urlSet"));
             OMAttribute ipAttr = connectionElement.getAttribute(new QName("ip"));
             OMAttribute authenticationPortAttr = connectionElement.getAttribute(new QName("authPort"));
             OMAttribute receiverPortAttr = connectionElement.getAttribute(new QName("receiverPort"));
-            if(this.isNotNullOrEmpty(ipAttr) && this.isNotNullOrEmpty(secureAttr) && this.isNotNullOrEmpty(authenticationPortAttr)){
-                this.bamServerConfig.setIp(ipAttr.getAttributeValue());
-                if("true".equals(secureAttr.getAttributeValue())){
-                    this.bamServerConfig.setSecurity(true);
-                } else if ("false".equals(secureAttr.getAttributeValue())) {
-                    this.bamServerConfig.setSecurity(false);
-                } else {
-                    return false; // Secure attribute should have a value
-                }
-                this.bamServerConfig.setAuthenticationPort(authenticationPortAttr.getAttributeValue());
-                if(receiverPortAttr.getAttributeValue() != null && !receiverPortAttr.getAttributeValue().equals("")){
-                    this.bamServerConfig.setReceiverPort(receiverPortAttr.getAttributeValue());
-                } else {
-                    this.bamServerConfig.setReceiverPort("");
-                }
-
+            if(this.isNotNullOrEmpty(loadbalancerAttr) && "true".equals(loadbalancerAttr.getAttributeValue())){
+                this.bamServerConfig.setLoadbalanced(true);
+                this.bamServerConfig.setUrlSet(urlSet.getAttributeValue());
             }
             else {
-                return false;
+                if(this.isNotNullOrEmpty(ipAttr) && this.isNotNullOrEmpty(secureAttr) && this.isNotNullOrEmpty(authenticationPortAttr)){
+                    this.bamServerConfig.setIp(ipAttr.getAttributeValue());
+                    if("true".equals(secureAttr.getAttributeValue())){
+                        this.bamServerConfig.setSecurity(true);
+                    } else if ("false".equals(secureAttr.getAttributeValue())) {
+                        this.bamServerConfig.setSecurity(false);
+                    } else {
+                        return false; // Secure attribute should have a value
+                    }
+                    this.bamServerConfig.setAuthenticationPort(authenticationPortAttr.getAttributeValue());
+                    if(receiverPortAttr.getAttributeValue() != null && !receiverPortAttr.getAttributeValue().equals("")){
+                        this.bamServerConfig.setReceiverPort(receiverPortAttr.getAttributeValue());
+                    } else {
+                        this.bamServerConfig.setReceiverPort("");
+                    }
+
+                }
+                else {
+                    return false;
+                }
             }
         }
         return true;
@@ -188,11 +196,13 @@ public class BamServerConfigBuilder {
     private boolean processPropertyElement(OMElement propertyElement, StreamConfiguration streamConfiguration){
         OMAttribute nameAttr = propertyElement.getAttribute(new QName("name"));
         OMAttribute valueAttr = propertyElement.getAttribute(new QName("value"));
+        OMAttribute typeAttr = propertyElement.getAttribute(new QName("type"));
         OMAttribute isExpressionAttr = propertyElement.getAttribute(new QName("isExpression"));
-        if(this.isNotNullOrEmpty(nameAttr) && this.isNotNullOrEmpty(valueAttr) && this.isNotNullOrEmpty(isExpressionAttr)){
+        if(this.isNotNullOrEmpty(nameAttr) && this.isNotNullOrEmpty(valueAttr) && this.isNotNullOrEmpty(typeAttr) && this.isNotNullOrEmpty(isExpressionAttr)){
             Property property = new Property();
             property.setKey(nameAttr.getAttributeValue());
             property.setValue(valueAttr.getAttributeValue());
+            property.setType(typeAttr.getAttributeValue());
             property.setExpression("true".equals(isExpressionAttr.getAttributeValue()));
             streamConfiguration.getProperties().add(property);
             return true;

@@ -43,6 +43,8 @@
                     mediaType.equals("application/vnd.mozilla.xul+xml") ||
                     mediaType.equals("application/vnd.wap.wbxml") ||
                     mediaType.equals("application/vnd.wso2.endpoint") ||
+                    mediaType.equals("application/vnd.wso2.registry-ext-type+xml") ||
+                    mediaType.equals("application/vnd.sun.wadl+xml") ||
                     mediaType.startsWith("application/vnd.sun.xml") ||
                     mediaType.endsWith(".bpel") ||
                     mediaType.equals("application/xml")) {

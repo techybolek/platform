@@ -1,5 +1,5 @@
 <!--
- ~ Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ ~ Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  ~
  ~ WSO2 Inc. licenses this file to you under the Apache License,
  ~ Version 2.0 (the "License"); you may not use this file except
@@ -15,31 +15,29 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
-<%@page import="org.wso2.carbon.identity.oauth.ui.OAuthConstants"%>
-<%@page import="org.wso2.carbon.identity.oauth.ui.client.OAuthServiceClient"%>
+<%@page import="org.apache.axis2.context.ConfigurationContext"%>
+<%@page import="org.wso2.carbon.CarbonConstants"%>
 <%@page import="org.wso2.carbon.identity.oauth.stub.types.Parameters"%>
+<%@page import="org.wso2.carbon.identity.oauth.ui.OAuthConstants"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
     prefix="carbon"%>
-<%@page import="org.wso2.carbon.utils.ServerConstants"%>
+<%@page import="org.wso2.carbon.identity.oauth.ui.client.OAuthServiceClient"%>
+<%@page import="org.wso2.carbon.ui.CarbonUIMessage"%>
 <%@page import="org.wso2.carbon.ui.CarbonUIUtil"%>
-<%@page import="org.apache.axis2.context.ConfigurationContext"%>
-<%@page import="org.wso2.carbon.CarbonConstants"%>
-<%@page import="java.lang.Exception"%>
+<%@page import="org.wso2.carbon.ui.util.CharacterEncoder"%>
+<%@page import="org.wso2.carbon.utils.ServerConstants"%>
 
 <%@page import="java.util.ResourceBundle"%>
-<%@page import="org.wso2.carbon.identity.oauth.ui.client.OAuthAdminClient"%>
 ><script type="text/javascript" src="extensions/js/vui.js"></script>
 <script type="text/javascript" src="../extensions/core/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
 
 <jsp:include page="../dialog/display_messages.jsp" />
-<%@ page import="org.wso2.carbon.ui.CarbonUIMessage"%>
-<%@ page import="org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO" %>
 
 <%
-	String oauthUserName = request.getParameter("oauth_user_name");
-    String oauthUserPassword = request.getParameter("oauth_user_password");
+	String oauthUserName = CharacterEncoder.getSafeText(request.getParameter("oauth_user_name"));
+    String oauthUserPassword = CharacterEncoder.getSafeText(request.getParameter("oauth_user_password"));
 	String forwardTo = "index.jsp";
     String BUNDLE = "org.wso2.carbon.identity.oauth.ui.i18n.Resources";
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());

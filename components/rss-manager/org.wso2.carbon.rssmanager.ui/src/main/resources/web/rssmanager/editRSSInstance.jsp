@@ -33,7 +33,7 @@
     <link rel="stylesheet" type="text/css" href="../resources/css/registry.css"/>
 
     <carbon:breadcrumb
-            label="Edit Database Instance"
+            label="Edit RSS Instance"
             resourceBundle="org.wso2.carbon.rssmanager.ui.i18n.Resources"
             topPage="false"
             request="<%=request%>"/>
@@ -169,10 +169,10 @@
                             <input type="hidden" id="flag" name="flag" value="edit"/>
                             <input class="button" type="button"
                                    value="<fmt:message key="rss.manager.test.connection"/>"
-                                   onclick="return testConnection();"/>
+                                   onclick="return testConnection(); return false;"/>
 
                             <input class="button" type="button"
-                                   onclick="return validateRSSInstanceProperties('edit');"
+                                   onclick="return validateRSSInstanceProperties('edit'); return false;"
                                    value="<fmt:message key="rss.manager.save"/>"/>
 
                             <input class="button" type="button"

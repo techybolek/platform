@@ -5,11 +5,13 @@
     <parent>
         <artifactId>bam2-feature</artifactId>
         <groupId>org.wso2.carbon</groupId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.bam.toolbox.deployer.feature</artifactId>
+    <version>4.0.5</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - BAM Tool Box Deployer Feature</name>
     <url>http://wso2.org</url>
@@ -21,13 +23,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.bam.toolbox.deployer.server.feature</artifactId>
-            <version>${wso2carbon.version.bam2}</version>
+            <version>${project.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.bam.toolbox.deployer.ui.feature</artifactId>
-            <version>${wso2carbon.version.bam2}</version>
+            <version>4.0.5</version>
             <type>zip</type>
         </dependency>
     </dependencies>
@@ -49,12 +51,12 @@
                             <id>org.wso2.carbon.bam.toolbox.deployer</id>
                             <propertiesFile>../feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:4.0.0-SNAPSHOT</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:${project.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.bam.toolbox.deployer.server.feature
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.bam.toolbox.deployer.server.feature:${project.version}
                                 </includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.bam.toolbox.deployer.ui.feature
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.bam.toolbox.deployer.ui.feature:4.0.5
                                 </includedFeatureDef>
                             </includedFeatures>
                         </configuration>

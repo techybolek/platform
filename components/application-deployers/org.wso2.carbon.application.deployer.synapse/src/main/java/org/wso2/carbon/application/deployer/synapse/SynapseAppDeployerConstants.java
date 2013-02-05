@@ -29,6 +29,8 @@ public class SynapseAppDeployerConstants {
     public static final String MESSAGE_STORE_TYPE = "synapse/message-store";
     public static final String MESSAGE_PROCESSOR_TYPE="synapse/message-processors";
     public static final String MEDIATOR_TYPE = "lib/synapse/mediator";
+    public static final String API_TYPE = "synapse/api";
+    public static final String TEMPLATE_TYPE = "synapse/template";
 
     // Deployment folders for synapse artifacts
     public static final String SEQUENCES_FOLDER = "/sequences/";
@@ -39,6 +41,8 @@ public class SynapseAppDeployerConstants {
     public static final String TASKS_FOLDER = "/tasks/";
     public static final String MESSAGE_STORE_FOLDER="/message-store/";
     public static final String MESSAGE_PROCESSOR_FOLDER="/message-processors/";
+    public static final String APIS_FOLDER = "/api/";
+    public static final String TEMPLATES_FOLDER = "/templates/";
 
     // Synapse config path
     public static final String SYNAPSE_CONFIGS = "synapse-configs";

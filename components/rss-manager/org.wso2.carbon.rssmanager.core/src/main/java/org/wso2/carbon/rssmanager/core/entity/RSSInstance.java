@@ -23,11 +23,15 @@ import org.wso2.carbon.rssmanager.common.RSSManagerHelper;
 import org.wso2.carbon.rssmanager.core.internal.util.RSSManagerUtil;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class to represent an RSS Server Instance.
  */
 public class RSSInstance {
+
+    private int id;
 
 	private String name;
 	
@@ -47,9 +51,10 @@ public class RSSInstance {
 
     private DataSource dataSource;
 
-	public RSSInstance(String name, String serverURL,
+	public RSSInstance(int id, String name, String serverURL,
 			String dbmsType, String instanceType, String serverCategory, String adminUsername,
 			String adminPassword, int tenantId) {
+        this.id = id;
 		this.name = name;
 		this.serverURL = serverURL;
 		this.dbmsType = dbmsType;
@@ -61,9 +66,10 @@ public class RSSInstance {
         this.dataSource = initDataSource();
 	}
 
-    public RSSInstance(String name, String serverURL,
+    public RSSInstance(int id, String name, String serverURL,
 			String dbmsType, String instanceType, String serverCategory, String adminUsername,
 			String adminPassword, int tenantId, DataSource dataSource) {
+        this.id = id;
 		this.name = name;
 		this.serverURL = serverURL;
 		this.dbmsType = dbmsType;
@@ -75,18 +81,36 @@ public class RSSInstance {
         this.dataSource = dataSource;
 	}
 
-    public RSSInstance() {
-        
-    }
+    public RSSInstance() {}
 
     private DataSource initDataSource() {
         RDBMSConfiguration config = new RDBMSConfiguration();
-        config.setUrl(this.getServerURL());
-        config.setUsername(this.getAdminUsername());
-        config.setPassword(this.getAdminPassword());
-        config.setDriverClassName(RSSManagerHelper.getDatabaseDriver(this.getServerURL()));
+        List<RDBMSConfiguration.DataSourceProperty> dataSourceProps =
+                new ArrayList<RDBMSConfiguration.DataSourceProperty>();
+        RDBMSConfiguration.DataSourceProperty userProp = new RDBMSConfiguration.DataSourceProperty();
+        userProp.setName("user");
+        userProp.setValue(this.getAdminUsername());
+        dataSourceProps.add(userProp);
+
+        RDBMSConfiguration.DataSourceProperty passwordProp = new RDBMSConfiguration.DataSourceProperty();
+        passwordProp.setName("password");
+        passwordProp.setValue(this.getAdminPassword());
+        dataSourceProps.add(passwordProp);
+
+        RDBMSConfiguration.DataSourceProperty urlProp = new RDBMSConfiguration.DataSourceProperty();
+        urlProp.setName("url");
+        urlProp.setValue(this.getServerURL());
+        dataSourceProps.add(urlProp);
+
+        RDBMSConfiguration.DataSourceProperty portProp = new RDBMSConfiguration.DataSourceProperty();
+        portProp.setName("port");
+        portProp.setValue("3306");
+        dataSourceProps.add(portProp);
+
+        config.setDataSourceProps(dataSourceProps);
+        config.setDataSourceClassName(RSSManagerHelper.getDatabaseDriver(this.getServerURL()));
         config.setTestOnBorrow(true);
-        config.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
+        config.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;org.wso2.carbon.ndatasource.rdbms.ConnectionRollbackOnReturnInterceptor");
         return RSSManagerUtil.createDataSource(config);
     }
 
@@ -161,4 +185,13 @@ public class RSSInstance {
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
     }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+    
 }

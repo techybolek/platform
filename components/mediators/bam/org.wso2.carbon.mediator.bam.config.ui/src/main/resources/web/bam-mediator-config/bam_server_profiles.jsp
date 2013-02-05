@@ -91,7 +91,7 @@
             %>
 
             <script type="text/javascript">
-                reloadPage();
+                CARBON.showInfoDialog("Server Profile was successfully deleted.", reloadPage);
             </script>
 
             <%

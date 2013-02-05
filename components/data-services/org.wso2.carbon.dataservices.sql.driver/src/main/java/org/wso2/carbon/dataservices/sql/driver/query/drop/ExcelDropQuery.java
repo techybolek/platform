@@ -52,16 +52,16 @@ public class ExcelDropQuery extends DropQuery {
     }
 
     private synchronized void executeSQL() throws SQLException {
-        Workbook workbook = ((TExcelConnection)this.getConnection()).getWorkbook();
+        Workbook workbook = ((TExcelConnection) this.getConnection()).getWorkbook();
 
         if (!isSheetExists(workbook)) {
-            throw new SQLException("EXCEL sheet named '" + this.getTableName() +
+            throw new SQLException("Excel sheet named '" + this.getTableName() +
                     "' does not exist");
         }
 
         int sheetIndex = workbook.getSheetIndex(this.getTableName());
         workbook.removeSheetAt(sheetIndex);
-        TDriverUtil.writeRecords(workbook, ((TExcelConnection)this.getConnection()).getPath());
+        TDriverUtil.writeRecords(workbook, ((TExcelConnection) this.getConnection()).getPath());
     }
 
     private boolean isSheetExists(Workbook workbook) {

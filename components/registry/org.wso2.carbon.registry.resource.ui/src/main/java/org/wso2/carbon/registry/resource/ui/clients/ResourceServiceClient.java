@@ -35,6 +35,7 @@ import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceCallbackHandle
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceStub;
 import org.wso2.carbon.registry.resource.stub.beans.xsd.*;
 import org.wso2.carbon.registry.resource.stub.common.xsd.ResourceData;
+import org.wso2.carbon.registry.resource.stub.services.ArrayOfString;
 import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.utils.ServerConstants;
 
@@ -407,6 +408,7 @@ public class
             String description,
             String fetchURL,
             String symlinkLocation,
+            String[][] properties,
             boolean isAsync) throws Exception {
 
         try {
@@ -417,7 +419,7 @@ public class
                         MessageContext.CLIENT_API_NON_BLOCKING,Boolean.TRUE);
                 stub.importResource(parentPath, resourceName,
                         MediaTypesUtils.getMimeTypeFromHumanReadableMediaType(mediaType), description, fetchURL,
-                        symlinkLocation);
+                        symlinkLocation, buildPropertiesArray(properties));
             } else {
                 /*stub._getServiceClient().engageModule(ADDRESSING_MODULE); // IMPORTANT
                 Options options = stub._getServiceClient().getOptions();
@@ -428,7 +430,7 @@ public class
                 callbackData.handleCallback();*/
                 stub.importResource(parentPath, resourceName,
                         MediaTypesUtils.getMimeTypeFromHumanReadableMediaType(mediaType), description, fetchURL,
-                        symlinkLocation);
+                        symlinkLocation, buildPropertiesArray(properties));
             }
 
         } catch (Exception e) {
@@ -437,6 +439,19 @@ public class
             log.error(msg, e);
             throw e;
         }
+    }
+
+    private ArrayOfString[] buildPropertiesArray(String[][] properties) {
+        if (properties == null) {
+            return new ArrayOfString[0];
+        }
+        ArrayOfString[] props = new ArrayOfString[properties.length];
+        for (int i = 0; i < props.length; i++) {
+            ArrayOfString arrayOfString = new ArrayOfString();
+            arrayOfString.setArray(new String[]{properties[i][0], properties[i][1]});
+            props[i] = arrayOfString;
+        }
+        return props;
     }
 
     public void delete(String pathToDelete) throws Exception {
@@ -641,7 +656,7 @@ public class
     }
 
     public void addResource(String path, String mediaType, String description, DataHandler content,
-                            String symlinkLocation)
+                            String symlinkLocation, String[][] properties)
             throws Exception {
 
         try {
@@ -653,7 +668,7 @@ public class
             stub.startaddResource(path, mediaType, description, content, symlinkLocation, callback);
             callbackData.handleCallback();*/
             stub.addResource(path, MediaTypesUtils.getMimeTypeFromHumanReadableMediaType(mediaType)
-                    , description, content, symlinkLocation);
+                    , description, content, symlinkLocation, buildPropertiesArray(properties));
 
         } catch (Exception e) {
 
@@ -828,5 +843,20 @@ public class
             log.error(msg, e);
             throw e;
         }
+    }
+
+    public ContentDownloadBean getZipWithDependencies(String path) throws Exception {
+        try {
+         return stub.getZipWithDependencies(path);
+        } catch (Exception e) {
+            String msg = "Failed to stream the zip with dependencies " +
+                    path + ". " + e.getMessage();
+            log.error(msg, e);
+            throw e;
+        }
+    }
+
+    public boolean hasAssociations(String path,String type) throws Exception {
+         return stub.hasAssociations(path,type);
     }
 }

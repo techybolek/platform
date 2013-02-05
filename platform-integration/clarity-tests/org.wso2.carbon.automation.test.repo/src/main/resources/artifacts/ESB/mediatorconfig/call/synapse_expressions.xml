@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><definitions xmlns="http://ws.apache.org/ns/synapse">
-    <proxy name="SplitAggregateProxy" startOnLoad="true">
+    <proxy name="SplitAggregateProxy123" startOnLoad="true">
         <target>
             <inSequence>
-                <call-template target="iter_func">
+                <call-template target="iter_func123">
                     <with-param xmlns:m0="http://services.samples" name="iter_expr" value="{{//m0:getQuote/m0:request}}"/>
                     <with-param name="symbol" value="WSO2"/>
                     <with-param xmlns:m0="http://services.samples" name="attach_path" value="{{//m0:getQuote}}"/>
                 </call-template>
             </inSequence>
             <outSequence>
-                <call-template target="aggr_func">
+                <call-template target="aggr_func123">
                     <with-param xmlns:m0="http://services.samples" name="aggr_expr" value="{{//m0:getQuoteResponse}}"/>
                 </call-template>
             </outSequence>
@@ -27,7 +27,7 @@
         <log/>
         <drop/>
     </sequence>
-    <template name="aggr_func">
+    <template name="aggr_func123">
         <parameter name="aggr_expr"/>
         <sequence>
             <log level="full"/>
@@ -42,7 +42,7 @@
             </aggregate>
         </sequence>
     </template>
-    <template name="iter_func">
+    <template name="iter_func123">
         <parameter name="iter_expr"/>
         <parameter name="attach_path"/>
         <parameter name="symbol"/>

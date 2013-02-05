@@ -22,12 +22,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>data-services-hosting-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.dataservices.feature</artifactId>
     <packaging>pom</packaging>
+    <version>4.0.5</version>
     <name>Data Service Hosting Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for Data Service hosting functionality</description>
@@ -62,7 +64,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.dataservices</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.eclipse.equinox.p2.type.group:true</propertyDef>

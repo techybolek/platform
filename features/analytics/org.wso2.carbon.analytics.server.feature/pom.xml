@@ -22,12 +22,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>analytics-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.analytics.server.feature</artifactId>
     <packaging>pom</packaging>
+    <version>4.0.7</version>
     <name>WSO2 Carbon - Analytics Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for analytics BE</description>
@@ -36,12 +38,42 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.analytics.hive</artifactId>
-	    <version>${wso2carbon.version.analytics}</version>
+	        <version>${carbon.patch.release.version407}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.rssmanager.stub</artifactId>
+            <version>${carbon.patch.release.version405}</version>
         </dependency>
     </dependencies>
 
     <build>
 	<plugins>
+         <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/resources</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>resources</directory>
+                                    <includes>
+                                        <include>conf/hive-rss-config.xml</include>
+                                        <include>p2.inf</include>
+                                        <include>build.properties</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.wso2.maven</groupId>
                 <artifactId>carbon-p2-plugin</artifactId>
@@ -55,7 +87,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.analytics.server</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server
@@ -66,11 +98,15 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.analytics.hive</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.rssmanager.stub</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version.analytics}</importFeatureDef>
-				                <importFeatureDef>org.wso2.carbon.analytics.hive.server:${wso2carbon.version.analytics}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.patch.release.version405}</importFeatureDef>
                             </importFeatures>
+                            <includedFeatures>
+                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.analytics.hive.server.feature:${carbon.patch.release.version407}
+                                </includedFeatureDef>
+                            </includedFeatures>
                         </configuration>
                     </execution>
                 </executions>
@@ -78,4 +114,10 @@
         </plugins>
     </build>
 
+    <properties>
+       <carbon.patch.release.version405>4.0.5</carbon.patch.release.version405>
+       <carbon.patch.release.version407>4.0.7</carbon.patch.release.version407>
+       <carbon.patch.release.version402>4.0.2</carbon.patch.release.version402>
+       <carbon.patch.release.version401>4.0.1</carbon.patch.release.version401>
+    </properties>
 </project>

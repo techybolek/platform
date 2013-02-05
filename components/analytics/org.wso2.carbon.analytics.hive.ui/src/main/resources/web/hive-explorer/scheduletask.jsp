@@ -24,11 +24,11 @@
 
 <fmt:bundle basename="org.wso2.carbon.analytics.hive.ui.i18n.Resources">
 <script type="text/javascript" src="../ajax/js/prototype.js"></script>
-<script type="text/javascript">
-    window.onload = function() {
-        customCronEnable();
-    };
-</script>
+<%--<script type="text/javascript">--%>
+<%--window.onload = function() {--%>
+<%--customCronEnable();--%>
+<%--};--%>
+<%--</script>--%>
 
 <%
     String scriptName = request.getParameter("scriptName");
@@ -37,7 +37,7 @@
     }
     String scriptContent = request.getParameter("scriptContent");
     if (null != scriptContent && !"".equals(scriptContent)) {
-        session.setAttribute("scriptContent"+scriptName, scriptContent);
+        session.setAttribute("scriptContent" + scriptName, scriptContent);
     }
     String mode = request.getParameter("mode");
     String cron = request.getParameter("cron");
@@ -141,13 +141,13 @@
     function customCronEnable() {
         disableCustomCron(false);
         disableUI(true);
-        disableIntervalSelection(true);
+//        disableIntervalSelection(true);
     }
 
     function simpleUI() {
         disableUI(false);
         disableCustomCron(true);
-        disableIntervalSelection(true);
+//        disableIntervalSelection(true);
     }
 
     function disableUI(value) {
@@ -205,14 +205,19 @@
     function intervalSelection() {
         disableCustomCron(true);
         disableUI(true);
-        disableIntervalSelection(false);
+//        disableIntervalSelection(false);
+    }
+
+    function unscheduleSelection() {
+        disableCustomCron(true);
+        disableUI(true);
     }
 
 
-    function disableIntervalSelection(value) {
-        document.getElementById('interval').disabled = value;
-        document.getElementById('count').disabled = value;
-    }
+    //    function disableIntervalSelection(value) {
+    //        document.getElementById('interval').disabled = value;
+    //        document.getElementById('count').disabled = value;
+    //    }
 
     function cancelCron() {
         history.go(-1);
@@ -323,7 +328,7 @@
                         <%
                             for (int i = 0; i < 12; i++) {
                         %>
-                        <option value="<%=i%>"><%=months[i]%>
+                        <option value="<%=i+1%>"><%=months[i]%>
                         </option>
                         <%
                             }
@@ -439,48 +444,49 @@
     </td>
 </tr>
 </tbody>
+    <%--<thead>--%>
+    <%--<tr>--%>
+    <%--<th>--%>
+    <%--<input TYPE=RADIO NAME="cronExpSelect" id="intervalSelect" VALUE="selectInterval"--%>
+    <%--onclick="intervalSelection()"><label>Schedule by Interval:</label>--%>
+    <%--</th>--%>
+    <%--</tr>--%>
+    <%--</thead>--%>
+    <%--<tbody>--%>
+    <%--<tr>--%>
+    <%--<td>--%>
+    <%--<table class="normal-nopadding" id='intervalSchedule'>--%>
+    <%--<tbody>--%>
+    <%--<tr>--%>
+    <%--<td width="250px"><fmt:message key="interval"/></td>--%>
+    <%--<td>--%>
+    <%--<input name="interval"--%>
+    <%--id="interval"--%>
+    <%--size="60"/>--%>
+
+    <%--</td>--%>
+    <%--</tr>--%>
+    <%--<tr>--%>
+    <%--<td width="250px"><fmt:message key="count"/></td>--%>
+    <%--<td>--%>
+    <%--<input name="count"--%>
+    <%--id="count"--%>
+    <%--size="60"/>--%>
+
+    <%--</td>--%>
+    <%--</tr>--%>
+    <%--</tbody>--%>
+    <%--</table>--%>
+    <%--</td>--%>
+    <%--</tr>--%>
+
+    <%--</tbody>--%>
+
 <thead>
 <tr>
     <th>
-        <input TYPE=RADIO NAME="cronExpSelect" id="intervalSelect" VALUE="selectInterval"
-               onclick="intervalSelection()"><label>Schedule by Interval:</label>
-    </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-    <td>
-        <table class="normal-nopadding" id='intervalSchedule'>
-            <tbody>
-            <tr>
-                <td width="250px"><fmt:message key="interval"/></td>
-                <td>
-                    <input name="interval"
-                           id="interval"
-                           size="60"/>
-
-                </td>
-            </tr>
-            <tr>
-                <td width="250px"><fmt:message key="count"/></td>
-                <td>
-                    <input name="count"
-                           id="count"
-                           size="60"/>
-
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </td>
-</tr>
-
-</tbody>
-
-<thead>
-<tr>
-    <th>
-        <input TYPE=RADIO NAME="cronExpSelect" id="noSchedule" VALUE="noSchedule"><label>Unschedule</label>
+        <input TYPE=RADIO NAME="cronExpSelect" id="noSchedule" VALUE="noSchedule"
+               onclick="unscheduleSelection()"><label>Unschedule</label>
     </th>
 </tr>
 </thead>
@@ -521,5 +527,20 @@
 </div>
 </div>
 
+<script type="text/javascript">
+    <%
+    if(null != cron && !cron.isEmpty()){
+    %>
+    customCronEnable();
+    <%
+    }else {
+    %>
+    document.getElementById('noSchedule').checked = 'true';
+    unscheduleSelection();
+    <%
+    }
+    %>
+
+</script>
 
 </fmt:bundle>

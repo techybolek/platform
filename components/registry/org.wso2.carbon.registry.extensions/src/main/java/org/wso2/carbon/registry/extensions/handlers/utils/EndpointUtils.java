@@ -17,12 +17,13 @@ package org.wso2.carbon.registry.extensions.handlers.utils;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.om.xpath.AXIOMXPath;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jaxen.JaxenException;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -45,11 +46,18 @@ public class EndpointUtils {
     private static final String SOAP11_ENDPOINT_EXPR = "/wsdl:definitions/wsdl:service/wsdl:port/soap:address";
     private static final String SOAP12_ENDPOINT_EXPR = "/wsdl:definitions/wsdl:service/wsdl:port/soap12:address";
     private static final String HTTP_ENDPOINT_EXPR = "/wsdl:definitions/wsdl:service/wsdl:port/http:address";
-    private static final String SERVICE_ENDPOINT_ENTRY_EXPR = "/s:serviceMetaData/s:endpoints/s:entry";
-    private static final String SERVICE_ENDPOINT_EXPR = "/s:serviceMetaData/s:endpoints";
+    private static final String SERVICE_ENDPOINT_ENTRY_EXPR = "/s:metadata/s:endpoints/s:entry";
+    private static final String SERVICE_ENDPOINT_EXPR = "/s:metadata/s:endpoints";
     private static final String SERVICE_ENDPOINTS_ELEMENT = "endpoints";
     private static final String SERVICE_ENDPOINTS_ENTRY_ELEMENT = "entry";
     private static final String LOCATION_ATTR = "location";
+
+    private static final String SYNAPSE_NAMESPACE = "http://ws.apache.org/ns/synapse";
+    private static final String SYNAPSE_NAMESPACE_PREFIX = "ns";
+    private static final String SYNAPSE_ENDPOINT = "endpoint";
+    private static final String SYNAPSE_ENDPOINT_NAME_ATTRIBUTE = "name";
+    private static final String SYNAPSE_ENDPOINT_ADDRESS = "address";
+    private static final String SYNAPSE_ENDPOINT_ADDRESS_URI_ATTRIBUTE = "uri";
 
     private static final String ENDPOINT_DEFAULT_LOCATION = "/trunk/endpoints/";
     private static String endpointLocation = ENDPOINT_DEFAULT_LOCATION;
@@ -71,6 +79,25 @@ public class EndpointUtils {
         return endpointMediaType;
     }
 
+    public static void removeEndpointEntry(String oldWSDL, OMElement serviceElement, Registry registry)
+            throws RegistryException {
+        List<OMElement> serviceEndpointEntryElements;
+        try {
+            serviceEndpointEntryElements = evaluateXPathToElements(SERVICE_ENDPOINT_ENTRY_EXPR, serviceElement);
+        } catch (Exception e) {
+            String msg = "Error in evaluating xpath expressions to extract endpoints";
+            log.error(msg, e);
+            throw new RegistryException(msg, e);
+        }
+        if (serviceEndpointEntryElements == null || serviceEndpointEntryElements.size() == 0) {
+            return;
+        }
+        for(OMElement endpointOmElement : serviceEndpointEntryElements){
+            if(endpointOmElement!=null){
+                endpointOmElement.detach();
+            }
+        }
+    }
     public static void saveEndpointsFromWSDL(String wsdlPath, Resource wsdlResource,
                                       Registry registry, Registry systemRegistry)
             throws RegistryException {
@@ -203,61 +230,54 @@ public class EndpointUtils {
     public static void saveEndpointsFromServices(String servicePath, OMElement serviceElement,
                                       Registry registry, Registry systemRegistry)
             throws RegistryException {
-        if (!CommonUtil.isAddingAssociationLockAvailable()) {
-            return;
-        }
-        CommonUtil.acquireAddingAssociationLock();
+
+        // first iterate through soap11 endpoints
+        // saving soap11 endpoints
+        List<OMElement> serviceEndpointEntryElements;
         try {
-            // first iterate through soap11 endpoints
-            // saving soap11 endpoints
-            List<OMElement> serviceEndpointEntryElements;
-            try {
-                serviceEndpointEntryElements =  evaluateXPathToElements(SERVICE_ENDPOINT_ENTRY_EXPR, serviceElement);
-            } catch (Exception e) {
-                String msg = "Error in evaluating xpath expressions to extract endpoints, " +
-                        "service path: " + servicePath + ".";
-                log.error(msg, e);
-                throw new RegistryException(msg, e);
+            serviceEndpointEntryElements =  evaluateXPathToElements(SERVICE_ENDPOINT_ENTRY_EXPR, serviceElement);
+        } catch (Exception e) {
+            String msg = "Error in evaluating xpath expressions to extract endpoints, " +
+                    "service path: " + servicePath + ".";
+            log.error(msg, e);
+            throw new RegistryException(msg, e);
+        }
+
+        // and add the associations and before adding them first remove all the endpoint dependencies
+        removeEndpointDependencies(servicePath, registry);
+
+        // iterate through the new endpoints..
+        for (OMElement endpointElement: serviceEndpointEntryElements) {
+            Map<String, String> properties = new HashMap<String, String>();
+
+            String entryText = endpointElement.getText();
+            String entryKey = null;
+            String entryVal;
+            int colonIndex = entryText.indexOf(":");
+            if (colonIndex < entryText.length()- 1) {
+                entryKey = entryText.substring(0, colonIndex);
+                entryText = entryText.substring(colonIndex + 1);
+            }
+            entryVal = entryText;
+
+            if (!"".equals(entryKey)) {
+                // here the key is the environment
+
+                String endpointPath = RegistryUtils.getAbsolutePath(registry.getRegistryContext(),
+                        org.wso2.carbon.registry.core.RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
+                                endpointLocation) + deriveEndpointFromUrl(entryVal);
+
+                String existingEnv = null;
+
+                if (registry.resourceExists(endpointPath)) {
+                    registry.get(endpointPath).removeProperty(CommonConstants.ENDPOINT_ENVIRONMENT_ATTR);
+                }
+                existingEnv = entryKey;
+                properties.put(CommonConstants.ENDPOINT_ENVIRONMENT_ATTR, existingEnv);
             }
 
-            // and add the associations and before adding them first remove all the endpoint dependencies
-            removeEndpointDependencies(servicePath, registry);
-
-            // iterate through the new endpoints..
-            for (OMElement endpointElement: serviceEndpointEntryElements) {
-                Map<String, String> properties = new HashMap<String, String>();
-
-                String entryText = endpointElement.getText();
-                String entryKey = null;
-                String entryVal;
-                int colonIndex = entryText.indexOf(":");
-                if (colonIndex < entryText.length()- 1) {
-                    entryKey = entryText.substring(0, colonIndex);
-                    entryText = entryText.substring(colonIndex + 1);
-                }
-                entryVal = entryText;
-
-                if (!"".equals(entryKey)) {
-                    // here the key is the environment
-
-                    String endpointPath = RegistryUtils.getAbsolutePath(registry.getRegistryContext(),
-                            org.wso2.carbon.registry.core.RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                    endpointLocation) + deriveEndpointFromUrl(entryVal);
-
-                    String existingEnv = null;
-
-                    if (registry.resourceExists(endpointPath)) {
-                        registry.get(endpointPath).removeProperty(CommonConstants.ENDPOINT_ENVIRONMENT_ATTR);
-                    }
-                    existingEnv = entryKey;
-                    properties.put(CommonConstants.ENDPOINT_ENVIRONMENT_ATTR, existingEnv);
-                }
-
-                // the entry value is the url
-                saveEndpoint(registry, entryVal, servicePath, properties, systemRegistry);
-            }
-        } finally {
-            CommonUtil.releaseAddingAssociationLock();
+            // the entry value is the url
+            saveEndpoint(registry, entryVal, servicePath, properties, systemRegistry);
         }
 
         // and we are getting the endpoints of all the attached wsdls.
@@ -361,11 +381,6 @@ public class EndpointUtils {
 
     private static void removeEndpointDependencies(String servicePath, Registry registry) throws RegistryException {
         // update lock check removed from for loop to prevent the database lock
-        try {
-            CommonUtil.releaseAddingAssociationLock();
-            if (!CommonUtil.isUpdateLockAvailable()) {
-                return;
-            }
             Association[] associations = registry.getAllAssociations(servicePath);
             for (Association association : associations) {
                 String path = association.getDestinationPath();
@@ -377,9 +392,6 @@ public class EndpointUtils {
                     }
                 }
             }
-        } finally {
-            CommonUtil.acquireUpdateLock();
-        }
     }
 
     private static String[] wsdlPrefixes = {
@@ -501,7 +513,7 @@ public class EndpointUtils {
             endpointId = resource.getUUID();
         } else {
             resource = registry.newResource();
-            resource.setContent(RegistryUtils.encodeString(url));
+            resource.setContent(RegistryUtils.encodeString(getEndpointContent(url, endpointAbsolutePath)));
         }
         boolean endpointIdCreated = false;
         if (endpointId == null) {
@@ -639,53 +651,6 @@ public class EndpointUtils {
         }
     }
 
-    // Added to fix CARBON-11713
-    public static void removeObsoleteWsdlEndpoint(OMElement oldServiceInfoElement, OMElement serviceInfoElement,
-                                                  String servicePath, Registry registry) throws RegistryException {
-        String oldWsdlPath = CommonUtil.getWSDLURL(oldServiceInfoElement);
-        String wsdlPath = CommonUtil.getWSDLURL(serviceInfoElement);
-
-        // get the endpoints associated with the previous wsdl, and remove that endpoint reference from the services
-        // that was associated with the service
-        if (oldWsdlPath != null && !wsdlPath.endsWith(oldWsdlPath)) {
-            Association[] associations = registry.getAssociations(servicePath, CommonConstants.DEPENDS);
-            List<OMElement> endpointsNodes;
-            AXIOMXPath endpointsXPath = null;
-            try {
-                endpointsXPath = new AXIOMXPath("//ns:endpoints/ns:entry");
-                endpointsXPath.addNamespace("ns", "http://www.wso2.org/governance/metadata");
-                endpointsNodes = (List<OMElement>) endpointsXPath.selectNodes(serviceInfoElement);
-            } catch (JaxenException e) {
-                throw new RegistryException(e.getMessage());
-            }
-
-            for (Association association : associations) {
-                if (association.getDestinationPath().contains("/endpoints/")) {
-                    String endpoint = association.getDestinationPath();
-                    for (OMElement endpointEntry : endpointsNodes) {
-                        if (endpoint.equals(getEndpointPathFromUrl(endpointEntry.getText(), registry))) {
-                            endpointEntry.detach();
-                        }
-                    }
-                }
-            }
-            endpointsNodes.size();
-        }
-    }
-
-    // Added to fix CARBON-11713
-    private static String getEndpointPathFromUrl(String endpointUrl, Registry registry) {
-
-        int colonIndex = endpointUrl.indexOf(":");
-        if (colonIndex < endpointUrl.length() - 1) {
-            endpointUrl = endpointUrl.substring(colonIndex + 1);
-        }
-
-        return RegistryUtils.getAbsolutePath(registry.getRegistryContext(),
-                org.wso2.carbon.registry.core.RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                        endpointLocation) + deriveEndpointFromUrl(endpointUrl);
-    }
-
     /**
      * Returns an endpoint path for the url without the starting '/'
      * @param url the endpoint url
@@ -710,5 +675,50 @@ public class EndpointUtils {
         urlToPath += "/" + ENDPOINT_RESOURCE_PREFIX +  name;
         return urlToPath;
     }
+
+    /**
+     * Create the endpoint content
+     *
+     * @param endpoint endpoint URI
+     * @param path endpoint location in the registry
+     * @return
+     * @throws RegistryException
+     */
+    public static String getEndpointContent(String endpoint, String path) throws RegistryException {
+        String p;
+        if(path.startsWith(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)){
+            p = new String("gov/" + path.substring((RegistryConstants.
+                GOVERNANCE_REGISTRY_BASE_PATH + ENDPOINT_DEFAULT_LOCATION).length()));
+        } else {
+            p = new String("gov/" + path);
+        }
+        OMFactory factory = OMAbstractFactory.getOMFactory();
+        OMElement ep = factory.createOMElement(new QName(SYNAPSE_NAMESPACE , SYNAPSE_ENDPOINT, SYNAPSE_NAMESPACE_PREFIX));
+        ep.addAttribute(SYNAPSE_ENDPOINT_NAME_ATTRIBUTE, p, null);
+        OMElement address = factory.createOMElement(new QName(SYNAPSE_NAMESPACE_PREFIX + ":" + SYNAPSE_ENDPOINT_ADDRESS));
+        address.addAttribute(SYNAPSE_ENDPOINT_ADDRESS_URI_ATTRIBUTE, endpoint, null);
+        ep.addChild(address);
+        return ep.toString();
+    }
+
+    /**
+     * Extract endpoint URL from content
+     *
+     * @param endpointContent endpoint content
+     * @return
+     * @throws RegistryException
+     */
+    public static String deriveEndpointFromContent(String endpointContent) throws RegistryException {
+        try {
+            OMElement endpointElement = AXIOMUtil.stringToOM(endpointContent);
+            OMElement addressElement = endpointElement.getFirstChildWithName
+                    (new QName(SYNAPSE_NAMESPACE, SYNAPSE_ENDPOINT_ADDRESS));
+            return addressElement.getAttribute(new QName(SYNAPSE_ENDPOINT_ADDRESS_URI_ATTRIBUTE)).getAttributeValue();
+        } catch (Exception e) {
+            throw new RegistryException("Invalid endpoint content", e);
+        }
+    }
+
+
 
 }

@@ -22,6 +22,7 @@ package org.wso2.carbon.usage.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
+import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -29,6 +30,8 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.usage.api.TenantUsageRetriever;
+
+import javax.sql.DataSource;
 
 /**
  * Util methods for usage.
@@ -41,6 +44,8 @@ public class Util {
     private static RealmService realmService;
     private static TenantUsageRetriever tenantUsageRetriever;
     private static ConfigurationContextService configurationContextService;
+    private static DataSourceService dataSourceService;
+    public static String BILLING_DATA_SOURCE_NAME="WSO2BillingDS";
 
     public static synchronized void setRegistryService(RegistryService service) {
         if (registryService == null) {
@@ -91,5 +96,13 @@ public class Util {
                 registryService, confCtxSvc.getServerConfigContext());
         bundleContext.registerService(
                 TenantUsageRetriever.class.getName(), tenantUsageRetriever, null);
+    }
+
+    public static DataSourceService getDataSourceService() {
+        return dataSourceService;
+    }
+
+    public static void setDataSourceService(DataSourceService dataSourceService) {
+        Util.dataSourceService = dataSourceService;
     }
 }

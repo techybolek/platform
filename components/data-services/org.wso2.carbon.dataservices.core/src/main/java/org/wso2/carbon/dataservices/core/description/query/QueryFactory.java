@@ -24,7 +24,7 @@ import org.wso2.carbon.dataservices.common.DBConstants;
 import org.wso2.carbon.dataservices.common.DBConstants.*;
 import org.wso2.carbon.dataservices.core.DBUtils;
 import org.wso2.carbon.dataservices.core.DataServiceFault;
-import org.wso2.carbon.dataservices.core.description.config.CarbonDataSourceConfig;
+import org.wso2.carbon.dataservices.core.description.config.SQLCarbonDataSourceConfig;
 import org.wso2.carbon.dataservices.core.description.config.Config;
 import org.wso2.carbon.dataservices.core.description.config.JNDIConfig;
 import org.wso2.carbon.dataservices.core.description.event.EventTrigger;
@@ -58,7 +58,8 @@ public class QueryFactory {
 		String sourceType = config.getType();
 		if (DataSourceTypes.RDBMS.equals(sourceType)
 				|| DataSourceTypes.JNDI.equals(sourceType) 
-				|| DataSourceTypes.CARBON.equals(sourceType)) {
+				|| DataSourceTypes.CARBON.equals(sourceType)
+				|| DataSourceTypes.CUSTOM_TABULAR.equals(sourceType)) {
 			query = createSQLQuery(dataService, queryEl);
 		} else if (DataSourceTypes.CSV.equals(sourceType)) {
 			query = createCSVQuery(dataService, queryEl);
@@ -70,8 +71,10 @@ public class QueryFactory {
         	query = createRdfFileQuery(dataService, queryEl);
         } else if (DataSourceTypes.SPARQL.equals(sourceType)) {
         	query = createSparqlEndpointQuery(dataService, queryEl);
-		}  else if (DataSourceTypes.WEB.equals(sourceType)) {
+		} else if (DataSourceTypes.WEB.equals(sourceType)) {
 			query = createWebQuery(dataService, queryEl);
+		} else if (DataSourceTypes.CUSTOM_QUERY.equals(sourceType)) {
+			query = createCustomQuery(dataService, queryEl);
 		} else {
 			throw new DataServiceFault("Invalid configType: " + 
 					sourceType + " in :- \n" + queryEl);
@@ -89,6 +92,11 @@ public class QueryFactory {
 	
 	private static String getQueryId(OMElement queryEl) {
 		return queryEl.getAttributeValue(new QName(DBSFields.ID));
+	}
+	
+	private static String getCustomQuery(OMElement queryEl) {
+		return ((OMElement) queryEl.getChildrenWithLocalName(
+				DBSFields.EXPRESSION).next()).getText();
 	}
 
     private static String getQueryVariable(OMElement queryEl) {
@@ -305,8 +313,8 @@ public class QueryFactory {
             if (connectionURL == null) {
                 String carbonDSURL = config.getProperty(CarbonDatasource.NAME);
                 if (carbonDSURL != null) {
-                    CarbonDataSourceConfig carbonDSConfig =
-                            (CarbonDataSourceConfig) dataService.getConfig(configId);
+                    SQLCarbonDataSourceConfig carbonDSConfig =
+                            (SQLCarbonDataSourceConfig) dataService.getConfig(configId);
                     try {
                         DataSource ds = carbonDSConfig.getDataSource();
                         if (ds != null) {
@@ -396,6 +404,28 @@ public class QueryFactory {
 		return query;
 	}
 
+	private static CustomQueryBasedDSQuery createCustomQuery(DataService dataService,
+            OMElement queryEl) throws DataServiceFault {
+		String queryId, configId, inputNamespace, expr;
+        EventTrigger[] eventTriggers;
+        Result result;
+        try {
+        	expr = getCustomQuery(queryEl);
+            queryId = getQueryId(queryEl);
+            configId = getConfigId(queryEl);
+            eventTriggers = getEventTriggers(dataService, queryEl);
+            result = getResultFromQueryElement(dataService, queryEl);
+		    inputNamespace = extractQueryInputNamespace(dataService, result, queryEl);
+        } catch (Exception e) {
+            throw new DataServiceFault(e, "Error in passing Web query element");
+        }
+		CustomQueryBasedDSQuery query = new CustomQueryBasedDSQuery(dataService, queryId,
+				getQueryParamsFromQueryElement(queryEl), result, configId,
+				eventTriggers[0], eventTriggers[1],
+				extractAdvancedProps(queryEl), inputNamespace, expr);
+        return query;
+	}
+	
     private static WebQuery createWebQuery(DataService dataService,
                                            OMElement queryEl) throws DataServiceFault {
         String queryId, configId, inputNamespace;
@@ -640,7 +670,7 @@ public class QueryFactory {
 			el = resElItr.next();
 			if (el.getQName().equals(elQName) && isElementGroup(el)) {
                 elGroup.addOutputElementGroupEntry(createOutputElementGroup(dataService, el,
-                        namespace, parentResult, ++level, optionalOverrideCurrent));
+                        namespace, parentResult, ++level, targetOptionalOverride));
 			} else if (el.getQName().equals(elQName)) {
 				elGroup.addElementEntry(createStaticOutputElement(dataService, el, namespace,
                         resultType, targetOptionalOverride));
@@ -883,6 +913,15 @@ public class QueryFactory {
 				exportType = ParamValue.PARAM_VALUE_ARRAY;
 			}
 		}
+		
+		/* optional value */
+		String optionalStr = el.getAttributeValue(new QName(DBSFields.OPTIONAL));
+		boolean optional = false;
+		if (optionalStr != null) {
+			optional = Boolean.parseBoolean(optionalStr);
+		}
+		
+		optionalOverride |= optional;
 		
 		StaticOutputElement soel = new StaticOutputElement(dataService, name, param, 
 				originalParam, paramType, elementType, namespace, 

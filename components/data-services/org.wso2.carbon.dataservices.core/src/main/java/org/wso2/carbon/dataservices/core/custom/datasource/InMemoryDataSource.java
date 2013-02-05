@@ -18,7 +18,6 @@
  */
 package org.wso2.carbon.dataservices.core.custom.datasource;
 
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.wso2.carbon.dataservices.common.DBConstants;
 import org.wso2.carbon.dataservices.core.DBUtils;
 import org.wso2.carbon.dataservices.core.DataServiceFault;
 
@@ -39,7 +39,7 @@ import com.hp.hpl.jena.sparql.lib.org.json.JSONTokener;
 /**
  * An in-memory custom data source implementation.
  */
-public class InMemoryDataSource implements CustomDataSource {
+public class InMemoryDataSource implements TabularDataBasedDS {
 
 	public static final String IN_MEMORY_DATASOURCE_SCHEMA = "inmemory_datasource_schema";
 	
@@ -55,7 +55,7 @@ public class InMemoryDataSource implements CustomDataSource {
 
 	@Override
 	public void init(Map<String, String> props) throws DataServiceFault {
-		this.dataSourceId = props.get(CustomDataSource.DATASOURCE_ID);
+		this.dataSourceId = props.get(DBConstants.CustomDataSource.DATASOURCE_ID);
 		String schemaContents = props.get(IN_MEMORY_DATASOURCE_SCHEMA);
 		if (!DBUtils.isEmptyString(schemaContents)) {
 			this.createInitialSchema(schemaContents);
@@ -75,7 +75,7 @@ public class InMemoryDataSource implements CustomDataSource {
 		    	columns = new ArrayList<DataColumn>();
 		    	colArray = obj.getJSONArray(table);
 		    	for (int i = 0; i < colArray.length(); i++) {
-		    		columns.add(new DataColumn(colArray.getString(i), Types.VARCHAR));
+		    		columns.add(new DataColumn(colArray.getString(i)));
 		    	}
 		    	this.createDataTable(table, columns);
 		    }
@@ -89,12 +89,12 @@ public class InMemoryDataSource implements CustomDataSource {
 		try {
 		    JSONObject obj = new JSONObject(new JSONTokener(recordContents));
 		    JSONArray entryArray, recordArray;
-		    Map<String, Object> rowValues;
+		    Map<String, String> rowValues;
 		    for (String table : JSONObject.getNames(obj)) {
 		    	entryArray = obj.getJSONArray(table);
 		    	for (int i = 0; i < entryArray.length(); i++) {
 		    		recordArray = entryArray.getJSONArray(i);
-		    		rowValues = new HashMap<String, Object>();
+		    		rowValues = new HashMap<String, String>();
 		    		for (int j = 0; j < recordArray.length(); j++) {
 		    			rowValues.put(this.getDataTable(table).getDataColumns().get(j).getName(), 
 		    					recordArray.get(j).toString());

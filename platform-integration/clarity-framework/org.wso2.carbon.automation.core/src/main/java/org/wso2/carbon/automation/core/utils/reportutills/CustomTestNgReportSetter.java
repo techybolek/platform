@@ -46,6 +46,23 @@ public class CustomTestNgReportSetter {
     }
 
 
+    public void createReport(ITestContext context) {
+        List<XmlSuite> xmlSuites = new ArrayList<XmlSuite>();
+        List<ISuite> iSuites = new ArrayList<ISuite>();
+        XmlSuite suite = new XmlSuite();
+        suite = context.getSuite().getXmlSuite();
+        XmlTest test = new XmlTest(suite);
+        List<XmlTest> xmlTests = new ArrayList<XmlTest>();
+        xmlTests.add(test);
+        suite.setTests(xmlTests);
+        xmlSuites.add(suite);
+        iSuites.add(context.getSuite());
+        String out = ProductConstant.REPORT_LOCATION + File.separator + "reports" + File.separator + suite.getName();
+        CustomTestNgReporter customTestNGrReporter = new CustomTestNgReporter(context);
+        customTestNGrReporter.generateReport(xmlSuites, iSuites, out);
+    }
+
+
     public void createReport(ISuite testSuite, Exception e) {
         List<XmlSuite> xmlSuites = new ArrayList<XmlSuite>();
         List<ISuite> iSuites = new ArrayList<ISuite>();
@@ -58,6 +75,21 @@ public class CustomTestNgReportSetter {
         iSuites.add(testSuite);
         String out = ProductConstant.REPORT_LOCATION + File.separator + "reports" + File.separator + suite.getName();
         CustomTestNgReporter customTestNGrReporter = new CustomTestNgReporter(testSuite, e);
+        customTestNGrReporter.generateReport(xmlSuites, iSuites, out);
+    }
+
+    public void createReport(ISuite testSuite) {
+        List<XmlSuite> xmlSuites = new ArrayList<XmlSuite>();
+        List<ISuite> iSuites = new ArrayList<ISuite>();
+        XmlSuite suite = testSuite.getXmlSuite();
+        XmlTest test = new XmlTest(suite);
+        List<XmlTest> xmlTests = new ArrayList<XmlTest>();
+        xmlTests.add(test);
+        suite.setTests(xmlTests);
+        xmlSuites.add(suite);
+        iSuites.add(testSuite);
+        String out = ProductConstant.REPORT_LOCATION + File.separator + "reports" + File.separator + suite.getName();
+        CustomTestNgReporter customTestNGrReporter = new CustomTestNgReporter(testSuite);
         customTestNGrReporter.generateReport(xmlSuites, iSuites, out);
     }
 }

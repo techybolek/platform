@@ -31,11 +31,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.registry.extensions.internal.GovernanceRegistryExtensionsComponent;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.internal.RegistryCoreServiceComponent;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
+import org.wso2.carbon.registry.core.session.CurrentSession;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.extensions.handlers.utils.EndpointUtils;
 import org.wso2.carbon.registry.extensions.handlers.utils.ExWSDLReaderImpl;
@@ -59,12 +60,11 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 public class WsdlUriProcessor {
     private Registry registry;
     private Registry systemRegistry;
-    private Registry systemGovernanceRegistry;
+    private Registry governanceUserRegistry;
     private Definition originalDefinition;
     private List<Association> associations;
     private SchemaUriProcessor schemaUriProcessor;
@@ -87,31 +87,6 @@ public class WsdlUriProcessor {
 
     private static Log log = LogFactory.getLog(WsdlUriProcessor.class);
 
-    private static InheritableThreadLocal<Set<String>> importedWSDLs =
-            new InheritableThreadLocal<Set<String>>() {
-                protected Set<String> initialValue() {
-                    return new ConcurrentSkipListSet<String>();
-                }
-            };
-
-    public static synchronized void loadImportedWSDLMap() {
-        importedWSDLs.get();
-    }
-
-    public static synchronized void clearImportedWSDLMap() {
-        importedWSDLs.remove();
-    }
-
-    public boolean getCreateService() {
-        return createService;
-    }
-
-    public void setCreateService(boolean createService) {
-        this.createService = createService;
-    }
-
-    private boolean createService = true;
-
     public WsdlUriProcessor(RequestContext requestContext) {
         this.registry = requestContext.getRegistry();
         try {
@@ -126,7 +101,10 @@ public class WsdlUriProcessor {
                 systemRegistry.put(getChrootedWSDLLocation(requestContext.getRegistryContext()),
                         systemRegistry.newCollection());
             }
-            this.systemGovernanceRegistry = RegistryCoreServiceComponent.getRegistryService().getGovernanceSystemRegistry();
+            int tenantId = CurrentSession.getTenantId();
+            String userName = CurrentSession.getUser();
+            this.governanceUserRegistry = GovernanceRegistryExtensionsComponent.getRegistryService().getGovernanceUserRegistry(userName, tenantId);
+
         } catch (RegistryException ignore) {
             this.systemRegistry = null;
         }
@@ -163,13 +141,12 @@ public class WsdlUriProcessor {
     public String addWSDLToRegistry(
             RequestContext context,
             String wsdlURL,
-            Resource metadata, boolean isPut, boolean addService, boolean skipValidation)
+            Resource metadata, boolean isPut)
             throws RegistryException {
         boolean evaluateExports = true;
         boolean isDefaultEnvironment =true;
         String currentWsdlLocation = null;
         String currentSchemaLocation = null;
-        String currentPolicyLocation;
         String currentEndpointLocation = null;
         String currentEnvironment;
         String masterVersion= null;
@@ -181,15 +158,14 @@ public class WsdlUriProcessor {
         resourceName = resourcePath.substring(resourcePath.lastIndexOf(RegistryConstants.PATH_SEPARATOR) + 1);
         RegistryContext registryContext = context.getRegistryContext();
         // 3rd parameter is false, for importing WSDLs.
-        evaluateWSDLsToDefinitions(wsdlURL, context, evaluateExports, false, isPut, skipValidation);
-        String wsdlPath = "";
+        evaluateWSDLsToDefinitions(wsdlURL, context, evaluateExports, false, isPut);
+        String wsdlPath;
         for (WSDLInfo wsdlInfo : wsdls.values()) {
             Definition wsdlDefinition = wsdlInfo.getWSDLDefinition();
             if (wsdlDefinition != null) {
                 Types types = wsdlDefinition.getTypes();
                 schemaUriProcessor.evaluateSchemas(types,
                         wsdlDefinition.getDocumentBaseURI(),
-                        evaluateExports,
                         wsdlInfo.getSchemaDependencies());
                 String wsdlName = wsdlInfo.getProposedRegistryURL();
                 int index = wsdlName.lastIndexOf("/");
@@ -242,7 +218,6 @@ public class WsdlUriProcessor {
                         }
                         currentWsdlLocation = currentEnvironment + wsdlLocation;
                         currentSchemaLocation = currentEnvironment + schemaLocation;
-                        currentPolicyLocation = currentEnvironment + policyLocation;
                         currentEndpointLocation = currentEnvironment + endpointLocation;
 
                     }
@@ -270,31 +245,29 @@ public class WsdlUriProcessor {
 
         String masterWSDLPath;
         if (!isDefaultEnvironment) {
-            schemaUriProcessor.saveSchemasToRegistry(context, currentSchemaLocation,
+            schemaUriProcessor.saveSchemasToRegistry(currentSchemaLocation,
                     null,masterVersion,dependeinciesList);
             updateWSDLSchemaLocations();
-            masterWSDLPath = saveWSDLsToRepositoryNew(context, metadata,currentEndpointLocation
+            masterWSDLPath = saveWSDLsToRepositoryNew(metadata,currentEndpointLocation
                     ,dependeinciesList,masterVersion);// 3rd parameter is false, for importing WSDLs.
 
             addPolicyImports(context);
 
             saveAssociations();
         } else {
-            schemaUriProcessor.saveSchemasToRegistry(context, getChrootedSchemaLocation(registryContext),
+            schemaUriProcessor.saveSchemasToRegistry(getChrootedSchemaLocation(registryContext),
                     null);
             updateWSDLSchemaLocations();
 
-            masterWSDLPath = saveWSDLsToRepositoryNew(context, metadata);// 3rd parameter is false, for importing WSDLs.
+            masterWSDLPath = saveWSDLsToRepositoryNew(metadata);
 
             addPolicyImports(context);
 
             saveAssociations();
-            if (addService && getCreateService()) {
-                List<OMElement> serviceContentBeans = createServiceContent(masterWSDLPath, metadata);
-                for (OMElement serviceContentBean : serviceContentBeans) {
-                    addService(serviceContentBean, context);
+            List<OMElement> serviceContentBeans = createServiceContent(masterWSDLPath, metadata);
+            for (OMElement serviceContentBean : serviceContentBeans) {
+                addService(serviceContentBean, context);
 
-                }
             }
         }
         return masterWSDLPath;
@@ -315,7 +288,7 @@ public class WsdlUriProcessor {
                             String source = getSource(policyURL);
 
                             String policyPath = getChrootedPolicyLocation(context.getRegistryContext()) + path;
-                            GenericArtifactManager genericArtifactManager = new GenericArtifactManager(systemGovernanceRegistry, "uri");
+                            GenericArtifactManager genericArtifactManager = new GenericArtifactManager(governanceUserRegistry, "uri");
 
                             if(!registry.resourceExists(policyPath)){
                                 GenericArtifact policy = genericArtifactManager.newGovernanceArtifact(new QName(source));
@@ -409,8 +382,7 @@ public class WsdlUriProcessor {
                                             RequestContext context,
                                             boolean evaluateImports,
                                             boolean isServiceImport,
-                                            boolean isPut,
-                                            boolean skipValidation)
+                                            boolean isPut)
             throws RegistryException {
         WSDLReader wsdlReader;
         Definition wsdlDefinition = null;
@@ -459,18 +431,17 @@ public class WsdlUriProcessor {
             map = wsdlDefinition.getImports();
         }
         // We perform validation only if there are no wsdl imports
-        if (!skipValidation) {
-            if (map != null && map.size() == 0) {
-                log.trace("Starting WSDL Validation");
-                wsdlValidationInfo = WSDLUtils.validateWSDL(context);
-                log.trace("Ending WSDL Validation");
-                log.trace("Starting WSI Validation");
-                wsiValidationInfo = WSDLUtils.validateWSI(context);
-                log.trace("Ending WSI Validation");
 
-            } else {
-                hasWSDLImports = true;
-            }
+        if (map != null && map.size() == 0) {
+            log.trace("Starting WSDL Validation");
+            wsdlValidationInfo = WSDLUtils.validateWSDL(context);
+            log.trace("Ending WSDL Validation");
+            log.trace("Starting WSI Validation");
+            wsiValidationInfo = WSDLUtils.validateWSI(context);
+            log.trace("Ending WSI Validation");
+
+        } else {
+            hasWSDLImports = true;
         }
 
         if(wsdlDefinition == null) {
@@ -605,10 +576,10 @@ public class WsdlUriProcessor {
     private void updateWSDLocations() {
         for (WSDLInfo wsdlInfo : wsdls.values()) {
             Definition definition = wsdlInfo.getWSDLDefinition();
-            ArrayList<String> wsdlDependancies = wsdlInfo.getWSDLDependencies();
+            ArrayList<String> wsdlDependencies = wsdlInfo.getWSDLDependencies();
             Vector[] importVector = (Vector[])definition.getImports().values().toArray(new Vector[definition.getImports().values().size()]);
             int count = 0;
-            for (String wsdlDependancy : wsdlDependancies) {
+            for (String wsdlDependancy : wsdlDependencies) {
                 Vector values = importVector[count];
                 WSDLInfo dependantWSDLInfo = wsdls.get(wsdlDependancy);
                 dependantWSDLInfo.getProposedRegistryURL();
@@ -653,7 +624,7 @@ public class WsdlUriProcessor {
     }
 
     @SuppressWarnings("unchecked")
-    private String saveWSDLsToRepositoryNew(RequestContext context, Resource metaDataResource)
+    private String saveWSDLsToRepositoryNew(Resource metaDataResource)
             throws RegistryException {
         String masterWSDLPath = null;
         try {
@@ -700,8 +671,7 @@ public class WsdlUriProcessor {
                 if (metaDataResource != null) {
                     wsdlResource.setDescription(metaDataResource.getDescription());
                 }
-                boolean newWSDLUpload = !registry.resourceExists(wsdlPath);
-                saveResource(context, wsdlInfo.getOriginalURL(), wsdlPath, wsdlResource, wsdlInfo.isMasterWSDL());
+                saveResource(wsdlInfo.getOriginalURL(), wsdlPath, wsdlResource, wsdlInfo.isMasterWSDL());
                 if (systemRegistry != null) {
                     org.wso2.carbon.registry.extensions.handlers.utils.EndpointUtils.saveEndpointsFromWSDL(wsdlPath, wsdlResource, registry,
                             systemRegistry);
@@ -794,7 +764,7 @@ public class WsdlUriProcessor {
     }
 
     @SuppressWarnings("unchecked")
-    private String saveWSDLsToRepositoryNew(RequestContext context, Resource metaDataResource
+    private String saveWSDLsToRepositoryNew(Resource metaDataResource
             ,String endpointEnvironment,List<String> dependenciesList,String version)
             throws RegistryException {
         String masterWSDLPath = null;
@@ -854,8 +824,7 @@ public class WsdlUriProcessor {
                 if (metaDataResource != null) {
                     wsdlResource.setDescription(metaDataResource.getDescription());
                 }
-                boolean newWSDLUpload = !registry.resourceExists(wsdlPath);
-                saveResource(context, wsdlInfo.getOriginalURL(), wsdlPath, wsdlResource, wsdlInfo.isMasterWSDL());
+                saveResource(wsdlInfo.getOriginalURL(), wsdlPath, wsdlResource, wsdlInfo.isMasterWSDL());
                 if (systemRegistry != null) {
                     EndpointUtils.saveEndpointsFromWSDL(wsdlPath, wsdlResource, registry,
                             systemRegistry, endpointEnvironment, dependenciesList, version);
@@ -916,13 +885,13 @@ public class WsdlUriProcessor {
     }
 
 
-    private void saveResource(RequestContext context, String url, String path, Resource resource,
+    private void saveResource(String url, String path, Resource resource,
                               boolean isMasterWSDL)
             throws RegistryException {
         log.trace("Started saving resource");
 
         String source = getSource(path);
-        GenericArtifactManager genericArtifactManager = new GenericArtifactManager(systemGovernanceRegistry, "uri");
+        GenericArtifactManager genericArtifactManager = new GenericArtifactManager(governanceUserRegistry, "uri");
         GenericArtifact wsdl = genericArtifactManager.newGovernanceArtifact(new QName(source));
         if (isMasterWSDL){
             wsdl.setId(resource.getUUID());

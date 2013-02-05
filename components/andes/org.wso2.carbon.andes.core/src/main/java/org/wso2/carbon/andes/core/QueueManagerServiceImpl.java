@@ -29,12 +29,8 @@ import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-
-import javax.jms.*;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import java.util.List;
-import java.util.Properties;
+
 
 public class QueueManagerServiceImpl implements QueueManagerService {
 
@@ -46,10 +42,10 @@ public class QueueManagerServiceImpl implements QueueManagerService {
 
     public void createQueue(String queueName) throws QueueManagerException {
         try {
-
+            String tenantBasedQueueName = Utils.getTenantBasedQueueName(queueName);
             String userName = getLoggedInUserName();
-            if(!QueueManagementBeans.getInstance().queueExists(queueName)){
-                QueueManagementBeans.getInstance().createQueue(queueName,userName);
+            if(!QueueManagementBeans.getInstance().queueExists(tenantBasedQueueName)){
+                QueueManagementBeans.getInstance().createQueue(tenantBasedQueueName,userName);
             }
         }catch (Exception e) {
             log.error("Error in creating queue", e);
@@ -59,7 +55,10 @@ public class QueueManagerServiceImpl implements QueueManagerService {
 
     @Override
     public List<Queue> getAllQueues() throws QueueManagerException {
-        return QueueManagementBeans.getInstance().getAllQueues();
+        List<Queue> allQueues = QueueManagementBeans.getInstance().getAllQueues();
+        //show queues belonging to current domain of user
+        //also set queue name used by user
+        return Utils.filterDomainSpecificQueues(allQueues);
     }
 
     @Override

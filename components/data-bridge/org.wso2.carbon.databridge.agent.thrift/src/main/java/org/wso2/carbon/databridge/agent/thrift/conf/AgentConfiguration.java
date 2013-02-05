@@ -30,6 +30,7 @@ public class AgentConfiguration {
 
     private int bufferedEventsSize = AgentConstants.DEFAULT_BUFFERED_EVENTS_SIZE;
     private int poolSize = AgentConstants.DEFAULT_POOL_SIZE;
+    private int asyncDataPublisherBufferedEventSize = AgentConstants.DEFAULT_ASYNC_CLIENT_BUFFERED_EVENTS_SIZE;
 
     private int maxTransportPoolSize = AgentConstants.DEFAULT_MAX_TRANSPORT_POOL_SIZE;
     private int maxIdleConnections = AgentConstants.DEFAULT_MAX_IDLE_CONNECTIONS;
@@ -42,7 +43,7 @@ public class AgentConfiguration {
     private int secureMaxIdleConnections = AgentConstants.DEFAULT_SECURE_MAX_IDLE_CONNECTIONS;
     private long secureEvictionTimePeriod = AgentConstants.DEFAULT_SECURE_EVICTION_IDLE_TIME_IN_POOL;
     private long secureMinIdleTimeInPool = AgentConstants.DEFAULT_SECURE_MIN_IDLE_TIME_IN_POOL;
-
+    private long reconnectionInterval = AgentConstants.DEFAULT_RECONNECTION_INTERVAL;
 
     private String trustStore = null;
     private String trustStorePassword = null;
@@ -149,5 +150,21 @@ public class AgentConfiguration {
 
     public long getSecureMinIdleTimeInPool() {
         return secureMinIdleTimeInPool;
+    }
+
+    public int getAsyncDataPublisherBufferedEventSize() {
+        return asyncDataPublisherBufferedEventSize;
+    }
+
+    public void setAsyncDataPublisherBufferedEventSize(int asyncDataPublisherBufferedEventSize) {
+        this.asyncDataPublisherBufferedEventSize = asyncDataPublisherBufferedEventSize;
+    }
+
+    public long getReconnectionInterval() {
+        return reconnectionInterval;
+    }
+
+    public void setReconnectionInterval(long reconnectionInterval) {
+        this.reconnectionInterval = reconnectionInterval;
     }
 }

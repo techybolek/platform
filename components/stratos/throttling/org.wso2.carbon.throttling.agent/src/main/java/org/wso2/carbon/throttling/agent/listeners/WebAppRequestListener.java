@@ -20,6 +20,7 @@ package org.wso2.carbon.throttling.agent.listeners;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.stratos.common.constants.StratosConstants;
 import org.wso2.carbon.throttling.agent.ThrottlingAgent;
 import org.wso2.carbon.throttling.agent.cache.TenantThrottlingInfo;
@@ -51,86 +52,94 @@ public class WebAppRequestListener implements CarbonTomcatValve {
 
     public void invoke(HttpServletRequest request, HttpServletResponse response) {
         String requestURI = request.getRequestURI();
-        String tenantDomainName = getTenantName(requestURI);
+        String tenantDomainName = CarbonContext.getCurrentContext().
+                                  getTenantDomain();
         String urlContext = getContext(requestURI);
-        try {
-            int tenantId = throttlingAgent.getRealmService().getTenantManager().getTenantId(tenantDomainName);
-            if (tenantId <= 0) {
-            	//Allow to proceed
-            } else {
-                if (!throttlingAgent.getRealmService().getTenantManager().getTenant(tenantId).isActive()) {
-                    //Check weather activated tenant or not
-                    String msg = "You are sending request to inactivated tenant. for Domain: "
-                            + tenantDomainName;
-                    log.error(msg);
-                    try {
-                        response.sendError(403, msg);
-                    } catch (IOException e) {
-                        String message = "Error in Sending throttling rule violation by inactive tenant" +
-                                " tenant Domain: " + tenantDomainName;
-                        log.error(message, e);
-                    }
-                } else if (urlContext != null) {
-                    //check weather request come to webapps
-                    if (CONTEXT_WEBAPPS.equals(urlContext)) {
-                        //if tenant is active we will throttle other parameters such as bandwidth in/out
+        if (tenantDomainName != null && urlContext != null) {
+            try {
+                int tenantId = throttlingAgent.getRealmService().getTenantManager().
+                        getTenantId(tenantDomainName);
+                if (tenantId <= 0) {
+                    //Allow to proceed
+                } else {
+                    if (!throttlingAgent.getRealmService().getTenantManager().getTenant(tenantId).
+                            isActive()) {
+                        //Check weather activated tenant or not
+                        String msg = "You are sending request to a deactivated tenant. for Domain: "
+                                     + tenantDomainName;
+                        log.error(msg);
                         try {
-                            TenantThrottlingInfo throttlingInfo =
-                                    throttlingAgent.getThrottlingInfoCache().getTenantThrottlingInfo(tenantId);
-                            if(throttlingInfo!=null){
-                                String[] actions =
-                                        new String[]{StratosConstants.THROTTLING_WEBAPP_IN_BANDWIDTH_ACTION,
-                                                StratosConstants.THROTTLING_WEBAPP_OUT_BANDWIDTH_ACTION};
-                                ThrottlingActionInfo actionInfo;
-
-                                actionInfo = throttlingInfo.getThrottlingActionInfo(actions);
-                                if (actionInfo!=null && actionInfo.isBlocked()) {
-                                    String blockedMsg = actionInfo.getMessage();
-                                    String msg = "The throttling action is blocked. message: " + blockedMsg;
-                                    log.error(msg);
-                                    response.sendError(509, msg);
-                                }
-                            }
-                        } catch (Exception ex) {
-                            String msg = "Error in Sending throttling rule violation." +
-                                    " for tenant Domain: " + tenantDomainName;
-                            log.error(msg, ex);
-                            return;
+                            response.sendError(403, msg);
+                        } catch (IOException e) {
+                            String message = "Error in sending throttling rule violation message by an inactive tenant." +
+                                             " Tenant Domain: " + tenantDomainName;
+                            log.error(message, e);
                         }
-                    } else if (CONTEXT_SERVICES.equals(urlContext)) {
-                        try {
-                            TenantThrottlingInfo throttlingInfo =
-                                    throttlingAgent.getThrottlingInfoCache().getTenantThrottlingInfo(tenantId);
-                            if(throttlingInfo!=null){
-                                String[] actions =
-                                        new String[]{StratosConstants.THROTTLING_SERVICE_IN_BANDWIDTH_ACTION,
-                                                StratosConstants.THROTTLING_SERVICE_OUT_BANDWIDTH_ACTION};
-                                ThrottlingActionInfo actionInfo;
+                    } else {
+                        //check weather request come to webapps
+                        if (CONTEXT_WEBAPPS.equals(urlContext)) {
+                            //if tenant is active we will throttle other parameters such as bandwidth in/out
+                            try {
+                                TenantThrottlingInfo throttlingInfo =
+                                        throttlingAgent.getThrottlingInfoCache().
+                                                getTenantThrottlingInfo(tenantId);
+                                if (throttlingInfo != null) {
+                                    String[] actions =
+                                            new String[]{StratosConstants.THROTTLING_WEBAPP_IN_BANDWIDTH_ACTION,
+                                                         StratosConstants.THROTTLING_WEBAPP_OUT_BANDWIDTH_ACTION};
+                                    ThrottlingActionInfo actionInfo;
 
-                                actionInfo = throttlingInfo.getThrottlingActionInfo(actions);
-                                if (actionInfo!=null && actionInfo.isBlocked()) {
-                                    String blockedMsg = actionInfo.getMessage();
-                                    String msg = "The throttling action is blocked. message: " + blockedMsg;
-                                    log.error(msg);
-                                    response.sendError(509, msg);
+                                    actionInfo = throttlingInfo.getThrottlingActionInfo(actions);
+                                    if (actionInfo != null && actionInfo.isBlocked()) {
+                                        String blockedMsg = actionInfo.getMessage();
+                                        String msg = "This action is blocked. Reason: "
+                                                     + blockedMsg;
+                                        log.error(msg);
+                                        response.sendError(509, msg);
+                                    }
                                 }
+                            } catch (Exception ex) {
+                                String msg = "Error in sending throttling rule violation message." +
+                                             " Tenant Domain: " + tenantDomainName;
+                                log.error(msg, ex);
+                                return;
                             }
-                        } catch (Exception ex) {
-                            String msg = "Error in Sending throttling rule violation." +
-                                    " for tenant Domain: " + tenantDomainName;
-                            log.error(msg, ex);
+                        } else if (CONTEXT_SERVICES.equals(urlContext)) {
+                            try {
+                                TenantThrottlingInfo throttlingInfo =
+                                        throttlingAgent.getThrottlingInfoCache().
+                                                getTenantThrottlingInfo(tenantId);
+                                if (throttlingInfo != null) {
+                                    String[] actions =
+                                            new String[]{StratosConstants.THROTTLING_SERVICE_IN_BANDWIDTH_ACTION,
+                                                         StratosConstants.THROTTLING_SERVICE_OUT_BANDWIDTH_ACTION};
+                                    ThrottlingActionInfo actionInfo;
+
+                                    actionInfo = throttlingInfo.getThrottlingActionInfo(actions);
+                                    if (actionInfo != null && actionInfo.isBlocked()) {
+                                        String blockedMsg = actionInfo.getMessage();
+                                        String msg = "This action is blocked. Reason: " +
+                                                     blockedMsg;
+                                        log.error(msg);
+                                        response.sendError(509, msg);
+                                    }
+                                }
+                            } catch (Exception ex) {
+                                String msg = "Error in sending throttling rule violation message." +
+                                             " Tenant Domain: " + tenantDomainName;
+                                log.error(msg, ex);
+                            }
                         }
+
                     }
-
                 }
+            } catch (UserStoreException e) {
+                String msg = "Error in getting tenant id to evaluate throttling rule. " +
+                             "Tenant Domain: " + tenantDomainName;
+                log.error(msg, e);
             }
-        } catch (UserStoreException e) {
-            String msg = "Error in getting tenant id for evaluate throttling rule. " +
-                    "for tenant Domain: " + tenantDomainName;
-            log.error(msg, e);
+
         }
-
-
     }
 
     /**
@@ -158,16 +167,13 @@ public class WebAppRequestListener implements CarbonTomcatValve {
      * @return context string
      */
     public String getContext(String requestUrl) {
-        Matcher matcher = servicesURLPattern.matcher(requestUrl);
-        if (matcher.find()) {
+        if (requestUrl.contains("/services") && requestUrl.contains("/t")) {
             return CONTEXT_SERVICES;
         }
 
-        matcher = webAppsURLPattern.matcher(requestUrl);
-        if (matcher.find()) {
+        if (requestUrl.contains("/t") && requestUrl.contains("/webapps")) {
             return CONTEXT_WEBAPPS;
         }
-
         return null;
     }
 }

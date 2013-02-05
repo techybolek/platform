@@ -15,182 +15,51 @@
  */
 package org.wso2.carbon.governance.list.util;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.governance.api.exception.GovernanceException;
-import org.wso2.carbon.governance.api.services.ServiceFilter;
-import org.wso2.carbon.governance.api.services.ServiceManager;
-import org.wso2.carbon.governance.api.services.dataobjects.Service;
-import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
+import org.wso2.carbon.governance.api.services.dataobjects.ServiceImpl;
+import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.list.beans.ServiceBean;
-import org.wso2.carbon.governance.list.util.beans.ArtifactInfoBean;
+import org.wso2.carbon.governance.list.util.filter.FilterService;
 import org.wso2.carbon.registry.core.ActionConstants;
-import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
-import org.wso2.carbon.registry.extensions.handlers.utils.ServiceUtils;
 import org.wso2.carbon.user.core.UserStoreException;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamReader;
-import java.io.StringReader;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import static org.wso2.carbon.governance.list.util.CommonUtil.buildServiceOMElement;
-import static org.wso2.carbon.governance.list.util.CommonUtil.getVersionFromContent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class ListServiceUtil {
     private static final Log log = LogFactory.getLog(ListServiceUtil.class);
-    private static final String REGISTRY_LC_NAME = "registry.LC.name";
-    private static int poolSize = 10;
-
-    private static ExecutorService preFetcher;
-    private static final Map<String,ArtifactInfoBean> serviceListMap =
-            Collections.synchronizedMap(new HashMap<String, ArtifactInfoBean>());
-
-    public static Map<String, ArtifactInfoBean> getServiceListMap() {
-        return serviceListMap;
-    }
-
-    public static String[] filterServices(String criteria, Registry governanceRegistry) throws RegistryException {
-        try {
-            ServiceManager serviceManger = new ServiceManager(governanceRegistry);
-            final Service referenceService;
-            if (criteria != null) {
-                XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(new StringReader(criteria));
-                StAXOMBuilder builder = new StAXOMBuilder(reader);
-                OMElement referenceServiceElement = builder.getDocumentElement();
-                referenceService = serviceManger.newService(referenceServiceElement);
-
-            //ListServiceFilter listServiceFilter = new ListServiceFilter(referenceService);
-            ServiceFilter listServiceFilter = new ServiceFilter() {
-                GovernanceArtifactFilter filter = new GovernanceArtifactFilter(referenceService);
-                public boolean matches(Service service) throws GovernanceException {
-                    return filter.matches(service);
-                }
-            };
-            Service[] services = serviceManger.findServices(listServiceFilter);
-
-            List<String> servicePaths = new ArrayList<String>();
-            if (services != null) {
-                GovernanceUtils.setTenantGovernanceSystemRegistry(CarbonContext.getCurrentContext().getTenantId());
-                for (Service service: services) {
-                    String path = service.getPath();
-                    if (path != null) {
-                        servicePaths.add(path);
-                    }
-                }
-                GovernanceUtils.unsetTenantGovernanceSystemRegistry();
-            }
-            return servicePaths.toArray(new String[servicePaths.size()]);
-            }else {
-                   return  serviceManger.getAllServicePaths();
-            }
-        } catch (Exception ignore) {
-            String msg = "Error in filtering the services. " + ignore.getMessage();
-            throw new RegistryException(msg);
-        }
-    }
-
-    public static void startArtifactFetcher(Registry userRegistry) {
-        try {
-            if (preFetcher == null) {
-                preFetcher = Executors.newFixedThreadPool(poolSize);
-                Registry governanceRegistry = GovernanceUtils.getGovernanceSystemRegistry(userRegistry);
-
-                String paths[] = ListServiceUtil.filterServices(null, governanceRegistry);
-
-                int chunkSize = paths.length / poolSize;
-                int mod = paths.length % poolSize;
-
-                for (int i = 0; i < poolSize; i++) {
-                    int start = i * chunkSize;
-                    int end = start + chunkSize + mod;
-
-                    if (end > paths.length) {
-                        end = paths.length;
-                    }
-
-                    PreFetcher fetcher = new PreFetcher();
-                    fetcher.setGovernanceRegistry(governanceRegistry);
-                    fetcher.setPaths(Arrays.copyOfRange(paths, start, end));
-                    preFetcher.execute(fetcher);
-                }
-
-            }
-        } catch (RegistryException e) {
-            log.error("Unable to get the list of services from the registry", e);
-        }
-    }
-
-    public static void stopArtifactFetcher(){
-        if(preFetcher != null){
-            preFetcher.shutdown();
-        }
-    }
-
-    public static void populateServiceInfoMap(Registry governanceRegistry,String[] paths,
-                                              Map<String,ArtifactInfoBean> listMap){
-        try {
-            for (String path : paths) {
-                if(!listMap.containsKey(path) && governanceRegistry.resourceExists(path)){
-                    ArtifactInfoBean bean = new ArtifactInfoBean();
-                    Resource resource = governanceRegistry.get(path);
-
-                    String version = getVersionFromContent(buildServiceOMElement(resource));
-
-                    bean.setName(CommonUtil.getServiceName(resource));
-                    bean.setNameSpace(CommonUtil.getServiceNamespace(resource));
-                    bean.setVersion(version);
-                    if(resource.getProperty(REGISTRY_LC_NAME) != null){
-                        String lcName = resource.getProperty(REGISTRY_LC_NAME);
-                        bean.setLifecycleName(lcName);
-                        bean.setLifecycleState(resource.getProperty("registry.lifecycle."+lcName+".state"));
-                    }
-
-                    listMap.put(path,bean);
-                }
-            }
-        } catch (RegistryException e) {
-            log.error("Unable to get the resource from the registry",e);
-        }
-
-    }
     
-    public static ServiceBean fillServiceBean(UserRegistry registry,String criteria) throws RegistryException {
-        
+    public static ServiceBean fillServiceBean(UserRegistry registry,
+                                          String criteria) throws RegistryException {
         ServiceBean bean = new ServiceBean();
-        Resource resource;
-        String[] path;
-        List<String> modifiedList = ServiceUtils.getModifiedList();
-
-
-        String defaultServicePath = RegistryUtils.getRelativePathToOriginal(registry.getRegistryContext().getServicePath()
-                , RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
+        GovernanceArtifact[] artifacts = new GovernanceArtifact[0];
+        String defaultServicePath = RegistryUtils.getRelativePathToOriginal(
+                registry.getRegistryContext().getServicePath(),
+                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
 
         try {
-            path = ListServiceUtil.filterServices(criteria, registry);
+            artifacts = (new FilterService(criteria, registry)).getArtifacts();
         } catch (RegistryException e) {
             log.error("An error occurred while obtaining the list of services.", e);
-            path = new String[0];
         }
-        String[] name = new String[path.length];
-        String[] namespace = new String[path.length];
-        String[] LCName = new String[path.length];
-        String[] LCState = new String[path.length];
-        String[] version = new String[path.length];
-        boolean[] canDelete = new boolean[path.length];
-        for (int i = 0; i < path.length; i++) {
-            bean.increment();
+        String[] path = new String[artifacts.length];
+        String[] name = new String[artifacts.length];
+        String[] namespace = new String[artifacts.length];
+        String[] LCName = new String[artifacts.length];
+        String[] LCState = new String[artifacts.length];
+        String[] version = new String[artifacts.length];
+        boolean[] canDelete = new boolean[artifacts.length];
 
+        for (int i = 0; i < artifacts.length; i++) {
+            bean.increment();
             if (registry.getUserRealm() != null && registry.getUserName() != null) {
                 try {
                     canDelete[i] =
@@ -204,36 +73,13 @@ public class ListServiceUtil {
             } else {
                 canDelete[i] = false;
             }
+            path[i] = ((ServiceImpl)artifacts[i]).getArtifactPath();
+            version[i] = artifacts[i].getAttribute(GovernanceConstants.SERVICE_VERSION_ATTRIBUTE);
+            name[i] = artifacts[i].getAttribute(GovernanceConstants.SERVICE_NAME_ATTRIBUTE);
+            namespace[i] = artifacts[i].getAttribute(GovernanceConstants.SERVICE_NAMESPACE_ATTRIBUTE);
+            LCName[i] = ((ServiceImpl)artifacts[i]).getLcName();
+            LCState[i] = ((ServiceImpl)artifacts[i]).getLcState();
 
-            if (serviceListMap.containsKey(path[i])) {
-                if (!modifiedList.contains(path[i])) {
-                    ArtifactInfoBean artifactInfoBean = serviceListMap.get(path[i]);
-                    name[i] = artifactInfoBean.getName();
-                    namespace[i] = artifactInfoBean.getNameSpace();
-                    version[i] = artifactInfoBean.getVersion();
-                    LCName[i] = artifactInfoBean.getLifecycleName() == null ? "" : artifactInfoBean.getLifecycleName();
-                    LCState[i] = artifactInfoBean.getLifecycleState() == null ? "" : artifactInfoBean.getLifecycleState();
-                    continue;
-                } else {
-                    modifiedList.remove(path[i]);
-                }
-            }
-
-            resource = registry.get(path[i]);
-            version[i] = CommonUtil.getVersionFromContent(CommonUtil.buildServiceOMElement(resource));
-            name[i] = CommonUtil.getServiceName(resource);
-            namespace[i] = CommonUtil.getServiceNamespace(resource);
-            LCName[i] = CommonUtil.getLifeCycleName(resource);
-            LCState[i] = CommonUtil.getLifeCycleState(resource);
-
-            ArtifactInfoBean artifactInfoBean = new ArtifactInfoBean();
-            artifactInfoBean.setName(name[i]);
-            artifactInfoBean.setNameSpace(namespace[i]);
-            artifactInfoBean.setLifecycleName(LCName[i]);
-            artifactInfoBean.setLifecycleState(LCState[i]);
-            artifactInfoBean.setVersion(version[i]);
-
-            serviceListMap.put(path[i], artifactInfoBean);
         }
         bean.setDefaultServicePath(defaultServicePath);
         bean.setNames(name);
@@ -247,16 +93,17 @@ public class ListServiceUtil {
         return bean;
     }
 
-    /**
+   /**
      * Sorts the services by name
-     *
-     * @param bean**/
+     * @param bean  ServiceBean
+     */
     private static void sortServicesByName(ServiceBean bean) {
 
         List<ServiceEntry> serviceEntryList = new ArrayList<ServiceEntry>();
         for(int i=0; i < bean.getPath().length; i++) {
-            serviceEntryList.add( new ServiceEntry(bean.getPath()[i], bean.getNames()[i], bean.getNamespace()[i],
-                    bean.getLCName()[i],bean.getLCState()[i],bean.getVersion()[i],bean.getCanDelete()[i]));
+            serviceEntryList.add(new ServiceEntry(bean.getPath()[i], bean.getNames()[i],
+                    bean.getNamespace()[i], bean.getLCName()[i], bean.getLCState()[i],
+                    bean.getVersion()[i],bean.getCanDelete()[i]));
         }
 
         Collections.sort(serviceEntryList, new Comparator<ServiceEntry>() {
@@ -293,7 +140,8 @@ public class ListServiceUtil {
                 lcstate,
                 version;
         private boolean canDelete;
-        ServiceEntry(String path, String name, String namespace,String lcname,String lcstate,String version, boolean canDelete) {
+        ServiceEntry(String path, String name, String namespace, String lcname, String lcstate,
+                     String version, boolean canDelete) {
             this.path = path;
             this.name = name;
             this.namespace = namespace;
@@ -303,4 +151,5 @@ public class ListServiceUtil {
             this.version = version;
         }
     }
+    
 }

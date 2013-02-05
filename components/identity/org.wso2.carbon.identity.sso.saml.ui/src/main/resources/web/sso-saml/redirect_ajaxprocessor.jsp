@@ -25,7 +25,9 @@
 <%@page import="java.util.List" %>
 <%@page import="java.util.Enumeration" %>
 <%@page import="org.apache.commons.codec.binary.Base64" %>
-<%@page import="org.wso2.carbon.identity.sso.saml.ui.session.mgt.FESessionManager" %>
+<%@page import="org.wso2.carbon.identity.core.util.IdentityUtil" %>
+<%@page import="org.wso2.carbon.identity.base.IdentityConstants" %>
+<%@page import="org.wso2.carbon.identity.sso.saml.ui.session.mgt.FESessionManager" %>   
 <%@page import="org.wso2.carbon.identity.sso.saml.ui.session.mgt.FESessionBean" %>
 <%@page import="org.wso2.carbon.identity.sso.saml.stub.types.SAMLSSOReqValidationResponseDTO" %>
 <%@page import="org.wso2.carbon.identity.sso.saml.stub.types.SAMLSSORespDTO" %>
@@ -34,46 +36,26 @@
 <body>
 <%
     String assertionConsumerURL = (String) request.getAttribute(SAMLSSOProviderConstants.ASSRTN_CONSUMER_URL);
-    String assertion = (String) request.getAttribute(SAMLSSOProviderConstants.ASSERTION_STR);
+    String samlResp = (String) request.getAttribute(SAMLSSOProviderConstants.SAML_RESP);
     String relayState = (String) request.getAttribute(SAMLSSOProviderConstants.RELAY_STATE);
     String subject = (String) request.getAttribute(SAMLSSOProviderConstants.SUBJECT);
     String domain = null;
 	if(subject != null && MultitenantUtils.getTenantDomain(subject) != null){
     	   domain = MultitenantUtils.getTenantDomain(subject);
 	}
+	// handling tenant partitioning
+    if("true".equals(IdentityUtil.getProperty((IdentityConstants.ServerConfig.SSO_TENANT_PARTITIONING_ENABLED)))){
+        assertionConsumerURL = assertionConsumerURL+"?"+MultitenantConstants.TENANT_DOMAIN+"="+domain;
+    }
     relayState = URLDecoder.decode(relayState, "UTF-8");
     relayState = relayState.replaceAll("&", "&amp;").replaceAll("\"", "&quot;").replaceAll("'", "&apos;").
             replaceAll("<", "&lt;").replaceAll(">", "&gt;").replace("\n", "");
-    
-    
-   /*  try {
-    	URL url = new URL(assertionConsumerURL);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestProperty("tenantDomain", "wso2.lk");
-        conn.setRequestProperty("something", "something");
-		conn.setRequestMethod("POST");
-		conn.setDoOutput(true);
-		conn.setDoInput(true);
-		DataOutputStream out = new DataOutputStream(conn.getOutputStream());
-		String content = "SAMLResponse="+assertion+"&RelayState="+relayState;
-		out.writeBytes(content);
-		out.flush();
-		out.close();
-		conn.disconnect();
-    } catch (MalformedURLException e) {
-        e.printStackTrace();
-    } catch (ProtocolException e) {
-        e.printStackTrace();
-    } catch (IOException e) {
-        e.printStackTrace();
-    } */
-    
     
 %>
 <p>You are now redirected back to <%=assertionConsumerURL%>. If the
  redirection fails, please click the post button.</p>
 <form method="post" action="<%=assertionConsumerURL%>">
-    <p><input type="hidden" name="SAMLResponse" value="<%=assertion%>"/>
+    <p><input type="hidden" name="SAMLResponse" value="<%=samlResp%>"/>
         <input type="hidden" name="RelayState" value="<%=relayState%>"/>
         <button type="submit">POST</button>
     </p>

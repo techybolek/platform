@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.registry.extensions.handlers;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.xni.parser.XMLInputSource;
@@ -40,12 +41,12 @@ import org.wso2.carbon.registry.extensions.utils.WSDLValidationInfo;
 import org.wso2.carbon.user.core.UserRealm;
 
 import java.io.*;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import org.apache.commons.io.FileUtils;
 
 @SuppressWarnings({"unused", "UnusedAssignment"})
 public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
@@ -88,7 +89,7 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
     private boolean disableSchemaValidation = false;
     private boolean useOriginalSchema = false;
 
-    private boolean disableSymlinkCreation = false;
+    private boolean disableSymlinkCreation = true;
     private static int numberOfRetry = 5;
 
     public void setNumberOfRetry(String numberOfRetry) {
@@ -139,8 +140,6 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
 
                     int threadPoolSize = this.threadPoolSize;
 
-                    int wsdlPathDepth = Integer.MAX_VALUE;
-                    int xsdPathDepth = Integer.MAX_VALUE;
                     File tempFile = File.createTempFile(tempFilePrefix, archiveExtension);
                     File tempDir = new File(tempFile.getAbsolutePath().substring(0,
                             tempFile.getAbsolutePath().length() - archiveExtension.length()));
@@ -211,14 +210,7 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
                                     if (uri.endsWith("/")) {
                                         uri = uri.substring(0, uri.length() -1);
                                     }
-                                    int uriPathDepth = uri.split("/").length;
-                                    if (uriPathDepth < wsdlPathDepth) {
-                                        wsdlPathDepth = uriPathDepth;
-                                        wsdlUriList = new LinkedList<String>();
-                                    }
-                                    if (wsdlPathDepth == uriPathDepth) {
-                                        wsdlUriList.add(uri);
-                                    }
+                                    wsdlUriList.add(uri);
                                 } else if (entryName != null &&
                                         entryName.toLowerCase().endsWith(xsdExtension)) {
                                     String uri = tempFile.toURI().toString();
@@ -234,14 +226,7 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
                                     if (uri.endsWith("/")) {
                                         uri = uri.substring(0, uri.length() -1);
                                     }
-                                    int uriPathDepth = uri.split("/").length;
-                                    if (uriPathDepth < xsdPathDepth) {
-                                        xsdPathDepth = uriPathDepth;
-                                        xsdUriList = new LinkedList<String>();
-                                    }
-                                    if (xsdPathDepth == uriPathDepth) {
-                                        xsdUriList.add(uri);
-                                    }
+                                    xsdUriList.add(uri);
                                 } else if (entryName != null) {
                                     String uri = tempFile.toURI().toString();
                                     uri = uri.substring(0, uri.length() -
@@ -267,27 +252,34 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
                             localPathMap =
                                     Collections.unmodifiableMap(CurrentSession.getLocalPathMap());
                         }
-                        if (wsdlUriList.isEmpty() && xsdUriList.isEmpty()) {
+                        if (wsdlUriList.isEmpty() && xsdUriList.isEmpty() && uriList.isEmpty()) {
                             throw new RegistryException(
-                                    "No WSDLs or Schemas found in the given WSDL archive");
+                                    "No Files found in the given archive");
                         }
-                        if (wsdlPathDepth < Integer.MAX_VALUE) {
-                            for (String uri : wsdlUriList) {
-                                tasks.add(new UploadWSDLTask(requestContext, uri,
+                        for (String uri : wsdlUriList) {
+                            tasks.add(new UploadWSDLTask(requestContext, uri,
+                                    CurrentSession.getTenantId(),
+                                    CurrentSession.getUserRegistry(), CurrentSession.getUserRealm(),
+                                    CurrentSession.getUser(), CurrentSession.getCallerTenantId(),
+                                    localPathMap));
+                        }
+                        for (String uri : xsdUriList) {
+                            tasks.add(new UploadXSDTask(requestContext, uri,
+                                    CurrentSession.getTenantId(),
+                                    CurrentSession.getUserRegistry(), CurrentSession.getUserRealm(),
+                                    CurrentSession.getUser(), CurrentSession.getCallerTenantId(),
+                                    localPathMap));
+                        }
+                        String mediaType = resource.getProperty("registry.mediaType");
+                        if (mediaType != null) {
+                            for (String uri : uriList) {
+                                tasks.add(new UploadFileTask(requestContext, uri,
                                         CurrentSession.getTenantId(),
                                         CurrentSession.getUserRegistry(), CurrentSession.getUserRealm(),
                                         CurrentSession.getUser(), CurrentSession.getCallerTenantId(),
-                                        localPathMap));
+                                        localPathMap, mediaType));
                             }
-                        }
-                        if (xsdPathDepth < Integer.MAX_VALUE) {
-                            for (String uri : xsdUriList) {
-                                tasks.add(new UploadXSDTask(requestContext, uri,
-                                        CurrentSession.getTenantId(),
-                                        CurrentSession.getUserRegistry(), CurrentSession.getUserRealm(),
-                                        CurrentSession.getUser(), CurrentSession.getCallerTenantId(),
-                                        localPathMap));
-                            }
+                            uriList.clear();
                         }
 
                         // calculate thread pool size for efficient use of resources in concurrent
@@ -356,7 +348,7 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
             requestContext.setResourcePath(new ResourcePath(path));
             WSDLProcessor wsdlProcessor = buildWSDLProcessor(requestContext, this.useOriginalSchema);
             String addedPath = wsdlProcessor.addWSDLToRegistry(requestContext, uri, local, false,
-                    true, disableWSDLValidation);
+                    true, disableWSDLValidation,disableSymlinkCreation);
             if (CommonConstants.ENABLE.equals(System.getProperty(
                     CommonConstants.UDDI_SYSTEM_PROPERTY))) {
                 BusinessServiceInfo businessServiceInfo = new BusinessServiceInfo();
@@ -415,7 +407,7 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
 
             String savedName = schemaProcessor
                     .importSchemaToRegistry(requestContext, path,
-                            getChrootedLocation(requestContext.getRegistryContext()), true);
+                            getChrootedLocation(requestContext.getRegistryContext()), true,disableSymlinkCreation);
 
             String parentPath = RegistryUtils.getParentPath(requestContext.getResourcePath().getPath());
 
@@ -716,6 +708,50 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
 
         public boolean getFailed() {
             return failed;
+        }
+    }
+
+    protected class UploadFileTask extends UploadTask {
+
+        String mediaType;
+
+        public UploadFileTask(RequestContext requestContext, String uri, int tenantId,
+                             UserRegistry userRegistry, UserRealm userRealm, String userId,
+                             int callerTenantId, Map<String, String> localPathMap,
+                             String mediaType) {
+            super(requestContext, uri, tenantId, userRegistry, userRealm, userId, callerTenantId,
+                    localPathMap);
+            this.mediaType = mediaType;
+        }
+
+        protected void doProcessing(RequestContext requestContext, String uri)
+                throws RegistryException {
+            Registry registry = requestContext.getRegistry();
+            Resource resource = registry.newResource();
+            if (resource.getUUID() == null) {
+                resource.setUUID(UUID.randomUUID().toString());
+            }
+            resource.setMediaType(this.mediaType);
+            InputStream inputStream;
+            try {
+                inputStream = new URL(uri).openStream();
+            } catch (IOException e) {
+                throw new RegistryException("The URL " + uri + " is incorrect.", e);
+            }
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            int nextChar;
+            try {
+                while ((nextChar = inputStream.read()) != -1) {
+                    outputStream.write(nextChar);
+                }
+                outputStream.flush();
+            } catch (IOException e) {
+                throw new RegistryException("Failed to read content from URL " + uri, e);
+            }
+            resource.setContent(outputStream.toByteArray());
+            String path = RegistryUtils.getParentPath(requestContext.getResourcePath().getPath()) +
+                    RegistryConstants.PATH_SEPARATOR + RegistryUtils.getResourceName(uri);
+            result = registry.put(path, resource);
         }
     }
 

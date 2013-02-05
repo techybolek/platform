@@ -22,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.server.namenode.NameNode;
-import org.apache.hadoop.metrics2.lib.DefaultMetricsSystem;
 import org.wso2.carbon.utils.ServerConstants;
 
 import java.io.File;
@@ -33,6 +32,8 @@ import java.io.File;
  */
 public class HDFSNameNode {
     private static Log log = LogFactory.getLog(HDFSNameNode.class);
+
+    private static String HDFS_NAMENODE_STARTUP_DELAY = "hdfs.namenode.startup.delay";
 
     private static final String CORE_SITE_XML = "core-site.xml";
     private static final String HDFS_SITE_XML = "hdfs-site.xml";
@@ -46,33 +47,33 @@ public class HDFSNameNode {
     public HDFSNameNode() {
         Configuration conf = new Configuration(false);
         String carbonHome = System.getProperty(ServerConstants.CARBON_HOME);
-        String hadoopConf =   carbonHome + File.separator + "repository" + File.separator +
-                                    "conf" + File.separator + "etc" + File.separator + "hadoop";
+        String hadoopConf = carbonHome + File.separator + "repository" + File.separator +
+                "conf" + File.separator + "etc" + File.separator + "hadoop";
         String hadoopCoreSiteConf = carbonHome + File.separator + "repository" + File.separator +
-                                    "conf" + File.separator + "etc" + File.separator + "hadoop" + File.separator + CORE_SITE_XML;
+                "conf" + File.separator + "etc" + File.separator + "hadoop" + File.separator + CORE_SITE_XML;
         String hdfsCoreSiteConf = carbonHome + File.separator + "repository" + File.separator +
-                                  "conf" + File.separator + "etc" + File.separator + "hadoop" + File.separator + HDFS_SITE_XML;
+                "conf" + File.separator + "etc" + File.separator + "hadoop" + File.separator + HDFS_SITE_XML;
         String hadoopPolicyConf = carbonHome + File.separator + "repository" + File.separator +
-                                  "conf" + File.separator + "etc" + File.separator + "hadoop" + File.separator + HADOOP_POLICY_XML;
+                "conf" + File.separator + "etc" + File.separator + "hadoop" + File.separator + HADOOP_POLICY_XML;
         String mapredSiteConf = carbonHome + File.separator + "repository" + File.separator +
-                                "conf" + File.separator + "etc" + File.separator + "hadoop" + File.separator + MAPRED_SITE_XML;
+                "conf" + File.separator + "etc" + File.separator + "hadoop" + File.separator + MAPRED_SITE_XML;
         String hadoopMetrics2Properties = carbonHome + File.separator + "repository" + File.separator +
                 "conf" + File.separator + "etc" + File.separator + "hadoop" + File.separator + METRICS2_PROPERTIES;
         conf.addResource(new Path(hadoopCoreSiteConf));
         conf.addResource(new Path(hdfsCoreSiteConf));
         conf.addResource(new Path(hadoopPolicyConf));
         conf.addResource(new Path(mapredSiteConf));
-        String alterdJobNameNodeKeyTabPath = hadoopConf+File.separator+conf.get("dfs.namenode.keytab.file");
+        String alterdJobNameNodeKeyTabPath = hadoopConf + File.separator + conf.get("dfs.namenode.keytab.file");
         conf.set("dfs.namenode.keytab.file", alterdJobNameNodeKeyTabPath);
+
         try {
-            DefaultMetricsSystem.initialize("namenode");
+            // DefaultMetricsSystem.initialize("namenode");
             NameNode namenode = new NameNode(conf);
 //            if (namenode != null) {
 //                namenode.join();
 //            }
         } catch (Throwable e) {
-            log.error(e);
-            //System.exit(-1);
+            log.error("NameNode initialization error." + e);
         }
     }
 
@@ -86,17 +87,24 @@ public class HDFSNameNode {
                     log.debug("Activating the HDFS Name Node");
                 }
                 new HDFSNameNode();
-                log.info("Hadoop Server Controller Thread was destroyed successfully");
             }
         }, "HDFSNameNode");
-
-        try {
-            Thread.sleep(40000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        long nameNodeStartupDelay = 0;
+        nameNodeStartupDelay = Long.parseLong(System.getProperty(HDFS_NAMENODE_STARTUP_DELAY));
+        if (nameNodeStartupDelay > 0) {
+            try {
+                if (log.isDebugEnabled()) {
+                    log.debug("Waiting for other services - datanode,mapred");
+                    log.debug("Name node starup delay is " + nameNodeStartupDelay);
+                }
+                Thread.sleep(nameNodeStartupDelay);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         thread.start();
     }
+
 
     /**
      * Stops the Hadoop Name Node daemon
@@ -109,5 +117,6 @@ public class HDFSNameNode {
             thread.join();
         } catch (InterruptedException ignored) {
         }
+        log.info("HDFS name node shutdown");
     }
 }

@@ -24,6 +24,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException;
 import org.wso2.carbon.deployment.synchronizer.internal.repository.CarbonRepositoryUtils;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 /**
@@ -47,7 +49,13 @@ public class DeploymentSyncAxis2ConfigurationContextObserver extends AbstractAxi
 
             DeploymentSynchronizer depsync =
                     CarbonRepositoryUtils.newCarbonRepositorySynchronizer(tenantId);
-            depsync.doInitialSyncUp();
+
+            if (GhostDeployerUtils.isGhostOn() && GhostDeployerUtils.isPartialUpdateEnabled()
+                    && CarbonUtils.isWorkerNode() && tenantId > 0) {
+                depsync.syncGhostMetaArtifacts();
+            } else {
+                depsync.doInitialSyncUp();
+            }
             //TODO: Need to sync up only the ghost metadata is ghost deployment has been enabled
         } catch (DeploymentSynchronizerException e) {
             log.error("Error while initializing the deployment synchronizer for tenant: " + tenantId);

@@ -21,52 +21,64 @@ package org.wso2.carbon.rssmanager.core.internal;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.rssmanager.core.RSSManagerException;
-import org.wso2.carbon.rssmanager.core.internal.manager.RSSManager;
+import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
+import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAOFactory;
 import org.wso2.carbon.rssmanager.core.internal.util.RSSConfig;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
+
+import java.util.List;
 
 /**
  * This class loads the tenant specific data.
  */
-public class RSSManagerAxis2ConfigContextObserver extends AbstractAxis2ConfigurationContextObserver{
+public class RSSManagerAxis2ConfigContextObserver extends AbstractAxis2ConfigurationContextObserver {
 
-    private static final Log log= LogFactory.getLog(RSSManagerAxis2ConfigContextObserver.class);
+    private static final Log log = LogFactory.getLog(RSSManagerAxis2ConfigContextObserver.class);
 
-    public void createdConfigurationContext(ConfigurationContext configurationContext){
-        int tid = SuperTenantCarbonContext.getCurrentContext(
-                configurationContext).getTenantId();
+    public void createdConfigurationContext(ConfigurationContext configurationContext) {
+        int tid = PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();
         try {
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(tid);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tid);
 
-            /* Initializes tenant's RSS metadata repository */
-            this.getRSSManager().initTenant(tid);
+            /* Initializing tenant RSS instance repository */
+            this.initializeTenantRSSInstanceRepository(tid);
         } catch (Exception e) {
             log.error("Error occurred while loading tenant RSS configurations ", e);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
     public void terminatingConfigurationContext(ConfigurationContext configurationContext) {
-        int tid = CarbonContext.getCurrentContext().getTenantId();
-        try {
-            this.getRSSManager().setMetaDataRepository(tid, null);
-        } catch (RSSManagerException e) {
-            log.error("Error occurred while unsetting tenant RSS metadata repository");
-        }
     }
 
-    private RSSManager getRSSManager() throws RSSManagerException {
-        RSSConfig config = RSSConfig.getInstance();
-        if (config == null) {
-            throw new RSSManagerException("RSSConfig is not properly initialized and is null");
+    private void initializeTenantRSSInstanceRepository(int tid) throws RSSManagerException {
+        List<RSSInstance> tenantOwnedInstances = null;
+        try {
+            RSSConfig.getInstance().getRssManager().beginTransaction();
+            tenantOwnedInstances = RSSDAOFactory.getRSSDAO().getAllRSSInstances(tid);
+            RSSConfig.getInstance().getRssManager().endTransaction();
+        } catch (RSSManagerException e) {
+            if (RSSConfig.getInstance().getRssManager().isInTransaction()) {
+                RSSConfig.getInstance().getRssManager().rollbackTransaction();
+            }
+            throw e;
         }
-        return config.getRssManager();
+        TenantRSSInstanceRepository repository =
+                RSSConfig.getInstance().getRssManager().getRSSInstancePool().
+                        getTenantRSSRepository(tid);
+        if (repository == null) {
+            repository = new TenantRSSInstanceRepository();
+        }
+        for (RSSInstance rssInstance : tenantOwnedInstances) {
+            repository.addRSSInstance(rssInstance);
+        }
+        RSSConfig.getInstance().getRssManager().getRSSInstancePool().
+                setTenantRSSRepository(tid, repository);
     }
-    
+
+
 }

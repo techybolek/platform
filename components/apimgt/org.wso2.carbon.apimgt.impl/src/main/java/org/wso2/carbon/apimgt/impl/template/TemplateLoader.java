@@ -38,11 +38,14 @@ public class TemplateLoader {
     public static final String TEMPLATE_TYPE_API = "api";
     public static final String TEMPLATE_TYPE_BLOCKED_API = "blocked_api";
     public static final String TEMPLATE_TYPE_RESOURCE = "resource";
+    public static final String TEMPLATE_TYPE_RESOURCE_WITH_JWT = "resource_with_jwt";
     public static final String TEMPLATE_TYPE_COMPLEX_RESOURCE = "complex_resource";
+    public static final String TEMPLATE_TYPE_COMPLEX_RESOURCE_WITH_JWT = "complex_resource_with_jwt";
     public static final String TEMPLATE_TYPE_HANDLERS = "handlers";
     public static final String TEMPLATE_TYPE_COMPLEX_HANDLER = "complex_handler";
     public static final String TEMPLATE_TYPE_SIMPLE_HANDLER = "simple_handler";
-
+    public static final String TEMPLATE_TYPE_USERTOKEN_HEADER = "usertoken_header";
+    
     private static final String TEMPLATE_FILE_PREFIX = "/api_templates_";
 
     private static final TemplateLoader instance = new TemplateLoader();

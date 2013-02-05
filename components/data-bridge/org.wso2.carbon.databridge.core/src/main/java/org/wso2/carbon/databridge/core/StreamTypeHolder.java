@@ -19,31 +19,15 @@ package org.wso2.carbon.databridge.core;
 
 import org.wso2.carbon.databridge.commons.AttributeType;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Event stream data type holder
  */
 public class StreamTypeHolder {
     private String domainName;
-    private Map<String, AttributeType[]> metaDataTypeMap =
-            Collections.synchronizedMap(new HashMap<String, AttributeType[]>());
-    private Map<String, AttributeType[]> correlationDataTypeMap =
-            Collections.synchronizedMap(new HashMap<String, AttributeType[]>());
-    private Map<String, AttributeType[]> payloadDataTypeMap =
-            Collections.synchronizedMap(new HashMap<String, AttributeType[]>());
-
-//    public StreamTypeHolder(String username) {
-//        String[] userNameParts = username.split("@");
-//        if (userNameParts.length == 1) {
-//            this.domainName = "";
-//        } else {
-//            this.domainName = userNameParts[1];
-//        }
-//    }
-
+    private Map<String, AttributeComposite> attributeCompositeMap =  new ConcurrentHashMap<String, AttributeComposite>();
 
     public StreamTypeHolder(String domainName) {
         this.domainName = domainName;
@@ -57,51 +41,26 @@ public class StreamTypeHolder {
         this.domainName = domainName;
     }
 
-    public Map<String, AttributeType[]> getMetaDataTypeMap() {
-        return metaDataTypeMap;
+
+    public Map<String, AttributeComposite> getAttributeCompositeMap() {
+        return attributeCompositeMap;
     }
 
-    public void setMetaDataType(String streamId, AttributeType[] metaDataType) {
-        this.metaDataTypeMap.put(streamId, metaDataType);
+    public void putDataType(String streamId, AttributeType[] meta,
+                            AttributeType[] correlation, AttributeType[] payload) {
+        // todo log
+        this.attributeCompositeMap.put(streamId, new AttributeComposite(new AttributeType[][]{meta, correlation, payload}));
     }
 
-    public Map<String, AttributeType[]> getCorrelationDataTypeMap() {
-        return correlationDataTypeMap;
+    public AttributeType[][] getDataType(String streamId) {
+        AttributeComposite type = attributeCompositeMap.get(streamId);
+        if(null != type){
+            return type.getAttributeTypes();
+        }
+        return null;
     }
 
-    public void setCorrelationDataType(String streamId, AttributeType[] correlationDataType) {
-        this.correlationDataTypeMap.put(streamId, correlationDataType);
-    }
-
-    public Map<String, AttributeType[]> getPayloadDataTypeMap() {
-        return payloadDataTypeMap;
-    }
-
-    public void setPayloadDataType(String streamId, AttributeType[] payloadDataType) {
-        this.payloadDataTypeMap.put(streamId, payloadDataType);
-    }
-
-    public AttributeType[] getMetaDataType(String streamId) {
-        return metaDataTypeMap.get(streamId);
-    }
-
-    public void addMetaDataType(String streamId, AttributeType[] metaDataType) {
-        this.metaDataTypeMap.put(streamId, metaDataType);
-    }
-
-    public AttributeType[] getCorrelationDataType(String streamId) {
-        return correlationDataTypeMap.get(streamId);
-    }
-
-    public void addCorrelationDataType(String streamId, AttributeType[] correlationDataType) {
-        this.correlationDataTypeMap.put(streamId, correlationDataType);
-    }
-
-    public AttributeType[] getPayloadDataType(String streamId) {
-        return payloadDataTypeMap.get(streamId);
-    }
-
-    public void addPayloadDataType(String streamId, AttributeType[] payloadDataType) {
-        this.payloadDataTypeMap.put(streamId, payloadDataType);
+    public AttributeComposite getAttributeComposite(String streamId){
+       return attributeCompositeMap.get(streamId);
     }
 }

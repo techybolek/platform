@@ -24,6 +24,7 @@ public class ArtifactsBean {
 
     private String[] names;
     private String[] types;
+    private String[] keys;
     private ArtifactBean[] artifacts;
 
     public String[] getNames() {
@@ -48,5 +49,13 @@ public class ArtifactsBean {
 
     public void setArtifacts(ArtifactBean[] artifacts) {
         this.artifacts = artifacts;
+    }
+
+    public String[] getKeys() {
+        return keys;
+    }
+
+    public void setKeys(String[] keys) {
+        this.keys = keys;
     }
 }

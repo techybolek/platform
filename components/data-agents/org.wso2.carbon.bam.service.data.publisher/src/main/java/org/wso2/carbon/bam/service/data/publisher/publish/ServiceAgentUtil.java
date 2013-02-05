@@ -16,7 +16,11 @@
 package org.wso2.carbon.bam.service.data.publisher.publish;
 
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.bam.data.publisher.util.BAMDataPublisherConstants;
+import org.wso2.carbon.bam.data.publisher.util.PublisherUtil;
+import org.wso2.carbon.bam.service.data.publisher.conf.EventConfigNStreamDef;
 import org.wso2.carbon.bam.service.data.publisher.conf.EventPublisherConfig;
 import org.wso2.carbon.bam.service.data.publisher.conf.EventingConfigData;
 import org.wso2.carbon.bam.service.data.publisher.conf.Property;
@@ -35,8 +39,20 @@ import java.util.Map;
 
 public class ServiceAgentUtil {
 
+    private static Log log = LogFactory.getLog(ServiceAgentUtil.class);
+
     private static Map<String,EventPublisherConfig> eventPublisherConfigMap =
             new HashMap<String, EventPublisherConfig>();
+
+    private static boolean isPublishingEnabled = false;
+
+    public static void setPublishingEnabled(boolean isPublishingEnabled) {
+        ServiceAgentUtil.isPublishingEnabled = isPublishingEnabled;
+    }
+
+    public static boolean getPublishingEnabled() {
+        return isPublishingEnabled;
+    }
 
     public static EventPublisherConfig getEventPublisherConfig(String key) {
         return eventPublisherConfigMap.get(key);
@@ -53,7 +69,7 @@ public class ServiceAgentUtil {
     }
 
     public static Event makeEventList(PublishData publishData,
-                                      EventingConfigData eventingConfigData) {
+                                      EventConfigNStreamDef eventingConfigData) {
 
         EventData event = publishData.getEventData();
 
@@ -68,11 +84,11 @@ public class ServiceAgentUtil {
         switch (statisticsType) {
             case ACTIVITY_STATS:
                 //In data
-                addActivityInEventData(event, eventData);
+                addActivityEventData(event, eventData);
                 addActivityMetaData(event, metaData);
                 addActivityCorrelationData(event, correlationData);
                 //Out data -- Meta and correlation values come from In data
-                addActivityOutEventData(event, eventData);
+                //addActivityOutEventData(event, eventData);
                 break;
             case SERVICE_STATS:
                 addStatisticEventData(event, eventData);
@@ -80,11 +96,11 @@ public class ServiceAgentUtil {
                 break;
             case ACTIVITY_SERVICE_STATS:
                 //In data
-                addActivityInEventData(event, eventData);
+                addActivityEventData(event, eventData);
                 addActivityMetaData(event, metaData);
                 addActivityCorrelationData(event, correlationData);
                 //Out data
-                addActivityOutEventData(event, eventData);
+                //addActivityOutEventData(event, eventData);
                 //ServiceStats data
                 addStatisticEventData(event, eventData);
                 break;
@@ -102,7 +118,7 @@ public class ServiceAgentUtil {
         return publishEvent;
     }
 
-    private static void addPropertiesAsMetaData(EventingConfigData eventingConfigData,
+    private static void addPropertiesAsMetaData(EventConfigNStreamDef eventingConfigData,
                                                 List<Object> metaData) {
         Property[] properties = eventingConfigData.getProperties();
         if (properties != null) {
@@ -117,14 +133,26 @@ public class ServiceAgentUtil {
 
     private static StatisticsType findTheStatisticType(EventData event) {
         StatisticsType statisticsType = null;
-        if ((event.getInMessageId() != null || event.getOutMessageId() != null) &&
+        if ((event.getMessageId() != null) &&
             event.getSystemStatistics() == null) {
             statisticsType = StatisticsType.ACTIVITY_STATS;
-        } else if (event.getInMessageId() == null && event.getOutMessageId() == null &&
+        } else if (event.getMessageId() == null &&
                    event.getSystemStatistics() != null) {
             statisticsType = StatisticsType.SERVICE_STATS;
-        } else if ((event.getInMessageId() != null || event.getOutMessageId() != null) &&
+        } else if ((event.getMessageId() != null) &&
                    event.getSystemStatistics() != null) {
+            statisticsType = StatisticsType.ACTIVITY_SERVICE_STATS;
+        }
+        return statisticsType;
+    }
+
+    public static StatisticsType findTheStatisticType(EventingConfigData eventingConfigData) {
+        StatisticsType statisticsType = null;
+        if (!eventingConfigData.isServiceStatsEnable() && eventingConfigData.isMsgDumpingEnable()) {
+            statisticsType = StatisticsType.ACTIVITY_STATS;
+        } else if (eventingConfigData.isServiceStatsEnable() && !eventingConfigData.isMsgDumpingEnable()) {
+            statisticsType = StatisticsType.SERVICE_STATS;
+        } else if (eventingConfigData.isMsgDumpingEnable() && eventingConfigData.isServiceStatsEnable()) {
             statisticsType = StatisticsType.ACTIVITY_SERVICE_STATS;
         }
         return statisticsType;
@@ -137,18 +165,23 @@ public class ServiceAgentUtil {
     }
 
     private static void addActivityMetaData(EventData event, List<Object> metaData) {
+        // adding server host or more correctly monitored server url
+        metaData.add(PublisherUtil.getHostAddress());
+        
         metaData.add(event.getRequestURL());
         metaData.add(event.getRemoteAddress());
         metaData.add(event.getContentType());
         metaData.add(event.getUserAgent());
-        metaData.add(event.getHost());
+
         metaData.add(event.getReferer());
     }
 
 
-    private static void addActivityInEventData(EventData event, List<Object> eventData) {
-        eventData.add(event.getInMessageId());
-        eventData.add(event.getInMessageBody());
+    private static void addActivityEventData(EventData event, List<Object> eventData) {
+        eventData.add(event.getMessageId());
+        eventData.add(event.getSOAPHeader());
+        eventData.add(event.getSOAPBody());
+        eventData.add(event.getMessageDirection());
     }
 
     private static void addActivityCorrelationData(EventData event,
@@ -156,10 +189,10 @@ public class ServiceAgentUtil {
         correlationData.add(event.getActivityId());
     }
 
-    private static void addActivityOutEventData(EventData event, List<Object> eventData) {
+/*    private static void addActivityOutEventData(EventData event, List<Object> eventData) {
         eventData.add(event.getOutMessageId());
         eventData.add(event.getOutMessageBody());
-    }
+    }*/
 
 
     private static void addStatisticEventData(EventData event, List<Object> eventData) {
@@ -175,7 +208,9 @@ public class ServiceAgentUtil {
         metaData.add(event.getRemoteAddress());
         metaData.add(event.getContentType());
         metaData.add(event.getUserAgent());
-        metaData.add(event.getHost());
+        // adding server host or more correctly monitored server url
+        metaData.add(PublisherUtil.getHostAddress());
+
         metaData.add(event.getReferer());
     }
 
@@ -187,19 +222,19 @@ public class ServiceAgentUtil {
         if (requestProperty instanceof HttpServletRequest) {
             HttpServletRequest httpServletRequest = (HttpServletRequest) requestProperty;
             eventData.setRequestURL(httpServletRequest.getRequestURL().toString());
-            eventData.setRemoteAddress(httpServletRequest.getRemoteAddr());
+            eventData.setRemoteAddress(PublisherUtil.getHostAddress());
             eventData.setContentType(httpServletRequest.getContentType());
             eventData.setUserAgent(httpServletRequest.getHeader(
                     BAMDataPublisherConstants.HTTP_HEADER_USER_AGENT));
-            eventData.setHost(httpServletRequest.getHeader(
-                    BAMDataPublisherConstants.HTTP_HEADER_HOST));
+//            eventData.setHost(httpServletRequest.getHeader(
+//                    BAMDataPublisherConstants.HTTP_HEADER_HOST));
             eventData.setReferer(httpServletRequest.getHeader(
                     BAMDataPublisherConstants.HTTP_HEADER_REFERER));
         }
 
     }
 
-    public static BAMServerInfo addBAMServerInfo(EventingConfigData eventingConfigData) {
+    public static BAMServerInfo addBAMServerInfo(EventConfigNStreamDef eventingConfigData) {
         BAMServerInfo bamServerInfo = new BAMServerInfo();
         bamServerInfo.setBamServerURL(eventingConfigData.getUrl());
         bamServerInfo.setBamUserName(eventingConfigData.getUserName());

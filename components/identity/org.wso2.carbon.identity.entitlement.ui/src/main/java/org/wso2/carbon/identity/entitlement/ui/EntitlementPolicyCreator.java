@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -37,6 +37,7 @@ public class EntitlementPolicyCreator {
 
     /**
      * Create XACML policy using the data received from XACML policy wizard
+     *
      * @param policyElementDTO  policy element
      * @param subElementDTOs   target elements
      * @param ruleElementDTOs  rule elements
@@ -99,14 +100,16 @@ public class EntitlementPolicyCreator {
 
     /**
      * Create XACML policy using the data received from basic policy wizard
+     *
      * @param policyElementDTO  policy element
      * @param ruleDTOs  rule elements
      * @param targetDTO  target element
+     * @param obligationDTOs obligation elements
      * @return  String object of the XACML policy
      * @throws EntitlementPolicyCreationException throws
      */
     public String createBasicPolicy(PolicyElementDTO policyElementDTO, List<RuleDTO> ruleDTOs,
-                                    BasicTargetDTO targetDTO) throws EntitlementPolicyCreationException {
+                BasicTargetDTO targetDTO, List<ObligationDTO> obligationDTOs) throws EntitlementPolicyCreationException {
 
         Element policyElement = null;
         String ruleElementOrder = null;
@@ -146,6 +149,13 @@ public class EntitlementPolicyCreator {
                             }
                         }
                     }
+
+                    if(obligationDTOs != null){
+                        List<Element> obligations =  PolicyEditorUtil.createObligation(obligationDTOs, doc);
+                        for(Element element : obligations){
+                            policyElement.appendChild(element);
+                        }
+                    }
                 }
                 return PolicyCreatorUtil.getStringFromDocument(doc);
             }
@@ -159,7 +169,29 @@ public class EntitlementPolicyCreator {
 
 
     /**
+     * Create XACML policy using the data received from basic policy wizard
+     * 
+     * @param policyEditorDTO complete policy editor object
+     * @return  String object of the XACML policy
+     * @throws EntitlementPolicyCreationException throws
+     */
+    public String createBasicPolicy(BasicPolicyEditorDTO policyEditorDTO) throws EntitlementPolicyCreationException {
+
+        try {
+            Document doc = createNewDocument();
+            if(doc != null) {
+                return PolicyEditorUtil.createBasicPolicy(policyEditorDTO, doc);
+            }
+        } catch (EntitlementPolicyCreationException e) {
+            throw new EntitlementPolicyCreationException("Error While Creating XACML Policy", e);
+        }
+        return null;
+    }
+
+
+    /**
      * Create policy set using the added policy ot policy sets
+     * 
      * @param policySetDTO   policy set element
      * @return String object of the XACML policy Set
      * @throws EntitlementPolicyCreationException  throws
@@ -184,8 +216,40 @@ public class EntitlementPolicyCreator {
         return null;
     }
 
+    public String addNewRules(String policy, List<BasicPolicyEditorElementDTO> elementDTOs)
+                                                        throws EntitlementPolicyCreationException {
+        String rules;
+
+        try {
+            Document doc = createNewDocument();
+            if(doc != null) {
+                rules = PolicyEditorUtil.createRules(elementDTOs, doc);
+                if(rules != null){
+                    if(policy.contains("ObligationExpressions")){
+                        String start = policy.substring(0, policy.indexOf("<ObligationExpressions>"));
+                        String end = policy.substring(policy.indexOf("<ObligationExpressions>"));
+                        policy = start + rules + end;
+                    } else if(policy.contains("AdviceExpressions")){
+                        String start = policy.substring(0, policy.indexOf("<AdviceExpressions>"));
+                        String end = policy.substring(policy.indexOf("<AdviceExpressions>"));
+                        policy = start + rules + end;
+                    } else {
+                        String start = policy.substring(0, policy.indexOf("</Policy>"));
+                        String end = policy.substring(policy.indexOf("</Policy>"));
+                        policy = start + rules + end;                                 
+                    }
+                }
+            }
+        } catch (EntitlementPolicyCreationException e) {
+            throw new EntitlementPolicyCreationException("Error While Creating XACML Policy", e);
+        }
+        return policy;
+
+    }
+
     /**
      * Create basic XACML request
+     *
      * @param requestElementDTO  request element
      * @return String object of the XACML request
      * @throws EntitlementPolicyCreationException  throws
@@ -206,6 +270,7 @@ public class EntitlementPolicyCreator {
 
     /**
      * Create Document Object
+     * 
      * @return Document Object
      * @throws EntitlementPolicyCreationException  throws
      */

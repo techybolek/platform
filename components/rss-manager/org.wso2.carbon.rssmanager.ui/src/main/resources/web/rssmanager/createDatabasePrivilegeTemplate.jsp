@@ -23,10 +23,10 @@
 
 <fmt:bundle basename="org.wso2.carbon.rssmanager.ui.i18n.Resources">
     <carbon:breadcrumb resourceBundle="org.wso2.carbon.rssmanager.ui.i18n.Resources"
-                       topPage="true" request="<%=request%>" label="Create database privilege template"/>
+                       topPage="true" request="<%=request%>" label="Create Database Privilege Template"/>
 
     <div id="middle">
-        <h2><fmt:message key="rss.manager.add.new.database.privilege.template"/></h2>
+        <h2><fmt:message key="rss.manager.add.database.privilege.template"/></h2>
 
         <div id="workArea">
             <form method="post" action="#" name="dataForm" id="dataForm">
@@ -140,7 +140,7 @@
 							<td class="buttonRow" colspan="2">
 								<input class="button" type="button"
 									   value="<fmt:message key="rss.manager.save"/>"
-									   onclick="return createDatabasePrivilegeTemplate('create')"/>
+									   onclick="return createDatabasePrivilegeTemplate('create'); return false"/>
 								<input class="button" type="button"
 									   value="<fmt:message key="rss.manager.cancel"/>"
 									   onclick="document.location.href='databasePrivilegeTemplates.jsp'"/>

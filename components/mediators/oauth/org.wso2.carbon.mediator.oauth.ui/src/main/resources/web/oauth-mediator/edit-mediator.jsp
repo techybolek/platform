@@ -26,16 +26,27 @@
 
 <%
 		String remoteServiceUrl = null;
+		String username = "";
+		String password = "";
 
 		try {
             Mediator mediator = SequenceEditorHelper.getEditingMediator(request, session);
             if (!(mediator instanceof OAuthMediator)) {
                 throw new RuntimeException("Unable to update the mediator");
             }
-            OAuthMediator entMediator = (OAuthMediator)mediator;
-            remoteServiceUrl = entMediator.getRemoteServiceUrl();
+            OAuthMediator oauthMediator = (OAuthMediator)mediator;
+            remoteServiceUrl = oauthMediator.getRemoteServiceUrl();
+            username = oauthMediator.getUsername();
+            password = oauthMediator.getPassword();
+            
             if(remoteServiceUrl==null){
             	remoteServiceUrl ="";
+            }
+            if(username == null){
+            	username = "";
+            }
+            if(password == null){
+            	password = "";
             }
         } catch (Exception e) {
             CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request, e);
@@ -73,6 +84,34 @@
                         </td>
                         <td class="text-box-big">
                         <input type="text" id="remoteServiceUrl" name="remoteServiceUrl" value="<%=remoteServiceUrl%>" />
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table style="width: 100%">
+                    <tr>
+                        <td class="leftCol-small">
+                            <fmt:message key="mediator.oauth.username"/>
+                        </td>
+                        <td class="text-box-big">
+                        <input type="text" id="username" name="username" value="<%=username%>" />
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table style="width: 100%">
+                    <tr>
+                        <td class="leftCol-small">
+                            <fmt:message key="mediator.oauth.password"/>
+                        </td>
+                        <td class="text-box-big">
+                        <input type="password" id="password" name="password" value="<%=password%>" />
                         </td>
                     </tr>
                 </table>

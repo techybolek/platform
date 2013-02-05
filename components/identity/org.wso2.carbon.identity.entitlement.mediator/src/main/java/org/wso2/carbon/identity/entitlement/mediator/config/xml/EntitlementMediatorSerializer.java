@@ -20,6 +20,9 @@ package org.wso2.carbon.identity.entitlement.mediator.config.xml;
 import org.apache.axiom.om.OMElement;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.config.xml.AbstractMediatorSerializer;
+import org.apache.synapse.config.xml.SequenceMediatorSerializer;
+import org.apache.synapse.config.xml.XMLConfigConstants;
+import org.apache.synapse.mediators.base.SequenceMediator;
 import org.wso2.carbon.identity.entitlement.mediator.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.mediator.EntitlementMediator;
 
@@ -65,25 +68,20 @@ public class EntitlementMediatorSerializer extends AbstractMediatorSerializer {
                     entitlement.getCallbackClass()));
         }
 
-        if (entitlement.getDecisionCaching() != null) {
-            entitlementElem.addAttribute(fac.createOMAttribute("decisionCaching", nullNS,
-                    entitlement.getDecisionCaching()));
+        if (entitlement.getCacheType() != null) {
+            entitlementElem.addAttribute(fac.createOMAttribute("cacheType", nullNS,
+                    entitlement.getCacheType()));
         }
 
-        if (entitlement.getDecisionCachingInterval() != 0) {
-            entitlementElem.addAttribute(fac.createOMAttribute("decisionCachingInterval", nullNS,
-                    Integer.toString(entitlement.getDecisionCachingInterval())));
+        if (entitlement.getInvalidationInterval() != 0) {
+            entitlementElem.addAttribute(fac.createOMAttribute("invalidationInterval", nullNS,
+                    Integer.toString(entitlement.getInvalidationInterval())));
         }
 
         if (entitlement.getMaxCacheEntries() != 0) {
             entitlementElem.addAttribute(fac.createOMAttribute("maxCacheEntries", nullNS,
                     Integer.toString(entitlement.getMaxCacheEntries())));
         }
-
-        if (entitlement.getBasicAuth() != null) {
-            entitlementElem.addAttribute(fac.createOMAttribute("basicAuth", nullNS,
-                    entitlement.getBasicAuth()));
-        }        
 
         if (entitlement.getThriftHost() != null) {
             entitlementElem.addAttribute(fac.createOMAttribute(EntitlementConstants.THRIFT_HOST,
@@ -100,9 +98,66 @@ public class EntitlementMediatorSerializer extends AbstractMediatorSerializer {
                     nullNS, entitlement.getReuseSession()));
         }
 
-        if (entitlement.getClientClass() != null) {
-            entitlementElem.addAttribute(fac.createOMAttribute(EntitlementConstants.CLIENT_CLASS,
-                    nullNS, entitlement.getClientClass()));
+        if (entitlement.getClient() != null) {
+            entitlementElem.addAttribute(fac.createOMAttribute(EntitlementConstants.CLIENT,
+                    nullNS, entitlement.getClient()));
+        }
+
+        String onReject = entitlement.getOnRejectSeqKey();
+        if (onReject != null) {
+            entitlementElem.addAttribute(fac.createOMAttribute(XMLConfigConstants.ONREJECT, nullNS,
+                    onReject));
+        } else {
+            Mediator m = entitlement.getOnRejectMediator();
+            SequenceMediatorSerializer serializer = new SequenceMediatorSerializer();
+            if (m != null && m instanceof SequenceMediator) {
+                OMElement element = serializer.serializeAnonymousSequence(null,
+                        (SequenceMediator) m);
+                element.setLocalName(XMLConfigConstants.ONREJECT);
+                entitlementElem.addChild(element);
+            }
+        }
+        String onAccept = entitlement.getOnAcceptSeqKey();
+        if (onAccept != null) {
+            entitlementElem.addAttribute(fac.createOMAttribute(XMLConfigConstants.ONACCEPT, nullNS,
+                    onAccept));
+        } else {
+            Mediator m = entitlement.getOnAcceptMediator();
+            SequenceMediatorSerializer serializer = new SequenceMediatorSerializer();
+            if (m != null && m instanceof SequenceMediator) {
+                OMElement element = serializer.serializeAnonymousSequence(null,
+                        (SequenceMediator) m);
+                element.setLocalName(XMLConfigConstants.ONACCEPT);
+                entitlementElem.addChild(element);
+            }
+        }
+        String obligation = entitlement.getObligationsSeqKey();
+        if (obligation != null) {
+            entitlementElem.addAttribute(fac.createOMAttribute(EntitlementMediatorFactory.OBLIGATIONS, nullNS,
+                    obligation));
+        } else {
+            Mediator m = entitlement.getObligationsMediator();
+            SequenceMediatorSerializer serializer = new SequenceMediatorSerializer();
+            if (m != null && m instanceof SequenceMediator) {
+                OMElement element = serializer.serializeAnonymousSequence(null,
+                        (SequenceMediator) m);
+                element.setLocalName(EntitlementMediatorFactory.OBLIGATIONS);
+                entitlementElem.addChild(element);
+            }
+        }
+        String advice = entitlement.getAdviceSeqKey();
+        if (advice != null) {
+            entitlementElem.addAttribute(fac.createOMAttribute(EntitlementMediatorFactory.ADVICE, nullNS,
+                    advice));
+        } else {
+            Mediator m = entitlement.getAdviceMediator();
+            SequenceMediatorSerializer serializer = new SequenceMediatorSerializer();
+            if (m != null && m instanceof SequenceMediator) {
+                OMElement element = serializer.serializeAnonymousSequence(null,
+                        (SequenceMediator) m);
+                element.setLocalName(EntitlementMediatorFactory.ADVICE);
+                entitlementElem.addChild(element);
+            }
         }
 
         return entitlementElem;

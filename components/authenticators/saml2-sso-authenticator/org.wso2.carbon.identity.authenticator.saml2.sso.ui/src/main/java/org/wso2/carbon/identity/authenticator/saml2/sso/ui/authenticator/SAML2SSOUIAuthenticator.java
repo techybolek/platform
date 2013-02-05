@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.identity.authenticator.saml2.sso.ui.authenticator;
 
+import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,11 +25,12 @@ import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.AuthnStatement;
 import org.opensaml.saml2.core.Response;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.common.AuthenticationException;
 import org.wso2.carbon.core.security.AuthenticatorsConfiguration;
-import org.wso2.carbon.identity.authenticator.saml2.sso.ui.SAML2SSOAuthenticatorConstants;
-import org.wso2.carbon.identity.authenticator.saml2.sso.ui.SAML2SSOUIAuthenticatorException;
-import org.wso2.carbon.identity.authenticator.saml2.sso.ui.client.SAML2SSOAuthenticationClient;
+import org.wso2.carbon.identity.authenticator.saml2.sso.common.SAML2SSOAuthenticatorConstants;
+import org.wso2.carbon.identity.authenticator.saml2.sso.common.SAML2SSOUIAuthenticatorException;
+import org.wso2.carbon.identity.authenticator.saml2.sso.common.client.SAML2SSOAuthenticationClient;
 import org.wso2.carbon.identity.authenticator.saml2.sso.ui.internal.SAML2SSOAuthFEDataHolder;
 import org.wso2.carbon.ui.AbstractCarbonUIAuthenticator;
 import org.wso2.carbon.ui.CarbonSSOSessionManager;
@@ -39,6 +41,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
 
 public class SAML2SSOUIAuthenticator extends AbstractCarbonUIAuthenticator {
 
@@ -46,8 +49,7 @@ public class SAML2SSOUIAuthenticator extends AbstractCarbonUIAuthenticator {
 
     public static final Log log = LogFactory.getLog(SAML2SSOUIAuthenticator.class);
 
-    public boolean isHandle(Object o) {
-        HttpServletRequest request = (HttpServletRequest) o;
+    public boolean canHandle(HttpServletRequest request) {
         String relayState = request.getParameter(SAML2SSOAuthenticatorConstants.HTTP_POST_PARAM_RELAY_STATE);
         Object samlResponse = request.getAttribute(SAML2SSOAuthenticatorConstants.HTTP_ATTR_SAML2_RESP_TOKEN);
         // if it is a logout request, do not check for Response and Relay State
@@ -61,9 +63,8 @@ public class SAML2SSOUIAuthenticator extends AbstractCarbonUIAuthenticator {
         return false;
     }
 
-    public boolean authenticate(Object o) throws AuthenticationException {
+    public void authenticate(HttpServletRequest request) throws AuthenticationException {
         boolean isAuthenticated = false;
-        HttpServletRequest request = (HttpServletRequest) o;
         HttpSession session = request.getSession();
         Response samlResponse = (Response) request.getAttribute(SAML2SSOAuthenticatorConstants.HTTP_ATTR_SAML2_RESP_TOKEN);
         String responseStr = request.getParameter(SAML2SSOAuthenticatorConstants.HTTP_POST_PARAM_SAML2_RESP);
@@ -92,8 +93,13 @@ public class SAML2SSOUIAuthenticator extends AbstractCarbonUIAuthenticator {
             if (isAuthenticated) {
                 CarbonSSOSessionManager ssoSessionManager =
                         SAML2SSOAuthFEDataHolder.getInstance().getCarbonSSOSessionManager();
-                ssoSessionManager.addSessionMapping(getSessionIndexFromResponse(samlResponse),
-                                                    session.getId());
+                String sessionId = getSessionIndexFromResponse(samlResponse);
+                if (sessionId != null) {
+                    // Session id is provided only when Single Logout enabled at the IdP.
+                    ssoSessionManager.addSessionMapping(getSessionIndexFromResponse(samlResponse),
+                            session.getId());
+                }
+                onSuccessAdminLogin(request, username);
             }
             else{
                 log.error("Authentication failed.");
@@ -106,12 +112,15 @@ public class SAML2SSOUIAuthenticator extends AbstractCarbonUIAuthenticator {
             log.error("Error when creating SAML2SSOAuthenticationClient.", e);
             throw new AuthenticationException("Error when creating SAML2SSOAuthenticationClient.", e);
         }
-        return isAuthenticated;
+        if (!isAuthenticated) {
+            throw new AuthenticationException("Authentication failure " + username);
+        }
     }
 
     public void unauthenticate(Object o) throws Exception {
         HttpServletRequest request = (HttpServletRequest) o;
         HttpSession session = request.getSession();
+        String username = (String) session.getAttribute(CarbonConstants.LOGGED_USER);
         ServletContext servletContext = session.getServletContext();
         ConfigurationContext configContext = (ConfigurationContext) servletContext
                 .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
@@ -124,6 +133,7 @@ public class SAML2SSOUIAuthenticator extends AbstractCarbonUIAuthenticator {
                                                                                        cookie,
                                                                                        session);
             authClient.logout(session);
+            log.info(username + "@" + PrivilegedCarbonContext.getCurrentContext().getTenantDomain() +" successfully logged out");
         } catch (Exception ignored) {
             String msg = "Configuration context is null.";
             log.error(msg);
@@ -206,4 +216,26 @@ public class SAML2SSOUIAuthenticator extends AbstractCarbonUIAuthenticator {
     public boolean reAuthenticateOnSessionExpire(Object object) throws AuthenticationException {
         return false;
     }
+
+
+	@Override
+	public void authenticateWithCookie(HttpServletRequest request)
+			throws AuthenticationException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	 public String doAuthentication(Object credentials, boolean isRememberMe, ServiceClient client,
+	            HttpServletRequest request) throws AuthenticationException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void handleRememberMe(Map transportHeaders, HttpServletRequest httpServletRequest)
+			throws AuthenticationException {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -63,6 +63,16 @@ public class CustomTestNgReporter implements IReporter {
         exception = e;
     }
 
+    public CustomTestNgReporter(ITestContext context) {
+        testRootContext = context;
+        exception = null;
+    }
+
+    public CustomTestNgReporter(ISuite suite) {
+        testRootSuite = suite;
+        exception = null;
+    }
+
     public void generateReport(List<XmlSuite> xmlSuites, List<ISuite> suites,
                                String outputDirectory) {
         if (Utils.isStringEmpty(config.getOutputDirectory())) {
@@ -150,8 +160,8 @@ public class CustomTestNgReporter implements IReporter {
         final IResultMap reportmap = resultMap;
         final ISuite reportsuite = newSuite;
 
-        ReportContextSetter contextSetter = new ReportContextSetter();
-        testRootContext = contextSetter.setContext(testContext2, resultMap, newSuite);
+       // ReportContextSetter contextSetter = new ReportContextSetter();
+       // testRootContext = contextSetter.setContext(testContext2, resultMap, newSuite);
         ISuiteResult iSuiteResult2 = new ISuiteResult() {
             public String getPropertyFileName() {
                 return reportsuite.getXmlSuite().getFileName();

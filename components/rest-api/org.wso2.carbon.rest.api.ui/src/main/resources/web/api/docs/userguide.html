@@ -51,10 +51,11 @@ Add API</span> page will be displayed as shown below.
 <p>Figure 2: Add API</p>
 </div>
 
-An API requires a Name, Context and at leaset one Resource. The Context should always contain
-a preceeding '/' character. In the design view, this character has been added by default
+An API requires a Name, Context and at least one Resource. The Context should always contain
+a proceeding '/' character. In the design view, this character has been added by default
 and therefore will not require the user to re-enter. (See the / character before the text
-box of the Context).
+box of the Context).Hostname can be utilized to filter (incoming message 'hostname' details are included in the message transport headers)
+the given REST API resource with the incoming requests from client.
 <br/><br/>
 Click on the <b>Add Resource</b> link to add a Resource to the API. A form for entering Resource information
 will be displayed below the API management section. See Figure 3.
@@ -70,7 +71,7 @@ will be displayed below the API management section. See Figure 3.
    <li>Rules for Resources
 	<ul>
 	<li>
-	   A Resource should contain at least one method. Sepcifying the Resource methods are done by checking
+	   A Resource should contain at least one method. Specifying the Resource methods are done by checking
            on the relevant check boxes.	
 	</li>
 	<li>
@@ -78,8 +79,8 @@ will be displayed below the API management section. See Figure 3.
            nor url-mapping).	
 	</li>
 	<li>
-	   A Resource may have an In-Sequence, Out-Sequence and a Fault-Sequence. Existing sequences
-          in the configuration are listed on drop-down lists to be specified.	
+	   A Resource may have an In-Sequence, Out-Sequence and a Fault-Sequence,configuration can be defined using either
+	   in-line,or selecting configuration from the registry or can use existing sequence defined at the local registry.
 	</li>
 	</ul>      	
    </li>

@@ -31,7 +31,10 @@ public interface APITemplateBuilder {
 
     public static final String KEY_FOR_HANDLER = "key_for_handler_class";
     public static final String KEY_FOR_HANDLER_POLICY_KEY = "key_for_handler_policy";
-
+    public static final String KEY_FOR_ENDPOINT_SECURED = "key_for_endpoint_secured";
+    public static final String KEY_FOR_ENDPOINT_USERNAME = "key_for_endpoint_username";
+    public static final String KEY_FOR_ENDPOINT_PASSWORD = "key_for_endpoint_password";
+    
     public String getConfigStringForTemplate() throws APITemplateException;
 
     public OMElement getConfigXMLForTemplate() throws APITemplateException;

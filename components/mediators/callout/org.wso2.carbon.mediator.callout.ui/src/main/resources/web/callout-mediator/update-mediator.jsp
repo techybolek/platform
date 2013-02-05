@@ -23,7 +23,7 @@
 
 <%
     Mediator mediator = SequenceEditorHelper.getEditingMediator(request, session);
-    String targetVal = null, sourceVal = null;
+    String targetVal = null, sourceVal = null, url = null, endpointKey = null;
     String targetExp = null, sourceExp = null;
     SynapseXPath xpath = null;
     String uri = null, prefix = null;
@@ -34,7 +34,23 @@
         throw new RuntimeException("Unable to edit the mediator");
     }
     CalloutMediator calloutMediator = (CalloutMediator) mediator;
-    calloutMediator.setServiceURL(request.getParameter("mediator.callout.svcURL"));
+
+    calloutMediator.setEndpointKey(null);
+    calloutMediator.setServiceURL(null);
+    String serviceURL = request.getParameter("serviceURLGroup");
+    if (serviceURL != null && !serviceURL.equals("")){
+        if (serviceURL.equals("URL")) {
+            url = request.getParameter("mediator.callout.serviceurl.url.value");
+            if (url != null && !url.equals("")) {
+                calloutMediator.setServiceURL(url);
+            }
+        } else if (serviceURL.equals("Endpoint")) {
+            endpointKey = request.getParameter("mediator.callout.serviceurl.key.value");
+            if (endpointKey != null && !endpointKey.equals("")) {
+                calloutMediator.setEndpointKey(endpointKey);
+            }
+        }
+    }
 
     calloutMediator.setAction(null);
     calloutMediator.setClientRepository(null);
@@ -66,12 +82,16 @@
 
     String sourceGroup = request.getParameter("sourcegroup");
     if (sourceGroup != null && !sourceGroup.equals("")){
-        if (sourceGroup.equals("Key")) {
+        if (sourceGroup.equals("Envelope")) {
+            calloutMediator.setUseEnvelopeAsSource(true);
+        } else if (sourceGroup.equals("Key")) {
+            calloutMediator.setUseEnvelopeAsSource(false);
             sourceVal = request.getParameter("mediator.callout.source.key_val");
             if (sourceVal != null && !sourceVal.equals("")) {
                 calloutMediator.setRequestKey(sourceVal);
             }
         } else if (sourceGroup.equals("XPath")) {
+            calloutMediator.setUseEnvelopeAsSource(false);
             sourceExp = request.getParameter("mediator.callout.source.xpath_val");
             if (sourceExp != null && !sourceExp.equals("")) {
                 calloutMediator.setRequestXPath(xPathFactory.createSynapseXPath("mediator.callout.source.xpath_val", request, session));
@@ -90,6 +110,32 @@
             targetExp = request.getParameter("mediator.callout.target.xpath_val");
             if (targetExp != null && !targetExp.equals("")) {
                 calloutMediator.setTargetXPath(xPathFactory.createSynapseXPath("mediator.callout.target.xpath_val", request, session));
+            }
+        }
+    }
+
+    calloutMediator.setSecurityOn(false);
+    calloutMediator.setWsSecPolicyKey(null);
+    calloutMediator.setOutboundWsSecPolicyKey(null);
+    calloutMediator.setInboundWsSecPolicyKey(null);
+
+    String wsSecurity = request.getParameter("wsSecurity");
+    if (wsSecurity != null) {
+        calloutMediator.setSecurityOn(true);
+        String useDifferentPolicies = request.getParameter("wsSecurityUseDifferentPolicies");
+        if (useDifferentPolicies != null) {
+            String outboundPolicy = request.getParameter("wsSecOutboundPolicyKeyID");
+            if (!outboundPolicy.trim().equals("")) {
+                calloutMediator.setOutboundWsSecPolicyKey(outboundPolicy);
+            }
+            String inboundPolicy = request.getParameter("wsSecInboundPolicyKeyID");
+            if (!inboundPolicy.trim().equals("")) {
+                calloutMediator.setInboundWsSecPolicyKey(inboundPolicy);
+            }
+        } else {
+            String secPolicy = request.getParameter("wsSecPolicyKeyID");
+            if (!secPolicy.trim().equals("")) {
+                calloutMediator.setWsSecPolicyKey(secPolicy);
             }
         }
     }

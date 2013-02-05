@@ -46,6 +46,8 @@
 
         String apiName = "";
         String apiContext = "";
+        String hostname = "";
+        String port = "";
         String source = "";
         String sourceXml = "";
 
@@ -57,15 +59,22 @@
 
         apiContext = request.getParameter("apiContext");
         apiName = request.getParameter("apiName");
+        hostname = request.getParameter("hostname");
+        port = request.getParameter("port");
+        
         APIData apiData = new APIData();
-
+        
         if ("edit".equals(mode)) {
             apiData.setName(apiName);
             apiData.setContext(apiContext);
+            apiData.setHost(hostname == null || "".equals(hostname) ? null : hostname);
+            apiData.setPort(Integer.parseInt(port != null && !"".equals(port) ? port : "-1"));
             apiData.setResources(resources.toArray(resourceArray));
         } else {
             apiData.setName(apiName != null ? apiName : "");
             apiData.setContext(apiContext != null ? apiContext : "/");
+            apiData.setHost(hostname == null || "".equals(hostname) ? null : hostname);
+            apiData.setPort(Integer.parseInt(port != null && !"".equals(port) ? port : "-1"));
             apiData.setResources(resources.toArray(resourceArray));
         }
         ResourceData resourceData;
@@ -85,18 +94,25 @@
     <script type="text/javascript">
 
         function saveResource() {
-            document.location.href = "manageAPI.jsp?mode=" + "<%=mode%>" + "&apiName=" + "<%=apiName%>";
+            //document.location.href = "manageAPI.jsp?mode=" + "<%=mode%>" + "&apiName=" + "<%=apiName%>";
 
             var source = editAreaLoader.getValue("resource_source");
-
+        <%session.setAttribute("index", index);%>
         <%if("edit".equals(mode)){%>
             jQuery.ajax({
                             type: "POST",
                             url: "savesource-ajaxprocessor.jsp",
                             data: { mode:"<%=mode%>", apiName:"<%=apiName%>", resourceString:source },
                             success: function(data) {
-                                CARBON.showInfoDialog("<fmt:message key="api.update.success"/> ", function() {
-                                    document.location.href = "index.jsp";
+                                 <%session.setAttribute("index", index);%>
+                                document.location.href = "manageAPI.jsp?mode=" + "<%=mode%>" + "&apiName=" + "<%=apiName%>" +
+                                						 "&hostname=" + "<%=hostname%>" + "&port=" + "<%=port%>";
+
+                            },
+                            error: function() {
+                                CARBON.showInfoDialog("Could not convert resource source to resource data. ", function() {
+                                    <%session.setAttribute("index", index);%>
+                                    document.location.href = "manageAPI.jsp?mode=" + "<%=mode%>" + "&apiName=" + "<%=apiName%>";
                                 });
                             }
                         });
@@ -107,8 +123,14 @@
                             url: "savesource-ajaxprocessor.jsp",
                             data: { mode:"<%=mode%>", resourceString:source },
                             success: function(data) {
-                                CARBON.showInfoDialog("<fmt:message key="api.add.success"/> ", function() {
-                                    document.location.href = "index.jsp";
+                                 <%session.setAttribute("index", index);%>
+                                document.location.href = "manageAPI.jsp?mode=" + "<%=mode%>" + "&apiName=" + "<%=apiName%>" +
+                                						 "&hostname=" + "<%=hostname%>" + "&port=" + "<%=port%>";
+                            },
+                            error: function() {
+                                CARBON.showInfoDialog("Could not convert resource source to resource data. ", function() {
+                                    <%session.setAttribute("index", index);%>
+                                    document.location.href = "manageAPI.jsp?mode=" + "<%=mode%>" + "&apiName=" + "<%=apiName%>";
                                 });
                             }
                         });
@@ -135,10 +157,11 @@
                             data: { resourceSource:source, index:'<%=index%>' },
                             success: function(data) {
                                 <%session.setAttribute("index", index);%>
-                                document.location.href = "manageAPI.jsp?mode=" + "<%=mode%>" + "&apiName=" + "<%=apiName%>";
+                                document.location.href = "manageAPI.jsp?mode=" + "<%=mode%>" + "&apiName=" + "<%=apiName%>" + 
+                                						 "&hostname=" + "<%=hostname%>" + "&port=" + "<%=port%>";
                             },
                             error: function() {
-                                CARBON.showInfoDialog("Could not convert resource source to resource data. ", function() {
+                                  CARBON.showInfoDialog("Could not convert resource source to resource data. ", function() {
                                     <%session.setAttribute("index", index);%>
                                     document.location.href = "manageAPI.jsp?mode=" + "<%=mode%>" + "&apiName=" + "<%=apiName%>";
                                 });
@@ -169,7 +192,7 @@
 							<span style="float:left; position:relative; margin-top:2px;">
 								<fmt:message key="api.source.view.text"/>
 							</span>
-                            <a href="#" onclick="switchToDesignView()" class="icon-link"
+                            <a onclick="switchToDesignView()" class="icon-link"
                                style="background-image:url(images/design-view.gif);">
                                 <fmt:message key="api.switchto.design.text"/>
                             </a>

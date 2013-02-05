@@ -21,6 +21,8 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
+import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 
 /**
  * @scr.component name="org.wso2.apimgt.usage.client" immediate="true"
@@ -34,8 +36,12 @@ public class APIUsageClientServiceComponent {
 
     private static APIManagerConfiguration configuration = null;
 
-    protected void activate(ComponentContext componentContext) {
-        log.debug("API usage client component activated");
+    protected void activate(ComponentContext componentContext)
+            throws APIMgtUsageQueryServiceClientException {
+        if (log.isDebugEnabled()) {
+            log.debug("API usage client component activated");
+        }
+        APIUsageStatisticsClient.initializeDataSource();
     }
 
     protected void deactivate(ComponentContext componentContext) {

@@ -19,7 +19,7 @@
 package org.wso2.carbon.transaction.manager;
 
 import org.apache.axis2.context.ConfigurationContext;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
 /**
@@ -30,7 +30,7 @@ public class TransactionManagerAxis2ConfigurationContextObserver extends Abstrac
 
     @Override
     public void createdConfigurationContext(ConfigurationContext configContext) {
-        int tid = SuperTenantCarbonContext.getCurrentContext(configContext).getTenantId();
+        int tid = PrivilegedCarbonContext.getCurrentContext(configContext).getTenantId();
         TransactionManagerComponent.bindTransactionManagerWithJNDIForTenant(tid);
     }
 

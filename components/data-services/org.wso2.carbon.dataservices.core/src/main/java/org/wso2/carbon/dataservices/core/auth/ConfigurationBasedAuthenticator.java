@@ -42,6 +42,10 @@ public class ConfigurationBasedAuthenticator implements DynamicUserAuthenticator
 			Unmarshaller unmarshaller = ctx.createUnmarshaller();
 			DynamicAuthConfiguration conf = (DynamicAuthConfiguration) unmarshaller.unmarshal(
 					new ByteArrayInputStream(xmlConfig.getBytes()));
+			if (conf == null) {
+				throw new DataServiceFault("Invalid configuration section " +
+						"for dynamic auth configuration:- \n" + xmlConfig);
+			}
 			this.credentialsMap = new HashMap<String, String[]>();
 			for (Entry entry : conf.getEntries()) {
 				this.credentialsMap.put(entry.getRequest(), 

@@ -91,15 +91,16 @@
     try {
         if(policyRequest != null && policyRequest.trim().length() > 0){
             policyRequest = policyRequest.trim().replaceAll("><", ">\n<");
-        } else {
+        } else if(!requestElementDTO.getRowDTOs().isEmpty()){
             String createdRequest = entitlementPolicyCreator.createBasicRequest(requestElementDTO);
             if(createdRequest != null && createdRequest.trim().length() > 0){
                 policyRequest = createdRequest.trim().replaceAll("><", ">\n<");
             }
+        }else {
+            policyRequest = "";
         }
     } catch (Exception e) {
-    	String message = resourceBundle.getString("error.while.loading.policy.resource");
-        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
+        CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request);
         forwardTo = "../admin/error.jsp";
 
 %>
@@ -133,7 +134,7 @@
     
     <script type="text/javascript">
         function validateRequest() {
-           var value = document.getElementById("txtRequest").value;
+           var value = document.getElementById("txtRequestTemp").value;
            if (value == '') {
                CARBON.showWarningDialog("<fmt:message key='empty.request'/>");
                return false;
@@ -145,8 +146,13 @@
            location.href = "<%=forwardTo%>";
         }
 
-        function evaluateXACMLRequest(){
+        function evaluateXACMLRequest(withPDP){
             if(validateRequest()){
+                if(withPDP){
+                    document.evaluateRequest.action = "eval-policy-submit.jsp?withPDP=true"; 
+                } else {
+                    document.evaluateRequest.action = "eval-policy-submit.jsp";     
+                }
                 document.getElementById("txtRequest").value = editAreaLoader.getValue("txtRequestTemp");
                 document.evaluateRequest.submit();
             }
@@ -178,7 +184,8 @@
         </tr>
         <tr>
             <td class="buttonRow">
-                <input type="button" value="<fmt:message key='evaluate'/>" class="button" onclick="evaluateXACMLRequest();"/>
+                <input type="button" value="<fmt:message key='test.evaluate'/>" class="button" onclick="evaluateXACMLRequest(false);"/>
+                <input type="button" value="<fmt:message key='pdp.evaluate'/>" class="button" onclick="evaluateXACMLRequest(true);"/>
                 <input class="button" type="reset" value="<fmt:message key='cancel'/>"  onclick="javascript:document.location.href='create-evaluation-request.jsp?region=region1&item=policy_tryit_menu'"/>
             </td>
         </tr>

@@ -29,6 +29,8 @@ public class UserApplicationAPIUsage {
 
     private String userId;
     private String applicationName;
+    private String accessToken;
+    private String accessTokenStatus;
     private List<APIIdentifier> apiIdentifiers = new ArrayList<APIIdentifier>();
 
     public String getUserId() {
@@ -53,5 +55,17 @@ public class UserApplicationAPIUsage {
 
     public void addApiIdentifier(APIIdentifier apiIdentifier) {
         apiIdentifiers.add(apiIdentifier);
+    }
+    public void setAccessToken(String accessToken){
+        this.accessToken=accessToken;
+    }
+    public String getAccessToken(){
+        return accessToken;
+    }
+    public void setAccessTokenStatus(String accessTokenStatus){
+        this.accessTokenStatus=accessTokenStatus;
+    }
+    public String getAccessTokenStatus(){
+        return accessTokenStatus;
     }
 }

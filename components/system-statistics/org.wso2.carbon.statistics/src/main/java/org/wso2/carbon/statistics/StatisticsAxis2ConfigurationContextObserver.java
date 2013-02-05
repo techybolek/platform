@@ -19,7 +19,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
 /**
@@ -37,8 +37,8 @@ public class StatisticsAxis2ConfigurationContextObserver
                 axisConfig.engageModule(StatisticsConstants.STATISTISTICS_MODULE_NAME);
             }
         } catch (Throwable e) {
-            SuperTenantCarbonContext carbonContext =
-                    SuperTenantCarbonContext.getCurrentContext(axisConfig);
+            PrivilegedCarbonContext carbonContext =
+                    PrivilegedCarbonContext.getCurrentContext(axisConfig);
             String msg;
             if (carbonContext.getTenantDomain() != null) {
                 msg = "Could not globally engage " + StatisticsConstants.STATISTISTICS_MODULE_NAME +

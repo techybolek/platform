@@ -225,7 +225,7 @@ public class QpidServiceImpl implements QpidService {
     @Override
     public boolean isExternalCassandraServerRequired() {
         if(externalCassandraRequired == null){
-            externalCassandraRequired = readClusterEnabledDisabledStatusFromQpidConfig();
+            externalCassandraRequired = readCassandraServerRequirementStatusFromQpidConfig();
         }
         return externalCassandraRequired;
     }
@@ -353,7 +353,7 @@ public class QpidServiceImpl implements QpidService {
         return false;
     }
 
-    private boolean readClusterEnabledDisabledStatusFromQpidConfig() {
+    private boolean readCassandraServerRequirementStatusFromQpidConfig() {
         String required = "";
 
         try {
@@ -387,7 +387,7 @@ public class QpidServiceImpl implements QpidService {
 
 
 
-    private boolean readCassandraServerRequirementStatusFromQpidConfig() {
+    private boolean readClusterEnabledDisabledStatusFromQpidConfig() {
         String enabled = "";
 
         try {

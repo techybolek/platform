@@ -35,10 +35,10 @@ public class ActivityAdminServiceClient {
     private ActivityAdminServiceStub activityAdminServiceStub;
     private String endPoint;
 
-    public final static String FILTER_ALL = "all";
-    public final static String FILTER_ASSOCIATE_ASPECT = "associateAspect";
-    public final static String FILTER_RESOURCE_ADDED = "resourceAdd";
-    public final static String FILTER_RESOURCE_UPDATE = "resourceUpdate";
+    public final static String FILTER_ALL = "All";
+    public final static String FILTER_ASSOCIATE_ASPECT = "Associate Aspect";
+    public final static String FILTER_RESOURCE_ADDED = "Resource Add";
+    public final static String FILTER_RESOURCE_UPDATE = "Resource Update";
 
     public ActivityAdminServiceClient(String backEndUrl, String sessionCookie) throws AxisFault {
         this.endPoint = backEndUrl + serviceName;

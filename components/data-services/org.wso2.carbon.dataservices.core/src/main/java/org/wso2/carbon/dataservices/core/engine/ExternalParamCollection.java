@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.wso2.carbon.dataservices.common.DBConstants;
+import org.wso2.carbon.dataservices.common.DBConstants.DBSFields;
 
 /**
  * Represents a collection of ExternalParam objects.
@@ -29,9 +30,14 @@ import org.wso2.carbon.dataservices.common.DBConstants;
 public class ExternalParamCollection {
 
 	/**
-	 * External parameters
+	 * External parameters for columns
 	 */
-	private Map<String, ExternalParam> entries;
+	private Map<String, ExternalParam> columnEntries;
+	
+	/**
+	 * External parameters for query params
+	 */
+	private Map<String, ExternalParam> queryParamEntries;
 	
 	/**
 	 * Temp params used for situations such as, default values etc..
@@ -39,12 +45,9 @@ public class ExternalParamCollection {
 	private Map<String, ParamValue> tmpEntries;
 	
 	public ExternalParamCollection() {
-		this.entries = new HashMap<String, ExternalParam>();
+		this.columnEntries = new HashMap<String, ExternalParam>();
+		this.queryParamEntries = new HashMap<String, ExternalParam>();
 		this.tmpEntries = new HashMap<String, ParamValue>();
-	}
-	
-	public Map<String, ExternalParam> getEntries() {
-		return entries;
 	}
 	
 	public Map<String, ParamValue> getTempEntries() {
@@ -52,7 +55,11 @@ public class ExternalParamCollection {
 	}
 	
 	public void addParam(ExternalParam param) {
-		this.getEntries().put(param.getType() + ":" + param.getName(), param);
+		if (DBSFields.COLUMN.equals(param.getType())) {
+			this.columnEntries.put(param.getName(), param);
+		} else {
+			this.queryParamEntries.put(param.getName(), param);
+		}
 	}
 	
 	public void addTempParam(String name, ParamValue value) {
@@ -68,7 +75,11 @@ public class ExternalParamCollection {
 	}
 	
 	public ExternalParam getParam(String type, String name) {
-		return this.getEntries().get(type + ":" + name);
+		if (DBSFields.COLUMN.equals(type)) {
+			return this.columnEntries.get(name);
+		} else {
+			return this.queryParamEntries.get(name);
+		}
 	}
 
     public ExternalParam getParam(String name) {
@@ -78,5 +89,5 @@ public class ExternalParamCollection {
         }
         return param;
     }
-	
+    
 }

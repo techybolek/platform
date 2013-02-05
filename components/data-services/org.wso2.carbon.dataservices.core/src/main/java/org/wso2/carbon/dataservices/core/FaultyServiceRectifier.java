@@ -26,6 +26,7 @@ import org.apache.axis2.deployment.util.Utils;
 import org.apache.axis2.description.AxisService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.dataservices.common.DBConstants;
 
 /**
@@ -39,11 +40,19 @@ public class FaultyServiceRectifier implements Runnable {
 	private ConfigurationContext configurationCtx;
 
 	private DeploymentFileData deploymentFileData;
+	
+	private int tenantId;
 
 	public FaultyServiceRectifier(AxisService service,
 			DeploymentFileData deploymentData, ConfigurationContext configCtx) {
-		deploymentFileData = deploymentData;
-		configurationCtx = configCtx;
+		this.deploymentFileData = deploymentData;
+		this.configurationCtx = configCtx;
+		try {
+		    this.tenantId = PrivilegedCarbonContext.getCurrentContext(this.configurationCtx).getTenantId();
+		} catch (Throwable e) {
+			/* this is done in the case of running unit tests, the above code fails */
+			this.tenantId = -1;
+		}
 	}
 	
 	/**
@@ -65,6 +74,8 @@ public class FaultyServiceRectifier implements Runnable {
 	public void run() {
 		String deploymentFilePath = null;
 		try {
+			PrivilegedCarbonContext.startTenantFlow();
+			PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(this.tenantId, true);
 			deploymentFilePath = deploymentFileData.getFile().getAbsolutePath();
 			File file = new File(deploymentFilePath);
 			if (file.isFile()) {
@@ -95,6 +106,8 @@ public class FaultyServiceRectifier implements Runnable {
 			}
 		} catch (Exception e) {
 			log.error("Error in faulty service rectifier", e);
+		} finally {
+			PrivilegedCarbonContext.endTenantFlow();
 		}
 	}
 

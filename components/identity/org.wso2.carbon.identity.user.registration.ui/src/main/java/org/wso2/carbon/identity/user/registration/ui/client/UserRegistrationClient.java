@@ -17,21 +17,21 @@
 */
 package org.wso2.carbon.identity.user.registration.ui.client;
 
-import java.util.Arrays;
-import java.util.Comparator;
-
-import org.wso2.carbon.identity.base.IdentityConstants;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.Options;
+import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.client.Options;
+import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceStub;
 import org.wso2.carbon.identity.user.registration.stub.dto.InfoCarDTO;
 import org.wso2.carbon.identity.user.registration.stub.dto.OpenIDDTO;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserDTO;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
+
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class UserRegistrationClient {
 
@@ -209,7 +209,7 @@ public class UserRegistrationClient {
      * @throws AxisFault
      */
     private void handleException(String msg, Exception e) throws AxisFault {
-        log.error(msg, e);
+       // log.error(msg, e);
         throw new AxisFault(msg, e);
     }
 

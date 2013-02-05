@@ -16,9 +16,10 @@
 
 package org.wso2.carbon.cep.core.listener;
 
-import org.wso2.carbon.cep.core.mapping.input.Input;
 import org.wso2.carbon.cep.core.exception.CEPEventProcessingException;
 import org.wso2.carbon.cep.core.internal.CEPBucket;
+import org.wso2.carbon.cep.core.mapping.input.Input;
+import org.wso2.carbon.cep.statistics.CEPStatisticsMonitor;
 
 /**
  * this class listens to the events comes from the topics
@@ -27,14 +28,14 @@ import org.wso2.carbon.cep.core.internal.CEPBucket;
 public class TopicEventListener {
 
     private CEPBucket cepBucket;
-
-
     private Input input;
+    private CEPStatisticsMonitor cepStatisticsMonitor;
 
 
-    public TopicEventListener(CEPBucket cepBucket, Input input) {
+    public TopicEventListener(CEPBucket cepBucket, Input input, CEPStatisticsMonitor cepStatisticsMonitor) {
         this.cepBucket = cepBucket;
         this.input = input;
+        this.cepStatisticsMonitor = cepStatisticsMonitor;
     }
 
     /**
@@ -44,14 +45,18 @@ public class TopicEventListener {
      * @throws CEPEventProcessingException
      */
     public void onEvent(Object event) throws CEPEventProcessingException {
-        if (this.input.getInputMapping() !=  null){
+        if (this.input.getInputMapping() != null) {
             event = this.input.getInputMapping().convert(event);
         }
         this.cepBucket.insertEvent(event, this.input.getInputMapping());
+        if (cepStatisticsMonitor != null) {
+            cepStatisticsMonitor.incrementRequest();
+        }
     }
 
     /**
      * Defines the event definition to map the outputs accordingly
+     *
      * @param eventDef
      */
     public void onEventDefinition(Object eventDef) {

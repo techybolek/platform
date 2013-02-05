@@ -68,7 +68,7 @@ public class ThriftAuthenticationServiceComponent {
         //register as an osgi service
         thriftAuthenticationservice = compCtx.getBundleContext().registerService(
                 ThriftAuthenticatorService.class.getName(), thriftAuthenticatorServiceImpl, null);
-
+        
         //register AuthenticatorServiceImpl as a thrift service.
         startThriftServices();
     }

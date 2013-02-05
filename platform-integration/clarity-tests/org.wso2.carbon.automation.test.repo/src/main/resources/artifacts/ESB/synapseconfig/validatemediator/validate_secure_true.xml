@@ -6,7 +6,7 @@
         <in>
             <validate>
                 <property name="validation-feature-id" value="true"/>
-                <schema key="validate_schema"/>
+                <schema key="validate_schema2"/>
                 <on-fail>
                     <!-- if the request does not validate againt schema throw a fault -->
                     <makefault response="true">
@@ -19,7 +19,7 @@
         <send/>
     </sequence>
 
-    <localEntry key="validate_schema">
+    <localEntry key="validate_schema2">
         <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
                    xmlns="http://services.samples" elementFormDefault="qualified"
                    attributeFormDefault="unqualified" targetNamespace="http://services.samples">

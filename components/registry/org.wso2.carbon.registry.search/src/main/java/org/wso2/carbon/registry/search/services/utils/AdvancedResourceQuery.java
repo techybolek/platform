@@ -90,73 +90,26 @@ public class AdvancedResourceQuery {
 		// if the registry is in read-only mode, and the query is not available
 		// on the registry,
 		// it will be passed in as a parameter.
+        String[] resourcePaths = new String[0];
+        String[] collectionPaths = new String[0];
 
-		String[] resourcePaths = executeResourceQuery(registry,
-				generateSQLForResources());
-		String[] collectionPaths = executeCollectionQuery(registry,
-				generateSQLForCollections());
+        String resourceQuery = generateSQLForResources();
+        if (resourceQuery != null) {
+            resourcePaths = executeResourceQuery(registry,
+                    resourceQuery);
+        }
 
-		Set<String> totalPathsArr = new HashSet<String>();
+        String collectionQuery = generateSQLForCollections();
+        if (collectionQuery != null) {
+            collectionPaths = executeCollectionQuery(registry,
+                    collectionQuery);
+        }
+
+        Set<String> totalPathsArr = new HashSet<String>();
 
 		totalPathsArr.addAll(Arrays.asList(resourcePaths));
-		/*
-		 * We have added this part since it is impossible to write a single SQL
-		 * statement, that can join the REG_ASSOCIATION table to the
-		 * REG_RESOURCE table. Hence we are getting all the resource paths from
-		 * the resource query and do a getAllAssociations() call to see whether
-		 * there are any associations that matches the given criteria
-		 */
+        totalPathsArr.addAll(Arrays.asList(collectionPaths));
 
-		// TODO: improve the logic, need to add a new return type in
-		// registry.core
-		List<String> destinationsPaths = new ArrayList<String>();
-		List<String> destinationsTypes = new ArrayList<String>();
-		if (associationDest != null) {
-			for (String resourcePath : resourcePaths) {
-				Association[] destinationAssociations = registry
-						.getAllAssociations(resourcePath);
-
-				for (Association association : destinationAssociations) {
-					if (association.getDestinationPath().contains(
-							associationDest)
-							&& !association.getDestinationPath().equals(
-									resourcePath)) {
-						destinationsPaths.add(resourcePath);
-						break;
-					}
-				}
-			}
-			totalPathsArr.retainAll(destinationsPaths);
-		}
-		if (associationType != null) {
-			for (String resourcePath : resourcePaths) {
-				Association[] typeAssociations = registry.getAssociations(
-						resourcePath, associationType);
-
-				for (Association association : typeAssociations) {
-					if (association.getSourcePath().equals(resourcePath)) {
-						destinationsTypes.add(resourcePath);
-					}
-				}
-			}
-			totalPathsArr.retainAll(destinationsTypes);
-		}
-		totalPathsArr.addAll(Arrays.asList(collectionPaths));
-
-		// This logic can be simplified. Hence commenting it out.
-		/*
-		 * ArrayList<String> totalPathsArr = new ArrayList<String>();
-		 * HashMap<String, Integer> resourceKeyHash = new HashMap<String,
-		 * Integer>();
-		 * 
-		 * for (int i = 0; i < resourcePaths.length; i++) {
-		 * totalPathsArr.add(resourcePaths[i]);
-		 * resourceKeyHash.put(resourcePaths[i], 1); }
-		 * 
-		 * for (int i = 0; i < collectionPaths.length; i++) { if
-		 * (resourceKeyHash.containsKey(collectionPaths[i])) { // is a resource
-		 * continue; } totalPathsArr.add(collectionPaths[i]); }
-		 */
 
 		String[] totalPaths = totalPathsArr.toArray(new String[totalPathsArr
 				.size()]);
@@ -224,14 +177,12 @@ public class AdvancedResourceQuery {
 		}
 
 		if (customSearchValues.size() > 0) {
-			Iterator<String> it = customSearchValues.keySet().iterator();
 
-			while (it.hasNext()) {
-				String s = it.next();
-				if (!customSearchValues.get(s).trim().equals("")) {
-					params.add(customSearchValues.get(s));
-				}
-			}
+            for (String s : customSearchValues.keySet()) {
+                if (!customSearchValues.get(s).trim().equals("")) {
+                    params.add(customSearchValues.get(s));
+                }
+            }
 		}
 
 		/*
@@ -241,14 +192,14 @@ public class AdvancedResourceQuery {
 		 * if(associationDest != null){
 		 * params.add(associationDest.toLowerCase()); }
 		 */
-		Map paramMap = new HashMap();
+		Map<String,Object> paramMap = new HashMap<String, Object>();
 		for (int i = 0; i < params.size(); i++) {
 			Object value = params.get(i);
 			paramMap.put(Integer.toString(i + 1), value);
 		}
-		if (content != null) {
-			paramMap.put("content", content);
-		}
+//		if (content != null) {
+//			paramMap.put("content", content);
+//		}
 		Resource r;
 		if (query != null && query.length() != 0) {
 			paramMap.put("query", query);
@@ -266,7 +217,7 @@ public class AdvancedResourceQuery {
 		List<Object> params = new ArrayList<Object>();
 		if (resourceName != null && resourceName.length() != 0) {
 			params.add("%/" + resourceName);
-			params.add("%/" + resourceName + "/%");
+//			params.add("%/" + resourceName + "%");
 		}
 
 		if (authorName != null && authorName.length() != 0) {
@@ -317,14 +268,12 @@ public class AdvancedResourceQuery {
 			params.add(mediaType);
 		}
 		if (customSearchValues.size() > 0) {
-			Iterator<String> it = customSearchValues.keySet().iterator();
 
-			while (it.hasNext()) {
-				String s = it.next();
-				if (!customSearchValues.get(s).trim().equals("")) {
-					params.add(customSearchValues.get(s));
-				}
-			}
+            for (String s : customSearchValues.keySet()) {
+                if (!customSearchValues.get(s).trim().equals("")) {
+                    params.add(customSearchValues.get(s));
+                }
+            }
 		}
 
 		if (associationType != null) {
@@ -334,14 +283,14 @@ public class AdvancedResourceQuery {
 			params.add("%/" + associationDest.toLowerCase());
 			params.add("%/" + associationDest.toLowerCase() + "/%");
 		}
-		Map paramMap = new HashMap();
+		Map<String,Object> paramMap = new HashMap<String, Object>();
 		for (int i = 0; i < params.size(); i++) {
 			Object value = params.get(i);
 			paramMap.put(Integer.toString(i + 1), value);
 		}
-		if (content != null) {
-			paramMap.put("content", content);
-		}
+//		if (content != null) {
+//			paramMap.put("content", content);
+//		}
 		Resource r;
 		if (query != null && query.length() != 0) {
 			paramMap.put("query", query);
@@ -454,7 +403,7 @@ public class AdvancedResourceQuery {
 	}
 
 	public void setMediaTypeNegate(String mediaNegate) {
-		this.mediaTypeNegate = mediaNegate.equals("") ? false : true;
+		this.mediaTypeNegate = !mediaNegate.equals("");
 	}
 
 	public String getCommentWords() {
@@ -487,10 +436,10 @@ public class AdvancedResourceQuery {
 		this.associationDest = associationDest;
 	}
 
-	public String getContent() {
-		return this.content;
-	}
-
+//	public String getContent() {
+//		return this.content;
+//	}
+//
 	public void setContent(String content) {
 		this.content = content;
 	}
@@ -516,19 +465,19 @@ public class AdvancedResourceQuery {
 	}
 
 	public void setAuthorNameNegate(String authNegate) {
-		this.authorNameNegate = authNegate.equals("") ? false : true;
+		this.authorNameNegate = !authNegate.equals("");
 	}
 
 	public void setUpdaterNameNegate(String updNegate) {
-		this.updaterNameNegate = updNegate.equals("") ? false : true;
+		this.updaterNameNegate = !updNegate.equals("");
 	}
 
 	public void setCreatedRangeNegate(String createdRange) {
-		this.createdRangeNegate = createdRange.equals("") ? false : true;
+		this.createdRangeNegate = !createdRange.equals("");
 	}
 
 	public void setUpdatedRangeNegate(String updatedRange) {
-		this.updatedRangeNegate = updatedRange.equals("") ? false : true;
+		this.updatedRangeNegate = !updatedRange.equals("");
 	}
 
 	public void setLeftOp(String leftOp) {
@@ -672,7 +621,7 @@ public class AdvancedResourceQuery {
 			tables.add(", REG_TAG T");
 			tables.add(", REG_RESOURCE_TAG RT");
 
-			StringBuffer tagClause = new StringBuffer();
+			StringBuilder tagClause = new StringBuilder();
 			if (StaticConfiguration.isVersioningTags()) {
 				tagClause.append("R.REG_VERSION=RT.REG_VERSION AND "
 						+ "RT.REG_TAG_ID=T.REG_ID ");
@@ -751,7 +700,7 @@ public class AdvancedResourceQuery {
 		}
 
 		if (customSearchValues.size() > 0) {
-			StringBuffer propertyClause = new StringBuffer();
+			StringBuilder propertyClause = new StringBuilder();
 			boolean firstTime = true;
 
 			for (Map.Entry<String, String> e : customSearchValues.entrySet()) {
@@ -797,7 +746,14 @@ public class AdvancedResourceQuery {
 		 * }
 		 */
 
-		StringBuffer query = new StringBuffer();
+//        At this time we check whether the conditions are empty
+//        This means that no fields have been filled. So there should be no results
+        if(conditions.isEmpty()){
+            return  null;
+        }
+//
+
+		StringBuilder query = new StringBuilder();
 		query.append("SELECT R.REG_PATH_ID, R.REG_NAME FROM REG_RESOURCE R");
 		for (String table : tables) {
 			query.append(table);
@@ -821,12 +777,12 @@ public class AdvancedResourceQuery {
 		ArrayList<String> tables = new ArrayList<String>();
 		ArrayList<String> conditions = new ArrayList<String>();
 
-		conditions.add("R.REG_NAME IS NULL");
 		if (resourceName != null && resourceName.length() != 0) {
 			tables.add(", REG_PATH P");
 			conditions
-					.add(" lower(P.REG_PATH_VALUE) LIKE ? AND lower(P.REG_PATH_VALUE) NOT LIKE "
-							+ "? AND P.REG_PATH_ID=R.REG_PATH_ID");
+					.add(" lower(P.REG_PATH_VALUE) LIKE ? " +
+//                            "AND lower(P.REG_PATH_VALUE) NOT LIKE ? " +
+                            "AND P.REG_PATH_ID=R.REG_PATH_ID");
 		}
 
 		if (authorName != null && authorName.length() != 0) {
@@ -902,7 +858,7 @@ public class AdvancedResourceQuery {
 			tables.add(", REG_TAG T");
 			tables.add(", REG_RESOURCE_TAG RT");
 
-			StringBuffer tagClause = new StringBuffer();
+			StringBuilder tagClause = new StringBuilder();
 			if (StaticConfiguration.isVersioningTags()) {
 				tagClause.append("R.REG_VERSION=RT.REG_VERSION AND "
 						+ "RT.REG_TAG_ID=T.REG_ID ");
@@ -982,7 +938,7 @@ public class AdvancedResourceQuery {
 				conditions.add("R.REG_MEDIA_TYPE LIKE ?");
 		}
 		if (customSearchValues.size() > 0) {
-			StringBuffer propertyClause = new StringBuffer();
+			StringBuilder propertyClause = new StringBuilder();
 			boolean firstTime = true;
 
 			for (Map.Entry<String, String> e : customSearchValues.entrySet()) {
@@ -1035,11 +991,12 @@ public class AdvancedResourceQuery {
 
 		}
 
-		if (conditions.size() == 0) {
+		if (conditions.isEmpty()) {
 			return null;
 		}
+        conditions.add("R.REG_NAME IS NULL");
 
-		StringBuffer query = new StringBuffer();
+		StringBuilder query = new StringBuilder();
 		query.append("SELECT R.REG_PATH_ID, R.REG_NAME FROM REG_RESOURCE R");
 		for (String table : tables) {
 			query.append(table);

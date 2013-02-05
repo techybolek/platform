@@ -37,6 +37,8 @@ public class OAuthMediatorFactory extends AbstractMediatorFactory {
 
     private static final QName ELEMENT_OAUTH = new QName(XMLConfigConstants.SYNAPSE_NAMESPACE,"oauthService");
     private static final QName ATTR_NAME_SERVICE_EPR = new QName("remoteServiceUrl");
+    private static final QName ATTR_NAME_USERNAME = new QName("username");
+    private static final QName ATTR_NAME_PASSWORD = new QName("password");
 
     /**
      * {@inheritDoc}
@@ -49,6 +51,8 @@ public class OAuthMediatorFactory extends AbstractMediatorFactory {
 
         OAuthMediator mediator = null;
         OMAttribute remoteServiceUrl = null;
+        OMAttribute username = null;
+        OMAttribute password = null;
 
         mediator = new OAuthMediator();
 
@@ -56,7 +60,14 @@ public class OAuthMediatorFactory extends AbstractMediatorFactory {
         if (remoteServiceUrl != null && remoteServiceUrl.getAttributeValue() != null) {
             mediator.setRemoteServiceUrl(remoteServiceUrl.getAttributeValue());
         }
-
+        username = element.getAttribute(ATTR_NAME_USERNAME);
+        if(username != null && username.getAttributeValue() != null){
+        	mediator.setUsername(username.getAttributeValue());
+        }
+        password = element.getAttribute(ATTR_NAME_PASSWORD);
+        if(password != null && password.getAttributeValue() != null){
+        	mediator.setPassword(password.getAttributeValue());
+        }
         return mediator;
     }
 

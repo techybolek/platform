@@ -25,11 +25,8 @@ public class DataColumn {
 
 	private String name;
 	
-	private int dataType;
-	
-	public DataColumn(String name, int dataType) {
+	public DataColumn(String name) {
 		this.name = name;
-		this.dataType = dataType;
 	}
 	
 	/**
@@ -38,15 +35,6 @@ public class DataColumn {
 	 */
 	public String getName() {
 		return name;
-	}
-	
-	/**
-	 * This method will return the SQL type of the column as mentioned in
-	 * <code>java.sql.Types</code>.
-	 * @return The data column SQL type
-	 */
-	public int getDataType() {
-		return dataType;
 	}
 	
 }

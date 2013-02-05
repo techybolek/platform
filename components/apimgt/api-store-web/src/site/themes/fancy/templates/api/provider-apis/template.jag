@@ -3,7 +3,7 @@
         <div class="corner-maker-left"></div>
 <ul class="list-main more-from-provider">
            <li class="list-header">
-               More APIs from '<%=outputs.providerId%>'
+               <%=i18n.localize("moreAPI")%>  '<%=outputs.providerId%>'
            </li>
      <%
     var i, api, path,apis = outputs.apis, thumbURL; if(apis!=null){length = apis.length;
@@ -21,7 +21,7 @@
                <img src="<%=thumbURL%>" width="70px"/>
            </div>
            <div class="span8">
-               <a href="<%=path%>" class="title" title="<%=api.name%>"><%=api.name%></a>
+               <a href="<%=path%>" class="title" title="<%=api.name%>"><%=api.name%>-<%=api.version%></a>
                <div class="star-ratings"><%=stars.getStaticStars(site.context, api.rating, jagg.getUserTheme().base)%></div>
            </div>
        </div>

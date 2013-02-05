@@ -33,6 +33,8 @@ public class Query extends DataServiceConfigurationElement {
 	private Param[] params;
 
 	private String sql;
+	
+	private String expression;
 
 	private String sparql;
 
@@ -373,6 +375,14 @@ public class Query extends DataServiceConfigurationElement {
 	public void setKeyColumns(String keyColumns) {
 		this.keyColumns = keyColumns;
 	}
+	
+	public String getExpression() {
+		return expression;
+	}
+
+	public void setExpression(String expression) {
+		this.expression = expression;
+	}
 
 	public boolean hasProperties() {
 		boolean hasProperty = false;
@@ -412,6 +422,10 @@ public class Query extends DataServiceConfigurationElement {
 			OMElement sqlEl = fac.createOMElement("sql", null);
 			sqlEl.setText(this.getSql().trim());
 			queryEl.addChild(sqlEl);
+		} else if (this.getExpression() != null) {
+			OMElement expEl = fac.createOMElement("expression", null);
+			expEl.setText(this.getExpression().trim());
+			queryEl.addChild(expEl);
 		} else if (this.getSparql() != null) {
 			OMElement sparqlEl = fac.createOMElement("sparql", null);
 			OMTextImpl omText = (OMTextImpl) fac.createOMText(this.getSparql());

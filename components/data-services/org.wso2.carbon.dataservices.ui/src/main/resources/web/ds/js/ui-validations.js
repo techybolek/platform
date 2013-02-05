@@ -162,7 +162,22 @@ function validateAddDataSourceForm(){
             CARBON.showWarningDialog('JDBC URL is mandatory');
             return false;
         }
-    }
+    } else if (document.getElementById('datasourceType').value == 'WEB_CONFIG') {
+    	if (document.getElementById('config').checked) {
+    		if(document.getElementById('web_harvest_config_textArea').value ==  ''){
+                CARBON.showWarningDialog('Please Specify Web Harvest Config');
+                return false;
+            } else if ((document.getElementById('web_harvest_config_textArea').value.trim()).indexOf('<config>') != 0) {
+            	CARBON.showWarningDialog('Invalid Web Harvest Config');
+                return false;
+            }
+    	} else {
+    		if(document.getElementById('web_harvest_config').value ==  ''){
+                CARBON.showWarningDialog('Please Specify Web Harvest Config File Path');
+                return false;
+            }
+    	}
+     }
 
     return true;
 }
@@ -170,6 +185,10 @@ function validateAddDataSourceForm(){
 function validateQueryId(obj){
 	var queryId = document.getElementById('queryId').value;
        var reWhiteSpace = new RegExp("^[a-zA-Z0-9_]+$");
+    if(queryId == ''){
+         CARBON.showWarningDialog('Query Id is mandatory');
+         return  false;
+    }
     // Validate for alphanumeric characters and underscores
     if (!reWhiteSpace.test(queryId)) {
         CARBON.showWarningDialog("Alphanumeric characters and underscores are only allowed in the Query Id");
@@ -407,10 +426,15 @@ function sendOutputMapping() {
 function showTables(obj, document) {
     var configId = obj[obj.selectedIndex].value;
     var datasourceType = '';
+    var customDataSourceType = '';
     if (configId != '#') {
         var datasourceTypeObj = document.getElementById(configId);
         if (datasourceTypeObj != null) {
             datasourceType = datasourceTypeObj.value;
+        }
+        var customDataSourceTypeObj = document.getElementById("customDatasourceType"+configId);
+        if (customDataSourceTypeObj != null) {
+        	customDataSourceType = customDataSourceTypeObj.value;
         }
     }
     
@@ -427,14 +451,32 @@ function showTables(obj, document) {
     var inputHeading = 'none';
     var autoResponse = 'none';
     var cassandra = 'none';
+    var CustomQuery = 'none';
 
-    if (datasourceType == 'RDBMS' || datasourceType == 'JNDI' || datasourceType == 'CARBON_DATASOURCE' ) {
+    if (datasourceType == 'RDBMS' || datasourceType == 'JNDI' || datasourceType == 'CARBON_DATASOURCE') {
         rdbmsNjndi = '';
         inputMappings = '';
         inputMappingsButton = '';
         queryProp = '';
         inputHeading = '';
         autoResponse ='';
+    }
+    if (datasourceType == 'CUSTOM') {
+    	if (customDataSourceType == 'CUSTOM_QUERY' || customDataSourceType == 'DS_CUSTOM_QUERY') {
+    		CustomQuery = '';
+            inputMappings = '';
+            inputMappingsButton = '';
+            queryProp = '';
+            inputHeading = '';
+            autoResponse ='';
+    	} else {
+    		rdbmsNjndi = '';
+            inputMappings = '';
+            inputMappingsButton = '';
+            queryProp = '';
+            inputHeading = '';
+            autoResponse ='';
+    	}
     }
     if (datasourceType == 'Cassandra') {
         cassandra = '';
@@ -473,6 +515,7 @@ function showTables(obj, document) {
     document.getElementById('inputHeading').style.display = inputHeading;
     document.getElementById('scraperRow').style.display = webConfig;
     document.getElementById('CASSANDRARow').style.display = cassandra;
+    document.getElementById('CustomQueryRow').style.display = CustomQuery;
     //document.getElementById('autoResponseRow').style.display = autoResponse;
     
 }
@@ -1036,7 +1079,7 @@ function redirectToMainConfiguration(obj){
 }
 
 function gspreadVisibiltyOnChange(obj, document) {
-    var selectedValue = obj[obj.selectedIndex].value;
+	var selectedValue = obj[obj.selectedIndex].value;
     dval = null;
     if (selectedValue == "private") {
         dval = "table-row";
@@ -1045,6 +1088,17 @@ function gspreadVisibiltyOnChange(obj, document) {
     }
     document.getElementById('tr:gspread_username').style.display = dval;
     document.getElementById('tr:gspread_password').style.display = dval;
+}
+
+function gspreadVisibiltyOnChangeQMode(obj, document) {
+	var selectedValue = obj[obj.selectedIndex].value;
+	if (selectedValue == "private") {
+		document.getElementById('tr:querymode_gspread_username').style.display = "";
+		document.getElementById('tr:querymode_gspread_password').style.display = "";
+    } else {
+    	document.getElementById('tr:querymode_gspread_username').style.display = "none";
+    	document.getElementById('tr:querymode_gspread_password').style.display = "none";
+    }
 }
 
 function defaultValueVisibilityOnChange(obj, document) {
@@ -1078,7 +1132,7 @@ function changeDataSourceType (obj, document) {
         obj.selectedIndex = 0;
         return false;
 	} else {
-		location.href = 'addDataSource.jsp?selectedType='+selectedType+'&configId='+selectedDS+'&ds=edit';
+		location.href = 'addDataSource.jsp?selectedType='+selectedType+'&configId='+selectedDS+'&ds=edit&flag=edit_changed';
 	}	
 	
 		
@@ -1710,9 +1764,25 @@ function ValidateDataSourceProperties() {
 	return true;
 }
 
+function showGsExcelProperties(checkbx, dsType) {
+	if(checkbx.checked) {
+		if (dsType == 'GDATA_SPREADSHEET') {
+			document.getElementById("sheetNameTr").style.display = '';
+		}
+		document.getElementById("useQueryModeValue").value = "true";
+	} else {
+		document.getElementById("sheetNameTr").style.display = 'none';
+		document.getElementById("useQueryModeValue").value = "false";
+	}
+}
 
-
-
+function changeCustomDsType() {
+	if (document.getElementById('custom_tabular').checked) {
+		document.getElementById('customTypeValue').value = "CUSTOM_TABULAR";
+	} else {
+		document.getElementById('customTypeValue').value = "CUSTOM_QUERY";
+	}
+}
 
 
 

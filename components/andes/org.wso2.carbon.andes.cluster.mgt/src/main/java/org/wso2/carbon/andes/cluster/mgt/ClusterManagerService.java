@@ -23,7 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.andes.cluster.mgt.internal.ClusterManagementDataHolder;
 import org.wso2.carbon.andes.cluster.mgt.internal.ClusterMgtException;
-import org.wso2.carbon.andes.cluster.mgt.internal.registry.ClusterManagementBeans;
+import org.wso2.carbon.andes.cluster.mgt.internal.Utils;
+import org.wso2.carbon.andes.cluster.mgt.internal.managementBeans.ClusterManagementBeans;
 
 import java.util.ArrayList;
 
@@ -67,7 +68,10 @@ public class ClusterManagerService {
 
             //get queues  whose queue manager runs on the given node
             ClusterManagementBeans clusterManagementBeans = new ClusterManagementBeans();
-            resultList = clusterManagementBeans.getQueuesRunningInNode(hostName);
+            ArrayList<Queue> allQueuesRunningInNode = clusterManagementBeans.getQueuesRunningInNode(hostName);
+
+            //filter queues according to tenant
+            resultList = (ArrayList<Queue>) Utils.filterDomainSpecificQueues(allQueuesRunningInNode);
 
             if ((resultList.size() - startingIndex) < maxQueueCount) {
                 resultSetSize = (resultList.size() - startingIndex);
@@ -251,7 +255,11 @@ public class ClusterManagerService {
         try {
             long result = 0;
             ClusterManagementBeans clusterManagementBeans = new ClusterManagementBeans();
-            result = clusterManagementBeans.getQueuesRunningInNode(hostName).size();
+            ArrayList<Queue> queuesRunningInNode =  clusterManagementBeans.getQueuesRunningInNode(hostName);
+
+            //filter according to tenant
+            ArrayList<Queue> queuesSpecificToTenant = (ArrayList<Queue>) Utils.filterDomainSpecificQueues(queuesRunningInNode);
+            result = queuesSpecificToTenant.size();
             return result;
         } catch (Exception e) {
             throw new ClusterMgtAdminException("Cannot get the queue manager ", e);

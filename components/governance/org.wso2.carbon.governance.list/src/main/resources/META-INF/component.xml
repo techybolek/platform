@@ -30,12 +30,12 @@
             <ResourceId>/permission/admin/manage/resources/govern</ResourceId>
         </ManagementPermission>
         <ManagementPermission>
-            <DisplayName>Metadata</DisplayName>
-            <ResourceId>/permission/admin/manage/resources/govern/metadata</ResourceId>
+            <DisplayName>Generic Artifacts</DisplayName>
+            <ResourceId>/permission/admin/configure/governance/generic</ResourceId>
         </ManagementPermission>
         <ManagementPermission>
             <DisplayName>List</DisplayName>
-            <ResourceId>/permission/admin/manage/resources/govern/metadata/list</ResourceId>
+            <ResourceId>/permission/admin/manage/resources/govern/generic/list</ResourceId>
         </ManagementPermission>
     </ManagementPermissions>
 </component>

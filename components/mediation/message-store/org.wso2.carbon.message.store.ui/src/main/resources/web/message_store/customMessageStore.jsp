@@ -337,11 +337,11 @@
                 <%} else {%>
                 <tr style="display:none;">
                     <td><fmt:message key="provider"/></td>
-                    <td><input type="text" size="60" name="Provider" value="custom.store"/></td>
+                    <td><input type="text" size="60" name="customStore" value="custom.store"/></td>
                 </tr>
                 <tr id="custom_class_input">
                     <td><fmt:message key="provider.class"/><span class="required"> *</span></td>
-                    <td><input id="Provider" name="custom_provider_class" size="60"
+                    <td><input id="Provider" name="Provider" size="60"
                                value=""/></td>
                 </tr>
                 <%}%>

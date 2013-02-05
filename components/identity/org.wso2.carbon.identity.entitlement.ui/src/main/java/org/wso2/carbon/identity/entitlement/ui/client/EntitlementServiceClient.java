@@ -28,6 +28,8 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.entitlement.stub.EntitlementServiceStub;
+import org.wso2.carbon.identity.entitlement.stub.dto.EntitledResultSetDTO;
+import org.wso2.carbon.identity.entitlement.ui.util.ClientUtil;
 
 public class EntitlementServiceClient {
 
@@ -53,10 +55,11 @@ public class EntitlementServiceClient {
     }
 
     /**
-     * 
-     * @param request
-     * @return
-     * @throws AxisFault
+     * Evaluate XACML request with PDP
+     *
+     * @param request  XACML request as String
+     * @return XACML response as String
+     * @throws AxisFault if fails
      */
     public String getDecision(String request) throws AxisFault {
         try {
@@ -64,16 +67,39 @@ public class EntitlementServiceClient {
                 request = request.trim().replaceAll("&lt;", "<"); //TODO should be properly fixed
                 request = request.trim().replaceAll("&gt;", ">");                 
             }
-            return getStatus(stub.getDecision(request));
+            return ClientUtil.getStatus(stub.getDecision(request));
         } catch (Exception e) {
             handleException("Error occurred while policy evaluation", e);
         }
         return null;
     }
 
+   /**
+    * Gets user or role entitled resources
+    * @param subjectName user or role name
+    * @param resourceName resource name
+    * @param subjectId  attribute id of the subject, user or role
+    * @param action action name
+    * @param enableChildSearch whether search is done for the child resources under the given resource name
+    * @throws org.apache.axis2.AxisFault  throws
+    * @return entitled resources as String array
+    */
+    public EntitledResultSetDTO getEntitledAttributes(String subjectName, String resourceName,
+                                      String subjectId, String action, boolean enableChildSearch)
+            throws AxisFault {
+        try {
+           return  stub.getEntitledAttributes(subjectName, resourceName, subjectId, action,
+                                              enableChildSearch);
+        } catch (Exception e) {
+           handleException(e.getMessage(), e);
+        }
+
+        return null;
+    }
+
     /**
      * Logs and wraps the given exception.
-     * 
+     *
      * @param msg Error message
      * @param e Exception
      * @throws AxisFault
@@ -81,28 +107,5 @@ public class EntitlementServiceClient {
     private void handleException(String msg, Exception e) throws AxisFault {
         log.error(msg, e);
         throw new AxisFault(msg, e);
-    }
-
-    /**
-     * 
-     * @param response
-     * @return
-     * @throws Exception
-     */
-    private String getStatus(String xmlstring) throws Exception {
-        OMElement response = null;
-        OMElement result = null;
-        OMElement decision = null;
-        response = AXIOMUtil.stringToOM(xmlstring);
-
-        result = response.getFirstChildWithName(new QName("Result"));
-        if (result != null) {
-            decision = result.getFirstChildWithName(new QName("Decision"));
-            if (decision != null) {
-                return decision.getText();
-            }
-        }
-
-        return "Invalid Status";
     }
 }

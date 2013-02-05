@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -25,7 +25,6 @@ import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
 import org.wso2.carbon.identity.oauth.ui.OAuth2Parameters;
 import org.wso2.carbon.identity.oauth.ui.OAuthConstants;
@@ -33,6 +32,7 @@ import org.wso2.carbon.identity.oauth.ui.client.OAuth2ServiceClient;
 import org.wso2.carbon.identity.oauth.ui.internal.OAuthUIServiceComponentHolder;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientValidationResponseDTO;
 import org.wso2.carbon.ui.CarbonUIUtil;
+import org.wso2.carbon.ui.util.CharacterEncoder;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -98,8 +98,8 @@ public class OAuth2AuthzEndpoint extends HttpServlet {
             // Extract the client_id and callback url from the request, because constructing an Amber
             // Authz request can cause an OAuthProblemException exception. In that case, that error
             // needs to be passed back to client. Before that we need to validate the client_id and callback URL
-            String clientId = req.getParameter("client_id");
-            String callbackURL = req.getParameter("redirect_uri");
+            String clientId = CharacterEncoder.getSafeText(req.getParameter("client_id"));
+            String callbackURL = CharacterEncoder.getSafeText(req.getParameter("redirect_uri"));
 
             if (clientId != null) {
                 clientValidationResponseDTO = validateClient(req, clientId, callbackURL);
@@ -151,23 +151,27 @@ public class OAuth2AuthzEndpoint extends HttpServlet {
         }
     }
 
-    private OAuth2ClientValidationResponseDTO validateClient(HttpServletRequest req,
-                                                               String clientId,
-                                                               String callbackURL)
-            throws OAuthSystemException {
-        // authenticate and issue the authorization code
-        String backendServerURL = CarbonUIUtil.getServerURL(
-                OAuthUIServiceComponentHolder.getInstance().getServerConfigurationService());
-        ConfigurationContext configContext = (ConfigurationContext) req.getSession()
-                .getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
-        try {
-            OAuth2ServiceClient oauth2ServiceClient = new OAuth2ServiceClient(backendServerURL,
-                    configContext);
-            return oauth2ServiceClient.validateClient(clientId, callbackURL);
-        } catch (RemoteException e) {
-            log.error("Error when invoking the OAuth2Service for client validation.");
-            throw new OAuthSystemException(e.getMessage(), e);
-        }
-    }
+	private OAuth2ClientValidationResponseDTO validateClient(HttpServletRequest req,
+	                                                         String clientId, String callbackURL)
+	                                                                                             throws OAuthSystemException {
+
+		String backendServerURL =
+		                          CarbonUIUtil.getServerURL(OAuthUIServiceComponentHolder.getInstance()
+		                                                                                 .getServerConfigurationService());
+		ConfigurationContext configContext =
+		                                     OAuthUIServiceComponentHolder.getInstance()
+		                                                                  .getConfigurationContextService()
+		                                                                  .getServerConfigContext();
+		
+		try {
+			OAuth2ServiceClient oauth2ServiceClient =
+			                                          new OAuth2ServiceClient(backendServerURL,
+			                                                                  configContext);
+			return oauth2ServiceClient.validateClient(clientId, callbackURL);
+		} catch (RemoteException e) {
+			log.error("Error when invoking the OAuth2Service for client validation.");
+			throw new OAuthSystemException(e.getMessage(), e);
+		}
+	}
 
 }

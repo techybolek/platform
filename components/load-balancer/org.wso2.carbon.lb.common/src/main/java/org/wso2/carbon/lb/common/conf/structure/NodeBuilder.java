@@ -30,7 +30,7 @@ public class NodeBuilder {
     private static final Log log = LogFactory.getLog(NodeBuilder.class);
 
     /**
-     * 
+     * This method is useful when you do not have a root node in your content.
      * @param aNode
      *            Node object whose name set.
      * @param content
@@ -51,6 +51,10 @@ public class NodeBuilder {
      */
     public static Node buildNode(Node aNode, String content) {
 
+    	if(content == null || content.isEmpty()){
+    		return aNode;
+    	}
+    	
         String[] lines = content.split("\n");
 
         for (int i = 0; i < lines.length; i++) {
@@ -92,7 +96,11 @@ public class NodeBuilder {
                         }
 
                         childNode = buildNode(childNode, sb.toString());
-                        aNode.appendChild(childNode);
+						if (aNode == null) {
+							aNode = childNode;
+						} else {
+							aNode.appendChild(childNode);
+						}
 
                     } catch (Exception e) {
                         String msg = "Malformatted element is defined in the configuration file. [" +
@@ -123,5 +131,9 @@ public class NodeBuilder {
 
         return aNode;
 
+    }
+    
+    public static Node buildNode(String content) {
+	    return buildNode(null, content);
     }
 }

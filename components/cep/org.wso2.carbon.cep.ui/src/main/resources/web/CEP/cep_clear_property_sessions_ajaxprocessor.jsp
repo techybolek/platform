@@ -9,6 +9,7 @@
 
     //Query
     session.removeAttribute("outputXMLPropertyHashSet");
+    session.removeAttribute("outputTextPropertyHashSet");
     session.removeAttribute("outputMapPropertyList");
     session.removeAttribute("outputTuplePayloadDataPropertyList");
     session.removeAttribute("outputTupleCorrelationDataPropertyList");

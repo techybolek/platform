@@ -42,9 +42,19 @@
 <%
 
     WSDLBean bean;
+    String wsdlFilterKey = null;
+    boolean filter = request.getParameter("filter") != null;
+    if (filter) {
+        wsdlFilterKey = request.getParameter("wsdlkey");
+    }
     try {
-        ListMetadataServiceClient listservice = new ListMetadataServiceClient(config, session);
-        bean = listservice.listwsdls();
+        if(!filter) {
+            ListMetadataServiceClient listservice = new ListMetadataServiceClient(config, session);
+            bean = listservice.listwsdls();
+        } else {
+            ListMetadataServiceClient listservice = new ListMetadataServiceClient(config, session);
+            bean = listservice.listWsdlsByName(wsdlFilterKey);
+        }
     } catch (Exception e) {
 
 %>
@@ -67,15 +77,65 @@
             topPage="true"
             request="<%=request%>" />
 <br/>
+
+<script type="text/javascript">
+    function submitFilterByNameForm() {
+        sessionAwareFunction(function() {
+            var advancedSearchForm = $('filterByNameForm');
+            advancedSearchForm.submit();
+        }, org_wso2_carbon_governance_list_ui_jsi18n["session.timed.out"]);
+    }
+</script>
+
 <div id="middle">
     <h2><fmt:message key="wsdl.list"/></h2>
     <div id="workArea">
+
+ <%if(bean.getSize() != 0 || filter){%>
+    <p style="padding:5px">
+    <form id="filterByNameForm" action="wsdl_name_filter_ajaxprocessor.jsp"
+          onsubmit="return submitFilterByNameForm();" method="post">
+
+        <table id="#_innerTable" style="width:100%">
+            <tr id="buttonRow">
+                <td nowrap="nowrap" style="line-height:25px;padding-right:10px;width:150px;">Filter by WSDL Name:</td>
+                <td nowrap="nowrap" style="width:200px">
+                    <input id="id_WSDL_Name" onkeypress="if (event.keyCode == 13) {submitFilterByNameForm(); }"
+                           type="text" name="WSDL_Name" style="width:200px;margin-bottom:10px;">
+                </td>
+                <td>
+                    <table style="*width:430px !important;">
+        		<tbody>
+                          <tr>
+        		    <td>
+       				<a class="icon-link" href="#" style="background-image: url(../search/images/search.gif);" onclick="submitFilterByNameForm(); return false;" alt="Search"></a>
+        		   </td>
+        		   <td style="vertical-align:middle;padding-left:10px;padding-right:5px;"></td>
+                         </tr>
+                       </tbody>
+                   </table>
+                </td>
+            </tr>
+        </table>
+    </form>
+    </p>
+    <br>
+ <%
+     }
+ %>
+
     <form id="profilesEditForm">
     <table class="styledLeft" id="customTable">
                <%if(bean.getSize()==0){%>
                 <thead>
                     <tr>
+                        <%
+                        if (filter) {
+                        %>
+                        <th><fmt:message key="no.wsdls.matches.filter"/></th>
+                        <% } else { %>
                         <th><fmt:message key="no.wsdls"/></th>
+                        <% } %>
                     </tr>
                 </thead>
         <%} else{
@@ -93,13 +153,22 @@
             } else {
                 numberOfPages = bean.getName().length / itemsPerPage + 1;
             }
+            boolean isBrowseAuthorized = CarbonUIUtil.isUserAuthorized(request,
+                    "/permission/admin/manage/resources/browse");
+            boolean isLCAvailable = false;
+            for(int i=(pageNumber - 1) * itemsPerPage;i<pageNumber * itemsPerPage && i<bean.getName().length;i++) {
+                if (bean.getLCName()[i]!=null && !bean.getLCName()[i].equals("")) {
+                    isLCAvailable = true;
+                    break;
+                }
+            }
         %>
             <thead>
             <tr>
                     <th><fmt:message key="wsdl.name"/></th>
                     <th><fmt:message key="wsdl.namespace"/></th>
                     <th><fmt:message key="version"/></th>
-                    <th><fmt:message key="wsdl.LC.info"/></th>
+                    <% if (isLCAvailable) {%><th><fmt:message key="wsdl.LC.info"/></th><%} %>
                     <th colspan="2"><fmt:message key="actions"/></th>
                 </tr>
             </thead>
@@ -118,7 +187,7 @@
                         String wsdlName = bean.getName()[i];
                         String wsdlNamespace = bean.getNamespace()[i];
                         String LCState = "";
-                        if(!bean.getLCName()[i].equals("")){
+                        if(isLCAvailable && bean.getLCName()[i]!=null && !bean.getLCName()[i].equals("")){
                             LCState = bean.getLCName()[i] + " / " + bean.getLCState()[i];
                         }
                         String version = "";
@@ -126,24 +195,27 @@
                                 "-SNAPSHOT", "").matches(CommonConstants.SERVICE_VERSION_REGEX)) {
                             version = RegistryUtils.getResourceName(RegistryUtils.getParentPath(completePath));
                         }
-                        if (CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/resources/browse")) { %>
+                        if (isBrowseAuthorized) { %>
                     <td><a href="../resources/resource.jsp?region=region3&item=resource_browser_menu&path=<%=urlCompletePath%>"><%=wsdlName%></a></td>
                     <td><%=wsdlNamespace%></td>
                     <td><%=version%></td>
-                    <td><%=LCState%></td>
+                    <% if (isLCAvailable) {%><td><%=LCState%></td><%} %>
                     <td>
                          <%if (bean.getCanDelete()[i])  { %>
                             <a title="<fmt:message key="delete"/>" onclick="deleteService('<%=completePath%>','/','../listWSDL/wsdl.jsp?region=region3&item=governance_list_wsdl_menu')" href="#" class="icon-link registryWriteOperation" style="background-image:url(../admin/images/delete.gif);"><fmt:message key="delete"/></a>
                          <%} else { %>
                             <a class="icon-link registryWriteOperation" style="background-image:url(./images/delete-desable.gif);color:#aaa !important;cursor:default;"><fmt:message key="delete"/></a>
                          <%} %>
+                        <a onclick="downloadDependencies('<%=completePath%>')"  href="#"
+                                   class="icon-link registryWriteOperation" style="background-image:url(../resources/images/icon-download.jpg);"><fmt:message key="download"/></a>
+
                     </td>
                     <td><a title="<fmt:message key="dependency"/>" onclick="showAssociationTree('depends','<%=completePath%>')" href="#" class="icon-link" style="background-image:url(../relations/images/dep-tree.gif);"> <fmt:message key="view.dependency"/></a> </td>
                     <% } else { %>
                     <td><%=wsdlName%></td>
                     <td><%=version%></td>
-                    <td><%=LCState%></td>
-                    <td><% if (bean.getCanDelete()[i] && CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/resources/browse")) {%><a title="<fmt:message key="delete"/>" onclick="deleteService('<%=completePath%>','/','../listWSDL/wsdl.jsp?region=region3&item=governance_list_wsdl_menu')" href="#" class="icon-link registryWriteOperation" style="background-image:url(../admin/images/delete.gif);"><fmt:message key="delete"/></a><% }%> </td>
+                    <% if (isLCAvailable) {%><td><%=LCState%></td><%} %>
+                    <td><% if (isBrowseAuthorized) {%><a title="<fmt:message key="delete"/>" onclick="deleteService('<%=completePath%>','/','../listWSDL/wsdl.jsp?region=region3&item=governance_list_wsdl_menu')" href="#" class="icon-link registryWriteOperation" style="background-image:url(../admin/images/delete.gif);"><fmt:message key="delete"/></a><% }%> </td>
                     <td><a title="<fmt:message key="dependency"/>" onclick="CARBON.showWarningDialog('<fmt:message key="not.sufficient.permissions"/>');" href="#" class="icon-link" style="background-image:url(../relations/images/dep-tree.gif);"> <fmt:message key="view.dependency"/></a> </td>
                     <% } %>
                 </tr>

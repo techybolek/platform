@@ -20,20 +20,23 @@
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ page import="org.apache.axiom.om.OMElement" %>
 <%@ page import="org.wso2.carbon.governance.generic.ui.clients.ManageGenericArtifactServiceClient" %>
-<%@ page import="org.wso2.carbon.governance.services.ui.utils.AddServiceUIGenerator" %>
-<%@ page import="org.wso2.carbon.governance.services.ui.utils.AddServicesUtil" %>
-<%@ page import="org.wso2.carbon.governance.services.ui.utils.UIGeneratorConstants" %>
+<%@ page import="org.wso2.carbon.governance.generic.ui.utils.GenericUIGenerator" %>
+<%@ page import="org.wso2.carbon.governance.generic.ui.utils.GenericUtil" %>
+<%@ page import="org.wso2.carbon.governance.generic.ui.utils.UIGeneratorConstants" %>
 <%@ page import="org.wso2.carbon.registry.core.RegistryConstants" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="javax.xml.namespace.QName" %>
 <%@ page import="java.util.Iterator" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 
 <script type="text/javascript" src="../registry_common/js/registry_validation.js"></script>
 <script type="text/javascript" src="../registry_common/js/registry_common.js"></script>
 <script type="text/javascript" src="../ajax/js/prototype.js"></script>
 <jsp:include page="../resources/resources-i18n-ajaxprocessor.jsp"/>
 <script type="text/javascript" src="../resources/js/resource_util.js"></script>
-<script type="text/javascript" src="../services/js/collapsible_menu_util.js"></script>
+<script type="text/javascript" src="../generic/js/collapsible_menu_util.js"></script>
 
 <fmt:bundle basename="org.wso2.carbon.governance.generic.ui.i18n.Resources">
 <carbon:jsi18n
@@ -80,8 +83,11 @@
     }
 
     String content = client.getArtifactContent(relativePath);
-    OMElement data = AddServicesUtil.loadAddedServiceContent(content);
-    AddServiceUIGenerator gen = new AddServiceUIGenerator(dataName, dataNamespace);
+    if(content ==null){
+        return;
+    }
+    OMElement data = GenericUtil.loadAddedServiceContent(content);
+    GenericUIGenerator gen = new GenericUIGenerator(dataName, dataNamespace);
     OMElement uiconfig = gen.getUIConfiguration(client.getArtifactUIConfiguration(
             request.getParameter("key")),request,config,session);
     request.setAttribute("content",data);
@@ -92,11 +98,15 @@
         String widgetText = gen.printWidgetWithValues(widget, data, false, true, true, request, config).replace("\n", "<!--LF-->").replace("\r", "<!--CR-->");
         table.append(widgetText.replace("<!--LF-->", "\n").replace("<!--CR-->", "\r"));
     }
+
+    List<Map> validatationAttributes = gen.getValidationAttributes(uiconfig);
     String[] mandatory = gen.getMandatoryIdList(uiconfig);
     String[] name = gen.getMandatoryNameList(uiconfig);
     String[] unboundedNameList = gen.getUnboundedNameList(uiconfig);
     String[] unboundedWidgetList = gen.getUnboundedWidgetList(uiconfig);
+    String[] unboundedTooltipList = gen.getUnboundedTooltipList(uiconfig);
     String[][] unboundedValues = gen.getUnboundedValues(uiconfig, request, config);
+    String[][] dateIdAndNameList = gen.getDateIdAndNameList(uiconfig, true);
 %>
 
 <br/>
@@ -118,6 +128,55 @@
             reason += validateEmpty(document.getElementById('<%=mandatory[i]%>'),
                         "<%=name[i]%>");
         <%}%>
+
+            <%
+                //validate date fields
+                for (int i=0; i<dateIdAndNameList.length; ++i) { %>
+            reason
+                    += validateDate(document.getElementById('<%=dateIdAndNameList[i][0]%>'),
+                    "<%=dateIdAndNameList[i][1]%>");
+            <%}
+            %>
+
+            var eleArr = null, ele = null;
+            <%
+                for (int i=0; i<validatationAttributes.size(); i++) {
+                    Map<String, Object> map = validatationAttributes.get(i);
+                    String prop = (String)map.get("properties");
+                    String eleName = (String)map.get("name");
+                    List<String> eleIds = (List<String>)map.get("ids");
+                    String regexp = StringEscapeUtils.escapeJavaScript((String)map.get("regexp"));
+
+                    if (prop != null && "unbounded".equals(prop)) {  %>
+
+            for (var i= 0, len = parseInt(document.getElementsByName('<%=eleName.replaceAll(" ",
+            "-") + UIGeneratorConstants.COUNT%>')[0].value); i<len; ++i) {
+                eleArr = new Array(); <%
+                for (int j=0; j<eleIds.size(); ++j) { %>
+                ele = document.getElementById('<%=eleIds.get(j)%>' + (i+1));
+                if (ele == undefined || ele == null) {
+                    ele = document.getElementsByName('<%=eleIds.get(j)%>' + (i+1))[0];
+                }
+                eleArr.push(ele);
+            <%} %>
+                reason += validateRegex("<%=regexp%>", eleArr, "<%=eleName%>" + (i+1));
+            }
+
+            <%  } else { %>
+            eleArr = new Array(); <%
+                for (int j=0; j<eleIds.size(); ++j) { %>
+            ele = document.getElementById('<%=eleIds.get(j)%>');
+            if (ele == undefined || ele == null) {
+                ele = document.getElementsByName('<%=eleIds.get(j)%>')[0];
+            }
+            eleArr.push(ele);
+            <%} %>
+            reason += validateRegex("<%=regexp%>", eleArr, "<%=eleName%>");
+
+            <%}
+               }
+            %>
+
             var CustomUIForm=document.getElementById('CustomUIForm');
             var waitMessage = document.getElementById('waitMessage');
             var buttonRow = document.getElementById('buttonRow');
@@ -135,16 +194,17 @@
         artifactLoader.innerHTML='<img src="images/ajax-loader.gif" align="left" hspace="20"/><fmt:message key="please.wait.saving.details.for"/> '+'<%=breadcrumb%>'+'...';
     }
 
+    jQuery(document).ready(function() {
+    <%
+    // date fields are loaded with jquery datepicks on JS page load
+    for (int i=0; i<dateIdAndNameList.length; ++i) { %>
+        jQuery('#<%=dateIdAndNameList[i][0]%>').datepicker();
+    <%}%>
+    });
+
     <%
        if(unboundedNameList != null && unboundedWidgetList != null && unboundedValues != null){
        for(int i=0;i<unboundedNameList.length;i++){%>
-        <%=unboundedNameList[i]%>Count = 0;
-        jQuery(document).ready(function() {
-            var countTracker = document.getElementById("<%=unboundedNameList[i]%>CountTaker");
-            if (countTracker != null && countTracker.value) {
-                <%=unboundedNameList[i]%>Count = parseInt(countTracker.value);
-            }
-        });
 
         function delete<%=unboundedNameList[i]%>_<%=unboundedWidgetList[i]%>(index) {
             var endpointMgt = document.getElementById('<%=unboundedNameList[i]%>Mgt');
@@ -159,6 +219,7 @@
             }
         }
         function add<%=unboundedNameList[i]%>_<%=unboundedWidgetList[i]%>(inputParam){
+           
         <%String[] valuelist = unboundedValues[i];%>
             var epOptions = '<%for(int j=0;j<valuelist.length;j++){%><option value="<%=valuelist[j]%>"><%=valuelist[j]%></option><%}%>';
             var endpointMgt = document.getElementById('<%=unboundedNameList[i]%>Mgt');
@@ -174,19 +235,23 @@
                     }
                 }
             }
-            <%=unboundedNameList[i]%>Count++;
             var epCountTaker = document.getElementById('<%=unboundedNameList[i]%>CountTaker');
-            epCountTaker.value = <%=unboundedNameList[i]%>Count;
+            var <%=unboundedNameList[i]%>Count = parseInt(epCountTaker.value);
+            <%=unboundedNameList[i]%>Count++;
+            epCountTaker.value = "" + <%=unboundedNameList[i]%>Count;
             var theTr = document.createElement("TR");
             var theTd1 = document.createElement("TD");
             var theTd2 = document.createElement("TD");
             var theTd3 = document.createElement("TD");
-            var td1Inner = '<select name="<%=(unboundedWidgetList[i].replaceAll(" ","_") + "_" + unboundedNameList[i].replaceAll(" ","-"))%>'+<%=unboundedNameList[i]%>Count+'">' + epOptions + '</select>';
+            var td1Inner = '<select name="<%=(unboundedWidgetList[i].replaceAll(" ","_") + "_" + unboundedNameList[i].replaceAll(" ","-"))%>'+<%=unboundedNameList[i]%>Count+
+                    '" title="<%=unboundedTooltipList[i]%>" >' + epOptions + '</select>';
             var selectResource = "";
             if (inputParam == "path") {
                 selectResource = ' <input type="button" class="button" value=".." title="<fmt:message key="select.path"/>" onclick="showGovernanceResourceTree(\'id_<%=unboundedWidgetList[i].replaceAll(" ","_") + "_" + unboundedNameList[i].replaceAll(" ","-")%>'+<%=unboundedNameList[i]%>Count+'\');"/>';
             }
-            var td2Inner = '<input id="id_<%=unboundedWidgetList[i].replaceAll(" ","_") + "_" + unboundedNameList[i].replaceAll(" ","-")%>'+<%=unboundedNameList[i]%>Count+'" type="text" name="<%=unboundedWidgetList[i].replaceAll(" ","-") + UIGeneratorConstants.TEXT_FIELD + "_" + unboundedNameList[i].replaceAll(" ","-")%>'+<%=unboundedNameList[i]%>Count+'" style="width:400px"/>' + selectResource;
+            var td2Inner = '<input id="id_<%=unboundedWidgetList[i].replaceAll(" ","_") + "_" + unboundedNameList[i].replaceAll(" ","-")%>'+<%=unboundedNameList[i]%>Count+'" type="text" name="<%=unboundedWidgetList[i].replaceAll(" ","-") + UIGeneratorConstants.TEXT_FIELD + "_" + unboundedNameList[i].replaceAll(" ","-")%>'+<%=unboundedNameList[i]%>Count
+                    +'" style="width:400px" title="<%=unboundedTooltipList[i]%>"/>' +
+                    selectResource;
             var td3Inner = '<a class="icon-link" title="delete" onclick="delete<%=unboundedNameList[i]%>_<%=unboundedWidgetList[i]%>(this.parentNode.parentNode.rowIndex)" style="background-image:url(../admin/images/delete.gif);">Delete</a>';
 
             theTd1.innerHTML = td1Inner;
@@ -225,6 +290,7 @@
                 <input type="hidden" name="key" value="<%=request.getParameter("key")%>"/>
                 <input type="hidden" name="breadcrumb" value="<%=request.getParameter("add_edit_breadcrumb")%>"/>
                 <input type="hidden" name="lifecycleAttribute" value="<%=request.getParameter("lifecycleAttribute")%>"/>
+                <input type="hidden" name="currentPath" value="<%=(request.getParameter("path") != null ? request.getParameter("path") : "")%>"/>
             <table class="styledLeft" id="#_addEditTable">
                 <tr><td>
                     <%=table.toString()%>

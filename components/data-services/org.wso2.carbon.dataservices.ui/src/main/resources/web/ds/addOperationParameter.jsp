@@ -87,10 +87,10 @@
                 <td class="buttonRow" colspan="2">
                     <%--<input class="button" type="button" value="Cancel"--%>
                     <%--onclick="location.href='operations.jsp'"/>--%>
-                    <input class="button" type="button" value="Cancel"
-                           onclick="location.href='addOperation.jsp?action=edit&operationName=<%=operationName%>&operationDesc=<%=operationsDesc%>&disableStreaming=<%=disableStreaming%>'"/>
                     <input class="button" type="submit" value="Add"
                onclick="document.dataForm.action = 'operationParamsProcessor.jsp?flag=add&operationName=<%=operationName%>&action=<%=action%>&editParamName=<%=editParamName%>'"/>
+               		<input class="button" type="button" value="Cancel"
+                           onclick="location.href='addOperation.jsp?action=edit&operationName=<%=operationName%>&operationDesc=<%=operationsDesc%>&disableStreaming=<%=disableStreaming%>'"/>
                 </td>
             </tr>
 

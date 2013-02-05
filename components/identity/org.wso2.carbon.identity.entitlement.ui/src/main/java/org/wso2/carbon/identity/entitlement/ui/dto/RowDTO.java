@@ -25,8 +25,6 @@ public class RowDTO {
 
     private String category;
 
-    private String userAttribute;
-
     private String preFunction;
 
     private String function;
@@ -46,7 +44,6 @@ public class RowDTO {
 
     public RowDTO(RowDTO rowDTO) {
         this.category = rowDTO.getCategory();
-        this.userAttribute = rowDTO.getUserAttribute();
         this.preFunction = rowDTO.getPreFunction();
         this.function = rowDTO.getFunction();
         this.attributeValue = rowDTO.getAttributeValue();
@@ -109,14 +106,6 @@ public class RowDTO {
 
     public void setPreFunction(String preFunction) {
         this.preFunction = preFunction;
-    }
-
-    public String getUserAttribute() {
-        return userAttribute;
-    }
-
-    public void setUserAttribute(String userAttribute) {
-        this.userAttribute = userAttribute;
     }
 
     public boolean isNotCompleted() {

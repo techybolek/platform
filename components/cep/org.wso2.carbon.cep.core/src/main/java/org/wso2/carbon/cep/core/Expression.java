@@ -8,11 +8,6 @@ public class Expression {
      * Text of the expression
      * */
     private String text;
-    /**
-     * Type of the expression
-     * type : inline | registry
-     * */
-    private String type;
 
     private String listenerName;
 
@@ -22,14 +17,6 @@ public class Expression {
 
     public void setText(String text) {
         this.text = text;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public String getListenerName() {

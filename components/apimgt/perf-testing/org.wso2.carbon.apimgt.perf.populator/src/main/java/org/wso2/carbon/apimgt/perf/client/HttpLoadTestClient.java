@@ -42,14 +42,19 @@ public class HttpLoadTestClient {
     private static int PIT_STOP = 1000;
 
     public static void main(String[] args) {
-        int concurrency = 50;
-        int count = 1000;
-        String url = "http://localhost:8280/ticker/1.0.0?symbol=IBM";
+        int concurrency = 10;
+        int count = 50;
+        //String apiEndpoint = "http://localhost:8280/ticker/1.0.0?symbol=IBM";
+        //String apiEndpoint = "http://localhost:8280/pizzashack/menu/1.0.0";
+        String directEndpoint = "http://localhost:9764/pizzashack-api-1.0.0/api/menu";
+
+        String apiEndpoint = "http://10.100.3.235:8290/pizzashack/menu/1.0.0";
+
 
 
         ClientWorker[] workers = new ClientWorker[concurrency];
         for (int i = 0; i < concurrency; i++) {
-            workers[i] = new ClientWorker(count, url);
+            workers[i] = new ClientWorker(count, apiEndpoint, directEndpoint);
             workers[i].start();
         }
 
@@ -64,7 +69,7 @@ public class HttpLoadTestClient {
             }
             success += workers[i].getSuccess();
             failures += workers[i].getFailures();
-            totalTime += workers[i].getTimeElapsed();
+            totalTime += workers[i].getTimeElapsedForAPICall();
         }
 
         int total = concurrency * count;
@@ -79,22 +84,24 @@ public class HttpLoadTestClient {
     private static class ClientWorker extends Thread {
 
         private int count;
-        private String url;
+        private String apiEndpoint;
+        private String directEndpoint;
 
         private int success = 0;
         private int failures = 0;
 
         private int rollingCounter = 0;
-        private long timeElapsed;
+        private long timeElapsedForAPICall;
+        private long timeElapsedForDirectCall;
 
-        public ClientWorker(int count, String url) {
+        public ClientWorker(int count, String apiEndpoint, String directEndpoint) {
             this.count = count;
-            this.url = url;
+            this.apiEndpoint = apiEndpoint;
+            this.directEndpoint = directEndpoint;
         }
 
         @Override
         public void run() {
-            long t1 = System.currentTimeMillis();
             SchemeRegistry supportedSchemes = new SchemeRegistry();
             SocketFactory sf = PlainSocketFactory.getSocketFactory();
             supportedSchemes.register(new Scheme("http", sf, 80));
@@ -109,10 +116,20 @@ public class HttpLoadTestClient {
                     return false;
                 }
             });
+            //test API call
+            long t1 = System.currentTimeMillis();
+            testEndpoint(client,apiEndpoint);
+            long t2 = System.currentTimeMillis();
+            timeElapsedForAPICall = t2 - t1;
 
+
+        }
+
+        private void testEndpoint(DefaultHttpClient client,String endpoint) {
             for (int i = 0; i < count; i++) {
-                HttpUriRequest request = new HttpGet(url);
+                HttpUriRequest request = new HttpGet(endpoint);
                 request.addHeader("Authorization", "Bearer " + getNextKey());
+                //request.addHeader("BypassTokenCache","true");
                 try {
                     HttpResponse response = client.execute(request);
                     int statusCode = response.getStatusLine().getStatusCode();
@@ -142,12 +159,10 @@ public class HttpLoadTestClient {
                     }
                 }
             }
-            long t2 = System.currentTimeMillis();
-            timeElapsed = t2 - t1;
         }
 
-        public long getTimeElapsed() {
-            return timeElapsed;
+        public long getTimeElapsedForAPICall() {
+            return timeElapsedForAPICall;
         }
 
         public int getSuccess() {
@@ -162,7 +177,9 @@ public class HttpLoadTestClient {
             if (rollingCounter == 10000) {
                 rollingCounter = 0;
             }
-            return "9nEQnijLZ0Gi0gZ6a3pZIC" + rollingCounter++;
+            //return "9nEQnijLZ0Gi0gZ6a3pZIC" + rollingCounter++;
+            return "9_xeV6fkaeyrqvZuo6mbuAaKvtUa";
+            //return "mBPSeDRGyc1Q3dx5fiNN8ujXv2Qa";
         }
     }
 }

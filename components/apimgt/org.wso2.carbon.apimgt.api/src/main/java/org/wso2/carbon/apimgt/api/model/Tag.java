@@ -26,12 +26,26 @@ package org.wso2.carbon.apimgt.api.model;
 public class Tag {
 
     private String name;
+    private int noOfOccurrences;
 
     public Tag(String name) {
         this.name = name;
     }
 
+    public Tag(String name, int noOfOccurrences) {
+        this.name = name;
+        this.noOfOccurrences = noOfOccurrences;
+    }
+
     public String getName() {
         return name;
+    }
+
+    public int getNoOfOccurrences() {
+        return noOfOccurrences;
+    }
+
+    public void setNoOfOccurrences(int noOfOccurrences) {
+        this.noOfOccurrences = noOfOccurrences;
     }
 }

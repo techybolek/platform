@@ -42,72 +42,17 @@ import java.util.Comparator;
  * numbers are compared in the conventional manner and the suffixes are compared
  * lexicographically.</p>
  */
-public class APIVersionComparator implements Comparator<API> ,Serializable{
+public class APIVersionComparator implements Comparator<API>,Serializable {
+
+    private APIVersionStringComparator stringComparator = new APIVersionStringComparator();
 
     public int compare(API api1, API api2) {
-        APIVersionTokenizer tokenizer1 = new APIVersionTokenizer(api1.getId().getVersion());
-        APIVersionTokenizer tokenizer2 = new APIVersionTokenizer(api2.getId().getVersion());
-
-        int number1, number2;
-        String suffix1, suffix2;
-
-        while (tokenizer1.next()) {
-            if (!tokenizer2.next()) {
-                do {
-                    number1 = tokenizer1.getNumber();
-                    suffix1 = tokenizer1.getSuffix();
-                    if (number1 != 0 || suffix1 != null) {
-                        // Version one is longer than number two, and non-zero
-                        return 1;
-                    }
-                } while (tokenizer1.next());
-
-                // Version one is longer than version two, but zero
-                return 0;
-            }
-
-            number1 = tokenizer1.getNumber();
-            suffix1 = tokenizer1.getSuffix();
-            number2 = tokenizer2.getNumber();
-            suffix2 = tokenizer2.getSuffix();
-
-            if (number1 < number2) {
-                // Number one is less than number two
-                return -1;
-            }
-            if (number1 > number2) {
-                // Number one is greater than number two
-                return 1;
-            }
-
-            if (suffix1 == null && suffix2 == null) {
-                continue; // No suffixes
-            } else if (suffix1 == null) {
-                return 1; // First suffix is empty (2.0 > 2.0-SNAPSHOT)
-            } else if (suffix2 == null) {
-                return -1; // Second suffix is empty (2.0-alpha < 2.0)
-            } else {
-                // Lexical comparison of suffixes - (2.0-wso2v4 < 2.0-wso2v5)
-                int result = suffix1.compareTo(suffix2);
-                if (result != 0) {
-                    return result;
-                }
-            }
+        if (api1.getId().getApiName().equals(api2.getId().getApiName())) {
+            return stringComparator.compare(api1.getId().getVersion(), api2.getId().getVersion());
+        } else {
+            APINameComparator apiNameComparator = new APINameComparator();
+            return apiNameComparator.compare(api1, api2);
         }
 
-        if (tokenizer2.next()) {
-            do {
-                number2 = tokenizer2.getNumber();
-                suffix2 = tokenizer2.getSuffix();
-                if (number2 != 0 || suffix2 != null) {
-                    // Version two is longer than version one, and non-zero
-                    return -1;
-                }
-            } while (tokenizer2.next());
-
-            // Version two is longer than version one, but zero
-            return 0;
-        }
-        return 0;
     }
 }

@@ -1,19 +1,14 @@
 <%
 include("/jagg/jagg.jag");
+include("header.jag");
 var site = require("/site/conf/site.json");
-
+var i18n = require("i18n");
+var localeResourcesBasePath="/site/conf/locales/jaggery/";
+i18n.init(request,localeResourcesBasePath);
+        
 (function () {
 
-    var result, api, title, mod, links,
-            apiName = request.getParameter("name"),
-            version = request.getParameter("version"),
-            provider = request.getParameter("provider"),
-            docName = request.getParameter("docName");
-
-    result = jagg.module("documentation").getInlineContent(provider,apiName,version,docName);
-    var doc= result.doc;
-
-    title = "API Store-Document Viewer";
+    var title = "API Store-Document Viewer";
 
     jagg.render({
         "name":"page/base",
@@ -28,10 +23,8 @@ var site = require("/site/conf/site.json");
                         "top":null,
                         "left":null,
                         "middle":{
-                            "name":"api/documentation/view",
-                            "inputs":{
-                                "doc":doc
-                            }
+                            "name":"api/documentation/view"
+
                         },
                         "right":null
                     }

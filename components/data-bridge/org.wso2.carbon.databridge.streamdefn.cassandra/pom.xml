@@ -5,23 +5,25 @@
    <parent>
         <artifactId>data-bridge</artifactId>
         <groupId>org.wso2.carbon</groupId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.databridge.streamdefn.cassandra</artifactId>
     <packaging>bundle</packaging>
+    <version>4.0.5</version>
     <name>WSO2 Carbon - Data Bridge Cassandra Stream Defn Store</name>
     <description>Agent Event Receiver</description>
     <url>http://wso2.org</url>
 
-    
+
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.databridge.core</artifactId>
-            <version>${wso2carbon.version.agent}</version>
+            <version>${carbon.platform.patch.version.405}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -38,6 +40,12 @@
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.databridge.commons</artifactId>
             <version>${wso2carbon.version.agent}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.databridge.persistence.cassandra</artifactId>
+            <version>${carbon.platform.patch.version.405}</version>
         </dependency>
 
         <!--<dependency>-->
@@ -158,8 +166,10 @@
         </plugins>
     </build>
 
-<properties>
+    <properties>
         <wso2carbon.version.agent>${wso2carbon.version}</wso2carbon.version.agent>
+        <carbon.platform.patch.version.402>4.0.2</carbon.platform.patch.version.402>
+        <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
     </properties>
 
 </project>

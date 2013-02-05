@@ -18,6 +18,7 @@ package org.wso2.carbon.bam.service.data.publisher.conf;
 
 public class EventingConfigData {
 
+    private boolean isPublishingEnable;
     private boolean isServiceStatsEnable;
     private boolean isMsgDumpingEnable;
     private String url;
@@ -28,6 +29,11 @@ public class EventingConfigData {
     private String version = "1.0.0";
     private String nickName = "ServiceDataAgent";
     private String description = "Publish service statistics events";
+
+    private String activityStreamName = "bam_activity_data_publisher";
+    private String activityStreamVersion = "1.0.0";
+    private String activityStreamNickName = "ActivityDataAgent";
+    private String activityStreamDescription = "Activity events";
 
     private Property[] properties;
 
@@ -87,6 +93,14 @@ public class EventingConfigData {
         isMsgDumpingEnable = msgDumpingEnable;
     }
 
+    public void setPublishingEnable(boolean isPublishingEnabled) {
+        isPublishingEnable = isPublishingEnabled;
+    }
+
+    public boolean getPublishingEnable() {
+        return isPublishingEnable;
+    }
+
     public String getUrl() {
         return url;
     }
@@ -109,6 +123,38 @@ public class EventingConfigData {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getActivityStreamName() {
+        return activityStreamName;
+    }
+
+    public void setActivityStreamName(String activityStreamName) {
+        this.activityStreamName = activityStreamName;
+    }
+
+    public String getActivityStreamVersion() {
+        return activityStreamVersion;
+    }
+
+    public void setActivityStreamVersion(String activityStreamVersion) {
+        this.activityStreamVersion = activityStreamVersion;
+    }
+
+    public String getActivityStreamNickName() {
+        return activityStreamNickName;
+    }
+
+    public void setActivityStreamNickName(String activityStreamNickName) {
+        this.activityStreamNickName = activityStreamNickName;
+    }
+
+    public String getActivityStreamDescription() {
+        return activityStreamDescription;
+    }
+
+    public void setActivityStreamDescription(String activityStreamDescription) {
+        this.activityStreamDescription = activityStreamDescription;
     }
 
 }

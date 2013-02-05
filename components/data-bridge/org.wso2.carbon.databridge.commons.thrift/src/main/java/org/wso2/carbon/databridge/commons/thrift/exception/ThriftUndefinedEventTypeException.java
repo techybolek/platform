@@ -5,11 +5,7 @@
  */
 package org.wso2.carbon.databridge.commons.thrift.exception;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Collections;
+import java.util.*;
 
 public class ThriftUndefinedEventTypeException extends Exception implements org.apache.thrift.TBase<ThriftUndefinedEventTypeException, ThriftUndefinedEventTypeException._Fields>, java.io.Serializable, Cloneable {
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("ThriftUndefinedEventTypeException");

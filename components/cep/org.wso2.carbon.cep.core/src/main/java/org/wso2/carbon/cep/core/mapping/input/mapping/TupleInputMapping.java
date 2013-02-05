@@ -18,7 +18,7 @@ package org.wso2.carbon.cep.core.mapping.input.mapping;
 
 import org.wso2.carbon.cep.core.exception.CEPEventProcessingException;
 import org.wso2.carbon.cep.core.internal.util.CEPConstants;
-import org.wso2.carbon.cep.core.mapping.property.TupleProperty;
+import org.wso2.carbon.cep.core.mapping.input.property.TupleInputProperty;
 import org.wso2.carbon.databridge.commons.Attribute;
 import org.wso2.carbon.databridge.commons.Event;
 
@@ -31,14 +31,14 @@ import java.util.Map;
 public class TupleInputMapping extends InputMapping {
 
 
-    private List<TupleProperty> properties;
+    private List<TupleInputProperty> properties;
     private int[][] propertyPositions = null; //int[meta=0,correlation=1,payload=2][position]
 
     private Map<String, Method> writeMethodMap;
 
     public TupleInputMapping() {
         this.writeMethodMap = new HashMap<String, Method>();
-        this.properties = new ArrayList<TupleProperty>();
+        this.properties = new ArrayList<TupleInputProperty>();
         mappingClass=Event.class;
     }
 
@@ -47,12 +47,12 @@ public class TupleInputMapping extends InputMapping {
         this.writeMethodMap.put(name, writeMethod);
     }
 
-    public void addProperty(TupleProperty property) {
+    public void addProperty(TupleInputProperty property) {
         this.properties.add(property);
     }
 
     @Override
-    protected Map convertToEventMap(Object event) {
+    protected Map convertToEventMap(Object event) throws CEPEventProcessingException {
         Map<String, Object> mapEvent = new HashMap<String, Object>();
         for (int i = 0, size = properties.size(); i < size; i++) {
             mapEvent.put(properties.get(i).getName(), getValue((Event) event, i));
@@ -77,7 +77,7 @@ public class TupleInputMapping extends InputMapping {
     }
 
     @Override
-    protected Event convertToEventTuple(Object event) {
+    protected Event convertToEventTuple(Object event) throws CEPEventProcessingException {
         if (propertyPositions == null) {
             initPropertyPositions();
         }
@@ -96,7 +96,7 @@ public class TupleInputMapping extends InputMapping {
         return (Event) event;
     }
 
-    public Object getValue(Event event, int i) {
+    public Object getValue(Event event, int i) throws CEPEventProcessingException {
         if (propertyPositions == null) {
             initPropertyPositions();
         }
@@ -112,19 +112,19 @@ public class TupleInputMapping extends InputMapping {
         return null;
     }
 
-    private void initPropertyPositions() {
+    private void initPropertyPositions() throws CEPEventProcessingException {
         propertyPositions = new int[properties.size()][2];
         for (int i = 0, propertySize = properties.size(); i < propertySize; i++) {
-            TupleProperty property = properties.get(i);
-            if (property.getDataType().equals(CEPConstants.CEP_CONF_ELE_TUPLE_DATA_TYPE_PAYLOAD)) {
+            TupleInputProperty property = properties.get(i);
+            if (property.getInputDataType().equals(CEPConstants.CEP_CONF_TUPLE_DATA_TYPE_PAYLOAD)) {
                 List<Attribute> payloadData = eventStreamDefinition.getPayloadData();
                 propertyPositions[i][0] = 2;
                 propertyPositions[i][1] = getPosition(property, payloadData);
-            } else if (property.getDataType().equals(CEPConstants.CEP_CONF_ELE_TUPLE_DATA_TYPE_META)) {
+            } else if (property.getInputDataType().equals(CEPConstants.CEP_CONF_TUPLE_DATA_TYPE_META)) {
                 List<Attribute> metaData = eventStreamDefinition.getMetaData();
                 propertyPositions[i][0] = 0;
                 propertyPositions[i][1] = getPosition(property, metaData);
-            } else if (property.getDataType().equals(CEPConstants.CEP_CONF_ELE_TUPLE_DATA_TYPE_CORRELATION)) {
+            } else if (property.getInputDataType().equals(CEPConstants.CEP_CONF_TUPLE_DATA_TYPE_CORRELATION)) {
                 List<Attribute> correlationData = eventStreamDefinition.getCorrelationData();
                 propertyPositions[i][0] = 1;
                 propertyPositions[i][1] = getPosition(property, correlationData);
@@ -132,24 +132,55 @@ public class TupleInputMapping extends InputMapping {
         }
     }
 
-    private int getPosition(TupleProperty property, List<Attribute> payloadData) {
+    private int getPosition(TupleInputProperty property, List<Attribute> payloadData)
+            throws CEPEventProcessingException {
 
         for (int i = 0, payloadDataSize = payloadData.size(); i < payloadDataSize; i++) {
             Attribute attribute = payloadData.get(i);
-            if (attribute.getName().equals(property.getName())) {
+            if (attribute.getName().equals(property.getInputName())) {
                 return i;
             }
         }
-        return -1;
+        throw new CEPEventProcessingException("Data bridge stream definition does not match with the input mapping ") ;
     }
 
-    public List<TupleProperty> getProperties() {
+    public List<TupleInputProperty> getProperties() {
         return properties;
     }
 
-    public void setProperties(List<TupleProperty> properties) {
+    public void setProperties(List<TupleInputProperty> properties) {
         this.properties = properties;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TupleInputMapping)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
 
+        TupleInputMapping that = (TupleInputMapping) o;
+
+        if (properties != null ? !properties.equals(that.properties) : that.properties != null) {
+            return false;
+        }
+        if (writeMethodMap != null ? !writeMethodMap.equals(that.writeMethodMap) : that.writeMethodMap != null) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (properties != null ? properties.hashCode() : 0);
+        result = 31 * result + (writeMethodMap != null ? writeMethodMap.hashCode() : 0);
+        return result;
+    }
 }

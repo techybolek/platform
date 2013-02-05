@@ -17,13 +17,14 @@ package org.wso2.carbon.governance.api.test.utils;
 
 import junit.framework.TestCase;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.governance.api.cache.ArtifactCache;
+import org.wso2.carbon.governance.api.cache.ArtifactCacheFactory;
+import org.wso2.carbon.governance.api.cache.ArtifactCacheManager;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.internal.RegistryCoreServiceComponent;
-import org.wso2.carbon.registry.core.jdbc.EmbeddedRegistryService;
 import org.wso2.carbon.registry.core.jdbc.InMemoryEmbeddedRegistryService;
-import org.wso2.carbon.registry.app.RemoteRegistryService;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -47,7 +48,7 @@ public class BaseTestCase extends TestCase {
         }
 
         // The line below is responsible for initializing the cache.
-        CarbonContextHolder.getCurrentCarbonContextHolder();
+        CarbonContext.getCurrentContext();
 
         InputStream is;
         try {
@@ -77,5 +78,7 @@ public class BaseTestCase extends TestCase {
             }
         };
         component.registerBuiltInHandlers(registryService);
+        ArtifactCache cache = ArtifactCacheFactory.createArtifactCache();
+        ArtifactCacheManager.getCacheManager().addTenantArtifactCache(cache, MultitenantConstants.SUPER_TENANT_ID);
     }
 }

@@ -18,18 +18,14 @@ package org.wso2.carbon.datasource.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.commons.datasource.DataSourceConstants;
-import org.apache.synapse.commons.datasource.DataSourceInformationRepository;
-import org.apache.synapse.commons.datasource.DataSourceInformationRepositoryListener;
-import org.apache.synapse.commons.datasource.DataSourceRepositoryManager;
-import org.apache.synapse.commons.datasource.InMemoryDataSourceRepository;
-import org.apache.synapse.commons.datasource.JNDIBasedDataSourceRepository;
+import org.apache.synapse.commons.datasource.*;
 import org.apache.synapse.commons.datasource.factory.DataSourceInformationRepositoryFactory;
 import org.apache.synapse.commons.util.MiscellaneousUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.datasource.DataSourceInformationManager;
 import org.wso2.carbon.datasource.DataSourceInformationRepositoryService;
 import org.wso2.carbon.datasource.DataSourceInformationRepositoryServiceImpl;
@@ -41,7 +37,6 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.securevault.SecretCallbackHandlerService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.securevault.secret.SecretCallbackHandler;
 import org.wso2.securevault.secret.handler.SharedSecretCallbackHandlerCache;
@@ -50,11 +45,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * @scr.component name="org.wso2.carbon.datasource" immediate="true"
@@ -94,11 +85,11 @@ public class DataSourceServiceComponent {
     protected void activate(ComponentContext cmpCtx) throws Exception {
         if (registryService != null) {
             try {
-                SuperTenantCarbonContext.startTenantFlow();
-                SuperTenantCarbonContext.getCurrentContext().setTenantId(
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getCurrentContext().setTenantId(
                         MultitenantConstants.SUPER_TENANT_ID);
 
-                int tenantId = CarbonContextHolder.getCurrentCarbonContextHolder().getTenantId();
+                int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
                 Registry registry = registryService.getConfigSystemRegistry(tenantId);
                 if (registry == null) {
                     handleException("Unable to retrieve the config registry from the registry " +
@@ -140,7 +131,7 @@ public class DataSourceServiceComponent {
                 registration = cmpCtx.getBundleContext().registerService(
                         DataSourceInformationRepositoryService.class.getName(),
                         repositoryServiceImpl, null);
-                SuperTenantCarbonContext.endTenantFlow();
+                PrivilegedCarbonContext.endTenantFlow();
             } catch (RegistryException e) {
                 log.error(e);
                 handleException("Error in retrieving SystemRegistry from Registry Service");

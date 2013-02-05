@@ -203,9 +203,22 @@ public abstract class ZKSyncPrimitive implements Watcher {
 		return id;
 	}
 	
+	protected boolean isUsefulWatchedEvent(WatchedEvent event) {
+		if (event.getPath() == null) {
+			if (log.isDebugEnabled()) {
+				log.debug("WatchedEvent path is null, the event state: " + event.getState());
+			}
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
 	@Override
 	public void process(WatchedEvent event) {
-		this.getEventQueue().add(event);
+		if (this.isUsefulWatchedEvent(event)) {
+		    this.getEventQueue().add(event);
+		}
 	}
 	
 }

@@ -163,7 +163,7 @@ public class LDAPTenantManagerService implements LDAPTenantManager {
         /*Following details of tenant admin is captured from the user through ui.*/
         //set admin's user name
         if (tenant.getAdminName() != null) {
-            tenantAdminInfo.setAdminUID(tenant.getAdminName());
+            tenantAdminInfo.setAdminUserName(tenant.getAdminName());
         }
 
         if (tenant.getAdminFirstName() != null) {

@@ -23,6 +23,8 @@
     <simpleType name="brokerType">
         <restriction base="string">
            <enumeration value="local"/>
+           <enumeration value="agent"/>
+           <enumeration value="e-mail"/>
            <enumeration value="ws-event"/>
            <enumeration value="jms-qpid"/>
         </restriction>

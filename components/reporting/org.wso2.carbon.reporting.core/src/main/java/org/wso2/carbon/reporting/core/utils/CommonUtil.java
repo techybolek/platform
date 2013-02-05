@@ -24,8 +24,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.reporting.api.ReportingException;
 import org.wso2.carbon.reporting.core.ReportConstants;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.FileUtil;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -49,9 +52,10 @@ public class CommonUtil {
      */
     public static void deleteReportTemplate(String templateName, Registry registry) throws ReportingException {
         try {
-
-            if (registry.resourceExists(ReportConstants.REPORT_BASE_PATH)) {
-                registry.delete(ReportConstants.REPORT_BASE_PATH + templateName + ".jrxml");
+            String resourcePath = RegistryUtils.getRelativePathToOriginal(ReportConstants.JRXML_PATH,
+                    RegistryConstants.CONFIG_REGISTRY_BASE_PATH);
+            if (registry.resourceExists(resourcePath)) {
+                registry.delete(resourcePath +RegistryConstants.PATH_SEPARATOR + templateName + ".jrxml");
             } else {
                 if (log.isDebugEnabled()) {
                     log.info("no any report templates called " + templateName + " , to delete");
@@ -75,8 +79,10 @@ public class CommonUtil {
         List<String> reportNames = null;
         try {
 
-            if (registry.resourceExists(ReportConstants.REPORT_BASE_PATH)) {
-                resource = registry.get(ReportConstants.REPORT_BASE_PATH);
+            String relativePath = RegistryUtils.getRelativePathToOriginal(ReportConstants.JRXML_PATH,
+                    RegistryConstants.CONFIG_REGISTRY_BASE_PATH);
+            if (registry.resourceExists(relativePath)) {
+                resource = registry.get(relativePath);
                 if (resource instanceof Collection) {
                     reportNames = new ArrayList<String>();
                     String[] paths = ((Collection) resource).getChildren();
@@ -114,12 +120,10 @@ public class CommonUtil {
             throws ReportingException, XMLStreamException {
 
         String jrXmlPath;
-        if (componentName != null) {
-            jrXmlPath = ReportConstants.REPORT_BASE_PATH + componentName + RegistryConstants.PATH_SEPARATOR + reportTemplate + ".jrxml";
-
+        if(reportTemplate!=null && !"".equals(reportTemplate)){
+            jrXmlPath = ReportConstants.JRXML_PATH +  RegistryConstants.PATH_SEPARATOR + reportTemplate + ".jrxml";
         } else {
-            jrXmlPath = ReportConstants.REPORT_BASE_PATH + reportTemplate + ".jrxml";
-
+            throw new ReportingException("Can't generate report without template ");
         }
 
         Resource resource;
@@ -128,8 +132,11 @@ public class CommonUtil {
         StAXOMBuilder stAXOMBuilder;
         OMElement reportJrXmlOmElement;
         try {
-            resource = registry.get(jrXmlPath);
+
+            resource = registry.get(RegistryUtils.getRelativePathToOriginal(jrXmlPath,
+                    RegistryConstants.CONFIG_REGISTRY_BASE_PATH));
             reportDefinitionOmStream = resource.getContentStream();
+
         } catch (RegistryException e) {
             throw new ReportingException(reportTemplate + " getting  failed from " + componentName, e);
         }
@@ -152,18 +159,17 @@ public class CommonUtil {
      }
 
     public static String getJRXMLFileContent(String componentName, String reportTemplate, Registry registry) throws ReportingException {
-       String jrXmlPath;
-        if (componentName != null) {
-            jrXmlPath = ReportConstants.REPORT_BASE_PATH + componentName + RegistryConstants.PATH_SEPARATOR + reportTemplate + ".jrxml";
-
+        String jrXmlPath;
+        if(reportTemplate!=null && !"".equals(reportTemplate)){
+            jrXmlPath = ReportConstants.JRXML_PATH +  RegistryConstants.PATH_SEPARATOR + reportTemplate + ".jrxml";
         } else {
-            jrXmlPath = ReportConstants.REPORT_BASE_PATH + reportTemplate + ".jrxml";
-
+            throw new ReportingException("Can't generate report without template ");
         }
         Resource resource;
         InputStream reportDefinitionOmStream;
         try {
-            resource = registry.get(jrXmlPath);
+            resource = registry.get(RegistryUtils.getRelativePathToOriginal(jrXmlPath,
+                    RegistryConstants.CONFIG_REGISTRY_BASE_PATH));
             reportDefinitionOmStream = resource.getContentStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(reportDefinitionOmStream));
 
@@ -205,12 +211,50 @@ public class CommonUtil {
             }
             Resource reportFilesResource = registry.newResource();
             reportFilesResource.setContent(fileContent);
-            registry.put(ReportConstants.REPORT_BASE_PATH +fileName +".jrxml" ,reportFilesResource);
+            registry.put(ReportConstants.JRXML_PATH +fileName +".jrxml" ,reportFilesResource);
             status = true;
         } catch (RegistryException e) {
             throw new ReportingException("Failed to update report template "+ fileName ,e);
         }
         return status;
+    }
+    public static void addJrxmlConfigs(Registry systemRegistry) throws RegistryException {
+        String rxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator +
+                "resources" + File.separator + "reports";
+        File file = new File(rxtDir);
+        if(!file.exists()){
+            return;
+        }
+        //create a FilenameFilter
+        FilenameFilter filenameFilter = new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                //if the file extension is .rxt return true, else false
+                return name.endsWith(".jrxml");
+            }
+        };
+        String[] rxtFilePaths = file.list(filenameFilter);
+        if(rxtFilePaths.length == 0){
+            return;
+        }
+        for (String rxtPath : rxtFilePaths) {
+            String resourcePath = ReportConstants.JRXML_PATH+"/"+rxtPath;
+            try {
+                if (systemRegistry.resourceExists(resourcePath)) {
+                    continue;
+                }
+                String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
+                Resource resource = systemRegistry.newResource();
+                resource.setContent(rxt.getBytes());
+                resource.setMediaType("application/xml");
+                systemRegistry.put(resourcePath, resource);
+            } catch (IOException e) {
+                String msg = "Failed to read rxt files";
+                throw new RegistryException(msg, e);
+            } catch (RegistryException e) {
+                String msg = "Failed to add rxt to registry ";
+                throw new RegistryException(msg, e);
+            }
+        }
     }
 
 }

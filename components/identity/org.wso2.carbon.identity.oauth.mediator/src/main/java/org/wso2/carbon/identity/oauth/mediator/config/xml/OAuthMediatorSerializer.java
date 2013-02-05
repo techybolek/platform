@@ -35,7 +35,8 @@ public class OAuthMediatorSerializer extends AbstractMediatorSerializer {
      * {@inheritDoc}
      */
     public OMElement serializeSpecificMediator(Mediator mediator) {
-        if (!(mediator instanceof OAuthMediator)) {
+        
+    	if (!(mediator instanceof OAuthMediator)) {
             handleException("Unsupported mediator passed in for serialization : "
                     + mediator.getType());
         }
@@ -48,8 +49,14 @@ public class OAuthMediatorSerializer extends AbstractMediatorSerializer {
         saveTracingState(oauthElem, oauth);
         oauthElem.addAttribute(fac.createOMAttribute("remoteServiceUrl", nullNS, oauth
                 .getRemoteServiceUrl()));
-
+        if (oauth.getUsername() != null) {
+            oauthElem.addAttribute(fac.createOMAttribute("username", nullNS, oauth.getUsername()));
+        }
+        if (oauth.getPassword() != null) {
+            oauthElem.addAttribute(fac.createOMAttribute("password", nullNS, oauth.getPassword()));
+        }
         oauth = (OAuthMediator) mediator;
+        
         return oauthElem;
     }
 

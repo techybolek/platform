@@ -9,20 +9,9 @@ var getAllDocumentation = function (api) {
             log.debug("getAllDocumentation : " + stringify(docs));
         }
 
-        for (i = 0; i < docs.length; i++) {
-            doc = docs[i];
-            list.push({
-                name:doc.docName,
-                type:doc.docType,
-                sourceType:doc.sourceType,
-                summary:doc.summary,
-                lastUpdated:doc.docLastUpdated,
-                sourceUrl:doc.sourceUrl
-            });
-        }
         return {
             error:false,
-            docs:list
+            docs:docs
         };
     } catch (e) {
         log.error(e.message);

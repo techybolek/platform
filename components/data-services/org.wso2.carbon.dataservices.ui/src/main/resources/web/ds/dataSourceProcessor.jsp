@@ -26,6 +26,7 @@
 <%@ page import="java.util.List" %>
 <jsp:useBean id="dataService" class="org.wso2.carbon.dataservices.ui.beans.Data" scope="session"/>
 <jsp:useBean id="newConfig" class="org.wso2.carbon.dataservices.ui.beans.Config" scope="session"/>
+<jsp:useBean id="backupConfigProps" class="java.util.ArrayList" scope="session"></jsp:useBean>
 <%!
     private void updateConfiguration(Config config, String propertyName, Object value) {
         if (value instanceof String) {
@@ -47,6 +48,7 @@
 %>
 <%
     //retrieve form values set in addDataSource.jsp page
+    String cancelButton = request.getParameter("cancel_button");
     String serviceName = request.getParameter("serviceName");
     String datasourceId = request.getParameter("datasourceId");
     String datasourceType = request.getParameter("datasourceType");
@@ -104,6 +106,8 @@
     String dynamicUserAuthClass = request.getParameter(DBConstants.RDBMS.DYNAMIC_USER_AUTH_CLASS);
 
     String excelDatasource = request.getParameter(DBConstants.Excel.DATASOURCE);
+    
+    boolean useQueryMode = Boolean.parseBoolean(request.getParameter("useQueryModeValue"));
 
     String rdfDatasource = request.getParameter(DBConstants.RDF.DATASOURCE);
 
@@ -125,6 +129,7 @@
     String gspreadVisibility = request.getParameter(DBConstants.GSpread.VISIBILITY);
     String gspreadUserName = request.getParameter(DBConstants.GSpread.USERNAME);
     String gspreadPassword = request.getParameter(DBConstants.GSpread.PASSWORD);
+    String gspreadSheetName = request.getParameter(DBConstants.GSpread.SHEET_NAME);
 
     String detailedServiceName = request.getParameter("detailedServiceName");
 
@@ -139,6 +144,9 @@
     }
     String cassandraUserName = request.getParameter(DBConstants.RDBMS.USERNAME);
     String cassandraPassword = request.getParameter(DBConstants.RDBMS.PASSWORD);
+    
+    String customDSType = request.getParameter("customTypeValue");
+    String customDSClassName = request.getParameter("customDataSourceClass");
 
     String webConfig;
     boolean isXAType = false;
@@ -162,8 +170,13 @@
     flag = (flag == null) ? "" : flag;
     String forwardTo = "dataSources.jsp?ordinal=1";
     boolean remove = true;
+    Config dsConfig = null;
     if (datasourceId != null) {
-        Config dsConfig = dataService.getConfig(datasourceId);
+    	dsConfig = dataService.getConfig(datasourceId);
+    }
+    if (cancelButton != null && dsConfig != null && !backupConfigProps.isEmpty()) {
+   		dsConfig.setProperties((ArrayList<Property>) backupConfigProps);
+    } else if (datasourceId != null) {
         if (flag.equals("") && dsConfig != null) {
             String message = "Data source " + datasourceId + " is already available. Please use different data-source name.";
             CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
@@ -214,6 +227,10 @@
                                     while (nestedPropertyIterator.hasNext()) {
                                         Property nestedProperty = nestedPropertyIterator.next();
                                         String propertyName = nestedProperty.getName();
+                                        /* String propertyNameValue = request.getParameter(propertyName + "Name");
+                                        if (!propertyName.equals(propertyNameValue)) {
+                                        	nestedProperty.setName(propertyNameValue);
+                                        } */
                                         	if (request.getParameter(propertyName) != null) {
                                         		if (request.getParameter("useSecretAliasFor"+propertyName) != null) {
                                         			nestedProperty.setUseSecretAlias(true);
@@ -382,8 +399,20 @@
                         dsConfig.removeProperty(DBConstants.RDBMS.DYNAMIC_USER_AUTH_MAPPING);
                     }
                 } else if (DBConstants.DataSourceTypes.EXCEL.equals(datasourceType)) {
-                    updateConfiguration(dsConfig, DBConstants.Excel.DATASOURCE, excelDatasource);
-                } else if (DBConstants.DataSourceTypes.RDF.equals(datasourceType)) {
+                	if (useQueryMode) {
+                		String excelQueryModeUrl = DBConstants.DSSQLDriverPrefixes.EXCEL_PREFIX + ":" +
+                			DBConstants.DSSQLDriverPrefixes.FILE_PATH + "=" + excelDatasource;
+                		updateConfiguration(dsConfig, DBConstants.RDBMS.DRIVER_CLASSNAME, DBConstants.SQL_DRIVER_CLASS_NAME);
+                		updateConfiguration(dsConfig, DBConstants.RDBMS.URL, excelQueryModeUrl);
+                		
+                		dsConfig.removeProperty(DBConstants.Excel.DATASOURCE);
+                	} else {
+                		updateConfiguration(dsConfig, DBConstants.Excel.DATASOURCE, excelDatasource);
+                		
+                		dsConfig.removeProperty(DBConstants.RDBMS.DRIVER_CLASSNAME);
+                		dsConfig.removeProperty(DBConstants.RDBMS.URL);
+                    }
+               } else if (DBConstants.DataSourceTypes.RDF.equals(datasourceType)) {
                     updateConfiguration(dsConfig, DBConstants.RDF.DATASOURCE, rdfDatasource);
                 } else if (DBConstants.DataSourceTypes.SPARQL.equals(datasourceType)) {
                     updateConfiguration(dsConfig, DBConstants.SPARQL.DATASOURCE, sparqlDatasource);
@@ -408,10 +437,35 @@
                     	gspreadPassword = passwordAlias;
                     	dataService.setSecureVaultNamespace(DBConstants.SECUREVAULT_NAMESPACE);
                     }
-                    updateConfiguration(dsConfig, DBConstants.GSpread.DATASOURCE, gspreadDatasource);
-                    updateConfiguration(dsConfig, DBConstants.GSpread.VISIBILITY, gspreadVisibility);
-                    updateConfiguration(dsConfig, DBConstants.GSpread.USERNAME, gspreadUserName);
-                    updateConfiguration(dsConfig, DBConstants.GSpread.PASSWORD, gspreadPassword);
+					if (useQueryMode) {
+						String gspreadQueryModeUrl = DBConstants.DSSQLDriverPrefixes.GSPRED_PREFIX + ":" +
+	                			DBConstants.DSSQLDriverPrefixes.FILE_PATH + "=" + gspreadDatasource + ";" + 
+	                			DBConstants.GSpread.SHEET_NAME + "=" + gspreadSheetName +";visibility=" + gspreadVisibility;
+						updateConfiguration(dsConfig, DBConstants.RDBMS.DRIVER_CLASSNAME, DBConstants.SQL_DRIVER_CLASS_NAME);
+                        updateConfiguration(dsConfig, DBConstants.RDBMS.URL, gspreadQueryModeUrl);
+                        if (gspreadVisibility.equals(DBConstants.GSpreadVisibility.PRIVATE)) {
+		                    updateConfiguration(dsConfig, DBConstants.RDBMS.USERNAME, gspreadUserName);
+		                    updateConfiguration(dsConfig, DBConstants.RDBMS.PASSWORD, gspreadPassword);
+	                    } else {
+	                    	dsConfig.removeProperty(DBConstants.RDBMS.USERNAME);
+	                    	dsConfig.removeProperty(DBConstants.RDBMS.PASSWORD);
+	                    }
+                        
+                        dsConfig.removeProperty(DBConstants.GSpread.DATASOURCE);
+                		dsConfig.removeProperty(DBConstants.GSpread.VISIBILITY);
+                		dsConfig.removeProperty(DBConstants.GSpread.USERNAME);
+                		dsConfig.removeProperty(DBConstants.GSpread.PASSWORD);
+                	} else {
+	                    updateConfiguration(dsConfig, DBConstants.GSpread.DATASOURCE, gspreadDatasource);
+	                    updateConfiguration(dsConfig, DBConstants.GSpread.VISIBILITY, gspreadVisibility);
+	                    updateConfiguration(dsConfig, DBConstants.GSpread.USERNAME, gspreadUserName);
+		                updateConfiguration(dsConfig, DBConstants.GSpread.PASSWORD, gspreadPassword);
+	                    	                    
+	                    dsConfig.removeProperty(DBConstants.RDBMS.DRIVER_CLASSNAME);
+                		dsConfig.removeProperty(DBConstants.RDBMS.URL);
+                		dsConfig.removeProperty(DBConstants.RDBMS.USERNAME);
+                		dsConfig.removeProperty(DBConstants.RDBMS.PASSWORD);
+                	}
                 } else if (DBConstants.DataSourceTypes.CARBON.equals(datasourceType)) {
                     if (carbonDatasourceName == null || carbonDatasourceName.length() == 0) {
                         String message = "Please select a valid data source name";
@@ -427,6 +481,68 @@
                     updateConfiguration(dsConfig, DBConstants.RDBMS.USERNAME, cassandraUserName);
                     updateConfiguration(dsConfig, DBConstants.RDBMS.PASSWORD, cassandraPassword);
                     updateConfiguration(dsConfig, DBConstants.RDBMS.DRIVER_CLASSNAME, cassandraDriverClass);
+                } else if (DBConstants.DataSourceTypes.CUSTOM.equals(datasourceType)) {
+                	ArrayList<Property> property = new ArrayList<Property>();
+                    Iterator<Property> iterator = dsConfig.getProperties().iterator();
+                    while (iterator.hasNext()) {
+                        Property availableProperty = iterator.next();
+                        if (availableProperty.getName().equals(DBConstants.CustomDataSource.DATA_SOURCE_PROPS)) {
+                            if (availableProperty.getValue() instanceof ArrayList) {
+                                ArrayList<Property> nestedPropertyList = (ArrayList<Property>) availableProperty.getValue();
+                                Iterator<Property> nestedPropertyIterator = nestedPropertyList.iterator();
+                                while (nestedPropertyIterator.hasNext()) {
+                                    Property nestedProperty = nestedPropertyIterator.next();
+                                    String propertyName = nestedProperty.getName();
+                                    /* String propertyNameValue = request.getParameter(propertyName + "Name");
+                                    if (!propertyName.equals(propertyNameValue)) {
+                                    	nestedProperty.setName(propertyNameValue);
+                                    } */
+                                    	if (request.getParameter(propertyName) != null) {
+                                    		if (request.getParameter("useSecretAliasFor"+propertyName) != null) {
+                                    			nestedProperty.setUseSecretAlias(true);
+                                    			dataService.setSecureVaultNamespace(DBConstants.SECUREVAULT_NAMESPACE);
+                                    		} else {
+                                    			nestedProperty.setUseSecretAlias(false);
+                                    		}
+                                    		nestedProperty.setValue(request.getParameter(propertyName));
+                                    	}
+                                    }
+
+                                for (int j = 0; j < propertyCount; j++) {
+                                    Property newProperty = new Property();
+
+                                    String propertyName = request.getParameter("propertyNameRaw" + j);
+                                    String propertValue = request.getParameter("propertyValueRaw" + j);
+                                   
+                                    if (propertyName != null) {
+                                        newProperty.setName(propertyName);
+                                        newProperty.setValue((String) propertValue);
+                                        boolean useSecretAlias = false;
+                                        if(request.getParameter("useSecretAliasFor"+j) != null) {
+                                        	//useSecretAlias = Boolean.parseBoolean(request.getParameter("useSecretAliasFor"+j));
+                                        	//if (useSecretAlias) {
+                                        		newProperty.setUseSecretAlias(true);
+                                        		dataService.setSecureVaultNamespace(DBConstants.SECUREVAULT_NAMESPACE);
+                                        	//}
+                                        }
+                                        nestedPropertyList.add(newProperty);
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                        if (customDSType.equals(DBConstants.DataSourceTypes.CUSTOM_QUERY)) {
+                        	updateConfiguration(dsConfig, DBConstants.CustomDataSource.DATA_SOURCE_QUERY_CLASS, customDSClassName);
+                        } else {
+                        	updateConfiguration(dsConfig, DBConstants.CustomDataSource.DATA_SOURCE_TABULAR_CLASS, customDSClassName);
+                        }
+                        updateConfiguration(dsConfig, DBConstants.CustomDataSource.DATA_SOURCE_PROPS, property);
+					}
+                    	if (customDSType.equals(DBConstants.DataSourceTypes.CUSTOM_QUERY)) {
+                    		dsConfig.removeProperty(DBConstants.CustomDataSource.DATA_SOURCE_TABULAR_CLASS);
+                    	} else {
+                    		dsConfig.removeProperty(DBConstants.CustomDataSource.DATA_SOURCE_QUERY_CLASS);
+                    	}
                 }
                 dsConfig.setUseSecretAliasForPassword(useSecretAliasForPassword);
             }

@@ -82,17 +82,6 @@
         <description>The main sequence for the message mediation</description>
     </sequence>
     
-    
-    <proxy name="StockQuoteProxy" transports="https">
-        <target>
-            <endpoint>
-                <address uri="http://localhost:9000/services/SimpleStockQuoteService" format="pox"/>
-            </endpoint>
-            <outSequence>
-                <send/>
-            </outSequence>
-        </target>
-        <publishWSDL uri="file:repository/samples/resources/proxy/sample_proxy_1.wsdl"/>
-    </proxy>
+
 </definitions>
 

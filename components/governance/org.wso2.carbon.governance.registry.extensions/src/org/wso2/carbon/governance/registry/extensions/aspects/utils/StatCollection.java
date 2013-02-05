@@ -19,6 +19,7 @@ public class StatCollection {
     private Map<String,OMElement> executors;
     private String actionValue;
     private String targetState;
+    private long timeMillis;
 
     public String getTargetState() {
         return targetState;
@@ -118,5 +119,13 @@ public class StatCollection {
 
     public void setAction(String action) {
         this.action = action;
+    }
+
+    public long getTimeMillis() {
+        return timeMillis;
+    }
+
+    public void setTimeMillis(long timeMillis) {
+        this.timeMillis = timeMillis;
     }
 }

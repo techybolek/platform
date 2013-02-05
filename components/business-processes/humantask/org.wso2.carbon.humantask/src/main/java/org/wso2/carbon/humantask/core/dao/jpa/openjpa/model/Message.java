@@ -35,7 +35,7 @@ import java.util.Map;
  * This will be used as the domain object for both document literal and RPC literal massages.
  */
 @Entity
-@Table(name = "MESSAGE")
+@Table(name = "HT_MESSAGE")
 public class Message implements MessageDAO, Serializable {
 
     @Id
@@ -43,14 +43,14 @@ public class Message implements MessageDAO, Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "NAME", length = 512)
+    @Column(name = "MESSAGE_NAME", length = 512)
     private String name;
 
-    @Column(name = "DATA", columnDefinition = "CLOB")
+    @Column(name = "MESSAGE_DATA", columnDefinition = "CLOB")
     @Lob
     private String data;
 
-    @Column(name = "HEADER", columnDefinition = "CLOB")
+    @Column(name = "MESSAGE_HEADER", columnDefinition = "CLOB")
     @Lob
     private String header;
 

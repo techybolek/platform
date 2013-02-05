@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.automation.core.utils.reportutills;
 
+import com.google.inject.Injector;
+import com.google.inject.Module;
 import org.testng.IResultMap;
 import org.testng.ISuite;
 import org.testng.ITestContext;
@@ -27,6 +29,7 @@ import org.testng.xml.XmlTest;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 public class ReportContextSetter {
@@ -107,6 +110,22 @@ public class ReportContextSetter {
 
             public XmlTest getCurrentXmlTest() {
                 return null;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public List<Module> getGuiceModules(Class<? extends Module> aClass) {
+                return null;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public void addGuiceModule(Class<? extends Module> aClass, Module module) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public Injector getInjector(List<Module> modules) {
+                return null;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public void addInjector(List<Module> modules, Injector injector) {
+                //To change body of implemented methods use File | Settings | File Templates.
             }
 
             public Object getAttribute(String name) {
@@ -208,6 +227,22 @@ public class ReportContextSetter {
                 return null;  //To change body of implemented methods use File | Settings | File Templates.
             }
 
+            public List<Module> getGuiceModules(Class<? extends Module> aClass) {
+                return null;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public void addGuiceModule(Class<? extends Module> aClass, Module module) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public Injector getInjector(List<Module> modules) {
+                return null;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public void addInjector(List<Module> modules, Injector injector) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+
             public Object getAttribute(String name) {
                 return null;  //To change body of implemented methods use File | Settings | File Templates.
             }
@@ -304,6 +339,22 @@ public class ReportContextSetter {
 
             public XmlTest getCurrentXmlTest() {
                 return null;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public List<Module> getGuiceModules(Class<? extends Module> aClass) {
+                return null;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public void addGuiceModule(Class<? extends Module> aClass, Module module) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public Injector getInjector(List<Module> modules) {
+                return null;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public void addInjector(List<Module> modules, Injector injector) {
+                //To change body of implemented methods use File | Settings | File Templates.
             }
 
             public Object getAttribute(String name) {

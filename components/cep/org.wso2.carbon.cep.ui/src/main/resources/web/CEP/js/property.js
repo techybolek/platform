@@ -82,14 +82,14 @@ function isRemainPropertyExpressions() {
              var prefix = document.getElementById("propertyName" + k);
              if (prefix != null && prefix != undefined) {
                  if (prefix.value == "") {
-                     CARBON.showWarningDialog(nameemptymsg)
+                     CARBON.showWarningDialog(nameemptymsg);
                      return false;
                  }
              }
              var uri = document.getElementById("propertyValue" + k);
              if (uri != null && uri != undefined) {
                  if (uri.value == "") {
-                     CARBON.showWarningDialog(valueemptymsg)
+                     CARBON.showWarningDialog(valueemptymsg);
                      return false;
                  }
              }

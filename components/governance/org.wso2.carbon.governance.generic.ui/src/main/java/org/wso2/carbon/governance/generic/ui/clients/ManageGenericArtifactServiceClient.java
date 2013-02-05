@@ -26,12 +26,18 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.governance.generic.stub.ManageGenericArtifactServiceStub;
 import org.wso2.carbon.governance.generic.stub.beans.xsd.ArtifactsBean;
+import org.wso2.carbon.governance.generic.stub.beans.xsd.ContentArtifactsBean;
+import org.wso2.carbon.governance.generic.stub.beans.xsd.StoragePathBean;
+import org.wso2.carbon.governance.generic.ui.utils.GenericUtil;
+import org.wso2.carbon.governance.generic.ui.utils.ManageGenericArtifactUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.utils.ServerConstants;
-
 import javax.servlet.ServletConfig;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.lang.String;
+import java.rmi.RemoteException;
 
 public class ManageGenericArtifactServiceClient {
 
@@ -88,17 +94,42 @@ public class ManageGenericArtifactServiceClient {
         }
     }
 
-    public String addArtifact(String key, String path, String lifecycleAttribute) throws Exception {
-        return stub.addArtifact(key, path, lifecycleAttribute);
+    public String addArtifact(String key, String info, String lifecycleAttribute) throws Exception {
+        return stub.addArtifact(key, info, lifecycleAttribute);
     }
 
-    public String editArtifact(String key, String path, String lifecycleAttribute)
+    public String editArtifact(String path, String key, String info, String lifecycleAttribute)
             throws Exception {
-        return stub.editArtifact(key, path, lifecycleAttribute);
+        return stub.editArtifact(path != null ? path : "", key, info, lifecycleAttribute);
     }
 
     public ArtifactsBean listArtifacts(String key, String criteria) throws Exception {
         return stub.listArtifacts(key, criteria);
+    }
+
+    public ArtifactsBean listArtifactsByName(String key, String name) throws Exception {
+        return stub.listArtifactsByName(key, name);
+    }
+
+    public ArtifactsBean listArtifactsByLC(String key, String LCName, String LCState, String LCInOut, String LCStateInOut) throws Exception {
+        return stub.listArtifactsByLC(key, LCName, LCState, LCInOut, LCStateInOut);
+    }
+
+    public ContentArtifactsBean listContentArtifacts(String mediaType) throws Exception {
+        return stub.listContentArtifacts(mediaType);
+    }
+
+    public ContentArtifactsBean listContentArtifactsbByLC(String mediaType, String LCName, String LCState, String LCInOut, String LCStateInOut) throws Exception {
+        return stub.listContentArtifactsByLC(mediaType, LCName, LCState, LCInOut, LCStateInOut);
+    }
+
+    public ContentArtifactsBean listContentArtifactsByName(String mediaType, String criteria)
+            throws Exception {
+        return stub.listContentArtifactsByName(mediaType, criteria);
+    }
+
+    public StoragePathBean getStoragePath(String key) throws Exception {
+        return stub.getStoragePath(key);
     }
 
     public String getArtifactContent(String path) throws Exception {
@@ -115,5 +146,42 @@ public class ManageGenericArtifactServiceClient {
 
     public boolean canChange(String path) throws Exception {
         return stub.canChange(path);
+    }
+
+    /* get available aspects */
+    public String[] getAvailableAspects() throws Exception {
+        return stub.getAvailableAspects();
+    }
+
+    public boolean addRXTResource(HttpServletRequest request, String config,String path)
+            throws Exception {
+        boolean result = stub.addRXTResource(config, path);
+        HttpSession session = request.getSession();
+        if (session != null) {
+            GenericUtil.buildMenuItems(request, getSessionParam(session, "logged-user"),
+                    getSessionParam(session, "tenantDomain"),
+                    getSessionParam(session, "ServerURL"));
+        }
+        return result;
+    }
+
+    private String getSessionParam(HttpSession session, String name) {
+        return (String) session.getAttribute(name);
+    }
+
+    public String[] getInstalledRXTs(String cookie, ServletConfig config, HttpSession session) throws Exception {
+        return ManageGenericArtifactUtil.getInstalledRxts(cookie,config,session);
+    }
+
+    public String getRxtAbsPathFromRxtName(String name) throws Exception {
+     return stub.getRxtAbsPathFromRxtName(name);
+    }
+
+    public String getArtifactViewRequestParams(String key) throws Exception {
+        return stub.getArtifactViewRequestParams(key);
+    }
+
+    public String[] getAllLifeCycleState(String LCName) throws RemoteException {
+        return stub.getAllLifeCycleState(LCName);
     }
 }

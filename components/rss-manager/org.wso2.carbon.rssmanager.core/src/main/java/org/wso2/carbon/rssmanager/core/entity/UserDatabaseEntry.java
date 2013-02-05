@@ -23,20 +23,49 @@ package org.wso2.carbon.rssmanager.core.entity;
  */
 public class UserDatabaseEntry {
 
+    private int id;
+
+    private int userId;
+
 	private String username;
+
+    private int databaseId;
 	
 	private String databaseName;
+
+    private int rssInstanceId;
 
     private String rssInstanceName;
 
 	private DatabasePrivilegeSet privileges;
+
+    public UserDatabaseEntry(){
+
+    }
 	
-	public UserDatabaseEntry(String username, String databaseName, String rssInstanceName) {
+	public UserDatabaseEntry(int id, String username, String databaseName, String rssInstanceName) {
 		this.username = username;
 		this.databaseName = databaseName;
         this.rssInstanceName = rssInstanceName;
 	}
 
+    public UserDatabaseEntry(int id, int userId, String username, int databaseId, String databaseName,
+                             int rssInstanceId, String rssInstanceName) {
+        this.id = id;
+        this.userId = userId;
+		this.username = username;
+        this.databaseId = databaseId;
+		this.databaseName = databaseName;
+        this.rssInstanceId = rssInstanceId;
+        this.rssInstanceName = rssInstanceName;
+	}
+
+    public UserDatabaseEntry(String username, String databaseName, String rssInstanceName) {
+		this.username = username;
+		this.databaseName = databaseName;
+        this.rssInstanceName = rssInstanceName;
+	}
+    
     public String getUsername() {
         return username;
     }
@@ -69,4 +98,35 @@ public class UserDatabaseEntry {
         this.rssInstanceName = rssInstanceName;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public int getDatabaseId() {
+        return databaseId;
+    }
+
+    public void setDatabaseId(int databaseId) {
+        this.databaseId = databaseId;
+    }
+
+    public int getRssInstanceId() {
+        return rssInstanceId;
+    }
+
+    public void setRssInstanceId(int rssInstanceId) {
+        this.rssInstanceId = rssInstanceId;
+    }
 }

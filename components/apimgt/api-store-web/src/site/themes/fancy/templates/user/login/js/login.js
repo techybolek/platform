@@ -24,7 +24,7 @@ var login = login || {};
     loginbox.logout = function () {
         jagg.post("/site/blocks/user/login/ajax/login.jag", {action:"logout"}, function (result) {
             if (result.error == false) {
-                window.location.reload();
+                window.location.href=requestURL;
             } else {
                 jagg.message({content:result.message,type:"error"});
             }
@@ -76,7 +76,11 @@ $(document).ready(function () {
 
 
     $("#logout-link").click(function () {
-        login.loginbox.logout();
+        if (ssoEnabled=='true') {
+            location.href = requestURL + '/site/pages/logout.jag';
+        } else {
+            login.loginbox.logout();
+        }
     });
 
     $(".need-login").click(showLoginForm);

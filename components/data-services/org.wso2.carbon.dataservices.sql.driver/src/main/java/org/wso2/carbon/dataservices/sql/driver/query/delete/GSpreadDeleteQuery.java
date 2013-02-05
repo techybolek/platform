@@ -18,17 +18,15 @@
  */
 package org.wso2.carbon.dataservices.sql.driver.query.delete;
 
-import com.google.gdata.data.spreadsheet.CellEntry;
-import com.google.gdata.data.spreadsheet.CellFeed;
-import com.google.gdata.data.spreadsheet.WorksheetEntry;
+import com.google.gdata.client.spreadsheet.SpreadsheetService;
+import com.google.gdata.data.spreadsheet.*;
 import com.google.gdata.util.ServiceException;
-import org.wso2.carbon.dataservices.sql.driver.TDriverUtil;
+import org.wso2.carbon.dataservices.sql.driver.TGSpreadConnection;
 
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashSet;
 import java.util.Set;
 
 public class GSpreadDeleteQuery extends DeleteQuery {
@@ -52,37 +50,43 @@ public class GSpreadDeleteQuery extends DeleteQuery {
     public boolean execute() throws SQLException {
         return (this.executeSQL() > 0);
     }
-
+    
     private synchronized int executeSQL() throws SQLException {
         int count = 0;
-        WorksheetEntry currentWorkSheet =
-                TDriverUtil.getCurrentWorkSheetEntry(getConnection(), getTargetTableName());
-        CellFeed cellFeed = TDriverUtil.getCellFeed(getConnection(), currentWorkSheet);
 
-        Set<Integer> rowKeys = this.getProcessedRowKeySet(this.getResultantRows().keySet());
-        for (CellEntry cell : cellFeed.getEntries()) {
-            int rowId = TDriverUtil.getRowIndex(cell.getId());
-            if (rowKeys.contains(rowId)) {
-                try {
-                    cell.delete();
-                    count++;
-                } catch (IOException e) {
-                    throw new SQLException("Error occurred while deleting the row", e);
-                } catch (ServiceException e) {
-                    throw new SQLException("Error occurred while deleting the row", e);
+        SpreadsheetService spreadsheetService =
+                ((TGSpreadConnection) getConnection()).getSpreadSheetService();
+        SpreadsheetFeed spreadsheetFeed =
+                ((TGSpreadConnection) getConnection()).getSpreadSheetFeed();
+        SpreadsheetEntry spreadsheet = spreadsheetFeed.getEntries().get(0);
+        try {
+            WorksheetFeed worksheetFeed =
+                    spreadsheetService.getFeed(spreadsheet.getWorksheetFeedUrl(),
+                            WorksheetFeed.class);
+            WorksheetEntry currentWorksheet = null;
+            for (WorksheetEntry tmp : worksheetFeed.getEntries()) {
+                if (getTargetTableName().equals(tmp.getTitle().getPlainText())) {
+                    currentWorksheet = tmp;
+                    break;
                 }
             }
+            if (currentWorksheet == null) {
+                throw new SQLException("Sheet '" + getTargetTableName() + "' does not exist");
+            }
+            ListFeed listFeed =
+                    spreadsheetService.getFeed(currentWorksheet.getListFeedUrl(), ListFeed.class);
+            Set<Integer> rowKeys = this.getResultantRows().keySet();
+
+            for (Integer rowKey : rowKeys) {
+                listFeed.getEntries().get(rowKey - 1).delete();
+                count++;
+            }
+        } catch (IOException e) {
+            throw new SQLException("Error occurred while deleting the row", e);
+        } catch (ServiceException e) {
+            throw new SQLException("Error occurred while deleting the row", e);
         }
         return count;
-    }
-
-    //temporary
-    private Set<Integer> getProcessedRowKeySet(Set<Integer> keys) {
-        Set<Integer> processedKeys = new HashSet<Integer>();
-        for (Integer key : keys) {
-            processedKeys.add(key + 1);
-        }
-        return processedKeys;
     }
 
 }

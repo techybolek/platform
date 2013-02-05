@@ -19,13 +19,13 @@ package org.wso2.carbon.cep.admin.internal;
 
 public class OutputMapMappingDTO {
 
-    private String[] properties;
+    private OutputMapPropertyDTO[] mapProperties;
 
-    public String[] getProperties() {
-        return properties;
+    public OutputMapPropertyDTO[] getMapProperties() {
+        return mapProperties;
     }
 
-    public void setProperties(String[] properties) {
-        this.properties = properties;
+    public void setMapProperties(OutputMapPropertyDTO[] mapProperties) {
+        this.mapProperties = mapProperties;
     }
 }

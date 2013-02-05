@@ -16,8 +16,6 @@
   -->
 
 <serviceGroup>
-   <parameter name="adminService" locked="true">true</parameter>
-
     <service name="RSSAdmin" scope="transportsession">
         <schema schemaNamespace="http://service.core.rssmanager.carbon.wso2.org"
                 elementFormDefaultQualified="true"/>
@@ -39,6 +37,32 @@
             org.wso2.carbon.rssmanager.core.service.RSSAdmin
         </parameter>
 
+        <operation name="getDatabaseForTenant">
+                    <parameter name="superTenantService" locked="true">true</parameter>
+        </operation>
+
+        <operation name="createDatabaseForTenant">
+                    <parameter name="superTenantService" locked="true">true</parameter>
+        </operation>
+
+        <operation name="getDatabasesForTenant">
+                    <parameter name="superTenantService" locked="true">true</parameter>
+        </operation>
+
+        <operation name="getDatabaseForTenant">
+                    <parameter name="superTenantService" locked="true">true</parameter>
+        </operation>
+
+        <operation name="initializeTenant">
+                    <parameter name="superTenantService" locked="true">true</parameter>
+        </operation>
+
+        <operation name="isInitializedTenant">
+                    <parameter name="superTenantService" locked="true">true</parameter>
+        </operation>
+
+        <parameter name="adminService" locked="true">true</parameter>
+        <parameter name="hiddenService" locked="true">true</parameter>
         <parameter name="AuthorizationAction" locked="true">/permission/admin/configure/rssmanager</parameter>
     </service>
 

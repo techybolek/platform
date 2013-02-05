@@ -1,7 +1,6 @@
 var copyAPIToNewVersion = function (provider) {
-    var api=$("#item-info h2")[0].innerHTML;
-    var apiName = $.trim(api.split("-")[0]);
-    var version = $.trim(api.split("-")[1]);
+    var apiName = $("#overviewAPIName").val();
+    var version = $("#overviewAPIVersion").val();
     var newVersion = $("#copy-api #new-version").val();
     jagg.post("/site/blocks/overview/ajax/overview.jag", { action:"createNewAPI", provider:provider,apiName:apiName, version:version, newVersion:newVersion },
               function (result) {
@@ -15,7 +14,11 @@ var copyAPIToNewVersion = function (provider) {
                       }
 
                   } else {
-                      jagg.message({content:result.message,type:"error"});
+                      if (result.message == "AuthenticateError") {
+                          jagg.showLogin();
+                      } else {
+                          jagg.message({content:result.message,type:"error"});
+                      }
                   }
               }, "json");
 

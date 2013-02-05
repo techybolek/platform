@@ -23,10 +23,7 @@ import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.utils.component.xml.config.ManagementPermission;
 
 import javax.xml.namespace.QName;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Configuration of a Governance Artifact
@@ -34,6 +31,8 @@ import java.util.List;
 public class GovernanceArtifactConfiguration {
 
     private String mediaType;
+    private String extension;
+    private boolean hasNamespace;
     private int iconSet = 0;
     private String key;
     private String singularLabel;
@@ -42,12 +41,26 @@ public class GovernanceArtifactConfiguration {
     private OMElement uiConfigurations;
     private List<Association> relationships = new LinkedList<Association>();
     private OMElement contentDefinition;
+    private String contentURL;
     private List<ManagementPermission> uiPermissions = new LinkedList<ManagementPermission>();
     private UIListConfiguration[] listConfigurations;
     private String artifactNameAttribute = "overview_name";
     private String artifactNamespaceAttribute = "overview_namespace";
     private String artifactElementRoot = "metadata";
     private String artifactElementNamespace = "http://www.wso2.org/governance/metadata";
+
+    private static final String WIDGET_ELEMENT = "table";
+    private static final String ARGUMENT_ELMENT = "field";
+    private static final String ARGUMENT_NAME = "name";
+    private static final String WIDGET_NAME = "name";
+    private static final String TYPE_ATTRIBUTE = "type";
+    private static final String MANDETORY_ATTRIBUTE = "required";
+    private static final String VALIDATE_ATTRIBUTE = "validate";
+    private static final String MAXOCCUR_UNBOUNDED = "unbounded";
+    private static final String OPTION_TEXT_FIELD = "option-text";
+    private static final String MAXOCCUR_ELEMENT = "maxoccurs";
+    public static final String TEXT_FIELD = "text";
+    public static final String ENTRY_FIELD = "entry";
 
     /**
      * Method to obtain the media type.
@@ -65,6 +78,56 @@ public class GovernanceArtifactConfiguration {
      */
     public void setMediaType(String mediaType) {
         this.mediaType = mediaType;
+    }
+
+    /**
+     * Method to get the content URL.
+     */
+    public String getContentURL() {
+        return contentURL;
+    }
+
+    /**
+     * Method to set the content URL.
+     *
+     * @param contentURL the content URL.
+     */
+    public void setContentURL(String contentURL) {
+        this.contentURL = contentURL;
+    }
+
+    /**
+     * Method to obtain the extension.
+     *
+     * @return the extension.
+     */
+    public String getExtension() {
+        return extension;
+    }
+
+    /**
+     * Method to set the extension.
+     *
+     * @param extension the extension.
+     */
+    public void setExtension(String extension) {
+        this.extension = extension;
+    }
+
+    /**
+     * Method to get whether namespace exists.
+     */
+    public boolean hasNamespace() {
+        return hasNamespace;
+    }
+
+    /**
+     * Method to set whether namespace exists.
+     *
+     * @param hasNamespace whether namespace exists.
+     */
+    public void setHasNamespace(boolean hasNamespace) {
+        this.hasNamespace = hasNamespace;
     }
 
     /**
@@ -390,6 +453,105 @@ public class GovernanceArtifactConfiguration {
             expressionsOnListUI[i] = listConfigurations[i].getExpression();
         }
         return expressionsOnListUI;
+    }
+
+    private String getDataElementName(String widgetName) {
+        if (widgetName == null || widgetName.length() == 0) {
+            return null;
+        }
+        String[] nameParts = widgetName.split("_");
+        String convertedName = null;
+        //  making widget name camel case
+        for (String namePart : nameParts) {
+            int i;
+            for (i = 0; i < namePart.length(); i++) {
+                char c = namePart.charAt(i);
+                if (!Character.isLetter(c) || Character.isLowerCase(c)) {
+                    break;
+                }
+            }
+            namePart = namePart.substring(0, i).toLowerCase() + namePart.substring(i);
+            if (convertedName == null) {
+                convertedName = namePart;
+            } else {
+                convertedName += "_" + namePart;
+            }
+        }
+        if (convertedName == null) {
+            return null;
+        }
+
+        return convertedName.replaceAll(" ", "").replaceAll("-", "");
+    }
+
+    /**
+     * Method to obtain the list of keys, in the form used in GovernanceArtifact
+     * getAttributes/setAttributes methods, for attributes need to be regex validated.
+     *
+     * @return  list of keys in the form used in GovernanceArtifact
+     *          getAttributes/setAttributes methods
+     */
+    public List<Map> getValidationAttributes() {
+        List<Map> res = new ArrayList<Map>();
+
+        List<String> id = new ArrayList<String>();
+        Iterator it = contentDefinition.getChildrenWithName(new QName(WIDGET_ELEMENT));
+        while (it.hasNext()) {
+            OMElement widget = (OMElement) it.next();
+            String widgetName = widget.getAttributeValue(new QName(null, ARGUMENT_NAME));
+            Iterator arguments = widget.getChildrenWithLocalName(ARGUMENT_ELMENT);
+            OMElement arg = null;
+            while (arguments.hasNext()) {
+                arg = (OMElement) arguments.next();
+                if (ARGUMENT_ELMENT.equals(arg.getLocalName())) {
+                    //check the validation fields and get the id's of them
+                    String value = arg.getAttributeValue(new QName(null,
+                            VALIDATE_ATTRIBUTE));
+
+                    if (value != null && !"".equals(value)) {
+                        String elementType = arg.getAttributeValue(new QName(null, TYPE_ATTRIBUTE));
+                        String name = arg.getFirstChildWithName(new QName(null, ARGUMENT_NAME)).getText();
+                        List<String> keys = new ArrayList<String>();
+
+                        if (OPTION_TEXT_FIELD.equals(elementType)) {
+                            if (MAXOCCUR_UNBOUNDED.equals(
+                                    arg.getAttributeValue(new QName(null, MAXOCCUR_ELEMENT)))) {
+                                Map<String, Object> map = new HashMap<String, Object>();
+
+                                keys.add(getDataElementName(widgetName + "_" + ENTRY_FIELD));
+                                map.put("keys", keys);
+                                map.put("name", name);
+                                map.put("regexp", value);
+                                map.put("properties", "unbounded");
+
+                                res.add(map);
+                            } else {
+                                Map<String, Object> map = new HashMap<String, Object>();
+
+                                keys.add(getDataElementName(widgetName + "_"  + name));
+                                keys.add(getDataElementName(widgetName + "_"  + TEXT_FIELD +
+                                        name));
+                                map.put("keys", keys);
+                                map.put("name", name);
+                                map.put("regexp", value);
+
+                                res.add(map);
+                            }
+                        } else {
+                            Map<String, Object> map = new HashMap<String, Object>();
+
+                            keys.add(getDataElementName(widgetName + "_"  + name));
+                            map.put("keys", keys);
+                            map.put("name", name);
+                            map.put("regexp", value);
+
+                            res.add(map);
+                        }
+                    }
+                }
+            }
+        }
+        return res;
     }
 
     private static class UIListConfiguration {

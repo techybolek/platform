@@ -21,8 +21,8 @@ package org.wso2.carbon.registry.common.services;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -63,8 +63,8 @@ public abstract class RegistryAbstractAdmin extends AbstractAdmin {
             if (registry != null) {
                 return registry;
             } else if (registryService != null) {
-                SuperTenantCarbonContext carbonContext =
-                        SuperTenantCarbonContext.getCurrentContext(httpSession);
+                PrivilegedCarbonContext carbonContext =
+                        PrivilegedCarbonContext.getCurrentContext(httpSession);
                 int tenantId = carbonContext.getTenantId();
                 String username = carbonContext.getUsername();
                 try {

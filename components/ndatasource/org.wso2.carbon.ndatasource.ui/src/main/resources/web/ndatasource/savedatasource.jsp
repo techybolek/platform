@@ -31,6 +31,8 @@
 		boolean canAdd = true;
 		boolean isSystem = false;
 		boolean editMode = "true".equals(request.getParameter("editMode"));
+		String dsName = request.getParameter("dsName");
+		if (dsName != null) {
 			try {
 				client = NDataSourceAdminServiceClient.getInstance(config, session);
 				WSDataSourceMetaInfo dataSourceMetaInformation = NDataSourceHelper
@@ -97,6 +99,14 @@
     </script>
 	<%
 		}
+			
+	} else {
 	%>
 
+
+<script type="text/javascript">
+forward("index.jsp?region=region1&item=new_datasource_menu");
+</script>
+
+<%} %>
 </fmt:bundle>

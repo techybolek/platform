@@ -20,6 +20,7 @@
 <%@ page import="org.wso2.carbon.sequences.ui.util.SequenceEditorHelper" %>
 <%@ page import="java.text.MessageFormat" %>
 <%@ page import="java.util.ResourceBundle"%>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%--<script src="../codepress/codepress.js" type="text/javascript"></script>--%>
@@ -30,6 +31,7 @@
     String mediatorXML = null;
     try {
         mediatorXML = SequenceEditorHelper.serializeMediator(mediator);
+        mediatorXML = StringEscapeUtils.escapeXml(mediatorXML);
     } catch (SequenceEditorException e) {
         session.setAttribute("sequence.warn.message", MessageFormat.format(bundle.getString("mediator.view.source.error"), e.getMessage()));
 %>

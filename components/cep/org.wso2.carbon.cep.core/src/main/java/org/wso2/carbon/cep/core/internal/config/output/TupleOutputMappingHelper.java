@@ -16,21 +16,19 @@
 
 package org.wso2.carbon.cep.core.internal.config.output;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.cep.core.exception.CEPConfigurationException;
 import org.wso2.carbon.cep.core.internal.util.CEPConstants;
 import org.wso2.carbon.cep.core.mapping.output.mapping.TupleOutputMapping;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.cep.core.mapping.output.property.TupleOutputProperty;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * This class will help to build the Tuple Output Object from a given OMELement
@@ -65,167 +63,79 @@ public class TupleOutputMappingHelper {
         return tupleOutputMapping;
     }
 
-    private static List<String> generatePropertyList(OMElement dataElement) {
-        List<String> propertyList = null;
+    private static List<TupleOutputProperty> generatePropertyList(OMElement dataElement) {
+        List<TupleOutputProperty> propertyList = null;
         for (Iterator iterator = dataElement.getChildrenWithName(new QName(CEPConstants.CEP_CONF_NAMESPACE,
                                                                            CEPConstants.CEP_CONF_ELE_PROPERTY)); iterator.hasNext(); ) {
             if (propertyList == null) {
-                propertyList = new ArrayList<String>();
+                propertyList = new ArrayList<TupleOutputProperty>();
             }
             OMElement propertyElement = (OMElement) iterator.next();
-            propertyList.add(propertyElement.getAttributeValue(new QName(CEPConstants.CEP_CONF_ATTR_NAME)));
+            String name = propertyElement.getAttributeValue(new QName(CEPConstants.CEP_CONF_ATTR_NAME));
+            String valueOf = propertyElement.getAttributeValue(new QName(CEPConstants.CEP_CONF_ATTR_VALUE_OF));
+            String type = propertyElement.getAttributeValue(new QName(CEPConstants.CEP_CONF_ATTR_TYPE));
+            propertyList.add(new TupleOutputProperty(name, valueOf, type));
         }
         return propertyList;
     }
 
-    public static void addTupleMappingToRegistry(Registry registry,
-                                                 TupleOutputMapping outputMapping,
-                                                 String queryPath)
-            throws CEPConfigurationException {
-        try {
-            String tupleMappingPathString = CEPConstants.CEP_REGISTRY_BS +
-                                            CEPConstants.CEP_REGISTRY_OUTPUT +
-                                            CEPConstants.CEP_REGISTRY_BS +
-                                            CEPConstants.CEP_REGISTRY_TUPLE_MAPPING;
-            Resource tupleMappingResource = registry.newCollection();
-            tupleMappingResource.addProperty(CEPConstants.CEP_REGISTRY_STREAM, outputMapping.getStreamId());
-            registry.put(queryPath + tupleMappingPathString, tupleMappingResource);
+    public static OMElement tupleOutputMappingToOM(TupleOutputMapping outputMapping) {
+        OMFactory factory = OMAbstractFactory.getOMFactory();
+        OMElement queryTupleOutputMappingElement = factory
+                .createOMElement(new QName(CEPConstants.CEP_CONF_NAMESPACE,
+                                           CEPConstants.CEP_CONF_ELE_TUPLE_MAPPING,
+                                           CEPConstants.CEP_CONF_CEP_NAME_SPACE_PREFIX));
 
-            List<String> metaDataProperties = outputMapping.getMetaDataProperties();
-            if (metaDataProperties != null) {
-                Resource mapping = registry.newResource();
-                for (int i = 0, metaDataPropertiesSize = metaDataProperties.size(); i < metaDataPropertiesSize; i++) {
-                    String property = metaDataProperties.get(i);
-                    mapping.addProperty(i + "", property);
-                }
-                registry.put(queryPath + tupleMappingPathString +
-                             CEPConstants.CEP_REGISTRY_BS + CEPConstants.CEP_REGISTRY_TUPLE_MAPPING_META, mapping);
-            }
-            List<String> correlationDataProperties = outputMapping.getCorrelationDataProperties();
+        OMElement metaDataPropertyElement = factory
+                .createOMElement(new QName(CEPConstants.CEP_CONF_NAMESPACE,
+                                           CEPConstants.CEP_CONF_ELE_TUPLE_DATA_TYPE_META,
+                                           CEPConstants.CEP_CONF_CEP_NAME_SPACE_PREFIX));
 
-            if (correlationDataProperties != null) {
-                Resource mapping = registry.newResource();
-                for (int i = 0, correlationDataPropertiesISize = correlationDataProperties.size(); i < correlationDataPropertiesISize; i++) {
-                    String property = correlationDataProperties.get(i);
-                    mapping.addProperty(i + "", property);
-                }
-                registry.put(queryPath + tupleMappingPathString +
-                             CEPConstants.CEP_REGISTRY_BS + CEPConstants.CEP_REGISTRY_TUPLE_MAPPING_CORRELATION, mapping);
-            }
-            List<String> payloadDataProperties = outputMapping.getPayloadDataProperties();
-
-            if (payloadDataProperties != null) {
-                Resource mapping = registry.newResource();
-                for (int i = 0, payloadDataPropertiesSize = payloadDataProperties.size(); i < payloadDataPropertiesSize; i++) {
-                    String property = payloadDataProperties.get(i);
-                    mapping.addProperty(i + "", property);
-                }
-                registry.put(queryPath + tupleMappingPathString +
-                             CEPConstants.CEP_REGISTRY_BS + CEPConstants.CEP_REGISTRY_TUPLE_MAPPING_PAYLOAD, mapping);
-            }
-        } catch (Exception e) {
-            String errorMessage = "Can not add tuple mapping to the registry ";
-            log.error(errorMessage, e);
-            throw new CEPConfigurationException(errorMessage, e);
+        queryTupleOutputMappingElement.addChild(metaDataPropertyElement);
+        List<TupleOutputProperty> metaDataProperties = outputMapping.getMetaDataProperties();
+        if (metaDataProperties != null) {
+            AddProperties(factory, metaDataPropertyElement, metaDataProperties);
         }
-    }
 
-    public static void modifyTupleMappingInRegistry(Registry registry,
-                                                    TupleOutputMapping outputMapping,
-                                                    String queryPath)
-            throws CEPConfigurationException {
-        try {
-            String tupleMappingPathString = CEPConstants.CEP_REGISTRY_BS +
-                                            CEPConstants.CEP_REGISTRY_OUTPUT +
-                                            CEPConstants.CEP_REGISTRY_BS +
-                                            CEPConstants.CEP_REGISTRY_TUPLE_MAPPING;
-            Resource tupleMappingResource = registry.newCollection();
-            tupleMappingResource.addProperty(CEPConstants.CEP_REGISTRY_STREAM, outputMapping.getStreamId());
-            registry.put(queryPath + tupleMappingPathString, tupleMappingResource);
 
-            List<String> metaDataProperties = outputMapping.getMetaDataProperties();
-            if (metaDataProperties != null) {
-                Resource mapping = registry.newResource();
-                for (int i = 0, metaDataPropertiesSize = metaDataProperties.size(); i < metaDataPropertiesSize; i++) {
-                    String property = metaDataProperties.get(i);
-                    mapping.addProperty(i + "", property);
-                }
-                registry.put(queryPath + tupleMappingPathString +
-                             CEPConstants.CEP_REGISTRY_BS + CEPConstants.CEP_REGISTRY_TUPLE_MAPPING_META, mapping);
-            }
-            List<String> correlationDataProperties = outputMapping.getCorrelationDataProperties();
+        OMElement correlationDataPropertyElement = factory
+                .createOMElement(new QName(CEPConstants.CEP_CONF_NAMESPACE,
+                                           CEPConstants.CEP_CONF_ELE_TUPLE_DATA_TYPE_CORRELATION,
+                                           CEPConstants.CEP_CONF_CEP_NAME_SPACE_PREFIX));
 
-            if (correlationDataProperties != null) {
-                Resource mapping = registry.newResource();
-                for (int i = 0, correlationDataPropertiesSize = correlationDataProperties.size(); i < correlationDataPropertiesSize; i++) {
-                    String property = correlationDataProperties.get(i);
-                    mapping.addProperty(i + "", property);
-                }
-                registry.put(queryPath + tupleMappingPathString +
-                             CEPConstants.CEP_REGISTRY_BS + CEPConstants.CEP_REGISTRY_TUPLE_MAPPING_CORRELATION, mapping);
-            }
-            List<String> payloadDataProperties = outputMapping.getPayloadDataProperties();
-
-            if (payloadDataProperties != null) {
-                Resource mapping = registry.newResource();
-                for (int i = 0, payloadDataPropertiesSize = payloadDataProperties.size(); i < payloadDataPropertiesSize; i++) {
-                    String property = payloadDataProperties.get(i);
-                    mapping.addProperty(i + "", property);
-                }
-                registry.put(queryPath + tupleMappingPathString +
-                             CEPConstants.CEP_REGISTRY_BS + CEPConstants.CEP_REGISTRY_TUPLE_MAPPING_PAYLOAD, mapping);
-            }
-        } catch (Exception e) {
-            String errorMessage = "Can not modify tuple mapping to the registry ";
-            log.error(errorMessage, e);
-            throw new CEPConfigurationException(errorMessage, e);
+        queryTupleOutputMappingElement.addChild(correlationDataPropertyElement);
+        List<TupleOutputProperty> correlationDataProperties = outputMapping.getCorrelationDataProperties();
+        if (correlationDataProperties != null) {
+            AddProperties(factory, correlationDataPropertyElement, correlationDataProperties);
         }
+
+
+        OMElement payloadDataPropertyElement = factory
+                .createOMElement(new QName(CEPConstants.CEP_CONF_NAMESPACE,
+                                           CEPConstants.CEP_CONF_ELE_TUPLE_DATA_TYPE_PAYLOAD,
+                                           CEPConstants.CEP_CONF_CEP_NAME_SPACE_PREFIX));
+
+        queryTupleOutputMappingElement.addChild(payloadDataPropertyElement);
+        List<TupleOutputProperty> payloadDataProperties = outputMapping.getPayloadDataProperties();
+        if (payloadDataProperties != null) {
+            AddProperties(factory, payloadDataPropertyElement, payloadDataProperties);
+        }
+        return queryTupleOutputMappingElement;
 
     }
 
-    public static TupleOutputMapping loadTupleMappingFromRegistry(Registry registry,
-                                                                  String mappingPath)
-            throws CEPConfigurationException {
+    private static void AddProperties(OMFactory factory, OMElement parentElement,
+                                      List<TupleOutputProperty> dataProperties) {
+        for (TupleOutputProperty outputProperty : dataProperties) {
 
-        TupleOutputMapping tupleOutputMapping = null;
-        try {
-            tupleOutputMapping = new TupleOutputMapping();
-
-            Resource resource = registry.get(mappingPath);
-            tupleOutputMapping.setStreamId(resource.getProperty(CEPConstants.CEP_REGISTRY_STREAM));
-
-            if (registry.resourceExists(mappingPath + CEPConstants.CEP_REGISTRY_BS + CEPConstants.CEP_REGISTRY_TUPLE_MAPPING_META)) {
-                Resource mappingResources = registry.get(mappingPath + CEPConstants.CEP_REGISTRY_BS + CEPConstants.CEP_REGISTRY_TUPLE_MAPPING_META);
-                List<String> dataList = loadProperties(mappingResources);
-                tupleOutputMapping.setMetaDataProperties(dataList);
-            }
-            if (registry.resourceExists(mappingPath + CEPConstants.CEP_REGISTRY_BS + CEPConstants.CEP_REGISTRY_TUPLE_MAPPING_CORRELATION)) {
-                Resource mappingResources = registry.get(mappingPath + CEPConstants.CEP_REGISTRY_BS + CEPConstants.CEP_REGISTRY_TUPLE_MAPPING_CORRELATION);
-                List<String> dataList = loadProperties(mappingResources);
-                tupleOutputMapping.setCorrelationDataProperties(dataList);
-            }
-            if (registry.resourceExists(mappingPath + CEPConstants.CEP_REGISTRY_BS + CEPConstants.CEP_REGISTRY_TUPLE_MAPPING_PAYLOAD)) {
-                Resource mappingResources = registry.get(mappingPath + CEPConstants.CEP_REGISTRY_BS + CEPConstants.CEP_REGISTRY_TUPLE_MAPPING_PAYLOAD);
-                List<String> dataList = loadProperties(mappingResources);
-                tupleOutputMapping.setPayloadDataProperties(dataList);
-            }
-        } catch (RegistryException e) {
-            String errorMessage = "Can not load tuple mapping from registry ";
-            log.error(errorMessage, e);
-            throw new CEPConfigurationException(errorMessage, e);
+            OMElement property = factory.createOMElement(new QName(
+                    CEPConstants.CEP_CONF_NAMESPACE,
+                    CEPConstants.CEP_CONF_ELE_PROPERTY,
+                    CEPConstants.CEP_CONF_CEP_NAME_SPACE_PREFIX));
+            property.addAttribute(CEPConstants.CEP_CONF_ATTR_NAME, outputProperty.getName(), null);
+            property.addAttribute(CEPConstants.CEP_CONF_ATTR_VALUE_OF, outputProperty.getValueOf(), null);
+            property.addAttribute(CEPConstants.CEP_CONF_ATTR_TYPE, outputProperty.getType(), null);
+            parentElement.addChild(property);
         }
-        return tupleOutputMapping;
-
-    }
-
-    private static List<String> loadProperties(Resource mappingResources) {
-        List<String> dataList = new ArrayList<String>();
-        Properties properties = mappingResources.getProperties();
-        int i = 0;
-        while (properties.get(i + "") != null) {
-            dataList.add(((List) properties.get(i + "")).get(0).toString());
-            i++;
-        }
-        return dataList;
     }
 }

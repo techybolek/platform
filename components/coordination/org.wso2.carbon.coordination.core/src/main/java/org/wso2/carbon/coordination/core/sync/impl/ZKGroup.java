@@ -47,6 +47,7 @@ import org.wso2.carbon.coordination.common.CoordinationException.ExceptionCode;
 import org.wso2.carbon.coordination.core.services.impl.ZKCoordinationService;
 import org.wso2.carbon.coordination.core.sync.Group;
 import org.wso2.carbon.coordination.core.sync.GroupEventListener;
+import org.wso2.carbon.coordination.core.utils.CoordinationUtils;
 
 /**
  * ZooKeeper based node group implementation.
@@ -290,6 +291,14 @@ public class ZKGroup extends ZKSyncPrimitive implements Group {
 	
 	@Override
 	public byte[] sendReceive(String targetMemberId, byte[] data) throws CoordinationException {
+		if (targetMemberId.equals(this.getMemberId())) {
+			GroupEventListener listener = this.getGroupEventListener();
+			if (listener == null) {
+				throw new CoordinationException(
+						"No group event listener registerd to handle sendReceive");
+			}
+			return listener.onPeerMessage(data);
+		}
 		PeerRequestMessage msg = new PeerRequestMessage();
 		String correlationId = UUID.randomUUID().toString();
 		msg.setCorrelationId(correlationId);
@@ -404,8 +413,10 @@ public class ZKGroup extends ZKSyncPrimitive implements Group {
 		if (!this.isActive()) {
 			return;
 		}
+		if (!isUsefulWatchedEvent(event)) {
+			return;
+		}
 		String path = event.getPath();
-
 		if (!this.isCommPath(path)) {
 			new Thread(new Runnable() {
 				/* we are creating a new thread here because, from zookeeper, when we are
@@ -415,8 +426,9 @@ public class ZKGroup extends ZKSyncPrimitive implements Group {
 					try {
 						processMemberNodes();
 					} catch (Exception e) {
-						log.error("Error in processing WatchedEvent: "
-										+ e.getMessage(), e);
+						if (!CoordinationUtils.isJVMShuttingDown()) {
+						    log.error("Error in processing WatchedEvent: " + e.getMessage(), e);
+						}
 					}
 				}
 			}).start();
@@ -634,6 +646,9 @@ public class ZKGroup extends ZKSyncPrimitive implements Group {
 		
 		@Override
 		public void process(WatchedEvent event) {
+			if (!isUsefulWatchedEvent(event)) {
+				return;
+			}
 			byte[] msgData;
 			try {
 				getZooKeeper().getData(this.getCommRootPath(), this, null);
@@ -641,7 +656,9 @@ public class ZKGroup extends ZKSyncPrimitive implements Group {
 			    	this.processMessageData(msgData);
 			    }
 			} catch (Exception e) {
-				log.error("Error in receiving group messages: " + e.getMessage(), e);
+				if (!CoordinationUtils.isJVMShuttingDown()) {
+				    log.error("Error in receiving group messages: " + e.getMessage(), e);
+				}
 			}
 		}
 		
@@ -865,6 +882,9 @@ public class ZKGroup extends ZKSyncPrimitive implements Group {
 		
 		@Override
 		public void process(WatchedEvent event) {
+			if (!isUsefulWatchedEvent(event)) {
+				return;
+			}
 			synchronized (this.lock) {
 				try {
 				    this.data = getZooKeeper().getData(this.getDataPath(), false, null);

@@ -28,7 +28,7 @@
                        <% } else if(outputs.title == "My Subscriptions") { %>
 
                             <h1>Subscriptions</h1>
-                            <p>Browse through all the API subscriptions made so far and review the generated API keys.</p>
+                            <p>Browse through all the API subscriptions made so far and review the generated keys.</p>
 
 
                        <% } else { %>

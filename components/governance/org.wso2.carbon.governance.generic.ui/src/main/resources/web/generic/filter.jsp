@@ -20,8 +20,8 @@
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ page import="org.apache.axiom.om.OMElement" %>
 <%@ page import="org.wso2.carbon.governance.generic.ui.clients.ManageGenericArtifactServiceClient" %>
-<%@ page import="org.wso2.carbon.governance.services.ui.utils.AddServiceUIGenerator" %>
-<%@ page import="org.wso2.carbon.governance.services.ui.utils.UIGeneratorConstants" %>
+<%@ page import="org.wso2.carbon.governance.generic.ui.utils.GenericUIGenerator" %>
+<%@ page import="org.wso2.carbon.governance.generic.ui.utils.UIGeneratorConstants" %>
 <%@ page import="javax.xml.namespace.QName" %>
 <%@ page import="java.util.Iterator" %>
 <script type="text/javascript" src="../yui/build/utilities/utilities.js"></script>
@@ -29,12 +29,13 @@
 <jsp:include page="../registry_common/registry_common-i18n-ajaxprocessor.jsp"/>
 <script type="text/javascript" src="../registry_common/js/registry_validation.js"></script>
 <script type="text/javascript" src="../registry_common/js/registry_common.js"></script>
-<jsp:include page="../list/list-i18n-ajaxprocessor.jsp"/>
-<script type="text/javascript" src="../list/js/list.js"></script>
 <jsp:include page="../resources/resources-i18n-ajaxprocessor.jsp"/>
 <script type="text/javascript" src="../resources/js/resource_util.js"></script>
 <fmt:bundle basename="org.wso2.carbon.governance.generic.ui.i18n.Resources">
-<carbon:breadcrumb
+    <carbon:jsi18n
+            resourceBundle="org.wso2.carbon.governance.generic.ui.i18n.JSResources"
+            request="<%=request%>" namespace="org.wso2.carbon.governance.generic.ui"/>
+    <carbon:breadcrumb
             label="filter.list"
             resourceBundle="org.wso2.carbon.governance.generic.ui.i18n.Resources"
             topPage="false"
@@ -43,7 +44,7 @@
   sessionAwareFunction(null, null, "<fmt:message key="session.timed.out"/>");
 </script>      
 <%
-    AddServiceUIGenerator gen = new AddServiceUIGenerator();
+    GenericUIGenerator gen = new GenericUIGenerator();
     ManageGenericArtifactServiceClient client = new ManageGenericArtifactServiceClient(config,session);
     OMElement uiconfig = gen.getUIConfiguration(client.getArtifactUIConfiguration(request.getParameter("key")),request,config,session);
     Iterator widgets = uiconfig.getChildrenWithName(new QName(null,UIGeneratorConstants.WIDGET_ELEMENT));
@@ -61,6 +62,35 @@
 <br/>
 <script type="text/javascript">
 
+    function submitFilterForm() {
+        sessionAwareFunction(function() {
+            var advancedSearchForm = $('filterForm');
+            advancedSearchForm.submit();
+        }, org_wso2_carbon_governance_generic_ui_jsi18n["session.timed.out"]);
+    }
+
+    function clearAll(){
+        var table = $('#_innerTable');
+        var Inputrows = table.getElementsByTagName('input');
+
+        for (var i = 0; i < Inputrows.length; i++) {
+            if (Inputrows[i].type == "text") {
+                Inputrows[i].value = "";
+            } else if (Inputrows[i].type == "checkbox") {
+                Inputrows[i].checked = false;
+            }
+        }
+
+        var TextAreas = table.getElementsByTagName('textarea');
+        for (var i = 0; i < TextAreas.length; i++) {
+            TextAreas[i].value = "";
+        }
+        var SelectAreas = table.getElementsByTagName('select');
+        for (var i = 0; i < SelectAreas.length; i++) {
+            SelectAreas[i].selectedIndex = 0;
+        }
+    }
+
     <%
        if(unboundedNameList != null && unboundedWidgetList != null && unboundedValues != null){
        for(int i=0;i<unboundedNameList.length;i++){%>
@@ -73,6 +103,7 @@
         });
 
         function add<%=unboundedNameList[i]%>_<%=unboundedWidgetList[i]%>(inputParam){
+           
         <%String[] valueList = unboundedValues[i];%>
             var epOptions = '<%for(int j=0;j<valueList.length;j++){%><option value="<%=valueList[j]%>"><%=valueList[j]%></option><%}%>';
             var endpointMgt = document.getElementById('<%=unboundedNameList[i]%>Mgt');

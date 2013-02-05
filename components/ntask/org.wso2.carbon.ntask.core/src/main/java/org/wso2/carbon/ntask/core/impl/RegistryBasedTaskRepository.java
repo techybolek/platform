@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
@@ -26,77 +27,75 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.registry.api.Collection;
-import org.wso2.carbon.registry.api.Resource;
+import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.common.TaskException.Code;
 import org.wso2.carbon.ntask.core.TaskInfo;
+import org.wso2.carbon.ntask.core.TaskManagerId;
 import org.wso2.carbon.ntask.core.TaskRepository;
 import org.wso2.carbon.ntask.core.TaskUtils;
-import org.wso2.carbon.ntask.core.service.impl.RegistryTaskAvailabilityManager;
 
 /**
  * Registry based task repository implementation.
  */
 public class RegistryBasedTaskRepository implements TaskRepository {
+		
+	public static final String REG_TASK_BASE_PATH = "/repository/components/org.wso2.carbon.tasks";
 	
-	private Log log = LogFactory.getLog(RegistryBasedTaskRepository.class);
-	
-	public static final String REG_TASK_REPO_BASE_PATH = "/repository/components/org.wso2.carbon.tasks/types";
+	public static final String REG_TASK_REPO_BASE_PATH = REG_TASK_BASE_PATH + "/" + "definitions";
 
-	private Registry registry;
+	private static Registry registry;
 	
 	private String taskType;
 	
-	private Marshaller taskMarshaller;
+	private static Marshaller taskMarshaller;
 	
-	private Unmarshaller taskUnmarshaller;
+	private static Unmarshaller taskUnmarshaller;
 	
 	private int tid;
 	
-	private RegistryTaskAvailabilityManager taskAvailabilityManager;
-		
-	public RegistryBasedTaskRepository(int tid, String taskType, RegistryTaskAvailabilityManager
-			taskAvailabilityManager) throws TaskException {
-		this.tid = tid;
-		this.taskType = taskType;
-		this.taskAvailabilityManager = taskAvailabilityManager;
+	static {
 		try {
 		    JAXBContext ctx = JAXBContext.newInstance(TaskInfo.class);
-		    this.taskMarshaller = ctx.createMarshaller();
-		    this.taskUnmarshaller = ctx.createUnmarshaller();
+		    taskMarshaller = ctx.createMarshaller();
+		    taskUnmarshaller = ctx.createUnmarshaller();
 		} catch (JAXBException e) {
-			throw new TaskException("Error creating task marshaller/unmarshaller", 
-					Code.CONFIG_ERROR, e);
+			throw new RuntimeException("Error creating task marshaller/unmarshaller: " 
+					+ e.getMessage());
 		}
 	}
-	
-	public RegistryTaskAvailabilityManager getTaskAvailabilityManager() {
-		return taskAvailabilityManager;
+			
+	public RegistryBasedTaskRepository(int tid, String taskType) throws TaskException {
+		this.tid = tid;
+		this.taskType = taskType;
 	}
 	
+	@Override
 	public int getTenantId() {
 		return tid;
 	}
 
-	public Marshaller getTaskMarshaller() {
+	private static Marshaller getTaskMarshaller() {
 		return taskMarshaller;
 	}
 
-	public Unmarshaller getTaskUnmarshaller() {
+	private static Unmarshaller getTaskUnmarshaller() {
 		return taskUnmarshaller;
 	}
 
-	public synchronized Registry getRegistry() throws TaskException {
-		if (this.registry == null) {
-		    this.registry = TaskUtils.getGovRegistryForTenant(this.getTenantId());
-		    if (log.isDebugEnabled()) {
-		        log.debug("Retrieving the governance registry for tenant: " + this.getTenantId());
-		    }
+	public static Registry getRegistry() throws TaskException {
+		if (registry == null) {
+			synchronized (RegistryBasedTaskRepository.class) {
+				if (registry == null) {
+					registry = TaskUtils.getGovRegistryForTenant(
+							MultitenantConstants.SUPER_TENANT_ID);
+				}
+			}
 		}
 		return registry;
 	}
@@ -110,9 +109,8 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 		List<TaskInfo> result = new ArrayList<TaskInfo>();
 		String tasksPath = this.getMyTasksPath();
 		try {
-			this.getRegistry().beginTransaction();
-			if (this.getRegistry().resourceExists(tasksPath)) {
-				Collection tasksCollection = (Collection) this.getRegistry().get(tasksPath);
+			if (getRegistry().resourceExists(tasksPath)) {
+				Collection tasksCollection = (Collection) getRegistry().get(tasksPath);
 				String[] taskPaths = tasksCollection.getChildren();
 				TaskInfo taskInfo;
 				for (String taskPath : taskPaths) {
@@ -120,30 +118,9 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 					result.add(taskInfo);
 				}
 			}
-			this.getRegistry().commitTransaction();
 			return result;
 		} catch (Exception e) {
-			try {
-				this.getRegistry().rollbackTransaction();
-			} catch (RegistryException e2) {
-				log.error(e2);
-			}
 			throw new TaskException("Error in getting all tasks from repository", 
-					Code.CONFIG_ERROR, e);
-		}
-	}
-	
-	private int getTaskCount() throws TaskException {
-		String tasksPath = this.getMyTasksPath();
-		try {
-			if (this.getRegistry().resourceExists(tasksPath)) {
-				Collection tasksCollection = (Collection) this.getRegistry().get(tasksPath);
-				return tasksCollection.getChildCount();
-			} else {
-				return 0;
-			}
-		} catch (Exception e) {			
-			throw new TaskException("Error in getting task count from repository", 
 					Code.CONFIG_ERROR, e);
 		}
 	}
@@ -153,21 +130,16 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 		String tasksPath = this.getMyTasksPath();
 		String currentTaskPath = tasksPath + "/" + taskName;
 		try {
-			this.getRegistry().beginTransaction();
-			if (!this.getRegistry().resourceExists(currentTaskPath)) {
-				throw new TaskException("The task with name: " + taskName + 
-						" doesn't exist in the repository for reload", Code.NO_TASK_EXISTS);
+			if (!getRegistry().resourceExists(currentTaskPath)) {
+				throw new TaskException("The task '" + taskName + "' does not exist",
+						Code.NO_TASK_EXISTS);
 			}
 			TaskInfo taskInfo = this.getTaskInfoRegistryPath(currentTaskPath);
-			this.getRegistry().commitTransaction();
 			return taskInfo;
+		} catch (TaskException e) {
+			throw e;
 		} catch (Exception e) {
-			try {
-				this.getRegistry().rollbackTransaction();
-			} catch (RegistryException e2) {
-				log.error(e2);
-			}
-			throw new TaskException("Error in reloading task '" + taskName + "' from registry", 
+			throw new TaskException("Error in loading task '" + taskName + "' from registry", 
 					Code.CONFIG_ERROR, e);
 		}
 	}
@@ -177,65 +149,47 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 		String tasksPath = this.getMyTasksPath();
 		String currentTaskPath = tasksPath + "/" + taskInfo.getName();
 		try {
-			this.getRegistry().beginTransaction();
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			this.getTaskMarshaller().marshal(taskInfo, out);
+			getTaskMarshaller().marshal(taskInfo, out);
 			ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-			Resource resource = this.getRegistry().newResource();
+			Resource resource = getRegistry().newResource();
 			resource.setContentStream(in);
-			this.getRegistry().put(currentTaskPath, resource);
-			this.getTaskAvailabilityManager().setTasksAvailable(this.getTenantId(), true);
-			this.getRegistry().commitTransaction();
+			getRegistry().put(currentTaskPath, resource);
 		} catch (Exception e) {
-			try {
-				this.getRegistry().rollbackTransaction();
-				this.processTasksAvailable();
-			} catch (RegistryException e2) {
-				log.error(e2);
-			}
 			throw new TaskException("Error in adding task '" + taskInfo.getName()
 					+ "' to the repository: " + e.getMessage(), Code.CONFIG_ERROR, e);
 		}
 	}
 
-	private void processTasksAvailable() throws TaskException {
-		if (this.getTaskCount() == 0) {
-			this.getTaskAvailabilityManager().setTasksAvailable(this.getTenantId(), false);
-		}
-	}
-	
 	@Override
-	public synchronized void deleteTask(String taskName) throws TaskException {
+	public synchronized boolean deleteTask(String taskName) throws TaskException {
 		String tasksPath = this.getMyTasksPath();
 		String currentTaskPath = tasksPath + "/" + taskName;
 		try {
-			this.getRegistry().beginTransaction();
-			if (!this.getRegistry().resourceExists(currentTaskPath)) {
-				throw new TaskException("The task with name: " + taskName + 
-						" doesn't exist in the repository for deletion", Code.NO_TASK_EXISTS);
+			if (!getRegistry().resourceExists(currentTaskPath)) {
+				return false;
 			}
-			this.getRegistry().delete(currentTaskPath);
-			this.getRegistry().commitTransaction();
-			this.processTasksAvailable();
+			getRegistry().delete(currentTaskPath);
+			return true;
 		} catch (RegistryException e) {
-			try {
-				this.getRegistry().rollbackTransaction();
-			} catch (RegistryException e2) {
-				log.error(e2);
-			}
 			throw new TaskException("Error in deleting task '" + taskName
 					+ "' in the repository", Code.CONFIG_ERROR, e);
 		}
 	}
 	
 	private String getMyTasksPath() {
-		return REG_TASK_REPO_BASE_PATH + "/" + this.getTasksType();
+		return REG_TASK_REPO_BASE_PATH + "/" + this.getTenantId() + "/" + this.getTasksType();
 	}
 	
 	private TaskInfo getTaskInfoRegistryPath(String path) throws Exception {
-		Resource resource = this.getRegistry().get(path);
+		Resource resource = getRegistry().get(path);
 		InputStream in = resource.getContentStream();
-		TaskInfo taskInfo = (TaskInfo) this.getTaskUnmarshaller().unmarshal(in);
+		TaskInfo taskInfo;
+		/* the following synchronized block is to avoid "org.xml.sax.SAXException: FWK005" error
+		 * where the XML parser is not thread safe */
+		synchronized (getTaskUnmarshaller()) {
+			taskInfo = (TaskInfo) getTaskUnmarshaller().unmarshal(in);
+		}
 		in.close();
 		taskInfo.getProperties().put(TaskInfo.TENANT_ID_PROP, String.valueOf(this.getTenantId()));
 		return taskInfo;
@@ -245,5 +199,102 @@ public class RegistryBasedTaskRepository implements TaskRepository {
 	public String getTasksType() {
 		return taskType;
 	}
+	
+	public static List<TaskManagerId> getAvailableTenantTasksInRepo() throws TaskException {
+		List<TaskManagerId> tmList = new ArrayList<TaskManagerId>();
+		try {
+		    boolean result = getRegistry().resourceExists(
+				    RegistryBasedTaskRepository.REG_TASK_REPO_BASE_PATH);
+		    Resource tmpRes;
+		    int tid;
+		    if (result) {
+		    	tmpRes = getRegistry().get(RegistryBasedTaskRepository.REG_TASK_REPO_BASE_PATH);
+		    	if (!(tmpRes instanceof Collection)) {
+		    		return tmList;
+		    	}
+			    Collection tenantsCollection = (Collection) tmpRes; 
+			    Collection tidPathCollection, taskTypePathCollection;
+			    for (String tidPath : tenantsCollection.getChildren()) {
+			    	tmpRes = getRegistry().get(tidPath);
+			    	if (!(tmpRes instanceof Collection)) {
+			    		continue;
+			    	}
+			    	tidPathCollection = (Collection) tmpRes;
+			    	for (String taskTypePath : tidPathCollection.getChildren()) {
+			    		tmpRes = getRegistry().get(taskTypePath);
+			    		if (!(tmpRes instanceof Collection)) {
+			    			continue;
+			    		}
+			    		taskTypePathCollection = (Collection) tmpRes;
+			    		if (taskTypePathCollection.getChildren().length > 0) {
+			    			try {
+			    			    tid = Integer.parseInt(tidPath.substring(tidPath.lastIndexOf('/') + 1));
+			    			    tmList.add(new TaskManagerId(tid, taskTypePath.substring(
+			    			    		taskTypePath.lastIndexOf('/') + 1)));
+			    			} catch (NumberFormatException ignore) {
+								continue;
+							}			    			
+			    		}
+			    	}
+			    }
+		    }
+		} catch (Exception e) {
+			throw new TaskException(e.getMessage(), Code.UNKNOWN, e);
+		}
+		return tmList;
+	}
+	
+	public static List<TaskManagerId> getAllTenantTaskManagersForType(
+			String taskType) throws TaskException {
+		List<TaskManagerId> tmList = getAvailableTenantTasksInRepo();
+		for (Iterator<TaskManagerId> itr = tmList.iterator(); itr.hasNext();) {
+			if (!itr.next().getTaskType().equals(taskType)) {
+				itr.remove();
+			}
+		}
+		return tmList;
+	}
 
+	private Resource getTaskMetadataPropResource(String taskName) 
+	        throws TaskException, RegistryException {
+		try {
+		    return getRegistry().get(RegistryBasedTaskRepository.REG_TASK_REPO_BASE_PATH + "/" + 
+				    this.getTenantId() + "/" + this.getTasksType() + "/" + taskName);
+		} catch (ResourceNotFoundException e) {
+			throw new TaskException("The task '" + taskName + "' does not exist", 
+					Code.NO_TASK_EXISTS, e);
+		}
+	}
+	
+	@Override
+	public void setTaskMetadataProp(String taskName, String key, String value)
+			throws TaskException {
+		try {
+			Resource res = this.getTaskMetadataPropResource(taskName);
+			res.setProperty(key, value);
+			getRegistry().put(res.getPath(), res);
+		} catch (RegistryException e) {
+			throw new TaskException("Error in setting task metadata properties: " + 
+					e.getMessage(), Code.UNKNOWN, e);
+		}
+	}
+
+	@Override
+	public String getTaskMetadataProp(String taskName, String key)
+			throws TaskException {
+		try {
+			return this.getTaskMetadataPropResource(taskName).getProperty(key);
+		} catch (TaskException e) {
+			if (Code.NO_TASK_EXISTS.equals(e.getCode())) {
+				/* if the task itself does not exist, we must return null */
+				return null;
+			} else {
+				throw e;
+			}
+		} catch (RegistryException e) {
+			throw new TaskException("Error in getting task metadata properties: " + 
+					e.getMessage(), Code.UNKNOWN, e);
+		}
+	}
+	
 }

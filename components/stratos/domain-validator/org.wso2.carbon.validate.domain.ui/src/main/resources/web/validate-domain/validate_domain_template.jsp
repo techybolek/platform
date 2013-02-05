@@ -21,7 +21,6 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil"%>
 <%@ page
 	import="org.wso2.carbon.utils.multitenancy.MultitenantConstants"%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
 	prefix="carbon"%>
@@ -106,12 +105,11 @@
 	<h2><fmt:message key="domain.ownership.validation" /></h2>
 
 	<div id="validation-introduction">
-	<p>You can validate your domain using one of the following two
-	methods <%=statementToIgnoreValidate%></p>
+	<p>You can validate your domain using the following method <%=statementToIgnoreValidate%></p>
 	<ul>
-		<li class="catagory">1. Creating a text file in the domain web
+		<li class="catagory">Creating a text file in the domain web
 		ROOT</li>
-		<li class="catagory">2. Setting up a CNAME entry in your DNS</li>
+<!-- 		<li class="catagory">2. Setting up a CNAME entry in your DNS</li> -->
 	</ul>
 	</div>
 
@@ -159,48 +157,48 @@
 	</div>
 
 
-	<div id="with-dns">
+<!-- 	<div id="with-dns"> -->
 
-	<table class="styledLeft">
-		<thead>
-			<tr>
-				<th>Validate domain using a CName entry</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr>
-				<td>
-				<p>Put a CNAME entry in your DNS with following configuration:
-				(Note that if you refresh this page, the parameters will be changed)
-				</p>
-				<div class="conf-info">
-				<p>Name: <strong><%=domainValidationKey%>.<%=domain%></strong></p>
-				<p>Type: <strong>CNAME</strong></p>
-				<p>Value: <strong><%=serverRoot%></strong></p>
-				</div>
-				<p class="validate-button"><em> Click the 'Validate'
-				button, after you finish setting the CNAME entry </em> <input
-					type="button" value="Validate"
-					onclick="validateWithDNS('<%=domain%>', '<%=status%>')" /> <span id="busyDNS"></span>
-				</p>
-				<p>
-				<div id="with-dns-msg"></div>
-				</p>
-				<p>
-				<div id="with-dns-continue" style="visibility: hidden">
-				<form id="validateWithDNSForm"
-					action="submit_validate_domain_ajaxprocessor.jsp"
-					onsubmit="return submitValidateWithDNSForm('<%=status%>');" method="post">
-				<input type="hidden" id="with-dns-success-key" name="successKey"
-					value="" /> <input type="hidden" name="domain" value="<%=domain%>" />
-				<input type="hidden" id="with-dns-status" name="status" value="<%=status%>"/>
-				<input type="submit" value="Continue" /></form>
-				</div>
-				</p>
-				</td>
-			</tr>
-		</tbody>
-	</table>
-	</div>
+<!-- 	<table class="styledLeft"> -->
+<!-- 		<thead> -->
+<!-- 			<tr> -->
+<!-- 				<th>Validate domain using a CName entry</th> -->
+<!-- 			</tr> -->
+<!-- 		</thead> -->
+<!-- 		<tbody> -->
+<!-- 			<tr> -->
+<!-- 				<td> -->
+<!-- 				<p>Put a CNAME entry in your DNS with following configuration: -->
+<!-- 				(Note that if you refresh this page, the parameters will be changed) -->
+<!-- 				</p> -->
+<!-- 				<div class="conf-info"> -->
+<%-- 				<p>Name: <strong><%=domainValidationKey%>.<%=domain%></strong></p> --%>
+<!-- 				<p>Type: <strong>CNAME</strong></p> -->
+<%-- 				<p>Value: <strong><%=serverRoot%></strong></p> --%>
+<!-- 				</div> -->
+<!-- 				<p class="validate-button"><em> Click the 'Validate' -->
+<!-- 				button, after you finish setting the CNAME entry </em> <input -->
+<!-- 					type="button" value="Validate" -->
+<%-- 					onclick="validateWithDNS('<%=domain%>', '<%=status%>')" /> <span id="busyDNS"></span> --%>
+<!-- 				</p> -->
+<!-- 				<p> -->
+<!-- 				<div id="with-dns-msg"></div> -->
+<!-- 				</p> -->
+<!-- 				<p> -->
+<!-- 				<div id="with-dns-continue" style="visibility: hidden"> -->
+<!-- 				<form id="validateWithDNSForm" -->
+<!-- 					action="submit_validate_domain_ajaxprocessor.jsp" -->
+<%-- 					onsubmit="return submitValidateWithDNSForm('<%=status%>');" method="post"> --%>
+<!-- 				<input type="hidden" id="with-dns-success-key" name="successKey" -->
+<%-- 					value="" /> <input type="hidden" name="domain" value="<%=domain%>" /> --%>
+<%-- 				<input type="hidden" id="with-dns-status" name="status" value="<%=status%>"/> --%>
+<!-- 				<input type="submit" value="Continue" /></form> -->
+<!-- 				</div> -->
+<!-- 				</p> -->
+<!-- 				</td> -->
+<!-- 			</tr> -->
+<!-- 		</tbody> -->
+<!-- 	</table> -->
+<!-- 	</div> -->
 	</div>
 </fmt:bundle>

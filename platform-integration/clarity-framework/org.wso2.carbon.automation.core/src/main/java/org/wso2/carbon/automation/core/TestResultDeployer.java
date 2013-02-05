@@ -25,7 +25,7 @@ import org.wso2.carbon.automation.core.utils.dashboardutils.DashboardVariables;
 import org.wso2.carbon.automation.core.utils.dbutils.MySqlDatabaseManager;
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
 import org.xml.sax.SAXException;
-import sun.misc.BASE64Encoder;
+import org.apache.commons.codec.binary.Base64;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -43,7 +43,7 @@ public class TestResultDeployer {
 
     private static final Log log = LogFactory.getLog(MySqlDatabaseManager.class);
     private static final String DEFAULT_ENCODING = "UTF-8";
-    private static BASE64Encoder enc = new BASE64Encoder();
+    private static Base64 enc = new Base64();
 
     public void writeResult(String testResultFilePath) {
         EnvironmentBuilder environmentBuilder = new EnvironmentBuilder();

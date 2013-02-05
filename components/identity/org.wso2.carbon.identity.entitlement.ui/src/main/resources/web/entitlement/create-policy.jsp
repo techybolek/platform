@@ -104,10 +104,7 @@
         	if (value == '') {
             	CARBON.showWarningDialog('<fmt:message key="policy.name.is.required"/>');
             	return false;
-        	}else if (value.match(new RegEx("^[^~!@#;%^*()+={}|\\<>\"',)]{3,30}$"))){
-                CARBON.showWarningDialog('<fmt:message key="policy.name.invalid"/>');
-                return false;
-            }
+        	}
         	return true;
     	}
 

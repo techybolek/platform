@@ -112,7 +112,7 @@ public class ApacheLDAPServerTest extends AbstractDirectoryTestCase {
 
         AdminGroupInfo groupInfo = new AdminGroupInfo("cn", "member", "admin");
         AdminInfo adminInfo =
-            new AdminInfo("duck", "Donald", "Duck", "dduck@wso2.com", "password", PasswordAlgorithm.MD5, groupInfo);
+            new AdminInfo("uid", "duck", "Donald", "Duck", "dduck@wso2.com", "password", PasswordAlgorithm.MD5, groupInfo);
         PartitionInfo partitionInfo = new PartitionInfo("duck1", "wso2donald.com", "dc=wso2donald,dc=com", adminInfo);
 
         assertFalse("Partition already exists", partitionManager.partitionInitialized(partitionInfo.getPartitionId()));

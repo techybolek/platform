@@ -20,11 +20,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>analytics</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>	
     <artifactId>org.wso2.carbon.analytics.hive.ui</artifactId>
+    <version>4.0.2</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon Component  - Hive Explorer - UI</name>
     <description>org.wso2.carbon.hive.explorer.ui represent the UI aspects of org.wso2.carbon.analytics.hive bundle</description>
@@ -34,7 +36,7 @@
          <dependency>
              <groupId>org.wso2.carbon</groupId>
              <artifactId>org.wso2.carbon.ui</artifactId>
-             <version>4.0.0-SNAPSHOT</version>
+             <version>4.0.0</version>
          </dependency>
          <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -47,7 +49,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.analytics.hive.stub</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>4.0.1</version>
         </dependency>
     </dependencies>
     

@@ -5,9 +5,9 @@
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.cep.stub.admin.CEPAdminServiceStub" %>
 <%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.InputDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.MapPropertyDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.TuplePropertyDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.XMLPropertyDTO" %>
+<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.InputMapPropertyDTO" %>
+<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.InputTuplePropertyDTO" %>
+<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.InputXMLPropertyDTO" %>
 <%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.XpathDefinitionDTO" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="java.util.List" %>
@@ -37,25 +37,34 @@
     String inputIndex = request.getParameter("index");
     int index = Integer.parseInt(inputIndex);
     InputDTO input = null;
-    XMLPropertyDTO[] xmlProperties = null;
-    TuplePropertyDTO[] tupleProperties = null;
-    MapPropertyDTO[] mapProperties = null;
+    InputXMLPropertyDTO[] xmlProperties = null;
+    InputTuplePropertyDTO[] tupleProperties = null;
+    InputMapPropertyDTO[] mapProperties = null;
     XpathDefinitionDTO[] xpathDefinitions = null;
     List<InputDTO> inputs = (List<InputDTO>) session.getAttribute("inputs");
     input = inputs.get(index);
     boolean XMLMapping = false;
     boolean TupleMapping = false;
     boolean MapMapping = false;
+    String eventType = null;
+
+    boolean eventClass = false;
     if (input.getInputXMLMappingDTO() != null) {
         XMLMapping = true;
         xmlProperties = input.getInputXMLMappingDTO().getProperties();
         xpathDefinitions = input.getInputXMLMappingDTO().getXpathDefinition();
+        eventType = input.getInputXMLMappingDTO().getQueryEventType();
+        eventClass = (!eventType.equalsIgnoreCase("Tuple") && !eventType.equalsIgnoreCase("Map"));
     } else if (input.getInputTupleMappingDTO() != null) {
         TupleMapping = true;
         tupleProperties = input.getInputTupleMappingDTO().getProperties();
+        eventType = input.getInputTupleMappingDTO().getQueryEventType();
+        eventClass = (!eventType.equalsIgnoreCase("Tuple") && !eventType.equalsIgnoreCase("Map"));
     } else if (input.getInputMapMappingDTO() != null) {
         MapMapping = true;
         mapProperties = input.getInputMapMappingDTO().getProperties();
+        eventType = input.getInputMapMappingDTO().getQueryEventType();
+        eventClass = (!eventType.equalsIgnoreCase("Tuple") && !eventType.equalsIgnoreCase("Map"));
     }
 
 %>
@@ -110,24 +119,41 @@
     <td><input type="text" id="mappingStream"
                value="<%=input.getInputXMLMappingDTO().getStream()%>"></td>
 </tr>
+
+
 <% } else if (TupleMapping) { %>
 <tr>
     <td class="leftCol-small"><fmt:message key="stream"/><span class="required">*</span></td>
     <td><input type="text" id="mappingStream"
                value="<%=input.getInputTupleMappingDTO().getStream()%>"></td>
 </tr>
+
 <% } else if (MapMapping) { %>
 <tr>
     <td class="leftCol-small"><fmt:message key="stream"/><span class="required">*</span></td>
     <td><input type="text" id="mappingStream"
                value="<%=input.getInputMapMappingDTO().getStream()%>"></td>
 </tr>
-<% } %>
 
-    <%--<tr>--%>
-    <%--<td class="leftCol-small"><fmt:message key="event.class.name"/></td>--%>
-    <%--<td><input type="text" id="eventClassName"></td>--%>
-    <%--</tr>--%>
+<% }%>
+<tr>
+    <td class="leftCol-small"><fmt:message key="query.event.type"/></td>
+    <td>
+        <select name="eventClassName" id="eventClassName" onchange="setEventClass()">
+            <option value="Map" <%=(eventType.equalsIgnoreCase("Map")) ? " selected=\"selected\"" : "" %>>Map</option>
+            <option value="Tuple" <%=(eventType.equalsIgnoreCase("Tuple")) ? " selected=\"selected\"" : "" %>>Tuple
+            </option>
+            <option value="Class" <%=(!eventType.equalsIgnoreCase("Tuple") && !eventType.equalsIgnoreCase("Map")) ? " selected=\"selected\"" : "" %>>
+                Class
+            </option>
+        </select>
+        <input name="inputEventClass" type="text" id="inputEventClass" style="width:25%;
+               display:<%=((eventType.equalsIgnoreCase("Tuple") ||eventType.equalsIgnoreCase("Map")))?"none":""%>"
+               value="<%=((eventType.equalsIgnoreCase("Tuple") || eventType.equalsIgnoreCase("Map")))?"":eventType%>">
+    </td>
+</tr>
+
+
 <tr>
     <td class="leftCol-small"><fmt:message key="input.mapping.type"/></td>
     <td><select name="inputMappingType" id="inputMappingType" onchange="setInputMapping()">
@@ -219,7 +245,7 @@
             </thead>
             <% if (XMLMapping) {
                 if (xmlProperties != null) {
-                    for (XMLPropertyDTO xmlPropertyDTO : xmlProperties) {
+                    for (InputXMLPropertyDTO xmlPropertyDTO : xmlProperties) {
             %>
             <tr>
                 <td><%=xmlPropertyDTO.getName()%>
@@ -233,7 +259,7 @@
                        onclick="removeInputProperty(this,'xml')">Delete</a></td>
             </tr>
             <script type="text/javascript">
-                addInputPropertyToSession('<%=xmlPropertyDTO.getName()%>', '<%=xmlPropertyDTO.getXpath()%>', '<%=xmlPropertyDTO.getType()%>', 'xml');
+                addInputPropertyToSession('<%=xmlPropertyDTO.getName()%>', '<%=xmlPropertyDTO.getType()%>', '<%=xmlPropertyDTO.getXpath()%>', '', 'xml');
             </script>
             <%
                         }
@@ -282,19 +308,22 @@
                style="width:100%;display:<%=(TupleMapping)&&tupleProperties!=null?"":"none" %>;">
             <thead>
             <th class="leftCol-med"><fmt:message key="property.name"/></th>
-            <th class="leftCol-med"><fmt:message key="property.data.type"/></th>
+            <th class="leftCol-med"><fmt:message key="property.input.name"/></th>
+            <th class="leftCol-med"><fmt:message key="property.input.data.type"/></th>
             <th class="leftCol-med"><fmt:message key="property.type"/></th>
             <th><fmt:message key="actions"/></th>
             </thead>
             <%
                 if (TupleMapping) {
                     if (tupleProperties != null) {
-                        for (TuplePropertyDTO tuplePropertyDTO : tupleProperties) {
+                        for (InputTuplePropertyDTO tuplePropertyDTO : tupleProperties) {
             %>
             <tr>
                 <td><%=tuplePropertyDTO.getName()%>
                 </td>
-                <td><%=tuplePropertyDTO.getDataType()%>
+                <td><%=tuplePropertyDTO.getInputName()%>
+                </td>
+                <td><%=tuplePropertyDTO.getInputDataType()%>
                 </td>
                 <td><%=tuplePropertyDTO.getType()%>
                 </td>
@@ -303,7 +332,7 @@
                        onclick="removeInputProperty(this,'tuple')">Delete</a></td>
             </tr>
             <script type="text/javascript">
-                addInputPropertyToSession('<%=tuplePropertyDTO.getName()%>', '<%=tuplePropertyDTO.getDataType()%>', '<%=tuplePropertyDTO.getType()%>', 'tuple');
+                addInputPropertyToSession('<%=tuplePropertyDTO.getName()%>', '<%=tuplePropertyDTO.getType()%>', '<%=tuplePropertyDTO.getInputName()%>', '<%=tuplePropertyDTO.getInputDataType()%>', 'tuple');
             </script>
             <%
                         }
@@ -317,8 +346,10 @@
             <tr>
                 <td class="leftCol-small"><fmt:message key="property.name"/>:</td>
                 <td><input type="text" id="inputTuplePropName"/></td>
-                <td><fmt:message key="property.data.type"/>:
-                    <select id="inputTuplePropertyDataTypes">
+                <td class="leftCol-small"><fmt:message key="property.input.name"/>:</td>
+                <td><input type="text" id="inputTuplePropInputName"/></td>
+                <td class="leftCol-small"><fmt:message key="property.input.data.type"/>:</td>
+                <td class="leftCol-small"><select id="inputTuplePropertyDataTypes">
                         <option value="metaData"><fmt:message
                                 key="property.data.type.meta"/></option>
                         <option value="correlationData"><fmt:message
@@ -327,13 +358,13 @@
                                 key="property.data.type.payload"/></option>
                     </select>
                 </td>
-                <td><fmt:message key="property.type"/>:
-                    <select id="inputTuplePropertyTypes">
+                <td class="leftCol-small"><fmt:message key="property.type"/>:
+                <td class="leftCol-small"><select id="inputTuplePropertyTypes">
                         <option value="java.lang.Integer">Integer</option>
                         <option value="java.lang.Long">Long</option>
                         <option value="java.lang.Double">Double</option>
                         <option value="java.lang.String">String</option>
-                    </select>
+                </select>
                 </td>
                 <td><input type="button" class="button" value="<fmt:message key="add"/>"
                            onclick="addTupleInputProperty()"/>
@@ -360,16 +391,19 @@
                style="width:100%;display:<%=(MapMapping)&&mapProperties!=null?"":"none" %>;">
             <thead>
             <th class="leftCol-med"><fmt:message key="property.name"/></th>
+            <th class="leftCol-med"><fmt:message key="property.input.name"/></th>
             <th class="leftCol-med"><fmt:message key="property.type"/></th>
             <th><fmt:message key="actions"/></th>
             </thead>
             <%
                 if (MapMapping) {
                     if (mapProperties != null) {
-                        for (MapPropertyDTO mapPropertyDTO : mapProperties) {
+                        for (InputMapPropertyDTO mapPropertyDTO : mapProperties) {
             %>
             <tr>
                 <td><%=mapPropertyDTO.getName()%>
+                </td>
+                <td><%=mapPropertyDTO.getInputName()%>
                 </td>
                 <td><%=mapPropertyDTO.getType()%>
                 </td>
@@ -378,7 +412,7 @@
                        onclick="removeInputProperty(this,'map')">Delete</a></td>
             </tr>
             <script type="text/javascript">
-                addInputPropertyToSession('<%=mapPropertyDTO.getName()%>', '', '<%=mapPropertyDTO.getType()%>', 'map');
+                addInputPropertyToSession('<%=mapPropertyDTO.getName()%>', '<%=mapPropertyDTO.getType()%>', '<%=mapPropertyDTO.getInputName()%>', '', 'map');
             </script>
             <%
                         }
@@ -392,6 +426,8 @@
             <tr>
                 <td class="leftCol-small"><fmt:message key="property.name"/>:</td>
                 <td><input type="text" id="inputMapPropName"/></td>
+                <td><fmt:message key="property.input.name"/>:</td>
+                <td><input type="text" id="inputMapPropInputName"/></td>
                 <td><fmt:message key="property.type"/>:
                     <select id="inputMapPropertyTypes">
                         <option value="java.lang.Integer">Integer</option>

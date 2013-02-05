@@ -20,6 +20,7 @@ package org.wso2.carbon.databridge.core.internal.authentication.session;
 
 import com.google.common.base.Function;
 import com.google.common.collect.MapMaker;
+import org.wso2.carbon.databridge.core.Utils.AgentSession;
 
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;

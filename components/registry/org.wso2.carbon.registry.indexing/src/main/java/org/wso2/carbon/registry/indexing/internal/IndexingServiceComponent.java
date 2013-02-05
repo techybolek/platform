@@ -35,11 +35,10 @@ import org.wso2.carbon.registry.indexing.indexer.IndexerException;
 import org.wso2.carbon.registry.indexing.service.ContentBasedSearchService;
 import org.wso2.carbon.registry.indexing.service.ContentSearchService;
 import org.wso2.carbon.registry.indexing.service.SearchResultsBean;
+import org.wso2.carbon.utils.WaitBeforeShutdownObserver;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.Stack;
 
 /**
  * @scr.component name="org.wso2.carbon.registry.indexing" immediate="true"
@@ -57,18 +56,32 @@ public class IndexingServiceComponent {
 
     private Registry registry = null;
     private boolean initialized = false;
-    private ServiceRegistration serviceRegistration;
+    private static Stack<ServiceRegistration> registrations = new Stack<ServiceRegistration>();
 
     protected void activate(ComponentContext context) {
-        serviceRegistration = context.getBundleContext().registerService(
-                ContentSearchService.class.getName(), new ContentSearchServiceImpl(), null);
+        registrations.push(context.getBundleContext().registerService(
+                ContentSearchService.class.getName(), new ContentSearchServiceImpl(), null));
+        registrations.push(context.getBundleContext().registerService(
+                WaitBeforeShutdownObserver.class.getName(), new WaitBeforeShutdownObserver() {
+            boolean status = false;
+            public void startingShutdown() {
+                try {
+                    IndexingManager.getInstance().stopIndexing();
+                } finally {
+                   status = true;
+                }
+            }
+
+            public boolean isTaskComplete() {
+                return status;
+            }
+        }, null));
         log.debug("******* Registry Indexing bundle is activated ******* ");
     }
 
     protected void deactivate(ComponentContext context) {
-        if (serviceRegistration != null) {
-            serviceRegistration.unregister();
-            serviceRegistration = null;
+        while (!registrations.empty()) {
+            registrations.pop().unregister();
         }
         log.debug("******* Registry Indexing bundle is deactivated ******* ");
     }
@@ -85,11 +98,6 @@ public class IndexingServiceComponent {
 
     private void startIndexing() {
         IndexingManager.getInstance().startIndexing();
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                IndexingManager.getInstance().stopIndexing(); // To be on the safe side
-            }
-        });
     }
 
     private void stopIndexing() {

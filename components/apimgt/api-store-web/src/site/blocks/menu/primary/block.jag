@@ -1,4 +1,8 @@
 <%
+var i18n = require("i18n");
+var localeResourcesBasePath="/site/conf/locales/jaggery/";
+i18n.init(request,localeResourcesBasePath);
+
 jagg.block("menu/primary", {
 
     initialize:function (data) {
@@ -14,29 +18,41 @@ jagg.block("menu/primary", {
     getOutputs:function (inputs) {
         var links = [], user = jagg.getUser(),
                 path = inputs.pagePath;
-        links.push({
-            "title":"APIs",
+
+       links.push({
+            "title":i18n.localize("apis"),
             "url":jagg.getMappedUrl("/"),
             "classes":"link-home",
-            "tooltip":"Browse the latest versions of published APIs, make subscriptions and generate API keys.",
+            "tooltip":i18n.localize("apisTooltip"),
             "active":(path == "/site/pages/list-apis.jag")
         });
 
         links.push({
-            "title":"My Applications",
+            "title":i18n.localize("myApps"),
             "url":jagg.getMappedUrl("/site/pages/applications.jag"),
             "classes":"link-myapplications" + (user ? "" : " need-login"),
-            "tooltip":"Browse and create applications. Applications are required to make API subscriptions and consume them.",
+            "tooltip":i18n.localize("myAppsTooltip"),
             "active":(path == "/site/pages/applications.jag")
         });
 
         links.push({
-            "title":"My Subscriptions",
+            "title":i18n.localize("mySubs"),
             "url":jagg.getMappedUrl("/site/pages/subscriptions.jag"),
             "classes":"link-mysubscriptions" + (user ? "" : " need-login"),
-            "tooltip":"Browse through all the API subscriptions made so far and review the generated API keys.",
+            "tooltip":i18n.localize("mySubsTooltip"),
             "active":(path == "/site/pages/subscriptions.jag")
         });
+
+        var result = jagg.module("billing").isBillingEnabled();
+        if(result!=null && result.isBillingEnabled==true){
+        links.push({
+            "title":i18n.localize("billing"),
+            "url":jagg.getMappedUrl("/site/pages/billing.jag"),
+            "classes":"link-mysubscriptions" + (user ? "" : " need-login"),
+            "tooltip":i18n.localize("billingTooltip"),
+            "active":(path == "/site/pages/billing.jag")
+        });
+        }
 
         return {
             "links":links

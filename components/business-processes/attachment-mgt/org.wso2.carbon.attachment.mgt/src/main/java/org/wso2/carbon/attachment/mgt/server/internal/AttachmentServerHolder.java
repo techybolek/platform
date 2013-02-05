@@ -17,6 +17,7 @@
 package org.wso2.carbon.attachment.mgt.server.internal;
 
 import org.wso2.carbon.attachment.mgt.server.Server;
+import org.wso2.carbon.utils.ConfigurationContextService;
 
 /**
  * [Singleton Class] Act as the main resource holder for Attachment Server
@@ -30,6 +31,12 @@ public final class AttachmentServerHolder {
      * data-sources etc.
      */
     private Server attachmentServer;
+
+    /** Reference to ConfigurationContextService
+     *
+     */
+
+    private ConfigurationContextService configurationContextService;
 
     /**
      * Private constructor disables new objects creation
@@ -66,5 +73,13 @@ public final class AttachmentServerHolder {
      */
     public void setAttachmentServer(Server attachmentServer) {
         this.attachmentServer = attachmentServer;
+    }
+
+    public void setConfigurationContextService(ConfigurationContextService service) {
+        this.configurationContextService = service;
+    }
+
+    public ConfigurationContextService getConfigurationContextService() {
+        return this.configurationContextService;
     }
 }

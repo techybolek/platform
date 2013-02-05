@@ -22,13 +22,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>jaxws-webapp-mgt-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.jaxws.webapp.mgt.server.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - JAX-WS/JAX-RS Webapp Management Backend Feature</name>
+    <version>4.0.2</version>
     <url>http://wso2.org</url>
     <description>This feature contains the core bundles required for Back-end JAX-WS/JAX-RS Webapp Management functionality</description>
 
@@ -36,23 +38,26 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.jaxws.webapp.mgt</artifactId>
+            <version>4.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.jaxws.webapp.deployer</artifactId>
+	    <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf.wso2</groupId>
             <artifactId>cxf-bundle</artifactId>
+	    <version>${cxf.orbit.patch.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>jsr311-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.ws.wso2</groupId>
-            <artifactId>spring.framework</artifactId>
-        </dependency>
+ <dependency>
+                <groupId>org.springframework.ws.wso2</groupId>
+                <artifactId>spring.framework</artifactId>
+            </dependency>
    </dependencies>
 
     <build>
@@ -70,7 +75,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.jaxws.webapp.mgt.server</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
@@ -78,15 +83,15 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.jaxws.webapp.mgt</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.jaxws.webapp.deployer</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.jaxws.webapp.mgt:4.0.1</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.jaxws.webapp.deployer:4.0.2</bundleDef>
                                 <bundleDef>org.apache.cxf.wso2:cxf-bundle</bundleDef>
                                 <bundleDef>javax.ws.rs:jsr311-api</bundleDef>
                                 <bundleDef>org.springframework.ws.wso2:spring.framework</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.webapp.mgt.server:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:${project.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.webapp.mgt.server:${project.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>
@@ -94,4 +99,8 @@
             </plugin>
         </plugins>
     </build>
+    <properties>
+      <cxf.orbit.patch.version>2.6.1.wso2v2</cxf.orbit.patch.version>
+    </properties>
+
 </project>

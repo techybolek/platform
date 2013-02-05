@@ -17,6 +17,8 @@
 package org.wso2.carbon.transport.passthru;
 
 import org.apache.axis2.context.MessageContext;
+import org.apache.http.HttpInetConnection;
+import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HTTP;
 import org.apache.axis2.builder.BuilderUtil;
 import org.apache.axis2.context.ConfigurationContext;
@@ -33,13 +35,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Comparator;
 
 public class ClientWorker implements Runnable {
-    private Log log = LogFactory.getLog(ClientWorker.class);
+   
+	private Log log = LogFactory.getLog(ClientWorker.class);
     /** the Axis2 configuration context */
     private ConfigurationContext cfgCtx = null;
     /** the response message context that would be created */
@@ -56,6 +62,29 @@ public class ClientWorker implements Runnable {
         this.response = response;
         this.expectEntityBody = response.isExpectResponseBody();
 
+        Map<String,String> headers = response.getHeaders();
+      
+		String oriURL = headers.get(PassThroughConstants.LOCATION);
+		
+		// Special casing 302 scenario in following section. Not sure whether it's the correct fix,
+		// but this fix makes it possible to do http --> https redirection.
+		if (oriURL != null && response.getStatus() != HttpStatus.SC_MOVED_TEMPORARILY) {
+			URL url = null;
+			try {
+				url = new URL(oriURL);
+			} catch (MalformedURLException e) {
+				log.error("Invalid URL received",e);
+	            return;
+			}
+
+			headers.remove(PassThroughConstants.LOCATION);
+			String prfix =  (String) outMsgCtx.getProperty(PassThroughConstants.SERVICE_PREFIX);
+			if (prfix != null) {
+				headers.put(PassThroughConstants.LOCATION, prfix + url.getFile());
+			}
+
+		}
+        
         try {
             responseMsgCtx = outMsgCtx.getOperationContext().
                 getMessageContext(WSDL2Constants.MESSAGE_LABEL_IN);
@@ -98,6 +127,8 @@ public class ClientWorker implements Runnable {
         for (Map.Entry<String, String> headerEntry : headerEntries) {
             headerMap.put(headerEntry.getKey(), headerEntry.getValue());
         }
+        
+        
         responseMsgCtx.setProperty(MessageContext.TRANSPORT_HEADERS, headerMap);
 
         responseMsgCtx.setAxisMessage(outMsgCtx.getOperationContext().getAxisOperation().
@@ -164,7 +195,6 @@ public class ClientWorker implements Runnable {
                         PassThroughConstants.TRUE);
             }
             responseMsgCtx.setProperty(PassThroughConstants.NON_BLOCKING_TRANSPORT, true);
-
             // process response received
             try {
                 AxisEngine.receive(responseMsgCtx);

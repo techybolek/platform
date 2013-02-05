@@ -129,12 +129,16 @@ public class BasicRuleElementDTO {
         this.environmentList = environmentList;
     }
 
-    public String getResourceDataType() {
+    public String setEnvironmentDataTypegetResourceDataType() {
         return resourceDataType;
     }
 
     public void setResourceDataType(String resourceDataType) {
         this.resourceDataType = resourceDataType;
+    }
+
+    public String getResourceDataType() {
+        return resourceDataType;
     }
 
     public String getEnvironmentId() {

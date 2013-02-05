@@ -23,8 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.http.mapper.MappingData;
-import org.wso2.carbon.context.ApplicationContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
+import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 import org.wso2.carbon.tomcat.ext.valves.CarbonTomcatValve;
 import org.wso2.carbon.url.mapper.internal.exception.UrlMapperException;
 import org.wso2.carbon.url.mapper.internal.util.DataHolder;
@@ -65,7 +65,7 @@ public class UrlMapperValve implements CarbonTomcatValve {
     private void process(HttpServletRequest request, HttpServletResponse response) throws Exception {
         String serverName = request.getServerName();
         String requestedUri = request.getRequestURI();
-        String uri = ApplicationContext.getCurrentApplicationContext().
+        String uri = URLMappingHolder.getInstance().
                 getApplicationFromUrlMapping(serverName);
 
         if ((uri != null) && (uri.contains("services"))) {

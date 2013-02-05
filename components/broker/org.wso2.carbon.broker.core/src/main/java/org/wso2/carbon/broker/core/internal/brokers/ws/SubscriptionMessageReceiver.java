@@ -28,19 +28,34 @@ import org.wso2.carbon.broker.core.BrokerListener;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SubscriptionMessageReceiver extends AbstractInMessageReceiver {
 
     private static final Log log = LogFactory.getLog(SubscriptionMessageReceiver.class);
 
     private List<BrokerListener> brokerListeners;
+    private ConcurrentHashMap<String, BrokerListener> brokerListenerMap;
 
     public SubscriptionMessageReceiver() {
+        this.brokerListenerMap = new ConcurrentHashMap<String, BrokerListener>();
         this.brokerListeners = new ArrayList<BrokerListener>();
     }
 
-    public void addBrokerListener(BrokerListener brokerListener){
-        this.brokerListeners.add(brokerListener);
+    public void addBrokerListener(String subscriptionId, BrokerListener brokerListener) {
+        if (null == brokerListenerMap.putIfAbsent(subscriptionId, brokerListener)) {
+            this.brokerListeners = new ArrayList<BrokerListener>(brokerListenerMap.values());
+        }
+    }
+
+    public boolean removeBrokerListener(String subscriptionId) {
+       if(null!= brokerListenerMap.remove(subscriptionId)){
+        this.brokerListeners = new ArrayList<BrokerListener>(brokerListenerMap.values());
+       }
+        if(brokerListeners.size()==0){
+            return true;
+        }
+        return false;
     }
 
     protected void invokeBusinessLogic(MessageContext messageContext) throws AxisFault {
@@ -50,7 +65,7 @@ public class SubscriptionMessageReceiver extends AbstractInMessageReceiver {
 
         // notify the BrokerProxies
         try {
-            for (BrokerListener brokerListener : this.brokerListeners){
+            for (BrokerListener brokerListener : this.brokerListeners) {
                 brokerListener.onEvent(bodyElement);
             }
         } catch (BrokerEventProcessingException e) {

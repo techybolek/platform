@@ -24,6 +24,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.SynapseException;
@@ -31,6 +32,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.mediators.base.SequenceMediator;
 import org.apache.synapse.mediators.filters.InMediator;
 import org.apache.synapse.mediators.filters.OutMediator;
+import org.apache.synapse.task.Task;
 import org.apache.synapse.task.TaskConstants;
 import org.apache.synapse.task.TaskDescription;
 import org.apache.synapse.task.TaskScheduler;
@@ -39,10 +41,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
-import org.wso2.carbon.mediator.autoscale.lbautoscale.util.ConfigHolder;
+import org.wso2.carbon.stratos.cloud.controller.interfaces.CloudControllerService;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.mediator.autoscale.lbautoscale.util.AutoscaleConstants;
 import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration;
+import org.wso2.carbon.lb.common.service.LoadBalancerConfigurationService;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.mediators.AutoscaleInMediator;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.mediators.AutoscaleOutMediator;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.task.AutoscalerTaskInitializer;
@@ -64,6 +66,14 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  * interface="org.wso2.carbon.user.core.service.RealmService"
  * cardinality="1..1" policy="dynamic" bind="setRealmService"
  * unbind="unsetRealmService"
+ * @scr.reference name="org.wso2.carbon.lb.common"
+ * interface="org.wso2.carbon.lb.common.service.LoadBalancerConfigurationService"
+ * cardinality="1..1" policy="dynamic" bind="setLoadBalancerConfigurationService"
+ * unbind="unsetLoadBalancerConfigurationService"
+ * @scr.reference name="org.wso2.carbon.stratos.cloud.controller"
+ * interface="org.wso2.carbon.stratos.cloud.controller.interfaces.CloudControllerService"
+ * cardinality="1..1" policy="dynamic" bind="setCloudControllerService"
+ * unbind="unsetCloudControllerService"
  */
 public class AutoscalerTaskServiceComponent {
 
@@ -71,11 +81,13 @@ public class AutoscalerTaskServiceComponent {
     private ConfigurationContext configurationContext = null;
 
     protected void activate(ComponentContext context) {
+    	
+    	try{
 
         // read config file
-        String configURL = System.getProperty(AutoscaleConstants.LOAD_BALANCER_CONFIG);
-        LoadBalancerConfiguration lbConfig = new LoadBalancerConfiguration();
-        lbConfig.init(configURL);
+//        String configURL = System.getProperty(AutoscaleConstants.LOAD_BALANCER_CONFIG);
+//        LoadBalancerConfiguration lbConfig = new LoadBalancerConfiguration();
+//        lbConfig.init(configURL);
         
         if(configurationContext == null){
             String msg = "Configuration context is null. Autoscaler task activation failed.";
@@ -99,11 +111,9 @@ public class AutoscalerTaskServiceComponent {
 
         /** Initializing autoscaleIn and autoscaleOut Mediators.**/
 
+        LoadBalancerConfiguration lbConfig = AutoscalerTaskDSHolder.getInstance().getWholeLoadBalancerConfig();
         // check whether autoscaling is enabled
         if (lbConfig.getLoadBalancerConfig().isAutoscaleEnabled()) {
-
-            // set the lb configuration 
-            AutoscalerTaskDSHolder.getInstance().setLoadBalancerConfig(lbConfig);
 
             // get the main sequence mediator
             SequenceMediator mainSequence =
@@ -120,7 +130,7 @@ public class AutoscalerTaskServiceComponent {
                     if (!(inSequence.getList().get(0) instanceof AutoscaleInMediator)) {
 
                         // we gonna add it!
-                        inSequence.getList().add(0, new AutoscaleInMediator(lbConfig));
+                        inSequence.getList().add(0, new AutoscaleInMediator());
                         if (log.isDebugEnabled()) {
                             log.debug("Added Mediator: " + inSequence.getChild(0) + "" +
                                     " to InMediator. Number of child mediators in InMediator" + " is " +
@@ -183,11 +193,27 @@ public class AutoscalerTaskServiceComponent {
                     scheduler.init(null);
                 }
             }
+            
+            String autoscalerClass = lbConfig.getLoadBalancerConfig().getAutoscalerTaskClass();
+            Task task;
+            if (autoscalerClass != null) {
+                try {
+                    task = (Task) Class.forName(autoscalerClass).newInstance();
+                } catch (Exception e) {
+                    String msg = "Cannot instantiate Autoscaling Task. Class: " + autoscalerClass
+                    		+". It should implement 'org.apache.synapse.task.Task' and "
+                    		+"'org.apache.synapse.ManagedLifecycle' interfaces.";
+                    log.error(msg, e);
+                    throw new RuntimeException(msg, e);
+                }
+            } else {
+                task = new ServiceRequestsInFlightAutoscaler();
+            }
 
             ServiceRequestsInFlightAutoscaler autoscalerTask =
                     new ServiceRequestsInFlightAutoscaler();
 
-            autoscalerTask.init(synapseEnv);
+            ((ManagedLifecycle) task).init(synapseEnv);
 
             // specify scheduler task details
             JobBuilder jobBuilder = JobBuilder.newJob(AutoscalingJob.class)
@@ -195,7 +221,7 @@ public class AutoscalerTaskServiceComponent {
             JobDetail job = jobBuilder.build();
 
             Map<String, Object> dataMap = job.getJobDataMap();
-            dataMap.put(AutoscalingJob.AUTOSCALER_TASK, autoscalerTask);
+            dataMap.put(AutoscalingJob.AUTOSCALER_TASK, task);
             dataMap.put(AutoscalingJob.SYNAPSE_ENVI, synapseEnv);
 
             final TaskDescription taskDescription = new TaskDescription();
@@ -203,7 +229,7 @@ public class AutoscalerTaskServiceComponent {
             taskDescription.setName("autoscaler");
             //taskDescription.setCount(SimpleTrigger.REPEAT_INDEFINITELY);
 
-            int interval = lbConfig.getLoadBalancerConfig().getAutoscalerTaskInterval();
+            int interval = AutoscalerTaskDSHolder.getInstance().getLoadBalancerConfig().getAutoscalerTaskInterval();
             taskDescription.setInterval(interval);
             taskDescription.setStartTime(new Date(System.currentTimeMillis() + interval));
 
@@ -215,6 +241,9 @@ public class AutoscalerTaskServiceComponent {
 
             log.info("Autoscaling is disabled.");
         }
+    	} catch (Throwable e) {
+            log.error("Failed to activate Autoscaler Task Service Component. ", e);
+        }
     }
 
 
@@ -225,6 +254,14 @@ public class AutoscalerTaskServiceComponent {
         }
     }
 
+    protected void setCloudControllerService(CloudControllerService cc) {
+        AutoscalerTaskDSHolder.getInstance().setCloudControllerService(cc);
+    }
+    
+    protected void unsetCloudControllerService(CloudControllerService cc) {
+        AutoscalerTaskDSHolder.getInstance().setCloudControllerService(null);
+    }
+    
     protected void setConfigurationContextService(ConfigurationContextService context) {
         if (log.isDebugEnabled()) {
             log.debug("ConfigurationContextService bound to the Autoscaler task initialization process");
@@ -245,14 +282,23 @@ public class AutoscalerTaskServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("Bound realm service from the Autoscaler task");
         }
-        ConfigHolder.setRealmService(realmService);
+        AutoscalerTaskDSHolder.getInstance().setRealmService(realmService);
     }
 
     protected void unsetRealmService(RealmService realmService) {
         if (log.isDebugEnabled()) {
             log.debug("Unbound realm service from the Autoscaler task");
         }
-        ConfigHolder.setRealmService(null);
+        AutoscalerTaskDSHolder.getInstance().setRealmService(null);
     }
+    
+    protected void setLoadBalancerConfigurationService(LoadBalancerConfigurationService lbConfigSer){
+        AutoscalerTaskDSHolder.getInstance().setLbConfigService(lbConfigSer);
+    }
+    
+    protected void unsetLoadBalancerConfigurationService(LoadBalancerConfigurationService lbConfigSer){
+        AutoscalerTaskDSHolder.getInstance().setLbConfigService(null);
+    }
+    
 
 }

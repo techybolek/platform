@@ -38,22 +38,27 @@ public class ThriftAuthenticatorServiceImpl extends AbstractAdmin
 
     private static final Log log = LogFactory.getLog(ThriftAuthenticatorServiceImpl.class);
 
-    private static ThriftAuthenticatorServiceImpl instance = new ThriftAuthenticatorServiceImpl();
+    private static ThriftAuthenticatorServiceImpl instance = null;
     //session timeout in milli seconds
-    private static long thriftSessionTimeOut = 60000;
+    private static long thriftSessionTimeOut = 60000*30;
     private AuthenticationService authenticationService;
     private RealmService realmService;
 
     private Map<String, ThriftSession> authenticatedSessions =
             new ConcurrentHashMap<String, ThriftSession>();
 
-    private ThriftAuthenticatorServiceImpl() {
-        //start session invalidator thread
-        //Runnable sessionInvalidator = new SessionInvalidator();
-        //exec.submit(sessionInvalidator);
-    }
-
+   
     public static ThriftAuthenticatorServiceImpl getInstance() {
+        if(instance == null){
+            synchronized (ThriftAuthenticatorServiceImpl.class){
+                if(instance == null){
+                    instance = new ThriftAuthenticatorServiceImpl();
+                    return instance;
+                } else {
+                    return instance;
+                }
+            }
+        }
         return instance;
     }
 
@@ -86,6 +91,14 @@ public class ThriftAuthenticatorServiceImpl extends AbstractAdmin
         //check whether the credentials are authenticated.
         boolean isSuccessful = authenticationService.authenticate(userName, password);
 
+        if (log.isDebugEnabled()) {
+            if (isSuccessful) {
+                log.debug("User: " + userName + " was successfully authenticated..");
+            } else {
+                log.debug("Authentication failed for user: " + userName + " Hence, returning null for session id.");
+            }
+        }
+
         if (isSuccessful) {
             //check if an already valid authenticated session exists for the given user name and password.
             for (Map.Entry<String, ThriftSession> thriftSessionEntry : authenticatedSessions.entrySet()) {
@@ -94,12 +107,23 @@ public class ThriftAuthenticatorServiceImpl extends AbstractAdmin
                     && password.equals(thriftSessionEntry.getValue().getPassword())) {
                     //get relevant session id
                     String existingId = thriftSessionEntry.getKey();
+                    if (log.isDebugEnabled()) {
+                        if (existingId != null) {
+                            log.debug("There is an existing session id for user: " + userName);
+                        }
+                    }
                     //check whether session is valid
                     if (isSessionValid(existingId)) {
                         //update last access time
                         authenticatedSessions.get(existingId).setLastAccess(System.currentTimeMillis());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Existing session is valid for user: " + userName);
+                        }
                         return thriftSessionEntry.getKey();
                     } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Existing session is expired for user: " + userName);
+                        }
                         //session expired, remove the session from map
                         authenticatedSessions.remove(existingId);
                     }
@@ -149,6 +173,9 @@ public class ThriftAuthenticatorServiceImpl extends AbstractAdmin
     public boolean isAuthenticated(String sessionId) {
 
         if (sessionId == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Session id sent for authentication is null.");
+            }
             return false;
         }
 
@@ -156,12 +183,21 @@ public class ThriftAuthenticatorServiceImpl extends AbstractAdmin
             if (isSessionValid(sessionId)) {
                 //update the last access time.
                 authenticatedSessions.get(sessionId).setLastAccess(System.currentTimeMillis());
+                if (log.isDebugEnabled()) {
+                    log.debug("Session id sent for authentication is successfully authenticated.");
+                }
                 return true;
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Session id sent for authentication is not valid.");
+                }
                 //invalidate session
                 authenticatedSessions.remove(sessionId);
                 return false;
             }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Session id sent for authentication is not existing.");
         }
         return false;
     }

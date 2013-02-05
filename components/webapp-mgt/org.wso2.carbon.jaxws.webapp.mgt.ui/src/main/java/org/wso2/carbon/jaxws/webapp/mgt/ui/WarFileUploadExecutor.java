@@ -76,7 +76,7 @@ public class WarFileUploadExecutor extends AbstractFileUploadExecutor {
                   + "successfully. Please refresh this page in a while to see "
                   + "the status of the running webapps.";
             CarbonUIMessage.sendCarbonUIMessage(msg, CarbonUIMessage.INFO, request, response,
-                                                "../" + webContext + "/jax-webapp-mgt/index.jsp");
+                                                "../" + webContext + "/webapp-list/index.jsp");
             return true;
         } catch (Exception e) {
             msg = "Web application upload failed. " + e.getMessage();

@@ -186,6 +186,10 @@
     String mediaTypeNegate = request.getParameter("mediaTypeNegate");
     if(mediaTypeNegate == null)
     	mediaTypeNegate = "";
+
+    String mediaType = request.getParameter("mediaType");
+    if(mediaType == null)
+       	mediaType = "";
     
     String leftOp = request.getParameter("leftOp");
     String rightOp = request.getParameter("rightOp");
@@ -222,7 +226,8 @@
                      "|leftPropertyValue^" + leftPropertyValue + "|rightPropertyValue^" + rightPropertyValue + 
                      "|leftOp^" + leftOp + "|rightOp^" + rightOp + "|authorNameNegate^" + authorNameNegate + 
                      "|updaterNameNegate^" + updaterNameNegate + "|createdRangeNegate^" + createdRangeNegate +
-                     "|updatedRangeNegate^" + updatedRangeNegate + "|mediaTypeNegate^" + mediaTypeNegate;
+                     "|updatedRangeNegate^" + updatedRangeNegate + "|mediaTypeNegate^" + mediaTypeNegate +
+                     "|mediaType^" + mediaType;
         searchPath = searchPath.replace("^|", "^null|");
         if (searchPath.charAt(searchPath.length() - 1) == ':') {
             searchPath = searchPath + "null";
@@ -241,7 +246,8 @@
                            "&leftPropertyValue=" + leftPropertyValue + "&rightPropertyValue=" + rightPropertyValue +
                            "&leftOp=" + leftOp + "&rightOp=" + rightOp + "&authorNameNegate=" + authorNameNegate + 
                            "&updaterNameNegate=" + updaterNameNegate + "&createdRangeNegate=" + createdRangeNegate +
-                           "&updatedRangeNegate=" + updatedRangeNegate + "&mediaTypeNegate=" + mediaTypeNegate;        
+                           "&updatedRangeNegate=" + updatedRangeNegate + "&mediaTypeNegate=" + mediaTypeNegate +
+                           "|mediaType^" + mediaType;
     }
 %>
 

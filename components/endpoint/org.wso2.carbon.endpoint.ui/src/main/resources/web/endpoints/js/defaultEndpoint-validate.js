@@ -66,6 +66,11 @@ function validateDefaultEndpoint(isAnonymous, isFromTemplateEditor) {
                 return false;
             }
         }
+    } else {
+        if (isEmptyField('templateName')) {
+            CARBON.showWarningDialog(jsi18n['template.name.field.cannot.be.empty']);
+            return false;
+        }
     }
     return true;
 }

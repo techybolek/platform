@@ -39,19 +39,20 @@
                        resourceBundle="org.wso2.carbon.mediation.statistics.ui.i18n.Resources"
                        topPage="true" request="<%=request%>"/>
     <%
-        // Set standard HTTP/1.1 no-cache headers.
-        response.setHeader("Cache-Control", "no-store, max-age=0, no-cache, must-revalidate");
-        // Set IE extended HTTP/1.1 no-cache headers.
-        response.addHeader("Cache-Control", "post-check=0, pre-check=0");
-        // Set standard HTTP/1.0 no-cache header.
-        response.setHeader("Pragma", "no-cache");
-
-        String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
-        ConfigurationContext configContext =
-                (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
-        String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
-        GraphData graphData = null;
         try {
+            // Set standard HTTP/1.1 no-cache headers.
+            response.setHeader("Cache-Control", "no-store, max-age=0, no-cache, must-revalidate");
+            // Set IE extended HTTP/1.1 no-cache headers.
+            response.addHeader("Cache-Control", "post-check=0, pre-check=0");
+            // Set standard HTTP/1.0 no-cache header.
+            response.setHeader("Pragma", "no-cache");
+
+            String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
+            ConfigurationContext configContext =
+                    (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+            String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+            GraphData graphData = null;
+
 
             MediationStatisticsClient client = new MediationStatisticsClient(configContext, serverURL, cookie);
             graphData = client.getDataForGraph();
@@ -248,12 +249,16 @@
     <%
             }
         } catch (Exception e) {
-            CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
-            session.setAttribute(CarbonUIMessage.ID, uiMsg);    
+                /*ToDo : handle this gracefully*/
+//            CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
+//            session.setAttribute(CarbonUIMessage.ID, uiMsg);
             %>
-                <script type="text/javascript">
-                    window.location.href = "../admin/error.jsp";
-                </script>
+    <p><font color="red">Mediation Statistics collector disabled</font></p>
+    <br/>
+    <p>Statistics collector can be enabled by setting element "StatisticsReporterDisabled" as "false" in [ESB_HOME]/repository/conf/carbon.xml</p>
+                <%--<script type="text/javascript">--%>
+                    <%--window.location.href = "../admin/error.jsp";--%>
+                <%--</script>--%>
             <%
         }
     %>

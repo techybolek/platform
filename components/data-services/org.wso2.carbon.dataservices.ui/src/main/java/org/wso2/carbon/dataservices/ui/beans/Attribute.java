@@ -33,21 +33,24 @@ public class Attribute extends DataServiceConfigurationElement{
     private String export;
     private String exportType;
     private String arrayName;
+    private String optional;
 
     
     public Attribute(String dataSourceType,String dataSourceValue, String name,
-                     String requiredRoles, String xsdType, String export, String exportType){
+                     String requiredRoles, String xsdType, String export, String exportType,
+                     String optional){
         super(requiredRoles, xsdType);
         this.dataSourceType = dataSourceType;
         this.dataSourceValue = dataSourceValue;
         this.name = name;
         this.export = export;
         this.exportType = exportType;
+        this.optional = optional;
     }
 
     public Attribute(String dataSourceType,String dataSourceValue, String name,
                      String requiredRoles, String xsdType, String export, String exportType,
-                     String arrayName){
+                     String arrayName, String optional){
         super(requiredRoles, xsdType);
         this.dataSourceType = dataSourceType;
         this.dataSourceValue = dataSourceValue;
@@ -55,6 +58,7 @@ public class Attribute extends DataServiceConfigurationElement{
         this.export = export;
         this.exportType = exportType;
         this.arrayName = arrayName;
+        this.optional = optional;
     }
 
     public Attribute(){
@@ -88,6 +92,9 @@ public class Attribute extends DataServiceConfigurationElement{
         }
         if (this.getArrayName() != null && this.getArrayName().trim().length() > 0) {
             attrEl.addAttribute("arrayName", this.getArrayName(), null);
+        }
+        if (this.getOptional() != null && this.getOptional().trim().equals("true")) {
+            attrEl.addAttribute("optional", this.getOptional().trim(), null);
         }
     	return attrEl;
     }
@@ -139,6 +146,14 @@ public class Attribute extends DataServiceConfigurationElement{
 	public void setExportType(String exportType) {
 		this.exportType = exportType;
 	}
+
+    public String getOptional() {
+        return this.optional;
+    }
+
+    public void setOptional(String optional) {
+        this.optional = optional;
+    }
     
 	public boolean equals(Object o) {
         if ((o instanceof Attribute) && (((Attribute) o).getName().equals(this.getName()))) {

@@ -23,32 +23,24 @@ function validateWSDLEndpoint(isAnonymous, isFromTemplateEditor) {
         }
     }
 
+    if (isEmptyField('uriWSDLVal')) {
+        CARBON.showWarningDialog(jsi18n['wsdl.uri.field.cannot.be.empty']);
+        return false;
+    }
+    if (isEmptyField('wsdlendpointService')) {
+        CARBON.showWarningDialog(jsi18n['service.field.cannot.be.empty']);
+        return false;
+    }
+    if (isEmptyField('wsdlendpointPort')) {
+        CARBON.showWarningDialog(jsi18n['port.field.cannot.be.empty']);
+        return false;
+    }
+
     if (!isFromTemplateEditor) {
 
-        var uri = document.getElementById('uriWSDL');
-        if (uri != null && uri != undefined) {
-            if (uri.checked) {
-                if (isEmptyField('uriWSDLVal')) {
-                    CARBON.showWarningDialog(jsi18n['wsdl.uri.field.cannot.be.empty']);
-                    return false;
-                }
-
-                var wsdluri = trim(document.getElementById('uriWSDLVal').value);
-                if (!isValidWSDLURL(wsdluri)) {
-                    CARBON.showWarningDialog(jsi18n['invalid.address.cannot.proceed']);
-                    return false;
-                }
-
-            }
-        }
-
-        if (isEmptyField('wsdlendpointService')) {
-            CARBON.showWarningDialog(jsi18n['service.field.cannot.be.empty']);
-            return false;
-        }
-
-        if (isEmptyField('wsdlendpointPort')) {
-            CARBON.showWarningDialog(jsi18n['port.field.cannot.be.empty']);
+        var wsdluri = trim(document.getElementById('uriWSDLVal').value);
+        if (!isValidWSDLURL(wsdluri)) {
+            CARBON.showWarningDialog(jsi18n['invalid.address.cannot.proceed']);
             return false;
         }
 
@@ -93,6 +85,11 @@ function validateWSDLEndpoint(isAnonymous, isFromTemplateEditor) {
                 CARBON.showWarningDialog(jsi18n['please.enter.a.positive.number.to.the.retrydelay.field']);
                 return false;
             }
+        }
+    } else {
+        if (isEmptyField('templateName')) {
+            CARBON.showWarningDialog(jsi18n['template.name.field.cannot.be.empty']);
+            return false;
         }
     }
     return true;

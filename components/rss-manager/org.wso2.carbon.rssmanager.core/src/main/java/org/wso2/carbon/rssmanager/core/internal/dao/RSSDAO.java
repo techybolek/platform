@@ -29,38 +29,33 @@ import java.util.List;
 public interface RSSDAO {
 
 	public void createRSSInstance(RSSInstance rssInstance) throws RSSManagerException;
-	
-	public List<RSSInstance> getAllTenantSpecificRSSInstances() throws RSSManagerException;
-	
+
 	public List<RSSInstance> getAllSystemRSSInstances() throws RSSManagerException;
 	
-	public void dropRSSInstance(String rssInstanceName) throws RSSManagerException;
+	public void dropRSSInstance(String rssInstanceName, int tenantId) throws RSSManagerException;
 	
 	public void updateRSSInstance(RSSInstance rssInstance) throws RSSManagerException;
 
 	public void createDatabase(Database database) throws RSSManagerException;
 
-	public List<Database> getAllDatabases(int tid) throws RSSManagerException;
+	public List<Database> getAllDatabases(int tenantId) throws RSSManagerException;
 
-	public List<Database> getAllDatabasesByRSSInstance(String rssInstanceName) throws
+	public void dropDatabase(RSSInstance rssInstance, String databaseName, int tenantId) throws
             RSSManagerException;
 
-	public void dropDatabase(String rssInstanceName, String databaseName) throws RSSManagerException;
+	public void createDatabaseUser(RSSInstance rssInstance, DatabaseUser user)
+            throws RSSManagerException;
 
-	public void createDatabaseUser(DatabaseUser user) throws RSSManagerException;
+	public void dropDatabaseUser(RSSInstance rssInstance, String username,
+                                 int tenantId) throws RSSManagerException;
 
-	public void dropDatabaseUser(String rssInstanceName, String username) throws RSSManagerException;
-	
-	public void updateDatabaseUser(DatabaseUser user) throws RSSManagerException;
+	public UserDatabaseEntry createUserDatabaseEntry(RSSInstance rssInstance, 
+                                                     Database database,
+                                                     String user) throws RSSManagerException;
 
-	public void addUserDatabaseEntry(UserDatabaseEntry userDBEntry) throws RSSManagerException;
-	
-	public void updateUserDatabaseEntry(UserDatabaseEntry userDBEntry) throws RSSManagerException;
-	
-	public void deleteUserDatabaseEntry(String rssInstanceName, String username) throws RSSManagerException;
-	
-	public void incrementSystemRSSDatabaseCount() throws RSSManagerException;
-	
+	public void deleteUserDatabaseEntry(RSSInstance rssInstance,
+                                        String username) throws RSSManagerException;
+
 	public int getSystemRSSDatabaseCount() throws RSSManagerException;
 
     public List<RSSInstance> getAllRSSInstances(int tid) throws RSSManagerException;
@@ -68,23 +63,22 @@ public interface RSSDAO {
     public RSSInstance getRSSInstance(String rssInstanceName) throws
             RSSManagerException;
 
-    public List<DatabaseUser> getUsersByDatabase(
-            String databaseName) throws RSSManagerException;
+    public Database getDatabase(RSSInstance rssInstance, 
+                                String databaseName) throws RSSManagerException;
 
-    public Database getDatabase(String databaseName) throws RSSManagerException;
+    public DatabaseUser getDatabaseUser(RSSInstance rssInstance,
+                                        String username) throws RSSManagerException;
+    
+    public DatabasePrivilegeSet getUserDatabasePrivileges(RSSInstance rssInstance,
+                                                          String databaseName,
+                                                          String username) throws RSSManagerException;
 
-    public DatabaseUser getDatabaseUser(String username) throws RSSManagerException;
+    public void updateDatabaseUser(DatabasePrivilegeSet privileges,
+                                   RSSInstance rssInstance,
+                                   DatabaseUser user,
+                                   String databaseName) throws RSSManagerException;
 
-    public List<UserDatabaseEntry> getUserDatabaseEntriesByDatabase(String rssInstanceName,
-            String databaseName) throws RSSManagerException;
-
-    public DatabasePrivilegeSet getUserDatabasePrivileges(
-            String rssInstanceName, String databaseName, String username) throws RSSManagerException;
-
-    public void updateDatabaseUser(DatabasePermissions modifiedPermissions, String username,
-                                              String databaseName) throws RSSManagerException;
-
-    public void createDatabasePrivilegesTemplate(
+    public DatabasePrivilegeTemplate createDatabasePrivilegesTemplate(
             DatabasePrivilegeTemplate template) throws RSSManagerException;
 
     public void dropDatabasePrivilegesTemplate(String templateName) throws RSSManagerException;
@@ -100,13 +94,57 @@ public interface RSSDAO {
     
     public List<DatabaseUser> getAllDatabaseUsers(int tid) throws RSSManagerException;
 
-    public List<DatabaseUser> getUsersByRSSInstance(String rssInstanceName) throws
+    public List<DatabaseUser> getUsersByRSSInstance(RSSInstance rssInstance) throws
             RSSManagerException;
 
     public List<String> getUsersAssignedToDatabase(
+            RSSInstance rssInstance, String databaseName) throws RSSManagerException;
+
+    public List<DatabaseUser> getSystemCreatedDatabaseUsers() throws RSSManagerException;
+
+    public List<String> getSystemUsersAssignedToDatabase(
+            RSSInstance rssInstance, String databaseName) throws RSSManagerException;
+
+    public DatabasePrivilegeSet getSystemUserDatabasePrivileges(RSSInstance rssInstance,
+            String databaseName, String username) throws RSSManagerException;
+
+    public RSSInstance findRSSInstanceDatabaseBelongsTo(
             String rssInstanceName, String databaseName) throws RSSManagerException;
 
-    public List<String> getAvailableUsersToBeAssigned(
+    public RSSInstance findRSSInstanceDatabaseUserBelongsTo(
             String rssInstanceName, String databaseName) throws RSSManagerException;
+
+    public void setUserDatabasePrivileges (
+            UserDatabaseEntry userDBEntry, DatabasePrivilegeTemplate template) throws
+            RSSManagerException;
+
+    public void deleteUserDatabasePrivilegeEntriesByDatabaseUser(
+            RSSInstance rssInstance, String username, int tenantId) throws RSSManagerException;
+
+    public void removeUserDatabaseEntriesByDatabaseUser(
+            RSSInstance rssInstance, String username, int tenantId) throws RSSManagerException;
+
+    public void removeUserDatabaseEntriesByDatabase(
+            RSSInstance rssInstance, String databaseName, int tenantId) throws RSSManagerException;
+
+    public void removeDatabasePrivilegesTemplateEntries(String templateName, int tenantId) throws
+            RSSManagerException;
+
+    public void incrementSystemRSSDatabaseCount() throws RSSManagerException;
+
+    public void deleteUserDatabasePrivileges(RSSInstance rssInstance, String username) throws
+            RSSManagerException;
+
+    public void setDatabasePrivilegeTemplateProperties(DatabasePrivilegeTemplate template) throws
+            RSSManagerException;
+
+    public boolean isDatabaseExist(String rssInstanceName, String databaseName) throws
+            RSSManagerException;
+
+    public boolean isDatabaseUserExist(String rssInstanceName, String databaseUsername) throws
+            RSSManagerException;
+
+    public boolean isDatabasePrivilegeTemplateExist(String templateName) throws
+            RSSManagerException;
 
 }

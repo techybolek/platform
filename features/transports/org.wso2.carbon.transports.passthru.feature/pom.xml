@@ -22,14 +22,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>axis2-transport-features</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.transports.passthru.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Axis2 Transport HTTP Pass-through Feature</name>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.2</version>
     <url>http://wso2.org</url>
     <description>This feature contains the HTTP Pass-through transport core feature</description>
 
@@ -37,7 +38,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.transports.passthru</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.2</version>
         </dependency>
     </dependencies>
 
@@ -56,7 +57,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.transports.passthru</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>

@@ -19,7 +19,15 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
 <%
     try {
-        AddMediaTypeProcessor.process(request, response, config);
+        boolean xmlToArtifactChangeHappen = AddMediaTypeProcessor.process(request, response, config);
+	if(xmlToArtifactChangeHappen)
+	{%>
+		----XmlToArtifactChange----
+	<%}
+	else{%>
+		<jsp:include page="metadata_ajaxprocessor.jsp"/>
+	<%}
+
     } catch (Exception e) {
         response.setStatus(500);
 %><%=e.getMessage()%><%
@@ -27,4 +35,4 @@
     }
 %>
 
-<jsp:include page="metadata_ajaxprocessor.jsp"/>
+

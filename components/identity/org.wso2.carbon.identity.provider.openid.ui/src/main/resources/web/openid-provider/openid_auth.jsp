@@ -15,61 +15,46 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
-           prefix="carbon" %>
-<jsp:include page="../dialog/display_messages.jsp"/>
-
-<%@page import="org.openid4java.message.ParameterList" %>
+<%@page import="org.wso2.carbon.identity.provider.openid.ui.OpenIDConstants"%>
 <%@page import="org.wso2.carbon.identity.provider.openid.ui.handlers.OpenIDUtil"%>
-<script type="text/javascript" src="../dialog/js/dialog.js"></script>
+<%@page import="org.wso2.carbon.identity.base.IdentityConstants"%>
+<%@page import="org.wso2.carbon.identity.base.IdentityConstants.OpenId"%>
+<%@page import="org.openid4java.message.ParameterList" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
-<link
-        media="all" type="text/css" rel="stylesheet"
-        href="css/registration.css"/>
+<jsp:include page="../dialog/display_messages.jsp"/>
+<script type="text/javascript" src="../dialog/js/dialog.js"></script>
+<link media="all" type="text/css" rel="stylesheet" href="css/registration.css"/>
+
+<style>
+    .identity-box{
+    	height:200px;
+    }
+</style>
 
 <%
-    ParameterList requestp = (ParameterList) session
-            .getAttribute("parameterlist");
-    String openidrealm = requestp.hasParameter("openid.realm") ? requestp
-            .getParameterValue("openid.realm")
-            : null;
-    String openidreturnto = requestp.hasParameter("openid.return_to") ? requestp
-            .getParameterValue("openid.return_to")
-            : null;
-    String openidclaimedid = requestp.hasParameter("openid.claimed_id") ? requestp
-            .getParameterValue("openid.claimed_id")
-            : null;
-    String openididentity = requestp.hasParameter("openid.identity") ? requestp
-            .getParameterValue("openid.identity")
-            : null;
+    ParameterList requestp = (ParameterList) session.getAttribute(IdentityConstants.OpenId.PARAM_LIST);
+    String openidrealm = requestp.hasParameter("openid.realm") ? requestp.getParameterValue("openid.realm") : null;
+    String openidreturnto = requestp.hasParameter("openid.return_to") ? requestp.getParameterValue("openid.return_to") : null;
+    String openidclaimedid = requestp.hasParameter("openid.claimed_id") ? requestp.getParameterValue("openid.claimed_id") : null;
+    String openididentity = requestp.hasParameter("openid.identity") ? requestp.getParameterValue("openid.identity") : null;
     
     String userName = null;
     if(openididentity != null){
-        userName = OpenIDUtil.getUserName(openididentity);
-    }          
-    
+           userName = OpenIDUtil.getUserName(openididentity);
+    }        
     String openidrp  = openidreturnto;
     if (openidrp!=null && openidreturnto.indexOf("?")>0){
     	openidrp = openidreturnto.substring(0,openidreturnto.indexOf("?"));
     }
-    
-    String site = (String) (openidrealm == null ? openidreturnto
-            : openidrealm);
-    session.setAttribute("openId", openididentity);
- 
+    String site = (String) (openidrealm == null ? openidreturnto : openidrealm);
+    session.setAttribute(OpenIDConstants.SessionAttribute.OPENID, openididentity);
  %>
 
-
 <fmt:bundle  basename="org.wso2.carbon.identity.provider.openid.ui.i18n.Resources">
-
       
 <script type="text/javascript">
-
-    function submitform()
-    {    	
-        document.multifactorInfoCardAuthForm.submit();
-    }
     function doLogin(){
         var loginForm = document.getElementById('loginForm');
 
@@ -111,7 +96,7 @@
                                 <strong id="loginDisplayText"><fmt:message key='enter.password.to.signin'/></strong>
 
                                 <h2></h2>
-                                <table id="loginTable">
+                                 <table id="loginTable">
                                     <tr height="20">
                                         <td colspan="2"></td>
                                     </tr>
@@ -157,8 +142,9 @@
 
                                         <tr>
                                         <td colspan="2"><input type="checkbox" id="chkRemember" onclick="setRememberMe();">Remember	me on this computer</td>
-                                       </tr>                                            
+                                       </tr>                                   
                                 </table>
+                                
                             </div>
                         </form>
                     </td>
@@ -170,27 +156,15 @@
                                 <strong id="loginDisplayText"><fmt:message key='authenticating.please.wait'/></strong>
 
                                 <h2></h2>
-				<div style="padding-left:30px; padding-top:25px;">
+				                <div style="padding-left:30px; padding-top:25px;">
                                 	<img src="images/ajax-loader.gif" vspace="20" />
                             	</div>
                                 
                             </div>
                         </form>
                     </td>
-                    <td width="50%" style="text-align:center !important">
-                        <form name="multifactorInfoCardAuthForm" action="multifactor_auth_infocard.jsp" method="POST">
-                            <div id="loginbox" class="identity-box">
-                                <strong><fmt:message key='signin.with.infocard'/></strong>
-
-                                <h2></h2>
-                                <img src="images/infocard-logo.png" border="0" onclick="submitform();">
-                            </div>
-                        </form>
-                    </td>
                 </tr>
             </table>
-
-
         </div>
     </div>
 </fmt:bundle>

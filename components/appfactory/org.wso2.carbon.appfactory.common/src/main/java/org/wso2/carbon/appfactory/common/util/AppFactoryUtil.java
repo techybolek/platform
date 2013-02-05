@@ -16,22 +16,11 @@
 
 package org.wso2.carbon.appfactory.common.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.client.ServiceClient;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,14 +32,31 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+
 /**
  * Util class for building app factory configuration
  */
 public class AppFactoryUtil {
     private static final Log log = LogFactory.getLog(AppFactoryUtil.class);
     private static SecretResolver secretResolver;
-    private static Map<String, List<String>> configuration = new HashMap<String, List<String>>();
+    private static Map<String, List<String>> configurationMap = new HashMap<String, List<String>>();
+    private static AppFactoryConfiguration appFactoryConfig = null;
 
+    private AppFactoryUtil() throws AppFactoryException {
+        loadAppFactoryConfiguration();
+    }
 
     public static File getApplicationWorkDirectory(String applicationId, String version, String revision)
             throws AppFactoryException {
@@ -59,7 +65,14 @@ public class AppFactoryUtil {
         return tempDir;
     }
 
-    public static AppFactoryConfiguration loadAppFactoryConfiguration() throws AppFactoryException {
+    public static AppFactoryConfiguration getAppfactoryConfiguration() throws AppFactoryException {
+        if(appFactoryConfig == null) {
+            loadAppFactoryConfiguration();
+        }
+        return appFactoryConfig;
+    }
+
+    private static void loadAppFactoryConfiguration() throws AppFactoryException {
         OMElement appFactoryElement = loadAppFactoryXML();
 
         //Initialize secure vault
@@ -79,8 +92,26 @@ public class AppFactoryUtil {
         Stack<String> nameStack = new Stack<String>();
         readChildElements(appFactoryElement, nameStack);
 
-        AppFactoryConfiguration appFactoryConfig = new AppFactoryConfiguration(configuration);
-        return appFactoryConfig;
+        appFactoryConfig = new AppFactoryConfiguration(configurationMap);
+    }
+
+    public static void sendNotification(final String applicationId,
+                                                           final String version,
+                                                           final String revision, final String epr,
+                                                           final OMElement payload) {
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    ServiceClient client = new ServiceClient();
+                    client.getOptions().setTo(new EndpointReference(epr));
+                    CarbonUtils.setBasicAccessSecurityHeaders(getAdminUsername(),getAdminPassword(),client);
+                    client.sendRobust(payload);
+                } catch (AxisFault e) {
+                    log.error(e);
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     private static OMElement loadAppFactoryXML() throws AppFactoryException {
@@ -213,16 +244,23 @@ public class AppFactoryUtil {
     }
 
     private static void addToConfiguration(String key, String value) {
-        List<String> list = configuration.get(key);
+        List<String> list = configurationMap.get(key);
         if (list == null) {
             list = new ArrayList<String>();
             list.add(value);
-            configuration.put(key, list);
+            configurationMap.put(key, list);
         } else {
             if (!list.contains(value)) {
                 list.add(value);
             }
         }
+    }
+    public static String getAdminUsername() {
+        return appFactoryConfig.getFirstProperty(AppFactoryConstants.SERVER_ADMIN_NAME);
+    }
+
+    public static String getAdminPassword() {
+        return appFactoryConfig.getFirstProperty(AppFactoryConstants.SERVER_ADMIN_PASSWORD);
     }
 }
 

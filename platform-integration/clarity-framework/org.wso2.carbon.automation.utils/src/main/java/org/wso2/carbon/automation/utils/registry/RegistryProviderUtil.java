@@ -48,6 +48,7 @@ public class RegistryProviderUtil {
 
     public WSRegistryServiceClient getWSRegistry(int userID, String productName)
             throws RegistryException, AxisFault {
+        System.setProperty("carbon.repo.write.mode", "true");
         WSRegistryServiceClient registry = null;
         String userName;
         String password;
@@ -65,9 +66,9 @@ public class RegistryProviderUtil {
             password = userDetails.getPassword();
             serverURL = getServiceURL(productName);
         }
-
         String axis2Repo = ProductConstant.getModuleClientPath();
-        String axis2Conf = ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + File.separator + "axis2config" + File.separator + "axis2_client.xml";
+        String axis2Conf = ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "axis2config" +
+                           File.separator + "axis2_client.xml";
         PlatformUtil.setKeyStoreProperties();
         try {
             configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(axis2Repo, axis2Conf);
@@ -86,12 +87,49 @@ public class RegistryProviderUtil {
         return registry;
     }
 
-    public Registry getGovernanceRegistry(WSRegistryServiceClient registry, int userId)
+
+    public WSRegistryServiceClient getWSRegistry(String userName, String password,
+                                                 String productName)
+            throws RegistryException, AxisFault {
+        System.setProperty("carbon.repo.write.mode", "true");
+        WSRegistryServiceClient registry = null;
+        ConfigurationContext configContext;
+        String serverURL;
+        EnvironmentBuilder env = new EnvironmentBuilder();
+        if (env.getFrameworkSettings().getEnvironmentSettings().is_runningOnStratos()) {   //if Stratos tests are enabled.
+            serverURL = getServiceURL(productName);
+        } else {
+            serverURL = getServiceURL(productName);
+        }
+
+        String axis2Repo = ProductConstant.getModuleClientPath();
+        String axis2Conf = ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + "axis2config" +
+                           File.separator + "axis2_client.xml";
+        PlatformUtil.setKeyStoreProperties();
+        try {
+            configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(axis2Repo, axis2Conf);
+            int timeOutInMilliSeconds = 1000 * 60;
+            configContext.setProperty(HTTPConstants.CONNECTION_TIMEOUT, timeOutInMilliSeconds);
+            log.info("Group ConfigurationContext Timeout " + configContext.getServiceGroupContextTimeoutInterval());
+            registry = new WSRegistryServiceClient(serverURL, userName, password, configContext);
+            log.info("WS Registry -Login Success");
+        } catch (AxisFault axisFault) {
+            log.error("Unable to initialize WSRegistryServiceClient :" + axisFault.getMessage());
+            throw new AxisFault("Unable to initialize WSRegistryServiceClient :" + axisFault.getMessage());
+        } catch (RegistryException e) {
+            log.error("Unable to initialize WSRegistryServiceClient:" + e);
+            throw new RegistryException("Unable to initialize WSRegistryServiceClient:" + e);
+        }
+        return registry;
+    }
+
+    public Registry getGovernanceRegistry(Registry registry, int userId)
             throws RegistryException {
         Registry governance;
         UserInfo userDetails = UserListCsvReader.getUserInfo(userId);
         String userName = userDetails.getUserName();
         PlatformUtil.setKeyStoreProperties();
+        System.setProperty("carbon.repo.write.mode", "true");
 
         try {
             governance = GovernanceUtils.getGovernanceUserRegistry(registry, userName);
@@ -111,10 +149,13 @@ public class RegistryProviderUtil {
         String password = userDetails.getPassword();
         EnvironmentBuilder env = new EnvironmentBuilder();
         FrameworkProperties properties = FrameworkFactory.getFrameworkProperties(productName);
+        System.setProperty("carbon.repo.write.mode", "true");
 
         if (env.getFrameworkSettings().getEnvironmentSettings().is_runningOnStratos()) {
-            registryURL = ProductUrlGeneratorUtil.getRemoteRegistryURLOfStratos(properties.getProductVariables().
-                    getHttpsPort(), properties.getProductVariables().getHostName(), properties, userDetails);
+            registryURL =
+                    ProductUrlGeneratorUtil.getRemoteRegistryURLOfStratos(properties.getProductVariables().getHttpsPort(),
+                                                                          properties.getProductVariables().getHostName(),
+                                                                          properties, userDetails);
         } else {
             registryURL = ProductUrlGeneratorUtil.getRemoteRegistryURLOfProducts(properties.getProductVariables().
                     getHttpsPort(), properties.getProductVariables().getHostName(), properties.getProductVariables().getWebContextRoot());

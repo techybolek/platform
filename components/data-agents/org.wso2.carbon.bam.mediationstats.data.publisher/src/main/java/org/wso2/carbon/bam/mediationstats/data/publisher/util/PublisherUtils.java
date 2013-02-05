@@ -21,7 +21,7 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.synapse.aspects.statistics.ErrorLog;
 import org.wso2.carbon.bam.mediationstats.data.publisher.conf.EventPublisherConfig;
 import org.wso2.carbon.bam.mediationstats.data.publisher.services.BAMMediationStatsPublisherAdmin;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.initializer.services.SynapseEnvironmentService;
 import org.wso2.carbon.mediation.statistics.MediationStatisticsSnapshot;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -171,7 +171,7 @@ public class PublisherUtils {
         String baseServerUrl = TRANSPORT + "://" + hostName + ":" + port;
         ConfigurationContext configurationContext = confContextService.getServerConfigContext();
         String context = configurationContext.getContextRoot();
-        SuperTenantCarbonContext tenantCarbonContext = SuperTenantCarbonContext.getCurrentContext(axisConfiguration);
+        PrivilegedCarbonContext tenantCarbonContext = PrivilegedCarbonContext.getCurrentContext(axisConfiguration);
         String tenantDomain = null;
         if (tenantCarbonContext != null) {
             tenantDomain = tenantCarbonContext.getTenantDomain();

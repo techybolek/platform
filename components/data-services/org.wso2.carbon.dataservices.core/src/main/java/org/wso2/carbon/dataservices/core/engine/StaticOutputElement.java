@@ -42,24 +42,9 @@ import java.util.Set;
 public class StaticOutputElement extends OutputElement {
 
     /**
-     * name of element/attribute
-     */
-    private String name;
-
-    /**
-     * param value
-     */
-    private String param;
-
-    /**
      * original param value, without any modifications: toLowerCase
      */
     private String originalParam;
-
-    /**
-     * i.e. column, query-param, value
-     */
-    private String paramType;
 
     /**
      * i.e. element, attribute
@@ -99,9 +84,6 @@ public class StaticOutputElement extends OutputElement {
      */
     private boolean hasConstantValue;
 
-    /* If this element corresponds to a SQLArray, its name */
-    private String arrayName;
-
     /* Represents whether this element corresponds to a User Defined Object such as UDT or
        SQLArray */
     private boolean isUserDefinedObj;
@@ -115,11 +97,8 @@ public class StaticOutputElement extends OutputElement {
                                Set<String> requiredRoles, int dataCategory, int resultType,
                                String export, int exportType, 
                                String arrayName) throws DataServiceFault {
-        super(namespace, requiredRoles);
-        this.name = name;
-        this.param = param;
+        super(name, namespace, requiredRoles, param, paramType, arrayName);
         this.originalParam = originalParam;
-        this.paramType = paramType;
         this.elementType = elementType;
         this.xsdType = xsdType;
         this.dataCategory = dataCategory;
@@ -127,21 +106,16 @@ public class StaticOutputElement extends OutputElement {
         this.export = export;
         this.exportType = exportType;
         this.hasConstantValue = DBSFields.VALUE.equals(paramType);
-        this.arrayName = arrayName;
         this.udtInfo = processParamForUserDefinedObjects(this.getParam());
         if (this.getArrayName() != null || this.getUDTInfo() != null) {
             this.isUserDefinedObj = true;
         }
 
         /* validate element/attribute name */
-        if (!NCName.isValid(this.name)) {
+        if (!NCName.isValid(this.getName())) {
             throw new DataServiceFault("Invalid output " + this.elementType + " name: '" +
-                    this.name + "', must be an NCName.");
+                    this.getName() + "', must be an NCName.");
         }
-    }
-
-    public String getArrayName() {
-        return arrayName;
     }
 
     public boolean hasConstantValue() {
@@ -170,18 +144,6 @@ public class StaticOutputElement extends OutputElement {
 
     public QName getXsdType() {
         return xsdType;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getParam() {
-        return param;
-    }
-
-    public String getParamType() {
-        return paramType;
     }
 
     public String getElementType() {
@@ -229,6 +191,8 @@ public class StaticOutputElement extends OutputElement {
             }
             if (paramObj != null) {
                 return paramObj.getValue();
+            } else if (this.isOptional()) {
+            	return null;
             } else {
                 throw new DataServiceFault(FaultCodes.INCOMPATIBLE_PARAMETERS_ERROR,
                         "Error in 'StaticOutputElement.execute', " +
@@ -265,6 +229,10 @@ public class StaticOutputElement extends OutputElement {
             paramValue = new ParamValue(this.getParam());
         } else {
             paramValue = this.getParamValue(params);
+        }
+        /* if the result is null, this is an optional field then, do not write it out */
+        if (paramValue == null) {
+        	return;
         }
         /* export it if told, and only if it's boxcarring */
         if (this.getExport() != null && DSSessionManager.isBoxcarring()) {

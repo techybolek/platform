@@ -60,7 +60,7 @@
 
     <!-- Advanced scenarios -->
     <Scenario id="scenario5">
-        <Summary>Sign and encrypt - X509 Authentication</Summary>
+        <Summary>Sign and Encrypt - X509 Authentication</Summary>
         <Description>Provides Authentication, Integrity and Confidentiality. Clients have X509 certificates</Description>
         <Category>keystore</Category>
         <Modules>
@@ -185,6 +185,26 @@
             <Module>rampart</Module>
         </Modules>
         <WsuId>kerberossignandencrypt</WsuId>
+        <Type>advanced</Type>
+    </Scenario>
+    <Scenario id="scenario21">
+        <Summary>Sign and Encrypt - X509 Authentication - SAML 2.0 Token Required</Summary>
+        <Description>Provides Authentication, Integrity and Confidentiality. Clients have X509 certificates and need to provide a SAML 2.0 Token with an Email as a claim by default.</Description>
+        <Category>keystore</Category>
+        <Modules>
+            <Module>rampart</Module>
+        </Modules>
+        <WsuId>SigEncrSAML20</WsuId>
+        <Type>advanced</Type>
+    </Scenario>
+    <Scenario id="scenario22">
+        <Summary>Sign and Encrypt - Anonymous clients - SAML 2.0 Token Required</Summary>
+        <Description>Provides Integrity and Confidentiality and clients need to provide a SAML 2.0 Token with an Email as a claim by default.</Description>
+        <Category>keystore</Category>
+        <Modules>
+            <Module>rampart</Module>
+        </Modules>
+        <WsuId>SgnEncrAnonymousSAML20</WsuId>
         <Type>advanced</Type>
     </Scenario>
     <Scenario id="policyFromRegistry">

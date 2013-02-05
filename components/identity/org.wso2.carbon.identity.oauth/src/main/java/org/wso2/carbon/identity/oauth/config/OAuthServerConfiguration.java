@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -21,6 +21,7 @@ package org.wso2.carbon.identity.oauth.config;
 import org.apache.amber.oauth2.common.message.types.GrantType;
 import org.apache.amber.oauth2.common.message.types.ResponseType;
 import org.apache.axiom.om.OMElement;
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.ServerConfigurationException;
@@ -28,6 +29,8 @@ import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.oauth.OAuthConstants;
 import org.wso2.carbon.identity.oauth.preprocessor.TokenPersistencePreprocessor;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
+import org.wso2.carbon.identity.oauth2.validators.OAuth2TokenValidator;
+import org.wso2.carbon.identity.oauth2.validators.TokenValidationHandler;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.xml.namespace.QName;
@@ -49,11 +52,18 @@ public class OAuthServerConfiguration {
         // Callback handler related configuration elements
         private static final String OAUTH_CALLBACK_HANDLERS = "OAuthCallbackHandlers";
         private static final String OAUTH_CALLBACK_HANDLER = "OAuthCallbackHandler";
+        private static final String CLAIM_URI = "ClaimUri";
+        private static final String REQUIRED_CLAIM_URIS = "RequiredRespHeaderClaimUris";
         private static final String CALLBACK_CLASS = "Class";
         private static final String CALLBACK_PRIORITY = "Priority";
         private static final String CALLBACK_PROPERTIES = "Properties";
         private static final String CALLBACK_PROPERTY = "Property";
         private static final String CALLBACK_ATTR_NAME = "Name";
+        private static final String TOKEN_VALIDATORS = "TokenValidators";
+        private static final String TOKEN_VALIDATOR = "TokenValidator";
+        private static final String TOKEN_TYPE_ATTR = "type";
+        private static final String TOKEN_CLASS_ATTR = "class";
+        
 
         // Default timestamp skew
         public static final String TIMESTAMP_SKEW = "TimestampSkew";
@@ -64,7 +74,7 @@ public class OAuthServerConfiguration {
         private static final String ACCESS_TOKEN_DEFAULT_VALIDITY_PERIOD =
                 "AccessTokenDefaultValidityPeriod";
         // Enable/Disable cache
-        public static final String ENABLE_CACHE = "EnableCache";
+        public static final String ENABLE_CACHE = "EnableOAuthCache";
 
         //TokenStoragePreprocessor
         public static final String TOKEN_PERSISTENCE_PREPROCESSOR = "TokenPersistencePreprocessor";
@@ -74,6 +84,20 @@ public class OAuthServerConfiguration {
 
         //Supported Response Types
         public static final String SUPPORTED_RESP_TYPES = "SupportedResponseTypes";
+        
+        //JWT Generator 
+        public static final String AUTHORIZATION_CONTEXT_TOKEN_GENERATION = "AuthorizationContextTokenGeneration";
+        public static final String ENABLED = "Enabled";
+        public static final String TOKEN_GENERATOR_IMPL_CLASS = "TokenGeneratorImplClass";
+        public static final String CLAIMS_RETRIEVER_IMPL_CLASS = "ClaimsRetrieverImplClass";
+        public static final String CONSUMER_DIALECT_URI = "ConsumerDialectURI";
+        public static final String SIGNATURE_ALGORITHM = "SignatureAlgorithm";
+        public static final String SECURITY_CONTEXT_TTL = "AuthorizationContextTTL";
+
+        public static final String ENABLE_ASSERTIONS = "EnableAssertions";
+        public static final String ENABLE_ASSERTIONS_USERNAME = "UserName";
+        public static final String ENABLE_ACCESS_TOKEN_PARTITIONING = "EnableAccessTokenPartitioning";
+        public static final String ACCESS_TOKEN_PARTITIONING_DOMAINS = "AccessTokenPartitioningDomains";
     }
 
 
@@ -87,10 +111,16 @@ public class OAuthServerConfiguration {
 
     private boolean cacheEnabled = true;
 
+    private boolean assertionsUserNameEnabled = false;
+
+    private boolean accessTokenPartitioningEnabled = false;
+
+    private String accessTokenPartitioningDomains = null;
+
     private String tokenPersistencePreProcessorClassName =
             "org.wso2.carbon.identity.oauth.preprocessor.PlainTokenPersistencePreprocessor";
 
-    private TokenPersistencePreprocessor tokenPersistencePreprocessor;
+    private TokenPersistencePreprocessor tokenPersistencePreprocessor = null;
 
     private Set<OAuthCallbackHandlerMetaData> callbackHandlerMetaData =
             new HashSet<OAuthCallbackHandlerMetaData>();
@@ -98,7 +128,20 @@ public class OAuthServerConfiguration {
     private List<String> supportedGrantTypes = new ArrayList<String>();
 
     private List<String> supportedResponseTypes = new ArrayList<String>();
+    
+    private List<String> requiredHeaderClaimUris = new ArrayList<String>();
+    
+    private boolean isAuthContextTokGenEnabled = false;
 
+    private String tokenGeneratorImplClass = "org.wso2.carbon.identity.oauth2.token.JWTTokenGenerator";
+
+    private String claimsRetrieverImplClass = "org.wso2.carbon.identity.oauth2.token.DefaultClaimsRetriever";
+
+    private String consumerDialectURI = "http://wso2.org/claims";
+
+    private String signatureAlgorithm = "SHA256withRSA";
+
+    private String authContextTTL = "15L";
 
     private OAuthServerConfiguration() {
         buildOAuthServerConfiguration();
@@ -118,6 +161,7 @@ public class OAuthServerConfiguration {
 
     private void buildOAuthServerConfiguration() {
         try {
+        	
             IdentityConfigParser configParser = IdentityConfigParser.getInstance();
             OMElement oauthElem = configParser.getConfigElement(CONFIG_ELEM_OAUTH);
 
@@ -129,6 +173,14 @@ public class OAuthServerConfiguration {
             // read callback handler configurations
             parseOAuthCallbackHandlers(oauthElem.getFirstChildWithName(
                     getQNameWithIdentityNS(ConfigElements.OAUTH_CALLBACK_HANDLERS)));
+            
+            // get the required claim uris - that needs to be included in the response.
+            parseRequiredHeaderClaimUris(oauthElem.getFirstChildWithName(
+                    getQNameWithIdentityNS(ConfigElements.REQUIRED_CLAIM_URIS)));
+            
+            // get the token validators by type
+            parseTokenValidators(oauthElem.getFirstChildWithName(
+                    getQNameWithIdentityNS(ConfigElements.TOKEN_VALIDATORS)));
 
             // read default timeout periods
             parseDefaultValidityPeriods(oauthElem);
@@ -144,6 +196,18 @@ public class OAuthServerConfiguration {
 
             // read supported response types
             parseSupportedResponseTypesConfig(oauthElem);
+            
+            // read JWT generator config
+            parseAuthorizationContextTokenGeneratorConfig(oauthElem);
+
+            // read the assertions user name config
+            parseEnableAssertionsUserNameConfig(oauthElem);
+
+            // read access token partitioning config
+            parseAccessTokenPartitioningConfig(oauthElem);
+
+            // read access token partitioning domains config
+            parseAccessTokenPartitioningDomainsConfig(oauthElem);
 
         } catch (ServerConfigurationException e) {
             log.error("Error when reading the OAuth Configurations. " +
@@ -178,6 +242,51 @@ public class OAuthServerConfiguration {
     public List<String> getSupportedResponseTypes() {
         return supportedResponseTypes;
     }
+    
+    public List<String> getRequiredHeaderClaimUris() {
+        return requiredHeaderClaimUris;
+   
+    }
+
+    public boolean isAccessTokenPartitioningEnabled() {
+        return accessTokenPartitioningEnabled;
+    }
+
+    public boolean isUserNameAssertionEnabled() {
+        return assertionsUserNameEnabled;
+    }
+
+    public String getAccessTokenPartitioningDomains() {
+        return accessTokenPartitioningDomains;
+    }
+
+    private QName getQNameWithIdentityNS(String localPart) {
+        return new QName(IdentityConfigParser.IDENTITY_DEFAULT_NAMESPACE, localPart);
+    }
+
+    public boolean isAuthContextTokGenEnabled() {
+        return isAuthContextTokGenEnabled;
+    }
+
+    public String getTokenGeneratorImplClass() {
+        return tokenGeneratorImplClass;
+    }
+
+    public String getSignatureAlgorithm() {
+        return signatureAlgorithm;
+    }
+
+    public String getConsumerDialectURI() {
+        return consumerDialectURI;
+    }
+
+    public String getClaimsRetrieverImplClass() {
+        return claimsRetrieverImplClass;
+    }
+
+    public String getAuthorizationContextTTL() {
+        return authContextTTL;
+    }
 
     public TokenPersistencePreprocessor getTokenPersistencePreprocessor()
             throws IdentityOAuth2Exception {
@@ -186,9 +295,7 @@ public class OAuthServerConfiguration {
         if (tokenPersistencePreprocessor == null) {
             synchronized (this) {
                 try {
-                    // create an instance of the TokenPersistencePreprocessor
-                    Class clazz = Thread.currentThread().getContextClassLoader().loadClass(
-                            tokenPersistencePreProcessorClassName);
+                    Class clazz = this.getClass().getClassLoader().loadClass(tokenPersistencePreProcessorClassName);
                     tokenPersistencePreprocessor = (TokenPersistencePreprocessor) clazz.newInstance();
 
                     if (log.isDebugEnabled()) {
@@ -233,6 +340,56 @@ public class OAuthServerConfiguration {
         // if no callback handlers are registered, print a WARN
         if (!(callbackHandlerCount > 0)) {
             warnOnFaultyConfiguration("No AuthorizationCallbackHandler elements were found.");
+        }
+    }
+    
+    private void parseRequiredHeaderClaimUris(OMElement requiredClaimUrisElem) {
+        if (requiredClaimUrisElem == null) {
+            return;
+        }
+
+        Iterator claimUris = requiredClaimUrisElem.getChildrenWithLocalName(
+                ConfigElements.CLAIM_URI);
+        if (claimUris != null) {
+            for (; claimUris.hasNext(); ) {
+                OMElement claimUri =  ((OMElement) claimUris.next());
+                if (claimUri != null) {
+                   requiredHeaderClaimUris.add(claimUri.getText());
+                }
+            }
+        }
+
+    }
+    
+    private void parseTokenValidators(OMElement tokenValidators) {
+        if (tokenValidators == null) {
+            return;
+        }
+
+        Iterator validators = tokenValidators.getChildrenWithLocalName(
+                ConfigElements.TOKEN_VALIDATOR);
+        if (validators != null) {
+            for (; validators.hasNext(); ) {
+                OMElement validator =  ((OMElement) validators.next());
+                if (validator != null) {
+                   OAuth2TokenValidator tokenValidator = null;
+                   String clazzName = null;
+                try {
+                    clazzName = validator.getAttributeValue(getQNameWithIdentityNS(ConfigElements.TOKEN_CLASS_ATTR));
+                    Class clazz = Thread.currentThread().getContextClassLoader().loadClass(clazzName);
+                    tokenValidator = (OAuth2TokenValidator) clazz.newInstance();
+                } catch (ClassNotFoundException e) {
+                    log.error("Class not in build path "+clazzName,e);
+                } catch (InstantiationException e) {
+                    log.error("Class initialization error "+clazzName,e);
+                } catch (IllegalAccessException e) {
+                    log.error("Class access error "+clazzName,e);
+
+                }
+                   String type = validator.getAttributeValue(getQNameWithIdentityNS(ConfigElements.TOKEN_TYPE_ATTR));
+                   TokenValidationHandler.getInstance().addTokenValidator(type, tokenValidator);
+                }
+            }
         }
     }
 
@@ -347,11 +504,56 @@ public class OAuthServerConfiguration {
         }
     }
 
+    private void parseAccessTokenPartitioningConfig(OMElement oauthConfigElem) {
+        OMElement enableAccessTokenPartitioningElem = oauthConfigElem.getFirstChildWithName(
+                getQNameWithIdentityNS(ConfigElements.ENABLE_ACCESS_TOKEN_PARTITIONING));
+        if (enableAccessTokenPartitioningElem != null) {
+            accessTokenPartitioningEnabled =
+                    Boolean.parseBoolean(enableAccessTokenPartitioningElem.getText());
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Enable OAuth Access Token Partitioning was set to : " +
+                    accessTokenPartitioningEnabled);
+        }
+    }
+
+    private void parseAccessTokenPartitioningDomainsConfig(OMElement oauthConfigElem) {
+        OMElement enableAccessTokenPartitioningElem = oauthConfigElem.getFirstChildWithName(
+                getQNameWithIdentityNS(ConfigElements.ACCESS_TOKEN_PARTITIONING_DOMAINS));
+        if (enableAccessTokenPartitioningElem != null) {
+            accessTokenPartitioningDomains = enableAccessTokenPartitioningElem.getText();
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Enable OAuth Access Token Partitioning Domains was set to : " +
+                    accessTokenPartitioningDomains);
+        }
+    }
+
+    private void parseEnableAssertionsUserNameConfig(OMElement oauthConfigElem) {
+        OMElement enableAssertionsElem = oauthConfigElem.getFirstChildWithName(
+                getQNameWithIdentityNS(ConfigElements.ENABLE_ASSERTIONS));
+        if (enableAssertionsElem != null) {
+            OMElement enableAssertionsUserNameElem = enableAssertionsElem.getFirstChildWithName(
+                getQNameWithIdentityNS(ConfigElements.ENABLE_ASSERTIONS_USERNAME));
+            if (enableAssertionsUserNameElem != null) {
+                assertionsUserNameEnabled =
+                        Boolean.parseBoolean(enableAssertionsUserNameElem.getText());
+            }
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Enable Assertions-UserName was set to : " +
+                    assertionsUserNameEnabled);
+        }
+    }
+
     private void parseTokenPersistencePreProcessorConfig(OMElement oauthConfigElem) {
         OMElement preprocessorConfigElem = oauthConfigElem.getFirstChildWithName(
                 getQNameWithIdentityNS(ConfigElements.TOKEN_PERSISTENCE_PREPROCESSOR));
         if (preprocessorConfigElem != null) {
-            tokenPersistencePreProcessorClassName = preprocessorConfigElem.getText();
+            tokenPersistencePreProcessorClassName = preprocessorConfigElem.getText().trim();
         }
 
         if (log.isDebugEnabled()) {
@@ -370,6 +572,7 @@ public class OAuthServerConfiguration {
         validGrantTypes.add(GrantType.CLIENT_CREDENTIALS.toString());
         validGrantTypes.add(GrantType.PASSWORD.toString());
         validGrantTypes.add(GrantType.REFRESH_TOKEN.toString());
+        validGrantTypes.add(GrantType.SAML20_BEARER_ASSERTION.toString());
 
         if (supportedGrantTypesElem != null) {
             String grantTypeStr = supportedGrantTypesElem.getText();
@@ -439,8 +642,41 @@ public class OAuthServerConfiguration {
             log.debug("Supported Response Types : " + supportedResponseTypes);
         }
     }
-
-    private QName getQNameWithIdentityNS(String localPart) {
-        return new QName(IdentityConfigParser.IDENTITY_DEFAULT_NAMESPACE, localPart);
-    }
+    
+	private void parseAuthorizationContextTokenGeneratorConfig(OMElement oauthConfigElem) {
+		OMElement authContextTokGenConfigElem =
+                oauthConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.AUTHORIZATION_CONTEXT_TOKEN_GENERATION));
+		if (authContextTokGenConfigElem != null) {
+            OMElement enableJWTGenerationConfigElem =
+                    authContextTokGenConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.ENABLED));
+			if(enableJWTGenerationConfigElem != null){
+                String enableJWTGeneration = enableJWTGenerationConfigElem.getText().trim();
+                if (enableJWTGeneration != null && JavaUtils.isTrueExplicitly(enableJWTGeneration)) {
+                    isAuthContextTokGenEnabled = true;
+                    if(authContextTokGenConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.TOKEN_GENERATOR_IMPL_CLASS)) != null){
+                        tokenGeneratorImplClass =  authContextTokGenConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.TOKEN_GENERATOR_IMPL_CLASS)).getText().trim();
+                    }
+                    if(authContextTokGenConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.CLAIMS_RETRIEVER_IMPL_CLASS)) != null){
+                        claimsRetrieverImplClass = authContextTokGenConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.CLAIMS_RETRIEVER_IMPL_CLASS)).getText().trim();
+                    }
+                    if(authContextTokGenConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.CONSUMER_DIALECT_URI)) != null){
+                        consumerDialectURI = authContextTokGenConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.CONSUMER_DIALECT_URI)).getText().trim();
+                    }
+                    if(authContextTokGenConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.SIGNATURE_ALGORITHM)) != null){
+                        signatureAlgorithm = authContextTokGenConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.SIGNATURE_ALGORITHM)).getText().trim();
+                    }
+                    if(authContextTokGenConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.SECURITY_CONTEXT_TTL)) != null){
+                        authContextTTL = authContextTokGenConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.SECURITY_CONTEXT_TTL)).getText().trim();
+                    }
+                }
+            }
+		}
+		if (log.isDebugEnabled()) {
+            if(isAuthContextTokGenEnabled){
+                log.debug("JWT Generation is enabled");
+            }else{
+			    log.debug("JWT Generation is disabled");
+            }
+		}
+	}
 }

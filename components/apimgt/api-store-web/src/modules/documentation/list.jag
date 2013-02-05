@@ -1,11 +1,11 @@
 <%
-var getAllDocumentations = function (api) {
+var getAllDocumentations = function (api,user) {
     var documentations,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        documentations = store.getAllDocumentation(api.provider, api.name, api.version);
+        documentations = store.getAllDocumentation(api.provider, api.name, api.version,user);
         if (log.isDebugEnabled()) {
             log.debug("getAllDocumentation : " + stringify(documentations));
         }
@@ -30,17 +30,10 @@ var getInlineContent = function (provider,name, version, docName) {
         if (log.isDebugEnabled()) {
             log.debug("getInlineContent for : " + docName);
         }
-        doc = {
-            provider:result.providerName,
-            name:result.apiName,
-            version:result.apiVersion,
-            docName:result.docName,
-            content:result.content
 
-        };
         return {
             error:false,
-            doc:doc
+            doc:result
         };
     } catch (e) {
         log.error(e.message);

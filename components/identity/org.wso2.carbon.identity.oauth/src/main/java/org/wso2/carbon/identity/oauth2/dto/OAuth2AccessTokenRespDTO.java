@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.identity.oauth2.dto;
 
+import org.wso2.carbon.identity.oauth2.ResponseHeader;
+
 public class OAuth2AccessTokenRespDTO {
     String tokenType;
     String accessToken;
@@ -27,6 +29,20 @@ public class OAuth2AccessTokenRespDTO {
     String errorCode;
     String errorMsg;
     long expiresIn;
+    long expiresInMillis;
+    ResponseHeader[] respHeaders;
+
+    
+    public ResponseHeader[] getRespHeaders() {
+        if (respHeaders==null){
+            return new ResponseHeader[0];
+        }
+        return respHeaders;
+    }
+
+    public void setRespHeaders(ResponseHeader[] respHeaders) {
+        this.respHeaders = respHeaders;
+    }
 
     public String getTokenType() {
         return tokenType;
@@ -90,5 +106,13 @@ public class OAuth2AccessTokenRespDTO {
 
     public void setExpiresIn(long expiresIn) {
         this.expiresIn = expiresIn;
+    }
+
+    public long getExpiresInMillis() {
+        return expiresInMillis;
+    }
+
+    public void setExpiresInMillis(long expiresInMillis) {
+        this.expiresInMillis = expiresInMillis;
     }
 }

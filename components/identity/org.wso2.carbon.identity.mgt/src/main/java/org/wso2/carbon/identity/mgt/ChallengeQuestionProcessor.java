@@ -24,6 +24,7 @@ import org.wso2.carbon.identity.mgt.dto.UserChallengesDTO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.identity.mgt.util.ClaimsMgtUtil;
 import org.wso2.carbon.identity.mgt.util.PasswordUtil;
+import org.wso2.carbon.identity.mgt.util.Utils;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -148,9 +149,11 @@ public class ChallengeQuestionProcessor {
      *  // TODO manage oder
      * @param userName
      * @param tenantId
+     * @param adminService
      * @return
      */
-    public UserChallengesDTO[] getChallengeQuestionsOfUser(String userName, int tenantId){
+    public UserChallengesDTO[] getChallengeQuestionsOfUser(String userName, int tenantId,
+                                                                            boolean adminService){
 
         ArrayList<UserChallengesDTO> challengesDTOs = new ArrayList<UserChallengesDTO>();
         try {
@@ -164,12 +167,14 @@ public class ChallengeQuestionProcessor {
                 String challengeValue = ClaimsMgtUtil.getClaimFromUserStoreManager(userName,
                                                                         tenantId, challengesUri);
 
-                String[] challengeValues = challengeValue.split(",");
+                String[] challengeValues = challengeValue.split(Utils.getChallengeSeparator());
                 if(challengeValues != null && challengeValues.length == 2){
                     UserChallengesDTO dto = new UserChallengesDTO();
                     dto.setId(challengesUri);
                     dto.setQuestion(challengeValues[0].trim());
-                    dto.setAnswer(challengeValues[1].trim());
+                    if(adminService){
+                        dto.setAnswer(challengeValues[1].trim());
+                    }
                     dto.setOrder(i);
                     dto.setPrimary(false);
                     challengesDTOs.add(dto);
@@ -213,8 +218,8 @@ public class ChallengeQuestionProcessor {
         }
 
         if(claimValue != null){
-            if(claimValue.contains(",")){
-                challengesUris = claimValue.split(",");
+            if(claimValue.contains(Utils.getChallengeSeparator())){
+                challengesUris = claimValue.split(Utils.getChallengeSeparator());
             } else {
                 challengesUris =  new String[]{claimValue.trim()};
             }
@@ -256,20 +261,25 @@ public class ChallengeQuestionProcessor {
             if (log.isDebugEnabled()) {
                 log.debug("Challenge Question from the user profile.");
             }
-            List<String> challengesUris = getChallengeQuestionUris(userName, tenantId);
+            List<String> challengesUris = new ArrayList<String>();
             String challengesUrisValue = "";
 
             if(challengesDTOs != null && challengesDTOs.length > 0) {
                 for(UserChallengesDTO dto : challengesDTOs){
                     if(dto.getId() != null){
                         if(dto.getQuestion() != null && dto.getAnswer() != null){
-                            String claimValue = dto.getQuestion().trim() + "," +
-                                    PasswordUtil.doHash(dto.getAnswer().trim());
-                            ClaimsMgtUtil.setClaimInUserStoreManager(userName,
-                                    tenantId, dto.getId().trim(), claimValue);
-                            if(!challengesUris.contains(dto.getId().trim())){
-                                challengesUris.add(dto.getId().trim());
+
+                            String oldValue = ClaimsMgtUtil.
+                                    getClaimFromUserStoreManager(userName, tenantId, dto.getId().trim());
+
+                            if(oldValue == null || !oldValue.equals(dto.getQuestion().trim() + Utils.getChallengeSeparator() +
+                                                                            dto.getAnswer().trim())){
+                                String claimValue = dto.getQuestion().trim() + Utils.getChallengeSeparator() +
+                                        PasswordUtil.doHash(dto.getAnswer().trim().toLowerCase());
+                                ClaimsMgtUtil.setClaimInUserStoreManager(userName,
+                                        tenantId, dto.getId().trim(), claimValue);
                             }
+                            challengesUris.add(dto.getId().trim());
                         }
                     }
                 }
@@ -278,9 +288,8 @@ public class ChallengeQuestionProcessor {
                     if("".equals(challengesUrisValue)){
                         challengesUrisValue = challengesUri;
                     } else {
-                        challengesUrisValue = challengesUrisValue + "," + challengesUri;
+                        challengesUrisValue = challengesUrisValue + Utils.getChallengeSeparator() + challengesUri;
                     }
-
                 }
 
                 ClaimsMgtUtil.setClaimInUserStoreManager(userName, tenantId,
@@ -309,7 +318,7 @@ public class ChallengeQuestionProcessor {
                 log.debug("Challenge Question from the user profile.");
             }
 
-            UserChallengesDTO[] storedDto = getChallengeQuestionsOfUser(userName, tenantId) ;
+            UserChallengesDTO[] storedDto = getChallengeQuestionsOfUser(userName, tenantId, true) ;
 
             for(UserChallengesDTO challengesDTO : challengesDTOs){
                 if(challengesDTO.getAnswer() == null || challengesDTO.getAnswer().trim().length() < 1){
@@ -360,7 +369,7 @@ public class ChallengeQuestionProcessor {
             claimValue = ClaimsMgtUtil.getClaimFromUserStoreManager(userName, tenantId,
                                    UserCoreConstants.ClaimTypeURIs.PRIMARY_CHALLENGES);
 
-            String[] challenges = claimValue.split(",");
+            String[] challenges = claimValue.split(Utils.getChallengeSeparator());
             for(String challenge : challenges){
                 UserChallengesDTO dto = new UserChallengesDTO();
                 String question = challenge.substring(0, challenge.indexOf("="));
@@ -403,7 +412,7 @@ public class ChallengeQuestionProcessor {
                 claimValue = ClaimsMgtUtil.getClaimFromUserStoreManager(userName, tenantId,
                                        UserCoreConstants.ClaimTypeURIs.PRIMARY_CHALLENGES);
 
-                String[] challenges = claimValue.split(",");
+                String[] challenges = claimValue.split(Utils.getChallengeSeparator());
                 for(String challenge : challenges){
                     String challengeQuestion = challenge.substring(0, challenge.indexOf("=")).trim();
                     if(challengeQuestion.equals(challengesDTO.getQuestion().trim())){

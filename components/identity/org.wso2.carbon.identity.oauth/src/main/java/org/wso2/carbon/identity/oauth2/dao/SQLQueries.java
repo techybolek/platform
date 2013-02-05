@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -33,8 +33,8 @@ public class SQLQueries {
     public static final String STORE_ACCESS_TOKEN = "INSERT INTO " +
             "IDN_OAUTH2_ACCESS_TOKEN " +
             "(ACCESS_TOKEN, REFRESH_TOKEN, CONSUMER_KEY, AUTHZ_USER, TIME_CREATED, " +
-            "VALIDITY_PERIOD, TOKEN_SCOPE, TOKEN_STATE) " +
-            "VALUES (?,?,?,?,?,?,?,?)";
+            "VALIDITY_PERIOD, TOKEN_SCOPE, TOKEN_STATE, USER_TYPE) " +
+            "VALUES (?,?,?,?,?,?,?,?,?)";
 
     public static final String REMOVE_AUTHZ_CODE = "DELETE " +
             "FROM IDN_OAUTH2_AUTHORIZATION_CODE " +
@@ -45,9 +45,24 @@ public class SQLQueries {
             "WHERE ACCESS_TOKEN = ?";
 
     public static final String VALIDATE_REFRESH_TOKEN = "SELECT ACCESS_TOKEN, AUTHZ_USER, " +
-            "TOKEN_SCOPE FROM IDN_OAUTH2_ACCESS_TOKEN " +
+            "TOKEN_SCOPE, TOKEN_STATE FROM IDN_OAUTH2_ACCESS_TOKEN " +
             "WHERE CONSUMER_KEY = ? AND REFRESH_TOKEN = ?";
 
     public static final String REMOVE_ACCESS_TOKEN = "DELETE FROM " +
             "IDN_OAUTH2_ACCESS_TOKEN WHERE ACCESS_TOKEN = ? ";
+
+    public static final String UPDATE_TOKE_STATE = "UPDATE IDN_OAUTH2_ACCESS_TOKEN SET TOKEN_STATE = ? " +
+            ",TOKEN_STATE_ID = ? WHERE CONSUMER_KEY = ? AND AUTHZ_USER = ? AND TOKEN_STATE_ID = 'NONE' AND USER_TYPE = ? ";
+
+    public static final String REVOKE_ACCESS_TOKEN_BY_CLIENT = "UPDATE IDN_OAUTH2_ACCESS_TOKEN" + " SET TOKEN_STATE=? ," +
+            " TOKEN_STATE_ID=?" + " WHERE ACCESS_TOKEN=? AND CONSUMER_KEY=?";
+
+    public static final String REVOKE_ACCESS_TOKEN_BY_RESOURCE_OWNER = "UPDATE IDN_OAUTH2_ACCESS_TOKEN " + " SET TOKEN_STATE=? ," +
+            " TOKEN_STATE_ID=?" + " WHERE CONSUMER_KEY=? AND AUTHZ_USER=? AND TOKEN_STATE=?";
+
+    public static final String GET_APPS_AUTHORIZED_BY_USER = "SELECT CONSUMER_KEY FROM IDN_OAUTH2_ACCESS_TOKEN WHERE" +
+            " AUTHZ_USER=? AND (TOKEN_STATE=? OR TOKEN_STATE=?)";
+
+    public static final String GET_TOKEN_STATE = "SELECT TOKEN_STATE FROM IDN_OAUTH2_ACCESS_TOKEN " +
+                                                 "WHERE CONSUMER_KEY = ? AND AUTHZ_USER = ? AND TOKEN_STATE_ID = 'NONE' AND USER_TYPE = ? ";
 }

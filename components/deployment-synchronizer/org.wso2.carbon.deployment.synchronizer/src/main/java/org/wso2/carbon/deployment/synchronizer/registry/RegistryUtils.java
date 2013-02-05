@@ -21,7 +21,7 @@ package org.wso2.carbon.deployment.synchronizer.registry;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.deployment.synchronizer.internal.DeploymentSynchronizerConstants;
 import org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException;
 import org.wso2.carbon.deployment.synchronizer.internal.util.ServiceReferenceHolder;
@@ -71,7 +71,7 @@ public class RegistryUtils {
         String topic = RegistryEventingConstants.TOPIC_PREFIX + absolutePath +
                 RegistryEvent.TOPIC_SEPARATOR + "#";
 
-        SuperTenantCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.startTenantFlow();
         try {
             Subscription subscription =
                     BuilderUtils.createSubscription(endpoint,
@@ -80,7 +80,7 @@ public class RegistryUtils {
             subscription.setTenantId(registry.getCallerTenantId());
             subscription.setOwner(registry.getUserName());
 
-            SuperTenantCarbonContext currentContext = SuperTenantCarbonContext.getCurrentContext();
+            PrivilegedCarbonContext currentContext = PrivilegedCarbonContext.getCurrentContext();
             currentContext.setTenantId(registry.getCallerTenantId(), true);
             currentContext.setUserRealm(registry.getUserRealm());
             currentContext.setUsername(registry.getUserName());
@@ -90,7 +90,7 @@ public class RegistryUtils {
             throw new DeploymentSynchronizerException("Error while subscribing for registry " +
                     "events on collection: " + absolutePath, e);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -107,13 +107,13 @@ public class RegistryUtils {
             throw new IllegalStateException("Registry eventing service unavailable");
         }
 
-        SuperTenantCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.startTenantFlow();
         try {
-            SuperTenantCarbonContext currentContext = SuperTenantCarbonContext.getCurrentContext();
+            PrivilegedCarbonContext currentContext = PrivilegedCarbonContext.getCurrentContext();
             currentContext.setTenantId(tenantId, true);
             return eventingService.unsubscribe(subscriptionId);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 

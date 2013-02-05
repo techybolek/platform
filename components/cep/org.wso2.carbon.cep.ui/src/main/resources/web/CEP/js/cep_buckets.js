@@ -116,7 +116,7 @@ function addXMLInputProperty() {
         }
     }
 
-    addInputPropertyToSession(propName.value, propValue.value, propType.value, 'xml');
+    addInputPropertyToSession(propName.value, propType.value, propValue.value, '', 'xml');
     //add new row
     var newTableRow = propertyTable.insertRow(propertyTable.rows.length);
     var newCell = newTableRow.insertCell(0);
@@ -141,6 +141,7 @@ function addXMLInputProperty() {
 
 function addTupleInputProperty() {
     var propName = document.getElementById("inputTuplePropName");
+    var propInputName = document.getElementById("inputTuplePropInputName");
     var propDataType = document.getElementById("inputTuplePropertyDataTypes")[document.getElementById("inputTuplePropertyDataTypes").selectedIndex];
     var propType = document.getElementById("inputTuplePropertyTypes")[document.getElementById("inputTuplePropertyTypes").selectedIndex];
     var propertyTable = document.getElementById("inputTuplePropertyTable");
@@ -150,6 +151,9 @@ function addTupleInputProperty() {
 
     if (propName.value == "") {
         error = "Name field is empty.\n";
+    }
+    if (propInputName.value == "") {
+        error = "Input Name field is empty.\n";
     }
     if (propDataType.value == "") {
         error = "Data Type field is empty.\n";
@@ -175,7 +179,7 @@ function addTupleInputProperty() {
         }
     }
 
-    addInputPropertyToSession(propName.value, propDataType.value, propType.value, 'tuple');
+    addInputPropertyToSession(propName.value,  propType.value,propInputName.value,propDataType.value, 'tuple');
     //add new row
     var newTableRow = propertyTable.insertRow(propertyTable.rows.length);
     var newCell = newTableRow.insertCell(0);
@@ -183,20 +187,25 @@ function addTupleInputProperty() {
     YAHOO.util.Dom.addClass(newCell, "property-names");
 
     var newCel2 = newTableRow.insertCell(1);
-    newCel2.innerHTML = propDataType.value;
+    newCel2.innerHTML = propInputName.value;
 
     var newCel3 = newTableRow.insertCell(2);
-    newCel3.innerHTML = propType.value;
+    newCel3.innerHTML = propDataType.value;
 
     var newCel4 = newTableRow.insertCell(3);
-    newCel4.innerHTML = ' <a class="icon-link" style="background-image:url(../admin/images/delete.gif)" onclick="removeInputProperty(this,\'tuple\')">Delete</a>';
+    newCel4.innerHTML = propType.value;
+
+    var newCel5 = newTableRow.insertCell(4);
+    newCel5.innerHTML = ' <a class="icon-link" style="background-image:url(../admin/images/delete.gif)" onclick="removeInputProperty(this,\'tuple\')">Delete</a>';
 
     propName.value = "";
+    propInputName.value = "";
     noPropertyDiv.style.display = "none";
     //    showAddProperty();
 }
 function addMapInputProperty() {
     var propName = document.getElementById("inputMapPropName");
+    var propInputName = document.getElementById("inputMapPropInputName");
     var propType = document.getElementById("inputMapPropertyTypes")[document.getElementById("inputMapPropertyTypes").selectedIndex];
     var propertyTable = document.getElementById("inputMapPropertyTable");
     var noPropertyDiv = document.getElementById("noInputMapPropertyDiv");
@@ -204,6 +213,9 @@ function addMapInputProperty() {
     var error = "";
 
     if (propName.value == "") {
+        error = "Name field is empty.\n";
+    }
+    if (propInputName.value == "") {
         error = "Name field is empty.\n";
     }
     if (propType.value == "") {
@@ -227,20 +239,24 @@ function addMapInputProperty() {
         }
     }
 
-    addInputPropertyToSession(propName.value, '', propType.value, 'map');
+    addInputPropertyToSession(propName.value, propType.value, propInputName.value,'', 'map');
     //add new row
     var newTableRow = propertyTable.insertRow(propertyTable.rows.length);
     var newCell = newTableRow.insertCell(0);
     newCell.innerHTML = propName.value;
     YAHOO.util.Dom.addClass(newCell, "property-names");
 
-    var newCel3 = newTableRow.insertCell(1);
+    var newCel2 = newTableRow.insertCell(1);
+    newCel2.innerHTML = propInputName.value;
+
+    var newCel3 = newTableRow.insertCell(2);
     newCel3.innerHTML = propType.value;
 
-    var newCel4 = newTableRow.insertCell(2);
+    var newCel4 = newTableRow.insertCell(3);
     newCel4.innerHTML = ' <a class="icon-link" style="background-image:url(../admin/images/delete.gif)" onclick="removeInputProperty(this,\'tuple\')">Delete</a>';
 
     propName.value = "";
+    propInputName.value = "";
     noPropertyDiv.style.display = "none";
     //    showAddProperty();
 }
@@ -278,71 +294,11 @@ function showAddQuery() {
     }
 }
 
-/**
- * Output Property
- */
-function addOutputElementProperty() {
-    document.getElementById("noOutputElementPropertyDiv").style.display = "none";
-    var xmlPropName = document.getElementById("xmlPropName");
-    var xmlFieldName = document.getElementById("xmlFieldName");
-    var xmlFieldType = document.getElementById("outputPropertyTypes")[document.getElementById("outputPropertyTypes").selectedIndex];
-    var propertyTable = document.getElementById("outputElementPropertyTable");
-
-    var error = "";
-
-    if (xmlPropName.value == "") {
-        error = "Name field is empty.\n";
-    }
-    if (xmlFieldName.value == "") {
-        error = "XML Name field is empty.\n";
-    }
-    if (xmlFieldType.value == "") {
-        error = "XML Type field is empty.\n";
-    }
-
-    if (error != "") {
-        CARBON.showErrorDialog(error);
-        return;
-    }
-
-    addOutputMappingPropertyToSession(xmlPropName.value, xmlFieldName.value, xmlFieldType.value);
-    propertyTable.style.display = "";
-
-    //Check for duplications
-    var topicNamesArr = YAHOO.util.Dom.getElementsByClassName("property-names");
-    var foundDuplication = false;
-    for (var i = 0; i < topicNamesArr.length; i++) {
-        if (topicNamesArr[i].innerHTML == xmlPropName.value) {
-            foundDuplication = true;
-            CARBON.showErrorDialog("Duplicated Entry");
-            return;
-        }
-    }
-
-    //add new row
-    var newTableRow = propertyTable.insertRow(propertyTable.rows.length);
-    var newCell = newTableRow.insertCell(0);
-    newCell.innerHTML = xmlPropName.value;
-    YAHOO.util.Dom.addClass(newCell, "property-names");
-
-    var newCel2 = newTableRow.insertCell(1);
-    newCel2.innerHTML = xmlFieldName.value;
-
-    var newCel3 = newTableRow.insertCell(2);
-    newCel3.innerHTML = xmlFieldType.value;
-
-    var newCel4 = newTableRow.insertCell(3);
-    newCel4.innerHTML = ' <a class="icon-link" style="background-image:url(../admin/images/delete.gif)" onclick="removeOutputProperty(this,\'element\')">Delete</a>';
-
-
-    xmlPropName.value = "";
-    xmlFieldName.value = "";
-    //        xmlFieldType.value = "";
-    //        showAddProperty();
-}
 
 function addOutputTupleProperty(dataType) {
     var propName = document.getElementById("output" + dataType + "DataPropName");
+    var propValueOf = document.getElementById("output" + dataType + "DataPropValueOf");
+    var propType = document.getElementById("output" + dataType + "DataPropType");
     var propertyTable = document.getElementById("output" + dataType + "DataTable");
     var noPropertyDiv = document.getElementById("noOutput" + dataType + "Data");
 
@@ -352,6 +308,10 @@ function addOutputTupleProperty(dataType) {
         error = "Name field is empty.\n";
     }
 
+    if (propValueOf.value == "") {
+        error = "Value Of field is empty.\n";
+    }
+
     if (error != "") {
         CARBON.showErrorDialog(error);
         return;
@@ -370,23 +330,32 @@ function addOutputTupleProperty(dataType) {
 //    }
 
 
-    addOutputTupleDataPropertyToSession(propName.value, dataType);
+    addOutputTupleDataPropertyToSession(propName.value, propValueOf.value, propType.value, dataType);
     //add new row
     var newTableRow = propertyTable.insertRow(propertyTable.rows.length);
-    var newCell = newTableRow.insertCell(0);
-    newCell.innerHTML = propName.value;
-    YAHOO.util.Dom.addClass(newCell, "property-names");
+    var newCell0 = newTableRow.insertCell(0);
+    newCell0.innerHTML = propName.value;
+    YAHOO.util.Dom.addClass(newCell0, "property-names");
 
-    var newCel2 = newTableRow.insertCell(1);
-    newCel2.innerHTML = ' <a class="icon-link" style="background-image:url(../admin/images/delete.gif)" onclick="removeOutputProperty(this,\'' + dataType + '\')">Delete</a>';
+    var newCell1 = newTableRow.insertCell(1);
+    newCell1.innerHTML = propValueOf.value;
+
+    var newCell2 = newTableRow.insertCell(2);
+    newCell2.innerHTML = propType.value;
+
+    var newCel3 = newTableRow.insertCell(3);
+    newCel3.innerHTML = ' <a class="icon-link" style="background-image:url(../admin/images/delete.gif)" onclick="removeOutputProperty(this,\'' + dataType + '\')">Delete</a>';
 
     propName.value = "";
+    propValueOf.value = "";
     noPropertyDiv.style.display = "none";
     //    propType.value = "";
     //    showAddProperty();
 }
+
 function addOutputMapProperty() {
     var propName = document.getElementById("outputMapPropName");
+    var propValueOf = document.getElementById("outputMapPropValueOf");
     var propertyTable = document.getElementById("outputMapPropertiesTable");
     var noPropertyDiv = document.getElementById("noOutputMapProperties");
 
@@ -396,6 +365,10 @@ function addOutputMapProperty() {
         error = "Name field is empty.\n";
     }
 
+    if (propValueOf.value == "") {
+        error = "Value Of field is empty.\n";
+    }
+
     if (error != "") {
         CARBON.showErrorDialog(error);
         return;
@@ -414,17 +387,21 @@ function addOutputMapProperty() {
 //    }
 
 
-    addOutputMapDataPropertyToSession(propName.value);
+    addOutputMapDataPropertyToSession(propName.value, propValueOf.value);
     //add new row
     var newTableRow = propertyTable.insertRow(propertyTable.rows.length);
-    var newCell = newTableRow.insertCell(0);
-    newCell.innerHTML = propName.value;
-    YAHOO.util.Dom.addClass(newCell, "property-names");
+    var newCell0 = newTableRow.insertCell(0);
+    newCell0.innerHTML = propName.value;
+    YAHOO.util.Dom.addClass(newCell0, "property-names");
 
-    var newCel2 = newTableRow.insertCell(1);
-    newCel2.innerHTML = ' <a class="icon-link" style="background-image:url(../admin/images/delete.gif)" onclick="removeOutputProperty(this,\'' + dataType + '\')">Delete</a>';
+    var newCell1 = newTableRow.insertCell(1);
+    newCell1.innerHTML = propValueOf.value;
+
+    var newCel2 = newTableRow.insertCell(2);
+    newCel2.innerHTML = ' <a class="icon-link" style="background-image:url(../admin/images/delete.gif)" onclick="removeOutputProperty(this,\'' + 'map' + '\')">Delete</a>';
 
     propName.value = "";
+    propValueOf.value = "";
     noPropertyDiv.style.display = "none";
     //    propType.value = "";
     //    showAddProperty();
@@ -452,18 +429,18 @@ function addNewInputToList() {
     var brokerName = document.getElementById("inputBrokerName")[document.getElementById("inputBrokerName").selectedIndex];
     var mappingStream = document.getElementById("mappingStream");
 
-    if (!addInputToList(topicsTable.rows.length - 1,false)) {
+    if (!addInputToList(topicsTable.rows.length - 1, false)) {
         return;
 
     }
     var newTableRow = topicsTable.insertRow(topicsTable.rows.length);
     var newInputTopicCell = newTableRow.insertCell(0);
     newInputTopicCell.innerHTML = '<input type="checkbox" name="inputs"' +
-                        'value="' + topicName.value + '"' +
-                        'onclick="resetInputVars()" class="chkBox"/>' +
-                        '<a href="cep_input.jsp?index=' + (topicsTable.rows.length - 2) + '">' + topicName.value + '</a>';
+        'value="' + topicName.value + '"' +
+        'onclick="resetInputVars()" class="chkBox"/>' +
+        '<a href="cep_input.jsp?index=' + (topicsTable.rows.length - 2) + '">' + topicName.value + '</a>';
     var newInputStreamCell = newTableRow.insertCell(1);
-    newInputStreamCell.innerHTML =  topicName.value ;
+    newInputStreamCell.innerHTML =  mappingStream.value ;
     var newInputBrokerCell = newTableRow.insertCell(2);
     newInputBrokerCell.innerHTML =  brokerName.value ;
 
@@ -488,10 +465,14 @@ function addInputToList(index,edit) {
     var brokerName = document.getElementById("inputBrokerName")[document.getElementById("inputBrokerName").selectedIndex];
     var mappingType = document.getElementById("inputMappingType")[document.getElementById("inputMappingType").selectedIndex];
     var mappingStream = document.getElementById("mappingStream");
+    var eventClass = document.getElementById("eventClassName")[document.getElementById("eventClassName").selectedIndex];
 
     if (topicName.value == "") {
         CARBON.showErrorDialog("Topic is empty");
         return false;
+    }
+    if (eventClass.value == "Class") {
+        eventClass = document.getElementById("inputEventClass");
     }
     var reWhiteSpace = new RegExp("^[a-zA-Z0-9_/#?.*-]+$");
     // Check for white space
@@ -562,7 +543,7 @@ function addInputToList(index,edit) {
         }
     }
 
-    addInputTopicToSession(topicName.value, brokerName.value, mappingStream.value, index, '', mappingType.value,edit);
+    addInputTopicToSession(topicName.value, brokerName.value, mappingStream.value, index, eventClass.value, mappingType.value, edit);
     return true;
 }
 
@@ -636,25 +617,16 @@ function addQueryToList(index,edit) {
         CARBON.showErrorDialog("Please add a broker.");
         return false;
     }
-    var query;
-    var type;
-    if (document.getElementById("expressionRegistryRd").checked) {
-        query = document.getElementById("expressionKey");
-        type = "registry";
-    } else {
-        query = document.getElementById("querySource");
-        type = "inline";
-    }
-
+    var query = document.getElementById("querySource");
+    var type = "inline";
 
     var queryName = document.getElementById("queryName");
-    var documentElement = document.getElementById("documentElement");
-    var namespace = document.getElementById("namespace");
     var topicName = document.getElementById("newTopic");
     var brokerName = document.getElementById("outputBrokerName")[document.getElementById("outputBrokerName").selectedIndex];
     var outputMapping = document.getElementById("outputMapping")[document.getElementById("outputMapping").selectedIndex];
 
     var xmlMappingText = document.getElementById("xmlSourceText");
+    var textMappingText = document.getElementById("textSourceText");
 
     if (queryName.value == "") {
         CARBON.showErrorDialog("Query Name is empty");
@@ -678,7 +650,7 @@ function addQueryToList(index,edit) {
      CARBON.showErrorDialog("Topic is empty");
      return;
      }*/
-    addQueryToSession(type, queryName.value, query.value, topicName.value, brokerName.value, outputMapping.value, namespace.value, documentElement.value, xmlMappingText.value, index,edit);
+    addQueryToSession(type, queryName.value, query.value, topicName.value, brokerName.value, outputMapping.value, xmlMappingText.value, textMappingText.value, index,edit);
     return true;
 }
 
@@ -686,16 +658,13 @@ function clearOutputFields() {
     document.getElementById("queryName").value = "";
     document.getElementById("newTopic").value = "";
     document.getElementById("xmlSourceText").value = "";
+    document.getElementById("textSourceText").value = "";
     document.getElementById("querySource").value = "";
-    document.getElementById("documentElement").value = "";
-    document.getElementById("namespace").value = "";
 
-    clearDataInTable("outputElementPropertyTable");
     clearDataInTable("outputMetaDataTable");
     clearDataInTable("outputCorrelationDataTable");
     clearDataInTable("outputPayloadDataTable");
 
-    document.getElementById("noOutputElementPropertyDiv").style.display = "";
     document.getElementById("noOutputMetaData").style.display = "";
     document.getElementById("noOutputCorrelationData").style.display = "";
     document.getElementById("noOutputPayloadData").style.display = "";
@@ -710,7 +679,21 @@ function finishAddBucketWizard() {
     if (providerConfigNames.value != "") {
         var providerConfigNamesArray = providerConfigNames.value.substr(2).split('::');
         for (var i = 0; i < providerConfigNamesArray.length; i++) {
-            providerConfigValues = providerConfigValues + "-__-"+providerConfigNamesArray[i]+ "-_-"+ document.getElementById("providerConfig::" + engineProvider.value + '::'+providerConfigNamesArray[i]).value;
+            if(providerConfigNamesArray[i]=="siddhi.enable.distributed.processing"){//siddhi.persistence.snapshot.time.interval.minutes
+                if(document.getElementById("providerConfig::" + engineProvider.value + '::'+providerConfigNamesArray[i]).value==undefined||document.getElementById("providerConfig::" + engineProvider.value + '::'+providerConfigNamesArray[i]).value==""){
+                    providerConfigValues = providerConfigValues + "-__-"+providerConfigNamesArray[i]+ "-_-"+ "false";
+                }   else{
+                    providerConfigValues = providerConfigValues + "-__-"+providerConfigNamesArray[i]+ "-_-"+ document.getElementById("providerConfig::" + engineProvider.value + '::'+providerConfigNamesArray[i]).value;
+                }
+            } else if(providerConfigNamesArray[i]=="siddhi.persistence.snapshot.time.interval.minutes"){
+                if(document.getElementById("providerConfig::" + engineProvider.value + '::'+providerConfigNamesArray[i]).value==undefined||document.getElementById("providerConfig::" + engineProvider.value + '::'+providerConfigNamesArray[i]).value==""){
+                    providerConfigValues = providerConfigValues + "-__-"+providerConfigNamesArray[i]+ "-_-"+ "0";
+                }   else{
+                    providerConfigValues = providerConfigValues + "-__-"+providerConfigNamesArray[i]+ "-_-"+ document.getElementById("providerConfig::" + engineProvider.value + '::'+providerConfigNamesArray[i]).value;
+                }
+            }  else{
+                providerConfigValues = providerConfigValues + "-__-"+providerConfigNamesArray[i]+ "-_-"+ document.getElementById("providerConfig::" + engineProvider.value + '::'+providerConfigNamesArray[i]).value;
+            }
         }
         providerConfigValues=providerConfigValues.substr(4);
     }
@@ -805,7 +788,7 @@ function finishEditBucketWizard() {
 }
 
 
-function addInputPropertyToSession(propName, propValue, propType, format) {
+function addInputPropertyToSession(propName, propType, propValue1, propValue2,   format) {
     var callback =
     {
         success:function (o) {
@@ -819,11 +802,11 @@ function addInputPropertyToSession(propName, propValue, propType, format) {
             }
         }
     };
-    var request = YAHOO.util.Connect.asyncRequest('POST', "cep_add_input_property.jsp", callback, "propName=" + propName + "&propValue=" + propValue + "&propType=" + propType + "&format=" + format);
+    var request = YAHOO.util.Connect.asyncRequest('POST', "cep_add_input_property.jsp", callback, "propName=" + propName +  "&propType=" + propType +"&propValue1=" + propValue1+"&propValue2=" + propValue2 + "&format=" + format);
 
 }
 
-function addOutputTupleDataPropertyToSession(propName, dataType) {
+function addOutputTupleDataPropertyToSession(propName, valueOf, type ,dataType) {
     var callback =
     {
         success:function (o) {
@@ -837,11 +820,11 @@ function addOutputTupleDataPropertyToSession(propName, dataType) {
             }
         }
     };
-    var request = YAHOO.util.Connect.asyncRequest('POST', "cep_add_output_mapping_property.jsp", callback, "propName=" + propName + "&dataType=" + dataType + "&format=tuple");
+    var request = YAHOO.util.Connect.asyncRequest('POST', "cep_add_output_mapping_property.jsp", callback, "propName=" + propName + "&valueOf=" + valueOf + "&type=" + type + "&dataType=" + dataType + "&format=tuple");
 
 }
 
-function addOutputMapDataPropertyToSession(propName) {
+function addOutputMapDataPropertyToSession(propName,valueOf) {
     var callback =
     {
         success:function (o) {
@@ -855,7 +838,7 @@ function addOutputMapDataPropertyToSession(propName) {
             }
         }
     };
-    var request = YAHOO.util.Connect.asyncRequest('POST', "cep_add_output_mapping_property.jsp", callback, "propName=" + propName + "&format=map");
+    var request = YAHOO.util.Connect.asyncRequest('POST', "cep_add_output_mapping_property.jsp", callback, "propName=" + propName + "&valueOf=" + valueOf + "&format=map");
 
 }
 
@@ -876,8 +859,7 @@ function addNSprefixesToSession(prefix, nameSpace) {
 
 }
 
-function addInputTopicToSession(topic, brokerName, mappingStream, tableIndex, eventClassName,
-                                mappingType,edit) {
+function addInputTopicToSession(topic, brokerName, mappingStream, tableIndex, eventClassName, mappingType, edit) {
     var callback =
     {
         success:function (o) {
@@ -891,7 +873,7 @@ function addInputTopicToSession(topic, brokerName, mappingStream, tableIndex, ev
             }
         }
     };
-    var request = YAHOO.util.Connect.asyncRequest('POST', "cep_add_input.jsp", callback, "topic=" + topic + "&brokerName=" + brokerName + "&mappingStream=" + mappingStream + "&tableIndex=" + tableIndex + "&eventClassName=" + eventClassName + "&mappingType=" + mappingType);
+    var request = YAHOO.util.Connect.asyncRequest('POST', "cep_add_input.jsp", callback, "topic=" + topic + "&brokerName=" + brokerName + "&mappingStream=" + mappingStream + "&tableIndex=" + tableIndex + "&queryEventType=" + eventClassName + "&mappingType=" + mappingType);
 
 }
 
@@ -913,8 +895,7 @@ function addOutputMappingPropertyToSession(propName, propXMLFieldName, propXMLFi
     var request = YAHOO.util.Connect.asyncRequest('POST', "cep_add_output_mapping_property.jsp", callback, "propName=" + propName + "&propXMLFieldName=" + propXMLFieldName + "&propXMLFieldType=" + propXMLFieldType + "&format=element");
 }
 
-function addQueryToSession(type, queryName, sourceText, outputTopic, brokerName, outputMapping,
-                           nameSpace, documentElement, xmlMappingText, tableIndex,edit) {
+function addQueryToSession(type, queryName, sourceText, outputTopic, brokerName, outputMapping, xmlMappingText, textMappingText, tableIndex, edit) {
     var callback =
     {
         success:function (o) {
@@ -930,7 +911,7 @@ function addQueryToSession(type, queryName, sourceText, outputTopic, brokerName,
     };
 
 
-    var request = YAHOO.util.Connect.asyncRequest('POST', "cep_add_query.jsp", callback, "type=" + type + "&queryName=" + queryName + "&sourceText=" + sourceText + "&outputTopic=" + outputTopic + "&brokerName=" + brokerName + "&nameSpace=" + nameSpace + "&documentElement=" + documentElement + "&xmlMappingText=" + xmlMappingText + "&tableIndex=" + tableIndex + "&outputMapping=" + outputMapping);
+    var request = YAHOO.util.Connect.asyncRequest('POST', "cep_add_query.jsp", callback, "type=" + type + "&queryName=" + queryName + "&sourceText=" + sourceText + "&outputTopic=" + outputTopic + "&brokerName=" + brokerName + "&xmlMappingText=" + xmlMappingText + "&textMappingText=" + textMappingText + "&tableIndex=" + tableIndex + "&outputMapping=" + outputMapping);
 }
 
 
@@ -1012,15 +993,38 @@ function setInputMapping() {
     }
 }
 
+
+function setBackendRuntimeConfigurations() {
+    var backendRuntimeConfigurationElement = document.getElementById("engineProviders");
+    var selectedType = backendRuntimeConfigurationElement[backendRuntimeConfigurationElement.selectedIndex].value;
+    populateElementDisplay(document.getElementsByName("SiddhiCEPRuntime"), "none");
+    if (selectedType == "SiddhiCEPRuntime") {
+        populateElementDisplay(document.getElementsByName("SiddhiCEPRuntime"), "");
+    }
+}
+
+
+function setEventClass() {
+    var inputEventClass = document.getElementById("eventClassName");
+    var selectedType = inputEventClass[inputEventClass.selectedIndex].value;
+    populateElementDisplay(document.getElementsByName("inputEventClass"), "none");
+    if (selectedType == "Class") {
+        populateElementDisplay(document.getElementsByName("inputEventClass"), "");
+    }
+}
+
 function setOutputMapping() {
     var outputMappingElement = document.getElementById("outputMapping");
     var selectedType = outputMappingElement[outputMappingElement.selectedIndex].value;
     populateElementDisplay(document.getElementsByName("outputXMLMapping"), "none");
+    populateElementDisplay(document.getElementsByName("outputTextMapping"), "none");
     populateElementDisplay(document.getElementsByName("outputElementMapping"), "none");
     populateElementDisplay(document.getElementsByName("outputTupleMapping"), "none");
     populateElementDisplay(document.getElementsByName("outputMapMapping"), "none");
     if (selectedType == "xml") {
         populateElementDisplay(document.getElementsByName("outputXMLMapping"), "");
+    } else if (selectedType == "text") {
+        populateElementDisplay(document.getElementsByName("outputTextMapping"), "");
     } else if (selectedType == "element") {
         populateElementDisplay(document.getElementsByName("outputElementMapping"), "");
     } else if (selectedType == "tuple") {
@@ -1036,22 +1040,3 @@ function populateElementDisplay(elements, display) {
     }
 }
 
-var elementId;
-var rootPath;
-
-function showRegistryBrowser(id, path) {
-    elementId = id;
-    rootPath = path;
-    showResourceTree(id, setValue, path);
-}
-
-function setValue() {
-    if (rootPath == "/_system/config") {
-        $(elementId).value = $(elementId).value.replace(rootPath, "");
-        $(elementId).value = $(elementId).value.substring(1);
-
-//        $(elementId).value = $(elementId).value.replace(rootPath, "conf:");
-    } else if (rootPath == "/_system/governance") {
-        $(elementId).value = $(elementId).value.replace(rootPath, "gov:");
-    }
-}

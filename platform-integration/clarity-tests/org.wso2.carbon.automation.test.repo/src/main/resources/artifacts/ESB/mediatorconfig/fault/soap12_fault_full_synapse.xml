@@ -9,7 +9,8 @@
             <detail>fault details by automation</detail>
             <node>automation-node</node>
         </makefault>
-        <header name="To" expression="get-property('ReplyTo')"/>
+        <property name="RESPONSE" value="true"/>
+        <header name="To" action="remove"/>
         <log level="full"/>
         <send/>
     </sequence>
@@ -27,6 +28,22 @@
         <out>
             <send/>
         </out>
+    </sequence>
+
+    <sequence name="fault">
+        <makefault version="soap12">
+            <code xmlns:tns="http://www.w3.org/2003/05/soap-envelope" value="tns:Receiver"/>
+            <reason value="Default Fault sequence Executed instead of myFaultHandler"/>
+        </makefault>
+
+        <log level="full">
+            <property name="ERROR_CODE" expression="get-property('ERROR_CODE')"/>
+            <property name="ERROR_MESSAGE" expression="get-property('ERROR_MESSAGE')"/>
+        </log>
+        <property name="RESPONSE" value="true"/>
+        <header name="To" action="remove"/>
+        <send/>
+
     </sequence>
 
 </definitions>

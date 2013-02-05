@@ -43,37 +43,13 @@
         <operation name="getBrokerNames">
             <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/cep</parameter>
         </operation>
-        <operation name="removeQuery">
-            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/cep</parameter>
-        </operation>
-        <operation name="removeAllQueries">
-            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/cep</parameter>
-        </operation>
-        <operation name="editQuery">
-            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/cep</parameter>
-        </operation>
-        <operation name="getAllQueries">
-            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/cep</parameter>
-        </operation>
-        <operation name="getAllQueryCount">
-            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/cep</parameter>
-        </operation>
-        <operation name="getAllInputs">
-            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/cep</parameter>
-        </operation>
-        <operation name="getAllInputCount">
-            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/cep</parameter>
-        </operation>
-        <operation name="removeInput">
-            <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/cep</parameter>
-        </operation>
-        <operation name="removeAllInputs">
+        <operation name="getAllBucketCount">
             <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/cep</parameter>
         </operation>
     </service>
 
-    <!--<parameter name="adminService" locked="true">true</parameter>-->
-    <!--<parameter name="hiddenService" locked="true">true</parameter>-->
-    <parameter name="adminService" locked="true">false</parameter>
-    <parameter name="hiddenService" locked="true">false</parameter>
+    <parameter name="adminService" locked="true">true</parameter>
+    <parameter name="hiddenService" locked="true">true</parameter>
+    <!--<parameter name="adminService" locked="true">false</parameter>-->
+    <!--<parameter name="hiddenService" locked="true">false</parameter>-->
 </serviceGroup>

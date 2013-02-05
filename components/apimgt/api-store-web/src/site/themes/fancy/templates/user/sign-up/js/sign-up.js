@@ -3,16 +3,35 @@ $(document).ready(function() {
 		return value == $("#newPassword").val();
 	}, "The passwords you entered do not match.");
 
+    $.validator.addMethod('noSpace', function(value, element) {
+            return !/\s/g.test(value);
+    }, 'The Name contains white spaces.');
+
+
     $("#sign-up").validate({
      submitHandler: function(form) {
-       jagg.post("/site/blocks/user/sign-up/ajax/user-add.jag", {
+    	var fieldCount = document.getElementById('fieldCount').value;
+	var allFieldsValues;
+ 	for(var i = 0; i < fieldCount; i++) {
+		var value = document.getElementById( i + '.0cliamUri').value;
+		if ( i == 0) {
+			allFieldsValues = value;
+		} else {
+			allFieldsValues = allFieldsValues + "|" + value;
+		}
+	}
+    	jagg.post("/site/blocks/user/sign-up/ajax/user-add.jag", {
             action:"addUser",
             username:$('#newUsername').val(),
-            password:$('#newPassword').val()
+            password:$('#newPassword').val(),
+            allFieldsValues:allFieldsValues
         }, function (result) {
             if (result.error == false) {
-                jagg.message({content:"User added successfully. You can now sign into the API store using the new user account.",type:"info",cbk:function(){location.href = context;}});
-
+                jagg.message({content:"User added successfully. You can now sign into the API store using the new user account.",type:"info",
+                    cbk:function() {
+                        $('#signUpRedirectForm').submit();
+                    }
+                });
             } else {
                 jagg.message({content:result.message,type:"error"});
             }
@@ -31,3 +50,14 @@ $(document).ready(function() {
         $('.password-meter').hide();
     });
 });
+
+var showMoreFields = function () {
+	$('#moreFields').show();
+	$('#moreFieldsLink').hide();
+	$('#hideFieldsLink').show();
+}
+var hideMoreFields = function () {
+	$('#moreFields').hide();
+	$('#hideFieldsLink').hide();
+	$('#moreFieldsLink').show();
+}

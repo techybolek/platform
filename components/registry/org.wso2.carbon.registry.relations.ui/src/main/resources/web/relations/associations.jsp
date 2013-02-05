@@ -105,8 +105,8 @@
                                      <option value="ownedBy">ownedBy</option>
                                      <option value="other">other</option>
                                 </select>
-                                <input type="text" name="type" id="type" disabled="disabled"
-                                       style="width:130px;margin-bottom:5px;"/>
+                                <input type="text" name="type" id="type"
+                                       style="width:130px;margin-bottom:5px;visibility:hidden;"/>
                             </td>
                         </tr>
                         <tr>

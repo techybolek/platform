@@ -36,6 +36,11 @@
     String nickName = request.getParameter("nick_name");
     String description = request.getParameter("description");
 
+    String activityStreamName = request.getParameter("activity_stream_name");
+    String activityVersion = request.getParameter("activity_version");
+    String activityNickName = request.getParameter("activity_nick_name");
+    String activityDescription = request.getParameter("activity_description");
+
     String[] propertyKeys = request.getParameterValues(PROPERTY_KEYS);
     String[] propertyValues = request.getParameterValues(PROPERTY_VALUES);
 
@@ -63,6 +68,7 @@
 
     if (setConfig != null) {    // form submitted request to set eventing config
         eventingConfigData = new EventingConfigData();
+        eventingConfigData.setPublishingEnable(true);
         if (enableServiceStats != null) {
             eventingConfigData.setServiceStatsEnable(true);
         } else {
@@ -103,18 +109,34 @@
             eventingConfigData.setDescription(description);
         }
 
+        if (activityStreamName != null) {
+            eventingConfigData.setActivityStreamName(activityStreamName);
+        }
+
+        if (activityVersion != null) {
+            eventingConfigData.setActivityStreamVersion(activityVersion);
+        }
+
+        if (activityNickName != null) {
+            eventingConfigData.setActivityStreamNickName(activityNickName);
+        }
+
+        if (activityDescription != null) {
+            eventingConfigData.setActivityStreamDescription(activityDescription);
+        }
+
         try {
             client.setEventingConfigData(eventingConfigData);
 
 %>
 <script type="text/javascript">
-    jQuery(document).init(function () {
+    /*jQuery(document).init(function () {*/
         function handleOK() {
 
         }
 
         CARBON.showInfoDialog("Eventing Configuration Successfully Updated!", handleOK);
-    });
+    /*});*/
 </script>
 <%
 } catch (Exception e) {
@@ -169,6 +191,19 @@
         description = eventingConfigData.getDescription();
     }
 
+    if (activityStreamName == null) {
+        activityStreamName = eventingConfigData.getActivityStreamName();
+    }
+    if (activityVersion == null) {
+        activityVersion = eventingConfigData.getActivityStreamVersion();
+    }
+    if(activityNickName == null){
+        activityNickName = eventingConfigData.getActivityStreamNickName();
+    }
+    if(activityDescription == null){
+        activityDescription = eventingConfigData.getActivityStreamDescription();
+    }
+
     if (properties == null) {
         Property[] propertiesDTO = eventingConfigData.getProperties();
         if (propertiesDTO != null) {
@@ -182,7 +217,41 @@
 
 %>
 
+ <style type="text/css">
+    .alert-error {
+        padding: 8px 35px 8px 14px;
+        margin-bottom: 20px;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+        border: 1px solid #eed3d7;
+        -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+        border-radius: 4px;
+        color: #b94a48;
+        background-color: #f2dede;
+    }
+</style>
+
 <script id="source" type="text/javascript">
+    $(document).ready(function(){
+        if($(".serviceConfigurationCheckBox").is(":checked")){
+                $(".serviceConfigurationInput").each(function(){
+                    $(this).removeAttr('disabled');
+                });
+           }else{
+                $(".serviceConfigurationInput").each(function(){
+                    $(this).attr('disabled','disabled');
+                })
+        }
+        if($(".activityConfigurationCheckBox").is(":checked")){
+                $(".activityConfigurationInput").each(function(){
+                     $(this).removeAttr('disabled');
+                });
+         }else{
+                $(".activityConfigurationInput").each(function(){
+                    $(this).attr('disabled','disabled');
+                });
+         }
+    });
     function showHideDiv(divId) {
         var theDiv = document.getElementById(divId);
         if (theDiv.style.display == "none") {
@@ -243,6 +312,85 @@
     function removeColumn(id) {
         $("#" + id).remove();
     }
+
+    function testServer(){
+
+        var serverUrl = document.getElementById('url').value;
+        var serverIp = serverUrl.split("://")[1].split(":")[0];
+        var authPort = serverUrl.split("://")[1].split(":")[1];
+
+        if(serverIp == null || authPort == null || serverIp == "" || authPort == ""){
+            CARBON.showInfoDialog("Please enter the URL correctly.");
+        } else{
+            jQuery.ajax({
+                            type:"GET",
+                            url:"../bampubsvcstat/test_server_ajaxprocessor.jsp",
+                            data:{action:"testServer", ip:serverIp, port:authPort},
+                            success:function(data){
+                                if(data != null && data != ""){
+                                    var result = data.replace(/\n+/g, '');
+                                    if(result == "true"){
+                                        CARBON.showInfoDialog("Successfully connected to BAM Server");
+                                    } else if(result == "false"){
+                                        CARBON.showErrorDialog("BAM Server cannot be connected!")
+                                    }
+                                }
+                            }
+                        });
+        }
+    }
+
+
+
+    function enableStatisticsStreamFields(){
+           if($(".serviceConfigurationCheckBox").is(":checked")){
+                $(".serviceConfigurationInput").each(function(){
+                    $(this).removeAttr('disabled');
+                });
+           }else{
+                $(".serviceConfigurationInput").each(function(){
+                    $(this).attr('disabled','disabled');
+                })
+           }
+    }
+    function enableActivityStreamFields(){
+         if($(".activityConfigurationCheckBox").is(":checked")){
+                $(".activityConfigurationInput").each(function(){
+                     $(this).removeAttr('disabled');
+                });
+         }else{
+                $(".activityConfigurationInput").each(function(){
+                    $(this).attr('disabled','disabled');
+                });
+         }
+    }
+
+    /*function enableActivityStreamFields() {
+            if (document.getElementsByName()[0]('enableActivityService').checked) {
+                document.getElementById('activity_stream_name').removeAttribute('disabled');
+                document.getElementById('activity_version').removeAttribute('disabled');
+                document.getElementById('activity_nick_name').removeAttribute('disabled');
+                document.getElementById('activity_description').removeAttribute('disabled');
+            } else {
+                document.getElementById('activity_stream_name').disabled = 'disabled';
+                document.getElementById('activity_version').disabled = 'disabled';
+                document.getElementById('activity_nick_name').disabled = 'disabled';
+                document.getElementById('activity_description').disabled = 'disabled';
+            }
+        }*/
+    /*function enableStatisticsStreamFields() {
+        if (document.getElementsByName()[0]('enableServiceStats').checked) {
+            document.getElementById('stream_name').removeAttribute('disabled');
+            document.getElementById('version').removeAttribute('disabled');
+            document.getElementById('nick_name').removeAttribute('disabled');
+            document.getElementById('description').removeAttribute('disabled');
+        } else {
+            document.getElementById('stream_name').disabled = 'disabled';
+            document.getElementById('version').disabled = 'disabled';
+            document.getElementById('nick_name').disabled = 'disabled';
+            document.getElementById('description').disabled = 'disabled';            
+        }
+    }*/
 </script>
 
 <div id="middle">
@@ -253,6 +401,15 @@
     <div id="workArea">
         <div id="result"></div>
         <p>&nbsp;</p>
+
+        <% if (eventingConfigData != null && !eventingConfigData.getPublishingEnable()) { %>
+            <div class="alert-error">
+                Data publishing currently disabled. To enable it configure ServiceDataPublishing to
+                'enable' in $CARBON_HOME/repository/conf/etc/bam.xml.
+            </div>
+        <%
+        }
+        %>
 
         <form action="configure_service_publisher.jsp" method="post">
             <input type="hidden" name="setConfig" value="on"/>
@@ -268,15 +425,49 @@
                     <td>
                         <% if (isServiceStatsEnable) { %>
                         <input type="checkbox" name="enableServiceStats"
-                               checked="true">&nbsp;&nbsp;&nbsp;&nbsp;
+                               checked="true"  class="serviceConfigurationCheckBox" onchange="enableStatisticsStreamFields()">&nbsp;&nbsp;&nbsp;&nbsp;
                         <% } else { %>
-                        <input type="checkbox" name="enableServiceStats">&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="checkbox" name="enableServiceStats" class="serviceConfigurationCheckBox" onchange="enableStatisticsStreamFields()">&nbsp;&nbsp;&nbsp;&nbsp;
                         <% } %>
                         <fmt:message key="enable.service.stats"/>
 
                     </td>
                 </tr>
-
+               <%-- <% if (isServiceStatsEnable) { %>--%>
+                    <tr>
+                        <td><fmt:message key="stream.name"/></td>
+                        <td><input id="stream_name" class="serviceConfigurationInput" type="text" name="stream_name" value="<%=streamName%>"/></td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="version"/></td>
+                        <td><input id="version" type="text" class="serviceConfigurationInput" name="version" value="<%=version%>"/></td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="nick.name"/></td>
+                        <td><input id="nick_name" type="text" class="serviceConfigurationInput" name="nick_name" value="<%=nickName%>"/></td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="description"/></td>
+                        <td><input id="description" type="text" class="serviceConfigurationInput" name="description" value="<%=description%>"/></td>
+                    </tr>
+<%--                <% } else { %>
+                    <tr>
+                        <td><fmt:message key="stream.name"/></td>
+                        <td><input id="stream_name" type="text" name="stream_name" value="<%=streamName%>" disabled="disabled"/></td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="version"/></td>
+                        <td><input id="version" type="text" name="version" value="<%=version%>" disabled="disabled"/></td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="nick.name"/></td>
+                        <td><input id="nick_name" type="text" name="nick_name" value="<%=nickName%>" disabled="disabled"/></td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="description"/></td>
+                        <td><input id="description" type="text" name="description" value="<%=description%>" disabled="disabled"/></td>
+                    </tr>
+                <% } %>--%>
                 <thead>
                 <tr>
                     <th colspan="4">
@@ -288,9 +479,9 @@
                     <td>
                         <% if (isMsgDumpingEnable) { %>
                         <input type="checkbox" name="enableActivityService"
-                               checked="true">&nbsp;&nbsp;&nbsp;&nbsp;
+                               checked="true" class="activityConfigurationCheckBox" onchange="enableActivityStreamFields()">&nbsp;&nbsp;&nbsp;&nbsp;
                         <% } else { %>
-                        <input type="checkbox" name="enableActivityService"
+                        <input type="checkbox" name="enableActivityService"  class="activityConfigurationCheckBox" onchange="enableActivityStreamFields()"
                                 >&nbsp;&nbsp;&nbsp;&nbsp;
                         <% } %>
                         <fmt:message key="enable.activity.service"/>
@@ -298,31 +489,49 @@
                     </td>
                 </tr>
 
-                <thead>
+                <%--<thead>
                 <tr>
                     <th colspan="4">
                         <fmt:message key="stream.definition.configuration"/>
                     </th>
                 </tr>
-                </thead>
+                </thead>--%>
 
-                <tr>
-                    <td><fmt:message key="stream.name"/></td>
-                    <td><input type="text" name="stream_name" value="<%=streamName%>"/></td>
-                </tr>
-                <tr>
-                    <td><fmt:message key="version"/></td>
-                    <td><input type="text" name="version" value="<%=version%>"/></td>
-                </tr>
-                <tr>
-                    <td><fmt:message key="nick.name"/></td>
-                    <td><input type="text" name="nick_name" value="<%=nickName%>"/></td>
-                </tr>
-                <tr>
-                    <td><fmt:message key="description"/></td>
-                    <td><input type="text" name="description" value="<%=description%>"/></td>
-                </tr>
-
+                <%--<% if (isMsgDumpingEnable) { %>--%>
+                    <tr>
+                        <td><fmt:message key="stream.name"/></td>
+                        <td><input id="activity_stream_name" class="activityConfigurationInput" type="text" name="activity_stream_name" value="<%=activityStreamName%>"/></td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="version"/></td>
+                        <td><input id="activity_version" class="activityConfigurationInput" type="text" name="activity_version" value="<%=activityVersion%>"/></td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="nick.name"/></td>
+                        <td><input id="activity_nick_name" class="activityConfigurationInput" type="text" name="activity_nick_name" value="<%=activityNickName%>"/></td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="description"/></td>
+                        <td><input id="activity_description" class="activityConfigurationInput" type="text" name="activity_description" value="<%=activityDescription%>"/></td>
+                    </tr>
+<%--                <% } else { %>
+                    <tr>
+                        <td><fmt:message key="stream.name"/></td>
+                        <td><input id="activity_stream_name" type="text" name="activity_stream_name" value="<%=activityStreamName%>" disabled="disabled"/></td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="version"/></td>
+                        <td><input id="activity_version" type="text" name="activity_version" value="<%=activityVersion%>" disabled="disabled"/></td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="nick.name"/></td>
+                        <td><input id="activity_nick_name" type="text" name="activity_nick_name" value="<%=activityNickName%>" disabled="disabled"/></td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="description"/></td>
+                        <td><input id="activity_description" type="text" name="activity_description" value="<%=activityDescription%>" disabled="disabled"/></td>
+                    </tr>
+                <% } %>--%>
 
                     <%--                    <% if (isServiceStatsEnable || isMsgDumpingEnable) { %>--%>
                 <thead>
@@ -332,10 +541,23 @@
                     </th>
                 </tr>
                 </thead>
+                <%
+                    if(!client.isCloudDeployment()){
+                %>
                 <tr>
                     <td><fmt:message key="bam.url"/></td>
-                    <td><input type="text" name="url" value="<%=url%>"/></td>
+                    <td>
+                        <input type="text" id="url" name="url" value="<%=url%>"/>
+                        <input type="button" value="Test Server" onclick="testServer()"/>
+                    </td>
                 </tr>
+                <%
+                    }else {
+                %>
+                   <input type="hidden" id="url" name="url" value="<%=client.getBAMServerURL()%>"/>
+                <%
+                    }
+                %>
                 <tr>
                     <td><fmt:message key="username"/></td>
                     <td><input type="text" name="user_name" value="<%=userName%>"/></td>
@@ -416,8 +638,13 @@
                 </tbody>
                 <tr>
                     <td colspan="4" class="buttonRow">
+                    <% if (eventingConfigData != null && eventingConfigData.getPublishingEnable()) {%>
                         <input type="submit" class="button" value="<fmt:message key="update"/>"
                                id="updateStats"/>&nbsp;&nbsp;
+                    <%    } else {  %>
+                        <input type="submit" class="button" value="<fmt:message key="update"/>"
+                               id="updateStats" disabled="disabled"/>&nbsp;&nbsp;
+                    <% } %>
                     </td>
                 </tr>
             </table>

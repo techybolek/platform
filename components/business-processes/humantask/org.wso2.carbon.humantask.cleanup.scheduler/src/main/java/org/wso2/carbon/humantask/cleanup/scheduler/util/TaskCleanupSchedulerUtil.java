@@ -18,7 +18,6 @@ package org.wso2.carbon.humantask.cleanup.scheduler.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.wso2.carbon.humantask.cleanup.scheduler.internal.HumanTaskCleanupSchedulerServiceComponent;
 import org.wso2.carbon.humantask.cleanup.scheduler.ntask.RemovableTaskCleanupJob;
 import org.wso2.carbon.humantask.core.HumanTaskConstants;
@@ -28,7 +27,6 @@ import org.wso2.carbon.humantask.core.engine.HumanTaskServerException;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.core.TaskInfo;
 import org.wso2.carbon.ntask.core.TaskManager;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -56,52 +54,28 @@ public final class TaskCleanupSchedulerUtil {
             try {
                 log.info("Initialising the task cleanup service.....");
                 HumanTaskCleanupSchedulerServiceComponent.getTaskService().registerTaskType(HumanTaskConstants.HUMANTASK_TASK_TYPE);
-                //TODO - pass the proper tenant id here.
-                SuperTenantCarbonContext.getCurrentContext().setTenantId(
-                        MultitenantConstants.SUPER_TENANT_ID);
                 TaskManager taskManager = HumanTaskCleanupSchedulerServiceComponent.getTaskService().
                         getTaskManager(HumanTaskConstants.HUMANTASK_TASK_TYPE);
 
-                TaskInfo taskInfo = new TaskInfo();
-                taskInfo.setName(HumanTaskConstants.HUMANTASK_CLEANUP_JOB);
-                taskInfo.setTaskClass(RemovableTaskCleanupJob.class.getName());
+                if (taskManager.getTask(HumanTaskConstants.HUMANTASK_CLEANUP_JOB) == null) {
+                    TaskInfo taskInfo = new TaskInfo();
+                    taskInfo.setName(HumanTaskConstants.HUMANTASK_CLEANUP_JOB);
+                    taskInfo.setTaskClass(RemovableTaskCleanupJob.class.getName());
 
-                TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
-                triggerInfo.setCronExpression(serverConfig.getTaskCleanupCronExpression());
+                    TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
+                    triggerInfo.setCronExpression(serverConfig.getTaskCleanupCronExpression());
 
-                taskInfo.setTriggerInfo(triggerInfo);
-                Map<String, String> propertyMap = new LinkedHashMap<String, String>();
-                taskInfo.setProperties(propertyMap);
-                taskManager.registerTask(taskInfo);
+                    taskInfo.setTriggerInfo(triggerInfo);
+                    Map<String, String> propertyMap = new LinkedHashMap<String, String>();
+                    taskInfo.setProperties(propertyMap);
+                    taskManager.registerTask(taskInfo);
+                }
 
                 taskManager.rescheduleTask(HumanTaskConstants.HUMANTASK_CLEANUP_JOB);
             } catch (TaskException ex) {
                 String errMsg = "Error occurred while registering task type : " + HumanTaskConstants.HUMANTASK_TASK_TYPE;
                 throw new HumanTaskServerException(errMsg, ex);
             }
-        }
-    }
-
-    /**
-     * Removes any scheduled job for task cleanup.
-     */
-    public static void deleteTaskCleanupScheduledJob() {
-        //remove the scheduled tasks.
-        try {
-            //TODO - pass the proper tenant id here.
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(
-                        MultitenantConstants.SUPER_TENANT_ID);
-            TaskManager taskManager =
-                    HumanTaskCleanupSchedulerServiceComponent.getTaskService().getTaskManager(
-                            HumanTaskConstants.HUMANTASK_TASK_TYPE);
-            if (taskManager != null) {
-                for (TaskInfo task : taskManager.getAllTasks()) {
-                    taskManager.deleteTask(task.getName());
-                }
-            }
-
-        } catch (TaskException ex) {
-            log.warn("Unable to clean-up scheduled tasks", ex);
         }
     }
 }

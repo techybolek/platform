@@ -29,6 +29,18 @@
             <icon>../entitlement/images/policy.gif</icon>
             <require-permission>/permission/admin/configure</require-permission>           
         </menu>
+		<menu>
+            <id>pdp_menu</id>
+            <i18n-key>identity.pdp</i18n-key>
+            <i18n-bundle>org.wso2.carbon.identity.entitlement.ui.i18n.Resources</i18n-bundle>
+            <parent-menu>identity_entitlement_menu</parent-menu>
+            <link>../entitlement/pdp-manage.jsp</link>
+            <region>region1</region>
+            <order>6</order>
+            <style-class>manage</style-class>
+            <icon>../entitlement/images/config.gif</icon>
+            <require-permission>/permission/admin/configure</require-permission>
+        </menu>
         <menu>         
             <id>policy_tryit_menu</id>
             <i18n-key>identity.policy.tryit</i18n-key>
@@ -36,9 +48,21 @@
             <parent-menu>identity_entitlement_menu</parent-menu>
             <link>../entitlement/create-evaluation-request.jsp</link>
             <region>region1</region>
-            <order>6</order>
+            <order>7</order>
             <style-class>manage</style-class>
             <icon>../entitlement/images/evaluate.png</icon>
+            <require-permission>/permission/admin/configure</require-permission>
+        </menu>
+        <menu>
+            <id>policy_publish_menu</id>
+            <i18n-key>identity.policy.publish</i18n-key>
+            <i18n-bundle>org.wso2.carbon.identity.entitlement.ui.i18n.Resources</i18n-bundle>
+            <parent-menu>identity_entitlement_menu</parent-menu>
+            <link>../entitlement/policy-publish.jsp</link>
+            <region>region1</region>
+            <order>8</order>
+            <style-class>manage</style-class>
+            <icon>../entitlement/images/publish.gif</icon>
             <require-permission>/permission/admin/configure</require-permission>
         </menu>
         <menu>
@@ -48,7 +72,7 @@
             <parent-menu>identity_entitlement_menu</parent-menu>
             <link>../entitlement/advance-search.jsp</link>
             <region>region1</region>
-            <order>6</order>
+            <order>9</order>
             <style-class>manage</style-class>
             <icon>../entitlement/images/search-top.png</icon>
             <require-permission>/permission/admin/configure</require-permission>

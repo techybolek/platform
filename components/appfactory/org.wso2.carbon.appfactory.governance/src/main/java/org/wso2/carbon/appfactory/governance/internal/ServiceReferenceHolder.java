@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.appfactory.governance.internal;
 
+import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -25,6 +26,7 @@ public class ServiceReferenceHolder {
 
     private RegistryService registryService;
     private RealmService realmService;
+    private AppFactoryConfiguration appFactoryConfiguration;
 
     private ServiceReferenceHolder() {
 
@@ -48,5 +50,13 @@ public class ServiceReferenceHolder {
 
     public void setRealmService(RealmService realmService) {
         this.realmService = realmService;
+    }
+
+    public AppFactoryConfiguration getAppFactoryConfiguration() {
+        return appFactoryConfiguration;
+    }
+
+    public void setAppFactoryConfiguration(AppFactoryConfiguration appFactoryConfiguration) {
+        this.appFactoryConfiguration = appFactoryConfiguration;
     }
 }

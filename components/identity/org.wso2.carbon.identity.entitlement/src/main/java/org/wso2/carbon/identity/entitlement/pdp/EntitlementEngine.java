@@ -18,6 +18,7 @@
 package org.wso2.carbon.identity.entitlement.pdp;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -29,29 +30,28 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.wso2.balana.Balana;
 import org.wso2.balana.ctx.RequestCtxFactory;
 import org.wso2.balana.ctx.AbstractRequestCtx;
 import org.wso2.balana.ctx.xacml2.RequestCtx;
 import org.wso2.balana.finder.*;
-import net.sf.jsr107cache.Cache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
-import org.wso2.carbon.caching.core.identity.IdentityCacheEntry;
-import org.wso2.carbon.caching.core.identity.IdentityCacheKey;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
+import org.wso2.carbon.identity.entitlement.cache.DecisionCache;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
+import org.wso2.carbon.identity.entitlement.pap.PolicyEditorDataFinder;
+import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyFinder;
+import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStore;
+import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreReader;
 import org.wso2.carbon.identity.entitlement.pip.CarbonAttributeFinder;
 import org.wso2.carbon.identity.entitlement.pip.PIPExtension;
-import org.wso2.carbon.identity.entitlement.policy.PolicyMetaDataFinder;
-import org.wso2.carbon.identity.entitlement.policy.PolicyReader;
-import org.wso2.carbon.identity.entitlement.policy.PolicyRequestBuilder;
-import org.wso2.carbon.identity.entitlement.policy.PolicyResponseBuilder;
-import org.wso2.carbon.identity.entitlement.policy.PolicyStoreReader;
-import org.wso2.carbon.identity.entitlement.policy.PolicyStore;
-import org.wso2.carbon.identity.entitlement.policy.finder.RegistryBasedPolicyFinder;
+import org.wso2.carbon.identity.entitlement.policy.*;
+import org.wso2.carbon.identity.entitlement.policy.finder.CarbonPolicyFinder;
 
 import org.wso2.balana.PDP;
 import org.wso2.balana.PDPConfig;
@@ -60,18 +60,22 @@ import org.wso2.balana.ctx.ResponseCtx;
 import org.wso2.balana.finder.impl.CurrentEnvModule;
 import org.wso2.balana.finder.impl.SelectorModule;
 import org.wso2.carbon.identity.entitlement.pip.CarbonResourceFinder;
-import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.identity.entitlement.policy.publisher.PolicyPublisher;
+import org.wso2.carbon.utils.CarbonUtils;
 
 public class EntitlementEngine {
 
-	private RegistryBasedPolicyFinder registryModule;
+	private PolicyFinder papPolicyFinder;
 	private CarbonAttributeFinder carbonAttributeFinder;
     private CarbonResourceFinder carbonResourceFinder;
-    private PolicyMetaDataFinder metaDataFinder;
+    private PolicyEditorDataFinder metaDataFinder;
+    private PolicyPublisher policyPublisher;
+    private PolicyFinder carbonPolicyFinder;
+    private PolicyStoreManager policyStoreManager;
 	private PDP pdp;
-    private PDPConfig pdpConfig;
+    private PDP pdpTest;
+    private Balana balana;
 	private int tenantId;
-	private int cacheClearingNode = 0;
 	private static volatile EntitlementEngine engine;
 	private static final Object lock = new Object();
 	private int pdpDecisionCachingInterval = 60000;
@@ -79,146 +83,120 @@ public class EntitlementEngine {
 	private Map<String, PolicyDecision> decisionCache = new ConcurrentHashMap<String, PolicyDecision>();
 	private Map<String, PolicyDecision> simpleDecisionCache = new ConcurrentHashMap<String, PolicyDecision>();
 
-	private Cache decisionClearingCache = EntitlementUtil
-			.getCommonCache(EntitlementConstants.XACML_DECISION_CACHE);
+	private DecisionCache decisionClearingCache = DecisionCache.getInstance();
 
 	private static Log log = LogFactory.getLog(EntitlementEngine.class);
 
 	/**
 	 * Get a EntitlementEngine instance for that tenant. This method will return an
 	 * EntitlementEngine instance if exists, or creates a new one
-	 * 
-	 * @param registry Governance Registry instance of the corresponding tenant
-	 * @param tenantId Tenant ID of corresponding tenant
+	 *
 	 * @return EntitlementEngine instance for that tenant
-	 * @throws org.wso2.carbon.identity.base.IdentityException throws IdentityException
 	 */
-	public static EntitlementEngine getInstance(Registry registry, int tenantId)
-			throws IdentityException {
+	public static EntitlementEngine getInstance() {
 
-        // TODO   why Registry is there ?
-        // TODO   create a lock ()
-		if (!entitlementEngines.containsKey(Integer.toString(tenantId))) {
-			entitlementEngines.put(Integer.toString(tenantId), new EntitlementEngine(registry,
-					tenantId));
-		}
-		return entitlementEngines.get(Integer.toString(tenantId));
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        if (!entitlementEngines.containsKey(Integer.toString(tenantId))) {
+            entitlementEngines.put(Integer.toString(tenantId), new EntitlementEngine(tenantId));
+        }
+        return entitlementEngines.get(Integer.toString(tenantId));
 	}
 
-	private EntitlementEngine(Registry registry, int tenantId) throws IdentityException {
+	private EntitlementEngine(int tenantId) {
 
-		PolicyFinder policyFinder = null;
-        ResourceFinder resourceFinder = null;
+        boolean isPDP = Boolean.parseBoolean((String)EntitlementServiceComponent.getEntitlementConfig().
+                        getEngineProperties().get(EntitlementConstants.PDP_ENABLE));
+        boolean isPAP = Boolean.parseBoolean((String)EntitlementServiceComponent.getEntitlementConfig().
+                        getEngineProperties().get(EntitlementConstants.PAP_ENABLE));
 
-		Set<PolicyFinderModule> policyModules = null;
+        if(!isPAP && !isPDP){
+            isPAP = true;
+        }
+
+        boolean balanaConfig = Boolean.parseBoolean((String)EntitlementServiceComponent.getEntitlementConfig().
+                                getEngineProperties().get(EntitlementConstants.BALANA_CONFIG_ENABLE));
+
+
+        if(balanaConfig){
+            System.setProperty("org.wso2.balana.PDPConfigFile", CarbonUtils.getCarbonConfigDirPath()
+                                + File.separator + "security" + File.separator + "balana-config.xml");
+        }
+
+        // if PDP config file is not configured, then balana instance is created from default configurations
+        balana = Balana.getInstance();
+
+        setUpAttributeFinders();
+        setUpResourceFinders();
 
 		this.tenantId = tenantId;
 
-		// Setup the PolicyFinder that the EntitlementEngine will use
-		policyFinder = new PolicyFinder();
-
-		registryModule = new RegistryBasedPolicyFinder(new PolicyStoreReader(new PolicyStore(
-				registry)), tenantId);
-
-		policyModules = new HashSet<PolicyFinderModule>();
-		// Add all policy finders - we only have RegistryBasedPolicyFinder
-		policyModules.add(registryModule);
-
-		policyFinder.setModules(policyModules);
-
-        resourceFinder = new ResourceFinder();
-		// init policy reader
-		PolicyReader.getInstance(null, policyFinder);
-
-		// Now setup attribute finder modules for the current date/time and
-		// AttributeSelectors (selectors are optional, but this project does
-		// support a basic implementation)
-		CurrentEnvModule envAttributeModule = new CurrentEnvModule();
-		SelectorModule selectorAttributeModule = new SelectorModule();
-
-		// Setup the AttributeFinder just like we setup the PolicyFinder. Note
-		// that unlike with the policy finder, the order matters here.
-		AttributeFinder attributeFinder = new AttributeFinder();
-		List<AttributeFinderModule> attributeModules = new ArrayList<AttributeFinderModule>();
-		attributeModules.add(envAttributeModule);
-		attributeModules.add(selectorAttributeModule);
-		carbonAttributeFinder = new CarbonAttributeFinder(tenantId);
-		carbonAttributeFinder.init();
-		attributeModules.add(carbonAttributeFinder);
-		attributeFinder.setModules(attributeModules);
-
-		carbonResourceFinder = new CarbonResourceFinder(tenantId);
-		carbonResourceFinder.init();
-
-        metaDataFinder = new PolicyMetaDataFinder(tenantId);
+        metaDataFinder = new PolicyEditorDataFinder(tenantId);
         metaDataFinder.init();
-        
-        List<ResourceFinderModule> resourceModuleList = new ArrayList<ResourceFinderModule>();
-        resourceModuleList.add(carbonResourceFinder);
-        resourceFinder.setModules(resourceModuleList);
-        Properties properties = EntitlementServiceComponent.getEntitlementConfig().getCachingProperties();
+
+        policyPublisher = new PolicyPublisher(EntitlementServiceComponent.getGovernanceRegistry(tenantId));
+        policyPublisher.init();
+
+        this.policyStoreManager = new PolicyStoreManager();
+
+        Properties properties = EntitlementServiceComponent.getEntitlementConfig().getEngineProperties();
 		String cacheEnable = properties.getProperty(EntitlementConstants.DECISION_CACHING);
-		if ("true".equals(cacheEnable)) {
+		if (cacheEnable != null && "true".equals(cacheEnable.trim())) {
 			String cacheInterval = properties.getProperty(EntitlementConstants.DECISION_CACHING_INTERVAL);
 			if (cacheInterval != null) {
-				pdpDecisionCachingInterval = Integer.parseInt(cacheInterval);
+				pdpDecisionCachingInterval = Integer.parseInt(cacheInterval.trim());
 			}
 		} else {
 			pdpDecisionCachingInterval = -1;
 		}
-        
-        pdpConfig = new PDPConfig(attributeFinder, policyFinder, resourceFinder, true);
-		// Finally, initialize
-		pdp = new PDP(pdpConfig);
-	}
+        // adding init value to cache
+        decisionClearingCache.addToCache(1);
 
-	/**
-	 * Evaluates the given XACML request and returns the Response that the EntitlementEngine will
-	 * hand back to the PEP. PEP needs construct the XACML request before sending it to the
-	 * EntitlementEngine
-	 * 
-	 * @param xamlRequest XACML request as an Element
-	 * @return XACML response as String
-	 * @throws org.wso2.balana.ParsingException throws
-	 */
-	public String evaluate(Element xamlRequest) throws ParsingException {
-
-		RequestCtx requestCtx = RequestCtx.getInstance(xamlRequest);
-        ResponseCtx responseCtx;
-        String response;
-        String request;
-
-        OutputStream responseOutXml = new ByteArrayOutputStream();
-        OutputStream requestOutXml = new ByteArrayOutputStream();
-        requestCtx.encode(requestOutXml);
-        request = requestOutXml.toString();
-        try {
-            requestOutXml.close();
-        } catch (IOException e) {
-           log.error("Error while closing out put stream of XACML request");
+        // Finally, initialize
+        if(isPAP){
+            // Test PDP with all finders but policy finder is different
+            PolicyFinder policyFinder = new PolicyFinder();
+            Set<PolicyFinderModule> policyModules = new HashSet<PolicyFinderModule>();
+            PAPPolicyFinder papPolicyFinder = new PAPPolicyFinder(new PAPPolicyStoreReader(new PAPPolicyStore()));
+            policyModules.add(papPolicyFinder);
+            policyFinder.setModules(policyModules);
+            this.papPolicyFinder = policyFinder;
+            PDPConfig pdpConfig = new PDPConfig(balana.getPdpConfig().getAttributeFinder(),
+                                policyFinder, balana.getPdpConfig().getResourceFinder(), true);
+            pdpTest = new PDP(pdpConfig);
         }
 
-        if ((response = getFromCache(request, false)) != null) {
-            return response;
-		}
-        
-		// evaluate the request
-		responseCtx = pdp.evaluate(requestCtx);
+        if(isPDP){
+             // Actual PDP with all finders but policy finder is different
+            Set<PolicyFinderModule> policyModules = new HashSet<PolicyFinderModule>();
+            CarbonPolicyFinder policyFinder = new CarbonPolicyFinder();
+            policyModules.add(policyFinder);
+            balana.getPdpConfig().getPolicyFinder().setModules(policyModules);
+            carbonPolicyFinder = balana.getPdpConfig().getPolicyFinder();
+            pdp = new PDP(balana.getPdpConfig());
+        }
+    }
 
-        responseCtx.encode(responseOutXml);
-        response = responseOutXml.toString();
 
-        try {
-            responseOutXml.close();
-        } catch (IOException e) {
-           log.error("Error while closing out put stream of XACML response");
+    /**
+     * Test request for PDP
+     * 
+     * @param xacmlRequest  XACML request as String
+     * @return   response as String
+     */
+    public String test(String xacmlRequest) {
+
+        if(log.isDebugEnabled()){
+            log.debug("XACML Request : " + xacmlRequest);
         }
 
-        addToCache(request, response, false);
+        String xacmlResponse = pdpTest.evaluate(xacmlRequest);
 
-		return response;
-
-	}
+        if(log.isDebugEnabled()){
+            log.debug("XACML Response : " + xacmlResponse);
+        }
+        
+        return xacmlResponse;
+    }
 
 	/**
 	 * Evaluates the given XACML request and returns the Response that the EntitlementEngine will
@@ -232,6 +210,10 @@ public class EntitlementEngine {
      */
 
 	public String evaluate(String xacmlRequest) throws IdentityException, ParsingException {
+
+        if(log.isDebugEnabled()){
+            log.debug("XACML Request : " + xacmlRequest);
+        }
 
         String xacmlResponse;
 
@@ -259,9 +241,25 @@ public class EntitlementEngine {
         }
 
         addToCache(xacmlRequest, xacmlResponse, false);
+
+        if(log.isDebugEnabled()){
+            log.debug("XACML Response : " + xacmlResponse);
+        }
+
         return xacmlResponse;
 
 	}
+
+    /**
+     * Evaluates XACML request directly. This is used by advance search module.
+     * Therefore caching and logging has not be implemented for this
+     * 
+     * @param requestCtx  Balana Object model for request
+     * @return ResponseCtx  Balana Object model for response
+     */
+    public ResponseCtx evaluateByContext(AbstractRequestCtx requestCtx){
+        return pdp.evaluate(requestCtx);
+    }
 
     /**
 	 * Evaluates the given XACML request and returns the Response that the EntitlementEngine will
@@ -288,9 +286,18 @@ public class EntitlementEngine {
 
         String requestAsString = EntitlementUtil.createSimpleXACMLRequest(subject, resource, action);
 
+        if(log.isDebugEnabled()){
+            log.debug("XACML Request : " + requestAsString);
+        }
+        
         response = pdp.evaluate(requestAsString);
         
         addToCache(request, response, true);
+
+        if(log.isDebugEnabled()){
+            log.debug("XACML Response : " + response);
+        }
+
         return response;
     }
 
@@ -300,9 +307,10 @@ public class EntitlementEngine {
 	 * 
 	 * @return RegistryBasedPolicyFinder
 	 */
-	public RegistryBasedPolicyFinder getRegistryModule() {
-		return registryModule;
+	public PolicyFinder getPapPolicyFinder() {
+		return papPolicyFinder;
 	}
+
 
 	/**
 	 * This method returns the carbon based attribute finder for the current tenant
@@ -318,7 +326,7 @@ public class EntitlementEngine {
      *
      * @return  PolicyMetaDataFinder
      */
-    public PolicyMetaDataFinder getMetaDataFinder() {
+    public PolicyEditorDataFinder getMetaDataFinder() {
         return metaDataFinder;
     }
 
@@ -332,11 +340,30 @@ public class EntitlementEngine {
     }
 
     /**
-     * This method returns PDP configurations
-     * @return PDPConfig
+     *  This method returns the carbon based policy finder for the current tenant
+     *
+     * @return  CarbonPolicyFinder
      */
-    public PDPConfig getPdpConfig() {
-        return pdpConfig;
+    public PolicyFinder getCarbonPolicyFinder() {
+        return carbonPolicyFinder;
+    }
+
+    /**
+     * This method returns policy publisher
+     * 
+     * @return PolicyPublisher
+     */
+    public PolicyPublisher getPolicyPublisher() {
+        return policyPublisher;
+    }
+
+    /**
+     * This returns policy store manager
+     * 
+     * @return
+     */
+    public PolicyStoreManager getPolicyStoreManager() {
+        return policyStoreManager;
     }
 
     /**
@@ -346,23 +373,21 @@ public class EntitlementEngine {
      * @return XACML response as String
      */
     private String getFromCache(String  request, boolean simpleCache) {
+
 		if (pdpDecisionCachingInterval > 0) {
 
             PolicyDecision decision;
 
-			IdentityCacheEntry cacheEntry = (IdentityCacheEntry) decisionClearingCache
-					.get(new IdentityCacheKey(tenantId, ""));
-			if (cacheEntry != null) {
-				if (cacheEntry.getHashEntry() != (cacheClearingNode)) {
-					decisionCache.clear();
-                    simpleDecisionCache.clear();
-					if (log.isDebugEnabled()) {
-						log.debug("Decision Cache is cleared for tenant " + tenantId);
-					}
-					cacheClearingNode = cacheEntry.getHashEntry();
-					return null;
-				}
-			}
+			int hashCode = decisionClearingCache.getFromCache();
+
+            if (hashCode == 0) {
+                clearDecisionCache(false);
+                if (log.isDebugEnabled()) {
+                    log.debug("Invalidation cache message is received. " +
+                                            "Decision Cache is cleared for tenant " + tenantId);
+                }
+                return null;
+            }
 
             if(simpleCache){
 			    decision = simpleDecisionCache.get(request);
@@ -374,12 +399,12 @@ public class EntitlementEngine {
 					&& (decision.getCachedTime() + (long) pdpDecisionCachingInterval > Calendar
 							.getInstance().getTimeInMillis())) {
 				if (log.isDebugEnabled()) {
-					log.debug("PDP Decision Cache Hit");
+					log.debug("PDP Decision Cache Hit for tenant " + tenantId);
 				}
 				return decision.getResponse();
 			} else {
 				if (log.isDebugEnabled()) {
-					log.debug("PDP Decision Cache Miss");
+					log.debug("PDP Decision Cache Miss for tenant " + tenantId);
 				}
                 if(simpleCache){
                     simpleDecisionCache.remove(request);
@@ -414,7 +439,7 @@ public class EntitlementEngine {
             }
 
 			if (log.isDebugEnabled()) {
-				log.debug("PDP Decision Cache Updated");
+				log.debug("PDP Decision Cache Updated for tenantId " + tenantId);
 			}
 		} else {
 			if (log.isDebugEnabled()) {
@@ -428,26 +453,55 @@ public class EntitlementEngine {
      * @param updateAllNodes whether to propagate the clearing of the cache to other nodes
      */
 	public void clearDecisionCache(boolean updateAllNodes) {
+
 		decisionCache.clear();
         simpleDecisionCache.clear();
-		if (log.isDebugEnabled()) {
-			log.debug("Decision Cache is cleared for tenant " + tenantId);
-		}
+        decisionClearingCache.addToCache(1);
 
         if(updateAllNodes){
-            IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, "");
-            IdentityCacheEntry cacheEntry = (IdentityCacheEntry) decisionClearingCache.get(cacheKey);
-            if(cacheEntry != null){
-                cacheClearingNode = cacheEntry.getHashEntry();
+            decisionClearingCache.invalidateCache();
+            if (log.isDebugEnabled()) {
+                log.debug("Invalidation decision cache of is called for tenant " + tenantId);
             }
-            cacheClearingNode ++ ;
-            if(cacheClearingNode == Integer.MAX_VALUE){
-                cacheClearingNode = 0;
-            }
-            cacheEntry = new IdentityCacheEntry(cacheClearingNode);
-            decisionClearingCache.put(cacheKey, cacheEntry);
         }
-        
 	}
 
+    /**
+     * Helper method to init engine
+     */
+    private void setUpAttributeFinders(){
+
+        List<AttributeFinderModule> attributeModules = new ArrayList<AttributeFinderModule>();
+
+        // Creates carbon attribute finder instance  and init it
+        carbonAttributeFinder = new CarbonAttributeFinder(tenantId);
+        carbonAttributeFinder.init();
+
+		// Now setup attribute finder modules for the current date/time and
+		// AttributeSelectors (selectors are optional, but this project does
+		// support a basic implementation)
+		CurrentEnvModule envAttributeModule = new CurrentEnvModule();
+		SelectorModule selectorAttributeModule = new SelectorModule();
+
+        attributeModules.add(carbonAttributeFinder);
+        attributeModules.add(envAttributeModule);
+        attributeModules.add(selectorAttributeModule);
+        balana.getPdpConfig().getAttributeFinder().setModules(attributeModules);
+    }
+
+    /**
+     * Helper method to init engine
+     */
+    private void setUpResourceFinders(){
+
+        List<ResourceFinderModule> resourceModuleList = new ArrayList<ResourceFinderModule>();
+        carbonResourceFinder = new CarbonResourceFinder(tenantId);
+        carbonResourceFinder.init();
+        resourceModuleList.add(carbonResourceFinder);
+        balana.getPdpConfig().getResourceFinder().setModules(resourceModuleList);
+    }
+
+    public int getPdpDecisionCachingInterval() {
+        return pdpDecisionCachingInterval;
+    }
 }

@@ -17,7 +17,6 @@
 */
 package org.wso2.carbon.identity.sso.saml.dto;
 
-
 public class SAMLSSOAuthnReqDTO {
 
     private String username;
@@ -31,12 +30,13 @@ public class SAMLSSOAuthnReqDTO {
     private String logoutURL;
     private String loginPageURL;
     private String rpSessionId;
-    private String assertionString;
+    private String requestMessageString;
+    private String queryString;
+    private String[] requestedClaims;
     private boolean doSingleLogout;
     private boolean doSignAssertions;
     private boolean useFullyQualifiedUsernameAsSubject;
-    private String[] requestedClaims;
-    
+    private boolean isStratosDeployment = false;
 
     public String getCertAlias() {
         return certAlias;
@@ -160,12 +160,20 @@ public class SAMLSSOAuthnReqDTO {
         this.doSignAssertions = doSignAssertions;
     }
 
-    public String getAssertionString() {
-        return assertionString;
+    /**
+     * 
+     * @return
+     */
+    public String getRequestMessageString() {
+        return requestMessageString;
     }
 
-    public void setAssertionString(String assertionString) {
-        this.assertionString = assertionString;
+    /**
+     * 
+     * @param requestMessageString
+     */
+    public void setRequestMessageString(String requestMessageString) {
+        this.requestMessageString = requestMessageString;
     }
 
 	public String[] getRequestedClaims() {
@@ -174,6 +182,28 @@ public class SAMLSSOAuthnReqDTO {
 
 	public void setRequestedClaims(String[] requestedClaims) {
 	    this.requestedClaims = requestedClaims;
+    }
+
+	public boolean isStratosDeployment() {
+	    return isStratosDeployment;
+    }
+
+	public void setStratosDeployment(boolean isStratosDeployment) {
+	    this.isStratosDeployment = isStratosDeployment;
+    }
+
+	/**
+     * @return the queryString
+     */
+    public String getQueryString() {
+	    return queryString;
+    }
+
+	/**
+     * @param queryString the queryString to set
+     */
+    public void setQueryString(String queryString) {
+	    this.queryString = queryString;
     }
 
  }

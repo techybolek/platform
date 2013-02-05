@@ -154,7 +154,7 @@ public class BAMArtifactProcessor {
                             String scriptFileName = props.getProperty(BAMToolBoxDeployerConstants.ANALYZER_SCRIPT_PREFIX + "."
                                     + aScriptVarName.trim() + "." + BAMToolBoxDeployerConstants.ANALYZER_SCRIPT_FILE_NAME_SUFFIX);
                             if (null == scriptFileName || scriptFileName.trim().equals("")) {
-                                log.error("No script file name specified for script reference name: "+aScriptVarName);
+                                log.error("No script file name specified for script reference name: " + aScriptVarName);
                             }
                             String cron = props.getProperty(BAMToolBoxDeployerConstants.ANALYZER_SCRIPT_PREFIX + "."
                                     + aScriptVarName.trim() + "." + BAMToolBoxDeployerConstants.ANALYZER_SCRIPT_CRON_SUFFIX);
@@ -194,20 +194,88 @@ public class BAMArtifactProcessor {
     private void setStreamDefnNames(ToolBoxDTO toolBoxDTO, String barDir)
             throws BAMToolboxDeploymentException {
         ArrayList<String> streamDefNames = getFilesInDirectory(barDir + File.separator + BAMToolBoxDeployerConstants.STREAM_DEFN_DIR);
+        int i = 0;
+        for (String aFile : streamDefNames) {
+            if (aFile.equalsIgnoreCase(BAMToolBoxDeployerConstants.STREAM_DEFN_PROP_FILE)) {
+                streamDefNames.remove(i);
+                break;
+            }
+            i++;
+        }
         if (streamDefNames.size() == 0) {
             toolBoxDTO.setStreamDefnParentDirectory(null);
             log.warn("No event streams found in the specified directory");
         } else {
-            toolBoxDTO.setStreamDefnParentDirectory(barDir + File.separator + BAMToolBoxDeployerConstants.STREAM_DEFN_DIR);
-            toolBoxDTO.setEvenStreamDefs(streamDefNames);
+            String streamDefnDir = barDir + File.separator + BAMToolBoxDeployerConstants.STREAM_DEFN_DIR;
+            toolBoxDTO.setStreamDefnParentDirectory(streamDefnDir);
+            toolBoxDTO.setDataStreamDefs(streamDefNames);
+            setCredentialsForDataStreams(toolBoxDTO, streamDefnDir);
         }
     }
 
+    private void setCredentialsForDataStreams(ToolBoxDTO toolBoxDTO, String streamDefnDir) {
+        String streamDefnPropPath = streamDefnDir + File.separator + BAMToolBoxDeployerConstants.STREAM_DEFN_PROP_FILE;
+        File streamsProps = new File(streamDefnPropPath);
+        Properties props = new Properties();
+        try {
+            props.load(new FileInputStream(streamsProps));
+
+            String streamDefnVarString = props.getProperty(BAMToolBoxDeployerConstants.STREAMS_DEFN_VAR_NAME);
+            if (null != streamDefnVarString && !streamDefnVarString.trim().equals("")) {
+                streamDefnVarString = streamDefnVarString.trim();
+                String[] streamDefnVars = streamDefnVarString.split(",");
+                if (streamDefnVars == null || streamDefnVars.length == 0) {
+                    throw new BAMToolboxDeploymentException("Invalid tbox artifact. No scripts found in analyzers.properties");
+                } else {
+                    for (String aStreamVarName : streamDefnVars) {
+                        if (!aStreamVarName.trim().equals("")) {
+                            String streamFileName = props.getProperty(BAMToolBoxDeployerConstants.STREAM_DEFN_PREFIX + "."
+                                    + aStreamVarName.trim() + "." + BAMToolBoxDeployerConstants.STREAM_DEFN_FILE_NAME_SUFFIX);
+                            if (null == streamFileName || streamFileName.trim().equals("")) {
+                                log.error("No stream definition file name specified for stream reference name: " + aStreamVarName);
+                                toolBoxDTO.removeStreamDefn(streamFileName);
+                            } else {
+                                String streamUsername = props.getProperty(BAMToolBoxDeployerConstants.STREAM_DEFN_PREFIX + "."
+                                        + aStreamVarName.trim() + "." + BAMToolBoxDeployerConstants.STREAM_DEFN_USERNAME_SUFFIX);
+                                if (null != streamUsername && !streamUsername.trim().equals("")) {
+                                    String streamPassword = props.getProperty(BAMToolBoxDeployerConstants.STREAM_DEFN_PREFIX + "."
+                                            + aStreamVarName.trim() + "." + BAMToolBoxDeployerConstants.STREAM_DEFN_PASSWORD_SUFFIX);
+                                    if (null != streamPassword && !streamPassword.isEmpty()) {
+                                        toolBoxDTO.setCredentialsForStreamDefn(streamFileName, streamUsername, streamPassword);
+                                    } else {
+                                        log.warn("No password specified for stream definition: "
+                                                + streamFileName + ".Stream defn " + streamFileName + " won't be deployed");
+                                        toolBoxDTO.removeStreamDefn(streamFileName);
+                                    }
+                                } else {
+                                    log.warn("No username specified for stream definition: "
+                                            + streamFileName + ".Stream defn " + streamFileName + " won't be deployed");
+                                    toolBoxDTO.removeStreamDefn(streamFileName);
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                log.warn("No stream defn variables defined in " + BAMToolBoxDeployerConstants.STREAM_DEFN_PROP_FILE + " file." +
+                        " No stream defnitions will be deployed");
+                toolBoxDTO.setStreamDefnParentDirectory(null);
+                toolBoxDTO.setDataStreamDefs(new ArrayList<String>());
+            }
+        } catch (IOException e) {
+            log.warn(e.getMessage());
+            toolBoxDTO.setStreamDefnParentDirectory(null);
+            toolBoxDTO.setDataStreamDefs(new ArrayList<String>());
+            log.warn("No stream defnitions will be deployed");
+        }
+
+
+    }
 
     private void setJaggeryAppNames(ToolBoxDTO toolBoxDTO, String barDir)
             throws BAMToolboxDeploymentException {
-        if (null != toolBoxDTO.getGagetsParentDirectory()) {
-            File jaggeryDir = new File(barDir);
+            File jaggeryDir = new File(barDir + File.separator + BAMToolBoxDeployerConstants.DASHBOARD_DIR
+                    + File.separator + BAMToolBoxDeployerConstants.JAGGERY_DIR);
             if (jaggeryDir.exists()) {
                 toolBoxDTO.setJaggeryAppParentDirectory(barDir + File.separator + BAMToolBoxDeployerConstants.DASHBOARD_DIR
                         + File.separator + BAMToolBoxDeployerConstants.JAGGERY_DIR);
@@ -215,10 +283,6 @@ public class BAMArtifactProcessor {
                 log.warn("No jaggery artifacts found..");
                 toolBoxDTO.setJaggeryAppParentDirectory(null);
             }
-        } else {
-            log.warn("No gadgets dir found, and skipping jaggery artifacts");
-            toolBoxDTO.setJaggeryAppParentDirectory(null);
-        }
     }
 
     private void setGadgetNames(ToolBoxDTO toolBoxDTO, String barDir)

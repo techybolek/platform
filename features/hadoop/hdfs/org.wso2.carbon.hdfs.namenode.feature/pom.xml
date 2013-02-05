@@ -22,11 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>hadoop.hdfs-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.hdfs.namenode.feature</artifactId>
+    <version>4.0.5</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - HDFS Name Node Feature</name>
     <url>http://wso2.org</url>
@@ -36,43 +38,53 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.hdfs.namenode</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.hadoop.wso2</groupId>
+            <artifactId>hadoop-core</artifactId>
+            <version>${hadoop-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson.wso2</groupId>
+            <artifactId>jackson</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mortbay.wso2</groupId>
+            <artifactId>jetty</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mortbay.jetty.wso2</groupId>
+            <artifactId>jetty-util</artifactId>
+            <version>${jetty-util.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json.wso2</groupId>
+            <artifactId>json</artifactId>
+            <version>${json.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>slf4j.wso2</groupId>
+            <artifactId>slf4j</artifactId>
+            <version>${slf4j.wso2.version}</version>
+        </dependency>
+        <dependency>
+              <groupId>commons-configuration.wso2</groupId>
+    <artifactId>commons-configuration</artifactId>
+            <version>${commons-configuration.version}</version>
+        </dependency>
+
+        <!--dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core.server.feature</artifactId>
             <type>zip</type>
-        </dependency>
+        </dependency-->
     </dependencies>
 
     <build>
         <plugins>
-	    <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-resources</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>src/main/resources</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>resources</directory>
-                                    <includes>
-                                        <include>conf/etc/hadoop/keytabs/carbon.keytab</include>
-                                        <include>conf/krb5.conf</include>
-                                        <include>p2.inf</include>
-                                        <include>build.properties</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>org.wso2.maven</groupId>
                 <artifactId>carbon-p2-plugin</artifactId>
@@ -86,7 +98,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.hdfs.namenode</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
@@ -95,6 +107,14 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.hdfs.namenode</bundleDef>
+                                <bundleDef>org.apache.hadoop.wso2:hadoop-core</bundleDef>
+                                <bundleDef>org.codehaus.jackson.wso2:jackson</bundleDef>
+                                <bundleDef>org.mortbay.wso2:jetty</bundleDef>
+                                <bundleDef>org.mortbay.jetty.wso2:jetty-util</bundleDef>
+                                <bunldeDef>org.json.wso2:json</bunldeDef>
+                                <bundleDef>slf4j.wso2:slf4j</bundleDef>
+                                <bundleDef>commons-configuration.wso2:commons-configuration</bundleDef>
+
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
@@ -105,4 +125,14 @@
             </plugin>
         </plugins>
     </build>
+    <properties>
+        <hadoop-core.version>0.20.203.1.wso2v2</hadoop-core.version>
+        <jackson.version>1.0.1.wso2v1</jackson.version>
+        <jetty.version>6.1.26.wso2v1</jetty.version>
+        <jetty-util.version>6.1.26.wso2v1</jetty-util.version>
+        <json.version>2.0.0.wso2v1</json.version>
+        <slf4j.version>1.5.10.wso2v1</slf4j.version>
+        <commons-configuration.version>1.6.0.wso2v1</commons-configuration.version>
+    </properties>
+
 </project>

@@ -19,13 +19,14 @@ package org.wso2.carbon.application.mgt;
 import org.wso2.carbon.application.deployer.AppDeployerConstants;
 import org.wso2.carbon.application.deployer.config.RegistryConfig;
 import org.wso2.carbon.application.deployer.persistence.CarbonAppPersistenceManager;
-import org.wso2.carbon.application.mgt.internal.AppManagementServiceComponent;
 import org.wso2.carbon.application.deployer.CarbonApplication;
 import org.wso2.carbon.application.deployer.AppDeployerUtils;
+import org.wso2.carbon.application.deployer.service.ApplicationManagerService;
 import org.wso2.carbon.application.deployer.handler.DefaultAppDeployer;
 import org.wso2.carbon.application.deployer.handler.RegistryResourceDeployer;
 import org.wso2.carbon.application.deployer.config.Artifact;
 import org.wso2.carbon.CarbonException;
+import org.wso2.carbon.application.mgt.internal.AppManagementServiceComponent;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.core.util.SystemFilter;
@@ -38,7 +39,10 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.io.File;
@@ -65,6 +69,57 @@ public class ApplicationAdmin extends AbstractAdmin {
             }
         }
         return existingApps.toArray(new String[existingApps.size()]);
+    }
+
+    /**
+     * Give the names of all faulty applications in the system
+     * @return - names array
+     * @throws Exception - error on getting carbon app service
+     */
+    public String[] listAllFaultyApplications() throws Exception {
+
+        String tenantId = AppDeployerUtils.getTenantIdString(getAxisConfig());
+        HashMap<String, Exception> faultyCarbonApps
+                = AppManagementServiceComponent.getAppManager().getFaultyCarbonApps(tenantId);
+        String fileName = null;
+        List<String> existingFaultyApps = new ArrayList<String>();
+
+        for (String anAppList : faultyCarbonApps.keySet()) {
+            fileName = anAppList.substring(anAppList.lastIndexOf('/') + 1);
+            existingFaultyApps.add(fileName);
+        }
+        return existingFaultyApps.toArray(new String[existingFaultyApps.size()]);
+
+    }
+
+
+    /**
+     * Gives Fault Reason of the given Faulty Carbon Application
+     *
+     * @param faultCarbonAppName - name of the faulty Application
+     * @throws Exception - error on getting carbon app service
+     */
+    public String getFaultException(String faultCarbonAppName) throws Exception {
+        String tenantId = AppDeployerUtils.getTenantIdString(getAxisConfig());
+        HashMap<String, Exception> appList
+                = AppManagementServiceComponent.getAppManager().getFaultyCarbonApps(tenantId);
+
+        String faultException = null;
+
+        String fileName = null;
+        for (String anAppList : appList.keySet()) {
+            fileName = anAppList.substring(anAppList.lastIndexOf('/') + 1);
+
+            if(faultCarbonAppName .equals(fileName)){
+                Exception e = appList.get(anAppList);
+                StringWriter errors = new StringWriter();
+                e.printStackTrace(new PrintWriter(errors));
+                faultException = errors.toString();
+                break;
+            }
+        }
+        return faultException;
+
     }
 
     /**
@@ -106,6 +161,75 @@ public class ApplicationAdmin extends AbstractAdmin {
             log.error("Artifact file couldn't be deleted for Application : "
                     + currentApp.getAppName());
         }
+    }
+    /**
+     * Deletes an entire application by deleting all its artifacts
+     *
+     * @param faultyAppName - name of the Application to be deleted
+     * @throws Exception - error on getting carbon app service
+     */
+    public void deleteFaultyApplication(String[] faultyAppName) throws Exception {
+        String tenantId = AppDeployerUtils.getTenantIdString(getAxisConfig());
+        HashMap<String, Exception> faultyCarbonAppList =
+                AppManagementServiceComponent.getAppManager().getFaultyCarbonApps(tenantId);
+        for(String faultyCarbonApplication : faultyAppName){
+//        If appName is null throw an exception
+            if (faultyCarbonApplication  == null) {
+                handleException("Application name can't be null");
+                return;
+            }
+            // CarbonApplication instance to delete
+            String currentApp=null;
+            String filename =null;
+
+            // Iterate all applications for this tenant and find the application to delete
+
+            for (String carbonApp : faultyCarbonAppList.keySet()) {
+
+                filename = carbonApp.substring(carbonApp.lastIndexOf('/') + 1);
+                if (faultyCarbonApplication .equals(filename)) {
+                    currentApp = carbonApp;
+                    faultyCarbonAppList.remove(currentApp);
+                    break;
+                }
+            }
+
+            // If requested application not found, throw an exception
+            if (currentApp == null) {
+                handleException("No Carbon Application found of the name : " + faultyCarbonApplication );
+                return;
+            }
+
+            // Remove the app artifact file from repository, cApp hot undeployer will do the rest
+            String appFilePath = currentApp;
+            File file = new File(appFilePath);
+            if (file.exists() && !file.delete()) {
+                log.error("Artifact file couldn't be deleted for Application : "
+                          + filename);
+            }
+        }
+    }
+    public void deleteAllFaultyAppliations() throws Exception{
+        String tenantId = AppDeployerUtils.getTenantIdString(getAxisConfig());
+        HashMap<String, Exception> faultyCarbonAppList =
+                AppManagementServiceComponent.getAppManager().getFaultyCarbonApps(tenantId);
+        // CarbonApplication instance to delete
+        String currentApp=null;
+        String filename =null;
+
+
+        // Iterate all applications for this tenant and find the application to delete
+        for (String carbonApp : faultyCarbonAppList.keySet()) {
+            //        If appName is null throw an exception
+            if (carbonApp  == null) {
+                handleException("Application name can't be null");
+                return;
+            }
+
+            filename = carbonApp.substring(carbonApp.lastIndexOf('/') + 1);
+        }
+
+
     }
 
     /**

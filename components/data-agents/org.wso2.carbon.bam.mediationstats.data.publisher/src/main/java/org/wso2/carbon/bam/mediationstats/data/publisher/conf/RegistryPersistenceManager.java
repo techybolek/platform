@@ -21,8 +21,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.bam.data.publisher.util.BAMDataPublisherConstants;
 import org.wso2.carbon.bam.mediationstats.data.publisher.util.MediationDataPublisherConstants;
 import org.wso2.carbon.bam.mediationstats.data.publisher.util.MediationPublisherException;
-import org.wso2.carbon.bam.mediationstats.data.publisher.util.TenantMediationStatConfigData;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -37,7 +35,6 @@ public class RegistryPersistenceManager {
 
     private static Log log = LogFactory.getLog(RegistryPersistenceManager.class);
     private static RegistryService registryService;
-    private static MediationStatConfig eventConfiguration = new MediationStatConfig();
     public static final String EMPTY_STRING = "";
 
     public static void setRegistryService(RegistryService registryServiceParam) {
@@ -48,7 +45,7 @@ public class RegistryPersistenceManager {
     /**
      * Loads configuration from Registry.
      */
-    public MediationStatConfig load() {
+    public MediationStatConfig load(int tenantId) {
 
         MediationStatConfig mediationStatConfig = new MediationStatConfig();
         // First set it to defaults, but do not persist
@@ -61,25 +58,29 @@ public class RegistryPersistenceManager {
         // then load it from registry
         try {
 
+            Registry registry = registryService.getConfigSystemRegistry(tenantId);
+
             String mediationStatsEnable = getConfigurationProperty(
-                    MediationDataPublisherConstants.ENABLE_MEDIATION_STATS);
-            String url = getConfigurationProperty(BAMDataPublisherConstants.BAM_URL);
-            String userName = getConfigurationProperty(BAMDataPublisherConstants.BAM_USER_NAME);
-            String password = getConfigurationProperty(BAMDataPublisherConstants.BAM_PASSWORD);
+                    MediationDataPublisherConstants.ENABLE_MEDIATION_STATS, registry);
+            String url = getConfigurationProperty(BAMDataPublisherConstants.BAM_URL,
+                                                  registry);
+            String userName = getConfigurationProperty(BAMDataPublisherConstants.BAM_USER_NAME,
+                                                       registry);
+            String password = getConfigurationProperty(BAMDataPublisherConstants.BAM_PASSWORD,
+                                                       registry);
+            String streamName = getConfigurationProperty(BAMDataPublisherConstants.STREAM_NAME,
+                                                         registry);
+            String version = getConfigurationProperty(BAMDataPublisherConstants.VERSION,
+                                                      registry);
+            String description = getConfigurationProperty(BAMDataPublisherConstants.DESCRIPTION,
+                                                          registry);
+            String nickName = getConfigurationProperty(BAMDataPublisherConstants.NICK_NAME,
+                                                       registry);
 
-            String streamName = getConfigurationProperty(BAMDataPublisherConstants.STREAM_NAME);
-            String version = getConfigurationProperty(BAMDataPublisherConstants.VERSION);
-            String description = getConfigurationProperty(BAMDataPublisherConstants.DESCRIPTION);
-            String nickName = getConfigurationProperty(BAMDataPublisherConstants.NICK_NAME);
-
-            Properties properties = getAllConfigProperties(MediationDataPublisherConstants.MEDIATION_STATISTICS_PROPERTIES_REG_PATH);
+            Properties properties = getAllConfigProperties(MediationDataPublisherConstants.MEDIATION_STATISTICS_PROPERTIES_REG_PATH,
+                                                           registry);
 
             if (mediationStatsEnable != null && url != null && userName != null && password != null) {
-
-                int tenantId = CarbonContext.getCurrentContext().getTenantId();
-                Map<Integer, MediationStatConfig> tenantEventConfigData =
-                        TenantMediationStatConfigData.getTenantSpecificEventingConfigData();
-                tenantEventConfigData.put(tenantId, mediationStatConfig);
 
                 mediationStatConfig.setEnableMediationStats(Boolean.parseBoolean(mediationStatsEnable));
                 mediationStatConfig.setUrl(url);
@@ -107,7 +108,7 @@ public class RegistryPersistenceManager {
 
             } else {
                 // Registry does not have eventing config
-                update(mediationStatConfig);
+                update(mediationStatConfig, tenantId);
             }
         } catch (Exception e) {
             log.error("Coul not load values from registry", e);
@@ -115,9 +116,8 @@ public class RegistryPersistenceManager {
         return mediationStatConfig;
     }
 
-    private Properties getAllConfigProperties(String mediationStatisticsPropertiesRegPath)
+    private Properties getAllConfigProperties(String mediationStatisticsPropertiesRegPath,Registry registry)
             throws RegistryException {
-        Registry registry = registryService.getConfigSystemRegistry(CarbonContext.getCurrentContext().getTenantId());
         Properties properties = null;
         Properties filterProperties = null;
 
@@ -144,10 +144,8 @@ public class RegistryPersistenceManager {
      * @param properties
      * @param registryPath
      */
-    public void updateAllProperties(Properties properties, String registryPath)
+    public void updateAllProperties(Properties properties, String registryPath,Registry registry)
             throws RegistryException {
-        Registry registry = registryService.getConfigSystemRegistry(CarbonContext.getCurrentContext().getTenantId());
-
         // Always creating a new resource because properties should be replaced and overridden
         Resource resource = registry.newResource();
 
@@ -160,14 +158,14 @@ public class RegistryPersistenceManager {
      * Read the resource from registry
      *
      * @param propertyName
+     * @param registry
      * @return
      * @throws RegistryException
      * @throws MediationPublisherException
      */
-    public String getConfigurationProperty(String propertyName)
+    public String getConfigurationProperty(String propertyName, Registry registry)
             throws RegistryException, MediationPublisherException {
         String resourcePath = MediationDataPublisherConstants.MEDIATION_STATISTICS_REG_PATH + propertyName;
-        Registry registry = registryService.getConfigSystemRegistry(CarbonContext.getCurrentContext().getTenantId());
         String value = null;
         if (registry != null) {
             try {
@@ -186,30 +184,26 @@ public class RegistryPersistenceManager {
      * Updates the Registry with given config data.
      *
      * @param eventConfig eventing configuration data
+     * @param tenantId
      */
-    public void update(MediationStatConfig eventConfig) {
+    public void update(MediationStatConfig eventConfig, int tenantId) {
         try {
-
-            int tenantId = CarbonContext.getCurrentContext().getTenantId();
-            Map<Integer, MediationStatConfig> tenantEventConfigData =
-                    TenantMediationStatConfigData.getTenantSpecificEventingConfigData();
-            tenantEventConfigData.put(tenantId, eventConfig);
-
+            Registry registry = registryService.getConfigSystemRegistry(tenantId);
             updateConfigProperty(MediationDataPublisherConstants.ENABLE_MEDIATION_STATS,
-                                 eventConfig.isEnableMediationStats());
-            updateConfigProperty(BAMDataPublisherConstants.BAM_URL, eventConfig.getUrl());
+                                 eventConfig.isEnableMediationStats(),registry);
+            updateConfigProperty(BAMDataPublisherConstants.BAM_URL, eventConfig.getUrl(),registry);
             updateConfigProperty(BAMDataPublisherConstants.BAM_USER_NAME,
-                                 eventConfig.getUserName());
+                                 eventConfig.getUserName(),registry);
             updateConfigProperty(BAMDataPublisherConstants.BAM_PASSWORD,
-                                 eventConfig.getPassword());
+                                 eventConfig.getPassword(),registry);
             updateConfigProperty(BAMDataPublisherConstants.STREAM_NAME,
-                                 eventConfig.getStreamName());
+                                 eventConfig.getStreamName(),registry);
             updateConfigProperty(BAMDataPublisherConstants.VERSION,
-                                 eventConfig.getVersion());
+                                 eventConfig.getVersion(),registry);
             updateConfigProperty(BAMDataPublisherConstants.NICK_NAME,
-                                 eventConfig.getNickName());
+                                 eventConfig.getNickName(),registry);
             updateConfigProperty(BAMDataPublisherConstants.DESCRIPTION,
-                                 eventConfig.getDescription());
+                                 eventConfig.getDescription(),registry);
 
 
             Property[] propertiesDTO = eventConfig.getProperties();
@@ -221,9 +215,11 @@ public class RegistryPersistenceManager {
                     valueList.add(property.getValue());
                     properties.put(property.getKey(), valueList);
                 }
-                updateAllProperties(properties, MediationDataPublisherConstants.MEDIATION_STATISTICS_PROPERTIES_REG_PATH);
+                updateAllProperties(properties, MediationDataPublisherConstants.MEDIATION_STATISTICS_PROPERTIES_REG_PATH,
+                                    registry);
             }else {
-                updateAllProperties(null, MediationDataPublisherConstants.MEDIATION_STATISTICS_PROPERTIES_REG_PATH);
+                updateAllProperties(null, MediationDataPublisherConstants.MEDIATION_STATISTICS_PROPERTIES_REG_PATH,
+                                    registry);
             }
 
         } catch (Exception e) {
@@ -236,14 +232,14 @@ public class RegistryPersistenceManager {
      *
      * @param propertyName
      * @param value
+     * @param registry
      * @throws org.wso2.carbon.registry.core.exceptions.RegistryException
      *
      * @throws MediationPublisherException
      */
-    public void updateConfigProperty(String propertyName, Object value)
+    public void updateConfigProperty(String propertyName, Object value, Registry registry)
             throws RegistryException, MediationPublisherException {
         String resourcePath = MediationDataPublisherConstants.MEDIATION_STATISTICS_REG_PATH + propertyName;
-        Registry registry = registryService.getConfigSystemRegistry(CarbonContext.getCurrentContext().getTenantId());
         Resource resource;
         if (registry != null) {
             try {
@@ -262,8 +258,8 @@ public class RegistryPersistenceManager {
         }
     }
 
-    public MediationStatConfig getEventingConfigData() {
-        return load();
+    public MediationStatConfig getEventingConfigData(int tenantId) {
+        return load(tenantId);
     }
 
 

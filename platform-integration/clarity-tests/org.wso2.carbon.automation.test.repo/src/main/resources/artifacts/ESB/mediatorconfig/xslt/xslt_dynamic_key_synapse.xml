@@ -55,7 +55,7 @@
             </xsl:template>
         </xsl:stylesheet>
     </localEntry>
-    <endpoint name="StockQuoteService">
+    <endpoint name="StockQuoteService8">
         <address uri="http://localhost:9000/services/SimpleStockQuoteService"/>
     </endpoint>
     <sequence name="xsltMediatorSequence" onError="fault">
@@ -72,7 +72,7 @@
             </log>
             <log level="full"/>
             <send>
-                <endpoint key="StockQuoteService"/>
+                <endpoint key="StockQuoteService8"/>
             </send>
         </in>
         <out>

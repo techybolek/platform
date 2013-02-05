@@ -227,6 +227,18 @@ function deleteRuleFile(name) {
     return false;
 }
 
+function deleteAllRuleFiles(){
+      var url = 'rule_delete_all_files-ajaxprocessor.jsp';
+        jQuery.get(url, ({}),
+            function(data, status) {
+                if (status != "success") {
+                    CARBON.showWarningDialog(ruleservicejsi18n['error.occurred']);
+                    return false;
+                }
+            });
+    return false;
+}
+
 function getSelectedValue(id) {
     var variableType = document.getElementById(id);
     var variableType_indexstr = null;

@@ -14,6 +14,7 @@ import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import java.io.StringReader;
+import java.sql.Timestamp;
 import java.util.Map;
 
 public class StatWriter {
@@ -21,9 +22,9 @@ public class StatWriter {
     private static final Log log = LogFactory.getLog(StatWriter.class);
     private static final String LOG_DEFAULT_PATH = "/_system/governance/repository/components/org.wso2.carbon.governance/lifecycles/history";
     private static final String REGISTRY_LIFECYCLE_HISTORY_ORDER = "registry.lifecycle_history.order";
-    private OMFactory factory = OMAbstractFactory.getOMFactory();
+    private static OMFactory factory = OMAbstractFactory.getOMFactory();
 
-    public void writeHistory(StatCollection currentCollection) {
+    public static void writeHistory(StatCollection currentCollection) {
 
         try {
             Registry systemRegistry = currentCollection.getRegistry();
@@ -51,12 +52,12 @@ public class StatWriter {
         }
     }
 
-    private String getStatResourcePath(String resourcePath) {
+    private static String getStatResourcePath(String resourcePath) {
         return LOG_DEFAULT_PATH + RegistryConstants.PATH_SEPARATOR
                 + resourcePath.replace(RegistryConstants.PATH_SEPARATOR,"_");
     }
 
-    private String buildOMContent(Resource resource, StatCollection currentCollection) throws Exception {
+    private static String buildOMContent(Resource resource, StatCollection currentCollection) throws Exception {
         String content = null;
 
         String property = resource.getProperty(REGISTRY_LIFECYCLE_HISTORY_ORDER);
@@ -82,7 +83,7 @@ public class StatWriter {
         return addNewContentElement(content, currentCollection, newOrder);
     }
 
-    private String addNewContentElement(String currentContent, StatCollection currentCollection, int order) throws Exception {
+    private static String addNewContentElement(String currentContent, StatCollection currentCollection, int order) throws Exception {
         OMElement currentOmElement;
 
         javax.xml.stream.XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(
@@ -111,6 +112,9 @@ public class StatWriter {
 
 //        Adding the originalPath attribute
         itemChildElement.addAttribute("originalPath", currentCollection.getResourcePath(), null);
+
+//        Adding the timestamp of the invocation
+        itemChildElement.addAttribute("timestamp", (new Timestamp(currentCollection.getTimeMillis())).toString(), null);
 
 //        Adding the action element
         OMElement actionElement = factory.createOMElement("action", itemChildElement.getNamespace(), itemChildElement);
@@ -165,7 +169,7 @@ public class StatWriter {
         return currentOmElement.toString();
     }
 
-    private OMElement buildInitialOMElement() {
+    private static OMElement buildInitialOMElement() {
         OMElement initialOMElement;
         initialOMElement = factory.createOMElement(new QName("lifecycleHistory"));
         return initialOMElement;

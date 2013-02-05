@@ -8,6 +8,7 @@ public class ManageEnvironment {
     private EnvironmentVariables is;
     private EnvironmentVariables bps;
     private EnvironmentVariables greg;
+    private EnvironmentVariables ss;
     private EnvironmentVariables dss;
     private EnvironmentVariables bam;
     private EnvironmentVariables brs;
@@ -68,6 +69,10 @@ public class ManageEnvironment {
         return dss;
     }
 
+    public EnvironmentVariables getSs() {
+        return ss;
+    }
+
     public EnvironmentVariables getAxis2() {
         return axis2;
     }
@@ -86,6 +91,7 @@ public class ManageEnvironment {
         this.esb = builder.esb;
         this.is = builder.is;
         this.bps = builder.bps;
+        this.ss=builder.ss;
         this.greg = builder.greg;
         this.dss = builder.dss;
         this.bam = builder.bam;

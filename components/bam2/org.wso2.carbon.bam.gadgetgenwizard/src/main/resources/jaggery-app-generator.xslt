@@ -36,6 +36,8 @@
         "<xsl:value-of select="gg:username"/>", "<xsl:value-of select="gg:password"/>", config);
     	var result = db.query("<xsl:value-of select="gg:sql"/>");
 
+        db.close();
+
         var respJson = null;
 
         <xsl:choose>

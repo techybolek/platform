@@ -246,12 +246,15 @@
     function executeQuery() {
         document.getElementById('hiveResult').innerHTML = '';
         var allQueries = editAreaLoader.getValue("allcommands");
-        if (allQueries != "") {
+        allQueries = trim(allQueries);
+        if (allQueries != '') {
             document.getElementById('middle').style.cursor = 'wait';
             openProgressBar();
+            window.location.hash = "scriptResults";
             new Ajax.Request('../hive-explorer/queryresults.jsp', {
                         method: 'post',
-                        parameters: {queries:allQueries},
+                        parameters: {queries:allQueries,
+                            scriptName: scriptName},
                         onSuccess: function(transport) {
                             document.getElementById('middle').style.cursor = '';
                             closeProgrsssBar();
@@ -272,16 +275,20 @@
                     });
 
         } else {
-            closeProgrsssBar();
             document.getElementById('middle').style.cursor = '';
             var message = "Empty query can not be executed";
             CARBON.showErrorDialog(message);
         }
     }
 
+    function trim(text) {
+        return text.replace(/^\s+|\s+$/g, "");
+    }
+
     function saveScript() {
         allQueries = editAreaLoader.getValue("allcommands");
         scriptName = document.getElementById('scriptName').value;
+        allQueries = trim(allQueries);
         if (allQueries != "") {
             if (scriptName != "") {
                 if (cron != "") {
@@ -304,7 +311,7 @@
             }
 
         } else {
-            var message = "Empty query can not be executed";
+            var message = "Empty query can not be saved";
             CARBON.showErrorDialog(message);
         }
     }
@@ -421,8 +428,8 @@
                 <tr>
                     <td style="padding: 10px 0 0 20px;">
                         <a class="icon-link" style="background: url('images/tasks-icon.gif') no-repeat;float:right;"
-                           href="javascript: scheduleTask();"><label>Schedule
-                            Script</label></a>
+                           href="javascript: scheduleTask();">Schedule
+                            Script</a>
                     </td>
                 </tr>
                 <%
@@ -487,10 +494,10 @@
                             <tr>
                                 <td>
                                     <input class="button" type="button" onclick="executeQuery()"
-                                           value="Run>"/>
+                                           value="<fmt:message key="execute"/>" />
                                     <input class="button" type="button" onclick="saveScript()"
-                                           value="Save"/>
-                                    <input type="button" value="Cancel" onclick="cancelScript()"
+                                           value="<fmt:message key="save"/>"/>
+                                    <input type="button" value="<fmt:message key="cancel"/>" onclick="cancelScript()"
                                            class="button"/>
                                 </td>
                             </tr>
@@ -515,7 +522,7 @@
                 </tr>
                 <tr>
                     <td class="middle-header">
-                        <fmt:message key="script.results"/>
+                        <a name="scriptResults"> <fmt:message key="script.results"/> </a>
                     </td>
                 </tr>
                 <tr>

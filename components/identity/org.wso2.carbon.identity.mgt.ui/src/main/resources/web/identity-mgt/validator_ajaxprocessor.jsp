@@ -25,7 +25,7 @@
 
 <%
     VerificationBean confirmationBean;
-    String redirect;
+    String redirect = null;
     String confirm = request.getParameter("confirmation");
     try {
         String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(),
@@ -37,7 +37,12 @@
                 new IdentityManagementClient(backendServerURL, configContext) ;
 
         confirmationBean = client.confirmLink(confirm);
-        redirect = confirmationBean.getRedirectPath();
+        if(confirmationBean.getVerified()){
+            redirect = confirmationBean.getRedirectPath();
+        } else {
+            response.sendRedirect("expired_reset_link.jsp");
+            return;
+        }
     } catch (Exception ignore) {
         response.sendRedirect("expired_reset_link.jsp");
         return;

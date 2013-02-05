@@ -23,6 +23,26 @@
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.rest.api.ui.client.RestApiAdminClient" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="javax.xml.stream.XMLStreamReader" %>
+<%@ page import="javax.xml.stream.XMLInputFactory" %>
+<%@ page import="java.io.ByteArrayInputStream" %>
+<%@ page import="java.io.InputStream" %>
+<%@ page import="org.apache.axiom.om.util.AXIOMUtil" %>
+<%@ page import="org.apache.axiom.om.OMElement" %>
+<%@ page import="org.apache.synapse.config.xml.rest.ResourceFactory" %>
+<%@ page import="org.apache.synapse.rest.Resource" %>
+<%@ page import="javax.xml.namespace.QName" %>
+<%@ page import="org.apache.axiom.om.OMAttribute" %>
+<%@ page import="org.apache.synapse.rest.dispatch.URLMappingHelper" %>
+<%@ page import="org.apache.synapse.rest.dispatch.URITemplateHelper" %>
+<%@ page import="org.apache.synapse.config.xml.XMLConfigConstants" %>
+<%@ page import="org.apache.synapse.config.xml.SequenceMediatorFactory" %>
+<%@ page import="org.apache.synapse.mediators.base.SequenceMediator" %>
+<%@ page import="java.util.Properties" %>
+<%@ page import="org.apache.axis2.Constants" %>
+<%@ page import="org.apache.synapse.rest.RESTConstants" %>
+<%@ page import="org.apache.synapse.SynapseException" %>
+<%@ page import="org.wso2.carbon.rest.api.ui.util.ApiEditorHelper" %>
 
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -50,7 +70,18 @@
         if (apiString != null && !"".equals(apiString)) {
             client.updateApiFromString(apiName, apiString);
         } else if (resourceString != null && !"".equals(resourceString)) {
-            // todo
+            ResourceData resourceData = ApiEditorHelper.convertStringToResourceData(resourceString);
+            String index = "0";
+            APIData apiData = (APIData) session.getAttribute("apiData");
+            int i = Integer.parseInt(index);
+            apiData.getResources()[i] = resourceData;
+            List<ResourceData> resourceList = (ArrayList<ResourceData>) session.getAttribute("apiResources");
+            resourceList.add(i, resourceData);
+            session.setAttribute("fromResourceSourceView", "true");
+            session.setAttribute("fromSourceView", "true");
+            session.setAttribute("resourceData", resourceData);
+            session.setAttribute("apiData", apiData);
+            session.setAttribute("apiResources", resourceList);
         }
     } else {
         client.addApiFromString(apiString);

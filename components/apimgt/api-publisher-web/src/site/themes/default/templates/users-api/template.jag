@@ -3,11 +3,14 @@
    var subs = jagg.module("subscription");
    var result = subs.getSubscribersOfAPI(api);
    var subscribers = result.subscribers;
+   var itemsPerPage = 10; //reduce this number to preview the pagination
+   var currentPage = 1;
+   var numberOfPages;
 
 %>
   <div class="row-fluid" id="usageSummary" style="display:none;">
     <div class="span6">
-        <h3>Usage Summary</h3>
+        <h3><%=i18n.localize("usageSummary")%></h3>
         <table class="table table-bordered">
           <tbody id="usageTable">
         </table>
@@ -16,12 +19,12 @@
 
     <div class="row-fluid">
             <div class="span12">
-                <h3>Active Subscriptions</h3>
+                <h3><%=i18n.localize("activeSubscriptions")%></h3>
                 <table class="table table-bordered">
                     <thead>
                     <tr>
-                        <th class="span4">Name</th>
-                        <th>Date of Subscription</th>
+                        <th class="span4"><%=i18n.localize("name")%></th>
+                        <th><%=i18n.localize("dateOfSubscription")%></th>
                         <!--<th>Actions</th> -->
                     </tr>
                     </thead>
@@ -30,32 +33,60 @@
         var i, subscriber;
         if(subscribers!=null){
         var length = subscribers.length;
-        for(i = 0; i < length; i++) {
+        numberOfPages = parseInt(length / itemsPerPage);
+        if (length % itemsPerPage != 0) {
+        numberOfPages++;
+        }
+        if (request.getParameter('page') != null) {
+        currentPage = parseInt(request.getParameter('page'));
+        if((currentPage-1)*itemsPerPage == length){
+        if(String(currentPage)=='1'){%>
+        <script>
+        window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/item-info.jag")%>";
+        </script>
+        <%}else{
+        currentPage = currentPage - 1;
+        %>
+        <script>
+        window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/item-info.jag")%>" +"?name="+"<%=api.name%>"+"&version="+"<%=api.version%>"+"&provider="+"<%=api.provider%>"+"&page="+"<%=String(currentPage)%>";
+        </script>
+        <%
+        } }  }
+        var from = (currentPage - 1)*itemsPerPage;
+        var to = currentPage*itemsPerPage;
+        if(currentPage == numberOfPages){
+        to = length%(itemsPerPage*currentPage);
+        if(to == 0){
+        to=itemsPerPage*currentPage;
+        }
+        }
+        if(length==0){
+        to=0;
+        %>
+        <tr><td colspan="3"><%=i18n.localize("noActiveSubscribersMsg")%></td></tr> <%}}%>
+        <%for(i = from; i < to; i++) {
         subscriber = subscribers[i];
         %>
         <tr>
         <td><i class="icon-user"></i><%=subscriber.username%></td>
-        <td><%=subscriber.subscribedDate%></td>
+        <td class="dateFull"><%=subscriber.subscribedDate%></td>
         <!--<td><i class="icon-edit"></i> <a href="#">Stats</a>
         <i class="icon-trash"></i> <a href="#">Revoke Access</a>
         <i class="icon-ban-circle"></i> <a href="#">Block</a>-->
         </td>
         </tr>
-        <%}}%>
-        <%
-        if (length == 0) {
-        %>
-        <tr><td colspan="3">No active subscribers</td></tr>
-        <%
-        }
-        %>
+        <%}%>
+
+
         </tbody>
                 </table>
+
+         <% jagg.includeBlock("paginator", {currentPage:currentPage,numberOfPages:numberOfPages}); %>
             </div>
         </div>
 
         <!-- Row -->
-<h3>Usage by Current Subscribers (v-<%=request.getParameter("version")%>)</h3>
+<h3><%=i18n.localize("usageByCurrentSubscribers")%> (v-<%=request.getParameter("version")%>)</h3>
 <div class="well">
     <div class="row-fluid">
         <div class="span6">
@@ -68,8 +99,8 @@
         <div class="span6">
             <table class="table" id="userVersionTable" style="display:none">
                   <tr>
-                    <th>Subscriber</th>
-                    <th>Number of API Calls</th>
+                    <th><%=i18n.localize("subscriber")%></th>
+                    <th><%=i18n.localize("noOfAPICalls")%></th>
                   </tr>
             </table>
         </div>
@@ -77,7 +108,7 @@
 </div>
 
 
-<h3>Usage by Current Subscribers (Across All Versions)</h3>
+<h3><%=i18n.localize("usageByCurrentSubscribersAcrossAll")%></h3>
 <div class="well">
     <div class="row-fluid">
         <div class="span6">
@@ -90,8 +121,8 @@
         <div class="span6">
             <table class="table" id="userTable" style="display:none">
               <tr>
-                <th>Subscriber</th>
-                <th>Number of API Calls</th>
+                <th><%=i18n.localize("subscriber")%></th>
+                <th><%=i18n.localize("noOfAPICalls")%></th>
               </tr>
             </table>
         </div>

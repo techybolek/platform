@@ -19,15 +19,15 @@
 
 package org.wso2.carbon.discovery;
 
-import org.wso2.carbon.registry.api.RegistryException;
-import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
-import org.wso2.carbon.discovery.util.Util;
-import org.wso2.carbon.discovery.util.DiscoveryMgtUtils;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.discovery.util.DiscoveryMgtUtils;
+import org.wso2.carbon.discovery.util.Util;
+import org.wso2.carbon.registry.api.RegistryException;
+import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
 /**
  * This observer implementation listens for configuration context creation and termination
@@ -50,7 +50,7 @@ public class DiscoveryAxis2ConfigurationContextObserver extends AbstractAxis2Con
         try {
             if (DiscoveryMgtUtils.isServiceDiscoveryEnabled(axisConfig)) {
                 if (log.isDebugEnabled()) {
-                    String domain = SuperTenantCarbonContext.getCurrentContext(configurationContext).
+                    String domain = PrivilegedCarbonContext.getCurrentContext(configurationContext).
                             getTenantDomain(true);
                     log.debug("Registering the Axis observer for WS-Discovery in tenant: " + domain);
                 }

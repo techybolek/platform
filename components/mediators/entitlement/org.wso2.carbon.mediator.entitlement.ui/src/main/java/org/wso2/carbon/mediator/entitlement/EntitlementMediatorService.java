@@ -48,4 +48,12 @@ public class EntitlementMediatorService extends AbstractMediatorService {
     public String getUIFolderName() {
         return "entitlement";
     }
+
+     public boolean isAddChildEnabled() {
+        return false;
+    }
+
+    public boolean isSequenceRefreshRequired() {
+        return true;
+    }
 }

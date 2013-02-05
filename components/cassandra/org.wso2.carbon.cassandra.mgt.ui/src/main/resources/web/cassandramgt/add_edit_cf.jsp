@@ -125,7 +125,9 @@
     <td><fmt:message key="cassandra.field.columnType"/></td>
     <td align="left">
         <select id="cf_editor_column_type" name="cf_editor_column_type" class="longInput" onchange="selectCLType()">
-            <% if (isSuperCl) {%>
+            <%
+                if(!"edit".equals(mode)){
+                if (isSuperCl) {%>
             <option value="<%=CassandraAdminClientConstants.COLUMN_TYPE_SUPER%>"
                     selected="selected">
                 <fmt:message key="cassandra.field.columnType.super"/></option>
@@ -138,7 +140,16 @@
                     key="cassandra.field.columnType.standard"/></option>
             <option value="<%=CassandraAdminClientConstants.COLUMN_TYPE_SUPER%>">
                 <fmt:message key="cassandra.field.columnType.super"/></option>
-            <% } %>
+            <% }}else{
+            if (isSuperCl) {%>
+            <option value="<%=CassandraAdminClientConstants.COLUMN_TYPE_SUPER%>"
+                    selected="selected">
+                <fmt:message key="cassandra.field.columnType.super"/></option>
+            <% } else { %>
+            <option value="<%=CassandraAdminClientConstants.COLUMN_TYPE_STANDARD%>"
+                    selected="selected"><fmt:message
+                    key="cassandra.field.columnType.standard"/></option>
+            <%}}%>
         </select>
     </td>
 </tr>
@@ -151,6 +162,7 @@
             <option value="<%=CassandraAdminClientConstants.ASCIITYPE%>" selected="selected">
                 <fmt:message
                         key="cassandra.field.comparator.ascii"/></option>
+            <%if(!"edit".equals(mode)){%>
             <option value="<%=CassandraAdminClientConstants.BYTESTYPE%>"><fmt:message
                     key="cassandra.field.comparator.bytes"/></option>
             <option value="<%=CassandraAdminClientConstants.UTF8TYPE%>"><fmt:message
@@ -163,9 +175,10 @@
                     key="cassandra.field.comparator.long"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
-            <% } else if (CassandraAdminClientConstants.UTF8TYPE.equals(comparator)) {%>
+            <% }} else if (CassandraAdminClientConstants.UTF8TYPE.equals(comparator)) {%>
             <option value="<%=CassandraAdminClientConstants.UTF8TYPE%>" selected="selected"><fmt:message
                     key="cassandra.field.comparator.utf8"/></option>
+            <%if(!"edit".equals(mode)){%>
             <option value="<%=CassandraAdminClientConstants.BYTESTYPE%>"><fmt:message
                     key="cassandra.field.comparator.bytes"/></option>
             <option value="<%=CassandraAdminClientConstants.ASCIITYPE%>"><fmt:message
@@ -178,10 +191,11 @@
                     key="cassandra.field.comparator.long"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
-            <% } else if (CassandraAdminClientConstants.LEXICALUUIDTYPE.equals(comparator)) {%>
+            <% }} else if (CassandraAdminClientConstants.LEXICALUUIDTYPE.equals(comparator)) {%>
             <option value="<%=CassandraAdminClientConstants.LEXICALUUIDTYPE%>" selected="selected">
                 <fmt:message
                         key="cassandra.field.comparator.lexicalUUID"/></option>
+            <%if(!"edit".equals(mode)){%>
             <option value="<%=CassandraAdminClientConstants.BYTESTYPE%>"><fmt:message
                     key="cassandra.field.comparator.bytes"/></option>
             <option value="<%=CassandraAdminClientConstants.ASCIITYPE%>"><fmt:message
@@ -194,10 +208,11 @@
                     key="cassandra.field.comparator.long"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
-            <% } else if (CassandraAdminClientConstants.TIMEUUIDTYPE.equals(comparator)) {%>
+            <% }} else if (CassandraAdminClientConstants.TIMEUUIDTYPE.equals(comparator)) {%>
             <option value="<%=CassandraAdminClientConstants.TIMEUUIDTYPE%>" selected="selected">
                 <fmt:message
                         key="cassandra.field.comparator.timeUUID"/></option>
+            <%if(!"edit".equals(mode)){%>
             <option value="<%=CassandraAdminClientConstants.BYTESTYPE%>"><fmt:message
                     key="cassandra.field.comparator.bytes"/></option>
             <option value="<%=CassandraAdminClientConstants.ASCIITYPE%>"><fmt:message
@@ -210,9 +225,10 @@
                     key="cassandra.field.comparator.long"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
-            <% } else if (CassandraAdminClientConstants.LONGTYPE.equals(comparator)) {%>
+            <% }} else if (CassandraAdminClientConstants.LONGTYPE.equals(comparator)) {%>
             <option value="<%=CassandraAdminClientConstants.LONGTYPE%>" selected="selected"><fmt:message
                     key="cassandra.field.comparator.long"/></option>
+            <%if(!"edit".equals(mode)){%>
             <option value="<%=CassandraAdminClientConstants.BYTESTYPE%>"><fmt:message
                     key="cassandra.field.comparator.bytes"/></option>
             <option value="<%=CassandraAdminClientConstants.ASCIITYPE%>"><fmt:message
@@ -225,9 +241,10 @@
                     key="cassandra.field.comparator.timeUUID"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
-            <% } else if (CassandraAdminClientConstants.INTEGERTYPE.equals(comparator)) {%>
+            <% }} else if (CassandraAdminClientConstants.INTEGERTYPE.equals(comparator)) {%>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>" selected=""><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
+            <%if(!"edit".equals(mode)){%>
             <option value="<%=CassandraAdminClientConstants.BYTESTYPE%>"><fmt:message
                     key="cassandra.field.comparator.bytes"/></option>
             <option value="<%=CassandraAdminClientConstants.ASCIITYPE%>"><fmt:message
@@ -240,10 +257,11 @@
                     key="cassandra.field.comparator.timeUUID"/></option>
             <option value="<%=CassandraAdminClientConstants.LONGTYPE%>"><fmt:message
                     key="cassandra.field.comparator.long"/></option>
-            <% } else {%>
+            <% }} else {%>
             <option value="<%=CassandraAdminClientConstants.BYTESTYPE%>" selected="selected">
                 <fmt:message
                         key="cassandra.field.comparator.bytes"/></option>
+            <%if(!"edit".equals(mode)){%>
             <option value="<%=CassandraAdminClientConstants.ASCIITYPE%>"><fmt:message
                     key="cassandra.field.comparator.ascii"/></option>
             <option value="<%=CassandraAdminClientConstants.UTF8TYPE%>"><fmt:message
@@ -256,7 +274,7 @@
                     key="cassandra.field.comparator.long"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
-            <% }%>
+            <% }}%>
         </select>
     </td>
 </tr>
@@ -269,6 +287,7 @@
             <option value="<%=CassandraAdminClientConstants.ASCIITYPE%>" selected="selected">
                 <fmt:message
                         key="cassandra.field.comparator.ascii"/></option>
+            <%if(!"edit".equals(mode)){%>
             <option value="<%=CassandraAdminClientConstants.BYTESTYPE%>"><fmt:message
                     key="cassandra.field.comparator.bytes"/></option>
             <option value="<%=CassandraAdminClientConstants.UTF8TYPE%>"><fmt:message
@@ -281,9 +300,10 @@
                     key="cassandra.field.comparator.long"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
-            <% } else if (CassandraAdminClientConstants.UTF8TYPE.equals(subComparator)) {%>
+            <% }} else if (CassandraAdminClientConstants.UTF8TYPE.equals(subComparator)) {%>
             <option value="<%=CassandraAdminClientConstants.UTF8TYPE%>" selected="selected"><fmt:message
                     key="cassandra.field.comparator.utf8"/></option>
+            <%if(!"edit".equals(mode)){%>
             <option value="<%=CassandraAdminClientConstants.BYTESTYPE%>"><fmt:message
                     key="cassandra.field.comparator.bytes"/></option>
             <option value="<%=CassandraAdminClientConstants.ASCIITYPE%>"><fmt:message
@@ -296,10 +316,11 @@
                     key="cassandra.field.comparator.long"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
-            <% } else if (CassandraAdminClientConstants.LEXICALUUIDTYPE.equals(subComparator)) {%>
+            <% }} else if (CassandraAdminClientConstants.LEXICALUUIDTYPE.equals(subComparator)) {%>
             <option value="<%=CassandraAdminClientConstants.LEXICALUUIDTYPE%>" selected="selected">
                 <fmt:message
                         key="cassandra.field.comparator.lexicalUUID"/></option>
+            <%if(!"edit".equals(mode)){%>
             <option value="<%=CassandraAdminClientConstants.BYTESTYPE%>"><fmt:message
                     key="cassandra.field.comparator.bytes"/></option>
             <option value="<%=CassandraAdminClientConstants.ASCIITYPE%>"><fmt:message
@@ -312,10 +333,11 @@
                     key="cassandra.field.comparator.long"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
-            <% } else if (CassandraAdminClientConstants.TIMEUUIDTYPE.equals(subComparator)) {%>
+            <% }} else if (CassandraAdminClientConstants.TIMEUUIDTYPE.equals(subComparator)) {%>
             <option value="<%=CassandraAdminClientConstants.TIMEUUIDTYPE%>" selected="selected">
                 <fmt:message
                         key="cassandra.field.comparator.timeUUID"/></option>
+            <%if(!"edit".equals(mode)){%>
             <option value="<%=CassandraAdminClientConstants.BYTESTYPE%>"><fmt:message
                     key="cassandra.field.comparator.bytes"/></option>
             <option value="<%=CassandraAdminClientConstants.ASCIITYPE%>"><fmt:message
@@ -328,9 +350,10 @@
                     key="cassandra.field.comparator.long"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
-            <% } else if (CassandraAdminClientConstants.LONGTYPE.equals(subComparator)) {%>
+            <% }} else if (CassandraAdminClientConstants.LONGTYPE.equals(subComparator)) {%>
             <option value="<%=CassandraAdminClientConstants.LONGTYPE%>" selected="selected"><fmt:message
                     key="cassandra.field.comparator.long"/></option>
+            <%if(!"edit".equals(mode)){%>
             <option value="<%=CassandraAdminClientConstants.BYTESTYPE%>"><fmt:message
                     key="cassandra.field.comparator.bytes"/></option>
             <option value="<%=CassandraAdminClientConstants.ASCIITYPE%>"><fmt:message
@@ -343,9 +366,10 @@
                     key="cassandra.field.comparator.timeUUID"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
-            <% } else if (CassandraAdminClientConstants.INTEGERTYPE.equals(subComparator)) {%>
+            <% }} else if (CassandraAdminClientConstants.INTEGERTYPE.equals(subComparator)) {%>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>" selected=""><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
+            <%if(!"edit".equals(mode)){%>
             <option value="<%=CassandraAdminClientConstants.BYTESTYPE%>"><fmt:message
                     key="cassandra.field.comparator.bytes"/></option>
             <option value="<%=CassandraAdminClientConstants.ASCIITYPE%>"><fmt:message
@@ -358,10 +382,11 @@
                     key="cassandra.field.comparator.timeUUID"/></option>
             <option value="<%=CassandraAdminClientConstants.LONGTYPE%>"><fmt:message
                     key="cassandra.field.comparator.long"/></option>
-            <% } else {%>
+            <% }} else {%>
             <option value="<%=CassandraAdminClientConstants.BYTESTYPE%>" selected="selected">
                 <fmt:message
                         key="cassandra.field.comparator.bytes"/></option>
+            <%if(!"edit".equals(mode)){%>
             <option value="<%=CassandraAdminClientConstants.ASCIITYPE%>"><fmt:message
                     key="cassandra.field.comparator.ascii"/></option>
             <option value="<%=CassandraAdminClientConstants.UTF8TYPE%>"><fmt:message
@@ -374,7 +399,7 @@
                     key="cassandra.field.comparator.long"/></option>
             <option value="<%=CassandraAdminClientConstants.INTEGERTYPE%>"><fmt:message
                     key="cassandra.field.comparator.integer"/></option>
-            <% }%>
+            <% }}%>
         </select>
     </td>
 </tr>

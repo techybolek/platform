@@ -35,7 +35,7 @@
         document.tablereport.action = 'table-data-save.jsp';
         var reportName = document.getElementById("reportName").value;
         if (reportName == '') {
-           CARBON.showErrorDialog('Please enter report name');
+            CARBON.showErrorDialog('Please enter report name');
             return false;
         }
 
@@ -134,13 +134,13 @@
             tableName = document.getElementById('tableName').value;
         }
         var fields = '';
-        if(null != document.getElementById('primaryField')){
+        if (null != document.getElementById('primaryField')) {
             fields = 'yes';
         }
-        if(tableName == '' || fields == '' || repName == ''){
+        if (tableName == '' || fields == '' || repName == '') {
             document.getElementById('save').disabled = 'disabled';
-        }else{
-           document.getElementById('save').disabled = '';
+        } else {
+            document.getElementById('save').disabled = '';
         }
     }
 
@@ -178,7 +178,7 @@
 
 </script>
 
- <carbon:breadcrumb label="add.report.step1"
+<carbon:breadcrumb label="add.report.step1"
                    resourceBundle="org.wso2.carbon.reporting.template.ui.i18n.Resources"
                    topPage="false" request="<%=request%>"/>
 
@@ -198,12 +198,12 @@
     try {
         client = new ReportTemplateClient(configContext, serverURL, cookie);
         datasources = client.getDatasourceNames();
-        if (datasources == null) {
+        if (datasources == null || datasources.length == 0) {
             errorString = "No data source found! Please add a data source!";
 %>
 <script type="text/javascript">
     CARBON.showErrorDialog('<%=errorString%>', function() {
-          location.href = "../reporting_custom/select-report.jsp";
+        location.href = "../reporting_custom/select-report.jsp";
     });
     // document.getElementById('save').disabled = true;
 </script>
@@ -213,7 +213,9 @@
     errorString = e.getMessage();
 %>
 <script type="text/javascript">
-    CARBON.showErrorDialog(<%=errorString%>);
+    CARBON.showErrorDialog('<%=errorString%>', function() {
+        location.href = "../reporting_custom/select-report.jsp";
+    });
 </script>
 <%
     }
@@ -251,7 +253,9 @@
                         }
                     %>
                     <td><input name="reportName"
-                               id="reportName" value="<%=tempReportName%>"  onkeyup="nextButtonValidate()" onmousemove="nextButtonValidate()" onfocus="nextButtonValidate()" onblur="nextButtonValidate()"/>
+                               id="reportName" value="<%=tempReportName%>" onkeyup="nextButtonValidate()"
+                               onmousemove="nextButtonValidate()" onfocus="nextButtonValidate()"
+                               onblur="nextButtonValidate()"/>
                     </td>
                 </tr>
 
@@ -279,13 +283,8 @@
                             <% }%>
                         </select>
 
-                        <% } else {
-                            errorString = "No datasource found";
+                        <% }
                         %>
-                        <script type="text/javascript">
-                            CARBON.showErrorDialog('<%=errorString%>');
-                        </script>
-                        <% } %>
                     </td>
                 </tr>
 
@@ -296,12 +295,13 @@
                     <td>
                         <div id="tableResult">
                             <% String[] tableNames = null;
-                                try {
-                                    tableNames = client.getTableNames(dsName);
-                                } catch (AxisFault e) {
-                                    errorString = e.getMessage();
-                                }
-                                if (tableNames != null && tableNames.length > 0) { %>
+                                if (!dsName.isEmpty()) {
+                                    try {
+                                        tableNames = client.getTableNames(dsName);
+                                    } catch (AxisFault e) {
+                                        errorString = e.getMessage();
+                                    }
+                                    if (tableNames != null && tableNames.length > 0) { %>
 
 
                             <select id="tableName" name="tableName" onchange="tableChanged()">
@@ -318,7 +318,8 @@
 
                                     <%=aTableName%>
                                 </option>
-                                <% }%>
+                                <% }
+                                %>
                             </select>
 
 
@@ -328,7 +329,9 @@
                             <script type="text/javascript">
                                 CARBON.showErrorDialog('<%=errorString%>');
                             </script>
-                            <% } %>
+                            <% }
+                            }
+                            %>
                         </div>
                     </td>
                 </tr>
@@ -340,15 +343,16 @@
                     <td>
                         <div id="fieldResults">
                             <% String[] fieldNames = null;
-                                try {
-                                    fieldNames = client.getFieldNames(dsName, tableName);
-                                } catch (AxisFault e) {
-                                    errorString = e.getMessage();
-                                }
-                                if (fieldNames != null && fieldNames.length > 0) {
-                                    for (int i = 0; i < fieldNames.length; i++) {
+                                if ((null != dsName && !dsName.isEmpty()) && (null != tableName && !tableName.isEmpty())) {
+                                    try {
+                                        fieldNames = client.getFieldNames(dsName, tableName);
+                                    } catch (AxisFault e) {
+                                        errorString = e.getMessage();
+                                    }
+                                    if (fieldNames != null && fieldNames.length > 0) {
+                                        for (int i = 0; i < fieldNames.length; i++) {
 
-                                        String aField = fieldNames[i];
+                                            String aField = fieldNames[i];
                             %>
                             <input type="checkbox" name="<%=aField%>"
                                    value="<%=aField%>" <%=i == 0 ? "checked" : ""%>/><%=aField%><br/>
@@ -358,9 +362,13 @@
                                 errorString = "No fields found in table " + tableName;
                             %>
                             <script type="text/javascript">
-                                CARBON.showErrorDialog('<%=errorString%>');
+                                CARBON.showErrorDialog('<%=errorString%>', function() {
+                                    location.href = "../reporting_custom/select-report.jsp";
+                                });
                             </script>
-                            <% } %>
+                            <% }
+                            }
+                            %>
                         </div>
                     </td>
 
@@ -392,13 +400,8 @@
                                 <% }
                                 %>
                             </select>
-                            <% } else {
-                                errorString = "No fields found in table " + tableName;
+                            <% }
                             %>
-                            <script type="text/javascript">
-                                CARBON.showErrorDialog('<%=errorString%>');
-                            </script>
-                            <% } %>
                         </div>
                     </td>
                 </tr>

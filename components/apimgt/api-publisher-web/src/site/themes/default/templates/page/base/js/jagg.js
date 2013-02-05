@@ -1,6 +1,9 @@
 var jagg = jagg || {};
 
 (function () {
+    var option = { resGetPath:requestURL+'/site/conf/locales/js/i18nResources.json'};
+    i18n.init(option);
+
     jagg.post = function () {
         var args = Array.prototype.slice.call(arguments);
         args[0] = this.site.context + args[0];
@@ -112,7 +115,10 @@ var jagg = jagg || {};
     jagg.fillProgress = function (chartId){
         if(t_on[chartId]){
             var progressBar = $('#'+chartId+' div.progress-striped div.bar')[0];
-
+            if(progressBar == undefined){
+                t_on[chartId] = 0 ;
+                return;
+            }
             var time = Math.floor((Math.random() * 400) + 800);
             var divider = Math.floor((Math.random() * 2) + 2);
             var currentWidth = parseInt(progressBar.style.width.split('%')[0]);
@@ -145,7 +151,7 @@ var jagg = jagg || {};
          );
         $('#username').focus();
         $('#loginErrorBox').show();
-        $('#loginErrorMsg').html('<strong>Session Timeout </strong>- your session has expired due to an extended period of inactivity. You will need to reauthenticate to access the requested information." ');
+        $('#loginErrorMsg').html('<strong>Session Timed Out </strong>- your session has expired due to an extended period of inactivity. You will need to re-authenticate to access the requested information. ');
     };
     jagg.login = function (username, password, params) {
         if(username == "" || password == ""){
@@ -202,6 +208,17 @@ var jagg = jagg || {};
         }else if(params.callback != undefined && typeof params.callback == "function"){
              params.callback();
          }
-    }
+    };
+    jagg.printDate = function(){
+
+        $('.dateFull').each(function(){
+            var timeStamp = parseInt($(this).html());
+            $(this).html(new Date(timeStamp).toLocaleString());
+        });
+    };
+    jagg.getDate = function(timestamp){
+         timestamp = parseInt(timestamp);
+         return new Date(timestamp).toLocaleString();
+    };
 
 }());

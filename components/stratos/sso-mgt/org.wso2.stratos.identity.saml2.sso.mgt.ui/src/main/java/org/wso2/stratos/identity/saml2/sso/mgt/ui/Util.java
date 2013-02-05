@@ -79,8 +79,9 @@ public class Util {
      */
     public static void populateLoginPageConfigParams() {
         Document document = null;
+        String configFilePath = null;
         try {
-            String configFilePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "sso-idp-config.xml";
+            configFilePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "sso-idp-config.xml";
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             document = builder.parse(configFilePath);
@@ -94,6 +95,9 @@ public class Util {
         if (tenantRegNodeSet.getLength() > 0) {
             Element elem = (Element) tenantRegNodeSet.item(0);
             tenantRegistrationPageURL = elem.getFirstChild().getNodeValue();
+        } else {
+            log.error("The configuration element '" + TENANT_REGISTRATION_PAGE + "' not found in '" +
+                    configFilePath + "'");
         }
 
         // read the base URL of the banner adds

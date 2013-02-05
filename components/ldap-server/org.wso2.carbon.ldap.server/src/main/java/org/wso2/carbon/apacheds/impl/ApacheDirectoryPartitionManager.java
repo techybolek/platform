@@ -102,7 +102,7 @@ class ApacheDirectoryPartitionManager implements PartitionManager {
                 addAdminGroup(partitionInformation.getPartitionAdministrator(), partition.
                         getSuffix());
 
-                addAdminACLEntry(partitionInformation.getPartitionAdministrator().getAdminUID(),
+                addAdminACLEntry(partitionInformation.getPartitionAdministrator().getAdminUserName(),
                                  partition.getSuffix());
 
                 this.directoryService.sync();
@@ -575,7 +575,7 @@ class ApacheDirectoryPartitionManager implements PartitionManager {
                 adminGroupEntry.add(groupInfo.getGroupNameAttribute(),
                                     groupInfo.getAdminRoleName());
                 adminGroupEntry.add(groupInfo.getMemberNameAttribute(),
-                                    "uid=" + adminInfo.getAdminUID() + "," + "ou=Users," +
+                                    adminInfo.getUsernameAttribute() + "=" + adminInfo.getAdminUserName() + "," + "ou=Users," +
                                     partitionSuffix);
                 directoryService.getAdminSession().add(adminGroupEntry);
             }
@@ -596,7 +596,7 @@ class ApacheDirectoryPartitionManager implements PartitionManager {
     private void addAdmin(AdminInfo adminInfo, String partitionSuffix, final String realm,
                           final boolean kdcEnabled) throws DirectoryServerException {
 
-        String domainName = "uid=" + adminInfo.getAdminUID() + "," + "ou=Users," + partitionSuffix;
+        String domainName =  adminInfo.getUsernameAttribute() + "=" + adminInfo.getAdminUserName() + "," + "ou=Users," + partitionSuffix;
 
         try {
             DN adminDn = new DN(domainName);
@@ -613,17 +613,19 @@ class ApacheDirectoryPartitionManager implements PartitionManager {
 
             addObjectClasses(adminEntry, objectClasses);
 
-            adminEntry.add("uid", adminInfo.getAdminUID());
+            adminEntry.add(adminInfo.getUsernameAttribute(), adminInfo.getAdminUserName());
             adminEntry.add("sn", adminInfo.getAdminLastName());
             adminEntry.add("givenName", adminInfo.getAdminCommonName());
             //setting admin full name as uid since 'cn' is a compulsory attribute when constructing a
             // user entry.
-            adminEntry.add("cn", adminInfo.getAdminUID());
-
-            adminEntry.add("mail", adminInfo.getAdminEmail());
+            adminEntry.add("cn", adminInfo.getAdminUserName());
+            
+            if (!"mail".equals(adminInfo.getUsernameAttribute())) {
+                adminEntry.add("mail", adminInfo.getAdminEmail());
+            }
 
             if (kdcEnabled) {
-                String principal = adminInfo.getAdminUID() + "@" + realm;
+                String principal = adminInfo.getAdminUserName() + "@" + realm;
                 adminEntry.put(KerberosAttribute.KRB5_PRINCIPAL_NAME_AT, principal);
                 adminEntry.put(KerberosAttribute.KRB5_KEY_VERSION_NUMBER_AT, "0");
             }

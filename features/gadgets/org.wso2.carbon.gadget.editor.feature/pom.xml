@@ -22,7 +22,8 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>gadgets-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -54,7 +55,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.gadget.editor</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
 				<bundles>		
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.gadget.editor</bundleDef>					
                             </bundles>

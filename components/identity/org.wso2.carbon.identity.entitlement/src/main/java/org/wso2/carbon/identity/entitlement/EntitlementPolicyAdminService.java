@@ -21,25 +21,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.balana.AbstractPolicy;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.IdentityRegistryResources;
 import org.wso2.carbon.identity.entitlement.dto.*;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
+import org.wso2.carbon.identity.entitlement.pap.PolicyEditorDataFinder;
+import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyFinder;
+import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStore;
+import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreManager;
+import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreReader;
 import org.wso2.carbon.identity.entitlement.pdp.EntitlementEngine;
-import org.wso2.carbon.identity.entitlement.pip.AbstractPIPAttributeFinder;
-import org.wso2.carbon.identity.entitlement.pip.CarbonAttributeFinder;
-import org.wso2.carbon.identity.entitlement.pip.CarbonResourceFinder;
-import org.wso2.carbon.identity.entitlement.pip.PIPAttributeFinder;
-import org.wso2.carbon.identity.entitlement.pip.PIPResourceFinder;
-import org.wso2.carbon.identity.entitlement.policy.PolicyAdmin;
-import org.wso2.carbon.identity.entitlement.policy.PolicyMetaDataFinder;
-import org.wso2.carbon.identity.entitlement.policy.PolicyReader;
-import org.wso2.carbon.identity.entitlement.policy.PolicySearch;
-import org.wso2.carbon.identity.entitlement.policy.PolicyStore;
-import org.wso2.carbon.identity.entitlement.policy.PolicyStoreReader;
-import org.wso2.carbon.identity.entitlement.policy.finder.RegistryBasedPolicyFinder;
+import org.wso2.carbon.identity.entitlement.policy.*;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -50,8 +43,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -65,18 +56,25 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 	 * This method persists a new XACML policy
 	 * 
 	 * @param policy PolicyDTO object
+     * @return returns whether True/False
 	 * @throws org.wso2.carbon.identity.base.IdentityException throws if invalid policy or if policy
 	 *             with same id is exist
 	 */
-	public void addPolicy(PolicyDTO policy) throws IdentityException {
-		PolicyAdmin policyAdmin;
+	public boolean addPolicy(PolicyDTO policy) throws IdentityException {
+
+		PAPPolicyStoreManager policyAdmin;
 		AbstractPolicy policyObj;
-	    EntitlementEngine entitlementEngine = EntitlementEngine.getInstance(
-				getGovernanceUserRegistry(), CarbonContext.getCurrentContext().getTenantId());
-        EntitlementUtil.validatePolicy(policy);
-		policyObj = PolicyReader.getInstance(null, null).getPolicy(policy.getPolicy());
+
+	    EntitlementEngine entitlementEngine = EntitlementEngine.getInstance();
+        if(policy.getPolicy() != null){
+            policy.setPolicy(policy.getPolicy().replaceAll(">\\s+<", "><"));
+        }
+        if(!EntitlementUtil.validatePolicy(policy)){
+            throw new IdentityException("Invalid Entitlement Policy");
+        }
+		policyObj = PolicyReader.getInstance(null).getPolicy(policy.getPolicy());
 		if (policyObj != null) {
-			policyAdmin = new PolicyAdmin(new PolicyStore(getGovernanceUserRegistry()));
+			policyAdmin = new PAPPolicyStoreManager(new PAPPolicyStore());
 			policy.setPolicyId(policyObj.getId().toASCIIString());
 			// All the policies wont be active at the time been added.
 			policy.setActive(policy.isActive());
@@ -84,10 +82,13 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 				throw new IdentityException(
 						"An Entitlement Policy with the given ID already exists");
 			}
+
 			policyAdmin.addOrUpdatePolicy(policy);
-			entitlementEngine.getRegistryModule().init(null);
-			// Whenever we add a policy - we need to clear decision cache.
-			entitlementEngine.clearDecisionCache(true);
+            if(policy.getPromoteStatus() == PolicyDTO.PROMOTED){
+                syncPDPPolicy(policy, PolicyDTO.PROMOTED, policyAdmin);
+            }
+			entitlementEngine.getPapPolicyFinder().init();
+            return true;
 		} else {
 			throw new IdentityException("Invalid Entitlement Policy");
 		}
@@ -102,16 +103,17 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 	public void addPolicies(PolicyDTO[] policies) throws IdentityException {
 
 		if (policies != null && policies.length > 0) {
-			EntitlementEngine entitlementEngine = EntitlementEngine.getInstance(
-					getGovernanceUserRegistry(), CarbonContext.getCurrentContext().getTenantId());
-			PolicyAdmin policyAdmin;
-			policyAdmin = new PolicyAdmin(new PolicyStore(getGovernanceUserRegistry()));
+			EntitlementEngine entitlementEngine = EntitlementEngine.getInstance();
+			PAPPolicyStoreManager policyAdmin;
+			policyAdmin = new PAPPolicyStoreManager(new PAPPolicyStore());
 
 			for (int i = 0; i < policies.length; i++) {
 				AbstractPolicy policyObj;
 				PolicyDTO policy = policies[i];
-                EntitlementUtil.validatePolicy(policy);
-				policyObj = PolicyReader.getInstance(null, null).getPolicy(policy.getPolicy());
+                if(!EntitlementUtil.validatePolicy(policy)){
+                    throw new IdentityException("Invalid Entitlement Policy");
+                }
+				policyObj = PolicyReader.getInstance(null).getPolicy(policy.getPolicy());
 				if (policyObj != null) {
 					policy.setPolicyId(policyObj.getId().toASCIIString());
 					policy.setActive(policy.isActive());
@@ -120,9 +122,7 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 								"An Entitlement Policy with the given ID already exists");
 					}
 					policyAdmin.addOrUpdatePolicy(policy);
-					entitlementEngine.getRegistryModule().init(null);
-					// Whenever we add a policy - we need to clear decision cache.
-					entitlementEngine.clearDecisionCache(true);
+					entitlementEngine.getPapPolicyFinder().init();
 				} else {
 					throw new IdentityException("Invalid Entitlement Policy");
 				}
@@ -202,27 +202,29 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 	 */
 	public PaginatedPolicySetDTO getAllPolicies(String policyTypeFilter, String policySearchString,
 			int pageNumber) throws IdentityException {
-		PolicyStoreReader policyReader;
+        
+		PAPPolicyStoreReader policyReader;
 		List<PolicyDTO> policyDTOList = new ArrayList<PolicyDTO>();
-		EntitlementEngine.getInstance(getGovernanceUserRegistry(), CarbonContext
-				.getCurrentContext().getTenantId());
-		policyReader = new PolicyStoreReader(new PolicyStore(getGovernanceUserRegistry()));
+		policyReader = new PAPPolicyStoreReader(new PAPPolicyStore());
 		PolicyDTO[] policyDTOs = policyReader.readAllLightPolicyDTOs();
 
 		for (PolicyDTO policyDTO : policyDTOs) {
 			boolean useAttributeFiler = false;
 			// Filter out policies based on policy type
 			if (!policyTypeFilter.equals("ALL")
-					&& !policyTypeFilter.equals(policyDTO.getPolicyType())) {
+					&& (!policyTypeFilter.equals(policyDTO.getPolicyType()) &&
+                    !("Active".equals(policyTypeFilter) && policyDTO.isActive()) &&
+                    !("Promoted".equals(policyTypeFilter) && 
+                            policyDTO.getPromoteStatus() == PolicyDTO.PROMOTED))) {
 				continue;
 			}
 
             if(policySearchString != null && policySearchString.trim().length() > 0){
                 // Filter out policies based on attribute value
                 PolicyDTO metaDataPolicyDTO = policyReader.readMetaDataPolicyDTO(policyDTO.getPolicyId());
-                AttributeValueDTO[] attributeValueDTOs = metaDataPolicyDTO.getPolicyMetaData();
-                for (AttributeValueDTO attributeValueDTO : attributeValueDTOs) {
-                    if (policySearchString.equals(attributeValueDTO.getAttribute())) {
+                AttributeDTO[] attributeDTOs = metaDataPolicyDTO.getPolicyMetaData();
+                for (AttributeDTO attributeDTO : attributeDTOs) {
+                    if (policySearchString.equals(attributeDTO.getAttributeValue())) {
                         useAttributeFiler = true;
                         break;
                     }
@@ -254,10 +256,9 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 	 * @throws org.wso2.carbon.identity.base.IdentityException throws
 	 */
 	public PolicyDTO getPolicy(String policyId) throws IdentityException {
-		PolicyStoreReader policyReader = null;
-		EntitlementEngine.getInstance(getGovernanceUserRegistry(), CarbonContext
-				.getCurrentContext().getTenantId());
-		policyReader = new PolicyStoreReader(new PolicyStore(getGovernanceUserRegistry()));
+		PAPPolicyStoreReader policyReader = null;
+        EntitlementEngine.getInstance();
+		policyReader = new PAPPolicyStoreReader(new PAPPolicyStore());
 		return policyReader.readPolicyDTO(policyId);
 	}
 
@@ -270,10 +271,9 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 	 * @throws org.wso2.carbon.identity.base.IdentityException throws
 	 */
 	public PolicyDTO getLightPolicy(String policyId) throws IdentityException {
-		PolicyStoreReader policyReader = null;
-		EntitlementEngine.getInstance(getGovernanceUserRegistry(), CarbonContext
-				.getCurrentContext().getTenantId());
-		policyReader = new PolicyStoreReader(new PolicyStore(getGovernanceUserRegistry()));
+		PAPPolicyStoreReader policyReader = null;
+        EntitlementEngine.getInstance();
+		policyReader = new PAPPolicyStoreReader(new PAPPolicyStore());
 		return policyReader.readLightPolicyDTO(policyId);
 	}
 
@@ -285,10 +285,9 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 	 * @throws org.wso2.carbon.identity.base.IdentityException throws
 	 */
 	public PolicyDTO getMetaDataPolicy(String policyId) throws IdentityException {
-		PolicyStoreReader policyReader = null;
-		EntitlementEngine.getInstance(getGovernanceUserRegistry(), CarbonContext
-				.getCurrentContext().getTenantId());
-		policyReader = new PolicyStoreReader(new PolicyStore(getGovernanceUserRegistry()));
+		PAPPolicyStoreReader policyReader = null;
+        EntitlementEngine.getInstance();
+		policyReader = new PAPPolicyStoreReader(new PAPPolicyStore());
 		return policyReader.readMetaDataPolicyDTO(policyId);
 	}
 
@@ -299,14 +298,18 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 	 * @throws org.wso2.carbon.identity.base.IdentityException throws
 	 */
 	public void removePolicy(PolicyDTO policy) throws IdentityException {
-		PolicyAdmin policyAdmin;
-		EntitlementEngine entitlementEngine = EntitlementEngine.getInstance(
-				getGovernanceUserRegistry(), CarbonContext.getCurrentContext().getTenantId());
-		policyAdmin = new PolicyAdmin(new PolicyStore(getGovernanceUserRegistry()));
+		PAPPolicyStoreManager policyAdmin;
+        PAPPolicyStoreReader reader;
+		EntitlementEngine entitlementEngine = EntitlementEngine.getInstance();
+		policyAdmin = new PAPPolicyStoreManager(new PAPPolicyStore());
+        reader = new PAPPolicyStoreReader(new PAPPolicyStore());
+        int status = reader.readLightPolicyDTO(policy.getPolicyId()).getPromoteStatus();
 		policyAdmin.removePolicy(policy);
+        if(status == PolicyDTO.PROMOTED || status == PolicyDTO.SYNC){
+            syncPDPPolicy(policy,PolicyDTO.DEPROMOTED, null);
+        }
 		// Reload the policies to the memory.
-		entitlementEngine.getRegistryModule().init(null);
-		entitlementEngine.clearDecisionCache(true);
+		entitlementEngine.getPapPolicyFinder().init();
 	}
 
 	/**
@@ -316,16 +319,20 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 	 * @throws org.wso2.carbon.identity.base.IdentityException throws if invalid policy
 	 */
 	public void updatePolicy(PolicyDTO policy) throws IdentityException {
-		PolicyAdmin policyAdmin;
+		PAPPolicyStoreManager policyAdmin;
 		AbstractPolicy policyObj;
-		EntitlementEngine entitlementEngine = EntitlementEngine.getInstance(
-				getGovernanceUserRegistry(), CarbonContext.getCurrentContext().getTenantId());
-        EntitlementUtil.validatePolicy(policy);
-        policyAdmin = new PolicyAdmin(new PolicyStore(getGovernanceUserRegistry()));
+		EntitlementEngine entitlementEngine = EntitlementEngine.getInstance();
+        if(policy.getPolicy() != null){
+            policy.setPolicy(policy.getPolicy().replaceAll(">\\s+<", "><"));
+        }        
+        if(!EntitlementUtil.validatePolicy(policy)){
+            throw new IdentityException("Invalid Entitlement Policy");
+        }
+        policyAdmin = new PAPPolicyStoreManager(new PAPPolicyStore());
         if(policy.getPolicyId() != null && policy.getPolicy() == null){
             policyAdmin.addOrUpdatePolicy(policy);
         } else {
-            policyObj = PolicyReader.getInstance(null, null).getPolicy(policy.getPolicy());
+            policyObj = PolicyReader.getInstance(null).getPolicy(policy.getPolicy());
             if (policyObj != null) {
                 policy.setPolicyId(policyObj.getId().toASCIIString());    
             } else {
@@ -333,25 +340,31 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
             }
             policyAdmin.addOrUpdatePolicy(policy);
         }
-        // Reload the policies to the memory.
-        entitlementEngine.getRegistryModule().init(null);
-        entitlementEngine.clearDecisionCache(true);
+        
+        if(policy.getPromoteStatus() == PolicyDTO.PROMOTED){
+            syncPDPPolicy(policy, PolicyDTO.PROMOTED, policyAdmin);
+        } else if (policy.getPromoteStatus() == PolicyDTO.DEPROMOTED){
+            syncPDPPolicy(policy, PolicyDTO.DEPROMOTED, policyAdmin);
+        } else if(policy.getPolicy() != null){
+            syncPDPPolicy(policy, PolicyDTO.SYNC, policyAdmin);    
+        }
 
+        // Reload the policies to the memory.
+        entitlementEngine.getPapPolicyFinder().init();
 	}
 
     /**
      * get attribute values to XACML editor UI from meta data finder modules
-     * @return Array of attribute value trees as PolicyAttributeDTO object
+     * @return Array of attribute value trees as PolicyEditorAttributeDTO object
      * @throws IdentityException throws, if fails
      */
-    public PolicyAttributeDTO[] getPolicyAttributeValues()
+    public PolicyEditorAttributeDTO[] getPolicyAttributeValues()
             throws IdentityException {
-        Set<PolicyAttributeDTO> policyAttributeDTOSet = null;
-		PolicyMetaDataFinder metaDataFinder = EntitlementEngine.getInstance(getGovernanceUserRegistry(),
-				CarbonContext.getCurrentContext().getTenantId()).getMetaDataFinder();
+        Set<PolicyEditorAttributeDTO> policyAttributeDTOSet = null;
+		PolicyEditorDataFinder metaDataFinder = EntitlementEngine.getInstance().getMetaDataFinder();
         policyAttributeDTOSet = metaDataFinder.getPolicyAttributeValues();
         if(policyAttributeDTOSet != null){
-            return policyAttributeDTOSet.toArray(new PolicyAttributeDTO[policyAttributeDTOSet.size()]);
+            return policyAttributeDTOSet.toArray(new PolicyEditorAttributeDTO[policyAttributeDTOSet.size()]);
         }
 
         return null;
@@ -369,13 +382,14 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 
 	public String[] getEntitlementPolicyDataFromRegistry(String resourceName)
 			throws IdentityException {
-		PolicyStore policyStoreAdmin;
+		PAPPolicyStore policyStoreAdmin;
 		List<String> entitlementPolicyResources = new ArrayList<String>();
+        EntitlementEngine.getInstance();
 		Resource resource;
 		InputStream inputStream = null;
 		BufferedReader bufferedReader = null;
 		try {
-			policyStoreAdmin = new PolicyStore(EntitlementServiceComponent.getRegistryService()
+			policyStoreAdmin = new PAPPolicyStore(EntitlementServiceComponent.getRegistryService()
 					.getGovernanceSystemRegistry());
 			resource = policyStoreAdmin.getEntitlementPolicyResources(resourceName);
 			inputStream = resource.getContentStream();
@@ -390,7 +404,7 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 			throw new IdentityException("Error occurs while creating inputStream from registry "
 					+ "resource", e);
 		} catch (IdentityException e) {
-			throw new IdentityException("Error occurs while initializing PolicyStore", e);
+			throw new IdentityException("Error occurs while initializing PAPPolicyStore", e);
 		} finally {
 			if (bufferedReader != null) {
 				try {
@@ -419,223 +433,14 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 	 */
 	public String[] getAllPolicyIds() throws IdentityException {
 		List<String> policyIds = new ArrayList<String>();
-		PolicyStoreReader policyReader;
-		policyReader = new PolicyStoreReader(new PolicyStore(getGovernanceUserRegistry()));
+		PAPPolicyStoreReader policyReader;
+        EntitlementEngine.getInstance();
+		policyReader = new PAPPolicyStoreReader(new PAPPolicyStore());
 
 		for (PolicyDTO policyDTO : policyReader.readAllLightPolicyDTOs()) {
 			policyIds.add(policyDTO.getPolicyId());
 		}
 		return policyIds.toArray(new String[policyIds.size()]);
-	}
-
-	/**
-	 * Clears the decision cache.
-	 * 
-	 * @throws IdentityException throws
-	 */
-	public void clearDecisionCache() throws IdentityException {
-		EntitlementEngine.getInstance(getGovernanceUserRegistry(),
-				CarbonContext.getCurrentContext().getTenantId()).clearDecisionCache(true);
-	}
-
-
-	/**
-	 * Clears Carbon attribute finder cache and All the attribute cache implementations in each
-     * PIP attribute finder level
-	 *
-	 * @throws IdentityException throws
-	 */
-	public void clearAllAttributeCaches() throws IdentityException {
-		CarbonAttributeFinder finder = EntitlementEngine.getInstance(getGovernanceUserRegistry(),
-				CarbonContext.getCurrentContext().getTenantId()).getCarbonAttributeFinder();
-		if (finder != null) {
-			finder.clearAttributeCache();
-			// we need invalidate decision cache as well.
-			clearDecisionCache();
-		} else {
-			throw new IdentityException("Can not clear all attribute caches - Carbon Attribute Finder "
-					+ "is not initialized");
-		}
-
-		Map<PIPAttributeFinder, Properties> designators = EntitlementServiceComponent.getEntitlementConfig()
-				.getDesignators();
-        if(designators != null && !designators.isEmpty()){
-            Set<PIPAttributeFinder> pipAttributeFinders = designators.keySet();
-            for (PIPAttributeFinder pipAttributeFinder : pipAttributeFinders) {
-                pipAttributeFinder.clearCache();
-            }
-        }
-	}
-
-
-	/**
-	 * Clears the carbon attribute cache
-	 * 
-	 * @throws IdentityException throws
-	 */
-	public void clearCarbonAttributeCache() throws IdentityException {
-		CarbonAttributeFinder finder = EntitlementEngine.getInstance(getGovernanceUserRegistry(),
-				CarbonContext.getCurrentContext().getTenantId()).getCarbonAttributeFinder();
-		if (finder != null) {
-			finder.clearAttributeCache();
-			// we need invalidate decision cache as well.
-			clearDecisionCache();
-		} else {
-			throw new IdentityException("Can not clear attribute cache - Carbon Attribute Finder "
-					+ "is not initialized");
-		}
-
-		Map<PIPAttributeFinder, Properties> designators = EntitlementServiceComponent.getEntitlementConfig()
-				.getDesignators();
-        if(designators != null && !designators.isEmpty()){
-            Set<PIPAttributeFinder> pipAttributeFinders = designators.keySet();
-            for (PIPAttributeFinder pipAttributeFinder : pipAttributeFinders) {
-                if(pipAttributeFinder instanceof AbstractPIPAttributeFinder){
-                    pipAttributeFinder.clearCache();
-                }
-            }
-        }        
-	}
-
-    /**
-     * Clears the cache maintained by the attribute finder.
-     *
-     * @param attributeFinder Canonical name of the attribute finder class.
-     */
-    public void clearAttributeFinderCache(String attributeFinder) {
-
-		Map<PIPAttributeFinder, Properties> designators = EntitlementServiceComponent.getEntitlementConfig()
-				.getDesignators();
-        if(designators != null && !designators.isEmpty()){
-            Set<PIPAttributeFinder> pipAttributeFinders = designators.keySet();
-            for (PIPAttributeFinder pipAttributeFinder : pipAttributeFinders) {
-                if(pipAttributeFinder instanceof AbstractPIPAttributeFinder){
-                    if (pipAttributeFinder.getClass().getCanonicalName().equals(attributeFinder)) {
-                        pipAttributeFinder.clearCache();
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-	/**
-	 * Clears the cache maintained by the attribute finder - by attributes
-	 *
-	 * @param attributeFinder Canonical name of the attribute finder class.
-	 * @param attributeIds An array of attribute id.
-	 */
-	public void clearAttributeFinderCacheByAttributes(String attributeFinder, String[] attributeIds) {
-
-		Map<PIPAttributeFinder, Properties> designators = EntitlementServiceComponent.getEntitlementConfig()
-				.getDesignators();
-        if(designators != null && !designators.isEmpty()){
-            Set<PIPAttributeFinder> pipAttributeFinders = designators.keySet();
-            for (PIPAttributeFinder pipAttributeFinder : pipAttributeFinders) {
-                if (pipAttributeFinder.getClass().getCanonicalName().equals(attributeFinder)) {
-                    pipAttributeFinder.clearCache(attributeIds);
-                    break;
-                }
-            }
-        }        
-	}
-
-	/**
-	 * Clears Carbon resource finder cache and All the resource cache implementations in each
-     * PIP resource finder level
-	 *
-	 * @throws IdentityException throws
-	 */
-	public void clearAllResourceCaches() throws IdentityException {
-        CarbonResourceFinder finder = EntitlementEngine.getInstance(getGovernanceUserRegistry(),
-				CarbonContext.getCurrentContext().getTenantId()).getCarbonResourceFinder();
-		if (finder != null) {
-			finder.clearAttributeCache();
-			// we need invalidate decision cache as well.
-			clearDecisionCache();
-		} else {
-			throw new IdentityException("Can not clear attribute cache - Carbon Attribute Finder "
-					+ "is not initialized");
-		}
-	}    
-
-	/**
-	 * Clears the carbon resource cache
-	 *
-	 * @throws IdentityException throws
-	 */
-	public void clearCarbonResourceCache() throws IdentityException {
-        CarbonResourceFinder finder = EntitlementEngine.getInstance(getGovernanceUserRegistry(),
-				CarbonContext.getCurrentContext().getTenantId()).getCarbonResourceFinder();
-		if (finder != null) {
-			finder.clearAttributeCache();
-			// we need invalidate decision cache as well.
-			clearDecisionCache();
-		} else {
-			throw new IdentityException("Can not clear attribute cache - Carbon Attribute Finder "
-					+ "is not initialized");
-		}
-
-		Map<PIPResourceFinder, Properties> resourceConfigs = EntitlementServiceComponent.getEntitlementConfig()
-				.getResourceFinders();
-        if(resourceConfigs != null && !resourceConfigs.isEmpty()){
-            Set<PIPResourceFinder> resourceFinders = resourceConfigs.keySet();
-            for (PIPResourceFinder pipResourceFinder : resourceFinders) {
-                pipResourceFinder.clearCache();
-            }
-        }
-	}
-
-	/**
-	 * Clears the cache maintained by the resource finder.
-	 *
-     * @param resourceFinder Canonical name of the resource finder class.
-     */
-	public void clearResourceFinderCache(String resourceFinder) {
-
-		Map<PIPResourceFinder, Properties> resourceConfigs = EntitlementServiceComponent.getEntitlementConfig()
-				.getResourceFinders();
-        if(resourceConfigs != null && !resourceConfigs.isEmpty()){
-            Set<PIPResourceFinder> resourceFinders = resourceConfigs.keySet();
-            for (PIPResourceFinder pipResourceFinder : resourceFinders) {
-                if (resourceFinder.getClass().getCanonicalName().equals(resourceFinder)) {
-                    pipResourceFinder.clearCache();
-                    break;
-                }
-            }
-        }
-	}
-
-
-	/**
-	 * Refreshes the supported Attribute ids of a given attribute finder module
-	 *
-	 * @param attributeFinder Canonical name of the attribute finder class.
-	 * @throws IdentityException throws if fails to  refresh
-	 */
-	public void refreshAttributeFinder(String attributeFinder) throws IdentityException {
-
-		Map<PIPAttributeFinder, Properties> designators = EntitlementServiceComponent.getEntitlementConfig()
-				.getDesignators();
-        if(designators != null && !designators.isEmpty()){
-            Set<Map.Entry<PIPAttributeFinder, Properties>> pipAttributeFinders = designators.entrySet();
-            for (Map.Entry<PIPAttributeFinder, Properties> pipAttributeFinder : pipAttributeFinders) {
-                if (pipAttributeFinder.getClass().getCanonicalName().equals(attributeFinder)) {
-                    try {
-                        pipAttributeFinder.getKey().init(pipAttributeFinder.getValue());
-                        pipAttributeFinder.getKey().clearCache();
-                        CarbonAttributeFinder carbonAttributeFinder = EntitlementEngine.
-                                getInstance(getGovernanceUserRegistry(), CarbonContext.getCurrentContext().
-                                        getTenantId()).getCarbonAttributeFinder();
-                        carbonAttributeFinder.init();
-                    } catch (Exception e) {
-                        throw new IdentityException("Error while refreshing attribute finder - " +
-                                                    attributeFinder);
-                    }
-                    break;
-                }
-            }
-        }
 	}
 
 	/**
@@ -645,13 +450,12 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 	 * @throws IdentityException throws
 	 */
 	public void setGlobalPolicyAlgorithm(String policyCombiningAlgorithm) throws IdentityException {
-		PolicyStore policyStore;
-		EntitlementEngine entitlementEngine = EntitlementEngine.getInstance(
-				getGovernanceUserRegistry(), CarbonContext.getCurrentContext().getTenantId());
-		policyStore = new PolicyStore(getGovernanceUserRegistry());
+		EntitlementEngine entitlementEngine = EntitlementEngine.getInstance();
+        PAPPolicyStore policyStore = new PAPPolicyStore();
 		policyStore.addPolicyCombiningAlgorithm(policyCombiningAlgorithm);
-		entitlementEngine.getRegistryModule().init(null);
-		entitlementEngine.clearDecisionCache(true);
+        // set policy combining algorithm in policy store also
+        entitlementEngine.getPolicyStoreManager().setPolicyCombiningAlgorithm();
+		entitlementEngine.getPapPolicyFinder().init();
 	}
 
 	/**
@@ -661,40 +465,64 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 	 * @throws IdentityException throws
 	 */
 	public String getGlobalPolicyAlgorithm() throws IdentityException {
-		RegistryBasedPolicyFinder policyFinder = EntitlementEngine.getInstance(
-				getGovernanceUserRegistry(), CarbonContext.getCurrentContext().getTenantId())
-				.getRegistryModule();
-		if (policyFinder != null) {
-			return policyFinder.getGlobalPolicyCombiningAlgorithm();
-		}
-		return null;
+		EntitlementEngine.getInstance();
+        PAPPolicyStoreReader reader = new PAPPolicyStoreReader(new PAPPolicyStore());
+        return reader.readPolicyCombiningAlgorithm();
 	}
 
-	/**
-	 * Gets entitled resources for given user or role
-	 *
-	 * @param subjectName subject Name, User or Role name
-     * @param subjectId attribute id of the subject, user or role
-	 * @param resourceName resource Name 
-     * @param action action name
-	 * @param enableChildSearch whether search is done for the child resources under the given  resource name
-     * @param useApplicablePolices whether search is done only for applicable policies in given search parameters
-     * @return entitled resources as String array
-	 * @throws org.wso2.carbon.identity.base.IdentityException throws if invalid data is provided
-	 */
-	public EntitledResultSetDTO getEntitledAttributes(String subjectName, String resourceName,
-                                      String subjectId, String action, boolean enableChildSearch,
-                                      boolean useApplicablePolices) throws IdentityException {
+    /**
+     * policy re-ordering
+     * 
+     * @param policyDTOs
+     * @throws  IdentityException
+     */
+    public void reOderPolicies(PolicyDTO[] policyDTOs) throws IdentityException {
 
-		if (subjectName == null) {
-			throw new IdentityException(
-					"Invalid input data - either the userName or roleName should be non-null");
-		}
+        boolean success = true;
 
-		PolicySearch policySearch = new PolicySearch();
-		return policySearch.getEntitledAttributes(subjectName, resourceName, subjectId, action,
-                                                  enableChildSearch, useApplicablePolices);
-	}
+        for(PolicyDTO dto : policyDTOs){
+            try {
+                updatePolicy(dto);  // TODO as transactions
+            } catch (IdentityException e) {
+                // ignore this error as this is reOrdering process
+                success = false;
+            }
+        }
+        
+        if(success){
+            PolicyStoreManager manager = EntitlementEngine.getInstance().getPolicyStoreManager();
+            for(PolicyDTO dto : policyDTOs){
+                manager.promotePolicy(dto.getPolicyId());
+                updatePolicy(dto);
+            }
+        }
+        EntitlementEngine.getInstance().getPapPolicyFinder().init();
+    }
+
+
+    private void syncPDPPolicy(PolicyDTO policyDTO, int promoteStatus, PAPPolicyStoreManager papManager)
+                                                                        throws IdentityException {
+
+        PolicyStoreManager manager = EntitlementEngine.getInstance().getPolicyStoreManager();
+
+        if(PolicyDTO.PROMOTED == promoteStatus){
+            if(manager.promotePolicy(policyDTO.getPolicyId())){
+                policyDTO.setPromoteStatus(PolicyDTO.PROMOTED);
+            }
+        } else if(PolicyDTO.DEPROMOTED == promoteStatus){
+            if(manager.removePolicy(policyDTO.getPolicyId())){
+                policyDTO.setPromoteStatus(PolicyDTO.PROMOTE);
+            }
+        } else if(PolicyDTO.SYNC == promoteStatus){
+            policyDTO.setPromoteStatus(PolicyDTO.SYNC);
+        } else {
+            policyDTO.setPromoteStatus(PolicyDTO.PROMOTE);    
+        }
+
+        if(papManager != null){
+            papManager.addOrUpdatePolicy(policyDTO);
+        }
+    }
 
 	/**
 	 * This method is used internally to do the pagination purposes.

@@ -352,32 +352,27 @@
                         </div>
                     </td>
                 </tr>
-                <tr id="buttonRow">
+                <tr id="buttonRow" colspan="2">
                     <td class="buttonRow">
                         <input type="hidden" name="selectedUsagePlan" id="selectedUsagePlan"/>
                         <input type="hidden" name="captcha-secret-key" value="<%=captchaSecretKey%>"/>
                         <%
                             if (isPublicCloud) {
                         %>
-                        <input class="button" id="submit-button" type="button" disabled="disabled"
-                               value="Submit" onclick="setFreeUsagePlan();addTenant()"/>
+                        <input class="button" id="submit-button" type="button" disabled="disabled" style="float:left; margin-top:4px"
+                               value="Next >" onclick="setFreeUsagePlan();addTenant();jQuery(this).attr('disabled', true);jQuery('#waitMessage').toggle('fast')"/>
                         <%
                         } else {
                         %>
-                        <input class="button" id="submit-button" type="button"
-                               value="Next >" onclick="setFreeUsagePlan();addTenant()"/>
+                        <input class="button" id="submit-button" type="button" style="float:left; margin-top:4px"
+                               value="Next >" onclick="setFreeUsagePlan();addTenant();jQuery(this).attr('disabled', true);jQuery('#waitMessage').toggle('fast')"/>
                         <%
                             }
                         %>
-
-                    </td>
-                </tr>
-                <tr id="waitMessage" style="display:none">
-                    <td>
-                        <div style="font-size:13px !important;margin-top:10px;margin-bottom:10px;"><img
-                                src="images/ajax-loader.gif" align="left" hspace="20"/>Please wait until the Service is
-                            importing to the Registry...
+                        <div id="waitMessage" style="font-size:13px !important;margin-top:5px; float:left;display:none"><img
+                                src="images/ajax-loader.gif" align="left" hspace="20"/>Registering new tenant ...
                         </div>
+                        <div style="clear:both"></div>
                     </td>
                 </tr>
                 </tbody>

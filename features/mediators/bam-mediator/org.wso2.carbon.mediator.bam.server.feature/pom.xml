@@ -22,11 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>bam-mediator-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.mediator.bam.server.feature</artifactId>
+    <version>4.0.5</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - BAM Mediator Feature</name>
     <url>http://wso2.org</url>
@@ -36,6 +38,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediator.bam</artifactId>
+            <version>${carbon.platform.patch.version.405}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -58,7 +61,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.mediator.bam.server</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
@@ -66,15 +69,13 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.bam</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.bam:${carbon.platform.patch.version.405}</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.bam.config.stub</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.apache.synapse.wso2:${synapse.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.mediation.initializer.server:${mediation.initializer.feature.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.databridge.agent.thrift.server:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.databridge.commons.thrift.server:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.databridge.commons.server:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.databridge.datapublisher:${carbon.platform.patch.version.402}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>
@@ -82,5 +83,10 @@
             </plugin>
         </plugins>
     </build>
+
+    <properties>
+        <carbon.platform.patch.version.402>4.0.2</carbon.platform.patch.version.402>
+        <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
+    </properties>
 
 </project>

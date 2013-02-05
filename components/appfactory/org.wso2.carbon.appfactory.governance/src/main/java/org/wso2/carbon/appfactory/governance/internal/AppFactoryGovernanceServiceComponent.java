@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -44,6 +45,11 @@ import java.io.IOException;
  * @scr.reference name="user.realm.service"
  * interface="org.wso2.carbon.user.core.service.RealmService"
  * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
+ * @scr.reference name="appfactory.configuration"
+ * interface="org.wso2.carbon.appfactory.common.AppFactoryConfiguration"
+ * cardinality="1..1" policy="dynamic"
+ * bind="setAppFactoryConfiguration"
+ * unbind="unsetAppFactoryConfiguration"
  */
 public class AppFactoryGovernanceServiceComponent {
 
@@ -71,7 +77,7 @@ public class AppFactoryGovernanceServiceComponent {
         }
     }
 
-     protected void setRegistryService(RegistryService registryService) {
+    protected void setRegistryService(RegistryService registryService) {
         if (registryService != null && log.isDebugEnabled()) {
             log.debug("Registry service initialized");
         }
@@ -95,11 +101,12 @@ public class AppFactoryGovernanceServiceComponent {
 
     /**
      * Register rxt's defined in rxts folder
+     *
      * @throws Exception
      */
     private void addRxtConfigs() throws Exception {
         String rxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator +
-                "resources" + File.separator + "rxts";
+                        "resources" + File.separator + "rxts";
         File file = new File(rxtDir);
         //create a FilenameFilter
         FilenameFilter filenameFilter = new FilenameFilter() {
@@ -121,7 +128,7 @@ public class AppFactoryGovernanceServiceComponent {
 
         for (String rxtPath : rxtFilePaths) {
             String resourcePath = GovernanceConstants.RXT_CONFIGS_PATH +
-                    RegistryConstants.PATH_SEPARATOR + rxtPath;
+                                  RegistryConstants.PATH_SEPARATOR + rxtPath;
             try {
                 if (systemRegistry.resourceExists(resourcePath)) {
                     continue;
@@ -142,5 +149,11 @@ public class AppFactoryGovernanceServiceComponent {
         }
     }
 
+    protected void unsetAppFactoryConfiguration(AppFactoryConfiguration appFactoryConfiguration) {
+        ServiceReferenceHolder.getInstance().setAppFactoryConfiguration(null);
+    }
 
+    protected void setAppFactoryConfiguration(AppFactoryConfiguration appFactoryConfiguration) {
+        ServiceReferenceHolder.getInstance().setAppFactoryConfiguration(appFactoryConfiguration);
+    }
 }

@@ -19,17 +19,13 @@ package org.wso2.carbon.appfactory.core.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTracker;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
-import org.wso2.carbon.appfactory.common.AppFactoryException;
 import org.wso2.carbon.appfactory.core.ArtifactStorage;
 import org.wso2.carbon.appfactory.core.BuildDriver;
+import org.wso2.carbon.appfactory.core.ContinuousIntegrationSystemDriver;
 import org.wso2.carbon.appfactory.core.RevisionControlDriver;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.wso2.carbon.registry.core.service.RegistryService;
 
 /**
  * @scr.component name=
@@ -54,34 +50,24 @@ import java.util.Map;
  *                cardinality="1..1" policy="dynamic"
  *                bind="setArtifactStorage"
  *                unbind="unsetArtifactStorage"
+ * @scr.reference name="appfactory.cidriver"
+ *                interface="org.wso2.carbon.appfactory.core.ContinuousIntegrationSystemDriver"
+ *                cardinality="0..1" policy="dynamic"
+ *                bind="setContinuousIntegrationSystemDriver"
+ *                unbind="unsetContinuousIntegrationSystemDriver"
+ *@scr.reference name="registry.service"
+ *                interface="org.wso2.carbon.registry.core.service.RegistryService"
+ *                cardinality="1..1" policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
  */
 
 public class AppFactoryCoreServiceComponent {
 
 	private static final Log log = LogFactory
 			.getLog(AppFactoryCoreServiceComponent.class);
-    private static Map<String,RevisionControlDriver> revisionControlDriverMap;
     private static BundleContext bundleContext;
     protected void activate(ComponentContext context) {
         AppFactoryCoreServiceComponent. bundleContext = context.getBundleContext();
-        revisionControlDriverMap=new HashMap<String, RevisionControlDriver>();
 
-
-        if (getBundleContext() != null) {
-            ServiceTracker tracker = new ServiceTracker(getBundleContext(),
-                                                        RevisionControlDriver.class.getName(), null);
-            tracker.open();
-            ServiceReference reference[] = tracker.getServiceReferences();
-            if (reference != null) {
-                for (ServiceReference serviceReference : reference) {
-                    revisionControlDriverMap.put((String)serviceReference.getProperty("type"),
-                                                 (RevisionControlDriver)tracker.getService(serviceReference));
-                }
-            } else {
-                String msg = "This instance does not have revision controller";
-                log.error(msg);
-                   }
-        }
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Appfactory core bundle is activated");
@@ -132,20 +118,28 @@ public class AppFactoryCoreServiceComponent {
         ServiceHolder.setAppFactoryConfiguration(null);
     }
 
-    public static  RevisionControlDriver getRevisionControlDriverMap(String type) {
-        return revisionControlDriverMap.get(type);
-    }
-
-    public static void setRevisionControlDriverMap(
-            Map<String, RevisionControlDriver> revisionControlDriverMap) {
-        AppFactoryCoreServiceComponent.revisionControlDriverMap = revisionControlDriverMap;
-    }
-
     public static BundleContext getBundleContext() {
         return bundleContext;
     }
 
     public static void setBundleContext(BundleContext bundleContext) {
         AppFactoryCoreServiceComponent.bundleContext = bundleContext;
+    }
+    protected void unsetContinuousIntegrationSystemDriver(ContinuousIntegrationSystemDriver driver) {
+        ServiceHolder.setContinuousIntegrationSystemDriver(null);
+    }
+
+    protected void setContinuousIntegrationSystemDriver(ContinuousIntegrationSystemDriver driver) {
+        ServiceHolder.setContinuousIntegrationSystemDriver(driver);
+    }
+    protected void setRegistryService(RegistryService registryService) {
+        if (registryService != null && log.isDebugEnabled()) {
+            log.debug("Registry service initialized");
+        }
+        ServiceHolder.getInstance().setRegistryService(registryService);
+    }
+
+    protected void unsetRegistryService(RegistryService registryService) {
+        ServiceHolder.getInstance().setRegistryService(null);
     }
 }

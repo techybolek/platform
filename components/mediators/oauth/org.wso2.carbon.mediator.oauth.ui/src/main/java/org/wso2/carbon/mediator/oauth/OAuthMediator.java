@@ -26,7 +26,11 @@ import javax.xml.namespace.QName;
 
 public class OAuthMediator extends AbstractMediator {
     private String remoteServiceUrl;
+    private String username;
+    private String password;
     private static final QName PROP_NAME_SERVICE_EPR = new QName("remoteServiceUrl");
+    private static final QName PROP_NAME_USERNAME = new QName("username");
+    private static final QName PROP_NAME_PASSWORD = new QName("password");
 
     public String getRemoteServiceUrl() {
         return remoteServiceUrl;
@@ -47,9 +51,18 @@ public class OAuthMediator extends AbstractMediator {
                     remoteServiceUrl));
         } else {
             throw new MediatorException(
-                    "Invalid Entitlement mediator.OAuth service epr required");
+                    "Invalid OAuth mediator. OAuth service epr is required");
         }
-
+        if(username != null){
+        	oauthService.addAttribute(fac.createOMAttribute("username", nullNS, username));
+        } else {
+        	throw new MediatorException("Invalid OAuth mediator. Username is required");
+        }
+        if(password != null){
+        	oauthService.addAttribute(fac.createOMAttribute("password", nullNS, password));
+        } else {
+        	throw new MediatorException("Invalid OAuth mediator. Password is required");
+        }
         saveTracingState(oauthService, this);
 
         if (parent != null) {
@@ -63,12 +76,24 @@ public class OAuthMediator extends AbstractMediator {
      */
     public void build(OMElement elem) {
         OMAttribute attRemoteServiceUri = elem.getAttribute(PROP_NAME_SERVICE_EPR);
+        OMAttribute attUsername = elem.getAttribute(PROP_NAME_USERNAME);
+        OMAttribute attPassword = elem.getAttribute(PROP_NAME_PASSWORD);
 
         if (attRemoteServiceUri != null) {
             remoteServiceUrl = attRemoteServiceUri.getAttributeValue();
         } else {
             throw new MediatorException(
-                    "The 'remoteServiceUrl' attribute is required for the Entitlement mediator");
+                    "The 'remoteServiceUrl' attribute is required for the OAuth mediator");
+        }
+        if(attUsername != null) {
+        	username = attUsername.getAttributeValue();
+        } else {
+        	throw new MediatorException("The 'username' attribute is required for the OAuth mediator ");
+        }
+        if(attPassword != null){
+        	password = attPassword.getAttributeValue();
+        } else {
+        	throw new MediatorException("The 'password' attribute is required for the OAuth mediator");
         }
     }
 
@@ -77,5 +102,21 @@ public class OAuthMediator extends AbstractMediator {
      */
     public String getTagLocalName() {
         return "oauthService";
+    }
+
+	public String getUsername() {
+	    return username;
+    }
+
+	public void setUsername(String username) {
+	    this.username = username;
+    }
+
+	public String getPassword() {
+	    return password;
+    }
+
+	public void setPassword(String password) {
+	    this.password = password;
     }
 }

@@ -25,7 +25,7 @@ import org.wso2.carbon.cep.core.exception.CEPEventProcessingException;
 import org.wso2.carbon.cep.core.internal.util.CEPConstants;
 import org.wso2.carbon.cep.core.mapping.input.mapping.TupleInputMapping;
 import org.wso2.carbon.cep.core.mapping.input.mapping.XMLInputMapping;
-import org.wso2.carbon.cep.core.mapping.property.TupleProperty;
+import org.wso2.carbon.cep.core.mapping.input.property.TupleInputProperty;
 import org.wso2.carbon.databridge.commons.Attribute;
 import org.wso2.carbon.databridge.commons.AttributeType;
 import org.wso2.carbon.databridge.commons.Event;
@@ -91,10 +91,11 @@ public class TestInputMapping extends TestCase {
         eventStreamDefinition.setPayloadData(payloadDataList);
 
         //Input Mapping
-        List<TupleProperty> tupleProperties = new ArrayList<TupleProperty>();
-        TupleProperty tupleProperty = new TupleProperty();
-        tupleProperty.setName("ipAdd");
-        tupleProperty.setDataType(CEPConstants.CEP_CONF_ELE_TUPLE_DATA_TYPE_META);
+        List<TupleInputProperty> tupleProperties = new ArrayList<TupleInputProperty>();
+        TupleInputProperty tupleProperty = new TupleInputProperty();
+        tupleProperty.setName("ip");
+        tupleProperty.setInputName("ipAdd");
+        tupleProperty.setInputDataType(CEPConstants.CEP_CONF_TUPLE_DATA_TYPE_META);
         tupleProperty.setType(String.class.getName());
         tupleProperties.add(tupleProperty);
 
@@ -132,10 +133,11 @@ public class TestInputMapping extends TestCase {
         eventStreamDefinition.setPayloadData(payloadDataList);
 
         //Input Mapping
-        List<TupleProperty> tupleProperties = new ArrayList<TupleProperty>();
-        TupleProperty tupleProperty = new TupleProperty();
+        List<TupleInputProperty> tupleProperties = new ArrayList<TupleInputProperty>();
+        TupleInputProperty tupleProperty = new TupleInputProperty();
         tupleProperty.setName("ipAdd");
-        tupleProperty.setDataType(CEPConstants.CEP_CONF_ELE_TUPLE_DATA_TYPE_META);
+        tupleProperty.setInputName("ipAdd");
+        tupleProperty.setInputDataType(CEPConstants.CEP_CONF_TUPLE_DATA_TYPE_META);
         tupleProperty.setType(String.class.getName());
         tupleProperties.add(tupleProperty);
 

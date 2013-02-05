@@ -24,11 +24,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.CarbonException;
-import org.wso2.carbon.context.ApplicationContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.session.CarbonTomcatClusterableSessionManager;
 import org.wso2.carbon.tomcat.api.CarbonTomcatService;
-import org.wso2.carbon.utils.multitenancy.CarbonApplicationContextHolder;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
+import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 
 import java.io.File;
 import java.lang.management.ManagementPermission;
@@ -90,41 +89,30 @@ public class TomcatGenericWebappsDeployer {
                        List<WebContextParameter> webContextParams,
                        List<Object> applicationEventListeners) throws CarbonException {
         String webappName = webappFile.getName();
-        CarbonContextHolder currentCarbonContextHolder =
-                CarbonContextHolder.getCurrentCarbonContextHolder();
-        currentCarbonContextHolder.startTenantFlow();
+        PrivilegedCarbonContext privilegedCarbonContext =
+                PrivilegedCarbonContext.getThreadLocalCarbonContext();
 
-        CarbonApplicationContextHolder currentCarbonAppContextHolder =
-                CarbonApplicationContextHolder.getCurrentCarbonAppContextHolder();
-        currentCarbonAppContextHolder.startApplicationFlow();
-        try {
-            currentCarbonContextHolder.setTenantId(tenantId);
-            currentCarbonContextHolder.setTenantDomain(tenantDomain);
-            if (webappFile.isDirectory()) {
-                currentCarbonAppContextHolder.setApplicationName(webappName);
-            } else if (webappName.contains(".war") || webappName.contains(".zip")) {
-                //removing extension to get app name for .war and .zip
-                currentCarbonAppContextHolder.setApplicationName(webappName.substring(0, webappName.indexOf(".war")));
-            }
-            long lastModifiedTime = webappFile.lastModified();
-            WebApplication deployedWebapp =
-                    webappsHolder.getStartedWebapps().get(webappFile.getName());
-            WebApplication undeployedWebapp =
-                    webappsHolder.getStoppedWebapps().get(webappFile.getName());
-            WebApplication faultyWebapp =
-                    webappsHolder.getFaultyWebapps().get(webappFile.getName());
-            if (deployedWebapp == null && faultyWebapp == null && undeployedWebapp == null) {
-                handleHotDeployment(webappFile, webContextParams, applicationEventListeners);
-            } else if (deployedWebapp != null &&
-                    deployedWebapp.getLastModifiedTime() != lastModifiedTime) {
-                handleHotUpdate(deployedWebapp, webContextParams, applicationEventListeners);
-            } else if (faultyWebapp != null &&
-                    faultyWebapp.getLastModifiedTime() != lastModifiedTime) {
-                handleHotDeployment(webappFile, webContextParams, applicationEventListeners);
-            }
-        } finally {
-            currentCarbonAppContextHolder.endApplicationFlow();
-            currentCarbonContextHolder.endTenantFlow();
+        if (webappFile.isDirectory()) {
+            privilegedCarbonContext.setApplicationName(webappName);
+        } else if (webappName.contains(".war") || webappName.contains(".zip")) {
+            //removing extension to get app name for .war and .zip
+            privilegedCarbonContext.setApplicationName(webappName.substring(0, webappName.indexOf(".war")));
+        }
+        long lastModifiedTime = webappFile.lastModified();
+        WebApplication deployedWebapp =
+                webappsHolder.getStartedWebapps().get(webappFile.getName());
+        WebApplication undeployedWebapp =
+                webappsHolder.getStoppedWebapps().get(webappFile.getName());
+        WebApplication faultyWebapp =
+                webappsHolder.getFaultyWebapps().get(webappFile.getName());
+        if (deployedWebapp == null && faultyWebapp == null && undeployedWebapp == null) {
+            handleHotDeployment(webappFile, webContextParams, applicationEventListeners);
+        } else if (deployedWebapp != null &&
+                   deployedWebapp.getLastModifiedTime() != lastModifiedTime) {
+            handleHotUpdate(deployedWebapp, webContextParams, applicationEventListeners);
+        } else if (faultyWebapp != null &&
+                   faultyWebapp.getLastModifiedTime() != lastModifiedTime) {
+            handleHotDeployment(webappFile, webContextParams, applicationEventListeners);
         }
     }
 
@@ -226,7 +214,7 @@ public class TomcatGenericWebappsDeployer {
                 for (String hostName : hostNames) {
                     CarbonTomcatService carbonTomcatService = DataHolder.getCarbonTomcatService();
                     Host host = DataHolder.getHotUpdateService().addHost(hostName);
-                    ApplicationContext.getCurrentApplicationContext().putUrlMappingForApplication(hostName, contextStr);
+                    URLMappingHolder.getInstance().putUrlMappingForApplication(hostName, contextStr);
                     Context contextForHost =
                             DataHolder.getCarbonTomcatService().addWebApp(host, "/", webappFile.getAbsolutePath());
                     log.info("Deployed webapp on host: " + contextForHost);
@@ -323,28 +311,18 @@ public class TomcatGenericWebappsDeployer {
      * @throws CarbonException If an error occurs while undeploying webapp
      */
     public void undeploy(File webappFile) throws CarbonException {
-        CarbonContextHolder currentCarbonContextHolder =
-                CarbonContextHolder.getCurrentCarbonContextHolder();
-        currentCarbonContextHolder.startTenantFlow();
-
-        try {
-            currentCarbonContextHolder.setTenantId(tenantId);
-            currentCarbonContextHolder.setTenantDomain(tenantDomain);
-            Map<String, WebApplication> deployedWebapps = webappsHolder.getStartedWebapps();
-            Map<String, WebApplication> stoppedWebapps = webappsHolder.getStoppedWebapps();
-            String fileName = webappFile.getName();
-            if (deployedWebapps.containsKey(fileName)) {
-                undeploy(deployedWebapps.get(fileName));
-            }
-            //also checking the stopped webapps.
-            else if (stoppedWebapps.containsKey(fileName)) {
-                undeploy(stoppedWebapps.get(fileName));
-            }
-
-            clearFaultyWebapp(fileName);
-        } finally {
-            currentCarbonContextHolder.endTenantFlow();
+        Map<String, WebApplication> deployedWebapps = webappsHolder.getStartedWebapps();
+        Map<String, WebApplication> stoppedWebapps = webappsHolder.getStoppedWebapps();
+        String fileName = webappFile.getName();
+        if (deployedWebapps.containsKey(fileName)) {
+            undeploy(deployedWebapps.get(fileName));
         }
+        //also checking the stopped webapps.
+        else if (stoppedWebapps.containsKey(fileName)) {
+            undeploy(stoppedWebapps.get(fileName));
+        }
+
+        clearFaultyWebapp(fileName);
     }
 
     /**
@@ -354,47 +332,33 @@ public class TomcatGenericWebappsDeployer {
      * @throws CarbonException If an error occurs while lazy unloading
      */
     public void lazyUnload(File webappFile) throws CarbonException {
-        CarbonContextHolder currentCarbonContextHolder =
-                CarbonContextHolder.getCurrentCarbonContextHolder();
-        currentCarbonContextHolder.startTenantFlow();
-
-        CarbonApplicationContextHolder currentCarbonAppContextHolder =
-                CarbonApplicationContextHolder.getCurrentCarbonAppContextHolder();
-        currentCarbonAppContextHolder.startApplicationFlow();
-        try {
-            currentCarbonContextHolder.setTenantId(tenantId);
-            currentCarbonContextHolder.setTenantDomain(tenantDomain);
-            Map<String, WebApplication> deployedWebapps = webappsHolder.getStartedWebapps();
-            String fileName = webappFile.getName();
-            if (deployedWebapps.containsKey(fileName)) {
-                WebApplication deployWebapp = deployedWebapps.get(fileName);
-                Context context = deployWebapp.getContext();
-                currentCarbonAppContextHolder.setApplicationName(
-                        TomcatUtil.getApplicationNameFromContext(context.getBaseName()));
-                deployWebapp.lazyUnload();
-            }
-
-            clearFaultyWebapp(fileName);
-        } finally {
-            currentCarbonAppContextHolder.endApplicationFlow();
-            currentCarbonContextHolder.endTenantFlow();
+        PrivilegedCarbonContext privilegedCarbonContext =
+                PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        Map<String, WebApplication> deployedWebapps = webappsHolder.getStartedWebapps();
+        String fileName = webappFile.getName();
+        if (deployedWebapps.containsKey(fileName)) {
+            WebApplication deployWebapp = deployedWebapps.get(fileName);
+            Context context = deployWebapp.getContext();
+            privilegedCarbonContext.setApplicationName(
+                    TomcatUtil.getApplicationNameFromContext(context.getBaseName()));
+            deployWebapp.lazyUnload();
         }
+
+        clearFaultyWebapp(fileName);
     }
 
     private void clearFaultyWebapp(String fileName) {
-        CarbonApplicationContextHolder currentCarbonAppContextHolder =
-                CarbonApplicationContextHolder.getCurrentCarbonAppContextHolder();
-        currentCarbonAppContextHolder.startApplicationFlow();
+        PrivilegedCarbonContext privilegedCarbonContext =
+                PrivilegedCarbonContext.getThreadLocalCarbonContext();
         Map<String, WebApplication> faultyWebapps = webappsHolder.getFaultyWebapps();
         if (faultyWebapps.containsKey(fileName)) {
             WebApplication faultyWebapp = faultyWebapps.get(fileName);
             Context context = faultyWebapp.getContext();
-            currentCarbonAppContextHolder.setApplicationName(
+            privilegedCarbonContext.setApplicationName(
                     TomcatUtil.getApplicationNameFromContext(context.getBaseName()));
             faultyWebapps.remove(fileName);
             log.info("Removed faulty webapp " + faultyWebapp);
         }
-        currentCarbonAppContextHolder.endApplicationFlow();
     }
 
     /**
@@ -404,14 +368,12 @@ public class TomcatGenericWebappsDeployer {
      * @throws CarbonException If an error occurs while undeploying
      */
     private void undeploy(WebApplication webapp) throws CarbonException {
-        CarbonApplicationContextHolder currentCarbonAppContextHolder =
-                CarbonApplicationContextHolder.getCurrentCarbonAppContextHolder();
-        currentCarbonAppContextHolder.startApplicationFlow();
+        PrivilegedCarbonContext privilegedCarbonContext =
+                PrivilegedCarbonContext.getThreadLocalCarbonContext();
         Context context = webapp.getContext();
-        currentCarbonAppContextHolder.setApplicationName(
+        privilegedCarbonContext.setApplicationName(
                 TomcatUtil.getApplicationNameFromContext(context.getBaseName()));
         webappsHolder.undeployWebapp(webapp);
         log.info("Undeployed webapp: " + webapp);
-        currentCarbonAppContextHolder.endApplicationFlow();
     }
 }

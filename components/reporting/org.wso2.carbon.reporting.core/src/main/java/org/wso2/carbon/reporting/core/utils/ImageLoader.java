@@ -20,56 +20,46 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.xpath.AXIOMXPath;
 import org.jaxen.JaxenException;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.reporting.api.ReportingException;
-import org.wso2.carbon.reporting.util.ReportParamMap;
+import org.wso2.carbon.reporting.core.internal.ReportingComponent;
 
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.transform.Source;
 import java.io.*;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ImageLoader {
     private ArrayList<String> imageNames;
-    private String directory = "repository/resources/reporting/images";
-
-    //private static final String IMAGE_JRXML_NAME_KEY = "image_jrxml_template";
+    private String imageLocation = "repository/reports/org.wso2.carbon.reporting.template/";
 
     public void loadTempImages(String templateName, String jrxmlContent) throws ReportingException {
         imageNames = getImageNames(jrxmlContent);
-
         for (String imageName : imageNames) {
-            String imagePath = directory + "/" + templateName + "_" + imageName;
-            copyImagesToHome(imagePath, imageName);
+            copyImagesToHome(templateName, imageName);
         }
 
     }
 
-    public boolean saveImage(String imageName, String reportName, DataHandler imageContent) {
+    public boolean saveImage(String imageName, String reportName, DataHandler imageContent) throws ReportingException {
         boolean success = true;
-
-        boolean exists = (new File(directory).exists());
-        if (!exists)
-            success = (new File(directory)).mkdirs();
-        if (success) {
-            File destFile = new File(directory + "/" + reportName + "_" + imageName);
-            FileOutputStream fos = null;
-            try {
-                fos = new FileOutputStream(destFile);
-                imageContent.writeTo(fos);
-                fos.flush();
-                fos.close();
-                success = true;
-            } catch (FileNotFoundException e) {
-                success = false;
-            } catch (IOException e) {
-                success = false;
-            }
+        try {
+            Registry registry = ReportingComponent.getRegistryService().
+                    getConfigSystemRegistry(CarbonContext.getCurrentContext().getTenantId());
+            Resource imgResource = registry.newResource();
+            imgResource.setContentStream(imageContent.getInputStream());
+            imgResource.setMediaType(imageContent.getContentType());
+            registry.put(imageLocation + reportName + "/" + imageName, imgResource);
+        } catch (RegistryException e) {
+            throw new ReportingException(e.getMessage(), e);
+        } catch (IOException e) {
+            throw new ReportingException(e.getMessage(), e);
         }
         return success;
 
@@ -79,8 +69,7 @@ public class ImageLoader {
         try {
             InputStream is = new ByteArrayInputStream(jrxmlContent.getBytes());
             XMLInputFactory xif = XMLInputFactory.newInstance();
-            XMLStreamReader reader = null;
-            reader = xif.createXMLStreamReader(is);
+            XMLStreamReader reader = xif.createXMLStreamReader(is);
             StAXOMBuilder builder = new StAXOMBuilder(reader);
             OMElement docElement = builder.getDocumentElement();
 
@@ -90,8 +79,8 @@ public class ImageLoader {
 
             // Iterator iterator = docElement.getChildrenWithLocalName("imageExpression");
             ArrayList<String> imageNames = new ArrayList<String>();
-            for (int i = 0; i < nodeList.size(); i++) {
-                OMElement element = (OMElement) nodeList.get(i);
+            for (Object aNodeList : nodeList) {
+                OMElement element = (OMElement) aNodeList;
                 String imageName = element.getText();
                 if (imageName != null && !imageName.equalsIgnoreCase("")) {
                     String imageText = imageName.replaceAll("\"", "");
@@ -107,31 +96,30 @@ public class ImageLoader {
         }
     }
 
-    private void copyImagesToHome(String imagePath, String imageName) throws ReportingException {
-
-        File src = new File(imagePath);
-        File destFile = new File(imageName);
-        FileChannel source = null;
-        FileChannel destination = null;
+    private void copyImagesToHome(String templateName, String imageName) throws ReportingException {
         try {
-            destFile.createNewFile();
-            source = new FileInputStream(src).getChannel();
-            destination = new FileOutputStream(destFile).getChannel();
-
-            long count = 0;
-            long size = source.size();
-            while ((count += destination.transferFrom(source, 0, size - count)) < size) ;
-
-            if (source != null) {
-                source.close();
+            Registry registry = ReportingComponent.getRegistryService().
+                    getConfigSystemRegistry(CarbonContext.getCurrentContext().getTenantId());
+            Resource resource;
+            if (registry.resourceExists(imageLocation + templateName + "/" + imageName)) {
+                resource = registry.get(imageLocation + templateName + "/" + imageName);
+                InputStream inputStream = resource.getContentStream();
+                File f = new File(imageName);
+                OutputStream out = new FileOutputStream(f);
+                byte buf[] = new byte[1024];
+                int len;
+                while ((len = inputStream.read(buf)) > 0)
+                    out.write(buf, 0, len);
+                out.close();
+                inputStream.close();
             }
-            if (destination != null) {
-                destination.close();
-            }
+        } catch (RegistryException e) {
+            throw new ReportingException(e.getMessage(), e);
+        } catch (FileNotFoundException e) {
+            throw new ReportingException(e.getMessage(), e);
         } catch (IOException e) {
-           throw new ReportingException(e.getMessage(), e);
+            throw new ReportingException(e.getMessage(), e);
         }
-
     }
 
     public void deleteTempImages() {

@@ -19,13 +19,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>saml2-sso-authenticator</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.identity.authenticator.saml2.sso.ui</artifactId>
     <packaging>bundle</packaging>
     <name>SAML2 SSO Authenticator - UI bundle</name>
+    <version>4.0.6</version>
     <description>SAML2 Based SSO Authenticator - UI bundle</description>
     <url>http://wso2.org</url>
 
@@ -33,6 +35,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
+            <version>4.0.5</version>                       
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.identity.authenticator.saml2.sso.common</artifactId>
+            <version>4.0.5</version>                       
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -45,23 +53,27 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ui</artifactId>
+            <version>4.0.5</version>                       
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
+            <version>4.0.5</version>                       
         </dependency>
         <dependency>
             <groupId>opensaml.wso2</groupId>
             <artifactId>opensaml2</artifactId>
         </dependency>
-	<dependency>
+        <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.identity.authenticator.saml2.sso.stub</artifactId>
+            <artifactId>org.wso2.carbon.identity.sso.saml.stub</artifactId>
+	        <version>4.0.6</version>
         </dependency>
-		<dependency>
-			<groupId>org.apache.ws.security.wso2</groupId>
-			<artifactId>wss4j</artifactId>
-		</dependency>
+
+	<dependency>
+	    <groupId>org.apache.ws.security.wso2</groupId>
+	    <artifactId>wss4j</artifactId>
+	</dependency>
     </dependencies>
 
     <build>
@@ -92,7 +104,6 @@
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
-			<Embed-Dependency>org.wso2.carbon.identity.authenticator.saml2.sso.stub;scope=compile|runtime;inline=true</Embed-Dependency>
                         <Carbon-Component>UIBundle</Carbon-Component>
                     </instructions>
                 </configuration>

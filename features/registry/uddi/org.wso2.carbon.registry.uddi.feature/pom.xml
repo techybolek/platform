@@ -22,7 +22,8 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>uddi-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <dependencies>
@@ -34,7 +35,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.uddi</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>4.0.1</version>
         </dependency>
     </dependencies>
 
@@ -42,6 +43,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.registry.uddi.feature</artifactId>
     <packaging>pom</packaging>
+    <version>4.0.1</version>
     <name>WSO2 Carbon - Registry UDDI Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for UDDI functionality</description>
@@ -60,7 +62,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.registry.uddi</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
 			     <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
@@ -68,7 +70,7 @@
                             </adviceFile>
 			    <bundles>
                                 <bundleDef>org.apache.juddi.wso2:juddi</bundleDef>
-				<bundleDef>org.wso2.carbon:org.wso2.carbon.registry.uddi</bundleDef>
+				<bundleDef>org.wso2.carbon:org.wso2.carbon.registry.uddi:4.0.1</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

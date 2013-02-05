@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -23,6 +23,8 @@ package org.wso2.carbon.identity.oauth2.dto;
  */
 public class OAuth2TokenValidationResponseDTO {
 
+    private String consumerKey;
+
     private String authorizedUser;
 
     private long expiryTime;
@@ -32,6 +34,24 @@ public class OAuth2TokenValidationResponseDTO {
     private boolean valid;
 
     private String errorMsg;
+    
+    private AuthorizationContextToken authorizationContextToken;
+
+    public String getConsumerKey() {
+        return consumerKey;
+    }
+
+    public void setConsumerKey(String consumerKey) {
+        this.consumerKey = consumerKey;
+    }
+
+    public AuthorizationContextToken getAuthorizationContextToken() {
+        return authorizationContextToken;
+    }
+
+    public void setAuthorizationContextToken(AuthorizationContextToken authorizationContextToken) {
+        this.authorizationContextToken = authorizationContextToken;
+    }
 
     public String getAuthorizedUser() {
         return authorizedUser;

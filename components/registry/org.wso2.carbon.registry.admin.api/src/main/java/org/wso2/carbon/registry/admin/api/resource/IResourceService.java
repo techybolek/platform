@@ -133,7 +133,8 @@ public interface IResourceService<MetadataBean, CollectionContentBean, ResourceD
     /**
      * Method to create a symbolic link.
      *
-     * @param parentPath the parent path (or the path at which we are adding this link).
+     * @param parentPath the parent path (or the path at which we are adding this link). Please note
+                         that the parent path should not have trailing slashes.
      * @param name       the name of the symbolic link.
      * @param targetPath the actual resource to which this link points to.
      *
@@ -170,6 +171,7 @@ public interface IResourceService<MetadataBean, CollectionContentBean, ResourceD
      * @param symlinkLocation the location of the symbolic link to be created. This parameter is
      *                        used when importing WSDL and Schema files, which will optionally
      *                        create a symbolic link that points to the uploaded WSDL or Schema.
+     * @param properties      list of properties to be added along with the resource.
      *
      * @return whether the operation was successful or not.
      * @throws Exception if the operation failed due to an unexpected error.
@@ -180,7 +182,8 @@ public interface IResourceService<MetadataBean, CollectionContentBean, ResourceD
             String mediaType,
             String description,
             String fetchURL,
-            String symlinkLocation) throws Exception;
+            String symlinkLocation,
+            String[][] properties) throws Exception;
 
     /**
      * Method to delete a resource (or collection) at the given path.
@@ -284,12 +287,13 @@ public interface IResourceService<MetadataBean, CollectionContentBean, ResourceD
      * @param symlinkLocation the location of the symbolic link to be created. This parameter is
      *                        used when importing WSDL and Schema files, which will optionally
      *                        create a symbolic link that points to the uploaded WSDL or Schema.
+     * @param properties      list of properties to be added along with the resource.
      *
      * @return whether the operation was successful or not.
      * @throws Exception if the operation failed due to an unexpected error.
      */
     boolean addResource(String path, String mediaType, String description, DataHandler content,
-                        String symlinkLocation)
+                        String symlinkLocation, String[][] properties)
             throws Exception;
 
     /**

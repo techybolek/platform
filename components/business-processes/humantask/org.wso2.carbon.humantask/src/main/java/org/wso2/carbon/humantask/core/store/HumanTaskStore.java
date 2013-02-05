@@ -17,6 +17,7 @@
 package org.wso2.carbon.humantask.core.store;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.deployment.util.Utils;
@@ -35,6 +36,7 @@ import org.wso2.carbon.bpel.common.config.EndpointConfiguration;
 import org.wso2.carbon.humantask.TNotification;
 import org.wso2.carbon.humantask.TTask;
 import org.wso2.carbon.humantask.core.HumanTaskConstants;
+import org.wso2.carbon.humantask.core.dao.TaskPackageStatus;
 import org.wso2.carbon.humantask.core.deployment.DeploymentUtil;
 import org.wso2.carbon.humantask.core.deployment.HumanTaskDeploymentException;
 import org.wso2.carbon.humantask.core.deployment.HumanTaskDeploymentUnit;
@@ -95,8 +97,10 @@ public class HumanTaskStore {
                                 humanTaskDU.getName(),
                                 humanTaskDU.getHumanTaskDefinitionFile());
                 taskConfigurations.add(taskConf);
-                deploy(taskConf);
-                createCallBackService(taskConf);
+                if (!taskConf.isErroneous()) {
+                    deploy(taskConf);
+                    createCallBackService(taskConf);
+                }
             }
         }
 
@@ -115,7 +119,9 @@ public class HumanTaskStore {
                                 humanTaskDU.getName(),
                                 humanTaskDU.getHumanTaskDefinitionFile());
                 taskConfigurations.add(notificationConf);
-                deploy(notificationConf);
+                if(!notificationConf.isErroneous()) {
+                    deploy(notificationConf);
+                }
             }
         }
 
@@ -148,46 +154,48 @@ public class HumanTaskStore {
     }
 
     private void deploy(HumanTaskBaseConfiguration taskConfig) throws HumanTaskDeploymentException {
-        /**
-         * Creating AxisService for HI
-         */
-        AxisService axisService;
-        Definition wsdlDef = taskConfig.getWSDL();
 
-        if (taskConfig instanceof TaskConfiguration) {
-            //to get the task id as response
-            wsdlDef.getPortType(taskConfig.getPortType()).getOperation(
-                    taskConfig.getOperation(),
-                    null, null).setStyle(OperationType.REQUEST_RESPONSE);
-        } else {
-            //ONE_WAY no feed back for NOTIFICATIONS
-            wsdlDef.getPortType(taskConfig.getPortType()).getOperation(
-                    taskConfig.getOperation(),
-                    null, null).setStyle(OperationType.ONE_WAY);
-        }
+        if (taskConfig != null) {
+            /**
+             * Creating AxisService for HI
+             */
+            AxisService axisService;
+            Definition wsdlDef = taskConfig.getWSDL();
 
-        WSDL11ToAxisServiceBuilder serviceBuilder = createAxisServiceBuilder(taskConfig, wsdlDef);
+            if (taskConfig instanceof TaskConfiguration) {
+                //to get the task id as response
+                wsdlDef.getPortType(taskConfig.getPortType()).getOperation(
+                        taskConfig.getOperation(),
+                        null, null).setStyle(OperationType.REQUEST_RESPONSE);
+            } else {
+                //ONE_WAY no feed back for NOTIFICATIONS
+                wsdlDef.getPortType(taskConfig.getPortType()).getOperation(
+                        taskConfig.getOperation(),
+                        null, null).setStyle(OperationType.ONE_WAY);
+            }
 
-        try {
-            axisService = createAxisService(serviceBuilder);
-            ServiceConfigurationUtil.configureService(axisService,
-                    taskConfig.getEndpointConfiguration(taskConfig.getServiceName().getLocalPart(),
-                            taskConfig.getPortName()),
-                    getConfigContext());
-            ArrayList<AxisService> serviceList = new ArrayList<AxisService>();
-            serviceList.add(axisService);
-            DeploymentEngine.addServiceGroup(createServiceGroupForService(axisService), serviceList,
-                    null, null, getTenantAxisConfig());
-        } catch (AxisFault axisFault) {
-            //Do not print stacktrace here since it will be printed in another level
-            String errMsg = "Error populating the service";
-            log.error(errMsg);
-            //TODO rollback
+            WSDL11ToAxisServiceBuilder serviceBuilder = createAxisServiceBuilder(taskConfig, wsdlDef);
+
+            try {
+                axisService = createAxisService(serviceBuilder);
+                ServiceConfigurationUtil.configureService(axisService,
+                                                          taskConfig.getEndpointConfiguration(taskConfig.getServiceName().getLocalPart(),
+                                                                                              taskConfig.getPortName()),
+                                                          getConfigContext());
+                ArrayList<AxisService> serviceList = new ArrayList<AxisService>();
+                serviceList.add(axisService);
+                DeploymentEngine.addServiceGroup(createServiceGroupForService(axisService), serviceList,
+                                                 null, null, getTenantAxisConfig());
+            } catch (AxisFault axisFault) {
+                //Do not print stacktrace here since it will be printed in another level
+                String errMsg = "Error populating the service";
+                log.error(errMsg);
+                //TODO rollback
 //            rolebackRegistry(taskConfig.getName());
-            throw new HumanTaskDeploymentException(errMsg, axisFault);
+                throw new HumanTaskDeploymentException(errMsg, axisFault);
+            }
+
         }
-
-
     }
 
     //Creates the AxisServiceBuilder object.
@@ -238,6 +246,10 @@ public class HumanTaskStore {
             operation.setMessageReceiver(msgReceiver);
             getTenantAxisConfig().getPhasesInfo().setOperationPhases(operation);
         }
+        List<String> transports = new ArrayList<String>();
+        transports.add(Constants.TRANSPORT_HTTPS);
+        transports.add(Constants.TRANSPORT_HTTP);
+        axisService.setExposedTransports(transports);
         return axisService;
     }
 
@@ -454,10 +466,18 @@ public class HumanTaskStore {
      * @return : The matching human task archive file.
      */
     public File getHumanTaskArchiveLocation(String packageName) {
-        String humanTaskArciveLocation = getTenantAxisConfig().getRepository().
-                getPath() + HumanTaskConstants.HUMANTASK_REPO_DIRECTORY + File.separator +
-                packageName + "." + HumanTaskConstants.HUMANTASK_PACKAGE_EXTENSION;
-        return new File(humanTaskArciveLocation);
+        String repoPath = getTenantAxisConfig().getRepository().getPath();
+
+        int length = repoPath.length();
+        String lastChar = repoPath.substring(length - 1);
+
+        if (!File.separator.equals(lastChar)) {
+            repoPath += File.separator;
+        }
+
+        String htArchiveLocation = repoPath + HumanTaskConstants.HUMANTASK_REPO_DIRECTORY + File.separator +
+                                         packageName + "." + HumanTaskConstants.HUMANTASK_PACKAGE_EXTENSION;
+        return new File(htArchiveLocation);
     }
 
     public ConfigurationContext getConfigContext() {
@@ -480,6 +500,20 @@ public class HumanTaskStore {
             log.warn("HumanTask package " + humanTaskPackageDirectory.getAbsolutePath() +
                     " not found. This can happen if you delete " +
                     "the HumanTask package from the file system.");
+        }
+    }
+
+    /**
+     * Update the task configurations with the given package status.
+     *
+     * @param packageName : package Name.
+     * @param status : The new status
+     */
+    public void updateTaskStatusForPackage(String packageName, TaskPackageStatus status) {
+        for (HumanTaskBaseConfiguration taskBaseConfiguration : this.taskConfigurations) {
+            if (taskBaseConfiguration.getPackageName().equals(packageName)) {
+                taskBaseConfiguration.setPackageStatus(status);
+            }
         }
     }
 }

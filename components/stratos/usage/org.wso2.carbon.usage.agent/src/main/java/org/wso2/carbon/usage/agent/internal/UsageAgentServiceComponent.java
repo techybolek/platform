@@ -24,12 +24,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.base.api.ServerConfigurationService;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.core.EventBroker;
+import org.wso2.carbon.statistics.services.SystemStatisticsUtil;
+import org.wso2.carbon.usage.agent.listeners.UsageStatsAxis2ConfigurationContextObserver;
 import org.wso2.carbon.usage.agent.util.PublisherUtils;
 import org.wso2.carbon.usage.agent.util.Util;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -50,6 +54,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
  * @scr.reference name="eventbroker.service"
  * interface="org.wso2.carbon.event.core.EventBroker" cardinality="1..1"
  * policy="dynamic" bind="setEventBrokerService" unbind="unsetEventBrokerService"
+ * @scr.reference name="org.wso2.carbon.statistics.services"
+ * interface="org.wso2.carbon.statistics.services.SystemStatisticsUtil"
+ * cardinality="0..1" policy="dynamic" bind="setSystemStatisticsUtil" unbind="unsetSystemStatisticsUtil"
  */
 public class UsageAgentServiceComponent {
     private static Log log = LogFactory.getLog(UsageAgentServiceComponent.class);
@@ -61,13 +68,13 @@ public class UsageAgentServiceComponent {
      */
     protected void activate(ComponentContext context) {
         try {
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getCurrentContext().setTenantId(
                     MultitenantConstants.SUPER_TENANT_ID);
-            SuperTenantCarbonContext.getCurrentContext().getTenantDomain(true);
-            SuperTenantCarbonContext.getCurrentContext().setUsername(
+            PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
+            PrivilegedCarbonContext.getCurrentContext().setUsername(
                     CarbonConstants.REGISTRY_SYSTEM_USERNAME);
-            SuperTenantCarbonContext.getCurrentContext().setUserRealm(
+            PrivilegedCarbonContext.getCurrentContext().setUserRealm(
                     Util.getRealmService().getBootstrapRealm());
             
             // initialize listeners
@@ -80,6 +87,14 @@ public class UsageAgentServiceComponent {
             // create statistic event subscription
             Util.createStaticEventSubscription();
 
+            if("true".equals(ServerConfiguration.getInstance().getFirstProperty("EnableMetering"))){
+                //PublisherUtils.defineUsageEventStream();
+
+                UsageStatsAxis2ConfigurationContextObserver statObserver = new UsageStatsAxis2ConfigurationContextObserver();
+                context.getBundleContext().registerService(Axis2ConfigurationContextObserver.class.getName(), statObserver, null);
+                log.info("Observer to register the module for request statistics publishing was registered");
+            }
+
             // register the request data persistor osgi service so that we can
             // store service request bandwidths
             // TODO: Remove this and ServiceDataPersistor after fixing ESB metering
@@ -90,7 +105,7 @@ public class UsageAgentServiceComponent {
         } catch (Throwable e) {
             log.error("******* Failed to activate Multitenancy Usage Agent bundle ****", e);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -130,11 +145,6 @@ public class UsageAgentServiceComponent {
     protected void setConfigurationContextService(ConfigurationContextService contextService) {
         Util.setConfigurationContextService(contextService);
         PublisherUtils.setConfigurationContextService(contextService);
-        try {
-            contextService.getServerConfigContext().getAxisConfiguration().engageModule("metering");
-        } catch (AxisFault e) {
-            log.error("Failed to engage request metering Module", e);
-        }
     }
 
     /**
@@ -143,13 +153,6 @@ public class UsageAgentServiceComponent {
      * @param contextService ConfigurationContextService
      */
     protected void unsetConfigurationContextService(ConfigurationContextService contextService) {
-        try {
-            AxisConfiguration axisConfig =
-                    contextService.getServerConfigContext().getAxisConfiguration();
-            axisConfig.disengageModule(axisConfig.getModule("metering"));
-        } catch (AxisFault e) {
-            log.error("Failed to disengage request metering Module", e);
-        }
         Util.setConfigurationContextService(null);
     }
 
@@ -188,6 +191,14 @@ public class UsageAgentServiceComponent {
      */
     protected void unsetEventBrokerService(EventBroker registryEventBrokerService) {
         Util.setEventBrokerService(null);
+    }
+
+    public static void setSystemStatisticsUtil(SystemStatisticsUtil systemStatisticsUtil){
+        Util.setSystemStatisticsUtil(systemStatisticsUtil);
+    }
+
+    public static void unsetSystemStatisticsUtil(SystemStatisticsUtil systemStatisticsUtil){
+        Util.setSystemStatisticsUtil(null);
     }
 
 }

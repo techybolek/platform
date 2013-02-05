@@ -35,10 +35,10 @@ Please follow the given steps:
     "SecureConversation - Sign and Encrypt - Service as STS - Bootstrap policy - Sign and Encrypt , X509 Authentication" on it.
     Makesure wso2carbon.jks keystore (wso2carbon keystore) is used for both Trust Store and Private Key Store.
 
-7.) Upload STS/conf/client.cert into the wso2carbon keystore (wso2carbon.jks) using the 
+8.) Upload STS/conf/client.cert into the wso2carbon keystore (wso2carbon.jks) using the 
     WSO2AppServer admin console.
 
-8.) Run client
+9.) Run client
      $ ./run-client.sh <wso2carbon-sts-http-address> <hello-service-http-address>
 	OR 
      path\>run-client.bat  <wso2carbon-sts-http-address> <hello-service-http-address>

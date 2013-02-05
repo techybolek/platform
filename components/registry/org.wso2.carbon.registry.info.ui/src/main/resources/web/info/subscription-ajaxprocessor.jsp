@@ -28,6 +28,8 @@
 <%@ page import="org.wso2.carbon.registry.common.beans.utils.EventType" %>
 <%@ page import="org.wso2.carbon.registry.resource.ui.clients.ResourceServiceClient" %>
 <%@ page import="org.wso2.carbon.registry.resource.stub.beans.xsd.ResourceTreeEntryBean" %>
+<%@ page import="org.wso2.carbon.context.CarbonContext" %>
+<%@ page import="org.wso2.carbon.utils.multitenancy.MultitenantConstants" %>
 
 <carbon:jsi18n resourceBundle="org.wso2.carbon.registry.info.ui.i18n.JSResources"
 		request="<%=request%>" namespace="org.wso2.carbon.registry.info.ui"/>
@@ -52,13 +54,17 @@
     boolean isCollection=true;
     ResourceServiceClient resourceServiceClient=null;
     ResourceTreeEntryBean resourceTreeEntryBean = null;
-
+    boolean isSuperTenant = false;
     resourceServiceClient = new ResourceServiceClient(config, session);
     String path = request.getParameter("path");
 
     if ((resourceTreeEntryBean = resourceServiceClient.getResourceTreeEntry(path)) != null) {
         isCollection = resourceTreeEntryBean.getCollection();
     }
+
+     if(CarbonContext.getCurrentContext().getTenantId() == MultitenantConstants.SUPER_TENANT_ID) {
+         isSuperTenant = true;
+     }
 
     try{
         InfoServiceClient client = null;
@@ -184,8 +190,10 @@
                     <option value="3"><fmt:message key="soap"/></option>
                     <option value="4"><fmt:message key="username"/></option>
                     <option value="5"><fmt:message key="role"/></option>
+                    <% if(isSuperTenant) {%>
                     <option value="6"><fmt:message key="management.console"/></option>
                     <option value="7"><fmt:message key="jmx"/></option>
+                    <%}%>
                 </select>
             </td>
         </tr>

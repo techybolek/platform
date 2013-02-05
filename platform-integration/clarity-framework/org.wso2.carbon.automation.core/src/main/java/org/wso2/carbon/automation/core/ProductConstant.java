@@ -27,6 +27,7 @@ public class ProductConstant {
     private static final Log log = LogFactory.getLog(ProductConstant.class);
 
     public static final String APP_SERVER_NAME = "AS";
+    public static final String SS_SERVER_NAME = "SS";
     public static final String ESB_SERVER_NAME = "ESB";
     public static final String BPS_SERVER_NAME = "BPS";
     public static final String DSS_SERVER_NAME = "DSS";
@@ -39,7 +40,7 @@ public class ProductConstant {
     public static final String BAM_SERVER_NAME = "BAM";
     public static final String IS_SERVER_NAME = "IS";
     public static final String AM_SERVER_NAME = "AM";
-    public static final String  AXIS2_SERVER_NAME = "AXIS2";
+    public static final String AXIS2_SERVER_NAME = "AXIS2";
     public static final String LB_SERVER_NAME = "LB";
     public static final String CLUSTER = "CLUSTER";
     public static final String MANAGER_SERVER_NAME = "MANAGER";
@@ -51,15 +52,30 @@ public class ProductConstant {
     public static final String CHROME_BROWSER = "chrome";
     public static final String IE_BROWSER = "ie";
     public static final String HTML_UNIT_DRIVER = "htmlUnit";
-    public static final int ADMIN_USER_ID = 0;
+    public static final int SUPER_ADMIN_USER_ID = 0;
+    public static final int ADMIN_USER_ID = 1;
+    public static final String TENANT_ADMIN_PASSWORD = "admin123";
+
+    public static final String DEFAULT_PRODUCT_ROLE = "testRole";
+    public static final String ADMIN_ROLE_NAME = "admin";
 
 
     public static EnvironmentBuilder env;
     public static FrameworkSettings framework;
-    public static String SYSTEM_TEST_RESOURCE_LOCATION = getSystemResourceLocation();
-    public static String REPORT_LOCATION = getReportLocation();
+    public static String SYSTEM_TEST_RESOURCE_LOCATION;
+    public static String SYSTEM_TEST_SETTINGS_LOCATION;
+    public static String SYSTEM_TEST_USER_FILE;
+    public static String SYSTEM_TEST_TENANT_FILE;
+    public static String REPORT_LOCATION;
     public static String REPORT_REPOSITORY = REPORT_LOCATION + "reports" + File.separator;
 
+    public static void init() {
+        SYSTEM_TEST_RESOURCE_LOCATION = getSystemResourceLocation();
+        SYSTEM_TEST_SETTINGS_LOCATION = getSystemSettingsLocation();
+        REPORT_LOCATION = getReportLocation();
+        SYSTEM_TEST_TENANT_FILE = getTenantFile();
+        SYSTEM_TEST_USER_FILE = getUsersFile();
+    }
 
     public static String getResourceLocations(String productName) {
         return SYSTEM_TEST_RESOURCE_LOCATION + File.separator + "artifacts" +
@@ -67,8 +83,7 @@ public class ProductConstant {
     }
 
     public static String getModuleClientPath() {
-        return SYSTEM_TEST_RESOURCE_LOCATION + File.separator +
-               "client";
+        return SYSTEM_TEST_RESOURCE_LOCATION + File.separator + "client";
     }
 
     public static String getSecurityScenarios() {
@@ -91,6 +106,32 @@ public class ProductConstant {
             resourceLocation = System.getProperty("framework.resource.location").replace("/", "/");
         }
         return resourceLocation;
+    }
+
+    public static String getSystemSettingsLocation() {
+        String settingsLocation = null;
+        if (System.getProperty("clarity.settings.location") != null) {
+            if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+                settingsLocation = System.getProperty("clarity.settings.location").replace("/", "\\");
+            } else {
+                settingsLocation = System.getProperty("clarity.settings.location").replace("/", "/");
+            }
+        } else {
+            settingsLocation = getSystemResourceLocation();
+        }
+        return settingsLocation;
+    }
+
+    public static String getTenantFile() {
+        String tenantFile = null;
+        tenantFile = getSystemSettingsLocation() + "tenantList.csv";
+        return tenantFile;
+    }
+
+    public static String getUsersFile() {
+        String usersFile = null;
+        usersFile = getSystemSettingsLocation() + "userList.csv";
+        return usersFile;
     }
 
     /**
@@ -143,6 +184,8 @@ public class ProductConstant {
             distributionPrefix = "wso2brs-";
         } else if (GREG_SERVER_NAME.equalsIgnoreCase(product)) {
             distributionPrefix = "wso2greg-";
+        } else if (SS_SERVER_NAME.equalsIgnoreCase(product)) {
+            distributionPrefix = "wso2ss-";
         } else if (MANAGER_SERVER_NAME.equalsIgnoreCase(product)) {
             distributionPrefix = "wso2manager-";
         } else {

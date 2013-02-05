@@ -21,6 +21,7 @@ import org.wso2.carbon.appfactory.core.ArtifactStorage;
 import org.wso2.carbon.appfactory.core.BuildDriver;
 import org.wso2.carbon.appfactory.core.ContinuousIntegrationSystemDriver;
 import org.wso2.carbon.appfactory.core.RevisionControlDriver;
+import org.wso2.carbon.registry.core.service.RegistryService;
 
 public class ServiceHolder {
     public static RevisionControlDriver revisionControlDriver;
@@ -28,6 +29,16 @@ public class ServiceHolder {
     public static ArtifactStorage artifactStorage;
     public static ContinuousIntegrationSystemDriver continuousIntegrationSystemDriver;
     public static AppFactoryConfiguration appFactoryConfiguration;
+    private static RegistryService registryService;
+
+    private static final ServiceHolder instance = new ServiceHolder();
+
+    private ServiceHolder() {
+    }
+
+    public static ServiceHolder getInstance(){
+        return instance;
+    }
 
     public static BuildDriver getBuildDriver() {
         return buildDriver;
@@ -72,4 +83,11 @@ public class ServiceHolder {
         ServiceHolder.appFactoryConfiguration = appFactoryConfiguration;
     }
 
+    public RegistryService getRegistryService() {
+        return registryService;
+    }
+
+    public void setRegistryService(RegistryService registryService) {
+        this.registryService = registryService;
+    }
 }

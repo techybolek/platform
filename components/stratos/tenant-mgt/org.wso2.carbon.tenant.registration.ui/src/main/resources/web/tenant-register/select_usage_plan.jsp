@@ -90,26 +90,40 @@
         for (var i = 0; i < packageInfo.length; i++) {
         <% if (chargeOnRegistration) { %>
             if (packageInfo[i].name == selectedUsagePlan && packageInfo[i].subscriptionCharge != "0") {
-                document.forms["selectUsagePlan"].submit();    
+                CARBON.showConfirmationDialog('<fmt:message key="redirect.to.paypal.msg1"/>' + " " + '<fmt:message key="billing.currency"/>' + packageInfo[i].subscriptionCharge +
+                                              ". " + '<fmt:message key="redirect.to.paypal.msg2"/>', function() {
+                    document.getElementById('waitMessage').style.display = 'block';
+                    document.forms["selectUsagePlan"].submit();
+                }, function () {
+                    document.getElementById('submit-button').removeAttribute('disabled');
+                })
+
             } else if (packageInfo[i].name == selectedUsagePlan && packageInfo[i].subscriptionCharge == "0") {
                 location.href = "../tenant-register/success_register.jsp";
+                break;
             }
             <% } else { %>
-                                jQuery.ajax({
-                                    type: 'POST',
-                                    url: '../payment/upgrade_registration_usage_plan_ajaxprocessor.jsp',
-                                    data: {selectedUsagePlan: selectedUsagePlan, regTenantDomain: regTenantDomain},
-                                    async: false,
-                                    success: function(msg) {
-                                    }});
-                location.href = "../tenant-register/success_register.jsp";
-            <% } %>
+                if(packageInfo[i].name == selectedUsagePlan && packageInfo[i].subscriptionCharge != "0") {
+                    jQuery.ajax({
+                        type: 'POST',
+                        url: '../payment/upgrade_registration_usage_plan_ajaxprocessor.jsp',
+                        data: {selectedUsagePlan: selectedUsagePlan, regTenantDomain: regTenantDomain},
+                        async: false,
+                        success: function(msg) {
+                    }});
+                    location.href = "../tenant-register/success_register.jsp";
+                    break;
+                } else if (packageInfo[i].name == selectedUsagePlan && packageInfo[i].subscriptionCharge == "0") {
+                    location.href = "../tenant-register/success_register.jsp";
+                    break;
+                }
+        <% } %>
 
         }
     }
 
     function cancelPaymet() {
-
+        location.href = "../tenant-register/success_register.jsp";
     }
 
     jQuery(document).ready(
@@ -193,6 +207,7 @@
             return false; //Prevent the browser jump to the link anchor
         });
     });
+
 </script>
 <div id="middle">
 
@@ -243,18 +258,14 @@
                 </tr>
                 <tr id="buttonRow">
                     <td class="buttonRow">
-                        <input class="button" id="submit-button" type="button"
-                               value="Submit" onclick="makePayment()"/>
-                        <input class="button" id="cancel-button" type="button"
+                        <input class="button" id="submit-button" type="button" style="float:left; margin-top:4px; margin-right:4px;"
+                               value="Submit" onclick="makePayment();jQuery(this).attr('disabled', true)"/>
+                        <input class="button" id="cancel-button" type="button" style="float:left; margin-top:4px"
                                value="Cancel" onclick="cancelPaymet()"/>
-                    </td>
-                </tr>
-                <tr id="waitMessage" style="display:none">
-                    <td>
-                        <div style="font-size:13px !important;margin-top:10px;margin-bottom:10px;"><img
-                                src="images/ajax-loader.gif" align="left" hspace="20"/>Please wait until the Service is
-                            importing to the Registry...
+                        <div id="waitMessage" style="font-size:13px !important;margin-top:5px; float:left; display:none"><img
+                                src="images/ajax-loader.gif" align="left" hspace="20"/>Connecting to PayPal ...
                         </div>
+                        <div style="clear:both"></div>
                     </td>
                 </tr>
                 </tbody>

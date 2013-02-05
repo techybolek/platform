@@ -23,12 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.wso2.carbon.um.ws.api.stub.Claim;
-import org.wso2.carbon.um.ws.api.stub.ClaimMapping;
-import org.wso2.carbon.um.ws.api.stub.ClaimValue;
-import org.wso2.carbon.um.ws.api.stub.ProfileConfiguration;
-import org.wso2.carbon.um.ws.api.stub.RealmConfigurationDTO;
-import org.wso2.carbon.um.ws.api.stub.RealmPropertyDTO;
+import org.wso2.carbon.um.ws.api.stub.*;
 import org.wso2.carbon.user.api.RealmConfiguration;
 
 /**
@@ -177,6 +172,19 @@ public class WSRealmUtil {
         return map;
     }
 
+    public static org.wso2.carbon.user.core.claim.Claim[] convertToClaims(ClaimDTO[] claims) {
+        if (claims == null) {
+            return null;
+        }
+        org.wso2.carbon.user.core.claim.Claim[] claimz = new org.wso2.carbon.user.core.claim.Claim[claims.length];
+        int i = 0;
+        for (ClaimDTO claim : claims) {
+            claimz[i] = convertToClaim(claim);
+            i++;
+        }
+        return claimz;
+    }
+
     public static org.wso2.carbon.user.core.claim.Claim[] convertToClaims(Claim[] claims) {
         if (claims == null) {
             return null;
@@ -187,6 +195,23 @@ public class WSRealmUtil {
             claimz[i] = convertToClaim(claim);
             i++;
         }
+        return claimz;
+    }
+
+    public static org.wso2.carbon.user.core.claim.Claim convertToClaim(ClaimDTO claim) {
+        if (claim == null) {
+            return null;
+        }
+        org.wso2.carbon.user.core.claim.Claim claimz = new org.wso2.carbon.user.core.claim.Claim();
+        claimz.setClaimUri(claim.getClaimUri());
+        claimz.setDescription(claim.getDescription());
+        claimz.setDialectURI(claim.getDialectURI());
+        claimz.setDisplayOrder(claim.getDisplayOrder());
+        claimz.setDisplayTag(claim.getDisplayTag());
+        claimz.setRegEx(claim.getRegEx());
+        claimz.setRequired(claim.getRequired());
+        claimz.setSupportedByDefault(claim.getSupportedByDefault());
+        claimz.setValue(claim.getValue());
         return claimz;
     }
 
@@ -206,6 +231,7 @@ public class WSRealmUtil {
         claimz.setValue(claim.getValue());
         return claimz;
     }
+
 
     public static org.wso2.carbon.user.core.claim.ClaimMapping convertToClaimMapping(
             ClaimMapping claimMapping) {

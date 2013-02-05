@@ -16,6 +16,7 @@
 package org.wso2.carbon.governance.lcm.internal;
 
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.governance.lcm.listener.LifecycleLoader;
@@ -50,30 +51,11 @@ public class LCMServiceComponent {
         CommonUtil.setRegistryService(registryService);
         // Generate LCM search query if it doesn't exist.
         try {
-            CommonUtil.isLifecycleNameInUse(UUIDGenerator.generateUUID(),
-                    registryService.getConfigSystemRegistry(),
-                    CommonUtil.getRootSystemRegistry());
+            CommonUtil.addDefaultLifecyclesIfNotAvailable(registryService.getConfigSystemRegistry(),
+                    registryService.getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME));
         } catch (Exception e) {
             log.error("An error occurred while setting up Governance Life Cycle Management", e);
         }
-        /*
-        String[] lifecycles = null;
-        try {
-            CommonUtil.addDefaultLifecyclesIfNotAvailable();
-            lifecycles = CommonUtil.getLifecycleList();
-        } catch (Exception e) {
-            log.warn("An error occured while populating lifecycles");
-        }
-        if (lifecycles != null && lifecycles.length > 0) {
-            for(String lifecycle: lifecycles) {
-                try {
-                    CommonUtil.generateAspect(CommonUtil.getContextRoot() + lifecycle);
-                } catch (Exception e) {
-                    continue;
-                }
-            }
-        }
-        */
     }
 
     protected void unsetRegistryService(RegistryService registryService) {

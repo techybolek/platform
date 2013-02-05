@@ -1,30 +1,34 @@
-<%@ page import="java.util.Map" %>
+<%@ page import="org.wso2.carbon.bam.gadgetgenwizard.ui.GGWUIUtils" %>
 <%
-    Map parameterMap = request.getParameterMap();
-    for (Object o : parameterMap.keySet()) {
-        String param = (String) o;
-        Object value = parameterMap.get(param);
-        session.setAttribute(param, value);
-    }
+    GGWUIUtils.overwriteSessionAttributes(request, session);
 
 
 %>
+<script type="text/javascript">
+    $(document).ready(function() {
+
+        $("#gadgettitlellbl").html(jsi18n["gadget.title"] + "<span style=\"color: red; \">*</span>");
+        $("#gadgetfilenamelbl").html(jsi18n["gadget.filename"] + "<span style=\"color: red; \">*</span>");
+        $("#refreshratelbl").html(jsi18n["refresh.rate"] + "<span style=\"color: red; \">*</span>");
+    });
+</script>
+
 <table class="normal">
     <tbody>
     <tr>
-        <td>Gadget Title<span style="color: red; ">*</span>
+        <td id="gadgettitlellbl">
         </td>
-        <td><input type="text" name="gadget-title" value="" style="width:200px"/></td>
+        <td><input type="text" class="validate" name="gadget-title" value="" style="width:300px"/></td>
     </tr>
     <tr>
-        <td>Gadget File Name<span style="color: red; ">*</span>
+        <td id="gadgetfilenamelbl">
         </td>
-        <td><input type="text" name="gadget-filename" value="" style="width:200px"/></td>
+        <td><input type="text" class="validate" name="gadget-filename" value="" style="width:300px"/></td>
     </tr>
     <tr>
-        <td>Refresh Rate (in Seconds)<span style="color: red; ">*</span>
+        <td id="refreshratelbl">
         </td>
-        <td><input type="text" name="refresh-rate" value="10" style="width:200px"/></td>
+        <td><input type="text" class="validate" name="refresh-rate" value="60" style="width:300px"/></td>
     </tr>
     <input type="hidden" name="page" id="page" value="4">
     </tbody>

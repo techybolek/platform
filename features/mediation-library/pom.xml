@@ -22,9 +22,9 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-features</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
     </parent>
-
+    <version>4.0.1</version>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>mediation-library-feature</artifactId>
     <packaging>pom</packaging>
@@ -32,24 +32,24 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.mediation.library.feature</module>
-        <module>org.wso2.carbon.mediation.library.ui.feature</module>
-        <module>org.wso2.carbon.mediation.library.server.feature</module>
-        <!--<module>org.wso2.carbon.mediation.library.connectors.server.feature</module>-->
+        <module>org.wso2.carbon.mediation.library.feature/4.0.1</module>
+        <module>org.wso2.carbon.mediation.library.ui.feature/4.0.1</module>
+        <module>org.wso2.carbon.mediation.library.server.feature/4.0.1</module>
+        <module>org.wso2.carbon.mediation.library.connectors.server.feature/4.0.1</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>            
-            <dependency>
+            <!--dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
-                <version>${wso2carbon.version.mediation.library}</version>
+                <version>${wso2carbon.patch.release.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.mediation.initializer.ui</artifactId>
-                <version>${wso2carbon.version.mediation.library}</version>
-            </dependency>
+                <version>4.0.0</version>
+            </dependency-->
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.mediation.registry</artifactId>
@@ -58,24 +58,26 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.mediation.library</artifactId>
-                <version>${wso2carbon.version.mediation.library}</version>
+                <version>${wso2carbon.patch.release.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.mediation.library.ui</artifactId>
-                <version>${wso2carbon.version.mediation.library}</version>
+                <version>4.0.1</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.mediation.library.connectors.core</artifactId>
-                <version>${wso2carbon.version.mediation.library}</version>
+                <version>4.0.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
     <properties>
+	<wso2carbon.patch.release.version>${project.version}</wso2carbon.patch.release.version>
         <wso2carbon.version.mediation.library>${wso2carbon.version}</wso2carbon.version.mediation.library>
         <wso2carbon.version.mediation.registry>${wso2carbon.version}</wso2carbon.version.mediation.registry>
+     	<synapse.patch.release.version>2.1.0-wso2v7</synapse.patch.release.version>
     </properties>
 
 </project>

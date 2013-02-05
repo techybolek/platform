@@ -177,10 +177,12 @@ public abstract class Query extends XMLWriterHelper {
 								"cannot find query param with name:" + queryParam.getName());
 					}
 				}
-			}			
-			ipc.addParam(new InternalParam(queryParam.getName(), tmpParamValue,
-                    queryParam.getSqlType(), queryParam.getType(), queryParam.getStructType(),
-                    queryParam.getOrdinal()));
+			}
+			for (int ordinal : queryParam.getOrdinals()) {
+			    ipc.addParam(new InternalParam(queryParam.getName(), tmpParamValue,
+                        queryParam.getSqlType(), queryParam.getType(), queryParam.getStructType(),
+                        ordinal));
+			}
 		}
 		return ipc;
 	}

@@ -19,7 +19,7 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.coordination.common.CoordinationConstants;
 import org.wso2.carbon.coordination.common.CoordinationException;
 import org.wso2.carbon.coordination.core.CoordinationConfiguration;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 /**
  * Utility methods for Coordination service.
@@ -37,7 +37,7 @@ public class CoordinationUtils {
 	public static String createPathFromId(String context, String id) {
 		int tenantId;
 		try {
-		    tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
+		    tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
 		} catch (Throwable e) {
 			/* when running tests */
 			tenantId = MultitenantConstants.SUPER_TENANT_ID;
@@ -46,6 +46,17 @@ public class CoordinationUtils {
 			tenantId = MultitenantConstants.SUPER_TENANT_ID;
 		}
 		return CoordinationConstants.CONTENT_PATH_ROOT + "/" + tenantId + "/" + context + "/" + id; 		
+	}
+	
+	public static boolean isJVMShuttingDown() {
+		try {
+			Thread thread = new Thread();
+	        Runtime.getRuntime().addShutdownHook(thread);
+	        Runtime.getRuntime().removeShutdownHook(thread);
+	    } catch (IllegalStateException e) {
+	        return true;
+	    }
+	    return false;
 	}
 	
 }

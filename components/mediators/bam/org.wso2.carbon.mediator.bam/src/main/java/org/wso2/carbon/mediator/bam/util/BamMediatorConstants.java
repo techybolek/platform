@@ -42,17 +42,20 @@ public final class BamMediatorConstants {
     public static final String VERSION = "version";
     public static final String NICK_NAME = "nickName";
     public static final String DESCRIPTION = "description";
-    public static final String TENANT_ID = "tenantId";
+    public static final String TENANT_ID = "tenant_id";
 
-    public static final String REQUEST_RECEIVED_TIME = "request_received_time";
+    public static final String REQUEST_RECEIVED_TIME = "timestamp";
     public static final String HTTP_METHOD = "http_method";
     public static final String CHARACTER_SET_ENCODING = "character_set_encoding";
     public static final String TRANSPORT_IN_URL = "transport_in_url";
     public static final String MESSAGE_TYPE = "message_type";
     public static final String REMOTE_HOST = "remote_host";
     public static final String SERVICE_PREFIX = "service_prefix";
+    public static final String HOST = "host";
+    //public static final String HOST_ADDRESS = "host_address";
     public static final String STRING = "STRING";
     public static final String INT = "INT";
+    public static final String LONG = "Long";
     public static final String NAME = "name";
     public static final String TYPE = "type";
     public static final String CORRELATION_DATA = "correlationData";
@@ -60,7 +63,7 @@ public final class BamMediatorConstants {
     public static final String PAYLOAD_DATA = "payloadData";
 
     public static final int NUM_OF_CONST_CORRELATION_PARAMS = 1;
-    public static final int NUM_OF_CONST_META_PARAMS = 1;
-    public static final int NUM_OF_CONST_PAYLOAD_PARAMS = 12;
+    public static final int NUM_OF_CONST_META_PARAMS = 9;
+    public static final int NUM_OF_CONST_PAYLOAD_PARAMS = 5;
 
 }

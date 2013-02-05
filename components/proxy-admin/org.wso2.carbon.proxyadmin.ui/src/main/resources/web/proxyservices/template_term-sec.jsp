@@ -204,7 +204,7 @@
                                 </tr>
                                 <jsp:include page="inc/endpoint_select.jsp"/>
                                 <tr>
-                                    <td><fmt:message key="sec.policy"/></td>
+                                    <td><fmt:message key="sec.policy"/><span class="required">*</span></td>
                                     <td>
                                         <table cellspacing="0">
                                             <tr>

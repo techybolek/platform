@@ -17,7 +17,7 @@
  -->
 <component xmlns="http://products.wso2.org/carbon">
     <menus>
-        <menu>
+<!--        <menu>
             <id>webapps_menu</id>
             <i18n-key>webappmgt.services.menu</i18n-key>
             <i18n-bundle>org.wso2.carbon.webapp.mgt.ui.i18n.Resources</i18n-bundle>
@@ -46,10 +46,22 @@
             <i18n-key>webappmgt.add.webapp.menu</i18n-key>
             <i18n-bundle>org.wso2.carbon.webapp.mgt.ui.i18n.Resources</i18n-bundle>
             <parent-menu>webapps_menu</parent-menu>
-            <link>../webapp-mgt/upload.jsp</link>
+            <link>#</link>
             <region>region1</region>
             <order>10</order>
             <icon>../webapp-mgt/images/add.gif</icon>
+            <style-class>home</style-class>
+            <require-permission>/permission/admin/manage/add/webapp</require-permission>
+        </menu>-->
+        <menu>
+            <id>webapps_add</id>
+            <i18n-key>webapps</i18n-key>
+            <i18n-bundle>org.wso2.carbon.webapp.mgt.ui.i18n.Resources</i18n-bundle>
+            <parent-menu>webapps_add_menu</parent-menu>
+            <link>../webapp-mgt/upload.jsp</link>
+            <region>region1</region>
+            <order>1</order>
+            <icon>../webapp-mgt/images/webapps.gif</icon>
             <style-class>home</style-class>
             <require-permission>/permission/admin/manage/add/webapp</require-permission>
         </menu>

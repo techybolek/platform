@@ -145,8 +145,8 @@
         environmentIdTarget = basicTargetElementDTO.getEnvironmentId();
         attributeIdTarget = basicTargetElementDTO.getAttributeId();
 
-        if(!entitlementPolicyBean.subjectTypeMap.containsKey("Target")){
-            entitlementPolicyBean.subjectTypeMap.put("Target", basicTargetElementDTO.getSubjectType());
+        if(!entitlementPolicyBean.getSubjectTypeMap().containsKey("Target")){
+            entitlementPolicyBean.getSubjectTypeMap().put("Target", basicTargetElementDTO.getSubjectType());
         }
     }
 

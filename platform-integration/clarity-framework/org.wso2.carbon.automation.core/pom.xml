@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.wso2.carbon.automation</groupId>
         <artifactId>clarity-framework</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.8</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -29,7 +29,7 @@
         <dependency>
             <groupId>org.wso2.carbon.automation</groupId>
             <artifactId>org.wso2.carbon.automation.api</artifactId>
-            <version>4.0.0-SNAPSHOT</version>
+            <version>${clarity-version}</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
@@ -37,9 +37,9 @@
             <version>5.1.16</version>
         </dependency>
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.0.20070304</version>
+            <groupId>com.h2database.wso2</groupId>
+            <artifactId>h2-database-engine</artifactId>
+            <version>1.2.140.wso2v3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.surefire</groupId>
@@ -55,11 +55,6 @@
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
             <version>3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.5.7.201204190339</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.mojo</groupId>
@@ -80,6 +75,16 @@
             <groupId>emma</groupId>
             <artifactId>emma</artifactId>
             <version>2.1.5320</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derbynet</artifactId>
+            <version>10.4.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derbyclient</artifactId>
+            <version>10.4.2.0</version>
         </dependency>
     </dependencies>
 </project>

@@ -19,10 +19,7 @@ package org.wso2.carbon.apimgt.usage.publisher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeRequestPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeResponsePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.*;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.apimgt.usage.publisher.service.APIMGTConfigReaderService;
 import org.wso2.carbon.databridge.agent.thrift.Agent;
@@ -41,6 +38,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
     private DataPublisher dataPublisher;
     private String requestStreamId;
     private String responseStreamId;
+    private String faultStreamId;
 
     public void init(){
         try {
@@ -48,6 +46,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             this.dataPublisher = getDataPublisher();
             this.requestStreamId = DataBridgeRequestPublisherDTO.addStreamId(dataPublisher);
             this.responseStreamId = DataBridgeResponsePublisherDTO.addStreamId(dataPublisher);
+            this.faultStreamId = DataBridgeFaultPublisherDTO.addStreamId(dataPublisher);
         }catch (Exception e){
             log.error("Error initializing APIMgtUsageDataBridgeDataPublisher", e);
         }
@@ -77,7 +76,20 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
 
     }
 
-   private DataPublisher getDataPublisher()
+    public void publishEvent(FaultPublisherDTO faultPublisherDTO) {
+        DataBridgeFaultPublisherDTO dataBridgeFaultPublisherDTO = new DataBridgeFaultPublisherDTO(faultPublisherDTO);
+
+        Event event = new Event(faultStreamId, System.currentTimeMillis(), new Object[]{"external"}, null,
+                (Object[]) dataBridgeFaultPublisherDTO.createPayload());
+
+        try {
+            dataPublisher.publish(event);
+        } catch (AgentException e) {
+            log.error("Error while publishing response event", e);
+        }
+    }
+
+    private DataPublisher getDataPublisher()
             throws AgentException, MalformedURLException, AuthenticationException,
                    TransportException {
         APIMGTConfigReaderService apimgtConfigReaderService = UsageComponent.getApiMgtConfigReaderService();

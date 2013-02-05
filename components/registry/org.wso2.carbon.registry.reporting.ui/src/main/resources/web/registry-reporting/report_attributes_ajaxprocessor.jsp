@@ -33,12 +33,15 @@
             return;
         }
         String[] attributeNames = client.getAttributeNames(reportClass);
-        if (attributeNames != null) {
+        if (attributeNames != null && attributeNames.length > 0) {
             attributes.addAll(Arrays.asList(attributeNames));
             String reportName = request.getParameter("reportName");
             if (reportName != null && reportName.length() > 0) {
                 // mandatory attributes show up only when you have already created a report. For the first time, everything is optional.
-                mandatoryAttributes.addAll(Arrays.asList(client.getMandatoryAttributeNames(reportClass)));
+                String[] mandatoryAttributeNames = client.getMandatoryAttributeNames(reportClass);
+                if (mandatoryAttributeNames != null && mandatoryAttributeNames.length > 0) {
+                    mandatoryAttributes.addAll(Arrays.asList(mandatoryAttributeNames));
+                }
                 attributeValues = CommonUtil.attributeArrayToMap(client.getSavedReport(reportName).getAttributes());
             }
         }

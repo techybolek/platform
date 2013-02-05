@@ -2,6 +2,7 @@
 <%@ page import="org.apache.axis2.client.ServiceClient" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
+<%@ page import="org.wso2.carbon.cep.stub.admin.CEPAdminServiceCEPAdminException" %>
 <%@ page import="org.wso2.carbon.cep.stub.admin.CEPAdminServiceStub" %>
 <%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.BucketDTO" %>
 <%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.CEPEngineProviderConfigPropertyDTO" %>
@@ -34,19 +35,23 @@
     String engineProvider = request.getParameter("engineProvider");
     String engineProviderConfig = request.getParameter("engineProviderConfig");
 
-    if(engineProviderConfig!=null&& !engineProviderConfig.equals("")){
-        String[] properties=engineProviderConfig.split("-__-");
-        CEPEngineProviderConfigPropertyDTO[] configProperties=new  CEPEngineProviderConfigPropertyDTO[properties.length];
+    if (engineProviderConfig != null && !engineProviderConfig.equals("")) {
+        String[] properties = engineProviderConfig.split("-__-");
+        CEPEngineProviderConfigPropertyDTO[] configProperties = new CEPEngineProviderConfigPropertyDTO[properties.length];
         for (int i = 0, propertiesLength = properties.length; i < propertiesLength; i++) {
             String property = properties[i];
             String[] vals = property.split("-_-");
-            configProperties[i]=new CEPEngineProviderConfigPropertyDTO();
+            configProperties[i] = new CEPEngineProviderConfigPropertyDTO();
             configProperties[i].setNames(vals[0]);
-            configProperties[i].setValues(vals[1]);
+            if (vals.length > 1) {
+                configProperties[i].setValues(vals[1]);
+            } else {
+                configProperties[i].setValues("null");
+            }
         }
         bucket.setEngineProviderConfigProperty(configProperties);
     }
-    if(bucketName != null){
+    if (bucketName != null) {
         bucketName = bucketName.trim();
     }
 
@@ -71,7 +76,8 @@
         session.removeAttribute("inputs");
         session.removeAttribute("queries");
         session.removeAttribute("tempBucketInformation");
-    } catch (Exception e) {
-        message = "Error in adding bucket :" + e.toString();
+    } catch (CEPAdminServiceCEPAdminException e) {
+        message = "Error in adding bucket :" + e.getFaultMessage().
+                getCEPAdminException().getErrorMessage();
     }
 %><%=message%>

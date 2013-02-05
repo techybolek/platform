@@ -31,20 +31,20 @@ import javax.jcr.nodetype.ConstraintViolationException;
 import java.util.*;
 
 public class RegistryRepository implements Repository {
-    //TODO implement the login, based on one login() method
-
     static Map keyMap = new HashMap();
     public static final Map credentialConstants = new LinkedHashMap();
-    //    public static final List implicitPropertiyNames = new ArrayList();
     public RegistryService registryService;
     private Set workspaces = new HashSet();
     private Map<String, Workspace> workspaceMap = new HashMap<String, Workspace>();
     private static int versionCounter = 0;
     private static Log log = LogFactory.getLog(RegistryNode.class);
+    private static String ADMIN_ROLE_NAME = "admin";
+    private static String ANONYMOUS_USER = "anonymous";
+    private static String SUPER_USER = "superuser";
 
 
-    /**
-     * It is better we can set the following in the registry DB
+  /**
+     *  TODO It is better we can set the following in the registry DB
      */
 //    private Set<NodeType> nodeTypesList = new HashSet<NodeType>();
 //    private Set primaryNodetypes = new HashSet();
@@ -217,7 +217,7 @@ public class RegistryRepository implements Repository {
 
     public Session login(Credentials credentials, String s) throws LoginException, NoSuchWorkspaceException, RepositoryException {
 
-        //TODO login with a not available workspace name must throw NoSuchWorkspaceException
+        //TODO login with a not available workspace name must throw NoSuchWorkspaceException, commented codes are not yet removed as those might be used in future JCR tasks when refactoring login scenario properly
         // Obtain default workspace
         Credentials tmpCredentials = credentials;
         if(credentials instanceof SimpleCredentials) {
@@ -239,17 +239,15 @@ public class RegistryRepository implements Repository {
             s = RegistryJCRSpecificStandardLoderUtil.getDefaultRegistryWorkspaceName();
             userID = ((RegistrySimpleCredentials)credentials).getUserID();
             try {
-                //TODO JCR super user maps to greg admin
-                if(((RegistrySimpleCredentials)credentials).getUserID().equals("superuser")) {
-                    userRegistry = registryService.getRegistry("admin","admin");
-                // Gives READONLY registry for anonymous  user
-                } else if((((RegistrySimpleCredentials)credentials).getUserID()).equals("anonymous")) {
+                if(((RegistrySimpleCredentials)credentials).getUserID().equals(SUPER_USER)) {
+                    userRegistry = registryService.getRegistry(ADMIN_ROLE_NAME,
+                            new String(((RegistrySimpleCredentials)credentials).getPassword()));
+                } else if((((RegistrySimpleCredentials)credentials).getUserID()).equals(ANONYMOUS_USER)) {
                     userRegistry = registryService.getRegistry();
-                } else {
-                 //TODO this is mainly used to give read write access repo.(For TCK compatibility)
-                   userRegistry = registryService.getRegistry("admin","admin");
-//                    userRegistry = registryService.getRegistry(((RegistrySimpleCredentials)credentials).getUserID(),
-//                                   new String(((RegistrySimpleCredentials)credentials).getPassword()));
+                }
+                else {
+             userRegistry = getRegistry(((RegistrySimpleCredentials)credentials).getUserID(),
+                                   new String(((RegistrySimpleCredentials)credentials).getPassword()));
                 }
             } catch (RegistryException e) {
                 throw new RepositoryException("Exception occurred when obtaining registry " +
@@ -257,7 +255,7 @@ public class RegistryRepository implements Repository {
             }
         } else if(credentials == null) {
             try {
-                userRegistry = registryService.getRegistry(((RegistrySimpleCredentials)credentials).getUserID());
+                userRegistry = registryService.getRegistry();
             } catch (RegistryException e) {
                 throw new RepositoryException("Exception occurred when obtaining registry " +
                        "from registry service :" + e.getMessage());
@@ -265,12 +263,11 @@ public class RegistryRepository implements Repository {
         } else {
             userID = ((RegistrySimpleCredentials)credentials).getUserID();
             try {
-
-                //TODO JCR super user maps to greg admin
-                if(((RegistrySimpleCredentials)credentials).getUserID().equals("superuser")) {
-                    userRegistry = registryService.getRegistry("admin","admin");
+                if(((RegistrySimpleCredentials)credentials).getUserID().equals(SUPER_USER)) {
+                    userRegistry = registryService.getRegistry(ADMIN_ROLE_NAME,
+                            new String(((RegistrySimpleCredentials)credentials).getPassword()));
                 } else {
-                userRegistry = registryService.getRegistry(((RegistrySimpleCredentials)credentials).getUserID(),
+            userRegistry = getRegistry(((RegistrySimpleCredentials)credentials).getUserID(),
                         new String(((RegistrySimpleCredentials)credentials).getPassword()));
                 }
             } catch (RegistryException e) {
@@ -278,6 +275,79 @@ public class RegistryRepository implements Repository {
                        "from registry service :" + e.getMessage());
             }
         }
+
+        RegistrySession registrySession = null;
+
+        synchronized (this) {
+            registrySession = new RegistrySession(this, s,(RegistrySimpleCredentials)credentials, userRegistry,userID);
+            workspaces.add(registrySession);
+        }
+
+
+        return registrySession;
+    }
+
+     public Session loginOriginal(Credentials credentials, String s) throws LoginException, NoSuchWorkspaceException, RepositoryException {
+
+        //TODO login with a not available workspace name must throw NoSuchWorkspaceException, commented codes are not yet removed as those might be used in future JCR tasks when refactoring login scenario properly
+        // Obtain default workspace
+        Credentials tmpCredentials = credentials;
+        if(credentials instanceof SimpleCredentials) {
+        credentials = new RegistrySimpleCredentials();
+        ((RegistrySimpleCredentials)credentials).setRegistrySimpleCredentials((SimpleCredentials)tmpCredentials);
+        }
+
+        UserRegistry userRegistry = null;
+        String userID = "";
+        if(credentials == null && s == null) {
+            s= RegistryJCRSpecificStandardLoderUtil.getDefaultRegistryWorkspaceName();
+            try {
+                userRegistry = registryService.getRegistry();
+            } catch (RegistryException e) {
+                throw new RepositoryException("Exception occurred when obtaining registry " +
+                       "from registry service :" + e.getMessage());
+            }
+        } else if (s == null) {
+            s = RegistryJCRSpecificStandardLoderUtil.getDefaultRegistryWorkspaceName();
+            userID = ((RegistrySimpleCredentials)credentials).getUserID();
+            try {
+//                if(((RegistrySimpleCredentials)credentials).getUserID().equals(SUPER_USER)) {
+//                    userRegistry = registryService.getRegistry(ADMIN_ROLE_NAME,
+//                            new String(((RegistrySimpleCredentials)credentials).getPassword()));
+//                } else if((((RegistrySimpleCredentials)credentials).getUserID()).equals(ANONYMOUS_USER)) {
+//                    userRegistry = registryService.getRegistry();
+//                }
+//                else {
+             userRegistry = getRegistry(((RegistrySimpleCredentials)credentials).getUserID(),
+                                   new String(((RegistrySimpleCredentials)credentials).getPassword()));
+//                }
+            } catch (RegistryException e) {
+                throw new RepositoryException("Exception occurred when obtaining registry " +
+                       "from registry service :" + e.getMessage());
+            }
+        } else if(credentials == null) {
+            try {
+                userRegistry = registryService.getRegistry();
+            } catch (RegistryException e) {
+                throw new RepositoryException("Exception occurred when obtaining registry " +
+                       "from registry service :" + e.getMessage());
+            }
+        } else {
+            userID = ((RegistrySimpleCredentials)credentials).getUserID();
+            try {
+//                if(((RegistrySimpleCredentials)credentials).getUserID().equals(SUPER_USER)) {
+//                    userRegistry = registryService.getRegistry(ADMIN_ROLE_NAME,
+//                            new String(((RegistrySimpleCredentials)credentials).getPassword()));
+//                } else {
+            userRegistry = getRegistry(((RegistrySimpleCredentials)credentials).getUserID(),
+                        new String(((RegistrySimpleCredentials)credentials).getPassword()));
+//                }
+            } catch (RegistryException e) {
+                throw new RepositoryException("Exception occurred when obtaining registry " +
+                       "from registry service :" + e.getMessage());
+            }
+        }
+
         RegistrySession registrySession = null;
 
         synchronized (this) {
@@ -303,4 +373,17 @@ public class RegistryRepository implements Repository {
     public Session login() throws LoginException, RepositoryException {
         return login(null,null);
     }
+
+    private UserRegistry getRegistry(String username, String password) throws RegistryException {
+       if (username == null) {
+           return registryService.getRegistry();
+       }
+       String[] nameComponents = username.split("@");
+       if (nameComponents.length > 1) {
+           return registryService.getUserRegistry(username, password);
+       } else {
+           return registryService.getRegistry(username, password);
+       }
+   }
+
 }

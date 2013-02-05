@@ -141,6 +141,10 @@ public class SCMUpdateTask implements Runnable {
                     makeChanges(scmManager, scmRepository, toCheckIn, toDelete, toAdd);
                 } else {
                     scmRepository = scmManager.makeScmRepository(checkInURL);
+                    if (username != null && password != null) {
+                        scmRepository.getProviderRepository().setUser(username);
+                        scmRepository.getProviderRepository().setPassword(password);
+                    }
                     makeChanges(scmManager, scmRepository, toCheckIn, toDelete, toAdd);
                 }
             }

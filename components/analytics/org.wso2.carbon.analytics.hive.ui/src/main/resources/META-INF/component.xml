@@ -24,13 +24,6 @@
             <servlet-class>org.wso2.carbon.analytics.hive.ui.servlet.SaveScriptProcessor
             </servlet-class>
         </servlet>
-        <servlet id="SaveHiveConfiguration">
-            <servlet-name>SaveHiveConfiguration</servlet-name>
-            <url-pattern>/carbon/hive-explorer/SaveHiveConfiguration</url-pattern>
-            <display-name>SaveHiveConfiguration</display-name>
-            <servlet-class>org.wso2.carbon.analytics.hive.ui.servlet.SaveHiveConfiguration
-            </servlet-class>
-        </servlet>
         <servlet id="SaveCronExpression">
             <servlet-name>SaveCronExpression</servlet-name>
             <url-pattern>/carbon/hive-explorer/SaveCronExpression</url-pattern>
@@ -69,18 +62,6 @@
             <order>20</order>
             <style-class>tools</style-class>
             <icon>../hive-explorer/images/list.gif</icon>
-            <require-permission>/permission/admin</require-permission>
-        </menu>
-        <menu>
-            <id>analytics_configure</id>
-            <i18n-key>analytics.configure</i18n-key>
-            <i18n-bundle>org.wso2.carbon.analytics.hive.ui.i18n.Resources</i18n-bundle>
-            <parent-menu>configure_menu</parent-menu>
-            <link>../hive-explorer/index.jsp</link>
-            <region>region1</region>
-            <order>21</order>
-            <style-class>manage</style-class>
-            <icon>../hive-explorer/images/analyzerFramework.png</icon>
             <require-permission>/permission/admin</require-permission>
         </menu>
 <!--        <menu>

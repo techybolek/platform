@@ -22,12 +22,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>gadgetgen-wizard-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.gadgetgenwizard.feature</artifactId>
     <packaging>pom</packaging>
+    <version>4.0.7</version>
     <name>WSO2 Carbon - Gadget Generation Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for Gadget Generation</description>
@@ -36,13 +38,13 @@
 	<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.gadgetgenwizard.server.feature</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>${carbon.platform.patch.version.407}</version>
             <type>zip</type>
 	</dependency>
 	<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.gadgetgenwizard.ui.feature</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>${carbon.platform.patch.version.407}</version>
             <type>zip</type>
 	</dependency>
     </dependencies>
@@ -62,13 +64,13 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.gadgetgenwizard</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core:${wso2carbon.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.gadgetgenwizard.server.feature:${wso2carbon.version}</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.gadgetgenwizard.ui.feature:${wso2carbon.version}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.gadgetgenwizard.server.feature:${carbon.platform.patch.version.407}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.gadgetgenwizard.ui.feature:${carbon.platform.patch.version.407}</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>
@@ -76,5 +78,7 @@
             </plugin>
         </plugins>
     </build>
-
+     <properties>
+        <carbon.platform.patch.version.407>4.0.7</carbon.platform.patch.version.407>
+    </properties>
 </project>

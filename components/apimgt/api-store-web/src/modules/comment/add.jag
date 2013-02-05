@@ -19,4 +19,30 @@ var addComment = function (api, comment) {
         };
     }
 };
+var isCommentActivated = function () {
+    var log = new Log(),
+            store = jagg.module("manager").getAPIStoreObj();
+	var result;
+    try {
+        result= store.isCommentActivated();
+        if (log.isDebugEnabled()) {
+            log.debug("isCommentActivated :" +result);
+        }
+        if (result) {
+            return {
+                allow:true
+            };
+        } else {
+            return {
+                allow:false
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+};
+
 %>

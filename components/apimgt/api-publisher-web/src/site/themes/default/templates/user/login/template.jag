@@ -1,4 +1,5 @@
 <% jagg.template("user/login", function(inputs, outputs, jagg) { %>
+
 <%
         if(request.isSecure()){
 
@@ -13,15 +14,15 @@
                 <span id="loginErrorSpan"></span>
             </div>
             <form class="well" action="index.jag" id="loginForm">
-                <label>Username:<span class="requiredAstrix">*</span></label>
+                <label><%=i18n.localize("username")%>:<span class="requiredAstrix">*</span></label>
                 <input type="text" class="span3" id="username" autofocus="autofocus" validation="required"  />
 
-                <label>Password:<span class="requiredAstrix">*</span></label>
+                <label><%=i18n.localize("password")%>:<span class="requiredAstrix">*</span></label>
                 <input type="password" class="span3" id="pass" />
 
                 <div>
-                    <input type="button" class="btn btn-primary" onclick="login()"  value="Login" id="loginButton" />
-                    <input type="reset" class="btn" value="Cancel" />
+                    <input type="button" class="btn btn-primary" onclick="login()"  value="<%=i18n.localize("login")%>" id="loginButton" />
+                    <input type="reset" class="btn" value="<%=i18n.localize("reset")%>" />
                 </div>
             </form>
         </div>

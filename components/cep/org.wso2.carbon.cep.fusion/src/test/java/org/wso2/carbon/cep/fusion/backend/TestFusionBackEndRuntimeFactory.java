@@ -18,14 +18,14 @@ package org.wso2.carbon.cep.fusion.backend;
 
 import junit.framework.TestCase;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.broker.core.exception.BrokerConfigException;
 import org.wso2.carbon.cep.core.Expression;
 import org.wso2.carbon.cep.core.backend.CEPBackEndRuntime;
 import org.wso2.carbon.cep.core.backend.CEPBackEndRuntimeFactory;
 import org.wso2.carbon.cep.core.exception.CEPConfigurationException;
 import org.wso2.carbon.cep.core.exception.CEPEventProcessingException;
-import org.wso2.carbon.cep.core.mapping.input.mapping.XMLInputMapping;
-import org.wso2.carbon.cep.core.internal.util.CEPConstants;
 import org.wso2.carbon.cep.core.listener.CEPEventListener;
+import org.wso2.carbon.cep.core.mapping.input.mapping.XMLInputMapping;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +34,7 @@ import java.util.Map;
 
 public class TestFusionBackEndRuntimeFactory extends TestCase {
 
-    public void testFusionBackEndRuntimeFacotry() throws CEPConfigurationException {
+    public void testFusionBackEndRuntimeFacotry() throws CEPConfigurationException, BrokerConfigException {
 
         CEPBackEndRuntimeFactory factory = new FusionBackEndRuntimeFactory();
         CEPBackEndRuntime cepBackEndRuntime = factory.createCEPBackEndRuntime(null, null, null,0);
@@ -66,10 +66,9 @@ public class TestFusionBackEndRuntimeFactory extends TestCase {
                 "    $fastMovingStock.put(\"average\",$average);\n" +
                 "    fusionListener.onEvent($fastMovingStock);\n" +
                 "end");
-        expression.setType(CEPConstants.CEP_CONF_EXPRESSION_INLINE);
         try {
 
-            CEPEventListener cepEventListener = new CEPEventListener(null, 0, CarbonConstants.REGISTRY_SYSTEM_USERNAME){
+            CEPEventListener cepEventListener = new CEPEventListener(null, 0, CarbonConstants.REGISTRY_SYSTEM_USERNAME, null){
                 public void onComplexEvent(List events) {
                     for (Object event : events){
                         Map eventMap = (Map) event;
@@ -125,7 +124,7 @@ public class TestFusionBackEndRuntimeFactory extends TestCase {
 
     }
 
-    public void testFusionBackEndRuntimeFacotry1() throws CEPConfigurationException {
+    public void testFusionBackEndRuntimeFacotry1() throws CEPConfigurationException, BrokerConfigException {
 
         CEPBackEndRuntimeFactory factory = new FusionBackEndRuntimeFactory();
         CEPBackEndRuntime cepBackEndRuntime = factory.createCEPBackEndRuntime(null, null, null,0);
@@ -146,10 +145,9 @@ public class TestFusionBackEndRuntimeFactory extends TestCase {
                 "                                 fusionListener.onEvent(serviceStatisticsData);\n" +
                 "                            end");
 
-        expression.setType(CEPConstants.CEP_CONF_EXPRESSION_INLINE);
         try {
 
-            CEPEventListener cepEventListener = new CEPEventListener(null,0,  CarbonConstants.REGISTRY_SYSTEM_USERNAME){
+            CEPEventListener cepEventListener = new CEPEventListener(null,0,  CarbonConstants.REGISTRY_SYSTEM_USERNAME, null){
                 public void onComplexEvent(List events) {
                     for (Object event : events){
                         Map eventMap = (Map) event;

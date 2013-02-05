@@ -71,6 +71,7 @@ public class JMSPersistentMessageHelper {
         org.apache.axis2.context.MessageContext msgCtx = ((Axis2SynapseEnvironment)
                 synapseEnvironment).getAxis2ConfigurationContext().createMessageContext();
 
+
         AxisConfiguration axisConfiguration = msgCtx.getConfigurationContext().getAxisConfiguration();
         JMSPersistentAxis2Message jmsAxis2MessageContext = message.getJmsPersistentAxis2Message();
         SOAPEnvelope envelope = getSoapEnvelope(jmsAxis2MessageContext.getSoapEnvelope());
@@ -193,10 +194,8 @@ public class JMSPersistentMessageHelper {
             jmsAxis2MessageContext.setOperationName(msgCtx.getAxisOperation().getName());
 
             jmsAxis2MessageContext.setAction(msgCtx.getOptions().getAction());
+            jmsAxis2MessageContext.setService(msgCtx.getAxisService().getName());
 
-            if(msgCtx.getAxisService()!=null) {
-                jmsAxis2MessageContext.setService(msgCtx.getAxisService().getName());
-            }
             if (msgCtx.getRelatesTo() != null) {
                 jmsAxis2MessageContext.setRelatesToMessageId(msgCtx.getRelatesTo().getValue());
             }
@@ -218,12 +217,9 @@ public class JMSPersistentMessageHelper {
             jmsAxis2MessageContext.setSoapEnvelope(soapEnvelope);
             jmsAxis2MessageContext.setFLOW(msgCtx.getFLOW());
 
-            if(msgCtx.getTransportIn() != null) {
-                jmsAxis2MessageContext.setTransportInName(msgCtx.getTransportIn().getName());
-            }
-            if(msgCtx.getTransportOut() != null) {
-                jmsAxis2MessageContext.setTransportOutName(msgCtx.getTransportOut().getName());
-            }
+
+            jmsAxis2MessageContext.setTransportInName(msgCtx.getTransportIn().getName());
+            jmsAxis2MessageContext.setTransportOutName(msgCtx.getTransportOut().getName());
             Iterator<String> it = msgCtx.getProperties().keySet().iterator();
 
             while (it.hasNext()) {

@@ -57,7 +57,11 @@ public class DefaultTenantBilling implements TenantBillingService {
             throw new StratosException(msg, e);
         }
 
-        return subscription.getSubscriptionPlan();
+        if(subscription!=null){
+            return subscription.getSubscriptionPlan();
+        }else{
+            return null;
+        }
     }
 
     public void updateUsagePlan(String tenantDomain, String usagePlan) throws StratosException {

@@ -18,10 +18,13 @@
 <serviceGroup>
 
 	<service name="WSRegistryService" scope="transportsession">
+        <transports>
+            <transport>https</transport>
+        </transports>
 		<parameter name="ServiceClass" locked="false">
 			org.wso2.carbon.registry.ws.api.WSRegistry
         </parameter>
-		
+
 		
 		<excludeOperations>
 			<operation>get</operation>

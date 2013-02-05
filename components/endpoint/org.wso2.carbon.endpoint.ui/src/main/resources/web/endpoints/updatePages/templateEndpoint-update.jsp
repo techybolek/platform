@@ -26,9 +26,6 @@
     String targetTemplate = request.getParameter("target.template");
 
     if (endpointName != null & !"".equals(endpointName.trim())) {
-        /*if(isAnonymous){
-            endpoint.setEnableMBeanStats(false);
-        }*/
         endpoint.addParameter("name", endpointName.trim());
     }
     if (address != null) {

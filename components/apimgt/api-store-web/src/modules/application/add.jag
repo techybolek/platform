@@ -1,10 +1,10 @@
 <%
-var addApplication = function (username, application) {
+var addApplication = function (username, application, tier) {
     var log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        store.addApplication(application, username);
+        store.addApplication(application, username, tier);
         if (log.isDebugEnabled()) {
             log.debug("addApplication");
         }

@@ -17,14 +17,18 @@
 */
 package org.wso2.carbon.identity.provider.openid;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.openid4java.server.ServerAssociationStore;
 import org.openid4java.server.ServerManager;
 import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
-import org.wso2.carbon.identity.provider.internal.IdentityProviderServiceComponent;
 
+/**
+ * This class is the WSO2 Implementation of OpenID Provider role.
+ * This is a singleton class which handles all OpenID Server related
+ * configurations and this class initiates the <code>ServerManager</code>
+ * 
+ * @author WSO2 Inc
+ * 
+ */
 public class OpenIDProvider {
 
     // Instantiate a ServerManager object.
@@ -34,26 +38,22 @@ public class OpenIDProvider {
 
     // Guaranteed to be thread safe
     private static OpenIDProvider provider = new OpenIDProvider();
-    private static Log log = LogFactory.getLog(OpenIDProvider.class);
 
     /**
      * Configure the OpenID Provider's end-point URL
      */
     private OpenIDProvider() {
         // This is the OpenID provider server URL
-        opAddress = IdentityUtil.getProperty(IdentityConstants.OPENID_SERVER_URL);
+        opAddress = IdentityUtil.getProperty(IdentityConstants.ServerConfig.OPENID_SERVER_URL);
         // The URL which accepts OpenID Authentication requests, obtained by
         // performing discovery on the the User-Supplied Identifier. This value
         // must be an absolute URL
-
-        // carbon server association store
-        ServerAssociationStore store = IdentityProviderServiceComponent.getAssociationStore();
         manager.setOPEndpointUrl(opAddress);
-        manager.setPrivateAssociations(store);
-        manager.setSharedAssociations(store);
     }
 
-    // Return an instance of the OpenIDProvider
+    /**
+     * @return an instance of the OpenIDProvider
+    */
     public static OpenIDProvider getInstance() {
         return provider;
     }

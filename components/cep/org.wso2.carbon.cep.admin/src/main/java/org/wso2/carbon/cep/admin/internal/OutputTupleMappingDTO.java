@@ -19,41 +19,31 @@ package org.wso2.carbon.cep.admin.internal;
 
 public class OutputTupleMappingDTO {
 
-    private String streamId;
-    private String[] payloadDataProperties;
-    private String[] correlationDataProperties;
-    private String[] metaDataProperties;
+    private OutputTuplePropertyDTO[] payloadDataProperties;
+    private OutputTuplePropertyDTO[] correlationDataProperties;
+    private OutputTuplePropertyDTO[] metaDataProperties;
 
-    public String getStreamId() {
-        return streamId;
-    }
-
-    public void setStreamId(String streamId) {
-        this.streamId = streamId;
-    }
-
-    public String[] getPayloadDataProperties() {
+    public OutputTuplePropertyDTO[] getPayloadDataProperties() {
         return payloadDataProperties;
     }
 
-    public void setPayloadDataProperties(String[] payloadDataProperties) {
+    public void setPayloadDataProperties(OutputTuplePropertyDTO[] payloadDataProperties) {
         this.payloadDataProperties = payloadDataProperties;
     }
 
-    public String[] getCorrelationDataProperties() {
+    public OutputTuplePropertyDTO[] getCorrelationDataProperties() {
         return correlationDataProperties;
     }
 
-    public void setCorrelationDataProperties(String[] correlationDataProperties) {
+    public void setCorrelationDataProperties(OutputTuplePropertyDTO[] correlationDataProperties) {
         this.correlationDataProperties = correlationDataProperties;
     }
 
-    public String[] getMetaDataProperties() {
+    public OutputTuplePropertyDTO[] getMetaDataProperties() {
         return metaDataProperties;
     }
 
-    public void setMetaDataProperties(String[] metaDataProperties) {
+    public void setMetaDataProperties(OutputTuplePropertyDTO[] metaDataProperties) {
         this.metaDataProperties = metaDataProperties;
     }
-
 }

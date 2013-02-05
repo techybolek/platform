@@ -30,7 +30,6 @@ import org.wso2.carbon.dataservices.core.description.resource.ResourceFactory;
 import org.wso2.carbon.dataservices.core.engine.CallableRequest;
 import org.wso2.carbon.dataservices.core.engine.DataService;
 import org.wso2.carbon.dataservices.core.engine.Result;
-import org.wso2.carbon.dataservices.core.internal.DataServicesDSComponent;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.SecurityConstants;
@@ -209,9 +208,6 @@ public class DataServiceFactory {
                     dataService.addOperation(tmpOp);
                 }
             }
-
-            /* register data service for event service notification */
-            DataServicesDSComponent.registerEventBrokerServiceListener(dataService);
 
             return dataService;
         } catch (DataServiceFault e) {

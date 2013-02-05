@@ -31,34 +31,46 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
+import java.rmi.RemoteException;
 
 public class MessageProcessorClient {
 
-    String backendUrl = null;
-    String SessionCookie = null;
-    MessageProcessorAdminServiceStub messageProcessorAdminServiceStub;
     private static final Log log = LogFactory.getLog(MessageProcessorClient.class);
 
-    public MessageProcessorClient(String backendUrl, String sessionCookie) {
-        this.backendUrl = backendUrl;
-        this.SessionCookie = sessionCookie;
+    private MessageProcessorAdminServiceStub messageProcessorAdminServiceStub;
+    private final String serviceName = "MessageProcessorAdminService";
+
+    public MessageProcessorClient(String backEndUrl, String sessionCookie) throws AxisFault {
+        String endPoint = backEndUrl + serviceName;
+        messageProcessorAdminServiceStub = new MessageProcessorAdminServiceStub(endPoint);
+        AuthenticateStub.authenticateStub(sessionCookie, messageProcessorAdminServiceStub);
     }
 
-    private MessageProcessorAdminServiceStub setMessageStoreStubStub() throws AxisFault {
-        final String messageProcessorServiceUrl = backendUrl + "MessageProcessorAdminService";
-        MessageProcessorAdminServiceStub messageProcessor = null;
-        messageProcessor = new MessageProcessorAdminServiceStub(messageProcessorServiceUrl);
-        AuthenticateStub.authenticateStub(SessionCookie, messageProcessor);
-        return messageProcessor;
+    public MessageProcessorClient(String backEndUrl, String userName, String password)
+            throws AxisFault {
+        String endPoint = backEndUrl + serviceName;
+        messageProcessorAdminServiceStub = new MessageProcessorAdminServiceStub(endPoint);
+        AuthenticateStub.authenticateStub(userName, password, messageProcessorAdminServiceStub);
     }
 
-    public void addMessageProcessor(DataHandler dh)
-            throws IOException, XMLStreamException {
-        messageProcessorAdminServiceStub = this.setMessageStoreStubStub();
+
+    public void addMessageProcessor(DataHandler dh) throws IOException, XMLStreamException {
         XMLStreamReader parser =
                 XMLInputFactory.newInstance().createXMLStreamReader(dh.getInputStream());
         StAXOMBuilder builder = new StAXOMBuilder(parser);
         OMElement messageProcessorElem = builder.getDocumentElement();
         messageProcessorAdminServiceStub.addMessageProcessor(messageProcessorElem.toString());
+    }
+
+    public void addMessageProcessor(OMElement messageProcessor) throws RemoteException {
+        messageProcessorAdminServiceStub.addMessageProcessor(messageProcessor.toString());
+    }
+
+    public void deleteMessageProcessor(String messageProcessorName) throws RemoteException {
+        messageProcessorAdminServiceStub.deleteMessageProcessor(messageProcessorName);
+    }
+
+    public String[] getMessageProcessorNames() throws RemoteException {
+        return messageProcessorAdminServiceStub.getMessageProcessorNames();
     }
 }

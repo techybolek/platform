@@ -22,6 +22,7 @@ import org.wso2.carbon.dataservices.core.DataServiceFault;
 import org.wso2.carbon.dataservices.core.sqlparser.analysers.AnalyzerFactory;
 import org.wso2.carbon.dataservices.core.sqlparser.analysers.KeyWordAnalyzer;
 import org.wso2.carbon.dataservices.core.sqlparser.mappers.SelectMapper;
+import org.wso2.carbon.dataservices.sql.driver.parser.Constants;
 
 import java.util.*;
 
@@ -33,7 +34,7 @@ public class SQLParserUtil {
     public static List<String> specialFunctions = new ArrayList<String>();
     public static List<String> stringFunctions = new ArrayList<String>();
     public static List<String> aggregateFunctions = new ArrayList<String>();
-    public static List<Character> controlCharacters = new ArrayList<Character>();
+    public static List<String> controlCharacters = new ArrayList<String>();
 
     static {
         keyWords.add(LexicalConstants.COUNT);
@@ -99,8 +100,10 @@ public class SQLParserUtil {
         operators.add(LexicalConstants.GREATER_THAN);
         operators.add(LexicalConstants.DIVISION);
 
+        delimiters.add(LexicalConstants.EQUAL);
+        delimiters.add(LexicalConstants.MINUS);
+        delimiters.add(LexicalConstants.PLUS);
         delimiters.add(LexicalConstants.COMMA);
-        delimiters.add(LexicalConstants.LESS_THAN);
         delimiters.add(LexicalConstants.SINGLE_QUOTATION);
         delimiters.add(LexicalConstants.SEMI_COLON);
         delimiters.add(LexicalConstants.COLON);
@@ -111,6 +114,8 @@ public class SQLParserUtil {
         delimiters.add(LexicalConstants.RIGHT_BRACKET);
         delimiters.add(LexicalConstants.HYPHEN);
         delimiters.add(LexicalConstants.WHITE_SPACE);
+        delimiters.add(LexicalConstants.RETURN);
+        delimiters.add(LexicalConstants.NEW_LINE);
 
         aggregateFunctions.add(LexicalConstants.AVG);
         aggregateFunctions.add(LexicalConstants.MAX);
@@ -132,8 +137,9 @@ public class SQLParserUtil {
         specialFunctions.add(LexicalConstants.NULL);
         specialFunctions.add(LexicalConstants.IN);
 
-        controlCharacters.add('\n');
-        controlCharacters.add('\r');
+        controlCharacters.add(LexicalConstants.NEW_LINE);
+        controlCharacters.add(LexicalConstants.RETURN);
+        controlCharacters.add(LexicalConstants.WHITE_SPACE);
     }
 
     public static List<String> getKeyWords() {
@@ -147,11 +153,7 @@ public class SQLParserUtil {
     public static List<String> getDelimiters() {
         return delimiters;
     }
-
-    public static List<String> getSpecialFunctions() {
-        return specialFunctions;
-    }
-
+    
     public static boolean isAggregateFunction(String token) {
         return aggregateFunctions.contains(token);
     }
@@ -168,7 +170,7 @@ public class SQLParserUtil {
      * @return A Queue of String objects.
      */
     public static Queue<String> getTokens(String sql) {
-
+        boolean isQuoted = false;
         char[] inputCharacters;
         StringBuilder token = new StringBuilder();
         Queue<String> tokenQueue = new LinkedList<String>();
@@ -177,34 +179,69 @@ public class SQLParserUtil {
         sql.getChars(0, sql.length(), inputCharacters, 0);
 
         for (char c : inputCharacters) {
-
-            if (!delimiters.contains(Character.valueOf(c).toString()) &&
-                    !operators.contains(Character.valueOf(c).toString()) &&
-                    !controlCharacters.contains(c)) {
-                token.append(c);
-            } else {
+            String tmp = Character.valueOf(c).toString();
+            if (Constants.SINGLE_QUOTATION.equals(tmp)) {
+                isQuoted = !isQuoted;
                 if (token.length() > 0) {
                     tokenQueue.add(token.toString());
                 }
-                if (!(Character.valueOf(c).toString().equals(" "))) {
-                    tokenQueue.add(new StringBuilder().append(c).toString());
-                }
+                tokenQueue.add(new StringBuilder().append(c).toString());
                 token = new StringBuilder();
+                continue;
+            }
+            if (isQuoted) {
+                token.append(c);
+            } else {
+                if (!SQLParserUtil.isDelimiter(tmp)) {
+                    if (!Constants.WHITE_SPACE.equals(tmp)) {
+                        token.append(c);
+                    } else if (Constants.WHITE_SPACE.equals(tmp)) {
+                        if (token.length() > 0) {
+                            tokenQueue.add(token.toString());
+                            token.setLength(0);
+                        }
+                    }
+                } else {
+                    if (token.length() > 0) {
+                        tokenQueue.add(token.toString());
+                        token.setLength(0);
+                    }
+                    if (SQLParserUtil.isControlCharacter(tmp)) {
+                        continue;
+                    }
+                    tokenQueue.add(new StringBuilder().append(c).toString());
+                    token.setLength(0);
+                }
             }
         }
-
-        //This condition is checked in order to avoid enqueing null tokens into the token queue.
         if (token.length() > 0) {
             tokenQueue.add(token.toString());
+            token.setLength(0);
         }
         return tokenQueue;
+    }
+
+    public static boolean isDelimiter(String token) {
+        return SQLParserUtil.getDelimiters().contains(token);
+    }
+
+    public static boolean isOperator(String token) {
+        return SQLParserUtil.getOperators().contains(token);
+    }
+
+    public static List<String> getControlCharacters() {
+        return controlCharacters;
+    }
+
+    public static boolean isControlCharacter(String token) {
+        return SQLParserUtil.getControlCharacters().contains(token);
     }
 
     /**
      * This method returns the list of queried columns of a particular input sql string.
      *
-     * @param sql               Input SQL string
-     * @return                  List if columns expected as the output
+     * @param sql Input SQL string
+     * @return List if columns expected as the output
      * @throws DataServiceFault If any error occurs while parsing the SQL query
      */
     public static List<String> extractOutputColumns(String sql) throws DataServiceFault {
@@ -231,8 +268,8 @@ public class SQLParserUtil {
     /**
      * Extracts out the Input mappings names specified in the query
      *
-     * @param sql   Input SQL string
-     * @return      List of input mappings specified in the query
+     * @param sql Input SQL string
+     * @return List of input mappings specified in the query
      */
     public static List<String> extractInputMappingNames(String sql) {
         int paramCount = 0;

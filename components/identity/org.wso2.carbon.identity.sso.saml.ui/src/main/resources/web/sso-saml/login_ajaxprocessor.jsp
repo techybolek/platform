@@ -100,8 +100,8 @@
                                                    value="<%= request.getAttribute(SAMLSSOProviderConstants.SUBJECT) %>"/>
                                             <input type="hidden" name="<%= SAMLSSOProviderConstants.RP_SESSION_ID %>"
                                                    value="<%= request.getAttribute(SAMLSSOProviderConstants.RP_SESSION_ID) %>"/>
-                                            <input type="hidden" name="<%= SAMLSSOProviderConstants.ASSERTION_STR %>"
-                                                   value="<%= request.getAttribute(SAMLSSOProviderConstants.ASSERTION_STR) %>"/>
+                                            <input type="hidden" name="<%= SAMLSSOProviderConstants.REQ_MSG_STR %>"
+                                                   value="<%= request.getAttribute(SAMLSSOProviderConstants.REQ_MSG_STR) %>"/>
                                             <input type="hidden" name="<%= SAMLSSOProviderConstants.RELAY_STATE %>"
                                                    value="<%= request.getAttribute(SAMLSSOProviderConstants.RELAY_STATE) %>"/>
                                         </td>

@@ -77,6 +77,11 @@
     complexPath = (complexPath == null) ? "" : complexPath;
     selectedQuery = (selectedQuery == null) ? "" : selectedQuery;
     datasourceType = (datasourceType == null) ? "column" : datasourceType;
+    boolean optional = false;
+    String enableOptional =  request.getParameter("optional");
+    if (enableOptional != null) {
+        optional = Boolean.parseBoolean(enableOptional);
+    }
     
     if (complexElementNamespace != null && complexElementNamespace.equals("null")) {
         complexElementNamespace = "";
@@ -640,6 +645,23 @@
                                 <% } %>
                             </select></td>
                     </tr>
+                    <tr>
+                        <td>
+                            <label for="optional"><fmt:message key="dataservice.optional"/></label>
+                            <% if(optional) {%>
+                                <input type="checkbox" id="optional" name="optional"
+                                       checked="checked" value=<%=optional%>/>
+                            <% } else {%>
+                                <input type="checkbox" id="optional" name="optional"
+                                       value=<%=optional%>/>
+                            <% } %>
+
+                        </td>
+
+                        <td>
+                        </td>
+
+                    </tr>
                 </table>
         </tr>
         </td>
@@ -927,7 +949,7 @@
         <a class="icon-link"
            style="background-image:url(../admin/images/edit.gif);"
            href="addOutputMapping.jsp?queryId=<%=queryId%>&name=<%=element.getName()%>&datasourceType=<%=element.getDataSourceType()%>&datasourceValue=<%=element.getDataSourceValue()%>&txtDataServiceElementNamespace=<%=namespace%>&requiredRoles=<%=roles%>&xsdType=<%=xType%>&exportName=<%=xportName%>&exportType=<%=xportType%>
-           &edit=<%=element.getName()%>&complexPath=<%=complexPath%>&mappingType=element&flag=<%=flag%>&arrayName=<%=(element.getArrayName()) == null ? "" : element.getArrayName()%>"><fmt:message
+           &edit=<%=element.getName()%>&complexPath=<%=complexPath%>&mappingType=element&optional=<%=optional%>&flag=<%=flag%>&arrayName=<%=(element.getArrayName()) == null ? "" : element.getArrayName()%>"><fmt:message
                 key="edit"/></a>
         <a class="icon-link"
            style="background-image:url(../admin/images/delete.gif);"
@@ -941,7 +963,7 @@
         <a class="icon-link"
            style="background-image:url(../admin/images/edit.gif);"
            href="addOutputMapping.jsp?queryId=<%=queryId%>&name=<%=element.getName()%>&datasourceType=<%=element.getDataSourceType()%>&txtDataServiceElementNamespace=<%=namespace%>&datasourceValue=<%=element.getDataSourceValue()%>&requiredRoles=<%=roles%>&xsdType=<%=xType%>&exportName=<%=xportName%>&exportType=<%=xportType%>
-           &edit=<%=element.getName()%>&mappingType=element&flag=<%=flag%>&arrayName=<%=(element.getArrayName()) == null ? "" : element.getArrayName()%>"><fmt:message
+           &edit=<%=element.getName()%>&mappingType=element&optional=<%=optional%>&flag=<%=flag%>&arrayName=<%=(element.getArrayName()) == null ? "" : element.getArrayName()%>"><fmt:message
                 key="edit"/></a>
         <a class="icon-link"
            style="background-image:url(../admin/images/delete.gif);"
@@ -1005,7 +1027,7 @@
         <a class="icon-link"
            style="background-image:url(../admin/images/edit.gif);"
            href="addOutputMapping.jsp?queryId=<%=queryId%>&name=<%=attribute.getName()%>&datasourceType=<%=attribute.getDataSourceType()%>&datasourceValue=<%=attribute.getDataSourceValue()%>&requiredRoles=<%=roles%>&xsdType=<%=xType%>&exportName=<%=xportName%>&exportType=<%=xportType%>
-           &edit=<%=attribute.getName()%>&complexPath=<%=complexPath%>&mappingType=attribute&flag=<%=flag%>&arrayName=<%=attribute.getArrayName()%>"><fmt:message
+           &edit=<%=attribute.getName()%>&complexPath=<%=complexPath%>&mappingType=attribute&optional=<%=optional%>&flag=<%=flag%>&arrayName=<%=attribute.getArrayName()%>"><fmt:message
                 key="edit"/></a>
         <a class="icon-link"
            style="background-image:url(../admin/images/delete.gif);"
@@ -1018,7 +1040,7 @@
         <a class="icon-link"
            style="background-image:url(../admin/images/edit.gif);"
            href="addOutputMapping.jsp?queryId=<%=queryId%>&name=<%=attribute.getName()%>&datasourceType=<%=attribute.getDataSourceType()%>&datasourceValue=<%=attribute.getDataSourceValue()%>&edit=<%=attribute.getName()%>&requiredRoles=<%=roles%>
-           &xsdType=<%=xType%>&exportName=<%=xportName%>&exportType=<%=xportType%>&mappingType=attribute&flag=<%=flag%>&arrayName=<%=attribute.getArrayName()%>"><fmt:message
+           &xsdType=<%=xType%>&exportName=<%=xportName%>&exportType=<%=xportType%>&mappingType=attribute&optional=<%=optional%>&flag=<%=flag%>&arrayName=<%=attribute.getArrayName()%>"><fmt:message
                 key="edit"/></a>
         <a class="icon-link"
            style="background-image:url(../admin/images/delete.gif);"

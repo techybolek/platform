@@ -84,7 +84,9 @@
     errorString = e.getMessage();
 %>
 <script type="text/javascript">
-    CARBON.showErrorDialog(<%=e.getMessage()%>);
+    CARBON.showErrorDialog(<%=e.getMessage()%>, function() {
+        location.href = "../reporting_custom/select-report.jsp";
+    });
 </script>
 <%
     }
@@ -322,79 +324,80 @@ function checkValidity() {
 
 <form id="chartreport" name="chartreport" action="" method="POST">
 <table class="styledLeft">
-    <thead>
-    <tr>
-        <th><span style="float: left; position: relative; margin-top: 2px;">
+<thead>
+<tr>
+    <th><span style="float: left; position: relative; margin-top: 2px;">
                             <fmt:message key="table.report.information"/></span>
-        </th>
-    </tr>
-    </thead>
-    <tbody>
+    </th>
+</tr>
+</thead>
+<tbody>
 
 
-    <tr>
-        <td>
-            <table class="normal-nopadding">
-                <tbody id="contentTableBody">
+<tr>
+    <td>
+        <table class="normal-nopadding">
+            <tbody id="contentTableBody">
 
-                <tr>
-                    <td width="180px"><fmt:message key="report.name"/> <span
-                            class="required">*</span></td>
-                    <%
-                        String tempReportName = request.getParameter("reportName");
-                        if (tempReportName == null) {
-                            tempReportName = "";
+            <tr>
+                <td width="180px"><fmt:message key="report.name"/> <span
+                        class="required">*</span></td>
+                <%
+                    String tempReportName = request.getParameter("reportName");
+                    if (tempReportName == null) {
+                        tempReportName = "";
+                    }
+                %>
+                <td><input name="reportName"
+                           id="reportName" value="<%=tempReportName%>" onkeyup="nextButtonValidate()"
+                           onmousemove="nextButtonValidate()" onfocus="nextButtonValidate()"
+                           onblur="nextButtonValidate()"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="leftCol-small"><fmt:message key="datasource.name"/><span
+                        class="required"> *</span>
+                </td>
+                <td>
+                    <% if (datasources != null && datasources.length > 0) {
+                        dsName = request.getParameter("selectedDsName");
+                        if (dsName == null || dsName.equals("")) {
+                            dsName = datasources[0];
                         }
                     %>
-                    <td><input name="reportName"
-                               id="reportName" value="<%=tempReportName%>" onkeyup="nextButtonValidate()"
-                               onmousemove="nextButtonValidate()" onfocus="nextButtonValidate()"
-                               onblur="nextButtonValidate()"/>
-                    </td>
-                </tr>
+                    </thead>
+                    <select id="datasource" name="datasource" onchange="dsChanged();">
+                        <%
+                            for (int i = 0; i < datasources.length; i++) {
+                                String datasource = datasources[i];
 
-                <tr>
-                    <td class="leftCol-small"><fmt:message key="datasource.name"/><span
-                            class="required"> *</span>
-                    </td>
-                    <td>
-                        <% if (datasources != null && datasources.length > 0) {
-                            dsName = request.getParameter("selectedDsName");
-                            if (dsName == null || dsName.equals("")) {
-                                dsName = datasources[0];
-                            }
                         %>
-                        </thead>
-                        <select id="datasource" name="datasource" onchange="dsChanged();">
-                            <%
-                                for (int i = 0; i < datasources.length; i++) {
-                                    String datasource = datasources[i];
+                        <option value="<%=datasource%>" <%=datasource.equalsIgnoreCase(dsName) ? "selected=\"selected\"" : ""%>>
+                            <%=datasource%>
+                        </option>
+                        <% }%>
+                    </select>
 
-                            %>
-                            <option value="<%=datasource%>" <%=datasource.equalsIgnoreCase(dsName) ? "selected=\"selected\"" : ""%>>
-                                <%=datasource%>
-                            </option>
-                            <% }%>
-                        </select>
+                    <% } else {
+                        errorString = "No datasource found";
+                    %>
+                    <script type="text/javascript">
+                        CARBON.showErrorDialog('<%=errorString%>', function() {
+                            location.href = "../reporting_custom/select-report.jsp";
+                        });
+                    </script>
+                    <% } %>
+                </td>
+            </tr>
 
-                        <% } else {
-                            errorString = "No datasource found";
-                        %>
-                        <script type="text/javascript">
-                            CARBON.showErrorDialog('<%=errorString%>', function() {
-                                location.href = "../reporting_custom/select-report.jsp";
-                            });
-                        </script>
-                        <% } %>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td class="leftCol-small"><fmt:message key="table.name"/><span
-                            class="required"> *</span>
-                    </td>
-                    <td>
-                        <% String[] tableNames = null;
+            <tr>
+                <td class="leftCol-small"><fmt:message key="table.name"/><span
+                        class="required"> *</span>
+                </td>
+                <td>
+                    <% String[] tableNames = null;
+                        if (null != dsName && !dsName.isEmpty()) {
                             try {
                                 tableNames = client.getTableNames(dsName);
                             } catch (AxisFault e) {
@@ -402,46 +405,54 @@ function checkValidity() {
                             }
                             if (tableNames != null && tableNames.length > 0) { %>
 
-                        <select id="tableName" name="tableName" onchange="javascript:tableChanged();">
-                            <%
-                                tableName = request.getParameter("selectedTableName");
-                                if (tableName == null || tableName.equals("")) {
-                                    tableName = tableNames[0];
-                                }
-                                for (int i = 0; i < tableNames.length; i++) {
-                                    String aTableName = tableNames[i];
+                    <select id="tableName" name="tableName" onchange="javascript:tableChanged();">
+                        <%
+                            tableName = request.getParameter("selectedTableName");
+                            if (tableName == null || tableName.equals("")) {
+                                tableName = tableNames[0];
+                            }
+                            for (int i = 0; i < tableNames.length; i++) {
+                                String aTableName = tableNames[i];
 
-                            %>
-                            <option value="<%=aTableName%>" <%= aTableName.equalsIgnoreCase(tableName) ? "selected=\"selected\"" : ""%>>
-                                <%=aTableName%>
-                            </option>
-                            <% }%>
-                        </select>
-
-                        <% } else {
-                            errorString = "No Tables found in datasource " + dsName;
                         %>
-                        <font color="#8b0000"> <i>No Tables</i></font>
-                        <script type="text/javascript">
-                            CARBON.showErrorDialog('<%=errorString%>');
-                        </script>
-                        <% } %>
+                        <option value="<%=aTableName%>" <%= aTableName.equalsIgnoreCase(tableName) ? "selected=\"selected\"" : ""%>>
+                            <%=aTableName%>
+                        </option>
+                        <% }%>
+                    </select>
 
-                    </td>
-                    <% if (repType != null && !repType.equalsIgnoreCase("pie_chart_type_report") && (datasources != null && datasources.length > 0)
-                            && (tableNames != null && tableNames.length > 0)) { %>
-                    <td><a style="background-image: url(../admin/images/add.gif);"
-                           class="icon-link spacer-bot" onclick="addSeries()"><fmt:message
-                            key="add.series"/></a></td>
-                    <%
-                        }
+                    <% } else {
+                        errorString = "No Tables found in datasource " + dsName;
                     %>
-                </tr>
-                <% String[] fieldNames = null;
-                    try {
-                        fieldNames = client.getFieldNames(dsName, tableName); %>
-                <script>
-                    var fields = new Array(<%
+                    <font color="#8b0000"> <i>No Tables</i></font>
+                    <script type="text/javascript">
+                        CARBON.showErrorDialog('<%=errorString%>');
+                    </script>
+                    <% }
+                    }
+                    %>
+
+                </td>
+                <% if (repType != null && !repType.equalsIgnoreCase("pie_chart_type_report") && (datasources != null && datasources.length > 0)
+                        && (tableNames != null && tableNames.length > 0)) { %>
+                <td><a style="background-image: url(../admin/images/add.gif);"
+                       class="icon-link spacer-bot" onclick="addSeries()"><fmt:message
+                        key="add.series"/></a></td>
+                <%
+                    }
+                %>
+            </tr>
+            <% String[] fieldNames = null;
+            %>
+            <script>
+                var fields = new Array();
+            </script>
+
+            <% if ((null != dsName && !dsName.isEmpty()) && (null != tableName && !tableName.isEmpty())) {
+                try {
+                    fieldNames = client.getFieldNames(dsName, tableName); %>
+            <script>
+                fields = new Array(<%
                                 for(int i = 0; i < fieldNames.length; i++) {
                                    out.print("\""+fieldNames[i]+"\"");
                                  if(i+1 < fieldNames.length) {
@@ -449,67 +460,71 @@ function checkValidity() {
                                 }
                                 }
                             %>);
-                </script>
-                <% } catch (AxisFault e) {
-                    errorString = e.getMessage();
-                %>
-                <script type="text/javascript">
-                    CARBON.showErrorDialog('<%=errorString%>');
-                </script>
-                <%
+            </script>
+            <% } catch (AxisFault e) {
+                errorString = e.getMessage();
+            %>
+            <script type="text/javascript">
+                CARBON.showErrorDialog('<%=errorString%>', function() {
+                    location.href = "../reporting_custom/select-report.jsp";
+                });
+            </script>
+            <%
                     }
-                %>
+                }
 
-                    <%--<tr>--%>
-                    <%--<td colspan="3" class="middle-header"><fmt:message key="series"/> - 1</td>--%>
-                    <%--</tr>--%>
-                    <%--<tr>--%>
-                    <%--<td><fmt:message key="series.name"/></td>--%>
-                    <%--<td><input name="series_1_name" id="series_1_name"></td>--%>
-                    <%--</tr>--%>
+            %>
 
-                    <%--<tr>--%>
-                    <%--<td class="leftCol-small"><fmt:message key="x.axis"/><span--%>
-                    <%--class="required"> *</span>--%>
-                    <%--</td>--%>
-                    <%--<td>--%>
-                    <%--<%--%>
-                    <%--String comboBox = getFieldsComboBox(fieldNames, "1", "xData");--%>
-                    <%--%>--%>
-                    <%--<%=comboBox%>--%>
-                    <%--</td>--%>
+                <%--<tr>--%>
+                <%--<td colspan="3" class="middle-header"><fmt:message key="series"/> - 1</td>--%>
+                <%--</tr>--%>
+                <%--<tr>--%>
+                <%--<td><fmt:message key="series.name"/></td>--%>
+                <%--<td><input name="series_1_name" id="series_1_name"></td>--%>
+                <%--</tr>--%>
 
-                    <%--</tr>--%>
+                <%--<tr>--%>
+                <%--<td class="leftCol-small"><fmt:message key="x.axis"/><span--%>
+                <%--class="required"> *</span>--%>
+                <%--</td>--%>
+                <%--<td>--%>
+                <%--<%--%>
+                <%--String comboBox = getFieldsComboBox(fieldNames, "1", "xData");--%>
+                <%--%>--%>
+                <%--<%=comboBox%>--%>
+                <%--</td>--%>
 
-                    <%--<tr>--%>
-                    <%--<td class="leftCol-small"><fmt:message key="y.axis"/><span--%>
-                    <%--class="required"> *</span>--%>
-                    <%--</td>--%>
-                    <%--<td>--%>
-                    <%--<%--%>
-                    <%--comboBox = getFieldsComboBox(fieldNames, "1", "yData");--%>
-                    <%--%>--%>
-                    <%--<%=comboBox%>--%>
-                    <%--</td>--%>
+                <%--</tr>--%>
 
-                    <%--</tr>--%>
+                <%--<tr>--%>
+                <%--<td class="leftCol-small"><fmt:message key="y.axis"/><span--%>
+                <%--class="required"> *</span>--%>
+                <%--</td>--%>
+                <%--<td>--%>
+                <%--<%--%>
+                <%--comboBox = getFieldsComboBox(fieldNames, "1", "yData");--%>
+                <%--%>--%>
+                <%--<%=comboBox%>--%>
+                <%--</td>--%>
+
+                <%--</tr>--%>
 
 
-                    <%--<input id="selectedFields" name="selectedFields" type="hidden"/>--%>
-                <%
+                <%--<input id="selectedFields" name="selectedFields" type="hidden"/>--%>
+            <%
 
-                %>
-                <input id="selectedDsName" name="selectedDsName" type="hidden"/>
-                <input id="selectedTableName" name="selectedTableName" type="hidden"/>
-                <input id="reportType" name="reportType" type="hidden" value="<%=repType%>"/>
-                <input id="noSeries" name="noSeries" type="hidden"/>
-                </tbody>
-            </table>
+            %>
+            <input id="selectedDsName" name="selectedDsName" type="hidden"/>
+            <input id="selectedTableName" name="selectedTableName" type="hidden"/>
+            <input id="reportType" name="reportType" type="hidden" value="<%=repType%>"/>
+            <input id="noSeries" name="noSeries" type="hidden"/>
+            </tbody>
+        </table>
 
-        </td>
-    </tr>
+    </td>
+</tr>
 
-    </tbody>
+</tbody>
 </table>
 
 
@@ -533,7 +548,7 @@ function checkValidity() {
 </div>
 </div>
 <script type="text/javascript">
-     addSeries();
+    addSeries();
     nextButtonValidate();
 </script>
 

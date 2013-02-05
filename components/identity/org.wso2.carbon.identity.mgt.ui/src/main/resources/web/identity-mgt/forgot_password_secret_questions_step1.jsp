@@ -30,13 +30,11 @@
         request="<%=request%>"/>
 
 <fmt:bundle basename="org.wso2.carbon.identity.mgt.ui.i18n.Resources">
-
-    <link href="css/forgot-password.css" rel="stylesheet" type="text/css" media="all"/>
-
     <%
         String userName = request.getParameter("userName");
         String userKey = request.getParameter("userKey");
-        UserChallengesDTO currentChallenge;
+        UserChallengesDTO currentChallenge = null;
+        String action = "forgot_password_secret_questions_step2.jsp";
         try {
             String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(),
                     session);
@@ -48,25 +46,20 @@
             UserChallengesDTO[] questionDTOs = client.getChallengeQuestionsOfUser(userName, userKey);
             if(questionDTOs != null && questionDTOs.length > 0) {
                 currentChallenge = questionDTOs[0];
-            }  else {
-%>
-    <div>
-        No User Challenges are defined for this user.
-    </div>
-<%              return;
             }
 
-            session.setAttribute(IdentityManagementClient.USER_CHALLENGE_QUESTION, questionDTOs[1]);
+            if(questionDTOs != null && questionDTOs.length > 1 && questionDTOs[1] != null){
+                session.setAttribute(IdentityManagementClient.USER_CHALLENGE_QUESTION, questionDTOs[1]);
+            } else {
+                action = "forgot_password_secret_questions_final.jsp";
+            }
 
         } catch (Exception e) {
-            CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR,
-                request);
     %>
             <script type="text/javascript">
-                location.href = "index.jsp";
+                location.href = "fail _password_reset.jsp";
             </script>
     <%
-            return;
         }
     %>
 
@@ -77,17 +70,16 @@
     </script>
 
     <div id="middle">
-        <h2>
-            We need secret information from you to recover your password
-        </h2>
+        <h2><fmt:message key="secret.information"/></h2>
     </div>
-
-
-    <form action="forgot_password_secret_questions_step2.jsp"                                                            id="userChallenge"  method="post">
+<%
+    if(currentChallenge != null){
+%>
+    <form action="<%=action%>" id="userChallenge"  method="post">
     <table>
         <tbody>
         <tr>
-            <td>Question :</td>
+            <td><fmt:message key="secret.question"/></td>
             <td><%=currentChallenge.getQuestion()%></td>
         </tr>
         <tr>
@@ -97,7 +89,7 @@
             </td>
         </tr>
         <tr>
-            <td>Answer  :</td>
+            <td><fmt:message key="secret.answer"/></td>
             <td>
                 <input type="text" tabindex="2" name="answer" id="answer" />
             </td>
@@ -117,5 +109,15 @@
         </tbody>
     </table>
     </form>
+
+<%
+    } else {
+%>
+        <script type="text/javascript">
+            location.href = "fail _password_reset.jsp";
+        </script>
+<%
+    }    
+%>
 </fmt:bundle>
 

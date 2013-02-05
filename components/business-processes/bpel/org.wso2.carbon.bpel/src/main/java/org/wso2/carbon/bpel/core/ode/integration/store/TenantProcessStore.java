@@ -105,5 +105,11 @@ public interface TenantProcessStore {
      * @param name BAM server profile name
      * @return BAM server profile
      */
-    public BAMServerProfile getBAMServerProfile(String name);
+    BAMServerProfile getBAMServerProfile(String name);
+
+    Object getDataPublisher(String processName);
+
+    void addDataPublisher(String processName, Object dataPublisher);
+
+    public Map getDataPublisherMap();
 }

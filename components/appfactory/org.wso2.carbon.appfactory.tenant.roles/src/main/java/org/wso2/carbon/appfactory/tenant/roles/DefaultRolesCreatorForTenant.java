@@ -48,12 +48,12 @@ public class DefaultRolesCreatorForTenant implements TenantMgtListener {
         roleBeanList = new ArrayList<RoleBean>();
         try {
             AppFactoryConfiguration configuration = Util.getConfiguration();
-            String[] roles = configuration.getProperties("DefaultRoles.Role");
+            String[] roles = configuration.getProperties("ApplicationRoles.Role");
             String adminUser = Util.getRealmService().getBootstrapRealm().
                     getRealmConfiguration().getAdminUserName();
             for (String role : roles) {
                 String resourceIdString =
-                        configuration.getFirstProperty("DefaultRoles.Role." + role + ".Permission");
+                        configuration.getFirstProperty("ApplicationRoles.Role." + role + ".Permission");
                 String[] resourceIds = resourceIdString.split(",");
                 RoleBean roleBean = new RoleBean(role);
                 roleBean.addUser(adminUser);

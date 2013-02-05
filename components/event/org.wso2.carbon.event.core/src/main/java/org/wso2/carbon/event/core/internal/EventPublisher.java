@@ -16,10 +16,10 @@
 
 package org.wso2.carbon.event.core.internal;
 
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.core.Message;
 import org.wso2.carbon.event.core.exception.EventBrokerException;
 import org.wso2.carbon.event.core.delivery.DeliveryManager;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -50,14 +50,14 @@ public class EventPublisher implements Runnable{
 
     public void run() {
         try {
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantID);
-            SuperTenantCarbonContext.getCurrentContext().getTenantDomain(true);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantID);
+            PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
             this.delivaryManager.publish(this.message, this.topicName, this.deliveryMode);
         } catch (EventBrokerException e) {
             log.error("Can not publish the message ", e);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 }

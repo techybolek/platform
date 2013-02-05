@@ -105,7 +105,7 @@
                       </td>
                       <td>
                           <% if (searchLC) { %>
-                          <a href="#" onclick="editLC('<%=next%>', true)" class="icon-link" style="background-image:url(../admin/images/edit.gif);"><fmt:message key="view"/></a>
+                          <a href="#" onclick="editLC('<%=next%>', true)" class="icon-link" style="background-image:url(../admin/images/edit.gif);"><fmt:message key="edit"/></a>
                           <a href="#" onclick="findUsage('<%=next%>')" class="icon-link" style="background-image:url(../search/images/search-resources.gif);"><fmt:message key="find.usage"/></a>
                           <% } else { %>
                           <a href="#" onclick="editLC('<%=next%>')" class="icon-link" style="background-image:url(../admin/images/edit.gif);"><fmt:message key="edit"/></a>
@@ -131,7 +131,7 @@
           </div>
           <% if (searchFound) { %>
           <div style="height:25px;">
-              <a class="icon-link" style="background-image: url(../search/images/search-resources.gif);" href="../search/advancedSearch.jsp?region=region3&item=registry_search_menu&PropertyName=registry.LC.name"><fmt:message key="search.resources.with.lc"/></a>
+              <a class="icon-link" style="background-image: url(../search/images/search-resources.gif);" href="../search/advancedSearch.jsp?region=region3&item=registry_search_menu&propertyName=registry.LC.name"><fmt:message key="search.resources.with.lc"/></a>
           </div>
           <% } %>
       </div>

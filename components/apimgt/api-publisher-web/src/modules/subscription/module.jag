@@ -9,6 +9,12 @@ jagg.module("subscription", {
     },
     getSubscribedAPIs:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/subscription.jag").getSubscribedAPIs.apply(this, arguments);
+    },
+    revokeAccessToken:function () {
+        return jagg.require(jagg.getModulesDir() + "subscription/revokeSubscription.jag").revokeAccessToken.apply(this, arguments);
+    },
+    getAccessTokenData:function () {
+        return jagg.require(jagg.getModulesDir() + "subscription/token.jag").getAccessTokenData.apply(this, arguments);
     }
 
 });

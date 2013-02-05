@@ -15,12 +15,12 @@
  */
 package org.wso2.carbon.dataservices.core.test.sql;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.axiom.om.OMElement;
 import org.wso2.carbon.dataservices.core.test.DataServiceBaseTestCase;
 import org.wso2.carbon.dataservices.core.test.util.TestUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Class to represent advanced stored procedure functionalities, i.e. IN/OUT parameters,
@@ -92,5 +92,27 @@ public class AbstractAdvancedStoredProcServiceTest extends DataServiceBaseTestCa
 			fail(e.getMessage());
 		}
 	}
+
+    /**
+     * Test with oracle Ref-Cursors. This test used to verify the "ORA-01000: maximum open cursors exceeded" issue.
+     */
+    protected void storedProcWithRefCursors() {
+        TestUtils.showMessage(this.epr + " - storedProcWithRefCursors");
+        try {
+			Map<String, String> params = new HashMap<String, String>();
+			params.put("id", "480");
+            for (int i = 0; i <= 1000; i++) {
+                OMElement result = TestUtils.callOperation(this.epr,
+                        "stored_procedure_with_ref_cursors_op", params);
+                String customerFirstName = TestUtils.getFirstValue(result,
+                        "/Customers/Customer/contactFirstName", TestUtils.DEFAULT_DS_WS_NAMESPACE);
+                assertTrue(customerFirstName.length() > 0);
+            }
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+
+    }
 	
 }

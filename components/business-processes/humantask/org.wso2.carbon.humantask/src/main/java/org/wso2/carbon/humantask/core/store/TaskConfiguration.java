@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,14 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.wso2.carbon.bpel.common.config.EndpointConfiguration;
-import org.wso2.carbon.humantask.*;
+import org.wso2.carbon.humantask.HumanInteractionsDocument;
+import org.wso2.carbon.humantask.TDeadline;
+import org.wso2.carbon.humantask.TDeadlines;
+import org.wso2.carbon.humantask.TPresentationElements;
+import org.wso2.carbon.humantask.TPriorityExpr;
+import org.wso2.carbon.humantask.TTask;
 import org.wso2.carbon.humantask.core.CallBackService;
+import org.wso2.carbon.humantask.core.dao.TaskPackageStatus;
 import org.wso2.carbon.humantask.core.deployment.HumanTaskDeploymentException;
 import org.wso2.carbon.humantask.core.deployment.config.TCallback;
 import org.wso2.carbon.humantask.core.deployment.config.THTDeploymentConfig;
@@ -56,12 +62,6 @@ public class TaskConfiguration extends HumanTaskBaseConfiguration {
     // Whether both interfaces(task interface ans callback interface) in one WSDL
     private boolean useOneWSDL = false;
 
-    // Whether this task definition is a sub task of a another task
-//    private boolean subTask;
-
-    // TODO: Do we want to keep a reference to child tasks
-//    private TaskConfiguration parent;
-
     private CallBackService callBackService;
 
     public TaskConfiguration(TTask task,
@@ -72,37 +72,55 @@ public class TaskConfiguration extends HumanTaskBaseConfiguration {
                              String humanTaskArtifactName,
                              AxisConfiguration tenatAxisConf,
                              String packageName,
-                             File humanTaskDefinitionFile) throws HumanTaskDeploymentException {
+                             File humanTaskDefinitionFile) {
         super(humanInteractionsDocument, targetNamespace, humanTaskArtifactName, tenatAxisConf,
-                true, packageName, humanTaskDefinitionFile);
+              true, packageName, humanTaskDefinitionFile);
 
         this.task = task;
         this.taskDeploymentConfiguration = taskDeploymentConfiguration;
 
-        Definition taskWSDL = findWSDLDefinition(wsdls, getPortType(), getOperation());
-        if (taskWSDL == null) {
-            throw new NullPointerException("Cannot find WSDL definition for task: " + task.getName());
+        try {
+            Definition taskWSDL = findWSDLDefinition(wsdls, getPortType(), getOperation());
+            if (taskWSDL == null) {
+                throw new HumanTaskDeploymentException("Cannot find WSDL definition for task: " + task.getName());
+            }
+            setWSDL(taskWSDL);
+
+            HumanTaskNamespaceContext nsContext = new HumanTaskNamespaceContext();
+            populateNamespace(task.getDomNode().getNodeType() == Node.ELEMENT_NODE ?
+                              (Element) task.getDomNode() : null, nsContext);
+            setNamespaceContext(nsContext);
+
+            PortType portType = getWSDL().getPortType(getResponsePortType());
+            if (portType != null && portType.getOperation(getResponseOperation(), null, null) != null) {
+                useOneWSDL = true;
+            }
+
+            if (!useOneWSDL) {
+                responseWSDL = findWSDLDefinition(wsdls, getResponsePortType(), getResponseOperation());
+            }
+
+            initEndpointConfigs();
+
+        } catch (HumanTaskDeploymentException depEx) {
+            this.setPackageStatus(TaskPackageStatus.INACTIVE);
+            this.setErroneous(true);
+            this.setDeploymentError(depEx.getMessage());
+            log.error(depEx);
         }
-        setWSDL(taskWSDL);
-
-        HumanTaskNamespaceContext nsContext = new HumanTaskNamespaceContext();
-        populateNamespace(task.getDomNode().getNodeType() == Node.ELEMENT_NODE ?
-                (Element) task.getDomNode() : null, nsContext);
-        setNamespaceContext(nsContext);
-
-        PortType portType = getWSDL().getPortType(getResponsePortType());
-        if (portType != null && portType.getOperation(getResponseOperation(), null, null) != null) {
-            useOneWSDL = true;
-        }
-
-        if (!useOneWSDL) {
-            responseWSDL = findWSDLDefinition(wsdls, getResponsePortType(), getResponseOperation());
-        }
-
-        initEndpointConfigs();
     }
 
     private void initEndpointConfigs() throws HumanTaskDeploymentException {
+
+        if(taskDeploymentConfiguration == null) {
+            throw new HumanTaskDeploymentException("Cannot find task deployment configuration.");
+        }
+
+        if (taskDeploymentConfiguration.getPublish() == null ||
+            taskDeploymentConfiguration.getPublish().getService() == null) {
+            throw new HumanTaskDeploymentException("Cannot find publish element in the htconfig.xml file.");
+        }
+
         TPublish.Service service = taskDeploymentConfiguration.getPublish().getService();
         OMElement serviceEle;
         serviceEle = HumanTaskStoreUtils.getOMElement(service.toString());
@@ -115,6 +133,13 @@ public class TaskConfiguration extends HumanTaskBaseConfiguration {
 
             addEndpointConfiguration(endpointConfig);
         }
+
+
+        if (taskDeploymentConfiguration.getCallback() == null ||
+            taskDeploymentConfiguration.getCallback().getService() == null) {
+            throw new HumanTaskDeploymentException("Cannot find callback element in the htconfig.xml file.");
+        }
+
         TCallback.Service cbService = taskDeploymentConfiguration.getCallback().getService();
         serviceEle = HumanTaskStoreUtils.getOMElement(cbService.toString());
         endpointConfig = HumanTaskStoreUtils.getEndpointConfig(serviceEle);
@@ -136,30 +161,6 @@ public class TaskConfiguration extends HumanTaskBaseConfiguration {
         this.task = task;
     }
 
-//    public THTDeploymentConfig.Task getTaskDeploymentConfiguration() {
-//        return taskDeploymentConfiguration;
-//    }
-
-//    public void setTaskDeploymentConfiguration(THTDeploymentConfig.Task taskDeploymentConfiguration) {
-//        this.taskDeploymentConfiguration = taskDeploymentConfiguration;
-//    }
-//
-//    public boolean isSubTask() {
-//        return subTask;
-//    }
-//
-//    public void setSubTask(boolean subTask) {
-//        this.subTask = subTask;
-//    }
-//
-//    public TaskConfiguration getParent() {
-//        return parent;
-//    }
-//
-//    public void setParent(TaskConfiguration parent) {
-//        this.parent = parent;
-//    }
-
     public Definition getResponseWSDL() {
         if (!useOneWSDL) {
             return responseWSDL;
@@ -167,18 +168,6 @@ public class TaskConfiguration extends HumanTaskBaseConfiguration {
             return getWSDL();
         }
     }
-
-//    public void setResponseWSDL(Definition responseWSDL) {
-//        this.responseWSDL = responseWSDL;
-//    }
-//
-//    public boolean isUseOneWSDL() {
-//        return useOneWSDL;
-//    }
-//
-//    public void setUseOneWSDL(boolean useOneWSDL) {
-//        this.useOneWSDL = useOneWSDL;
-//    }
 
     public QName getResponsePortType() {
         return task.getInterface().getResponsePortType();
@@ -198,13 +187,6 @@ public class TaskConfiguration extends HumanTaskBaseConfiguration {
         return task.getInterface().getOperation();
     }
 
-//    public QName getCallbackPortType() {
-//        return task.getInterface().getResponsePortType();
-//    }
-//
-//    public String getCallbackOperation() {
-//        return task.getInterface().getResponseOperation();
-//    }
 
     @Override
     public QName getName() {

@@ -25,6 +25,7 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.api.wsdls.dataobjects.Wsdl;
+import org.wso2.carbon.governance.api.wsdls.dataobjects.WsdlImpl;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -63,7 +64,7 @@ public class WsdlManager {
      */
     public Wsdl newWsdl(String url) throws GovernanceException {
         String wsdlId = UUID.randomUUID().toString();
-        Wsdl wsdl = new Wsdl(wsdlId, url);
+        WsdlImpl wsdl = new WsdlImpl(wsdlId, url);
         wsdl.associateRegistry(registry);
         return wsdl;
     }
@@ -92,15 +93,18 @@ public class WsdlManager {
     public Wsdl newWsdl(byte[] content, String name)
             throws RegistryException {
         String wsdlId = UUID.randomUUID().toString();
-    	Wsdl wsdl = new Wsdl(wsdlId, name != null ? "name://" + name : null);
+        WsdlImpl wsdl = new WsdlImpl(wsdlId, name != null ? "name://" + name : null);
     	wsdl.associateRegistry(registry);
     	wsdl.setWsdlElement(GovernanceUtils.buildOMElement(content));
     	return wsdl;
     }
 
     /**
-     * Adds the given WSDL artifact to the registry.
-     * 
+     * Adds the given WSDL artifact to the registry. Please do not use this method to update an
+     * existing artifact use the update method instead. If this method is used to update an existing
+     * artifact, all existing properties (such as lifecycle details) will be removed from the
+     * existing artifact.
+     *
      * @param wsdl the WSDL artifact.
      * 
      * @throws GovernanceException if the operation failed.
@@ -109,7 +113,7 @@ public class WsdlManager {
         boolean succeeded = false;
         try {
             registry.beginTransaction();
-            String url = wsdl.getUrl();
+            String url = ((WsdlImpl)wsdl).getUrl();
             Resource wsdlResource = registry.newResource();
             wsdlResource.setMediaType(GovernanceConstants.WSDL_MEDIA_TYPE);
 
@@ -138,15 +142,15 @@ public class WsdlManager {
                 registry.importResource(tmpPath, url, wsdlResource);
             }
 //            wsdl.setId(resource.getUUID());
-            wsdl.updatePath();
-        //    wsdl.loadWsdlDetails();
+            ((WsdlImpl)wsdl).updatePath();
+            ((WsdlImpl)wsdl).loadWsdlDetails();
             succeeded = true;
         } catch (RegistryException e) {
             String msg = "Error in adding the wsdl. wsdl id: " + wsdl.getId() + ".";
             log.error(msg, e);
             throw new GovernanceException(msg, e);
         } catch (MalformedURLException e) {
-            String msg = "Malformed policy url provided. url: " + wsdl.getUrl() + ".";
+            String msg = "Malformed policy url provided. url: " + ((WsdlImpl)wsdl).getUrl() + ".";
             log.error(msg, e);
             throw new GovernanceException(msg, e);
         } finally {
@@ -211,8 +215,8 @@ public class WsdlManager {
             wsdlResource.setUUID(wsdl.getId());
             registry.put(tmpPath, wsdlResource);
 //            wsdl.setId(wsdlResource.getUUID());
-            wsdl.updatePath();
-//            wsdl.loadWsdlDetails();
+            ((WsdlImpl)wsdl).updatePath();
+            ((WsdlImpl)wsdl).loadWsdlDetails();
             
             succeeded = true;
         } catch (RegistryException e) {

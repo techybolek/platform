@@ -13,11 +13,18 @@ var removeAPI = function(name, version, provider) {
                   }
                   else if (!result.error) {
                       window.location.reload();
+                  }else{
+                       jagg.message({content:result.message,type:"error"});
                   }
               }, "json");
 
     }});
 
+};
+
+var selectUserTab = function(path){
+    $.cookie("selectedTab","users");
+    location.href = path;
 };
 $(document).ready(
          function() {

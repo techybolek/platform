@@ -22,12 +22,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>application-deployer-features</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.application.deployer.synapse.feature</artifactId>
     <packaging>pom</packaging>
+    <version>4.0.5</version>
     <name>WSO2 Carbon - Synapse Application Deployer Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the core bundles required for Synapse application deployment functionality</description>
@@ -55,14 +57,14 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.application.deployer.synapse</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.application.deployer.synapse</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.application.deployer.synapse:${project.version}</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.apache.synapse.wso2:${synapse.version}</importFeatureDef>

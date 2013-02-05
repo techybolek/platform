@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><definitions xmlns="http://ws.apache.org/ns/synapse">
 
     <!-- sequence for conditional-route -->
-    <sequence name="cnd_seq" trace="enable">
+    <sequence name="cnd_seq4">
         <log>
             <property name="message" value="**********Conditional Router Test Condition Satisfied **************"/>
         </log>
@@ -29,7 +29,7 @@
                     <condition>
                         <match type="url" regex=".*StockQuote.*"/>
                     </condition>
-                    <target sequence="cnd_seq"/>
+                    <target sequence="cnd_seq4"/>
                 </conditionalRoute>
             </conditionalRouter>
 

@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.registry.core.utils.MediaTypesUtils;
+import org.wso2.carbon.registry.resource.ui.Utils;
 import org.wso2.carbon.server.admin.common.IServerAdmin;
 import org.wso2.carbon.server.admin.common.ServerData;
 import org.wso2.carbon.server.admin.ui.ServerAdminClient;
@@ -119,6 +120,10 @@ public class AddResourceProcessor extends AbstractFileUploadExecutor {
             if (formFieldsMap.get("symlinkLocation") != null) {
                 symlinkLocation = formFieldsMap.get("symlinkLocation").get(0);
             }
+            String properties = null;
+            if (formFieldsMap.get("properties") != null) {
+                properties = formFieldsMap.get("properties").get(0);
+            }
             IServerAdmin adminClient =
                     (IServerAdmin) CarbonUIUtil.
                             getServerProxy(new ServerAdminClient(configurationContext,
@@ -173,7 +178,7 @@ public class AddResourceProcessor extends AbstractFileUploadExecutor {
 
             client.addResource(
                     calculatePath(parentPath, resourceName), mediaType, description, dataHandler,
-                    symlinkLocation);
+                    symlinkLocation, Utils.getProperties(properties));
 
             response.setContentType("text/html; charset=utf-8");
             String msg = "Successfully uploaded content.";

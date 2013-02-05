@@ -14,6 +14,8 @@ import org.wso2.carbon.user.core.service.RealmService;
 public class HDFSNameNodeController {
 
     private static Log log = LogFactory.getLog(HDFSNameNodeController.class);
+    private static String DISABLE_HDFS_NAMENODE_STARTUP = "disable.hdfs.namenode.startup";
+    private static String DISABLE_HDFS_STARTUP = "disable.hdfs.startup";
 
     private RealmService realmService;
     // private AuthenticationService authenticationService;
@@ -23,10 +25,15 @@ public class HDFSNameNodeController {
         if (log.isDebugEnabled()) {
             log.debug("HDFS Name Node bunddle is activated.");
         }
-
+        String disableNameNodeStartup = System.getProperty(DISABLE_HDFS_NAMENODE_STARTUP);
+        String disableHdfsStartup = System.getProperty(DISABLE_HDFS_STARTUP);
+        if (("true".equals(disableNameNodeStartup)) || ("true".equals(disableHdfsStartup))) {
+            log.debug("HDFS name node is disabled and not started in the service activator");
+            return;
+        }
         HDFSNameNodeComponentManager.getInstance().init(realmService);
         HDFSNameNode HDFSNameNode = new HDFSNameNode();
-        HDFSNameNode.start();
+        //HDFSNameNode.start();
     }
 
     protected void deactivate(ComponentContext componentContext) {

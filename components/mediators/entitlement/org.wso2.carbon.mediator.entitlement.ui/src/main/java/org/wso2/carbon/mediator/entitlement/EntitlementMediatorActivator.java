@@ -42,6 +42,18 @@ public class EntitlementMediatorActivator implements BundleActivator {
         bundleContext.registerService(
                 MediatorService.class.getName(), new EntitlementMediatorService(), props);
 
+        bundleContext.registerService(
+                MediatorService.class.getName(), new OnAcceptMediatorService(), props);
+
+        bundleContext.registerService(
+                MediatorService.class.getName(), new OnRejectMediatorService(), props);
+
+        bundleContext.registerService(
+                MediatorService.class.getName(), new AdviceMediatorService(), props);
+
+        bundleContext.registerService(
+                MediatorService.class.getName(), new ObligationsMediatorService(), props);
+
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered the property mediator service");
         }

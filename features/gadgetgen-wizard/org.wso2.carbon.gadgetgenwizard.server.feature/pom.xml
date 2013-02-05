@@ -22,13 +22,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>gadgetgen-wizard-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.gadgetgenwizard.server.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Gadget Generation Server Feature</name>
+    <version>4.0.7</version>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for Gadget Generation BE functionality
     </description>
@@ -37,7 +39,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.bam.gadgetgenwizard</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>${carbon.platform.patch.version.407}</version>
         </dependency>
     </dependencies>
 
@@ -56,7 +58,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.gadgetgenwizard.server</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:console</propertyDef>
@@ -77,4 +79,9 @@
         </plugins>
     </build>
 
-   </project>
+
+    <properties>
+        <carbon.platform.patch.version.407>4.0.7</carbon.platform.patch.version.407>
+    </properties>
+
+ </project>

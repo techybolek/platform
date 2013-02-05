@@ -41,6 +41,6 @@ public class HumanTaskDatabaseCreator extends DatabaseCreator {
         }
         String carbonHome = System.getProperty("carbon.home");
         return carbonHome + File.separator + "dbscripts" + File.separator + "bps" + File.separator
-                + "ht" + File.separator + scriptName;
+                + scriptName;
     }
 }

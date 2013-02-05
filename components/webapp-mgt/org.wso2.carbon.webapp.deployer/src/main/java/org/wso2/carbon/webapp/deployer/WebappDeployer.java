@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.webapp.deployer;
 
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.DeploymentException;
 import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.commons.logging.Log;
@@ -31,6 +32,12 @@ public class WebappDeployer extends AbstractWebappDeployer {
     private static final Log log = LogFactory.getLog(WebappDeployer.class);
 
     @Override
+    public void init(ConfigurationContext configCtx) {
+        super.init(configCtx);
+        configCtx.setProperty(WebappsConstants.TOMCAT_GENERIC_WEBAPP_DEPLOYER, tomcatWebappDeployer);
+    }
+
+    @Override
     public void deploy(DeploymentFileData deploymentFileData) throws DeploymentException {
         super.deploy(deploymentFileData);
     }
@@ -40,6 +47,7 @@ public class WebappDeployer extends AbstractWebappDeployer {
     }
 
     public void setExtension(String extension) {
+        this.extension = extension;
     }
 
     @Override

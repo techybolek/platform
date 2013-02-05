@@ -17,15 +17,34 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class URITemplate {
 
     private String uriTemplate;
-    private Set<String> methods = new HashSet<String>();
     private String resourceURI;
     private String resourceSandboxURI;
+    private String httpVerb;
+    private String authType;
+    private LinkedHashSet<String> httpVerbs = new LinkedHashSet<String>();
+    private List<String> authTypes = new ArrayList<String>();
+
+    public String getHTTPVerb() {
+        return httpVerb;
+    }
+
+    public void setHTTPVerb(String httpVerb) {
+        this.httpVerb = httpVerb;
+    }
+
+    public String getAuthType() {
+        return authType;
+    }
+
+    public void setAuthType(String authType) {
+        this.authType = authType;
+
+    }
 
     public String getResourceURI() {
         return resourceURI;
@@ -51,19 +70,31 @@ public class URITemplate {
         this.uriTemplate = template;
     }
 
-    public Set<String> getMethods() {
-        return methods;
+    public void setHttpVerbs(String httpVerb) {
+
+        httpVerbs.add(httpVerb);
     }
-    
+
+    public void setAuthTypes(String authType) {
+
+        authTypes.add(authType);
+    }
+
     public String getMethodsAsString() {
         String str = "";
-        for (String method : methods) {
+        for (String method : httpVerbs) {
             str += method + " ";
         }
         return str.trim();
     }
 
-    public void addMethod(String method) {
-        this.methods.add(method);
+    public String getAuthTypeAsString() {
+        String str = "";
+        for (String authType : authTypes) {
+            str += authType + " ";
+        }
+        return str.trim();
     }
+
+
 }

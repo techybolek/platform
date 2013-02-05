@@ -243,6 +243,31 @@ function isValidWSDLURL(url) {
     return isValid;
 }
 
+function testWSDLConnection(url){
+    if (url == '') {
+        CARBON.showWarningDialog(jsi18n['wsdl.uri.field.cannot.be.empty']);
+    } else {
+       jQuery.get("ajaxprocessors/testConnection-ajaxprocessor.jsp?type=wsdl&", {'url' : url},
+                   function(data, status) {
+                       if (data.replace(/^\s+|\s+$/g, '') == 'success') {
+                           CARBON.showInfoDialog(jsi18n['valid.address'] + " " + url);
+                       } else if (data.replace(/^\s+|\s+$/g, '') == 'unknown') {
+                           CARBON.showErrorDialog(jsi18n['unknown.address'] + " " + url);
+                       } else if (data.replace(/^\s+|\s+$/g, '') == 'malformed') {
+                           CARBON.showErrorDialog(jsi18n['malformed.address'] + " " + url);
+                       } else if (data.replace(/^\s+|\s+$/g, '') == 'ssl_error') {
+                           CARBON.showErrorDialog(jsi18n['ssl.error'] + " " + url);
+                       } else if (data.replace(/^\s+|\s+$/g, '') == 'unknown_service') {
+                           CARBON.showErrorDialog(jsi18n['unknown.service'] + " " + url);
+                       } else if (data.replace(/^\s+|\s+$/g, '') == 'unsupported') {
+                           CARBON.showErrorDialog(jsi18n['unsupported.protocol']);
+                       } else {
+                           CARBON.showErrorDialog(jsi18n['invalid.address']);
+                       }
+                   });
+    }
+}
+
 function showHideOnSelect(selectID, element) {
     if (document.getElementById(selectID).checked == true) {
         document.getElementById(element).style.display = '';
@@ -254,11 +279,55 @@ function showHideOnSelect(selectID, element) {
 function showErrorCodeEditor(inputID) {
     var url = 'ajaxprocessors/errorCodeEditor-ajaxprocessor.jsp?codes=' + document.getElementById(inputID).value + "&inputID=" + inputID;
     var loadingContent = "<div id='workArea' style='overflow-x:hidden;'><div id='popupContent'><div class='ajax-loading-message'> <img src='../resources/images/ajax-loader.gif' align='top'/> <span>" + jsi18n["ns.editor.waiting.text"] + "</span> </div></div></div>";
-    CARBON.showPopupDialog(loadingContent, jsi18n["errorcode.editor.title"], 420, false, null, 560);
+    CARBON.showPopupDialog(loadingContent, jsi18n["errorcode.editor.title"], 470, false, null, 560);
 
     jQuery("#popupContent").load(url, null, function (responseText, status, XMLHttpRequest) {
         if (status != "success") {
             CARBON.showErrorDialog(jsi18n["errorcode.editor.load.error"]);
         }
     });
+}
+
+function onTemplateSelectionChange() {
+    var templateSelected = getSelectedValue('templateSelector');
+    if (templateSelected != null && "default" != templateSelected) {
+    	var targetEl = document.getElementById("target.template");
+        targetEl.value = templateSelected;
+        handleParamGet(templateSelected);
+    }
+}
+
+function handleParamGet(templateName) {
+    jQuery.ajax({
+                    type: 'POST',
+                    url: 'ajaxprocessors/get_template_params-ajaxprocessor.jsp',
+                    data: 'templateSelect=' + templateName,
+                    success: function(msg) {
+                        loadProperties(msg);
+                    }
+                });
+}
+
+function loadProperties(data){
+    jQuery("#propertytbody").html(data);
+    var count = document.getElementById('propertyCount').value;
+    var element = document.getElementById('propertytable');
+    if (count == 0 ) {
+       element.style.display = "none";
+    } else {
+        element.style.display = "";
+    }
+}
+
+function getSelectedValue(id) {
+    var propertyType = document.getElementById(id);
+    var propertyType_indexstr = null;
+    var propertyType_value = null;
+    if (propertyType != null) {
+        propertyType_indexstr = propertyType.selectedIndex;
+        if (propertyType_indexstr != null) {
+            propertyType_value = propertyType.options[propertyType_indexstr].value;
+        }
+    }
+    return propertyType_value;
 }

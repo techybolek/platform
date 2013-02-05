@@ -22,13 +22,13 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.commons.datasource.*;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.datasource.DataSourceInformationManager;
 import org.wso2.carbon.datasource.DataSourceManagementHandler;
 import org.wso2.carbon.datasource.internal.DataSourceServiceComponent;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,9 +45,9 @@ public class DataSourceInitializer extends AbstractAxis2ConfigurationContextObse
             new HashMap<Integer, List<DataSourceRepositoryListener>>();
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
-    	int tenantId = CarbonContextHolder.getCurrentCarbonContextHolder().getTenantId();
-    	SuperTenantCarbonContext.startTenantFlow();
-    	SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantId);
+    	int tenantId = CarbonContext.getCurrentContext().getTenantId();
+    	PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
 
         //creating a separate datasource repository for the tenant
         DataSourceInformationRepository repository = new DataSourceInformationRepository();
@@ -81,7 +81,7 @@ public class DataSourceInitializer extends AbstractAxis2ConfigurationContextObse
         	}
         	dsrListenerMap.remove(tenantId);
         }
-        SuperTenantCarbonContext.endTenantFlow();
+        PrivilegedCarbonContext.endTenantFlow();
     }
     
     public static void addDataSourceRepositoryListener(int tenantId,

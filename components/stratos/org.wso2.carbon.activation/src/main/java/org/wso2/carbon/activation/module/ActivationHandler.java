@@ -31,7 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.activation.utils.ActivationManager;
 import org.wso2.carbon.activation.utils.Util;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.stratos.common.util.CloudServicesUtil;
 import org.wso2.carbon.utils.ServerConstants;
@@ -118,12 +118,12 @@ public class ActivationHandler extends AbstractHandler implements Handler {
     }
 
     private String getTenantDomain(MessageContext messageContext) {
-        return SuperTenantCarbonContext.getCurrentContext(messageContext).getTenantDomain(true);
+        return PrivilegedCarbonContext.getCurrentContext(messageContext).getTenantDomain(true);
     }
 
     private int getTenantId(MessageContext messageContext) {
-        SuperTenantCarbonContext carbonContext =
-                SuperTenantCarbonContext.getCurrentContext(messageContext);
+        PrivilegedCarbonContext carbonContext =
+                PrivilegedCarbonContext.getCurrentContext(messageContext);
         int tenantId = carbonContext.getTenantId();
         if (tenantId > -1 || tenantId == MultitenantConstants.SUPER_TENANT_ID) {
             return tenantId;

@@ -86,9 +86,9 @@
                                style="background: url('../hive-explorer/images/execute.gif') no-repeat;">
                                 Execute</a>
                             <a class="icon-link" style="background: url('images/tasks-icon.gif') no-repeat;"
-                               href="../hive-explorer/scheduleAndSave.jsp?scriptName=<%=aName%>"><label>Schedule
-                                Script</label></a>
-
+                                      href="../hive-explorer/scheduleAndSave.jsp?scriptName=<%=aName%>">Schedule
+                                Script
+                            </a>
                             <a onclick="deleteRow('<%=aName%>','Do you want to delete')"
                                class="delete-icon-link" href="#">Delete</a>
                         </td>
@@ -107,6 +107,19 @@
                     <input type="hidden" id="driver" name="driver" value="">
                 </table>
             </form>
+            <table>
+                <tbody>
+                <tr>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><a class="icon-link" style="background-image:url(images/add.gif);"
+                           href="hiveexplorer.jsp"><fmt:message
+                            key="script.add.main"/></a></td>
+                </tr>
+                </tbody>
+            </table>
+
         </div>
     </div>
 

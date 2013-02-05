@@ -27,15 +27,13 @@ public class EntitlementConstants {
 
 	public static final String POLICY_EDITOR_TYPE = "policyEditor";
 
-	public static final String POLICY_EDITOR_RULE_DATA = "policyEditorRuleData";
-
-	public static final String POLICY_EDITOR_RULE_TARGET_DATA = "policyEditorRuleTargetData";
-
-	public static final String POLICY_EDITOR_TARGET_DATA = "policyEditorTargetData";
+	public static final String BASIC_POLICY_EDITOR_META_DATA = "basicPolicyEditorMetaData";
 
 	public static final String BASIC_POLICY_EDITOR_META_DATA_AMOUNT = "NoOfBasicPolicyEditorMetaData";
 
 	public static final String ACTIVE_POLICY = "isActive";
+
+	public static final String PROMOTED_POLICY = "promoted";
 
 	public static final String POLICY_ORDER = "policyOrder";
 
@@ -66,6 +64,10 @@ public class EntitlementConstants {
 	public static final String RESOURCE_CATEGORY_ID = "Resource";
 
 	public static final String ENVIRONMENT_CATEGORY_ID = "Environment";
+
+	public static final String ANY_OF = "AnyOf";
+
+	public static final String ALL_OF = "AllOf";
 
     public static final String RESOURCE_CATEGORY_URI = "urn:oasis:names:tc:xacml:3.0:" +
             "attribute-category:resource";
@@ -103,6 +105,8 @@ public class EntitlementConstants {
 
 	public static final String DATA_TYPE = "DataType";
 
+	public static final String CATEGORY = "Category";
+
 	public static final String REQUEST_CONTEXT_PATH = "RequestContextPath";
 
 	public static final String SUBJECT_ID_DEFAULT = "urn:oasis:names:tc:xacml:1.0:subject:subject-id";
@@ -129,11 +133,11 @@ public class EntitlementConstants {
 
 	public static final String MAX_POLICY_ENTRIES = "OnDemandPolicyLoading.MaxPolicyEntries";
 
-	public static final int MAX_NO_OF_IN_MEMORY_POLICIES = 100;
+	public static final int MAX_NO_OF_IN_MEMORY_POLICIES = 10;
 
-	public static final String DECISION_CACHING = "DecisionCaching.Enable";
+	public static final String DECISION_CACHING = "PDP.DecisionCaching.Enable";
 
-	public static final String DECISION_CACHING_INTERVAL = "DecisionCaching.CachingInterval";
+	public static final String DECISION_CACHING_INTERVAL = "PDP.DecisionCaching.CachingInterval";
 
 	public static final String ATTRIBUTE_CACHING = "AttributeCaching.Enable";
 
@@ -142,6 +146,10 @@ public class EntitlementConstants {
 	public static final String AUTHORIZATION_PERMISSION = "/permission/admin/configure";
 
 	public static final String PIP_RESOURCE_CACHE = "PIP_RESOURCE_CACHE";
+
+	public static final String PDP_DECISION_CACHE = "PDP_DECISION_CACHE";
+
+	public static final String POLICY_SEARCH_CACHE = "POLICY_SEARCH_CACHE";
 
 	public static final String PIP_ABSTRACT_RESOURCE_CACHE = "PIP_ABSTRACT_RESOURCE_CACHE";
 
@@ -207,4 +215,13 @@ public class EntitlementConstants {
     public static final String XACML_2_POLICY_SCHEMA_FILE = "xacml2.xsd";
 
     public static final String XACML_1_POLICY_SCHEMA_FILE = "xacml1.xsd";
+
+    public static final String ENTITLEMENT_POLICY_PUBLISHER = "/repository/identity/Entitlement/publisher/";
+
+    public static final String PDP_ENABLE = "PDP.Enable";
+
+    public static final String PAP_ENABLE = "PAP.Enable";
+
+    public static final String BALANA_CONFIG_ENABLE = "PDP.Balana.Config.Enable";
+
 }

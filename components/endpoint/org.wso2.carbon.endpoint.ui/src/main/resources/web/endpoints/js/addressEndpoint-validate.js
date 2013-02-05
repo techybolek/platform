@@ -27,16 +27,17 @@ function validateAddressEndpoint(isAnonymous,isFromTemplateEditor) {
         return false;
     }
 
-    // check for a valid URL
-    var endpointURI = getElementValue('url');
-    if (endpointURI != null) {
-        if (!isValidURL(endpointURI)) {
-            CARBON.showWarningDialog(jsi18n['invalid.url.provided']);
-            return false;
-        }
-    }
-
     if (!isFromTemplateEditor) {
+
+        // check for a valid URL
+        var endpointURI = getElementValue('url');
+        if (endpointURI != null) {
+            if (!isValidURL(endpointURI)) {
+                CARBON.showWarningDialog(jsi18n['invalid.url.provided']);
+                return false;
+            }
+        }
+
         var durationVal = getElementValue('suspendDuration');
         if (durationVal != null) {
             if (isNaN(durationVal)) {
@@ -79,7 +80,11 @@ function validateAddressEndpoint(isAnonymous,isFromTemplateEditor) {
                 return false;
             }
         }
+    } else {
+        if (isEmptyField('templateName')) {
+            CARBON.showWarningDialog(jsi18n['template.name.field.cannot.be.empty']);
+            return false;
+        }
     }
     return true;
-
 }

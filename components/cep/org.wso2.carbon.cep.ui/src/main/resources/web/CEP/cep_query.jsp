@@ -4,14 +4,7 @@
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.cep.stub.admin.CEPAdminServiceStub" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.ExpressionDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.OutputDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.OutputElementMappingDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.OutputMapMappingDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.OutputTupleMappingDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.OutputXMLMappingDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.QueryDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.XMLPropertyDTO" %>
+<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.*" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="java.util.LinkedList" %>
 <fmt:bundle basename="org.wso2.carbon.cep.ui.i18n.Resources">
@@ -20,14 +13,13 @@
 <script type="text/javascript" src="../yui/build/yahoo-dom-event/yahoo-dom-event.js"></script>
 <script type="text/javascript" src="../yui/build/connection/connection-min.js"></script>
 <script type="text/javascript" src="../CEP/js/cep_buckets.js"></script>
-"/>
+
 
 <%--Includes for registry browser--%>
 <script type="text/javascript" src="../resources/js/resource_util.js"></script>
 <jsp:include page="../resources/resources-i18n-ajaxprocessor.jsp"/>
 <script type="text/javascript" src="../ajax/js/prototype.js"></script>
 <link rel="stylesheet" type="text/css" href="../resources/css/registry.css"/>
-<script type="text/javascript" src="js/expression_utils.js"></script>
 <%
 
     ConfigurationContext configContext = (ConfigurationContext) config.getServletContext()
@@ -50,8 +42,8 @@
     QueryDTO query = null;
     ExpressionDTO expression = null;
     OutputDTO output = null;
-    OutputElementMappingDTO elementMapping = null;
     OutputXMLMappingDTO xmlMapping = null;
+    OutputTextMappingDTO textMapping = null;
     OutputTupleMappingDTO tupleMapping = null;
     OutputMapMappingDTO mapMapping = null;
 
@@ -61,22 +53,11 @@
     expression = query.getExpression();
     output = query.getOutput();
     if (output != null) {
-        elementMapping = output.getOutputElementMapping();
         xmlMapping = output.getOutputXmlMapping();
+        textMapping = output.getOutputTextMapping();
         tupleMapping = output.getOutputTupleMapping();
         mapMapping = output.getOutputMapMapping();
     }
-
-    boolean inline;
-    if (expression.getType().equals("registry")) {
-        inline = false;
-    } else {
-        inline = true;
-    }
-    String inlineDisplay = inline ? "" : "display:none;";
-    String registryDisplay = inline ? "display:none;" : "";
-    String key = expression.getText();
-
     boolean isViewingBucket = false;
     String viewingBucket = request.getParameter("view");
     if (viewingBucket != null) {
@@ -95,43 +76,7 @@
     <td class="leftCol-small"><fmt:message key="query.name"/><span class="required">*</span></td>
     <td><input type="text" id="queryName" value="<%= query.getName()%>"></td>
 </tr>
-
-<tr>
-    <td><fmt:message key="query.as"/><span class="required">*</span>
-    </td>
-    <td>
-        <%
-            if (inline) {
-        %>
-        <input type="radio" name="expressionType"
-               id="expressioninlinedRd"
-               value="inline"
-               onclick="setExpressionType('inline');"
-               checked="checked"/>
-        <fmt:message key="inlined"/>
-        <input type="radio" name="expressionType"
-               id="expressionRegistryRd"
-               value="registry"
-               onclick="setExpressionType('registry');"/>
-        <fmt:message key="reg.key"/>
-        <% } else { %>
-        <input type="radio" name="expressionType"
-               id="expressioninlinedRd"
-               value="inline"
-               onclick="setExpressionType('inline');"/>
-        <fmt:message key="inlined"/>
-        <input type="radio" name="expressionType"
-               id="expressionRegistryRd"
-               value="registry"
-               checked="checked"
-               onclick="setExpressionType('registry');"/>
-        <fmt:message key="reg.key"/>
-        <%
-            }
-        %>
-    </td>
-</tr>
-<tr id="expressionInlined" style="<%=inlineDisplay%>">
+<tr id="expressionInlined" >
     <td style="vertical-align:top !important;"><fmt:message key="query.expression"/><span
             class="required">*</span>
     </td>
@@ -140,19 +85,6 @@
                   style="border:solid 1px rgb(204, 204, 204); width: 99%; height: 275px; margin-top: 5px;"
                   name="querySource" rows="30"><%=expression.getText() %>
         </textarea>
-    </td>
-</tr>
-<tr id="expressionRegistry" style="<%=registryDisplay%>">
-    <td class="leftCol-small"><fmt:message key="query.expression.key"/></td>
-    <td>
-        <input class="longInput" type="text" name="expressionKey"
-               id="expressionKey"
-               value="<%=(!inline)?key.trim():""%>"/>
-
-        <a href="#registryBrowserLink"
-           class="registry-picker-icon-link"
-           onclick="showRegistryBrowser('expressionKey','/_system/config')"><fmt:message
-                key="registry.config"/></a>
     </td>
 </tr>
 <tr>
@@ -194,8 +126,8 @@
     <td><select name="outputBrokerName" id="outputMapping" onchange="setOutputMapping()">
         <option value="xml" <%=xmlMapping != null ? "selected=\"selected\"" : "" %>><fmt:message
                 key="xml.mapping"/></option>
-        <option value="element" <%=elementMapping != null ? "selected=\"selected\"" : "" %>>
-            <fmt:message key="element.mapping"/></option>
+        <option value="text" <%=textMapping != null ? "selected=\"selected\"" : "" %>><fmt:message
+                key="text.mapping"/></option>
         <option value="tuple" <%=tupleMapping != null ? "selected=\"selected\"" : "" %>><fmt:message
                 key="tuple.mapping"/></option>
         <option value="map" <%=mapMapping != null ? "selected=\"selected\"" : "" %>><fmt:message
@@ -204,13 +136,13 @@
     </td>
 </tr>
 <tr name="outputXMLMapping"
-    style="display:<%=xmlMapping!=null||(xmlMapping==null&&elementMapping==null&&tupleMapping==null&&mapMapping==null)?"":"none" %>">
+    style="display:<%=xmlMapping!=null||(xmlMapping==null&&textMapping==null&&tupleMapping==null&&mapMapping==null)?"":"none" %>">
     <td colspan="2" class="middle-header">
         <fmt:message key="xml.mapping"/>
     </td>
 </tr>
 <tr name="outputXMLMapping"
-    style="display:<%=xmlMapping!=null||(xmlMapping==null&&elementMapping==null&&tupleMapping==null&&mapMapping==null)?"":"none" %>">
+    style="display:<%=xmlMapping!=null||(xmlMapping==null&&textMapping==null&&tupleMapping==null&&mapMapping==null)?"":"none" %>">
     <td colspan="2">
         <p><fmt:message key="xml.mapping.text"/></P>
 
@@ -224,92 +156,25 @@
         </p>
     </td>
 </tr>
-<tr name="outputElementMapping" style="display:<%=elementMapping!=null?"":"none" %>">
+<tr name="outputTextMapping"
+    style="display:<%=textMapping!=null?"":"none" %>">
     <td colspan="2" class="middle-header">
-        <fmt:message key="element.mapping"/>
+        <fmt:message key="text.mapping"/>
     </td>
 </tr>
-<tr name="outputElementMapping" style="display:<%=elementMapping!=null?"":"none" %>">
+<tr name="outputTextMapping"
+    style="display:<%=textMapping!=null?"":"none" %>">
     <td colspan="2">
-        <table>
-            <tbody>
-            <td class="leftCol-small"><fmt:message key="element.mapping.xmlDocumentElement"/></td>
-            <td><input type="text" id="documentElement"
-                       value="<%=elementMapping!=null?elementMapping.getDocumentElement():""%>">
-            </td>
-            <td><fmt:message key="element.mapping.namespace"/></td>
-            <td><input type="text" id="namespace"
-                       value="<%=elementMapping!=null?elementMapping.getNamespace():""%>"></td>
-            </tbody>
-        </table>
-        <h4><fmt:message key="property"/></h4>
-        <table class="styledLeft" id="outputElementPropertyTable"
-               style="display:<%=elementMapping!=null&&elementMapping.getProperties() != null?"":"none" %>">
-            <thead>
-            <th class="leftCol-med"><fmt:message key="property.name"/></th>
-            <th class="leftCol-med"><fmt:message key="xml.field.name"/></th>
-            <th class="leftCol-med"><fmt:message key="xml.field.type"/></th>
-            <th><fmt:message key="actions"/></th>
-            </thead>
-            <%
-                if (elementMapping != null && elementMapping.getProperties() != null) {
-            %>
-            <tbody>
-            <%
-                XMLPropertyDTO[] properties = elementMapping.getProperties();
-                for (XMLPropertyDTO property : properties) {
-            %>
-            <tr>
-                <td><%=property.getName()%>
-                </td>
-                <td><%=property.getXmlFieldName()%>
-                </td>
-                <td><%=property.getXmlFieldType()%>
-                </td>
-                <td><a class="icon-link"
-                       style="background-image:url(../admin/images/delete.gif)"
-                       onclick="removeOutputProperty(this,'xml')">Delete</a>
-                    <script type="text/javascript">
-                        addOutputMappingPropertyToSession('<%=property.getName()%>', '<%=property.getXmlFieldName()%>', '<%=property.getXmlFieldType()%>');
-                    </script>
-                </td>
-            </tr>
+        <p><fmt:message key="text.mapping.text"/></P>
 
-            <%
-                }
-            %>
-            </tbody>
-            <%
-                }
-            %>
-        </table>
-        <div class="noDataDiv-plain" id="noOutputElementPropertyDiv"
-             style="display:<%=elementMapping!=null&&elementMapping.getProperties() != null?"none":"" %>">
-            No XPath prefixes Defined
-        </div>
-        <table id="addPropertyTable" class="normal">
-            <tbody>
-            <tr>
-                <td class="leftCol-small"><fmt:message key="property.name"/> :</td>
-                <td>
-                    <input type="text"
-                           id="xmlPropName"/>
-                </td>
-                <td><fmt:message key="property.xmlFName"/> : <input type="text"
-                                                                    id="xmlFieldName"/>
-                </td>
-                <td><fmt:message key="property.xmlFType"/> :
-                    <select id="outputPropertyTypes">
-                        <option value="attribute">Attribute</option>
-                        <option value="element">Element</option>
-                    </select>
-                </td>
-                <td><input type="button" class="button" value="<fmt:message key="add"/>"
-                           onclick="addOutputElementProperty()"/>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+        <p>
+            <textarea id="textSourceText"
+                      style="border:solid 1px rgb(204, 204, 204); width: 99%;
+                                     height: 150px; margin-top: 5px;"
+                      name="textSource"
+                      rows="30"><%=textMapping != null ? textMapping.getMappingText() : ""%>
+            </textarea>
+        </p>
     </td>
 </tr>
 <tr name="outputTupleMapping" style="display:<%=tupleMapping!=null?"":"none" %>">
@@ -325,6 +190,8 @@
                style="display:<%=tupleMapping!=null&&tupleMapping.getMetaDataProperties() != null?"":"none" %>">
             <thead>
             <th class="leftCol-med"><fmt:message key="property.name"/></th>
+            <th class="leftCol-med"><fmt:message key="property.value.of"/></th>
+            <th class="leftCol-med"><fmt:message key="property.type"/></th>
             <th><fmt:message key="actions"/></th>
             </thead>
             <%
@@ -332,17 +199,18 @@
             %>
             <tbody>
             <%
-                String[] properties = tupleMapping.getMetaDataProperties();
-                for (String property : properties) {
+                OutputTuplePropertyDTO[] properties = tupleMapping.getMetaDataProperties();
+                for (OutputTuplePropertyDTO property : properties) {
             %>
             <tr>
-                <td><%=property%>
-                </td>
+                <td><%=property.getName()%></td>
+                <td><%=property.getValueOf()%> </td>
+                <td><%=property.getType()%></td>
                 <td><a class="icon-link"
                        style="background-image:url(../admin/images/delete.gif)"
                        onclick="removeOutputProperty(this,'Meta')">Delete</a>
                     <script type="text/javascript">
-                        addOutputTupleDataPropertyToSession('<%=property%>', 'Meta');
+                        addOutputTupleDataPropertyToSession('<%=property.getName()%>','<%=property.getValueOf()%>','<%=property.getType()%>', 'Meta');
                     </script>
                 </td>
 
@@ -367,6 +235,20 @@
                 <td>
                     <input type="text" id="outputMetaDataPropName"/>
                 </td>
+                <td class="col-small"><fmt:message key="property.value.of"/> :</td>
+                <td>
+                    <input type="text" id="outputMetaDataPropValueOf"/>
+                </td>
+                <td><fmt:message key="property.type"/>:
+                    <select id="outputMetaDataPropType">
+                        <option value="java.lang.Integer">Integer</option>
+                        <option value="java.lang.Long">Long</option>
+                        <option value="java.lang.Double">Double</option>
+                        <option value="java.lang.Float">Float</option>
+                        <option value="java.lang.String">String</option>
+                        <option value="java.lang.Boolean">Boolean</option>
+                    </select>
+                </td>
                 <td><input type="button" class="button" value="<fmt:message key="add"/>"
                            onclick="addOutputTupleProperty('Meta')"/>
                 </td>
@@ -383,6 +265,8 @@
                style="display:<%=tupleMapping!=null&&tupleMapping.getCorrelationDataProperties() != null?"":"none" %>">
             <thead>
             <th class="leftCol-med"><fmt:message key="property.name"/></th>
+            <th class="leftCol-med"><fmt:message key="property.value.of"/></th>
+            <th class="leftCol-med"><fmt:message key="property.type"/></th>
             <th><fmt:message key="actions"/></th>
             </thead>
             <%
@@ -390,17 +274,18 @@
             %>
             <tbody>
             <%
-                String[] properties = tupleMapping.getCorrelationDataProperties();
-                for (String property : properties) {
+                OutputTuplePropertyDTO[] properties = tupleMapping.getCorrelationDataProperties();
+                for (OutputTuplePropertyDTO property : properties) {
             %>
             <tr>
-                <td><%=property%>
-                </td>
+                <td><%=property.getName()%></td>
+                <td><%=property.getValueOf()%> </td>
+                <td><%=property.getType()%></td>
                 <td><a class="icon-link"
                        style="background-image:url(../admin/images/delete.gif)"
                        onclick="removeOutputProperty(this,'Correlation')">Delete</a>
                     <script type="text/javascript">
-                        addOutputTupleDataPropertyToSession('<%=property%>', 'Correlation');
+                        addOutputTupleDataPropertyToSession('<%=property.getName()%>','<%=property.getValueOf()%>','<%=property.getType()%>', 'Correlation');
                     </script>
                 </td>
             </tr>
@@ -423,6 +308,20 @@
                 <td>
                     <input type="text" id="outputCorrelationDataPropName"/>
                 </td>
+                <td class="col-small"><fmt:message key="property.value.of"/> :</td>
+                <td>
+                    <input type="text" id="outputCorrelationDataPropValueOf"/>
+                </td>
+                <td><fmt:message key="property.type"/>:
+                    <select id="outputCorrelationDataPropType">
+                        <option value="java.lang.Integer">Integer</option>
+                        <option value="java.lang.Long">Long</option>
+                        <option value="java.lang.Double">Double</option>
+                        <option value="java.lang.Float">Float</option>
+                        <option value="java.lang.String">String</option>
+                        <option value="java.lang.Boolean">Boolean</option>
+                    </select>
+                </td>
                 <td><input type="button" class="button" value="<fmt:message key="add"/>"
                            onclick="addOutputTupleProperty('Correlation')"/>
                 </td>
@@ -439,6 +338,8 @@
                style="display:<%=tupleMapping!=null&&tupleMapping.getPayloadDataProperties() != null?"":"none" %>">
             <thead>
             <th class="leftCol-med"><fmt:message key="property.name"/></th>
+            <th class="leftCol-med"><fmt:message key="property.value.of"/></th>
+            <th class="leftCol-med"><fmt:message key="property.type"/></th>
             <th><fmt:message key="actions"/></th>
             </thead>
             <%
@@ -446,17 +347,18 @@
             %>
             <tbody>
             <%
-                String[] properties = tupleMapping.getPayloadDataProperties();
-                for (String property : properties) {
+                OutputTuplePropertyDTO[] properties = tupleMapping.getPayloadDataProperties();
+                for (OutputTuplePropertyDTO property : properties) {
             %>
             <tr>
-                <td><%=property%>
-                </td>
+                <td><%=property.getName()%></td>
+                <td><%=property.getValueOf()%> </td>
+                <td><%=property.getType()%></td>
                 <td><a class="icon-link"
                        style="background-image:url(../admin/images/delete.gif)"
                        onclick="removeOutputProperty(this,'Payload')">Delete</a>
                     <script type="text/javascript">
-                        addOutputTupleDataPropertyToSession('<%=property%>', 'Payload');
+                        addOutputTupleDataPropertyToSession('<%=property.getName()%>','<%=property.getValueOf()%>','<%=property.getType()%>', 'Payload');
                     </script>
                 </td>
             </tr>
@@ -480,6 +382,20 @@
                 <td>
                     <input type="text" id="outputPayloadDataPropName"/>
                 </td>
+                <td class="col-small"><fmt:message key="property.value.of"/> :</td>
+                <td>
+                    <input type="text" id="outputPayloadDataPropValueOf"/>
+                </td>
+                <td><fmt:message key="property.type"/>:
+                    <select id="outputPayloadDataPropType">
+                        <option value="java.lang.Integer">Integer</option>
+                        <option value="java.lang.Long">Long</option>
+                        <option value="java.lang.Double">Double</option>
+                        <option value="java.lang.Float">Float</option>
+                        <option value="java.lang.String">String</option>
+                        <option value="java.lang.Boolean">Boolean</option>
+                    </select>
+                </td>
                 <td><input type="button" class="button" value="<fmt:message key="add"/>"
                            onclick="addOutputTupleProperty('Payload')"/>
                 </td>
@@ -498,27 +414,28 @@
 
 
         <table class="styledLeft" id="outputMapPropertiesTable"
-               style="display:<%=mapMapping!=null&&mapMapping.getProperties() != null?"":"none" %>">
+               style="display:<%=mapMapping!=null&&mapMapping.getMapProperties() != null?"":"none" %>">
             <thead>
             <th class="leftCol-med"><fmt:message key="property.name"/></th>
+            <th class="leftCol-med"><fmt:message key="property.value.of"/></th>
             <th><fmt:message key="actions"/></th>
             </thead>
             <%
-                if (mapMapping != null && mapMapping.getProperties() != null) {
+                if (mapMapping != null && mapMapping.getMapProperties() != null) {
             %>
             <tbody>
             <%
-                String[] properties = mapMapping.getProperties();
-                for (String property : properties) {
+                OutputMapPropertyDTO[] properties = mapMapping.getMapProperties();
+                for (OutputMapPropertyDTO property : properties) {
             %>
             <tr>
-                <td><%=property%>
-                </td>
+                <td><%=property.getName()%></td>
+                <td><%=property.getValueOf()%> </td>
                 <td><a class="icon-link"
                        style="background-image:url(../admin/images/delete.gif)"
                        onclick="removeOutputMapProperty(this)">Delete</a>
                     <script type="text/javascript">
-                        addOutputMapDataPropertyToSession('<%=property%>');
+                        addOutputMapDataPropertyToSession('<%=property.getName()%>','<%=property.getValueOf()%>');
                     </script>
                 </td>
 
@@ -533,7 +450,7 @@
             %>
         </table>
         <div class="noDataDiv-plain" id="noOutputMapProperties"
-             style="display:<%=mapMapping!=null&&mapMapping.getProperties() != null?"none":"" %>">
+             style="display:<%=mapMapping!=null&&mapMapping.getMapProperties() != null?"none":"" %>">
             No Map properties Defined
         </div>
         <table id="addOutputMapProperties" class="normal">
@@ -541,7 +458,11 @@
             <tr>
                 <td class="leftCol-small"><fmt:message key="property.name"/> :</td>
                 <td>
-                    <input type="text" id="OutputMapPropName"/>
+                    <input type="text" id="outputMapPropName"/>
+                </td>
+                <td class="col-small"><fmt:message key="property.value.of"/> :</td>
+                <td>
+                    <input type="text" id="outputMapPropValueOf"/>
                 </td>
                 <td><input type="button" class="button" value="<fmt:message key="add"/>"
                            onclick="addOutputMapProperty()"/>

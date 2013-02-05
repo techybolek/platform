@@ -23,8 +23,8 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-dependents</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
+        <version>4.0.0</version>
+        <relativePath>../../../pom.xml</relativePath>
    </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -32,7 +32,7 @@
     <artifactId>hive</artifactId>
     <packaging>bundle</packaging>
     <name>hive.wso2</name>
-    <version>0.8.1-wso2v2</version>
+    <version>0.8.1.wso2v6</version>
     <description>
         This bundle will represent hive jars
     </description>
@@ -42,47 +42,47 @@
 	    <dependency>
 		<groupId>org.apache.hive</groupId>
 		<artifactId>hive-exec</artifactId>
-		<version>0.8.1-wso2v2</version>
+		<version>${hive.wso2.version}</version>
 	    </dependency>
 	    <dependency>
 		<groupId>org.apache.hive</groupId>
 		<artifactId>hive-shims</artifactId>
-		<version>0.8.1-wso2v2</version>
+		<version>${hive.wso2.version}</version>
 	    </dependency>
 	    <dependency>
 		<groupId>org.apache.hive</groupId>
 		<artifactId>hive-builtins</artifactId>
-		<version>0.8.1-wso2v2</version>
+		<version>${hive.wso2.version}</version>
 	    </dependency>
 	    <dependency>
 		<groupId>org.apache.hive</groupId>
 		<artifactId>hive-service</artifactId>
-		<version>0.8.1-wso2v2</version>
+		<version>${hive.wso2.version}</version>
 	    </dependency>
 	    <dependency>
 		<groupId>org.apache.hive</groupId>
 		<artifactId>hive-serde</artifactId>
-		<version>0.8.1-wso2v2</version>
+		<version>${hive.wso2.version}</version>
 	    </dependency>
             <dependency>
 		<groupId>org.apache.hive</groupId>
 		<artifactId>hive-metastore</artifactId>
-		<version>0.8.1-wso2v2</version>
+		<version>${hive.wso2.version}</version>
 	    </dependency>
 	    <dependency>
 		<groupId>org.apache.hive</groupId>
                 <artifactId>hive-cassandra</artifactId>
-                <version>0.8.1-wso2v2</version>
+                <version>${hive.wso2.version}</version>
 	   </dependency>
 	    <dependency>
 		<groupId>org.apache.hive</groupId>
                 <artifactId>hive-jdbc</artifactId>
-                <version>0.8.1-wso2v2</version>
+                <version>${hive.wso2.version}</version>
 	   </dependency>
            <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>hive-jdbc-handler</artifactId>
-                <version>0.8.1-wso2v2</version>
+                <version>${hive.wso2.version}</version>
            </dependency>
     </dependencies>
 
@@ -128,6 +128,7 @@
     <properties>
         <hive.thrift.osgi.version>0.7.5.wso2v1</hive.thrift.osgi.version>
         <antlr.osgi.version>3.2.0.wso2v1</antlr.osgi.version>
+	<hive.wso2.version>0.8.1-wso2v6</hive.wso2.version>
     </properties>
 
 </project>

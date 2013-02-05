@@ -30,6 +30,7 @@
 <%@ page import="org.wso2.carbon.bpel.ui.InstanceFilter" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
+<%@ page import="javax.xml.namespace.QName" %>
 
 <jsp:useBean id="instanceFilter" scope="session" class="org.wso2.carbon.bpel.ui.InstanceFilter"/>
 <jsp:setProperty name="instanceFilter" property="*" />
@@ -48,7 +49,7 @@
     String cookie = (String)session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
 
     InstanceManagementServiceClient client;
-    ProcessManagementServiceClient processManagementClient;
+    ProcessManagementServiceClient processManagementClient = null;
     PaginatedInstanceList instanceList = null;
     int numberOfPages = 0;
     String processIds[] = null;
@@ -102,7 +103,7 @@
         // URL parameter.
         if (instanceListFilter != null && instanceListFilter.length() > 0 && !(" ").equals(instanceListFilter)) {
             String[] stateArray = new String[1];
-            stateArray[0] = instanceListFilter.substring(instanceListFilter.indexOf('=') + 1);
+//            stateArray[0] = instanceListFilter.substring(instanceListFilter.indexOf('=') + 1);
             String[] filterParams = instanceListFilter.split(" ");
             for (String filterParam : filterParams) {
                 String[] param = filterParam.split("=");
@@ -113,7 +114,7 @@
                     instanceFilter.setStatus(stateArray);
                 }
             }
-            instanceFilter.setStatus(stateArray);
+//            instanceFilter.setStatus(stateArray);
         } //else use the advanced filter
 
         // TODO: Add instance filter saving support(only for the session)
@@ -632,6 +633,7 @@
                                 <th><nobr><fmt:message key="status"/></nobr></th>
                                 <th><nobr><fmt:message key="date.started"/></nobr></th>
                                 <th><nobr><fmt:message key="last.active"/></nobr></th>
+                                <th><nobr><fmt:message key="total.instances"/></nobr></th>
 <%
         if(isAuthenticatedForInstanceManagement) {
 %>
@@ -660,16 +662,6 @@
 %>
                                 <td><%=instanceInfo.getStatus()%></td>
                                 <td><%=instanceInfo.getDateStarted().getTime().toString()%></td>
-
-                                <%
-                                    if(instanceInfo.getDateLastActive()!=null && instanceInfo.getDateLastActive().getTime()!= null){
-
-                                %>
-                                <td><%=instanceInfo.getDateLastActive().getTime().toString()%></td>
-
-                                <%
-                                    }
-                                %>
 <%
     if (instanceInfo.getDateLastActive() != null && instanceInfo.getDateLastActive().getTime() != null) {
 %>
@@ -680,6 +672,13 @@
                                 <td></td>
 <%
     }
+
+                                QName pid = QName.valueOf(instanceInfo.getPid());
+%>
+                                <td><a href="<%=BpelUIUtil.getInstanceFilterURL(instanceInfo.getPid())%>"><%=Integer.toString(BpelUIUtil.getTotalInstance(processManagementClient.getProcessInfo(pid)))%></a></td>
+
+<%
+
             if(isAuthenticatedForInstanceManagement) {
 %>
                 <%=BpelUIUtil.getInstanceOperations(instanceInfo.getStatus(), instanceInfo.getIid())%>

@@ -17,17 +17,25 @@
 package org.wso2.carbon.webapp.mgt;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.clustering.ClusteringAgent;
+import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.deployment.Deployer;
 import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.catalina.Container;
+import org.apache.catalina.core.StandardWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.CarbonException;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.utils.ArchiveManipulator;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.DataPaginator;
 import org.wso2.carbon.utils.NetworkUtils;
+import org.wso2.carbon.webapp.mgt.sync.ApplicationSynchronizeRequest;
+import org.wso2.carbon.webapp.mgt.WebappsConstants.ApplicationOpType;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
@@ -37,12 +45,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,17 +72,24 @@ public class WebappAdmin extends AbstractAdmin {
      * @param webappState        State of the webapp.
      *                           Can be either WebappsConstants.WebappState.STARTED or
      *                           WebappsConstants.WebappState.STOPPED
+     * @param webappType application type
      * @param pageNumber         The pageNumber of the page to be fetched
      * @return WebappsWrapper
      * @throws AxisFault
      */
     public WebappsWrapper getPagedWebappsSummary(String webappSearchString,
-                                                 String webappState,
+                                                 String webappState, String webappType,
                                                  int pageNumber) throws AxisFault {
         if (webappState.equalsIgnoreCase(WebappsConstants.WebappState.STARTED)) {
-            return getPagedWebapps(pageNumber, getStartedWebapps(webappSearchString));
+            return getPagedWebapps(pageNumber,
+                                   getStartedWebapps(webappType, webappSearchString), webappType);
         } else if (webappState.equalsIgnoreCase(WebappsConstants.WebappState.STOPPED)) {
-            return getPagedWebapps(pageNumber, getStoppedWebapps(webappSearchString));
+            return getPagedWebapps(pageNumber,
+                                   getStoppedWebapps(webappType, webappSearchString), webappType);
+        } else if(webappState.equalsIgnoreCase(WebappsConstants.WebappState.ALL)){
+            List<WebappMetadata> webapps = getStartedWebapps(webappType, webappSearchString);
+            webapps.addAll(getStoppedWebapps(webappType, webappSearchString));
+            return getPagedWebapps(pageNumber, webapps, webappType);
         } else {
             throw new AxisFault("Invalid webapp state: ", webappState);
         }
@@ -122,8 +132,19 @@ public class WebappAdmin extends AbstractAdmin {
     private WebappMetadata getWebapp(WebApplication webApplication) {
         WebappMetadata webappMetadata;
         webappMetadata = new WebappMetadata();
+
+        String appContext = "/";
+        for (Container container : webApplication.getContext().findChildren()) {
+            if(((StandardWrapper) container).getServletName().equals("JAXServlet")) {
+                appContext = (((StandardWrapper) container).findMappings())[0];
+            }
+        }
+        if(appContext.endsWith("/*")) {
+            appContext = appContext.substring(0, appContext.indexOf("/*"));
+        }
         webappMetadata.setDisplayName(webApplication.getDisplayName());
         webappMetadata.setContext(webApplication.getContextName());
+        webappMetadata.setServletContext(appContext);
         webappMetadata.setLastModifiedTime(webApplication.getLastModifiedTime());
         webappMetadata.setWebappFile(webApplication.getWebappFile().getName());
         webappMetadata.setState(webApplication.getState());
@@ -139,23 +160,27 @@ public class WebappAdmin extends AbstractAdmin {
         stats.setRejectedSessions(statistics.getRejectedSessions());
 
         webappMetadata.setStatistics(stats);
+        webappMetadata.setWebappType((String) webApplication.getProperty(WebappsConstants.WEBAPP_FILTER));
+
         return webappMetadata;
     }
 
     /**
      * @param webappSearchString
+     * @param webappType application type
      * @param pageNumber
      * @return
      * @throws AxisFault
      */
     public WebappsWrapper getPagedFaultyWebappsSummary(String webappSearchString,
+                                                       String webappType,
                                                        int pageNumber) throws AxisFault {
-        return getPagedWebapps(pageNumber, getFaultyWebapps(webappSearchString));
+        return getPagedWebapps(pageNumber, getFaultyWebapps(webappSearchString), webappType);
     }
 
-    private WebappsWrapper getPagedWebapps(int pageNumber, List<WebappMetadata> webapps) {
+    private WebappsWrapper getPagedWebapps(int pageNumber, List<WebappMetadata> webapps, String webappType) {
         WebApplicationsHolder webappsHolder = getWebappsHolder();
-        WebappsWrapper webappsWrapper = getWebappsWrapper(webappsHolder, webapps);
+        WebappsWrapper webappsWrapper = getWebappsWrapper(webappsHolder, webapps, webappType);
         try {
             webappsWrapper.setHostName(NetworkUtils.getLocalHostname());
         } catch (SocketException e) {
@@ -198,35 +223,45 @@ public class WebappAdmin extends AbstractAdmin {
         }
     }
 
-    private List<WebappMetadata> getStartedWebapps(String webappsSearchString) {
-        return getWebapps(getWebappsHolder().getStartedWebapps().values(), webappsSearchString);
+    private List<WebappMetadata> getStartedWebapps(String webappType, String webappSearchString) {
+        return getWebapps(getWebappsHolder().getStartedWebapps().values(), webappType, webappSearchString);
     }
 
-    private List<WebappMetadata> getStoppedWebapps(String webappsSearchString) {
-        return getWebapps(getWebappsHolder().getStoppedWebapps().values(), webappsSearchString);
+    private List<WebappMetadata> getStoppedWebapps(String webappType, String webappSearchString) {
+        return getWebapps(getWebappsHolder().getStoppedWebapps().values(), webappType, webappSearchString);
     }
 
     private List<WebappMetadata> getWebapps(Collection<WebApplication> allWebapps,
-                                            String webappsSearchString) {
+                                            String webappType, String webappsSearchString) {
         List<WebappMetadata> webapps = new ArrayList<WebappMetadata>();
         for (WebApplication webapp : allWebapps) {
             if (!doesWebappSatisfySearchString(webapp, webappsSearchString)) {
                 continue;
             }
             // Check whether this is a generic webapp, if not ignore..
-            if (!isWebappRelevant(webapp)) {
+            if (!isWebappRelevant(webapp, webappType)) {
                 continue;
+            }
+            String appContext = "/";
+            for (Container container : webapp.getContext().findChildren()) {
+                if(((StandardWrapper) container).getServletClass().equals("org.apache.cxf.transport.servlet.CXFServlet")) {
+                    appContext = (((StandardWrapper) container).findMappings())[0];
+                }
+            }
+            if(appContext.endsWith("/*")) {
+                appContext = appContext.substring(0, appContext.indexOf("/*"));
             }
             WebappMetadata webappMetadata = new WebappMetadata();
             webappMetadata.setDisplayName(webapp.getDisplayName());
             webappMetadata.setContext(webapp.getContextName());
+            webappMetadata.setServletContext(appContext);
             webappMetadata.setLastModifiedTime(webapp.getLastModifiedTime());
             webappMetadata.setWebappFile(webapp.getWebappFile().getName());
             webappMetadata.setState(webapp.getState());
             WebappStatistics statistics = new WebappStatistics();
             statistics.setActiveSessions(webapp.getStatistics().getActiveSessions());
             webappMetadata.setStatistics(statistics);
-
+            webappMetadata.setWebappType((String) webapp.getProperty(WebappsConstants.WEBAPP_FILTER));
             webapps.add(webappMetadata);
         }
         return webapps;
@@ -268,7 +303,6 @@ public class WebappAdmin extends AbstractAdmin {
             String regex = searchString.toLowerCase().
                     replace("..?", ".?").replace("..*", ".*").
                     replaceAll("\\?", ".?").replaceAll("\\*", ".*?");
-                    //Replace wild cards ? and * with .? and .*? respectively to make it compatible with regex
 
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(webapp.getContextName().toLowerCase());
@@ -285,21 +319,21 @@ public class WebappAdmin extends AbstractAdmin {
     }
 
     private WebappsWrapper getWebappsWrapper(WebApplicationsHolder webappsHolder,
-                                             List<WebappMetadata> webapps) {
+                                             List<WebappMetadata> webapps, String webappType) {
         WebappsWrapper webappsWrapper = new WebappsWrapper();
         webappsWrapper.setWebapps(webapps.toArray(new WebappMetadata[webapps.size()]));
         webappsWrapper.setNumberOfCorrectWebapps(
-                getNumberOfWebapps(webappsHolder.getStartedWebapps()));
+                getNumberOfWebapps(webappsHolder.getStartedWebapps(), webappType));
         webappsWrapper.setNumberOfFaultyWebapps(
-                getNumberOfWebapps(webappsHolder.getFaultyWebapps()));
+                getNumberOfWebapps(webappsHolder.getFaultyWebapps(), webappType));
         return webappsWrapper;
     }
 
-    private int getNumberOfWebapps(Map <String, WebApplication> webappMap) {
+    private int getNumberOfWebapps(Map <String, WebApplication> webappMap, String webappType) {
         int number = 0;
         for (Map.Entry<String, WebApplication> webappEntry : webappMap.entrySet()) {
             // Check whether this is a generic webapp, if so count..
-            if (isWebappRelevant(webappEntry.getValue())) {
+            if (isWebappRelevant(webappEntry.getValue(), webappType)) {
                 number++;
             }
         }
@@ -310,20 +344,32 @@ public class WebappAdmin extends AbstractAdmin {
      * This method can be used to check whether the given web app is relevant for this Webapp
      * type. Only generic webapps are relevant for this Admin service.
      *
+     *
      * @param webapp - WebApplication instance
+     * @param webappType  application type
      * @return - true if relevant
      */
-    protected boolean isWebappRelevant(WebApplication webapp) {
+    protected boolean isWebappRelevant(WebApplication webapp, String webappType) {
         // skip the Stratos landing page webapp 
         if (webapp.getContextName().contains("STRATOS_ROOT")) {
             return false;
         }
         String filterProp = (String) webapp.getProperty(WebappsConstants.WEBAPP_FILTER);
         // If non of the filters are set, this is a generic webapp, so return true
-        if (filterProp == null) {
+
+        if(WebappsConstants.ALL_WEBAPP_FILTER_PROP.equalsIgnoreCase(webappType)) {
             return true;
+        } else if(WebappsConstants.JAX_WEBAPP_FILTER_PROP.equalsIgnoreCase(webappType)) {
+            return filterProp != null &&
+                   WebappsConstants.JAX_WEBAPP_FILTER_PROP.equalsIgnoreCase
+                    (filterProp);
+        } else if(WebappsConstants.JAGGERY_WEBAPP_FILTER_PROP.equalsIgnoreCase(webappType)) {
+            return filterProp != null &&
+                   WebappsConstants.JAGGERY_WEBAPP_FILTER_PROP.equalsIgnoreCase(filterProp);
+        } else {
+            return filterProp == null ||
+                   WebappsConstants.WEBAPP_FILTER_PROP.equalsIgnoreCase(filterProp);
         }
-        return false;
     }
 
     /**
@@ -354,6 +400,18 @@ public class WebappAdmin extends AbstractAdmin {
      */
     public void deleteFaultyWebapps(String[] webappFileNames) throws AxisFault {
         deleteWebapps(webappFileNames, getWebappsHolder().getFaultyWebapps());
+    }
+
+    /**
+     *Delete set of all types of webapps. (started, stopped, faulty)
+     *
+     * @param webappFileNames  The names of the webapp files to be deleted
+     * @throws AxisFault   AxisFault If an error occurs while deleting a webapp
+     */
+    public void deleteAllWebApps(String[] webappFileNames) throws AxisFault {
+        for (String webappFileName : webappFileNames) {
+            deleteWebapp(webappFileName);
+        }
     }
 
     /**
@@ -443,9 +501,12 @@ public class WebappAdmin extends AbstractAdmin {
      */
     public void reloadAllWebapps() {
         Map<String, WebApplication> startedWebapps = getWebappsHolder().getStartedWebapps();
+        String[] webappFileNames = Arrays.copyOf(startedWebapps.keySet().toArray(),
+                startedWebapps.size(), String[].class);
         for (WebApplication webapp : startedWebapps.values()) {
             webapp.reload();
         }
+        sendClusterSyncMessage(ApplicationOpType.RELOAD, webappFileNames);
     }
 
     /**
@@ -457,6 +518,7 @@ public class WebappAdmin extends AbstractAdmin {
         for (String webappFileName : webappFileNames) {
             getWebappsHolder().getStartedWebapps().get(webappFileName).reload();
         }
+        sendClusterSyncMessage(ApplicationOpType.RELOAD, webappFileNames);
     }
 
     /**
@@ -466,6 +528,8 @@ public class WebappAdmin extends AbstractAdmin {
      */
     public void stopAllWebapps() throws AxisFault {
         Map<String, WebApplication> startedWebapps = getWebappsHolder().getStartedWebapps();
+        String[] webappFileNames = Arrays.copyOf(startedWebapps.keySet().toArray(),
+                startedWebapps.size(), String[].class);
         for (WebApplication webapp : startedWebapps.values()) {
             try {
                 webapp.stop();
@@ -474,6 +538,7 @@ public class WebappAdmin extends AbstractAdmin {
             }
         }
         startedWebapps.clear();
+        sendClusterSyncMessage(ApplicationOpType.STOP, webappFileNames);
     }
 
     /**
@@ -488,11 +553,14 @@ public class WebappAdmin extends AbstractAdmin {
         for (String webappFileName : webappFileNames) {
             try {
                 WebApplication webApplication = startedWebapps.get(webappFileName);
-                webappsHolder.stopWebapp(webApplication);
+                if(webApplication != null) {
+                    webappsHolder.stopWebapp(webApplication);
+                }
             } catch (CarbonException e) {
                 handleException("Error occurred while undeploying webapps", e);
             }
         }
+        sendClusterSyncMessage(ApplicationOpType.STOP, webappFileNames);
     }
 
     /**
@@ -502,6 +570,8 @@ public class WebappAdmin extends AbstractAdmin {
      */
     public void startAllWebapps() throws AxisFault {
         Map<String, WebApplication> stoppedWebapps = getWebappsHolder().getStoppedWebapps();
+        String[] webappFileNames = Arrays.copyOf(stoppedWebapps.keySet().toArray(),
+                stoppedWebapps.size(), String[].class);
         Deployer webappDeployer =
                 ((DeploymentEngine) getAxisConfig().getConfigurator()).getDeployer(WebappsConstants
                         .WEBAPP_DEPLOYMENT_FOLDER, WebappsConstants.WEBAPP_EXTENSION);
@@ -509,6 +579,7 @@ public class WebappAdmin extends AbstractAdmin {
             startWebapp(stoppedWebapps, webapp);
         }
         stoppedWebapps.clear();
+        sendClusterSyncMessage(ApplicationOpType.START, webappFileNames);
     }
 
     /**
@@ -525,8 +596,11 @@ public class WebappAdmin extends AbstractAdmin {
                         .WEBAPP_DEPLOYMENT_FOLDER, WebappsConstants.WEBAPP_EXTENSION);
         for (String webappFileName : webappFileNames) {
             WebApplication webapp = stoppedWebapps.get(webappFileName);
-            startWebapp(stoppedWebapps, webapp);
+            if(webapp!= null){
+                startWebapp(stoppedWebapps, webapp);
+            }
         }
+        sendClusterSyncMessage(ApplicationOpType.START, webappFileNames);
     }
 
     private void startWebapp(Map<String, WebApplication> stoppedWebapps,
@@ -656,13 +730,14 @@ public class WebappAdmin extends AbstractAdmin {
      */
     public boolean uploadWebapp(WebappUploadData[] webappUploadDataList) throws AxisFault {
         AxisConfiguration axisConfig = getAxisConfig();
-        File webappsDir = new File(getWebappDeploymentDirPath());
+        File webappsDir = new File(getWebappDeploymentDirPath(WebappsConstants.WEBAPP_FILTER_PROP));
         if (!webappsDir.exists() && !webappsDir.mkdirs()) {
             log.warn("Could not create directory " + webappsDir.getAbsolutePath());
         }
 
         for (WebappUploadData uploadData : webappUploadDataList) {
             String fileName = uploadData.getFileName();
+            fileName = fileName.substring(fileName.lastIndexOf(System.getProperty("file.separator"))+1);
             File destFile = new File(webappsDir, fileName);
             FileOutputStream fos = null;
             try {
@@ -684,9 +759,16 @@ public class WebappAdmin extends AbstractAdmin {
         return true;
     }
 
-    protected String getWebappDeploymentDirPath() {
-        return getAxisConfig().getRepository().getPath() + File.separator +
-                WebappsConstants.WEBAPP_DEPLOYMENT_FOLDER;
+    protected String getWebappDeploymentDirPath(String webappType) {
+        String webappDeploymentDir;
+        if(WebappsConstants.JAX_WEBAPP_FILTER_PROP.equalsIgnoreCase(webappType)) {
+            webappDeploymentDir = WebappsConstants.JAX_WEBAPP_REPO;
+        } else if(WebappsConstants.JAGGERY_WEBAPP_FILTER_PROP.equalsIgnoreCase(webappType)) {
+            webappDeploymentDir = WebappsConstants.JAGGERY_WEBAPP_REPO;
+        } else {
+            webappDeploymentDir = WebappsConstants.WEBAPP_DEPLOYMENT_FOLDER;
+        }
+        return getAxisConfig().getRepository().getPath() + File.separator + webappDeploymentDir;
     }
 
     private void handleException(String msg, Exception e) throws AxisFault {
@@ -697,14 +779,33 @@ public class WebappAdmin extends AbstractAdmin {
     /**
      * Downloads the webapp archive (.war) file
      * @param fileName name of the .war that needs to be downloaded
+     * @param webappType application type
      * @return the corresponding data handler of the .war that needs to be downloaded
      */
-    public DataHandler downloadWarFileHandler(String fileName) {
-        String repoPath = getWebappDeploymentDirPath() + File.separator + fileName;
+    public DataHandler downloadWarFileHandler(String fileName, String webappType) {
+        String repoPath = getAxisConfig().getRepository().getPath();
+        String appsPath = getWebappDeploymentDirPath(webappType) + File.separator + fileName;
 
-        FileDataSource datasource = new FileDataSource(new File(repoPath));
-        DataHandler handler = new DataHandler(datasource);
+        File webAppFile = new File(appsPath);
+        DataHandler handler = null;
 
+        if (webAppFile.isDirectory()) {
+            String zipTo = "tmp" + File.separator + fileName + ".zip";
+            File fDownload = new File(zipTo);
+            ArchiveManipulator archiveManipulator = new ArchiveManipulator();
+            synchronized (this) {
+                try {
+                    archiveManipulator.archiveDir(zipTo, webAppFile.getAbsolutePath());
+                    FileDataSource datasource = new FileDataSource(fDownload);
+                    handler = new DataHandler(datasource);
+                } catch (IOException e) {
+                    log.error("Error downloading WAR file.", e);
+                }
+            }
+        } else {
+            FileDataSource datasource = new FileDataSource(new File(appsPath));
+            handler = new DataHandler(datasource);
+        }
         return handler;
     }
 
@@ -715,5 +816,43 @@ public class WebappAdmin extends AbstractAdmin {
      */
     public boolean isUnpackWARs(){
         return TomcatUtil.checkUnpackWars();
+    }
+
+    private void sendClusterSyncMessage(ApplicationOpType applicationOpType, String[] webappFileNames) {
+        // For sending clustering messages we need to use the super-tenant's AxisConfig (Main Server
+        // AxisConfiguration) because we are using the clustering facility offered by the ST in the
+        // tenants
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+
+        ClusteringAgent clusteringAgent =
+                DataHolder.getServerConfigContext().getAxisConfiguration().getClusteringAgent();
+        if (clusteringAgent != null) {
+            int numberOfRetries = 0;
+            UUID messageId = UUID.randomUUID();
+            ApplicationSynchronizeRequest request =
+                    new ApplicationSynchronizeRequest(tenantId, tenantDomain, messageId,
+                            applicationOpType, webappFileNames);
+            while (numberOfRetries < 60) {
+                try {
+                    clusteringAgent.sendMessage(request, true);
+                    log.info("Sent [" + request + "]");
+                    break;
+                } catch (ClusteringFault e) {
+                    numberOfRetries++;
+                    if (numberOfRetries < 60) {
+                        log.warn("Could not send SynchronizeRepositoryRequest for tenant " +
+                                tenantId + ". Retry will be attempted in 2s. Request: " + request, e);
+                    } else {
+                        log.error("Could not send SynchronizeRepositoryRequest for tenant " +
+                                tenantId + ". Several retries failed. Request:" + request, e);
+                    }
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ignored) {
+                    }
+                }
+            }
+        }
     }
 }

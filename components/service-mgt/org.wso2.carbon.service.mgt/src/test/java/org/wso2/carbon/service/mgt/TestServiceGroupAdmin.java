@@ -17,11 +17,11 @@
 */
 package org.wso2.carbon.service.mgt;
 
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.utils.WSO2Constants;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.core.util.ParameterUtil;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.apache.axis2.description.*;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.context.ConfigurationContext;
@@ -60,9 +60,9 @@ public class TestServiceGroupAdmin extends BaseTestCase {
         axisCon = confContext.getAxisConfiguration();
         axisCon.setRepository(new URL("file://"+new File(repoPath).getAbsolutePath()));
         createAnAxisService();
-        SuperTenantCarbonContext.getCurrentContext(axisCon).setRegistry(
+        PrivilegedCarbonContext.getCurrentContext(axisCon).setRegistry(
                 RegistryType.SYSTEM_CONFIGURATION, configRegistry);
-        SuperTenantCarbonContext.getCurrentContext(axisCon).setRegistry(
+        PrivilegedCarbonContext.getCurrentContext(axisCon).setRegistry(
                 RegistryType.SYSTEM_CONFIGURATION, governanceRegistry);
             
         // The following line of code is kept for backward compatibility. Remove this once we

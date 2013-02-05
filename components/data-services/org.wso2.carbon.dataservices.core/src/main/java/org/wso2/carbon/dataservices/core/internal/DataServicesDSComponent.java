@@ -22,20 +22,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
-import org.wso2.carbon.dataservices.core.listeners.EventBrokerServiceListener;
 import org.wso2.carbon.event.core.EventBroker;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.securevault.SecretCallbackHandlerService;
 import org.wso2.carbon.transaction.manager.TransactionManagerDummyService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.wso2.carbon.context.CarbonContext;
 
 /**
  * @scr.component name="dataservices.component" immediate="true"
@@ -51,6 +46,10 @@ import java.util.List;
  * interface="org.wso2.carbon.securevault.SecretCallbackHandlerService"
  * cardinality="1..1" policy="dynamic"
  * bind="setSecretCallbackHandlerService" unbind="unsetSecretCallbackHandlerService"
+ * @scr.reference name="tenant.registryloader"
+ * interface="org.wso2.carbon.registry.core.service.TenantRegistryLoader"
+ * cardinality="1..1" policy="dynamic" bind="setTenantRegistryLoader"
+ * unbind="unsetTenantRegistryLoader"
  */
 public class DataServicesDSComponent {
 
@@ -66,8 +65,7 @@ public class DataServicesDSComponent {
 
     private static SecretCallbackHandlerService secretCallbackHandlerService;
     
-    private static List<EventBrokerServiceListener> eventBrokerServiceListeners =
-            new ArrayList<EventBrokerServiceListener>();
+    private static TenantRegistryLoader tenantRegLoader;
 
     private static Object dsComponentLock = new Object(); /* class level lock for controlling synchronized access to static variables */
 
@@ -154,34 +152,7 @@ public class DataServicesDSComponent {
                 log.debug("Setting the Event Broker Service");
             }
             DataServicesDSComponent.eventBroker = eventBroker;
-            /* event functionality depends on realm service */
-            if (DataServicesDSComponent.realmService != null) {
-                this.doEventRealmInitiliased();
-            }
         }
-    }
-
-    private void notifyEventServiceListeners() {
-        for (EventBrokerServiceListener listener : eventBrokerServiceListeners) {
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(listener.getTenantId());
-            listener.setEventBroker(eventBroker);
-            SuperTenantCarbonContext.endTenantFlow();
-        }
-        eventBrokerServiceListeners.clear();
-    }
-
-    private void doEventRealmInitiliased() {
-         RealmService realmService = DataServicesDSComponent.getRealmService();
-        try {
-            SuperTenantCarbonContext.getCurrentContext().setUserRealm(
-                    realmService.getBootstrapRealm());
-            SuperTenantCarbonContext.getCurrentContext().setUsername(
-                    CarbonConstants.REGISTRY_SYSTEM_USERNAME);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        this.notifyEventServiceListeners();
     }
 
     protected void unsetEventBroker(EventBroker eventBroker) {
@@ -197,20 +168,8 @@ public class DataServicesDSComponent {
         return eventBroker;
     }
 
-    public static void registerEventBrokerServiceListener(
-            EventBrokerServiceListener listener) {
-        synchronized (dsComponentLock) {
-            EventBroker eventBroker = getEventBroker();
-            if (eventBroker == null) {
-                eventBrokerServiceListeners.add(listener);
-            } else {
-                listener.setEventBroker(eventBroker);
-            }
-        }
-    }
-
     public static String getUsername() {
-        return CarbonContextHolder.getCurrentCarbonContextHolder().getUsername();
+        return CarbonContext.getCurrentContext().getUsername();
     }
 
     public static SecretCallbackHandlerService getSecretCallbackHandlerService() {
@@ -231,4 +190,16 @@ public class DataServicesDSComponent {
         DataServicesDSComponent.secretCallbackHandlerService = null;
     }
 
+    protected void setTenantRegistryLoader(TenantRegistryLoader tenantRegLoader) {
+    	DataServicesDSComponent.tenantRegLoader = tenantRegLoader;
+    }
+
+    protected void unsetTenantRegistryLoader(TenantRegistryLoader tenantRegLoader) {
+    	DataServicesDSComponent.tenantRegLoader = null;
+    }
+
+    public static TenantRegistryLoader getTenantRegistryLoader(){
+        return DataServicesDSComponent.tenantRegLoader;
+    }
+    
 }

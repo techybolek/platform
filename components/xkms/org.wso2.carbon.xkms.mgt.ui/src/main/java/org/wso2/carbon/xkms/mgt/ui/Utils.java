@@ -40,16 +40,16 @@ public class Utils {
             paramValue = request.getParameter(XKMSMgtConstants.KEY_STORE_PASSWORD);
             configData.setKeystorePassword(paramValue);
         }
-        if (request.getParameter(XKMSMgtConstants.SERVER_CERT_ALIACE) != null) {
-            paramValue = request.getParameter(XKMSMgtConstants.SERVER_CERT_ALIACE);
+        if (request.getParameter(XKMSMgtConstants.SERVER_CERT_ALIAS) != null) {
+            paramValue = request.getParameter(XKMSMgtConstants.SERVER_CERT_ALIAS);
             configData.setServerCertAlias(paramValue);
         }
         if (request.getParameter(XKMSMgtConstants.SERVER_KEY_PASSWORD) != null) {
             paramValue = request.getParameter(XKMSMgtConstants.SERVER_KEY_PASSWORD);
             configData.setServerKeyPassword(paramValue);
         }
-        if (request.getParameter(XKMSMgtConstants.ISSUER_CERT_ALIACE) != null) {
-            paramValue = request.getParameter(XKMSMgtConstants.ISSUER_CERT_ALIACE);
+        if (request.getParameter(XKMSMgtConstants.ISSUER_CERT_ALIAS) != null) {
+            paramValue = request.getParameter(XKMSMgtConstants.ISSUER_CERT_ALIAS);
             configData.setIssuerCertAlias(paramValue);
         }
         if (request.getParameter(XKMSMgtConstants.ISSUER_KEY_PASSWORD) != null) {

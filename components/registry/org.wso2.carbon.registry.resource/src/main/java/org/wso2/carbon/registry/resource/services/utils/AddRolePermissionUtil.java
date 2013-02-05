@@ -49,6 +49,12 @@ public class AddRolePermissionUtil {
             log.error(msg, e);
             throw new RegistryException(msg, e);
         }
+        if (!userRealm.getAuthorizationManager().isUserAuthorized(userRegistry.getUserName(),pathToAuthorize,
+                AccessControlConstants.AUTHORIZE)) {
+            String msg = userRegistry.getUserName()+" is not allowed to authorize resource " + pathToAuthorize;
+            log.error(msg);
+            throw new RegistryException(msg);
+        }
 
         try {
             String notificationResponse = "The following authorization has been added.";

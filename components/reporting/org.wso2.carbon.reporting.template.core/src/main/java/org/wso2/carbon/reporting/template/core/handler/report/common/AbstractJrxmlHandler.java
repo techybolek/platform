@@ -76,9 +76,9 @@ public abstract class AbstractJrxmlHandler {
     }
 
     private void createXMLObjectModel(String jrxmlFile) throws FileNotFoundException,
-            XMLStreamException, ReportingException {
+        XMLStreamException, ReportingException {
         XMLInputFactory xif = XMLInputFactory.newInstance();
-
+        xif.setProperty("javax.xml.stream.isCoalescing", true);
         InputStream jrxmlInputStream = getJrxmlFileContent(jrxmlFile);
         XMLStreamReader reader = xif.createXMLStreamReader(jrxmlInputStream);
 

@@ -24,6 +24,9 @@ public final class OAuthConstants {
 	public static final String ASSOCIATION_OAUTH_CONSUMER_TOKEN = "ASSOCIATION_OAUTH_CONSUMER_TOKEN";
 	public static final String OAUTHORIZED_USER = "OAUTHORIZED_USER";
 
-	
+	// OAuth 2.0 parameters
+	public static final String BEARER = "Bearer ";
+	public static final String ACCESS_TOKEN = "access_token";
+	public static final String BEARER_TOKEN_TYPE="bearer";
 
 }

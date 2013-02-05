@@ -93,13 +93,13 @@ public class TestLDAPConfigurationBuilder extends TestCase {
         assertEquals(admin.getAdminCommonName(), "me");
         assertEquals(admin.getAdminLastName(), "admin");
         assertEquals(admin.getAdminEmail(), "admin@example.com");
-        assertEquals(admin.getAdminPassword(), "password");
-        assertEquals(admin.getPasswordAlgorithm(), PasswordAlgorithm.MD5);
+        assertEquals(admin.getAdminPassword(), "admin");
+        assertEquals(admin.getPasswordAlgorithm(), PasswordAlgorithm.SHA);
 
         AdminGroupInfo groupInfo = admin.getGroupInformation();
 
         //assertEquals(groupInfo.getAdminRoleName(), "super");
-        assertEquals(groupInfo.getGroupNameAttribute(), "root");
+        assertEquals(groupInfo.getGroupNameAttribute(), "cn");
         assertEquals(groupInfo.getMemberNameAttribute(), "member");
 
 

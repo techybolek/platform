@@ -22,14 +22,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>registry.profiles-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.registry.profiles.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Registry Profiles Feature</name>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.0</version>
     <url>http://wso2.org</url>
     <description>
         Ability to associate a profile with a user account on carbon, which will be stored on the
@@ -66,7 +67,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.registry.profiles</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.registry.core.common:${registry.core.feature.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.registry.core.server:${registry.core.feature.version}</importFeatureDef>

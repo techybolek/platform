@@ -21,8 +21,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.core.AgentCallback;
+import org.wso2.carbon.databridge.core.RawDataAgentCallback;
 import org.wso2.carbon.databridge.core.exception.EventConversionException;
-import org.wso2.carbon.databridge.core.internal.utils.EventComposite;
+import org.wso2.carbon.databridge.core.Utils.EventComposite;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -36,11 +37,13 @@ public class QueueWorker implements Runnable {
 
     private BlockingQueue<EventComposite> eventQueue;
     private List<AgentCallback> subscribers;
+    private List<RawDataAgentCallback> rawDataSubscribers;
 
     public QueueWorker(BlockingQueue<EventComposite> queue,
-                       List<AgentCallback> subscribers) {
+                       List<AgentCallback> subscribers, List<RawDataAgentCallback> rawDataSubscribers) {
         this.eventQueue = queue;
         this.subscribers = subscribers;
+        this.rawDataSubscribers = rawDataSubscribers;
     }
 
     public void run() {
@@ -51,27 +54,45 @@ public class QueueWorker implements Runnable {
                 // If the numbers go above 1000+, then it probably will.
                 // Typically, for c = 300, n = 1000, the number stays < 100
                 log.debug(eventQueue.size() + " messages in queue before " +
-                          Thread.currentThread().getName() + " worker has polled queue");
+                        Thread.currentThread().getName() + " worker has polled queue");
             }
             EventComposite eventComposite = eventQueue.poll();
-            try {
-                eventList = eventComposite.getEventConverter().toEventList(eventComposite.getEventBundle(),
-                                                                           eventComposite.getStreamTypeHolder());
-                if (log.isDebugEnabled()) {
-                    log.debug("Dispatching event to " + subscribers.size() + " subscriber(s)");
+
+            if (rawDataSubscribers.size() > 0) {
+                for (RawDataAgentCallback agentCallback : rawDataSubscribers) {
+                    try {
+                        agentCallback.receive(eventComposite);
+                    } catch (Throwable e) {
+                        log.error("Error in passing event composite " + eventComposite + " to subscriber " + agentCallback, e);
+                    }
                 }
-                for (AgentCallback agentCallback : subscribers) {
-                    agentCallback.receive(eventList, eventComposite.getAgentSession().getCredentials());
+            }
+            if (subscribers.size() > 0) {
+                try {
+                    eventList = eventComposite.getEventConverter().toEventList(eventComposite.getEventBundle(),
+                            eventComposite.getStreamTypeHolder());
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("Dispatching event to " + subscribers.size() + " subscriber(s)");
+                    }
+                    for (AgentCallback agentCallback : subscribers) {
+                        try {
+                            agentCallback.receive(eventList, eventComposite.getAgentSession().getCredentials());
+                        } catch (Throwable e) {
+                            log.error("Error in passing event eventList " + eventList + " to subscriber " + agentCallback, e);
+                        }
+                    }
+                    if (log.isDebugEnabled()) {
+                        log.debug(eventQueue.size() + " messages in queue after " +
+                                Thread.currentThread().getName() + " worker has finished work");
+                    }
+
+                } catch (EventConversionException re) {
+                    log.error("Wrongly formatted event sent for " + eventComposite.getStreamTypeHolder().getDomainName(), re);
                 }
-                if (log.isDebugEnabled()) {
-                    log.debug(eventQueue.size() + " messages in queue after " +
-                              Thread.currentThread().getName() + " worker has finished work");
-                }
-            } catch (EventConversionException re) {
-                log.error("Wrongly formatted event sent for " + eventComposite.getStreamTypeHolder().getDomainName(), re);
             }
         } catch (Throwable e) {
-            log.error("Error in passing events " + eventList + " to subscribers " + subscribers, e);
+            log.error("Error in passing events " + eventList + " to subscribers " + subscribers + " " + rawDataSubscribers, e);
         }
     }
 

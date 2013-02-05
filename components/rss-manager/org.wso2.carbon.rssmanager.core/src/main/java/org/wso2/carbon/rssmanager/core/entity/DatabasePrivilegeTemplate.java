@@ -20,19 +20,23 @@ package org.wso2.carbon.rssmanager.core.entity;
 
 public class DatabasePrivilegeTemplate {
 
+    private int id;
+
     private String name;
 
     private DatabasePrivilegeSet privileges;
 
     private int tenantId;
 
-    public DatabasePrivilegeTemplate(String name, DatabasePrivilegeSet privileges) {
+    public DatabasePrivilegeTemplate(int id, String name, DatabasePrivilegeSet privileges) {
+        this.id = id;
         this.name = name;
         this.privileges = privileges;
     }
 
-    public DatabasePrivilegeTemplate(String name, DatabasePrivilegeSet privileges,
+    public DatabasePrivilegeTemplate(int id, String name, DatabasePrivilegeSet privileges,
                                      int tenantId) {
+        this.id = id;
         this.name = name;
         this.privileges = privileges;
         this.tenantId = tenantId;
@@ -64,4 +68,12 @@ public class DatabasePrivilegeTemplate {
         this.tenantId = tenantId;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
+    
 }

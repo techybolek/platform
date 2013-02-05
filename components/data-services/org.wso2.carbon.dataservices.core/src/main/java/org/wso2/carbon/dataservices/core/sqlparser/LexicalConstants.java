@@ -114,4 +114,7 @@ public class LexicalConstants {
     public static final String COLUMNS="COLUMNS";
 
     public static final String QUESTION_MARK = "?";
+    public static final String RETURN = "\r";
+    public static final String NEW_LINE = "\n";
+
 }

@@ -19,6 +19,8 @@ package org.wso2.carbon.cep.core;
 import org.wso2.carbon.cep.core.mapping.input.Input;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -47,35 +49,30 @@ public class Bucket {
     /**
      * query list of this bucket.
      */
-    private Map<Integer,Query> queries;
+    private Map<Integer, Query> queries;
 
     /**
      * Inputs for this bucket
-     * */
+     */
     private List<Input> inputs;
 
     /**
      * Owner (Name of the person who created the bucket)
-     * */
+     */
     private String owner;
-
-    /**
-     * Permission to over write the bucket details, if already stored in registry
-     * */
-    private boolean overWriteRegistry = false;
 
     /**
      * Configuration related to engine providers
      */
-    private Properties providerConfiguration=null;
+    private Properties providerConfigurationProperties = null;
 
 
     public Bucket() {
-        this.queries = new ConcurrentHashMap<Integer,Query>();
+        this.queries = new ConcurrentHashMap<Integer, Query>();
         this.inputs = new ArrayList<Input>();
     }
 
-    public void addQuery(Query query){
+    public void addQuery(Query query) {
         this.queries.put(query.getQueryIndex(), query);
     }
 
@@ -105,17 +102,29 @@ public class Bucket {
 
 
     public List<Query> getQueries() {
-         return new ArrayList (queries.values());
+        List<Query> queryList = new ArrayList(queries.values());
+        Collections.sort(queryList, new SortByQueryIndex());
+        return queryList;
     }
 
-    public Map<Integer,Query> getQueriesMap(){
+    class SortByQueryIndex implements Comparator<Query> {
+
+        public int compare(Query o1, Query o2) {
+            return o1.getQueryIndex() - o2.getQueryIndex();
+        }
+
+
+    }
+
+
+    public Map<Integer, Query> getQueriesMap() {
         return queries;
     }
 
     public void setQueries(List<Query> queries) {
         if (queries != null) {
-            for (Query query : queries){
-                this.queries.put(query.getQueryIndex(),query);
+            for (Query query : queries) {
+                this.queries.put(query.getQueryIndex(), query);
             }
         }
     }
@@ -128,44 +137,47 @@ public class Bucket {
         this.inputs = inputs;
     }
 
-    public void addInput(Input input){
+    public void addInput(Input input) {
         this.inputs.add(input);
     }
-    public Input getInput (String topic){
-        for(Input input : this.inputs){
-            if(input.getTopic().equals(topic.trim())){
+
+    public Input getInput(String topic) {
+        for (Input input : this.inputs) {
+            if (input.getTopic().equals(topic.trim())) {
                 return input;
             }
         }
         return null;
     }
-    public void removeInput(String topic){
-         int topicIndex = 0 ;
-         for(Input input : this.inputs) {
-             if (input.getTopic().equals(topic.trim())) {
-                 break;
-             }
-             topicIndex++;
-         }
+
+    public void removeInput(String topic) {
+        int topicIndex = 0;
+        for (Input input : this.inputs) {
+            if (input.getTopic().equals(topic.trim())) {
+                break;
+            }
+            topicIndex++;
+        }
         this.inputs.remove(topicIndex);
     }
 
-    public Query getQuery (String name){
-        for(Query query : this.queries.values()){
-            if(query.getName().equals(name.trim())){
+    public Query getQuery(String name) {
+        for (Query query : this.queries.values()) {
+            if (query.getName().equals(name.trim())) {
                 return query;
             }
         }
         return null;
     }
-    public void removeQuery(String name){
-         int queryIndex = 0 ;
-         for(Query query : this.queries.values()) {
-             if (query.getName().equals(name.trim())) {
-                 break;
-             }
-             queryIndex++;
-         }
+
+    public void removeQuery(String name) {
+        int queryIndex = 0;
+        for (Query query : this.queries.values()) {
+            if (query.getName().equals(name.trim())) {
+                break;
+            }
+            queryIndex++;
+        }
         this.queries.remove(queryIndex);
     }
 
@@ -177,20 +189,12 @@ public class Bucket {
         this.owner = owner;
     }
 
-    public boolean isOverWriteRegistry() {
-        return overWriteRegistry;
+    public void setProviderConfigurationProperties(Properties providerConfigurationProperties) {
+        this.providerConfigurationProperties = providerConfigurationProperties;
     }
 
-    public void setOverWriteRegistry(boolean overWriteRegistry) {
-        this.overWriteRegistry = overWriteRegistry;
-    }
-
-    public void setProviderConfiguration(Properties providerConfiguration) {
-        this.providerConfiguration = providerConfiguration;
-    }
-
-    public Properties getProviderConfiguration() {
-        return providerConfiguration;
+    public Properties getProviderConfigurationProperties() {
+        return providerConfigurationProperties;
     }
 }
 

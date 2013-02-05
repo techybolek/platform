@@ -28,7 +28,7 @@ public class MediationStatConfig {
     private String version = "1.0.0";
     private String nickName = "MediationStatsDataAgent";
     private String description = "Publish Mediation statistics events";
-
+    private boolean isLoadBalancingEnabled = false;
 
     public String getStreamName() {
         return streamName;
@@ -76,6 +76,8 @@ public class MediationStatConfig {
 
     public void setUrl(String url) {
         this.url = url;
+        String[] urls = this.url.split(",");
+        isLoadBalancingEnabled = urls != null && urls.length > 1;
     }
 
     public String getUserName() {
@@ -100,6 +102,10 @@ public class MediationStatConfig {
 
     public void setEnableMediationStats(boolean enableMediationStats) {
         this.enableMediationStats = enableMediationStats;
+    }
+
+    public boolean isLoadBalancingEnabled(){
+        return isLoadBalancingEnabled;
     }
 
 }

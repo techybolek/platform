@@ -53,7 +53,7 @@
     <Property name="instanceId">default</Property>
     <Property name="connectionPassword">admin</Property>
     <Property name="workingDirectory">.</Property>
-    <Property name="AdminEntryObjectClass">wso2Person</Property>
+    <Property name="AdminEntryObjectClass">scimPerson</Property>
     <Property name="allowAnonymousAccess">false</Property>
     <Property name="accessControlEnabled">true</Property>
     <Property name="denormalizeOpAttrsEnabled">false</Property>
@@ -80,7 +80,7 @@
   -->
   <DefaultPartition>
     <Property name="id">root</Property>
-    <Property name="realm">wso2.org</Property>    
+    <Property name="realm">WSO2.ORG</Property>    
     <Property name="kdcPassword">secret</Property>
     <Property name="ldapServerPrinciplePassword">randall</Property>
   </DefaultPartition>

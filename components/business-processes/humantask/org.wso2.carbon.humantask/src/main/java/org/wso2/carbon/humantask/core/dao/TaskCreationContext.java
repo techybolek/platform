@@ -29,7 +29,7 @@ import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.wso2.carbon.businessprocesses.common.Constants;
+import org.wso2.carbon.bpel.common.constants.Constants;
 
 /**
  * The context data required to create a task object.

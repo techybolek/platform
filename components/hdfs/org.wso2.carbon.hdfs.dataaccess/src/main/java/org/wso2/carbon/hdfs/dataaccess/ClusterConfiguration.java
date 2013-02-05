@@ -38,7 +38,7 @@ public class ClusterConfiguration {
 
 
     /**
-     * Set default Configuration required to conect with the HDFS cluster
+     * Set default Configuration required to connect with the HDFS cluster
      */
     public static void setDefaultConfiguration() {
 

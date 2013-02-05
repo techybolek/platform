@@ -46,7 +46,7 @@ public class TDriver implements Driver {
 
     public Connection connect(String url, Properties info) throws SQLException {
         Properties props = getProperties(url, info);
-        String conType = props.getProperty(Constants.DATA_SOURCE_TYPE);
+        String conType = props.getProperty(Constants.DRIVER_PROPERTIES.DATA_SOURCE_TYPE);
         return TConnectionFactory.createConnection(conType, props);
     }
 
@@ -71,13 +71,13 @@ public class TDriver implements Driver {
     }
 
     @SuppressWarnings("unchecked")
-	private Properties getProperties(String url, Properties info) throws SQLException {
+    private Properties getProperties(String url, Properties info) throws SQLException {
         if (url == null) {
             throw new SQLException("JDBC URL cannot be NULL");
         }
         Properties props = new Properties();
-        for (Enumeration<String> e = (Enumeration<String>) info.propertyNames(); 
-                    e.hasMoreElements();) {
+        for (Enumeration<String> e = (Enumeration<String>) info.propertyNames();
+             e.hasMoreElements();) {
             String key = e.nextElement();
             String value = info.getProperty(key);
             if (value != null) {
@@ -85,7 +85,7 @@ public class TDriver implements Driver {
             }
         }
         int pos = 0;
-        StringBuffer token = new StringBuffer();
+        StringBuilder token = new StringBuilder();
         pos = getNextTokenPos(url, pos, token);
         if (!Constants.JDBC_PREFIX.equalsIgnoreCase(token.toString())) {
             throw new SQLException("Malformed URL");
@@ -99,36 +99,89 @@ public class TDriver implements Driver {
                 !Constants.GSPRED_PREFIX.equalsIgnoreCase(token.toString())) {
             throw new SQLException("Malformed URL");
         }
-        props.setProperty(Constants.DATA_SOURCE_TYPE, token.toString());
+        props.setProperty(Constants.DRIVER_PROPERTIES.DATA_SOURCE_TYPE, token.toString());
         pos = getNextTokenPos(url, pos, token);
-        if (Constants.FILE_PATH.equals(token.toString())) {
+        if (Constants.DRIVER_PROPERTIES.FILE_PATH.equals(token.toString())) {
             isFilePath = true;
             pos = getNextTokenPos(url, pos, token);
             String propValue = token.toString();
             if (propValue == null || "".equals(propValue)) {
                 throw new SQLException("File path attribute is missing");
             }
-            props.setProperty(Constants.FILE_PATH, propValue);
+            props.setProperty(Constants.DRIVER_PROPERTIES.FILE_PATH, propValue);
         }
-        pos = getNextTokenPos(url, pos, token);
-        if (Constants.SHEET_NAME.equals(token.toString())) {
-             pos = getNextTokenPos(url, pos, token);
-            String propValue = token.toString();
-            if (propValue == null || "".equals(propValue)) {
-                throw new SQLException("File path attribute is missing");
-            }
-            props.setProperty(Constants.SHEET_NAME, propValue);
-        }
-        pos = getNextTokenPos(url, pos, token);
-        if (Constants.VISIBILITY.equals(token.toString())) {
+
+        Object dsType = props.getProperty(Constants.DRIVER_PROPERTIES.DATA_SOURCE_TYPE);
+        if (dsType != null && Constants.GSPRED_PREFIX.equals(dsType.toString())) {
             pos = getNextTokenPos(url, pos, token);
-            props.setProperty(Constants.VISIBILITY, token.toString());
+            if (Constants.DRIVER_PROPERTIES.SHEET_NAME.equals(token.toString())) {
+                pos = getNextTokenPos(url, pos, token);
+                String propValue = token.toString();
+                if (propValue == null || "".equals(propValue)) {
+                    throw new SQLException("Sheet name attribute is missing");
+                }
+                props.setProperty(Constants.DRIVER_PROPERTIES.SHEET_NAME, propValue);
+            }
         }
-        getNextTokenPos(url, pos, token);
+        Properties optionalProps = getOptionalProperties(url, pos, token);
+        /* check for maxColumns property */
+        this.checkForHasHeaderProperty(optionalProps);
+
+        for (Enumeration<String> e = (Enumeration<String>) optionalProps.propertyNames();
+             e.hasMoreElements();) {
+            String key = e.nextElement();
+            props.setProperty(key, optionalProps.getProperty(key));
+        }
         return props;
     }
 
-    private int getNextTokenPos(String url, int pos, StringBuffer token) {
+    private Properties getOptionalProperties(String url, int pos,
+                                             StringBuilder token) throws SQLException {
+        Properties optionalProps = new Properties();
+        token.setLength(0);
+        while (pos < url.length()) {
+            char c = url.charAt(pos++);
+            if (c != ';') {
+                token.append(c);
+            } else {
+                addProperty(optionalProps, token);
+                token.setLength(0);
+            }
+        }
+        if (token.length() > 0) {
+            addProperty(optionalProps, token);
+            token.setLength(0);
+        }
+        return optionalProps;
+    }
+
+    private void checkForHasHeaderProperty(Properties optionalProps) throws SQLException {
+        String hasHeader = (String) optionalProps.get(Constants.DRIVER_PROPERTIES.HAS_HEADER);
+        if (hasHeader != null && !Boolean.parseBoolean(hasHeader)) {
+            String maxColumns = (String) optionalProps.get(Constants.DRIVER_PROPERTIES.MAX_COLUMNS);
+            if (maxColumns == null) {
+                throw new SQLException("'hasHeader' attribute should be accompanied by the " +
+                        "attribute 'maxColumns'");
+            }
+            try {
+                Integer.parseInt(maxColumns);
+            } catch (Exception e) {
+                throw new SQLException("Invalid value specified for the attribute 'maxColumns'", e);
+            }
+        }
+    }
+
+    private void addProperty(Properties props, StringBuilder token) throws SQLException {
+        String propName = token.substring(0, token.indexOf(Constants.EQUAL));
+        if (!TDriverUtil.getAvailableDriverProperties().contains(propName)) {
+            throw new SQLException("Invalid driver property '" + propName + "' specified");
+        }
+        String propValue =
+                token.substring(token.indexOf(Constants.EQUAL) + 1, token.length());
+        props.setProperty(propName, propValue);
+    }
+
+    private int getNextTokenPos(String url, int pos, StringBuilder token) {
         token.setLength(0);
         while (pos < url.length()) {
             char c = url.charAt(pos++);

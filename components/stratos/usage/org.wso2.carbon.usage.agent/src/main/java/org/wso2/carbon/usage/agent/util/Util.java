@@ -18,12 +18,14 @@ package org.wso2.carbon.usage.agent.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.event.core.EventBroker;
 import org.wso2.carbon.event.core.exception.EventBrokerException;
 import org.wso2.carbon.event.core.subscription.Subscription;
 import org.wso2.carbon.event.core.util.EventBrokerConstants;
 import org.wso2.carbon.registry.core.config.RegistryContext;
+import org.wso2.carbon.statistics.services.SystemStatisticsUtil;
 import org.wso2.carbon.stratos.common.constants.StratosConstants;
 import org.wso2.carbon.usage.agent.beans.BandwidthUsage;
 import org.wso2.carbon.usage.agent.config.UsageAgentConfiguration;
@@ -32,6 +34,7 @@ import org.wso2.carbon.usage.agent.persist.UsageDataPersistenceManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.File;
 
@@ -51,6 +54,8 @@ public class Util {
     //private static EventBrokerService eventBrokerService;
     private static EventBroker eventBrokerService;
     private static ServerConfigurationService serverConfiguration;
+
+    private static SystemStatisticsUtil systemStatisticsUtil;
 
     public static synchronized void setRealmService(RealmService service) {
         if (realmService == null) {
@@ -84,8 +89,10 @@ public class Util {
                 StratosConstants.MULTITENANCY_CONFIG_FOLDER + File.separator + Util.USAGE_THROTTLING_AGENT_CONFIG_FILE);
         persistenceManager = new UsageDataPersistenceManager(new UsageAgentConfiguration(usageAgentConfigFile));
         //start a thread for persisting bandwidth Usage statistics
-        persistenceManager.scheduleBandwidthUsageDataRetrievalTask();
-        persistenceManager.scheduleUsageDataPersistenceTask();
+        if("true".equals(ServerConfiguration.getInstance().getFirstProperty("EnableMetering"))){
+            persistenceManager.scheduleBandwidthUsageDataRetrievalTask();
+            persistenceManager.scheduleUsageDataPersistenceTask();
+        }
     }
 
     public static void addToPersistingControllerQueue(BandwidthUsage usage) {
@@ -108,6 +115,13 @@ public class Util {
         Util.serverConfiguration = serverConfiguration;
     }
 
+    public static SystemStatisticsUtil getSystemStatisticsUtil() {
+        return systemStatisticsUtil;
+    }
+
+    public static void setSystemStatisticsUtil(SystemStatisticsUtil systemStatisticsUtil) {
+        Util.systemStatisticsUtil = systemStatisticsUtil;
+    }
 
     /**
      * method to create static subscription to BAM
@@ -147,5 +161,15 @@ public class Util {
                 throw e;
             }
         }
+    }
+    
+    public static int getTenantId(String toAddress) throws Exception {
+        int index = toAddress.indexOf("/t/");
+        int tenantId = MultitenantConstants.INVALID_TENANT_ID;
+        if(index >= 0){
+            String tenantDomain = toAddress.substring(index+2, toAddress.indexOf("/", index+3));
+            tenantId = getRealmService().getTenantManager().getTenantId(tenantDomain);
+        }
+        return tenantId;
     }
 }

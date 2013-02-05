@@ -18,10 +18,16 @@
 package org.wso2.carbon.automation.core.utils.fileutils;
 
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
 
 
 public class FileManager {
@@ -65,10 +71,18 @@ public class FileManager {
 
     public static void writeToFile(String filePath, String content) throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true));
-        writer.write(content);
-        writer.newLine();
-        writer.flush();
-        writer.close();
+        try {
+            writer.write(content);
+            writer.newLine();
+            writer.flush();
+        } finally {
+            try {
+                writer.close();
+            } catch (IOException e) {
+                //ignore
+            }
+        }
+
 
     }
 
@@ -78,13 +92,127 @@ public class FileManager {
         FileReader in = new FileReader(sourceFile);
         FileWriter out = new FileWriter(destinationFile);
         int c;
-
-        while ((c = in.read()) != -1) {
-            out.write(c);
+        try {
+            while ((c = in.read()) != -1) {
+                out.write(c);
+            }
+        } finally {
+            try {
+                in.close();
+            } catch (IOException e) {
+                //ignore
+            }
+            try {
+                out.close();
+            } catch (IOException e) {
+                //ignore
+            }
         }
 
-        in.close();
-        out.close();
+    }
+
+    public static File copyResourceToFileSystem(String sourcePath, String targetPath,
+                                                String fileName)
+            throws IOException {
+
+        File file = new File(targetPath + File.separator + fileName);
+        if (file.exists()) {
+            FileUtils.deleteQuietly(file);
+        }
+
+        FileUtils.touch(file);
+        OutputStream os = FileUtils.openOutputStream(file);
+
+        InputStream is = new FileInputStream(sourcePath);
+
+        if (is != null) {
+            byte[] data = new byte[1024];
+            int len;
+            while ((len = is.read(data)) != -1) {
+                os.write(data, 0, len);
+            }
+            os.flush();
+            os.close();
+            is.close();
+        }
+        return file;
+    }
+
+
+    public void copyJarFile(String sourceFileLocationWithFileName, String destinationDirectory)
+            throws IOException, URISyntaxException {
+        File sourceFile = new File(getClass().getResource(sourceFileLocationWithFileName).toURI());
+        File destinationFileDirectory = new File(destinationDirectory);
+        JarFile jarFile = new JarFile(sourceFile);
+        String fileName = jarFile.getName();
+        String fileNameLastPart = fileName.substring(fileName.lastIndexOf(File.separator));
+        File destinationFile = new File(destinationFileDirectory, fileNameLastPart);
+
+        JarOutputStream jarOutputStream = new JarOutputStream(new FileOutputStream(destinationFile));
+        Enumeration<JarEntry> entries = jarFile.entries();
+
+        while (entries.hasMoreElements()) {
+            JarEntry jarEntry = entries.nextElement();
+            InputStream inputStream = jarFile.getInputStream(jarEntry);
+
+            //jarOutputStream.putNextEntry(jarEntry);
+            //create a new jarEntry to avoid ZipException: invalid jarEntry compressed size
+            jarOutputStream.putNextEntry(new JarEntry(jarEntry.getName()));
+            byte[] buffer = new byte[4096];
+            int bytesRead = 0;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                jarOutputStream.write(buffer, 0, bytesRead);
+            }
+            inputStream.close();
+            jarOutputStream.flush();
+            jarOutputStream.closeEntry();
+        }
+        jarOutputStream.close();
+    }
+
+    public static void copyJarFile(File sourceFile, String destinationDirectory)
+            throws IOException {
+        File destinationFileDirectory = new File(destinationDirectory);
+        JarFile jarFile = new JarFile(sourceFile);
+        String fileName = jarFile.getName();
+        String fileNameLastPart = fileName.substring(fileName.lastIndexOf(File.separator));
+        File destinationFile = new File(destinationFileDirectory, fileNameLastPart);
+        JarOutputStream jarOutputStream = null;
+        try {
+            jarOutputStream = new JarOutputStream(new FileOutputStream(destinationFile));
+            Enumeration<JarEntry> entries = jarFile.entries();
+
+            while (entries.hasMoreElements()) {
+                JarEntry jarEntry = entries.nextElement();
+                InputStream inputStream = jarFile.getInputStream(jarEntry);
+
+                //jarOutputStream.putNextEntry(jarEntry);
+                //create a new jarEntry to avoid ZipException: invalid jarEntry compressed size
+                jarOutputStream.putNextEntry(new JarEntry(jarEntry.getName()));
+                byte[] buffer = new byte[4096];
+                int bytesRead = 0;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    jarOutputStream.write(buffer, 0, bytesRead);
+                }
+                inputStream.close();
+                jarOutputStream.flush();
+                jarOutputStream.closeEntry();
+            }
+        } finally {
+            if (jarOutputStream != null) {
+                try {
+                    jarOutputStream.close();
+                } catch (IOException e) {
+
+                }
+            }
+        }
+
+    }
+
+    public static boolean deleteFile(String filePathWithFileName) {
+        File jarFile = new File(filePathWithFileName);
+        return !jarFile.isDirectory() && jarFile.delete();
     }
 }
 

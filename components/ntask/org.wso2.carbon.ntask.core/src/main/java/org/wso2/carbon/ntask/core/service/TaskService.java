@@ -15,6 +15,9 @@
  */
 package org.wso2.carbon.ntask.core.service;
 
+import java.util.List;
+import java.util.Set;
+
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.core.TaskManager;
 
@@ -32,13 +35,13 @@ public interface TaskService {
 	public TaskManager getTaskManager(String taskType) throws TaskException;
 	
 	/**
-	 * This method is called when a new tenant has arrived, and respective task managers should be
-	 * initialized for this tenant.
-     * @param tid tenant id of the newly arrived tenant 
+	 * Returns all the tenant task managers for a specific task type
+	 * @param taskType The task type
+	 * @return The list of task managers
 	 * @throws TaskException
 	 */
-	public void newTenantArrived(int tid) throws TaskException;
-	
+	public List<TaskManager> getAllTenantTaskManagersForType(String taskType) throws TaskException;
+
 	/**
 	 * This method registers a task type in the server,
 	 * this must be done for the task managers for the current tenant
@@ -49,8 +52,42 @@ public interface TaskService {
 	public void registerTaskType(String taskType) throws TaskException;
 	
 	/**
+	 * Retrieves all the registered task types.
+	 * @return The task types
+	 */
+	public Set<String> getRegisteredTaskTypes();
+	
+	/**
 	 * Notifies the task service implementation that the server is fully initialized.
 	 */
 	public void serverInitialized();
+	
+	/**
+	 * Returns the current task server configuration.
+	 * @return The task server configuration
+	 */
+	public TaskServiceConfiguration getServerConfiguration();
+	
+	public static interface TaskServiceConfiguration {
+		
+		TaskServerMode getTaskServerMode();
+		
+		int getTaskServerCount();
+		
+		String getTaskClientDispatchAddress();
+		
+		String getRemoteServerAddress();
+		
+		String getRemoteServerUsername();
+		
+		String getRemoteServerPassword();
+		
+	}
+	
+	public static enum TaskServerMode {
+		STANDALONE,
+		CLUSTERED,
+		REMOTE
+	}
 	
 }

@@ -37,10 +37,17 @@ import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.utils.GUID;
 import org.wso2.carbon.bpel.core.ode.integration.config.BPELServerConfiguration;
+import org.wso2.carbon.bpel.core.ode.integration.jmx.Instance;
+import org.wso2.carbon.bpel.core.ode.integration.jmx.InstanceStatusMonitor;
+import org.wso2.carbon.bpel.core.ode.integration.jmx.Processes;
 import org.wso2.carbon.bpel.core.ode.integration.store.*;
 import org.wso2.carbon.bpel.core.ode.integration.utils.BPELDatabaseCreator;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.MBeanRegistrar;
 
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.NotCompliantMBeanException;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import java.io.File;
@@ -163,6 +170,7 @@ public final class BPELServerImpl implements BPELServer {
             log.debug("Starting scheduler..");
         }
         scheduler.start();
+        registerMBeans();
     }
 
     /**
@@ -608,7 +616,7 @@ public final class BPELServerImpl implements BPELServer {
     private void registerEventListeners() {
         /* let's always register the debugging listener */
         odeBpelServer.registerBpelEventListener(new DebugBpelEventListener());
-//        bpelServer.registerBpelEventListener(new CustomEventListener());
+
 
         List<String> eventListeners = bpelServerConfiguration.getEventListeners();
         if (!eventListeners.isEmpty()) {
@@ -870,6 +878,24 @@ public final class BPELServerImpl implements BPELServer {
             super(cause);
         }
     }
+
+
+
+    public void registerMBeans() throws Exception, MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException {
+        log.info("Registering MBeans");
+        Processes processMBean= new Processes();
+        Instance instanceMBean= new Instance();
+        InstanceStatusMonitor statusMonitorMBean= InstanceStatusMonitor.getInstanceStatusMonitor();
+//        ObjectName instanceStatusObjectName= new ObjectName("org.wso2.carbon.bpel.core.ode.integration.jmx:type=InstanceStatusMonitor");
+//        ObjectName processObjectName= new ObjectName("org.wso2.carbon.bpel.core.ode.integration.jmx:type=Process");
+//        ObjectName instanceObjectName= new ObjectName("org.wso2.carbon.bpel.core.ode.integration.jmx:type=Instance");
+        MBeanRegistrar.registerMBean(processMBean,"org.wso2.carbon.bpel.core.ode.integration.jmx:type=Process");
+        MBeanRegistrar.registerMBean(instanceMBean, "org.wso2.carbon.bpel.core.ode.integration.jmx:type=Instance");
+        MBeanRegistrar.registerMBean(statusMonitorMBean, "org.wso2.carbon.bpel.core.ode.integration.jmx:type=InstanceStatusMonitor");
+
+
+    }
+
 
 
 }

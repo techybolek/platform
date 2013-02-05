@@ -78,7 +78,7 @@ public class DBLookupMediatorClient {
 		}
 
         for(WSDataSourceInfo info : wsDataSourceInfo){
-            sourceList.add(info.getDsMetaInfo().getName());
+            sourceList.add(info.getDsMetaInfo().getJndiConfig().getName());
         }
 
 		return sourceList;

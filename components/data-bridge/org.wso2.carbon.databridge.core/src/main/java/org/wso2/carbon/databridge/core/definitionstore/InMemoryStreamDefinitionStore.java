@@ -22,8 +22,7 @@ import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The in memory implementation of the Event Stream definition Store
@@ -31,14 +30,34 @@ import java.util.Map;
 public class InMemoryStreamDefinitionStore extends
         AbstractStreamDefinitionStore {
 
-    private Map<String, HashMap<String, StreamDefinition>> streamDefinitionStore = new HashMap<String, HashMap<String, StreamDefinition>>();
-    private Map<String, HashMap<String, String>> streamIdStore = new HashMap<String, HashMap<String, String>>();
+    private ConcurrentHashMap<String, ConcurrentHashMap<String, StreamDefinition>> streamDefinitionStore = new ConcurrentHashMap<String, ConcurrentHashMap<String, StreamDefinition>>();
+    private ConcurrentHashMap<String, ConcurrentHashMap<String, String>> streamIdStore = new ConcurrentHashMap<String, ConcurrentHashMap<String, String>>();
+
+    @Override
+    protected boolean removeStreamId(Credentials credentials, String streamIdKey) {
+        if (streamIdStore.containsKey(credentials.getDomainName())) {
+            if (null != streamIdStore.get(credentials.getDomainName()).remove(streamIdKey)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    protected boolean removeStreamDefinition(Credentials credentials, String streamId) {
+        if (streamDefinitionStore.containsKey(credentials.getDomainName())) {
+            if (null != streamDefinitionStore.get(credentials.getDomainName()).remove(streamId)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     protected void saveStreamIdToStore(Credentials credentials, String streamIdKey, String streamId)
             throws StreamDefinitionStoreException {
         if (!streamIdStore.containsKey(credentials.getDomainName())) {
-            streamIdStore.put(credentials.getDomainName(), new HashMap<String, String>());
+            streamIdStore.put(credentials.getDomainName(), new ConcurrentHashMap<String, String>());
         }
         streamIdStore.get(credentials.getDomainName()).put(streamIdKey, streamId);
     }
@@ -49,7 +68,7 @@ public class InMemoryStreamDefinitionStore extends
                                                StreamDefinition streamDefinition)
             throws StreamDefinitionStoreException {
         if (!streamDefinitionStore.containsKey(credentials.getDomainName())) {
-            streamDefinitionStore.put(credentials.getDomainName(), new HashMap<String, StreamDefinition>());
+            streamDefinitionStore.put(credentials.getDomainName(), new ConcurrentHashMap<String, StreamDefinition>());
         }
         streamDefinitionStore.get(credentials.getDomainName()).put(streamId, streamDefinition);
     }
@@ -65,7 +84,7 @@ public class InMemoryStreamDefinitionStore extends
 
 
     public StreamDefinition getStreamDefinitionFromStore(Credentials credentials,
-                                                              String streamId) throws StreamDefinitionStoreException {
+                                                         String streamId) throws StreamDefinitionStoreException {
         if (streamDefinitionStore.get(credentials.getDomainName()) != null) {
             return streamDefinitionStore.get(credentials.getDomainName()).get(streamId);
         }
@@ -75,7 +94,7 @@ public class InMemoryStreamDefinitionStore extends
 
     public Collection<StreamDefinition> getAllStreamDefinitionsFromStore(
             Credentials credentials) {
-        HashMap<String, StreamDefinition> map = streamDefinitionStore.get(credentials.getDomainName());
+        ConcurrentHashMap<String, StreamDefinition> map = streamDefinitionStore.get(credentials.getDomainName());
         if (map != null) {
             return map.values();
         }

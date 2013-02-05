@@ -45,6 +45,11 @@ public class DefaultResourceFinder implements PIPResourceFinder{
     }
 
     @Override
+    public String getModuleName() {
+        return "Default Resource Finder";
+    }
+
+    @Override
     public Set<String> findDescendantResources(String parentResourceId, EvaluationCtx context) throws Exception {
         Set<String> resourceSet = new HashSet<String>();
         registry = EntitlementServiceComponent.getRegistryService().getSystemRegistry(CarbonContext.

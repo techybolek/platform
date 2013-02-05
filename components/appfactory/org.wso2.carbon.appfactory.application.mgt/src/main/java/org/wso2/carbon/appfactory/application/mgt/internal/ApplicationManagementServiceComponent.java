@@ -23,6 +23,8 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.appfactory.application.mgt.service.ApplicationManagementService;
 import org.wso2.carbon.appfactory.application.mgt.util.Util;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
+import org.wso2.carbon.appfactory.core.ApplicationEventsListener;
+import org.wso2.carbon.appfactory.core.ContinuousIntegrationSystemDriver;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -47,6 +49,18 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  *               cardinality="1..1" policy="dynamic"
  *               bind="setAppFactoryConfiguration"
  *               unbind="unsetAppFactoryConfiguration"
+ *               
+ *@scr.reference name="appfactory.continuous.integration"
+ *               interface="org.wso2.carbon.appfactory.core.ContinuousIntegrationSystemDriver"
+ *               cardinality="0..1" policy="dynamic"
+ *               bind="setContinuousIntegrationSystemDriver"
+ *               unbind="unsetContinuousIntegrationSystemDriver"
+ *               
+ @scr.reference name="appfactory.application.events.listener"
+ *               interface="org.wso2.carbon.appfactory.core.ApplicationEventsListener"
+ *               cardinality="0..n" policy="dynamic"
+ *               bind="setApplicationEventsListener"
+ *               unbind="unsetApplicationEventsListener"
  */
 public class ApplicationManagementServiceComponent {
     private static Log log = LogFactory.getLog(ApplicationManagementServiceComponent.class);
@@ -104,4 +118,20 @@ public class ApplicationManagementServiceComponent {
    protected void unsetAppFactoryConfiguration(AppFactoryConfiguration configuration){
        Util.setConfiguration(null);
    }
+
+   public static void setContinuousIntegrationSystemDriver(ContinuousIntegrationSystemDriver continuousIntegrationSystemDriver) {
+      Util.setContinuousIntegrationSystemDriver(continuousIntegrationSystemDriver);
+   }
+
+   public static void unsetContinuousIntegrationSystemDriver(ContinuousIntegrationSystemDriver continuousIntegrationSystemDriver) {
+       Util.setContinuousIntegrationSystemDriver(null);
+   }
+   
+    public static void setApplicationEventsListener(ApplicationEventsListener applicationEventsListener) {
+        Util.addApplicationEventsListener(applicationEventsListener);
+    }
+
+    public static void unsetApplicationEventsListener(ApplicationEventsListener applicationEventsListener) {
+        Util.removeApplicationEventsListener(applicationEventsListener);
+    }
 }

@@ -2,7 +2,7 @@
 <definitions xmlns="http://ws.apache.org/ns/synapse">
 
     <!--  If condition satisfied send it to service -->
-    <sequence name="cnd1_seq" trace="enable">
+    <sequence name="cnd2_seq">
         <log>
             <property name="message"
                       value="**********Conditional Router Test Condition Satisfied **************"/>
@@ -31,7 +31,7 @@
 
     <!-- StockQuoteProxy -->
 
-    <proxy name="SimpleStockQuoteServiceProxy" transports="https http" startOnLoad="true" trace="disable">
+    <proxy name="conditionalRouterWithManyRoutesProxy" transports="https http" startOnLoad="true" trace="disable">
 
         <target>
             <inSequence>
@@ -48,7 +48,7 @@
                             <!-- url means To address -->
                             <match type="url" regex=".*SimpleStockQuoteService.*"/>
                         </condition>
-                        <target sequence="cnd1_seq"/>
+                        <target sequence="cnd2_seq"/>
                     </conditionalRoute>
 
                     <conditionalRoute breakRoute="false">
@@ -56,105 +56,105 @@
                             <!-- url means To address -->
                             <match type="url" regex=".*SimpleStockQuoteService.*"/>
                         </condition>
-                        <target sequence="cnd1_seq"/>
+                        <target sequence="cnd2_seq"/>
                     </conditionalRoute>
                     <conditionalRoute breakRoute="false">
                         <condition>
                             <!-- url means To address -->
                             <match type="url" regex=".*SimpleStockQuoteService.*"/>
                         </condition>
-                        <target sequence="cnd1_seq"/>
+                        <target sequence="cnd2_seq"/>
                     </conditionalRoute>
                     <conditionalRoute breakRoute="false">
                         <condition>
                             <!-- url means To address -->
                             <match type="url" regex=".*SimpleStockQuoteService.*"/>
                         </condition>
-                        <target sequence="cnd1_seq"/>
+                        <target sequence="cnd2_seq"/>
                     </conditionalRoute>
                     <conditionalRoute breakRoute="false">
                         <condition>
                             <!-- url means To address -->
                             <match type="url" regex=".*SimpleStockQuoteService.*"/>
                         </condition>
-                        <target sequence="cnd1_seq"/>
+                        <target sequence="cnd2_seq"/>
                     </conditionalRoute>
                     <conditionalRoute breakRoute="false">
                         <condition>
                             <!-- url means To address -->
                             <match type="url" regex=".*SimpleStockQuoteService.*"/>
                         </condition>
-                        <target sequence="cnd1_seq"/>
+                        <target sequence="cnd2_seq"/>
                     </conditionalRoute>
                     <conditionalRoute breakRoute="false">
                         <condition>
                             <!-- url means To address -->
                             <match type="url" regex=".*SimpleStockQuoteService.*"/>
                         </condition>
-                        <target sequence="cnd1_seq"/>
+                        <target sequence="cnd2_seq"/>
                     </conditionalRoute>
                     <conditionalRoute breakRoute="false">
                         <condition>
                             <!-- url means To address -->
                             <match type="url" regex=".*SimpleStockQuoteService.*"/>
                         </condition>
-                        <target sequence="cnd1_seq"/>
+                        <target sequence="cnd2_seq"/>
                     </conditionalRoute>
                     <conditionalRoute breakRoute="false">
                         <condition>
                             <!-- url means To address -->
                             <match type="url" regex=".*SimpleStockQuoteService.*"/>
                         </condition>
-                        <target sequence="cnd1_seq"/>
+                        <target sequence="cnd2_seq"/>
                     </conditionalRoute>
                     <conditionalRoute breakRoute="false">
                         <condition>
                             <!-- url means To address -->
                             <match type="url" regex=".*SimpleStockQuoteService.*"/>
                         </condition>
-                        <target sequence="cnd1_seq"/>
+                        <target sequence="cnd2_seq"/>
                     </conditionalRoute>
                     <conditionalRoute breakRoute="false">
                         <condition>
                             <!-- url means To address -->
                             <match type="url" regex=".*SimpleStockQuoteService.*"/>
                         </condition>
-                        <target sequence="cnd1_seq"/>
+                        <target sequence="cnd2_seq"/>
                     </conditionalRoute>
                     <conditionalRoute breakRoute="false">
                         <condition>
                             <!-- url means To address -->
                             <match type="url" regex=".*SimpleStockQuoteService.*"/>
                         </condition>
-                        <target sequence="cnd1_seq"/>
+                        <target sequence="cnd2_seq"/>
                     </conditionalRoute>
                     <conditionalRoute breakRoute="false">
                         <condition>
                             <!-- url means To address -->
                             <match type="url" regex=".*SimpleStockQuoteService.*"/>
                         </condition>
-                        <target sequence="cnd1_seq"/>
+                        <target sequence="cnd2_seq"/>
                     </conditionalRoute>
                     <conditionalRoute breakRoute="false">
                         <condition>
                             <!-- url means To address -->
                             <match type="url" regex=".*SimpleStockQuoteService.*"/>
                         </condition>
-                        <target sequence="cnd1_seq"/>
+                        <target sequence="cnd2_seq"/>
                     </conditionalRoute>
                     <conditionalRoute breakRoute="false">
                         <condition>
                             <!-- url means To address -->
                             <match type="url" regex=".*SimpleStockQuoteService.*"/>
                         </condition>
-                        <target sequence="cnd1_seq"/>
+                        <target sequence="cnd2_seq"/>
                     </conditionalRoute>
                     <conditionalRoute breakRoute="false">
                         <condition>
                             <!-- url means To address -->
                             <match type="url" regex=".*SimpleStockQuoteService.*"/>
                         </condition>
-                        <target sequence="cnd1_seq"/>
+                        <target sequence="cnd2_seq"/>
                     </conditionalRoute>
 
                     <!-- final conditional route -->

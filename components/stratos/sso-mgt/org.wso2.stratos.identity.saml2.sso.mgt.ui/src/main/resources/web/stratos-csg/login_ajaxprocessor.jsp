@@ -96,7 +96,7 @@
     </script>
 <div id="login-content">
 					<div class="main-text">
-						WSO2 Cloud Services Gateway creates a managed, secured channel for business processes, and other tasks running in public cloud, to get access to enterprise data and services resides behind a firewall.
+						WSO2 Cloud Gateway creates a managed, secured channel for business processes, and other tasks running in public cloud, to get access to enterprise data and services resides behind a firewall.
 					</div>
 					<div class="clear"></div>
 					<div class="feature feature-left">

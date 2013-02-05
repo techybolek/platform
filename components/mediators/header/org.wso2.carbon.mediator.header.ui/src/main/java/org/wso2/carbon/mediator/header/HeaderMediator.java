@@ -97,7 +97,7 @@ public class HeaderMediator extends AbstractMediator {
             header.addChild(getXml());
         }
         QName qName = getQName();
-        if (qName != null) {
+        if (qName != null && getXml() ==null) {
             if (qName.getNamespaceURI() != null) {
                 header.addAttribute(fac.createOMAttribute(
                     "name", nullNS,

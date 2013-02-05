@@ -30,9 +30,6 @@
     String print = request.getParameter("print");
     String amount = request.getParameter("amount");
     String invoiceId = request.getParameter("invoiceId");
-    /*int invoiceId =  (Integer) session.getAttribute("invoiceId");
-    session.removeAttribute("invoiceId");
-    */
 %>
 
 <link href="../payment/css/billing.css" rel="stylesheet" type="text/css" media="all"/>
@@ -109,10 +106,6 @@
                                     <tr>
                                         <td>Transaction ID</td>
                                         <td><%=transactionID%></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Invoice ID</td>
-                                        <td><%=invoiceId%></td>
                                     </tr>
                                     <tr>
                                         <td>Amount</td>

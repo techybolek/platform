@@ -19,8 +19,7 @@ package org.wso2.carbon.attachment.mgt.core.dao;
 import org.wso2.carbon.attachment.mgt.core.exceptions.AttachmentMgtException;
 
 import javax.activation.DataHandler;
-import java.io.InputStream;
-import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * DAO interface for the {@link org.wso2.carbon.attachment.mgt.api.Resource}
@@ -39,12 +38,12 @@ public interface ResourceDAO {
     /**
      * Returns the created-time of a resource
      */
-    public Timestamp getCreatedTime();
+    public Date getCreatedTime();
 
     /**
      * Sets the created-time of a resource
      */
-    public void setCreatedTime(Timestamp createdTime);
+    public void setCreatedTime(Date createdTime);
 
     /**
      * Returns the name of a resource

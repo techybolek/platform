@@ -29,19 +29,9 @@ import org.wso2.carbon.databridge.agent.thrift.internal.EventQueue;
 import org.wso2.carbon.databridge.agent.thrift.internal.publisher.authenticator.AgentAuthenticator;
 import org.wso2.carbon.databridge.agent.thrift.internal.utils.ThriftEventConverter;
 import org.wso2.carbon.databridge.commons.Event;
-import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
-import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
-import org.wso2.carbon.databridge.commons.exception.NoStreamDefinitionExistException;
-import org.wso2.carbon.databridge.commons.exception.SessionTimeoutException;
-import org.wso2.carbon.databridge.commons.exception.StreamDefinitionException;
-import org.wso2.carbon.databridge.commons.exception.UndefinedEventTypeException;
+import org.wso2.carbon.databridge.commons.exception.*;
 import org.wso2.carbon.databridge.commons.thrift.data.ThriftEventBundle;
-import org.wso2.carbon.databridge.commons.thrift.exception.ThriftDifferentStreamDefinitionAlreadyDefinedException;
-import org.wso2.carbon.databridge.commons.thrift.exception.ThriftMalformedStreamDefinitionException;
-import org.wso2.carbon.databridge.commons.thrift.exception.ThriftNoStreamDefinitionExistException;
-import org.wso2.carbon.databridge.commons.thrift.exception.ThriftSessionExpiredException;
-import org.wso2.carbon.databridge.commons.thrift.exception.ThriftStreamDefinitionException;
-import org.wso2.carbon.databridge.commons.thrift.exception.ThriftUndefinedEventTypeException;
+import org.wso2.carbon.databridge.commons.thrift.exception.*;
 import org.wso2.carbon.databridge.commons.thrift.service.general.ThriftEventTransmissionService;
 import org.wso2.carbon.databridge.commons.thrift.service.secure.ThriftSecureEventTransmissionService;
 
@@ -134,7 +124,7 @@ public class ThriftEventPublisher extends EventPublisher {
     @Override
     protected String findStreamId(Object client, String currentSessionId, String name,
                                        String version)
-            throws NoStreamDefinitionExistException, SessionTimeoutException,
+            throws SessionTimeoutException,
                    EventPublisherException {
         try {
             if (client instanceof ThriftSecureEventTransmissionService.Client) {
@@ -142,12 +132,43 @@ public class ThriftEventPublisher extends EventPublisher {
             } else {
                 return ((ThriftEventTransmissionService.Client) client).findStreamId(currentSessionId, name, version);
             }
-        } catch (ThriftNoStreamDefinitionExistException e) {
-            throw new NoStreamDefinitionExistException("Thrift No Stream Definition Exist", e);
         } catch (ThriftSessionExpiredException e) {
             throw new SessionTimeoutException("Session Expired ", e);
         } catch (TException e) {
             throw new EventPublisherException("Thrift Exception", e);
+        } catch (ThriftNoStreamDefinitionExistException e) {
+            //this is used as Thrift cannot send null values
+            return null;
+        }
+    }
+
+    @Override
+    protected boolean deleteStream(Object client, String currentSessionId, String streamId) throws EventPublisherException, SessionTimeoutException {
+        try {
+            if (client instanceof ThriftSecureEventTransmissionService.Client) {
+                return ((ThriftSecureEventTransmissionService.Client) client).deleteStreamById(currentSessionId, streamId);
+            } else {
+                return ((ThriftEventTransmissionService.Client) client).deleteStreamById(currentSessionId, streamId);
+            }
+        } catch (TException e) {
+            throw new EventPublisherException("Thrift Exception", e);
+        } catch (ThriftSessionExpiredException e) {
+            throw new SessionTimeoutException("Session Expired ", e);
+        }
+    }
+
+    @Override
+    protected boolean deleteStream(Object client, String currentSessionId, String streamName, String streamVersion) throws EventPublisherException, SessionTimeoutException {
+        try {
+            if (client instanceof ThriftSecureEventTransmissionService.Client) {
+                return ((ThriftSecureEventTransmissionService.Client) client).deleteStreamByNameVersion(currentSessionId, streamName, streamVersion);
+            } else {
+                return ((ThriftEventTransmissionService.Client) client).deleteStreamByNameVersion(currentSessionId, streamName, streamVersion);
+            }
+        } catch (TException e) {
+            throw new EventPublisherException("Thrift Exception", e);
+        } catch (ThriftSessionExpiredException e) {
+            throw new SessionTimeoutException("Session Expired ", e);
         }
     }
 

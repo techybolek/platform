@@ -1,12 +1,32 @@
+/*
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*WSO2 Inc. licenses this file to you under the Apache License,
+*Version 2.0 (the "License"); you may not use this file except
+*in compliance with the License.
+*You may obtain a copy of the License at
+*
+*http://www.apache.org/licenses/LICENSE-2.0
+*
+*Unless required by applicable law or agreed to in writing,
+*software distributed under the License is distributed on an
+*"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+*KIND, either express or implied.  See the License for the
+*specific language governing permissions and limitations
+*under the License.
+*/
+
 package org.wso2.carbon.identity.oauth.ui;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.identity.oauth.stub.OAuthServiceAuthenticationException;
 import org.wso2.carbon.identity.oauth.stub.types.Parameters;
 import org.wso2.carbon.identity.oauth.ui.client.OAuthServiceClient;
+import org.wso2.carbon.identity.oauth.ui.internal.OAuthUIServiceComponentHolder;
 import org.wso2.carbon.ui.CarbonUIUtil;
+import org.wso2.carbon.ui.util.CharacterEncoder;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -42,10 +62,8 @@ public class OAuthServlet extends HttpServlet {
 		String oauthCallbackConfirmed = null;
 
 		try {
-			String backendServerURL = CarbonUIUtil.getServerURL(req.getSession()
-					.getServletContext(), req.getSession());
-			ConfigurationContext configContext = (ConfigurationContext) req.getSession()
-					.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+			String backendServerURL = CarbonUIUtil.getServerURL(OAuthUIServiceComponentHolder.getInstance().getServerConfigurationService());
+            ConfigurationContext configContext = OAuthUIServiceComponentHolder.getInstance().getConfigurationContextService().getServerConfigContext();
 			OAuthServiceClient client = new OAuthServiceClient(backendServerURL, configContext);
 
 			if (requestType.indexOf(OAuthConstants.REQUEST_TOKEN_URL) > -1) {
@@ -74,8 +92,8 @@ public class OAuthServlet extends HttpServlet {
 				// Token, the Consumer MUST obtain approval from the User by directing the User to
 				// the Service Provider. The Consumer constructs an HTTP GET request to the Service
 				// Provider's User Authorization URL.
-				String userName = req.getParameter("oauth_user_name");
-				String password = req.getParameter("oauth_user_password");
+				String userName = CharacterEncoder.getSafeText(req.getParameter("oauth_user_name"));
+				String password = CharacterEncoder.getSafeText(req.getParameter("oauth_user_password"));
 				String tokenFromSession = (String) req.getSession().getAttribute("oauth_req_token");
 				if (userName == null || password == null || tokenFromSession == null) {
 					Parameters metadata = client.getScope(params.getOauthToken());
@@ -103,7 +121,11 @@ public class OAuthServlet extends HttpServlet {
 				out.close();
 				resp.setStatus(200);
 			}
-		} catch (Exception e) {
+		} catch (OAuthServiceAuthenticationException e) {
+            log.debug(e);
+            resp.setStatus(401);
+            resp.setHeader("WWW-Authenticate","Basic realm=\"WSO2 IS\"");
+        } catch (Exception e) {
 			log.error(e);
 			resp.setStatus(400);
 		}

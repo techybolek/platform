@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ package org.wso2.carbon.bpel.core.ode.integration.config.bam;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.bpel.core.BPELConstants;
+import org.wso2.carbon.bpel.core.internal.BPELServiceComponent;
 import org.wso2.carbon.bpel.core.ode.integration.store.BPELDeploymentException;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.registry.api.Registry;
@@ -35,6 +35,8 @@ import org.wso2.carbon.unifiedendpoint.core.UnifiedEndpointConstants;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 
 /**
@@ -42,10 +44,12 @@ import java.util.Iterator;
  */
 public class BAMServerProfileBuilder {
     private String profileLocation;
+    private Integer tenantId;
     private static Log log = LogFactory.getLog(BAMServerProfileBuilder.class);
 
-    public BAMServerProfileBuilder(String profileLocation) {
+    public BAMServerProfileBuilder(String profileLocation, Integer tenantId) {
         this.profileLocation = profileLocation;
+        this.tenantId = tenantId;
     }
 
     public BAMServerProfile build() {
@@ -53,35 +57,79 @@ public class BAMServerProfileBuilder {
         Registry registry;
         String location;
 
-        if (profileLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_CONF_REG)) {
-            registry =
-                    CarbonContext.getCurrentContext().getRegistry(RegistryType.SYSTEM_CONFIGURATION);
-            location = profileLocation.substring(profileLocation.indexOf(
-                    UnifiedEndpointConstants.VIRTUAL_CONF_REG) +
-                    UnifiedEndpointConstants.VIRTUAL_CONF_REG.length());
-            loadBAMProfileFromRegistry(bamServerProfile, registry, location);
-        } else if (profileLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_GOV_REG)) {
-            registry =
-                    CarbonContext.getCurrentContext().getRegistry(RegistryType.SYSTEM_GOVERNANCE);
-            location = profileLocation.substring(profileLocation.indexOf(
-                    UnifiedEndpointConstants.VIRTUAL_GOV_REG) +
-                    UnifiedEndpointConstants.VIRTUAL_GOV_REG.length());
-            loadBAMProfileFromRegistry(bamServerProfile, registry, location);
-        } else if (profileLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_REG)) {
-            registry =
-                    CarbonContext.getCurrentContext().getRegistry(RegistryType.LOCAL_REPOSITORY);
-            location = profileLocation.substring(profileLocation.indexOf(
-                    UnifiedEndpointConstants.VIRTUAL_REG) +
-                    UnifiedEndpointConstants.VIRTUAL_REG.length());
-            loadBAMProfileFromRegistry(bamServerProfile, registry, location);
-        } else if (profileLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_FILE)) {
-            //TODO
-        } else {
-            String errMsg = "Invalid bam profile location: " + profileLocation;
-            handleError(errMsg);
-        }
+            if (profileLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_CONF_REG)) {
+                try {
+                    registry =
+                        BPELServiceComponent.getRegistryService().getConfigSystemRegistry(tenantId);
+                    location = profileLocation.substring(profileLocation.indexOf(
+                            UnifiedEndpointConstants.VIRTUAL_CONF_REG) +
+                            UnifiedEndpointConstants.VIRTUAL_CONF_REG.length());
+                    loadBAMProfileFromRegistry(bamServerProfile, registry, location);
+                }catch (RegistryException re) {
+                    String errMsg ="Error while loading config registry";
+                    handleError(errMsg, re);
+                }
 
-        return bamServerProfile;
+            } else if (profileLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_GOV_REG)) {
+                try {
+                    registry =  BPELServiceComponent.getRegistryService().getGovernanceSystemRegistry(tenantId);
+                    location = profileLocation.substring(profileLocation.indexOf(
+                            UnifiedEndpointConstants.VIRTUAL_GOV_REG) +
+                            UnifiedEndpointConstants.VIRTUAL_GOV_REG.length());
+                    loadBAMProfileFromRegistry(bamServerProfile, registry, location);
+                } catch (RegistryException re) {
+                    String errMsg ="Error while loading governance registry";
+                    handleError(errMsg, re);
+                }
+            } else if (profileLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_REG)) {
+                try {
+                    registry = BPELServiceComponent.getRegistryService().getLocalRepository(tenantId);
+                    location = profileLocation.substring(profileLocation.indexOf(
+                            UnifiedEndpointConstants.VIRTUAL_REG) +
+                            UnifiedEndpointConstants.VIRTUAL_REG.length());
+                    loadBAMProfileFromRegistry(bamServerProfile, registry, location);
+                } catch (RegistryException re) {
+                    String errMsg ="Error while loading local registry";
+                    handleError(errMsg, re);
+                }
+            } else if (profileLocation.startsWith(UnifiedEndpointConstants.VIRTUAL_FILE)) {
+                location = profileLocation.substring(profileLocation.indexOf(
+                        UnifiedEndpointConstants.VIRTUAL_FILE) +
+                        UnifiedEndpointConstants.VIRTUAL_FILE.length());
+                loadBAMProfileFromFileSystem(bamServerProfile, location);
+            } else {
+                String errMsg = "Invalid bam profile location: " + profileLocation;
+                handleError(errMsg);
+            }
+
+            return bamServerProfile;
+    }
+
+    private void loadBAMProfileFromFileSystem(BAMServerProfile bamServerProfile, String location) {
+        File file = new File(location);
+        if(file.exists()) {
+            try {
+                String profileFileContent = FileUtils.readFileToString(file);
+                OMElement resourceElement = new StAXOMBuilder(new ByteArrayInputStream(profileFileContent.getBytes())).getDocumentElement();
+                processBAMServerProfileName(resourceElement, bamServerProfile);
+                processCredentialElement(resourceElement, bamServerProfile);
+                processConnectionElement(resourceElement, bamServerProfile);
+                processKeyStoreElement(resourceElement, bamServerProfile);
+                processStreamsElement(resourceElement, bamServerProfile);
+            } catch (IOException e) {
+                String errMsg = "Error occurred while reading the file from file system: " +
+                        location + "to build the BAM server profile:" + profileLocation;
+                handleError(errMsg, e);
+            } catch (XMLStreamException e) {
+                String errMsg = "Error occurred while creating the OMElement out of BAM server " +
+                        "profile: " + profileLocation;
+                handleError(errMsg, e);
+            } catch (CryptoException e) {
+                String errMsg = "Error occurred while decrypting password in BAM server profile: " +
+                        profileLocation;
+                handleError(errMsg, e);
+            }
+        }
     }
 
     private void loadBAMProfileFromRegistry(BAMServerProfile bamServerProfile, Registry registry, String location) {
@@ -199,7 +247,17 @@ public class BAMServerProfileBuilder {
                     !locationAttr.getAttributeValue().equals("") &&
                     !passwordAttr.getAttributeValue().equals("")) {
                 bamServerProfile.setKeyStoreLocation(locationAttr.getAttributeValue());
-                bamServerProfile.setKeyStorePassword(passwordAttr.getAttributeValue());
+
+                try{
+                    bamServerProfile.setKeyStorePassword(
+                        new String(CryptoUtil.getDefaultCryptoUtil().base64DecodeAndDecrypt(
+                                passwordAttr.getAttributeValue())));
+
+                } catch (CryptoException e) {
+                    String errMsg = "Error occurred while decrypting password in BAM server profile: " +
+                            profileLocation;
+                    handleError(errMsg, e);
+                }
             } else {
                 String errMsg = "Key store details location or password not found for BAM " +
                         "server profile: " + profileLocation;
@@ -207,7 +265,9 @@ public class BAMServerProfileBuilder {
             }
         } else {
             String errMsg = "Key store element not found for BAM server profile: " + profileLocation;
-            handleError(errMsg);
+            /** handle this with new api
+            log.warn("Key store element not specified");
+             **/
         }
     }
 
@@ -216,8 +276,6 @@ public class BAMServerProfileBuilder {
         OMElement streamsElement = bamServerConfigElement.getFirstChildWithName(
                 new QName(BPELConstants.BAM_SERVER_PROFILE_NS, "Streams"));
         if (streamsElement == null) {
-//            String errMsg = "Streams not found for BAM server profile: " + profileLocation;
-//            handleError(errMsg);
             log.warn("No Streams found for BAM server profile: " + profileLocation);
         } else {
             Iterator itr = streamsElement.getChildrenWithName(
@@ -251,7 +309,6 @@ public class BAMServerProfileBuilder {
                         profileLocation;
                 handleError(errMsg);
             }
-
             Iterator itr = dataElement.getChildrenWithName(
                     new QName(BPELConstants.BAM_SERVER_PROFILE_NS, "Key"));
             OMElement keyElement;
@@ -259,7 +316,7 @@ public class BAMServerProfileBuilder {
                 keyElement = (OMElement) itr.next();
                 processKeyElement(keyElement, streamConfiguration);
             }
-            bamServerProfile.addBAMStreamConfiguration(streamConfiguration.getName(),
+            bamServerProfile.addBAMStreamConfiguration(streamConfiguration.getName(), streamConfiguration.getVersion(),
                     streamConfiguration);
         } else {
             String errMsg = "One or many of the attributes of Stream element is not available " +
@@ -271,9 +328,10 @@ public class BAMServerProfileBuilder {
 
     private void processKeyElement(OMElement keyElement,
                                    BAMStreamConfiguration streamConfiguration) {
+
         BAMKey bamKey;
         String name;
-        BAMKey.BAMKeyType type;
+        BAMKey.BAMKeyType type = BAMKey.BAMKeyType.NONE;
         String variable;
         String expression;
         String part = null;
@@ -293,7 +351,13 @@ public class BAMServerProfileBuilder {
             log.debug("type attribute of Key element: " + name + " is not available. " +
                     "Type is default to payload");
         }
-        type = BAMKey.BAMKeyType.valueOf(typeAttribute.getAttributeType());
+        try {
+            type = BAMKey.BAMKeyType.valueOf(typeAttribute.getAttributeValue().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            String errMsg = "Invalid key type specified for key name " + name;
+            handleError(errMsg, e);
+        }
+
 
         OMElement fromElement = keyElement.getFirstChildWithName(
                 new QName(BPELConstants.BAM_SERVER_PROFILE_NS, "From"));
@@ -314,7 +378,7 @@ public class BAMServerProfileBuilder {
 
             OMElement queryElement = fromElement.getFirstChildWithName(
                     new QName(BPELConstants.BAM_SERVER_PROFILE_NS, "Query"));
-            if (queryElement == null || "".equals(queryElement.getText())) {
+            if (queryElement != null && ( "".equals(queryElement.getText()) == false)) {
                 query = queryElement.getText();
             }
             bamKey = new BAMKey(name, variable, part, query, type);

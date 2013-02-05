@@ -61,10 +61,8 @@ public class CassandraExplorerAdminClient {
         Options options = client.getOptions();
         options.setManageSession(true);
         options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, cookie);
-        //options.setProperty(Constants.Configuration.ENABLE_MTOM, Constants.VALUE_TRUE);
         options.setTimeOutInMilliSeconds(10000);
-        options.setProperty(org.apache.axis2.Constants.Configuration
-                                    .CHARACTER_SET_ENCODING, "UTF-16");
+
     }
 
     public Column[] getPaginateSliceforColumns(String keyspace, String columnFamily, String rowName,
@@ -137,6 +135,11 @@ public class CassandraExplorerAdminClient {
     public int getNoOfRows(String keyspace, String columnFamily)
             throws CassandraExplorerAdminCassandraExplorerException, RemoteException {
         return explorerAdminStub.getNoOfRows(keyspace, columnFamily);
+    }
+
+    public void setMaxRowCount(int maxRowCount)
+            throws CassandraExplorerAdminCassandraExplorerException, RemoteException {
+        explorerAdminStub.setMaxRowCount(maxRowCount);
     }
 
 }

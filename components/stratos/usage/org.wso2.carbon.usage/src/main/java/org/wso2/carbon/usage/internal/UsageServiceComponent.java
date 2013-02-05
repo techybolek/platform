@@ -27,6 +27,7 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.usage.util.Util;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
+import org.wso2.carbon.ndatasource.core.DataSourceService;
 
 /**
  * @scr.component name="org.wso2.carbon.usage" immediate="true"
@@ -39,6 +40,10 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  * @scr.reference name="config.context.service" 
  * interface="org.wso2.carbon.utils.ConfigurationContextService" cardinality="1..1" 
  * policy="dynamic" bind="setConfigurationContextService" unbind="unsetConfigurationContextService"
+ * @scr.reference name="datasources.service"
+ * interface="org.wso2.carbon.ndatasource.core.DataSourceService"
+ * cardinality="1..1" policy="dynamic"
+ * bind="setDataSourceService" unbind="unsetDataSourceService"
  */
 public class UsageServiceComponent {
     private static Log log = LogFactory.getLog(UsageServiceComponent.class);
@@ -86,5 +91,13 @@ public class UsageServiceComponent {
 
     protected void unsetConfigurationContextService(ConfigurationContextService ccService) {
         Util.setConfigurationContextService(null);
+    }
+
+    protected void setDataSourceService(DataSourceService dataSourceService){
+        Util.setDataSourceService(dataSourceService);
+    }
+    
+    protected void unsetDataSourceService(DataSourceService dataSourceService){
+        Util.setDataSourceService(null);
     }
 }

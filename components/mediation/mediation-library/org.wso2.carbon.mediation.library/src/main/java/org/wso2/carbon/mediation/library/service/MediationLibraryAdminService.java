@@ -28,18 +28,16 @@ import org.apache.synapse.config.xml.SynapseImportFactory;
 import org.apache.synapse.config.xml.SynapseImportSerializer;
 import org.apache.synapse.libraries.imports.SynapseImport;
 import org.apache.synapse.libraries.model.Library;
-import org.apache.synapse.libraries.model.SynapseLibrary;
 import org.apache.synapse.libraries.util.LibDeployerUtils;
-import org.wso2.carbon.application.deployer.AppDeployerUtils;
-import org.wso2.carbon.application.deployer.CarbonApplication;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.initializer.AbstractServiceBusAdmin;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
 import org.wso2.carbon.mediation.initializer.ServiceBusUtils;
 import org.wso2.carbon.mediation.initializer.persistence.MediationPersistenceManager;
-import org.wso2.carbon.mediation.library.MediationLibraryServiceComponent;
 import org.wso2.carbon.mediation.library.util.ConfigHolder;
 
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -291,8 +289,34 @@ public class MediationLibraryAdminService extends AbstractServiceBusAdmin {
     }
 
     private static int getTenantId(AxisConfiguration axisConfig) {
-        SuperTenantCarbonContext carbonContext = SuperTenantCarbonContext.getCurrentContext(axisConfig);
+        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getCurrentContext(axisConfig);
         return carbonContext.getTenantId();
+    }
+
+    /**
+     * Used to download a carbon application archive.
+     * @param fileName the name of the application archive (.car) to be downloaded
+     * @return datahandler corresponding to the .car file to be downloaded
+     * @throws Exception for invalid scenarios
+     */
+    public DataHandler downloadLibraryArchive(String fileName) throws Exception {
+        // CarbonApplication instance to delete
+        Library currentMediationLib = null;
+        // Iterate all applications for this tenant and find the application to delete
+        int tenantId = getTenantId(getAxisConfig());
+        SynapseConfiguration synConfigForTenant = ConfigHolder.getInstance().
+                getSynapseEnvironmentService(tenantId).getSynapseEnvironment().getSynapseConfiguration();
+        Collection<Library> appList = synConfigForTenant.getSynapseLibraries().values();
+        for (Library mediationLib : appList) {
+            if (fileName.equals(mediationLib.getQName().getLocalPart().toString())) {
+                currentMediationLib = mediationLib;
+            }
+        }
+
+        FileDataSource datasource = new FileDataSource(new File(currentMediationLib.getFileName()));
+        DataHandler handler = new DataHandler(datasource);
+
+        return handler;
     }
 
 }

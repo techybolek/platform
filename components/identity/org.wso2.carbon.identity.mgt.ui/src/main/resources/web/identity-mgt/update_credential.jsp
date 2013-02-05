@@ -33,8 +33,8 @@
 <script type="text/javascript">
 
     function updateCredentials() {
-        updateCredentialsForm.action = "update_credential_final_ajaxprocessor.jsp";
-        updateCredentialsForm.submit();
+        document.updateCredentialsForm.action = "update_credential_final.jsp";
+        document.updateCredentialsForm.submit();
     }
 
     function cancel(){
@@ -82,7 +82,7 @@
         } catch (Exception e) {
     %>
     <div>
-        Error in generating the captcha image.
+        <p><fmt:message key="error.captcha.generate"/></p>    
     </div>
     <%
             return;
@@ -125,7 +125,7 @@
         </h2>
     </div>
     <div id="workarea">
-        <form id="updateCredentialsForm" action="update_credential_final_ajaxprocessor.jsp"
+        <form id="updateCredentialsForm" name="updateCredentialsForm" action="update_credential_final.jsp"
               method="post">
 
             <table class="styledLeft">
@@ -222,7 +222,7 @@
         <p><fmt:message key="request.verification.failed"/></p>
 
         <p>
-            You can retry resetting the password <a href="forgot_root.jsp">here</a> .
+            <fmt:message key="try.again"/><a href="forgot_root.jsp"><fmt:message key="try.again.here"/></a> .
         </p>
     </div>
     <%

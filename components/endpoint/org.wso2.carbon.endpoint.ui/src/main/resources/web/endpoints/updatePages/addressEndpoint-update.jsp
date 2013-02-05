@@ -80,14 +80,27 @@
         addressEndpoint.setRest(true);
     } else if ("GET".equals(formatOption)) {
         addressEndpoint.setGet(true);
+    } else {
+        addressEndpoint.setSoap11(false);
+        addressEndpoint.setSoap12(false);
+        addressEndpoint.setPox(false);
+        addressEndpoint.setRest(false);
+        addressEndpoint.setGet(false);
     }
+
     if ("SWA".equals(optimizeOption)) {
         addressEndpoint.setSwa(true);
     } else if ("MTOM".equals(optimizeOption)) {
         addressEndpoint.setMtom(true);
+    } else {
+        addressEndpoint.setSwa(false);
+        addressEndpoint.setMtom(false);
     }
+
     if (description != null && !"".equals(description)) {
         addressEndpoint.setDescription(description);
+    } else {
+        addressEndpoint.setDescription("");
     }
     if (errorCode != null) {
         addressEndpoint.setErrorCodes(errorCode);
@@ -119,6 +132,8 @@
             addressEndpoint.setTimeoutAction("discard");
         } else if (action.equals("executeFaultSequence")) {
             addressEndpoint.setTimeoutAction("fault");
+        } else {
+            addressEndpoint.setTimeoutAction("100");
         }
     }
     if (actionDuration != null) {
@@ -126,24 +141,38 @@
     }
     if (wsAddressing != null) {
         addressEndpoint.setWsadd(true);
+    } else {
+        addressEndpoint.setWsadd(false);
     }
     if (useSeprateListner != null) {
         addressEndpoint.setSepList(true);
+    } else {
+        addressEndpoint.setSepList(false);
     }
     if (wsSecurity != null) {
         addressEndpoint.setWssec(true);
+    } else {
+        addressEndpoint.setWssec(false);
     }
     if (secPolicy != null) {
         addressEndpoint.setSecPolKey(secPolicy);
+    } else {
+        addressEndpoint.setSecPolKey(null);
     }
     if (wsRM != null) {
         addressEndpoint.setWsrm(true);
+    } else {
+        addressEndpoint.setWsrm(false);
     }
     if (rmPolicy != null) {
         addressEndpoint.setRmPolKey(rmPolicy);
+    } else {
+        addressEndpoint.setRmPolKey(null);
     }
     if (properties != null) {
         addressEndpoint.setProperties(properties);
+    } else {
+        addressEndpoint.setProperties(null);
     }
 
     OMElement endpointElement = addressEndpoint.serialize(null);

@@ -1,26 +1,18 @@
-#!/bin/bash
-
-# ----------------------------------------------------------------------------
-#  Copyright 2005-20012 WSO2, Inc. http://www.wso2.org
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-
-# ----------------------------------------------------------------------------
+#!/usr/bin/env bash
 export LOG=/var/log/wso2-openstack.log
-export instance_path=/var/lib/cloud/instance
+export JAVA_HOME=/opt/java/
+instance_path=/var/lib/cloud/instance
+
+# Variables taken from the payload passed to the instance
+export REPO_PATH_S3=""
+export CONF_PATH_S3=""
+export REPO_PATH_EBS=""
+export CONF_PATH_EBS=""
+export PRODUCT_NAME=""
+export CONTROLLER_IP=""
+CRON_DURATION=2
 PUBLIC_IP=""
-CRON_DURATION=1
-PRODUCT_NAME=""
+
 
 #Check whether if any java processes are running
 if [[ "$(pidof java)" ]]; then
@@ -37,36 +29,50 @@ fi
 
 echo ---------------------------- >> $LOG
 
-
 if [ ! -d ${instance_path}/payload ]; then
-    echo "creating payload dir ... " >> $LOG
-    mkdir ${instance_path}/payload
-    echo "payload dir created ... " >> $LOG
-    # payload will be copied into ${instance_path}/payload/launch-params file
-    cp ${instance_path}/user-data.txt ${instance_path}/payload/launch-params
-    echo "payload copied  ... " >> $LOG
-    for i in `/usr/bin/ruby /opt/get-launch-params.rb`
-    do
-    echo "exporting to bashrc $i ... " >> $LOG
-        echo "export" ${i} >> /home/ubuntu/.bashrc
-    done
-    source /home/ubuntu/.bashrc
+    # payload will be copied into ${instance_path}/user-data.txt file
+    # that file will be renamed as zip file and extract, 
+
+    # copy user-data.txt and rename as payload.zip file
+    cp ${instance_path}/user-data.txt ${instance_path}/payload.zip
+
+    # if error code is 0, there was no error
+    if [ "$?" = "0" ]; then
+        echo retrieved data >> $LOG
+        rm -Rf ${instance_path}/payload
+        unzip ${instance_path}/payload.zip -d ${instance_path}/
+        # if unzip error code is 0, there was no error
+        if [ "$?" = "0" ]; then
+            echo Extracted payload >> $LOG
+        else
+            echo rc.local : payload.zip is corrupted >> $LOG
+        fi
+
+    else
+        echo rc.local : error retrieving user data >> $LOG
+    fi
+
+    chmod -R 0600 ${instance_path}/payload/wso2-key
+    cat ${instance_path}/payload/known_hosts >> ~/.ssh/known_hosts
+
     # Write a cronjob to execute wso2-openstack-init.sh periodically until public ip is assigned
     crontab -l > ./mycron
     echo "*/${CRON_DURATION} * * * * /opt/wso2-openstack-init.sh > /var/log/wso2-openstack-init.log" >> ./mycron
     crontab ./mycron
     rm ./mycron
 
+    for i in `/usr/bin/ruby /opt/get-launch-params.rb`
+    do
+        echo "export" ${i} >> /home/ubuntu/.bashrc
+    done
+
 fi
 
 
-echo ---------------------------- >> $LOG
-
-echo "getting public ip from metadata service" >> $LOG
 wget http://169.254.169.254/latest/meta-data/public-ipv4
 files="`cat public-ipv4`"
 if [[ -z ${files} ]]; then
-    echo "getting public ip. If fail retry 30 times" >> $LOG
+    echo "getting public ip" >> $LOG
     for i in {1..30}
     do
       rm -f ./public-ipv4
@@ -77,7 +83,6 @@ if [[ -z ${files} ]]; then
           sleep 1
       else
           echo "Public ip assigned" >> $LOG
-          crontab -r
           break
       fi
     done
@@ -91,18 +96,41 @@ if [[ -z ${files} ]]; then
         PUBLIC_IP="$x"
     done
 
-
-else 
-    PUBLIC_IP="$files"
-    crontab -r
 fi
 
+echo wget the ipv4 >> $LOG
+echo "$files" >> $LOG
+
+echo done_ public ip >> $LOG
+echo $PUBLIC_IP >> $LOG
+
+temp_private_ip=`ifconfig eth0 | grep inet | grep -v inet6 | cut -d ":" -f 2 | cut -d " " -f 1`
+PRIVATE_IP=$temp_private_ip
 
 for i in `/usr/bin/ruby /opt/get-launch-params.rb`
 do
     export ${i}
 done
 
+if [[ ! -d /opt/${PRODUCT_NAME} ]]; then
+    if [[ "$(pidof scp)" || "$(pidof unzip)" ]]; then
+        echo "Copying and unarchiving the products already begun. So exiting ..." >> $LOG
+        exit 0
+    fi
+    if [[ ! -f /opt/${PRODUCT_NAME}.zip ]]; then
+    	echo "Copying the product from the controller" >> $LOG
+    	echo "scp -i ${instance_path}/payload/wso2-key root@${CONTROLLER_IP}:/opt/${PRODUCT_NAME}.zip /opt/" >> $LOG
+    	scp -i ${instance_path}/payload/wso2-key root@${CONTROLLER_IP}:/opt/${PRODUCT_NAME}.zip /opt/
+    	echo "Unarchiving the pack ..." >> $LOG
+    	unzip /opt/${PRODUCT_NAME}.zip -d /opt/ 
+        if [ "$?" = "0" ]; then
+            echo Extracted product >> $LOG
+        else
+            echo product zip file is corrupted >> $LOG
+            exit 0
+        fi
+    fi
+fi
 
 if [ "$ADMIN_USERNAME" = "" ]; then
 	echo Launching with default admin username >> $LOG

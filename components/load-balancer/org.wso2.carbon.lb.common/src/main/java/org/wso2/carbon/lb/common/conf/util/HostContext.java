@@ -19,6 +19,7 @@ package org.wso2.carbon.lb.common.conf.util;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.synapse.endpoints.algorithms.AlgorithmContext;
@@ -57,6 +58,14 @@ public class HostContext {
         this.hostName = hostName;
     }
     
+    public void addTenantDomainContexts(List<TenantDomainContext> ctxts) {
+        
+        for (TenantDomainContext tenantDomainContext : ctxts) {
+            tenantIdToTenantDomainContextMap.put(tenantDomainContext.getTenantId(), tenantDomainContext);
+        }
+    }
+    
+    @Deprecated
     public void addTenantDomainContext(TenantDomainContext ctxt) {
         tenantIdToTenantDomainContextMap.put(ctxt.getTenantId(), ctxt);
     }

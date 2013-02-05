@@ -95,7 +95,7 @@ public class ArtifactCleanerUtil {
         ApplicationAdminClient adminServiceApplicationAdmin;
         try {
             adminServiceApplicationAdmin = new ApplicationAdminClient(serviceURL, sessionCookie);
-            appList = adminServiceApplicationAdmin.listAllApplications(sessionCookie);
+            appList = adminServiceApplicationAdmin.listAllApplications();
 
         } catch (ApplicationAdminExceptionException e) {
             log.error("Error occurred while getting CApp list " + e);
@@ -139,7 +139,7 @@ public class ArtifactCleanerUtil {
     public void deleteMatchingCarArtifact(String sessionCookie, String backendURL, String appName)
             throws RemoteException, ApplicationAdminExceptionException {
         ApplicationAdminClient carMgtAdmin = new ApplicationAdminClient(backendURL, sessionCookie);
-        carMgtAdmin.deleteMatchingApplication(sessionCookie, appName);
+        carMgtAdmin.deleteMatchingApplication(appName);
     }
 
     public void deleteWebApp(String sessionCookie, String fileName, String backendURL)

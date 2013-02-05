@@ -52,23 +52,32 @@ public class EndPointAdminClient {
         AuthenticateStub.authenticateStub(userName, password, endpointAdminStub);
     }
 
-    public void addEndPoint(DataHandler dh)
+    public boolean addEndPoint(DataHandler dh)
             throws EndpointAdminEndpointAdminException, IOException, XMLStreamException {
         XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(dh.getInputStream());
         //create the builder
         StAXOMBuilder builder = new StAXOMBuilder(parser);
         OMElement endPointElem = builder.getDocumentElement();
-        endpointAdminStub.addEndpoint(endPointElem.toString());
+        return endpointAdminStub.addEndpoint(endPointElem.toString());
     }
 
-    public void addEndPoint(OMElement endPointElem)
+    public boolean addEndPoint(OMElement endPointElem)
             throws EndpointAdminEndpointAdminException, IOException, XMLStreamException {
-        endpointAdminStub.addEndpoint(endPointElem.toString());
+        return endpointAdminStub.addEndpoint(endPointElem.toString());
     }
 
-    public void deleteEndPoint(String endPointName)
-            throws EndpointAdminEndpointAdminException, RemoteException {
-        endpointAdminStub.deleteEndpoint(endPointName);
+    public boolean addDynamicEndPoint(String key, DataHandler dh)
+            throws EndpointAdminEndpointAdminException, IOException, XMLStreamException {
+        XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(dh.getInputStream());
+        //create the builder
+        StAXOMBuilder builder = new StAXOMBuilder(parser);
+        OMElement endPointElem = builder.getDocumentElement();
+        return endpointAdminStub.addDynamicEndpoint(key, endPointElem.toString());
+    }
+
+    public boolean addDynamicEndPoint(String key, OMElement endPointElem)
+            throws EndpointAdminEndpointAdminException, IOException, XMLStreamException {
+        return endpointAdminStub.addDynamicEndpoint(key, endPointElem.toString());
     }
 
     public int getEndpointCount() throws EndpointAdminEndpointAdminException, RemoteException {
@@ -79,6 +88,21 @@ public class EndPointAdminClient {
         return endpointAdminStub.getEndPointsNames();
     }
 
+    public int getDynamicEndpointCount()
+            throws EndpointAdminEndpointAdminException, RemoteException {
+        return endpointAdminStub.getDynamicEndpointCount();
+    }
+
+    public String getDynamicEndpoint(String key)
+            throws EndpointAdminEndpointAdminException, RemoteException {
+        return endpointAdminStub.getDynamicEndpoint(key);
+    }
+
+    public String[] getDynamicEndpoints()
+            throws EndpointAdminEndpointAdminException, RemoteException {
+        return endpointAdminStub.getDynamicEndpoints();
+    }
+
     public void enableEndpointStatistics(String endpointName)
             throws RemoteException, EndpointAdminEndpointAdminException {
         endpointAdminStub.enableStatistics(endpointName);
@@ -86,9 +110,14 @@ public class EndPointAdminClient {
         assert (endpoint.contains("statistics=\"enable"));
     }
 
-    public void deleteEndpoint(String endpointName)
+    public boolean deleteEndpoint(String endpointName)
             throws RemoteException, EndpointAdminEndpointAdminException {
-        endpointAdminStub.deleteEndpoint(endpointName);
+        return endpointAdminStub.deleteEndpoint(endpointName);
+    }
+
+    public boolean deleteDynamicEndpoint(String key)
+            throws RemoteException, EndpointAdminEndpointAdminException {
+        return endpointAdminStub.deleteDynamicEndpoint(key);
     }
 
     public String getEndpointConfiguration(String endpointName)

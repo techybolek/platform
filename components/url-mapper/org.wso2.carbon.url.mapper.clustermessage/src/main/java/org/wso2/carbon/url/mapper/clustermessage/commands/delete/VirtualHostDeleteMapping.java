@@ -23,7 +23,7 @@ import org.apache.axis2.clustering.ClusteringMessage;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.ApplicationContext;
+import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 import org.wso2.carbon.url.mapper.clustermessage.util.VirtualHostClusterUtil;
 
 /**
@@ -44,6 +44,6 @@ public class VirtualHostDeleteMapping extends ClusteringMessage {
     @Override
     public void execute(ConfigurationContext configurationContext) throws ClusteringFault {
         VirtualHostClusterUtil.removeVirtualHost(this.hostName);
-        ApplicationContext.getCurrentApplicationContext().removeUrlMappingMap(this.hostName);
+        URLMappingHolder.getInstance().removeUrlMappingMap(this.hostName);
     }
 }

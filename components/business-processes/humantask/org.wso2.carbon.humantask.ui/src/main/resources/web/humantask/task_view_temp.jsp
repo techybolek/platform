@@ -59,11 +59,11 @@
 
 <div>
     <div>
-    <a class="backToTaskList" href="<%=taskListLink%>" style="display:block;padding:0px 0px 10px 0px"><< Back to Task List</a>
+    <a class="backToTaskList" href="<%=taskListLink%>" style="display:block;padding:0px 0px 10px 0px"><< <fmt:message key="humantask.taskview.back.to.list"/></a>
     <%
         if(HumanTaskUIConstants.CLIENTS.GADGET.equals(taskClient)) {
             %>
-    <a class="taskListLogout" href="<%=taskListLogout%>" style="display:block;padding:0px 0px 10px 0px">Logout</a>
+    <a class="taskListLogout" href="<%=taskListLogout%>" style="display:block;padding:0px 0px 10px 0px"><fmt:message key="humantask.taskview.logout"/></a>
     <%
         }
     %>
@@ -73,19 +73,19 @@
     <div class="contentPlacer">
         <div class="tabLinks" id="tabs_task">
             <ul>
-                <li id="claimLinkLi" style="display:none;"><a id="claimLink">Claim</a></li>
-                <li id="startLinkLi" style="display:none;"><a id="startLink">Start</a></li>
-                <li id="stopLinkLi" style="display:none;"><a id="stopLink">Stop</a></li>
-                <li id="releaseLinkLi" style="display:none;"><a id="releaseLink">Release</a></li>
-                <li id="suspendLinkLi" style="display:none;"><a id="suspendLink">Suspend</a></li>
-                <li id="resumeLinkLi" style="display:none;"><a id="resumeLink">Resume</a></li>
-                <li id="commentLinkLi" style="display:none;"><a onclick="toggleMe('commentSection')">Comment</a></li>
-                <li id="delegateLinkLi" style="display:none;"><a onclick="HUMANTASK.handleDelegateSelection('delegateSection')">Assign</a></li>
-                <li id="changePriorityLinkLi" style="display:none;"><a onclick="HUMANTASK.handleChangePrioritySelection('changePrioritySection')">Change Priority</a></li>
-                <li id="removeLinkLi" style="display:none;"><a id="removeLink">Remove</a></li>
-                <li id="skipLinkLi" style="display:none;"><a id="skipLink">Skip</a></li>
-                <li id="failLinkLi" style="display:none;"><a id="failLink">Fail</a></li>
-                <li id="moreActionsLinkLi" style="display:none;"><a id="moreActionsLink">More Actions</a></li>
+                <li id="claimLinkLi" style="display:none;"><a id="claimLink"><fmt:message key="humantask.taskview.claim"/></a></li>
+                <li id="startLinkLi" style="display:none;"><a id="startLink"><fmt:message key="humantask.taskview.start"/></a></li>
+                <li id="stopLinkLi" style="display:none;"><a id="stopLink"><fmt:message key="humantask.taskview.stop"/></a></li>
+                <li id="releaseLinkLi" style="display:none;"><a id="releaseLink"><fmt:message key="humantask.taskview.release"/></a></li>
+                <li id="suspendLinkLi" style="display:none;"><a id="suspendLink"><fmt:message key="humantask.taskview.suspend"/></a></li>
+                <li id="resumeLinkLi" style="display:none;"><a id="resumeLink"><fmt:message key="humantask.taskview.resume"/></a></li>
+                <li id="commentLinkLi" style="display:none;"><a onclick="toggleMe('commentSection')"><fmt:message key="humantask.taskview.comment"/></a></li>
+                <li id="delegateLinkLi" style="display:none;"><a onclick="HUMANTASK.handleDelegateSelection('delegateSection')"><fmt:message key="humantask.taskview.assign"/></a></li>
+                <li id="changePriorityLinkLi" style="display:none;"><a onclick="HUMANTASK.handleChangePrioritySelection('changePrioritySection')"><fmt:message key="humantask.taskview.change.priority"/></a></li>
+                <li id="removeLinkLi" style="display:none;"><a id="removeLink"><fmt:message key="humantask.taskview.remove"/></a></li>
+                <li id="skipLinkLi" style="display:none;"><a id="skipLink"><fmt:message key="humantask.taskview.skip"/></a></li>
+                <li id="failLinkLi" style="display:none;"><a id="failLink"><fmt:message key="humantask.taskview.fail"/></a></li>
+                <li id="moreActionsLinkLi" style="display:none;"><a id="moreActionsLink"><fmt:message key="humantask.taskview.more.actions"/></a></li>
             </ul>
         </div>
         <div id="commentSection" style="display:none">
@@ -102,17 +102,17 @@
         <div class="tabLessContent-noBorder" id="tabContent">
             <div id="actionTab" class="tabContentData">
                 <fieldset>
-                    <legend><a onclick="toggleMe('details')"><h3>Details:</h3></a></legend>
+                    <legend><a onclick="toggleMe('details')"><h3><fmt:message key="humantask.taskview.details"/>:</h3></a></legend>
                     <div id="details">
                         <table class="normal">
                             <tr>
                                 <td class="cellHSeperator">
                                     <table class="normal">
                                         <tbody>
-                                            <tr><th>Type:</th><td id="taskTypeTxt"></td></tr>
-                                            <tr><th>Priority:</th><td id="taskPriorityTxt"></td></tr>
-                                            <tr><th>Created On:</th><td id="taskCreatedOnDateTxt"></td></tr>
-                                            <tr><th>Updated On:</th><td id="taskUpdatedOnDateTxt"></td></tr>
+                                            <tr><th><fmt:message key="humantask.taskview.type"/>:</th><td id="taskTypeTxt"></td></tr>
+                                            <tr><th><fmt:message key="humantask.taskview.priority"/>:</th><td id="taskPriorityTxt"></td></tr>
+                                            <tr><th><fmt:message key="humantask.taskview.createdon"/>:</th><td id="taskCreatedOnDateTxt"></td></tr>
+                                            <tr><th><fmt:message key="humantask.taskview.updatedon"/>:</th><td id="taskUpdatedOnDateTxt"></td></tr>
                                         </tbody>
                                     </table>
                                 </td>
@@ -120,7 +120,7 @@
                                     <table class="normal">
                                         <tbody>
                                             <tr><th>Status:</th><td id="taskStatusTxt"></td></tr>
-                                            <tr id="taskPreviousStatusTR" style="display:none;"><th>Previous Status:</th><td id="taskPreviousStatusTxt"></td></tr>
+                                            <tr id="taskPreviousStatusTR" style="display:none;"><th><fmt:message key="humantask.taskview.previous.state"/>:</th><td id="taskPreviousStatusTxt"></td></tr>
                                         </tbody>
                                      </table>
                                 </td>
@@ -133,7 +133,7 @@
 
 
                 <fieldset>
-                    <legend><a onclick="toggleMe('description')"><h3>Description:</h3></a></legend>
+                    <legend><a onclick="toggleMe('description')"><h3><fmt:message key="humantask.taskview.description"/>:</h3></a></legend>
                     <div id="description">
                         <div id="descriptionTxtDiv">
                         </div>
@@ -141,11 +141,11 @@
                   </fieldset>
 
                 <fieldset>
-                    <legend><a onclick="toggleMe('people')"><h3>People:</h3></a></legend>
+                    <legend><a onclick="toggleMe('people')"><h3><fmt:message key="humantask.taskview.people"/>:</h3></a></legend>
                     <div id="people">
                         <table class="normal">
                         <tbody>
-                            <tr id="taskCreatedByTR" style="display:none;"><th>Created By:</th><td id="taskCreatedByTxt"></td></tr>
+                            <tr id="taskCreatedByTR" style="display:none;"><th><fmt:message key="humantask.taskview.createdby"/>:</th><td id="taskCreatedByTxt"></td></tr>
                             <tr><th>Owner:</th><td id="taskOwnerTxt"></td></tr>
                         </tbody>
                         </table>
@@ -154,24 +154,24 @@
 
 
                 <fieldset id="requestFieldSet" style="display: none;">
-                    <legend><a onclick="toggleMe('requestDiv')"><h3>Request:</h3></a></legend>
+                    <legend><a onclick="toggleMe('requestDiv')"><h3><fmt:message key="humantask.taskview.request"/>:</h3></a></legend>
                     <div id="requestDiv" class="dynamicContent">
                           <jsp:include page="<%=requestJSPContextPath%>"/>
                     </div>
                 </fieldset>
 
                 <fieldset id="responseFormFieldSet" style="display: none;">
-                    <legend><a onclick="toggleMe('responseFormDiv')"><h3>Response:</h3></a></legend>
+                    <legend><a onclick="toggleMe('responseFormDiv')"><h3><fmt:message key="humantask.taskview.response"/>:</h3></a></legend>
                     <div id="responseFormDiv" class="dynamicContent">
                           <jsp:include page="<%=outputJspContextPath%>"/>
                     </div>
                     <div id="completeButtonDiv">
-                          <button id="completeTaskButton" value="Complete">Complete</button>
+                          <button id="completeTaskButton" value="Complete"><fmt:message key="humantask.taskview.complete"/></button>
                     </div>
                 </fieldset>
 
                 <fieldset id="responseFieldSet" style="display: none;">
-                    <legend><a onclick="toggleMe('responseDiv')"><h3>Response:</h3></a></legend>
+                    <legend><a onclick="toggleMe('responseDiv')"><h3><fmt:message key="humantask.taskview.response"/>:</h3></a></legend>
                     <div id="responseDiv" class="dynamicContent">
                         <jsp:include page="<%=responseJspContextPath%>"/>
                     </div>
@@ -184,8 +184,8 @@
         <div class="tabs_task" id="tabsDown">
             <ul>
                 <%--<li><a onclick="selectTab({me:this,tabContainer:'tabsDown',tabContentContainer:'tabContentDown'})" class="selected" rel="commentsTab">Comments</a></li>--%>
-                <li><a id="commentTabLink" onclick="HUMANTASK.handleTabSelection('commentsTab')" class="selected" rel="commentsTab">Comments</a></li>
-                <li><a id="eventTabLink" onclick="HUMANTASK.handleTabSelection('eventsTab')" rel="eventsTab">History</a></li>
+                <li><a id="commentTabLink" onclick="HUMANTASK.handleTabSelection('commentsTab')" class="selected" rel="commentsTab"><fmt:message key="humantask.taskview.comments"/></a></li>
+                <li><a id="eventTabLink" onclick="HUMANTASK.handleTabSelection('eventsTab')" rel="eventsTab"><fmt:message key="humantask.taskview.history"/></a></li>
                 <li><a id="attachmentsTabLink" onclick="HUMANTASK.handleTabSelection('attachmentsTab')" rel="attachmentsTab"><fmt:message key="humantask.taskview.attachments"/></a></li>
             </ul>
         </div>

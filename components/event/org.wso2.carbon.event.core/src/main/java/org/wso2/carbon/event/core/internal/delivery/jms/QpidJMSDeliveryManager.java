@@ -29,7 +29,7 @@ import java.util.Properties;
 
 public class QpidJMSDeliveryManager extends JMSDeliveryManager {
 
-    public static final String QPID_ICF = "org.apache.qpid.jndi.PropertiesFileInitialContextFactory";
+    public static final String QPID_ICF = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory";
     public static final String CF_NAME_PREFIX = "connectionfactory.";
     public static final String CF_NAME = "qpidConnectionfactory";
 

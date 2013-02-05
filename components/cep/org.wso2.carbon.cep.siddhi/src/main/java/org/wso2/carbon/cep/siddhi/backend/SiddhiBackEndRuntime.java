@@ -29,9 +29,13 @@ import org.wso2.carbon.cep.core.mapping.input.mapping.InputMapping;
 import org.wso2.carbon.cep.core.mapping.input.mapping.MapInputMapping;
 import org.wso2.carbon.cep.core.mapping.input.mapping.TupleInputMapping;
 import org.wso2.carbon.cep.core.mapping.input.mapping.XMLInputMapping;
-import org.wso2.carbon.cep.core.mapping.property.Property;
+import org.wso2.carbon.cep.core.mapping.input.property.MapInputProperty;
+import org.wso2.carbon.cep.core.mapping.input.property.TupleInputProperty;
+import org.wso2.carbon.cep.core.mapping.input.property.XMLInputProperty;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.AttributeType;
 import org.wso2.carbon.databridge.commons.Event;
+import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -124,45 +128,36 @@ public class SiddhiBackEndRuntime implements CEPBackEndRuntime {
     public void addQuery(String queryName, Expression expression,
                          final CEPEventListener cepEventListener)
             throws CEPConfigurationException {
-        String siddhiQuery = null;
+        String siddhiQuery = expression.getText();
+        String queryReference;
         try {
-            if (expression.getType().equals("inline")) {
-                siddhiQuery = expression.getText();
-            } else {
-                siddhiQuery = readSourceTextFromRegistry(expression.getText().trim());
-            }
-            String queryReference;
-            try {
-                queryReference = siddhiManager.addQuery(siddhiQuery);
-                queryReferenceMap.put(queryName, queryReference);
-            } catch (SiddhiPraserException e) {
-                throw new CEPConfigurationException("Error in query ", e);
-            }
+            queryReference = siddhiManager.addQuery(siddhiQuery);
+            queryReferenceMap.put(queryName, queryReference);
+        } catch (SiddhiPraserException e) {
+            throw new CEPConfigurationException("Error in query "+e.getMessage(), e);
+        }
 //            StreamReference streamReference = siddhiManager.addQuery(siddhiQuery);
 //            queryReferenceMap.put(queryName, streamReference);
 
-            if (cepEventListener != null) {
-                String outputStreamId = siddhiManager.getQuery(queryReference).getOutputStream().getStreamId();
-                StreamDefinition streamDefinition = siddhiManager.getStreamDefinition(outputStreamId);
-                cepEventListener.defineStream(createStreamTypeDef(streamDefinition));
-                siddhiManager.addCallback(outputStreamId, new SiddhiEventListner(streamDefinition,
-                                                                                 cepEventListener));
+        if (cepEventListener != null) {
+            String outputStreamId = siddhiManager.getQuery(queryReference).getOutputStream().getStreamId();
+            StreamDefinition streamDefinition = siddhiManager.getStreamDefinition(outputStreamId);
+            try {
+                cepEventListener.setStreamDefinition(createStreamTypeDef(streamDefinition));
+            } catch (MalformedStreamDefinitionException e) {
+                throw new CEPConfigurationException("Cannot create proper stream definition using the configuration, "+e.getErrorMessage(), e);
             }
-        } catch (RegistryException e) {
-            log.error("Error in reading query from registry");
-            throw new CEPConfigurationException("Problem with reading query from registry " + e);
-//        } catch (SiddhiPraserException e) {
-//            throw new CEPConfigurationException("Query :" + siddhiQuery + " , is invalid", e);
-//        } catch (SiddhiException e) {
-//            throw new CEPConfigurationException("Exception when adding query :" + siddhiQuery, e);
+            siddhiManager.addCallback(queryReference, new SiddhiEventListner(streamDefinition,
+                                                                             cepEventListener));
         }
 
 
     }
 
     private org.wso2.carbon.databridge.commons.StreamDefinition createStreamTypeDef(
-            StreamDefinition streamDefinition) {
-        org.wso2.carbon.databridge.commons.StreamDefinition typeDef = new org.wso2.carbon.databridge.commons.StreamDefinition(streamDefinition.getStreamId());
+            StreamDefinition streamDefinition)
+            throws MalformedStreamDefinitionException {
+        org.wso2.carbon.databridge.commons.StreamDefinition typeDef = new org.wso2.carbon.databridge.commons.StreamDefinition("rowStreamDefinition");
         List<org.wso2.carbon.databridge.commons.Attribute> attributeList = new ArrayList<org.wso2.carbon.databridge.commons.Attribute>();
         List<Attribute> attributes = streamDefinition.getAttributeList();
         for (Attribute attribute : attributes) {
@@ -206,22 +201,28 @@ public class SiddhiBackEndRuntime implements CEPBackEndRuntime {
 
         StreamDefinition streamDefinition = new StreamDefinition();
         streamDefinition.name(mapping.getStream());
-        List properties;
+
         if (mapping instanceof TupleInputMapping) {
             TupleInputMapping tupleInputMapping = (TupleInputMapping) mapping;
-            properties = tupleInputMapping.getProperties();
+            List<TupleInputProperty> properties = tupleInputMapping.getProperties();
+            for (TupleInputProperty property1 : properties) {
+                streamDefinition.attribute(property1.getName(), javaToSiddhiType.get(property1.getType()));
+            }
         } else if (mapping instanceof MapInputMapping) {
             MapInputMapping mapInputMapping = (MapInputMapping) mapping;
-            properties = mapInputMapping.getProperties();
+            List<MapInputProperty> properties = mapInputMapping.getProperties();
+            for (MapInputProperty property1 : properties) {
+                streamDefinition.attribute(property1.getName(), javaToSiddhiType.get(property1.getType()));
+            }
         } else { //Xml mapping
             XMLInputMapping xmlInputMapping = (XMLInputMapping) mapping;
-            properties = xmlInputMapping.getProperties();
+            List<XMLInputProperty> properties = xmlInputMapping.getProperties();
+            for (XMLInputProperty property1 : properties) {
+                streamDefinition.attribute(property1.getName(), javaToSiddhiType.get(property1.getType()));
+            }
         }
 
-        for (Object property1 : properties) {
-            Property property = (Property) property1;
-            streamDefinition.attribute(property.getName(), javaToSiddhiType.get(property.getType()));
-        }
+
         if (siddhiManager.getStreamDefinition(streamDefinition.getStreamId()) == null) {
 //        try {
             siddhiInputHandlerMap.put(mapping.getStream(),
@@ -254,9 +255,26 @@ public class SiddhiBackEndRuntime implements CEPBackEndRuntime {
 
     @Override
     public void init() {
-        siddhiManager.restoreLastRevision();
-        persistenceScheduler.scheduleWithFixedDelay(new PersistenceWorker(siddhiManager), persistenceTimeInterval, persistenceTimeInterval, TimeUnit.MINUTES);
+        if (persistenceTimeInterval > 0) {
+            siddhiManager.restoreLastRevision();
+            persistenceScheduler.scheduleWithFixedDelay(new PersistenceWorker(siddhiManager), persistenceTimeInterval, persistenceTimeInterval, TimeUnit.MINUTES);
+        }
+    }
 
+    @Override
+    public void shutdown() {
+        if (persistenceTimeInterval > 0) {
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
+                PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
+                siddhiManager.persist();
+                log.info("Siddhi successfully persisted the sates of bucket " + bucketName+" before shutdown");
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        siddhiManager.shutdown();
     }
 
     private String readSourceTextFromRegistry(String key) throws RegistryException {
@@ -274,8 +292,16 @@ public class SiddhiBackEndRuntime implements CEPBackEndRuntime {
 
         @Override
         public void run() {
-            log.info("Siddhi persisting sates of bucket " + bucketName);
-            siddhiManager.persist();
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
+                PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
+                siddhiManager.persist();
+                log.info("Siddhi persisted sates of bucket " + bucketName);
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+
         }
     }
 

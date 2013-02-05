@@ -21,12 +21,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>data-services</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.dataservices.core</artifactId>
+    <version>4.0.5</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Data Services Core</name>
     <url>http://wso2.org</url>
@@ -36,32 +38,32 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>${wso2carbon.version.data-services}</version>
+            <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core.services</artifactId>
-            <version>${wso2carbon.version.data-services}</version>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.event.core</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.transaction.manager</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
-            <version>${wso2carbon.version.data-services}</version>
+            <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ndatasource.core</artifactId>
-            <version>${wso2carbon.version.data-services}</version>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -125,12 +127,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.dataservices.common</artifactId>
-            <version>${project.version}</version>
+            <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.dataservices.sql.driver</artifactId>
-            <version>${project.version}</version>
+            <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.webharvest.wso2</groupId>

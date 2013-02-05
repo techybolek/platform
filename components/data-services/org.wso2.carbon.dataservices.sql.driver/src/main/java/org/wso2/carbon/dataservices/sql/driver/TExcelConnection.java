@@ -32,8 +32,8 @@ public class TExcelConnection extends TConnection {
 
     public TExcelConnection(Properties props) throws SQLException {
         super(props);
-        String filePath = (String) props.get(Constants.FILE_PATH);
-        this.workbook = createConnectionToExcelDocument(filePath);
+        String filePath = (String) props.get(Constants.DRIVER_PROPERTIES.FILE_PATH);
+        this.workbook = this.createConnectionToExcelDocument(filePath);
     }
 
     /**
@@ -50,9 +50,10 @@ public class TExcelConnection extends TConnection {
             InputStream fin = new FileInputStream(new File(filePath));
             workbook = new HSSFWorkbook(fin);
         } catch (FileNotFoundException e) {
-            throw new SQLException("Could not locate the EXCEL datasource in the provided location");
+            throw new SQLException("Could not locate the EXCEL datasource in the provided " +
+                    "location", e);
         } catch (IOException e) {
-            throw new SQLException("Error occurred while initializing the EXCEL datasource");
+            throw new SQLException("Error occurred while initializing the EXCEL datasource", e);
         }
         return workbook;
     }

@@ -90,6 +90,7 @@ public class StreamConfigListBuilder {
                 currentProperty = new Property();
                 currentProperty.setKey(property.split(PROPERTY_VALUE_SEPARATOR)[i++]);
                 currentProperty.setValue(property.split(PROPERTY_VALUE_SEPARATOR)[i++]);
+                currentProperty.setType(property.split(PROPERTY_VALUE_SEPARATOR)[i++]);
                 if(PROPERTY_TYPE_VALUE.equals(property.split(PROPERTY_VALUE_SEPARATOR)[i])){
                     currentProperty.setExpression(false);
                 } else if(PROPERTY_TYPE_EXPRESSION.equals(property.split(PROPERTY_VALUE_SEPARATOR)[i])){

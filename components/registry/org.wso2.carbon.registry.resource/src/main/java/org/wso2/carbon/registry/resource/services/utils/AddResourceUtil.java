@@ -36,7 +36,7 @@ public class AddResourceUtil {
 
     public static void addResource(
             String path, String mediaType, String description, DataHandler content,
-            String symlinkLocation, Registry registry)
+            String symlinkLocation, Registry registry, String[][] properties)
             throws Exception {
 
         try {
@@ -50,6 +50,11 @@ public class AddResourceUtil {
             }
             resourceImpl.setMediaType(mediaType);
             resourceImpl.setDescription(description);
+            if (properties != null && properties.length > 0) {
+                for (String[] p : properties) {
+                    resourceImpl.setProperty(p[0], p[1]);
+                }
+            }
            //allow to upload a file with empty content
             if (content == null) {
                 String temp = "";

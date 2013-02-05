@@ -24,10 +24,10 @@ package org.wso2.carbon.dataservices.core.custom.datasource;
 public interface DataRow {
 	
 	/**
-	 * This method returns the object value at a given column.
+	 * This method returns the string value at a given column.
 	 * @param column The name of the column to read the value from
-	 * @return The value of the cell, the type of the object depends on the column type
+	 * @return The string value of the cell
 	 */
-	Object getValueAt(String column);
+	String getValueAt(String column);
 	
 }

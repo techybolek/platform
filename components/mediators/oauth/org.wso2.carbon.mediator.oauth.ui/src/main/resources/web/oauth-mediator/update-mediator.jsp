@@ -18,17 +18,19 @@
 
 <%
     try {       
-		String remoteServiceUrl = null;
-
-		remoteServiceUrl = request.getParameter("remoteServiceUrl");
+		String remoteServiceUrl = request.getParameter("remoteServiceUrl");
+		String username = request.getParameter("username");
+		String password = request.getParameter("password");
 		 
         Mediator mediator = SequenceEditorHelper.getEditingMediator(request, session);
         if (!(mediator instanceof OAuthMediator)) {
             // todo : proper error handling
             throw new RuntimeException("Unable to update the mediator");
         }
-        OAuthMediator entMediator = (OAuthMediator) mediator;
-        entMediator.setRemoteServiceUrl(remoteServiceUrl);
+        OAuthMediator oauthMediator = (OAuthMediator) mediator;
+        oauthMediator.setRemoteServiceUrl(remoteServiceUrl);
+        oauthMediator.setUsername(username);
+        oauthMediator.setPassword(password);
 
     } catch (Exception e) {
         session.setAttribute("sequence.error.message", e.getMessage());

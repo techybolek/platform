@@ -47,10 +47,34 @@ import java.util.Properties;
 public class SecureAxisServiceClient implements CallbackHandler {
     private static final Log log = LogFactory.getLog(SecureAxisServiceClient.class);
 
+    /**
+     * This will send request by getting keyStore wso2carbon.jks
+     *
+     * @param userName
+     * @param password
+     * @param endpointReference
+     * @param operation
+     * @param payload
+     * @param securityScenarioNo
+     * @return
+     * @throws Exception
+     */
     public OMElement sendReceive(String userName, String password, String endpointReference,
                                  String operation, OMElement payload, int securityScenarioNo)
             throws Exception {
-        ServiceClient sc = getServiceClient(userName, password, endpointReference, operation, securityScenarioNo);
+        if (securityScenarioNo == 1) {
+            Assert.assertTrue(endpointReference.startsWith("https:"), "Endpoint reference should be https");
+        }
+        EnvironmentBuilder environmentBuilder = new EnvironmentBuilder();
+
+        String keyPath =
+                environmentBuilder.getFrameworkSettings().getEnvironmentVariables().getKeystorePath();
+        String securityPolicyPath = ProductConstant.getSecurityScenarios() + File.separator +
+                                    "scenario" + securityScenarioNo + "-policy.xml";
+
+
+        ServiceClient sc = getServiceClient(userName, password, endpointReference, operation,
+                                            securityPolicyPath, "wso2carbon", "wso2carbon", keyPath, "wso2carbon");
         OMElement result;
         if (log.isDebugEnabled()) {
             log.debug("payload :" + payload);
@@ -76,10 +100,77 @@ public class SecureAxisServiceClient implements CallbackHandler {
 
     }
 
+    /**
+     * @param userName
+     * @param password
+     * @param endpointReference
+     * @param operation
+     * @param payload
+     * @param securityPolicyPath
+     * @param userCertAlias
+     * @param encryptionUser
+     * @param keyStorePath
+     * @param keyStorePassword
+     * @return
+     * @throws Exception
+     */
+    public OMElement sendReceive(String userName, String password, String endpointReference,
+                                 String operation, OMElement payload, String securityPolicyPath,
+                                 String userCertAlias, String encryptionUser, String keyStorePath,
+                                 String keyStorePassword)
+            throws Exception {
+        ServiceClient sc = getServiceClient(userName, password, endpointReference, operation,
+                                            securityPolicyPath, userCertAlias, encryptionUser, keyStorePath, keyStorePassword);
+        OMElement result;
+        if (log.isDebugEnabled()) {
+            log.debug("payload :" + payload);
+            log.debug("Policy Path :" + securityPolicyPath);
+            log.debug("Operation :" + operation);
+            log.debug("username :" + userName);
+            log.debug("password :" + password);
+        }
+
+        log.info("Endpoint reference :" + endpointReference);
+        try {
+            result = sc.sendReceive(payload);
+            if (log.isDebugEnabled()) {
+                log.debug("Response :" + result);
+            }
+        } catch (AxisFault axisFault) {
+            log.error("AxisFault : " + axisFault.getMessage());
+            throw new AxisFault("AxisFault : " + axisFault.getMessage(), axisFault);
+        }
+        Assert.assertNotNull(result);
+        return result;
+
+
+    }
+
+    /**
+     * This will send request by getting keyStore wso2carbon.jks
+     *
+     * @param userName
+     * @param password
+     * @param endpointReference
+     * @param operation
+     * @param payload
+     * @param securityScenarioNo
+     * @throws Exception
+     */
     public void sendRobust(String userName, String password, String endpointReference,
                            String operation, OMElement payload, int securityScenarioNo)
             throws Exception {
-        ServiceClient sc = getServiceClient(userName, password, endpointReference, operation, securityScenarioNo);
+        if (securityScenarioNo == 1) {
+            Assert.assertTrue(endpointReference.startsWith("https:"), "Endpoint reference should be https");
+        }
+        EnvironmentBuilder environmentBuilder = new EnvironmentBuilder();
+
+        String keyPath =
+                environmentBuilder.getFrameworkSettings().getEnvironmentVariables().getKeystorePath();
+        String securityPolicyPath = ProductConstant.getSecurityScenarios() + File.separator +
+                                    "scenario" + securityScenarioNo + "-policy.xml";
+        ServiceClient sc = getServiceClient(userName, password, endpointReference, operation,
+                                            securityPolicyPath, "wso2carbon", "wso2carbon", keyPath, "wso2carbon");
         try {
             sc.sendRobust(payload);
             log.info("Request Sent");
@@ -89,7 +180,48 @@ public class SecureAxisServiceClient implements CallbackHandler {
         }
     }
 
-    private Policy loadPolicy(String userName, String securityPolicyPath, String keyPath)
+    /**
+     * @param userName
+     * @param password
+     * @param endpointReference
+     * @param operation
+     * @param payload
+     * @param securityPolicyPath
+     * @param userCertAlias
+     * @param encryptionUser
+     * @param keyStorePath
+     * @param keyStorePassword
+     * @throws Exception
+     */
+    public void sendRobust(String userName, String password, String endpointReference,
+                           String operation, OMElement payload, String securityPolicyPath,
+                           String userCertAlias, String encryptionUser, String keyStorePath,
+                           String keyStorePassword)
+            throws Exception {
+        ServiceClient sc = getServiceClient(userName, password, endpointReference, operation,
+                                            securityPolicyPath, userCertAlias, encryptionUser, keyStorePath, keyStorePassword);
+        if (log.isDebugEnabled()) {
+            log.debug("payload :" + payload);
+            log.debug("Security Policy Path :" + securityPolicyPath);
+            log.debug("Operation :" + operation);
+            log.debug("username :" + userName);
+            log.debug("password :" + password);
+        }
+
+        log.info("Endpoint reference :" + endpointReference);
+        try {
+            sc.sendRobust(payload);
+        } catch (AxisFault axisFault) {
+            log.error("AxisFault : " + axisFault.getMessage());
+            throw new AxisFault("AxisFault : " + axisFault.getMessage(), axisFault);
+        }
+
+
+    }
+
+
+    private Policy loadPolicy(String userName, String securityPolicyPath, String keyStorePath,
+                              String keyStorePassword, String userCertAlias, String encryptionUser)
             throws Exception {
 
         Policy policy = null;
@@ -103,11 +235,9 @@ public class SecureAxisServiceClient implements CallbackHandler {
 
             rc.setUser(userName);
 
-            rc.setUserCertAlias("wso2carbon");
-            rc.setEncryptionUser("wso2carbon");
+            rc.setUserCertAlias(userCertAlias);
+            rc.setEncryptionUser(encryptionUser);
             rc.setPwCbClass(SecureAxisServiceClient.class.getName());
-            String pass = "wso2carbon";
-
 
             CryptoConfig sigCryptoConfig = new CryptoConfig();
 
@@ -116,8 +246,8 @@ public class SecureAxisServiceClient implements CallbackHandler {
 
             Properties prop1 = new Properties();
             prop1.put("org.apache.ws.security.crypto.merlin.keystore.type", "JKS");
-            prop1.put("org.apache.ws.security.crypto.merlin.file", keyPath);
-            prop1.put("org.apache.ws.security.crypto.merlin.keystore.password", pass);
+            prop1.put("org.apache.ws.security.crypto.merlin.file", keyStorePath);
+            prop1.put("org.apache.ws.security.crypto.merlin.keystore.password", keyStorePassword);
 
             sigCryptoConfig.setProp(prop1);
 
@@ -127,8 +257,8 @@ public class SecureAxisServiceClient implements CallbackHandler {
             Properties prop2 = new Properties();
 
             prop2.put("org.apache.ws.security.crypto.merlin.keystore.type", "JKS");
-            prop2.put("org.apache.ws.security.crypto.merlin.file", keyPath);
-            prop2.put("org.apache.ws.security.crypto.merlin.keystore.password", pass);
+            prop2.put("org.apache.ws.security.crypto.merlin.file", keyStorePath);
+            prop2.put("org.apache.ws.security.crypto.merlin.keystore.password", keyStorePassword);
 
             encrCryptoConfig.setProp(prop2);
 
@@ -147,21 +277,18 @@ public class SecureAxisServiceClient implements CallbackHandler {
 
     private ServiceClient getServiceClient(String userName, String password,
                                            String endpointReference, String operation,
-                                           int securityScenarioNo) throws Exception {
-        EnvironmentBuilder environmentBuilder = new EnvironmentBuilder();
+                                           String securityPolicyPath, String userCertAlias,
+                                           String encryptionUser, String keyStorePath,
+                                           String keyStorePassword)
+            throws Exception {
 
-        String keyPath =
-                environmentBuilder.getFrameworkSettings().getEnvironmentVariables().getKeystorePath();
-        String securityPolicyPath =
-                ProductConstant.getSecurityScenarios() + File.separator +
-                "scenario" + securityScenarioNo + "-policy.xml";
         if (log.isDebugEnabled()) {
-            log.debug("Key_Path :" + keyPath);
+            log.debug("Key_Path :" + keyStorePath);
             log.debug("securityPolicyPath :" + securityPolicyPath);
         }
 
-        System.setProperty("javax.net.ssl.trustStore", keyPath);
-        System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
+        System.setProperty("javax.net.ssl.trustStore", keyStorePath);
+        System.setProperty("javax.net.ssl.trustStorePassword", keyStorePassword);
 
         if (log.isDebugEnabled()) {
             log.debug("javax.net.ssl.trustStore :" + System.getProperty("javax.net.ssl.trustStore"));
@@ -181,10 +308,14 @@ public class SecureAxisServiceClient implements CallbackHandler {
             sc.engageModule("addressing");
 
             Options opts = new Options();
-            if (securityScenarioNo == 1) {
-                Assert.assertTrue(endpointReference.startsWith("https:"), "Endpoint reference should be https");
-            } else {
-                Assert.assertTrue(endpointReference.startsWith("http:"), "Endpoint reference should be https");
+
+            try {
+                opts.setProperty(RampartMessageData.KEY_RAMPART_POLICY,
+                                 loadPolicy(userName, securityPolicyPath, keyStorePath, keyStorePassword, userCertAlias, encryptionUser));
+
+            } catch (Exception e) {
+                log.error(e);
+                throw new Exception(e.getMessage(), e);
             }
 
             opts.setTo(new EndpointReference(endpointReference));
@@ -193,16 +324,6 @@ public class SecureAxisServiceClient implements CallbackHandler {
             opts.setUserName(userName);
             opts.setPassword(password);
 
-            try {
-                if (securityScenarioNo >= 1) {
-                    opts.setProperty(RampartMessageData.KEY_RAMPART_POLICY,
-                                     loadPolicy(userName, securityPolicyPath, keyPath));
-                }
-
-            } catch (Exception e) {
-                log.error(e);
-                throw new Exception(e.getMessage(), e);
-            }
 
             sc.setOptions(opts);
         } catch (AxisFault axisFault) {
@@ -222,14 +343,20 @@ public class SecureAxisServiceClient implements CallbackHandler {
         if (usage == WSPasswordCallback.SIGNATURE || usage == WSPasswordCallback.DECRYPT) {
             // Logic to get the private key password for signture or decryption
             if ("client".equals(id)) {
-                pwcb.setPassword("apache");
-            }
-            if ("service".equals(id)) {
-                pwcb.setPassword("apache");
+                pwcb.setPassword("automation");
 
-            }
-            if ("wso2carbon".equals(id)) {
+            } else if ("service".equals(id)) {
+                pwcb.setPassword("automation");
+
+            } else if ("wso2carbon".equals(id)) {
                 pwcb.setPassword("wso2carbon");
+
+            } else if ("alice".equals(id)) {
+                pwcb.setPassword("password");
+
+            } else if ("bob".equals(id)) {
+                pwcb.setPassword("password");
+
             }
         }
     }

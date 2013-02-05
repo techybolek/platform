@@ -76,14 +76,27 @@
         defaultEndpoint.setRest(true);
     } else if ("GET".equals(formatOption)) {
         defaultEndpoint.setGet(true);
+    } else {
+        defaultEndpoint.setSoap11(false);
+        defaultEndpoint.setSoap12(false);
+        defaultEndpoint.setPox(false);
+        defaultEndpoint.setRest(false);
+        defaultEndpoint.setGet(false);
     }
+
     if ("SWA".equals(optimizeOption)) {
         defaultEndpoint.setSwa(true);
     } else if ("MTOM".equals(optimizeOption)) {
         defaultEndpoint.setMtom(true);
+    }else {
+        defaultEndpoint.setSwa(false);
+        defaultEndpoint.setMtom(false);
     }
+
     if (description != null && !"".equals(description)) {
         defaultEndpoint.setDescription(description);
+    } else {
+        defaultEndpoint.setDescription("");
     }
     if (errorCode != null) {
         defaultEndpoint.setErrorCodes(errorCode);
@@ -114,6 +127,8 @@
             defaultEndpoint.setTimeoutAct("discard");
         } else if (action.equals("executeFaultSequence")) {
             defaultEndpoint.setTimeoutAct("fault");
+        } else {
+            defaultEndpoint.setTimeoutAct("100");
         }
     }
     if (actionDuration != null) {
@@ -121,24 +136,38 @@
     }
     if (wsAddressing != null) {
         defaultEndpoint.setWsadd(true);
+    } else {
+        defaultEndpoint.setWsadd(false);
     }
     if (useSeprateListner != null) {
         defaultEndpoint.setSepList(true);
+    } else {
+        defaultEndpoint.setSepList(false);
     }
     if (wsSecurity != null) {
         defaultEndpoint.setWssec(true);
+    } else {
+        defaultEndpoint.setWssec(false);
     }
     if (secPolicy != null) {
         defaultEndpoint.setSecPolKey(secPolicy);
+    } else {
+        defaultEndpoint.setSecPolKey(null);
     }
     if (wsRM != null) {
         defaultEndpoint.setWsrm(true);
+    } else {
+        defaultEndpoint.setWsrm(false);
     }
     if (rmPolicy != null) {
         defaultEndpoint.setRmPolKey(rmPolicy);
+    } else {
+        defaultEndpoint.setRmPolKey(null);
     }
     if (properties != null) {
         defaultEndpoint.setProperties(properties);
+    } else {
+        defaultEndpoint.setProperties(null);
     }
 
     OMElement endpointElement = defaultEndpoint.serialize(null);

@@ -1,7 +1,21 @@
 <% jagg.template("page/base", function(inputs, outputs, jagg) { %>
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<%
+var i18n = require("i18n");
+var localeResourcesBasePath="/site/conf/locales/jaggery/";
+i18n.init(request,localeResourcesBasePath);
+%>
 <head>
+    <%
+    var partWithContext = request.getRequestURL().split(
+                                request.getRequestURI()
+                              )[0]+request.getContextPath();
+
+    %>
+    <script>
+        var requestURL = '<%=partWithContext%>';
+    </script>
     <title><%=outputs.title%></title>
     <meta charset="UTF-8">
     <meta name="description" content=""/>
@@ -22,6 +36,7 @@
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]><script src="<%=jagg.getAbsoluteUrl("/site/themes/default/lib/html5/html5.js")%>"></script><![endif]-->
+    <script src="<%=jagg.getAbsoluteUrl("/site/themes/default/lib/i18n/i18next-1.5.9.js")%>"></script>
 
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/jquery-1.7.1.min.js"))%>"></script>
 

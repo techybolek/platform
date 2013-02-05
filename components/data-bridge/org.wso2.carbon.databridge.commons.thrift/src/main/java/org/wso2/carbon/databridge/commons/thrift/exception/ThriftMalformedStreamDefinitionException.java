@@ -5,11 +5,7 @@
  */
 package org.wso2.carbon.databridge.commons.thrift.exception;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Collections;
+import java.util.*;
 
 public class ThriftMalformedStreamDefinitionException extends Exception implements org.apache.thrift.TBase<ThriftMalformedStreamDefinitionException, ThriftMalformedStreamDefinitionException._Fields>, java.io.Serializable, Cloneable {
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("ThriftMalformedStreamDefinitionException");

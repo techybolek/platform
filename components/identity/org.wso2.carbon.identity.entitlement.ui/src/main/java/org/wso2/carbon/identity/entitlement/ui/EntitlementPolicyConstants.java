@@ -114,6 +114,24 @@ public class EntitlementPolicyConstants {
 
     public static final String  VARIABLE_ID = "VariableId";
 
+    public static final String  OBLIGATION_EXPRESSIONS = "ObligationExpressions";
+
+    public static final String  OBLIGATION_EXPRESSION = "ObligationExpression";
+
+    public static final String  OBLIGATION_ID = "ObligationId";
+
+    public static final String  OBLIGATION_EFFECT = "FulfillOn";
+
+    public static final String  ADVICE_EXPRESSIONS = "AdviceExpressions";
+
+    public static final String  ADVICE_EXPRESSION = "AdviceExpression";
+
+    public static final String  ADVICE_ID = "AdviceId";
+
+    public static final String  ADVICE_EFFECT = "AppliesTo";
+
+    public static final String  ATTRIBUTE_ASSIGNMENT = "AttributeAssignmentExpression";
+
     public static final int CONDITION_ELEMENT_IDENTIFIER = -1 ;
 
     public static final String STRING_DATA_TYPE = "http://www.w3.org/2001/XMLSchema#string";
@@ -216,10 +234,16 @@ public class EntitlementPolicyConstants {
 
     public static final String BASIC_POLICY_EDITOR = "Basic";
 
+    public static final String SOA_POLICY_EDITOR = "SOA";
+
     public static final String SEARCH_ERROR = "Search_Error";
 
     public static final String DEFAULT_META_DATA_MODULE_NAME = "Carbon Attribute Finder Module";
 
     public static final int BASIC_POLICY_OPTIONAL_META_DATA_AMOUNT= 20;
+
+    public static final String ENTITLEMENT_PUBLISHER_PROPERTY = "entitlementPublisherPropertyDTO";
+
+    public static final String ENTITLEMENT_PUBLISHER_MODULE = "entitlementPublisherModuleHolders";
 
 }

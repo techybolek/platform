@@ -27,7 +27,9 @@ import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.core.common.AuthenticationException;
 import org.wso2.carbon.core.security.AuthenticatorsConfiguration;
 import org.wso2.carbon.core.services.authentication.AuthenticationAdmin;
+import org.wso2.carbon.core.services.authentication.AuthenticationFailureException;
 import org.wso2.carbon.core.services.authentication.CarbonServerAuthenticator;
+import org.wso2.carbon.core.services.authentication.ServerAuthenticator;
 import org.wso2.carbon.utils.ServerConstants;
 
 import javax.servlet.http.HttpSession;
@@ -49,7 +51,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class Krb5Authenticator /*extends AbstractAdmin*/ implements CarbonServerAuthenticator {
+//public class Krb5Authenticator /*extends AbstractAdmin*/ implements CarbonServerAuthenticator {
+    public class Krb5Authenticator extends AbstractAdmin implements ServerAuthenticator {
 
     private static final Log log = LogFactory.getLog(Krb5Authenticator.class);
     private static final int DEFAULT_PRIORITY_LEVEL = 10;
@@ -121,7 +124,6 @@ public class Krb5Authenticator /*extends AbstractAdmin*/ implements CarbonServer
             ioe.printStackTrace();
             throw new AuthenticationException(ioe.getMessage());
         } catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new AuthenticationException(e.getMessage());
 		}
@@ -129,13 +131,11 @@ public class Krb5Authenticator /*extends AbstractAdmin*/ implements CarbonServer
     
 	@Override
 	public String getAuthenticatorName() {
-		// TODO Auto-generated method stub
 		return AUTHENTICATOR_NAME;
 	}
 
 	@Override
 	public int getPriority() {
-		// TODO Auto-generated method stub
 		return DEFAULT_PRIORITY_LEVEL;
 	}
 	
@@ -169,26 +169,36 @@ public class Krb5Authenticator /*extends AbstractAdmin*/ implements CarbonServer
 		}
 	}
 
-	public boolean isAuthenticated(MessageContext messageContext) {
+    @Override
+    public boolean canHandle(MessageContext msgContext) {
+        return true;
+    }
+
+    public boolean isAuthenticated(MessageContext messageContext) {
         HttpServletRequest request = (HttpServletRequest) messageContext
                 .getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
         HttpSession httpSession = request.getSession();
         String userLoggedIn = (String) httpSession.getAttribute(ServerConstants.USER_LOGGED_IN);
         return (userLoggedIn != null);
     }
-	
-	public String getTicketCache() {
+
+    @Override
+    public void authenticate(MessageContext msgContext) throws AuthenticationFailureException {
+
+    }
+
+    public String getTicketCache() {
 		HttpSession clientSession = getHttpSession();
 		String username = (String) clientSession.getAttribute(ServerConstants.USER_LOGGED_IN);
 		return tgtCachePrefix+nameToUuidMap.get(username);
 	}
 
-	@Override
+	//@Override
 	public boolean isHandle(MessageContext msgContext) {
 		return true;
 	}
 
-	@Override
+	//@Override
 	public boolean authenticateWithRememberMe(MessageContext msgContext) {
 		return false;
 	}

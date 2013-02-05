@@ -18,7 +18,7 @@
  */
 package org.wso2.carbon.datasource;
 
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
+import org.wso2.carbon.context.CarbonContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +45,7 @@ public class DataSourceManagementHandler {
     }
     
     public DataSourceInformationManager getTenantDataSourceInformationManager() {
-        int tenantId = CarbonContextHolder.getCurrentCarbonContextHolder().getTenantId();
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
         return this.getDataSourceManagerMap().get(tenantId);
     }
 

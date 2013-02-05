@@ -22,28 +22,29 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>analytics-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.analytics.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Analytics Feature</name>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.7</version>
     <url>http://wso2.org</url>
-    <description> Analytics feature</description>
+    <description>Analytics feature</description>
 
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.analytics.server.feature</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.patch.release.version407}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.analytics.ui.feature</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.patch.release.version402}</version>
             <type>zip</type>
         </dependency>
     </dependencies>
@@ -63,13 +64,17 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.analytics</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:${carbon.patch.release.version402}
+                                </importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.analytics.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.analytics.ui.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.analytics.server.feature:${carbon.patch.release.version407}
+                                </includedFeatureDef>
+                                <includedFeatureDef>
+                                    org.wso2.carbon:org.wso2.carbon.analytics.ui.feature:${carbon.patch.release.version402}
+                                </includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>
@@ -77,4 +82,9 @@
             </plugin>
         </plugins>
     </build>
+
+    <properties>
+        <carbon.patch.release.version407>4.0.7</carbon.patch.release.version407>
+        <carbon.patch.release.version402>4.0.2</carbon.patch.release.version402>
+    </properties>
 </project>

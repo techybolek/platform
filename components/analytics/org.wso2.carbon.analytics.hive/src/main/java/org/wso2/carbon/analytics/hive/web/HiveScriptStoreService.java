@@ -42,7 +42,7 @@ public class HiveScriptStoreService {
         } else {
             log.error("Script name is empty. Please provide a valid script name!");
             throw new HiveScriptStoreException("Script name is empty. Please provide a valid" +
-                                               " script name!");
+                    " script name!");
         }
     }
 
@@ -55,7 +55,7 @@ public class HiveScriptStoreService {
         } else {
             log.error("Script name is empty. Please provide a valid script name!");
             throw new HiveScriptStoreException("Script name is empty. Please provide a valid" +
-                                               " script name!");
+                    " script name!");
         }
 
         if (cron != null && !cron.equals("")) {
@@ -63,18 +63,22 @@ public class HiveScriptStoreService {
             TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
             //triggerInfo.setRepeatCount(sequence.getCount());
             //triggerInfo.setIntervalMillis(sequence.getInterval());
+            triggerInfo.setDisallowConcurrentExecution(true);
             triggerInfo.setCronExpression(cron);
 
-            TaskInfo info = new TaskInfo();
-            info.setName(scriptName);
-            info.setTriggerInfo(triggerInfo);
-            info.setTaskClass(HiveConstants.HIVE_DEFAULT_TASK_CLASS);
 
             Map<String, String> properties = new HashMap<String, String>();
             properties.put(HiveConstants.HIVE_SCRIPT_NAME, scriptName);
-            properties.put(HiveConstants.TASK_TENANT_ID_KEY, String.valueOf(CarbonContext.getCurrentContext().getTenantId()));
+            properties.put(HiveConstants.TASK_TENANT_ID_KEY,
+                           String.valueOf(CarbonContext.getCurrentContext().getTenantId()));
 
-            info.setProperties(properties);
+            TaskInfo info = new TaskInfo(scriptName, HiveConstants.HIVE_DEFAULT_TASK_CLASS,
+                                         properties, triggerInfo);
+/*            info.setName(scriptName);
+            info.setTriggerInfo(triggerInfo);
+            info.setTaskClass(HiveConstants.HIVE_DEFAULT_TASK_CLASS);
+
+            info.setProperties(properties);*/
 
             int tenantId = CarbonContext.getCurrentContext().getTenantId();
             try {
@@ -82,25 +86,25 @@ public class HiveScriptStoreService {
                 ServiceHolder.getTaskManager().scheduleTask(info.getName());
             } catch (TaskException e) {
                 log.error("Error while scheduling script : " + info.getName() + " for tenant : " +
-                          tenantId + "..", e);
+                        tenantId + "..", e);
                 throw new HiveScriptStoreException("Error while scheduling script : " +
-                                                   info.getName() + " for tenant : " + tenantId +
-                                                   "..", e);
+                        info.getName() + " for tenant : " + tenantId +
+                        "..", e);
             }
 
             if (log.isDebugEnabled()) {
                 log.debug("Registered script execution task : " + info.getName() +
-                          " for tenant : " + tenantId);
+                        " for tenant : " + tenantId);
             }
-        }else {
-           deleteTask(scriptName);
+        } else {
+            deleteTask(scriptName);
         }
 
     }
 
     public String getCronExpression(String scriptName) throws HiveScriptStoreException {
-      scriptName = validateScriptName(scriptName);
-      TaskManager.TaskState taskState = null;
+        scriptName = validateScriptName(scriptName);
+        TaskManager.TaskState taskState = null;
         TaskInfo info = null;
         TaskManager manager = ServiceHolder.getTaskManager();
         try {
@@ -111,9 +115,9 @@ public class HiveScriptStoreService {
         }
 
         if (info != null && taskState != null) {
-          return info.getTriggerInfo().getCronExpression();
+            return info.getTriggerInfo().getCronExpression();
         }
-        return  "";
+        return "";
     }
 
 // Not needed since the saving the same script will overwrite.
@@ -136,19 +140,20 @@ public class HiveScriptStoreService {
     public void deleteScript(String scriptName) throws HiveScriptStoreException {
         scriptName = validateScriptName(scriptName);
         if (null != scriptName) {
+            deleteTask(scriptName);
             HiveScriptPersistenceManager manager = HiveScriptPersistenceManager.getInstance();
             manager.deleteScript(scriptName);
         } else {
             log.error("Script name is empty. Please provide a valid script name!");
             throw new HiveScriptStoreException("Script name is empty. Please provide a valid" +
-                                               " script name!");
+                    " script name!");
         }
-        deleteTask(scriptName);
+
     }
 
 
     private void deleteTask(String scriptName) throws HiveScriptStoreException {
-       TaskManager.TaskState taskState = null;
+        TaskManager.TaskState taskState = null;
         TaskInfo info = null;
         TaskManager manager = ServiceHolder.getTaskManager();
         try {
@@ -164,15 +169,35 @@ public class HiveScriptStoreService {
             } catch (TaskException e) {
                 log.error("Error while unscheduling task : " + scriptName + "..", e);
                 throw new HiveScriptStoreException("Error while unscheduling task : " + scriptName +
-                                                   "..", e);
+                        "..", e);
             }
         }
     }
+
     private String validateScriptName(String scriptName) {
         if (scriptName.endsWith(HiveConstants.HIVE_SCRIPT_EXT)) {
             scriptName = scriptName.substring(0, scriptName.length() -
-                                                 HiveConstants.HIVE_SCRIPT_EXT.length());
+                    HiveConstants.HIVE_SCRIPT_EXT.length());
         }
         return scriptName;
+    }
+
+    public boolean isTaskExecuting(String scriptName) throws HiveScriptStoreException {
+        if (null != scriptName && !scriptName.trim().isEmpty()) {
+            TaskManager manager = ServiceHolder.getTaskManager();
+            try {
+                TaskManager.TaskState state = manager.getTaskState(scriptName);
+                return null != state && state == TaskManager.TaskState.BLOCKED;
+            } catch (TaskException e) {
+                if (e.getCode().equals(TaskException.Code.NO_TASK_EXISTS)){
+                    return false;
+                } else {
+                    log.error("Error while retrieving the status of the task:" + scriptName, e);
+                    throw new HiveScriptStoreException("Error while retrieving the status of the task:" + scriptName, e);
+                }
+            }
+        } else {
+            return false;
+        }
     }
 }

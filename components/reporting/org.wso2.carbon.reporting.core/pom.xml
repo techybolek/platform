@@ -14,18 +14,20 @@
  ~ See the License for the specific language governing permissions and
  ~ limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>reporting</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.reporting.core</artifactId>
     <groupId>org.wso2.carbon</groupId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.2</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Reporting Core</name>
 
@@ -37,6 +39,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <artifactId>org.wso2.carbon.reporting.api</artifactId>
@@ -44,7 +47,7 @@
         </dependency>
         <dependency>
             <artifactId>org.wso2.carbon.reporting.util</artifactId>
-            <groupId>org.wso2.carbon</groupId>
+        <groupId>org.wso2.carbon</groupId>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
@@ -54,7 +57,7 @@
         <dependency>
             <groupId>jasperreports.wso2</groupId>
             <artifactId>jasperreports</artifactId>
-            <version>${jasperreports.wso2.version}</version>
+            <version>${jasperreports.wso2.version.reporting}</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
@@ -67,25 +70,25 @@
             <artifactId>jxl</artifactId>
             <version>${jxl.wso2.version}</version>
         </dependency>
-      <dependency>
-        <groupId>org.wso2.carbon</groupId>
-        <artifactId>org.wso2.carbon.ndatasource.core</artifactId>
-        <version>${wso2carbon.version}</version>
-      </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.ndatasource.core</artifactId>
+            <version>${wso2carbon.version}</version>
+        </dependency>
 
     </dependencies>
 
     <build>
         <plugins>
-          <plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-          </plugin>
-            
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                
+
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -103,8 +106,8 @@
                             javax.servlet.jsp.resources;version="2.0.0",
                             javax.servlet.jsp.tagext;version="2.0.0",
                             javax.servlet.resources;version="2.4.0",
-                            org.wso2.carbon.reporting.api.*,
-                            org.wso2.carbon.reporting.util.*,
+                            org.wso2.carbon.reporting.api.*;version="0.0.0",
+                            org.wso2.carbon.reporting.util.*;version="0.0.0",
                             org.osgi.framework.*,
                             net.sf.jasperreports.*,
                             org.jfree.chart.*,
@@ -121,4 +124,6 @@
             </plugin>
         </plugins>
     </build>
+
+
 </project>

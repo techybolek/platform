@@ -19,41 +19,32 @@ package org.wso2.carbon.mediator.entitlement;
 
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
-import org.wso2.carbon.mediator.service.ui.AbstractMediator;
+import org.apache.synapse.config.xml.XMLConfigConstants;
 import org.wso2.carbon.mediator.service.MediatorException;
+import org.wso2.carbon.mediator.service.ui.AbstractListMediator;
+import org.wso2.carbon.mediator.service.ui.Mediator;
 
 import javax.xml.namespace.QName;
 
-public class EntitlementMediator extends AbstractMediator {
+public class EntitlementMediator extends AbstractListMediator {
     private String remoteServiceUserName;
     private String remoteServicePassword;
     private String remoteServiceUrl;
     private static final QName PROP_NAME_SERVICE_EPR = new QName("remoteServiceUrl");
     private static final QName PROP_NAME_USER = new QName("remoteServiceUserName");
     private static final QName PROP_NAME_PASSWORD = new QName("remoteServicePassword");
+    private static final String ADVICE = "advice";
+    private static final String OBLIGATIONS = "obligations";
+    private String onRejectSeqKey = null;
+    private String onAcceptSeqKey = null;
+    private String adviceSeqKey = null;
+    private String obligationsSeqKey = null;
 
-    public String getRemoteServiceUserName() {
-        return remoteServiceUserName;
-    }
-
-    public void setRemoteServiceUserName(String remoteServiceUserName) {
-        this.remoteServiceUserName = remoteServiceUserName;
-    }
-
-    public String getRemoteServicePassword() {
-        return remoteServicePassword;
-    }
-
-    public void setRemoteServicePassword(String remoteServicePassword) {
-        this.remoteServicePassword = remoteServicePassword;
-    }
-
-    public String getRemoteServiceUrl() {
-        return remoteServiceUrl;
-    }
-
-    public void setRemoteServiceUrl(String remoteServiceUrl) {
-        this.remoteServiceUrl = remoteServiceUrl;
+    public EntitlementMediator() {
+        addChild(new OnAcceptMediator());
+        addChild(new OnRejectMediator());
+        addChild(new ObligationsMediator());
+        addChild(new AdviceMediator());
     }
 
     /**
@@ -86,6 +77,50 @@ public class EntitlementMediator extends AbstractMediator {
                     "Invalid Entitlement mediator. Remote service password required");
         }
 
+        if (onRejectSeqKey != null) {
+            entitlementService.addAttribute(fac.createOMAttribute(XMLConfigConstants.ONREJECT, nullNS,
+                    onRejectSeqKey));
+        } else {
+            for (Mediator m : getList()) {
+                if (m instanceof OnRejectMediator) {
+                    m.serialize(entitlementService);
+                }
+            }
+        }
+
+        if (onAcceptSeqKey != null) {
+            entitlementService.addAttribute(fac.createOMAttribute(XMLConfigConstants.ONACCEPT, nullNS,
+                    onAcceptSeqKey));
+        } else {
+            for (Mediator m : getList())  {
+                if (m instanceof OnAcceptMediator) {
+                    m.serialize(entitlementService);
+                }
+            }
+        }
+
+        if (adviceSeqKey != null) {
+            entitlementService.addAttribute(fac.createOMAttribute(ADVICE, nullNS,
+                    adviceSeqKey));
+        } else {
+            for (Mediator m : getList())  {
+                if (m instanceof AdviceMediator) {
+                    m.serialize(entitlementService);
+                }
+            }
+        }
+
+        if (obligationsSeqKey != null) {
+            entitlementService.addAttribute(fac.createOMAttribute(OBLIGATIONS, nullNS,
+                    obligationsSeqKey));
+        } else {
+            for (Mediator m : getList())  {
+                if (m instanceof ObligationsMediator) {
+                    m.serialize(entitlementService);
+                }
+            }
+        }
+
         saveTracingState(entitlementService, this);
 
         if (parent != null) {
@@ -98,9 +133,14 @@ public class EntitlementMediator extends AbstractMediator {
      * {@inheritDoc}
      */
     public void build(OMElement elem) {
+        getList().clear();
         OMAttribute attRemoteServiceUri = elem.getAttribute(PROP_NAME_SERVICE_EPR);
         OMAttribute attRemoteServiceUserName = elem.getAttribute(PROP_NAME_USER);
         OMAttribute attRemoteServicePassword = elem.getAttribute(PROP_NAME_PASSWORD);
+        this.onAcceptSeqKey = null;
+        this.onRejectSeqKey = null;
+        this.adviceSeqKey = null;
+        this.obligationsSeqKey = null;
 
         if (attRemoteServiceUri != null) {
             remoteServiceUrl = attRemoteServiceUri.getAttributeValue();
@@ -122,6 +162,127 @@ public class EntitlementMediator extends AbstractMediator {
             throw new MediatorException(
                     "The 'remoteServicePassword' attribute is required for the Entitlement mediator");
         }
+
+        OMAttribute onReject = elem.getAttribute(
+                new QName(XMLConfigConstants.NULL_NAMESPACE, XMLConfigConstants.ONREJECT));
+        if (onReject != null) {
+            String onRejectValue = onReject.getAttributeValue();
+            if (onRejectValue != null) {
+                onRejectSeqKey = onRejectValue.trim();
+            }
+        } else {
+            OMElement onRejectMediatorElement = elem.getFirstChildWithName(
+                    new QName(XMLConfigConstants.SYNAPSE_NAMESPACE, XMLConfigConstants.ONREJECT));
+            if (onRejectMediatorElement != null) {
+                OnRejectMediator onRejectMediator = new OnRejectMediator();
+                onRejectMediator.build(onRejectMediatorElement);
+                addChild(onRejectMediator);
+            }
+        }
+        OMAttribute onAccept = elem.getAttribute(
+                new QName(XMLConfigConstants.NULL_NAMESPACE, XMLConfigConstants.ONACCEPT));
+        if (onAccept != null) {
+            String onAcceptValue = onAccept.getAttributeValue();
+            if (onAcceptValue != null) {
+                onAcceptSeqKey = onAcceptValue;
+            }
+        } else {
+            OMElement onAcceptMediatorElement = elem.getFirstChildWithName(
+                    new QName(XMLConfigConstants.SYNAPSE_NAMESPACE, XMLConfigConstants.ONACCEPT));
+            if (onAcceptMediatorElement != null) {
+                OnAcceptMediator onAcceptMediator = new OnAcceptMediator();
+                onAcceptMediator.build(onAcceptMediatorElement);
+                addChild(onAcceptMediator);
+            }
+        }
+        OMAttribute advice = elem.getAttribute(
+                new QName(XMLConfigConstants.NULL_NAMESPACE, ADVICE));
+        if (advice != null) {
+            String adviceValue = advice.getAttributeValue();
+            if (adviceValue != null) {
+                adviceSeqKey = adviceValue;
+            }
+        } else {
+            OMElement adviceMediatorElement = elem.getFirstChildWithName(
+                    new QName(XMLConfigConstants.SYNAPSE_NAMESPACE, ADVICE));
+            if (adviceMediatorElement != null) {
+                AdviceMediator adviceMediator = new AdviceMediator();
+                adviceMediator.build(adviceMediatorElement);
+                addChild(adviceMediator);
+            }
+        }
+        OMAttribute obligations = elem.getAttribute(
+                new QName(XMLConfigConstants.NULL_NAMESPACE, OBLIGATIONS));
+        if (obligations != null) {
+            String obligationsValue = obligations.getAttributeValue();
+            if (obligationsValue != null) {
+                onAcceptSeqKey = obligationsValue;
+            }
+        } else {
+            OMElement obligationsMediatorElement = elem.getFirstChildWithName(
+                    new QName(XMLConfigConstants.SYNAPSE_NAMESPACE, OBLIGATIONS));
+            if (obligationsMediatorElement != null) {
+                ObligationsMediator obligationsMediator = new ObligationsMediator();
+                obligationsMediator.build(obligationsMediatorElement);
+                addChild(obligationsMediator);
+            }
+        }
+    }
+
+    public String getRemoteServiceUserName() {
+        return remoteServiceUserName;
+    }
+
+    public void setRemoteServiceUserName(String remoteServiceUserName) {
+        this.remoteServiceUserName = remoteServiceUserName;
+    }
+
+    public String getRemoteServicePassword() {
+        return remoteServicePassword;
+    }
+
+    public void setRemoteServicePassword(String remoteServicePassword) {
+        this.remoteServicePassword = remoteServicePassword;
+    }
+
+    public String getRemoteServiceUrl() {
+        return remoteServiceUrl;
+    }
+
+    public void setRemoteServiceUrl(String remoteServiceUrl) {
+        this.remoteServiceUrl = remoteServiceUrl;
+    }
+
+    public String getOnRejectSeqKey() {
+        return onRejectSeqKey;
+    }
+
+    public void setOnRejectSeqKey(String onRejectSeqKey) {
+        this.onRejectSeqKey = onRejectSeqKey;
+    }
+
+    public String getOnAcceptSeqKey() {
+        return onAcceptSeqKey;
+    }
+
+    public void setOnAcceptSeqKey(String onAcceptSeqKey) {
+        this.onAcceptSeqKey = onAcceptSeqKey;
+    }
+
+    public String getAdviceSeqKey() {
+        return adviceSeqKey;
+    }
+
+    public void setAdviceSeqKey(String adviceSeqKey) {
+        this.adviceSeqKey = adviceSeqKey;
+    }
+
+    public String getObligationsSeqKey() {
+        return obligationsSeqKey;
+    }
+
+    public void setObligationsSeqKey(String obligationsSeqKey) {
+        this.obligationsSeqKey = obligationsSeqKey;
     }
 
     /**

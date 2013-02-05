@@ -4,12 +4,13 @@
         <makefault version="soap12" response="false">
             <code xmlns:soap12Env="http://www.w3.org/2003/05/soap-envelope"
                   value="soap12Env:VersionMismatch"/>
-            <reason value="Custom ERROR Message"/>
+            <reason value="Soap12FaultWithAttributeResponseFalseTestCase"/>
             <role>automation</role>
             <detail>fault details by automation</detail>
             <node>automation-node</node>
         </makefault>
         <log level="full"/>
+        <!--This will send to endpoint again and go throw the default fault-->
         <send/>
     </sequence>
 
@@ -26,6 +27,22 @@
         <out>
             <send/>
         </out>
+    </sequence>
+
+    <sequence name="fault">
+        <makefault version="soap12">
+            <code xmlns:tns="http://www.w3.org/2003/05/soap-envelope" value="tns:Receiver"/>
+            <reason value="Default Fault sequence Executed instead of myFaultHandler"/>
+        </makefault>
+
+        <log level="full">
+            <property name="ERROR_CODE" expression="get-property('ERROR_CODE')"/>
+            <property name="ERROR_MESSAGE" expression="get-property('ERROR_MESSAGE')"/>
+        </log>
+        <property name="RESPONSE" value="true"/>
+        <header name="To" action="remove"/>
+        <send/>
+
     </sequence>
 
 </definitions>

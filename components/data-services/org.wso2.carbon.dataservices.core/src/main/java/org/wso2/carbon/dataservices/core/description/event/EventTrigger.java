@@ -24,6 +24,8 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.dataservices.common.DBConstants;
 import org.wso2.carbon.dataservices.core.DBUtils;
 import org.wso2.carbon.dataservices.core.DataServiceFault;
@@ -32,6 +34,8 @@ import org.wso2.carbon.dataservices.core.internal.DataServicesDSComponent;
 import org.wso2.carbon.event.core.EventBroker;
 import org.wso2.carbon.event.core.Message;
 import org.wso2.carbon.event.core.subscription.Subscription;
+import org.wso2.carbon.user.core.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 
 import javax.xml.namespace.QName;
 import java.util.*;
@@ -44,7 +48,7 @@ public abstract class EventTrigger {
 
     public static final String EVENT_DISPATCHER_NAME = "wsEventDispatcher";
 
-	private static Log log = LogFactory.getLog(EventTrigger.class);
+    private static Log log = LogFactory.getLog(EventTrigger.class);
 
     private DataService dataService;
 
@@ -67,12 +71,9 @@ public abstract class EventTrigger {
         this.expression = expression;
         this.targetTopic = targetTopic;
         this.endpointUrls = endpointUrls;
-    }
-
-    public void initEventBroker(EventBroker eventBroker)
-            throws DataServiceFault {
         if (!dataService.isServiceInactive()) {
-            this.registerSubscribers(eventBroker, this.getTargetTopic(), this.endpointUrls);
+            this.registerSubscribers(DataServicesDSComponent.getEventBroker(), 
+            		this.getTargetTopic(), this.endpointUrls);
         }
     }
 
@@ -111,18 +112,33 @@ public abstract class EventTrigger {
     private void registerSubscribers(EventBroker eventBroker, String topic,
                                      List<String> endpointUrls) throws DataServiceFault {
         if (eventBroker == null) {
-            String msg = "Unable To Register Event Subscribers, Event Broker Not Available.";
-            log.error(msg);
-            throw new DataServiceFault(msg);
+			String msg = "Unable To Register Event Subscribers for topic: '"
+					+ topic + "' , Event Broker Not Available.";
+            log.warn(msg);
+            return;
         }
 
         /*
          * Adding new subscriptions.
          */
-
         Subscription subscription;
         for (String epr : endpointUrls) {
             try {
+                int tenantId = CarbonContext.getCurrentContext().getTenantId();
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
+                PrivilegedCarbonContext.getCurrentContext().setUsername(
+                        CarbonConstants.REGISTRY_SYSTEM_USERNAME);
+                RealmService realmService = DataServicesDSComponent.getRealmService();
+                if (realmService != null) {
+                    try {
+                    	PrivilegedCarbonContext.getCurrentContext().setUserRealm(
+                                realmService.getBootstrapRealm());
+                    } catch (UserStoreException e) {
+                        throw new DataServiceFault(e,
+                                "Error occurred while registering the user realm");
+                    }
+                }
                 subscription = new Subscription();
                 subscription.setEventSinkURL(epr);
                 subscription.setId(UUID.randomUUID().toString());
@@ -130,12 +146,14 @@ public abstract class EventTrigger {
                 subscription.setEventDispatcherName(EVENT_DISPATCHER_NAME);
                 //Setting subscription owner as wso2.system.user as there's no logged-in user
                 //at service deployment time.
-                subscription.setOwner(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
+                subscription.setOwner(CarbonContext.getCurrentContext().getUsername());
                 subscription.setProperties(this.getSubscriptionProperties());
                 eventBroker.subscribe(subscription);
             } catch (Exception e) {
                 throw new DataServiceFault(e, "Error in event subscription for EPR: " + epr +
                         " Topic:" + topic);
+            } finally {
+            	PrivilegedCarbonContext.endTenantFlow();
             }
         }
     }
@@ -147,7 +165,7 @@ public abstract class EventTrigger {
      */
     private Map<String, String> getSubscriptionProperties() {
         Map<String, String> properties = new HashMap<String, String>();
-                properties.put(DBConstants.DATA_SERVICE_NAME, this.getDataService().getName());
+        properties.put(DBConstants.DATA_SERVICE_NAME, this.getDataService().getName());
         return properties;
     }
 
@@ -162,13 +180,13 @@ public abstract class EventTrigger {
         try {
             EventBroker eventBroker = DataServicesDSComponent.getEventBroker();
             if (eventBroker == null) {
-            	throw new DataServiceFault("Event broker instance is not available");
+                throw new DataServiceFault("Event broker instance is not available");
             }
             Message message = new Message();
             message.setMessage(omMessage);
             eventBroker.publish(message, topic);
         } catch (Exception e) {
-        	throw new DataServiceFault(e, "Error in publishing event for topic: " +
+            throw new DataServiceFault(e, "Error in publishing event for topic: " +
                     topic + " message:-\n" + omMessage);
         }
     }
@@ -217,9 +235,8 @@ public abstract class EventTrigger {
     public void execute(OMElement input, String queryId) throws DataServiceFault {
         /* if evaluation succeeds, fire event .. */
         if (this.evaluate(input)) {
-            this.sendMessageToTopic(this.createEventMessage(this
-                    .getDataService(), queryId, input), this
-                    .getTargetTopic());
+            this.sendMessageToTopic(this.createEventMessage(this.getDataService(), 
+            		queryId, input), this.getTargetTopic());
         }
     }
 

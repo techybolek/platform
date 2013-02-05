@@ -18,6 +18,7 @@ package org.wso2.carbon.datasource;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.commons.datasource.DataSourceInformation;
@@ -221,10 +222,13 @@ public class MiscellaneousHelper {
         //Encrypting the password field
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
         String password = props.getProperty(passwordProp);
-        String encryptedPassword = cryptoUtil.encryptAndBase64Encode(password.getBytes());
 
-        //serializing the properties back to an OMElement
-        props.setProperty(passwordProp, encryptedPassword);
+        if (!StringUtils.isEmpty(password)) {
+            String encryptedPassword = cryptoUtil.encryptAndBase64Encode(password.getBytes());
+
+            //serializing the properties back to an OMElement
+            props.setProperty(passwordProp, encryptedPassword);
+        }
         return createOMElement(props);
     }
 
@@ -235,11 +239,13 @@ public class MiscellaneousHelper {
         //Decrypting the password field
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
         String encryptedPassword = props.getProperty(passwordProp);
-        byte[] decryptedPassword = cryptoUtil.base64DecodeAndDecrypt(encryptedPassword);
 
-        //serializing the properties back to an OMElement
-        props.setProperty(passwordProp, new String(decryptedPassword));
+        if (!StringUtils.isEmpty(encryptedPassword)) {
+            byte[] decryptedPassword = cryptoUtil.base64DecodeAndDecrypt(encryptedPassword);
+
+            //serializing the properties back to an OMElement
+            props.setProperty(passwordProp, new String(decryptedPassword));
+        }
         return createOMElement(props);
     }
-
 }

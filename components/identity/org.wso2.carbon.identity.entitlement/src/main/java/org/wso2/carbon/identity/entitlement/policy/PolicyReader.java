@@ -56,7 +56,7 @@ public class PolicyReader implements ErrorHandler {
     private static volatile PolicyReader reader;
 
     // To enable attempted thread-safety using double-check locking
-    private static Object lock = new Object();
+    private static final Object lock = new Object();
 
     // the builder used to create DOM documents
     private DocumentBuilder builder;
@@ -64,40 +64,31 @@ public class PolicyReader implements ErrorHandler {
     // policy finder module to find  policies
     private PolicyFinder policyFinder;
 
-    private PolicyReader(File schemaFile, PolicyFinder policyFinder) {
+    private PolicyReader(PolicyFinder policyFinder) {
 
         this.policyFinder = policyFinder;
         // create the factory
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setIgnoringComments(true);
         factory.setNamespaceAware(true);
-        // see if we want to schema-validate policies
-        if (schemaFile == null) {
-            factory.setValidating(false);
-        } else {
-            factory.setValidating(true);
-            factory.setAttribute(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA);
-            factory.setAttribute(JAXP_SCHEMA_SOURCE, schemaFile);
-        }
         // now use the factory to create the document builder
         try {
             builder = factory.newDocumentBuilder();
             builder.setErrorHandler(this);
         } catch (ParserConfigurationException pce) {
-            throw new IllegalArgumentException("Filed to setup reader: ");
+            throw new IllegalArgumentException("Filed to setup repository: ");
         }
     }
 
     /**
-     * 
-     * @param schemaFile
+     *
      * @return
      */
-    public static PolicyReader getInstance(File schemaFile, PolicyFinder policyFinder) {
+    public static PolicyReader getInstance(PolicyFinder policyFinder) {
         if (reader == null) {
             synchronized (lock) {
                 if (reader == null) {
-                    reader = new PolicyReader(schemaFile, policyFinder);
+                    reader = new PolicyReader(policyFinder);
                 }
             }
         }
@@ -125,7 +116,7 @@ public class PolicyReader implements ErrorHandler {
      * @param policy
      * @return
      */
-    public AbstractPolicy getPolicy(String policy) {
+    public synchronized AbstractPolicy getPolicy(String policy) {
         InputStream stream = null;
         try {
             stream = new ByteArrayInputStream(policy.getBytes("UTF-8"));

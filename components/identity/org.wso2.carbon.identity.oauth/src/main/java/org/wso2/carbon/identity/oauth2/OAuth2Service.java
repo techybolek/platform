@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -21,13 +21,20 @@ package org.wso2.carbon.identity.oauth2;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.model.OAuthAppDO;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
+import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
+import org.wso2.carbon.identity.oauth.common.exception.UnauthorizedRevocationException;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDAO;
 import org.wso2.carbon.identity.oauth2.authz.AuthorizationHandlerManager;
+import org.wso2.carbon.identity.oauth2.dao.TokenMgtDAO;
 import org.wso2.carbon.identity.oauth2.dto.*;
+import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
+import org.wso2.carbon.identity.oauth2.model.RefreshTokenValidationDataDO;
 import org.wso2.carbon.identity.oauth2.token.AccessTokenIssuer;
+import org.wso2.carbon.identity.oauth2.util.OAuth2Constants;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 
 /**
@@ -97,15 +104,6 @@ public class OAuth2Service extends AbstractAdmin {
             OAuthAppDAO oAuthAppDAO = new OAuthAppDAO();
             OAuthAppDO appDO = oAuthAppDAO.getAppInformation(clientId);
 
-            // There is no such Client ID being registered. So it is a request from an invalid client.
-            if (appDO == null) {
-                log.warn("No registered Client Id found against the given Client id : " + clientId);
-                validationResponseDTO.setValidClient(false);
-                validationResponseDTO.setErrorCode(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
-                validationResponseDTO.setErrorMsg("Invalid Client Id.");
-                return validationResponseDTO;
-            }
-
             // Valid Client, No callback has provided. Use the callback provided during the registration.
             if (callbackURI == null) {
                 validationResponseDTO.setValidClient(true);
@@ -133,7 +131,14 @@ public class OAuth2Service extends AbstractAdmin {
                 validationResponseDTO.setErrorMsg("Registered callback does not match with the provided url.");
                 return validationResponseDTO;
             }
-        } catch (IdentityOAuthAdminException e) {
+        } catch(InvalidOAuthClientException e){
+            // There is no such Client ID being registered. So it is a request from an invalid client.
+            log.debug(e.getMessage());
+            validationResponseDTO.setValidClient(false);
+            validationResponseDTO.setErrorCode(OAuth2ErrorCodes.INVALID_CLIENT);
+            validationResponseDTO.setErrorMsg(e.getMessage());
+            return validationResponseDTO;
+        }catch (IdentityOAuthAdminException e) {
             log.error("Error when reading the Application Information.", e);
             validationResponseDTO.setValidClient(false);
             validationResponseDTO.setErrorCode(OAuth2ErrorCodes.SERVER_ERROR);
@@ -158,7 +163,13 @@ public class OAuth2Service extends AbstractAdmin {
         try {
             AccessTokenIssuer tokenIssuer = AccessTokenIssuer.getInstance();
             return tokenIssuer.issue(tokenReqDTO);
-
+        } catch (InvalidOAuthClientException e){
+            log.debug(e.getMessage());
+            OAuth2AccessTokenRespDTO tokenRespDTO = new OAuth2AccessTokenRespDTO();
+            tokenRespDTO.setError(true);
+            tokenRespDTO.setErrorCode(OAuth2ErrorCodes.INVALID_CLIENT);
+            tokenRespDTO.setErrorMsg(e.getMessage());
+            return tokenRespDTO;
         } catch (Exception e) { // in case of an error, consider it as a system error
             log.error("Error when issuing the access token. ", e);
             OAuth2AccessTokenRespDTO tokenRespDTO = new OAuth2AccessTokenRespDTO();
@@ -166,6 +177,63 @@ public class OAuth2Service extends AbstractAdmin {
             tokenRespDTO.setErrorCode(OAuth2ErrorCodes.SERVER_ERROR);
             tokenRespDTO.setErrorMsg("Error when issuing the access token");
             return tokenRespDTO;
+        }
+    }
+
+    /**
+     * Revoke tokens issued to OAuth clients
+     * @param revokeRequestDTO DTO representing consumerKey, consumerSecret and tokens[]
+     * @return revokeRespDTO DTO representing success or failure message
+     */
+    public OAuthRevocationResponseDTO revokeTokensByOAuthClient(OAuthRevocationRequestDTO revokeRequestDTO) {
+
+        TokenMgtDAO tokenMgtDAO = new TokenMgtDAO();
+        try{
+            if (revokeRequestDTO.getConsumerKey()!=null && revokeRequestDTO.getConsumerSecret()!=null
+                    && revokeRequestDTO.getTokens() != null) {
+                if(!OAuth2Util.authenticateClient(revokeRequestDTO.getConsumerKey(), revokeRequestDTO.getConsumerSecret())){
+                    OAuthRevocationResponseDTO revokeRespDTO = new OAuthRevocationResponseDTO();
+                    revokeRespDTO.setError(true);
+                    revokeRespDTO.setErrorCode(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
+                    revokeRespDTO.setErrorMsg("ConsumerKey: " + revokeRequestDTO.getConsumerKey() +
+                            " not authorized to revoke: " + revokeRequestDTO.getTokens()[0]);
+                    return revokeRespDTO;
+                }
+                for (String token : revokeRequestDTO.getTokens()) {
+                    AccessTokenDO accessTokenDO = tokenMgtDAO.validateBearerToken(token);
+                    if(accessTokenDO != null){
+                        org.wso2.carbon.identity.oauth.OAuthUtil.clearOAuthCache(revokeRequestDTO.getConsumerKey(),accessTokenDO.getAuthzUser());
+                        tokenMgtDAO.revokeAccessTokensByClient(token, revokeRequestDTO.getConsumerKey());
+                    }else{
+                        RefreshTokenValidationDataDO refreshTokenDO = tokenMgtDAO.validateRefreshToken(revokeRequestDTO.getConsumerKey(), token);
+                        if(refreshTokenDO != null && refreshTokenDO.getRefreshTokenState() != null &&
+                                (refreshTokenDO.getRefreshTokenState().equals(OAuth2Constants.TokenStates.TOKEN_STATE_ACTIVE) ||
+                                        refreshTokenDO.getRefreshTokenState().equals(OAuth2Constants.TokenStates.TOKEN_STATE_EXPIRED))){
+                            org.wso2.carbon.identity.oauth.OAuthUtil.clearOAuthCache(revokeRequestDTO.getConsumerKey(),refreshTokenDO.getAuthorizedUser());
+                            tokenMgtDAO.revokeAccessTokensByClient(refreshTokenDO.getAccessToken(), revokeRequestDTO.getConsumerKey());
+                        }
+                    }
+                }
+            } else {
+                OAuthRevocationResponseDTO revokeRespDTO = new OAuthRevocationResponseDTO();
+                revokeRespDTO.setError(true);
+                revokeRespDTO.setErrorCode(OAuth2ErrorCodes.SERVER_ERROR);
+                revokeRespDTO.setErrorMsg("Invalid revocation request");
+                return revokeRespDTO;
+            }
+            return new OAuthRevocationResponseDTO();
+        }catch(UnauthorizedRevocationException e){
+            OAuthRevocationResponseDTO revokeRespDTO = new OAuthRevocationResponseDTO();
+            revokeRespDTO.setError(true);
+            revokeRespDTO.setErrorCode(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
+            revokeRespDTO.setErrorMsg(e.getMessage());
+            return revokeRespDTO;
+        } catch (IdentityException e) {
+            OAuthRevocationResponseDTO revokeRespDTO = new OAuthRevocationResponseDTO();
+            revokeRespDTO.setError(true);
+            revokeRespDTO.setErrorCode(OAuth2ErrorCodes.SERVER_ERROR);
+            revokeRespDTO.setErrorMsg("Error when processing the revocation request");
+            return revokeRespDTO;
         }
     }
 }

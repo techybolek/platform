@@ -43,7 +43,7 @@ public interface BrokerType {
      * @param brokerConfiguration - broker configuration details
      * @throws BrokerEventProcessingException - if can not subscribe to the broker
      */
-    void subscribe(String topicName,
+    String subscribe(String topicName,
                    BrokerListener brokerListener,
                    BrokerConfiguration brokerConfiguration,
                    AxisConfiguration axisConfiguration) throws BrokerEventProcessingException;
@@ -60,6 +60,15 @@ public interface BrokerType {
                  Object object,
                  BrokerConfiguration brokerConfiguration) throws BrokerEventProcessingException;
 
+
+    /**
+     * publish test message to check the connection with the broker configuration.
+     *
+     * @param brokerConfiguration - broker configuration to be used
+     * @throws BrokerEventProcessingException - if the message can not publish
+     */
+    void testConnection(BrokerConfiguration brokerConfiguration) throws BrokerEventProcessingException;
+
     /**
      * this method unsubscribes the subscription from the broker.
      *
@@ -69,7 +78,7 @@ public interface BrokerType {
      */
     void unsubscribe(String topicName,
                      BrokerConfiguration brokerConfiguration,
-                     AxisConfiguration axisConfiguration)
+                     AxisConfiguration axisConfiguration,String subscriptionId)
             throws BrokerEventProcessingException;
 
 

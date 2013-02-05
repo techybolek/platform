@@ -1,9 +1,14 @@
 <%
 include("/jagg/jagg.jag");
+include("header.jag");
 var site = require("/site/conf/site.json");
 
+var i18n = require("i18n");
+var localeResourcesBasePath="/site/conf/locales/jaggery/";
+i18n.init(request,localeResourcesBasePath);
+
 (function () {
-    var  mod,result,isPermitted,user = jagg.getUser(),permit=jagg.getCreatePermitted();
+    var  isPermitted,user = jagg.getUser(),permit=jagg.getCreatePermitted();
     if(permit){
     isPermitted= permit.permitted;
     }

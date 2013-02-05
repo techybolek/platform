@@ -102,10 +102,10 @@ public class CarbonCassandraAuthenticator implements IAuthenticator {
                     Collections.<String>emptySet(), domainName);
             return authenticatedUser;
         } else if (authenticationService.authenticate(userName, password)) {
-            CarbonCassandraAuthenticator.addToCache(userName, password);
+            /*CarbonCassandraAuthenticator.addToCache(userName, password);
             if (log.isDebugEnabled()) {
                 log.debug("Credentials for Username : " + userName + " added to cache");
-            }
+            } */
             AuthenticatedUser authenticatedUser = new AuthenticatedUser(userName,
                     Collections.<String>emptySet(), domainName);
             return authenticatedUser;
@@ -126,7 +126,7 @@ public class CarbonCassandraAuthenticator implements IAuthenticator {
         if(cacheEntry != null){
            value = ((StringCacheEntry)cacheEntry).getStringValue();
         }else {
-            log.error("The key is not present in the cache...");
+            log.info("The key is not present in the cache...");
             if (log.isDebugEnabled()) {
                 log.debug("Credentials for Username : " + username + " retrieved from cache");
             }

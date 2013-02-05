@@ -62,7 +62,7 @@ public class PerUserAddListener extends AbstractUserStoreManagerListener {
         }
 
         try {
-            ThrottlingAgentServiceComponent.getThrottlingAgent().executeManagerThrottlingRules();
+            ThrottlingAgentServiceComponent.getThrottlingAgent().executeManagerThrottlingRules(tenantId);
             ThrottlingAgentServiceComponent.getThrottlingAgent().updateThrottlingCacheForTenant();
         } catch (Exception e1) {
             String msg = "Error in executing the throttling rules in manager.";

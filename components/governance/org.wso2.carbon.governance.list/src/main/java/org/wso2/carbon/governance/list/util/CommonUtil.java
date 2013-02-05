@@ -19,17 +19,38 @@ package org.wso2.carbon.governance.list.util;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.xpath.AXIOMXPath;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.Parameter;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ws.commons.schema.XmlSchema;
+import org.apache.ws.commons.schema.XmlSchemaCollection;
 import org.jaxen.JaxenException;
 import org.jaxen.SimpleNamespaceContext;
+import org.wso2.carbon.governance.api.util.GovernanceArtifactConfiguration;
+import org.wso2.carbon.governance.api.util.GovernanceConstants;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.governance.list.operations.*;
+import org.wso2.carbon.governance.list.operations.util.OperationsConstants;
+import org.wso2.carbon.ntask.common.TaskException;
+import org.wso2.carbon.ntask.core.TaskInfo;
+import org.wso2.carbon.ntask.core.TaskManager;
+import org.wso2.carbon.ntask.core.service.TaskService;
+import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.extensions.utils.CommonConstants;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.component.xml.config.ManagementPermission;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -44,7 +65,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.util.List;
+import java.util.*;
 
 public class CommonUtil {
 
@@ -52,6 +73,8 @@ public class CommonUtil {
 
     private static RegistryService registryService;
     private static ConfigurationContext configurationContext;
+    private static TaskService taskService;
+    private static TaskManager taskManager;
 
     public static synchronized void setRegistryService(RegistryService service) {
         if (registryService == null) {
@@ -61,6 +84,44 @@ public class CommonUtil {
 
     public static RegistryService getRegistryService() {
         return registryService;
+    }
+
+    /**
+     * Sets the task manager instance obtained from the task service.
+     *
+     * @param taskManager Task manager instance.
+     */
+    public static void setTaskManager(TaskManager taskManager) {
+        CommonUtil.taskManager = taskManager;
+    }
+
+    /**
+     * Retrieves the task manager instance obtained and registered while invoking the activate
+     * method of the GovernanceMgtUIListMetadataServiceComponent.
+     *
+     * @return Task manager instance
+     */
+    public static TaskManager getTaskManager() {
+        return taskManager;
+    }
+
+    /**
+     * Sets the task service instance.
+     *
+     * @param taskService Task service instance.
+     */
+    public static void setTaskService(TaskService taskService) {
+        CommonUtil.taskService = taskService;
+    }
+
+    /**
+     * Retrieves the task service instance that has been registered while invoking the activate
+     * method of the GovernanceMgtUIListMetadataServiceComponent.
+     *
+     * @return Task service instance
+     */
+    public static TaskService getTaskService() {
+        return taskService;
     }
 
     public static ConfigurationContext getConfigurationContext() {
@@ -228,28 +289,28 @@ public class CommonUtil {
         String serviceConfPath = "";
         if ("rxt-ui-config".equalsIgnoreCase(schema)) {
             serviceConfPath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator +
-                    "conf" + File.separator + "rxt.xsd";
+                    "resources" + File.separator + "rxt.xsd";
         } else if ("lifecycle-config".equalsIgnoreCase(schema)) {
-            serviceConfPath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator +
-                    "conf" + File.separator + "lifecycle-config.xsd";
+            serviceConfPath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
+                    + File.separator + "lifecycle-config.xsd";
         }
-      return validateRXTContent(xml, serviceConfPath);
+        return validateRXTContent(xml, serviceConfPath);
     }
 
     private static boolean validateRXTContent(String rxtContent, String xsdPath) throws RegistryException {
         try {
-        OMElement rxt = getRXTContentOMElement(rxtContent);
-        AXIOMXPath xpath = new AXIOMXPath("//artifactType");
-        OMElement c1 = (OMElement) xpath.selectSingleNode(rxt);
-        InputStream is = new ByteArrayInputStream(c1.toString().getBytes());
-        Source xmlFile = new StreamSource(is);
-        SchemaFactory schemaFactory = SchemaFactory
-                .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        Schema schema = schemaFactory.newSchema(new File(xsdPath));
-        Validator validator = schema.newValidator();
+            OMElement rxt = getRXTContentOMElement(rxtContent);
+            AXIOMXPath xpath = new AXIOMXPath("//artifactType");
+            OMElement c1 = (OMElement) xpath.selectSingleNode(rxt);
+            InputStream is = new ByteArrayInputStream(c1.toString().getBytes());
+            Source xmlFile = new StreamSource(is);
+            SchemaFactory schemaFactory = SchemaFactory
+                    .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            Schema schema = schemaFactory.newSchema(new File(xsdPath));
+            Validator validator = schema.newValidator();
             validator.validate(xmlFile);
         } catch (Exception e) {
-            log.error("RXT validation fails due to: "+e.getMessage());
+            log.error("RXT validation fails due to: " + e.getMessage());
             return false;
         }
         return true;
@@ -267,6 +328,243 @@ public class CommonUtil {
             throw new RegistryException(e.getMessage());
         }
     }
+
+    public static void configureGovernanceArtifacts(Registry systemRegistry, AxisConfiguration axisConfig)
+            throws RegistryException {
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) systemRegistry);
+        List<GovernanceArtifactConfiguration> configurations =
+                GovernanceUtils.findGovernanceArtifactConfigurations(systemRegistry);
+        Registry governanceSystemRegistry = GovernanceUtils.getGovernanceSystemRegistry(systemRegistry);
+
+        for (GovernanceArtifactConfiguration configuration : configurations) {
+            for (ManagementPermission uiPermission : configuration.getUIPermissions()) {
+                String resourceId = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
+                        uiPermission.getResourceId();
+                if (systemRegistry.resourceExists(resourceId)) {
+                    continue;
+                }
+                Collection collection = systemRegistry.newCollection();
+                collection.setProperty("name", uiPermission.getDisplayName());
+                systemRegistry.put(resourceId, collection);
+            }
+            RXTMessageReceiver receiver = new RXTMessageReceiver();
+
+            if (axisConfig != null) {
+                try {
+
+                    String singularLabel = configuration.getSingularLabel().replaceAll("\\s", "");
+                    String key = configuration.getKey();
+                    String mediaType = configuration.getMediaType();
+
+//                    We avoid creation of a axis service if there is a service with the same name
+                    if (axisConfig.getService(singularLabel) != null) {
+                        continue;
+                    }
+                    AxisService service = new AxisService(singularLabel);
+
+                    Parameter param1 = new Parameter("AuthorizationAction", "/permission/admin/login");
+                    param1.setLocked(true);
+                    service.addParameter(param1);
+
+                    Parameter param2 = new Parameter("adminService", "true");
+                    param2.setLocked(true);
+                    service.addParameter(param2);
+
+                    Parameter param3 = new Parameter("hiddenService", "true");
+                    param3.setLocked(true);
+                    service.addParameter(param3);
+
+                    Parameter param4 = new Parameter("enableMTOM", "true");
+                    param4.setLocked(true);
+                    service.addParameter(param4);
+
+                    XmlSchemaCollection schemaCol = new XmlSchemaCollection();
+                    List<XmlSchema> schemaList = new ArrayList<XmlSchema>();
+
+                    AbstractOperation create = new CreateOperation(new QName(OperationsConstants.ADD + singularLabel),
+                            governanceSystemRegistry, mediaType,
+                            OperationsConstants.NAMESPACE_PART1 +
+                                    OperationsConstants.ADD + "." + key + OperationsConstants.NAMESPACE_PART2).
+                            init(key, receiver);
+
+                    Parameter authorizationActionCreate = new Parameter("AuthorizationAction",
+                            "/permission/admin/manage/resources/govern/" + key + "/add");
+                    authorizationActionCreate.setLocked(true);
+                    create.addParameter(authorizationActionCreate);
+
+                    service.addOperation(create);
+                    schemaList.addAll(Arrays.asList(create.getSchemas(schemaCol)));
+
+                    AbstractOperation read = new ReadOperation(new QName(OperationsConstants.GET + singularLabel),
+                            governanceSystemRegistry, mediaType,
+                            OperationsConstants.NAMESPACE_PART1 +
+                                    OperationsConstants.GET + "." + key + OperationsConstants.NAMESPACE_PART2).
+                            init(key, receiver);
+
+                    Parameter authorizationActionRead = new Parameter("AuthorizationAction",
+                            "/permission/admin/manage/resources/govern/" + key + "/list");
+                    authorizationActionRead.setLocked(true);
+                    read.addParameter(authorizationActionRead);
+
+                    service.addOperation(read);
+                    schemaList.addAll(Arrays.asList(read.getSchemas(schemaCol)));
+
+                    AbstractOperation update = new UpdateOperation(new QName(OperationsConstants.UPDATE + singularLabel),
+                            governanceSystemRegistry, mediaType,
+                            OperationsConstants.NAMESPACE_PART1 +
+                                    OperationsConstants.UPDATE + "." + key + OperationsConstants.NAMESPACE_PART2).
+                            init(key, receiver);
+
+                    Parameter authorizationActionUpdate = new Parameter("AuthorizationAction",
+                            "/permission/admin/manage/resources/govern/" + key + "/add");
+                    authorizationActionUpdate.setLocked(true);
+                    update.addParameter(authorizationActionUpdate);
+
+                    service.addOperation(update);
+                    schemaList.addAll(Arrays.asList(update.getSchemas(schemaCol)));
+
+                    AbstractOperation delete = new DeleteOperation(new QName(OperationsConstants.DELETE + singularLabel),
+                            governanceSystemRegistry, mediaType,
+                            OperationsConstants.NAMESPACE_PART1 +
+                                    OperationsConstants.DELETE + "." + key + OperationsConstants.NAMESPACE_PART2).
+                            init(key, receiver);
+
+                    Parameter authorizationActionDelete = new Parameter("AuthorizationAction",
+                            "/permission/admin/manage/resources/govern/" + key + "/add");
+                    authorizationActionDelete.setLocked(true);
+                    delete.addParameter(authorizationActionDelete);
+
+                    service.addOperation(delete);
+                    schemaList.addAll(Arrays.asList(delete.getSchemas(schemaCol)));
+
+                    AbstractOperation getAllArtifactIds = new GetAllArtifactIDsOperation(
+                            new QName(OperationsConstants.GET + singularLabel + OperationsConstants.ARTIFACT_IDS),
+                            governanceSystemRegistry, mediaType,
+                            OperationsConstants.NAMESPACE_PART1 +
+                                    OperationsConstants.GET + "." + key + "." +
+                                    OperationsConstants.ARTIFACT_IDS.toLowerCase() + OperationsConstants.NAMESPACE_PART2).
+                            init(key, receiver);
+
+                    Parameter authorizationActionGetArtifactIDs = new Parameter("AuthorizationAction",
+                            "/permission/admin/manage/resources/govern/" + key + "/list");
+                    authorizationActionGetArtifactIDs.setLocked(true);
+                    getAllArtifactIds.addParameter(authorizationActionGetArtifactIDs);
+
+                    service.addOperation(getAllArtifactIds);
+                    schemaList.addAll(Arrays.asList(getAllArtifactIds.getSchemas(schemaCol)));
+
+                    AbstractOperation getDependencies = new GetDependenciesOperation(
+                            new QName(OperationsConstants.GET + singularLabel + OperationsConstants.DEPENDENCIES),
+                            governanceSystemRegistry, mediaType,
+                            OperationsConstants.NAMESPACE_PART1 +
+                                    OperationsConstants.GET + "." + key + "." +
+                                    OperationsConstants.DEPENDENCIES.toLowerCase() + OperationsConstants.NAMESPACE_PART2).
+                            init(key, receiver);
+
+                    Parameter authorizationActionGetDependencies = new Parameter("AuthorizationAction",
+                            "/permission/admin/manage/resources/govern/" + key + "/list");
+                    authorizationActionGetDependencies.setLocked(true);
+                    getDependencies.addParameter(authorizationActionGetDependencies);
+
+                    service.addOperation(getDependencies);
+                    schemaList.addAll(Arrays.asList(getDependencies.getSchemas(schemaCol)));
+
+                    List<String> transports = new ArrayList<String>();
+                    transports.add(Constants.TRANSPORT_HTTPS);
+                    service.setExposedTransports(transports);
+                    axisConfig.addService(service);
+
+                    XmlSchema schema = schemaCol.read(new StreamSource(
+                            new ByteArrayInputStream(OperationsConstants.REGISTRY_EXCEPTION1_XSD.getBytes())), null);
+                    schemaList.add(schema);
+
+                    schema = schemaCol.read(new StreamSource(
+                            new ByteArrayInputStream(OperationsConstants.GOVERNANCE_EXCEPTION_XSD.getBytes())), null);
+                    schemaList.add(schema);
+
+                    schema = schemaCol.read(new StreamSource(
+                            new ByteArrayInputStream(OperationsConstants.REGISTRY_EXCEPTION2_XSD.getBytes())), null);
+                    schemaList.add(schema);
+
+                    service.addSchema(schemaList);
+
+                } catch (AxisFault axisFault) {
+                    String msg = "Error occured while adding services";
+                    log.error(msg, axisFault);
+                }
+            }
+        }
+    }
+
+    /**
+     * <p>Creates a task configuration that carries all the information that the task manager needs
+     * to schedule the task. This contains the fully qualified name of the task implementation
+     * class, cron expression to be evaluated and other related custom properties.</p>
+     *
+     * @param artifactType Name of the task to be scheduled
+     * @return An instance of taskInfo populated with the task configuration parameters
+     */
+    public static TaskInfo createTaskConfiguration(String artifactType) {
+        TaskInfo taskInfo = new TaskInfo();
+        taskInfo.setName(artifactType);
+        taskInfo.setTaskClass(GovernanceConstants.PRE_FETCH_TASK_CLASS);
+        taskInfo.setProperties(new HashMap<String, String>());
+
+        TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
+        triggerInfo.setCronExpression("0 0/2 * * * ?");
+        //triggerInfo.setRepeatCount(1);
+        triggerInfo.setDisallowConcurrentExecution(false);
+        taskInfo.setTriggerInfo(triggerInfo);
+
+        Map<String, String> props = new HashMap<String, String>();
+        props.put(GovernanceConstants.TASK_CLASS, GovernanceConstants.PRE_FETCH_TASK);
+        props.put(GovernanceConstants.ARTIFACT_TYPE, artifactType);
+        taskInfo.setProperties(props);
+
+        return taskInfo;
+    }
+
+    /**
+     * <p>Schedules the task. It first registers the necessary task configurations inside the task
+     * engine that the registered task manager runs on. Then it schedules the actual task in the
+     * quartz runtime.</p>
+     *
+     * @param artifactType Name of the task to be scheduled.
+     */
+    public static void scheduleTask(String artifactType) {
+        TaskInfo taskInfo = createTaskConfiguration(artifactType);
+        try {
+            CommonUtil.getTaskManager().registerTask(taskInfo);
+            CommonUtil.getTaskManager().scheduleTask(taskInfo.getName());
+        } catch (TaskException e) {
+            log.error("Error occurred while registering the task for '" +
+                    GovernanceConstants.PRE_FETCH_TASK + "'", e);
+        }
+    }
+
+    public static void schedulePreFetchTasks() {
+        try {
+            if (!CommonUtil.getTaskManager().isTaskScheduled(
+                    GovernanceConstants.ArtifactTypes.SERVICE)) {
+                CommonUtil.scheduleTask(GovernanceConstants.ArtifactTypes.SERVICE);
+            }
+            if (!CommonUtil.getTaskManager().isTaskScheduled(
+                    GovernanceConstants.ArtifactTypes.WSDL)) {
+                CommonUtil.scheduleTask(GovernanceConstants.ArtifactTypes.WSDL);
+            }
+            if (!CommonUtil.getTaskManager().isTaskScheduled(
+                    GovernanceConstants.ArtifactTypes.SCHEMA)) {
+                CommonUtil.scheduleTask(GovernanceConstants.ArtifactTypes.SCHEMA);
+            }
+            if (!CommonUtil.getTaskManager().isTaskScheduled(
+                    GovernanceConstants.ArtifactTypes.POLICY)) {
+                CommonUtil.scheduleTask(GovernanceConstants.ArtifactTypes.POLICY);
+            }
+        } catch (TaskException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
 
 

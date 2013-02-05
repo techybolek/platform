@@ -18,7 +18,9 @@ package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.ConfigurationContextService;
 
 public class ServiceReferenceHolder {
 
@@ -27,7 +29,17 @@ public class ServiceReferenceHolder {
     private RegistryService registryService;
     private APIManagerConfigurationService amConfigurationService;
     private RealmService realmService;
+    private static UserRealm userRealm;
 
+    public static ConfigurationContextService getContextService() {
+        return contextService;
+    }
+
+    public static void setContextService(ConfigurationContextService contextService) {
+        ServiceReferenceHolder.contextService = contextService;
+    }
+
+    private static ConfigurationContextService contextService;
     private ServiceReferenceHolder() {
 
     }
@@ -58,5 +70,12 @@ public class ServiceReferenceHolder {
 
     public void setRealmService(RealmService realmService) {
         this.realmService = realmService;
+    }
+    public static void setUserRealm(UserRealm realm) {
+        userRealm = realm;
+    }
+
+    public static UserRealm getUserRealm() {
+        return userRealm;
     }
 }

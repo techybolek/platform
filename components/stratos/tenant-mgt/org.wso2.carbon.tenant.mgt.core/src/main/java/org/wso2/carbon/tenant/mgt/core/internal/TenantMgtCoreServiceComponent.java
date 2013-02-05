@@ -62,7 +62,7 @@ public class TenantMgtCoreServiceComponent {
             bundleContext.registerService(TenantPersistor.class.getName(), tenantPersistor, null);
             log.debug("******* Tenant Core bundle is activated ******* ");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error occurred while activating tenant.mgt.core bundle. " + e);
         }
     }
     

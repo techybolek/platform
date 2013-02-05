@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.api.clients.utils.AuthenticateStub;
 import org.wso2.carbon.sequences.stub.types.SequenceAdminServiceStub;
 import org.wso2.carbon.sequences.stub.types.SequenceEditorException;
+import org.wso2.carbon.sequences.stub.types.common.to.SequenceInfo;
 
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLInputFactory;
@@ -52,7 +53,14 @@ public class SequenceAdminServiceClient {
         AuthenticateStub.authenticateStub(userName, password, sequenceAdminServiceStub);
     }
 
-
+    /**
+     * adding sequence
+     *
+     * @param dh
+     * @throws SequenceEditorException
+     * @throws IOException
+     * @throws XMLStreamException
+     */
     public void addSequence(DataHandler dh)
             throws SequenceEditorException, IOException, XMLStreamException {
 
@@ -63,36 +71,162 @@ public class SequenceAdminServiceClient {
         sequenceAdminServiceStub.addSequence(sequenceElem);
     }
 
+    /**
+     * adding sequence
+     *
+     * @param sequence
+     * @throws SequenceEditorException
+     * @throws RemoteException
+     */
+    public void addSequence(OMElement sequence) throws SequenceEditorException, RemoteException {
+        sequenceAdminServiceStub.addSequence(sequence);
+    }
+
+    /**
+     * updating existing sequence
+     *
+     * @param sequence
+     * @throws SequenceEditorException
+     * @throws RemoteException
+     */
+    public void updateSequence(OMElement sequence) throws SequenceEditorException, RemoteException {
+        sequenceAdminServiceStub.saveSequence(sequence);
+    }
+
+    /**
+     * adding dynamic sequence
+     *
+     * @param key
+     * @param omElement
+     * @throws SequenceEditorException
+     * @throws RemoteException
+     */
     public void addDynamicSequence(String key, OMElement omElement)
             throws SequenceEditorException, RemoteException {
         sequenceAdminServiceStub.addDynamicSequence(key, omElement);
 
     }
 
+    /**
+     * getting  sequence element
+     *
+     * @param sequenceName
+     * @return
+     * @throws SequenceEditorException
+     * @throws RemoteException
+     */
     public OMElement getSequence(String sequenceName)
             throws SequenceEditorException, RemoteException {
         return sequenceAdminServiceStub.getSequence(sequenceName);
 
     }
 
+    /**
+     * deleting existing sequence
+     *
+     * @param sequenceName
+     * @throws SequenceEditorException
+     * @throws RemoteException
+     */
     public void deleteSequence(String sequenceName)
             throws SequenceEditorException, RemoteException {
         sequenceAdminServiceStub.deleteSequence(sequenceName);
 
     }
 
+    /**
+     * updating dynamic sequence
+     *
+     * @param key
+     * @param OmSequence
+     * @throws SequenceEditorException
+     * @throws RemoteException
+     */
     public void updateDynamicSequence(String key, OMElement OmSequence)
             throws SequenceEditorException, RemoteException {
         sequenceAdminServiceStub.updateDynamicSequence(key, OmSequence);
     }
 
+    /**
+     * getting dynamic sequence count
+     *
+     * @return
+     * @throws SequenceEditorException
+     * @throws RemoteException
+     */
     public int getDynamicSequenceCount()
             throws SequenceEditorException, RemoteException {
         return sequenceAdminServiceStub.getDynamicSequenceCount();
     }
 
+    /**
+     * deleting dynamic sequence
+     *
+     * @param key
+     * @throws SequenceEditorException
+     * @throws RemoteException
+     */
     public void deleteDynamicSequence(String key)
             throws SequenceEditorException, RemoteException {
         sequenceAdminServiceStub.deleteDynamicSequence(key);
+    }
+
+    /**
+     * getting sequence list
+     *
+     * @param pageNo
+     * @param sequencePerPage
+     * @return
+     * @throws SequenceEditorException
+     * @throws RemoteException
+     */
+    public SequenceInfo[] getSequences(int pageNo, int sequencePerPage)
+            throws SequenceEditorException, RemoteException {
+        return sequenceAdminServiceStub.getSequences(pageNo, sequencePerPage);
+    }
+
+    /**
+     * getting sequence list
+     *
+     * @return
+     * @throws SequenceEditorException
+     * @throws RemoteException
+     */
+    public String[] getSequences()
+            throws SequenceEditorException, RemoteException {
+        SequenceInfo[] info = sequenceAdminServiceStub.getSequences(0, 200);
+        String[] sequences;
+
+        if (info != null && info.length > 0) {
+            sequences = new String[info.length];
+        } else {
+            return null;
+        }
+        for (int i = 0; i < info.length; i++) {
+            sequences[i] = info[i].getName();
+        }
+        return sequences;
+    }
+
+    /**
+     * getting dynamic sequence list
+     *
+     * @return
+     * @throws SequenceEditorException
+     * @throws RemoteException
+     */
+    public String[] getDynamicSequences() throws SequenceEditorException, RemoteException {
+        SequenceInfo[] seqInfo = sequenceAdminServiceStub.getDynamicSequences(0, 200);
+        String[] sequences;
+
+        if (seqInfo != null && seqInfo.length > 0) {
+            sequences = new String[seqInfo.length];
+        } else {
+            return null;
+        }
+        for (int i = 0; i < seqInfo.length; i++) {
+            sequences[i] = seqInfo[i].getName();
+        }
+        return sequences;
     }
 }

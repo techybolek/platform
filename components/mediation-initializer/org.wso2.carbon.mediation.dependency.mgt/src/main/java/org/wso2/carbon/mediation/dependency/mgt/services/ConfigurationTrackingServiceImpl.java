@@ -21,7 +21,7 @@ import org.apache.synapse.config.SynapseObserver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.dependency.mgt.DependencyTracker;
 
 import java.util.List;
@@ -43,7 +43,7 @@ public class ConfigurationTrackingServiceImpl implements ConfigurationTrackingSe
     }
 
     public void setSynapseConfiguration(SynapseConfiguration synCfg) {
-        int tenantId = SuperTenantCarbonContext.getCurrentContext(
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(
                 synCfg.getAxisConfiguration()).getTenantId();
 
         List<SynapseObserver> observers = synCfg.getObservers();

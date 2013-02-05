@@ -169,11 +169,11 @@
                         <td class="buttonRow" colspan="2">
                             <input class="button" type="button"
                                    value="<fmt:message key="rss.manager.create"/>"
-                                   onclick="return attachUserToDatabase()"/>
+                                   onclick="return attachUserToDatabase(); return false"/>
 
                             <input class="button" type="button"
                                    value="<fmt:message key="rss.manager.cancel"/>"
-                                   onclick="document.location.href = 'databases.jsp'"/>
+                                   onclick="document.location.href = 'attachedDatabaseUsers.jsp'"/>
                         </td>
                     </tr>
                 </table>

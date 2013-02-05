@@ -5,12 +5,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>rss-manager</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.rssmanager.core</artifactId>
+    <version>4.0.6</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - RSS Manager Core</name>
     <description>WSO2 Carbon - RSS Manager Core</description>
@@ -57,7 +59,7 @@
                             org.apache.commons.logging,
                             org.wso2.carbon.core.*,
                             org.wso2.carbon.utils.*,
-                            org.wso2.carbon.rssmanager.common,
+                            org.wso2.carbon.rssmanager.common; version="0.0.0",
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.rssmanager.core.internal,
@@ -72,29 +74,24 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.jboss.spec.javax.transaction</groupId>
+            <artifactId>jboss-transaction-api_1.1_spec</artifactId>
+            <version>${jboss-transaction-api.version}</version>
+        </dependency>
+         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.core</artifactId>
-            <version>${carbon.platform.version}</version>
+            <artifactId>org.wso2.carbon.utils</artifactId>
+            <version>${carbon.platform.patch.version.402}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rssmanager.common</artifactId>
-            <version>${carbon.platform.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.registry.core</artifactId>
-            <version>${carbon.platform.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.axis2.wso2</groupId>
-            <artifactId>axis2</artifactId>
-            <version>${axis2.osgi.version}</version>
+            <version>${carbon.platform.patch.version.405}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ndatasource.core</artifactId>
-            <version>${carbon.platform.version}</version>
+            <version>${carbon.platform.patch.version.402}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -102,30 +99,23 @@
             <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.tomcat.wso2</groupId>
-            <artifactId>jdbc-pool</artifactId>
-            <version>7.0.28.wso2v1</version>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.transaction.manager</artifactId>
-            <version>${carbon.platform.version}</version>
+            <version>${carbon.platform.patch.version.405}</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>com.google.guava.wso2</groupId>-->
-            <!--<artifactId>guava</artifactId>-->
-            <!--<version>${google.guava.wso2.version}</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.wso2.carbon</groupId>-->
-            <!--<artifactId>org.wso2.carbon.securevault</artifactId>-->
-            <!--<version>${project.version}</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.ndatasource.common</artifactId>
-            <version>${carbon.platform.version}</version>
+            <artifactId>org.wso2.carbon.coordination.core</artifactId>
+            <version>${carbon.platform.patch.version.402}</version>
         </dependency>
     </dependencies>
 
+    <properties>
+           <carbon.platform.patch.version.401>4.0.1</carbon.platform.patch.version.401>
+           <carbon.platform.patch.version.402>4.0.2</carbon.platform.patch.version.402>
+           <carbon.platform.patch.version.403>4.0.3</carbon.platform.patch.version.403>
+           <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
+       </properties>
+
 </project>
+

@@ -33,14 +33,18 @@ public interface DataBridgeReceiverService {
 
     public String defineStream(String sessionId, String streamDefinition)
             throws DifferentStreamDefinitionAlreadyDefinedException,
-                   MalformedStreamDefinitionException, SessionTimeoutException;
+            MalformedStreamDefinitionException, SessionTimeoutException;
 
     public String findStreamId(String sessionId, String streamName, String streamVersion)
-            throws NoStreamDefinitionExistException, SessionTimeoutException;
+            throws  SessionTimeoutException;
+
+    public boolean deleteStream(String sessionId, String streamId)
+            throws SessionTimeoutException;
+
+    public boolean deleteStream(String sessionId, String streamName, String streamVersion) throws SessionTimeoutException;
 
     public void publish(Object eventBundle, String sessionId, EventConverter eventConverter)
             throws UndefinedEventTypeException, SessionTimeoutException;
-
 
     public StreamDefinition getStreamDefinition(String sessionId, String streamName, String streamVersion)
             throws SessionTimeoutException, StreamDefinitionNotFoundException, StreamDefinitionStoreException;

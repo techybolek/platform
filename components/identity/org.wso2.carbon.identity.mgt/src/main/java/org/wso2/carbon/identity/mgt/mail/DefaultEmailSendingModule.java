@@ -23,13 +23,17 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.mail.MailConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.CarbonConfigurationContextFactory;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -50,18 +54,19 @@ public class DefaultEmailSendingModule extends EmailSendingModule {
         Map<String, String> userParameters = new HashMap<String, String>();
         Map<String, String> headerMap = new HashMap<String, String>();
 
-        String tenantDomain = emailDataDTO.getDomainName();
         String emailAddress = emailDataDTO.getEmail();
         EmailConfig config = emailDataDTO.getEmailConfig();
         
         userParameters.put("user-id", emailDataDTO.getUserId());
-        userParameters.put("domain-name", emailDataDTO.getDomainName());
-        userParameters.put("first-name", emailDataDTO.getFirstName());
+        if(emailDataDTO.getFirstName() == null){
+            userParameters.put("first-name", emailDataDTO.getUserId());
+        } else {
+            userParameters.put("first-name", emailDataDTO.getFirstName());
+        }
         userParameters.put("temporary-password", emailDataDTO.getTemporaryPassword());
 
         try {
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantDomain(tenantDomain, true);
+            PrivilegedCarbonContext.startTenantFlow();
             if (config.getSubject().length() == 0) {
                 headerMap.put(MailConstants.MAIL_HEADER_SUBJECT, EmailConfig.DEFAULT_VALUE_SUBJECT);
             } else {
@@ -75,8 +80,7 @@ public class DefaultEmailSendingModule extends EmailSendingModule {
                     BaseConstants.DEFAULT_TEXT_WRAPPER, null);
             payload.setText(requestMessage);
             ServiceClient serviceClient;
-            ConfigurationContext configContext = IdentityMgtServiceComponent.
-                                            getConfigurationContextService().getServerConfigContext();
+            ConfigurationContext configContext = CarbonConfigurationContextFactory.getConfigurationContext();
             if (configContext != null) {
                 serviceClient = new ServiceClient(configContext, null);
             } else {
@@ -96,10 +100,10 @@ public class DefaultEmailSendingModule extends EmailSendingModule {
             // Send the message
 
             log.info("User credentials configuration mail has been sent to " + emailAddress);
-        } catch (AxisFault e) {
+        } catch (Exception e) {
             log.error("Failed Sending Email", e);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -109,21 +113,28 @@ public class DefaultEmailSendingModule extends EmailSendingModule {
         EmailConfig config = emailDataDTO.getEmailConfig();
         
         String targetEpr = config.getTargetEpr();
-        String tenantDomain = emailDataDTO.getDomainName();
-        if (tenantDomain == null) {
-            SuperTenantCarbonContext.getCurrentContext().getTenantDomain(true);
-        }
-        if (tenantDomain != null && targetEpr.indexOf("/carbon") > 0 &&
-                MultitenantUtils.getTenantDomainFromRequestURL(targetEpr) == null) {
-            targetEpr = targetEpr.replace("/carbon", "/" +
-                    MultitenantConstants.TENANT_AWARE_URL_PREFIX + "/" + tenantDomain + "/carbon");
-        }
+//        String tenantDomain = emailDataDTO.getDomainName();
+//        if (tenantDomain == null) {
+//            PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
+//        }
+//        if (tenantDomain != null && MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain) &&
+//                targetEpr.indexOf("/carbon") > 0 &&
+//                MultitenantUtils.getTenantDomainFromRequestURL(targetEpr) == null) {
+//            targetEpr = targetEpr.replace("/carbon", "/" +
+//                    MultitenantConstants.TENANT_AWARE_URL_PREFIX + "/" + tenantDomain + "/carbon");
+//        }
         if (config.getEmailBody().length() == 0) {
-            msg = EmailConfig.DEFAULT_VALUE_MESSAGE + "\n" + targetEpr + "?"
-                    + CONF_STRING + "=" + emailDataDTO.getConfirmation() + "m\n";
+            msg = EmailConfig.DEFAULT_VALUE_MESSAGE + "\n";
+            if(emailDataDTO.getConfirmation() != null){
+                msg  = msg  + targetEpr + "?"
+                    + CONF_STRING + "=" + emailDataDTO.getConfirmation() + "\n";
+            }
         } else {
-            msg = config.getEmailBody() + "\n" + targetEpr + "?" + CONF_STRING + "="
-                    + emailDataDTO.getConfirmation() + "\n";
+            msg = config.getEmailBody() + "\n" ;
+            if(emailDataDTO.getConfirmation() != null){
+                msg  = msg  + targetEpr + "?"
+                    + CONF_STRING + "=" + emailDataDTO.getConfirmation() + "\n";
+            }            
         }
         if (config.getEmailFooter() != null) {
             msg = msg + "\n" + config.getEmailFooter();
@@ -141,7 +152,9 @@ public class DefaultEmailSendingModule extends EmailSendingModule {
         if (userParameters != null) {
             for (Map.Entry<String, String> entry : userParameters.entrySet()) {
                 String key = entry.getKey();
-                text = text.replaceAll("\\{" + key + "\\}", entry.getValue());
+                if(key != null && entry.getValue() != null){
+                    text = text.replaceAll("\\{" + key + "\\}", entry.getValue());
+                }
             }
         }
         return text;

@@ -66,35 +66,21 @@
     <link href="css/forgot-password.css" rel="stylesheet" type="text/css" media="all"/>
 
     <div id="middle">
-        <h2>
-             WSO2 Identity Server Account Id Lookup!
-        </h2>
+        <h2><fmt:message key="account.id.recovery.lookup"/></h2>
     </div>
 <%
     if(success){
 %>
     <div>
-        <h3>Matching account is found.</h3>
-        <table>
-            <tbody>
-            <tr>
-                <td>We were able to find any accounts that matched the verification data you provided and
-                account is sent to your email address</td>
-            </tr>
-        </table>
+        <h3><fmt:message key="account.id.found"/></h3>
+        <p><fmt:message key="account.id.found"/></p>
     </div>
 <%
     } else {
 %>
     <div>
-        <h3>No matching account is found</h3>
-        <table>
-            <tbody>
-            <tr>
-                <td>We were unable to find any accounts that matched the verification data you provided
-                  Please search  again or contact admin of WSO2 Identity Server</td>
-            </tr>
-        </table>
+        <h3><fmt:message key="account.id.not.found"/></h3>
+        <p><fmt:message key="account.id.not.found.message"/></p>
     </div>
 <%
     }

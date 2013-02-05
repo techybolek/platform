@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,60 +21,88 @@ import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
 
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.logging.config.LoggingConfigManager;
+import org.wso2.carbon.logging.internal.LoggingServiceComponent;
 import org.wso2.carbon.logging.service.LogViewerException;
 import org.wso2.carbon.logging.service.data.LogInfo;
 import org.wso2.carbon.logging.service.data.LoggingConfig;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
 
 public class FileHandler {
-
-	private String getFileLocation(String serverURL, String logFile) {
+	
+	private static final Log log = LogFactory.getLog(FileHandler.class);
+	private String getFileLocation(String serverURL, String logFile, String domain, String serverKey) throws
+                                                                                            LogViewerException {
 		String fileLocation = "";
+        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        String serviceName = "";
 		String lastChar = String.valueOf(serverURL.charAt(serverURL.length() - 1));
 		if (lastChar.equals(LoggingConstants.URL_SEPARATOR)) { // http://my.log.server/logs/stratos/
 			serverURL = serverURL.substring(0, serverURL.length() - 1);
 		}
 		fileLocation = serverURL.replaceAll("\\s", "%20");
 		logFile = logFile.replaceAll("\\s", "%20");
-		String tenantId = String.valueOf(CarbonContextHolder.getCurrentCarbonContextHolder()
-				.getTenantId());
-	
-		if (tenantId.equals(String.valueOf(MultitenantConstants.INVALID_TENANT_ID))
-				|| tenantId.equals(String.valueOf(MultitenantConstants.SUPER_TENANT_ID))) {
-			tenantId = "0";
-		}
-		String ServiceName = getCurrentServerName();
+        if (domain == null || domain.equals("")) {
+            tenantId = CarbonContext.getCurrentContext()
+                    .getTenantId();
+        } else {
+            try {
+                tenantId = getTenantIdForDomain(domain);
+            } catch (LogViewerException e) {
+                throw new LogViewerException("error while getting tenant id from tenant domain", e);
+            }
+        }
+
+	    String currTenant = "";
+		if (tenantId == MultitenantConstants.INVALID_TENANT_ID
+				|| tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+			currTenant = "0";
+		} else {
+            currTenant = String.valueOf(tenantId);
+        }
+
+        if(serverKey == null || serverKey.equals("")) {
+            serviceName = getCurrentServerName();
+        } else {
+            serviceName = serverKey;
+        }
 		if (logFile != null && !logFile.equals("")) {
-			return fileLocation + LoggingConstants.URL_SEPARATOR + tenantId
-					+ LoggingConstants.URL_SEPARATOR + ServiceName + LoggingConstants.URL_SEPARATOR
+			return fileLocation + LoggingConstants.URL_SEPARATOR + currTenant
+					+ LoggingConstants.URL_SEPARATOR + serviceName + LoggingConstants.URL_SEPARATOR
 					+ logFile;
 		} else {
-			return fileLocation + LoggingConstants.URL_SEPARATOR + tenantId
-			+ LoggingConstants.URL_SEPARATOR + ServiceName;
+			return fileLocation + LoggingConstants.URL_SEPARATOR + currTenant
+			+ LoggingConstants.URL_SEPARATOR + serviceName;
 		}
-
+		
 	}
 	
 	private String getCurrentServerName() {
-		String serverName = ServerConfiguration.getInstance().getFirstProperty("Name");
-		serverName = serverName.replace("WSO2", "");
-		return serverName.replace(" ", "_");
+		String serverName = ServerConfiguration.getInstance().getFirstProperty("ServerKey");
+		return serverName;
 	}
 
-	private InputStream getLogDataStream(String fileName) throws Exception {
+	private InputStream getLogDataStream(String fileName, String domain, String serverKey) throws Exception {
 		LoggingConfig config = LoggingConfigManager.loadLoggingConfiguration();
 		String url = "";
 		// TODO this will change depending on the hive impl
 		String hostUrl = config.getArchivedHost();
-		url = getFileLocation(hostUrl, fileName);
+		url = getFileLocation(hostUrl, fileName, domain, serverKey);
 		String password = config.getArchivedUser();
 		String userName = config.getArchivedPassword();
 		int port = Integer.parseInt(config.getArchivedPort());
@@ -88,59 +117,121 @@ public class FileHandler {
 		client.executeMethod(get);
 		return get.getResponseBodyAsStream();
 	}
-
-	public LogInfo[] getRemoteLogFiles() throws LogViewerException {
-		InputStream logStream;
-		try {
-			logStream = getLogDataStream("");
-		} catch (HttpException e) {
-			throw new LogViewerException("Cannot establish the connection to the syslog server", e);
+	
+	private InputStream getHDFSLogDataStream (String fileName, String domain, String serverKey) throws LogViewerException {
+	    Configuration conf = new Configuration(false);
+        /**
+         * Create HDFS Client configuration to use name node hosted on host master and port 9000.
+         * Client configured to connect to a remote distributed file system.
+         */
+      //  conf.set("fs.default.name", "hdfs://master:9000");
+     
+        /**
+         * Get connection to remote file sytem
+         */
+        try {
+        	LoggingConfig config = LoggingConfigManager.loadLoggingConfiguration();
+        	String url = "";
+    		// TODO this will change depending on the hive impl
+    		String hostUrl = config.getArchivedHost();
+    	    conf.set("fs.default.name", hostUrl);
+    	    conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
+    		//creating the file path.
+    		url = getFileLocation(config.getArchivedHDFSPath(), fileName, domain, serverKey);
+			if (log.isDebugEnabled()) {
+				log.debug("Connecting to hdfs file "+url);
+			}
+			FileSystem fs = FileSystem.get(conf);
+			Path tenantFileName = new Path(url);
+			if (!fs.exists(tenantFileName)) {
+				if (log.isDebugEnabled()) {
+					log.debug("The HDF file " + url + " does not exsist");
+				}
+				return null;
+			}
+			FSDataInputStream in = fs.open(tenantFileName);
+			return in;
 		} catch (IOException e) {
-			throw new LogViewerException("Cannot find the specified file location to the log file",
+			log.error("Cannot find the specified hdfs file location to the log file",
 					e);
-		} catch (Exception e) {
-			throw new LogViewerException("Cannot find the specified file location to the log file",
+			throw new LogViewerException("Cannot find the specified hdfs file location to the log file",
 					e);
 		}
-		BufferedReader dataInput = new BufferedReader(new InputStreamReader(logStream));
-		String line;
-		ArrayList<LogInfo> logs = new ArrayList<LogInfo>();
-		Pattern pattern = Pattern.compile(LoggingConstants.RegexPatterns.SYS_LOG_FILE_NAME_PATTERN);
+	}
+
+	public LogInfo[] getRemoteLogFiles(String domain, String serverKey)
+			throws LogViewerException {
+		String url = "";
 		try {
-			while ((line = dataInput.readLine()) != null) {
-				String fileNameLinks[] = line
-						.split(LoggingConstants.RegexPatterns.LINK_SEPARATOR_PATTERN);
-				String fileDates[] = line
-						.split((LoggingConstants.RegexPatterns.SYSLOG_DATE_SEPARATOR_PATTERN));
-				String dates[] = null;
-				String sizes[] = null;
-				if (fileDates.length == 3) {
-					dates = fileDates[1]
-							.split(LoggingConstants.RegexPatterns.COLUMN_SEPARATOR_PATTERN);
-					sizes = fileDates[2]
-							.split(LoggingConstants.RegexPatterns.COLUMN_SEPARATOR_PATTERN);
+			LoggingConfig config = LoggingConfigManager
+					.loadLoggingConfiguration();
+			url = getFileLocation(config.getArchivedHDFSPath(), "", domain,
+					serverKey);
+			Configuration conf = new Configuration(false);
+			conf.set("fs.default.name", config.getArchivedHost());
+			conf.set("fs.hdfs.impl",
+					"org.apache.hadoop.hdfs.DistributedFileSystem");
+			FileSystem fs = FileSystem.get(conf);
+			Path tenantFileName = new Path(url);
+			if (!fs.exists(tenantFileName)) {
+				if (log.isDebugEnabled()) {
+					log.debug("The HDF file " + url + " does not exsist");
 				}
-				if (fileNameLinks.length == 2) {
-					String logFileName[] = fileNameLinks[1]
-							.split(LoggingConstants.RegexPatterns.GT_PATTARN);
-					Matcher matcher = pattern.matcher(logFileName[0]);
-					if (matcher.find()) {
-						if (logFileName != null && dates != null && sizes != null) {
-							String logName = logFileName[0].replace(
-									LoggingConstants.RegexPatterns.BACK_SLASH_PATTERN, "");
-							logName = logName.replaceAll("%20", " ");
-							LogInfo log = new LogInfo(logName, dates[0], sizes[0]);
-							logs.add(log);
-						}
-					}
+				return null;
+			}
+			FileStatus[] status = fs.listStatus(tenantFileName);
+			ArrayList<LogInfo> logs = new ArrayList<LogInfo>();
+			if (log.isDebugEnabled()) {
+				log.debug("The retrieving log data from " + url );
+			}
+			for (int i = 0; i < status.length; i++) {
+				Path logFilePath = new Path(status[i].getPath().toString()+"/"+status[i].getPath().getName()+".log");
+				String fileName = logFilePath.getName();
+				FileStatus[] newStatus = fs.listStatus(logFilePath);
+				if (log.isDebugEnabled()) {
+					log.debug("The retrieving log data from " + url );
+				}
+                if(newStatus != null) {
+                    if (newStatus[0] != null) {
+
+                        LogInfo logEvent = new LogInfo(fileName, new Date(
+                                newStatus[0].getModificationTime()).toString(),
+                                getFileSize(newStatus[0].getLen()));
+                        logs.add(logEvent);
+                    }
+                }
+				
+				if (log.isDebugEnabled()) {
+					log.debug("Retrieving "
+							+ fileName
+							+ " "
+							+ getFileSize(status[i].getLen())
+							+ " "
+							+ new Date(status[i].getModificationTime())
+									.toString());
 				}
 			}
-			dataInput.close();
-		} catch (IOException e) {
-			throw new LogViewerException("Cannot find the specified file location to the log file",
-					e);
+            return getSortedLogInfo(logs.toArray(new LogInfo[logs.size()]));
+		} catch (Exception e) {
+			log.error("Cannot get log files from " + url, e);
+			throw new LogViewerException("Cannot get log files from " + url, e);
 		}
-		return getSortedLogInfo(logs.toArray(new LogInfo[logs.size()]));
+	}
+	
+	private boolean isLogFile(String fileName) {
+		String archivePattern = "[a-zA-Z]*\\.log";
+		CharSequence inputStr = fileName;
+		Pattern pattern = Pattern.compile(archivePattern);
+		Matcher matcher = pattern.matcher(inputStr);
+		return matcher.find();
+	}
+	private  String getFileSize(long bytes) {
+		int unit = 1024;
+		if (bytes < unit)
+			return bytes + " B";
+		int exp = (int) (Math.log(bytes) / Math.log(unit));
+		char pre = "KMGTPE".charAt(exp - 1);
+		return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
 	}
 
 	private LogInfo[] getSortedLogInfo(LogInfo logs[]) {
@@ -196,21 +287,20 @@ public class FileHandler {
 		}
 	}
 
-	public DataHandler downloadArchivedLogFiles(String logFile) throws LogViewerException {
+	public DataHandler downloadArchivedLogFiles(String logFile, String domain, String serverKey) throws LogViewerException {
 		InputStream logStream;
 		try {
-			logStream = getLogDataStream(logFile);
-		} catch (HttpException e) {
-			throw new LogViewerException("Cannot establish the connection to the apache server", e);
-		} catch (IOException e) {
-			throw new LogViewerException("Cannot find the specified file location to the log file",
-					e);
+			logFile = logFile.replace(".log", "")+"/"+logFile;
+			logStream = getHDFSLogDataStream(logFile, domain, serverKey);
+			if (logStream == null) {
+				return null;
+			}
 		} catch (Exception e) {
 			throw new LogViewerException("Cannot find the specified file location to the log file",
 					e);
 		}
 		try {
-			ByteArrayDataSource bytArrayDS = new ByteArrayDataSource(logStream, "application/gzip");
+			ByteArrayDataSource bytArrayDS = new ByteArrayDataSource(logStream, "application/txt");
 			DataHandler dataHandler = new DataHandler(bytArrayDS);
 			return dataHandler;
 		} catch (IOException e) {
@@ -219,6 +309,7 @@ public class FileHandler {
 			try {
 				logStream.close();
 			} catch (IOException e) {
+				log.error("Cannot close the input stream " + logFile, e);
 				throw new LogViewerException("Cannot close the input stream " + logFile, e);
 			}
 		}
@@ -256,9 +347,27 @@ public class FileHandler {
 			}
 			dataInput.close();
 		} catch (IOException e) {
+			log.error("Cannot read the log file", e);
 			throw new LogViewerException("Cannot read the log file", e);
 		}
 		return logsList.toArray(new String[logsList.size()]);
 	}
 
+    public int getTenantIdForDomain(String tenantDomain) throws LogViewerException {
+        int tenantId;
+        TenantManager tenantManager = LoggingServiceComponent.getTenantManager();
+        if (tenantDomain == null || tenantDomain.equals("")) {
+            tenantId = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID;
+        } else {
+
+            try {
+                tenantId = tenantManager.getTenantId(tenantDomain);
+            } catch (UserStoreException e) {
+            	log.error("Cannot find tenant id for the given tenant domain.");
+                throw new LogViewerException("Cannot find tenant id for the given tenant domain.");
+            }
+        }
+        return tenantId;
+    }
 }
+

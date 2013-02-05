@@ -40,7 +40,7 @@ public class StatisticsAdmin extends AbstractAdmin implements StatisticsAdminMBe
     public StatisticsAdmin() {
     }
 
-    public SystemStatistics getSystemStatistics() throws AxisFault{                                                                                     
+    public SystemStatistics getSystemStatistics() throws AxisFault{
         return sysStatsUtil.getSystemStatistics(getAxisConfig());
     }
 

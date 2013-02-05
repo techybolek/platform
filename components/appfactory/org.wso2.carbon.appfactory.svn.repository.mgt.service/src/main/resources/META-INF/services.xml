@@ -15,7 +15,7 @@
   -->
 
 <serviceGroup>
-    <service name="RepositoryManagementService" scope="transportsession">
+    <service name="RepositoryManagementService2" scope="transportsession">
         <transports>
             <transport>https</transport>
         </transports>

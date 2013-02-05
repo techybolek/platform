@@ -4,12 +4,11 @@
         <ui>
             <list>
                 <column name="Name">
-                    <data href="@{storagePath}" type="path" value="details_name">
-                </data>
+                    <data href="@{storagePath}" type="path" value="details_name"/>
                </column>          
                 <column name="Description">
-                    <data href="@{storagePath}" type="path" value="rules_description">
-                </data></column>
+                    <data href="@{storagePath}" type="path" value="rules_description"/>
+                </column>
             </list>
         </ui>
         <content>

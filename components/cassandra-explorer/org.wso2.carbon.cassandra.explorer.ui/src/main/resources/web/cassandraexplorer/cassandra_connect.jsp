@@ -63,6 +63,17 @@
                         <td class="labelField">Password</td>
                         <td><input type="password" name="password" id="password"/></td>
                     </tr>
+                    <tr>
+                        <td class="labelField">Maximum Result count</td>
+                        <td>
+                            <select name="max_row_count">
+                                <option value="1000">1000</option>
+                                <option value="10000">10000</option>
+                                <option value="100000">100000</option>
+                            </select>
+                        </td>
+                    </tr>
+
                 </table>
                 <div class="buttonRow">
                     <input type="submit" value="Connect">

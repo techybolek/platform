@@ -62,7 +62,7 @@ public class MessageBuilder {
         formatters.put("application/xml", new ApplicationXMLFormatter());
         formatters.put("text/xml", new SOAPMessageFormatter());
         formatters.put("application/soap+xml", new SOAPMessageFormatter());
-        formatters.put("application/json", new JSONFormatter());
+        formatters.put("application/json", new JSONMessageFormatter());
     }
 
     public Map<String, Builder> getBuilders() {

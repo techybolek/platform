@@ -16,13 +16,12 @@
 
 package org.wso2.carbon.cep.fusion.internal.ds;
 
-import org.wso2.carbon.cep.core.CEPServiceInterface;
-import org.wso2.carbon.cep.core.exception.CEPConfigurationException;
-import org.wso2.carbon.cep.core.backend.CEPEngineProvider;
-import org.wso2.carbon.cep.fusion.backend.FusionBackEndRuntimeFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.cep.core.CEPServiceInterface;
+import org.wso2.carbon.cep.core.backend.CEPEngineProvider;
+import org.wso2.carbon.cep.fusion.backend.FusionBackEndRuntimeFactory;
 
 /**
  * this class is used to get the CEPServiceInterface service. it is used to
@@ -46,13 +45,9 @@ public class FustionBackEndRuntimeDS {
                 droolsFusionCEPEngineProvider = new CEPEngineProvider();
                 droolsFusionCEPEngineProvider.setName("DroolsFusionCEPRuntime");
                 droolsFusionCEPEngineProvider.setProviderClass(FusionBackEndRuntimeFactory.class);
+                FusionBackEndRuntimeValueHolder.getInstance().getCEPService()
+                        .registerCEPEngineProvider(droolsFusionCEPEngineProvider);
 
-                try {
-                    FusionBackEndRuntimeValueHolder.getInstance().getCEPService()
-                            .registerCEPEngineProvider(droolsFusionCEPEngineProvider);
-                } catch (CEPConfigurationException e) {
-                    log.error("Can not register Fusion back end runtime with the cep service ", e);
-                }
             }
         } catch (Throwable e) {
             log.error("Can not register Fusion back end runtime with the cep service ", e);

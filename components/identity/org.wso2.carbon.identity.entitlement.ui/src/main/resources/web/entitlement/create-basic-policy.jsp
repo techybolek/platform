@@ -32,7 +32,7 @@
 <%@ page import="org.wso2.carbon.claim.mgt.stub.dto.ClaimMappingDTO" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.BasicTargetElementDTO" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.AttributeValueTreeNodeDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.AttributeTreeNodeDTO" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <jsp:useBean id="entitlementPolicyBean" type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
@@ -499,9 +499,6 @@
         if (value == '') {
             CARBON.showWarningDialog('<fmt:message key="policy.name.is.required"/>');
             return false;
-        }else if (value.match(new RegEx("^[^~!@#;%^*()+={}|\\<>\"',)]{3,30}$"))){
-            CARBON.showWarningDialog('<fmt:message key="policy.name.invalid"/>');
-            return false;
         }
 
         value = document.getElementsByName("ruleId")[0].value;
@@ -518,9 +515,6 @@
         var value = document.getElementsByName("policyName")[0].value;
         if (value == '') {
             CARBON.showWarningDialog('<fmt:message key="policy.name.is.required"/>');
-            return false;
-        }else if (value.match(new RegEx("^[^~!@#;%^*()+={}|\\<>\"',)]{3,30}$"))){
-            CARBON.showWarningDialog('<fmt:message key="policy.name.invalid"/>');
             return false;
         }
 

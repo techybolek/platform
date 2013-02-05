@@ -18,6 +18,7 @@ package org.wso2.carbon.usage.agent.listeners;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -95,7 +96,7 @@ public class RegistryUsageListener extends Handler {
 
 
         // persisting bandwidth
-        RegistryUsagePersister.storeIncomingBandwidth(tenantId, size);
+        //RegistryUsagePersister.storeIncomingBandwidth(tenantId, size);
         //persisting to registry content addition
         RegistryUsagePersister.storeAddContent(tenantId, size);
 
@@ -125,7 +126,7 @@ public class RegistryUsageListener extends Handler {
 
 //        ResourcePath resourcePath = context.getResourcePath();
         String sourceURL = context.getSourceURL();
-     
+
 
         // the import resource logic
         URL url;
@@ -147,7 +148,7 @@ public class RegistryUsageListener extends Handler {
             int size = inByteArr.length;
 
             // persisting bandwidth
-            RegistryUsagePersister.storeIncomingBandwidth(tenantId, size);
+            //RegistryUsagePersister.storeIncomingBandwidth(tenantId, size);
 
         } catch (IOException e) {
 
@@ -211,7 +212,7 @@ public class RegistryUsageListener extends Handler {
             throw new RegistryException(msg);
         }
         // persisting bandwidth
-        RegistryUsagePersister.storeOutgoingBandwidth(tenantId, size);
+        //RegistryUsagePersister.storeOutgoingBandwidth(tenantId, size);
         return resource;
     }
 
@@ -251,7 +252,7 @@ public class RegistryUsageListener extends Handler {
         }
 
         // persisting bandwidth
-        RegistryUsagePersister.storeOutgoingBandwidth(tenantId, size);
+        //RegistryUsagePersister.storeOutgoingBandwidth(tenantId, size);
 
     }
 
@@ -289,22 +290,29 @@ public class RegistryUsageListener extends Handler {
             requestContext.setProcessingComplete(true);
         }
         // persisting bandwidth
-        RegistryUsagePersister.storeIncomingBandwidth(tenantId, size);
+        //RegistryUsagePersister.storeIncomingBandwidth(tenantId, size);
 
     }
 
     public static void registerRegistryUsagePersistingListener(RegistryContext registryContext)
             throws RegistryException {
+
+        //If metering is disabled, we do not need to register the handler
+        if(!"true".equals(ServerConfiguration.getInstance().getFirstProperty("EnableMetering"))){
+            return;
+        }
+
         HandlerManager handlerManager = registryContext.getHandlerManager();
         RegistryUsageListener handler = new RegistryUsageListener();
         URLMatcher anyUrlMatcher = new URLMatcher();
         anyUrlMatcher.setPattern(".*");
         String[] applyingFilters = new String[]{
-                Filter.PUT, Filter.IMPORT, Filter.GET, Filter.DUMP, Filter.RESTORE,Filter.DELETE };
+                Filter.PUT, Filter.IMPORT, Filter.GET, Filter.DUMP, Filter.RESTORE, Filter.DELETE};
 
         handlerManager.addHandlerWithPriority(applyingFilters, anyUrlMatcher, handler,
                 HandlerLifecycleManager.DEFAULT_REPORTING_HANDLER_PHASE);
     }
+
     //===========================================================================================
     public void delete(RequestContext context) throws RegistryException {
         if (CurrentSession.getCallerTenantId() == MultitenantConstants.SUPER_TENANT_ID ||
@@ -332,17 +340,21 @@ public class RegistryUsageListener extends Handler {
         if (contentObj == null) {
             return;
         }
-        int size;
+        int size = 0;
         if (contentObj instanceof String) {
             size = ((String) contentObj).length();
         } else if (contentObj instanceof byte[]) {
             size = ((byte[]) contentObj).length;
+        } else if (contentObj instanceof String[]) {
+            // of type collection
+            for (String str : (String[]) contentObj) {
+                size += str.length();
+            }
         } else {
             String msg = "Unsupported type for the content.";
             log.error(msg);
             throw new RegistryException(msg);
         }
-        // persisting bandwidth
         RegistryUsagePersister.storeDeleteContent(tenantId, size);
 
         //we will pass through, so that normal registry operation will put the resource

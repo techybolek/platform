@@ -27,8 +27,8 @@
             <region>region1</region>
             <order>35</order>
             <style-class>manage</style-class>
-            <icon>../bam-mediator-config/images/chart_bar.gif</icon>
-			<require-super-tenant>true</require-super-tenant>
+            <icon>../bam-mediator-config/images/activity_monitor_icon.png</icon>
+			<require-super-tenant>false</require-super-tenant>
             <require-permission>/permissions/admin/manage</require-permission>
         </menu>
 	</menus>

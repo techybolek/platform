@@ -31,6 +31,7 @@ import org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException;
 import org.wso2.carbon.deployment.synchronizer.internal.repository.CarbonRepositoryUtils;
 import org.wso2.carbon.deployment.synchronizer.internal.util.DeploymentSynchronizerConfiguration;
 import org.wso2.carbon.deployment.synchronizer.internal.util.RepositoryConfigParameter;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -64,6 +65,7 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
     private boolean forceUpdate = true;
 
     private  List<RepositoryConfigParameter> parameters;
+    private DeploymentSynchronizerConfiguration conf;
 
     public SVNBasedArtifactRepository(){
         populateParameters();
@@ -72,39 +74,31 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
     public void init(int tenantId) throws DeploymentSynchronizerException {
 
         ServerConfiguration serverConfig = ServerConfiguration.getInstance();
-
-        DeploymentSynchronizerConfiguration conf =
-                CarbonRepositoryUtils.getActiveSynchronizerConfiguration(tenantId);
+        conf = CarbonRepositoryUtils.getActiveSynchronizerConfiguration(tenantId);
 
         String url = null;
         boolean appendTenantId = false;
         String user = null;
         String password = null;
-        
+
         RepositoryConfigParameter[] configParameters = conf.getRepositoryConfigParameters();
 
         if(configParameters == null || configParameters.length == 0){
             handleException("SVN configuration parameters must be specified for the SVN based deployment synchronizer");
         }
 
-        for(int i=0; i<configParameters.length; i++){
-            RepositoryConfigParameter parameter = configParameters[i];
-            if(SVNConstants.SVN_URL.equals(parameter.getName())){
+        for (RepositoryConfigParameter parameter : configParameters) {
+            if (SVNConstants.SVN_URL.equals(parameter.getName())) {
                 url = parameter.getValue();
-            }
-            else if(SVNConstants.SVN_USER.equals(parameter.getName())){
+            } else if (SVNConstants.SVN_USER.equals(parameter.getName())) {
                 user = parameter.getValue();
-            }
-            else if(SVNConstants.SVN_PASSWORD.equals(parameter.getName())){
+            } else if (SVNConstants.SVN_PASSWORD.equals(parameter.getName())) {
                 password = parameter.getValue();
-            }
-            else if(SVNConstants.SVN_URL_APPEND_TENANT_ID.equals(parameter.getName())){
+            } else if (SVNConstants.SVN_URL_APPEND_TENANT_ID.equals(parameter.getName())) {
                 appendTenantId = Boolean.valueOf(parameter.getValue());
-            }
-            else if(SVNConstants.SVN_IGNORE_EXTERNALS.equals(parameter.getName())){
+            } else if (SVNConstants.SVN_IGNORE_EXTERNALS.equals(parameter.getName())) {
                 ignoreExternals = Boolean.valueOf(parameter.getValue());
-            }
-            else if(SVNConstants.SVN_FORCE_UPDATE.equals(parameter.getName())){
+            } else if (SVNConstants.SVN_FORCE_UPDATE.equals(parameter.getName())) {
                 forceUpdate = Boolean.valueOf(parameter.getValue());
             }
         }
@@ -218,6 +212,9 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
     }
 
     private void svnAddFiles(File root) throws SVNClientException {
+        if (log.isDebugEnabled()) {
+            log.debug("SVN adding files in " + root);
+        }
         ISVNStatus[] status = svnClient.getStatus(root, true, false);
         for (ISVNStatus s : status) {
             if (s.getTextStatus().toInt() == UNVERSIONED) {
@@ -253,6 +250,9 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
     }
 
     public boolean commit(String filePath) throws DeploymentSynchronizerException {
+        if (log.isDebugEnabled()) {
+            log.debug("SVN committing " + filePath);
+        }
         File root = new File(filePath);
         try {
             svnClient.cleanup(root);
@@ -282,31 +282,76 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
     }
 
     public boolean checkout(String filePath) throws DeploymentSynchronizerException {
+        if (log.isDebugEnabled()) {
+            log.debug("SVN checking out " + filePath);
+        }
         File root = new File(filePath);
         try {
-            cleanupDeletedFiles(root);
+            if (conf.isAutoCommit()) {
+                cleanupDeletedFiles(root);
+            }
             ISVNStatus status = svnClient.getSingleStatus(root);
+            if (CarbonUtils.isWorkerNode()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("reverting " + root);
+                }
+                if (status != null && status.getTextStatus().toInt() != UNVERSIONED) {
+                    svnClient.revert(root, true);
+                }
+            }
             if (status != null && status.getTextStatus().toInt() == UNVERSIONED) {
-                cleanupUnversionedFiles(root);
+                cleanupUnversionedFiles(this.svnUrl,root);
                 if (svnClient instanceof CmdLineClientAdapter) {
                     // CmdLineClientAdapter does not support all the options
                     svnClient.checkout(svnUrl, root, SVNRevision.HEAD, RECURSIVE);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Checked out using CmdLineClientAdapter");
+                    }
                 } else {
                     svnClient.checkout(svnUrl, root, SVNRevision.HEAD,
                             Depth.infinity, ignoreExternals, forceUpdate);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Checked out using SVN Kit");
+                    }
                 }
                 return true;
             } else {
                 long filesUpdated = -1;
                 svnClient.cleanup(root);
-                if (svnClient instanceof CmdLineClientAdapter) {
-                    // CmdLineClientAdapter does not support all the options
-                    filesUpdated = svnClient.update(root, SVNRevision.HEAD, RECURSIVE);
-                } else {
-                    filesUpdated = svnClient.update(root, SVNRevision.HEAD,
-                                                   Depth.infinity, NO_SET_DEPTH,
-                                                   ignoreExternals, forceUpdate);
-                }
+                int tries = 0;
+                do {
+                    try {
+                        tries++;
+                        if (svnClient instanceof CmdLineClientAdapter) {
+                            // CmdLineClientAdapter does not support all the options
+                            filesUpdated = svnClient.update(root, SVNRevision.HEAD, RECURSIVE);
+                            if (log.isDebugEnabled()) {
+                                log.debug(filesUpdated + " files were updated using CmdLineClientAdapter");
+                            }
+                        } else {
+                            filesUpdated = svnClient.update(root, SVNRevision.HEAD,
+                                    Depth.infinity, NO_SET_DEPTH,
+                                    ignoreExternals, forceUpdate);
+                            if (log.isDebugEnabled()) {
+                                log.debug(filesUpdated + " files were updated using SVN Kit");
+                            }
+                        }
+                        break;
+                    } catch (SVNClientException e) {
+                        if (tries < 10 &&
+                                (e.getMessage().contains("an unversioned file of the same name already exists") ||
+                                 e.getMessage().contains("an unversioned directory of the same name already exists"))) {
+                            log.info("Unversioned file problem. Retrying " + tries);
+                            try {
+                                Thread.sleep(5000);
+                            } catch (InterruptedException ignored) {
+                            }
+                            cleanupUnversionedFiles(this.svnUrl,root);
+                        } else {
+                            throw e;
+                        }
+                    }
+                } while (tries < 10); // try to recover & retry
                 return filesUpdated > 1;
             }
         } catch (SVNClientException e) {
@@ -316,8 +361,8 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
         return false;
     }
 
-    private void cleanupUnversionedFiles(File root) throws SVNClientException {
-        ISVNDirEntry[] entries = svnClient.getList(svnUrl, SVNRevision.HEAD, false);
+    private void cleanupUnversionedFiles(SVNUrl svnURL,  File root) throws SVNClientException {
+        ISVNDirEntry[] entries = svnClient.getList(svnURL, SVNRevision.HEAD, false);
         for (ISVNDirEntry entry : entries) {
             String fileName = entry.getPath();
             SVNNodeKind nodeType = entry.getNodeKind();
@@ -325,7 +370,13 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
             if (localFile.exists()) {
                 ISVNStatus status = svnClient.getSingleStatus(localFile);
                 if (status != null && status.getTextStatus().toInt() != UNVERSIONED) {
-                    continue;
+                    if (localFile.isDirectory()) { // see whether there are unversioned files under this dir. Recursive
+                        String appendPath = "/" + localFile.getName();
+                        cleanupUnversionedFiles(svnURL.appendPath(appendPath), localFile);
+                        continue; // this is not an unversioned directory, continue
+                    } else if (localFile.isFile()) {
+                        continue;
+                    }
                 }
 
                 if (localFile.isFile() && SVNNodeKind.FILE.equals(nodeType)) {
@@ -381,15 +432,133 @@ public class SVNBasedArtifactRepository implements ArtifactRepository {
         // Nothing to impl
     }
 
-    @Override
     public String getRepositoryType() {
         return DeploymentSynchronizerConstants.REPOSITORY_TYPE_SVN;
     }
 
-    @Override
     public List<RepositoryConfigParameter> getParameters() {
         return parameters;
     }
+
+    public boolean checkout(String filePath, int depth)
+            throws DeploymentSynchronizerException {
+        log.info("SVN checking out " + filePath);
+        File root = new File(filePath);
+        try {
+            if (conf.isAutoCommit()) {
+                cleanupDeletedFiles(root);
+            }
+            ISVNStatus status = svnClient.getSingleStatus(root);
+            if (status != null && status.getTextStatus().toInt() == UNVERSIONED) {
+                cleanupUnversionedFiles(this.svnUrl, root);
+                if (svnClient instanceof CmdLineClientAdapter) {
+                    // CmdLineClientAdapter does not support all the options
+                    svnClient.checkout(svnUrl, root, SVNRevision.HEAD, RECURSIVE);
+                    log.info("Checked out using CmdLineClientAdapter");
+                } else {
+                    svnClient.checkout(svnUrl, root, SVNRevision.HEAD,
+                                       depth, ignoreExternals, forceUpdate);
+                    log.info("Checked out using SVN Kit");
+                }
+                return true;
+            } else {
+                long filesUpdated = -1;
+                svnClient.cleanup(root);
+                int tries = 0;
+                do {
+                    try {
+                        tries++;
+                        if (svnClient instanceof CmdLineClientAdapter) {
+                            // CmdLineClientAdapter does not support all the options
+                            filesUpdated = svnClient.update(root, SVNRevision.HEAD, RECURSIVE);
+                            log.info(filesUpdated + " files were updated using CmdLineClientAdapter");
+                        } else {
+                            filesUpdated = svnClient.update(root, SVNRevision.HEAD,
+                                                            depth, NO_SET_DEPTH,
+                                                            ignoreExternals, forceUpdate);
+                            log.info(filesUpdated + " files were updated using SVN Kit");
+                        }
+                        break;
+                    } catch (SVNClientException e) {
+                        if (tries < 10 &&
+                            (e.getMessage().contains("an unversioned file of the same name already exists") ||
+                             e.getMessage().contains("an unversioned directory of the same name already exists"))) {
+                            log.info("Unversioned file problem. Retrying " + tries);
+                            try {
+                                Thread.sleep(5000);
+                            } catch (InterruptedException ignored) {
+                            }
+                            cleanupUnversionedFiles(this.svnUrl, root);
+                        } else {
+                            throw e;
+                        }
+                    }
+                } while (tries < 10); // try to recover & retry
+                return filesUpdated > 1;
+            }
+        } catch (SVNClientException e) {
+            handleException("Error while checking out or updating artifacts from the " +
+                            "SVN repository", e);
+        }
+        return false;
+    }
+
+    public boolean update(String rootPath, String filePath, int depth) throws DeploymentSynchronizerException {
+        log.info("SVN updating " + filePath);
+        File root = new File(rootPath);
+        boolean setDepth = false;
+        if (depth == Depth.infinity) {
+            setDepth = true;
+        }
+        long filesUpdated = -1;
+        try {
+            svnClient.cleanup(root);
+
+            if (CarbonUtils.isWorkerNode()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("reverting " + root);
+                }
+                svnClient.revert(root, true);
+            }
+
+            int tries = 0;
+            do {
+                try {
+                    tries++;
+                    if (svnClient instanceof CmdLineClientAdapter) {
+                        // CmdLineClientAdapter does not support all the options
+                        filesUpdated = svnClient.update(root, SVNRevision.HEAD, RECURSIVE);
+                        log.info(filesUpdated + " files were updated using CmdLineClientAdapter");
+                    } else {
+                        filesUpdated = svnClient.update(root, filePath,SVNRevision.HEAD,
+                                                        depth, setDepth,
+                                                        ignoreExternals, forceUpdate);
+                        log.info(filesUpdated + " files were updated using SVN Kit");
+                    }
+                    break;
+                } catch (SVNClientException e) {
+                    if (tries < 10 &&
+                        (e.getMessage().contains("an unversioned file of the same name already exists") ||
+                         e.getMessage().contains("an unversioned directory of the same name already exists"))) {
+                        log.info("Unversioned file problem. Retrying " + tries);
+                        try {
+                            Thread.sleep(5000);
+                        } catch (InterruptedException ignored) {
+                        }
+                        cleanupUnversionedFiles(this.svnUrl, root);
+                    } else {
+                        throw e;
+                    }
+                }
+            } while (tries < 10); // try to recover & retry
+            return filesUpdated > 1;
+        } catch (SVNClientException e) {
+            handleException("Error while checking out or updating artifacts from the " +
+                            "SVN repository", e);
+        }
+        return false;
+    }
+
 
     @Override
     public boolean equals(Object o) {

@@ -32,10 +32,11 @@ import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.bpel.common.WSDLAwareSOAPProcessor;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.humantask.core.HumanTaskConstants;
 import org.wso2.carbon.humantask.core.engine.HumanTaskEngine;
 import org.wso2.carbon.humantask.core.integration.utils.SOAPUtils;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
 
 /**
  * Message receiver for the humantasks exposed as services.
@@ -53,8 +54,8 @@ public class AxisHumanTaskMessageReceiver extends AbstractMessageReceiver {
     @Override
     protected void invokeBusinessLogic(MessageContext messageContext) throws AxisFault {
 
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(CarbonContext.
+                getCurrentContext().getTenantId());
 
         if (messageTraceLog.isDebugEnabled()) {
             messageTraceLog.debug("Message received: " +

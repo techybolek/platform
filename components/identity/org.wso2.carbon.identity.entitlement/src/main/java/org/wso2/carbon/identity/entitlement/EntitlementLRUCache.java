@@ -41,7 +41,8 @@ public class EntitlementLRUCache<String, Set> extends LinkedHashMap<String, Set>
 
 	@Override
 	protected boolean removeEldestEntry(Map.Entry eldest) {
-		return size() > this.cacheSize;
+        // oldest entry of the cache would be removed when max cache size become 
+		return size() == this.cacheSize * 0.7;
 	}
 
 }

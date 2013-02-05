@@ -20,20 +20,22 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>hdfs</artifactId>
-	<version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.hdfs.mgt</artifactId>
+    <version>4.0.5</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - HDFS Management Server</name>
     <url>http://wso2.org</url>
     <build>
         <plugins>
-	   <plugin>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>maven-scr-plugin</artifactId>
-           </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -49,7 +51,7 @@
                         </Export-Package>
                         <Import-Package>
                             !org.wso2.carbon.hdfs.mgt.*,
- 			    org.apache.axis2.*; version="${axis2.osgi.version.range.hdfs}",
+                            org.apache.axis2.*; version="${axis2.osgi.version.range.hdfs}",
                             org.apache.axiom.*; version="${axiom.osgi.version.range.hdfs}",
                             *;resolution:=optional,
                         </Import-Package>
@@ -68,7 +70,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.authenticator.krb5</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -88,15 +90,19 @@
             <version>3.8.1</version>
             <scope>test</scope>
         </dependency>
-       <dependency>
+        <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.hdfs.dataaccess</artifactId>
-	    	<version>${wso2carbon.version}</version>	
-        </dependency><dependency>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.hadoop.security</artifactId>
-	    	<version>${wso2carbon.version}</version>	
+            <version>4.0.2</version>
         </dependency>
     </dependencies>
+    <properties>
+        <hadoop.version>0.20.203.1-wso2v2</hadoop.version>
+    </properties>
 
 </project>

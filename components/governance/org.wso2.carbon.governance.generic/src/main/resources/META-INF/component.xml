@@ -54,5 +54,9 @@
             <DisplayName>Generic Artifacts</DisplayName>
             <ResourceId>/permission/admin/configure/governance/generic</ResourceId>
         </ManagementPermission>
+        <ManagementPermission>
+            <DisplayName>Manage RXT</DisplayName>
+            <ResourceId>/permission/admin/configure/governance/manage-rxt</ResourceId>
+        </ManagementPermission>
    </ManagementPermissions>
 </component>

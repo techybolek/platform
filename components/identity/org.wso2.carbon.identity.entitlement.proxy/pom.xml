@@ -21,12 +21,14 @@
    <parent>
        <groupId>org.wso2.carbon</groupId>
        <artifactId>identity</artifactId>
-	   <version>4.0.0-SNAPSHOT</version>
+       <version>4.0.0</version>
+       <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.identity.entitlement.proxy</artifactId>
+    <version>4.0.2</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Identity Entitlement PDP Proxy</name>
     <description>A custom wso2 products or solution</description>
@@ -36,17 +38,17 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
-            <version>4.0.0-SNAPSHOT</version>
+            <version>4.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.entitlement.stub</artifactId>
-            <version>4.0.0-SNAPSHOT</version>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.authenticator.stub</artifactId>
-            <version>4.0.0-SNAPSHOT</version>
+            <version>4.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
@@ -119,11 +121,6 @@
             <version>4.1.0-wso2v1</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.balana</groupId>
-            <artifactId>org.wso2.balana</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.securevault</groupId>
             <artifactId>org.wso2.securevault</artifactId>
             <version>1.0.0</version>
@@ -140,6 +137,39 @@
         <dependency>
             <groupId>slf4j.wso2</groupId>
             <artifactId>slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.caching.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.utils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.context</artifactId>
+            <version>4.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.balana</groupId>
+            <artifactId>org.wso2.balana</artifactId>
+            <version>1.0.0-wso2v2</version>
+        </dependency>
+         <dependency>
+            <groupId>opensaml.wso2</groupId>
+            <artifactId>opensaml2</artifactId>
+            <version>2.4.1.wso2v1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ws.security.wso2</groupId>
+            <artifactId>wss4j</artifactId>
+            <version>1.5.9.wso2v1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.core</artifactId>
+            <version>4.0.2</version>
         </dependency>
     </dependencies>
 
@@ -166,7 +196,7 @@
                             !org.apache.axis2.databinding,
 							!org.apache.axis2.databinding.utils.reader,
 							!org.pache.axis2.databinding.utils.writer,
-                            !org.wso2.carbon.identity.entitlement.filter.*,
+                            !org.wso2.carbon.identity.entitlement.proxy.*,
                             org.wso2.carbon.identity.entitlement.stub.*;version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.authenticator.stub.*;version="${carbon.platform.package.import.version.range}",
                             *; resolution:=optional

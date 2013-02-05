@@ -50,7 +50,7 @@ public class HumanTaskDAOConnectionImpl implements HumanTaskDAOConnection {
 
         creationContext.injectExpressionEvaluationContext(task);
         JPATaskUtil.processGenericHumanRoles(task, creationContext.getTaskConfiguration(),
-                                             creationContext.getPeopleQueryEvaluator());
+                                             creationContext.getPeopleQueryEvaluator(),creationContext.getEvalContext());
         JPATaskUtil.processPresentationElements(task, creationContext.getTaskConfiguration(),
                                                 creationContext);
         CommonTaskUtil.nominate(task, creationContext.getPeopleQueryEvaluator());

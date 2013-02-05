@@ -70,8 +70,6 @@ public class IdentityMgtConstants {
 
     public static  final String TENANT_DOMAIN = "tenantDomain";
 
-//    public static  final String CONFIRMATION_KEY = "confirmationKey";
-
     public static  final String SECRET_KEY = "secretKey";
 
     public static  final String USER_KEY = "userKey";
@@ -84,14 +82,6 @@ public class IdentityMgtConstants {
 
     public static  final String REDIRECT_PATH = "redirectPath";
 
-//    public static  final String EMAIL_TYPE_PASSWORD_RESET = "sendPasswordResetLink";
-//
-//    public static  final String EMAIL_TYPE_ACCOUNT_CONFORM = "sendConformationLink";
-//
-//    public static  final String EMAIL_TYPE_TEMPORARY_PASSWORD = "sendTemporaryPassword";
-//
-//    public static  final String EMAIL_TYPE_ACCOUNT_ID = "sendAccountId";
-
     public static  final String RECOVERY_TYPE_PASSWORD_RESET = "passwordReset";
 
     public static  final String RECOVERY_TYPE_ACCOUNT_ID = "accountId";
@@ -99,7 +89,9 @@ public class IdentityMgtConstants {
     public static  final String RECOVERY_TYPE_TEMPORARY_PASSWORD = "temporaryPassword";
 
     public static  final String RECOVERY_TYPE_ACCOUNT_CONFORM= "accountConformation";
-    
+
+    public static  final String NOTIFY_ACCOUNT_UNLOCK= "notifyAccountUnlock";
+
     public static  final String EMAIL_MANAGE_INTERNALLY = "emailSendingInternallyManaged";
 
     public static final String MAX_FAILED_ATTEMPT = "maxFailedLoginAttempt";
@@ -110,5 +102,7 @@ public class IdentityMgtConstants {
 
     public static final String DEFAULT_PASSWORD = "defaultPassword";
 
-    public static final int DEFAULT_MAX_FAILED_LOGIN_ATTEMPT = 100;    
+    public static final int DEFAULT_MAX_FAILED_LOGIN_ATTEMPT = 100;
+
+    public static final String CHALLENGES_SEPARATOR = "!";    
 }

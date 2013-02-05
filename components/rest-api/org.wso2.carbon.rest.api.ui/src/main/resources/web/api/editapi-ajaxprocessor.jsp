@@ -47,30 +47,42 @@
 	String apiName = request.getParameter("apiName");
 	String apiContext = request.getParameter("apiContext");
 	String filename = request.getParameter("filename");
+	String hostname = request.getParameter("hostname");
+	String port = request.getParameter("port");
+	
+	if(port == null || "".equals(port)){
+		port = "-1";
+	}
 	
 	List<ResourceData> resourceList = 
 			(ArrayList<ResourceData>)session.getAttribute("apiResources");
 	APIData apiData = new APIData();
 	apiData.setName(apiName);
 	apiData.setContext(apiContext);
+	apiData.setHost(hostname);
+	apiData.setPort(Integer.parseInt(port));
 	apiData.setFileName(filename);
 	ResourceData resources[] = new ResourceData[resourceList.size()];
 	
-	if(resourceList != null){
-		//Using a set so duplicates are ignored.
-		Set<String> urlPatterns = new HashSet<String>();
-		
-		for(ResourceData resource : resourceList){
-			//Assign whichever (uri-template or url-mapping) is not null nor empty.
-			String urlPattern = resource.getUriTemplate() == null || "".equals(resource.getUriTemplate()) ? 
-								resource.getUrlMapping() : resource.getUriTemplate();
-			
-			//If any other resource has the same url pattern.
-			if(!urlPatterns.add(urlPattern)){
-				response.setStatus(454);
-				return;
-			}
-		}	
+	if(resourceList != null) {
+
+        for (int i = 0; i < resourceList.size() - 1; ++i) {
+            ResourceData a = resourceList.get(i);
+            for (int j = i + 1; j < resourceList.size(); ++j) {
+                ResourceData b = resourceList.get(j);
+                if (a.getUrlMapping() != null &&
+                    a.getUrlMapping().equals(b.getUrlMapping())) {
+                    for (String aMethod : a.getMethods()) {
+                        for (String bMethod : b.getMethods()) {
+                            if (aMethod != null && aMethod.equals(bMethod)) {
+                                response.setStatus(454);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
 	}
 	
 	apiData.setResources(resourceList.toArray(resources));

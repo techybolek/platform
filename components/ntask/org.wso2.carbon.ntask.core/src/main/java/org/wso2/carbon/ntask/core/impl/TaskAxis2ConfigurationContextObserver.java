@@ -15,11 +15,6 @@
  */
 package org.wso2.carbon.ntask.core.impl;
 
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
-import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
@@ -28,23 +23,11 @@ import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
  * tenant arrives.
  */
 public class TaskAxis2ConfigurationContextObserver extends AbstractAxis2ConfigurationContextObserver {
-
-	private static final Log log = LogFactory.getLog(TaskAxis2ConfigurationContextObserver.class);
 	
 	private TaskService taskService;
 	
 	public TaskAxis2ConfigurationContextObserver(TaskService taskService) {
 		this.taskService = taskService;
-	}
-	
-	@Override
-	public void createdConfigurationContext(ConfigurationContext configContext) {
-		int tid = SuperTenantCarbonContext.getCurrentContext(configContext).getTenantId();
-		try {
-			this.getTaskService().newTenantArrived(tid);
-		} catch (TaskException e) {
-			log.error("Error in initializing tasks for tenant: " + tid, e);
-		}
 	}
 	
 	public TaskService getTaskService() {

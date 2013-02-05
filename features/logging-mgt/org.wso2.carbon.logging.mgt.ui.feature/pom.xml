@@ -22,12 +22,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>logging-mgt-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.logging.mgt.ui.feature</artifactId>
     <packaging>pom</packaging>
+    <version>4.0.5</version>
     <name>WSO2 Carbon - Logging Management UI Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for Front-end Logging Management functionality</description>
@@ -40,6 +42,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging.view.ui</artifactId>
+	    <version>${carbon.platform.patch.version.405}</version>
         </dependency>
     </dependencies>
 
@@ -58,7 +61,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.logging.mgt.ui</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
 			                <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:console</propertyDef>
@@ -69,7 +72,7 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.logging.admin.ui</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.logging.view.ui</bundleDef>
                                <bundleDef>org.wso2.carbon:org.wso2.carbon.logging.admin.stub:${wso2carbon.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.logging.view.stub:${wso2carbon.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.logging.view.stub:${carbon.platform.patch.version.403}</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.ui:${wso2carbon.version}</importFeatureDef>
@@ -80,5 +83,8 @@
             </plugin>
         </plugins>
     </build>
-
+    <properties>
+	<carbon.platform.patch.version.403>4.0.3</carbon.platform.patch.version.403>
+	<carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
+    </properties>
 </project>

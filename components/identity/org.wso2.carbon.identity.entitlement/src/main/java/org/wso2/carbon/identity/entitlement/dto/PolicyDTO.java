@@ -30,6 +30,8 @@ public class PolicyDTO {
     
     private boolean active;
 
+    private int promoteStatus;
+
     private String policyType;
 
     private String policyEditor;
@@ -44,11 +46,19 @@ public class PolicyDTO {
 
     private String neighborId;    
 
-    private AttributeValueDTO[] policyMetaData = new AttributeValueDTO[0];
+    private AttributeDTO[] policyMetaData = new AttributeDTO[0];
 
     private String[] policySetIdReferences = new String[0];
 
     private String[] policyIdReferences = new String[0];
+
+    public final static int PROMOTE = 0;
+
+    public final static int SYNC = 1;
+
+    public final static int PROMOTED = 2;
+
+    public final static int DEPROMOTED = 3;
 
     public String getPolicyId() {
         return policyId;
@@ -72,6 +82,14 @@ public class PolicyDTO {
 
     public boolean isActive() {
         return active;
+    }
+
+    public int getPromoteStatus() {
+        return promoteStatus;
+    }
+
+    public void setPromoteStatus(int promoteStatus) {
+        this.promoteStatus = promoteStatus;
     }
 
     public String getPolicyType() {
@@ -99,11 +117,11 @@ public class PolicyDTO {
                                                                 basicPolicyEditorMetaData.length);
     }
 
-    public AttributeValueDTO[] getPolicyMetaData() {
+    public AttributeDTO[] getPolicyMetaData() {
         return Arrays.copyOf(policyMetaData, policyMetaData.length);
     }
 
-    public void setPolicyMetaData(AttributeValueDTO[] policyMetaData) {
+    public void setPolicyMetaData(AttributeDTO[] policyMetaData) {
         this.policyMetaData = Arrays.copyOf(policyMetaData, policyMetaData.length);
     }
 

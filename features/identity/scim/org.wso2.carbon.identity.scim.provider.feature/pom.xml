@@ -6,11 +6,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>scim-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.identity.scim.provider.feature</artifactId>
+    <version>4.0.7</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - SCIM - Service Provider Feature</name>
     <url>http://wso2.org</url>
@@ -20,11 +22,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.scim.provider</artifactId>
+	    <version>4.0.7</version>
             <type>war</type>
         </dependency>
 	<dependency>
             <groupId>org.wso2.charon</groupId>
             <artifactId>org.wso2.charon.core</artifactId>
+            <version>1.0.1-wso2v1</version>
         </dependency>
     </dependencies>
 
@@ -56,6 +60,7 @@
                                 <artifactItem>
                                     <groupId>org.wso2.carbon</groupId>
                                     <artifactId>org.wso2.carbon.identity.scim.provider</artifactId>
+                                    <version>4.0.7</version>
                                     <type>war</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
@@ -117,13 +122,12 @@
                                 <bundleDef>org.wso2.charon:org.wso2.charon.core</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.claim.mgt:${wso2carbon.version}</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.identity.scim.common:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.claim.mgt:4.0.2</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.identity.scim.common:4.0.7</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.jaxws.webapp.mgt.server.feature:${wso2carbon.version}</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.webapp.mgt.server.feature:${wso2carbon.version}</includedFeatureDef>
-				<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.url.mapper.server.feature:${wso2carbon.version}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.jaxws.webapp.mgt.server.feature:4.0.2</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.webapp.mgt.server.feature:4.0.5</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

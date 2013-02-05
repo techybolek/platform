@@ -19,6 +19,7 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
 import org.wso2.carbon.dataservices.common.DBConstants;
 import org.wso2.carbon.dataservices.common.DBConstants.DBSFields;
 import org.wso2.carbon.dataservices.common.conf.DynamicAuthConfiguration;
@@ -395,6 +396,26 @@ public class Data extends DataServiceConfigurationElement{
                     }
                     dynamicAuthConfiguration.setEntries(dynamicUserList);
                     property.setValue(dynamicAuthConfiguration);
+                } else if(name.getAttributeValue().equals(DBConstants.CustomDataSource.DATA_SOURCE_PROPS)) {
+                	property.setName(name.getAttributeValue());
+                    Iterator<OMElement> nestedProperties = propertyEle.getChildrenWithName(new QName("property"));
+
+                     ArrayList<Property> nestedProperty = new ArrayList<Property>();
+                     while (nestedProperties.hasNext()){
+                    	 Property nestedProp = new Property();
+                         OMElement nestedPropertyEle = nestedProperties.next();
+                         OMAttribute secretAlias = nestedPropertyEle.getAttribute(new QName(DBConstants.SECUREVAULT_NAMESPACE,"secretAlias"));
+                         OMAttribute propertyName = nestedPropertyEle.getAttribute(new QName("name"));
+                         nestedProp.setName(propertyName.getAttributeValue());
+                         if (secretAlias != null) {
+                        	 nestedProp.setUseSecretAlias(true);
+                        	 nestedProp.setValue(secretAlias.getAttributeValue());
+                         } else {
+                        	 nestedProp.setValue(nestedPropertyEle.getText());
+                         }
+                         nestedProperty.add(nestedProp);
+                     }
+                    property.setValue(nestedProperty);
                 } else {
                 	property.setName(name.getAttributeValue());
                 	if (name.getAttributeValue().equals(DBConstants.RDBMS.PASSWORD) || 
@@ -477,6 +498,24 @@ public class Data extends DataServiceConfigurationElement{
 		return query;
 	}
 	
+	@SuppressWarnings ("unchecked")
+	private Query getExpQuery(OMElement queryEle) {
+		Query query = new Query();
+	    this.setCommonQueryProps(queryEle, query);
+		Iterator<OMElement> itr = queryEle.getChildrenWithName(new QName(DBSFields.EXPRESSION));
+		String sql = null;
+		while (itr.hasNext()) {
+			OMElement sqlQuery = itr.next();
+			if (sqlQuery.getAttributeValue(new QName(DBSFields.DIALECT)) == null) {
+				sql = sqlQuery.getText();
+			}
+		}
+		if (sql != null) {
+			query.setExpression(sql);
+		}
+		return query;
+	}
+	
 	private Query getSparqlQuery(OMElement queryEle) {
 		Query query = new Query();
 		this.setCommonQueryProps(queryEle, query);
@@ -554,6 +593,11 @@ public class Data extends DataServiceConfigurationElement{
 		if (xsdTypeAttr != null) {
 			xsdType = xsdTypeAttr.getAttributeValue();
 		}
+        OMAttribute optionalattr = attributeEle.getAttribute(new QName("optional"));
+        String optional = null;
+        if (optionalattr != null) {
+            optional = optionalattr.getAttributeValue();
+        }
 		OMAttribute exportattr = attributeEle.getAttribute(new QName("export"));
 		String export = null;
 		if (exportattr != null) {
@@ -565,10 +609,10 @@ public class Data extends DataServiceConfigurationElement{
 			exportType = exportTypeattr.getAttributeValue();
 		}
 		if (column != null) {
-			Attribute attribute = new Attribute("column",column, name, requiredRoles, xsdType, export, exportType, arrayName);		
+			Attribute attribute = new Attribute("column",column, name, requiredRoles, xsdType, export, exportType, arrayName, optional);		
 			complexEl.addAttribute(attribute);
 		} else if (queryParam != null) {
-			Attribute attribute = new Attribute("query-param",queryParam, name, requiredRoles, xsdType,  export, exportType, arrayName);
+			Attribute attribute = new Attribute("query-param",queryParam, name, requiredRoles, xsdType,  export, exportType, arrayName, optional);
 			complexEl.addAttribute(attribute);
 		}
 	}
@@ -604,6 +648,11 @@ public class Data extends DataServiceConfigurationElement{
 		if (xsdTypeattr != null) {
 			xsdType = xsdTypeattr.getAttributeValue();
 		}
+        OMAttribute optionalattr = elementEle.getAttribute(new QName("optional"));
+        String optional = null;
+        if (optionalattr != null) {
+            optional = optionalattr.getAttributeValue();
+        }
 		OMAttribute exportattr = elementEle.getAttribute(new QName("export"));
 		String export = null;
 		if (exportattr != null) {
@@ -626,11 +675,11 @@ public class Data extends DataServiceConfigurationElement{
 		}
 		if (column != null) {
 			Element element = new Element("column", column, name,
-					requiredRoles, xsdType, export, exportType, namespace, arrayName);
+					requiredRoles, xsdType, export, exportType, namespace, arrayName, optional);
 			complexEl.addElement(element);
 		} else if (queryParam != null) {
 			Element element = new Element("query-param", queryParam, name,
-					requiredRoles, xsdType, export, exportType, namespace, arrayName);
+					requiredRoles, xsdType, export, exportType, namespace, arrayName, optional);
 			complexEl.addElement(element);
 		} else {
 			RDFResource rdfResource = new RDFResource(resource, name, requiredRoles, xsdType);
@@ -745,6 +794,7 @@ public class Data extends DataServiceConfigurationElement{
 
 	private Query getQuery(OMElement queryEle) {
 		OMElement sqlEle = queryEle.getFirstChildWithName(new QName("sql"));
+		OMElement expEle = queryEle.getFirstChildWithName(new QName("expression"));
 		OMElement sparqlEle = queryEle.getFirstChildWithName(new QName("sparql"));
         OMElement excelEle = queryEle.getFirstChildWithName(new QName("excel"));
         OMElement gspreadEl = queryEle.getFirstChildWithName(new QName("gspread"));
@@ -761,7 +811,10 @@ public class Data extends DataServiceConfigurationElement{
         	query = this.getGSpreadQuery(queryEle);
         } else if (scraperEle != null) {
             query = this.getScraperVariable(queryEle);
-        } else { /* for other generic queries, CSV etc.. */
+        } else if (expEle != null) {
+        	query = this.getExpQuery(queryEle);
+        }
+        else { /* for other generic queries, CSV etc.. */
         	query = new Query();
         	this.setCommonQueryProps(queryEle, query);
         }
@@ -935,9 +988,9 @@ public class Data extends DataServiceConfigurationElement{
 		}
 		
 		/* xmlns:svns property for using securevault */
-		OMAttribute secureVaultNamespaceAttr = dsXml.getAttribute(new QName("xmlns:svns"));
-		if (secureVaultNamespaceAttr != null) {
-			setSecureVaultNamespace(secureVaultNamespaceAttr.getAttributeValue());
+		OMNamespace secureVaultNamespace = dsXml.findNamespaceURI("svns");
+		if (secureVaultNamespace != null) {
+			setSecureVaultNamespace(secureVaultNamespace.getNamespaceURI());
 		}
 		
 		/*populate password manager information */

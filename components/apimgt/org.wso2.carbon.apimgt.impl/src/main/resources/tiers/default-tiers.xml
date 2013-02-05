@@ -34,5 +34,16 @@
                 </throttle:Control>
             </wsp:Policy>
         </wsp:Policy>
+	<wsp:Policy>
+            <throttle:ID throttle:type="ROLE">Unauthenticated</throttle:ID>
+            <wsp:Policy>
+                <throttle:Control>
+                    <wsp:Policy>
+                        <throttle:MaximumCount>60</throttle:MaximumCount>
+                        <throttle:UnitTime>60000</throttle:UnitTime>
+                    </wsp:Policy>
+                </throttle:Control>
+            </wsp:Policy>
+        </wsp:Policy>
     </throttle:MediatorThrottleAssertion>
 </wsp:Policy>

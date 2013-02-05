@@ -83,7 +83,7 @@ public class Parser {
     private static void parseCreate(Queue<String> tokens,
                                     Queue<String> processedTokens) throws SQLException {
         if (!Constants.CREATE.equalsIgnoreCase(tokens.peek())) {
-             throw new SQLException("Syntax Error : 'CREATE' keyword is expected");
+            throw new SQLException("Syntax Error : 'CREATE' keyword is expected");
         }
         processedTokens.add(tokens.poll().toUpperCase());
         if (!Constants.SHEET.equalsIgnoreCase(tokens.peek())) {
@@ -95,6 +95,10 @@ public class Parser {
         }
         processedTokens.add(Constants.TABLE);
         processedTokens.add(tokens.poll());
+        if (tokens.isEmpty()) {
+            /* Handling the possibility where the user creates an empty table without columns */
+            return;
+        }
         if (!Constants.LEFT_BRACKET.equals(tokens.peek())) {
             throw new SQLException("Syntax Error : '(' is expected");
         }
@@ -148,6 +152,7 @@ public class Parser {
         }
     }
 
+    @SuppressWarnings("unused")
     private static void processSelectClause(Queue<String> tokens,
                                             Queue<String> processed) throws SQLException {
         StringBuilder sb;
@@ -508,6 +513,11 @@ public class Parser {
         }
         processed.add(tokens.poll().toUpperCase());
         processUpdateTargets(tokens, processed);
+        /* returns if no conditions exist upon the update */
+        if (tokens.isEmpty()) {
+            return;
+        }
+        /* processes WHERE clause */
         if (Constants.WHERE.equalsIgnoreCase(tokens.peek())) {
             processWhere(tokens, processed);
         }
@@ -521,18 +531,21 @@ public class Parser {
         }
         processed.add(Constants.COLUMN);
         processed.add(tokens.poll());
-//        if (!Constants.EQUAL.equalsIgnoreCase(tokens.peek())) {
-//            throw new SQLException("Syntax Error : '=' is expected");
-//        }
-        tokens.poll();
+        if (!Constants.EQUAL.equalsIgnoreCase(tokens.peek())) {
+            throw new SQLException("Syntax Error : '=' is expected");
+        }
+        processed.add(Constants.OPERATOR);
+        processed.add(tokens.poll());
         processColumnValue(tokens, processed);
-        if (Constants.WHERE.equalsIgnoreCase(tokens.peek())) {
-            //do nothing
-        } else if (Constants.COMMA.equalsIgnoreCase(tokens.peek())) {
+        if (tokens.isEmpty() || Constants.WHERE.equalsIgnoreCase(tokens.peek())) {
+            return;
+        }
+        if (Constants.COMMA.equals(tokens.peek())) {
+            /* drops COMMA */
             tokens.poll();
             processUpdateTargets(tokens, processed);
         } else {
-            throw new SQLException("Syntax Error");
+            throw new SQLException("Syntax Error : Unexpected token found");
         }
     }
 
@@ -544,14 +557,35 @@ public class Parser {
         } else if (Constants.SINGLE_QUOTATION.equalsIgnoreCase(tokens.peek())) {
             processed.add(Constants.PARAM_VALUE);
             processed.add(tokens.poll());
-            processed.add(tokens.poll());
+            while (!Constants.SINGLE_QUOTATION.equalsIgnoreCase(tokens.peek())) {
+                processed.add(tokens.poll());
+            }
             if (!Constants.SINGLE_QUOTATION.equalsIgnoreCase(tokens.peek())) {
                 throw new SQLException("Syntax Error : Single quote is expected");
             }
             processed.add(tokens.poll());
         } else if (ParserUtil.isStringLiteral(tokens.peek())) {
             processed.add(Constants.PARAM_VALUE);
-            processed.add(tokens.poll());
+            StringBuilder tmp = new StringBuilder();
+            while (!tokens.isEmpty() &&
+                    !ParserUtil.getConditionalOperatorList().contains(tokens.peek()) &&
+                    !Constants.RIGHT_BRACKET.equals(tokens.peek())) {
+                tmp.append(tokens.poll());
+            }
+            validateParamValue(tmp.toString());
+            processed.add(tmp.toString());
+        }
+    }
+
+    private static void validateParamValue(String s) throws SQLException {
+        try {
+            if (!s.contains(".")) {
+                Integer.parseInt(s);
+            } else {
+                Double.parseDouble(s);
+            }
+        } catch (Exception e) {
+            throw new SQLException("Invalid parameter value ('" + s + "') specified", e);
         }
     }
 

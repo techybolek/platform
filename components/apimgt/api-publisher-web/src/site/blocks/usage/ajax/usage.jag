@@ -6,6 +6,12 @@ include("/jagg/jagg.jag");
             action = request.getParameter("action"),
             site = require("/site/conf/site.json"),
             msg = require("/site/conf/ui-messages.jag");
+    if (jagg.getUser() == null) {
+        print({
+                  error:true,
+                  message:'AuthenticateError'
+              });
+    } else {
     if (action === "getProviderAPIVersionUsage") {
         mod = jagg.module("statistics");
         var provider =request.getParameter("provider");
@@ -84,6 +90,7 @@ include("/jagg/jagg.jag");
                   error:true,
                   message:msg.error.invalidAction(action)
               });
+    }
     }
 }());
 %>

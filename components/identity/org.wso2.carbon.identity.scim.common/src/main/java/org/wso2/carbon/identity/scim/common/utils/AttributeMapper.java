@@ -95,9 +95,14 @@ public class AttributeMapper {
                     Map<String, Attribute> subAttributes = ((ComplexAttribute) complexAttribute).getSubAttributes();
                     SimpleAttribute typeAttribute = (SimpleAttribute) subAttributes.get(
                             SCIMConstants.CommonSchemaConstants.TYPE);
-                    String typeValue = (String) typeAttribute.getValue();
+                    String valueAttriubuteURI;
                     //construct attribute URI
-                    String valueAttriubuteURI = attributeURI + "." + typeValue;
+                    if (typeAttribute != null) {
+                        String typeValue = (String) typeAttribute.getValue();
+                        valueAttriubuteURI = attributeURI + "." + typeValue;
+                    } else {
+                        valueAttriubuteURI = attributeURI;
+                    }
                     SimpleAttribute valueAttribute = (SimpleAttribute) subAttributes.get(
                             SCIMConstants.CommonSchemaConstants.VALUE);
                     if (valueAttribute != null) {
@@ -154,30 +159,33 @@ public class AttributeMapper {
                 //get attribute schema
                 AttributeSchema attributeSchema = getAttributeSchema(attributeNames[0], scimObjectType);
 
-                //either simple valued or multi-valued with simple attributes
-                if (isMultivalued(attributeNames[0], scimObjectType)) {
-                    //see whether multiple values are there
-                    String value = attributeEntry.getValue();
-                    String[] values = value.split(",");
-                    //create attribute
-                    MultiValuedAttribute multiValuedAttribute = new MultiValuedAttribute(
-                            attributeSchema.getName());
-                    //set values
-                    multiValuedAttribute.setValuesAsStrings(Arrays.asList(values));
-                    //set attribute in scim object
-                    DefaultAttributeFactory.createAttribute(attributeSchema, multiValuedAttribute);
-                    ((AbstractSCIMObject) scimObject).setAttribute(multiValuedAttribute);
+                if (attributeSchema != null) {
+                    //either simple valued or multi-valued with simple attributes
+                    if (isMultivalued(attributeNames[0], scimObjectType)) {
+                        //see whether multiple values are there
+                        String value = attributeEntry.getValue();
+                        String[] values = value.split(",");
+                        //create attribute
+                        MultiValuedAttribute multiValuedAttribute = new MultiValuedAttribute(
+                                attributeSchema.getName());
+                        //set values
+                        multiValuedAttribute.setValuesAsStrings(Arrays.asList(values));
+                        //set attribute in scim object
+                        DefaultAttributeFactory.createAttribute(attributeSchema, multiValuedAttribute);
+                        ((AbstractSCIMObject) scimObject).setAttribute(multiValuedAttribute);
 
-                } else {
-                    //convert attribute to relevant type
-                    Object attributeValueObject = AttributeUtil.getAttributeValueFromString(
-                            attributeEntry.getValue(), attributeSchema.getType());
+                    } else {
+                        //convert attribute to relevant type
+                        Object attributeValueObject = AttributeUtil.getAttributeValueFromString(
+                                attributeEntry.getValue(), attributeSchema.getType());
 
-                    //create attribute
-                    SimpleAttribute simpleAttribute = new SimpleAttribute(attributeNames[0], attributeValueObject);
-                    DefaultAttributeFactory.createAttribute(attributeSchema, simpleAttribute);
-                    //set attribute in the SCIM object
-                    ((AbstractSCIMObject) scimObject).setAttribute(simpleAttribute);
+                        //create attribute
+                        SimpleAttribute simpleAttribute = new SimpleAttribute(attributeNames[0],
+                                                                              attributeValueObject);
+                        DefaultAttributeFactory.createAttribute(attributeSchema, simpleAttribute);
+                        //set attribute in the SCIM object
+                        ((AbstractSCIMObject) scimObject).setAttribute(simpleAttribute);
+                    }
                 }
             } else if (attributeNames.length == 2) {
                 //get parent attribute name

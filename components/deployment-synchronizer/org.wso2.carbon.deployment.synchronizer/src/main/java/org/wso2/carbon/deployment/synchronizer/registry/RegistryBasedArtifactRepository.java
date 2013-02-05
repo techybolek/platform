@@ -21,8 +21,8 @@ package org.wso2.carbon.deployment.synchronizer.registry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.deployment.synchronizer.ArtifactRepository;
-import org.wso2.carbon.deployment.synchronizer.internal.DeploymentSynchronizerConstants;
 import org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException;
+import org.wso2.carbon.deployment.synchronizer.internal.DeploymentSynchronizerConstants;
 import org.wso2.carbon.deployment.synchronizer.internal.util.RepositoryConfigParameter;
 import org.wso2.carbon.deployment.synchronizer.internal.util.ServiceReferenceHolder;
 import org.wso2.carbon.registry.core.Collection;
@@ -31,6 +31,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.synchronization.RegistrySynchronizer;
 import org.wso2.carbon.registry.synchronization.SynchronizationException;
+import org.wso2.carbon.registry.synchronization.Utils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.List;
@@ -106,12 +107,10 @@ public class RegistryBasedArtifactRepository implements ArtifactRepository {
             log.debug("Committing artifacts at " + filePath + " to the collection at " +
                     registryPath);
         }
-
         try {
-            RegistrySynchronizer.checkIn(registry, filePath, false);
-            // TODO: RegistrySynchronizer.checkIn should return true/false to indicate whether a checkin
-            // was performed
-            return true;
+            Utils.addResource(filePath);
+            Utils.setResourcesDelete(filePath);
+            return RegistrySynchronizer.checkIn(registry, filePath, false);
         } catch (SynchronizationException e) {
             handleException("Error while committing artifacts to the registry", e);
         }
@@ -123,20 +122,17 @@ public class RegistryBasedArtifactRepository implements ArtifactRepository {
             log.debug("Checking out artifacts from " + registryPath + " to the file system " +
                     "at " + filePath);
         }
-
+        boolean succeed = false;
         try {
             if (RegistrySynchronizer.isCheckedOut(filePath)) {
-                RegistrySynchronizer.update(registry, filePath, false);
+                succeed =  RegistrySynchronizer.update(registry, filePath, false);
             } else {
-                RegistrySynchronizer.checkOut(registry, filePath, registryPath);
+                succeed =  RegistrySynchronizer.checkOut(registry, filePath, registryPath);
             }
-            // TODO: RegistrySynchronizer.update & RegistrySynchronizer.checkOut should return true
-            // if files were actually checked out
-            return true;
         } catch (SynchronizationException e) {
             handleException("Error while updating artifacts in the file system from the registry", e);
         }
-        return false;
+        return succeed;
     }
 
     public void initAutoCheckout(boolean useEventing) throws DeploymentSynchronizerException {
@@ -177,6 +173,17 @@ public class RegistryBasedArtifactRepository implements ArtifactRepository {
         //Returning null since the Registry Based Artifact Repository does not have any specific
         //configuration parameters.
         return null;
+    }
+
+    @Override
+    public boolean checkout(String filePath, int depth)
+            throws DeploymentSynchronizerException {
+        throw new DeploymentSynchronizerException("Not implemented yet.");
+    }
+
+    @Override
+    public boolean update(String rootPath, String filePath, int depth) throws DeploymentSynchronizerException {
+        throw new DeploymentSynchronizerException("Not implemented yet.");
     }
 
     @Override

@@ -27,8 +27,8 @@ import org.apache.catalina.LifecycleException;
 import org.apache.catalina.core.StandardHost;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.ApplicationContext;
 import org.wso2.carbon.tomcat.api.CarbonTomcatService;
+import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 import org.wso2.carbon.tomcat.ext.valves.CarbonContextCreatorValve;
 import org.wso2.carbon.tomcat.ext.valves.CompositeValve;
 import org.wso2.carbon.url.mapper.clustermessage.commands.add.ServiceMappingAddRequest;
@@ -148,7 +148,7 @@ public class VirtualHostClusterUtil {
         }catch (LifecycleException e) {
             log.error("error while removing host from tomcat", e);
         }
-        ApplicationContext.getCurrentApplicationContext().removeUrlMappingMap(
+        URLMappingHolder.getInstance().removeUrlMappingMap(
                 host.getName());
         log.info("Unloaded host from the engine: " + host);
 

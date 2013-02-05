@@ -1,4 +1,4 @@
-<version number="${mashup_version}" build-date="${release_date}" nightly="${is_nightly}">
+<version number="${product.version}" build-date="${release_date}" nightly="${is_nightly}">
 	<!--
 	 ~ Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 	 ~

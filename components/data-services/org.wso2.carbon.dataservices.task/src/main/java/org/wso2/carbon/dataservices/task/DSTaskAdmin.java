@@ -50,7 +50,6 @@ public class DSTaskAdmin extends AbstractAdmin {
             }
             return result.toArray(new String[result.size()]);
         } catch (Exception e) {
-            log.error(e);
             throw new AxisFault("Error in getting task names: " + e.getMessage(), e);
         }
     }
@@ -61,7 +60,6 @@ public class DSTaskAdmin extends AbstractAdmin {
                     DSTaskConstants.DATA_SERVICE_TASK_TYPE);
             return DSTaskUtils.convert(tm.getTask(taskName));
         } catch (Exception e) {
-            log.error(e);
             throw new AxisFault("Error getting task info for task: " + taskName, e);
         }
     }
@@ -95,7 +93,6 @@ public class DSTaskAdmin extends AbstractAdmin {
             tm.registerTask(taskInfo);
             tm.rescheduleTask(taskInfo.getName());
         } catch (Exception e) {
-            log.error(e);
             throw new AxisFault("Error rescheduling task: " + dsTaskInfo.getName(), e);
         }
         return true;
@@ -118,7 +115,6 @@ public class DSTaskAdmin extends AbstractAdmin {
                     DSTaskConstants.DATA_SERVICE_TASK_TYPE);
             return tm.isTaskScheduled(taskName);
         } catch (Exception e) {
-            log.error(e);
             throw new AxisFault("Error checking task scheduled status: " + taskName, e);
         }
     }

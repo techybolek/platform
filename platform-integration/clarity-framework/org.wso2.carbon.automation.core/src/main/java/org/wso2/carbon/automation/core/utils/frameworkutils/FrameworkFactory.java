@@ -1,6 +1,7 @@
 package org.wso2.carbon.automation.core.utils.frameworkutils;
 
 import org.wso2.carbon.automation.core.ProductConstant;
+import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.AMSetter;
 import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.AsSetter;
 import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.Axis2Setter;
 import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.BamSetter;
@@ -16,6 +17,7 @@ import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.IsSet
 import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.ManagerSetter;
 import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.MbSetter;
 import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.MsSetter;
+import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.SsSetter;
 
 public class FrameworkFactory {
     static FrameworkProperties properties = new FrameworkProperties();
@@ -29,6 +31,7 @@ public class FrameworkFactory {
             properties.setRavana(bpsSetter.getRavana());
             properties.setSelenium(bpsSetter.getSelenium());
             properties.setProductVariables(bpsSetter.getProductVariables());
+            properties.setWorkerVariables(bpsSetter.getWorkerVariables());
         }
 
         if (product.equals(ProductConstant.AXIS2_SERVER_NAME)) {
@@ -41,7 +44,6 @@ public class FrameworkFactory {
             properties.setProductVariables(axis2Setter.getProductVariables());
         }
 
-
         if (product.equals(ProductConstant.APP_SERVER_NAME)) {
 
             AsSetter asSetter = new AsSetter();
@@ -51,6 +53,19 @@ public class FrameworkFactory {
             properties.setRavana(asSetter.getRavana());
             properties.setSelenium(asSetter.getSelenium());
             properties.setProductVariables(asSetter.getProductVariables());
+            properties.setWorkerVariables(asSetter.getWorkerVariables());
+        }
+
+        if (product.equals(ProductConstant.AM_SERVER_NAME)) {
+
+            AMSetter amSetter = new AMSetter();
+            properties.setDataSource(amSetter.getDataSource());
+            properties.setEnvironmentSettings(amSetter.getEnvironmentSettings());
+            properties.setEnvironmentVariables(amSetter.getEnvironmentVariables());
+            properties.setRavana(amSetter.getRavana());
+            properties.setSelenium(amSetter.getSelenium());
+            properties.setProductVariables(amSetter.getProductVariables());
+            properties.setWorkerVariables(amSetter.getWorkerVariables());
         }
 
 
@@ -62,6 +77,7 @@ public class FrameworkFactory {
             properties.setRavana(esbSetter.getRavana());
             properties.setSelenium(esbSetter.getSelenium());
             properties.setProductVariables(esbSetter.getProductVariables());
+            properties.setWorkerVariables(esbSetter.getWorkerVariables());
         }
 
 
@@ -73,8 +89,19 @@ public class FrameworkFactory {
             properties.setRavana(dssSetter.getRavana());
             properties.setSelenium(dssSetter.getSelenium());
             properties.setProductVariables(dssSetter.getProductVariables());
+            properties.setWorkerVariables(dssSetter.getWorkerVariables());
         }
 
+        if (product.equals(ProductConstant.SS_SERVER_NAME)) {
+            SsSetter ssSetter = new SsSetter();
+            properties.setDataSource(ssSetter.getDataSource());
+            properties.setEnvironmentSettings(ssSetter.getEnvironmentSettings());
+            properties.setEnvironmentVariables(ssSetter.getEnvironmentVariables());
+            properties.setRavana(ssSetter.getRavana());
+            properties.setSelenium(ssSetter.getSelenium());
+            properties.setProductVariables(ssSetter.getProductVariables());
+            properties.setWorkerVariables(ssSetter.getWorkerVariables());
+        }
 
         if (product.equals(ProductConstant.IS_SERVER_NAME)) {
             IsSetter isSetter = new IsSetter();
@@ -84,6 +111,7 @@ public class FrameworkFactory {
             properties.setRavana(isSetter.getRavana());
             properties.setSelenium(isSetter.getSelenium());
             properties.setProductVariables(isSetter.getProductVariables());
+            properties.setWorkerVariables(isSetter.getWorkerVariables());
         }
 
         if (product.equals(ProductConstant.BRS_SERVER_NAME)) {
@@ -94,6 +122,7 @@ public class FrameworkFactory {
             properties.setRavana(brsSetter.getRavana());
             properties.setSelenium(brsSetter.getSelenium());
             properties.setProductVariables(brsSetter.getProductVariables());
+            properties.setWorkerVariables(brsSetter.getWorkerVariables());
         }
 
         if (product.equals(ProductConstant.CEP_SERVER_NAME)) {
@@ -104,6 +133,7 @@ public class FrameworkFactory {
             properties.setRavana(cepSetter.getRavana());
             properties.setSelenium(cepSetter.getSelenium());
             properties.setProductVariables(cepSetter.getProductVariables());
+            properties.setWorkerVariables(cepSetter.getWorkerVariables());
         }
 
         if (product.equals(ProductConstant.GREG_SERVER_NAME)) {
@@ -114,6 +144,7 @@ public class FrameworkFactory {
             properties.setRavana(gregSetter.getRavana());
             properties.setSelenium(gregSetter.getSelenium());
             properties.setProductVariables(gregSetter.getProductVariables());
+            properties.setWorkerVariables(gregSetter.getWorkerVariables());
         }
 
         if (product.equals(ProductConstant.GS_SERVER_NAME)) {
@@ -124,6 +155,7 @@ public class FrameworkFactory {
             properties.setRavana(gsSetter.getRavana());
             properties.setSelenium(gsSetter.getSelenium());
             properties.setProductVariables(gsSetter.getProductVariables());
+            properties.setWorkerVariables(gsSetter.getWorkerVariables());
         }
 
         if (product.equals(ProductConstant.MB_SERVER_NAME)) {
@@ -134,6 +166,7 @@ public class FrameworkFactory {
             properties.setRavana(mbSetter.getRavana());
             properties.setSelenium(mbSetter.getSelenium());
             properties.setProductVariables(mbSetter.getProductVariables());
+            properties.setWorkerVariables(mbSetter.getWorkerVariables());
         }
 
         if (product.equals(ProductConstant.MS_SERVER_NAME)) {
@@ -144,6 +177,7 @@ public class FrameworkFactory {
             properties.setRavana(msSetter.getRavana());
             properties.setSelenium(msSetter.getSelenium());
             properties.setProductVariables(msSetter.getProductVariables());
+            properties.setWorkerVariables(msSetter.getWorkerVariables());
         }
 
         if (product.equals(ProductConstant.BAM_SERVER_NAME)) {
@@ -154,6 +188,7 @@ public class FrameworkFactory {
             properties.setRavana(bamSetter.getRavana());
             properties.setSelenium(bamSetter.getSelenium());
             properties.setProductVariables(bamSetter.getProductVariables());
+            properties.setWorkerVariables(bamSetter.getWorkerVariables());
         }
 
 
@@ -165,6 +200,7 @@ public class FrameworkFactory {
             properties.setRavana(manSetter.getRavana());
             properties.setSelenium(manSetter.getSelenium());
             properties.setProductVariables(manSetter.getProductVariables());
+            properties.setWorkerVariables(manSetter.getWorkerVariables());
         }
 
         if (product.equals(ProductConstant.CLUSTER)) {

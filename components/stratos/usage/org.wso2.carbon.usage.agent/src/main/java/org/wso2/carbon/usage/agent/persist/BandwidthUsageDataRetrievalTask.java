@@ -18,7 +18,11 @@ package org.wso2.carbon.usage.agent.persist;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.core.init.CarbonServerManager;
 import org.wso2.carbon.stratos.common.constants.UsageConstants;
+import org.wso2.carbon.stratos.common.util.StratosConfiguration;
 import org.wso2.carbon.usage.agent.beans.BandwidthUsage;
 import org.wso2.carbon.usage.agent.config.UsageAgentConfiguration;
 import org.wso2.carbon.tomcat.ext.transport.statistics.TransportStatisticsContainer;
@@ -26,6 +30,7 @@ import org.wso2.carbon.tomcat.ext.transport.statistics.TransportStatisticsEntry;
 import org.wso2.carbon.usage.agent.util.UsageAgentConstants;
 import org.wso2.carbon.usage.agent.util.Util;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import java.util.Queue;
 
@@ -35,9 +40,18 @@ public class BandwidthUsageDataRetrievalTask implements Runnable {
     private Queue<TransportStatisticsEntry> transportStats;
     private UsageAgentConfiguration configuration;
 
+    //This will be decided based on whether a BAM Server URL is provided or not
+    private boolean isBamAvailable=false;
+
     public BandwidthUsageDataRetrievalTask(UsageAgentConfiguration configuration) {
         transportStats = TransportStatisticsContainer.getTransportStatistics();
         this.configuration = configuration;
+
+        //Checking for the BAM Server URL
+        String bamServerUrl = ServerConfiguration.getInstance().getFirstProperty("BamServerURL");
+        if(bamServerUrl != null){
+            this.isBamAvailable = true;
+        }
     }
 
     public void run() {
@@ -49,6 +63,10 @@ public class BandwidthUsageDataRetrievalTask implements Runnable {
             for (int i = 0; i < configuration.getUsageTasksNumberOfRecordsPerExecution() && !transportStats.isEmpty(); i++) {
                 TransportStatisticsEntry entry = transportStats.remove();
                 try {
+                    if(!isBamAvailable){
+                        return;
+                    }
+
                     int tenantId = getTenantID(entry.getTenantName());
                     //if the tenant does not exist, no need and no way of updating the usage data
                     //therefore ignore it

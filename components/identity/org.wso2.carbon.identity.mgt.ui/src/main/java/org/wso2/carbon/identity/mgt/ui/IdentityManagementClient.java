@@ -28,7 +28,6 @@ import org.wso2.carbon.captcha.mgt.beans.xsd.CaptchaInfoBean;
 import org.wso2.carbon.identity.mgt.stub.IdentityManagementServiceStub;
 import org.wso2.carbon.identity.mgt.stub.beans.UserMgtBean;
 import org.wso2.carbon.identity.mgt.stub.beans.VerificationBean;
-import org.wso2.carbon.identity.mgt.stub.dto.ChallengeQuestionDTO;
 import org.wso2.carbon.identity.mgt.stub.dto.UserChallengesDTO;
 
 /**
@@ -36,10 +35,8 @@ import org.wso2.carbon.identity.mgt.stub.dto.UserChallengesDTO;
  */
 public class IdentityManagementClient {
 
-    public static final String CHALLENGE_QUESTION = "challenge.question";
-
     public static final String USER_CHALLENGE_QUESTION = "user.challenge.question";
-
+    
     protected IdentityManagementServiceStub stub = null;
        
     protected static Log log = LogFactory.getLog(IdentityManagementClient.class);
@@ -65,29 +62,7 @@ public class IdentityManagementClient {
             handleException(e.getMessage(), e);
         }
     }
-    
-    public ChallengeQuestionDTO[] getChallengeQuestions() throws AxisFault {
-
-        try {
-            return stub.getAllChallengeQuestions();
-        } catch (Exception e) {
-            handleException(e.getMessage(), e);
-        }
-
-        return null;
-    }
-
-
-    public void setChallengeQuestions(ChallengeQuestionDTO[] challengeQuestionDTOs)
-                                                                        throws AxisFault {
-        try {
-            stub.setChallengeQuestions(challengeQuestionDTOs);
-        } catch (Exception e) {
-            handleException(e.getMessage(), e);
-        }
-    }
-
-    
+        
     public CaptchaInfoBean generateRandomCaptcha() throws AxisFault {
         
         try {

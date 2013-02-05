@@ -43,7 +43,7 @@ public class Authenticator {
     }
 
     private boolean authenticate() throws Exception {
-        boolean isAuthenticated = false;
+        boolean isAuthenticated;
         try {
             THttpClient client = new THttpClient(serverUrl);
             TProtocol protocol = new TCompactProtocol(client);
@@ -64,10 +64,6 @@ public class Authenticator {
             authenticate();
         }
         return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
     }
 
 }

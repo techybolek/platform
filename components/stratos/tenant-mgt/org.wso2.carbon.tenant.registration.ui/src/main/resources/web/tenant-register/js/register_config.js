@@ -64,6 +64,8 @@ function addTenant(isPublicCloud) {
     }
     if (reason != "") {
         CARBON.showWarningDialog(reason);
+        document.getElementbyId("submit-button").disabled = false;
+        document.getElementById('waitMessage').style.display = 'none';
         return;
     }
     addTenantForm.submit();

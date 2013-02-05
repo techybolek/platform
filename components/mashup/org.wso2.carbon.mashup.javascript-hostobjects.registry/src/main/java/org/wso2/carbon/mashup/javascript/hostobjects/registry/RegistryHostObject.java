@@ -22,7 +22,7 @@ import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.mozilla.javascript.*;
 import org.wso2.carbon.CarbonException;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mashup.utils.MashupConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -57,7 +57,7 @@ public class RegistryHostObject extends ScriptableObject {
             }
             String mashupAuthor = (String) axisService.getParameter(
                     MashupConstants.MASHUP_AUTHOR).getValue();
-            int tenantId = SuperTenantCarbonContext.getCurrentContext(axisConfig).getTenantId();
+            int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfig).getTenantId();
             registryHostObject.registry = RegistryHostObjectContext.getUserRegistry(mashupAuthor, tenantId);
             return registryHostObject;
         } else {

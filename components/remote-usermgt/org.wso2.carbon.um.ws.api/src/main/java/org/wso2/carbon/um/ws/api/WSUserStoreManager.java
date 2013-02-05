@@ -43,6 +43,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.um.ws.api.stub.ClaimValue;
+import org.wso2.carbon.um.ws.api.stub.PermissionDTO;
 import org.wso2.carbon.um.ws.api.stub.RemoteUserStoreManagerServiceStub;
 import org.wso2.carbon.user.core.Permission;
 import org.wso2.carbon.user.core.UserStoreException;
@@ -257,9 +258,8 @@ public class WSUserStoreManager implements UserStoreManager {
     public Map<String, String> getUserClaimValues(String userName, String[] claims,
             String profileName) throws UserStoreException {
         try {
-            // return
-            // WSRealmUtil.convertClaimValuesToMap(stub.getUserClaimValues(userName,
-            // claims, profileName));
+            return WSRealmUtil.
+                convertClaimValuesToMap(stub.getUserClaimValuesForClaims(userName, claims, profileName));
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }
@@ -407,13 +407,13 @@ public class WSUserStoreManager implements UserStoreManager {
         return true;
     }
 
-    private org.wso2.carbon.um.ws.api.stub.Permission[] convertPermission(Permission[] permissions) {
+    private PermissionDTO[] convertPermission(Permission[] permissions) {
         if (permissions == null) {
             return null;
         }
-        org.wso2.carbon.um.ws.api.stub.Permission[] perms = new org.wso2.carbon.um.ws.api.stub.Permission[permissions.length];
+        PermissionDTO[] perms = new PermissionDTO[permissions.length];
         for (int i = 0; i < permissions.length; i++) {
-            perms[i] = new org.wso2.carbon.um.ws.api.stub.Permission();
+            perms[i] = new org.wso2.carbon.um.ws.api.stub.PermissionDTO();
             perms[i].setAction(permissions[i].getAction());
             perms[i].setResourceId(permissions[i].getResourceId());
         }
@@ -463,8 +463,13 @@ public class WSUserStoreManager implements UserStoreManager {
     @Override
     public String[] getUserList(String claim, String claimValue, String profileName)
                                                                         throws UserStoreException {
-        // TODO
-        return new String[0];
+        try {
+            return stub.getUserList(claim, claimValue, profileName);
+        } catch (Exception e) {
+            handleException(e.getMessage(), e);
+        }
+        
+        return null;
     }
 
 

@@ -12,7 +12,7 @@ public class InputXMLMappingDTO {
     /**
      * Name of the to be converted event class
      */
-    protected String mappingClass ;
+    protected String queryEventType;
 
     /**
      * Definition of the XPaths to be used (Prefix Namespace mapping)
@@ -23,7 +23,7 @@ public class InputXMLMappingDTO {
     /**
      * Properties of the mapping
      * */
-    private XMLPropertyDTO[] XMLPropertyDTOs;
+    private InputXMLPropertyDTO[] InputXMLPropertyDTOs;
 
 
     public String getStream() {
@@ -34,12 +34,12 @@ public class InputXMLMappingDTO {
         this.stream = stream;
     }
 
-    public XMLPropertyDTO[] getProperties() {
-        return XMLPropertyDTOs;
+    public InputXMLPropertyDTO[] getProperties() {
+        return InputXMLPropertyDTOs;
     }
 
-    public void setProperties(XMLPropertyDTO[] XMLPropertyDTOs) {
-        this.XMLPropertyDTOs = XMLPropertyDTOs;
+    public void setProperties(InputXMLPropertyDTO[] InputXMLPropertyDTOs) {
+        this.InputXMLPropertyDTOs = InputXMLPropertyDTOs;
     }
 
     public void setXpathDefinition(XpathDefinitionDTO[] xpathDefinitionDTOs){
@@ -49,11 +49,11 @@ public class InputXMLMappingDTO {
         return xpathDefinitionDTOs;
     }
 
-    public String getMappingClass() {
-        return mappingClass;
+    public String getQueryEventType() {
+        return queryEventType;
     }
 
-    public void setMappingClass(String mappingClass) {
-        this.mappingClass = mappingClass;
+    public void setQueryEventType(String queryEventType) {
+        this.queryEventType = queryEventType;
     }
 }

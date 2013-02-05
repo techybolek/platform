@@ -85,8 +85,12 @@ public class Property extends DataServiceConfigurationElement{
                     propEl.addChild(propNestedEl);
                 }
             } else if (this.getValue() instanceof String) {
-                propEl.addAttribute("name", this.getName(), null);
-                propEl.setText((String) this.getValue());
+            	if (((String)this.getValue()).trim().length() != 0) {
+            		propEl.addAttribute("name", this.getName(), null);
+            		propEl.setText((String) this.getValue());
+            	} else {
+            		return null;
+            	}
             } else if (this.getValue() instanceof DynamicAuthConfiguration) {
                 propEl.addAttribute("name", this.getName(), null);
                 OMElement dynamicUserAuthConfigEle = fac.createOMElement("configuration", null);

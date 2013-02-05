@@ -22,11 +22,11 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>dashboard-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
-
+        <version>4.0.0</version>
+       <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.5</version>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.dashboard.ui.feature</artifactId>
     <packaging>pom</packaging>
@@ -40,20 +40,20 @@
             <artifactId>shindig</artifactId>
             <version>${shindig.platform.patch.version}</version>
         </dependency>
-    <dependency>
+    <!--dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.core</artifactId>
-            <version>4.0.0-SNAPSHOT</version>
-        </dependency>
+            <version>4.0.1</version>
+        </dependency-->
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.dashboard.common</artifactId>
-            <version>${carbon.platform.version}</version>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.dashboard.ui</artifactId>
-            <version>4.0.0-SNAPSHOT</version>
+            <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -100,7 +100,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.dashboard.ui</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:console
@@ -111,9 +111,9 @@
                             </adviceFile>
                             <bundles>
                             	<bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.stub</bundleDef>
-                            	<bundleDef>org.wso2.carbon:org.wso2.carbon.registry.core</bundleDef>
+                            	<!--bundleDef>org.wso2.carbon:org.wso2.carbon.registry.core</bundleDef-->
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.common</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.ui</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.ui:4.0.5</bundleDef>
                                 <bundleDef>org.apache.shindig.wso2:shindig</bundleDef>
                                 <bundleDef>joda-time.wso2:joda-time</bundleDef>
                                 <bundleDef>jdom.wso2:jdom</bundleDef>
@@ -135,8 +135,8 @@
 
     <properties>
         <carbon.platform.patch.version.321>3.2.1</carbon.platform.patch.version.321>
-        <carbon.platform.version>4.0.0-SNAPSHOT</carbon.platform.version>
-        <shindig.platform.patch.version>1.1.0.wso2v6</shindig.platform.patch.version>
+        <carbon.platform.version>4.0.0</carbon.platform.version>
+        <shindig.platform.patch.version>1.1.0.wso2v7</shindig.platform.patch.version>
     </properties>
 
 </project>

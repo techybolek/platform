@@ -20,9 +20,9 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.context.ApplicationContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.tomcat.api.CarbonTomcatService;
+import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 import org.wso2.carbon.tomcat.ext.valves.CarbonTomcatValve;
 import org.wso2.carbon.tomcat.ext.valves.TomcatValveContainer;
 import org.wso2.carbon.url.mapper.HotUpdateService;
@@ -35,6 +35,7 @@ import org.wso2.carbon.url.mapper.internal.util.HostUtil;
 import org.wso2.carbon.url.mapper.internal.util.MappingConfigManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
@@ -108,7 +109,7 @@ public class UrlMapperServiceComponent {
                 if(mapping.getTenantDomain().
                         equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                     if(mapping.isServiceMapping()) {
-                        ApplicationContext.getCurrentApplicationContext().
+                        URLMappingHolder.getInstance().
                                 putUrlMappingForApplication(mapping.getMappingName(), mapping.getUrl());
                     }
                 }
@@ -119,6 +120,14 @@ public class UrlMapperServiceComponent {
 
     protected void deactivate(ComponentContext componentContext) {
         serviceRegistration.unregister();
+    }
+
+    protected void setConfigurationContextService(ConfigurationContextService contextService) {
+        DataHolder.getInstance().setServerConfigContext(contextService.getServerConfigContext());
+    }
+
+    protected void unsetConfigurationContextService(ConfigurationContextService contextService) {
+        DataHolder.getInstance().setServerConfigContext(null);
     }
 
     protected void setCarbonTomcatService(CarbonTomcatService carbonTomcatService) {

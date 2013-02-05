@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -18,8 +18,13 @@
 
 package org.wso2.carbon.identity.oauth.ui.client;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.oauth.ui.internal.OAuthUIServiceComponentHolder;
+import org.wso2.carbon.identity.oauth2.OAuth2Service;
+import org.wso2.carbon.identity.oauth2.ResponseHeader;
 import org.wso2.carbon.identity.oauth2.stub.OAuth2ServiceStub;
 import org.wso2.carbon.identity.oauth2.stub.dto.*;
 
@@ -28,26 +33,169 @@ import java.rmi.RemoteException;
 public class OAuth2ServiceClient {
 
     private OAuth2ServiceStub stub;
+    private OAuth2Service oauth2Service;
+    private boolean wsMode;
+
 
     public OAuth2ServiceClient(String backendServerURL, ConfigurationContext configCtx)
             throws AxisFault {
-        String serviceURL = backendServerURL + "OAuth2Service";
-        stub = new OAuth2ServiceStub(configCtx, serviceURL);
+
+        OMElement wsModeOM;
+        try {
+            wsMode = Boolean.parseBoolean(IdentityUtil.getProperty("SeparateBackEnd"));
+        } catch (Exception e) {
+            //ignore exception this means that WSMode element is not present
+        }
+
+        if (!wsMode) {
+            oauth2Service = OAuthUIServiceComponentHolder.getInstance().getOAuth2Service();
+        }
+        if (wsMode) {
+            String serviceURL = backendServerURL + "OAuth2Service";
+            stub = new OAuth2ServiceStub(configCtx, serviceURL);
+        }
+
     }
 
     public OAuth2AuthorizeRespDTO authorize(OAuth2AuthorizeReqDTO authorizeReqDTO)
             throws RemoteException {
-        return stub.authorize(authorizeReqDTO);
+        if (wsMode) {
+            return stub.authorize(authorizeReqDTO);
+        }
+        return _authorize(authorizeReqDTO);
     }
-    
+
+
+    private OAuth2AuthorizeRespDTO _authorize(OAuth2AuthorizeReqDTO authorizeReqDTO)
+            throws RemoteException {
+        org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeReqDTO oauthDTO = new org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeReqDTO();
+
+        oauthDTO.setCallbackUrl(authorizeReqDTO.getCallbackUrl());
+        oauthDTO.setConsumerKey(authorizeReqDTO.getConsumerKey());
+        oauthDTO.setPassword(authorizeReqDTO.getPassword());
+        oauthDTO.setResponseType(authorizeReqDTO.getResponseType());
+        oauthDTO.setScopes(authorizeReqDTO.getScopes());
+        oauthDTO.setUsername(authorizeReqDTO.getUsername());
+
+        org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeRespDTO resp = oauth2Service.authorize(oauthDTO);
+
+        OAuth2AuthorizeRespDTO returnDTO = new OAuth2AuthorizeRespDTO();
+
+        returnDTO.setAccessToken(resp.getAccessToken());
+        returnDTO.setAuthenticated(resp.isAuthenticated());
+        returnDTO.setAuthorizationCode(resp.getAuthorizationCode());
+        returnDTO.setAuthorized(resp.isAuthorized());
+        returnDTO.setCallbackURI(resp.getCallbackURI());
+        returnDTO.setErrorCode(resp.getErrorCode());
+        returnDTO.setErrorMsg(resp.getErrorMsg());
+        returnDTO.setScope(resp.getScope());
+        returnDTO.setValidityPeriod(resp.getValidityPeriod());
+
+        return returnDTO;
+    }
+
     public OAuth2ClientValidationResponseDTO validateClient(String clientId, String callbackURI)
             throws RemoteException {
-        return stub.validateClientInfo(clientId, callbackURI);
+        if (wsMode) {
+            return stub.validateClientInfo(clientId, callbackURI);
+        }
+        return _validateClient(clientId, callbackURI);
     }
+
+
+    private OAuth2ClientValidationResponseDTO _validateClient(String clientId, String callbackURI)
+            throws RemoteException {
+        org.wso2.carbon.identity.oauth2.dto.OAuth2ClientValidationResponseDTO validationRespDTO = oauth2Service.validateClientInfo(clientId, callbackURI);
+
+        OAuth2ClientValidationResponseDTO responseDTO = new OAuth2ClientValidationResponseDTO();
+        responseDTO.setApplicationName(validationRespDTO.getApplicationName());
+        responseDTO.setCallbackURL(validationRespDTO.getCallbackURL());
+        responseDTO.setErrorCode(validationRespDTO.getErrorCode());
+        responseDTO.setErrorMsg(validationRespDTO.getErrorMsg());
+        responseDTO.setValidClient(validationRespDTO.isValidClient());
+
+        return responseDTO;
+    }
+
 
     public OAuth2AccessTokenRespDTO issueAccessToken(OAuth2AccessTokenReqDTO tokenReqDTO)
             throws RemoteException {
-        return stub.issueAccessToken(tokenReqDTO);
+        if (wsMode) {
+            return stub.issueAccessToken(tokenReqDTO);
+        }
+        return _issueAccessToken(tokenReqDTO);
+
+    }
+
+    private OAuth2AccessTokenRespDTO _issueAccessToken(OAuth2AccessTokenReqDTO tokenReqDTO)
+            throws RemoteException {
+        org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenReqDTO areqDTO = new org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenReqDTO();
+
+        areqDTO.setAuthorizationCode(tokenReqDTO.getAuthorizationCode());
+        areqDTO.setCallbackURI(tokenReqDTO.getCallbackURI());
+        areqDTO.setClientId(tokenReqDTO.getClientId());
+        areqDTO.setClientSecret(tokenReqDTO.getClientSecret());
+        areqDTO.setGrantType(tokenReqDTO.getGrantType());
+        areqDTO.setRefreshToken(tokenReqDTO.getRefreshToken());
+        areqDTO.setResourceOwnerPassword(tokenReqDTO.getResourceOwnerPassword());
+        areqDTO.setResourceOwnerUsername(tokenReqDTO.getResourceOwnerUsername());
+        areqDTO.setAuthorizationCode(tokenReqDTO.getAuthorizationCode());
+        areqDTO.setScope(tokenReqDTO.getScope());
+        areqDTO.setAssertion(tokenReqDTO.getAssertion());
+
+        org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenRespDTO resp = oauth2Service.issueAccessToken(areqDTO);
+
+        OAuth2AccessTokenRespDTO respDTO = new OAuth2AccessTokenRespDTO();
+
+        respDTO.setAccessToken(resp.getAccessToken());
+        respDTO.setCallbackURI(resp.getCallbackURI());
+        respDTO.setErrorCode(resp.getErrorCode());
+        respDTO.setErrorMsg(resp.getErrorMsg());
+        respDTO.setExpiresIn(resp.getExpiresIn());
+        respDTO.setRefreshToken(resp.getRefreshToken());
+        respDTO.setError(resp.isError());
+        respDTO.setTokenType(resp.getTokenType());
+
+        org.wso2.carbon.identity.oauth2.stub.types.ResponseHeader[] headers = new org.wso2.carbon.identity.oauth2.stub.types.ResponseHeader[resp.getRespHeaders().length];
+        respDTO.setRespHeaders(headers);
+
+        for (int i = 0; i < resp.getRespHeaders().length; i++) {
+            ResponseHeader[] rhr = resp.getRespHeaders();
+            org.wso2.carbon.identity.oauth2.stub.types.ResponseHeader h = new org.wso2.carbon.identity.oauth2.stub.types.ResponseHeader();
+            ResponseHeader rh = rhr[i];
+            h.setKey(rh.getKey());
+            h.setValue(rh.getValue());
+            headers[i] = h;
+        }
+
+        respDTO.setRespHeaders(headers);
+        return respDTO;
+    }
+
+    public OAuthRevocationResponseDTO revokeTokensByOAuthClient(OAuthRevocationRequestDTO reqDTO)
+            throws RemoteException {
+        if (wsMode) {
+            return stub.revokeTokensByOAuthClient(reqDTO);
+        }
+        return _revokeTokensByOAuthClient(reqDTO);
+    }
+
+    private OAuthRevocationResponseDTO _revokeTokensByOAuthClient(OAuthRevocationRequestDTO reqDTO)
+            throws RemoteException {
+        org.wso2.carbon.identity.oauth2.dto.OAuthRevocationRequestDTO areqDTO = new org.wso2.carbon.identity.oauth2.dto.OAuthRevocationRequestDTO();
+
+        areqDTO.setConsumerKey(reqDTO.getConsumerKey());
+        areqDTO.setConsumerSecret(reqDTO.getConsumerSecret());
+        areqDTO.setTokens(reqDTO.getTokens());
+
+        org.wso2.carbon.identity.oauth2.dto.OAuthRevocationResponseDTO resp = oauth2Service.revokeTokensByOAuthClient(areqDTO);
+
+        OAuthRevocationResponseDTO respDTO = new OAuthRevocationResponseDTO();
+        respDTO.setError(resp.isError());
+        respDTO.setErrorCode(resp.getErrorCode());
+        respDTO.setErrorMsg(resp.getErrorMsg());
+
+        return respDTO;
     }
 
 }

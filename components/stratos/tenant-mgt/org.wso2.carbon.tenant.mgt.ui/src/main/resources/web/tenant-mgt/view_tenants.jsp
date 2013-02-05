@@ -17,7 +17,6 @@
 -->
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
-<%@ page import="org.wso2.carbon.registry.common.ui.UIException" %>
 <%@ page import="org.wso2.carbon.tenant.mgt.stub.beans.xsd.PaginatedTenantInfoBean" %>
 <%@ page import="org.wso2.carbon.tenant.mgt.stub.beans.xsd.TenantInfoBean" %>
 <%@ page import="org.wso2.carbon.tenant.mgt.ui.clients.TenantServiceClient" %>
@@ -63,7 +62,7 @@
             request="<%=request%>"/>
 
     <div id="top">
-        <form id="findTenantForm" action="add_tenant.jsp" method="post">
+        <form id="findTenantForm" action="view_tenants.jsp?action=search" method="post">
             <table class="normal-nopadding" cellspacing="0">
                 <tbody>
                 <tr>
@@ -83,6 +82,33 @@
     <div id="middle">
 
         <%
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            String activatingDomain = request.getParameter("activate.domain");
+            String action = request.getParameter("action");
+            String domainName = request.getParameter("domain");
+            if (activatingDomain != null) {
+                // try to activate deactive the tenant
+                String activate = request.getParameter("activate");
+                try {
+                    if (activate != null && activate.equalsIgnoreCase("on")) {
+                        TenantMgtUtil.activateTenant(request, config, session);
+                    } else {
+                        TenantMgtUtil.deactivateTenant(request, config, session);
+                    }
+                } catch (Exception e) {
+                    String error1 = "Error in activating/deactivating tenant";
+                    request.setAttribute(CarbonUIMessage.ID,
+                            new CarbonUIMessage(error1, error1, null));
+
+        %>
+
+        <jsp:forward page="../admin/error.jsp?<%=error1%>"/>
+
+        <%
+                    return;
+                }
+            }
+
             String pageNumberStr = request.getParameter("pageNumber");
             if (pageNumberStr == null) {
                 pageNumberStr = "0";
@@ -108,12 +134,17 @@
             TenantInfoBean[] tenantInfoArr;
             try {
                 client = new TenantServiceClient(cookie, backendServerURL, configContext);
-                tenantsInfo = client.retrievePaginatedTenants(pageNumber);
+                if (action != null && action.equals("search")) {
+                	   tenantsInfo = client.retrievePaginatedPartialSearchTenants(domainName,pageNumber);
+                } else {
+                	   tenantsInfo = client.retrievePaginatedTenants(pageNumber);
+                }
+             
 
                 tenantInfoArr = tenantsInfo.getTenantInfoBeans();
                 numberOfPages = tenantsInfo.getNumberOfPages();
 
-            } catch (UIException e) {
+            } catch (Exception e) {
                 String error1 = "Error in retrieving tenants";
                 request.setAttribute(CarbonUIMessage.ID, new CarbonUIMessage(error1, error1, null));
         %>
@@ -132,45 +163,27 @@
                           page="view_tenants.jsp" pageNumberParameterName="pageNumber"/>
 
         <div id="workArea">
-            <table cellpadding="0" cellspacing="0" border="0" style="width:100%" class="styledLeft">
-                <thead>
-                <tr>
-                    <th style="padding-left:5px;text-align:left;"><fmt:message key="domain"/></th>
-                    <th style="padding-left:5px;text-align:left;"><fmt:message
-                            key="admin.email"/></th>
-                    <th style="padding-left:5px;text-align:left;"><fmt:message
-                            key="created.date"/></th>
-                    <th style="padding-left:5px;text-align:left;"><fmt:message key="active"/></th>
-                    <th style="padding-left:5px;text-align:left;"><fmt:message key="edit"/></th>
-                </tr>
-                </thead>
-                <tbody>
-                <%
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                    String activatingDomain = request.getParameter("activate.domain");
-                    if (activatingDomain != null) {
-                        // try to activate deactive the tenant
-                        String activate = request.getParameter("activate");
-                        try {
-                            if (activate != null && activate.equalsIgnoreCase("on")) {
-                                TenantMgtUtil.activateTenant(request, config, session);
-                            } else {
-                                TenantMgtUtil.deactivateTenant(request, config, session);
-                            }
-                        } catch (UIException e) {
-                            String error1 = "Error in activating/deactivating tenant";
-                            request.setAttribute(CarbonUIMessage.ID,
-                                                 new CarbonUIMessage(error1, error1, null));
 
+
+                <%
+                    if (tenantInfoArr != null && tenantInfoArr.length>0 && tenantInfoArr[0]!=null) {
                 %>
 
-                <jsp:forward page="../admin/error.jsp?<%=error1%>"/>
+                <table cellpadding="0" cellspacing="0" border="0" style="width:100%" class="styledLeft">
+                    <thead>
+                    <tr>
+                        <th style="padding-left:5px;text-align:left;"><fmt:message key="domain"/></th>
+                        <th style="padding-left:5px;text-align:left;"><fmt:message
+                                key="admin.email"/></th>
+                        <th style="padding-left:5px;text-align:left;"><fmt:message
+                                key="created.date"/></th>
+                        <th style="padding-left:5px;text-align:left;"><fmt:message key="active"/></th>
+                        <th style="padding-left:5px;text-align:left;"><fmt:message key="edit"/></th>
+                    </tr>
+                    </thead>
+                    <tbody>
 
                 <%
-                            return;
-                        }
-                    }
-                    if (tenantInfoArr != null) {
                         for (TenantInfoBean tenantInfo : tenantInfoArr) {
                             if (tenantInfo == null) {
                                 continue;
@@ -183,6 +196,7 @@
                             Date createdDate = new Date(createdDateCal.getTimeInMillis());
                             String createdDateStr = dateFormat.format(createdDate);
                 %>
+
                 <tr id="1">
                     <td style="padding-left:5px;padding-top:3px;text-align:left;"><%=tenantDomain%>
                     </td>
@@ -203,10 +217,17 @@
                     </td>
                 </tr>
                 <% }
-                }
                 %>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+                <%
+                }else{
+                %>
+            <div><fmt:message key="no.tenants.available"/></div>
+            <%
+                }
+            %>
+
         </div>
                 <carbon:paginator pageNumber="<%=pageNumber%>" numberOfPages="<%=numberOfPages%>"
                                   noOfPageLinksToDisplay="<%=noOfPageLinksToDisplay%>"

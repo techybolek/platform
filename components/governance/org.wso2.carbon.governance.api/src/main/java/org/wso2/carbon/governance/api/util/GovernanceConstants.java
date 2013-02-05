@@ -117,6 +117,11 @@ public class GovernanceConstants {
     public static final String SERVICE_MEDIA_TYPE = RegistryConstants.SERVICE_MEDIA_TYPE;
 
     /**
+     * Version of a  service artifact.
+     */
+    public static final String SERVICE_VERSION_ATTRIBUTE = "overview_version";
+
+    /**
      * Media type of a consumer artifact
      */
     public static final String PEOPLE_MEDIA_TYPE = "application/vnd.wso2-people+xml";
@@ -250,6 +255,30 @@ public class GovernanceConstants {
      * Defines the environment change of the resource in order to be used in creating notifications
      */
     public static final String REGISTRY_IS_ENVIRONMENT_CHANGE = "registry.is.environment.change.property";
-
+     //Default service name
     public static final String DEFAULT_SERVICE_NAME="C0E6D4A8-C446-4f01-99DB-70E212685A40";
+    // Default service namespace
+    public static final String DEFAULT_NAMESPACE=".*";
+
+    public static final String PRE_FETCH_TASK = "PRE_FETCH_TASK";
+
+    public static final String PRE_FETCH_TASK_CLASS = "org.wso2.carbon.governance.list.util.task.PreFetchTask";
+
+    public static final String TASK_CLASS = "taskClass";
+
+    public static final String ARTIFACT_TYPE = "artifactType";
+
+    public static final class ArtifactTypes {
+
+        private ArtifactTypes() {
+            throw new AssertionError();
+        }
+
+        public static String SERVICE = "SERVICE";
+        public static String WSDL = "WSDL";
+        public static String POLICY = "POLICY";
+        public static String SCHEMA = "SCHEMA";
+        public static String GENERIC = "GENERIC";
+    }
+
 }

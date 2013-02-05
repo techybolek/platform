@@ -47,6 +47,8 @@ var getSubscribersOfProvider = function (username) {
             list.push({
                 username:subscriber.userName,
                 application:subscriber.application,
+                token:subscriber.token,
+                tokenStatus:subscriber.tokenStatus,
                 apis:subscriber.apis
             });
         }

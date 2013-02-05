@@ -15,24 +15,22 @@
  */
 package org.wso2.carbon.governance.api.endpoints;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Properties;
-import java.util.UUID;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.endpoints.dataobjects.Endpoint;
+import org.wso2.carbon.governance.api.endpoints.dataobjects.EndpointImpl;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.registry.extensions.handlers.utils.EndpointUtils;
 import org.wso2.carbon.registry.extensions.utils.CommonUtil;
+
+import java.util.*;
 
 /**
  * This provides the management functionality for endpoint artifacts stored on
@@ -62,14 +60,17 @@ public class EndpointManager {
      */
     public Endpoint newEndpoint(String url) throws GovernanceException {
         String endpointId = UUID.randomUUID().toString();
-        Endpoint endpoint = new Endpoint(url, endpointId);
+        EndpointImpl endpoint = new EndpointImpl(url, endpointId);
         endpoint.associateRegistry(registry);
         return endpoint;
     }
 
     /**
-     * Adds the given endpoint artifact to the registry.
-     * 
+     * Adds the given endpoint artifact to the registry. Please do not use this method to update an
+     * existing artifact use the update method instead. If this method is used to update an existing
+     * artifact, all existing properties (such as lifecycle details) will be removed from the
+     * existing artifact.
+     *
      * @param endpoint the endpoint artifact.
      * 
      * @throws GovernanceException if the operation failed.
@@ -81,13 +82,13 @@ public class EndpointManager {
             Resource endpointResource = registry.newResource();
             endpointResource.setMediaType(GovernanceConstants.ENDPOINT_MEDIA_TYPE);
             setContent(endpoint, endpointResource);
-            String tmpPath = "/" + GovernanceUtils.getNameFromUrl(endpoint.getUrl());
+            String tmpPath = "/" + GovernanceUtils.getNameFromUrl(((EndpointImpl)endpoint).getUrl());
             endpointResource.setUUID(endpoint.getId());
 
 //            Resource resource = registry.get(registry.put(tmpPath, endpointResource));
             registry.put(tmpPath, endpointResource);
 //            endpoint.setId(endpointResource.getUUID());
-            endpoint.updatePath();
+            ((EndpointImpl)endpoint).updatePath();
             succeeded = true;
         } catch (RegistryException e) {
             String msg =
@@ -129,7 +130,7 @@ public class EndpointManager {
      */
     @SuppressWarnings("unused")
     public void updateEndpoint(Endpoint endpoint) throws GovernanceException {
-        if (endpoint.getUrl() == null) {
+        if (((EndpointImpl)endpoint).getUrl() == null) {
             // there won't be any updates
             String msg =
                     "Updates are only accepted if the url is available. " +
@@ -143,12 +144,12 @@ public class EndpointManager {
             registry.beginTransaction();
 
             // getting the old endpoint.
-            Endpoint oldEndpoint = getEndpoint(endpoint.getId());
-            if (oldEndpoint != null) {
-                // we are expecting only the OMElement to be different.
-                String oldPath = oldEndpoint.getPath();
-                registry.delete(oldPath);
-            }
+//            Endpoint oldEndpoint = getEndpoint(endpoint.getId());
+//            if (oldEndpoint != null) {
+//                // we are expecting only the OMElement to be different.
+//                String oldPath = oldEndpoint.getPath();
+//                registry.delete(oldPath);
+//            }
             
             addEndpoint(endpoint);
             succeeded = true;
@@ -224,9 +225,10 @@ public class EndpointManager {
      */
     public void setContent(Endpoint endpoint, Resource endpointResource) throws GovernanceException {
         // set the endpoint url
-        String url = endpoint.getUrl();
+        String url = ((EndpointImpl)endpoint).getUrl();
         try {
-            endpointResource.setContent(url);
+            String content = EndpointUtils.getEndpointContent(url, EndpointUtils.deriveEndpointFromUrl(url));
+            endpointResource.setContent(content);
         } catch (RegistryException e) {
             String msg =
                     "Error in setting the resource content for endpoint. path: " +
@@ -283,5 +285,37 @@ public class EndpointManager {
             return getEndpoint(artifactId);
         }
         return null;
+    }
+
+
+    /**
+     * Finds all Endpoint artifacts on the registry.
+     *
+     * @return all Endpoint artifacts on the registry.
+     * @throws GovernanceException if the operation failed.
+     */
+    public Endpoint[] getAllEndpoints() throws GovernanceException {
+        List<String> endpointPaths =
+                Arrays.asList(GovernanceUtils.getResultPaths(registry,
+                        GovernanceConstants.ENDPOINT_MEDIA_TYPE));
+        Collections.sort(endpointPaths, new Comparator<String>() {
+            public int compare(String o1, String o2) {
+                // First order by name
+                int result = RegistryUtils.getResourceName(o1).compareToIgnoreCase(
+                        RegistryUtils.getResourceName(o2));
+                if (result != 0) {
+                    return result;
+                }
+                // Then order by namespace
+                return o1.compareToIgnoreCase(o2);
+            }
+        });
+        List<Endpoint> endpoints = new ArrayList<Endpoint>();
+        for (String endpointPath : endpointPaths) {
+            GovernanceArtifact artifact =
+                    GovernanceUtils.retrieveGovernanceArtifactByPath(registry, endpointPath);
+            endpoints.add((Endpoint) artifact);
+        }
+        return endpoints.toArray(new Endpoint[endpoints.size()]);
     }
 }

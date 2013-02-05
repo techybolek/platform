@@ -22,11 +22,12 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>dashboard-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
 
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.5</version>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.dashboard.feature</artifactId>
     <packaging>pom</packaging>
@@ -38,13 +39,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.dashboard.server.feature</artifactId>
-            <version>${carbon.platform.version}</version>
+            <version>4.0.2</version>
             <type>zip</type>
 	    </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.dashboard.ui.feature</artifactId>
-            <version>${carbon.platform.version}</version>
+            <version>4.0.5</version>
             <type>zip</type>
 	    </dependency>
     </dependencies>
@@ -64,13 +65,13 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.dashboard</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.registry.core:${registry.core.feature.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.registry.core:4.0.1</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.dashboard.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.dashboard.ui.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.dashboard.server.feature:4.0.2</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.dashboard.ui.feature:4.0.5</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>
@@ -80,7 +81,7 @@
     </build>
 
     <properties>        
-        <carbon.platform.version>4.0.0-SNAPSHOT</carbon.platform.version>
+        <carbon.platform.version>4.0.0</carbon.platform.version>
     </properties>
 
 </project>

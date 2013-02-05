@@ -22,7 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.identity.authenticator.saml2.sso.ui.SSOAssertionConsumerService;
-import org.wso2.carbon.identity.authenticator.saml2.sso.ui.Util;
+import org.wso2.carbon.identity.authenticator.saml2.sso.common.Util;
 import org.wso2.carbon.identity.authenticator.saml2.sso.ui.authenticator.SAML2SSOUIAuthenticator;
 import org.wso2.carbon.identity.authenticator.saml2.sso.ui.filters.LoginPageFilter;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -94,11 +94,11 @@ public class SAML2SSOAuthenticatorUIDSComponent {
                                                                   loginServlet, redirectorParams);
 
                 //Register the SSO Assertion Consumer Service Servlet
-                HttpServlet acsServlet = new SSOAssertionConsumerService();
-                Dictionary acsParams = new Hashtable(2);
-                acsParams.put("url-pattern","/acs");
-                acsParams.put("display-name", "SAML SSO Assertion Consumer Service");
-                ctxt.getBundleContext().registerService(Servlet.class.getName(), acsServlet, acsParams);
+//                HttpServlet acsServlet = new SSOAssertionConsumerService();
+//                Dictionary acsParams = new Hashtable(2);
+//                acsParams.put("url-pattern","/acs");
+//                acsParams.put("display-name", "SAML SSO Assertion Consumer Service");
+//                ctxt.getBundleContext().registerService(Servlet.class.getName(), acsServlet, acsParams);
 
                 // register the UI authenticator
                 SAML2SSOUIAuthenticator authenticator = new SAML2SSOUIAuthenticator();

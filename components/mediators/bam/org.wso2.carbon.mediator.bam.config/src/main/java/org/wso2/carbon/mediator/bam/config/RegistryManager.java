@@ -16,12 +16,19 @@
 
 package org.wso2.carbon.mediator.bam.config;
 
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.mediator.bam.config.internal.RegistryManagementComponent;
+import org.wso2.carbon.mediator.bam.config.services.utils.ServiceHolder;
 import org.wso2.carbon.registry.common.services.RegistryAbstractAdmin;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.ConfigurationContextService;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.nio.charset.Charset;
 
@@ -35,7 +42,14 @@ public class RegistryManager extends RegistryAbstractAdmin {
     private Resource resource;
 
     public RegistryManager(){
-        registry = getConfigSystemRegistry();
+        //registry = getConfigSystemRegistry();
+        try {
+            RegistryService registryService = ServiceHolder.getRegistryService();
+            registry = registryService.getConfigSystemRegistry(MultitenantUtils.getTenantId(super.getConfigContext()));
+        } catch (RegistryException e) {
+            String errorMsg = "Error while getting the Registry Service. " + e.getMessage();
+            log.error(errorMsg, e);
+        }
     }
 
     public void saveResourceString(String resourceString, String gadgetResourcePath){
@@ -103,5 +117,17 @@ public class RegistryManager extends RegistryAbstractAdmin {
         }
         return new String[0];
     }
+
+    /*public static ConfigurationContext getConfigContext() {
+        if (configContextService == null) {
+            log.error(new BamMediatorException("ConfigurationContextService is null"));
+        }
+        try {
+            return configContextService.getServerConfigContext();
+        } catch (Exception e) {
+            String errorMsg = "Error occurred while getting the Registry Service. " + e.getMessage();
+            log.error(e);
+        }
+    }*/
 
 }

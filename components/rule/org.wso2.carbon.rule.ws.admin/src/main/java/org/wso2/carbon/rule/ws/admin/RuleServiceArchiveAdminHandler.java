@@ -308,6 +308,8 @@ public class RuleServiceArchiveAdminHandler extends AbstractRuleServiceAdminHand
         File sourceFile = new File(servicePath);
         String targetDirectory = getTempDir() + File.separator + serviceName + "." +
                 Constants.RULE_SERVICE_ARCHIVE_EXTENSION;
+        File targetDirPath = new File(targetDirectory);
+      if(!targetDirPath.exists()){
 
         if (sourceFile.exists() &&
                 servicePath.endsWith(Constants.RULE_SERVICE_ARCHIVE_EXTENSION)) {
@@ -322,7 +324,7 @@ public class RuleServiceArchiveAdminHandler extends AbstractRuleServiceAdminHand
         } else {
             new File(targetDirectory).mkdirs();
         }
-
+       }
         return new Paths(servicePath, targetDirectory);
     }
 

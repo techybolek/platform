@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.application.mgt.webapp;
 
+import org.apache.catalina.Container;
+import org.apache.catalina.core.StandardWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
@@ -124,7 +126,16 @@ public class WarApplicationAdmin extends AbstractAdmin {
         // if we could find a web app for the given file name, create the Metadata instance
         if (webApplication != null) {
             warCappMetadata = new WarCappMetadata();
-            warCappMetadata.setContext(webApplication.getContextName());
+            String appContext = webApplication.getContextName();
+            for (Container container : webApplication.getContext().findChildren()) {
+                if(((StandardWrapper) container).getServletClass().equals("org.apache.cxf.transport.servlet.CXFServlet")) {
+                    appContext += (((StandardWrapper) container).findMappings())[0];
+                }
+            }
+            if(appContext.endsWith("/*")) {
+                appContext = appContext.substring(0, appContext.indexOf("/*"));
+            }
+            warCappMetadata.setContext(appContext);
             warCappMetadata.setState(state);
             warCappMetadata.setWebappFileName(webApplication.getWebappFile().getName());
 

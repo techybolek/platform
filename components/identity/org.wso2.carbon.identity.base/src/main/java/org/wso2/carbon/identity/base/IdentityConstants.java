@@ -65,9 +65,7 @@ public class IdentityConstants {
 	public final static String RESOURCES = "org.wso2.solutions.identity.resources";
 	public final static String INITIAL_CLAIMS_FILE_PATH = "conf/initial-claims.xml";
 	public static final String PROPERTY_USER = "IdentityProvier.User";
-	public static final String OPENID_SERVER_URL = "OpenIDServerUrl";
-	public static final String OPENID_USER = "OpenIDUserUrl";
-	public final static String OPENID_SKIP_USER_CONSENT = "OpenIDSkipUserConsent";
+	
 	public static final String HTTPS = "https://";
 	public static final String HTTPS_PORT = "Ports.HTTPS";
 	public static final String HOST_NAME = "HostName";
@@ -111,6 +109,7 @@ public class IdentityConstants {
 	 * Server Configuration data retrieval Strings.
 	 */
 	public static class ServerConfig {
+		
 		public final static String USER_TRUSTED_RP_STORE_LOCATION = "Security.UserTrustedRPStore.Location";
 		public final static String USER_TRUSTED_RP_STORE_PASSWORD = "Security.UserTrustedRPStore.Password";
 		public final static String USER_TRUSTED_RP_STORE_TYPE = "Security.UserTrustedRPStore.Type";
@@ -121,9 +120,12 @@ public class IdentityConstants {
 		public final static String USER_SSO_STORE_TYPE = "Security.UserSSOStore.Type";
 		public final static String USER_SSO_KEY_PASSWORD = "Security.UserSSOStore.KeyPassword";
         
-        public final static String OPENID_SERVER_URL = "OpenIDServerUrl";
-		public final static String OPENID_USER_PATTERN = "OpenIDUserPattern";
-		public final static String OPENID_SKIP_USER_CONSENT = "OpenIDSkipUserConsent";
+        public final static String OPENID_SERVER_URL = "OpenID.OpenIDServerUrl";
+		public final static String OPENID_USER_PATTERN = "OpenID.OpenIDUserPattern";
+		public final static String OPENID_SKIP_USER_CONSENT = "OpenID.OpenIDSkipUserConsent";
+		public final static String OPENID_REMEMBER_ME_EXPIRY = "OpenID.OpenIDRememberMeExpiry";
+		public final static String OPENID_USE_MULTIFACTOR_AUTHENTICATION = "OpenID.UseMultifactorAuthentication";
+		public final static String OPENID_DISABLE_DUMB_MODE = "OpenID.DisableOpenIDDumbMode";
 
 		public static final String ISSUER_POLICY = "Identity.IssuerPolicy";
 		public static final String TOKEN_VALIDATE_POLICY = "Identity.TokenValidationPolicy";
@@ -171,6 +173,7 @@ public class IdentityConstants {
         public final static String SSO_ATTRIB_CLAIM_DIALECT = "SSOService.AttributesClaimDialect";
         public static final String SINGLE_LOGOUT_RETRY_COUNT = "SSOService.SingleLogoutRetryCount";
         public static final String SINGLE_LOGOUT_RETRY_INTERVAL = "SSOService.SingleLogoutRetryInterval";
+        public static final String SSO_TENANT_PARTITIONING_ENABLED = "SSOService.TenantPartitioningEnabled";
 
         //Identity Persistence Manager
         public static final String SKIP_DB_SCHEMA_CREATION = "JDBCPersistenceManager.SkipDBSchemaCreation";

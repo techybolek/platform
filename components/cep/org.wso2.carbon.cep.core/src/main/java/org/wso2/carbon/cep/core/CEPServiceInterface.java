@@ -80,45 +80,6 @@ public interface CEPServiceInterface {
      * */
     public String[] getCEPBrokerNames() throws CEPConfigurationException;
 
-    /**
-     * This method is used to remove an existing query from the back end
-     * @param bucketName - Name of the bucket which the query contains
-     * @param queryName - name of the query to be deleted
-     * */
-    public boolean removeQuery(String bucketName , String queryName)
-            throws CEPConfigurationException;
-    /**
-     * This method is used to remove all the available queries of a bucket from back end
-     * @param bucketName - Name of the bucket which need  to remove all the existing queries
-     * @return status of the operation
-     * */
-    public boolean removeAllQueries(String bucketName)
-            throws CEPConfigurationException;
-
-    /**
-     * This method is used to edit an existing query in the back end
-     * @param bucketName - Name of the bucket which the query contains
-     * @param query - Query to be modified with new data
-     * @return status of the operation
-     * */
-    public boolean editQuery(String bucketName,Query query)
-            throws CEPConfigurationException;
-
-    /**
-     * This method is used to remove an existing input of a bucket from back end
-     * @param bucketName - Name of the bucket which contains the input to be removed
-     * @param inputTopic - topic of the input to be deleted
-     * @return status of the operation
-     * */
-    public boolean removeInput(String bucketName, String inputTopic)
-                                                               throws CEPConfigurationException;
-
-    /**
-     * This method is used to remove all the inputs of a bucket from the back end
-     * @param bucketName - Name of the bucket which all the inputs to be removed
-     * @return status of the operation*/
-    public boolean removeAllInputs(String bucketName)
-            throws CEPConfigurationException;
 
     /**
      * CEP Back end runtime engines registers with the cep core using this method.
@@ -126,7 +87,7 @@ public interface CEPServiceInterface {
      * @param cepEngineProvider
      * @throws CEPConfigurationException
      */
-    public void registerCEPEngineProvider(CEPEngineProvider cepEngineProvider)
-                                                              throws CEPConfigurationException;
+    public void registerCEPEngineProvider(CEPEngineProvider cepEngineProvider);
+
 
 }

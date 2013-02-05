@@ -22,6 +22,7 @@ struct ThriftEventBundle {
     5: optional list<double>  doubleAttributeList;
     6: optional list<bool>  boolAttributeList;
     7: optional list<string>  stringAttributeList;
+    8: optional map<i32,map<string,string>>  arbitraryDataMapMap;
 }
 
 

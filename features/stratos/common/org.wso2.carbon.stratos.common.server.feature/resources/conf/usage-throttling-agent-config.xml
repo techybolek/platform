@@ -20,7 +20,7 @@
         <UsageDataPersistenceTask>
             <StartupDelayInMilliSeconds>60000</StartupDelayInMilliSeconds>
             <NumberOfRecordsPerExecution>100</NumberOfRecordsPerExecution>
-            <ExecutionIntervalInMilliSeconds>100</ExecutionIntervalInMilliSeconds>
+            <ExecutionIntervalInMilliSeconds>-1</ExecutionIntervalInMilliSeconds>
         </UsageDataPersistenceTask>
     </UsageAgent>
     <ThrottlingAgent>

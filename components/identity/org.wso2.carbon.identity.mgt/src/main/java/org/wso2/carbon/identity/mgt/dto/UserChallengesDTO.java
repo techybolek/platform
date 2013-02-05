@@ -32,10 +32,7 @@ public class UserChallengesDTO {
     private int order;
 
     private boolean primary;
-
-    private String setId;
-        
-
+      
     public String getId() {
         return id;
     }
@@ -74,13 +71,5 @@ public class UserChallengesDTO {
 
     public void setPrimary(boolean primary) {
         this.primary = primary;
-    }
-
-    public String getSetId() {
-        return setId;
-    }
-
-    public void setSetId(String setId) {
-        this.setId = setId;
     }
 }

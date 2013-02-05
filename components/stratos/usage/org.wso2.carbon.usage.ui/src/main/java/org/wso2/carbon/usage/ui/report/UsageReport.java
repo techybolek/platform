@@ -172,7 +172,7 @@ public class UsageReport {
         reportData.add("Request Count");
         reportData.add("Response Count");
         reportData.add("Fault Count");
-        if (svcStats != null) {
+        if (svcStats != null && svcStats.length>0 && svcStats[0]!=null) {
             for (RequestStatistics stat : svcStats) {
                 long svcReqCount = stat.getRequestCount();
                 long svcResCount = stat.getResponseCount();

@@ -20,13 +20,18 @@ package org.wso2.carbon.automation.core;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.maven.plugin.MojoFailureException;
 import org.testng.Assert;
 import org.testng.ISuite;
 import org.testng.ISuiteListener;
+import org.wso2.carbon.automation.core.annotations.ExecutionEnvironment;
+import org.wso2.carbon.automation.core.annotations.ExecutionMode;
 import org.wso2.carbon.automation.core.utils.coreutils.PlatformUtil;
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
 import org.wso2.carbon.automation.core.utils.reportutills.CustomTestNgReportSetter;
 import org.wso2.carbon.automation.core.utils.serverutils.ServerManager;
+import org.wso2.carbon.automation.core.utils.virtualTestRunUtils.RunnerSetter;
+import org.wso2.carbon.automation.core.utils.virtualTestRunUtils.VirtualSuiteRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,45 +44,75 @@ public class PlatformSuiteManager implements ISuiteListener {
     List<ServerManager> serverList = new ArrayList<ServerManager>();
     EnvironmentBuilder environmentBuilder;
     ServerGroupManager serverGroupManager;
+    String environmet;
+    String executionMode;
+    List<String> defaultProductList;
+    ISuite currentSuite = null;
+
 
     /**
      * This method is invoked before the SuiteRunner starts.
      */
     public synchronized void onStart(ISuite suite) {
+        currentSuite = suite;
         PlatformUtil.setKeyStoreProperties();
-
+        int exeCount = RunnerSetter.getCount();
+        boolean isFirstExecution = RunnerSetter.getIsFirstRun();
+        RunnerSetter.setRunner(suite.getName(), exeCount + 1);
         environmentBuilder = new EnvironmentBuilder();
+        environmentBuilder = new EnvironmentBuilder();
+
+
+        boolean deploymentEnabled =
+                environmentBuilder.getFrameworkSettings().getEnvironmentSettings().isEnableDipFramework();
+        boolean startosEnabled =
+                environmentBuilder.getFrameworkSettings().getEnvironmentSettings().is_runningOnStratos();
+        boolean builderEnabled =
+                environmentBuilder.getFrameworkSettings().getEnvironmentSettings().is_builderEnabled();
+        defaultProductList =
+                environmentBuilder.getFrameworkSettings().getEnvironmentVariables().getProductList();
+        environmet = environmentBuilder.getFrameworkSettings().getEnvironmentSettings().executionEnvironment();
+        executionMode = environmentBuilder.getFrameworkSettings().getEnvironmentSettings().executionMode();
+        log.info("**********Starting executing test Suite " + suite.getName() + " on "
+                 + executionMode.toString() + "***********");
         try {
-
-            boolean deploymentEnabled =
-                    environmentBuilder.getFrameworkSettings().getEnvironmentSettings().isEnableDipFramework();
-            boolean startosEnabled =
-                    environmentBuilder.getFrameworkSettings().getEnvironmentSettings().is_runningOnStratos();
-            boolean builderEnabled =
-                    environmentBuilder.getFrameworkSettings().getEnvironmentSettings().is_builderEnabled();
-            List<String> defaultProductList =
-                    environmentBuilder.getFrameworkSettings().getEnvironmentVariables().getProductList();
-
+            /* If Execution mode is tenant executes main execution as tenant*/
+            if (executionMode.equals(ExecutionMode.tenant.name()) && !environmet.equalsIgnoreCase(ExecutionEnvironment.stratos.name())) {
+                setEnvoronmentSettingsForTenant(true);
+            }
             serverGroupManager = new ServerGroupManager(0);
-            //stratos user are populated to manager. Therefor product list not required
             if (startosEnabled) {
-                new UserPopulator().populateUsers(null);
+                UserPopulator populator = new UserPopulator();
+                if (!environmet.equals(ExecutionEnvironment.stratos)) {
+                    if (executionMode.equals(ExecutionMode.tenant.name()) || executionMode.equals(ExecutionMode.all.name())) {
+                        populator.populateUsers(defaultProductList);
+                    } else {
+                        log.error("\n......................................................" +
+                                  "Invalid Environment Settings.......\n " +
+                                  "Please Check The Clarity.properties file \n" +
+                                  "......................................................");
+                    }
+                } else {
+                    populator.populateUsers(null);
+                }
             } else if (deploymentEnabled) {
                 if (suite.getParameter("server.list") != null) {
                     List<String> productList = Arrays.asList(suite.getParameter("server.list").split(","));
                     log.info("Starting servers...");
                     serverGroupManager.startServers(productList);
-                    new UserPopulator().populateUsers(productList);
+                    UserPopulator populator = new UserPopulator();
+                    populator.populateUsers(defaultProductList);
                 } else {
                     log.info("Starting servers with default product list...");
                     serverGroupManager.startServers(defaultProductList);
-                    new UserPopulator().populateUsers(defaultProductList);
+                    if (executionMode.equals(ExecutionMode.user.name()) || executionMode.equals(ExecutionMode.all.name())) {
+                        UserPopulator populator = new UserPopulator();
+                        populator.populateUsers(defaultProductList);
+                    }
                 }
-            } else if (builderEnabled) {
-                log.info("Ignored - handled by PlatformExecution manager");
             } else {
-                log.info("Server startup criterias do not match");
-                assert false : "Invalid framework configuration, please update clarity.properties file";
+                UserPopulator populator = new UserPopulator();
+                populator.populateUsers(defaultProductList);
             }
 
         } catch (Exception e) {  /*cannot throw the exception */
@@ -93,19 +128,37 @@ public class PlatformSuiteManager implements ISuiteListener {
      */
 
     public void onFinish(ISuite suite) {
+        VirtualSuiteRunner runner = new VirtualSuiteRunner();
+        CustomTestNgReportSetter reportSetter = new CustomTestNgReportSetter();
+        /*          If Execution mode is all attempts for the second test execution cycle*/
+        log.info("***********Finishing executing test Suite " + suite.getName() + " on "
+                 + executionMode.toString() + "*******");
         try {
             EnvironmentBuilder environmentBuilder = new EnvironmentBuilder();
 
             if (!environmentBuilder.getFrameworkSettings().getEnvironmentSettings().is_builderEnabled()) {
                 stopMultipleServers(suite.getParameter("server.list"));
             }
-
+            // Runtime.getRuntime().gc();
         } catch (Exception e) { /*cannot throw the exception */
             log.error(e);
-            CustomTestNgReportSetter reportSetter = new CustomTestNgReportSetter();
             reportSetter.createReport(suite, e);
             Assert.fail("Fail to stop servers " + e);
         }
+        if (((executionMode.equals(ExecutionMode.all.name()))) &&
+            RunnerSetter.getCount() <= 1 && !RunnerSetter.getMixedModeRun()) {
+            setEnvoronmentSettingsForTenant(true);
+            reportSetter.createReport(suite);
+            try {
+                runner.testset(currentSuite);
+                setEnvoronmentSettingsForTenant(false);
+            } catch (MojoFailureException e) {
+                log.error(e);
+                reportSetter.createReport(suite, e);
+            }
+            reportSetter.createReport(suite);
+        }
+        RunnerSetter.resetRunner();
     }
 
     /**
@@ -125,5 +178,9 @@ public class PlatformSuiteManager implements ISuiteListener {
             log.info("Stopping all server");
             ServerGroupManager.shutdownServers(productList);
         }
+    }
+
+    private void setEnvoronmentSettingsForTenant(boolean setting) {
+        System.setProperty("integration.stratos.cycle", String.valueOf(setting));
     }
 }

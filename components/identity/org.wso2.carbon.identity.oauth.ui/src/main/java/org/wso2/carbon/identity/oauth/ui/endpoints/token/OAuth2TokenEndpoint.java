@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -31,6 +31,7 @@ import org.wso2.carbon.identity.oauth.ui.OAuthClientException;
 import org.wso2.carbon.identity.oauth.ui.OAuthConstants;
 import org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AccessTokenRespDTO;
+import org.wso2.carbon.identity.oauth2.stub.types.ResponseHeader;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -42,6 +43,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import java.util.Enumeration;
 
 @Path("/")
@@ -115,19 +117,29 @@ public class OAuth2TokenEndpoint {
             }
 
             else {
-                OAuthResponse response = OAuthASResponse
-                        .tokenResponse(HttpServletResponse.SC_OK)
+                OAuthResponse response = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
                         .setAccessToken(oauth2AccessTokenResp.getAccessToken())
                         .setRefreshToken(oauth2AccessTokenResp.getRefreshToken())
                         .setExpiresIn(Long.toString(oauth2AccessTokenResp.getExpiresIn()))
-                        .setTokenType("bearer")
-                        .buildJSONMessage();
-                return Response.status(response.getResponseStatus())
+                        .setTokenType("bearer").buildJSONMessage();
+                ResponseHeader[] headers = oauth2AccessTokenResp.getRespHeaders();
+
+                ResponseBuilder respBuilder = Response
+                        .status(response.getResponseStatus())
                         .header(OAuthConstants.HTTP_RESP_HEADER_CACHE_CONTROL,
                                 OAuthConstants.HTTP_RESP_HEADER_VAL_CACHE_CONTROL_NO_STORE)
                         .header(OAuthConstants.HTTP_RESP_HEADER_PRAGMA,
-                                OAuthConstants.HTTP_RESP_HEADER_VAL_PRAGMA_NO_CACHE)
-                        .entity(response.getBody()).build();
+                                OAuthConstants.HTTP_RESP_HEADER_VAL_PRAGMA_NO_CACHE);
+
+                if (headers != null && headers.length > 0) {
+                    for (int i = 0; i < headers.length; i++) {
+                        if (headers[i] != null) {
+                            respBuilder.header(headers[i].getKey(), headers[i].getValue());
+                        }
+                    }
+                }
+
+                return respBuilder.entity(response.getBody()).build();
             }
 
         } catch (OAuthProblemException e) {

@@ -19,24 +19,24 @@
 
 package org.wso2.carbon.discovery;
 
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
-import org.wso2.carbon.base.DiscoveryService;
-import org.wso2.carbon.discovery.client.DiscoveryClient;
-import org.wso2.carbon.discovery.util.ConfigHolder;
-import org.wso2.carbon.discovery.messages.TargetService;
-import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
-import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.CarbonException;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.description.Parameter;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axis2.description.Parameter;
-import org.apache.axis2.context.ConfigurationContext;
+import org.wso2.carbon.CarbonException;
+import org.wso2.carbon.base.DiscoveryService;
+import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
+import org.wso2.carbon.discovery.client.DiscoveryClient;
+import org.wso2.carbon.discovery.messages.TargetService;
+import org.wso2.carbon.discovery.util.ConfigHolder;
 
 import javax.xml.namespace.QName;
 import java.net.URI;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The generic WS-Discovery service that can be used by any tenant or user to discover
@@ -68,7 +68,7 @@ public class CarbonDiscoveryService implements DiscoveryService {
                           int tenantId) throws CarbonException {
 
         // First check whether a Discovery proxy has been configured at tenant axis config level
-        String tenantDomain = SuperTenantCarbonContext.getCurrentContext().getTenantDomain(true);
+        String tenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
         Parameter proxyURL = null;
         if (tenantDomain != null) {
             AxisConfiguration axisConf = TenantAxisUtils.getTenantAxisConfiguration(tenantDomain,

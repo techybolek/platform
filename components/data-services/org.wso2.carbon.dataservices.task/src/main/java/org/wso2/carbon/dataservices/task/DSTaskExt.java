@@ -18,7 +18,7 @@
  */
 package org.wso2.carbon.dataservices.task;
 
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ntask.core.AbstractTask;
 
 /**
@@ -35,8 +35,8 @@ public class DSTaskExt extends AbstractTask {
 		try {
 		    this.taskInstance = (DataTask) Class.forName(this.getProperties().get(
 		    		DSTaskConstants.DATA_TASK_CLASS_NAME)).newInstance();
-		    int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
-		    this.dataTaskContext = new DataTaskContext(tenantId);
+		    this.dataTaskContext = new DataTaskContext(
+		    		PrivilegedCarbonContext.getCurrentContext().getTenantId());
 		} catch (Exception e) {
 			throw new RuntimeException("Error in initializing Data Task: " + e.getMessage(), e);
 		}

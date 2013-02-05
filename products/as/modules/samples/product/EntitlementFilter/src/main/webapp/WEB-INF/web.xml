@@ -4,13 +4,49 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          id="WebApp_ID" version="2.5">
 
-    <display-name>Entitlement_Sample_WebApp</display-name>
+     <display-name>Entitlement_Sample_WebApp</display-name>
+    
+     <security-constraint>
+        <display-name>Example Security Constraint</display-name>
+        <web-resource-collection>
+            <web-resource-name>Protected Area</web-resource-name>
+        <!-- Protected URL -->
+            <url-pattern>/protected.jsp</url-pattern>
+            <!-- If you list http methods, only those methods are protected -->
+            <http-method>DELETE</http-method>
+            <http-method>GET</http-method>
+            <http-method>POST</http-method>
+            <http-method>PUT</http-method>
+        </web-resource-collection>
+        <auth-constraint>
+            <!-- Anyone with one of the listed roles may access this area -->
+            <role-name>admin</role-name>
+        </auth-constraint>
+    </security-constraint>
+ 
+    <!-- Default login configuration uses form-based authentication -->
+    <login-config>
+        <auth-method>BASIC</auth-method>
+        <!--<auth-method>FORM</auth-method>-->
+        <realm-name>Example Form-Based Authentication Area</realm-name>
+        <form-login-config>
+            <form-login-page>/protected.jsp</form-login-page>
+        </form-login-config>
+    </login-config>
+ 
+    <!-- Security roles referenced by this web application -->
+    <security-role>
+        <role-name>everyone</role-name>
+    </security-role>
+    <security-role>
+        <role-name>admin</role-name>
+    </security-role>
 
-    <!-- The scope in which the subject would be available.  Legal values are request-param, request-attribute, session -->
+    <!-- The scope in which the subject would be available.  Legal values are basicAuth, request-param, request-attribute, session -->
     <!-- This param is optional. If not provided would be set to default value -->
     <context-param>
         <param-name>subjectScope</param-name>
-        <param-value>basic-auth</param-value>
+        <param-value>basicAuth</param-value>
     </context-param>
 
     <!-- The name of the identifier by which to identify the subject -->
@@ -23,14 +59,14 @@
     <!-- The username to perform EntitlementService query-->
     <!-- This param is Mandatory. Should be provided -->
     <context-param>
-        <param-name>remoteServiceUserName</param-name>
+        <param-name>userName</param-name>
         <param-value>admin</param-value>
     </context-param>
 
     <!-- The password to perform EntitlementService query -->
     <!-- This param is Mandatory. Should be provided -->
     <context-param>
-        <param-name>remoteServicePassword</param-name>
+        <param-name>password</param-name>
         <param-value>admin</param-value>
     </context-param>
 
@@ -39,15 +75,8 @@
     <!--If the transport type is SOAP give the url like https://localhost:9443/services/-->
     <!--If the transport type is Thrift give the url like https://localhost:9443/-->
     <context-param>
-        <param-name>remoteServiceURL</param-name>
-        <param-value>http://localhost:9443/services/</param-value>
-    </context-param>
-
-    <!-- The transport you use for query Entitlement Service. Legal values are soap,thrift -->
-    <!-- This param is optional. If not provided would be set to default value -->
-    <context-param>
-        <param-name>transportType</param-name>
-        <param-value>soap</param-value>
+        <param-name>remoteServiceUrl</param-name>
+        <param-value>https://localhost:9444/services/</param-value>
     </context-param>
 
     <!-- EntitlementFilter Settings -->
@@ -55,18 +84,31 @@
         <filter-name>EntitlementFilter</filter-name>
         <filter-class>org.wso2.carbon.identity.entitlement.filter.EntitlementFilter</filter-class>
 
-        <!-- Decision caching at PEP. Legal values are enable (or default), disable and wso2as -->
-        <!-- This param is optional. If not provided would be set to default value -->
+        <!--Client Class that extends AbstractEntitlementServiceClient. Legal values are basicAuth, soap and thrift.
+        Default is 'thrift'.-->
         <init-param>
-            <param-name>decisionCaching</param-name>
-            <param-value>enable</param-value>
+            <param-name>client</param-name>
+            <param-value>basicAuth</param-value>
         </init-param>
 
-        <!-- Maximum number of cached entries. Legal values are between 0 and 10000 -->
-        <!-- This param is optional. If not provided would be set to default value -->
+        <!--Decision caching at PEPProxy. Legal values are simple and carbon.This parameter is optional.
+        If not specified no caching is done.-->
+        <init-param>
+            <param-name>cacheType</param-name>
+            <param-value>simple</param-value>
+        </init-param>
+
+        <!--Maximum number of cached entries. Legal values are between 0 and 10000 .
+        Only works with caching.-->
         <init-param>
             <param-name>maxCacheEntries</param-name>
-            <param-value>100</param-value>
+            <param-value>1000</param-value>
+        </init-param>
+
+        <!-- Time interval for which cached entry is valid. Only works with simple cache type. -->
+        <init-param>
+            <param-name>invalidationInterval</param-name>
+            <param-value>100000</param-value>
         </init-param>
 
         <!-- URL ro redirect to if authorization fails -->
@@ -79,7 +121,7 @@
 	<!-- This will be used if the transport type is thrift. This is mandatory -->
         <init-param>
             <param-name>thriftHost</param-name>
-            <param-value>10.100.3.109</param-value>
+            <param-value>localhost</param-value>
         </init-param>
 
         <!-- This will be used if the transport type is thrift. This is optional. If not provided would be set to default value -->

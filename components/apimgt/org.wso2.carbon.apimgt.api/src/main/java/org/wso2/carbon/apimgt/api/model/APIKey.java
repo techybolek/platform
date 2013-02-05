@@ -22,6 +22,10 @@ public class APIKey {
     private String consumerSecret;
     private String accessToken;
     private String type;
+    private String tokenScope;
+    private String validityPeriod;
+    private String createdDate;
+    private String authUser;
 
     public String getConsumerKey() {
         return consumerKey;
@@ -53,5 +57,34 @@ public class APIKey {
 
     public void setType(String type) {
         this.type = type;
+    }
+    public String getAuthUser() {
+        return authUser;
+    }
+
+    public void setAuthUser(String userId) {
+        this.authUser = userId;
+    }
+    public String getValidityPeriod() {
+        return validityPeriod;
+    }
+
+    public void setValidityPeriod(String validityPeriod) {
+        this.validityPeriod = validityPeriod;
+    }
+
+    public String getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(String createdDate) {
+        this.createdDate = createdDate;
+    }
+    public String getTokenScope() {
+        return tokenScope;
+    }
+
+    public void setTokenScope(String tokenScope) {
+        this.tokenScope = tokenScope;
     }
 }

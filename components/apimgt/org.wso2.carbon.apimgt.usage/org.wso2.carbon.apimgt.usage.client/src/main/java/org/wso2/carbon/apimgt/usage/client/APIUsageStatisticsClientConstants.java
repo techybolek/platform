@@ -24,6 +24,8 @@ public final class APIUsageStatisticsClientConstants {
 
     public static final String API_VERSION_SERVICE_TIME_SUMMARY_INDEX = "APIVersionServiceTimeSummaryIndex";
 
+    public static final String API_Resource_Path_USAGE_SUMMARY = "API_Resource_Path_USAGE_SUMMARY";
+
     public static final String API_VERSION_USAGE_SUMMARY = "API_VERSION_USAGE_SUMMARY";
 
     public static final String API_VERSION_USAGE_SUMMARY_INDEX = "APIVersionUsageSummaryIndex";
@@ -37,6 +39,14 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_VERSION_KEY_LAST_ACCESS_SUMMARY_INDEX = "APIVersionKeyLastAccessSummaryIndex";
 
     public static final String KEY_USAGE_SUMMARY = "API_REQUEST_SUMMARY";
+
+    public static final String KEY_USAGE_MONTH_SUMMARY = "API_REQUEST_MONTHLY_SUMMARY";
+
+    public static final String MONTH= "month";
+
+    public static final String  API_FAULT_SUMMARY = " API_FAULT_SUMMARY";
+
+	public static final String  API_REQUEST_TIME_FAULT_SUMMARY = "API_REQUEST_TIME_FAULT_SUMMARY";
 
     public static final String KEY_USAGE_SUMMARY_INDEX = "KeyUsageSummaryIndex";
 
@@ -56,7 +66,13 @@ public final class APIUsageStatisticsClientConstants {
     
     public static final String CONTEXT= "context";
 
+    public static final String RESOURCE= "resource";
+
     public static final String RESPONSE = "total_response_count";
+
+	public static final String INVOCATION_TIME = "requesttime";
+
+    public static final String FAULT = "total_fault_count";
 
     public static final String REQUEST_TIME = "max_request_time";
 

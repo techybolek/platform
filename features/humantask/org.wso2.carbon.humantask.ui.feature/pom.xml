@@ -22,10 +22,12 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
     	<artifactId>humantask-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
+    <version>4.0.5</version>
     <artifactId>org.wso2.carbon.humantask.ui.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - HumanTask UI Feature</name>
@@ -36,13 +38,15 @@
             <groupId>com.googlecode.json-simple.wso2</groupId>
             <artifactId>json-simple</artifactId>
         </dependency>
-	<dependency>
+	    <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.humantask.stub</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.humantask.ui</artifactId>
+            <version>4.0.5</version>
         </dependency>
 
     </dependencies>    
@@ -61,7 +65,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.humantask.ui</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:console</propertyDef>
@@ -70,12 +74,12 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.humantask.ui</bundleDef>
-				<bundleDef>org.wso2.carbon:org.wso2.carbon.humantask.stub</bundleDef>
+				                <bundleDef>org.wso2.carbon:org.wso2.carbon.humantask.stub</bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.ui:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.attachment.mgt.ui:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.ui:4.0.4</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.attachment.mgt.ui:4.0.5</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

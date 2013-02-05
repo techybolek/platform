@@ -29,7 +29,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.dashboard.bean.DashboardContentBean;
 import org.wso2.carbon.dashboard.common.DashboardConstants;
 import org.wso2.carbon.dashboard.common.LayoutConstants;
@@ -1861,7 +1861,7 @@ public class DashboardService extends AbstractAdmin {
                     // Following property used to ensure first time population (running only ones)
                     serverNameResource.setProperty(tabResourcePath, tabResourcePath);
 
-                    String tenantDomain = SuperTenantCarbonContext.getCurrentContext().getTenantDomain();
+                    String tenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain();
 
                     // So gadget resources not populated for this tab
                     // Need to populate resources related to this tab

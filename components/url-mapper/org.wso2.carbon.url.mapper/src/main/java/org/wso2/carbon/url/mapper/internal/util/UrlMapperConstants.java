@@ -16,26 +16,30 @@
 
 package org.wso2.carbon.url.mapper.internal.util;
 
-import org.wso2.carbon.utils.CarbonUtils;
-
 public final class UrlMapperConstants {
 
 	public final static String SERVICE_URL_PATTERN =  "/services";
+    public final static String JAX_SERVLET = "JAXServlet";
     public static final class HostProperties {
         public static final String HOST_NAME = "host.name";
         public static final String HOSTINFO = "hostinfo/";
-        public static final String DEFAULT_REGISTRY_HOSTINFO_PATH="/_system/config/hostinfo/";
-        public static final String HOSTINFO_DIR = "/hostinfo/";
-       
+
+        public static final String JAX_APP="jaxWebapp";
+        public static final String JAGGERY_APP = "jaggeryWebapp";
+        public static final String WEBAPP = "webapp";
+
+        public static final String JAX_WEBAPPS="jaxwebapps";
+        public static final String JAGGERY_APPS = "jaggeryapps";
+        public static final String SERVICE = "services" ;
+        public static final String WEB_APPS = "webapps";
+
         public static final String WAR = ".war";
         public static final String FILE_SERPERATOR = "/";
         public static final String WEB_APP = "web.app";
         public static final String TENANT_DOMAIN = "tenant.domain";
         public static final String SERVICE_EPR="service.epr";
-        public static final String WEB_APPS = "webapps";
-        public static final String HOST_DIR = "lib/tomcat/work/Catalina";
-        public static final String SERVICE_IDENTIFIER="/services";
-        public static final String CATALINA_HOME = CarbonUtils.getCarbonHome() + "/lib/tomcat/work/Catalina/";
+        public static final String APP_NAME = "app.name";
+        public static final String JAGGERY_LISTENER = "JaggeryConfListener";
     }
     
     public static final class MappingConfigs {

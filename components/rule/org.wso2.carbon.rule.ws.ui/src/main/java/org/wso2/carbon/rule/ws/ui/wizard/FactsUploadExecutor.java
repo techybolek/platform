@@ -43,7 +43,7 @@ public class FactsUploadExecutor extends AbstractFileUploadExecutor {
         String webContext = (String) request.getAttribute(CarbonConstants.WEB_CONTEXT);
         String serverURL = (String) request.getAttribute(CarbonConstants.SERVER_URL);
         String cookie = (String) request.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
-            Map<String, ArrayList<FileItemData>> fileItemsMap = getFileItemsMap();
+        Map<String, ArrayList<FileItemData>> fileItemsMap = getFileItemsMap();
         Map<String, ArrayList<String>> formFieldsMap = getFormFieldsMap();
 
         if (fileItemsMap == null || fileItemsMap.isEmpty()) {
@@ -69,7 +69,14 @@ public class FactsUploadExecutor extends AbstractFileUploadExecutor {
                         String[] facts =
                                 adminClient.uploadFacts(ruleServiceName,
                                         fileName, fileItemData.getDataHandler(), request);
-                        request.getSession().setAttribute(RuleServiceAdminClient.FACTS, facts);
+                        ArrayList<String> factArchiveList =
+                                (ArrayList<String>) request.getSession().getAttribute(RuleServiceAdminClient.FACTS);
+                        if (factArchiveList == null) {
+                            factArchiveList = new ArrayList<String>();
+                        }
+                        factArchiveList.add(fileName);
+                        request.getSession().setAttribute(RuleServiceAdminClient.FACTS, factArchiveList);
+
 
                         String[] allFacts = ((String[]) request.getSession().getAttribute("allFacts"));
                         if (allFacts != null) {
@@ -96,6 +103,7 @@ public class FactsUploadExecutor extends AbstractFileUploadExecutor {
                         throw new CarbonException("File with extension " + fileName
                                 + " is not supported!");
                     }
+
                     msg = "Facts file uploaded successfully.";
                     fileToRedirect = "/ruleservices/rule_service_wizard_step3.jsp";
                 } else if ("ruleFilename".equals(fieldName)) {
@@ -103,19 +111,21 @@ public class FactsUploadExecutor extends AbstractFileUploadExecutor {
                     String fileName = getFileName(fileItemData.getFileItem().getName());
                     adminClient.uploadRuleFile(ruleServiceName,
                             fileName, fileItemData.getDataHandler(), request);
-                    String[] ruleFileNames = adminClient.getRuleFileList(adminClient.getRuleServiceDescription(request),request.getSession());
+                    String[] ruleFileNames =
+                            adminClient.getRuleFileList(adminClient.getRuleServiceDescription(request), request.getSession());
                     List<String> fileNames = new ArrayList<String>();
                     fileNames = Arrays.asList(ruleFileNames);//(ArrayList<String>) request.getSession().getAttribute("ruleScript"); // String filePath = (String) request.getSession().getAttribute("ruleScript");
-                    Map<String, String>  scriptList = (Map<String, String>) request.getSession().getAttribute("ruleScript");
-                    if(scriptList == null){
+                    Map<String, String> scriptList =
+                            (Map<String, String>) request.getSession().getAttribute(RuleServiceAdminClient.SCRIPTS);
+                    if (scriptList == null) {
 
                         scriptList = new HashMap<String, String>();
                     }
-                    for(String filename : fileNames){
+                    for (String filename : fileNames) {
                         scriptList.put(filename, "file");
 
                     }
-                    request.getSession().setAttribute("ruleScript", scriptList);
+                    request.getSession().setAttribute(RuleServiceAdminClient.SCRIPTS, scriptList);
                     msg = "Rule Script file uploaded successfully.";
                     fileToRedirect = "/ruleservices/rule_service_wizard_step2.jsp";
                 }

@@ -35,7 +35,7 @@ public final class Axis2Util {
     public static AxisService registerAxis2Service(String topicName,
                                                    BrokerListener brokerListener,
                                                    BrokerConfiguration brokerConfiguration,
-                                                   AxisConfiguration axisConfiguration)
+                                                   AxisConfiguration axisConfiguration, String subscriptionId)
             throws AxisFault {
         //first create an Axis2 service to receive the messages to this broker
         //operation name can not have
@@ -49,7 +49,7 @@ public final class Axis2Util {
             axisService.getAxisServiceGroup().addParameter(CarbonConstants.DYNAMIC_SERVICE_PARAM_NAME, "true");
         }
 
-        String topicNameWithoutSlash = topicName.replaceAll("/","");
+        String topicNameWithoutSlash = topicName.replaceAll("/", "");
         AxisOperation axisOperation = axisService.getOperation(new QName("", topicNameWithoutSlash));
         if (axisOperation == null) {
             axisOperation = new InOnlyAxisOperation(new QName("", topicNameWithoutSlash));
@@ -63,29 +63,44 @@ public final class Axis2Util {
 
         SubscriptionMessageReceiver messageReceiver =
                 (SubscriptionMessageReceiver) axisOperation.getMessageReceiver();
-        messageReceiver.addBrokerListener(brokerListener);
+        messageReceiver.addBrokerListener(subscriptionId, brokerListener);
         return axisService;
     }
 
     /**
-     * removes the operation from the Axis service. 
+     * removes the operation from the Axis service.
+     *
      * @param topicName
      * @param brokerConfiguration
      * @param axisConfiguration
+     * @param subscriptionId
      * @throws AxisFault
      */
     public static void removeOperation(String topicName,
                                        BrokerConfiguration brokerConfiguration,
-                                       AxisConfiguration axisConfiguration) throws AxisFault {
+                                       AxisConfiguration axisConfiguration, String subscriptionId) throws AxisFault {
+
 
         String axisServiceName = brokerConfiguration.getName() + "Service";
         AxisService axisService = axisConfiguration.getService(axisServiceName);
 
-        if (axisService == null){
-            throw new AxisFault("There is not service with the name ==> " + axisServiceName);
+        if (axisService == null) {
+            throw new AxisFault("There is no service with the name ==> " + axisServiceName);
+        }
+        String topicNameWithoutSlash = topicName.replaceAll("/", "");
+        AxisOperation axisOperation = axisService.getOperation(new QName("", topicNameWithoutSlash));
+        if (axisOperation == null) {
+            throw new AxisFault("There is no operation with the name ==> " + topicNameWithoutSlash);
+        }
+        SubscriptionMessageReceiver messageReceiver =
+                (SubscriptionMessageReceiver) axisOperation.getMessageReceiver();
+        if (messageReceiver == null) {
+            throw new AxisFault("There is no message receiver for operation with name ==> " + topicNameWithoutSlash);
+        }
+        if (messageReceiver.removeBrokerListener(subscriptionId)) {
+            axisService.removeOperation(new QName("", topicName.replaceAll("/", "")));
         }
 
-        axisService.removeOperation(new QName("", topicName.replaceAll("/", "")));
     }
 
 

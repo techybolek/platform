@@ -22,7 +22,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.core.axis2.ProxyService;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.proxyadmin.ProxyAdminException;
+import org.wso2.carbon.proxyadmin.service.ProxyServiceAdmin;
 import org.wso2.carbon.proxyadmin.util.ConfigHolder;
 
 
@@ -39,7 +41,7 @@ public class ProxyServiceParameterObserver implements ParameterObserver{
 
     public ProxyServiceParameterObserver(AxisService service) {
         this.service = service;
-        this.tanentId = SuperTenantCarbonContext.getCurrentContext(service).getTenantId();
+        this.tanentId = PrivilegedCarbonContext.getCurrentContext(service).getTenantId();
     }
 
     /**
@@ -53,6 +55,9 @@ public class ProxyServiceParameterObserver implements ParameterObserver{
                 getSynapseConfiguration();
 
         ProxyService proxy = config.getProxyService(service.getName());
+        if("passwordCallbackRef".equals(name)){
+        	proxy.setModuleEngaged(true);
+        }
 
         if(proxy != null) {
 
@@ -63,10 +68,16 @@ public class ProxyServiceParameterObserver implements ParameterObserver{
                 //if  this is a parameter remove 
                 proxy.getParameterMap().remove(name);
             }
+             try {
+                    new ProxyServiceAdmin().persistProxyService(proxy);
+                } catch (ProxyAdminException e) {
+                    log.error("Error While persisting proxy information", e);
+                }
 
 
         }else {
             log.error("Proxy Service " +name + " does not exist ");
         }
     }
+
 }

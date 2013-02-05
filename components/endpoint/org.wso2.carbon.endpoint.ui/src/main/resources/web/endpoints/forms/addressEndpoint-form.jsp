@@ -14,17 +14,18 @@
 ~  limitations under the License.
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"
-        import="org.wso2.carbon.endpoint.ui.util.ListEndpointDesignerHelper" %>
-<%@ page import="org.apache.axiom.om.OMElement" %>
+        import="org.apache.axiom.om.OMElement" %>
 <%@ page import="org.apache.axiom.om.util.AXIOMUtil" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.apache.synapse.config.xml.endpoints.TemplateFactory" %>
 <%@ page import="org.apache.synapse.endpoints.Template" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.endpoint.ui.client.EndpointAdminClient" %>
+<%@ page import="org.wso2.carbon.endpoint.ui.endpoints.ListEndpoint" %>
 <%@ page import="org.wso2.carbon.endpoint.ui.endpoints.address.AddressEndpoint" %>
 <%@ page import="org.wso2.carbon.endpoint.ui.factory.TemplateDefinitionFactory" %>
 <%@ page import="org.wso2.carbon.endpoint.ui.util.EndpointConfigurationHelper" %>
+<%@ page import="org.wso2.carbon.endpoint.ui.util.ListEndpointDesignerHelper" %>
 <%@ page import="org.wso2.carbon.endpoint.ui.util.TemplateParameterContainer" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
@@ -42,6 +43,12 @@
 <%
 
     boolean isEditingListEndpoint = session.getAttribute("isEditingListEndpoint") != null ? true : false;
+    boolean isRetryAvailableInParentEndpoint = false;
+    if (isEditingListEndpoint) {
+        ListEndpoint listEndpoint = (ListEndpoint) session.getAttribute("editingListEndpoint");
+        isRetryAvailableInParentEndpoint = listEndpoint.isRetryAvailable();
+    }
+
     String endpointName = (String) session.getAttribute("endpointName");
     String endpointAction = (String) session.getAttribute("endpointAction");
     String origin = (String) session.getAttribute("origin");
@@ -333,6 +340,15 @@
         if (endpoint.getProperties() != null && endpoint.getProperties() != "") {
             properties = endpoint.getProperties();
         }
+    } else {
+        if (isFromTemplateEditor) { // set default variables to template fields
+            if (addressEpName.equals("")) {
+                addressEpName = "$name";
+            }
+            if (validAddressURL.equals("")) {
+                validAddressURL = "$uri";
+            }
+        }
     }
 
 %>
@@ -418,44 +434,51 @@
     <%
         if (isFromTemplateEditor) {
             String propertyTableStyle = params.length == 0 ? "display:none;" : "";
+            if (params.length == 2 && ((params[0].equals("name") && params[1].equals("uri")) || (params[1].equals("name") && params[0].equals("uri")))) {
+                propertyTableStyle = "display:none;";
+            }
     %>
-    <div style="margin-top:0px;">
-        <tr>
-        <table id="propertytable" style="<%=propertyTableStyle%>" class="styledInner">
-            <thead>
-            <tr>
-                <th width="75%"><fmt:message key="template.parameter.name"/></th>
-                <th><fmt:message key="template.parameter.action"/></th>
-            </tr>
-            </thead>
-            <tbody id="propertytbody">
-            <%
-                int i = 0;
-                for (; i < params.length; i++) {
-                    String paramName = params[i];
-            %>
-            <tr id="propertyRaw<%=i%>">
-                <td><input type="text" name="propertyName<%=i%>" id="propertyName<%=i%>"
-                           class="esb-edit small_textbox"
-                           value="<%=paramName%>"/>
-                </td>
-                <td><a href="#" class="delete-icon-link"
-                       onclick="deleteProperty(<%=i%>)"><fmt:message
-                        key="template.parameter.delete"/></a></td>
-            </tr>
-            <%
-                }%>
-            <input type="hidden" name="propertyCount" id="propertyCount" value="<%=i%>"/>
-            </tbody>
-        </table>
-    </div>
+    <tr>
+        <td colspan="2">
+            <div style="margin-top:0px;">
+                <table id="propertytable" style="<%=propertyTableStyle%>" class="styledInner">
+                    <thead>
+                    <tr>
+                        <th width="75%"><fmt:message key="template.parameter.name"/></th>
+                        <th><fmt:message key="template.parameter.action"/></th>
+                    </tr>
+                    </thead>
+                    <tbody id="propertytbody">
+                    <%
+                        int i = 0;
+                        for (; i < params.length; i++) {
+                            String paramName = params[i];
+                            if (paramName.equals("name") || paramName.equals("uri")) { // hide default parameters
+                                continue;
+                            }
+                    %>
+                    <tr id="propertyRaw<%=i%>">
+                        <td><input type="text" name="propertyName<%=i%>" id="propertyName<%=i%>"
+                                   class="esb-edit small_textbox"
+                                   value="<%=paramName%>"/>
+                        </td>
+                        <td><a class="delete-icon-link"
+                               onclick="deleteProperty(<%=i%>)"><fmt:message
+                                key="template.parameter.delete"/></a></td>
+                    </tr>
+                    <%
+                        }%>
+                    <input type="hidden" name="propertyCount" id="propertyCount" value="<%=i%>"/>
+                    </tbody>
+                </table>
+            </div>
+        </td>
     </tr>
     <tr>
         <td>
             <div style="margin-top:10px;">
                 <a name="addNameLink"></a>
                 <a class="add-icon-link"
-                   href="#addNameLink"
                    onclick="addParameter()"><fmt:message key="template.parameter.add"/></a>
             </div>
         </td>
@@ -529,8 +552,7 @@
                            size="75" />
                 </td>
                 <td>
-                    <a href="#"
-                       class="errorcode-picker-icon-link"
+                    <a class="errorcode-picker-icon-link"
                        style="padding-left:20px;padding-right:20px"
                        onclick="showErrorCodeEditor('suspendErrorCode')"><fmt:message
                             key="errorcode.editor.link"/></a>
@@ -573,8 +595,7 @@
                            size="75"/>
                 </td>
                 <td>
-                    <a href="#"
-                       class="errorcode-picker-icon-link"
+                    <a class="errorcode-picker-icon-link"
                        style="padding-left:20px;padding-right:20px"
                        onclick="showErrorCodeEditor('retryErroCode')"><fmt:message
                             key="errorcode.editor.link"/></a>
@@ -595,6 +616,12 @@
                value="<%=(retryTimeOut==0)?EndpointConfigurationHelper.getMappingFrom(templateMappings, TemplateParameterContainer.EndpointDefKey.retryDurationOnTimeout):retryTimeOut%>"/>
     </td>
 </tr>
+
+<% if (isRetryAvailableInParentEndpoint) {
+%>
+<tr>
+    <td colspan="2" class="sub-header"><fmt:message key="failover.retry"/></td>
+</tr>
 <tr id="disabled_error_codes">
     <td>
         <div class="indented"><fmt:message key="disabled.error.codes"/></div>
@@ -605,8 +632,7 @@
                 <td><input type="text" id="disabledErrorCodes" name="disabledErrorCodes" class="longInput"
                            value="<%=retryDisabledErrorCodes%>" size="75"></td>
                 <td>
-                    <a href="#"
-                       class="errorcode-picker-icon-link"
+                    <a class="errorcode-picker-icon-link"
                        style="padding-left:20px;padding-right:20px"
                        onclick="showErrorCodeEditor('disabledErrorCodes')"><fmt:message
                             key="errorcode.editor.link"/></a>
@@ -615,6 +641,9 @@
         </table>
     </td>
 </tr>
+<%
+    }
+%>
 <tr>
     <td colspan="2" class="sub-header"><fmt:message key="timeout"/></td>
 </tr>
@@ -755,7 +784,7 @@
     </tr>
     <tr>
         <td colspan="2">
-            <a href="#" onclick="addServiceParams('headerTable')"
+            <a onclick="addServiceParams('headerTable')"
                style="background-image: url('../admin/images/add.gif');" class="icon-link">Add
                                                                                            Property</a><input
                 type="hidden" name="endpointProperties" id="endpointProperties"/>

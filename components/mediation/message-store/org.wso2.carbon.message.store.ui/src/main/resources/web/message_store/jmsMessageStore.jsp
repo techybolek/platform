@@ -96,6 +96,7 @@
         addServiceParameter("store.jms.password", document.getElementById('jms_password').value);
         addServiceParameter("store.jms.JMSSpecVersion", document.getElementById('jms_spec_version').options[document.getElementById('jms_spec_version').selectedIndex].value);
         addServiceParameter("store.jms.cache.connection", document.getElementById('jms_cache_connection').options[document.getElementById('jms_cache_connection').selectedIndex].value);
+        addServiceParameter("store.jms.ConsumerReceiveTimeOut", document.getElementById('jms_ConsumerReceiveTimeOut').value);
     }
 
     function addServiceParameter(parameter, value) {
@@ -335,6 +336,13 @@
                                 <option selected="selected" value="false">false</option>
                                 <%}%>
                             </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><fmt:message key="store.jms.ConsumerReceiveTimeOut"/></td>
+                        <td><input type="text" id="jms_ConsumerReceiveTimeOut" name="jms_ConsumerReceiveTimeOut"
+                                   value="<%=((null!=messageStore)&&(messageStore.getParams().get("store.jms.ConsumerReceiveTimeOut")!=null))?messageStore.getParams().get("store.jms.ConsumerReceiveTimeOut"):""%>"
+                                   size="75"/>
                         </td>
                     </tr>
                     </tbody>

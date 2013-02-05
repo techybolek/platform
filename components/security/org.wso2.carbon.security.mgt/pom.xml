@@ -19,29 +19,38 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>security</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.security.mgt</artifactId>
+    <version>4.0.5</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Security BE</name>
     <description>A custom wso2 products or solution</description>
     <url>http://wso2.org</url>
 
     <dependencies>
-<dependency>
+		<dependency>
                 <groupId>org.apache.neethi.wso2</groupId>
                 <artifactId>neethi</artifactId>
-            </dependency>
+        </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
+	    	<version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.utils</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.ws.security.wso2</groupId>
@@ -51,17 +60,17 @@
         <dependency>
             <groupId>org.apache.rampart.wso2</groupId>
             <artifactId>rampart-core</artifactId>
-            <version>${rampart.wso2.version.security}</version>
+            <version>1.6.1.wso2v8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.rampart.wso2</groupId>
             <artifactId>rampart-policy</artifactId>
-            <version>${rampart.wso2.version.security}</version>
+            <version>1.6.1.wso2v8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.rampart.wso2</groupId>
             <artifactId>rampart-trust</artifactId>
-            <version>${rampart.wso2.version.security}</version>
+            <version>1.6.1.wso2v8</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.xkms.wso2</groupId>
@@ -71,6 +80,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.caching.core</artifactId>
+            <version>4.0.1</version>
         </dependency>
 		<dependency>
 			<groupId>backport-util-concurrent.wso2</groupId>
@@ -103,10 +118,10 @@
                             org.apache.axiom.*; version="${axiom.osgi.version.range.security}",
                             org.apache.neethi.*; version="${neethi.osgi.version.range.security}",
                             org.apache.commons.logging.*; version="1.0.4",
-                            org.apache.rampart.*; version="[${rampart.wso2.version.security}, 2)",
-                            org.apache.rahas.*; version="[${rampart.wso2.version.security}, 2)",
+                            org.apache.rampart.*; version="[1.6.1.wso2v8, 2)",
+                            org.apache.rahas.*; version="[1.6.1.wso2v8, 2)",
                             org.apache.ws.security.*; version="[${wss4j.version}, 2)",
-                            org.wso2.carbon.core.*,
+                            org.wso2.carbon.core.*; version="0.0.0",
                             org.wso2.carbon.user.core,
                             org.wso2.carbon.utils,
                             org.wso2.carbon.registry.core,

@@ -91,7 +91,7 @@ public class AttachmentUploadServlet extends HttpServlet {
             int startPos = ((file.substring(0, pos)).getBytes()).length;
             int endPos = ((file.substring(0, boundaryLocation)).getBytes()).length;
 
-            log.warn("Hard-coded directory path:" + "\"tmp/\"");
+            //TODO log.warn("Hard-coded directory path:" + "\"tmp/\"");
             File tmpFile = new File("tmp" + File.separator + saveFile);
             FileOutputStream fileOut = new FileOutputStream(tmpFile);
             fileOut.write(dataBytes, startPos, (endPos - startPos));

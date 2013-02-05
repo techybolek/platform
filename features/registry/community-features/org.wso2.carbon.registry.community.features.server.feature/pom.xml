@@ -22,28 +22,32 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>community.features-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.registry.community.features.server.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Registry Community Features Server Feature</name>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.5</version>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for Back-end Registry Community Features functionality</description>
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.info</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.eventing</artifactId>
+            <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.email.verification</artifactId>
+	    <version>4.0.2</version>
         </dependency>
     </dependencies>
     <build>
@@ -61,7 +65,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.registry.community.features.server</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>

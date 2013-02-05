@@ -30,6 +30,8 @@ public class PolicySetDTO {
 
     private String policyCombiningAlgId;
 
+    private String version;
+
     private TargetElementDTO targetElementDTO;
 
     private BasicTargetElementDTO basicTargetElementDTO;
@@ -52,6 +54,14 @@ public class PolicySetDTO {
 
     public void setPolicySetId(String policySetId) {
         this.policySetId = policySetId;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public String getPolicyCombiningAlgId() {

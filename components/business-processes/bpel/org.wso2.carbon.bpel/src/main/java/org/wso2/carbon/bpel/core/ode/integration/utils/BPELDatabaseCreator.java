@@ -25,6 +25,6 @@ public class BPELDatabaseCreator extends DatabaseCreator {
         }
         String carbonHome = System.getProperty("carbon.home");
         return carbonHome + File.separator + "dbscripts" + File.separator + "bps" + File.separator
-                + "bpel" + File.separator + scriptName;
+                + scriptName;
     }
 }

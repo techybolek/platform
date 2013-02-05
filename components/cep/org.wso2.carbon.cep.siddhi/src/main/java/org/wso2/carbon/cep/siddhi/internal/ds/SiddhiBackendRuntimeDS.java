@@ -24,7 +24,6 @@ import org.wso2.carbon.cassandra.dataaccess.ClusterInformation;
 import org.wso2.carbon.cassandra.dataaccess.DataAccessService;
 import org.wso2.carbon.cep.core.CEPServiceInterface;
 import org.wso2.carbon.cep.core.backend.CEPEngineProvider;
-import org.wso2.carbon.cep.core.exception.CEPConfigurationException;
 import org.wso2.carbon.cep.siddhi.backend.SiddhiBackEndRuntimeFactory;
 import org.wso2.carbon.cep.siddhi.persistence.CasandraPersistenceStore;
 import org.wso2.carbon.user.core.UserRealm;
@@ -65,26 +64,24 @@ public class SiddhiBackendRuntimeDS {
                 String adminPassword = userRealm.getRealmConfiguration().getAdminPassword();
                 String adminUserName = userRealm.getRealmConfiguration().getAdminUserName();
 //           int tenantId =userRealm.getRealmConfiguration().getTenantId();
-                List<String> configPropertyNames=new ArrayList<String>();
+                List<String> configPropertyNames = new ArrayList<String>();
                 configPropertyNames.add(SiddhiBackEndRuntimeFactory.PERSISTENCE_SNAPSHOT_TIME_INTERVAL_MINUTES);
+                configPropertyNames.add(SiddhiBackEndRuntimeFactory.ENABLE_DISTRIBUTED_PROCESSING);
                 cepEngineProvider.setConfigurationPropertyNames(configPropertyNames);
 
                 ClusterInformation clusterInformation = new ClusterInformation(adminUserName,
                                                                                adminPassword);
-                clusterInformation.setClusterName("SiddhiPersistenceCluster");
+                clusterInformation.setClusterName(CasandraPersistenceStore.CLUSTER_NAME);
                 Cluster cluster = dataAccessService.getCluster(clusterInformation);
                 clusterName = cluster.getName();
                 casandraPersistenceStore = new CasandraPersistenceStore(cluster);
                 SiddhiBackendRuntimeValueHolder.getInstance().setPersistenceStore(casandraPersistenceStore);
-
                 SiddhiBackendRuntimeValueHolder.getInstance().getCEPService()
                         .registerCEPEngineProvider(cepEngineProvider);
-            } catch (CEPConfigurationException e) {
-                log.error("Can not register Siddhi back end runtime with the cep service ");
             } catch (UserStoreException e) {
                 log.error("Error in accessing user store ", e);
-            } catch (Throwable e){
-                log.error("Error in registering Siddhi back end runtime with the cep service ",e);
+            } catch (Throwable e) {
+                log.error("Error in registering Siddhi back end runtime with the cep service ", e);
             }
         }
 

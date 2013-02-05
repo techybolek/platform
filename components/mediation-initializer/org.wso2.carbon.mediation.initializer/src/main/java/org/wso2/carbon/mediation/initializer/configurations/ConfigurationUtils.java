@@ -253,7 +253,7 @@ public class ConfigurationUtils {
 
             // Finally init the persistence manager
             MediationPersistenceManager pm = new MediationPersistenceManager(
-                    ServiceBusConstants.DISABLED.equals(regPersistence) ? null : registry,
+                    ServiceBusConstants.ENABLED.equals(regPersistence) ? registry : null,
                     configurationLocation,
                     synCfgConfiguration, intervalInMillis, name);
 

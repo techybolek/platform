@@ -21,7 +21,10 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -81,7 +84,10 @@ public class BasicTemplateBuilder implements APITemplateBuilder {
             }
             configAPIOM.addChild(handlersConfigOM);
         }
-
+       
+        //set Auth transport header
+        constructUsertokenEndpoint(configAPIOM);     
+       
         return configAPIOM.toString();
     }
 
@@ -124,7 +130,12 @@ public class BasicTemplateBuilder implements APITemplateBuilder {
                     singleResMap.get(KEY_FOR_RESOURCE_URI_TEMPLATE) != null &&
                     singleResMap.get(KEY_FOR_RESOURCE_URI) != null &&
                     singleResMap.get(KEY_FOR_RESOURCE_SANDBOX_URI) != null) {
-                String resourceTemplate = templateLoader.getTemplate(TemplateLoader.TEMPLATE_TYPE_COMPLEX_RESOURCE);
+                String resourceTemplate;
+                if(ApiMgtDAO.jwtGenerator != null){
+                    resourceTemplate = templateLoader.getTemplate(TemplateLoader.TEMPLATE_TYPE_COMPLEX_RESOURCE_WITH_JWT);
+                }else{
+                    resourceTemplate = templateLoader.getTemplate(TemplateLoader.TEMPLATE_TYPE_COMPLEX_RESOURCE);
+                }
                 String endpoint = StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(
                         singleResMap.get(KEY_FOR_RESOURCE_URI)));
                 String testEndpoint = StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(
@@ -140,7 +151,13 @@ public class BasicTemplateBuilder implements APITemplateBuilder {
             } else if (singleResMap != null && singleResMap.get(KEY_FOR_RESOURCE_METHODS) != null &&
                     singleResMap.get(KEY_FOR_RESOURCE_URI_TEMPLATE) != null &&
                     singleResMap.get(KEY_FOR_RESOURCE_URI) != null) {
-                String resourceTemplate = templateLoader.getTemplate(TemplateLoader.TEMPLATE_TYPE_RESOURCE);
+                String resourceTemplate;
+                if(ApiMgtDAO.jwtGenerator != null){
+                    resourceTemplate = templateLoader.getTemplate(TemplateLoader.TEMPLATE_TYPE_RESOURCE_WITH_JWT);
+                }else{
+                    resourceTemplate = templateLoader.getTemplate(TemplateLoader.TEMPLATE_TYPE_RESOURCE);
+                }
+
                 String endpoint = StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(
                         singleResMap.get(KEY_FOR_RESOURCE_URI)));
                 String replacedStr = resourceTemplate.
@@ -152,7 +169,9 @@ public class BasicTemplateBuilder implements APITemplateBuilder {
                 resourceListString.add(replacedStr);
             } else {
                 handleException("Required resource mapping not provided");
-            }
+            }           
+			
+            
             i++;
         }
         return resourceListString;
@@ -200,5 +219,57 @@ public class BasicTemplateBuilder implements APITemplateBuilder {
     private void handleException(String msg) throws APITemplateException {
         log.error(msg);
         throw new APITemplateException(msg);
+    }
+
+	/**
+	 * Create secured endpoint config using Usernametoken auth header 
+	 * 
+	 * @return
+	 * @throws APITemplateException
+	 */
+	private OMElement constructUsertokenEndpoint(OMElement configAPIOM) throws APITemplateException {
+        if(resourceMappings!=null){
+		Iterator<Map<String, String>> resourceMaps = resourceMappings.iterator();
+		String username = null, password = null;
+		while (resourceMaps.hasNext()) {
+			Map<String, String> singleResMap = resourceMaps.next();
+
+			if (singleResMap != null && "true".equals(singleResMap.get(KEY_FOR_ENDPOINT_SECURED)) &&
+			    singleResMap.get(KEY_FOR_ENDPOINT_USERNAME) != null &&
+			    singleResMap.get(KEY_FOR_ENDPOINT_PASSWORD) != null) {
+				username = singleResMap.get(KEY_FOR_ENDPOINT_USERNAME);
+				password = singleResMap.get(KEY_FOR_ENDPOINT_PASSWORD);
+
+			}
+		}
+		if (username != null && password != null) {
+			String userTokenEndpointTemplate =
+			                                   templateLoader.getTemplate(TemplateLoader.TEMPLATE_TYPE_USERTOKEN_HEADER);
+
+			String replacedStr =
+			                     userTokenEndpointTemplate.replaceAll("\\[1\\]", username)
+			                                              .replaceAll("\\[2\\]", password);
+
+			OMElement utEndpoint = createOMElementFrom(replacedStr);
+
+			Iterator resourceItr =
+			                       configAPIOM.getChildrenWithName(new QName(
+			                                                                 APIConstants.SYNAPSE_NAMESPACE,
+			                                                                 "resource"));
+			OMElement resourceElement, inSeqElement = null;
+			if (resourceItr.hasNext()) {
+				resourceElement = (OMElement) resourceItr.next();
+				Iterator inSeqItr = resourceElement.getChildrenWithLocalName("inSequence");
+				if (inSeqItr.hasNext()) {
+					inSeqElement = (OMElement) inSeqItr.next();
+				}
+			}
+			if (utEndpoint != null) {
+				inSeqElement.getFirstOMChild().insertSiblingBefore(utEndpoint);
+			}
+		}
+
+	}
+    return configAPIOM;
     }
 }

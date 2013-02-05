@@ -22,12 +22,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>data-services-hosting-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.dataservices.server.feature</artifactId>
     <packaging>pom</packaging>
+    <version>4.0.5</version>
     <name>Data Service Hosting Server Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for Back-end Data Service hosting functionality</description>
@@ -36,12 +38,17 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.dataservices.core</artifactId>
-            <version>${carbon.platform.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.dataservices.common</artifactId>
-            <version>${carbon.platform.version}</version>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.dataservices.sql.driver</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.gdata.wso2</groupId>
@@ -111,7 +118,7 @@
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.transaction.manager.feature</artifactId>
             <type>zip</type>
-            <version>${carbon.platform.version}</version>
+            <version>4.0.5</version>
         </dependency>    
     </dependencies>
 
@@ -130,7 +137,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.dataservices.server</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:console</propertyDef>
@@ -141,6 +148,8 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.dataservices.core
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.dataservices.common
+                                </bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.dataservices.sql.driver
                                 </bundleDef>
                                 <bundleDef>com.google.gdata.wso2:gdata-core</bundleDef>
                                 <bundleDef>com.google.gdata.wso2:gdata-spreadsheet</bundleDef>
@@ -154,13 +163,13 @@
                                 <bundleDef>bsh.wso2:bsh</bundleDef>
                                 <bundleDef>org.htmlcleaner.wso2:htmlcleaner</bundleDef>
                                 <bundleDef>commons-dbcp.wso2:commons-dbcp</bundleDef>
-                                <bundleDef>commons-pool.wso2:commons-pool</bundleDef>
+                                <bundleDef>commons-pool.wso2:commons-pool</bundleDef>                              
                             </bundles>
 				<importFeatures>
-                                <importFeatureDef>org.wso2.carbon.service.mgt.server
+                                <importFeatureDef>org.wso2.carbon.service.mgt.server:4.0.5
                                 </importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.event.server</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.transaction.manager</importFeatureDef>   
+                                <importFeatureDef>org.wso2.carbon.event.server:4.0.5</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.transaction.manager:4.0.5</importFeatureDef>   
                        </importFeatures>
                         </configuration>
                     </execution>

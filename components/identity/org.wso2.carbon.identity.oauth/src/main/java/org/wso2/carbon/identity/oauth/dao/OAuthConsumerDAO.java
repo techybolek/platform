@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -72,6 +72,49 @@ public class OAuthConsumerDAO {
         }
 
         return consumerSecret;
+
+    }
+
+    /**
+     * Returns the username corresponding to a given client id and consumer secret
+     *
+     * @param clientId                          Client Id/Key
+     * @param clientSecret                      Consumer secret
+     * @return                                  Username if successful, empty string otherwise
+     * @throws IdentityOAuthAdminException      Error when reading consumer secret from the persistence store
+     */
+    public String getAuthenticatedUsername(String clientId, String clientSecret) throws IdentityOAuthAdminException {
+        String username = "";
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet resultSet = null;
+
+        try {
+            connection = JDBCPersistenceManager.getInstance().getDBConnection();
+            prepStmt = connection.prepareStatement(SQLQueries.OAuthConsumerDAOSQLQueries.GET_USERNAME_FOR_KEY_AND_SECRET);
+            prepStmt.setString(1, clientId);
+            prepStmt.setString(2, clientSecret);
+            resultSet = prepStmt.executeQuery();
+
+            if (resultSet.next()) {
+                username = resultSet.getString(1);
+            } else {
+                log.debug("Invalid client id : " + clientId + ", and consumer secret : " + clientSecret);
+            }
+        } catch (IdentityException e) {
+            String errorMsg = "Error when getting an Identity Persistence Store instance.";
+            log.error(errorMsg, e);
+            throw new IdentityOAuthAdminException(errorMsg, e);
+        } catch (SQLException e) {
+            log.error("Error when executing the SQL : " + SQLQueries.OAuthConsumerDAOSQLQueries.GET_USERNAME_FOR_KEY_AND_SECRET);
+            log.error(e.getMessage(), e);
+            throw new IdentityOAuthAdminException("Error while reading username for client id : " + clientId +
+                    ", and consumer secret : " + clientSecret);
+        } finally {
+            IdentityDatabaseUtil.closeAllConnections(connection, resultSet, prepStmt);
+        }
+
+        return username;
 
     }
 
@@ -235,10 +278,6 @@ public class OAuthConsumerDAO {
                 params.setOauthTokenVerifier(resultSet.getString(7));
                 params.setAuthorizedbyUserName(resultSet.getString(8));
 
-                String tokenIssued = resultSet.getString(6);
-                if("true".equals(tokenIssued)){
-                    params.setAccessTokenIssued(true);
-                }
             } else {
                 log.error("Invalid request token : " + oauthToken);
                 throw new IdentityException("Invalid request token. No such token issued.");
@@ -278,6 +317,7 @@ public class OAuthConsumerDAO {
             issueAccessTokStmt.setString(3, consumerKey);
             issueAccessTokStmt.setString(4, scope);
             issueAccessTokStmt.setString(5, authorizedUser);
+            issueAccessTokStmt.execute();
 
             connection.commit();
 
@@ -316,7 +356,7 @@ public class OAuthConsumerDAO {
         try {
             connection = JDBCPersistenceManager.getInstance().getDBConnection();
             prepStmt = connection.prepareStatement(SQLQueries.OAuthConsumerDAOSQLQueries.GET_ACCESS_TOKEN);
-            prepStmt.setString(1, consumerKey);
+            prepStmt.setString(1, oauthToken);
             resultSet = prepStmt.executeQuery();
 
             if (resultSet.next()) {

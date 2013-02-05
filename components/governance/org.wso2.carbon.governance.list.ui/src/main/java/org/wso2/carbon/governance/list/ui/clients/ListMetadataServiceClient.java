@@ -92,10 +92,23 @@ public class ListMetadataServiceClient {
     public WSDLBean listwsdls() throws Exception{
         return stub.listwsdls();
     }
+    public WSDLBean listWsdlsByName(String wsdlName) throws Exception{
+        return stub.listWsdlsByName(wsdlName);
+    }
     public PolicyBean listpolicies() throws Exception{
         return stub.listpolicies();
     }
+
+    public PolicyBean listPoliciesByName(String policyName) throws Exception{
+        return stub.listPoliciesByNames(policyName);
+    }
+
     public SchemaBean listschemas() throws Exception{
         return stub.listschema();
     }
+
+    public SchemaBean listSchemasByName(String name) throws Exception{
+        return stub.listSchemaByName(name);
+    }
+
 }

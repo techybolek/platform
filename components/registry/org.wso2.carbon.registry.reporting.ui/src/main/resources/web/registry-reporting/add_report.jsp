@@ -65,7 +65,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="leftCol-small" ><fmt:message key="report.template"/></td>
+                                        <td class="leftCol-small" ><fmt:message key="report.template"/>&nbsp;<span class="required">*</span></td>
                                         <td>
                                             <input type="text" id="reportTemplate" name="reportTemplate"/>
                                             <input type="button" class="button"
@@ -84,7 +84,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="leftCol-small" ><fmt:message key="report.class"/></td>
+                                        <td class="leftCol-small" ><fmt:message key="report.class"/>&nbsp;<span class="required">*</span></td>
                                         <td>
                                             <input type="text" id="reportClass" name="reportClass" />
                                             <input type="button" class="button"

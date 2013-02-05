@@ -234,6 +234,33 @@
     function removeColumn(id) {
         $("#" + id).remove();
     }
+
+    function testServer(){
+
+        var serverUrl = document.getElementById('url').value;
+        var serverIp = serverUrl.split("://")[1].split(":")[0];
+        var authPort = serverUrl.split("://")[1].split(":")[1];
+
+        if(serverIp == null || authPort == null || serverIp == "" || authPort == ""){
+            CARBON.showInfoDialog("Please enter the URL correctly.");
+        } else{
+            jQuery.ajax({
+                            type:"GET",
+                            url:"../bammediationstatpub/test_server_ajaxprocessor.jsp",
+                            data:{action:"testServer", ip:serverIp, port:authPort},
+                            success:function(data){
+                                if(data != null && data != ""){
+                                    var result = data.replace(/\n+/g, '');
+                                    if(result == "true"){
+                                        CARBON.showInfoDialog("Successfully connected to BAM Server");
+                                    } else if(result == "false"){
+                                        CARBON.showErrorDialog("BAM Server cannot be connected!")
+                                    }
+                                }
+                            }
+                        });
+        }
+    }
 </script>
 
 <div id="middle">
@@ -301,10 +328,23 @@
                     </th>
                 </tr>
                 </thead>
+                <%
+                    if (!client.isCloudDeployment()){
+                %>
                 <tr>
                     <td><fmt:message key="bam.url"/></td>
-                    <td><input type="text" name="url" value="<%=url%>"/></td>
+                    <td>
+                        <input type="text" id="url" name="url" value="<%=url%>"/>
+                        <input type="button" value="Test Server" onclick="testServer()"/>
+                    </td>
                 </tr>
+                <%
+                    }else{
+                %>
+                  <input type="hidden" id="url" name="url" value="<%=client.getBAMServerURL()%>"/>
+                <%
+                    }
+                %>
                 <tr>
                     <td><fmt:message key="username"/></td>
                     <td><input type="text" name="user_name" value="<%=userName%>"/></td>

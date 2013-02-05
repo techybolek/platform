@@ -20,7 +20,13 @@ package org.wso2.carbon.apimgt.impl.dao.test;
 
 import junit.framework.TestCase;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -30,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 
 import java.util.Date;
@@ -50,6 +57,8 @@ public class APIMgtDAOTest extends TestCase {
         APIMgtDBUtil.initialize();
         apiMgtDAO = new ApiMgtDAO();
         IdentityTenantUtil.setRealmService(new TestRealmService());
+        String identityConfigPath = System.getProperty("IdentityConfigurationPath");
+        IdentityConfigParser.getInstance(identityConfigPath);
     }
 
     public void testGetSubscribersOfProvider() throws Exception{
@@ -68,51 +77,30 @@ public class APIMgtDAOTest extends TestCase {
         assertTrue(accessKey.length() > 0);
     }
 
-
     public void testGetSubscribedAPIsOfUser()throws Exception{
         APIInfoDTO[] apis = apiMgtDAO.getSubscribedAPIsOfUser("SUMEDHA");
         assertNotNull(apis);
         assertTrue(apis.length > 1);
     }
 
-    public void testValidateKey() throws Exception {
-        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = apiMgtDAO.validateKey("/deli2", "V1.0.0", "a1b2c3d4");
+    public void testValidateApplicationKey() throws Exception {
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = apiMgtDAO.validateKey("/context1", "V1.0.0", "test1", "DEVELOPER");
         assertNotNull(apiKeyValidationInfoDTO);
         assertTrue(apiKeyValidationInfoDTO.isAuthorized());
-        assertEquals("SUMEDHA", apiKeyValidationInfoDTO.getUsername());
+        assertEquals("SUMEDHA", apiKeyValidationInfoDTO.getSubscriber());
+        assertEquals("PRODUCTION", apiKeyValidationInfoDTO.getType());
+        assertEquals("T1", apiKeyValidationInfoDTO.getTier());
+
+        apiKeyValidationInfoDTO = apiMgtDAO.validateKey("/context1", "V1.0.0", "test2", "DEVELOPER");
+        assertNotNull(apiKeyValidationInfoDTO);
+        assertTrue(apiKeyValidationInfoDTO.isAuthorized());
+        assertEquals("SUMEDHA", apiKeyValidationInfoDTO.getSubscriber());
         assertEquals("SANDBOX", apiKeyValidationInfoDTO.getType());
         assertEquals("T1", apiKeyValidationInfoDTO.getTier());
 
-        apiKeyValidationInfoDTO = apiMgtDAO.validateKey("/context1", "V1.0.0", "p1q2r3s4");
-        assertNotNull(apiKeyValidationInfoDTO);
-        assertTrue(apiKeyValidationInfoDTO.isAuthorized());
-
-        apiKeyValidationInfoDTO = apiMgtDAO.validateKey("/deli2", "V1.0.0", "w1x2y3z4");
+        apiKeyValidationInfoDTO = apiMgtDAO.validateKey("/deli2", "V1.0.0", "test3", "DEVELOPER");
         assertNotNull(apiKeyValidationInfoDTO);
         assertFalse(apiKeyValidationInfoDTO.isAuthorized());
-    }
-
-    public void testValidateApplicationKey() throws Exception {
-        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = apiMgtDAO.validateKey("/context1", "V1.0.0", "test1");
-        assertNotNull(apiKeyValidationInfoDTO);
-        assertTrue(apiKeyValidationInfoDTO.isAuthorized());
-        assertEquals("SUMEDHA", apiKeyValidationInfoDTO.getUsername());
-        assertEquals("PRODUCTION", apiKeyValidationInfoDTO.getType());
-        assertEquals("T1", apiKeyValidationInfoDTO.getTier());
-
-        apiKeyValidationInfoDTO = apiMgtDAO.validateKey("/context1", "V1.0.0", "test2");
-        assertNotNull(apiKeyValidationInfoDTO);
-        assertTrue(apiKeyValidationInfoDTO.isAuthorized());
-        assertEquals("SUMEDHA", apiKeyValidationInfoDTO.getUsername());
-        assertEquals("SANDBOX", apiKeyValidationInfoDTO.getType());
-        assertEquals("T1", apiKeyValidationInfoDTO.getTier());
-
-        apiKeyValidationInfoDTO = apiMgtDAO.validateKey("/deli2", "V1.0.0", "test3");
-        assertNotNull(apiKeyValidationInfoDTO);
-        assertTrue(apiKeyValidationInfoDTO.isAuthorized());
-        assertEquals("SUMEDHA", apiKeyValidationInfoDTO.getUsername());
-        assertEquals("PRODUCTION", apiKeyValidationInfoDTO.getType());
-        assertEquals("T1", apiKeyValidationInfoDTO.getTier());
     }
 
     public void testGetSubscribedUsersForAPI() throws Exception{
@@ -141,6 +129,7 @@ public class APIMgtDAOTest extends TestCase {
         isSubscribed = apiMgtDAO.isSubscribed(apiIdentifier, "UDAYANGA");
         assertFalse(isSubscribed);
     }
+
 
     public void testGetAllAPIUsageByProvider() throws Exception{
         UserApplicationAPIUsage[] userApplicationAPIUsages = apiMgtDAO.getAllAPIUsageByProvider("SUMEDHA");
@@ -174,7 +163,7 @@ public class APIMgtDAOTest extends TestCase {
         assertTrue(!key1.equals(key2));
     }
 
-    public void testRegisterApplicationAccessToken()throws  Exception{
+    public String[] testRegisterApplicationAccessToken()throws  Exception{
         apiMgtDAO.registerApplicationAccessToken("CON1","APPLICATION3","PRABATH",MultitenantConstants.SUPER_TENANT_ID,"PRODUCTION");
         String key1 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION3", "PRODUCTION");
         assertNotNull(key1);
@@ -184,6 +173,7 @@ public class APIMgtDAOTest extends TestCase {
         assertNotNull(key2);
 
         assertTrue(!key1.equals(key2));
+        return new String[]{key1, key2};
     }
 
     public void testGetSubscribedAPIs() throws Exception{
@@ -329,6 +319,25 @@ public class APIMgtDAOTest extends TestCase {
         subscriptions = apiMgtDAO.getSubscribedAPIs(subscriber);
         assertTrue(subscriptions.isEmpty());
     }
+
+    public void testIsAccessTokenExists() throws Exception {
+        boolean exist = apiMgtDAO.isAccessTokenExists(testRegisterApplicationAccessToken()[0]);
+        assertEquals(true, exist);
+    }
+
+    public void testRefreshAccessToken() throws Exception {
+        apiMgtDAO.refreshAccessToken("PRODUCTION", testRegisterApplicationAccessToken()[0]);
+        String key1 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION3", "PRODUCTION");
+        assertNotNull(key1);
+
+        apiMgtDAO.refreshAccessToken("PRODUCTION", testRegisterApplicationAccessToken()[1]);
+        String key2 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION4", "SANDBOX");
+        assertNotNull(key1);
+        assertTrue(!key1.equals(key2));
+    }
+
+
+
 
 }
 

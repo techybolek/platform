@@ -25,7 +25,9 @@ import org.wso2.carbon.cep.core.mapping.input.mapping.InputMapping;
 import org.wso2.carbon.cep.core.mapping.input.mapping.MapInputMapping;
 import org.wso2.carbon.cep.core.mapping.input.mapping.TupleInputMapping;
 import org.wso2.carbon.cep.core.mapping.input.mapping.XMLInputMapping;
-import org.wso2.carbon.cep.core.mapping.property.Property;
+import org.wso2.carbon.cep.core.mapping.input.property.MapInputProperty;
+import org.wso2.carbon.cep.core.mapping.input.property.TupleInputProperty;
+import org.wso2.carbon.cep.core.mapping.input.property.XMLInputProperty;
 import org.wso2.carbon.cep.siddhi.internal.ds.SiddhiBackendRuntimeValueHolder;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.config.SiddhiConfiguration;
@@ -36,11 +38,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 public class SiddhiBackEndRuntimeFactory implements CEPBackEndRuntimeFactory {
 
     private static final Log log = LogFactory.getLog(SiddhiBackEndRuntimeFactory.class);
     public static final String PERSISTENCE_SNAPSHOT_TIME_INTERVAL_MINUTES = "siddhi.persistence.snapshot.time.interval.minutes";
+    public static final String ENABLE_DISTRIBUTED_PROCESSING = "siddhi.enable.distributed.processing";
 
     public CEPBackEndRuntime createCEPBackEndRuntime(String bucketName,
                                                      Properties providerConfiguration,
@@ -48,61 +52,71 @@ public class SiddhiBackEndRuntimeFactory implements CEPBackEndRuntimeFactory {
                                                      int tenantId)
             throws CEPConfigurationException {
 
-        long persistenceTimeInterval = 1;
-        if (providerConfiguration != null && providerConfiguration.size() > 0) {
-            String timeString = providerConfiguration.getProperty(PERSISTENCE_SNAPSHOT_TIME_INTERVAL_MINUTES);
-            try {
-                persistenceTimeInterval = Long.parseLong(timeString);
-            } catch (NumberFormatException e) {
-                log.warn("Error reading siddhi persistence snapshot time interval, hence using " + persistenceTimeInterval + " min");
+        try {
+            long persistenceTimeInterval = 0;
+            boolean isDistributedProcessingEnabled = false;
+            if (providerConfiguration != null && providerConfiguration.size() > 0) {
+                String timeString = providerConfiguration.getProperty(PERSISTENCE_SNAPSHOT_TIME_INTERVAL_MINUTES);
+                try {
+                    persistenceTimeInterval = Long.parseLong(timeString);
+                } catch (NumberFormatException e) {
+                    log.warn("Error reading siddhi persistence snapshot time interval, hence persistence is disabled for " + bucketName);
+                }
+                String isDistributedProcessingEnabledString = providerConfiguration.getProperty(ENABLE_DISTRIBUTED_PROCESSING);
+                if (isDistributedProcessingEnabledString.toLowerCase().equals("true") || isDistributedProcessingEnabledString.toLowerCase().equals("false")) {
+                    isDistributedProcessingEnabled = Boolean.parseBoolean(isDistributedProcessingEnabledString);
+                } else {
+                    log.warn("Error reading siddhi enable distributed processing, hence distributed processing is disabled for " + bucketName);
+                }
             }
-        }
-        SiddhiConfiguration siddhiConfig = new SiddhiConfiguration();
-        siddhiConfig.setSingleThreading(true); //todo check which is good?
-        siddhiConfig.setExecutionPlanIdentifier(bucketName);
-        SiddhiManager siddhiManager = new SiddhiManager(siddhiConfig);
-        siddhiManager.setPersistStore(SiddhiBackendRuntimeValueHolder.getInstance().getPersistenceStore());
+            SiddhiConfiguration siddhiConfig = new SiddhiConfiguration();
+            siddhiConfig.setAsyncProcessing(false); //todo check which is good?
+            siddhiConfig.setQueryPlanIdentifier(bucketName);
+            siddhiConfig.setInstanceIdentifier(UUID.randomUUID().toString());
+            siddhiConfig.setClusterIdentifier("WSO2CEP-Siddhi-Cluster");
+            siddhiConfig.setDistributedProcessing(isDistributedProcessingEnabled);
+            SiddhiManager siddhiManager = new SiddhiManager(siddhiConfig);
+            siddhiManager.setPersistStore(SiddhiBackendRuntimeValueHolder.getInstance().getPersistenceStore());
 
-        Map<String, InputHandler> siddhiInputHandlerMap = new HashMap<String, InputHandler>();
+            Map<String, InputHandler> siddhiInputHandlerMap = new HashMap<String, InputHandler>();
 
-        for (InputMapping mapping : mappings) {
+            for (InputMapping mapping : mappings) {
 
-            StreamDefinition streamDefinition = new StreamDefinition();
-            streamDefinition.name(mapping.getStream());
+                StreamDefinition streamDefinition = new StreamDefinition();
+                streamDefinition.name(mapping.getStream());
 
-            List properties;
-            if (mapping instanceof TupleInputMapping) {
-                TupleInputMapping tupleInputMapping = (TupleInputMapping) mapping;
-                properties = tupleInputMapping.getProperties();
-            } else if (mapping instanceof MapInputMapping) {
-                MapInputMapping mapInputMapping = (MapInputMapping) mapping;
-                properties = mapInputMapping.getProperties();
-            } else { //Xml mapping
-                XMLInputMapping xmlInputMapping = (XMLInputMapping) mapping;
-                properties = xmlInputMapping.getProperties();
-            }
-//            String[] attributeNames = new String[properties.size()];
-//            Class[] attributeTypes = new Class[properties.size()];
-
-            for (Object property1 : properties) {
-                Property property = (Property) property1;
-                streamDefinition.attribute(property.getName(), SiddhiBackEndRuntime.javaToSiddhiType.get(property.getType()));
-            }
+                if (mapping instanceof TupleInputMapping) {
+                    TupleInputMapping tupleInputMapping = (TupleInputMapping) mapping;
+                    List<TupleInputProperty> properties = tupleInputMapping.getProperties();
+                    for (TupleInputProperty property1 : properties) {
+                        streamDefinition.attribute(property1.getName(), SiddhiBackEndRuntime.javaToSiddhiType.get(property1.getType()));
+                    }
+                } else if (mapping instanceof MapInputMapping) {
+                    MapInputMapping mapInputMapping = (MapInputMapping) mapping;
+                    List<MapInputProperty> properties = mapInputMapping.getProperties();
+                    for (MapInputProperty property1 : properties) {
+                        streamDefinition.attribute(property1.getName(), SiddhiBackEndRuntime.javaToSiddhiType.get(property1.getType()));
+                    }
+                } else { //Xml mapping
+                    XMLInputMapping xmlInputMapping = (XMLInputMapping) mapping;
+                    List<XMLInputProperty> properties = xmlInputMapping.getProperties();
+                    for (XMLInputProperty property1 : properties) {
+                        streamDefinition.attribute(property1.getName(), SiddhiBackEndRuntime.javaToSiddhiType.get(property1.getType()));
+                    }
+                }
 
 
 //            try {
-            siddhiInputHandlerMap.put(mapping.getStream(), siddhiManager.defineStream(streamDefinition));
+                siddhiInputHandlerMap.put(mapping.getStream(), siddhiManager.defineStream(streamDefinition));
 //            } catch (SiddhiException e) {
 //                throw new CEPConfigurationException("Invalid input stream configuration for " +
 //                                                    mapping.getStream(), e);
 //            }
-        }
+            }
 
-//        try {
-//            siddhiManager.init();
-//        } catch (SiddhiException e) {
-//            throw new CEPConfigurationException("Cannot init Siddhi Backend", e);
-//        }
-        return new SiddhiBackEndRuntime(bucketName, siddhiManager, siddhiInputHandlerMap, tenantId,persistenceTimeInterval);
+            return new SiddhiBackEndRuntime(bucketName, siddhiManager, siddhiInputHandlerMap, tenantId, persistenceTimeInterval);
+        } catch (Throwable e) {
+            throw new CEPConfigurationException("Error occurred in creating Siddhi Backend Runtime,"+e);
+        }
     }
 }

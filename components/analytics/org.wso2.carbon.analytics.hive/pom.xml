@@ -5,13 +5,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>analytics</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.analytics.hive</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.7</version>
     <name>WSO2 Hive - Core APIs and Manager interfaces</name>
     <packaging>bundle</packaging>
 
@@ -19,10 +20,50 @@
         <dependency>
             <groupId>org.apache.hive.wso2</groupId>
             <artifactId>hive</artifactId>
+            <version>${hive.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.hive</groupId>
+                    <artifactId>hive-exec</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hive</groupId>
+                    <artifactId>hive-shims</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hive</groupId>
+                    <artifactId>hive-builtins</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hive</groupId>
+                    <artifactId>hive-service</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hive</groupId>
+                    <artifactId>hive-serde</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hive</groupId>
+                    <artifactId>hive-metastore</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hive</groupId>
+                    <artifactId>hive-cassandra</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hive</groupId>
+                    <artifactId>hive-jdbc</artifactId>
+                </exclusion>
+		<exclusion>
+                    <groupId>org.wso2.carbon</groupId>
+                    <artifactId>hive-jdbc-handler</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop.wso2</groupId>
             <artifactId>hadoop-core</artifactId>
+	    <version>0.20.203.1.wso2v4</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -35,17 +76,51 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ntask.core</artifactId>
-            <version>${project.version}</version>
+            <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ntask.solutions</artifactId>
-            <version>${project.version}</version>
+            <version>${wso2carbon.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.datasource</artifactId>
+            <version>${wso2carbon.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.ndatasource.core</artifactId>
+            <version>${wso2carbon.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.ndatasource.rdbms</artifactId>
+            <version>${wso2carbon.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rssmanager.core</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.platform.patch.version.401}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.core</artifactId>
+            <version>${carbon.platform.patch.version.406}</version>
+        </dependency>
+         <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.utils</artifactId>
+            <version>${carbon.platform.patch.version.406}</version>
+        </dependency>
+         <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.rssmanager.stub</artifactId>
+            <version>4.0.5</version>
+        </dependency>
+         <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.authenticator.stub</artifactId>
         </dependency>
     </dependencies>
 
@@ -106,7 +181,11 @@
     </build>
 
     <properties>
+	<carbon.platform.patch.version.402>4.0.2</carbon.platform.patch.version.402>
+        <carbon.platform.patch.version.401>4.0.1</carbon.platform.patch.version.401>
+        <carbon.platform.patch.version.406>4.0.6</carbon.platform.patch.version.406>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <hive.version>0.8.1.wso2v6</hive.version>
     </properties>
 
 </project>

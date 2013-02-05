@@ -151,6 +151,7 @@
         jQuery.ajax({
                      type: 'POST',
                      url: '../templates/endpoint_template-ajaxprocessor.jsp',
+                     data: 'data=null',
                      success: function(msg) {
                                  document.location.href = "../endpoints/index.jsp?templateAdd=true&endpointOriginator=template";
                      },
@@ -275,7 +276,7 @@
         if (endPointType == 'address') {
             document.location.href = '../endpoints/addressEndpoint.jsp?endpointName=' + endPointName + '&endpointAction=edit&endpointOriginator=template';
         } else if (endPointType == 'wsdl') {
-            document.location.href = '../endpoints/WSDLEndpoint.jsp?endpointName=' + endPointName + '&endpointAction=edit&endpointOriginator=template';
+            document.location.href = '../endpoints/wsdlEndpoint.jsp?endpointName=' + endPointName + '&endpointAction=edit&endpointOriginator=template';
         } else if (endPointType == 'failover') {
             document.location.href = '../endpoints/failOverEndpoint.jsp?endpointName=' + endPointName + '&endpointAction=edit&endpointOriginator=template';
         } else if (endPointType == 'loadbalance') {
@@ -297,13 +298,9 @@
     }
 
     function deleteEndpoint(sequenceName) {
-        if (sequenceName == "main" || sequenceName == "fault") {
-           CARBON.showWarningDialog('<fmt:message key="sequence.main.fault.cannot.delete"/>');
-        } else {
-            CARBON.showConfirmationDialog("<fmt:message key="sequence.delete.confirmation"/> " + sequenceName + "?", function(){
-                location.href = "../templates/delete_template.jsp?sequenceName=" + sequenceName+"&templateType=endpoint";
-            });
-        }
+        CARBON.showConfirmationDialog("<fmt:message key="endpoint.delete.confirmation"/> " + sequenceName + "?", function() {
+            location.href = "../templates/delete_template.jsp?sequenceName=" + sequenceName + "&templateType=endpoint";
+        });
     }
 
     function getResponseValue(responseXML) {
@@ -352,13 +349,9 @@
     }
 
     function deleteRegistryEndpoint(sequenceName) {
-        if (sequenceName == "main" || sequenceName == "fault") {
-           CARBON.showWarningDialog('<fmt:message key="sequence.main.fault.cannot.delete"/>');
-        } else {
-            CARBON.showConfirmationDialog("<fmt:message key="sequence.delete.confirmation"/> " + sequenceName + "?", function(){
-                location.href = "../templates/delete_template.jsp?type=registry&sequenceName=" + sequenceName + "&templateType=endpoint";
-            });
-        }
+        CARBON.showConfirmationDialog("<fmt:message key="endpoint.delete.confirmation"/> " + sequenceName + "?", function() {
+            location.href = "../templates/delete_template.jsp?type=registry&sequenceName=" + sequenceName + "&templateType=endpoint";
+        });
     }
 
     function minMaxReg() {

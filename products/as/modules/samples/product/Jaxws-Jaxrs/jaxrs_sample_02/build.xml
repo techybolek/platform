@@ -24,11 +24,9 @@
     <property name="webapps" value="${build.dir}/webapps"/>
 
     <path id="compile.classpath">
-        <fileset dir="${wso2appserver.home}/repository/components/plugins">
+	<pathelement path="${java.class.path}"/>
+        <fileset dir="${lib}">
             <include name="*.jar"/>
-        </fileset>
-        <fileset dir="${wso2appserver.home}">
-            <include name="repository/lib/*.jar"/>
         </fileset>
     </path>
 
@@ -37,6 +35,19 @@
         <mkdir dir="${classes}"/>
         <mkdir dir="${webapps}"/>
         <mkdir dir="${lib}"/>
+	<copy toDir="${lib}">
+            <fileset dir="${wso2appserver.home}/repository/components/plugins/">
+                <include name="commons-httpclient_3.1.0.wso2v2.jar"/>
+                <include name="javax.ws.rs.jsr311-api_1.1.1.jar"/>
+                <include name="cxf-bundle_2.6.1.wso2v2.jar"/>
+                <include name="commons-lang_2.6.0.wso2v1.jar"/>
+                <include name="wsdl4j_1.6.2.wso2v4.jar"/>
+                <include name="jaxb_2.2.5.wso2v1.jar"/>
+                <include name="commons-codec_1.4.0.wso2v1.jar"/>
+		<include name="org.wso2.carbon.logging_4.0.0.jar"/>
+		<include name="jettison_1.1.0.wso2v1.jar"/>
+            </fileset>
+        </copy>
     </target>
 
     <target name="compile" depends="init" >
@@ -53,12 +64,10 @@
         <war destfile="${webapps}/${warName}" webxml="src/main/webapp/WEB-INF/web.xml">
             <classes dir="${classes}"/>
             <fileset file="src/main/webapp/servicelist.css"/>
-            <lib dir="${lib}"/>
             <webinf dir="src/main/webapp/WEB-INF"
                     includes="cxf-servlet.xml">
             </webinf>
         </war>
-        <delete dir="${lib}" />
     </target>
 
     <target name="build-all" depends ="war">

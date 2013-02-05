@@ -36,6 +36,8 @@ import org.wso2.carbon.proxyadmin.stub.ProxyServiceAdminStub;
 import org.wso2.carbon.proxyadmin.stub.types.carbon.Entry;
 import org.wso2.carbon.proxyadmin.stub.types.carbon.MetaData;
 import org.wso2.carbon.proxyadmin.stub.types.carbon.ProxyData;
+import org.wso2.carbon.proxyadmin.stub.types.carbon.ProxyServicePolicyInfo;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
@@ -420,6 +422,15 @@ public class ProxyServiceAdminClient {
                     new QName(XMLConfigConstants.SYNAPSE_NAMESPACE, "description"));
             if (description != null) {
                 pd.setDescription(description.getText());
+            }
+
+            Iterator policies = elem.getChildrenWithName(new QName(XMLConfigConstants.SYNAPSE_NAMESPACE,"policy"));
+            while (policies.hasNext()){
+                OMElement policyElement = (OMElement)policies.next();
+                String policyKey = policyElement.getAttributeValue(new QName("key"));
+                ProxyServicePolicyInfo policyInfo = new ProxyServicePolicyInfo();
+                policyInfo.setKey(policyKey);
+                pd.addPolicies(policyInfo);
             }
 
         } catch (XMLStreamException e) {

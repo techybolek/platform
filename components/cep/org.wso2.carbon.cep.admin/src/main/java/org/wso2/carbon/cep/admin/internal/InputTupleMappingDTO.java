@@ -14,12 +14,12 @@ public class InputTupleMappingDTO {
     /**
      * Name of the to be converted event class
      */
-    protected String mappingClass ;
+    protected String queryEventType;
 
     /**
      * Properties of the mapping
      * */
-    private TuplePropertyDTO[] tuplePropertyDTOs;
+    private InputTuplePropertyDTO[] inputTuplePropertyDTOs;
 
     public String getStream() {
         return stream;
@@ -29,20 +29,20 @@ public class InputTupleMappingDTO {
         this.stream = stream;
     }
 
-    public String getMappingClass() {
-        return mappingClass;
+    public String getQueryEventType() {
+        return queryEventType;
     }
 
-    public void setMappingClass(String mappingClass) {
-        this.mappingClass = mappingClass;
+    public void setQueryEventType(String queryEventType) {
+        this.queryEventType = queryEventType;
     }
 
-    public TuplePropertyDTO[] getProperties() {
-        return tuplePropertyDTOs;
+    public InputTuplePropertyDTO[] getProperties() {
+        return inputTuplePropertyDTOs;
     }
 
-    public void setProperties(TuplePropertyDTO[] tuplePropertyDTOs) {
-        this.tuplePropertyDTOs = tuplePropertyDTOs;
+    public void setProperties(InputTuplePropertyDTO[] inputTuplePropertyDTOs) {
+        this.inputTuplePropertyDTOs = inputTuplePropertyDTOs;
     }
 
 

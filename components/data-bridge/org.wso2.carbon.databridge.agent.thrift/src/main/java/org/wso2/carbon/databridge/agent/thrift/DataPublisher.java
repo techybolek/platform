@@ -23,24 +23,21 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.agent.thrift.conf.DataPublisherConfiguration;
 import org.wso2.carbon.databridge.agent.thrift.conf.ReceiverConfiguration;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
-import org.wso2.carbon.databridge.commons.exception.TransportException;
 import org.wso2.carbon.databridge.agent.thrift.internal.EventQueue;
 import org.wso2.carbon.databridge.agent.thrift.internal.publisher.client.EventPublisher;
 import org.wso2.carbon.databridge.agent.thrift.internal.publisher.client.EventPublisherFactory;
 import org.wso2.carbon.databridge.agent.thrift.internal.utils.AgentServerURL;
+import org.wso2.carbon.databridge.agent.thrift.lb.ReceiverStateObserver;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
-import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
-import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
-import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
-import org.wso2.carbon.databridge.commons.exception.NoStreamDefinitionExistException;
-import org.wso2.carbon.databridge.commons.exception.StreamDefinitionException;
+import org.wso2.carbon.databridge.commons.exception.*;
 import org.wso2.carbon.databridge.commons.thrift.utils.CommonThriftConstants;
 import org.wso2.carbon.databridge.commons.thrift.utils.HostAddressFinder;
 
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.SocketException;
+import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -53,13 +50,15 @@ public class DataPublisher {
 //    private static Log log = LogFactory.getLog(DataPublisher.class);
 
     private static Log log = LogFactory.getLog(DataPublisher.class);
-    private Agent agent;
+    //    private Agent agent;
     private DataPublisherConfiguration dataPublisherConfiguration;
     private EventPublisher eventPublisher;
     private EventQueue<Event> eventQueue;
     private Gson gson = new Gson();
 
     private ThreadPoolExecutor threadPool;
+
+    private ReceiverStateObserver receiverStateObserver;
 
     /**
      * To create the Data Publisher and the respective agent to publish events
@@ -85,8 +84,8 @@ public class DataPublisher {
      */
     public DataPublisher(String receiverUrl, String userName, String password)
             throws MalformedURLException, AgentException, AuthenticationException,
-                   TransportException {
-        this(receiverUrl, userName, password, new Agent());
+            TransportException {
+        this(receiverUrl, userName, password, AgentHolder.getOrCreateAgent());
     }
 
     /**
@@ -109,8 +108,8 @@ public class DataPublisher {
     public DataPublisher(String authenticationUrl, String receiverUrl, String userName,
                          String password)
             throws MalformedURLException, AgentException, AuthenticationException,
-                   TransportException {
-        this(authenticationUrl, receiverUrl, userName, password, new Agent());
+            TransportException {
+        this(authenticationUrl, receiverUrl, userName, password, AgentHolder.getOrCreateAgent());
     }
 
     /**
@@ -139,21 +138,26 @@ public class DataPublisher {
     public DataPublisher(String receiverUrl, String userName,
                          String password, Agent agent)
             throws MalformedURLException, AgentException, AuthenticationException,
-                   TransportException {
+            TransportException {
+        if (null == agent) {
+            agent = AgentHolder.getOrCreateAgent();
+        } else if (AgentHolder.getAgent() == null) {
+            AgentHolder.setAgent(agent);
+        }
         AgentServerURL receiverURL = new AgentServerURL(receiverUrl);
         checkHostAddress(receiverURL.getHost());
         if (receiverURL.isSecured()) {
             this.start(new ReceiverConfiguration(userName, password, receiverURL.getProtocol(),
-                                                 (receiverURL.getHost()), receiverURL.getPort(),
-                                                 receiverURL.getProtocol(),
-                                                 (receiverURL.getHost()), receiverURL.getPort(), receiverURL.isSecured()),
-                       agent);
-        } else if(receiverURL.getProtocol()== ReceiverConfiguration.Protocol.TCP){
+                    (receiverURL.getHost()), receiverURL.getPort(),
+                    receiverURL.getProtocol(),
+                    (receiverURL.getHost()), receiverURL.getPort(), receiverURL.isSecured()),
+                    agent);
+        } else if (receiverURL.getProtocol() == ReceiverConfiguration.Protocol.TCP) {
             this.start(new ReceiverConfiguration(userName, password, receiverURL.getProtocol(),
-                                                 (receiverURL.getHost()), receiverURL.getPort(),
-                                                 receiverURL.getProtocol(),
-                                                 (receiverURL.getHost()), receiverURL.getPort() + CommonThriftConstants.SECURE_EVENT_RECEIVER_PORT_OFFSET, receiverURL.isSecured()),
-                       agent);
+                    (receiverURL.getHost()), receiverURL.getPort(),
+                    receiverURL.getProtocol(),
+                    (receiverURL.getHost()), receiverURL.getPort() + CommonThriftConstants.SECURE_EVENT_RECEIVER_PORT_OFFSET, receiverURL.isSecured()),
+                    agent);
         } else {
             throw new AgentException("http not supported via this constructor use https, ssl or tcp ");
         }
@@ -181,7 +185,12 @@ public class DataPublisher {
     public DataPublisher(String authenticationUrl, String receiverUrl, String userName,
                          String password, Agent agent)
             throws MalformedURLException, AgentException, AuthenticationException,
-                   TransportException {
+            TransportException {
+        if (null == agent) {
+            agent = AgentHolder.getOrCreateAgent();
+        } else if (AgentHolder.getAgent() == null) {
+            AgentHolder.setAgent(agent);
+        }
         AgentServerURL authenticationURL = new AgentServerURL(authenticationUrl);
         if (!authenticationURL.isSecured()) {
             throw new MalformedURLException("Authentication url protocol is not ssl/https, expected = <ssl/https>://<HOST>:<PORT> but actual = " + authenticationUrl);
@@ -190,10 +199,10 @@ public class DataPublisher {
         checkHostAddress(receiverURL.getHost());
         checkHostAddress(authenticationURL.getHost());
         this.start(new ReceiverConfiguration(userName, password, receiverURL.getProtocol(),
-                                             receiverURL.getHost(), receiverURL.getPort(),
-                                             authenticationURL.getProtocol(),
-                                             authenticationURL.getHost(), authenticationURL.getPort(), receiverURL.isSecured()),
-                   agent);
+                receiverURL.getHost(), receiverURL.getPort(),
+                authenticationURL.getProtocol(),
+                authenticationURL.getHost(), authenticationURL.getPort(), receiverURL.isSecured()),
+                agent);
 
     }
 
@@ -219,8 +228,10 @@ public class DataPublisher {
      */
     public void setAgent(Agent agent)
             throws AgentException, AuthenticationException, TransportException {
-        this.agent.shutdown(this);// to shutdown the old agent
+        AgentHolder.getAgent().shutdown(this);// to shutdown the old agent
+        AgentHolder.setAgent(agent);
         start(this.dataPublisherConfiguration.getReceiverConfiguration(), agent);
+        if (null != this.receiverStateObserver) eventPublisher.registerReceiverStateObserver(receiverStateObserver);
     }
 
     /**
@@ -229,13 +240,17 @@ public class DataPublisher {
      * @return agent
      */
     public Agent getAgent() {
-        return agent;
+        return AgentHolder.getAgent();
+    }
+
+    public void registerReceiverStateObserver(ReceiverStateObserver stateObserver) {
+        this.receiverStateObserver = stateObserver;
+        this.eventPublisher.registerReceiverStateObserver(receiverStateObserver);
     }
 
     private void start(ReceiverConfiguration receiverConfiguration, Agent agent)
             throws AgentException, AuthenticationException, TransportException {
         agent.addDataPublisher(this);
-        this.agent = agent;
         this.dataPublisherConfiguration = new DataPublisherConfiguration(receiverConfiguration);
         this.eventQueue = new EventQueue<Event>();
         this.threadPool = agent.getThreadPool();
@@ -265,7 +280,7 @@ public class DataPublisher {
      */
     public String defineStream(String streamDefinition)
             throws AgentException, MalformedStreamDefinitionException, StreamDefinitionException,
-                   DifferentStreamDefinitionAlreadyDefinedException {
+            DifferentStreamDefinitionAlreadyDefinedException {
         String sessionId = dataPublisherConfiguration.getSessionId();
         return eventPublisher.defineStream(sessionId, streamDefinition);
     }
@@ -286,7 +301,7 @@ public class DataPublisher {
      */
     public String defineStream(StreamDefinition streamDefinition)
             throws AgentException, MalformedStreamDefinitionException, StreamDefinitionException,
-                   DifferentStreamDefinitionAlreadyDefinedException {
+            DifferentStreamDefinitionAlreadyDefinedException {
         String sessionId = dataPublisherConfiguration.getSessionId();
         String streamId = eventPublisher.defineStream(sessionId, gson.toJson(streamDefinition));
         try {
@@ -310,12 +325,70 @@ public class DataPublisher {
      * @throws org.wso2.carbon.databridge.agent.thrift.exception.AgentException
      *          if client cannot publish the type definition
      */
+    @Deprecated
     public String findStream(String name, String version)
             throws AgentException, StreamDefinitionException, NoStreamDefinitionExistException {
+        String streamId= findStreamId(name,version);
+        if(streamId==null){
+            throw new NoStreamDefinitionExistException("Cannot find Stream Id for "+name+" "+version);
+        }
+        return streamId;
+    }
+
+ /**
+     * Finding already existing stream's Id to publish data
+     *
+     * @param name    the stream name
+     * @param version the version of the stream
+     * @return stream id
+     * @throws org.wso2.carbon.databridge.agent.thrift.exception.AgentException
+     *          if client cannot publish the type definition
+     */
+    public String findStreamId(String name, String version)
+            throws AgentException {
         String sessionId = dataPublisherConfiguration.getSessionId();
         return eventPublisher.findStreamId(sessionId, name, version);
     }
 
+
+    /**
+     * Defining stream on which events will be published by this DataPublisher
+     *
+     * @param streamId of the Stream
+     * @return the stream id
+     * @throws org.wso2.carbon.databridge.agent.thrift.exception.AgentException
+     *
+     * @throws org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException
+     *
+     * @throws org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException
+     *
+     * @throws org.wso2.carbon.databridge.commons.exception.StreamDefinitionException
+     *
+     */
+    public boolean deleteStream(String streamId) throws AgentException {
+        String sessionId = dataPublisherConfiguration.getSessionId();
+        return eventPublisher.deleteStream(sessionId, streamId);
+    }
+
+    /**
+     * Defining stream on which events will be published by this DataPublisher
+     *
+     * @param streamName    of the Stream
+     * @param streamVersion of the Stream
+     * @return the stream id
+     * @throws org.wso2.carbon.databridge.agent.thrift.exception.AgentException
+     *
+     * @throws org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException
+     *
+     * @throws org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException
+     *
+     * @throws org.wso2.carbon.databridge.commons.exception.StreamDefinitionException
+     *
+     */
+    public boolean deleteStream(String streamName, String streamVersion) throws AgentException {
+        String sessionId = dataPublisherConfiguration.getSessionId();
+        return eventPublisher.deleteStream(sessionId, streamName, streamVersion);
+    }
 
     /**
      * Publishing the events to the server
@@ -326,13 +399,13 @@ public class DataPublisher {
      */
     public void publish(Event event) throws AgentException {
         try {
-            agent.getQueueSemaphore().acquire();//control the total number of buffered events
+            AgentHolder.getAgent().getQueueSemaphore().acquire();//control the total number of buffered events
 
             //Adds event to the queue and checks whether its scheduled for event dispatching
             if (!eventQueue.put(event)) {
                 try {
                     //if not schedule for event dispatching
-                    threadPool.submit(eventPublisher);
+                    threadPool.execute(eventPublisher);
                 } catch (RejectedExecutionException ignored) {
                 }
             }
@@ -357,6 +430,24 @@ public class DataPublisher {
         publish(new Event(streamId, System.currentTimeMillis(), metaDataArray, correlationDataArray, payloadDataArray));
     }
 
+
+    /**
+     * Publishing events to the server
+     *
+     * @param streamId             of the stream on which the events are published
+     * @param metaDataArray        metadata array of the event
+     * @param correlationDataArray correlation data array of the event
+     * @param payloadDataArray     payload data array of the event
+     * @param arbitraryDataMap     arbitrary mata (as meta.<key_name>),correlation (as correlation.<key_name>) & payload (as <key_name>) data as key-value pairs
+     * @throws org.wso2.carbon.databridge.agent.thrift.exception.AgentException
+     *
+     */
+    public void publish(String streamId, Object[] metaDataArray, Object[] correlationDataArray,
+                        Object[] payloadDataArray, Map<String, String> arbitraryDataMap)
+            throws AgentException {
+        publish(new Event(streamId, System.currentTimeMillis(), metaDataArray, correlationDataArray, payloadDataArray, arbitraryDataMap));
+    }
+
     /**
      * Publishing events to the server
      *
@@ -375,21 +466,38 @@ public class DataPublisher {
     }
 
     /**
+     * Publishing events to the server
+     *
+     * @param streamId             of the stream on which the events are published
+     * @param timeStamp            time stamp of the event
+     * @param metaDataArray        metadata array of the event
+     * @param correlationDataArray correlation data array of the event
+     * @param payloadDataArray     payload data array of the event
+     * @param arbitraryDataMap     arbitrary mata (as meta.<key_name>),correlation (as correlation.<key_name>) & payload (as <key_name>) data as key-value pairs
+     * @throws org.wso2.carbon.databridge.agent.thrift.exception.AgentException
+     *
+     */
+    public void publish(String streamId, long timeStamp, Object[] metaDataArray,
+                        Object[] correlationDataArray, Object[] payloadDataArray, Map<String, String> arbitraryDataMap)
+            throws AgentException {
+        publish(new Event(streamId, timeStamp, metaDataArray, correlationDataArray, payloadDataArray, arbitraryDataMap));
+    }
+
+    /**
      * Disconnecting from the server
      */
     public void stop() {
-        agent.getAgentAuthenticator().disconnect(dataPublisherConfiguration);
-        agent.shutdown(this);
+        AgentHolder.getAgent().getAgentAuthenticator().disconnect(dataPublisherConfiguration);
+        AgentHolder.getAgent().shutdown(this);
     }
-
 
 
     /**
      * Disconnecting from the server
      */
     public void stopNow() {
-        agent.getAgentAuthenticator().disconnect(dataPublisherConfiguration);
-        agent.shutdownNow(this);
+        AgentHolder.getAgent().getAgentAuthenticator().disconnect(dataPublisherConfiguration);
+        AgentHolder.getAgent().shutdownNow(this);
     }
 
 

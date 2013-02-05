@@ -39,6 +39,20 @@ public interface APIKeyDataStore {
                                                  String apiKey) throws APISecurityException;
 
     /**
+     * Validate the given API key for the specified API context and version.
+     *
+     * @param context Context of an API
+     * @param apiVersion A valid version of the API
+     * @param apiKey An API key string - Not necessarily a valid key
+     * @param requiredAuthenticationLevel - type of  key. can be one of 'Application or Application_User'
+     * @return an APIKeyValidationInfoDTO instance containing key validation data
+     * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException on error
+     */
+    public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
+                                                 String apiKey, String requiredAuthenticationLevel) throws APISecurityException;
+
+
+    /**
      * Clean up any resources allocated to this API key data store instance.
      */
     public void cleanup();

@@ -100,7 +100,7 @@
     if (cssLocation == null) {
 %>
 <carbon:breadcrumb
-        label="signin.with.info.openid"
+        label="signin.with.openid"
         resourceBundle="org.wso2.carbon.identity.relyingparty.ui.i18n.Resources"
         topPage="true"
         request="<%=request%>"/>
@@ -149,26 +149,6 @@
     <div id="workArea">
         <table style="width:100%">
             <tr>
-                <td style="width:50%">
-                    <div id="loginbox" class="identity-box">
-                        <strong><fmt:message key='signin.with.infocard'/></strong>
-
-                        <h2></h2>
-                        <%
-                            String infoCardLink = "infocard_signin.jsp";
-
-                            if (cssLocation != null) {
-                                infoCardLink = infoCardLink + "?forwardPage=" +
-                                        URLEncoder.encode(forwardPage, "UTF-8") +
-                                        "&css=" + URLEncoder.encode(cssLocation, "UTF-8") +
-                                        "&title=" +
-                                        URLEncoder.encode(pageTitle, "UTF-8");
-                            }
-                        %>
-                        <a href="<%=infoCardLink%>"><img src="images/infocard-logo.png"
-                                                         border="0"></a>
-                    </div>
-                </td>
                 <td style="width:50%">
                     <div id="loginbox" class="identity-box">
                         <strong><fmt:message key='signin.with.openid'/></strong>

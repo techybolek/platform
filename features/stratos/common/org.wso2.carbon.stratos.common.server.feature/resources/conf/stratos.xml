@@ -41,7 +41,9 @@
     <!--Super Admin Email Address to moderate the tenant registrations-->
     <SuperAdminEmail>super-admin-email</SuperAdminEmail>
 
-    <UsagePlanUrl>http://wso2.com/cloud/stratoslive/pricing</UsagePlanUrl>
+	<!-- 
+	<UsagePlanUrl>http://wso2.com/cloud/stratoslive/pricing</UsagePlanUrl> 
+	-->
     
      <!--this parameter is used to disable usage summary generator for registry content-->
      <SkipSummaryGenerator>false</SkipSummaryGenerator>
@@ -66,7 +68,7 @@
     <PaypalAPIUsername>username</PaypalAPIUsername>
     <PaypalAPIPassword>password</PaypalAPIPassword>
     <PaypalAPISignature>signature</PaypalAPISignature>
-    <PaypalEnvironment>live</PaypalEnvironment>
+	<PaypalEnvironment>live</PaypalEnvironment>
 
      <!--Manager Configurations-->
      <managerServiceUrl>https://cloud-test.wso2.com/services/</managerServiceUrl>
@@ -75,4 +77,7 @@
 
     <!--The google-analytics URL-->
    <GoogleAnalyticsURL>http://google-analytics.js</GoogleAnalyticsURL>
+
+    <!--Loading message shown during SSO. For example, "Loading StratosLive" -->
+    <SSOLoadingMessage>Loading...</SSOLoadingMessage>	
 </stratosConfig>

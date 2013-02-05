@@ -1,5 +1,5 @@
 <!--
- ~ Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ ~ Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  ~
  ~ WSO2 Inc. licenses this file to you under the Apache License,
  ~ Version 2.0 (the "License"); you may not use this file except
@@ -15,6 +15,7 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
+<%@page import="org.wso2.carbon.ui.util.CharacterEncoder"%>
 <%@ page import="java.net.URLDecoder" %>
 <%@ page import="java.net.URLEncoder" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -29,7 +30,7 @@
         cssLocation = URLDecoder.decode(cssLocation, "UTF-8");
     }
 
-    String forwardPage = request.getParameter("forwardPage");
+    String forwardPage = CharacterEncoder.getSafeText(request.getParameter("forwardPage"));
     if (forwardPage != null) {
         forwardPage = URLDecoder.decode(forwardPage, "UTF-8");
         session.setAttribute("forwardPage", forwardPage);

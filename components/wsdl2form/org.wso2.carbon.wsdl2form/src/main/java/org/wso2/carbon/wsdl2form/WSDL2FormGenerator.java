@@ -628,7 +628,7 @@ public class WSDL2FormGenerator {
                     .put(htmlFileLocation.getUuid(), files1[0].getAbsoluteFile().getAbsolutePath());
         }
 
-        return serviceContextRoot + ".." + ServerConstants.ContextPaths.DOWNLOAD_PATH + "?id=" +
+        return "../.." + ServerConstants.ContextPaths.DOWNLOAD_PATH + "?id=" +
                 htmlFileLocation.getUuid();
     }
 

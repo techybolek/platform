@@ -114,7 +114,7 @@ function directToSubmitPage() {
     jQuery.ajax({
                     type: 'POST',
                     url: 'ajaxprocessors/submitEndpoint-ajaxprocessor.jsp',
-
+                    data: 'data=null',
                     success: function(msg) {
                         var index = msg.toString().trim().indexOf('<div>');
                         if (msg.toString().trim().indexOf('<div>Error:') == index) {
@@ -132,7 +132,7 @@ function showSaveAsForm(show, isFromTemplateEditor) {
         formElem.style.display = "";
         var keyField = document.getElementById('synRegKey');
         if (keyField.value == '') {
-            if (isFromTemplateEditor == 'true') {
+            if (isFromTemplateEditor == true) {
                 keyField.value = document.getElementById("templateName").value;
             } else {
                 keyField.value = document.getElementById("endpointName").value;

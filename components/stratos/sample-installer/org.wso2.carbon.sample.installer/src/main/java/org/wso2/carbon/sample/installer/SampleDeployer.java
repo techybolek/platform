@@ -24,23 +24,20 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 import org.wso2.carbon.application.upload.CarbonAppUploader;
 import org.wso2.carbon.application.upload.UploadedFileItem;
-import org.wso2.carbon.feature.mgt.services.CompMgtConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.feature.mgt.services.CompMgtConstants;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.utils.RegistryClientUtils;
-import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.sample.installer.beans.SampleInformation;
 import org.wso2.carbon.sample.installer.utils.Util;
+import org.wso2.carbon.user.core.UserStoreException;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.activation.DataHandler;
 import javax.servlet.http.HttpSession;
@@ -71,13 +68,11 @@ public class SampleDeployer extends CarbonAppUploader {
      */
     public boolean deploySample(String sampleName, String tenantDomain) throws AxisFault,
                                                                                RegistryException {
-        SuperTenantCarbonContext.startTenantFlow();
-
         try {
-            SuperTenantCarbonContext carbonContext =
-                    SuperTenantCarbonContext.getCurrentContext();
-            SuperTenantCarbonContext carbonContextOnMessageContext =
-                    SuperTenantCarbonContext.getCurrentContext(
+            /*PrivilegedCarbonContext carbonContext =
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            PrivilegedCarbonContext carbonContextOnMessageContext =
+                    PrivilegedCarbonContext.getCurrentContext(
                             MessageContext.getCurrentMessageContext());
             carbonContextOnMessageContext.setTenantDomain(tenantDomain, true);
             BundleContext bundleContext = Util.getBundleContext();
@@ -96,16 +91,20 @@ public class SampleDeployer extends CarbonAppUploader {
                 }
                 tracker.close();
             }
+            carbonContext.setTenantDomain(tenantDomain, true);*/
 
-            carbonContext.setTenantDomain(tenantDomain, true);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getCurrentContext().setTenantDomain(tenantDomain, true);
+            PrivilegedCarbonContext.getCurrentContext().getTenantId(true);
+
+            Registry registry = (Registry) PrivilegedCarbonContext.getCurrentContext().getRegistry(RegistryType.SYSTEM_GOVERNANCE);
 
             int tenantId = Util.getRealmService().getTenantManager().getTenantId(tenantDomain);
             String pathToAuthorize = "/_system/governance/policies/policy_service.xml";
             Util.getRealmService().getTenantUserRealm(tenantId).
                     getAuthorizationManager().authorizeRole("wso2.anonymous.role", pathToAuthorize, ActionConstants.GET);
 
-            Resource sampleFile = (Resource) carbonContext.getRegistry(RegistryType.SYSTEM_GOVERNANCE).
-                            get(getSamplePath(sampleName));
+            Resource sampleFile = (Resource) registry.get(getSamplePath(sampleName));
             UploadedFileItem[] fileItems = new UploadedFileItem[1];
             fileItems[0] = new UploadedFileItem();
             fileItems[0].setDataHandler(
@@ -120,9 +119,10 @@ public class SampleDeployer extends CarbonAppUploader {
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             log.error("Failed to set permission", e);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
-            return false;
+            PrivilegedCarbonContext.endTenantFlow();  
         }
+
+        return false;
     }
 
     public void setPolicyPermission() {
@@ -151,11 +151,11 @@ public class SampleDeployer extends CarbonAppUploader {
      */
     public boolean uploadSample(String sampleName, String tenantDomain) throws RegistryException {
         try {
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantDomain(tenantDomain, true);
-            SuperTenantCarbonContext.getCurrentContext().getTenantId(true);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getCurrentContext().setTenantDomain(tenantDomain, true);
+            PrivilegedCarbonContext.getCurrentContext().getTenantId(true);
 
-            Registry registry = (Registry) SuperTenantCarbonContext.getCurrentContext().getRegistry(RegistryType.SYSTEM_GOVERNANCE);
+            Registry registry = (Registry) PrivilegedCarbonContext.getCurrentContext().getRegistry(RegistryType.SYSTEM_GOVERNANCE);
             try {
                 if (registry.resourceExists(getSamplePath(sampleName))) {
                     return true;
@@ -193,7 +193,7 @@ public class SampleDeployer extends CarbonAppUploader {
             }
         } finally {
             // Ultimately cleanup the tenant information before exiting the thread.
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
         return true;
     }
@@ -216,7 +216,7 @@ public class SampleDeployer extends CarbonAppUploader {
             String[] serviceNames = sample.getRequiredServices();
             boolean installable = true;
             if (serviceNames.length > 0) {
-                int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
+                int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
                 for (String serviceName : serviceNames) {
                     try {
                         if (!Util.isCloudServiceActive(serviceName, tenantId)) {

@@ -16,17 +16,13 @@
 
 package org.wso2.carbon.um.ws.api;
 
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
 
 import org.apache.axis2.context.ConfigurationContext;
-import org.wso2.carbon.um.ws.api.internal.UserMgtWSAPIDSComponent;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.api.RealmConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.user.core.config.RealmConfiguration;
 
 public class WSRealmBuilder {
 

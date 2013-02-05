@@ -47,7 +47,6 @@ import org.wso2.carbon.bpel.core.ode.integration.utils.ActivityInfoWithEventsDoc
 import org.wso2.carbon.bpel.core.ode.integration.utils.ActivityLifeCycleEventsDocumentBuilder;
 import org.wso2.carbon.bpel.core.ode.integration.utils.ActivityStateAndEventDocumentBuilder;
 import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.w3c.dom.Node;
 

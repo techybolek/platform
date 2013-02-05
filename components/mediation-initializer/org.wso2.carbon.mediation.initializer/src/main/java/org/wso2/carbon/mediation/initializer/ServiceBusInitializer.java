@@ -260,8 +260,8 @@ public class ServiceBusInitializer {
             // Check registry persistence is disabled or not
             String regPersistence = serverConf.getFirstProperty(
                     ServiceBusConstants.REGISTRY_PERSISTENCE);
-            UserRegistry registry = ServiceBusConstants.DISABLED.equals(regPersistence) ?
-                    null : registryService.getConfigSystemRegistry();
+            UserRegistry registry = ServiceBusConstants.ENABLED.equals(regPersistence) ?
+                    registryService.getConfigSystemRegistry() : null;
 
             // Check the worker interval is set or not
             String interval = serverConf.getFirstProperty(ServiceBusConstants.WORKER_INTERVAL);

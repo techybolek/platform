@@ -13,7 +13,7 @@ var login = function () {
 
                   } else {
                       $('#loginError').show('fast');
-                      $('#loginErrorSpan').html('<strong>Unable to log you in!</strong><br />' + result.message);
+                      $('#loginErrorSpan').html('<strong>'+i18n.t("errorMsgs.login")+'</strong><br />' + result.message);
                   }
               }, "json");
 

@@ -2,6 +2,7 @@
 <%@ page import="org.apache.axis2.client.ServiceClient" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
+<%@ page import="org.wso2.carbon.cep.stub.admin.CEPAdminServiceCEPAdminException" %>
 <%@ page import="org.wso2.carbon.cep.stub.admin.CEPAdminServiceStub" %>
 <%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.BucketDTO" %>
 <%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.InputDTO" %>
@@ -46,7 +47,8 @@
         session.removeAttribute("inputs");
         session.removeAttribute("queries");
         session.removeAttribute("tempBucketInformation");
-    } catch (Exception e) {
-        message = "Error in adding bucket :" + e.toString();
+    } catch (CEPAdminServiceCEPAdminException e) {
+        message = "Error in adding bucket :" + e.getFaultMessage().
+                getCEPAdminException().getErrorMessage();
     }
 %><%=message%>

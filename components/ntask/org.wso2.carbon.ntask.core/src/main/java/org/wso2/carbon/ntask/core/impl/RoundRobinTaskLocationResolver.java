@@ -41,7 +41,16 @@ public class RoundRobinTaskLocationResolver implements TaskLocationResolver {
 		int n = names.size();
 		for (int i = 0; i < n; i++) {
 			if (taskInfo.getName().equals(names.get(i))) {
-				return i;
+				int tenantTaskTypeOffset = (ctx.getTenantId() + ":" + ctx.getTaskType()).hashCode();
+				int result = i + tenantTaskTypeOffset;
+				if (result < 0) {
+					if (result == Integer.MIN_VALUE) {
+						result = Integer.MAX_VALUE;
+					} else {
+					    result = -result;
+					}
+				}
+				return result;
 			}
 		}
 		return 0;

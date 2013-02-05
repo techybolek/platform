@@ -20,30 +20,16 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.wso2.carbon.humantask.TArgument;
 import org.wso2.carbon.humantask.TDeadline;
 import org.wso2.carbon.humantask.TDeadlines;
-import org.wso2.carbon.humantask.TFrom;
 import org.wso2.carbon.humantask.TPriorityExpr;
 import org.wso2.carbon.humantask.core.HumanTaskConstants;
 import org.wso2.carbon.humantask.core.api.event.TaskEventInfo;
-import org.wso2.carbon.humantask.core.dao.TaskEventType;
 import org.wso2.carbon.humantask.core.api.event.TaskInfo;
 import org.wso2.carbon.humantask.core.api.scheduler.Scheduler;
-import org.wso2.carbon.humantask.core.dao.DeadlineDAO;
-import org.wso2.carbon.humantask.core.dao.EventDAO;
-import org.wso2.carbon.humantask.core.dao.GenericHumanRoleDAO;
-import org.wso2.carbon.humantask.core.dao.MessageDAO;
-import org.wso2.carbon.humantask.core.dao.OrganizationalEntityDAO;
-import org.wso2.carbon.humantask.core.dao.PresentationDescriptionDAO;
-import org.wso2.carbon.humantask.core.dao.PresentationNameDAO;
-import org.wso2.carbon.humantask.core.dao.PresentationParameterDAO;
-import org.wso2.carbon.humantask.core.dao.PresentationSubjectDAO;
-import org.wso2.carbon.humantask.core.dao.TaskDAO;
-import org.wso2.carbon.humantask.core.dao.TaskStatus;
+import org.wso2.carbon.humantask.core.dao.*;
 import org.wso2.carbon.humantask.core.dao.jpa.openjpa.model.Deadline;
-import org.wso2.carbon.humantask.core.engine.HumanTaskException;
+import org.wso2.carbon.humantask.core.dao.jpa.openjpa.model.GenericHumanRole;
 import org.wso2.carbon.humantask.core.engine.PeopleQueryEvaluator;
 import org.wso2.carbon.humantask.core.engine.runtime.api.EvaluationContext;
 import org.wso2.carbon.humantask.core.engine.runtime.api.ExpressionLanguageRuntime;
@@ -59,11 +45,7 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Common utility method for all the TaskDAO objects.
@@ -327,32 +309,57 @@ public final class CommonTaskUtil {
     public static void nominate(TaskDAO task, PeopleQueryEvaluator pqe) {
         //we can nominate only if there's no specified activation time or the provided activation time has expired.
         if (task.getActivationTime() == null || !task.getActivationTime().after(new Date())) {
-            for (GenericHumanRoleDAO ghr : task.getHumanRoles()) {
-                if (GenericHumanRoleDAO.GenericHumanRoleType.POTENTIAL_OWNERS.equals(ghr.getType())) {
-                    for (OrganizationalEntityDAO orgEntity : ghr.getOrgEntities()) {
-                        if (OrganizationalEntityDAO.OrganizationalEntityType.GROUP.equals(orgEntity.getOrgEntityType())) {
-                            String roleName = orgEntity.getName();
+            GenericHumanRoleDAO potentialOwners =
+                    task.getGenericHumanRole(GenericHumanRoleDAO.GenericHumanRoleType.POTENTIAL_OWNERS);
+            boolean hasMultipleOwners = hasMultiplePotentialOwners(potentialOwners, pqe);
+            for (OrganizationalEntityDAO orgEntity : potentialOwners.getOrgEntities()) {
+                if (OrganizationalEntityDAO.OrganizationalEntityType.GROUP.equals(
+                        orgEntity.getOrgEntityType())) {
+                    String roleName = orgEntity.getName();
 
-                            if (pqe.isExistingRole(roleName) && pqe.getUserNameListForRole(roleName).size() == 1) {
-                                // There's only 1 user matching for potential owners. so we can safely reserve the
-                                // task for that particular user.
-                                GenericHumanRoleDAO actualOwnerRole =
-                                        pqe.createGHRForRoleName(roleName,
-                                                                 GenericHumanRoleDAO.GenericHumanRoleType.ACTUAL_OWNER);
-                                actualOwnerRole.setTask(task);
-                                task.addHumanRole(actualOwnerRole);
-                                task.setStatus(TaskStatus.RESERVED);
-                            } else if (pqe.isExistingRole(roleName)) {
-                                // this means there might be more than 1 user or zero users with
-                                // the given role name. In both cases we make the task status to be READY.
-                                task.setStatus(TaskStatus.READY);
-                            }
-                        }
+                    if (pqe.isExistingRole(roleName) &&
+                            pqe.getUserNameListForRole(roleName).size() == 1) {
+                        // There's only 1 user matching for potential owners. so we can safely reserve the
+                        // task for that particular user.
+                        GenericHumanRoleDAO actualOwnerRole = pqe.createGHRForRoleName(roleName,
+                                GenericHumanRoleDAO.GenericHumanRoleType.ACTUAL_OWNER);
+                        actualOwnerRole.setTask(task);
+                        task.addHumanRole(actualOwnerRole);
+                        task.setStatus(TaskStatus.RESERVED);
+                    } else if (pqe.isExistingRole(roleName)) {
+                        // this means there might be more than 1 user or zero users with
+                        // the given role name. In both cases we make the task status to be READY.
+                        task.setStatus(TaskStatus.READY);
                     }
-                    break;
+                } else if (OrganizationalEntityDAO.OrganizationalEntityType.USER.equals(
+                        orgEntity.getOrgEntityType())) {
+                    if (hasMultipleOwners) {
+                        task.setStatus(TaskStatus.READY);
+                    } else {
+                        GenericHumanRoleDAO actualOwnerRole =
+                                HumanTaskServiceComponent.getHumanTaskServer().
+                                        getDaoConnectionFactory().getConnection().
+                                        createNewGHRObject(
+                                                GenericHumanRole.GenericHumanRoleType.ACTUAL_OWNER);
+                        actualOwnerRole.setTask(task);
+                        task.addHumanRole(actualOwnerRole);
+                        task.setStatus(TaskStatus.RESERVED);
+                    }
                 }
             }
         }
+    }
+    
+    private static boolean hasMultiplePotentialOwners(GenericHumanRoleDAO ghr,
+                                                      PeopleQueryEvaluator pqe) {
+        int counter = 0;
+        for (OrganizationalEntityDAO orgEntity : ghr.getOrgEntities()) {
+            if (OrganizationalEntityDAO.OrganizationalEntityType.USER.equals(
+                    orgEntity.getOrgEntityType()) && pqe.isExistingUser(orgEntity.getName())) {
+                counter++;
+            }
+        }
+        return (counter > 1);
     }
 
     /**
@@ -391,36 +398,22 @@ public final class CommonTaskUtil {
     }
 
     /**
-     * @param peopleQueryEvaluator
-     * @param tFrom
-     * @return
-     * @throws HumanTaskException
+     * Calculates the Role.
+     *
+     * @param evalCtx    : The evaluation context.
+     * @param  roleExpression : the role expression
+     * @param expressionLanguage : Expression language associated with the argument named "role"
+     * @return : The task priority
      */
-    public static List<OrganizationalEntityDAO> getOrganizationalEntities(
-
-            PeopleQueryEvaluator peopleQueryEvaluator,
-            TFrom tFrom) throws HumanTaskException {
-
-        String roleName = null;
-        for (TArgument tArgument : tFrom.getArgumentArray()) {
-            //TODO what about expression language
-            if ("role".equals(tArgument.getName())) {
-                roleName = tArgument.newCursor().getTextValue();
-                break;
-            }
+    public static String calculateRole(EvaluationContext evalCtx, String roleExpression,
+                                       String expressionLanguage) {
+        ExpressionLanguageRuntime expLangRuntime = HumanTaskServiceComponent.getHumanTaskServer().
+                getTaskEngine().getExpressionLanguageRuntime(expressionLanguage);
+        String role = expLangRuntime.evaluateAsString(roleExpression, evalCtx);
+        if (role == null) {
+            log.warn(String.format("Role cannot be  null"));
         }
-
-        if (roleName == null || StringUtils.isEmpty(roleName)) {
-            throw new HumanTaskRuntimeException("The role name cannot be empty: " + tFrom.toString());
-        } else {
-            roleName = roleName.trim();
-        }
-
-        List<OrganizationalEntityDAO> orgEnties = new ArrayList<OrganizationalEntityDAO>();
-        orgEnties.add(peopleQueryEvaluator.createGroupOrgEntityForRole(roleName));
-
-        return orgEnties;
-
+        return role;
     }
 
     /**
@@ -591,31 +584,37 @@ public final class CommonTaskUtil {
      * @return : the list of assignable user name list.
      */
     public static List<String> getAssignableUserNameList(TaskDAO task, boolean excludeActualOwner) {
-        String potentialOwnerRole = getPotentialOwnerRoleName(task);
+        List<String> allPotentialOwners = new ArrayList<String>();
+        GenericHumanRoleDAO ghr =
+                task.getGenericHumanRole(GenericHumanRole.GenericHumanRoleType.POTENTIAL_OWNERS);
         RegistryService registryService = HumanTaskServiceComponent.getRegistryService();
-        try {
-            UserRealm userRealm = registryService.getUserRealm(task.getTenantId());
-
-            String[] assignableUsersArray =
-                    userRealm.getUserStoreManager().getUserListOfRole(potentialOwnerRole);
-
-            List<String> allPotentialOwners = new ArrayList<String>(Arrays.asList(assignableUsersArray));
-
-            OrganizationalEntityDAO actualOwner = getActualOwner(task);
-
-            if (excludeActualOwner && actualOwner != null) {
-                allPotentialOwners.remove(actualOwner.getName());
-            }
-
-            return allPotentialOwners;
-
-        } catch (RegistryException e) {
-            throw new HumanTaskRuntimeException("Cannot locate user realm for tenant id " +
+        for (OrganizationalEntityDAO orgEntity : ghr.getOrgEntities()) {
+            if (OrganizationalEntityDAO.OrganizationalEntityType.GROUP.equals(
+                    orgEntity.getOrgEntityType())) {
+                String roleName = orgEntity.getName();
+                UserRealm userRealm;
+                try {
+                    userRealm = registryService.getUserRealm(task.getTenantId());
+                    String[] assignableUsersArray =
+                                    userRealm.getUserStoreManager().getUserListOfRole(roleName);
+                    allPotentialOwners.addAll(Arrays.asList(assignableUsersArray));
+                } catch (RegistryException e) {
+                    throw new HumanTaskRuntimeException("Cannot locate user realm for tenant id " +
                                                 task.getTenantId());
-        } catch (UserStoreException e) {
-            throw new HumanTaskRuntimeException("Error retrieving the UserStoreManager " +
+                } catch (UserStoreException e) {
+                    throw new HumanTaskRuntimeException("Error retrieving the UserStoreManager " +
                                                 task.getTenantId(), e);
+                }
+            } else if (OrganizationalEntityDAO.OrganizationalEntityType.USER.equals(
+                    orgEntity.getOrgEntityType())) {
+                allPotentialOwners.add(orgEntity.getName());
+            }
         }
+        OrganizationalEntityDAO actualOwner = getActualOwner(task);
+        if (excludeActualOwner && actualOwner != null) {
+            allPotentialOwners.remove(actualOwner.getName());
+        }
+        return allPotentialOwners;
     }
 
     /**

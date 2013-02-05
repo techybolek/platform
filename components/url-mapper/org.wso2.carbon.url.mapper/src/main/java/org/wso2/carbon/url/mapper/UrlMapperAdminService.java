@@ -18,13 +18,14 @@ package org.wso2.carbon.url.mapper;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.ApplicationContext;
 import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 import org.wso2.carbon.url.mapper.clustermessage.util.VirtualHostClusterUtil;
 import org.wso2.carbon.url.mapper.data.MappingData;
 import org.wso2.carbon.url.mapper.data.PaginatedMappingData;
 import org.wso2.carbon.url.mapper.internal.exception.UrlMapperException;
 import org.wso2.carbon.url.mapper.internal.util.HostUtil;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.DataPaginator;
 
 import java.util.Arrays;
@@ -36,10 +37,10 @@ import java.util.List;
 public class UrlMapperAdminService extends AbstractAdmin {
 	private static final Log log = LogFactory.getLog(UrlMapperAdminService.class);
 
-	public void addWebAppToHost(String hostName, String uri) throws UrlMapperException {
+	public void addWebAppToHost(String hostName, String uri, String appType) throws UrlMapperException {
 		try {
 			hostName = hostName + getDomainNamePrefix();
-			HostUtil.addWebAppToHost(hostName, uri);
+			HostUtil.addWebAppToHost(hostName, uri, appType);
 		} catch (Exception e) {
 			log.error(e); // To change body of catch statement use File |
 							// Settings | File Templates.
@@ -48,8 +49,15 @@ public class UrlMapperAdminService extends AbstractAdmin {
 	}
 
 	public String getHttpPort () throws UrlMapperException {
-		return HostUtil.getHttpPort();
-	}
+        int port = 0;
+        if(getConfigContext().getAxisConfiguration().getTransportIn("http") != null) {
+            port = CarbonUtils.getTransportProxyPort(getConfigContext(), "http");
+            if (port == -1) {
+                port  = CarbonUtils.getTransportPort(getConfigContext(), "http");
+            }
+        }
+        return Integer.toString(port);
+    }
 	
 	public static PaginatedMappingData getPaginatedMappings(int pageNumber, String tenantDomain)
 			throws UrlMapperException {
@@ -70,9 +78,9 @@ public class UrlMapperAdminService extends AbstractAdmin {
 		return HostUtil.getAllMappingsFromRegistry();
 	}
 
-	public void addServiceDomain(String hostName, String url) throws UrlMapperException {
+	public void addServiceDomain(String hostName, String url, String appType) throws UrlMapperException {
 		hostName = hostName + getDomainNamePrefix();
-		HostUtil.addDomainToServiceEpr(hostName, url);
+		HostUtil.addDomainToServiceEpr(hostName, url, appType);
 	}
 
 	public void editServiceDomain(String newHost, String oldhost) throws UrlMapperException {
@@ -81,7 +89,7 @@ public class UrlMapperAdminService extends AbstractAdmin {
 	}
 
 	public void deleteServiceDomain(String hostName) throws UrlMapperException, AxisFault {
-        ApplicationContext.getCurrentApplicationContext().removeUrlMappingMap(hostName);
+        URLMappingHolder.getInstance().removeUrlMappingMap(hostName);
         VirtualHostClusterUtil.deleteServiceMappingToCluster(hostName);
         HostUtil.deleteResourceToRegistry(hostName);
     }

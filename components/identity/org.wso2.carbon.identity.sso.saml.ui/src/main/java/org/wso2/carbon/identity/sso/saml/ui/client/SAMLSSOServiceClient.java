@@ -34,6 +34,12 @@ public class SAMLSSOServiceClient {
     private static Log log = LogFactory.getLog(SAMLSSOServiceClient.class);
     private IdentitySAMLSSOServiceStub stub;
 
+    /**
+     * 
+     * @param backendServerURL
+     * @param configCtx
+     * @throws AxisFault
+     */
     public SAMLSSOServiceClient(String backendServerURL, ConfigurationContext configCtx) throws AxisFault {
         String serviceURL = backendServerURL + "IdentitySAMLSSOService";
         stub = new IdentitySAMLSSOServiceStub(configCtx, serviceURL);
@@ -42,42 +48,56 @@ public class SAMLSSOServiceClient {
         option.setManageSession(true);
     }
 
-    public SAMLSSOReqValidationResponseDTO validate(String authnRequest, String sessionId,
-                                                    String rpSessionId, String authnMode) throws
-                                                                                          IdentityException {
-        try {
-            return stub.validateRequest(authnRequest, sessionId, rpSessionId, authnMode);
-        } catch (Exception e) {
-            log.error("Error validating the Authentication Request", e);
-            throw new IdentityException("Error in parsing authentication request", e);
-//            String response = ErrorResponseBuilder.generateErrorneousResponse();
-//            SAMLSSOReqValidationResponseDTO responseDTO = new SAMLSSOReqValidationResponseDTO();
-//            responseDTO.setResponse(response);
-//            return responseDTO;
-        }
-    }
+	/**
+	 * 
+	 * @param authnRequest
+	 * @param sessionId
+	 * @param rpSessionId
+	 * @param authnMode
+	 * @return
+	 * @throws IdentityException
+	 */
+	public SAMLSSOReqValidationResponseDTO validate(String samlReq, String queryString,
+	                                                String sessionId, String rpSessionId,
+	                                                String authnMode) throws IdentityException {
+		try {
+			return stub.validateRequest(samlReq, queryString, sessionId, rpSessionId, authnMode);
+		} catch (Exception e) {
+			log.error("Error validating the Authentication Request", e);
+			throw new IdentityException("Error in parsing authentication request", e);
+		}
+	}
 
-    public SAMLSSORespDTO authenticate(SAMLSSOAuthnReqDTO authnReqDTO, String sessionId) throws IdentityException {
-        try {
-            return stub.authenticate(authnReqDTO, sessionId);
-        } catch (Exception e) {
-            log.error("Error authenticating the user.", e);
-            throw new IdentityException("Authentication Failure", e);
-//            String response = ErrorResponseBuilder.generateErrorneousResponse();
-//            SAMLSSORespDTO respDTO = new SAMLSSORespDTO();
-//            respDTO.setRespString(response);
-//            respDTO.setSessionEstablished(false);
-//            respDTO.setAssertionConsumerURL(authnReqDTO.getAssertionConsumerURL());
-//            return respDTO;
-        }
-    }
+	/**
+	 * 
+	 * @param authnReqDTO
+	 * @param sessionId
+	 * @return
+	 * @throws IdentityException
+	 */
+	public SAMLSSORespDTO authenticate(SAMLSSOAuthnReqDTO authnReqDTO, String sessionId)
+	                                                                                    throws IdentityException {
+		try {
+			return stub.authenticate(authnReqDTO, sessionId);
+		} catch (Exception e) {
+			log.error("Error authenticating the user.", e);
+			throw new IdentityException("Authentication Failure", e);
+		}
+	}
 
-    public SAMLSSOReqValidationResponseDTO doSingleLogout(String sessionId) throws IdentityException {
-        try {
-            return stub.doSingleLogout(sessionId);
-        } catch (Exception ex) {
-            log.error("Error performing single logout.", ex);
-            throw new IdentityException("Error performing Single Logout", ex);
-        }
-    }
+	/**
+	 * 
+	 * @param sessionId
+	 * @return
+	 * @throws IdentityException
+	 */
+	public SAMLSSOReqValidationResponseDTO doSingleLogout(String sessionId)
+	                                                                       throws IdentityException {
+		try {
+			return stub.doSingleLogout(sessionId);
+		} catch (Exception ex) {
+			log.error("Error performing single logout.", ex);
+			throw new IdentityException("Error performing Single Logout", ex);
+		}
+	}
 }

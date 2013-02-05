@@ -20,10 +20,12 @@ package org.wso2.carbon.identity.entitlement.policy;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
-import org.apache.rampart.util.Axis2Util;
+import org.wso2.balana.XACMLConstants;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
-import org.wso2.carbon.identity.entitlement.dto.AttributeValueDTO;
+import org.wso2.carbon.identity.entitlement.EntitlementUtil;
+import org.wso2.carbon.identity.entitlement.dto.AttributeDTO;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
@@ -38,17 +40,40 @@ import java.util.Properties;
  */
 public class PolicyMetaDataBuilder {
 
+    private String policy;
+
+    private int version;
+
+    public PolicyMetaDataBuilder() {
+        
+    }
+
+    /**
+     *
+     * @param policy policy as a String
+     */
+    public PolicyMetaDataBuilder(String policy) {
+        this.policy = policy;
+        String version = EntitlementUtil.getPolicyVersion(policy);
+        if(XACMLConstants.XACML_1_0_IDENTIFIER.equals(version)){
+            this.version = XACMLConstants.XACML_VERSION_1_0;
+        } else if(XACMLConstants.XACML_2_0_IDENTIFIER.equals(version)){
+            this.version = XACMLConstants.XACML_VERSION_2_0;
+        }  else {
+            this.version = XACMLConstants.XACML_VERSION_3_0;
+        }
+    }
+
     /**
      * This creates properties object which contains the policy meta data.
-     * @param policy policy as a String
      * @return properties object which contains the policy meta data
      * @throws IdentityException throws
      */
-    public Properties getPolicyMetaDataFromPolicy(String policy) throws IdentityException {
+    public Properties getPolicyMetaDataFromPolicy() throws IdentityException {
 
-        List<AttributeValueDTO> attributeValueDTOs = new ArrayList<AttributeValueDTO>();
+        List<AttributeDTO> attributeDTOs = new ArrayList<AttributeDTO>();
         try {
-            attributeValueDTOs = createPolicyMetaData(policy, attributeValueDTOs);
+            attributeDTOs = createPolicyMetaData(policy, attributeDTOs);
         } catch (IdentityException e) {
             throw new IdentityException("Can not create Policy MetaData for given policy");
         }
@@ -56,13 +81,13 @@ public class PolicyMetaDataBuilder {
         int attributeElementNo = 0;
         Properties properties = new Properties();
 
-        if(attributeValueDTOs != null){
-            for(AttributeValueDTO attributeValueDTO : attributeValueDTOs){
+        if(attributeDTOs != null){
+            for(AttributeDTO attributeDTO : attributeDTOs){
                 properties.setProperty(EntitlementConstants.POLICY_META_DATA + attributeElementNo,
-                       attributeValueDTO.getAttributeType() + EntitlementConstants.ATTRIBUTE_SEPARATOR + 
-                       attributeValueDTO.getAttribute() + EntitlementConstants.ATTRIBUTE_SEPARATOR +
-                       attributeValueDTO.getAttributeId() + EntitlementConstants.ATTRIBUTE_SEPARATOR +
-                       attributeValueDTO.getAttributeDataType());
+                       attributeDTO.getAttributeType() + EntitlementConstants.ATTRIBUTE_SEPARATOR +
+                       attributeDTO.getAttributeValue() + EntitlementConstants.ATTRIBUTE_SEPARATOR +
+                       attributeDTO.getAttributeId() + EntitlementConstants.ATTRIBUTE_SEPARATOR +
+                       attributeDTO.getAttributeDataType());
                 attributeElementNo ++;
             }
         }
@@ -72,11 +97,11 @@ public class PolicyMetaDataBuilder {
     /**
      * This creates the attributes from registry property values
      * @param properties Properties object read from registry resource
-     * @return  attributes as AttributeValueDTO[] object
+     * @return  attributes as AttributeDTO[] object
      */
-    public AttributeValueDTO[] getPolicyMetaDataFromRegistryProperties(Properties properties){
+    public AttributeDTO[] getPolicyMetaDataFromRegistryProperties(Properties properties){
 
-        List<AttributeValueDTO> attributeValueDTOs = new ArrayList<AttributeValueDTO>();
+        List<AttributeDTO> attributeDTOs = new ArrayList<AttributeDTO>();
         if(properties != null && !properties.isEmpty()){
             for (int attributeElementNo = 0; attributeElementNo < properties.size();){
                 List attributeList = (ArrayList) properties.get(EntitlementConstants.POLICY_META_DATA +
@@ -85,12 +110,12 @@ public class PolicyMetaDataBuilder {
                     String[] attributeData = attributeList.get(0).toString().
                             split(EntitlementConstants.ATTRIBUTE_SEPARATOR);
                     if(attributeData.length == EntitlementConstants.POLICY_META_DATA_ARRAY_LENGTH){
-                        AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                        attributeValueDTO.setAttributeType(attributeData[0]);
-                        attributeValueDTO.setAttribute(attributeData[1]);
-                        attributeValueDTO.setAttributeId(attributeData[2]);                        
-                        attributeValueDTO.setAttributeDataType(attributeData[3]);
-                        attributeValueDTOs.add(attributeValueDTO);
+                        AttributeDTO attributeDTO = new AttributeDTO();
+                        attributeDTO.setAttributeType(attributeData[0]);
+                        attributeDTO.setAttributeValue(attributeData[1]);
+                        attributeDTO.setAttributeId(attributeData[2]);
+                        attributeDTO.setAttributeDataType(attributeData[3]);
+                        attributeDTOs.add(attributeDTO);
                     }
                 }
                 attributeElementNo ++;
@@ -99,18 +124,18 @@ public class PolicyMetaDataBuilder {
             return null;
         }
 
-        return attributeValueDTOs.toArray(new AttributeValueDTO[attributeValueDTOs.size()]);
+        return attributeDTOs.toArray(new AttributeDTO[attributeDTOs.size()]);
     }
 
     /**
      * This creates the OMElement from the policy xml and create the the meta data for hole policy
      * @param policy   policy as a String
-     * @param attributeValueDTOs object which holds the policy meta data in String format
-     * @return  list of AttributeValueDTO object which holds the policy meta data in String format
+     * @param attributeDTOs object which holds the policy meta data in String format
+     * @return  list of AttributeDTO object which holds the policy meta data in String format
      * @throws IdentityException throws if OMElement can not be created
      */
-    public List<AttributeValueDTO> createPolicyMetaData(String policy,
-                            List<AttributeValueDTO> attributeValueDTOs) throws IdentityException {
+    public List<AttributeDTO> createPolicyMetaData(String policy,
+                            List<AttributeDTO> attributeDTOs) throws IdentityException {
 
         OMElement omElement;
 
@@ -125,36 +150,40 @@ public class PolicyMetaDataBuilder {
                     TARGET_ELEMENT);
             while(iterator1.hasNext()){
                 OMElement targetElement = (OMElement)iterator1.next();
-                createMetaDataFromTargetElement(targetElement, attributeValueDTOs);
+                if(version == XACMLConstants.XACML_VERSION_3_0){
+                    createMetaDataFromXACML3TargetElement(targetElement, attributeDTOs);
+                } else {
+                    createMetaDataFromTargetElement(targetElement, attributeDTOs);
+                }
             }
 
             Iterator iterator2 = omElement.getChildrenWithLocalName(EntitlementConstants.
                     RULE_ELEMENT);
             while(iterator2.hasNext()){
                 OMElement targetElement = (OMElement)iterator2.next();
-                createMetaDataFromRuleElement(targetElement, attributeValueDTOs);
+                createMetaDataFromRuleElement(targetElement, attributeDTOs);
             }
 
             Iterator iterator3 = omElement.getChildrenWithLocalName(EntitlementConstants.
                     POLICY_ELEMENT);
             while(iterator3.hasNext()){
                 OMElement targetElement = (OMElement)iterator3.next();
-                createPolicyMetaData(targetElement.toString(), attributeValueDTOs);
+                createPolicyMetaData(targetElement.toString(), attributeDTOs);
             }
         }
 
-        return attributeValueDTOs;
+        return attributeDTOs;
     }
 
     /**
      * This extract policy meta data from target element in the policy
      * @param omElement  target element as an OMElement
-     * @param attributeValueDTOs  list of AttributeValueDTO object which holds the policy meta data
+     * @param attributeDTOs  list of AttributeDTO object which holds the policy meta data
      * in String format
-     * @return list of AttributeValueDTO object which holds the policy meta data in String format
+     * @return list of AttributeDTO object which holds the policy meta data in String format
      */
-    public List<AttributeValueDTO> createMetaDataFromTargetElement(OMElement omElement,
-                                                        List<AttributeValueDTO> attributeValueDTOs){
+    public List<AttributeDTO> createMetaDataFromTargetElement(OMElement omElement,
+                                                        List<AttributeDTO> attributeDTOs){
 
         if(omElement != null){
 
@@ -174,11 +203,11 @@ public class PolicyMetaDataBuilder {
 
                     while(iterator3.hasNext()){
                         OMElement resourceMatch = (OMElement) iterator3.next();
-                        List<AttributeValueDTO> attributeValueDTOList =
+                        List<AttributeDTO> attributeDTOList =
                                 createMetaDataFromMatchElement(resourceMatch,
                                                                EntitlementConstants.RESOURCE_ELEMENT);
-                        for(AttributeValueDTO attributeValueDTO : attributeValueDTOList){
-                            attributeValueDTOs.add(attributeValueDTO);
+                        for(AttributeDTO attributeDTO : attributeDTOList){
+                            attributeDTOs.add(attributeDTO);
                         }
                     }
                 }
@@ -200,11 +229,11 @@ public class PolicyMetaDataBuilder {
 
                     while(iterator3.hasNext()){
                         OMElement resourceMatch = (OMElement) iterator3.next();
-                        List<AttributeValueDTO> attributeValueDTOList =
+                        List<AttributeDTO> attributeDTOList =
                                 createMetaDataFromMatchElement(resourceMatch,
                                                                EntitlementConstants.SUBJECT_ELEMENT);
-                        for(AttributeValueDTO attributeValueDTO : attributeValueDTOList){
-                            attributeValueDTOs.add(attributeValueDTO);
+                        for(AttributeDTO attributeDTO : attributeDTOList){
+                            attributeDTOs.add(attributeDTO);
                         }
                     }
                 }
@@ -228,11 +257,11 @@ public class PolicyMetaDataBuilder {
 
                     while(iterator3.hasNext()){
                         OMElement resourceMatch = (OMElement) iterator3.next();
-                        List<AttributeValueDTO> attributeValueDTOList =
+                        List<AttributeDTO> attributeDTOList =
                                 createMetaDataFromMatchElement(resourceMatch,
                                                                EntitlementConstants.ACTION_ELEMENT);
-                        for(AttributeValueDTO attributeValueDTO : attributeValueDTOList){
-                            attributeValueDTOs.add(attributeValueDTO);
+                        for(AttributeDTO attributeDTO : attributeDTOList){
+                            attributeDTOs.add(attributeDTO);
                         }
                     }
                 }
@@ -257,11 +286,11 @@ public class PolicyMetaDataBuilder {
                     while(iterator3.hasNext()){
                         OMElement resourceMatch = (OMElement) iterator3.next();
 
-                        List<AttributeValueDTO> attributeValueDTOList =
+                        List<AttributeDTO> attributeDTOList =
                                 createMetaDataFromMatchElement(resourceMatch,
                                                            EntitlementConstants.ENVIRONMENT_ELEMENT);
-                        for(AttributeValueDTO attributeValueDTO : attributeValueDTOList){
-                            attributeValueDTOs.add(attributeValueDTO);
+                        for(AttributeDTO attributeDTO : attributeDTOList){
+                            attributeDTOs.add(attributeDTO);
                         }
                     }
                 }
@@ -270,8 +299,50 @@ public class PolicyMetaDataBuilder {
 
         }
 
-        return attributeValueDTOs;
+        return attributeDTOs;
+    }
 
+
+    /**
+     * This extract policy meta data from target element in the policy
+     * @param omElement  target element as an OMElement
+     * @param attributeDTOs  list of AttributeDTO object which holds the policy meta data
+     * in String format
+     * @return list of AttributeDTO object which holds the policy meta data in String format
+     */
+    public List<AttributeDTO> createMetaDataFromXACML3TargetElement(OMElement omElement,
+                                                        List<AttributeDTO> attributeDTOs){
+
+        if(omElement != null){
+
+            Iterator iterator1 = omElement.
+                    getChildrenWithLocalName(EntitlementConstants.ANY_OF);
+            while(iterator1.hasNext()){
+
+                OMElement anyOff = (OMElement) iterator1.next();
+
+                Iterator iterator2 = anyOff.
+                        getChildrenWithLocalName(EntitlementConstants.ALL_OF);
+
+                while(iterator2.hasNext()){
+                    OMElement allOf = (OMElement) iterator2.next();
+
+                    Iterator iterator3 = allOf.
+                            getChildrenWithLocalName(EntitlementConstants.MATCH_ELEMENT);
+
+                    while(iterator3.hasNext()){
+                        OMElement resourceMatch = (OMElement) iterator3.next();
+                        List<AttributeDTO> attributeDTOList =
+                                createMetaDataFromXACML3MatchElement(resourceMatch);
+                        for(AttributeDTO attributeDTO : attributeDTOList){
+                            attributeDTOs.add(attributeDTO);
+                        }
+                    }
+                }
+            }
+        }
+
+        return attributeDTOs;
     }
 
     /**
@@ -280,10 +351,10 @@ public class PolicyMetaDataBuilder {
      * @param subElementName  match element name
      * @return AttributeValueDTO object which holds the policy meta data in String format
      */
-    public List<AttributeValueDTO> createMetaDataFromMatchElement(OMElement omElement,
+    public List<AttributeDTO> createMetaDataFromMatchElement(OMElement omElement,
                                                                   String subElementName){
 
-        List<AttributeValueDTO> attributeValueDTOs = new ArrayList<AttributeValueDTO>();
+        List<AttributeDTO> attributeDTOs = new ArrayList<AttributeDTO>();
         String attributeId = null;
         String dataType = null;
 
@@ -317,29 +388,71 @@ public class PolicyMetaDataBuilder {
             while(iterator3.hasNext()){
                 OMElement attributeElement = (OMElement)iterator3.next();
                 if(attributeElement != null){
-                    AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                    attributeValueDTO.setAttribute(attributeElement.getText());
-                    attributeValueDTO.setAttributeId(attributeId);
-                    attributeValueDTO.setAttributeDataType(dataType);
-                    attributeValueDTO.setAttributeType(subElementName);
-                    attributeValueDTOs.add(attributeValueDTO);
+                    AttributeDTO attributeDTO = new AttributeDTO();
+                    attributeDTO.setAttributeValue(attributeElement.getText());
+                    attributeDTO.setAttributeId(attributeId);
+                    attributeDTO.setAttributeDataType(dataType);
+                    attributeDTO.setAttributeType(subElementName);
+                    attributeDTOs.add(attributeDTO);
                 }
             }
 
         }
-        return attributeValueDTOs;
-
+        return attributeDTOs;
     }
 
+
+    /**
+     * This extract policy meta data from match element in the policy
+     * @param omElement  match element  as an OMElement
+     * @return AttributeValueDTO object which holds the policy meta data in String format
+     */
+    public List<AttributeDTO> createMetaDataFromXACML3MatchElement(OMElement omElement){
+
+        List<AttributeDTO> attributeDTOs = new ArrayList<AttributeDTO>();
+        String attributeId = null;
+        String category = null;
+
+        if(omElement != null){
+            Iterator iterator1 = omElement.
+                    getChildrenWithLocalName(EntitlementConstants.ATTRIBUTE_DESIGNATOR);
+            while(iterator1.hasNext()){
+                OMElement attributeDesignator = (OMElement)iterator1.next();
+                if(attributeDesignator != null){
+                    attributeId = attributeDesignator.
+                            getAttributeValue(new QName(EntitlementConstants.ATTRIBUTE_ID));
+                    category = attributeDesignator.
+                            getAttributeValue(new QName(EntitlementConstants.CATEGORY));
+                }
+            }
+
+            Iterator iterator3 = omElement.
+                    getChildrenWithLocalName(EntitlementConstants.ATTRIBUTE_VALUE);
+            while(iterator3.hasNext()){
+                OMElement attributeElement = (OMElement)iterator3.next();
+                if(attributeElement != null){
+                    String dataType = attributeElement.
+                            getAttributeValue(new QName(EntitlementConstants.DATA_TYPE));
+                    AttributeDTO attributeDTO = new AttributeDTO();
+                    attributeDTO.setAttributeValue(attributeElement.getText());
+                    attributeDTO.setAttributeId(attributeId);
+                    attributeDTO.setAttributeDataType(dataType);
+                    attributeDTO.setAttributeType(category);
+                    attributeDTOs.add(attributeDTO);
+                }
+            }
+        }
+        return attributeDTOs;
+    }
     /**
      * This extract policy meta data from apply element in the policy
      * @param omElement apply element as an OMElement
-     * @param attributeValueDTOs  list of AttributeValueDTO object which holds the policy meta data
+     * @param attributeDTOs  list of AttributeDTO object which holds the policy meta data
      * in String format
-     * @return list of AttributeValueDTO object which holds the policy meta data in String format
+     * @return list of AttributeDTO object which holds the policy meta data in String format
      */
-    public List<AttributeValueDTO> createMetaDataFromApplyElement(OMElement omElement,
-                                                      List<AttributeValueDTO> attributeValueDTOs) {
+    public List<AttributeDTO> createMetaDataFromApplyElement(OMElement omElement,
+                                                      List<AttributeDTO> attributeDTOs) {
 
         //TODO check with function id and decide whether search can be done or not
         if(omElement != null){
@@ -356,27 +469,27 @@ public class PolicyMetaDataBuilder {
                     List<String> attributeValues = searchAttributeValues(omElement,
                                                                          new ArrayList<String>(), true);
                     if(attributeValues == null){
-                        AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                        attributeValueDTO.setAttributeType(EntitlementConstants.UNKNOWN);
-                        attributeValueDTO.setAttribute(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
+                        AttributeDTO attributeDTO = new AttributeDTO();
+                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
-                        attributeValueDTOs.add(attributeValueDTO);
+                        attributeDTOs.add(attributeDTO);
                     } else if(attributeValues.isEmpty()){
-                        AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                        attributeValueDTO.setAttributeType(EntitlementConstants.UNKNOWN);
-                        attributeValueDTO.setAttribute(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
+                        AttributeDTO attributeDTO = new AttributeDTO();
+                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
 
                     } else {
                         for(String value : attributeValues){
-                            AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                            attributeValueDTO.setAttribute(value);
-                            attributeValueDTO.setAttributeDataType(dataType);
-                            attributeValueDTO.setAttributeType(EntitlementConstants.RESOURCE_ELEMENT);
-                            attributeValueDTO.setAttributeId(attributeId);
-                            attributeValueDTOs.add(attributeValueDTO);
+                            AttributeDTO attributeDTO = new AttributeDTO();
+                            attributeDTO.setAttributeValue(value);
+                            attributeDTO.setAttributeDataType(dataType);
+                            attributeDTO.setAttributeType(EntitlementConstants.RESOURCE_ELEMENT);
+                            attributeDTO.setAttributeId(attributeId);
+                            attributeDTOs.add(attributeDTO);
                         }
                     }
                 }
@@ -395,28 +508,28 @@ public class PolicyMetaDataBuilder {
                     List<String> attributeValues = searchAttributeValues(omElement,
                                                                          new ArrayList<String>(), true);
                     if(attributeValues == null){
-                        AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                        attributeValueDTO.setAttributeType(EntitlementConstants.UNKNOWN);
-                        attributeValueDTO.setAttribute(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
+                        AttributeDTO attributeDTO = new AttributeDTO();
+                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
 
-                        attributeValueDTOs.add(attributeValueDTO);
+                        attributeDTOs.add(attributeDTO);
                     } else if(attributeValues.isEmpty()){
-                        AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                        attributeValueDTO.setAttributeType(EntitlementConstants.UNKNOWN);
-                        attributeValueDTO.setAttribute(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
+                        AttributeDTO attributeDTO = new AttributeDTO();
+                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
 
                     } else {
                         for(String value : attributeValues){
-                            AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                            attributeValueDTO.setAttribute(value);
-                            attributeValueDTO.setAttributeDataType(dataType);
-                            attributeValueDTO.setAttributeType(EntitlementConstants.SUBJECT_ELEMENT);
-                            attributeValueDTO.setAttributeId(attributeId);
-                            attributeValueDTOs.add(attributeValueDTO);
+                            AttributeDTO attributeDTO = new AttributeDTO();
+                            attributeDTO.setAttributeValue(value);
+                            attributeDTO.setAttributeDataType(dataType);
+                            attributeDTO.setAttributeType(EntitlementConstants.SUBJECT_ELEMENT);
+                            attributeDTO.setAttributeId(attributeId);
+                            attributeDTOs.add(attributeDTO);
                         }
                     }
                 }
@@ -435,28 +548,28 @@ public class PolicyMetaDataBuilder {
                     List<String> attributeValues = searchAttributeValues(omElement,
                                                                          new ArrayList<String>(), true);
                     if(attributeValues == null){
-                        AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                        attributeValueDTO.setAttributeType(EntitlementConstants.UNKNOWN);
-                        attributeValueDTO.setAttribute(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
+                        AttributeDTO attributeDTO = new AttributeDTO();
+                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
 
-                        attributeValueDTOs.add(attributeValueDTO);
+                        attributeDTOs.add(attributeDTO);
                     } else if(attributeValues.isEmpty()){
-                        AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                        attributeValueDTO.setAttributeType(EntitlementConstants.UNKNOWN);
-                        attributeValueDTO.setAttribute(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
+                        AttributeDTO attributeDTO = new AttributeDTO();
+                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
 
                     } else {
                         for(String value : attributeValues){
-                            AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                            attributeValueDTO.setAttribute(value);
-                            attributeValueDTO.setAttributeDataType(dataType);
-                            attributeValueDTO.setAttributeType(EntitlementConstants.ACTION_ELEMENT);
-                            attributeValueDTO.setAttributeId(attributeId);
-                            attributeValueDTOs.add(attributeValueDTO);
+                            AttributeDTO attributeDTO = new AttributeDTO();
+                            attributeDTO.setAttributeValue(value);
+                            attributeDTO.setAttributeDataType(dataType);
+                            attributeDTO.setAttributeType(EntitlementConstants.ACTION_ELEMENT);
+                            attributeDTO.setAttributeId(attributeId);
+                            attributeDTOs.add(attributeDTO);
                         }
                     }
                 }
@@ -475,28 +588,28 @@ public class PolicyMetaDataBuilder {
                     List<String> attributeValues = searchAttributeValues(omElement,
                                                                          new ArrayList<String>(), true);
                     if(attributeValues == null){
-                        AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                        attributeValueDTO.setAttributeType(EntitlementConstants.UNKNOWN);
-                        attributeValueDTO.setAttribute(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
+                        AttributeDTO attributeDTO = new AttributeDTO();
+                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
 
-                        attributeValueDTOs.add(attributeValueDTO);
+                        attributeDTOs.add(attributeDTO);
                     } else if(attributeValues.isEmpty()){
-                        AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                        attributeValueDTO.setAttributeType(EntitlementConstants.UNKNOWN);
-                        attributeValueDTO.setAttribute(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
+                        AttributeDTO attributeDTO = new AttributeDTO();
+                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
 
                     } else {
                         for(String value : attributeValues){
-                            AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                            attributeValueDTO.setAttribute(value);
-                            attributeValueDTO.setAttributeDataType(dataType);
-                            attributeValueDTO.setAttributeType(EntitlementConstants.ENVIRONMENT_ELEMENT);
-                            attributeValueDTO.setAttributeId(attributeId);
-                            attributeValueDTOs.add(attributeValueDTO);
+                            AttributeDTO attributeDTO = new AttributeDTO();
+                            attributeDTO.setAttributeValue(value);
+                            attributeDTO.setAttributeDataType(dataType);
+                            attributeDTO.setAttributeType(EntitlementConstants.ENVIRONMENT_ELEMENT);
+                            attributeDTO.setAttributeId(attributeId);
+                            attributeDTOs.add(attributeDTO);
                         }
                     }
                 }
@@ -515,27 +628,27 @@ public class PolicyMetaDataBuilder {
                     List<String> attributeValues = searchAttributeValues(omElement,
                                                                          new ArrayList<String>(), true);
                     if(attributeValues == null){
-                        AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                        attributeValueDTO.setAttributeType(EntitlementConstants.UNKNOWN);
-                        attributeValueDTO.setAttribute(EntitlementConstants.SEARCH_WARNING_MESSAGE3);
+                        AttributeDTO attributeDTO = new AttributeDTO();
+                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE3);
 
-                        attributeValueDTOs.add(attributeValueDTO);
+                        attributeDTOs.add(attributeDTO);
                     } else if(attributeValues.isEmpty()){
-                        AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                        attributeValueDTO.setAttributeType(EntitlementConstants.UNKNOWN);
-                        attributeValueDTO.setAttribute(EntitlementConstants.SEARCH_WARNING_MESSAGE3);
+                        AttributeDTO attributeDTO = new AttributeDTO();
+                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE3);
 
                     } else {
                         for(String value : attributeValues){
-                            AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                            attributeValueDTO.setAttribute(value);
-                            attributeValueDTO.setAttributeDataType(dataType);
-                            attributeValueDTO.setAttributeType(subElementName);
-                            attributeValueDTO.setAttributeId(attributeId);
-                            attributeValueDTOs.add(attributeValueDTO);
+                            AttributeDTO attributeDTO = new AttributeDTO();
+                            attributeDTO.setAttributeValue(value);
+                            attributeDTO.setAttributeDataType(dataType);
+                            attributeDTO.setAttributeType(subElementName);
+                            attributeDTO.setAttributeId(attributeId);
+                            attributeDTOs.add(attributeDTO);
                             // Remove following after fixing XPath issues
-                            attributeValueDTO.setAttributeType(EntitlementConstants.UNKNOWN);
-                            attributeValueDTO.setAttribute(EntitlementConstants.SEARCH_WARNING_MESSAGE3);
+                            attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                            attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE3);
                         }
                     }
                 }
@@ -546,31 +659,35 @@ public class PolicyMetaDataBuilder {
             if(iterator6.hasNext()) {
                 List<String> attributeValues = searchAttributeValues(omElement, new ArrayList<String>(), false);
                 if(attributeValues == null){
-                    AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                    attributeValueDTO.setAttributeType(EntitlementConstants.UNKNOWN);
-                        attributeValueDTO.setAttribute(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
+                    AttributeDTO attributeDTO = new AttributeDTO();
+                    attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
-                    attributeValueDTOs.add(attributeValueDTO);
+                    attributeDTOs.add(attributeDTO);
                 } else if(attributeValues.isEmpty()){
-                    AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                    attributeValueDTO.setAttributeType(EntitlementConstants.UNKNOWN);
-                        attributeValueDTO.setAttribute(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
+                    AttributeDTO attributeDTO = new AttributeDTO();
+                    attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
                                                     " for " + EntitlementConstants.RESOURCE_ELEMENT +
                                                     " Designator Element ");
                 } else {
                     for(String values : attributeValues){
-                        AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-                        attributeValueDTO.setAttribute(values);
+                        AttributeDTO attributeDTO = new AttributeDTO();
+                        attributeDTO.setAttributeValue(values);
                         Iterator iterator8 = omElement.
                                 getChildrenWithLocalName(EntitlementConstants.APPLY_ELEMENT);
                         while(iterator8.hasNext()){
                             OMElement applyElement = (OMElement)iterator8.next();
-                            searchDesignatorOrSelector(applyElement, attributeValueDTO);
+                            if(version == XACMLConstants.XACML_VERSION_3_0){
+                                searchXACML3Designator(applyElement, attributeDTO);
+                            } else {
+                                searchDesignatorOrSelector(applyElement, attributeDTO);
+                            }
                         }
-                        if(attributeValueDTO.getAttributeType() != null ||
-                                                        "".equals(attributeValueDTO.getAttributeType())) {
-                            attributeValueDTOs.add(attributeValueDTO);
+                        if(attributeDTO.getAttributeType() != null ||
+                                                        "".equals(attributeDTO.getAttributeType())) {
+                            attributeDTOs.add(attributeDTO);
                         }
                     }
                 }
@@ -579,10 +696,108 @@ public class PolicyMetaDataBuilder {
             Iterator iterator7 = omElement.getChildrenWithLocalName(EntitlementConstants.APPLY_ELEMENT);
             while(iterator7.hasNext()){
                 OMElement applyElement = (OMElement)iterator7.next();
-                createMetaDataFromApplyElement(applyElement,attributeValueDTOs);
+                createMetaDataFromApplyElement(applyElement, attributeDTOs);
             }                    
         }
-        return attributeValueDTOs;
+        return attributeDTOs;
+    }
+
+
+    /**
+     * This extract policy meta data from apply element in the policy
+     * @param omElement apply element as an OMElement
+     * @param attributeDTOs  list of AttributeDTO object which holds the policy meta data
+     * in String format
+     * @return list of AttributeDTO object which holds the policy meta data in String format
+     */
+    public List<AttributeDTO> createMetaDataFromXACML3ApplyElement(OMElement omElement,
+                                                      List<AttributeDTO> attributeDTOs) {
+
+        //TODO check with function id and decide whether search can be done or not
+        if(omElement != null){
+            Iterator iterator1 = omElement.
+                    getChildrenWithLocalName(EntitlementConstants.ATTRIBUTE_DESIGNATOR);
+            while(iterator1.hasNext()){
+                OMElement attributeDesignator = (OMElement)iterator1.next();
+                if(attributeDesignator != null){
+                    String attributeId = attributeDesignator.
+                            getAttributeValue(new QName(EntitlementConstants.ATTRIBUTE_ID));
+                    String category = attributeDesignator.
+                            getAttributeValue(new QName(EntitlementConstants.CATEGORY));
+                    String dataType = attributeDesignator.
+                            getAttributeValue(new QName(EntitlementConstants.DATA_TYPE));   //TODO
+                    List<String> attributeValues = searchAttributeValues(omElement,
+                                                                     new ArrayList<String>(), true);
+                    if(attributeValues == null){
+                        AttributeDTO attributeDTO = new AttributeDTO();
+                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
+                                                    " for " + EntitlementConstants.RESOURCE_ELEMENT +
+                                                    " Designator Element ");
+                        attributeDTOs.add(attributeDTO);
+                    } else if(attributeValues.isEmpty()){
+                        AttributeDTO attributeDTO = new AttributeDTO();
+                        attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
+                                                    " for " + EntitlementConstants.RESOURCE_ELEMENT +
+                                                    " Designator Element ");
+
+                    } else {
+                        for(String value : attributeValues){
+                            AttributeDTO attributeDTO = new AttributeDTO();
+                            attributeDTO.setAttributeValue(value);
+                            attributeDTO.setAttributeDataType(dataType);
+                            attributeDTO.setAttributeType(category);
+                            attributeDTO.setAttributeId(attributeId);
+                            attributeDTOs.add(attributeDTO);
+                        }
+                    }
+                }
+            }
+
+
+            Iterator iterator2 = omElement.
+                    getChildrenWithLocalName(EntitlementConstants.ATTRIBUTE_VALUE);
+            if(iterator2.hasNext()) {
+                List<String> attributeValues = searchAttributeValues(omElement, new ArrayList<String>(), false);
+                if(attributeValues == null){
+                    AttributeDTO attributeDTO = new AttributeDTO();
+                    attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE1 +
+                                                    " for " + EntitlementConstants.RESOURCE_ELEMENT +
+                                                    " Designator Element ");
+                    attributeDTOs.add(attributeDTO);
+                } else if(attributeValues.isEmpty()){
+                    AttributeDTO attributeDTO = new AttributeDTO();
+                    attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                        attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE2 +
+                                                    " for " + EntitlementConstants.RESOURCE_ELEMENT +
+                                                    " Designator Element ");
+                } else {
+                    for(String values : attributeValues){
+                        AttributeDTO attributeDTO = new AttributeDTO();
+                        attributeDTO.setAttributeValue(values);
+                        Iterator iterator8 = omElement.
+                                getChildrenWithLocalName(EntitlementConstants.APPLY_ELEMENT);
+                        while(iterator8.hasNext()){
+                            OMElement applyElement = (OMElement)iterator8.next();
+                            searchXACML3Designator(applyElement, attributeDTO);
+                        }
+                        if(attributeDTO.getAttributeType() != null ||
+                                                        "".equals(attributeDTO.getAttributeType())) {
+                            attributeDTOs.add(attributeDTO);
+                        }
+                    }
+                }
+            }
+
+            Iterator iterator7 = omElement.getChildrenWithLocalName(EntitlementConstants.APPLY_ELEMENT);
+            while(iterator7.hasNext()){
+                OMElement applyElement = (OMElement)iterator7.next();
+                createMetaDataFromXACML3ApplyElement(applyElement, attributeDTOs);
+            }
+        }
+        return attributeDTOs;
     }
 
     /**
@@ -602,6 +817,8 @@ public class PolicyMetaDataBuilder {
             while(iterator.hasNext()){
                 OMElement attributeElement = (OMElement)iterator.next();
                 if(attributeElement != null){
+                    String dataType = attributeElement.
+                            getAttributeValue(new QName(EntitlementConstants.DATA_TYPE));   // TODO
                     values.add(attributeElement.getText());
                 }
             }
@@ -612,12 +829,16 @@ public class PolicyMetaDataBuilder {
             OMElement applyElement = (OMElement)iterator1.next();
             searchAttributeValues(applyElement, values, searchDesignators);
 
-            AttributeValueDTO  attributeValueDTO = new AttributeValueDTO();
+            AttributeDTO attributeDTO = new AttributeDTO();
             if(searchDesignators){
-                searchDesignatorOrSelector(applyElement, attributeValueDTO);
+                if(version == XACMLConstants.XACML_VERSION_3_0){
+                    searchXACML3Designator(applyElement, attributeDTO);
+                } else {
+                    searchDesignatorOrSelector(applyElement, attributeDTO);
+                }
             }
-            if(attributeValueDTO.getAttributeType() != null || attributeValueDTO.getAttributeId() != null ||
-                    attributeValueDTO.getAttributeDataType() != null){
+            if(attributeDTO.getAttributeType() != null || attributeDTO.getAttributeId() != null ||
+                    attributeDTO.getAttributeDataType() != null){
                 values = null;
             }
         }
@@ -629,11 +850,11 @@ public class PolicyMetaDataBuilder {
      * This searches through  designator and selector values in the attribute elements to extract
      * the policy meta data
      * @param omElement apply element as an OMElement
-     * @param attributeValueDTO AttributeValueDTO object which holds the policy meta data in String format
+     * @param attributeDTO AttributeDTO object which holds the policy meta data in String format
      * @return   AttributeValueDTO object which holds the policy meta data in String format
      */
-    public AttributeValueDTO searchDesignatorOrSelector(OMElement omElement,
-                                                        AttributeValueDTO attributeValueDTO) {
+    public AttributeDTO searchDesignatorOrSelector(OMElement omElement,
+                                                        AttributeDTO attributeDTO) {
 
 
         Iterator iterator1 = omElement.
@@ -646,9 +867,9 @@ public class PolicyMetaDataBuilder {
                         getAttributeValue(new QName(EntitlementConstants.ATTRIBUTE_ID));
                 String dataType = attributeDesignator.
                         getAttributeValue(new QName(EntitlementConstants.DATA_TYPE));
-                attributeValueDTO.setAttributeDataType(dataType);
-                attributeValueDTO.setAttributeType(EntitlementConstants.RESOURCE_ELEMENT);
-                attributeValueDTO.setAttributeId(attributeId);
+                attributeDTO.setAttributeDataType(dataType);
+                attributeDTO.setAttributeType(EntitlementConstants.RESOURCE_ELEMENT);
+                attributeDTO.setAttributeId(attributeId);
             }
         }
 
@@ -662,9 +883,9 @@ public class PolicyMetaDataBuilder {
                         getAttributeValue(new QName(EntitlementConstants.ATTRIBUTE_ID));
                 String dataType = attributeDesignator.
                         getAttributeValue(new QName(EntitlementConstants.DATA_TYPE));
-                attributeValueDTO.setAttributeDataType(dataType);
-                attributeValueDTO.setAttributeType(EntitlementConstants.SUBJECT_ELEMENT);
-                attributeValueDTO.setAttributeId(attributeId);
+                attributeDTO.setAttributeDataType(dataType);
+                attributeDTO.setAttributeType(EntitlementConstants.SUBJECT_ELEMENT);
+                attributeDTO.setAttributeId(attributeId);
             }
         }
 
@@ -678,9 +899,9 @@ public class PolicyMetaDataBuilder {
                         getAttributeValue(new QName(EntitlementConstants.ATTRIBUTE_ID));
                 String dataType = attributeDesignator.
                         getAttributeValue(new QName(EntitlementConstants.DATA_TYPE));
-                attributeValueDTO.setAttributeDataType(dataType);
-                attributeValueDTO.setAttributeType(EntitlementConstants.ACTION_ELEMENT);
-                attributeValueDTO.setAttributeId(attributeId);
+                attributeDTO.setAttributeDataType(dataType);
+                attributeDTO.setAttributeType(EntitlementConstants.ACTION_ELEMENT);
+                attributeDTO.setAttributeId(attributeId);
             }
         }
 
@@ -694,9 +915,9 @@ public class PolicyMetaDataBuilder {
                         getAttributeValue(new QName(EntitlementConstants.ATTRIBUTE_ID));
                 String dataType = attributeDesignator.
                         getAttributeValue(new QName(EntitlementConstants.DATA_TYPE));
-                attributeValueDTO.setAttributeDataType(dataType);
-                attributeValueDTO.setAttributeType(EntitlementConstants.ENVIRONMENT_ELEMENT);
-                attributeValueDTO.setAttributeId(attributeId);
+                attributeDTO.setAttributeDataType(dataType);
+                attributeDTO.setAttributeType(EntitlementConstants.ENVIRONMENT_ELEMENT);
+                attributeDTO.setAttributeId(attributeId);
             }
         }
 
@@ -710,48 +931,82 @@ public class PolicyMetaDataBuilder {
                 String subElementName = attributeId;  //TODO  Fix finding element name from Xpath
                 String dataType = attributeDesignator.
                         getAttributeValue(new QName(EntitlementConstants.DATA_TYPE));
-                attributeValueDTO.setAttributeDataType(dataType);
-                attributeValueDTO.setAttributeType(EntitlementConstants.UNKNOWN);
-                attributeValueDTO.setAttribute(EntitlementConstants.SEARCH_WARNING_MESSAGE3);
-                attributeValueDTO.setAttributeId(attributeId);
+                attributeDTO.setAttributeDataType(dataType);
+                attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+                attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE3);
+                attributeDTO.setAttributeId(attributeId);
             }
         }
 
-        return attributeValueDTO;
+        return attributeDTO;
+    }
+
+    /**
+     * This searches through  designator and selector values in the attribute elements to extract
+     * the policy meta data
+     * @param omElement apply element as an OMElement
+     * @param attributeDTO AttributeDTO object which holds the policy meta data in String format
+     * @return   AttributeValueDTO object which holds the policy meta data in String format
+     */
+    public AttributeDTO searchXACML3Designator(OMElement omElement,
+                                                        AttributeDTO attributeDTO) {
+
+        Iterator iterator1 = omElement.
+                getChildrenWithLocalName(EntitlementConstants.ATTRIBUTE_DESIGNATOR);
+        while(iterator1.hasNext()){
+            OMElement attributeDesignator = (OMElement)iterator1.next();
+            if(attributeDesignator != null){
+                String attributeId = attributeDesignator.
+                        getAttributeValue(new QName(EntitlementConstants.ATTRIBUTE_ID));
+                String category = attributeDesignator.
+                        getAttributeValue(new QName(EntitlementConstants.CATEGORY));
+                String dataType = attributeDesignator.
+                        getAttributeValue(new QName(EntitlementConstants.DATA_TYPE));
+                attributeDTO.setAttributeType(category);
+                attributeDTO.setAttributeId(attributeId);
+                attributeDTO.setAttributeDataType(dataType);
+            }
+        }
+
+        return attributeDTO;
     }
 
     /**
      * This extract policy meta data from condition element in the policy
      * @param omElement condition element as an OMElement
-     * @param attributeValueDTOs  list of AttributeValueDTO object which holds the policy meta data
+     * @param attributeDTOs  list of AttributeDTO object which holds the policy meta data
      * in String format
-     * @return list of AttributeValueDTO object which holds the policy meta data in String format
+     * @return list of AttributeDTO object which holds the policy meta data in String format
      */
-    public List<AttributeValueDTO> createMetaDataFromConditionElement(OMElement omElement,
-                                                   List<AttributeValueDTO> attributeValueDTOs){
+    public List<AttributeDTO> createMetaDataFromConditionElement(OMElement omElement,
+                                                   List<AttributeDTO> attributeDTOs){
 
         Iterator iterator = omElement.getChildrenWithLocalName(EntitlementConstants.APPLY_ELEMENT);
         if(iterator.hasNext()){
-            createMetaDataFromApplyElement(omElement, attributeValueDTOs);
+            if(version == XACMLConstants.XACML_VERSION_3_0){
+                createMetaDataFromXACML3ApplyElement(omElement, attributeDTOs);
+            } else {
+                createMetaDataFromApplyElement(omElement, attributeDTOs);
+            }
         } else {
-            AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-            attributeValueDTO.setAttributeType(EntitlementConstants.UNKNOWN);
-            attributeValueDTO.setAttribute(EntitlementConstants.SEARCH_WARNING_MESSAGE4);
+            AttributeDTO attributeDTO = new AttributeDTO();
+            attributeDTO.setAttributeType(EntitlementConstants.UNKNOWN);
+            attributeDTO.setAttributeValue(EntitlementConstants.SEARCH_WARNING_MESSAGE4);
         }
 
         // TODO currently only search meta data on Apply Element, support for other elements 
-        return attributeValueDTOs;
+        return attributeDTOs;
     }
 
     /**
      * This extract policy meta data from each rule element in the policy
      * @param omElement rule element as an OMElement
-     * @param attributeValueDTOs  list of AttributeValueDTO object which holds the policy meta data
+     * @param attributeDTOs  list of AttributeDTO object which holds the policy meta data
      * in String format
-     * @return list of AttributeValueDTO object which holds the policy meta data in String format
+     * @return list of AttributeDTO object which holds the policy meta data in String format
      */
-    public List<AttributeValueDTO> createMetaDataFromRuleElement(OMElement omElement,
-                                              List<AttributeValueDTO> attributeValueDTOs){
+    public List<AttributeDTO> createMetaDataFromRuleElement(OMElement omElement,
+                                              List<AttributeDTO> attributeDTOs){
 
         if (omElement != null) {
 
@@ -759,17 +1014,21 @@ public class PolicyMetaDataBuilder {
                     TARGET_ELEMENT);
             while(iterator1.hasNext()){
                 OMElement targetElement = (OMElement)iterator1.next();
-                createMetaDataFromTargetElement(targetElement, attributeValueDTOs);
+                if(version == XACMLConstants.XACML_VERSION_3_0){
+                    createMetaDataFromXACML3TargetElement(targetElement, attributeDTOs);
+                } else {
+                    createMetaDataFromTargetElement(targetElement, attributeDTOs);
+                }
             }
 
             Iterator iterator2 = omElement.getChildrenWithLocalName(EntitlementConstants.
                     CONDITION_ELEMENT);
             while(iterator2.hasNext()){
                 OMElement conditionElement = (OMElement)iterator2.next();
-                createMetaDataFromConditionElement(conditionElement, attributeValueDTOs );
+                createMetaDataFromConditionElement(conditionElement, attributeDTOs);
             }
         }
 
-        return attributeValueDTOs;
+        return attributeDTOs;
     }
 }

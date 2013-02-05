@@ -27,9 +27,12 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.Handler;
 import org.apache.axis2.engine.Phase;
 import org.apache.axis2.phaseresolver.PhaseMetadata;
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.*;
+import org.apache.synapse.commons.snmp.SNMPConstants;
+import org.apache.synapse.commons.snmp.SynapseSNMPAgent;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.config.SynapsePropertiesLoader;
@@ -47,6 +50,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.ServerConstants;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -57,6 +61,8 @@ public class CarbonSynapseController extends Axis2SynapseController {
     private String currentConfigurationName;
 
     private String synapseXMLLocation;
+
+    private SynapseSNMPAgent snmpAgent;
 
     @Override
     public void init(ServerConfigurationInformation serverConfigurationInformation,
@@ -92,6 +98,19 @@ public class CarbonSynapseController extends Axis2SynapseController {
      * if the axis2 instance is created by the Synapse
      */
     public void start() {
+        /*Starting SNMP Agent if activated in */
+        Properties properties = SynapsePropertiesLoader.loadSynapseProperties();
+        String enabled = properties.getProperty(SNMPConstants.SNMP_ENABLED);
+        try {
+            if (enabled != null && JavaUtils.isTrueExplicitly(enabled)) {
+                snmpAgent = new SynapseSNMPAgent(properties);
+                snmpAgent.start();
+            }
+        } catch (IOException e) {
+            log.error("Error while initializing SNMP", e);
+        } catch (Exception e){
+            log.info("SNMP not initialized, SNMP not supported in tenants. Message : " + e.getMessage());
+        }
 
         // add the Synapse handlers
         if (getContext() != null) {
@@ -149,7 +168,10 @@ public class CarbonSynapseController extends Axis2SynapseController {
             log.info("Loading the mediation configuration from the file system");
             synapseConfig = super.createSynapseConfiguration();
 
-            saveToRegistry(registry, synapseConfig);
+            //save synapse config to registry only if registry persistance enabled
+            if (ServiceBusConstants.ENABLED.equals(getParameter(ServiceBusConstants.REGISTRY_PERSISTENCE))) {
+                saveToRegistry(registry, synapseConfig);
+            }
 
         } else if ("true".equals(getParameter(ServiceBusConstants.SAVE_TO_FILE))) {
             // If the configuration was loaded from the registry and the 'saveConfigToFile'

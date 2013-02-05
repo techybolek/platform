@@ -22,11 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>service</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.rule.service.ui.feature</artifactId>
+    <version>4.0.3</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Rule Service UI Feature</name>
     <url>http://wso2.org</url>
@@ -36,17 +38,17 @@
 	 <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rule.ws.ui</artifactId>
-	    <version>${carbon.platform.version}</version>
+	    <version>4.0.2</version>
         </dependency>
 	<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rule.ws.stub</artifactId>
-	    <version>${wso2carbon.version.rule}</version>
+	    <version>4.0.2</version>
         </dependency>
 	 <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rule.common</artifactId>
-	    <version>${wso2carbon.version.rule}</version>
+	    <version>4.0.2</version>
         </dependency>
     </dependencies>
     <build>
@@ -64,7 +66,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.rule.service.ui</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
 			    <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:console</propertyDef>
@@ -76,8 +78,8 @@
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.rule.ws.stub</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.service.mgt.ui:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.core.ui:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.service.mgt.ui:4.0.1</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.ui:4.0.2</importFeatureDef>
                             </importFeatures>
 			    <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.rule.service.common.feature</includedFeatureDef>

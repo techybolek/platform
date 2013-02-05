@@ -21,6 +21,7 @@ import org.wso2.carbon.databridge.commons.Credentials;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.core.definitionstore.AbstractStreamDefinitionStore;
 import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
+import org.wso2.carbon.databridge.persistence.cassandra.datastore.ClusterFactory;
 import org.wso2.carbon.databridge.streamdefn.cassandra.internal.util.ServiceHolder;
 
 import java.util.Collection;
@@ -34,6 +35,22 @@ public class CassandraStreamDefinitionStore extends AbstractStreamDefinitionStor
 
 
     public CassandraStreamDefinitionStore(){
+    }
+
+    @Override
+    protected boolean removeStreamId(Credentials credentials, String streamIdKey) {
+        return ServiceHolder.getCassandraConnector().deleteStreamIdFromStore(ClusterFactory.getCluster(credentials), streamIdKey);
+    }
+
+    @Override
+    protected boolean removeStreamDefinition(Credentials credentials, String streamId) {
+        try {
+            return ServiceHolder.getCassandraConnector()
+                    .deleteStreamDefinitionFromStore(ClusterFactory.getCluster(credentials),
+                                                     streamId);
+        } catch (StreamDefinitionStoreException e) {
+            return false;
+        }
     }
 
     @Override

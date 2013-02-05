@@ -36,8 +36,16 @@ public class InvokeAspectUtil {
             if(parameters.size() == 0){
                 parameters = new HashMap<String, String>();
             }
+            
+            String itemType;
+            if ("voteClick".equals(action)) {
+            	itemType = ".vote";
+            }else {
+            	itemType = ".item";
+            }
+            
             for (int i = 0; i < items.length; i++) {
-                parameters.put(i + ".item", items[i]);
+                parameters.put(i + itemType, items[i]);
             }
 
             if (parameters.size() > 0) {

@@ -25,7 +25,9 @@ import org.wso2.carbon.broker.core.exception.BrokerConfigException;
 import org.wso2.carbon.broker.core.internal.BrokerTypeFactory;
 import org.wso2.carbon.broker.core.internal.CarbonBrokerService;
 import org.wso2.carbon.broker.core.internal.brokers.agent.AgentBrokerTypeFactory;
+import org.wso2.carbon.broker.core.internal.brokers.email.EmailBrokerTypeFactory;
 import org.wso2.carbon.broker.core.internal.brokers.jms.generic.GenericJMSBrokerTypeFactory;
+import org.wso2.carbon.broker.core.internal.brokers.jms.qpid.QpidBrokerTypeFactory;
 import org.wso2.carbon.broker.core.internal.brokers.local.LocalBrokerTypeFactory;
 import org.wso2.carbon.broker.core.internal.brokers.ws.WSBrokerTypeFactory;
 import org.wso2.carbon.broker.core.internal.util.BrokerConstants;
@@ -93,10 +95,9 @@ public final class BrokerServiceBuilder {
             registerBrokerType(brokerService, WSBrokerTypeFactory.class.getName());
         }
 
-        //Qpid no more supported
-//        if (!existingBrokerNames.contains(BrokerConstants.BROKER_TYPE_JMS_QPID)){
-//            registerBrokerType(brokerService, QpidBrokerTypeFactory.class.getName());
-//        }
+        if (!existingBrokerNames.contains(BrokerConstants.BROKER_TYPE_JMS_QPID)){
+            registerBrokerType(brokerService, QpidBrokerTypeFactory.class.getName());
+        }
 
         if (!existingBrokerNames.contains(BrokerConstants.BROKER_TYPE_JMS_GENERIC)) {
             registerBrokerType(brokerService, GenericJMSBrokerTypeFactory.class.getName());
@@ -104,6 +105,10 @@ public final class BrokerServiceBuilder {
 
         if (!existingBrokerNames.contains(BrokerConstants.BROKER_TYPE_AGENT)) {
             registerBrokerType(brokerService, AgentBrokerTypeFactory.class.getName());
+        }
+
+        if (!existingBrokerNames.contains(BrokerConstants.BROKER_TYPE_EMAIL)) {
+            registerBrokerType(brokerService, EmailBrokerTypeFactory.class.getName());
         }
 
 

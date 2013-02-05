@@ -26,7 +26,13 @@ import org.wso2.carbon.deployment.synchronizer.DeploymentSynchronizerException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -135,6 +141,10 @@ public final class DeploymentSynchronizationManager {
 
     public DeploymentSynchronizer getSynchronizer(int tenantId) {
         return getSynchronizer(MultitenantUtils.getAxis2RepositoryPath(tenantId));
+    }
+
+    public Map<String, DeploymentSynchronizer> getSynchronizers() {
+        return synchronizers;
     }
 
     /**

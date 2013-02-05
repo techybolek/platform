@@ -20,7 +20,7 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.common.services.RegistryAbstractAdmin;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.config.RegistryContext;
@@ -70,7 +70,7 @@ public class WSRegistry extends RegistryAbstractAdmin implements Registry {
                     HTTPConstants.MC_HTTP_SERVLETREQUEST)).getSession();
         RegistryService registryService = CommonUtil.getRegistryService();
         if (httpSession != null && registryService != null) {
-            if (SuperTenantCarbonContext.getCurrentContext(httpSession).getTenantId() ==
+            if (PrivilegedCarbonContext.getCurrentContext(httpSession).getTenantId() ==
                     MultitenantConstants.SUPER_TENANT_ID) {
                 try {
                     Object tenantId = httpSession.getAttribute(REGISTRY_WS_API_TENANT);
@@ -889,7 +889,7 @@ public class WSRegistry extends RegistryAbstractAdmin implements Registry {
 	}
 
 	public Collection searchContent(String keywords) throws RegistryException{
-		return getRegistryForTenant().searchContent(keywords);
+		throw new UnsupportedOperationException("Content search operation not supported");
 	}
 	
 	/**
@@ -1119,17 +1119,18 @@ public class WSRegistry extends RegistryAbstractAdmin implements Registry {
         resourceData.setAssociations(WSgetAllAssociations(path));
         return resourceData;
     }
-    
-    /*
-     * TODO Just a dummy until implemented
-     * (non-Javadoc)
-     * @see org.wso2.carbon.registry.core.Registry#removeVersionHistory(java.lang.String, java.lang.String)
+
+
+    /**
+     *
+     * @param path                Path of the resource
+     * @param snapshotId          Version ID
+     * @return                    Succeed or not
+     * @throws RegistryException  If operation fails
      */
-    
     public boolean removeVersionHistory(String path, long snapshotId)
     		throws RegistryException {
-    
-    	throw new UnsupportedOperationException("Unsupported Operation");
+        return getRegistryForTenant().removeVersionHistory(path, snapshotId);
     }
 }
 

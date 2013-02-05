@@ -17,13 +17,19 @@
 package org.wso2.carbon.governance.lcm.util;
 
 import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMNamespace;
+import org.apache.axiom.om.OMNode;
+import org.apache.axiom.om.OMText;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axiom.om.xpath.AXIOMXPath;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.governance.lcm.beans.LifecycleBean;
 import org.wso2.carbon.registry.core.*;
+import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.config.RegistryConfigurationProcessor;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.config.StaticConfiguration;
@@ -44,9 +50,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class CommonUtil {
 
@@ -58,7 +62,6 @@ public class CommonUtil {
                     "/governance/searchLCMProperties";
 
     private static Validator lifecycleSchemaValidator = null;
-    private static Validator aspectSchemaValidator = null;
 
     public static synchronized void setRegistryService(RegistryService service) {
         if (registryService == null) {
@@ -75,6 +78,14 @@ public class CommonUtil {
             return null;
         } else {
             return registryService.getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
+        }
+    }
+
+    public static UserRegistry getRootSystemRegistry(int tenantId) throws RegistryException {
+        if (registryService == null) {
+            return null;
+        } else {
+            return registryService.getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME, tenantId);
         }
     }
 
@@ -141,13 +152,10 @@ public class CommonUtil {
     }
 
     public static boolean updateLifecycle(String oldName, String payload, Registry registry, Registry rootRegistry) throws RegistryException, XMLStreamException {
-        if (isLifecycleNameInUse(oldName, registry, rootRegistry))
-            throw new RegistryException("Could not update lifecycle name since it is already in use!");
-
         String newName = null;
         OMElement element = buildOMElement(payload);
 //        We have added an validation here too since someone can directly call this method
-        validateOMContent(element);
+        validateOMContent(element);        
 
         if (element != null) {
             newName = element.getAttributeValue(new QName("name"));
@@ -292,7 +300,7 @@ public class CommonUtil {
     }
 
     public static void validateOMContent(OMElement element) throws RegistryException {
-        if(!validateOMContent(element, getSCXMLSchemaValidator(getLifecycleSchemaLocation()))){
+        if(!validateOMContent(element, getLifecycleSchemaValidator(getLifecycleSchemaLocation()))){
             String message = "Unable to validate the lifecycle configuration";
             log.error(message);
             throw new RegistryException(message);
@@ -568,7 +576,7 @@ public class CommonUtil {
         return true;
     }
 
-    public static Validator getSCXMLSchemaValidator(String schemaPath){
+    public static Validator getLifecycleSchemaValidator(String schemaPath){
 
         if (lifecycleSchemaValidator == null) {
             try {
@@ -582,27 +590,135 @@ public class CommonUtil {
         }
         return lifecycleSchemaValidator;
     }
-    public static Validator getAspectSchemaValidator(String schemaPath){
-
-        if (aspectSchemaValidator == null) {
-            try {
-                SchemaFactory schemaFactory = SchemaFactory
-                        .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-                Schema schema = schemaFactory.newSchema(new File(schemaPath));
-                aspectSchemaValidator = schema.newValidator();
-            } catch (SAXException e) {
-                log.error("Unable to get a schema validator from the given file path : " + schemaPath);
-            }
-        }
-        return aspectSchemaValidator;
-    }
 
     public static String getLifecycleSchemaLocation(){
-        return CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator +
-                "conf" + File.separator + "lifecycle-config.xsd";
+        return CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" +
+                File.separator+ "lifecycle-config.xsd";
     }
-    public static String getAspectSchemaLocation(){
-        return CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator +
-                "conf" + File.separator + "local.xsd";
+
+    public static boolean validateSCXMLDataModel(OMElement content){
+//       fetch all state elements
+        String stateXpath = "//x:state";
+        String forEventXpath = "//@forEvent";
+        String transitionXpath = "//x:transition";
+
+        List stateList = evaluateXpath(content,stateXpath,"x");
+
+        if(stateList != null){
+            for (Object stateObject: stateList) {
+                OMElement state = ((OMElement) stateObject).cloneOMElement();
+
+                List<String> stateForEvents = new ArrayList<String>();
+
+//                Fetch all the transition Elements
+                List transitions = evaluateXpath(state,transitionXpath,"x");
+                if (transitions != null) {
+                    for (Object transition : transitions) {
+                        OMElement transitionElement = (OMElement) transition;
+                        stateForEvents.add(transitionElement.getAttributeValue(new QName("event")));
+                    }
+                }
+
+//                Fetch all the forEvent Elements
+                List allForEvents = evaluateXpath(state,forEventXpath,null);
+
+                if (allForEvents != null) {
+                    for (Object forEvent : allForEvents) {
+                        OMAttribute forEventElement = (OMAttribute) forEvent;
+                        if(!forEventElement.getAttributeValue().equals("")){
+                            String[] forEvents = forEventElement.getAttributeValue().split(",");
+                            for (String event : forEvents) {
+                                if(!stateForEvents.contains(event)){
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
     }
+
+    public static List evaluateXpath(OMElement contentElement, String xpathString,String nsPrefix) {
+        List ret = new ArrayList();
+        try {
+            AXIOMXPath xpath = new AXIOMXPath(xpathString);
+
+            Iterator nsIterator = contentElement.getAllDeclaredNamespaces();
+            if (nsIterator.hasNext()) {
+                while (nsIterator.hasNext()) {
+                    OMNamespace next = (OMNamespace) nsIterator.next();
+                    xpath.addNamespace(nsPrefix, next.getNamespaceURI());
+                    ret.addAll(xpath.selectNodes(contentElement));
+                }
+            }else if(contentElement.getDefaultNamespace() != null){
+                xpath.addNamespace(nsPrefix, contentElement.getDefaultNamespace().getNamespaceURI());
+                ret.addAll(xpath.selectNodes(contentElement));
+            }else if(nsPrefix != null){
+                xpathString = xpathString.replace(nsPrefix + ":","");
+                xpath = new AXIOMXPath(xpathString);
+                ret.addAll(xpath.selectNodes(contentElement));
+            }else{
+                xpath = new AXIOMXPath(xpathString);
+                ret.addAll(xpath.selectNodes(contentElement));
+            }
+            return ret;
+        } catch (Exception e) {
+            log.error(e);
+        }
+        return null;
+    }
+    
+    public static void validateLifeCycle(OMElement element) throws RegistryException {
+		String stateXpath = "//x:state";
+
+		String checkItems = "//x:data[@name='checkItems']"; // "//@forEvent";
+		String transitionValidation = "//x:data[@name='transitionValidation']";
+		String transitionPermission = "//x:data[@name='transitionPermission']";
+		String transitionScripts = "//x:data[@name='transitionScripts']";
+		String transitionExecution = "//x:data[@name='transitionExecution']";
+		String transitionUI = "//x:data[@name='transitionUI']";
+		String transitionApproval = "//x:data[@name='transitionApproval']";
+
+		List stateList = evaluateXpath(element, stateXpath, "x");
+		if (stateList != null) {
+			for (Object stateObject : stateList) {
+				OMElement state = ((OMElement) stateObject).cloneOMElement();
+
+				validateElements(state, checkItems, "item");
+				validateElements(state, transitionValidation, "validation");
+				validateElements(state, transitionPermission, "permission");
+				validateElements(state, transitionScripts, "js");
+				validateElements(state, transitionExecution, "execution");
+				validateElements(state, transitionUI, "ui");
+				validateElements(state, transitionApproval, "approval");
+			}
+		}
+    }
+    
+    private static void validateElements(OMElement element, String xpath, String childElement) throws RegistryException {
+		List elements = evaluateXpath(element, xpath, "x");
+		if (elements != null) {
+			for (Object object : elements) {
+				OMElement cloneElement = ((OMElement) object).cloneOMElement();
+				Iterator children = cloneElement.getChildElements();
+				while (children.hasNext()) {
+					String elementName = "";
+					Object node = children.next();
+					if (node instanceof OMText) {
+						elementName = ((OMText) node).getText();
+					} else if (node instanceof OMElement) {
+						elementName = ((OMElement) node).getLocalName();
+					}
+					if (!elementName.equals(childElement)) {
+						String message = "Unable to validate the lifecycle configuration";
+						log.error(message);
+						throw new RegistryException(message);
+					}
+				}
+			}
+		}    	
+    }    
 }

@@ -85,6 +85,8 @@
     String apiName = "";
     String apiContext = "";
     String filename = "";
+    String hostname = "";
+    String port = "";
 
     APIData apiData = null;
 
@@ -93,7 +95,7 @@
     session.setAttribute("mode", mode);
     if ("edit".equals(mode)) {
         //To apply changes that might have been made in the source view
-        if (fromSourceView) {
+        if (fromSourceView || fromResourceSourceView) {
             apiData = (APIData) session.getAttribute("apiData");
             apiName = apiData.getName();
             //session.removeAttribute("fromSourceView");
@@ -117,6 +119,14 @@
             apiContext = apiContext.substring(1);
         }
         filename = apiData.getFileName();
+        port = String.valueOf(apiData.getPort() != -1 ? apiData.getPort() : "");
+        hostname = apiData.getHost() != null? apiData.getHost() : "";
+        
+        if(fromResourceSourceView){
+        	hostname = request.getParameter("hostname");
+        	port = request.getParameter("port");
+        }
+        
         if (apiData.getResources() != null) {
             resourceList = new ArrayList<ResourceData>(Arrays.asList(apiData.getResources()));
         } else {
@@ -126,7 +136,7 @@
     //If not in edit mode, we are adding an API
     else {
         //To apply changes that might have been made in the source view
-        if (fromSourceView) {
+        if (fromSourceView || fromResourceSourceView) {
             apiData = (APIData) session.getAttribute("apiData");
             apiName = apiData.getName();
             apiContext = apiData.getContext();
@@ -144,10 +154,19 @@
         } else {
             if (apiData == null) {
                 apiData = new APIData();
+                apiData.setPort(-1);
             } else {
-                apiData = (APIData) session.getAttribute("apiData");
+            	apiData = (APIData) session.getAttribute("apiData");
             }
             resourceList = new ArrayList<ResourceData>();
+        }
+        
+        port = String.valueOf(apiData.getPort() != -1 ? apiData.getPort() : "");
+        hostname = apiData.getHost() != null? apiData.getHost() : "";
+        
+        if(fromResourceSourceView){
+        	hostname = request.getParameter("hostname");
+        	port = request.getParameter("port");
         }
     }
     String index = (String) session.getAttribute("index");
@@ -201,7 +220,7 @@ function buildResourceTree() {
     jQuery.ajax({
                     type: "GET",
                     url: "treeBuilder-ajaxprocessor.jsp",
-                    data: {},
+                    data:  "data=null",
                     success: function(data) {
                         jQuery("#parent").html(data);
                     }
@@ -212,7 +231,7 @@ function addResource() {
     jQuery.ajax({
                     type: "GET",
                     url: "addResource-ajaxprocessor.jsp",
-                    data: {},
+                    data:  "data=null",
                     success: function(data) {
                         jQuery("#info").html(data);
                     }
@@ -248,13 +267,11 @@ function loadResourceData(a) {
 
     var parentId = a.parentNode.id;
     var index = parentId.split('.')[1];
-
     loadResource(index);
 }
 
 function getResourceNode(idSuffix) {
     var html = "<div id=\"branch." + idSuffix + "\" class=\"branch-node\"></div>";
-
     html += "<ul id=\"ul." + idSuffix + "\" class=\"child-list\">" +
             "<li>" +
             "<div class=\"dot-icon\"></div>" +
@@ -399,10 +416,10 @@ function updateResource(v) {
 
     faultSequence = getSequenceValue('fault');
     var faultSeqIsInline = seqIsDefinedInline('fault');
-
     jQuery.ajax({
                     type: "POST",
                     url: "updateResource-ajaxprocessor.jsp",
+                    async: false,
                     data: { apiName:apiNameValue, apiContext:apiContextValue,
                         index:index, methods:methods, urlStyle:urlStyle, url:url,
                         inSequence:inSequence, outSequence:outSequence, faultSequence:faultSequence,
@@ -416,9 +433,11 @@ function updateResource(v) {
                         <%
                         resourceList = (ArrayList<ResourceData>)session.getAttribute("apiResources");
                         %>
+                            document.getElementById("resourceSizeVar").innerHTML = data;
+                            var size = document.getElementById("resourcesSize").value;
                             var parentNode = document.getElementById("parent");
                             var innerHtml = parentNode.innerHTML;
-                            innerHtml += getResourceNode(<%=resourceList.size()%>);
+                            innerHtml += getResourceNode(size-1);
                             parentNode.innerHTML = innerHtml;
                         }
                     },
@@ -432,7 +451,7 @@ function updateResource(v) {
     return true;
 }
 
-function saveApi(apiNameValue, apiContextValue) {
+function saveApi(apiNameValue, apiContextValue, hostname, port) {
     var apiFileName = document.getElementById("apiFileName").value;
 
     apiContextValue = "/" + apiContextValue;
@@ -446,7 +465,7 @@ function saveApi(apiNameValue, apiContextValue) {
     jQuery.ajax({
                     type: "POST",
                     url: "addapi-ajaxprocessor.jsp",
-                    data: { apiName:apiNameValue, apiContext:apiContextValue },
+                    data: { apiName:apiNameValue, apiContext:apiContextValue, hostname:hostname, port:port },
                     success: function(data) {
                         CARBON.showInfoDialog("<fmt:message key="api.add.success"/> ", function() {
                             document.location.href = "index.jsp";
@@ -467,7 +486,7 @@ function saveApi(apiNameValue, apiContextValue) {
     jQuery.ajax({
                     type: "POST",
                     url: "editapi-ajaxprocessor.jsp",
-                    data: { apiName:apiNameValue, apiContext:apiContextValue, filename:apiFileName },
+                    data: { apiName:apiNameValue, apiContext:apiContextValue, filename:apiFileName, hostname:hostname, port:port },
                     success: function(data) {
                         CARBON.showInfoDialog("<fmt:message key="api.update.success"/> ", function() {
                             document.location.href = "index.jsp";
@@ -487,6 +506,8 @@ function saveApi(apiNameValue, apiContextValue) {
 function validateAndSaveApi() {
     var apiNameValue = document.getElementById('api.name').value;
     var apiContextValue = document.getElementById('api.context').value;
+    var hostname = document.getElementById('api.hostname').value;
+    var port = document.getElementById('api.port').value;
 
     if (apiNameValue == null || apiNameValue == "") {
         CARBON.showWarningDialog('<fmt:message key="api.name.required"/>');
@@ -496,13 +517,19 @@ function validateAndSaveApi() {
         CARBON.showWarningDialog('<fmt:message key="api.context.required"/>');
         return false;
     }
+    else if(port != null && port != ""){
+    	if(!(/^\d{1,5}([ ]\d{1,5})*$/).test(port)){
+    		CARBON.showWarningDialog('<fmt:message key="api.port.invalid"/>');
+            return false;
+    	}
+    }
 
     jQuery.ajax({
                     type: "POST",
                     url: "validateResources-ajaxprocessor.jsp",
-                    data: {},
+                    data: "data=null" ,
                     success:function() {
-                        return saveApi(apiNameValue, apiContextValue);
+                        return saveApi(apiNameValue, apiContextValue, hostname, port);
                     },
                     error:function() {
                         CARBON.showWarningDialog('<fmt:message key="api.resources.empty"/>');
@@ -543,11 +570,23 @@ function resourceSourceView() {
     var index = document.getElementById('resIndex').value;
     var apiNameValue = document.getElementById('api.name').value;
     var apiContextValue = "/" + document.getElementById('api.context').value;
+    var hostname = document.getElementById('api.hostname').value;
+    var port = document.getElementById('api.port').value;
+    
+    if(port != null && port != ""){
+    	if(!(/^\d{1,5}([ ]\d{1,5})*$/).test(port)){
+    		CARBON.showWarningDialog('<fmt:message key="api.port.invalid"/>');
+            return false;
+    	}
+    }
+    
     var result = updateResource("true");
     if (result != false)  {
         document.location.href = "sourceView_resource.jsp?ordinal=1&mode=" + "<%=mode%>" +
                              "&apiName=" + apiNameValue +
                              "&apiContext=" + apiContextValue +
+                             "&hostname=" + hostname + 
+                             "&port=" + port +
                              "&index=" + index;
         goBack(1);
 
@@ -557,11 +596,21 @@ function resourceSourceView() {
 function sourceView() {
     var apiNameValue = document.getElementById('api.name').value;
     var apiContextValue = "/" + document.getElementById('api.context').value;
-    //var sourceMode = ;
+    var hostname = document.getElementById('api.hostname').value;
+    var port = document.getElementById('api.port').value;
+    
+    if(port != null && port != ""){
+    	if(!(/^\d{1,5}([ ]\d{1,5})*$/).test(port)){
+    		CARBON.showWarningDialog('<fmt:message key="api.port.invalid"/>');
+            return false;
+    	}
+    }
 
     document.location.href = "sourceview_api.jsp?ordinal=1&mode=" + "<%=mode%>" +
                              "&apiName=" + apiNameValue +
-                             "&apiContext=" + apiContextValue;
+                             "&apiContext=" + apiContextValue + 
+                             "&hostname=" + hostname + 
+                             "&port=" + port;
 
     goBack(1);
 }
@@ -590,7 +639,7 @@ function sourceView() {
                 	<span style="float: left; position: relative; margin-top: 2px;"><fmt:message
                             key="design.view.of.api"/></span>
                         <a style="background-image:url(images/source-view.gif);" class="icon-link"
-                           onclick="sourceView()" href="#"><fmt:message
+                           onclick="sourceView()"><fmt:message
                                 key="switch.to.source"/>
                         </a>
                     </th>
@@ -629,6 +678,26 @@ function sourceView() {
                                            value="<%=apiContext%>"/>
                                 </td>
                             </tr>
+                            <!-- API Hostname -->
+                            <tr>
+                                <td class="leftCol-small">
+                                    <fmt:message key="api.hostname"/>
+                                </td>
+                                <td>
+                                    <input type="text" id="api.hostname" value="<%=hostname%>"/>
+                                    <input type="hidden" name="api.hostname" value="<%=hostname%>"/>
+                                </td>
+                            </tr>
+                            <!-- API Port -->
+                            <tr>
+                                <td class="leftCol-small">
+                                    <fmt:message key="api.port"/>
+                                </td>
+                                <td>
+                                    <input type="text" id="api.port" value="<%=port%>"/>
+                                    <input type="hidden" name="api.port" value="<%=port%>"/>
+                                </td>
+                            </tr>
                             <!-- Resources -->
                             <tr>
                                 <td colspan="3">
@@ -662,12 +731,12 @@ function sourceView() {
                                                 <td class="middle-header">
                                         <span style="float:left;position:relative; margin-top:2px;">
                                             <fmt:message key="design.view.of.the.resource"/></span>
-                                                    <a style="background-image:url(images/source-view.gif);"
+                                                    <!--a style="background-image:url(images/source-view.gif);"
                                                        class="icon-link"
                                                        onclick="resourceSourceView()"
-                                                       href="#"><fmt:message
+                                                      ><fmt:message
                                                             key="switch.to.source"/>
-                                                    </a>
+                                                    </a-->
                                                 </td>
                                             </tr>
                                             <tr>
@@ -684,6 +753,7 @@ function sourceView() {
                         </div>
                         <input type="hidden" id="resIndex" name="resIndex"/>
                         <input type="hidden" id="apiFileName" name="apiFileName"/>
+                        <div id="resourceSizeVar" name="resourceSizeVar"/>
                     </td>
                 </tr>
                 <tr>

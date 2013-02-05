@@ -83,6 +83,8 @@
             $.ajax({
                 type: "POST",
                 url: "add_broker_ajaxprocessor.jsp" + parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "text",
                 data: {},
                 async:false,
                 success: function(msg) {
@@ -158,6 +160,8 @@
             type: "POST",
             url: "get_properties_ajaxprocessor.jsp?brokerType=" + selected_text + "",
             data: {},
+            contentType: "application/json; charset=utf-8",
+            dataType: "text",
             async:false,
             success: function(msg) {
                 if (msg != null) {

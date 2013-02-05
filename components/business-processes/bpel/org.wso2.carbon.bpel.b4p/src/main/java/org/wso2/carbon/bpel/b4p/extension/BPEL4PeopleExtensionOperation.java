@@ -24,12 +24,15 @@ import org.apache.ode.bpel.runtime.extension.ExtensionContext;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.wso2.carbon.bpel.core.BPELConstants;
 
 /**
  * Class that implements <code>&lt;peopleActivity&gt;</code> related to BPEL4People.
  */
 public class BPEL4PeopleExtensionOperation extends AbstractLongRunningExtensionOperation {
     private static Log log = LogFactory.getLog(BPEL4PeopleExtensionOperation.class);
+
+    private static Log messageTraceLog = LogFactory.getLog(BPEL4PeopleConstants.MESSAGE_TRACE);
 
     private ExtensionContext extensionContext;
 
@@ -53,6 +56,7 @@ public class BPEL4PeopleExtensionOperation extends AbstractLongRunningExtensionO
         this.extensionContext = extensionContext;
         this.cid = cid;
 
+//        extensionContext.getInternalInstance().getPid();
         peopleActivity = new PeopleActivity(extensionContext, element);
         String taskID = peopleActivity.invoke(extensionContext);
         extensionContext.setCorrelationValues(new String[]{taskID});
@@ -72,8 +76,13 @@ public class BPEL4PeopleExtensionOperation extends AbstractLongRunningExtensionO
         Element notificationMessageEle = extensionContext.getInternalInstance().getMyRequest(mexId);
         Node part = extensionContext.getPartData(notificationMessageEle,
                 outputVarName);
-        log.info("RESPONSE: " + DOMUtils.domToString(notificationMessageEle));
-        log.info("PART: " + DOMUtils.domToString(part));
+        if (messageTraceLog.isTraceEnabled()) {
+            messageTraceLog.trace("B4P Response Message: " +
+                                  DOMUtils.domToString(notificationMessageEle));
+            messageTraceLog.trace("B4P Response Part: " +
+                                  DOMUtils.domToString(part));
+
+        }
         extensionContext.writeVariable(outputVarName, notificationMessageEle);
         extensionContext.complete(cid);
     }

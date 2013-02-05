@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.broker.core.BrokerConfiguration;
 import org.wso2.carbon.broker.core.BrokerService;
+import org.wso2.carbon.broker.core.exception.BrokerConfigException;
 import org.wso2.carbon.broker.core.exception.BrokerEventProcessingException;
 import org.wso2.carbon.cep.core.Bucket;
 import org.wso2.carbon.cep.core.Query;
@@ -34,7 +35,8 @@ import org.wso2.carbon.cep.core.listener.CEPEventListener;
 import org.wso2.carbon.cep.core.listener.TopicEventListener;
 import org.wso2.carbon.cep.core.mapping.input.Input;
 import org.wso2.carbon.cep.core.mapping.input.mapping.InputMapping;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.cep.core.mapping.output.mapping.TupleOutputMapping;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.Map;
 
@@ -57,6 +59,7 @@ public class CEPBucket {
      */
     private Bucket bucket;
 
+    private String bucketPath;
 
     private int tenantId;
 
@@ -65,40 +68,64 @@ public class CEPBucket {
     private AxisConfiguration axisConfiguration;
 
 
-    public CEPBucket(CEPBackEndRuntime cepBackEndRuntime, Bucket bucket, AxisConfiguration axisConfiguration) {
+    public CEPBucket(CEPBackEndRuntime cepBackEndRuntime, Bucket bucket,
+                     AxisConfiguration axisConfiguration, String bucketPath) {
         this.cepBackEndRuntime = cepBackEndRuntime;
         this.bucket = bucket;
         this.axisConfiguration = axisConfiguration;
-        tenantId = SuperTenantCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+        tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
         this.userName = bucket.getOwner();
-
+        this.bucketPath = bucketPath;
     }
 
     public void init() throws CEPConfigurationException {
 
-        // create the listeners for subscriptions.
-        if (bucket.getInputs() != null) {
-            for (Input input : bucket.getInputs()) {
-                processInput(input);
+        try {
+            // create the listeners for subscriptions.
+            if (bucket.getInputs() != null) {
+                for (Input input : bucket.getInputs()) {
+                    processInput(input);
+                }
             }
+        } catch (Throwable e) {
+            throw new CEPConfigurationException("Error in creating the listeners for subscriptions in Siddhi backend Runtime," + e.getMessage(), e);
         }
-        // register the queries
-        if (bucket.getQueries() != null) {
-            Map<Integer,Query> queries = bucket.getQueriesMap();
-            for(int i=0 ; i <  queries.size(); i ++){
-                processQuery(queries.get(i));
+        try {
+            // register the queries
+            if (bucket.getQueries() != null) {
+                Map<Integer, Query> queries = bucket.getQueriesMap();
+                for (int i = 0; i < queries.size(); i++) {
+                    processQuery(queries.get(i));
+                }
             }
+        } catch (Throwable e) {
+            throw new CEPConfigurationException("Error in registering the queries in Siddhi backend Runtime," + e.getMessage(), e);
         }
-        this.cepBackEndRuntime.init();
+
+        try {
+            this.cepBackEndRuntime.init();
+        } catch (Throwable e) {
+            throw new CEPConfigurationException("Error in initializing Siddhi backend Runtime," + e.getMessage(), e);
+        }
+
     }
 
     public void processQuery(Query query) throws CEPConfigurationException {
 
         CEPEventListener cepEventListener = null;
         if (query.getOutput() != null) {
-            cepEventListener = new CEPEventListener(query.getOutput(), tenantId, userName);
+            if (query.getOutput().getOutputMapping() != null && query.getOutput().getOutputMapping() instanceof TupleOutputMapping) {
+                ((TupleOutputMapping) (query.getOutput().getOutputMapping())).initStreamDefinition(query.getOutput().getTopic());
+            }
+            try {
+                cepEventListener = new CEPEventListener(query.getOutput(), tenantId, userName, CEPServiceValueHolder.getInstance().getCepStatisticsManager().createNewCEPStatisticMonitor(query.getOutput().getTopic(), query.getOutput().getBrokerName(), bucket.getName(), tenantId));
+            } catch (BrokerConfigException e) {
+                String errorMessage = "Can not subscribe to output the broker, No broker config found for " + query.getOutput().getBrokerName();
+                log.error(errorMessage);
+                throw new CEPConfigurationException(errorMessage, e);
+            }
             this.cepBackEndRuntime.addQuery(query.getName(), query.getExpression(), cepEventListener);
-        }else{
+        } else {
             this.cepBackEndRuntime.addQuery(query.getName(), query.getExpression(), null);
         }
 
@@ -107,19 +134,25 @@ public class CEPBucket {
     public void processInput(Input input) throws CEPConfigurationException {
 
         cepBackEndRuntime.addInput(input);
-        TopicEventListener topicEventListener = new TopicEventListener(this, input);
+        TopicEventListener topicEventListener = new TopicEventListener(this, input, CEPServiceValueHolder.getInstance().getCepStatisticsManager().createNewCEPStatisticMonitor(input.getTopic(), input.getBrokerName(), bucket.getName(), tenantId));
         // subscribe to the broker if given.
         if (input.getBrokerName() != null) {
             BrokerEventListener brokerEventListener = new BrokerEventListener(topicEventListener);
             BrokerService brokerService = CEPServiceValueHolder.getInstance().getBrokerService();
             BrokerConfigurationHelper brokerConfigurationHelper = new BrokerConfigurationHelper();
             BrokerConfiguration brokerConfiguration =
-                    brokerConfigurationHelper.getBrokerConfiguration(input.getBrokerName(), tenantId);
+                    null;
             try {
-                brokerService.subscribe(brokerConfiguration, input.getTopic(),
-                        brokerEventListener, axisConfiguration);
+                brokerConfiguration = brokerConfigurationHelper.getBrokerConfiguration(input.getBrokerName(), tenantId);
+
+                input.setSubscriptionId(brokerService.subscribe(brokerConfiguration, input.getTopic(),
+                        brokerEventListener, axisConfiguration));
             } catch (BrokerEventProcessingException e) {
                 String errorMessage = "Can not subscribe to the broker " + input.getBrokerName();
+                log.error(errorMessage);
+                throw new CEPConfigurationException(errorMessage, e);
+            } catch (BrokerConfigException e) {
+                String errorMessage = "Can not subscribe, no broker config found for " + input.getBrokerName();
                 log.error(errorMessage);
                 throw new CEPConfigurationException(errorMessage, e);
             }
@@ -127,7 +160,8 @@ public class CEPBucket {
 
     }
 
-    public void insertEvent(Object event, InputMapping inputMapping) throws CEPEventProcessingException {
+    public void insertEvent(Object event, InputMapping inputMapping)
+            throws CEPEventProcessingException {
         this.cepBackEndRuntime.insertEvent(event, inputMapping);
     }
 
@@ -157,31 +191,51 @@ public class CEPBucket {
         if (input.getBrokerName() != null) {
             BrokerService brokerService = CEPServiceValueHolder.getInstance().getBrokerService();
             BrokerConfigurationHelper brokerConfigurationHelper = new BrokerConfigurationHelper();
-            BrokerConfiguration brokerConfiguration =
-                    brokerConfigurationHelper.getBrokerConfiguration(input.getBrokerName(), tenantId);
             try {
-                brokerService.unsubscribe(input.getTopic(), brokerConfiguration, axisConfiguration);
+                BrokerConfiguration brokerConfiguration =
+                        brokerConfigurationHelper.getBrokerConfiguration(input.getBrokerName(), tenantId);
+                brokerService.unsubscribe(input.getTopic(), brokerConfiguration, axisConfiguration, input.getSubscriptionId());
             } catch (BrokerEventProcessingException e) {
-                String errorMessage = "Can not subscribe to the broker " + input.getBrokerName();
+                String errorMessage = "Can not unsubscribe to the broker " + input.getBrokerName();
+                throw new CEPConfigurationException(errorMessage, e);
+            } catch (BrokerConfigException e) {
+                String errorMessage = "Can not unsubscribe to the broker, No broker config found for " + input.getBrokerName();
+                log.error(errorMessage);
                 throw new CEPConfigurationException(errorMessage, e);
             }
         }
     }
 
     public void unSubscribeFromAllInputs() throws CEPConfigurationException {
-        for (Input input : this.bucket.getInputs()){
+        for (Input input : this.bucket.getInputs()) {
             unSubscribeFromInput(input);
         }
     }
 
     /**
      * unsubscribe from all the subscriptions and remove all queries
+     *
      * @throws CEPConfigurationException
      */
     public void delete() throws CEPConfigurationException {
 
         unSubscribeFromAllInputs();
         removeAllQueries();
+        log.info("bucket " + bucket.getName() + " deleted");
+
+
+    }
+
+    public String getBucketPath() {
+        return bucketPath;
+    }
+
+    public void setBucketPath(String bucketPath) {
+        this.bucketPath = bucketPath;
+    }
+
+    public void shutdown() {
+        cepBackEndRuntime.shutdown();
 
     }
 }

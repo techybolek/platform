@@ -23,27 +23,27 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.coordination.core.services.CoordinationService;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.RSSManagerException;
+import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
 import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAO;
 import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAOFactory;
-import org.wso2.carbon.rssmanager.core.entity.RSSInstance;
-import org.wso2.carbon.rssmanager.core.internal.manager.RSSMetaDataRepository;
 import org.wso2.carbon.rssmanager.core.internal.util.RSSConfig;
 import org.wso2.carbon.rssmanager.core.internal.util.RSSManagerUtil;
 import org.wso2.carbon.rssmanager.core.service.RSSManagerService;
+import org.wso2.carbon.transaction.manager.TransactionManagerDummyService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
-import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.naming.InitialContext;
 import javax.transaction.TransactionManager;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -68,6 +68,12 @@ import java.util.Map;
  * policy="dynamic"
  * bind="setCoordinationService"
  * unbind="unsetCoordinationService"
+ * @scr.reference name="transactionmanager"
+ * interface="org.wso2.carbon.transaction.manager.TransactionManagerDummyService"
+ * cardinality="1..1"
+ * policy="dynamic"
+ * bind="setTransactionManagerDummyService"
+ * unbind="unsetTransactionManagerDummyService"
  */
 public class RSSManagerServiceComponent {
 
@@ -87,31 +93,31 @@ public class RSSManagerServiceComponent {
     protected void activate(ComponentContext componentContext) {
         BundleContext bundleContext = componentContext.getBundleContext();
 
-        SuperTenantCarbonContext.startTenantFlow();
-        CarbonContextHolder.getCurrentCarbonContextHolder().setTenantId(
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
                 MultitenantConstants.SUPER_TENANT_ID);
         try {
-            /* Initializes the RSS configuration */
-            RSSConfig.init();
-            /* Initializes the system RSS instances */
-            this.initSystemRSSInstances();
-            /* Initializes the RSS Manager repositories of all existing tenants */
-            RSSConfig.getInstance().getRssManager().initAllTenants();
-            /* Looks up for the JNDI registered transaction manager */
-            RSSManagerUtil.setTransactionManager(this.lookupTransactionManager());
-
             /* Loading tenant specific data */
-            bundleContext.registerService(AbstractAxis2ConfigurationContextObserver.class.getName(),
+            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(),
                     new RSSManagerAxis2ConfigContextObserver(), null);
             /* Registers RSSManager service */
             bundleContext.registerService(RSSManagerService.class.getName(),
                     new RSSManagerService(), null);
-
+            bundleContext.registerService(TransactionManagerDummyService.class.getName(),
+                    new TransactionManagerDummyService(), null);
+            /* Looks up for the JNDI registered transaction manager */
+            RSSManagerUtil.setTransactionManager(this.lookupTransactionManager());
+            /* Initializes the RSS configuration */
+            RSSConfig.init();
+            /* Initializing system RSS instances */
+            this.initSystemRSSInstances();
+            /* Initializing super tenant RSS instance repository */
+            this.initializeSuperTenantRSSInstanceRepository();
         } catch (Throwable e) {
             String msg = "Error occurred while initializing RSS Manager core bundle";
             log.error(msg, e);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -211,6 +217,63 @@ public class RSSManagerServiceComponent {
         return coordinationService;
     }
 
+    private TransactionManager lookupTransactionManager() {
+        TransactionManager transactionManager = null;
+        try {
+            Object txObj = InitialContext.doLookup(
+                    RSSManagerConstants.STANDARD_USER_TRANSACTION_JNDI_NAME);
+            if (txObj instanceof TransactionManager) {
+                transactionManager = (TransactionManager) txObj;
+            }
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cannot find transaction manager at: "
+                        + RSSManagerConstants.STANDARD_USER_TRANSACTION_JNDI_NAME, e);
+            }
+            /* ignore, move onto next step */
+        }
+        if (transactionManager == null) {
+            try {
+                transactionManager = InitialContext.doLookup(
+                        RSSManagerConstants.STANDARD_TRANSACTION_MANAGER_JNDI_NAME);
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Cannot find transaction manager at: " +
+                            RSSManagerConstants.STANDARD_TRANSACTION_MANAGER_JNDI_NAME, e);
+                }
+                /* we'll do the lookup later, maybe user provided a custom JNDI name */
+            }
+        }
+        return transactionManager;
+    }
+
+    private void initializeSuperTenantRSSInstanceRepository() throws RSSManagerException {
+        RSSConfig config = RSSConfig.getInstance();
+        try {
+            int tid = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            TenantRSSInstanceRepository repository =
+                    config.getRssManager().getRSSInstancePool().
+                            getTenantRSSRepository(tid);
+            if (repository == null) {
+                repository = new TenantRSSInstanceRepository();
+            }
+            config.getRssManager().beginTransaction();
+            List<RSSInstance> systemRSSInstances =
+                    RSSDAOFactory.getRSSDAO().getAllSystemRSSInstances();
+            for (RSSInstance rssInstance : systemRSSInstances) {
+                repository.addRSSInstance(rssInstance);
+            }
+            config.getRssManager().getRSSInstancePool().
+                    setTenantRSSRepository(tid, repository);
+            config.getRssManager().endTransaction();
+        } catch (RSSManagerException e) {
+            if (config.getRssManager().isInTransaction()) {
+                config.getRssManager().rollbackTransaction();
+            }
+            throw e;
+        }
+    }
+
     /**
      * Initialises the RSS DAO database by reading from the "rss-config.xml".
      *
@@ -218,15 +281,8 @@ public class RSSManagerServiceComponent {
      *          rssDaoException
      */
     private void initSystemRSSInstances() throws RSSManagerException {
-        int tid = SuperTenantCarbonContext.getCurrentContext().getTenantId();
+        RSSConfig config = RSSConfig.getInstance();
         try {
-            RSSConfig config = RSSConfig.getInstance();
-            RSSMetaDataRepository repository =
-                    config.getRssManager().getTenantMetadataRepository(tid);
-            if (repository == null) {
-                repository = new RSSMetaDataRepository(tid);
-            }
-
             /* adds the rss instances listed in the configuration file,
              * if any of them are already existing in the database, they will be skipped */
             Map<String, RSSInstance> rssInstances = new HashMap<String, RSSInstance>();
@@ -234,48 +290,29 @@ public class RSSManagerServiceComponent {
                 rssInstances.put(tmpInst.getName(), tmpInst);
             }
             RSSDAO rssDAO = RSSDAOFactory.getRSSDAO();
+            config.getRssManager().beginTransaction();
             for (RSSInstance tmpInst : rssDAO.getAllSystemRSSInstances()) {
                 rssInstances.remove(tmpInst.getName());
             }
             for (RSSInstance inst : rssInstances.values()) {
                 rssDAO.createRSSInstance(inst);
-                repository.addRSSInstance(inst);
             }
-            config.getRssManager().setMetaDataRepository(tid, repository);
+            config.getRssManager().endTransaction();
         } catch (RSSManagerException e) {
-            log.error("Error occurred while initializing system RSS instances", e);
+            if (config.getRssManager().isInTransaction()) {
+                config.getRssManager().rollbackTransaction();
+            }
             throw e;
         }
     }
 
-    private TransactionManager lookupTransactionManager() {
-        TransactionManager transactionManager = null;
-        try {
-			Object txObj = InitialContext.doLookup(
-					RSSManagerConstants.STANDARD_USER_TRANSACTION_JNDI_NAME);
-			if (txObj instanceof TransactionManager) {
-				transactionManager = (TransactionManager) txObj;
-			}
-		} catch (Exception e) {
-			if (log.isDebugEnabled()) {
-				log.debug("Cannot find transaction manager at: "
-						+ RSSManagerConstants.STANDARD_USER_TRANSACTION_JNDI_NAME, e);
-			}
-			/* ignore, move onto next step */
-		}
-		if (transactionManager == null) {
-			try {
-				transactionManager = InitialContext.doLookup(
-						RSSManagerConstants.STANDARD_TRANSACTION_MANAGER_JNDI_NAME);
-			} catch (Exception e) {
-				if (log.isDebugEnabled()) {
-					log.debug("Cannot find transaction manager at: " +
-				         RSSManagerConstants.STANDARD_TRANSACTION_MANAGER_JNDI_NAME, e);
-				}
-				/* we'll do the lookup later, maybe user provided a custom JNDI name */
-			}
-		}
-        return transactionManager;
+
+    protected void setTransactionManagerDummyService(TransactionManagerDummyService dummyService) {
+        //do nothing
+    }
+
+    protected void unsetTransactionManagerDummyService(TransactionManagerDummyService dummyService) {
+        //do nothing
     }
 
 }

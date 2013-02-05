@@ -18,10 +18,9 @@
 package org.wso2.carbon.registry.social.impl.test.people.userprofile;
 
 import junit.framework.TestCase;
+import org.wso2.carbon.context.CarbonContext;
 
 import java.io.File;
-
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
 
 public class BaseTestCase extends TestCase {
     public void setUp() throws Exception {
@@ -37,7 +36,7 @@ public class BaseTestCase extends TestCase {
             }
         }
         // The line below is responsible for initializing the cache.
-        CarbonContextHolder.getCurrentCarbonContextHolder();
+        CarbonContext.getCurrentContext();
     }
 
     protected static boolean deleteDir(File dir) {

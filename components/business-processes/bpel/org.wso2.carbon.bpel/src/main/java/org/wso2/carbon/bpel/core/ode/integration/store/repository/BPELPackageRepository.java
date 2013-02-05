@@ -40,7 +40,11 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Central manager who is responsible for managing BPEL archives, BPEL deployment units repository
@@ -287,14 +291,29 @@ public class BPELPackageRepository {
                 for (int i = children.length - 1; i >= 0; i--) {
                     bpelPackages.add(getBPELPackageInfo(children[i]));
                 }
-
-                return bpelPackages;
+                return sortByPackageName(bpelPackages);
             }
         } catch (RegistryException re) {
             handleExceptionWithRollback("Unable to get BPEL Packages from Repository.", re);
         }
 
         return null;
+    }
+
+    private List<BPELPackageInfo> sortByPackageName(List<BPELPackageInfo> packageList) {
+
+        List<BPELPackageInfo> sortedPackageList = new ArrayList<BPELPackageInfo>();
+        Map<String, BPELPackageInfo> packageInfoMap = new HashMap<String, BPELPackageInfo>();
+        for(BPELPackageInfo packageInfo : packageList) {
+            packageInfoMap.put(packageInfo.getName(), packageInfo);
+        }
+        SortedSet<String> sortedPackageNames = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+        sortedPackageNames.addAll(packageInfoMap.keySet());
+        for ( String packageName : sortedPackageNames) {
+            sortedPackageList.add(packageInfoMap.get(packageName));
+        }
+
+        return sortedPackageList;
     }
 
     /**

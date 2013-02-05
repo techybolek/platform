@@ -18,15 +18,22 @@ under the License.
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
 <%@ page import="org.wso2.carbon.governance.notifications.ui.worklist.HumanTaskClient" %>
 <%@ page import="org.wso2.carbon.governance.notifications.ui.worklist.WorkItem" %>
+<%@ page import="org.wso2.carbon.context.CarbonContext" %>
+<%@ page import="org.wso2.carbon.utils.multitenancy.MultitenantConstants" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="carbon" uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" %>
 <%
     String[] roles;
     WorkItem[] workItems;
+    boolean isSuperTenant = false;
     try {
         HumanTaskClient client = new HumanTaskClient(config, session);
         roles = client.getRoles(session);
         workItems = client.getWorkItems(request);
+        if(CarbonContext.getCurrentContext().getTenantId() == MultitenantConstants.SUPER_TENANT_ID) {
+          isSuperTenant = true;
+        }
+
     } catch (Exception ignored) {
         return;
     }
@@ -36,7 +43,9 @@ under the License.
         resourceBundle="org.wso2.carbon.governance.notifications.ui.i18n.JSResources"
         request="<%=request%>" namespace="org.wso2.carbon.governance.notifications.ui"/>
 <fmt:bundle basename="org.wso2.carbon.governance.notifications.ui.i18n.Resources">
+   <%if(isSuperTenant) {%>
   <a class="view-notification" id="viewNotification"><%=workItems.length%></a>
+   <%}%>
     <div id="notificationPopupView" class="notificationPopup" style="display:none">
         <div class="popupPointer"></div>
         <div class="popupBox">

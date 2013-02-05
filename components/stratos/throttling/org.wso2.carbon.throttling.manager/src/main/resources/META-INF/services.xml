@@ -19,6 +19,10 @@
 		<parameter name="adminService" locked="true">true</parameter>
 		<parameter name="AuthorizationAction" locked="true">/permission/protected/manage/throttling
 		</parameter>
+
+        <operation name="executeThrottlingRules">
+            <parameter name="superTenantService" locked="true">true</parameter>
+        </operation>
 	</service>
 
 	<service name="ThrottlingRuleEditorService" scope="transportsession">

@@ -86,6 +86,27 @@ public interface DeploymentSynchronizerService {
     public boolean checkout(String filePath) throws DeploymentSynchronizerException;
 
     /**
+     * Invoke the checkout operation on the specified repository, with given depth
+     *
+     * @param filePath Location of the repository in file system
+     * @param depth Depth given to check-out, eg 0 - empty, 3 - infinite
+     * @return true if files were checked out or updated, false otherwise
+     * @throws DeploymentSynchronizerException on error
+     */
+    public boolean checkout(String filePath, int depth) throws DeploymentSynchronizerException;
+
+    /**
+     * Invoke the update operation on the specified file in the repository, with given depth
+     *
+     * @param rootPath - root path of the repository of which the dep-sychronizer is registered
+     * @param filePath - location of the file in the repository
+     * @param depth Depth given to update, (eg 0 - empty, 3 - infinite)
+     * @return true if files were updated, false otherwise
+     * @throws DeploymentSynchronizerException on error
+     */
+    public boolean update(String rootPath, String filePath, int depth) throws DeploymentSynchronizerException;
+
+    /**
      * Invoke the commit operation on the specified repository
      *
      * @param filePath Location of the repository in file system
@@ -95,4 +116,15 @@ public interface DeploymentSynchronizerService {
      */
     public boolean commit(String filePath) throws DeploymentSynchronizerException;
 
+    /**
+     * Invoke the commit operation on the specified repository at rootPath, with the given
+     * filePath to commit. This will only commit the filePath in the given repository.
+     *
+     * @param rootPath repo path at which the dep synch is registered
+     * @param filePath Location of the repository in file system
+     * @return rue if file changes were committed, false otherwise
+     * @throws DeploymentSynchronizerException if a deployment synchronizer does not exist
+     * for the specified path
+     */
+    public boolean commit(String rootPath, String filePath) throws DeploymentSynchronizerException;
 }

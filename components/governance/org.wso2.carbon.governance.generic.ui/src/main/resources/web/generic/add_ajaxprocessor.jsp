@@ -19,14 +19,15 @@
 <%@ page import="org.apache.axiom.om.OMElement" %>
 <%@ page import="org.wso2.carbon.governance.generic.ui.clients.ManageGenericArtifactServiceClient" %>
 <%@ page import="org.wso2.carbon.governance.generic.ui.utils.ManageGenericArtifactUtil" %>
-<%@ page import="org.wso2.carbon.governance.services.ui.utils.AddServiceUIGenerator" %>
+<%@ page import="org.wso2.carbon.governance.generic.ui.utils.GenericUIGenerator" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="java.net.URLEncoder" %>
+<%@ page import="org.wso2.carbon.registry.common.ui.UIException"%>
 <%
     String error1 = "Your modification cause replacement of another resource!";
     String dataName = request.getParameter("dataName");
     String dataNamespace = request.getParameter("dataNamespace");
-    AddServiceUIGenerator uigen = new AddServiceUIGenerator(dataName, dataNamespace);
+    GenericUIGenerator uigen = new GenericUIGenerator(dataName, dataNamespace);
     ManageGenericArtifactServiceClient
             client = new ManageGenericArtifactServiceClient(config,session);
     OMElement head = null;
@@ -39,9 +40,10 @@
         head = (OMElement)request.getAttribute("content");
     }
     String registryArtifactPath = null;
+    String currentPath = request.getParameter("currentPath");
     try {
         String effectivePath = ManageGenericArtifactUtil.addArtifactContent(
-                head, request, config, session, dataName, dataNamespace);
+                head, request, config, session, dataName, dataNamespace, currentPath);
         if (effectivePath != null){
             try {
 //REGISTRY-698
@@ -64,11 +66,25 @@
 
 <%}
 } catch (Exception e) {
-%>
+
+    String errorMsg = e.getMessage();
+    String error;
+    if(errorMsg != null){
+        if(errorMsg.contains("contains one or more illegal characters")) {
+            error = "Failed to add the artifact, Special characters are not allowed in the name fields";
+        } else if(errorMsg.contains("Governance artifact") && errorMsg.contains("already exists")){
+            error = "Failed to add the artifact, Governance artifact is already exists";
+        } else {
+            error = errorMsg.replace("org.apache.axis2.AxisFault:", "").trim();
+        }
+    } else{
+        error = "An unknown error has occurred, please see the error log";
+    }
+
+	%>
     <script type="text/javascript">
-        window.location = "../generic/add_edit.jsp?region=<%=request.getParameter("region")%>&item=<%=request.getParameter("item")%>&key=<%=request.getParameter("key")%>&lifecycleAttribute=<%=request.getParameter("lifecycleAttribute")%>&breadcrumb=<%=request.getParameter("breadcrumb")%>&wsdlError=" + encodeURIComponent("<%=e.getMessage()%>");
-    </script><%
-    return;
+       window.location = '../generic/add_edit.jsp?region=<%=request.getParameter("region")%>&item=<%=request.getParameter("item")%>&key=<%=request.getParameter("key")%>&lifecycleAttribute=<%=request.getParameter("lifecycleAttribute")%>&breadcrumb=<%=request.getParameter("breadcrumb")%>&wsdlError=<%=error%>';              
+    </script><%   
 }
 %>
 

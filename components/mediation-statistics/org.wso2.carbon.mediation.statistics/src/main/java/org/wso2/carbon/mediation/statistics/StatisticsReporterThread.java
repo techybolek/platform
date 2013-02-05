@@ -27,6 +27,7 @@ import org.apache.synapse.aspects.statistics.StatisticsLog;
 import org.apache.synapse.aspects.statistics.view.InOutStatisticsView;
 import org.apache.synapse.aspects.statistics.view.StatisticsViewStrategy;
 import org.apache.synapse.aspects.statistics.view.SystemViewStrategy;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.mediation.initializer.services.SynapseEnvironmentService;
 
 import java.util.*;
@@ -53,12 +54,18 @@ public class StatisticsReporterThread extends Thread {
     private long delay = 5 * 1000;
 
     private final StatisticsViewStrategy systemViewStrategy = new SystemViewStrategy();
+    
+	/**
+	 * This flag will be updated according to the carbon.xml defined value, if
+	 * setup as'true' the statistic collector will be disabled.
+	 */
+     private boolean statisticsReporterDisabled =false;
 
     public StatisticsReporterThread(SynapseEnvironmentService synEnvSvc,
                                     MediationStatisticsStore mediationStatStore) {
         this.synapseEnvironmentService = synEnvSvc;
         this.mediationStatisticsStore = mediationStatStore;
-    }
+     }
 
     public void setDelay(long delay) {
         if (log.isDebugEnabled()) {

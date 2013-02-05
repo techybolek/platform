@@ -115,6 +115,36 @@ public class PropertiesAdminServiceClient {
         }
     }
 
+    public PropertiesBean getProperties(String path, String viewProps)
+            throws RemoteException, PropertiesAdminServiceRegistryExceptionException {
+        try {
+            return propertiesAdminServiceStub.getProperties(path, viewProps);
+        } catch (RemoteException e) {
+            String errMsg="Getting properties fails";
+            log.error(errMsg);
+            throw new RemoteException(errMsg,e);
+        } catch (PropertiesAdminServiceRegistryExceptionException e) {
+            String errMsg="Getting properties fails";
+            log.error(errMsg);
+            throw new PropertiesAdminServiceRegistryExceptionException(errMsg,e);
+        }
+    }
+
+    public void updateProperty(String path, String name, String value, String oldValue)
+            throws RemoteException, PropertiesAdminServiceRegistryExceptionException {
+        try {
+            propertiesAdminServiceStub.updateProperty(path, name, value, oldValue);
+        } catch (RemoteException e) {
+            String errMsg="Update properties fails";
+            log.error(errMsg);
+            throw new RemoteException(errMsg,e);
+        } catch (PropertiesAdminServiceRegistryExceptionException e) {
+            String errMsg="Update properties fails";
+            log.error(errMsg);
+            throw new PropertiesAdminServiceRegistryExceptionException(errMsg,e);
+        }
+    }
+
     public void removeProperty(String path, String viewProps)
             throws RemoteException, PropertiesAdminServiceRegistryExceptionException {
         try {

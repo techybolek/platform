@@ -19,7 +19,6 @@ package org.wso2.carbon.governance.list.operations;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
-import org.apache.axiom.om.xpath.AXIOMXPath;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
@@ -71,12 +70,12 @@ public class CreateOperation extends AbstractOperation {
 
     public MessageContext process(MessageContext requestMessageContext) throws AxisFault {
         OMElement content = null;
-        AXIOMXPath expression;
         try {
-            content = AXIOMUtil.stringToOM(
-                    requestMessageContext.getEnvelope().getBody().getFirstElement().getFirstChildWithName(
-                            new QName(namespace, "info")).getText());
-
+            OMElement info;
+            if((info = requestMessageContext.getEnvelope().getBody().
+                    getFirstElement().getFirstChildWithName(new QName(namespace, "info"))) != null){
+                content = AXIOMUtil.stringToOM(info.getText());
+            }
             if(content == null){
                 String msg = "Content of the resource should be in correct format";
                 log.error(msg);

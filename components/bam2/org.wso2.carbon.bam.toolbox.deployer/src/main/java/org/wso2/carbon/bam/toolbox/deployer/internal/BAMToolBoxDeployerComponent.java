@@ -19,11 +19,13 @@ package org.wso2.carbon.bam.toolbox.deployer.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.bam.toolbox.deployer.BAMToolBoxDeployerConstants;
 import org.wso2.carbon.bam.toolbox.deployer.BasicToolBox;
 import org.wso2.carbon.bam.toolbox.deployer.ServiceHolder;
 import org.wso2.carbon.base.api.ServerConfigurationService;
+import org.wso2.carbon.core.ServerStartupHandler;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.UserRealm;
@@ -81,6 +83,9 @@ public class BAMToolBoxDeployerComponent {
 
     protected void activate(ComponentContext context) {
         loadAvailableToolBoxes();
+        BundleContext bundleContext = context.getBundleContext();
+        bundleContext.registerService(ServerStartupHandler.class.getName(),
+                new ServerStartUpInspector(), null);
         log.info("Successfully Started BAM Toolbox Deployer");
     }
 
@@ -110,7 +115,7 @@ public class BAMToolBoxDeployerComponent {
                             if (location.indexOf(BAMToolBoxDeployerConstants.CARBON_HOME) == 0) {
                                 location = location.substring(BAMToolBoxDeployerConstants.CARBON_HOME.length());
                                 location = CarbonUtils.getCarbonHome() + location;
-                                location=location.replace("/", File.separator);
+                                location = location.replace("/", File.separator);
                             }
                             BasicToolBox toolBox = new BasicToolBox(toolBoxId, location, displayName, desc);
                             BasicToolBox.addToAvailableToolBox(toolBox);

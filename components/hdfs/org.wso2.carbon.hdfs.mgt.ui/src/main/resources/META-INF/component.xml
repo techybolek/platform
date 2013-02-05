@@ -55,18 +55,19 @@
             <!--<icon>../hdfsmgt/images/add.gif</icon>-->
             <!--<require-permission>/permission/admin/manage/add</require-permission>-->
         <!--</menu>-->
-        <menu>
-            <id>hdfs_cluster_mgt_menu</id>
-            <i18n-key>hdfs.cluster.status.mgt.menu.text</i18n-key>
-            <i18n-bundle>org.wso2.carbon.hdfs.mgt.ui.i18n.Resources</i18n-bundle>
-            <parent-menu>monitor_menu</parent-menu>
-            <link>../hdfsmgt/hdfs_cluster_status.jsp</link>
-            <region>region4</region>
-            <order>52</order>
-            <style-class>monitor</style-class>
-            <icon>../hdfsmgt/images/cluster_status.gif</icon>
-            <require-permission>/permission/admin/monitor/hdfs</require-permission>
-            <require-super-tenant>true</require-super-tenant>            
-        </menu>
+        <!--Left menu item to monitor HDFS cluster-->
+        <!--<menu>-->
+            <!--<id>hdfs_cluster_mgt_menu</id>-->
+            <!--<i18n-key>hdfs.cluster.status.mgt.menu.text</i18n-key>-->
+            <!--<i18n-bundle>org.wso2.carbon.hdfs.mgt.ui.i18n.Resources</i18n-bundle>-->
+            <!--<parent-menu>monitor_menu</parent-menu>-->
+            <!--<link>../hdfsmgt/hdfs_cluster_status.jsp</link>-->
+            <!--<region>region4</region>-->
+            <!--<order>52</order>-->
+            <!--<style-class>monitor</style-class>-->
+            <!--<icon>../hdfsmgt/images/cluster_status.gif</icon>-->
+            <!--<require-permission>/permission/admin/monitor/hdfs</require-permission>-->
+            <!--<require-super-tenant>true</require-super-tenant>            -->
+        <!--</menu>-->
     </menus>
 </component>

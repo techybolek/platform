@@ -42,7 +42,7 @@ import org.wso2.carbon.ui.UIAuthenticationExtender;
 import org.wso2.carbon.ui.deployment.ComponentBuilder;
 import org.wso2.carbon.ui.deployment.beans.Component;
 import org.wso2.carbon.ui.deployment.beans.Menu;
-import org.wso2.carbon.user.core.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ServerConstants;
 
 import javax.servlet.http.HttpServletRequest;
@@ -66,6 +66,7 @@ public class GovernanceListUIServiceComponent {
     private ServiceRegistration serviceRegistration;
     private static final String DEFAULT_LIFECYCLE_GENERATOR_CLASS
             = "org.wso2.carbon.governance.services.ui.utils.LifecycleListPopulator";
+    private int menuOrder = 50;
 
     protected void activate(ComponentContext context) {
         UIAuthenticationExtender authenticationExtender = new UIAuthenticationExtender() {
@@ -91,28 +92,29 @@ public class GovernanceListUIServiceComponent {
                                     "/configuration/";
                             String layoutStoragePath = configurationPath
                                     + key;
-                            if (registry.getRegistryContext().getRealmService().getBootstrapRealm()
-                                    .getAuthorizationManager().isUserAuthorized(s,configurationPath, ActionConstants.PUT)
+                            RealmService realmService = registry.getRegistryContext().getRealmService();
+                            if (realmService.getTenantUserRealm(realmService.getTenantManager().getTenantId(s1))
+                                    .getAuthorizationManager().isUserAuthorized(s, configurationPath, ActionConstants.PUT)
                                     || registry.resourceExists(layoutStoragePath)) {
+                                List<Menu> menuList = component.getMenusList();
                                 if (uiConfigurations != null) {
                                     ComponentBuilder
                                             .processMenus("artifactType", uiConfigurations, component);
                                     ComponentBuilder.processCustomUIs(uiConfigurations, component);
-                                    List<Menu> menuList = component.getMenusList();
-                                    if (menuList.size() == 0) {
-                                        // if no menu definitions were present, define the default ones.
-                                        buildMenuList(request, configuration, menuList, key);
-                                    }
-                                    userCustomMenuItemsList.addAll(menuList);
-                                    customAddUIMap.putAll(component.getCustomAddUIMap());
-                                    Map<String, String> viewUIMap =
-                                            component.getCustomViewUIMap();
-                                    if (viewUIMap.isEmpty()) {
-                                        // if no custom UI definitions were present, define the default.
-                                        buildViewUI(configuration, viewUIMap, key);
-                                    }
-                                    customViewUIMap.putAll(viewUIMap);
                                 }
+                                if (menuList.size() == 0) {
+                                    // if no menu definitions were present, define the default ones.
+                                    buildMenuList(request, configuration, menuList, key);
+                                }
+                                userCustomMenuItemsList.addAll(menuList);
+                                customAddUIMap.putAll(component.getCustomAddUIMap());
+                                Map<String, String> viewUIMap =
+                                        component.getCustomViewUIMap();
+                                if (viewUIMap.isEmpty()) {
+                                    // if no custom UI definitions were present, define the default.
+                                    buildViewUI(configuration, viewUIMap, key);
+                                }
+                                customViewUIMap.putAll(viewUIMap);
                                 OMElement layout = configuration.getContentDefinition();
                                 if (layout != null && !registry.resourceExists(layoutStoragePath)) {
                                     Resource resource = registry.newResource();
@@ -129,7 +131,7 @@ public class GovernanceListUIServiceComponent {
                         session.setAttribute("customViewUI",customViewUIMap);
                     } catch (RegistryException e) {
                         log.error("unable to create connection to registry");
-                    } catch (UserStoreException e) {
+                    } catch (org.wso2.carbon.user.api.UserStoreException e) {
                         log.error("unable to realm service");
                     }
                 }
@@ -153,11 +155,18 @@ public class GovernanceListUIServiceComponent {
             log.error("The singular label and plural label have not " +
                     "been defined for the artifact type: " + key);
         } else {
-            String path = "../generic/edit_ajaxprocessor.jsp?hideEditView=true&key=" + key +
-                    "&lifecycleAttribute=" + lifecycleAttribute +"&add_edit_breadcrumb=" +
-                    singularLabel + "&add_edit_region=region3&add_edit_item=governance_add_" + key +
-                    "_menu&breadcrumb=" + singularLabel;
-            viewUIMap.put(configuration.getMediaType(), path);
+            String contentURL = configuration.getContentURL();
+            if (contentURL != null) {
+                if (!contentURL.toLowerCase().equals("default")) {
+                    viewUIMap.put(configuration.getMediaType(), contentURL);
+                }
+            } else {
+                String path = "../generic/edit_ajaxprocessor.jsp?hideEditView=true&key=" + key +
+                        "&lifecycleAttribute=" + lifecycleAttribute +"&add_edit_breadcrumb=" +
+                        singularLabel + "&add_edit_region=region3&add_edit_item=governance_add_" +
+                        key + "_menu&breadcrumb=" + singularLabel;
+                viewUIMap.put(configuration.getMediaType(), path);
+            }
         }
     }
 
@@ -205,7 +214,7 @@ public class GovernanceListUIServiceComponent {
                         OMElement rootElement = (OMElement) ((OMElement) parentElement.getParent()).getParent();
                         lifecycleParentName = rootElement.getAttributeValue(new QName("name"));
                         break;
-                    }else if(parentElement.getAttributeValue(new QName("isLifecycle")).equals("true")){
+                    }else if(parentElement.getAttributeValue(new QName("isLifecycle")) != null && parentElement.getAttributeValue(new QName("isLifecycle")).equals("true")){
                         Iterator childrenIterator = parentElement.getParent().getChildrenWithLocalName("name");
                         while (childrenIterator.hasNext()) {
                             OMElement next = (OMElement) childrenIterator.next();
@@ -259,7 +268,7 @@ public class GovernanceListUIServiceComponent {
                                String key) {
         String singularLabel = configuration.getSingularLabel();
         String pluralLabel = configuration.getPluralLabel();
-
+        boolean hasNamespace = configuration.hasNamespace();
         String lifecycleAttribute = key + "Lifecycle_lifecycleName";
 
         lifecycleAttribute = BuilLifecycleAttribute(configuration, DEFAULT_LIFECYCLE_GENERATOR_CLASS, lifecycleAttribute);
@@ -279,11 +288,20 @@ public class GovernanceListUIServiceComponent {
                 addMenu.setId("governance_add_" + key + "_menu");
                 addMenu.setI18nKey(singularLabel);
                 addMenu.setParentMenu("add_sub_menu");
-                addMenu.setLink("../generic/add_edit.jsp");
-                addMenu.setUrlParameters("key=" + key + "&lifecycleAttribute=" + lifecycleAttribute +
-                        "&breadcrumb=" + singularLabel);
+                if (configuration.getExtension() == null) {
+                    addMenu.setLink("../generic/add_edit.jsp");
+                    addMenu.setUrlParameters("key=" + key + "&lifecycleAttribute=" +
+                            lifecycleAttribute + "&breadcrumb=" + singularLabel);
+                } else {
+                    addMenu.setLink("../generic/add_content.jsp");
+                    addMenu.setUrlParameters("key=" + key + "&lifecycleAttribute=" +
+                            lifecycleAttribute + "&breadcrumb=" + singularLabel + "&mediaType=" +
+                            configuration.getMediaType() + "&extension=" +
+                            configuration.getExtension() + "&singularLabel=" + singularLabel +
+                            "&pluralLabel=" + pluralLabel + "&hasNamespace" + hasNamespace);
+                }
                 addMenu.setRegion("region3");
-                addMenu.setOrder("50");
+                addMenu.setOrder(String.valueOf(menuOrder));
                 addMenu.setStyleClass("manage");
                 if (iconSet > 0) {
                     addMenu.setIcon("../generic/images/add" + iconSet + ".png");
@@ -306,11 +324,19 @@ public class GovernanceListUIServiceComponent {
                 listMenu.setId("governance_list_" + key + "_menu");
                 listMenu.setI18nKey(pluralLabel);
                 listMenu.setParentMenu("list_sub_menu");
-                listMenu.setLink("../generic/list.jsp");
-                listMenu.setUrlParameters("key=" + key + "&breadcrumb=" + pluralLabel +
-                        "&singularLabel=" + singularLabel + "&pluralLabel=" + pluralLabel);
+                if (configuration.getExtension() == null) {
+                    listMenu.setLink("../generic/list.jsp");
+                    listMenu.setUrlParameters("key=" + key + "&breadcrumb=" + pluralLabel +
+                            "&singularLabel=" + singularLabel + "&pluralLabel=" + pluralLabel);
+                } else {
+                    listMenu.setLink("../generic/list_content.jsp");
+                    listMenu.setUrlParameters("key=" + key + "&lifecycleAttribute=" +
+                            lifecycleAttribute + "&breadcrumb=" + singularLabel + "&mediaType=" +
+                            configuration.getMediaType() + "&singularLabel=" + singularLabel +
+                            "&pluralLabel=" + pluralLabel + "&hasNamespace=" + hasNamespace);
+                }
                 listMenu.setRegion("region3");
-                listMenu.setOrder("50");
+                listMenu.setOrder(String.valueOf(menuOrder));
                 listMenu.setStyleClass("manage");
                 if (iconSet > 0) {
                     listMenu.setIcon("../generic/images/list" + iconSet + ".png");
@@ -323,7 +349,7 @@ public class GovernanceListUIServiceComponent {
                                 "/permission/admin/manage/resources/ws-api"});
                 menuList.add(listMenu);
             }
-            if (CarbonUIUtil.isUserAuthorized(request,
+            /*if (CarbonUIUtil.isUserAuthorized(request,
                     "/permission/admin/configure/governance/" + key + "-ui")) {
                 Menu configureMenu = new Menu();
                 configureMenu.setId("governance_" + key + "_config_menu");
@@ -346,7 +372,8 @@ public class GovernanceListUIServiceComponent {
                 configureMenu.setRequirePermission(
                         new String[]{"/permission/admin/configure/governance/" + key + "-ui"});
                 menuList.add(configureMenu);
-            }
+            }*/
+            menuOrder++;
         }
     }
 

@@ -41,9 +41,12 @@ public class ResourceServlet extends HttpServlet {
             throws ServletException, IOException {
 
         try {
-            GetResourceContentProcessor.getContent(request, response, servletConfig);
+            if(request.getParameter("withDependencies") != null ) {
+                GetResourceContentProcessor.getContentWithDependencies(request, response, servletConfig);
+            } else {
+                GetResourceContentProcessor.getContent(request, response, servletConfig);
+            }
         } catch (Exception e) {
-            
             String msg = "Failed to get resource content. " + e.getMessage();
             log.error(msg, e);
             response.setStatus(500);

@@ -43,16 +43,24 @@ public class AutoscaleOutMediator extends AbstractMediator implements ManagedLif
             ((Axis2MessageContext) synCtx).getAxis2MessageContext().getConfigurationContext();
 
         String domain = (String) synCtx.getProperty(AutoscaleConstants.TARGET_DOMAIN);
+        // gets the corresponding sub domain
+        String subDomain = (String) synCtx.getProperty(AutoscaleConstants.TARGET_SUB_DOMAIN);
+        
         String tokenId = (String) synCtx.getProperty(AutoscaleConstants.REQUEST_ID);
         @SuppressWarnings("unchecked")
-        Map<String, AppDomainContext> appDomainContexts =
-            (Map<String, AppDomainContext>) configCtx.getPropertyNonReplicable(AutoscaleConstants.APP_DOMAIN_CONTEXTS);
-        AppDomainContext appDomainContext = appDomainContexts.get(domain);
+        Map<String, Map<String, AppDomainContext>> appDomainContexts =
+            (Map<String, Map<String, AppDomainContext>>) configCtx.getPropertyNonReplicable(AutoscaleConstants.APP_DOMAIN_CONTEXTS);
+        AppDomainContext appDomainContext = null ;
+        
+        if(appDomainContexts.get(domain) != null){
+        	appDomainContext = appDomainContexts.get(domain).get(subDomain);
+        }
+        
         if (appDomainContext != null) {
             appDomainContext.removeRequestToken(tokenId);
             System.setProperty(AutoscaleConstants.IS_TOUCHED, "true");
         } else {
-            log.error("AppDomainContext not found for domain " + domain);
+            log.error("AppDomainContext not found for domain " + domain+" and sub domain : "+subDomain);
         }
         return true;
     }

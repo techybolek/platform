@@ -20,7 +20,6 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.hosting.mgt.stub.ApplicationManagementServiceStub;
@@ -44,27 +43,17 @@ public class HostingAdminClient {
 
     public HostingAdminClient( Locale locale, String cookie, ConfigurationContext configCtx,
                                String backendServerURL) throws AxisFault {
-        String serviceURL = backendServerURL + "ApplicationManagementService";
         bundle = ResourceBundle.getBundle(BUNDLE, locale);
-
-        stub = new ApplicationManagementServiceStub(configCtx, serviceURL);
+        String serviceURL = backendServerURL + "ApplicationManagementService";
+        stub = new ApplicationManagementServiceStub(/*configCtx,*/serviceURL);
         stub._getServiceClient().getOptions().setTimeOutInMilliSeconds(270000);
-        stub._getServiceClient().getOptions().setProperty(HTTPConstants.SO_TIMEOUT, 270000);
-        stub._getServiceClient().getOptions().setProperty(HTTPConstants.CONNECTION_TIMEOUT, 270000);
-        ServiceClient client = stub._getServiceClient();
-        client.getOptions().setTimeOutInMilliSeconds(270000);
-        Options option = client.getOptions();
-        option.setManageSession(true);
-        option.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, cookie);
-        option.setProperty(Constants.Configuration.ENABLE_MTOM, Constants.VALUE_TRUE);
-
     }
 
     public void uploadCartridgeApps(FileUploadData[] fileUploadDataList, String cartridge) throws AxisFault {
         try {
             stub.uploadApp(fileUploadDataList, cartridge);
         } catch (RemoteException e) {
-            handleException("Cannot upload Web application.", e);
+            handleException("cannot.upload.webapps", e);
         }
     }
 

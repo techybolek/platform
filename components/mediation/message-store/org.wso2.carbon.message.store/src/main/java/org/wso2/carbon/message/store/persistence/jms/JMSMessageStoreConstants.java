@@ -50,8 +50,13 @@ public final class JMSMessageStoreConstants {
      */
     public static final String JMS_SPEC_VERSION = "store.jms.JMSSpecVersion";
 
+
+    public static final String CONSUMER_RECEIVE_TIMEOUT = "store.jms.ConsumerReceiveTimeOut";
+
     public static final int CACHE_CONNECTION = 1;
 
     public static final int CACHE_NOTHING = 0;
+    
+    public static final  String VENDER_CLASS_LOADER_ENABLE= "vender.class.loader.enabled";
 
 }

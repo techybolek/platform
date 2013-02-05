@@ -28,6 +28,8 @@ public class ColumnInfo {
 
     private int id;
 
+    private int ordinal;
+
     private Object value;
 
     public ColumnInfo(String name, String tableName, int sqlType) {
@@ -36,18 +38,17 @@ public class ColumnInfo {
         this.sqlType = sqlType;
     }
 
-    public ColumnInfo(String name, String tableName, int sqlType, Object value) {
+    public ColumnInfo(String name, int ordinal) {
         this.name = name;
-        this.tableName = tableName;
-        this.sqlType = sqlType;
-        this.value = value;
+        this.ordinal = ordinal;
     }
     
-    public ColumnInfo(int id, String name, String tableName, int sqlType) {
+    public ColumnInfo(int id, String name, String tableName, int sqlType, int ordinal) {
     	this.id = id;
         this.name = name;
         this.tableName = tableName;
         this.sqlType = sqlType;
+        this.ordinal = ordinal;
     }
 
     public ColumnInfo(String name) {
@@ -90,4 +91,12 @@ public class ColumnInfo {
         this.value = value;
     }
 
+    public int getOrdinal() {
+        return ordinal;
+    }
+
+    public void setOrdinal(int ordinal) {
+        this.ordinal = ordinal;
+    }
+    
 }

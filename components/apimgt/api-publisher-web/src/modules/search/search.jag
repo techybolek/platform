@@ -1,68 +1,56 @@
 <%
 var searchAPIs = function (username,apiName) {
-        var i,api,apis,length, log = new Log(), list = [],
+        var i,api,apis,length, log = new Log(),
         provider = jagg.module("manager").getAPIProviderObj();
         try {
         apis = provider.searchAPIs(username,apiName);
         if (log.isDebugEnabled()) {
         log.debug("searchAPI : " + stringify(apis));
         }
-length = apis.length;
 
-for (i = 0; i < length; i++) {
-            api = apis[i];
-            list.push({
-            name:api.apiName,
-            version:api.version,
-            status:api.status,
-            thumb:api.thumb,
-            subs:api.subs
-            });
-    }
     return {
             error:false,
-            apis:list
+            apis:apis
             };
     } catch (e) {
             log.error(e.message);
             return {
-            error:e,
+            error:true,
             apis:null,
             message:e.message.split(":")[1]
             };
     }
     };
 
-var searchAllAPIs = function (apiName) {
-    var i,api,apis,length, log = new Log(), list = [],
+var searchAccessTokens = function (query) {
+    var i,accessToken,result,length, log = new Log(), list = [],
     provider = jagg.module("manager").getAPIProviderObj();
     try {
-        apis = provider.searchAllAPIs(apiName);
+        result = provider.searchAccessTokens(query);
         if (log.isDebugEnabled()) {
-            log.debug("searchAPI : " + stringify(apis));
+            log.debug("searchAccessToken : " + stringify(apis));
         }
-        length = apis.length;
-
+        length = result.length;
         for (i = 0; i < length; i++) {
-            api = apis[i];
+            accessToken = result[i];
             list.push({
-                name:api.apiName,
-                provider:api.provider,
-                version:api.version,
-                status:api.status,
-                thumb:api.thumb,
-                subs:api.subs
+                token:accessToken.token,
+                user:accessToken.user,
+                scope:accessToken.scope,
+                createTime:accessToken.createTime,
+                validTime:accessToken.validTime,
+                consumerKey:accessToken.consumerKey
             });
         }
         return {
             error:false,
-            apis:list
+            accessTokens:list
         };
     } catch (e) {
         log.error(e.message);
         return {
-            error:e,
-            apis:null,
+            error:true,
+            accessTokens:null,
             message:e.message.split(":")[1]
         };
     }

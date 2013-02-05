@@ -75,7 +75,7 @@ public class CarbonResourceFinder extends ResourceFinderModule{
         if(resourceConfigs != null && !resourceConfigs.isEmpty()){
             resourceFinders = resourceConfigs.keySet();    
         }
-        Properties properties = EntitlementServiceComponent.getEntitlementConfig().getCachingProperties();
+        Properties properties = EntitlementServiceComponent.getEntitlementConfig().getEngineProperties();
 		if ("true".equals(properties.getProperty(EntitlementConstants.RESOURCE_CACHING))) {
 			resourceCache = EntitlementUtil
 					.getCommonCache(EntitlementConstants.PIP_RESOURCE_CACHE);

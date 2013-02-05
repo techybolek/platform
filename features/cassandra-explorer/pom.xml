@@ -5,7 +5,7 @@
     <parent>
         <artifactId>carbon-features</artifactId>
         <groupId>org.wso2.carbon</groupId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>cassandra-explorer-feature</artifactId>
@@ -14,9 +14,9 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.cassandra.explorer.feature</module>
-        <module>org.wso2.carbon.cassandra.explorer.server.feature</module>
-        <module>org.wso2.carbon.cassandra.explorer.ui.feature</module>
+        <module>org.wso2.carbon.cassandra.explorer.feature/4.0.0</module>
+        <module>org.wso2.carbon.cassandra.explorer.server.feature/4.0.0</module>
+        <module>org.wso2.carbon.cassandra.explorer.ui.feature/4.0.0</module>
     </modules>
 
 
@@ -175,7 +175,7 @@
 <simple-json.version>1.1.wso2v1</simple-json.version>
 <!--jetty.version>6.1.26</jetty.version-->
 <jackson.version>1.9.2</jackson.version>
-<jamm.version>0.2.5.wso2v1</jamm.version>
+<jamm.version>0.2.5.wso2v2</jamm.version>
 <antlr.version>3.2.0.wso2v1</antlr.version>
 <metrics-core.version>2.0.3.wso2v1</metrics-core.version>
 <snaptree.version>0.1.wso2v1</snaptree.version>

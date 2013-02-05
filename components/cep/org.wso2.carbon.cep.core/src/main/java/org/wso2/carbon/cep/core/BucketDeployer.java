@@ -27,13 +27,13 @@ import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.cep.core.exception.CEPConfigurationException;
 import org.wso2.carbon.cep.core.internal.CEPService;
-import org.wso2.carbon.cep.core.internal.builder.CEPBucketBuilder;
+import org.wso2.carbon.cep.core.internal.config.BucketHelper;
 import org.wso2.carbon.cep.core.internal.ds.CEPServiceValueHolder;
 import org.wso2.carbon.cep.core.internal.util.CEPConstants;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.cep.core.internal.util.NotDeployedBucketElement;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -55,11 +55,11 @@ public class BucketDeployer extends AbstractDeployer {
 
     private static Log log = LogFactory.getLog(BucketDeployer.class);
     private ConfigurationContext configurationContext;
-    private Map<String, String> fileNameToBucketNameMap;
+    private static Map<String, String> fileNameToBucketNameMap = new ConcurrentHashMap<String, String>();
+
 
     public void init(ConfigurationContext configurationContext) {
         this.configurationContext = configurationContext;
-        this.fileNameToBucketNameMap = new ConcurrentHashMap<String, String>();
     }
 
     /**
@@ -73,7 +73,7 @@ public class BucketDeployer extends AbstractDeployer {
         String path = deploymentFileData.getAbsolutePath();
         File bucketFile = new File(path);
 
-        SuperTenantCarbonContext.getCurrentContext().setUsername(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
+        //   PrivilegedCarbonContext.getCurrentContext().setUsername(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
 
         try {
 
@@ -83,22 +83,23 @@ public class BucketDeployer extends AbstractDeployer {
                 throw new DeploymentException("Invalid root element " + bucketElement.getQName() + " in " + bucketFile.getName());
             }
 
-            String bucketName = bucketElement.getAttributeValue(new QName(CEPConstants.CEP_CONF_ELE_NAME));
-            this.fileNameToBucketNameMap.put(deploymentFileData.getAbsolutePath(), bucketName);
+            String bucketName = bucketElement.getAttributeValue(new QName(CEPConstants.CEP_CONF_ATTR_NAME));
+            fileNameToBucketNameMap.put(deploymentFileData.getAbsolutePath(), bucketName);
             //If the CepService is present adds buckets element to the registry.
             // else keep that in memory for CepService to add them to the registry
 
             CEPService cepService = CEPServiceValueHolder.getInstance().getCepService();
             if (null != cepService) {
                 AxisConfiguration axisConfiguration = this.configurationContext.getAxisConfiguration();
-                int tenantId = SuperTenantCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
-                CEPBucketBuilder.addNewBucketToRegistry(bucketElement,tenantId);
-                CEPBucketBuilder.loadBucketFromRegistry(cepService, axisConfiguration, bucketName);
+                int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+                if (cepService.deployBucket(BucketHelper.fromOM(bucketElement), axisConfiguration, deploymentFileData.getAbsolutePath())) {
+                    log.info("Successfully deployed the bucket " + bucketName);
+                }
             } else {
-                CEPServiceValueHolder.getInstance().getUnDeployedBuckets().add(bucketElement);
+                CEPServiceValueHolder.getInstance().getNotDeployedBucketElements().add(new NotDeployedBucketElement(bucketElement, deploymentFileData.getAbsolutePath()));
+                log.info(bucketFile.getName() + " is scheduled for deployment");
             }
 
-            log.info("Successfully deployed the bucket " + bucketName);
 
         } catch (CEPConfigurationException e) {
             String errorMessage = "wrong configuration provided for adding " + bucketFile.getName();
@@ -151,26 +152,35 @@ public class BucketDeployer extends AbstractDeployer {
     /**
      * Removing already deployed bucket
      *
-     * @param fileName the path to the bucket to be removed
+     * @param filePath the path to the bucket to be removed
      * @throws org.apache.axis2.deployment.DeploymentException
      *
      */
-    public void undeploy(String fileName) throws DeploymentException {
-        // do nothing
+    public void undeploy(String filePath) throws DeploymentException {
         CEPService cepService = CEPServiceValueHolder.getInstance().getCepService();
-        try {
-            cepService.removeBucket(this.fileNameToBucketNameMap.get(fileName));
-        } catch (CEPConfigurationException e) {
-            throw new DeploymentException("Can not undeploy the cep bucket with file name " + fileName);
+        String bucketName = fileNameToBucketNameMap.remove(filePath);
+        if (bucketName != null) {
+            try {
+                AxisConfiguration axisConfiguration = this.configurationContext.getAxisConfiguration();
+                int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+                if (cepService.unDeployBucket(bucketName, tenantId)) {
+                    log.info("Undeployed bucket " + bucketName);
+                }
+            } catch (CEPConfigurationException e) {
+                throw new DeploymentException("Can not undeploy the cep bucket with file name " + filePath);
+            }
         }
 
-        log.info("Undeployed the bucket " + this.fileNameToBucketNameMap.get(fileName));
     }
 
     public void setDirectory(String directory) {
 
     }
 
+
+    public static void addToFileNameBucketNameMap(String bucketPath, String bucketName) {
+        fileNameToBucketNameMap.put(bucketPath, bucketName);
+    }
 
 }
 

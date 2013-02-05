@@ -118,7 +118,6 @@ public class LogEventSorter implements Callable<LogEvent[]>{
         DateFormat formatter;
         try {
         	formatter = new SimpleDateFormat(LoggingConstants.DATE_TIME_FORMATTER);
-    		formatter.setTimeZone(TimeZone.getTimeZone(LoggingConstants.GMT));
             d = formatter.parse(date);
         } catch (ParseException e) {
     		log.error("Illegal Date Format", e);

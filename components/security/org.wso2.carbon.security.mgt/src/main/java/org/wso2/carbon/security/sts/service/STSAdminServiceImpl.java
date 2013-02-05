@@ -172,16 +172,26 @@ public class STSAdminServiceImpl extends AbstractAdmin implements STSAdminServic
     }
 
     public String[] getCertAliasOfPrimaryKeyStore() throws SecurityConfigException {
-
+        
         KeyStoreData[] keyStores = getKeyStores();
-
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
         KeyStoreData primaryKeystore = null;
-        for (int i = 0; i < keyStores.length; i++) {
-            if (KeyStoreUtil.isPrimaryStore(keyStores[i].getKeyStoreName())) {
-                primaryKeystore = keyStores[i];
-                break;
+        for (KeyStoreData keyStore : keyStores) {
+            if (keyStore != null) {
+                if (tenantId == MultitenantConstants.SUPER_TENANT_ID){
+                    if(KeyStoreUtil.isPrimaryStore(keyStore.getKeyStoreName())){
+                        primaryKeystore = keyStore;
+                        break;
+                    }
+                } else {
+                    if (keyStore.getPrivateStore()){
+                        primaryKeystore = keyStore;
+                        break;
+                    }
+                }
             }
         }
+        
         if (primaryKeystore != null) {
             return getStoreEntries(primaryKeystore.getKeyStoreName());
         }
@@ -197,8 +207,8 @@ public class STSAdminServiceImpl extends AbstractAdmin implements STSAdminServic
     private KeyStoreData[] getKeyStores() throws SecurityConfigException {
         KeyStoreAdmin admin = new KeyStoreAdmin(CarbonContext.getCurrentContext().getTenantId(),
                 getGovernanceSystemRegistry());
-        boolean isSuperTenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(
-                super.getTenantDomain()) ? true : false;
+        boolean isSuperTenant = CarbonContext.getCurrentContext().getTenantId() ==
+                                                        MultitenantConstants.SUPER_TENANT_ID;
         return admin.getKeyStores(isSuperTenant);
     }
 

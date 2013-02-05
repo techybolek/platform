@@ -26,9 +26,15 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.catalina.Container;
 import org.apache.catalina.Context;
 import org.apache.catalina.Host;
+import org.apache.catalina.Lifecycle;
+import org.apache.catalina.LifecycleEvent;
+import org.apache.catalina.LifecycleListener;
+import org.apache.catalina.Wrapper;
 import org.apache.catalina.core.StandardContext;
+import org.apache.catalina.core.StandardWrapper;
 import org.apache.catalina.startup.ContextConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -111,11 +117,12 @@ public class GhostWebappDeployerUtils {
                     }
                     DeploymentFileData dfd = ghostDeployer.getFileData(deployedWebapp.
                             getWebappFile().getPath());
+                    Host host = DataHolder.getCarbonTomcatService().getTomcat().getHost();
 
                     if (dfd != null) {
                         // remove the existing webapp
                         log.info("Removing Ghost webapp and loading actual webapp : " +
-                                 deployedWebapp.getWebappFile().getName());
+                                deployedWebapp.getWebappFile().getName());
                         try {
                             Map<String, WebApplication> transitGhostList =
                                     getTransitGhostWebAppsMap(configurationContext);
@@ -129,20 +136,24 @@ public class GhostWebappDeployerUtils {
                             WebContextParameter serverUrlParam =
                                     new WebContextParameter("webServiceServerURL", CarbonUtils.
                                             getServerURL(ServerConfiguration.getInstance(),
-                                                         configurationContext));
+                                                    configurationContext));
 
                             List<WebContextParameter> servletContextParameters =
                                     (ArrayList<WebContextParameter>) configurationContext.
                                             getProperty(CarbonConstants.
-                                                                SERVLET_CONTEXT_PARAMETER_LIST);
+                                                    SERVLET_CONTEXT_PARAMETER_LIST);
                             if (servletContextParameters != null) {
                                 servletContextParameters.add(serverUrlParam);
                             }
 
+                            if (host != null &&
+                                host.findChild(deployedWebapp.getContextName()) != null) {
+                                host.removeChild(deployedWebapp.getContext());
+                            }
                             ArrayList<Object> listeners = new ArrayList<Object>(1);
                             tomcatWebappDeployer.deploy(dfd.getFile(),
-                                                        servletContextParameters,
-                                                        listeners);
+                                    servletContextParameters,
+                                    listeners);
                             newWebApp = webappsHolder.getStartedWebapps().get(dfd.getFile().
                                     getName());
                             newWebApp.setProperty(CarbonConstants.GHOST_WEBAPP_PARAM, "false");
@@ -155,7 +166,7 @@ public class GhostWebappDeployerUtils {
                             transitGhostList.remove(newWebApp.getContextName());
                         } catch (CarbonException e) {
                             log.error("Error while loading actual webapp : " +
-                                      deployedWebapp.getWebappFile().getName(), e);
+                                    deployedWebapp.getWebappFile().getName(), e);
                         }
                     }
                 }
@@ -178,10 +189,10 @@ public class GhostWebappDeployerUtils {
         }
         try {
             webApplication.setProperty(CarbonConstants.WEB_APP_LAST_USED_TIME,
-                                       String.valueOf(System.currentTimeMillis()));
+                    String.valueOf(System.currentTimeMillis()));
         } catch (Exception e) {
             log.error("Error while updating " + CarbonConstants.WEB_APP_LAST_USED_TIME +
-                      " parameter in webapp : " + webApplication.getContextName(), e);
+                    " parameter in webapp : " + webApplication.getContextName(), e);
         }
     }
 
@@ -198,20 +209,6 @@ public class GhostWebappDeployerUtils {
             return (GhostDeployer) param.getValue();
         }
         return ghostDeployer;
-    }
-
-    /**
-     * Read the "EnableGhostDeployer" property from the carbon.xml and return the boolean value
-     *
-     * @return - true if the property is set to true. otherwise false
-     */
-    public static boolean isGhostOn() {
-        ServerConfiguration serverConfig = ServerConfiguration.getInstance();
-        String ghostOn = serverConfig.getFirstProperty(ENABLE_GHOST_DEPLOYER);
-        if (ghostOn != null && Boolean.parseBoolean(ghostOn)) {
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -243,46 +240,19 @@ public class GhostWebappDeployerUtils {
      * whether the relevant webapp is available in that map and if it is found, returns the
      * name of the context of the webapp.
      *
-     * @param requestURI - uri to be checked of contextName
+     * @param ctxName - contextName of webapp
      * @param cfgContext - ConfigurationContext to get the transitGhost webapps map
      * @return the webapp
      */
 
-    public static WebApplication dispatchWebAppFromTransitGhosts(String requestURI,
-                                                         ConfigurationContext cfgContext) {
+    public static WebApplication dispatchWebAppFromTransitGhosts(String ctxName,
+                                                                 ConfigurationContext cfgContext) {
         WebApplication actualWebapp = null;
-        // get the map of ghost services which are being redeployed..
+        // get the map of ghost webapps which are being redeployed..
         Map<String, WebApplication> transitGhostMap = getTransitGhostWebAppsMap(cfgContext);
 
-
-        if (requestURI != null) {
-            // First remove anything after .
-            int index = requestURI.indexOf('.');
-            if (index != -1) {
-                requestURI = requestURI.substring(0, index);
-            }
-            /**
-             * Split the serviceOpPart from '/' and add part by part and check whether we have
-             * a service. This is because we are supporting hierarchical services. We can't
-             * decide the service name just by looking at the request URL.
-             */
-            String[] parts = requestURI.split("/");
-            String tmpWebappContextName = "";
-            int count = 0;
-
-            /**
-             * To avoid performance issues if an incorrect URL comes in with a long service name
-             * including lots of '/' separated strings, we limit the hierarchical depth to 10
-             */
-            while (actualWebapp == null && count < parts.length &&
-                   count < WebappsConstants.MAX_DEPTH) {
-                tmpWebappContextName = count == 0 ? tmpWebappContextName + parts[count] :
-                                       tmpWebappContextName + "/" + parts[count];
-                if (transitGhostMap.containsKey(tmpWebappContextName)) {
-                    actualWebapp = transitGhostMap.get(tmpWebappContextName);
-                }
-                count++;
-            }
+        if (ctxName != null && transitGhostMap.containsKey(ctxName)) {
+            actualWebapp = transitGhostMap.get(ctxName);
         }
         return actualWebapp;
     }
@@ -330,12 +300,12 @@ public class GhostWebappDeployerUtils {
      *
      * @param ghostFile    - ghost metadata file
      * @param originalFile - original webapp file
-     * @param axisConfig - axisconfig to get tenant details
+     * @param configContext   - configContext to get tenant details and webapp deployer instance
      * @return - WebApplication which is created
      */
     public static WebApplication createGhostWebApp(File ghostFile, File originalFile,
-                                                   TomcatGenericWebappsDeployer tomcatGenericWebappsDeployer,
-                                                   AxisConfiguration axisConfig) {
+                                                   TomcatGenericWebappsDeployer applicationDeployer,
+                                                   ConfigurationContext configContext) {
         WebApplication ghostWebApp = null;
 
         OMElement webAppElm;
@@ -350,70 +320,110 @@ public class GhostWebappDeployerUtils {
         try {
             String contextName = webAppElm.
                     getAttributeValue(new QName(CarbonConstants.GHOST_ATTR_NAME));
+            String contextPath = webAppElm.
+                    getAttributeValue(new QName(CarbonConstants.GHOST_ATTR_WEBAPP_CONTEXT_PATH));
+            String jaxContext = webAppElm.getAttributeValue(new QName("jaxContext"));
+            String jaxMapping = webAppElm.getAttributeValue(new QName("jaxMapping"));
             Context context = new StandardContext();
             context.setName(contextName);
-            context.setPath(contextName);
-            ghostWebApp = new WebApplication(tomcatGenericWebappsDeployer, context, originalFile);
-            ghostWebApp.setProperty(CarbonConstants.GHOST_WEBAPP_PARAM, "true");
-            ghostWebApp.setIsGhostWebapp(true);
-            String displayName = webAppElm.
-                    getAttributeValue(new QName(CarbonConstants.GHOST_ATTR_WEBAPP_DISPLAY_NAME));
-            if (displayName != null) {
-                ghostWebApp.setDisplayName(displayName);
+            context.setPath(contextPath);
+            if(jaxMapping != null && jaxContext!= null){
+                Wrapper jaxContextWrapper = context.createWrapper();
+                jaxContextWrapper.setName(jaxMapping);
+                jaxContextWrapper.setLoadOnStartup(1);
+                jaxContextWrapper.setServletClass("org.apache.cxf.transport.servlet.CXFServlet");
+                context.addChild(jaxContextWrapper);
+                context.addServletMapping(jaxContext, jaxMapping);
             }
 
-            String webAppFile = webAppElm.
-                    getAttributeValue(new QName(CarbonConstants.GHOST_ATTR_WEBAPP_FILE));
-            if (webAppFile != null) {
-                // webapp file name
-            }
-
-            String lastModifiedTime = webAppElm.
-                    getAttributeValue(new QName(CarbonConstants.GHOST_ATTR_LAST_MODIFIED_TIME));
-
-            if (lastModifiedTime != null) {
-                ghostWebApp.setLastModifiedTime(Long.parseLong(lastModifiedTime));
-            }
-            String activeSessions = webAppElm.
-                    getAttributeValue(new QName(CarbonConstants.GHOST_ATTR_WEBAPP_SESSIONS));
-
-            if (activeSessions != null) {
-                // set active session to this ghostWebapp
-
-            }
-
-            // Check for jaxWebapps filter property
             String filterProp = webAppElm.
                     getAttributeValue(new QName(WebappsConstants.WEBAPP_FILTER));
-            if (filterProp != null) {
-                ghostWebApp.setProperty(WebappsConstants.WEBAPP_FILTER, filterProp);
-            }
 
-            // We have to add a context for the ghost webapp in tomcat so that when Tomcat's CoyoteAdaptor
-            // searches for available contexts, this will result in not null for a request for ghost webapp
-            String dummyContextPath = getDummyContextDirectoryPath(contextName, axisConfig);
-
-            File dummyCtxFolder = new File(dummyContextPath);
-            if (!dummyCtxFolder.exists() && !dummyCtxFolder.mkdir()) {
-                log.error("Error while creating dummy context folder at : " + dummyContextPath);
-                return null;
-            }
-            if (dummyContextPath != null) {
-                Host host = DataHolder.getCarbonTomcatService().getTomcat().getHost();
-                if (host.findChild(contextName) == null) {
-                    context.setDocBase(dummyContextPath);
-                    ContextConfig ctxCfg = new ContextConfig();
-                    context.addLifecycleListener(ctxCfg);
-                    host.addChild(context);
+            if(applicationDeployer == null) {
+                if (WebappsConstants.WEBAPP_FILTER_PROP.equals(filterProp)) {
+                    applicationDeployer = (TomcatGenericWebappsDeployer)
+                            configContext.getProperty(WebappsConstants.TOMCAT_GENERIC_WEBAPP_DEPLOYER);
+                } else if (WebappsConstants.JAX_WEBAPP_FILTER_PROP.equals(filterProp)) {
+                    applicationDeployer = (TomcatGenericWebappsDeployer)
+                            configContext.getProperty(WebappsConstants.TOMCAT_JAX_WEBAPP_DEPLOYER);
+                } else if (WebappsConstants.JAGGERY_WEBAPP_FILTER_PROP.equals(filterProp)) {
+                    applicationDeployer = (TomcatGenericWebappsDeployer)
+                            configContext.getProperty(WebappsConstants.TOMCAT_JAGGERY_WEBAPP_DEPLOYER);
                 }
+            }
+
+            if (applicationDeployer != null) {
+                ghostWebApp = new WebApplication(applicationDeployer, context, originalFile);
+                ghostWebApp.setProperty(CarbonConstants.GHOST_WEBAPP_PARAM, "true");
+                ghostWebApp.setIsGhostWebapp(true);
+                String displayName = webAppElm.
+                        getAttributeValue(new QName(CarbonConstants.GHOST_ATTR_WEBAPP_DISPLAY_NAME));
+                if (displayName != null) {
+                    ghostWebApp.setDisplayName(displayName);
+                }
+
+                String webAppFile = webAppElm.
+                        getAttributeValue(new QName(CarbonConstants.GHOST_ATTR_WEBAPP_FILE));
+                if (webAppFile != null) {
+                    ghostWebApp.setProperty(WebappsConstants.APP_FILE_NAME, webAppFile);
+                }
+
+                String lastModifiedTime = webAppElm.
+                        getAttributeValue(new QName(CarbonConstants.GHOST_ATTR_LAST_MODIFIED_TIME));
+
+                if (lastModifiedTime != null) {
+                    ghostWebApp.setLastModifiedTime(Long.parseLong(lastModifiedTime));
+                }
+
+                // Check for jaxWebapps filter property
+                if (filterProp != null) {
+                    ghostWebApp.setProperty(WebappsConstants.WEBAPP_FILTER, filterProp);
+                }
+
+                // We have to add a context for the ghost webapp in tomcat so that when Tomcat's CoyoteAdaptor
+                // searches for available contexts, this will result in not null for a request for ghost webapp
+                String dummyContextPath = getDummyContextDirectoryPath(contextName, configContext.getAxisConfiguration());
+
+                File dummyCtxFolder = new File(dummyContextPath);
+                if (!dummyCtxFolder.exists() && !dummyCtxFolder.mkdir()) {
+                    log.error("Error while creating dummy context folder at : " + dummyContextPath);
+                    return null;
+                }
+                if (dummyContextPath != null) {
+                    Host host = DataHolder.getCarbonTomcatService().getTomcat().getHost();
+                    if (host.findChild(contextName) == null) {
+                        context.setDocBase(dummyContextPath);
+                        ContextConfig ctxCfg = new ContextConfig();
+                        context.addLifecycleListener(ctxCfg);
+                        context.addLifecycleListener(new DefaultConfListener(displayName));
+                        host.addChild(context);
+                    }
+                }
+            } else {
+                log.error("Unable to retrieve " + filterProp + " Application Deployer instance.");
             }
 
         } catch (Exception e) {
             log.error("Error while creating Ghost Webapp from Ghost File : " +
-                      ghostFile.getAbsolutePath(), e);
+                    ghostFile.getAbsolutePath(), e);
         }
 
         return ghostWebApp;
+    }
+
+    //Setting the webapp displayname at goast app deployment
+    private static class DefaultConfListener implements LifecycleListener {
+        private String displayName;
+
+        private DefaultConfListener(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public void lifecycleEvent(LifecycleEvent event) {
+            if (Lifecycle.START_EVENT.equals(event.getType())) {
+                ((Context) event.getLifecycle()).setDisplayName(this.displayName);
+            }
+        }
     }
 
     /**
@@ -430,24 +440,43 @@ public class GhostWebappDeployerUtils {
                                        AxisConfiguration axisConfig, String webappPath) {
         OMFactory omFactory = OMAbstractFactory.getOMFactory();
 
+        String contextPath = webApplication.getContextName();
+        String jaxContext = null;
+        String jaxMapping = null;
+        for (Container container : webApplication.getContext().findChildren()) {
+            if(((StandardWrapper) container).getServletClass().equals(
+                    "org.apache.cxf.transport.servlet.CXFServlet")) {
+                jaxContext = (((StandardWrapper) container).findMappings())[0];
+                jaxMapping = ((StandardWrapper) container).getServletName();
+                if(jaxContext.endsWith("/*")) {
+                    jaxContext = jaxContext.substring(0, jaxContext.indexOf("/*"));
+                }
+                break;
+            }
+        }
+
         // webapp element
         OMElement webappEle = omFactory
                 .createOMElement(new QName(CarbonConstants.GHOST_WEBAPP));
         webappEle.addAttribute(CarbonConstants.GHOST_ATTR_NAME,
-                               webApplication.getContext().getName(), null);
+                webApplication.getContext().getName(), null);
 
         // get the service type
-        String contextPath = webApplication.getContextName();
         if (contextPath != null) {
             webappEle.addAttribute(CarbonConstants.GHOST_ATTR_WEBAPP_CONTEXT_PATH,
-                                   contextPath, null);
+                    contextPath, null);
+        }
+
+        if(jaxContext != null && jaxMapping != null) {
+            webappEle.addAttribute("jaxContext", jaxContext, null);
+            webappEle.addAttribute("jaxMapping", jaxMapping, null);
         }
 
         // get the service type
         String displayName = webApplication.getDisplayName();
         if (displayName != null) {
             webappEle.addAttribute(CarbonConstants.GHOST_ATTR_WEBAPP_DISPLAY_NAME,
-                                   displayName, null);
+                    displayName, null);
         }
 
         // get the service type
@@ -460,12 +489,7 @@ public class GhostWebappDeployerUtils {
         String lastModifiedTime = String.valueOf(webApplication.getLastModifiedTime());
         if (lastModifiedTime != null) {
             webappEle.addAttribute(CarbonConstants.GHOST_ATTR_LAST_MODIFIED_TIME,
-                                   lastModifiedTime, null);
-        }
-
-        String sessions = String.valueOf(webApplication.getStatistics().getActiveSessions());
-        if (sessions != null) {
-            webappEle.addAttribute(CarbonConstants.GHOST_ATTR_WEBAPP_SESSIONS, sessions, null);
+                    lastModifiedTime, null);
         }
 
 //        String filterProp = (String) webApplication.getProperty(WebappsConstants.WEBAPP_FILTER);
@@ -474,12 +498,12 @@ public class GhostWebappDeployerUtils {
                 (String) webApplication.getProperty(WebappsConstants.WEBAPP_FILTER), null);
 
         // Now create a ghostFile and serialize the created OMElement
-        String tenantTmpDirPath = CarbonUtils.getTenantTmpDirPath(axisConfig);
-        if (tenantTmpDirPath == null) {
+        String ghostMetafilesDirPath = CarbonUtils.getGhostMetafileDir(axisConfig);
+        if (ghostMetafilesDirPath == null) {
             return;
         }
-        String ghostPath = tenantTmpDirPath +
-                           File.separator + CarbonConstants.GHOST_WEBAPPS_FOLDER;
+        String ghostPath = ghostMetafilesDirPath +
+                File.separator + CarbonConstants.GHOST_WEBAPPS_FOLDER;
         File ghostFolder = new File(ghostPath);
         if (!ghostFolder.exists() && !ghostFolder.mkdir()) {
             log.error("Error while creating ghostWebapps folder at : " + ghostPath);
@@ -489,8 +513,8 @@ public class GhostWebappDeployerUtils {
         FileOutputStream fos = null;
         try {
             File serviceFile = new File(ghostPath + File.separator +
-                                        calculateGhostFileName(webappPath,
-                                                               axisConfig.getRepository().getPath()));
+                    calculateGhostFileName(webappPath,
+                            axisConfig.getRepository().getPath()));
             fos = new FileOutputStream(serviceFile);
             webappEle.serialize(fos);
             fos.flush();
@@ -515,13 +539,13 @@ public class GhostWebappDeployerUtils {
      * @return - File instance created
      */
     public static File getGhostFile(String fileName, AxisConfiguration axisConfig) {
-        String tenantTmpDirPath = CarbonUtils.getTenantTmpDirPath(axisConfig);
-        if (tenantTmpDirPath == null) {
+        String ghostMetafilesDirPath = CarbonUtils.getGhostMetafileDir(axisConfig);
+        if (ghostMetafilesDirPath == null) {
             return null;
         }
-        return new File(tenantTmpDirPath + File.separator +
-                        CarbonConstants.GHOST_WEBAPPS_FOLDER + File.separator +
-                        calculateGhostFileName(fileName, axisConfig.getRepository().getPath()));
+        return new File(ghostMetafilesDirPath + File.separator +
+                CarbonConstants.GHOST_WEBAPPS_FOLDER + File.separator +
+                calculateGhostFileName(fileName, axisConfig.getRepository().getPath()));
     }
 
     /**
@@ -580,19 +604,20 @@ public class GhostWebappDeployerUtils {
     /**
      * Method which will return the dummy context directory path for current tenant which will be
      * created in /tmp/tenants/ directory
+     *
      * @param contextName - context name
-     * @param axisConfig - axisConfig used to get tenant info
+     * @param axisConfig  - axisConfig used to get tenant info
      * @return - dummyContextDirPath
      */
     public static String getDummyContextDirectoryPath(String contextName,
-                                                   AxisConfiguration axisConfig) {
+                                                      AxisConfiguration axisConfig) {
         if (contextName.contains("/t/")) {
             String tenantCtx = "/t/" + TenantAxisUtils.getTenantDomain(contextName);
             if (contextName.contains("/" + WebappsConstants.WEBAPP_PREFIX + "/")) {
                 tenantCtx = tenantCtx + File.separator + WebappsConstants.WEBAPP_PREFIX;
             } else if (contextName.contains("/" + WebappsConstants.JAGGERY_APPS_PREFIX + "/")) {
                 tenantCtx = tenantCtx + File.separator + WebappsConstants.JAGGERY_APPS_PREFIX;
-            } else if (contextName.contains(("/" + WebappsConstants.JAX_WEBAPPS_PREFIX + "/"))){
+            } else if (contextName.contains(("/" + WebappsConstants.JAX_WEBAPPS_PREFIX + "/"))) {
                 tenantCtx = tenantCtx + File.separator + WebappsConstants.JAX_WEBAPPS_PREFIX;
             } else {
                 return null;
@@ -600,18 +625,22 @@ public class GhostWebappDeployerUtils {
             contextName = contextName.substring(tenantCtx.length() + 1);
         }
 
-        String tenantTmpDirPath = CarbonUtils.getTenantTmpDirPath(axisConfig);
+        String tenantTmpDirPath = CarbonUtils.getTenantTmpDirPath(axisConfig) + File.separator +
+                CarbonConstants.GHOST_WEBAPPS_FOLDER ;
+        File tenantTmpDir = new File(tenantTmpDirPath);
 
-        return  tenantTmpDirPath + File.separator +
-                                  CarbonConstants.GHOST_WEBAPPS_FOLDER + File.separator +
-                                  contextName;
+        if (!tenantTmpDir.exists() && !tenantTmpDir.mkdir()) {
+            log.error("Error while creating tenant temporary directory at : " + tenantTmpDirPath);
+            return null;
+        }
 
+        return tenantTmpDirPath + File.separator + contextName;
     }
 
     /**
      * Calculate the dummy context file name using the original file name.
      *
-     * @param fileName - original file name
+     * @param fileName   - original file name
      * @param axisConfig - axisConfig
      * @return - derived context file
      */
@@ -635,14 +664,15 @@ public class GhostWebappDeployerUtils {
 
             String tenantTmpDirPath = CarbonUtils.getTenantTmpDirPath(axisConfig);
             dummyContextFile = new File(tenantTmpDirPath + File.separator +
-                                  CarbonConstants.GHOST_WEBAPPS_FOLDER + File.separator +
-                                  dummyContextName);
+                    CarbonConstants.GHOST_WEBAPPS_FOLDER + File.separator +
+                    dummyContextName);
         }
         return dummyContextFile;
     }
 
     /**
      * Method to check if the undeploying of ghost related files needs to be skipped
+     *
      * @param fileName name of the webapp file
      * @return true or false
      */
@@ -653,5 +683,43 @@ public class GhostWebappDeployerUtils {
         }
         File warFile = new File(fileName + ".war");
         return warFile.exists();
+    }
+
+    public static void deployGhostArtifacts(ConfigurationContext configContext) {
+        // load the ghost service group
+        File[] ghostMetaArtifacts;
+        File ghostMetafilesDir = new File(CarbonUtils.
+                getGhostMetafileDir(configContext.getAxisConfiguration()) + File.separator +
+                                          CarbonConstants.GHOST_WEBAPPS_FOLDER);
+
+        if (ghostMetafilesDir.exists()) {
+            ghostMetaArtifacts = ghostMetafilesDir.listFiles();
+        } else {
+            return;
+        }
+
+        for (File ghostFile : ghostMetaArtifacts) {
+            if (!ghostFile.getPath().endsWith(".svn")) {
+                try {
+                    WebApplication ghostWebApplication = GhostWebappDeployerUtils.createGhostWebApp(
+                            ghostFile, ghostFile, null, configContext);
+                    WebApplicationsHolder webappsHolder = (WebApplicationsHolder) configContext.
+                            getProperty(CarbonConstants.WEB_APPLICATIONS_HOLDER);
+
+                    String ghostWebappFileName = ghostWebApplication.getWebappFile().getName();
+                    String webappFileProperty = (String) ghostWebApplication.
+                            getProperty(WebappsConstants.APP_FILE_NAME);
+
+                    if (!(webappsHolder.getStartedWebapps().containsKey(ghostWebappFileName) ||
+                        webappsHolder.getStartedWebapps().containsKey(webappFileProperty))) {
+                        log.info("Deploying Ghost webapp : " + webappFileProperty);
+                        webappsHolder.getStartedWebapps().put(ghostWebappFileName, ghostWebApplication);
+                        webappsHolder.getFaultyWebapps().remove(ghostWebappFileName);
+                    }
+                } catch (Exception e) {
+                    log.error("Error while deploying Ghost webapp :"+ghostFile.getPath());
+                }
+            }
+        }
     }
 }

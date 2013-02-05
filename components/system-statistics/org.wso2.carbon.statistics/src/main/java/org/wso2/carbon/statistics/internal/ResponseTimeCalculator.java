@@ -24,7 +24,6 @@ import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.WSDL2Constants;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.statistics.StatisticsConstants;
@@ -112,12 +111,7 @@ public class ResponseTimeCalculator {
 
     private static void updateCurrentInvocationStatistic(MessageContext messageContext,
                                                          long responseTime) throws AxisFault {
-        AxisConfiguration axisConfiguration = messageContext.getConfigurationContext().getAxisConfiguration();
-
-        Parameter globalCurrentResponseTimeParam = new Parameter();
-        globalCurrentResponseTimeParam.setName(StatisticsConstants.GLOBAL_CURRENT_INVOCATION_RESPONSE_TIME);
-        globalCurrentResponseTimeParam.setValue(responseTime);
-        axisConfiguration.addParameter(globalCurrentResponseTimeParam);
+        messageContext.setProperty(StatisticsConstants.GLOBAL_CURRENT_INVOCATION_RESPONSE_TIME,responseTime);
 
         if (messageContext.getAxisOperation() != null) {
             Parameter operationResponseTimeParam = new Parameter();

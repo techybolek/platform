@@ -26,7 +26,8 @@ import org.wso2.carbon.attachment.mgt.server.AttachmentServer;
 import org.wso2.carbon.attachment.mgt.server.AttachmentServerService;
 import org.wso2.carbon.attachment.mgt.server.AttachmentServerServiceImpl;
 import org.wso2.carbon.attachment.mgt.servlet.AttachmentDownloadServlet;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.datasource.DataSourceInformationRepositoryService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -66,9 +67,9 @@ public class AttachmentServiceComponent {
      */
     protected void activate(ComponentContext componentContext) {
         try {
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(
-                    MultitenantConstants.SUPER_TENANT_ID);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(PrivilegedCarbonContext.
+                getCurrentContext().getTenantId());
 
             this.bundleContext = componentContext.getBundleContext();
             if (dataSourceInfoRepoProvided) {
@@ -113,7 +114,9 @@ public class AttachmentServiceComponent {
         //redirectorParams.put("url-pattern", "/t/carbon.super" + AttachmentMgtConfigurationConstants.ATTACHMENT_DOWNLOAD_SERVELET_URL_PATTERN);
         bundleContext.registerService(Servlet.class.getName(), attachmentDownloadServlet,
                 redirectorParams);
-        log.info("Attachment Download Servlet registered.");
+        if(log.isDebugEnabled()) {
+            log.debug("Attachment Download Servlet registered.");
+        }
     }
 
     /**

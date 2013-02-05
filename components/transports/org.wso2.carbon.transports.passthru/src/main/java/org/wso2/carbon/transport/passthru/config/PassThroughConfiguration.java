@@ -138,7 +138,7 @@ public class PassThroughConfiguration {
                 log.debug("Unable to load file  '" + filePath + "'");
             }
 
-            filePath = "conf" + File.separatorChar + filePath;
+            filePath = "repository"+ File.separatorChar + "conf" + File.separatorChar + filePath;
             if (log.isDebugEnabled()) {
                 log.debug("Loading the file '" + filePath + "'");
             }

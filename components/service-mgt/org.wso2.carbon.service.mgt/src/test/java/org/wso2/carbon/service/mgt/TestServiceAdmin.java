@@ -32,10 +32,10 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisConfigurator;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.core.CarbonAxisConfigurator;
 import org.wso2.carbon.core.RegistryResources;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.wso2.carbon.core.multitenancy.TenantAxisConfigurator;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.utils.WSO2Constants;
@@ -109,9 +109,9 @@ public class TestServiceAdmin extends BaseTestCase {
 
 
         handleNewModuleAddition(newModule, newModule.getName(), newModule.getVersion().toString());
-        SuperTenantCarbonContext.getCurrentContext(axisConfig).setRegistry(
+        PrivilegedCarbonContext.getCurrentContext(axisConfig).setRegistry(
                 RegistryType.SYSTEM_CONFIGURATION, configRegistry);
-        SuperTenantCarbonContext.getCurrentContext(axisConfig).setRegistry(
+        PrivilegedCarbonContext.getCurrentContext(axisConfig).setRegistry(
                 RegistryType.SYSTEM_CONFIGURATION, governanceRegistry);
             
         // The following line of code is kept for backward compatibility. Remove this once we

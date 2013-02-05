@@ -17,8 +17,6 @@ package org.wso2.carbon.brokermanager.admin.internal;
  * limitations under the License.
  */
 
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.om.util.StAXUtils;
 import org.wso2.carbon.broker.core.BrokerTypeDto;
 import org.wso2.carbon.broker.core.Property;
 import org.wso2.carbon.broker.core.exception.BrokerEventProcessingException;
@@ -30,9 +28,6 @@ import org.wso2.carbon.brokermanager.core.exception.BMConfigurationException;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -229,22 +224,12 @@ public class BrokerManagerAdminService extends AbstractAdmin {
         configuration.setName(brokerConfiguration.getName());
         configuration.setType(brokerConfiguration.getType());
         configuration.setProperties(brokerConfiguration.getProperties());
-        XMLStreamReader reader1 = null;
-        String testMessage = " <brokerConfigurationTest>\n" +
-                             "   <message>This is a test message.</message>\n" +
-                             "   </brokerConfigurationTest>";
         try {
-            reader1 = StAXUtils.createXMLStreamReader(new ByteArrayInputStream(testMessage.getBytes()));
-            StAXOMBuilder builder1 = new StAXOMBuilder(reader1);
-            brokerHolder.getBrokerService().publish(configuration, "test", builder1.getDocumentElement());
-        } catch (XMLStreamException e) {
-            removeBrokerConfiguration(brokerName);
-            throw new BrokerManagerAdminServiceException("Failed to prepare test message to " +
-                                                         " publish to broker:" + brokerName, e);
+            brokerHolder.getBrokerService().testConnection(configuration);
         } catch (BrokerEventProcessingException e) {
             removeBrokerConfiguration(brokerName);
             throw new BrokerManagerAdminServiceException("Error at testing broker configuration with name"
-                                                         + brokerName + ". " + e.getMessage(), e);
+                    + brokerName + ". " + e.getMessage(), e);
         }
     }
 

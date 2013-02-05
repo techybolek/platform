@@ -1,2 +1,0 @@
-synapse-core_
-org.wso2.carbon.message.store_

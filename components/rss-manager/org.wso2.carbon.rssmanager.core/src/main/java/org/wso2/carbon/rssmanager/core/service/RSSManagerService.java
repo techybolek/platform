@@ -20,15 +20,12 @@ package org.wso2.carbon.rssmanager.core.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.ndatasource.core.DataSourceMetaInfo;
 import org.wso2.carbon.rssmanager.core.RSSManagerException;
-import org.wso2.carbon.rssmanager.core.internal.RSSManagerServiceComponent;
-import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAO;
-import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAOFactory;
 import org.wso2.carbon.rssmanager.core.entity.*;
+import org.wso2.carbon.rssmanager.core.internal.RSSManagerServiceComponent;
 import org.wso2.carbon.rssmanager.core.internal.manager.RSSManager;
 import org.wso2.carbon.rssmanager.core.internal.util.RSSConfig;
 import org.wso2.carbon.rssmanager.core.internal.util.RSSManagerUtil;
@@ -85,7 +82,7 @@ public class RSSManagerService {
     }
 
     public RSSInstanceMetaData[] getRSSInstances() throws RSSManagerException {
-        int tid = CarbonContext.getCurrentContext().getTenantId();
+        int tid = this.getCurrentTenantId();
         RSSInstanceMetaData[] rssInstances = new RSSInstanceMetaData[0];
         try {
             List<RSSInstanceMetaData> tmpList =
@@ -125,7 +122,7 @@ public class RSSManagerService {
     }
 
     public DatabaseMetaData[] getDatabases() throws RSSManagerException {
-        int tid = CarbonContext.getCurrentContext().getTenantId();
+        int tid = this.getCurrentTenantId();
         DatabaseMetaData[] databases = new DatabaseMetaData[0];
         try {
             List<DatabaseMetaData> tmpList =
@@ -208,7 +205,7 @@ public class RSSManagerService {
 
     public DatabaseUserMetaData[] getDatabaseUsers() throws RSSManagerException {
         DatabaseUserMetaData[] users = new DatabaseUserMetaData[0];
-        int tid = CarbonContext.getCurrentContext().getTenantId();
+        int tid = this.getCurrentTenantId();
         try {
             List<DatabaseUserMetaData> tmpList =
                     this.getRSSManager().getDatabaseUsers(tid);
@@ -269,43 +266,43 @@ public class RSSManagerService {
                 templateName);
     }
 
-    public void createCarbonDataSource(String databaseName, String username) throws
-            RSSManagerException {
-        RSSDAO dao = RSSDAOFactory.getRSSDAO();
-
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        SuperTenantCarbonContext.startTenantFlow();
-        SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantId);
-
-        Database database;
-        DatabaseUser user;
-        String dsName = null;
-        try {
-            database = dao.getDatabase(databaseName);
-            user = dao.getDatabaseUser(username);
-
-            DataSourceMetaInfo.DataSourceDefinition dsDef =
-                    new DataSourceMetaInfo.DataSourceDefinition();
-            dsDef.setDsXMLConfiguration(null);
-            dsDef.setType(null);
-
-            DataSourceMetaInfo metaInfo = new DataSourceMetaInfo();
-            dsName = database.getName() + "_" + user.getUsername();
-            metaInfo.setName(dsName);
-            metaInfo.setDefinition(dsDef);
-
-            RSSManagerServiceComponent.getDataSourceService().addDataSource(metaInfo);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while creating datasource'" +
-                    username + "'";
-            handleException(msg, e);
-        } catch (DataSourceException e) {
-            String msg = "Error occurred while creating the datasource '" + dsName + "'";
-            handleException(msg, e);
-        } finally {
-            SuperTenantCarbonContext.endTenantFlow();
-        }
-    }
+//    public void createCarbonDataSource(String databaseName, String username) throws
+//            RSSManagerException {
+//        RSSDAO dao = RSSDAOFactory.getRSSDAO();
+//
+//        int tenantId = this.getCurrentTenantId();
+//        PrivilegedCarbonContext.startTenantFlow();
+//        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+//
+//        Database database;
+//        DatabaseUser user;
+//        String dsName = null;
+//        try {
+//            database = dao.getDatabase(databaseName);
+//            user = dao.getDatabaseUser(username);
+//
+//            DataSourceMetaInfo.DataSourceDefinition dsDef =
+//                    new DataSourceMetaInfo.DataSourceDefinition();
+//            dsDef.setDsXMLConfiguration(null);
+//            dsDef.setType(null);
+//
+//            DataSourceMetaInfo metaInfo = new DataSourceMetaInfo();
+//            dsName = database.getName() + "_" + user.getUsername();
+//            metaInfo.setName(dsName);
+//            metaInfo.setDefinition(dsDef);
+//
+//            RSSManagerServiceComponent.getDataSourceService().addDataSource(metaInfo);
+//        } catch (RSSManagerException e) {
+//            String msg = "Error occurred while creating datasource'" +
+//                    username + "'";
+//            handleException(msg, e);
+//        } catch (DataSourceException e) {
+//            String msg = "Error occurred while creating the datasource '" + dsName + "'";
+//            handleException(msg, e);
+//        } finally {
+//            PrivilegedCarbonContext.endTenantFlow();
+//        }
+//    }
 
     private void handleException(String msg, Exception e) throws RSSManagerException {
         log.error(msg, e);
@@ -418,6 +415,10 @@ public class RSSManagerService {
             handleException(msg, e);
         }
         return privileges;
+    }
+
+    private int getCurrentTenantId() {
+        return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
     }
 
 }

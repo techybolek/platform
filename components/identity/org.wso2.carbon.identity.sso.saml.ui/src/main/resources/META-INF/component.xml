@@ -35,7 +35,7 @@
             <parent-menu>manage_menu</parent-menu>
             <link>../sso-saml/manage_service_providers.jsp</link>
             <region>region1</region>
-            <order>50</order>
+            <order>5</order>
             <style-class>manage</style-class>
             <icon>../sso-saml/images/sso.gif</icon>
             <require-permission>/permission/admin/manage</require-permission>

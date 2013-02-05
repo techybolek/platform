@@ -16,7 +16,7 @@
  ~ under the License.
  -->
 <%@ page
-        import="org.wso2.carbon.identity.authenticator.saml2.sso.ui.SAML2SSOAuthenticatorConstants" %>
+        import="org.wso2.carbon.identity.authenticator.saml2.sso.common.SAML2SSOAuthenticatorConstants" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
            prefix="carbon" %>

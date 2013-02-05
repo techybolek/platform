@@ -20,8 +20,9 @@ package org.wso2.carbon.databridge.core.internal.queue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.core.AgentCallback;
+import org.wso2.carbon.databridge.core.RawDataAgentCallback;
 import org.wso2.carbon.databridge.core.conf.DataBridgeConfiguration;
-import org.wso2.carbon.databridge.core.internal.utils.EventComposite;
+import org.wso2.carbon.databridge.core.Utils.EventComposite;
 
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -41,10 +42,12 @@ public class EventQueue {
 
     private ExecutorService executorService;
     private List<AgentCallback> subscribers;
+    private List<RawDataAgentCallback> rawDataSubscribers;
 
-    public EventQueue(List<AgentCallback> subscribers,
+    public EventQueue(List<AgentCallback> subscribers, List<RawDataAgentCallback> rawDataSubscribers,
                       DataBridgeConfiguration dataBridgeConfiguration) {
         this.subscribers = subscribers;
+        this.rawDataSubscribers = rawDataSubscribers;
         // Note : Using a fixed worker thread pool and a bounded queue to prevent the server dying if load is too high
         executorService = Executors.newFixedThreadPool(dataBridgeConfiguration.getWorkerThreads());
         eventQueue = new ArrayBlockingQueue<EventComposite>(dataBridgeConfiguration.getEventBufferCapacity());
@@ -57,7 +60,7 @@ public class EventQueue {
             String logMessage = "Failure to insert event into queue";
             log.warn(logMessage);
         }
-        executorService.submit(new QueueWorker(eventQueue, subscribers));
+        executorService.submit(new QueueWorker(eventQueue, subscribers, rawDataSubscribers));
     }
 
     @Override

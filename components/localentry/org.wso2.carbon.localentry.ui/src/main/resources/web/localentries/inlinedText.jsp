@@ -35,7 +35,7 @@
         topPage="false"
         request="<%=request%>"/>
 
-    
+
 <script type="text/javascript">
 
     String.prototype.trim = function() {
@@ -51,8 +51,7 @@
     }
 
     function ValidateTextForm(form) {
-        if (IsEmpty(form.Name))
-        {
+        if (IsEmpty(form.Name)) {
             CARBON.showWarningDialog('<fmt:message key="name.field.cannot.be.empty"/>')
             form.Name.focus();
             return false;
@@ -69,7 +68,7 @@
 
     function IsEmpty(aTextField) {
         if ((aTextField.value.trim().length == 0) ||
-            (aTextField.value.trim() == null) || (aTextField.value.trim() == '')) {
+                (aTextField.value.trim() == null) || (aTextField.value.trim() == '')) {
             return true;
         }
         else {
@@ -93,6 +92,7 @@
 
 <div id="middle">
     <h2><fmt:message key="inlined.text.entry"/></h2>
+
     <div id="workArea">
         <form name="Submit" action="ServiceCaller.jsp" method="POST"
               onsubmit="javascript:return ValidateTextForm(this)">
@@ -117,61 +117,104 @@
                     }
                 }
             %>
-            <table cellpadding="0" cellspacing="0" border="0" class="styledLeft noBorders">
+            <table cellpadding="0" cellspacing="0" border="0" class="styledLeft">
                 <thead>
-                    <tr>
-                        <th colspan="2"></th>
-                    </tr>
+                <tr>
+                    <th colspan="2"><fmt:message key="Localentry.design.view.text"/></th>
+                </tr>
                 </thead>
                 <tbody>
-                    <input type="hidden" name="pageName" value="inlinedText.jsp"/>
-                    <%if ((entry != null) && entry.getName() != null) {%>
-                    <tr>
+                <tr>
+                    <td>
+                        <table class="normal" width="100%">
 
-                        <td><fmt:message key="name"/><span class="required">*</span></td>
-                        <td>
-                            <input id="Name" type="hidden" name="Name" value="<%=entry.getName()%>"/>
-                            <label for="Name"><%=entry.getName()%></label>
-                        </td>
-                    </tr>
-                    <%} else {%>
-                    <tr>
-                        <td><fmt:message key="name"/><span class="required">*</span></td>
-                        <td><input type="text" size="60" name="Name" value=""/></td>
-                    </tr>
-                    <%}%>
-                    <tr>
-                        <td style="width:100px;"><fmt:message key="value"/><span
-                                class="required">*</span></td>
-                        <td>
-                            <%if ((entry != null) && entry.getValue() != null) {%>
-                            <textarea name="Value" id="Value" cols="100" rows="18"><%=entry.getValue().trim()%></textarea>
-                            <br/>
-                            <%} else {%>                            
-                            <textarea name="Value" id="Value" cols="100" rows="18"></textarea>
-                            <br/>
+                            <input type="hidden" name="pageName" value="inlinedText.jsp"/>
+                            <%if ((entry != null) && entry.getName() != null) {%>
+                            <tr>
+
+                                <td><fmt:message key="name"/><span class="required">*</span></td>
+                                <td>
+                                    <input id="Name" type="hidden" name="Name" value="<%=entry.getName()%>"/>
+                                    <label for="Name"><%=entry.getName()%>
+                                    </label>
+                                </td>
+                            </tr>
+                            <%} else {%>
+                            <tr>
+                                <td><fmt:message key="name"/><span class="required">*</span></td>
+                                <td><input type="text" size="60" name="Name" value=""/></td>
+                            </tr>
                             <%}%>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="buttonRow">
-                            <input type="submit" value="<fmt:message key="save"/>" class="button"
-                                    onclick="submitTextContent(document.Submit);return false;" />
-                            <input type="button" value="<fmt:message key="cancel"/>"
-                                   onclick="javascript:document.location.href='index.jsp?region=region1&item=localentries_menu'"
-                                   class="button"/>
-                        </td>
-                    </tr>
+                            <tr>
+                                <td style="width:100px;"><fmt:message key="value"/><span
+                                        class="required">*</span></td>
+                                <td>
+                                    <%if ((entry != null) && entry.getValue() != null) {%>
+                                    <textarea name="Value" id="Value" cols="100"
+                                              rows="18"><%=entry.getValue().trim()%>
+                                    </textarea>
+                                    <br/>
+                                    <%} else {%>
+                                    <textarea name="Value" id="Value" cols="100" rows="18"></textarea>
+                                    <br/>
+                                    <%}%>
+                                </td>
+                            </tr>
+
+
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <script type="text/javascript">
+                            jQuery(document).ready(function() {
+
+                                jQuery(".toggle_container").hide();
+                                jQuery("h2.trigger").click(function() {
+                                    if (jQuery(this).next().is(":visible")) {
+                                        this.className = "active trigger";
+                                    } else {
+                                        this.className = "trigger";
+                                    }
+
+                                    jQuery(this).next().slideToggle("fast");
+                                    return false; //Prevent the browser jump to the link anchor
+                                });
+                            });
+                        </script>
+
+                        <h2 class="trigger active"><a href="#"><fmt:message key="Localentry.description"/></a></h2>
+
+                        <div class="toggle_container">
+                            <textarea name="eventDescription" id="eventDescription"
+                                      title="Sequence Description"
+                                      cols="100"
+                                      rows="3"><%= ((entry != null) && (entry.getDescription() != null)) ? entry.getDescription() : ""%></textarea>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2" class="buttonRow">
+                        <input type="submit" value="<fmt:message key="save"/>" class="button"
+                               onclick="submitTextContent(document.Submit);return false;"/>
+                        <input type="button" value="<fmt:message key="cancel"/>"
+                               onclick="javascript:document.location.href='index.jsp?region=region1&item=localentries_menu'"
+                               class="button"/>
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </form>
     </div>
 </div>
-    <script type="text/javascript">
-        editAreaLoader.init({
-            id : "Value"		// textarea id
-            ,syntax: "xml"			// syntax to be uses for highgliting
-            ,start_highlight: true		// to display with highlight mode on start-up
-        });
-    </script>
+<script type="text/javascript">
+    editAreaLoader.init({
+        id : "Value"        // textarea id
+        ,syntax: "xml"            // syntax to be uses for highgliting
+        ,start_highlight: true        // to display with highlight mode on start-up
+    });
+</script>
 </fmt:bundle>

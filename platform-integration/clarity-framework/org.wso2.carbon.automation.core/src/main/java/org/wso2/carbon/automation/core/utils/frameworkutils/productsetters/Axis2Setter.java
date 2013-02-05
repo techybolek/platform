@@ -30,12 +30,9 @@ public class Axis2Setter extends EnvironmentSetter {
         ProductUrlGeneratorUtil productUrlGeneratorUtil = new ProductUrlGeneratorUtil();
         prop = productUrlGeneratorUtil.getStream();
 
-        String hostName = null;
-        if (!Boolean.parseBoolean(prop.getProperty("stratos.test"))) {
-            hostName = (prop.getProperty("axis2.host.name", "localhost"));
-        }
-        String httpPort = (prop.getProperty("axis2.http.port", "9764"));
-        String httpsPort = (prop.getProperty("axis2.https.port", "9444"));
+        String hostName = (prop.getProperty("axis2.host.name", "localhost"));
+        String httpPort = (prop.getProperty("axis2.http.port", "9000"));
+        String httpsPort = (prop.getProperty("axis2.https.port", "9002"));
         String webContextRoot = (prop.getProperty("axis2.webContext.root", null));
         productVariables.setProductVariables
                 (hostName, httpPort, httpsPort, webContextRoot,

@@ -35,7 +35,7 @@ import java.util.Date;
  * The task comment JPA implementation..
  */
 @Entity
-@Table(name = "TASK_COMMENT")
+@Table(name = "HT_TASK_COMMENT")
 public class Comment implements CommentDAO {
 
     @Id
@@ -50,7 +50,7 @@ public class Comment implements CommentDAO {
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
 
-    @Column(name = "COMMENT_TEXT", length = 8192)
+    @Column(name = "COMMENT_TEXT", length = 4000)
     private String commentText;
 
     @Column(name = "COMMENTED_BY", length = 100)

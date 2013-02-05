@@ -22,28 +22,38 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>cep-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.cep.ui.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - CEP UI Feature</name>
+    <version>4.0.5</version>
     <url>http://wso2.org</url>
-    <description>This feature contains the bundles required for Front-end CEP functionality</description>
+    <description>This feature contains the bundles required for Front-end CEP functionality
+    </description>
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cep.ui</artifactId>
-	    <version>${wso2carbon.version.cep}</version>
-       </dependency>
-	<dependency>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cep.stub</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.brokermanager.ui.feature</artifactId>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.cep.statistics.ui.feature</artifactId>
+            <version>4.0.2</version>
             <type>zip</type>
         </dependency>
     </dependencies>
@@ -62,7 +72,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.cep.ui</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:console
@@ -72,12 +82,18 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cep.ui</bundleDef>
-				<bundleDef>org.wso2.carbon:org.wso2.carbon.cep.stub</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cep.ui:${project.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cep.stub:${project.version}</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.ui:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.brokermanager.ui:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.ui:${project.version}
+                                </importFeatureDef>
+                                <importFeatureDef>
+                                    org.wso2.carbon.brokermanager.ui:${wso2carbon.version}
+                                </importFeatureDef>
+                                <importFeatureDef>
+                                    org.wso2.carbon.cep.statistics.ui:4.0.2
+                                </importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

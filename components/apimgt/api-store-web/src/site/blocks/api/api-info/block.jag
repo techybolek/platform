@@ -1,4 +1,7 @@
 <%
+var i18n = require("i18n");
+var localeResourcesBasePath="/site/conf/locales/jaggery/";
+i18n.init(request,localeResourcesBasePath);
 jagg.block("api/api-info", {
     initialize:function (data) {
 
@@ -12,14 +15,19 @@ jagg.block("api/api-info", {
 
     getOutputs:function (inputs) {
 
-        var applications, application, i, j, lenI, lenJ, subscriptions, subscription, username, result,
+        var applications, application, i, j, lenI, lenJ, subscriptions,isRatingActivated, subscription, username, result,
                 list = [],
                 api = inputs.api,
+                selectedAPI=null,
                 user = jagg.getUser();
+
         if (user) {
             username = user.username;
             result = jagg.module("application").getApplications(username);
             applications = result.applications;
+
+            result = jagg.module("rating").isRatingActivated();
+            isRatingActivated = result.allow;
 
             result = jagg.module("subscription").getAPISubscriptions(api, username);
             subscriptions = result.subscriptions;
@@ -39,15 +47,19 @@ jagg.block("api/api-info", {
                         }
                         list.push(application);
                     }
-        }
+
+
+            }
+
         return {
-            "api":inputs.api,
+            "api":api,
             "applications":list,
             "user":user,
+            "isRatingActivated":isRatingActivated,
             "tabs":{
                 "tabs":[
                     {
-                        "title":"Overview",
+                        "title":i18n.localize("overview.title"),
                         "body":[
                             {
                                 "name":"api/overview",
@@ -59,7 +71,7 @@ jagg.block("api/api-info", {
                         ]
                     },
                     {
-                        "title":"Documentation",
+                        "title":i18n.localize("documentation.title"),
                         "body":[
                             {
                                 "name":"api/documentation",

@@ -143,6 +143,9 @@
 <%
             }
 %>
+<%
+		ServiceMetaData services[] =  serviceGroupData.getServices();
+		if(services[0].getServiceType().equalsIgnoreCase("axis2") ) { %>
                 <tr>
                     <td>
                         <a href="#" onclick="createServiceArchive()">
@@ -151,6 +154,7 @@
                         </a>
                     </td>
                 </tr>
+				 <% } %>
                 <tr>
                     <td><img src="images/service.gif" alt="MTOM state"/>
                         &nbsp;&nbsp;MTOM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

@@ -48,6 +48,7 @@
 
         String packageName = request.getParameter("packageName");
         String operation = request.getParameter("operation");
+        boolean isErroneous = false;
 
         boolean isAuthorizedToManagePackages =
                 CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/humantask/packages");
@@ -87,6 +88,7 @@
         if (isAuthorizedToManagePackages) {
             try {
                 taskDefinitionsInPackage = htPackageMgtClient.listTasksInPackage(packageName);
+               isErroneous =  HumanTaskUIUtil.isErroneous(taskDefinitionsInPackage);
             } catch (Exception e) {
                 response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
                 CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
@@ -191,6 +193,7 @@
 
                         <% if (taskDefinitionsInPackage != null) {
                             for (Task_type0 aTaskDefinitionsInPackage : taskDefinitionsInPackage) {
+
                         %>
                         <tr>
                             <td>
@@ -207,6 +210,48 @@
 
                         </tbody>
                     </table>
+
+                    <%
+                        if(isErroneous) {
+                    %>
+
+
+                    <table>
+                        <tr>&nbsp;</tr>
+                    </table>
+
+
+                    <table id="deploymentErrorListTbl" class="styledLeft" width="100%" style="color:red">
+                        <thead>
+                        <tr>
+                            <th>
+                                <nobr><fmt:message key="humantask.deployment.errors"/></nobr>
+                            </th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+
+                        <% if (taskDefinitionsInPackage != null) {
+                            for (Task_type0 aTaskDefinitionsInPackage : taskDefinitionsInPackage) {
+
+                        %>
+                        <tr>
+                            <td>
+                                 <%=aTaskDefinitionsInPackage.getName()%> : <%=aTaskDefinitionsInPackage.getDeploymentError()%>
+                            </td>
+                        </tr>
+                        <%
+                                }
+                            }
+                        %>
+
+                        </tbody>
+                    </table>
+
+                     <%
+                         }
+                     %>
                 </div>
             </div>
         </div>

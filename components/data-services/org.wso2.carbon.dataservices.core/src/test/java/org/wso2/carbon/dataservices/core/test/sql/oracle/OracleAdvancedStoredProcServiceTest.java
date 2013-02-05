@@ -20,4 +20,8 @@ public class OracleAdvancedStoredProcServiceTest extends AbstractAdvancedStoredP
 		this.storedProcWithInOutParamsAndRS();
 	}
 
+    public void testStoredProcWithRefCursors() {
+        this.storedProcWithRefCursors();
+    }
+
 }

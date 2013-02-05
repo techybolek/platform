@@ -50,16 +50,9 @@ hostName = request.getParameter("hostName");
 user = (String) session.getAttribute("logged-user");
 
 try	{
-    boolean isXmppEnabled = false;
+    boolean isXmppEnabled = true;
     boolean isPINEnabled = false;
     String[] enableXmpp =  request.getParameterValues("enablexmppmultifact");
-
-    for(String str : enableXmpp){
-        if(str.equals("true")){
-            isXmppEnabled = true;
-            break;
-        }
-    }
 
     String[] enablePIN =  request.getParameterValues("enablePIN");
 

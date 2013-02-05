@@ -15,12 +15,14 @@
 	<parent>
 		<groupId>org.wso2.carbon</groupId>
 		<artifactId>logging</artifactId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>4.0.0</version>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>org.wso2.carbon.logging.service</artifactId>
 	<packaging>bundle</packaging>
+	<version>4.0.6</version>
 	<name>WSO2 Carbon - Logging Services</name>
 	<url>http://wso2.org</url>
 
@@ -46,27 +48,26 @@
 							org.wso2.carbon.logging.config.*,
 							org.wso2.carbon.logging.appender.*,
 							org.wso2.carbon.logging.session.*,
-                                                        org.wso2.carbon.logging.sort.*,
+							org.wso2.carbon.logging.sort.*,
 							org.wso2.carbon.logging.util
-                        </Export-Package>
+                                                </Export-Package>
 						<Import-Package>
 							!org.wso2.carbon.logging.registry,
 							!org.wso2.carbon.logging.service.*,
 							!org.wso2.carbon.logging.config.*,
 							!org.wso2.carbon.logging.appender.*,
-                                                        !org.wso2.carbon.logging.session.*,
-                                                        !org.wso2.carbon.logging.sort.*,
+							!org.wso2.carbon.logging.session.*,
+							!org.wso2.carbon.logging.sort.*,
 							!org.wso2.carbon.logging.util,
-							org.apache.cassandra.*,
 							org.apache.axis2.*; version="${axis2.osgi.version.range}",
 							org.springframework.*;version="${imp.pkg.version.spring}",
-							org.wso2.carbon.utils,
+							org.wso2.carbon.utils; version="0.0.0",
 							org.wso2.carbon.registry.core.*,
 							org.apache.commons.logging,
-							org.apache.log4j,
-							org.apache.log4j.net,
-							org.wso2.carbon.databridge.agent.thrift.*,
-							org.apache.log4j.spi,
+							org.apache.log4j; version="0.0.0",
+							org.apache.log4j.net;
+							version="0.0.0",
+							org.apache.log4j.spi; version="0.0.0",
 							*;resolution:=optional,
                         </Import-Package>
 						<DynamicImport-Package>*</DynamicImport-Package>
@@ -84,6 +85,7 @@
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.utils</artifactId>
+			<version>4.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
@@ -94,25 +96,24 @@
 			<artifactId>org.wso2.carbon.logging</artifactId>
 		</dependency>
 
-
 		<!--Agent -->
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.databridge.agent.thrift</artifactId>
-			<version>4.0.0-SNAPSHOT</version>
+			<version>4.0.0</version>
 		</dependency>
 
 		<!--Hector -->
 		<dependency>
-			<groupId>org.hectorclient</groupId>
+			<groupId>org.hectorclient.wso2</groupId>
 			<artifactId>hector-core</artifactId>
-			<version>${hector-core.version}</version>
+			<version>${hector-core.version.110}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.core.common</artifactId>
-			<version>4.0.0-SNAPSHOT</version>
+			<version>4.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-pool.wso2</groupId>
@@ -123,16 +124,27 @@
 			<groupId>org.springframework.ws.wso2</groupId>
 			<artifactId>spring.framework</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-core</artifactId>
+			<version>${hadoop.version}</version>
+		</dependency>
+		<dependency>
+            	      <groupId>com.google.guava.wso2</groupId>
+                      <artifactId>guava</artifactId>
+                      <version>${google.guava.wso2.version}</version>
+                </dependency>
 	</dependencies>
-
 	<properties>
 		<slf4j.version>1.6.1</slf4j.version>
-		<cassandra.version>1.1.0.wso2v1</cassandra.version>
-		<libthrift.version>0.7.wso2v1</libthrift.version>
-		<hector-core.version>1.1-0</hector-core.version>
+		<cassandra.version>1.1.0.wso2v3</cassandra.version>
+		<libthrift.version>0.7.0.wso2v2</libthrift.version>
+		<hector-core.version.110>1.1.0.wso2v1</hector-core.version.110>
 		<perf4j.version>0.9.12.wso2v1</perf4j.version>
 		<highscale.version>1.0.wso2v1</highscale.version>
+		<hadoop.version>0.20.203.1-wso2v2</hadoop.version>
 	</properties>
+
 
 </project>
 

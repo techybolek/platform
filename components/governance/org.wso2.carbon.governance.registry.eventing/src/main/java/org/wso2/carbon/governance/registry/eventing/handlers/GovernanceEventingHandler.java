@@ -17,24 +17,30 @@
 */
 package org.wso2.carbon.governance.registry.eventing.handlers;
 
-import java.util.*;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
-import org.wso2.carbon.governance.registry.eventing.handlers.utils.events.*;
 import org.wso2.carbon.governance.registry.eventing.handlers.utils.events.CheckListItemCheckedEvent;
+import org.wso2.carbon.governance.registry.eventing.handlers.utils.events.CheckListItemUncheckedEvent;
+import org.wso2.carbon.governance.registry.eventing.handlers.utils.events.LifeCycleCreatedEvent;
+import org.wso2.carbon.governance.registry.eventing.handlers.utils.events.LifeCycleDeletedEvent;
+import org.wso2.carbon.governance.registry.eventing.handlers.utils.events.LifeCycleStateChangedEvent;
 import org.wso2.carbon.governance.registry.eventing.internal.Utils;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.common.eventing.RegistryEvent;
 import org.wso2.carbon.registry.core.Collection;
-import org.wso2.carbon.registry.core.utils.RegistryUtils;
-import org.wso2.carbon.registry.core.session.CurrentSession;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.Handler;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
-import org.wso2.carbon.registry.common.eventing.RegistryEvent;
+import org.wso2.carbon.registry.core.session.CurrentSession;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 public class GovernanceEventingHandler extends Handler {
     private static final Log log = LogFactory.getLog(GovernanceEventingHandler.class);
@@ -86,7 +92,7 @@ public class GovernanceEventingHandler extends Handler {
         String oldLcName = oldResource.getProperty("registry.LC.name");
         if (lcName == null && oldLcName != null) {
             RegistryEvent event = new LifeCycleDeletedEvent<String>(
-                    "[" + oldLcName + "] The LifeCycle was deleted.");
+                    "[" + oldLcName + "] The LifeCycle was deleted for resource at "+relativePath+".");
             ((LifeCycleDeletedEvent)event).setResourcePath(relativePath);
             event.setParameter("LifecycleName", oldLcName);
             event.setTenantId(CurrentSession.getCallerTenantId());
@@ -98,7 +104,7 @@ public class GovernanceEventingHandler extends Handler {
             return;
         } else if (lcName != null && oldLcName == null) {
             RegistryEvent event = new LifeCycleCreatedEvent<String>(
-                    "[" + lcName + "] The LifeCycle was created.");
+                    "[" + lcName + "] The LifeCycle was created for resource at "+relativePath+".");
             ((LifeCycleCreatedEvent)event).setResourcePath(relativePath);
             event.setParameter("LifecycleName", lcName);
             event.setTenantId(CurrentSession.getCallerTenantId());
@@ -151,19 +157,19 @@ public class GovernanceEventingHandler extends Handler {
                             if (oldValue.equals(Boolean.toString(Boolean.TRUE))) {
                                 event = new CheckListItemUncheckedEvent<String>(
                                     "[" + lcName + "] The CheckList item '" + oldName + "' of LifeCycle State '" +
-                                    oldLifeCycleState + "' was Unchecked.");
+                                    oldLifeCycleState + "' was Unchecked for resource at "+relativePath +".");
                                 ((CheckListItemUncheckedEvent)event).setResourcePath(relativePath);
                             } else {
                                 event = new CheckListItemCheckedEvent<String>(
                                     "[" + lcName + "] The CheckList item '" + oldName + "' of LifeCycle State '" +
-                                    oldLifeCycleState + "' was Checked.");
+                                    oldLifeCycleState + "' was Checked for resource at "+relativePath +".");
                                 ((CheckListItemCheckedEvent)event).setResourcePath(relativePath);
                             }
                         } else {
                             // In here we are un-aware of the changes that happened.
                             event = new CheckListItemCheckedEvent<String>(
                                     "[" + lcName + "] The State of the CheckList item '" + oldName + "' of LifeCycle State '" +
-                                    oldLifeCycleState + "' was changed.");
+                                    oldLifeCycleState + "' was changed for resource at "+relativePath +".");
                             ((CheckListItemCheckedEvent)event).setResourcePath(relativePath);
                         }
                         event.setParameter("LifecycleName", lcName);
@@ -222,7 +228,14 @@ public class GovernanceEventingHandler extends Handler {
         String path = requestContext.getResourcePath().getPath();
         String relativePath = RegistryUtils.getRelativePath(requestContext.getRegistryContext(),
                 path);
+        if (!requestContext.getRegistry().resourceExists(path)) {
+            return;
+        }
         resource = requestContext.getRegistry().get(path);
+
+        if (resource == null) {
+            return;
+        }
 
         if(resource.getProperty(GovernanceConstants.REGISTRY_IS_ENVIRONMENT_CHANGE)!=null &&
                 !resource.getProperty(GovernanceConstants.REGISTRY_IS_ENVIRONMENT_CHANGE).isEmpty()){
@@ -231,9 +244,6 @@ public class GovernanceEventingHandler extends Handler {
             requestContext.setResource(resource);
             requestContext.getRegistry().put(path,resource);
         }
-        if (resource == null) {
-            return;
-        }
         String newState = resource.getProperty(stateKey);
         if (oldState != null && oldState.equalsIgnoreCase(newState)) {
             return;
@@ -241,15 +251,17 @@ public class GovernanceEventingHandler extends Handler {
         String extendedMessage = "";
         if (!oldPath.equals(path)) {
             if (resource instanceof Collection) {
-                extendedMessage = " The collection has moved from: '" + relativeOldPath + "' to: '"+
-                        relativePath + "'.";
+                extendedMessage = ". The collection has moved from: '" + relativeOldPath + "' to: '" +
+                                  relativePath + "'.";
             } else {
-                extendedMessage = " The resource has moved from: '" + relativeOldPath + "' to: '" +
-                        relativePath + "'.";
+                extendedMessage = ". The resource has moved from: '" + relativeOldPath + "' to: '" +
+                                  relativePath + "'.";
             }
+        } else {
+            extendedMessage = " for resource at " + path + ".";
         }
         RegistryEvent<String> event = new LifeCycleStateChangedEvent<String>("[" + lcName + "] The LifeCycle State Changed from '" +
-                oldState + "' to '" + newState + "'." + extendedMessage);
+                oldState + "' to '" + newState+"'" + extendedMessage);
         event.setParameter("LifecycleName", lcName);
         event.setParameter("OldLifecycleState", oldState);
         event.setParameter("NewLifecycleState", newState);

@@ -28,8 +28,8 @@ public class KeyStoreAdminServiceImpl extends AbstractAdmin implements KeyStoreA
     public KeyStoreData[] getKeyStores() throws SecurityConfigException {
         KeyStoreAdmin admin = new KeyStoreAdmin(CarbonContext.getCurrentContext().getTenantId(),
                 getGovernanceSystemRegistry());
-        boolean isSuperTenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(
-                super.getTenantDomain()) ? true : false;
+        boolean isSuperTenant = CarbonContext.getCurrentContext().getTenantId() ==
+                                                        MultitenantConstants.SUPER_TENANT_ID;
         return admin.getKeyStores(isSuperTenant);
     }
 

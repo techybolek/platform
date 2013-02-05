@@ -64,7 +64,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
     private static Map<String, SessionInfo> sessionIdMap = new ConcurrentHashMap<String, SessionInfo>();
     //used store logged in user name until put into jaggery session
     private String loggedInUserName;
-    
+
 
     @Override
     public String getClassName() {
@@ -112,7 +112,8 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         if (argLength != 1 || !(args[0] instanceof String)) {
             throw new ScriptException("Invalid argument. SAML response is missing.");
         }
-        XMLObject samlObject = Util.unmarshall((String) args[0]);
+        String decodedString = Util.decode((String) args[0]);
+        XMLObject samlObject = Util.unmarshall(decodedString);
         if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
             SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
@@ -142,7 +143,9 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         if (argLength != 1 || !(args[0] instanceof String)) {
             throw new ScriptException("Invalid argument. Logout request xml is missing.");
         }
-        XMLObject samlObject = Util.unmarshall(decode((String) args[0]));
+        String decodedString = Util.decode((String) args[0]);
+
+        XMLObject samlObject = Util.unmarshall(decodedString);
         return samlObject instanceof LogoutRequest;
 
     }
@@ -162,7 +165,8 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         if (argLength != 1 || !(args[0] instanceof String)) {
             throw new ScriptException("Invalid argument. Logout response xml is missing.");
         }
-        XMLObject samlObject = Util.unmarshall((String) args[0]);
+        String decodedString = Util.decode((String) args[0]);
+        XMLObject samlObject = Util.unmarshall(decodedString);
         return samlObject instanceof LogoutResponse;
 
     }
@@ -186,6 +190,22 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         }
         return Util.encode((String) args[0]);
 
+    }
+
+    public static String jsFunction_getSAMLToken(Context cx, Scriptable thisObj, Object[] args,
+                                                 Function funObj)
+            throws Exception {
+        int argLength = args.length;
+        if (argLength != 1 || !(args[0] instanceof String)) {
+            throw new ScriptException("Invalid argument. Session Id is missing.");
+        }
+        SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
+        SessionInfo sessionInfo = relyingPartyObject.getSessionInfo((String) args[0]);
+        if (sessionInfo != null) {
+//            Here the samlToken is encoded. So no need to encode that again
+            return sessionInfo.getSamlToken();
+        }
+        return null;
     }
 
     /**
@@ -291,8 +311,9 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         if (argLength != 1 || !(args[0] instanceof String)) {
             throw new ScriptException("Invalid argument. The SAML response is missing.");
         }
-        XMLObject samlObject = Util.unmarshall((String) args[0]);
-        String username = "anonymous user";
+        String decodedString = Util.decode((String) args[0]);
+        XMLObject samlObject = Util.unmarshall(decodedString);
+        String username = null;
 
         if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
@@ -307,10 +328,9 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                     }
                 }
             }
-        } else {
-            if (log.isWarnEnabled()) {
-                log.warn("Provided SAML response in is not a SAML Response. So default user name:" + username + " is provided.");
-            }
+        }
+        if (username == null) {
+            throw new Exception("Failed to get subject assertion from SAML response.");
         }
         return username;
     }
@@ -360,6 +380,22 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
 
     }
 
+    public static String jsFunction_getIdentitySessionId(Context cx, Scriptable thisObj,
+            Object[] args,
+            Function funObj) throws ScriptException {
+    	 String identitySession = null;
+    	 int argLength = args.length;
+         if (argLength != 1 || !(args[0] instanceof String)) {
+             throw new ScriptException("Invalid argument. Session id is missing.");
+         }
+         SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
+         SessionInfo sessionInfo = relyingPartyObject.getSessionInfo((String) args[0]);
+         if (sessionInfo != null) {
+        	 identitySession = sessionInfo.getSessionId();
+         }
+         return identitySession;
+    }
+
     public static String jsFunction_getLoggedInUser(Context cx, Scriptable thisObj,
                                                     Object[] args,
                                                     Function funObj)
@@ -370,7 +406,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         }
         SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
         SessionInfo sessionInfo = relyingPartyObject.getSessionInfo((String) args[0]);
-        String loggedInUser = "anonymous user";
+        String loggedInUser = null;
         if (sessionInfo != null && sessionInfo.getLoggedInUser() != null) {
             loggedInUser = sessionInfo.getLoggedInUser();
         }
@@ -395,8 +431,10 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         if (argLength != 1 || !(args[0] instanceof String)) {
             throw new ScriptException("Invalid argument. SAML log out request is missing.");
         }
+        String decodedString = Util.decode((String) args[0]);
+
         SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
-        XMLObject samlObject = Util.unmarshall(decode((String) args[0]));
+        XMLObject samlObject = Util.unmarshall(decodedString);
         String sessionIndex = null;
         if (samlObject instanceof LogoutRequest) {
             // if log out request
@@ -459,10 +497,11 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         if (argLength != 2 || !(args[0] instanceof String) || !(args[1] instanceof String)) {
             throw new ScriptException("Invalid argument. Current session id and SAML response are missing.");
         }
+        String decodedString = Util.decode((String) args[1]);
         SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
-        XMLObject samlObject = Util.unmarshall((String) args[1]);
+        XMLObject samlObject = Util.unmarshall(decodedString);
         String sessionIndex = null;
-        String username = "anonymous user";
+        String username = null;
         if (samlObject instanceof Response) {
             Response samlResponse = (Response) samlObject;
             List<Assertion> assertions = samlResponse.getAssertions();
@@ -491,10 +530,14 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         if (sessionIndex == null) {
             throw new Exception("Failed to get session index from authentication statement in SAML response.");
         }
+        if (username == null) {
+            throw new Exception("Failed to get subject assertion from SAML response.");
+        }
 
         SessionInfo sessionInfo = new SessionInfo((String) args[0]);
         sessionInfo.setSessionIndex(sessionIndex);
         sessionInfo.setLoggedInUser(username);
+        sessionInfo.setSamlToken((String) args[1]);//We expect an encoded SamlToken here.
         relyingPartyObject.addSessionInfo(sessionInfo);
 
     }
@@ -563,6 +606,36 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         String requestedURI = relayStateMap.get((String) args[0]);
         relayStateMap.remove((String) args[0]);
         return requestedURI;
+
+    }
+    public static String jsFunction_xmlDecode(Context cx, Scriptable thisObj,
+                                                          Object[] args,
+                                                          Function funObj)
+            throws ScriptException {
+        int argLength = args.length;
+        if (argLength != 1 || !(args[0] instanceof String)) {
+            throw new ScriptException("Invalid argument. Relay state value is missing.");
+        }
+        String xmlString = (String) args[0];
+        xmlString = xmlString.replaceAll("&gt;", ">").replaceAll("&lt;", "<");
+//                .replaceAll("&apos;", "'").replaceAll("&quot;", "\"").replaceAll("&amp;", "&");
+
+        return xmlString;
+
+    }
+    public static String jsFunction_xmlEncode(Context cx, Scriptable thisObj,
+                                                          Object[] args,
+                                                          Function funObj)
+            throws ScriptException {
+        int argLength = args.length;
+        if (argLength != 1 || !(args[0] instanceof String)) {
+            throw new ScriptException("Invalid argument. Relay state value is missing.");
+        }
+        String xmlString = (String) args[0];
+        xmlString = xmlString.replaceAll(">","&gt;").replaceAll( "<","&lt;")                  ;
+//                .replaceAll("'","&apos;").replaceAll("\"","&quot;").replaceAll("&","&amp;");
+
+        return xmlString;
 
     }
 

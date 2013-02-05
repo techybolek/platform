@@ -20,6 +20,7 @@ public class SessionInfo {
     private String sessionId;
     private String loggedInUser;
     private String sessionIndex;
+    private String samlToken;
 
     public SessionInfo(String sessionId) {
         this.sessionId = sessionId;
@@ -47,5 +48,13 @@ public class SessionInfo {
 
     public void setSessionIndex(String sessionIndex) {
         this.sessionIndex = sessionIndex;
+    }
+
+    public String getSamlToken() {
+        return samlToken;
+    }
+
+    public void setSamlToken(String samlToken) {
+        this.samlToken = samlToken;
     }
 }

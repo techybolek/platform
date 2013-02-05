@@ -61,19 +61,6 @@ public class HiveExecutionClient {
         option.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, cookie);
     }
 
-
-    public boolean saveConfiguration(String driver, String url, String username, String password) throws RemoteException, HiveExecutionServiceHiveExecutionException {
-        try {
-            return stub.setConnectionParameters(driver,url, username, password);
-        } catch (RemoteException e) {
-          log.error(e);
-          throw e;
-        } catch (HiveExecutionServiceHiveExecutionException e) {
-          log.error(e);
-          throw e;
-        }
-    }
-
     public QueryResult[] executeScript(String script) throws RemoteException, HiveExecutionServiceHiveExecutionException {
         try {
             QueryResult[] res = stub.executeHiveScript(script);

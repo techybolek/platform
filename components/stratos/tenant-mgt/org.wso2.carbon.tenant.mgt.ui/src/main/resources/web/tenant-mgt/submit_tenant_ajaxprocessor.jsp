@@ -40,9 +40,12 @@
     try {
         tenantId = request.getParameter("tenantId");
         tenantDomain = request.getParameter("domain");
+        isUpdating = Boolean.parseBoolean(request.getParameter("isUpdating"));
 
-
-    boolean isDomainAvailable = CommonUtil.isDomainNameAvailable(tenantDomain);
+        boolean isDomainAvailable=false;
+        if(!isUpdating){
+            isDomainAvailable = CommonUtil.isDomainNameAvailable(tenantDomain);
+        }
 
     //if the request is for creating a new tenant and if the domain name is not available, show a warning
 

@@ -18,15 +18,10 @@ package org.wso2.carbon.attachment.mgt.core.dao.impl.jdbc.dao;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.attachment.mgt.api.attachment.Attachment;
-import org.wso2.carbon.attachment.mgt.core.AttachmentImpl;
 import org.wso2.carbon.attachment.mgt.core.dao.AttachmentDAO;
-import org.wso2.carbon.attachment.mgt.core.dao.impl.jdbc.*;
-import org.wso2.carbon.attachment.mgt.util.URLGeneratorUtil;
 
 import javax.activation.DataHandler;
-import java.io.InputStream;
-import java.sql.*;
+import java.util.Date;
 
 /**
  * JDBC based DAO impl for the Attachment
@@ -41,7 +36,7 @@ public class AttachmentDAOImpl implements AttachmentDAO {
     @Override
     public Long getID() {
         log.warn(new UnsupportedOperationException("Not impled yet."));
-        return new Long(-1);
+        return null;
     }
 
     @Override
@@ -50,13 +45,13 @@ public class AttachmentDAOImpl implements AttachmentDAO {
     }
 
     @Override
-    public Timestamp getCreatedTime() {
+    public Date getCreatedTime() {
         log.warn(new UnsupportedOperationException("Not impled yet."));
         return null;
     }
 
     @Override
-    public void setCreatedTime(Timestamp createdTime) {
+    public void setCreatedTime(Date createdTime) {
         log.warn(new UnsupportedOperationException("Not impled yet."));
     }
 

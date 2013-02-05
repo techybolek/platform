@@ -32,14 +32,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.hector.api.Cluster;
+import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.beans.Row;
+import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
+import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
@@ -53,11 +58,9 @@ import org.wso2.carbon.logging.internal.LoggingServiceComponent;
 import org.wso2.carbon.logging.service.LogViewerException;
 import org.wso2.carbon.logging.service.data.LogEvent;
 import org.wso2.carbon.logging.service.data.LoggingConfig;
-import org.wso2.carbon.logging.session.LoggingSessionManager;
 import org.wso2.carbon.logging.sort.LogEventSorter;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.tenant.TenantManager;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 public class CassandraLogReader {
@@ -81,7 +84,7 @@ public class CassandraLogReader {
 		if (isManager() && serverName != null && serverName.length() > 0) {
 			return serverName;
 		} else {
-			return ServerConfiguration.getInstance().getFirstProperty("Name");
+			return ServerConfiguration.getInstance().getFirstProperty("ServerKey");
 		}
 
 	}
@@ -93,7 +96,7 @@ public class CassandraLogReader {
 
 	private boolean isManager() {
 		if (LoggingConstants.WSO2_STRATOS_MANAGER.equals(ServerConfiguration.getInstance()
-				.getFirstProperty("Name"))) {
+				.getFirstProperty("ServerKey"))) {
 			return true;
 		} else {
 			return false;
@@ -101,23 +104,26 @@ public class CassandraLogReader {
 	}
 
 	private Cluster retrieveCassandraCluster(String clusterName, String connectionUrl,
-			Map<String, String> credentials) {
-
+			Map<String, String> credentials) throws LogViewerException {
+        LoggingConfig config;
+        try {
+            config = LoggingConfigManager.loadLoggingConfiguration();
+        } catch (Exception e) {
+            throw new LogViewerException("Cannot read the log config file", e);
+        }
 		CassandraHostConfigurator hostConfigurator = new CassandraHostConfigurator(connectionUrl);
-		hostConfigurator.setRetryDownedHosts(false);
+		hostConfigurator.setRetryDownedHosts(config.isRetryDownedHostsEnable());
+		hostConfigurator.setRetryDownedHostsQueueSize(config.getRetryDownedHostsQueueSize());
+		hostConfigurator.setAutoDiscoverHosts(config.isAutoDiscoveryEnable());
+		hostConfigurator.setAutoDiscoveryDelayInSeconds(config.getAutoDiscoveryDelay());
 		Cluster cluster = HFactory.createCluster(clusterName, hostConfigurator, credentials);
-		LoggingSessionManager.setSessionObject(CASSANDRA_CLUSTER_CONNECTION, cluster);
 		return cluster;
 	}
 
 	private Cluster getCluster(String clusterName, String connectionUrl,
-			Map<String, String> credentials) {
-		Cluster cluster = (Cluster) LoggingSessionManager.getSessionObject(CASSANDRA_CLUSTER_CONNECTION);
-		if (cluster != null) {
-			return cluster;
-		} else {
-			return retrieveCassandraCluster(clusterName, connectionUrl, credentials);
-		}
+			Map<String, String> credentials) throws LogViewerException {
+        //removed getting cluster from session, since we dont aware of BAM shutting down time
+		return retrieveCassandraCluster(clusterName, connectionUrl, credentials);
 	}
 
 	private Keyspace getCurrentCassandraKeyspace() throws LogViewerException {
@@ -127,18 +133,34 @@ public class CassandraLogReader {
 		} catch (Exception e) {
 			throw new LogViewerException("Cannot read the log config file", e);
 		}
+        String keySpaceName = config.getKeyspace();
+        String consistencyLevel = config.getConsistencyLevel();
+        Cluster cluster;
+        cluster = getCurrentCassandraCluster();
+        // Create a customized Consistency Level
+        ConfigurableConsistencyLevel configurableConsistencyLevel = new ConfigurableConsistencyLevel();
+        configurableConsistencyLevel.setDefaultReadConsistencyLevel(HConsistencyLevel.valueOf(consistencyLevel));
+        return HFactory.createKeyspace(keySpaceName, cluster, configurableConsistencyLevel);
+	}
+	
+	private Cluster getCurrentCassandraCluster() throws LogViewerException {
+		LoggingConfig config;
+		try {
+			config = LoggingConfigManager.loadLoggingConfiguration();
+		} catch (Exception e) {
+			throw new LogViewerException("Cannot read the log config file", e);
+		}
 		String connectionUrl = config.getUrl();
 		String userName = config.getUser();
 		String password = config.getPassword();
-		String keyspaceName = config.getKeyspace();
 		String clusterName = config.getCluster();
-		Cluster cluster;
 		Map<String, String> credentials = new HashMap<String, String>();
 		credentials.put(LoggingConstants.USERNAME_KEY, userName);
 		credentials.put(LoggingConstants.PASSWORD_KEY, password);
-		cluster = getCluster(clusterName, connectionUrl, credentials);
-		return HFactory.createKeyspace(keyspaceName, cluster);
+		return getCluster(clusterName, connectionUrl, credentials);
 	}
+	
+	
 
 	private boolean isSuperTenantUser() {
 		CarbonContext carbonContext = CarbonContext.getCurrentContext();
@@ -165,7 +187,6 @@ public class CassandraLogReader {
 	private String convertLongToString(Long longval) {
 		Date date = new Date(longval);
 		DateFormat formatter = new SimpleDateFormat(LoggingConstants.DATE_TIME_FORMATTER);
-		formatter.setTimeZone(TimeZone.getTimeZone(LoggingConstants.GMT));
 		String formattedDate = formatter.format(date);
 		return formattedDate;
 	}
@@ -236,34 +257,46 @@ public class CassandraLogReader {
 	}
 
 	private String getCurrentServerName() {
-		String serverName = ServerConfiguration.getInstance().getFirstProperty("Name");
-		serverName = serverName.replace("WSO2", "");
-		return serverName.replace(" ", "_");
+		String serverName = ServerConfiguration.getInstance().getFirstProperty("ServerKey");
+		return serverName;
 	}
 
 	private String getCurrentDate() {
 		Date cirrDate = new Date();
 		DateFormat formatter = new SimpleDateFormat(LoggingConstants.DATE_FORMATTER);
-		formatter.setTimeZone(TimeZone.getTimeZone(LoggingConstants.GMT));
 		String formattedDate = formatter.format(cirrDate);
 		return formattedDate.replace("-", "_");
 	}
 
-	private String getCFName(LoggingConfig config) {
-		int tenantId = CarbonContextHolder.getCurrentCarbonContextHolder().getTenantId();
-		String currTenantId = "";
-		if (tenantId == MultitenantConstants.INVALID_TENANT_ID
-				|| tenantId == MultitenantConstants.SUPER_TENANT_ID) {
-			currTenantId = "0";
-		} else {
-			currTenantId = String.valueOf(tenantId);
-		}
-		String applicationName = getCurrentServerName();
-		String currDateStr = getCurrentDate();
-		String colFamily = config.getColFamily() + "_" + currTenantId + "_" + applicationName + "_"
-				+ currDateStr;
-		return colFamily;
-	}
+    private String getCFName(LoggingConfig config, String domain, String serverKey) {
+        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        String serverName = "";
+        if(domain == null || domain.equals("")) {
+            tenantId  = CarbonContext.getCurrentContext().getTenantId();
+        } else {
+            try {
+                tenantId = getTenantIdForDomain(domain);
+            } catch (LogViewerException e) {
+
+            }
+        }
+        String currTenantId = "";
+        if (tenantId == MultitenantConstants.INVALID_TENANT_ID
+                || tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+            currTenantId = "0";
+        } else {
+            currTenantId = String.valueOf(tenantId);
+        }
+        if( serverKey == null || serverKey.equals("")) {
+            serverName = getCurrentServerName();
+        } else {
+            serverName = serverKey;
+        }
+        String currDateStr = getCurrentDate();
+        String colFamily = config.getColFamily() + "_" + currTenantId + "_" + serverName + "_"
+                + currDateStr;
+        return colFamily;
+    }
 
 	private LogEvent[] getLogsForType(LogEvent[] events, String type) {
 		List<LogEvent> resultList = new ArrayList<LogEvent>();
@@ -282,16 +315,18 @@ public class CassandraLogReader {
 					&& (event.getMessage().toLowerCase().indexOf(keyword.toLowerCase()) > -1);
 			boolean isInLogger = event.getLogger() != null
 					&& (event.getLogger().toLowerCase().indexOf(keyword.toLowerCase()) > -1);
-			if (isInLogger || isInLogMessage) {
+			boolean isInStacktrace = event.getStacktrace() != null
+			&& (event.getStacktrace().toLowerCase().indexOf(keyword.toLowerCase()) > -1);
+			if (isInLogger || isInLogMessage || isInStacktrace) {
 				resultList.add(event);
 			}
 		}
 		return resultList.toArray(new LogEvent[resultList.size()]);
 	}
 
-	private LogEvent[] getSortedLogsFromCassandra(String applicationName) throws LogViewerException {
+	private LogEvent[] getSortedLogsFromCassandra(String applicationName, String domain, String serverKey) throws LogViewerException {
 		Future<LogEvent[]> task = this.getExecutorService().submit(
-				new LogEventSorter(this.getSystemLogs(), ""));
+				new LogEventSorter(this.getSystemLogs(domain, serverKey), ""));
 		List<LogEvent> resultList = new ArrayList<LogEvent>();
 		try {
 			if (applicationName.equals("")) {
@@ -346,7 +381,7 @@ public class CassandraLogReader {
 
 	}
 
-	public int getNoOfRows() throws LogViewerException {
+	public int getNoOfRows(String domain, String serverKey) throws LogViewerException {
 		Keyspace currKeyspace = getCurrentCassandraKeyspace();
 		LoggingConfig config;
 		try {
@@ -354,7 +389,7 @@ public class CassandraLogReader {
 		} catch (Exception e) {
 			throw new LogViewerException("Cannot load cassandra configuration", e);
 		}
-		String colFamily = getCFName(config);
+		String colFamily = getCFName(config, domain, serverKey);
 
 		RangeSlicesQuery<String, String, String> rangeSlicesQuery = HFactory
 				.createRangeSlicesQuery(currKeyspace, stringSerializer, stringSerializer,
@@ -367,8 +402,8 @@ public class CassandraLogReader {
 		return result.get().getCount();
 	}
 
-	public LogEvent[] getLogs(String type, String keyword) throws LogViewerException {
-		LogEvent[] events = getSortedLogsFromCassandra("");
+	public LogEvent[] getLogs(String type, String keyword, String domain, String serverKey) throws LogViewerException {
+		LogEvent[] events = getSortedLogsFromCassandra("", domain, serverKey);
 		if (keyword == null || keyword.equals("")) {
 			// keyword is null
 			if (type == null || type.equals("") || type.equalsIgnoreCase("ALL")) {
@@ -391,9 +426,9 @@ public class CassandraLogReader {
 		}
 	}
 
-	public LogEvent[] getApplicationLogs(String type, String keyword, String appName)
+	public LogEvent[] getApplicationLogs(String type, String keyword, String appName, String domain, String serverKey)
 			throws LogViewerException {
-		LogEvent[] events = getSortedLogsFromCassandra(appName);
+		LogEvent[] events = getSortedLogsFromCassandra(appName, domain, serverKey);
 		if (keyword == null || keyword.equals("")) {
 			// keyword is null
 			if (type == null || type.equals("") || type.equalsIgnoreCase("ALL")) {
@@ -420,9 +455,9 @@ public class CassandraLogReader {
 		return executorService;
 	}
 
-	private LogEvent[] getSearchedAppLogsFromCassandra(String type, String keyword, String appName)
+	private LogEvent[] getSearchedAppLogsFromCassandra(String type, String keyword, String appName, String domain, String serverKey)
 			throws LogViewerException {
-		LogEvent sortedLogs[] = getSortedLogsFromCassandra(appName);
+		LogEvent sortedLogs[] = getSortedLogsFromCassandra(appName, domain, serverKey);
 		if ("ALL".equalsIgnoreCase(type)) {
 			return getLogsForKey(sortedLogs, keyword);
 		} else {
@@ -448,8 +483,28 @@ public class CassandraLogReader {
 		}
 
 	}
+	
+	private boolean isCFExsist(String keyspaceName, String columnFamilyName) throws LogViewerException {
+		KeyspaceDefinition keyspaceDefinition;
+		try {
+			keyspaceDefinition = getCurrentCassandraCluster().describeKeyspace(keyspaceName);
+			if (keyspaceDefinition != null && !keyspaceDefinition.equals("")) {
+				List<ColumnFamilyDefinition> columnFamilyDefinitionList = keyspaceDefinition
+						.getCfDefs();
+				for (ColumnFamilyDefinition cfd : columnFamilyDefinitionList) {
+					if (cfd.getName().equals(columnFamilyName)) {
+						return true;
+					}
+				}
+			}
+		} catch (LogViewerException e) {
+			log.error("Error occurred while retrieving column families", e);
+			throw new LogViewerException("Error occurred while retrieving column families");
+		}
+		return false;
+	}
 
-	public LogEvent[] getSystemLogs() throws LogViewerException {
+	public LogEvent[] getSystemLogs(String domain, String serverKey) throws LogViewerException {
 
 		// int tenantId = getCurrentTenantId(tenantDomain);
 		// serviceName = getCurrentServerName(serviceName);
@@ -460,7 +515,10 @@ public class CassandraLogReader {
 		} catch (Exception e) {
 			throw new LogViewerException("Cannot load cassandra configuration", e);
 		}
-		String colFamily = getCFName(config);
+		String colFamily = getCFName(config, domain, serverKey);
+		if (!isCFExsist(config.getKeyspace(), colFamily)) {
+			return new LogEvent[0];
+		}
 		RangeSlicesQuery<String, String, byte[]> rangeSlicesQuery = HFactory
 				.createRangeSlicesQuery(currKeyspace, stringSerializer, stringSerializer,
 						BytesArraySerializer.get());
@@ -479,22 +537,33 @@ public class CassandraLogReader {
 		return resultList.toArray(new LogEvent[resultList.size()]);
 	}
 
-	public String[] getApplicationNamesFromCassandra() throws LogViewerException {
+	public String[] getApplicationNamesFromCassandra(String domain, String serverKey) throws LogViewerException {
 		List<String> appList = new ArrayList<String>();
 		LogEvent allLogs[];
 		try {
-			allLogs = getSystemLogs();
+			allLogs = getSystemLogs(domain, serverKey);
 		} catch (LogViewerException e) {
 			log.error("Error retrieving application logs", e);
 			throw new LogViewerException("Error retrieving application logs", e);
 		}
 		for (LogEvent event : allLogs) {
 			if (event.getAppName() != null && !event.getAppName().equals("")  && !event.getAppName().equals("NA")
-					&& !LoggingUtil.isAdmingService(event.getAppName()) && !appList.contains(event.getAppName())) {
+					&& !LoggingUtil.isAdmingService(event.getAppName()) && !appList.contains(event.getAppName()) &&
+                    !event.getAppName().equals("STRATOS_ROOT")) {
 				appList.add(event.getAppName());
 			}
 		}
-		return appList.toArray(new String[appList.size()]);
+		return getSortedApplicationNames(appList);
+	}
+	
+	private  String[] getSortedApplicationNames(List<String> applicationNames) {
+		Collections.sort(applicationNames, new Comparator<String>() {
+			public int compare(String s1, String s2) {
+				return s1.toLowerCase().compareTo(s2.toLowerCase());
+			}
+
+		});
+		return (String[]) applicationNames.toArray(new String[applicationNames.size()]);
 	}
 
 	// convert date to the given fomat.
@@ -502,7 +571,6 @@ public class CassandraLogReader {
 		// 2012-05-23 09:16:46,114
 		DateFormat formatter;
 		formatter = new SimpleDateFormat(LoggingConstants.DATE_TIME_FORMATTER);
-		formatter.setTimeZone(TimeZone.getTimeZone(LoggingConstants.GMT));
 		dateString = (dateString.length() == 16) ? dateString + ":00,000" : dateString;
 		dateString = (dateString.length() == 19) ? dateString + ",000" : dateString;
 		Date date;
@@ -520,7 +588,6 @@ public class CassandraLogReader {
 		int maxLen = logs.length;
 		final SimpleDateFormat formatter = new SimpleDateFormat(
 				LoggingConstants.DATE_TIME_FORMATTER);
-		formatter.setTimeZone(TimeZone.getTimeZone(LoggingConstants.GMT));
 		if (maxLen > 0) {
 			List<LogEvent> logInfoList = Arrays.asList(logs);
 			Collections.sort(logInfoList, new Comparator<Object>() {
@@ -562,3 +629,4 @@ public class CassandraLogReader {
 		return tenantId;
 	}
 }
+

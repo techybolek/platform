@@ -23,9 +23,15 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.mediation.library.stub.MediationLibraryAdminServiceException;
 import org.wso2.carbon.mediation.library.stub.MediationLibraryAdminServiceStub;
 import org.wso2.carbon.mediation.library.stub.types.carbon.LibraryInfo;
 
+import javax.activation.DataHandler;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -123,14 +129,13 @@ public class LibraryAdminClient {
         throw new AxisFault(msg, e);
     }
 
-/*
     public void downloadCappArchive(String filename, HttpServletResponse response)
-            throws IOException, ApplicationAdminExceptionException {
+            throws IOException, MediationLibraryAdminServiceException {
 
         ServletOutputStream out = response.getOutputStream();
-        DataHandler dataHandler = stub.downloadCappArchive(filename);
+        DataHandler dataHandler = stub.downloadLibraryArchive(filename);
         if (dataHandler != null) {
-            response.setHeader("Content-Disposition", "fileName=" + filename + ".car");
+            response.setHeader("Content-Disposition", "fileName=" + filename + ".zip");
             response.setContentType(dataHandler.getContentType());
             InputStream in = dataHandler.getDataSource().getInputStream();
             int nextChar;
@@ -141,10 +146,9 @@ public class LibraryAdminClient {
             in.close();
             out.close();
         } else {
-			out.write("The requested capp archive was not found on the server".getBytes());
-		}
+            out.write("The requested library archive was not found on the server".getBytes());
+        }
 
     }
-*/
 
 }

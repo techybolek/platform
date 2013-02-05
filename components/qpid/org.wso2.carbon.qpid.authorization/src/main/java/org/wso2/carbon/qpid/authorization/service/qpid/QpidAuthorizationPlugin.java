@@ -16,30 +16,24 @@
 
 package org.wso2.carbon.qpid.authorization.service.qpid;
 
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.log4j.Logger;
 import org.apache.qpid.server.configuration.plugins.ConfigurationPlugin;
 import org.apache.qpid.server.security.AbstractPlugin;
 import org.apache.qpid.server.security.Result;
+import org.apache.qpid.server.security.SecurityManager;
 import org.apache.qpid.server.security.SecurityPluginFactory;
 import org.apache.qpid.server.security.access.ObjectProperties;
-import org.apache.qpid.server.security.access.Operation;
 import org.apache.qpid.server.security.access.ObjectType;
-import org.apache.qpid.server.security.SecurityManager;
-import org.apache.log4j.Logger;
+import org.apache.qpid.server.security.access.Operation;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.qpid.authorization.internal.AuthorizationServiceDataHolder;
 import org.wso2.carbon.qpid.authorization.qpid.QpidAuthorizationHandler;
-import org.wso2.carbon.qpid.authorization.qpid.QpidAuthorizationHandlerException;
-import org.wso2.carbon.qpid.commons.registry.RegistryClient;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserRealm;
-import java.security.Principal;
-import org.apache.commons.configuration.ConfigurationException;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.user.core.service.RealmService;
+
+import java.security.Principal;
 
 /**
  * Qpid access control class based on Carbon Authorization Manager
@@ -116,7 +110,7 @@ public class QpidAuthorizationPlugin extends AbstractPlugin {
         try {
 
             // Get username from tenant username
-            SuperTenantCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.startTenantFlow();
             switch (operation) { // These operations do not need users associated with them
                 case UNBIND:
                     return QpidAuthorizationHandler.handleUnbindQueue(properties);
@@ -140,10 +134,10 @@ public class QpidAuthorizationPlugin extends AbstractPlugin {
 
             if (username.indexOf(DOMAIN_NAME_SEPARATOR) > -1){
                 String tenantDomain = username.substring(username.indexOf(DOMAIN_NAME_SEPARATOR) + 1);
-                SuperTenantCarbonContext.getCurrentContext().setTenantDomain(tenantDomain);
-                SuperTenantCarbonContext.getCurrentContext().getTenantId(true);
+                PrivilegedCarbonContext.getCurrentContext().setTenantDomain(tenantDomain);
+                PrivilegedCarbonContext.getCurrentContext().getTenantId(true);
             } else {
-                SuperTenantCarbonContext.getCurrentContext().setTenantId(0);
+                PrivilegedCarbonContext.getCurrentContext().setTenantId(0);
             }
 
             int domainNameSeparatorIndex = username.indexOf(DOMAIN_NAME_SEPARATOR);
@@ -171,7 +165,7 @@ public class QpidAuthorizationPlugin extends AbstractPlugin {
         } catch (Exception e) {
             logger.error("Error while invoking QpidAuthorizationHandler", e);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
         
         return Result.DENIED;

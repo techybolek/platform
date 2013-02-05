@@ -6,22 +6,16 @@ user = jagg.getUser();
 //methods for usage monitoring
 function getProviderAPIVersionUsage(providerName, apiName, server) {
     var usage = [];
-    var usageout = [];
+
     try {
         usage = apiProvider.getProviderAPIVersionUsage(providerName, apiName, server);
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIVersionUsage for : " + server);
         }
-        for (var k = 0; k < usage.length; k++) {
-            var elem = {
-                version:usage[k].version,
-                count:usage[k].count
-            };
-            usageout.push(elem);
-        }
+
         return {
             error:false,
-            usage:usageout
+            usage:usage
         };
     } catch (e) {
         log.error(e.message);
@@ -36,22 +30,15 @@ function getProviderAPIVersionUsage(providerName, apiName, server) {
 
 function getSubscriberCountByAPIVersions(providerName, apiName) {
     var usage = [];
-    var usageout = [];
+
     try {
         usage = apiProvider.getSubscriberCountByAPIVersions(providerName, apiName);
         if (log.isDebugEnabled()) {
             log.debug("getSubscriberCountByAPIVersions for : " +apiName);
         }
-        for (var k = 0; k < usage.length; k++) {
-            var elem = {
-                version:usage[k].apiVersion,
-                count:usage[k].count
-            };
-            usageout.push(elem);
-        }
         return {
             error:false,
-            usage:usageout
+            usage:usage
         };
     } catch (e) {
         log.error(e.message);
@@ -77,18 +64,10 @@ function getProviderAPIUsage(providerName, server) {
             };
 
         } else {
-            for (var k = 0; k < usage.length; k++) {
-                var elem = {
-                    apiName:usage[k].apiName,
-                    count:usage[k].count
-                };
-                usageout.push(elem);
 
-
-            }
             return {
                 error:false,
-                usage:usageout
+                usage:usage
             };
         }
     } catch (e) {
@@ -115,18 +94,40 @@ function getProviderAPIUserUsage(providerName, apiName, server) {
             };
 
         } else {
-            for (var k = 0; k < usage.length; k++) {
-                var elem = {
-                    user:usage[k].user,
-                    count:usage[k].count
-                };
-                usageout.push(elem);
 
-
-            }
             return {
                 error:false,
-                usage:usageout
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
+function getAPIUsageByResourcePath(providerName) {
+    var usage = [];
+    var usageout = [];
+    try {
+        usage = apiProvider.getAPIUsageByResourcePath(providerName);
+        if (log.isDebugEnabled()) {
+            log.debug("getAPIUsageByResourcePath for : " + providerName);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+
+            return {
+                error:false,
+                usage:usage
             };
         }
     } catch (e) {
@@ -141,7 +142,6 @@ function getProviderAPIUserUsage(providerName, apiName, server) {
 
 function getProviderAPIVersionUserLastAccess(providerName, server) {
     var usage = [];
-    var usageout = [];
     try {
         usage = apiProvider.getProviderAPIVersionUserLastAccess(providerName, server);
         if (log.isDebugEnabled()) {
@@ -153,20 +153,9 @@ function getProviderAPIVersionUserLastAccess(providerName, server) {
             };
 
         } else {
-            for (var k = 0; k < usage.length; k++) {
-                var elem = {
-                    api_name:usage[k].api_name,
-                    api_version:usage[k].api_version,
-                    user:usage[k].user,
-                    lastAccess:usage[k].lastAccess
-                };
-                usageout.push(elem);
-
-
-            }
             return {
                 error:false,
-                usage:usageout
+                usage:usage
             };
         }
     } catch (e) {
@@ -193,18 +182,10 @@ function getProviderAPIServiceTime(providerName, server) {
             };
 
         } else {
-            for (var k = 0; k < usage.length; k++) {
-                var elem = {
-                    apiName:usage[k].apiName,
-                    serviceTime:usage[k].serviceTime
-                };
-                usageout.push(elem);
 
-
-            }
             return {
                 error:false,
-                usage:usageout
+                usage:usage
             };
         }
     } catch (e) {
@@ -231,18 +212,9 @@ function getSubscriberCountByAPIs(providerName) {
             };
 
         } else {
-            for (var k = 0; k < usage.length; k++) {
-                var elem = {
-                    name:usage[k].apiName,
-                    count:usage[k].count
-                };
-                usageout.push(elem);
-
-
-            }
             return {
                 error:false,
-                usage:usageout
+                usage:usage
             };
         }
     } catch (e) {
@@ -269,18 +241,9 @@ function getProviderAPIVersionUserUsage(providerName,apiName,version,serverUrl) 
             };
 
         } else {
-            for (var k = 0; k < usage.length; k++) {
-                var elem = {
-                    user:usage[k].user,
-                    count:usage[k].count
-                };
-                usageout.push(elem);
-
-
-            }
             return {
                 error:false,
-                usage:usageout
+                usage:usage
             };
         }
     } catch (e) {
@@ -292,6 +255,65 @@ function getProviderAPIVersionUserUsage(providerName,apiName,version,serverUrl) 
         };
     }
 }
+
+function getAPIResponseFaultCount(providerName) {
+     var usage = [];
+     var usageout = [];
+     try {
+         usage = apiProvider.getAPIResponseFaultCount(providerName);
+         if (log.isDebugEnabled()) {
+             log.debug("getAPIResponseFaultCount for : " + providerName);
+         }
+         if (usage == null) {
+             return {
+                 error:true
+             };
+
+         } else {
+             return {
+                 error:false,
+                 usage:usage
+             };
+         }
+     } catch (e) {
+         log.error(e.message);
+         return {
+             error:e,
+             usage:null
+
+         };
+     }
+ }
+
+function getAPIFaultyAnalyzeByTime(providerName) {
+     var usage = [];
+     var usageout = [];
+     try {
+         usage = apiProvider.getAPIFaultyAnalyzeByTime(providerName);
+         if (log.isDebugEnabled()) {
+             log.debug("getAPIFaultyAnalyzeByTime for : " + providerName);
+         }
+         if (usage == null) {
+             return {
+                 error:true
+             };
+
+         } else {
+             return {
+                 error:false,
+                 usage:usage
+             };
+         }
+     } catch (e) {
+         log.error(e.message);
+         return {
+             error:e,
+             usage:null
+
+         };
+     }
+ }
+
 
 
 %>

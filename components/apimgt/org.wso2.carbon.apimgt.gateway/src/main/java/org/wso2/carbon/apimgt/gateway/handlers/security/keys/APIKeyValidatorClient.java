@@ -65,7 +65,7 @@ public class APIKeyValidatorClient {
     }
 
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
-                                                 String apiKey) throws APISecurityException {
+                                                 String apiKey,String requiredAuthenticationLevel) throws APISecurityException {
 
         CarbonUtils.setBasicAccessSecurityHeaders(username, password,
                 true, clientStub._getServiceClient());
@@ -74,7 +74,7 @@ public class APIKeyValidatorClient {
         }
         try {
             org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO dto =
-                    clientStub.validateKey(context, apiVersion, apiKey);
+                    clientStub.validateKey(context, apiVersion, apiKey,requiredAuthenticationLevel);
             ServiceContext serviceContext = clientStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
             cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
@@ -88,10 +88,18 @@ public class APIKeyValidatorClient {
     private APIKeyValidationInfoDTO toDTO(
             org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO generatedDto) {
         APIKeyValidationInfoDTO dto = new APIKeyValidationInfoDTO();
-        dto.setUsername(generatedDto.getUsername());
+        dto.setSubscriber(generatedDto.getSubscriber());
         dto.setAuthorized(generatedDto.getAuthorized());
         dto.setTier(generatedDto.getTier());
         dto.setType(generatedDto.getType());
+        dto.setEndUserToken(generatedDto.getEndUserToken());
+        dto.setEndUserName(generatedDto.getEndUserName());
+        dto.setApplicationName(generatedDto.getApplicationName());
+        dto.setEndUserName(generatedDto.getEndUserName());
+        dto.setApplicationName(generatedDto.getApplicationName());
+        dto.setValidationStatus(generatedDto.getValidationStatus());
+        dto.setApplicationId(generatedDto.getApplicationId());
+        dto.setApplicationTier(generatedDto.getApplicationTier());
         return dto;
     }
 }

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -30,39 +30,39 @@
     <url>http://wso2.org</url>
 
             <modules>
-                <module>org.wso2.carbon.mashup.utils</module>
-                <module>org.wso2.carbon.mashup.im-wrapper.core</module>
-                <module>org.wso2.carbon.mashup.im-wrapper.msn</module>
-                <module>org.wso2.carbon.mashup.im-wrapper.jabber</module>
-                <module>org.wso2.carbon.mashup.im-wrapper.yahoo</module>
-                <module>org.wso2.carbon.mashup.im-wrapper.oscar</module>
-                <module>org.wso2.carbon.mashup.javascript.message-receiver</module>
-                <module>org.wso2.carbon.mashup.javascript-hostobjects.hostObject-service</module>
-                <module>org.wso2.carbon.mashup.javascript-hostobjects.session</module>
-                <module>org.wso2.carbon.mashup.javascript-hostobjects.request</module>
-                <module>org.wso2.carbon.mashup.javascript-hostobjects.system</module>
-                <module>org.wso2.carbon.mashup.javascript-hostobjects.email</module>
-                <module>org.wso2.carbon.mashup.javascript-hostobjects.file</module>
-                <module>org.wso2.carbon.mashup.javascript-hostobjects.feed</module>
-                <module>org.wso2.carbon.mashup.javascript-hostobjects.atom</module>
-                <module>org.wso2.carbon.mashup.javascript-hostobjects.wsrequest</module>
-                <module>org.wso2.carbon.mashup.javascript-hostobjects.registry</module>
-                <module>org.wso2.carbon.mashup.javascript-hostobjects.scraper</module>
-                <module>org.wso2.carbon.mashup.javascript-hostobjects.im</module>
-                <module>org.wso2.carbon.mashup.javascript-hostobjects.httpclient</module>
-		<module>org.wso2.carbon.mashup.javascript-hostobjects.sparql</module>
-                <module>org.wso2.carbon.mashup.javascript-stub-generator</module>
-                <module>org.wso2.carbon.mashup.javascript-stub-generator.ui</module>
-                <module>org.wso2.carbon.mashup.javascript-scraper</module>
-                <module>org.wso2.carbon.mashup.javascript-scraper.ui</module>
-                <module>org.wso2.carbon.mashup.jsservices</module>
-                <module>org.wso2.carbon.mashup.jsservices.admin</module>
-                <module>org.wso2.carbon.mashup.jsservices.ui</module>
-                <module>org.wso2.carbon.mashup.jsservices.custom-ui</module>
-                <module>org.wso2.carbon.mashup.request-processors.source</module>
-                <module>org.wso2.carbon.mashup.request-processors.gadget</module>
-                <module>org.wso2.carbon.mashup.request-processors.doc</module>
-                <module>org.wso2.carbon.mashup.request-processors.template</module>
+                <module>org.wso2.carbon.mashup.utils/4.0.0</module>
+                <module>org.wso2.carbon.mashup.im-wrapper.core/4.0.0</module>
+                <module>org.wso2.carbon.mashup.im-wrapper.msn/4.0.0</module>
+                <module>org.wso2.carbon.mashup.im-wrapper.jabber/4.0.0</module>
+                <module>org.wso2.carbon.mashup.im-wrapper.yahoo/4.0.0</module>
+                <module>org.wso2.carbon.mashup.im-wrapper.oscar/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript.message-receiver/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-hostobjects.hostObject-service/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-hostobjects.session/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-hostobjects.request/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-hostobjects.system/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-hostobjects.email/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-hostobjects.file/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-hostobjects.feed/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-hostobjects.atom/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-hostobjects.wsrequest/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-hostobjects.registry/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-hostobjects.scraper/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-hostobjects.im/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-hostobjects.httpclient/4.0.0</module>
+		<module>org.wso2.carbon.mashup.javascript-hostobjects.sparql/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-stub-generator/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-stub-generator.ui/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-scraper/4.0.0</module>
+                <module>org.wso2.carbon.mashup.javascript-scraper.ui/4.0.0</module>
+                <module>org.wso2.carbon.mashup.jsservices/4.0.0</module>
+                <module>org.wso2.carbon.mashup.jsservices.admin/4.0.0</module>
+                <module>org.wso2.carbon.mashup.jsservices.ui/4.0.0</module>
+                <module>org.wso2.carbon.mashup.jsservices.custom-ui/4.0.0</module>
+                <module>org.wso2.carbon.mashup.request-processors.source/4.0.0</module>
+                <module>org.wso2.carbon.mashup.request-processors.gadget/4.0.0</module>
+                <module>org.wso2.carbon.mashup.request-processors.doc/4.0.0</module>
+                <module>org.wso2.carbon.mashup.request-processors.template/4.0.0</module>
             </modules>
 
     <dependencyManagement>
@@ -312,7 +312,7 @@
     </dependencyManagement>
 
     <properties>
-        <scriptengine.version.mashup>0.9.0-SNAPSHOT</scriptengine.version.mashup>
+        <scriptengine.version.mashup>0.9.0-ALPHA1</scriptengine.version.mashup>
         <axiom.osgi.version.range.mashup>${axiom.osgi.version.range}
         </axiom.osgi.version.range.mashup>
         <commons-logging.osgi.version.mashup>${commons-logging.version}

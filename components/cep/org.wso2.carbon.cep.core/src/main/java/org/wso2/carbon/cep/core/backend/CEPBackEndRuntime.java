@@ -89,5 +89,7 @@ public interface CEPBackEndRuntime {
      * Called after adding all inputs and queries
      */
     void init();
+
+    void shutdown();
 }
 

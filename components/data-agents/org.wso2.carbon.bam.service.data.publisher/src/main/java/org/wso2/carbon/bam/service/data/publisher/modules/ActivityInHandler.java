@@ -28,15 +28,14 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.WSDL2Constants;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.bam.data.publisher.util.BAMDataPublisherConstants;
-import org.wso2.carbon.bam.service.data.publisher.conf.EventingConfigData;
+import org.wso2.carbon.bam.data.publisher.util.PublisherUtil;
+import org.wso2.carbon.bam.service.data.publisher.conf.EventConfigNStreamDef;
 import org.wso2.carbon.bam.service.data.publisher.data.BAMServerInfo;
 import org.wso2.carbon.bam.service.data.publisher.data.Event;
 import org.wso2.carbon.bam.service.data.publisher.data.EventData;
@@ -44,9 +43,8 @@ import org.wso2.carbon.bam.service.data.publisher.data.PublishData;
 import org.wso2.carbon.bam.service.data.publisher.publish.EventPublisher;
 import org.wso2.carbon.bam.service.data.publisher.publish.ServiceAgentUtil;
 import org.wso2.carbon.bam.service.data.publisher.util.ActivityPublisherConstants;
-import org.wso2.carbon.bam.service.data.publisher.util.CommonConstants;
 import org.wso2.carbon.bam.service.data.publisher.util.TenantEventConfigData;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.core.util.SystemFilter;
 import org.wso2.carbon.statistics.StatisticsConstants;
 
 import javax.xml.namespace.QName;
@@ -54,38 +52,35 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
 
 
 public class ActivityInHandler extends AbstractHandler {
 
-    private static Log log = LogFactory.getLog(StatisticsHandler.class);
+    private static Log log = LogFactory.getLog(ActivityInHandler.class);
 
 
     public InvocationResponse invoke(MessageContext messageContext) throws AxisFault {
 
-        AxisConfiguration axisConfiguration = messageContext.getConfigurationContext().getAxisConfiguration();
-        int tenantID = SuperTenantCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
-        Map<Integer, EventingConfigData> tenantSpecificEventConfig = TenantEventConfigData.getTenantSpecificEventingConfigData();
-        EventingConfigData eventingConfigData = tenantSpecificEventConfig.get(tenantID);
+        int tenantID = PublisherUtil.getTenantId(messageContext);
+
+        Map<Integer, EventConfigNStreamDef> tenantSpecificEventConfig = TenantEventConfigData.getTenantSpecificEventingConfigData();
+        EventConfigNStreamDef eventingConfigData = tenantSpecificEventConfig.get(tenantID);
 
         if (eventingConfigData != null && eventingConfigData.isMsgDumpingEnable()) {
             Timestamp timestamp;
             AxisService service = messageContext.getAxisService();
-            Parameter adminServiceParam = service.getParameter(CommonConstants.ADMIN_SERVICE_PARAMETER);
-            Parameter hiddenServiceParam = service.getParameter(CommonConstants.HIDDEN_SERVICE_PARAMETER);
 
-            if (adminServiceParam == null && hiddenServiceParam == null) {
-
+            if (service == null || SystemFilter.isFilteredOutService(service.getAxisServiceGroup()) || service.isClientSide()) {
+                return InvocationResponse.CONTINUE;
+            } else {
                 SOAPFactory soapFactory = null;
                 SOAPHeaderBlock soapHeaderBlock = null;
                 SOAPEnvelope soapEnvelope = messageContext.getEnvelope();
                 String soapNamespaceURI = soapEnvelope.getNamespace().getNamespaceURI();
-                UUID activityUUID = UUID.randomUUID();
+                String activityUUID = getUniqueId();
 
                 if (messageContext.getMessageID() == null) {
-                    UUID msgUUID = UUID.randomUUID();
-                    messageContext.setMessageID(msgUUID.toString());
+                    messageContext.setMessageID(getUniqueId());
                 }
 
                 if (soapNamespaceURI.equals(SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI)) {
@@ -107,16 +102,16 @@ public class ActivityInHandler extends AbstractHandler {
                                 ActivityPublisherConstants.BAM_ACTIVITY_ID_HEADER_NAMESPACE_URI, "ns");
                         soapHeaderBlock = soapEnvelope.getHeader().addHeaderBlock(
                                 ActivityPublisherConstants.ACTIVITY_ID_HEADER_BLOCK_NAME, omNs);
-                        soapHeaderBlock.addAttribute(ActivityPublisherConstants.ACTIVITY_ID, activityUUID.toString(), null);
+                        soapHeaderBlock.addAttribute(ActivityPublisherConstants.ACTIVITY_ID, activityUUID, null);
                     } else {
                         OMElement element = (OMElement) itr.next();
                         String aid = element.getAttributeValue(new QName(ActivityPublisherConstants.ACTIVITY_ID));
                         if (aid != null) {
                             if (aid.equals("")) {
-                                element.addAttribute(ActivityPublisherConstants.ACTIVITY_ID, activityUUID.toString(), null);
+                                element.addAttribute(ActivityPublisherConstants.ACTIVITY_ID, activityUUID, null);
                             }
                         } else {
-                            element.addAttribute(ActivityPublisherConstants.ACTIVITY_ID, activityUUID.toString(), null);
+                            element.addAttribute(ActivityPublisherConstants.ACTIVITY_ID, activityUUID, null);
                         }
                     }
                 } else {
@@ -128,7 +123,7 @@ public class ActivityInHandler extends AbstractHandler {
                         soapHeaderBlock = soapEnvelope.getHeader().addHeaderBlock(
                                 ActivityPublisherConstants.ACTIVITY_ID_HEADER_BLOCK_NAME, omNs);
                         soapHeaderBlock.addAttribute(ActivityPublisherConstants.ACTIVITY_ID,
-                                                     activityUUID.toString(), null);
+                                                     activityUUID, null);
                     }
                 }
 
@@ -154,13 +149,14 @@ public class ActivityInHandler extends AbstractHandler {
                 publishData.setEventData(eventData);
                 publishData.setBamServerInfo(bamServerInfo);
 
-                if (isInOnlyMEP(messageContext)) {
-                    Event event = ServiceAgentUtil.makeEventList(publishData, eventingConfigData);
-                    EventPublisher publisher = new EventPublisher();
-                    publisher.publish(event, eventingConfigData);
-                } else {
-                    inMessageContext.setProperty(BAMDataPublisherConstants.PUBLISH_DATA, publishData);
+                if (!isInOnlyMEP(messageContext)) {
+                    inMessageContext.setProperty(BAMDataPublisherConstants.ACTIVITY_PUBLISH_DATA, publishData);
                 }
+
+                Event event = ServiceAgentUtil.makeEventList(publishData, eventingConfigData);
+                EventPublisher publisher = new EventPublisher();
+                publisher.publish(event, eventingConfigData);
+
             }
         }
         return InvocationResponse.CONTINUE;
@@ -168,21 +164,28 @@ public class ActivityInHandler extends AbstractHandler {
 
 
     private EventData addDetailsOfTheMessage(EventData eventData, Timestamp timestamp,
-                                                UUID randomUUID,
-                                                MessageContext messageContext) {
-        eventData.setActivityId(randomUUID.toString());
+                                             String randomUUID,
+                                             MessageContext messageContext) {
+        eventData.setActivityId(randomUUID);
         eventData.setTimestamp(timestamp);
-        String msgBody = null;
+        SOAPEnvelope envelope = messageContext.getEnvelope();
+
+        String soapBody = null;
+        String soapHeader = null;
         try {
-            msgBody = messageContext.getEnvelope().getBody().toString();
+            soapHeader = envelope.getHeader().toString();
+            soapBody = envelope.getBody().toString();
         } catch (OMException e) {
             log.warn("Exception occurred while getting soap envelop", e);
         }
-        eventData.setInMessageBody(msgBody);
+
+        eventData.setMessageDirection(BAMDataPublisherConstants.IN_DIRECTION);
+        eventData.setSOAPHeader(soapHeader);
+        eventData.setSOAPBody(soapBody);
         //eventData.setMessageDirection(ActivityPublisherConstants.ACTIVITY_DATA_MESSAGE_DIRECTION_IN);
         eventData.setServiceName(messageContext.getAxisService().getName());
         eventData.setOperationName(messageContext.getAxisOperation().getName().getLocalPart());
-        eventData.setInMessageId(messageContext.getMessageID());
+        eventData.setMessageId(messageContext.getMessageID());
 
         return eventData;
 
@@ -193,12 +196,16 @@ public class ActivityInHandler extends AbstractHandler {
 
         if (mep.equals(WSDL2Constants.MEP_URI_IN_ONLY) ||
             mep.equals(WSDL2Constants.MEP_URI_IN_OPTIONAL_OUT) ||
-            mep.equals(WSDL2Constants.MEP_URI_ROBUST_IN_ONLY) ) {
+            mep.equals(WSDL2Constants.MEP_URI_ROBUST_IN_ONLY)) {
 
             return true;
         }
 
         return false;
 
+    }
+
+    public String getUniqueId() {
+        return System.nanoTime() + "_" + Thread.currentThread().getId();
     }
 }

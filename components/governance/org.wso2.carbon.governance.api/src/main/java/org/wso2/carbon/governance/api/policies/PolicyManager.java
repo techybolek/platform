@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.policies.dataobjects.Policy;
+import org.wso2.carbon.governance.api.policies.dataobjects.PolicyImpl;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
@@ -73,7 +74,7 @@ public class PolicyManager {
     public Policy newPolicy(byte[] content, String name)
             throws RegistryException {
         String policyId = UUID.randomUUID().toString();
-        Policy policy = new Policy(policyId, name != null ? "name://" + name : null);
+        PolicyImpl policy = new PolicyImpl(policyId, name != null ? "name://" + name : null);
         policy.associateRegistry(registry);
         policy.setPolicyContent(RegistryUtils.decodeBytes(content));
         return policy;
@@ -89,13 +90,16 @@ public class PolicyManager {
      */
     public Policy newPolicy(String url) throws GovernanceException {
         String policyId = UUID.randomUUID().toString();
-        Policy policy = new Policy(policyId, url);
+        PolicyImpl policy = new PolicyImpl(policyId, url);
         policy.associateRegistry(registry);
         return policy;
     }
 
     /**
-     * Adds the given policy artifact to the registry.
+     * Adds the given policy artifact to the registry. Please do not use this method to update an
+     * existing artifact use the update method instead. If this method is used to update an existing
+     * artifact, all existing properties (such as lifecycle details) will be removed from the
+     * existing artifact.
      * 
      * @param policy the policy artifact.
      * 
@@ -103,7 +107,7 @@ public class PolicyManager {
      */
     public void addPolicy(Policy policy) throws GovernanceException {
         boolean succeeded = false;
-        String url = policy.getUrl();
+        String url = ((PolicyImpl)policy).getUrl();
         try {
             registry.beginTransaction();
             Resource policyResource = registry.newResource();
@@ -133,8 +137,8 @@ public class PolicyManager {
                 registry.importResource(tmpPath, url, policyResource);
             }
 //            policy.setId(policyResource.getUUID());
-            policy.updatePath();
-           // policy.loadPolicyDetails();
+            ((PolicyImpl)policy).updatePath();
+            ((PolicyImpl)policy).loadPolicyDetails();
             succeeded = true;
         } catch (RegistryException e) {
             String msg = "Error in adding the Policy. policy id: " + policy.getId() + ".";
@@ -185,7 +189,7 @@ public class PolicyManager {
             throw new GovernanceException(msg);
         }
         boolean succeeded = false;
-        String url = policy.getUrl();
+        String url = ((PolicyImpl)policy).getUrl();
         try {
             registry.beginTransaction();
 
@@ -201,9 +205,6 @@ public class PolicyManager {
             // setting the policy content
             setContent(policy, policyResource);
 
-            // remove the old policy resource.
-            registry.delete(oldPolicy.getPath());
-
             String tmpPath;
             if (policy.getQName() != null) {
                 tmpPath = "/" + policy.getQName().getLocalPart();
@@ -218,7 +219,7 @@ public class PolicyManager {
             policyResource.setUUID(policy.getId());
             registry.put(tmpPath, policyResource);
 //            policy.setId(policyResource.getUUID());
-            policy.updatePath();
+            ((PolicyImpl)policy).updatePath();
 
             succeeded = true;
         } catch (RegistryException e) {

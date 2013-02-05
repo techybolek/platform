@@ -19,12 +19,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.analytics.hive.conf.HiveConnectionManager;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
+import org.wso2.carbon.analytics.hive.web.HiveScriptStoreService;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.core.TaskManager;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.rssmanager.core.service.RSSManagerService;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 public class ServiceHolder {
@@ -38,6 +40,17 @@ public class ServiceHolder {
     private static TaskService taskService;
     private static HiveConnectionManager connectionManager;
     private static RSSManagerService rssManagerService;
+    private static RealmService realmService;
+
+    private static HiveScriptStoreService hiveScriptStoreService;
+
+    public static void setHiveScriptStoreService(HiveScriptStoreService scriptStoreService) {
+        hiveScriptStoreService = scriptStoreService;
+    }
+
+    public static HiveScriptStoreService getHiveScriptStoreService(){
+        return hiveScriptStoreService;
+    }
 
     public static void setHiveExecutorService(HiveExecutorService service) {
         hiveExecutorService = service;
@@ -70,16 +83,31 @@ public class ServiceHolder {
 
     public static void setTaskService(TaskService taskService) {
         ServiceHolder.taskService = taskService;
+        if (null != taskService) {
+            try {
+                taskService.registerTaskType(HiveConstants.HIVE_TASK);
+            } catch (TaskException e) {
+                log.error("Error while initializing TaskManager. Script scheduling may not" +
+                        " work properly..", e);
+            }
+        }
+    }
+
+    public static void setRealmService(RealmService realmSvc) {
+        realmService = realmSvc;
+    }
+
+    public static RealmService getRealmService() {
+        return realmService;
     }
 
     public static TaskManager getTaskManager() {
         TaskService taskService = ServiceHolder.getTaskService();
         try {
-            taskService.registerTaskType(HiveConstants.HIVE_TASK);
             return taskService.getTaskManager(HiveConstants.HIVE_TASK);
         } catch (TaskException e) {
             log.error("Error while initializing TaskManager. Script scheduling may not" +
-                      " work properly..", e);
+                    " work properly..", e);
             return null;
         }
 
@@ -105,8 +133,6 @@ public class ServiceHolder {
         rssManagerService = rssMgrService;
     }
 
-    public static RSSManagerService getRSSManagerService() {
-        return rssManagerService;
-    }
+
 
 }

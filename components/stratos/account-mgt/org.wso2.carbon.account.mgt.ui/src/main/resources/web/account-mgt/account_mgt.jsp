@@ -128,10 +128,7 @@
     usagePlan = org.wso2.carbon.account.mgt.ui.utils.Util.getUsagePlanName(config, session);
     if ("true".equals(request.getParameter("isDeactivated"))) {
         client.deactivate();
-        UsagePlanClient usagePlanClient = new UsagePlanClient(config, session);
         tenantDomain = (String) session.getAttribute("tenantDomain");
-        usagePlanClient.deactivateActiveUsagePlan(tenantDomain);
-
 %>
 
 <script type="text/javascript">

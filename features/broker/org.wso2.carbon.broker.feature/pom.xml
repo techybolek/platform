@@ -21,10 +21,12 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>broker-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.broker.feature</artifactId>
+    <version>4.0.5</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Broker Feature</name>
     <url>http://wso2.org</url>
@@ -33,9 +35,9 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.broker.server.feature</artifactId>
-            <version>${wso2carbon.version.broker}</version>
+            <version>${project.version}</version>
             <type>zip</type>
-        </dependency>       
+        </dependency>
     </dependencies>
 
     <build>
@@ -53,15 +55,15 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.broker</id>
-                            <propertiesFile>../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:${wso2carbon.version}
+                                <importFeatureDef>org.wso2.carbon.core:4.0.1
                                 </importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>
-                                    org.wso2.carbon:org.wso2.carbon.broker.server.feature
-                                </includedFeatureDef>                               
+                                    org.wso2.carbon:org.wso2.carbon.broker.server.feature:${project.version}
+                                </includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

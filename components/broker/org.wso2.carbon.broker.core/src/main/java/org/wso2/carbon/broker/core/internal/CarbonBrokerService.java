@@ -17,6 +17,8 @@
 package org.wso2.carbon.broker.core.internal;
 
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.broker.core.*;
 import org.wso2.carbon.broker.core.exception.BrokerEventProcessingException;
 
@@ -30,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CarbonBrokerService implements BrokerService {
 
+    private static Log log = LogFactory.getLog(CarbonBrokerService.class);
     private Map<String, BrokerType> brokerTypeMap;
 
     public CarbonBrokerService() {
@@ -61,25 +64,51 @@ public class CarbonBrokerService implements BrokerService {
         return brokerTypeMap.get(brokerType).getBrokerTypeDto().getPropertyList();
     }
 
-    public void subscribe(BrokerConfiguration brokerConfiguration,
+    public String subscribe(BrokerConfiguration brokerConfiguration,
                           String topicName,
                           BrokerListener brokerListener,
                           AxisConfiguration axisConfiguration) throws BrokerEventProcessingException {
         BrokerType brokerType = this.brokerTypeMap.get(brokerConfiguration.getType());
-        brokerType.subscribe(topicName, brokerListener, brokerConfiguration, axisConfiguration);
+        try {
+           return brokerType.subscribe(topicName, brokerListener, brokerConfiguration, axisConfiguration);
+        } catch (BrokerEventProcessingException e) {
+            log.error(e.getMessage(),e);
+            throw new BrokerEventProcessingException(e.getMessage(),e);
+        }
     }
 
     public void publish(BrokerConfiguration brokerConfiguration,
                         String topicName, Object object) throws BrokerEventProcessingException {
 
         BrokerType brokerType = this.brokerTypeMap.get(brokerConfiguration.getType());
-        brokerType.publish(topicName, object, brokerConfiguration);
+        try {
+            brokerType.publish(topicName, object, brokerConfiguration);
+        } catch (BrokerEventProcessingException e) {
+            log.error(e.getMessage(),e);
+            throw new BrokerEventProcessingException(e.getMessage(),e);
+        }
+    }
+
+    @Override
+    public void testConnection(BrokerConfiguration brokerConfiguration) throws BrokerEventProcessingException {
+        BrokerType brokerType = this.brokerTypeMap.get(brokerConfiguration.getType());
+        try {
+            brokerType.testConnection(brokerConfiguration);
+        } catch (BrokerEventProcessingException e) {
+            log.error(e.getMessage(),e);
+            throw new BrokerEventProcessingException(e.getMessage(),e);
+        }
     }
 
     public void unsubscribe(String topicName,
                             BrokerConfiguration brokerConfiguration,
-                            AxisConfiguration axisConfiguration) throws BrokerEventProcessingException {
+                            AxisConfiguration axisConfiguration,String subscriptionId) throws BrokerEventProcessingException {
         BrokerType brokerType = this.brokerTypeMap.get(brokerConfiguration.getType());
-        brokerType.unsubscribe(topicName, brokerConfiguration, axisConfiguration);
+        try {
+            brokerType.unsubscribe(topicName, brokerConfiguration, axisConfiguration,subscriptionId);
+        } catch (BrokerEventProcessingException e) {
+            log.error(e.getMessage(), e);
+            throw new BrokerEventProcessingException(e.getMessage(),e);
+        }
     }
 }

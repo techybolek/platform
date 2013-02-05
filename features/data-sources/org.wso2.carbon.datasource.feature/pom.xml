@@ -22,13 +22,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>datasource-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.datasource.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Datasource Management Feature</name>
+    <version>4.0.5</version>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for Datasource Management functionality</description>
 
@@ -42,7 +44,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.datasource.ui.feature</artifactId>
-            <version>${project.version}</version>
+            <version>4.0.0</version>
             <type>zip</type>
 	    </dependency>
     </dependencies>
@@ -62,13 +64,13 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.datasource</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:4.0.5</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.datasource.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.datasource.ui.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.datasource.ui.feature:4.0.0</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

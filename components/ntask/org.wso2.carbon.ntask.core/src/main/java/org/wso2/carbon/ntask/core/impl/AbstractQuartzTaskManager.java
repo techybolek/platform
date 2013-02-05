@@ -38,13 +38,14 @@ import org.quartz.Trigger.TriggerState;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.quartz.spi.OperableTrigger;
 import org.wso2.carbon.ntask.common.TaskConstants;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.common.TaskException.Code;
 import org.wso2.carbon.ntask.core.TaskInfo;
 import org.wso2.carbon.ntask.core.TaskManager;
 import org.wso2.carbon.ntask.core.TaskRepository;
+import org.wso2.carbon.ntask.core.TaskUtils;
 import org.wso2.carbon.ntask.core.TaskInfo.TriggerInfo;
 import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
 
@@ -73,12 +74,16 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
 		return scheduler;
 	}
 	
+	public int getTenantId() {
+		return this.getTaskRepository().getTenantId();
+	}
+	
+	public String getTaskType() {
+		return this.getTaskRepository().getTasksType();
+	}
+	
 	protected TaskState getLocalTaskState(String taskName) throws TaskException {
 		String taskGroup = this.getTenantTaskGroup();
-		if (!this.containsLocalTask(taskName, taskGroup)) {
-			throw new TaskException("Non-existing task with name: " + taskName + 
-					", to check the state.", Code.NO_TASK_EXISTS);
-		}
 		try {
 			return triggerStateToTaskState(this.getScheduler().getTriggerState(
 					new TriggerKey(taskName, taskGroup)));
@@ -110,7 +115,7 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
 	
 	private TaskState triggerStateToTaskState(TriggerState triggerState) {
 		if (triggerState == TriggerState.NONE) {
-			return TaskState.STOPPED;
+			return TaskState.NONE;
 		} else if (triggerState == TriggerState.PAUSED) {
 			return TaskState.PAUSED;
 		} else if (triggerState == TriggerState.COMPLETE) {
@@ -118,23 +123,27 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
 		} else if (triggerState == TriggerState.ERROR) {
 			return TaskState.ERROR;
 		} else if (triggerState == TriggerState.NORMAL) {
-			return TaskState.STARTED;
+			return TaskState.NORMAL;
+		} else if (triggerState == TriggerState.BLOCKED) {
+			return TaskState.BLOCKED;
 		} else {
 			return TaskState.UNKNOWN;
 		}
 	}
 	
-	protected synchronized void deleteLocalTask(String taskName, boolean removeRegistration) throws TaskException {
+	protected synchronized boolean deleteLocalTask(String taskName, boolean removeRegistration) throws TaskException {
 		String taskGroup = this.getTenantTaskGroup();
+		boolean result = false;
 		try {
-		    this.getScheduler().deleteJob(new JobKey(taskName, taskGroup));
+		    result = this.getScheduler().deleteJob(new JobKey(taskName, taskGroup));
 		} catch (SchedulerException e) {
 			throw new TaskException("Error in deleting task with name: " + taskName,
 					Code.UNKNOWN, e);
 		}
 		if (removeRegistration) {
-		    this.getTaskRepository().deleteTask(taskName);
+			result &= this.getTaskRepository().deleteTask(taskName);
 		}
+		return result;
 	}
 	
 	protected synchronized void pauseLocalTask(String taskName) throws TaskException {
@@ -148,7 +157,7 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
 	}
 		
 	private String getTenantTaskGroup() {
-		return "TENANT" + SuperTenantCarbonContext.getCurrentContext().getTenantId();
+		return "TENANT_" + this.getTenantId() + "_TYPE_" + this.getTaskType();
 	}
 	
 	private JobDataMap getJobDataMapFromTaskInfo(TaskInfo taskInfo) {
@@ -170,6 +179,12 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
 	}
 	
 	protected synchronized void scheduleLocalTask(String taskName) throws TaskException {
+		boolean paused = TaskUtils.isTaskPaused(this.getTaskRepository(), taskName);
+		this.scheduleLocalTask(taskName, paused);
+	}
+	
+	protected synchronized void scheduleLocalTask(String taskName, 
+			boolean paused) throws TaskException {
 		TaskInfo taskInfo = this.getTaskRepository().getTask(taskName);
 		String taskGroup = this.getTenantTaskGroup();
 		if (taskInfo == null) {
@@ -187,7 +202,11 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
 		Trigger trigger = this.getTriggerFromInfo(taskName, taskGroup, taskInfo.getTriggerInfo());
 		try {
 			this.getScheduler().scheduleJob(job, trigger);
-			log.info("Task scheduled: " + taskName);
+			if (paused) {
+				this.getScheduler().pauseJob(job.getKey());
+			}
+			log.info("Task scheduled: [" + this.getTenantId() + 
+					"][" + this.getTaskType() + "][" + taskName + "]");
 		} catch (SchedulerException e) {
 			throw new TaskException("Error in scheduling task with name: " + taskName,
 					Code.UNKNOWN, e);
@@ -227,11 +246,14 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
 		TaskInfo taskInfo = this.getTaskRepository().getTask(taskName);
 		Trigger trigger = this.getTriggerFromInfo(taskName, taskGroup, taskInfo.getTriggerInfo());
 		try {
+			boolean paused = TaskUtils.isTaskPaused(this.getTaskRepository(), taskName);
 			Date resultDate = this.getScheduler().rescheduleJob(
 					new TriggerKey(taskName, taskGroup), trigger);
 			if (resultDate == null) {
 				/* do normal schedule */
-				this.scheduleLocalTask(taskName);
+				this.scheduleLocalTask(taskName, paused);
+			} else if (paused) {
+				this.pauseLocalTask(taskName);
 			}
 		} catch (SchedulerException e) {
 			throw new TaskException("Error in rescheduling task with name: " + taskName,
@@ -246,6 +268,11 @@ public abstract class AbstractQuartzTaskManager implements TaskManager {
 					Code.NO_TASK_EXISTS);
 		}
 		try {
+			Trigger trigger = this.getScheduler().getTrigger(new TriggerKey(taskName, taskGroup));
+			if (trigger instanceof OperableTrigger) {
+				((OperableTrigger) trigger).setNextFireTime(
+						((OperableTrigger) trigger).getFireTimeAfter(null));
+			}
 			this.getScheduler().resumeJob(new JobKey(taskName, taskGroup));
 		} catch (SchedulerException e) {
 			throw new TaskException("Error in resuming task with name: " + taskName,

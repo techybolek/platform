@@ -26,6 +26,7 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.securevault.SecretResolver;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -259,9 +260,10 @@ public class CommonUtil {
                 formatter = new SimpleDateFormat("yyyy");
                 value += " " + formatter.format(dateToParse);
             }
-            value = "on" + value;
+            value = "on " + value;
         }
-        return value;
+
+        return new StringBuilder(value).append(" (on ").append(dateToParse.toString()).append(")").toString();
     }
 
     /**
@@ -380,5 +382,19 @@ public class CommonUtil {
             list.add(e.getKey() + "|" + e.getValue());
         }
         return list.toArray(new String[list.size()]);
+    }
+
+    public static String getResolvedPassword(SecretResolver secretResolver,
+                                             String configName, String password) {
+
+        if (secretResolver != null && secretResolver.isInitialized()) {
+            if (secretResolver.isTokenProtected("wso2registry." + configName + ".password")) {
+                return secretResolver.resolve("wso2registry." + configName + ".password");
+            } else {
+                return password;
+            }
+        } else {
+            return password;
+        }
     }
 }

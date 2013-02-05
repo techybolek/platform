@@ -75,7 +75,9 @@ public class RequestToken {
     private String userName;
 
     // The password used to login to the passive STS
-    private String password;   
+    private String password;
+
+    private String dialect;
     
     public String getAttributes() {
         return attributes;
@@ -181,4 +183,11 @@ public class RequestToken {
         this.requestPointer = requestPointer;
     }
 
+    public String getDialect() {
+        return dialect;
+    }
+
+    public void setDialect(String dialect) {
+        this.dialect = dialect;
+    }
 }

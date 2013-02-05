@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 
-import org.wso2.carbon.identity.entitlement.policy.PolicyMetaDataFinderModule;
+import org.wso2.carbon.identity.entitlement.pap.PolicyEditorDataFinderModule;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.xml.namespace.QName;
@@ -241,7 +241,7 @@ public class PIPExtensionBuilder {
             while (metaDataFinderIterator.hasNext()) {
                 OMElement finder = null;
                 String clazzName = null;
-                PolicyMetaDataFinderModule metaDataFinderModule = null;
+                PolicyEditorDataFinderModule metaDataFinderModule = null;
                 finder = (OMElement) metaDataFinderIterator.next();
                 clazzName = finder.getAttribute(new QName(LOCAL_NAME_META_DATA_FINDER_CLASS))
                         .getAttributeValue();
@@ -260,7 +260,7 @@ public class PIPExtensionBuilder {
 
                 try{
                     Class clazz = Thread.currentThread().getContextClassLoader().loadClass(clazzName);
-                    metaDataFinderModule = (PolicyMetaDataFinderModule) clazz.newInstance();
+                    metaDataFinderModule = (PolicyEditorDataFinderModule) clazz.newInstance();
                     metaDataFinderModule.init(properties);
                 } catch (ClassNotFoundException e) {
                     log.error("Error while initializing resource designator : " + clazzName);

@@ -32,6 +32,9 @@ import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 
 import java.io.File;
+import java.lang.Integer;
+import java.lang.String;
+import java.lang.System;
 
 /**
  * @scr.component name="org.wso2.carbon.cassandra.server.component" immediate="true"
@@ -58,18 +61,17 @@ public class CassandraServerDSComponent {
      * WSO2 Carbon Port for carbon.xml
      */
     private static int CARBON_DEFAULT_PORT_OFFSET = 0;
-    private static String CARBON_CONFIG_CASSANDRA_RPC_PORT = "Ports.EmbeddedCassandra.RPCPort";
-    private static String CARBON_CONFIG_CASSANDRA_STORAGE_PORT = "Ports.EmbeddedCassandra.StoragePort";
     private static String CARBON_CONFIG_PORT_OFFSET = "Ports.Offset";
 
-
     private static String DISABLE_CASSANDRA_SERVER_STARTUP = "disable.cassandra.server.startup";
+    private static final String DEFAULT_CASSANDRA_RPC_PORT = "cassandra.rpc.port";
+    private static final String DEFAULT_CASSANDRA_STORAGE_PORT = "cassandra.storage.port";
+    private static final String DEFAULT_CASSANDRA_SSL_STORAGE_PORT = "cassandra.ssl.storage.port";
 
     private CassandraServerController cassandraServerController;
     private RealmService realmService;
     private AuthenticationService authenticationService;
     private ServerConfigurationService serverConfigurationService;
-
 
     protected void activate(ComponentContext componentContext) {
         try {
@@ -88,66 +90,28 @@ public class CassandraServerDSComponent {
             System.setProperty("cassandra.config", cassandraConfLocation);
             System.setProperty("cassandra-foreground", "yes");
             int carbonPortOffset = readPortOffset();
-            int cassandrRPCPort = CASSANDRA_RPC_PORT + carbonPortOffset;
-            System.setProperty("cassandra.rpc_port", Integer.toString(cassandrRPCPort));
-            int cassandraStoragePort = CASSANDRA_STORAGE_PORT + carbonPortOffset;
+
+            int cassandraRPCPort = readPortFromSystemVar(CASSANDRA_RPC_PORT, carbonPortOffset, DEFAULT_CASSANDRA_RPC_PORT);
+            System.setProperty("cassandra.rpc_port", Integer.toString(cassandraRPCPort));
+
+            int cassandraStoragePort = readPortFromSystemVar(CASSANDRA_STORAGE_PORT, carbonPortOffset, DEFAULT_CASSANDRA_STORAGE_PORT);
             System.setProperty("cassandra.storage_port", Integer.toString(cassandraStoragePort));
-            int cassandraSSLStoragePort = CASSANDRA_SSL_STORAGE_PORT + carbonPortOffset;
-            System.setProperty("cassandra.ssl_storage_port", Integer.toString(cassandraStoragePort));
 
-
-            //set Cassnadra ports form carbon.xml
-
-//            int rpcPort = 9160;
-//            String carbonCassandraRPCPort = readRPCPortFromCarbonConfig();
-//            int carbonPortOffset = readPortOffset();
-//            try {
-//                if (!carbonCassandraRPCPort.isEmpty()) {
-//                    rpcPort = Integer.parseInt(carbonCassandraRPCPort) + carbonPortOffset;
-//                } else {
-//                    rpcPort += carbonPortOffset;
-//                }
-//                if (rpcPort > 0 && rpcPort < 65535) {
-//                    System.setProperty("cassandra.rpcport", Integer.toString(rpcPort));
-//                } else {
-//                    log.error("Error setting Cassandra RPC port : Port out of range :" + rpcPort);
-//                }
-//            } catch (NumberFormatException e) {
-//                log.debug("Error Reading Cassandra RPC Port");
-//            }
-//
-//            int storagePort = 0;
-//            String carbonCassandraStoragePort = readStoragePortFromCarbonConfig();
-//
-//            if (!carbonCassandraStoragePort.isEmpty()) {
-//                try {
-//                    storagePort = Integer.parseInt(carbonCassandraStoragePort) + carbonPortOffset;
-//                    if (storagePort > 0 && storagePort < 65535) {
-//                        System.setProperty("cassandra.storageport", Integer.toString(storagePort));
-//                    }
-//                } catch (NumberFormatException e) {
-//                    log.debug("Error Reading Cassandra RPC Port");
-//                }
-//            }
-//
+            int cassandraSSLStoragePort = readPortFromSystemVar(CASSANDRA_SSL_STORAGE_PORT, carbonPortOffset, DEFAULT_CASSANDRA_SSL_STORAGE_PORT);
+            System.setProperty("cassandra.ssl_storage_port", Integer.toString(cassandraSSLStoragePort));
 
             cassandraServerController = new CassandraServerController();
-
             //register OSGI service
-
             CassandraServerService cassandraServerService =
                     new CassandraServerServiceImpl(cassandraServerController);
             componentContext.getBundleContext().registerService(
                     CassandraServerService.class.getName(), cassandraServerService, null);
-
+            //Disable Cassandra server
             String disableServerStartup = System.getProperty(DISABLE_CASSANDRA_SERVER_STARTUP);
-
-
             if ("true".equals(disableServerStartup)) {
                 log.debug("Cassandra server is not started in service activator");
                 return;
             }
-
             cassandraServerController.start();
         } catch (Throwable throwable) {
             throwable.printStackTrace();
@@ -191,9 +155,9 @@ public class CassandraServerDSComponent {
     }
 
     /**
-     * Checks the existence of the cassandra conf
+     * Checks the existence of the cassandra.yaml
      *
-     * @return true if it is there in advanced directory
+     * @return true if cassandra.yaml is in conf/etc directory
      */
     private boolean isConfigurationExists() {
         String carbonHome = System.getProperty(ServerConstants.CARBON_HOME);
@@ -206,25 +170,10 @@ public class CassandraServerDSComponent {
         }
     }
 
-//    /**
-//        * Read port from carbon.xml
-//        *
-//        * @return
-//        */
-//    private String readRPCPortFromCarbonConfig() {
-//        ServerConfiguration carbonConfig = ServerConfiguration.getInstance();
-//        String port = carbonConfig.getFirstProperty(CARBON_CONFIG_CASSANDRA_RPC_PORT);
-//
-//        return ((port != null) ? port.trim() : "");
-//    }
-//
-//    private String readStoragePortFromCarbonConfig() {
-//        ServerConfiguration carbonConfig = ServerConfiguration.getInstance();
-//        String port = carbonConfig.getFirstProperty(CARBON_CONFIG_CASSANDRA_STORAGE_PORT);
-//
-//        return ((port != null) ? port.trim() : "");
-//    }
-
+    /**
+     * Read Carbon Server port offset
+     * @return offset number
+     */
     private int readPortOffset() {
         ServerConfiguration carbonConfig = ServerConfiguration.getInstance();
         String portOffset = carbonConfig.getFirstProperty(CARBON_CONFIG_PORT_OFFSET);
@@ -236,5 +185,24 @@ public class CassandraServerDSComponent {
         }
     }
 
-
+    /**
+     * Return Cassandra server ports with carbon offset
+     * @param defaultPort  default port
+     * @param carbonPortOffset Carbon server offset
+     * @param systemVar System variable name
+     * @return final port with or without carbon offset.
+     */
+    private int readPortFromSystemVar(int defaultPort, int carbonPortOffset, String systemVar) {
+        String port = System.getProperty(systemVar);
+        int portNum = 0;
+        if (port != null && !port.isEmpty()) {
+            portNum = Integer.parseInt(port);
+        }
+        if (65537 > portNum && portNum > 0) {
+            portNum = portNum + carbonPortOffset;
+        } else {
+            portNum = defaultPort + carbonPortOffset;
+        }
+        return portNum;
+    }
 }

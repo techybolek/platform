@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManager;
 import org.wso2.carbon.apimgt.api.model.*;
@@ -30,15 +29,16 @@ import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
-import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.user.core.AuthorizationManager;
+import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 
-import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -46,17 +46,20 @@ import java.util.*;
  * the governance system registry for storing APIs and related metadata.
  */
 public abstract class AbstractAPIManager implements APIManager {
-    
+
     protected Log log = LogFactory.getLog(getClass());
-    
+
     protected Registry registry;
     protected ApiMgtDAO apiMgtDAO;
+
 
     public AbstractAPIManager() throws APIManagementException {
         apiMgtDAO = new ApiMgtDAO();
         try {
             this.registry = ServiceReferenceHolder.getInstance().
                     getRegistryService().getGovernanceSystemRegistry();
+            UserRegistry configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry();
+            registerCustomQueries(configRegistry,"admin");
         } catch (RegistryException e) {
             handleException("Error while obtaining registry objects", e);
         }
@@ -64,11 +67,142 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public AbstractAPIManager(String username) throws APIManagementException {
         apiMgtDAO = new ApiMgtDAO();
+        UserRegistry configRegistry;
         try {
-            this.registry = ServiceReferenceHolder.getInstance().
-                    getRegistryService().getGovernanceUserRegistry(username);
+            if (username == null) {
+                this.registry = ServiceReferenceHolder.getInstance().
+                        getRegistryService().getGovernanceUserRegistry();
+                configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
+                        getConfigSystemRegistry();
+            } else {
+                this.registry = ServiceReferenceHolder.getInstance().
+                        getRegistryService().getGovernanceUserRegistry(username);
+                configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
+                        getConfigUserRegistry(username);
+            }
+            ServiceReferenceHolder.setUserRealm(ServiceReferenceHolder.getInstance().
+                    getRegistryService().getConfigSystemRegistry().getUserRealm());
+            registerCustomQueries(configRegistry, username);
         } catch (RegistryException e) {
             handleException("Error while obtaining registry objects", e);
+        }
+    }
+
+    /**
+     * method to register custom registry queries
+     * @param registry  Registry instance to use
+     * @throws RegistryException n error
+     */
+    private void registerCustomQueries(UserRegistry registry, String username)
+            throws RegistryException, APIManagementException {
+        String tagsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/tag-summary";
+        String latestAPIsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/latest-apis";
+        String resourcesByTag = RegistryConstants.QUERIES_COLLECTION_PATH + "/resource-by-tag";
+        if (username == null) {
+            try {
+                UserRealm realm = ServiceReferenceHolder.getUserRealm();
+                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(realm);
+                String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + "/repository");
+                authorizationManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
+
+            } catch (UserStoreException e) {
+                handleException("Error while setting the permissions", e);
+            }
+        }
+
+        if (!registry.resourceExists(tagsQueryPath)) {
+            Resource resource = registry.newResource();
+
+            //Tag Search Query
+            //'MOCK_PATH' used to bypass ChrootWrapper -> filterSearchResult. A valid registry path is
+            // a must for executeQuery results to be passed to client side
+            String sql1 =
+                    "SELECT  " +
+                    "   '/_system/governance/repository' AS MOCK_PATH, " +
+                    "   RT.REG_TAG_NAME AS TAG_NAME, " +
+                    "   COUNT(RT.REG_TAG_NAME) AS USED_COUNT " +
+                    "FROM " +
+                    "   REG_RESOURCE_TAG RRT, " +
+                    "   REG_TAG RT, " +
+                    "   REG_RESOURCE R, " +
+                    "   REG_RESOURCE_PROPERTY RRP, " +
+                    "   REG_PROPERTY RP " +
+                    "WHERE " +
+                    "   RT.REG_ID = RRT.REG_TAG_ID  " +
+                    "   AND R.REG_MEDIA_TYPE = 'application/vnd.wso2-api+xml' " +
+                    "   AND RRT.REG_VERSION = R.REG_VERSION " +
+                    "   AND RRP.REG_VERSION = R.REG_VERSION " +
+                    "   AND RP.REG_NAME = 'STATUS' " +
+                    "   AND RRP.REG_PROPERTY_ID = RP.REG_ID " +
+                    "   AND (RP.REG_VALUE !='DEPRECATED' AND RP.REG_VALUE !='CREATED') " +
+                    "GROUP BY " +
+                    "   RT.REG_TAG_NAME";
+            resource.setContent(sql1);
+            resource.setMediaType(RegistryConstants.SQL_QUERY_MEDIA_TYPE);
+            resource.addProperty(RegistryConstants.RESULT_TYPE_PROPERTY_NAME,
+                                 RegistryConstants.TAG_SUMMARY_RESULT_TYPE);
+            registry.put(tagsQueryPath, resource);
+        }
+        if (!registry.resourceExists(latestAPIsQueryPath)) {
+            //Recently added APIs
+            Resource resource = registry.newResource();
+//            String sql =
+//                    "SELECT " +
+//                    "   RR.REG_PATH_ID," +
+//                    "   RR.REG_NAME " +
+//                    "FROM " +
+//                    "   REG_RESOURCE RR " +
+//                    "WHERE " +
+//                    "   RR.REG_MEDIA_TYPE = 'application/vnd.wso2-api+xml' " +
+//                    "ORDER BY " +
+//                    "   RR.REG_LAST_UPDATED_TIME DESC ";
+            String sql =
+                    "SELECT " +
+                    "   RR.REG_PATH_ID AS REG_PATH_ID, " +
+                    "   RR.REG_NAME AS REG_NAME " +
+                    "FROM " +
+                    "   REG_RESOURCE RR, " +
+                    "   REG_RESOURCE_PROPERTY RRP, " +
+                    "   REG_PROPERTY RP " +
+                    "WHERE " +
+                    "   RR.REG_MEDIA_TYPE = 'application/vnd.wso2-api+xml' " +
+                    "   AND RRP.REG_VERSION = RR.REG_VERSION " +
+                    "   AND RP.REG_NAME = 'STATUS' " +
+                    "   AND RRP.REG_PROPERTY_ID = RP.REG_ID " +
+                    "   AND (RP.REG_VALUE !='DEPRECATED' AND RP.REG_VALUE !='CREATED') " +
+                    "ORDER BY " +
+                    "   RR.REG_LAST_UPDATED_TIME " +
+                    "DESC ";
+            resource.setContent(sql);
+            resource.setMediaType(RegistryConstants.SQL_QUERY_MEDIA_TYPE);
+            resource.addProperty(RegistryConstants.RESULT_TYPE_PROPERTY_NAME,
+                                 RegistryConstants.RESOURCES_RESULT_TYPE);
+            registry.put(latestAPIsQueryPath, resource);
+        }
+        if(!registry.resourceExists(resourcesByTag)){
+            Resource resource = registry.newResource();
+            String sql =
+                    "SELECT " +
+                    "   '/_system/governance/repository' AS MOCK_PATH, " +
+                    "   R.REG_UUID AS REG_UUID " +
+                    "FROM " +
+                    "   REG_RESOURCE_TAG RRT, " +
+                    "   REG_TAG RT, " +
+                    "   REG_RESOURCE R, " +
+                    "   REG_PATH RP " +
+                    "WHERE " +
+                    "   RT.REG_TAG_NAME = ? "+
+                    "   AND R.REG_MEDIA_TYPE = 'application/vnd.wso2-api+xml' " +
+                    "   AND RP.REG_PATH_ID = R.REG_PATH_ID " +
+                    "   AND RT.REG_ID = RRT.REG_TAG_ID " +
+                    "   AND RRT.REG_VERSION = R.REG_VERSION ";
+
+            resource.setContent(sql);
+            resource.setMediaType(RegistryConstants.SQL_QUERY_MEDIA_TYPE);
+            resource.addProperty(RegistryConstants.RESULT_TYPE_PROPERTY_NAME,
+                                 RegistryConstants.RESOURCE_UUID_RESULT_TYPE);
+            registry.put(resourcesByTag, resource);
         }
     }
 
@@ -81,10 +215,10 @@ public abstract class AbstractAPIManager implements APIManager {
 
         try {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
+                                                                                APIConstants.API_KEY);
             GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
             for (GenericArtifact artifact : artifacts) {
-                apiSortedList.add(APIUtil.getAPI(artifact, registry));
+                apiSortedList.add(APIUtil.getAPI(artifact));
             }
 
         } catch (RegistryException e) {
@@ -99,7 +233,7 @@ public abstract class AbstractAPIManager implements APIManager {
         String apiPath = APIUtil.getAPIPath(identifier);
         try {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
+                                                                                APIConstants.API_KEY);
             Resource apiResource = registry.get(apiPath);
             String artifactId = apiResource.getUUID();
             if (artifactId == null) {
@@ -114,10 +248,28 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
+    public API getAPI(String apiPath) throws APIManagementException {
+        try {
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                                                                                APIConstants.API_KEY);
+            Resource apiResource = registry.get(apiPath);
+            String artifactId = apiResource.getUUID();
+            if (artifactId == null) {
+                throw new APIManagementException("artifact id is null for : " + apiPath);
+            }
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
+            return APIUtil.getAPI(apiArtifact);
+
+        } catch (RegistryException e) {
+            handleException("Failed to get API from : " + apiPath, e);
+            return null;
+        }
+    }
+
     public boolean isAPIAvailable(APIIdentifier identifier) throws APIManagementException {
         String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
+                      identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                      identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
         try {
             return registry.resourceExists(path);
         } catch (RegistryException e) {
@@ -131,7 +283,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         Set<String> versionSet = new HashSet<String>();
         String apiPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                providerName + RegistryConstants.PATH_SEPARATOR + apiName;
+                         providerName + RegistryConstants.PATH_SEPARATOR + apiName;
         try {
             Resource resource = registry.get(apiPath);
             if (resource instanceof Collection) {
@@ -141,69 +293,46 @@ public abstract class AbstractAPIManager implements APIManager {
                     return versionSet;
                 }
                 for (String path : versionPaths) {
-                    versionSet.add(path = path.substring(apiPath.length() + 1));
+                    versionSet.add(path.substring(apiPath.length() + 1));
                 }
             } else {
                 throw new APIManagementException("API version must be a collection " + apiName);
             }
         } catch (RegistryException e) {
-            handleException("Failed to get versions for API: " + apiName, e);            
+            handleException("Failed to get versions for API: " + apiName, e);
         }
         return versionSet;
     }
 
-    public String addIcon(APIIdentifier identifier, InputStream in,
-                        String contentType) throws APIManagementException {
+    public String addIcon(String resourcePath, Icon icon) throws APIManagementException {
         try {
             Resource thumb = registry.newResource();
-            thumb.setContentStream(in);
-            thumb.setMediaType(contentType);
-
-            String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                    identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
-
-            String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
-
-            AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
-                    getRegistryService().getUserRealm(IdentityUtil.getTenantIdOFUser(
-                    identifier.getProviderName())).getAuthorizationManager();
-
-            registry.put(thumbPath, thumb);
-
-            if (!accessControlAdmin.isRoleAuthorized(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
-                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + thumbPath, ActionConstants.GET)) {
-                // Can we get rid of this?
-                accessControlAdmin.authorizeRole(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
-                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + thumbPath, ActionConstants.GET);
-            }
-
+            thumb.setContentStream(icon.getContent());
+            thumb.setMediaType(icon.getContentType());
+            registry.put(resourcePath, thumb);
             return RegistryConstants.PATH_SEPARATOR + "registry"
-                    + RegistryConstants.PATH_SEPARATOR + "resource"
-                    + RegistryConstants.PATH_SEPARATOR + "_system"
-                    + RegistryConstants.PATH_SEPARATOR + "governance"
-                    + thumbPath;
+                   + RegistryConstants.PATH_SEPARATOR + "resource"
+                   + RegistryConstants.PATH_SEPARATOR + "_system"
+                   + RegistryConstants.PATH_SEPARATOR + "governance"
+                   + resourcePath;
         } catch (RegistryException e) {
             handleException("Error while adding the icon image to the registry", e);
-        } catch (UserStoreException e) {
-            handleException("Error while obtaining the authorization manager", e);
-        } catch (IdentityException e) {
-            handleException("Error while checking user permissions", e);
         }
         return null;
     }
 
     public List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException {
         List<Documentation> documentationList = new ArrayList<Documentation>();
-        String apiResourcePath =APIUtil.getAPIPath(apiId);
+        String apiResourcePath = APIUtil.getAPIPath(apiId);
         try {
             Association[] docAssociations = registry.getAssociations(apiResourcePath,
-                    APIConstants.DOCUMENTATION_ASSOCIATION);
+                                                                     APIConstants.DOCUMENTATION_ASSOCIATION);
             for (Association association : docAssociations) {
                 String docPath = association.getDestinationPath();
+
                 Resource docResource = registry.get(docPath);
                 GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
-                        APIConstants.DOCUMENTATION_KEY);
+                                                                                    APIConstants.DOCUMENTATION_KEY);
                 GenericArtifact docArtifact = artifactManager.getGenericArtifact(
                         docResource.getUUID());
                 Documentation doc = APIUtil.getDocumentation(docArtifact);
@@ -216,19 +345,58 @@ public abstract class AbstractAPIManager implements APIManager {
         return documentationList;
     }
 
+    public List<Documentation> getAllDocumentation(APIIdentifier apiId,String loggedUsername) throws APIManagementException {
+        List<Documentation> documentationList = new ArrayList<Documentation>();
+        String apiResourcePath = APIUtil.getAPIPath(apiId);
+        try {
+            Association[] docAssociations = registry.getAssociations(apiResourcePath,
+                                                                     APIConstants.DOCUMENTATION_ASSOCIATION);
+            for (Association association : docAssociations) {
+                String docPath = association.getDestinationPath();
+                UserRealm realm = ServiceReferenceHolder.getUserRealm();
+                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(realm);
+                String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + docPath);
+                boolean checkAuthorized;
+                if(loggedUsername==""){
+                    checkAuthorized=authorizationManager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE,path,ActionConstants.GET);
+                }else{
+                    checkAuthorized= authorizationManager.isUserAuthorized(loggedUsername,path,ActionConstants.GET);
+                }
+                String apiArtifactId=null;
+                Resource docResource = null;
+                if(checkAuthorized){
+                    docResource = registry.get(docPath);
+
+                }
+                if (docResource != null) {
+                    GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
+                                                                                        APIConstants.DOCUMENTATION_KEY);
+                    GenericArtifact docArtifact = artifactManager.getGenericArtifact(
+                            docResource.getUUID());
+                    Documentation doc = APIUtil.getDocumentation(docArtifact);
+                    doc.setLastUpdated(docResource.getLastModified());
+                    documentationList.add(doc);
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Failed to get documentations for api ", e);
+        } catch (UserStoreException e) {
+            handleException("Failed to get documentations for api ", e);
+        }
+        return documentationList;
+    }
+
     public Documentation getDocumentation(APIIdentifier apiId, DocumentationType docType,
                                           String docName) throws APIManagementException {
         Documentation documentation = null;
         String docPath = APIUtil.getAPIDocPath(apiId) + docName;
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                APIConstants.DOCUMENTATION_KEY);
+                                                                            APIConstants.DOCUMENTATION_KEY);
         try {
-            Association[] associations = registry.getAssociations(docPath, docType.getType());
-            for (Association association : associations) {
-                Resource docResource = registry.get(association.getSourcePath());
-                GenericArtifact artifact = artifactManager.getGenericArtifact(docResource.getId());
-                documentation = APIUtil.getDocumentation(artifact);
-            }
+            Resource docResource = registry.get(docPath);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(docResource.getUUID());
+            documentation = APIUtil.getDocumentation(artifact);
         } catch (RegistryException e) {
             handleException("Failed to get documentation details", e);
         }
@@ -238,14 +406,16 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getDocumentationContent(APIIdentifier identifier, String documentationName)
             throws APIManagementException {
         String contentPath = APIUtil.getAPIDocPath(identifier) +
-                APIConstants.INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR +
-                documentationName;
+                             APIConstants.INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR +
+                             documentationName;
         try {
-            Resource docContent = registry.get(contentPath);
-            return new String((byte[])docContent.getContent());
+            if (registry.resourceExists(contentPath)) {
+                Resource docContent = registry.get(contentPath);
+                return new String((byte[]) docContent.getContent());
+            }
         } catch (RegistryException e) {
             String msg = "No document content found for documentation: "
-                    + documentationName + " of API: "+identifier.getApiName();
+                         + documentationName + " of API: "+identifier.getApiName();
             handleException(msg, e);
         }
         return null;
@@ -258,7 +428,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public boolean isContextExist(String context) throws APIManagementException {
         try {
             GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
-                    APIConstants.API_KEY);
+                                                                                APIConstants.API_KEY);
             GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
             for (GenericArtifact artifact : artifacts) {
                 String artifactContext = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
@@ -287,16 +457,17 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getSubscriber(subscriberId);
     }
 
-    public InputStream getIcon(APIIdentifier identifier) throws APIManagementException {
-        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
+    public Icon getIcon(APIIdentifier identifier) throws APIManagementException {
+        String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                              identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                              identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
 
         String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
         try {
             if (registry.resourceExists(thumbPath)) {
                 Resource res = registry.get(thumbPath);
-                return res.getContentStream();
+                Icon icon = new Icon(res.getContentStream(), res.getMediaType());
+                return icon;
             }
         } catch (RegistryException e) {
             handleException("Error while loading API icon from the registry", e);
@@ -324,9 +495,63 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return apiSortedSet;
     }
-    
+
     protected void handleException(String msg, Exception e) throws APIManagementException {
         log.error(msg, e);
         throw new APIManagementException(msg, e);
     }
+
+
+    public boolean isApplicationTokenExists(String accessToken) throws APIManagementException {
+        return apiMgtDAO.isAccessTokenExists(accessToken);
+    }
+
+    public boolean isApplicationTokenRevoked(String accessToken) throws APIManagementException {
+        return apiMgtDAO.isAccessTokenRevoked(accessToken);
+    }
+
+
+    public APIKey getAccessTokenData(String accessToken) throws APIManagementException {
+        return apiMgtDAO.getAccessTokenData(accessToken);
+    }
+
+    public Map<Integer, APIKey> searchAccessToken(String searchType, String searchTerm)
+            throws APIManagementException {
+        if (searchType == null) {
+            return apiMgtDAO.getAccessTokens(searchTerm);
+        } else {
+            if (searchType.equalsIgnoreCase("User")) {
+                return apiMgtDAO.getAccessTokensByUser(searchTerm);
+            } else if (searchType.equalsIgnoreCase("Before")) {
+                return apiMgtDAO.getAccessTokensByDate(searchTerm,false);
+            }  else if (searchType.equalsIgnoreCase("After")) {
+                return apiMgtDAO.getAccessTokensByDate(searchTerm,true);
+            } else {
+                return apiMgtDAO.getAccessTokens(searchTerm);
+            }
+        }
+
+    }
+    public Set<APIIdentifier> getAPIByAccessToken(String accessToken) throws APIManagementException{
+        return apiMgtDAO.getAPIByAccessToken(accessToken);
+    }
+    public API getAPI(APIIdentifier identifier,APIIdentifier oldIdentifier) throws APIManagementException {
+        String apiPath = APIUtil.getAPIPath(identifier);
+        try {
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                                                                                APIConstants.API_KEY);
+            Resource apiResource = registry.get(apiPath);
+            String artifactId = apiResource.getUUID();
+            if (artifactId == null) {
+                throw new APIManagementException("artifact id is null for : " + apiPath);
+            }
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
+            return APIUtil.getAPI(apiArtifact, registry,oldIdentifier);
+
+        } catch (RegistryException e) {
+            handleException("Failed to get API from : " + apiPath, e);
+            return null;
+        }
+    }
+
 }

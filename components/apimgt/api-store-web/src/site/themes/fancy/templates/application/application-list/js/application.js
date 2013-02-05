@@ -1,38 +1,79 @@
 function changeAppNameMode(linkObj){
     var theTr = $(linkObj).parent().parent();
     var appName = $(theTr).attr('data-value');
-    $('td:first',theTr).html('<div class="row-fluid"><div class="span6"> <input class="app_name_new" value="'+theTr.attr('data-value')+'" type="text" /> </div><div class="span6"><button class="btn btn-primary" onclick="updateApplication(this)">Save</button> <button class="btn" onclick="updateApplication_reset(this)">Cancel</button></div></div> ');
+    $('td:first',theTr).html('<div class="row-fluid"><div class="span6"> <input class="app_name_new" maxlength="70" value="'
+    +theTr.attr('data-value')+'" type="text" /> </div></div> ');
+
+    //Hide the Edit link
+    $("td:eq(2)", theTr).children("a").hide();
+    //Show the Save and Cancel buttons
+    $("td:eq(2)", theTr).children("div").show();
+
     $('input.app_name_new',theTr).focus();
     $('input.app_name_new',theTr).keyup(function(){
+        var error = "";
+        var illegalChars = /([~!#$;%^*+={}\|\\<>\"\'\/,])/;
         if($(this).val() == ""){
+            error = i18n.t('validationMsgs.fieldRequired');
+        }else if($(this).val().length>70){
+            error = i18n.t('validationMsgs.exceedChars');
+        }else if(/(["\'])/g.test($(this).val())){
+            error = i18n.t('validationMsgs.illegalChars')+'( " \' )';
+        } else if ($(this).val().search(illegalChars) != -1) {
+            error = i18n.t('validationMsgs.illegalChars');
+        }
+        if(error != ""){
             $(this).addClass('error');
             if(!$(this).next().hasClass('error')){
-                $(this).parent().append('<label class="error">This field is required.</label>');
+                $(this).parent().append('<label class="error">'+error+'</label>');
             }else{
-                $(this).next().show();
+                $(this).next().show().html(error);
             }
         }else{
             $(this).removeClass('error');
             $(this).next().hide();
         }
     });
+    var row = $(linkObj).parent().parent();
+    $("td:eq(1)", theTr).children("select").removeAttr("disabled");
 }
 function updateApplication_reset(linkObj){
-    var theTr = $(linkObj).parent().parent().parent().parent();
+    var theTr = $(linkObj).parent().parent().parent();
     var appName = $(theTr).attr('data-value');
+    var tier = $(theTr).attr('tier-value');
     $('td:first',theTr).html(appName);
+    $("td:eq(1)", theTr).children("select").val(tier);
+    $("td:eq(1)", theTr).children("select").attr("disabled", "disabled");
+
+    //Hide the Save and Cancel buttons
+    $("td:eq(2)", theTr).children("div").hide();
+    //Show the Edit link
+    $("td:eq(2)", theTr).children("a").show();
 }
 function updateApplication(linkObj){
-    var theTr = $(linkObj).parent().parent().parent().parent();
+    var theTr = $(linkObj).parent().parent().parent();
     var applicationOld = $(theTr).attr('data-value');
     var applicationNew = $('input.app_name_new',theTr).val();
-    if(applicationNew == ""){
+    var tier = $("td:eq(1)", theTr).children("select").val();
+    var error = "";
+    var illegalChars = /([~!#$;%^*+={}\|\\<>\"\'\/,])/;
+    if (applicationNew == "") {
+        error =  i18n.t("validationMsgs.fieldRequired");
+    } else if (applicationNew.length > 70) {
+        error = i18n.t('validationMsgs.exceedChars');
+    } else if (/(["\'])/g.test(applicationNew)) {
+        error = i18n.t('validationMsgs.illegalChars')+'( " \' )';
+    }else if (applicationNew.search(illegalChars)!=-1) {
+        error = i18n.t('validationMsgs.illegalChars');
+    }
+    if(error != ""){
         return;
     }
         jagg.post("/site/blocks/application/application-update/ajax/application-update.jag", {
             action:"updateApplication",
             applicationOld:applicationOld,
-            applicationNew:applicationNew
+            applicationNew:applicationNew,
+            tier:tier
         }, function (result) {
             if (result.error == false) {
                 window.location.reload();
@@ -46,10 +87,10 @@ function deleteApp(linkObj) {
     var theTr = $(linkObj).parent().parent();
     var appName = $(theTr).attr('data-value');
     $('#messageModal').html($('#confirmation-data').html());
-    $('#messageModal h3.modal-title').html('Confirm Delete');
-    $('#messageModal div.modal-body').html('\n\nAre you sure you want to remove the application "' + appName + '"? This will cancel all the existing subscriptions and keys associated with the application.');
-    $('#messageModal a.btn-primary').html('Yes');
-    $('#messageModal a.btn-other').html('No');
+    $('#messageModal h3.modal-title').html(i18n.t('confirm.delete'));
+    $('#messageModal div.modal-body').html('\n\n'+i18n.t('confirm.deleteMsg')+'"' + appName + '"'+i18n.t('confirm.deleteMsgPostfix'));
+    $('#messageModal a.btn-primary').html(i18n.t('info.yes'));
+    $('#messageModal a.btn-other').html(i18n.t('info.no'));
     $('#messageModal a.btn-primary').click(function() {
         jagg.post("/site/blocks/application/application-remove/ajax/application-remove.jag", {
             action:"removeApplication",
@@ -69,7 +110,7 @@ function deleteApp(linkObj) {
 
 }
 
-function alertMsg() {
+function hideMsg() {
     $('#applicationTable tr:last').css("background-color", "");
     $('#appAddMessage').hide("fast");
 }
@@ -80,6 +121,6 @@ $(document).ready(function() {
         $('#applicationTable tr:last').css("background-color", "#d1dce3");
         $('#appAddMessage').show();
         $('#applicationShowName').text($.cookie('lastAppName'));
-        var t = setTimeout("alertMsg()", 3000);
+        var t = setTimeout("hideMsg()", 3000);
     }
 });

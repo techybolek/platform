@@ -35,16 +35,13 @@ import java.util.Map;
 public class WsdlUriHandler {
     private static final Log log = LogFactory.getLog(WsdlUriHandler.class);
 
-    private boolean createService = true;
-
-    private boolean disableWSDLValidation = false;
-
     public void importResource(RequestContext requestContext, String sourceURL) throws RegistryException {
         if (!CommonUtil.isUpdateLockAvailable()) {
             return;
         }
         CommonUtil.acquireUpdateLock();
         WsdlUriProcessor wsdlUriProcessor;
+        log.debug("Processing WSDL URI started");
         try {
             Resource metadata = requestContext.getResource();
             if (requestContext.getSourceURL() != null &&
@@ -70,6 +67,7 @@ public class WsdlUriHandler {
                 throw new RegistryException(e.getMessage(), e);
             }
 
+            log.debug("Processing WSDL URI finished");
             requestContext.setProcessingComplete(true);
 
             if (wsdlUriProcessor != null && CommonConstants.ENABLE.equals(System.getProperty(CommonConstants.UDDI_SYSTEM_PROPERTY))) {
@@ -98,8 +96,7 @@ public class WsdlUriHandler {
     protected String processWSDLImport(RequestContext requestContext, WsdlUriProcessor wsdlUriProcessor,
                                        Resource metadata, String sourceURL)
             throws RegistryException {
-        return wsdlUriProcessor.addWSDLToRegistry(requestContext, sourceURL, metadata, false, true,
-                disableWSDLValidation);
+        return wsdlUriProcessor.addWSDLToRegistry(requestContext, sourceURL, metadata, false);
     }
 
     /**
@@ -124,16 +121,6 @@ public class WsdlUriHandler {
      */
     @SuppressWarnings("unused")
     protected WsdlUriProcessor buildWsdlUriProcessor(RequestContext requestContext) {
-        WsdlUriProcessor wsdlUriProcessor = new WsdlUriProcessor(requestContext);
-        wsdlUriProcessor.setCreateService(createService);
-        return wsdlUriProcessor;
-    }
-
-    public void setDisableWSDLValidation(String disableWSDLValidation) {
-        this.disableWSDLValidation = Boolean.toString(true).equals(disableWSDLValidation);
-    }
-
-    public void setCreateService(String createService) {
-        this.createService = Boolean.valueOf(createService);
+        return new WsdlUriProcessor(requestContext);
     }
 }

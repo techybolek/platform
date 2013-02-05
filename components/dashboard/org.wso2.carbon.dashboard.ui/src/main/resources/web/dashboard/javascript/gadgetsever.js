@@ -146,21 +146,21 @@ gadgetserver.activateAddButton = function () {
     if (checkGroup.length > 0) {
         for (var i = 0; i < checkGroup.length; i++) {
             if(actButton.disabled == true) {
-            	if (checkGroup[i].checked) {
-                	actButton.disabled = false;
-                	break;
-                }             	
+                if (checkGroup[i].checked) {
+                    actButton.disabled = false;
+                    break;
+                }
             } else{
-            	if (checkGroup[i].checked) {
-            		actButton.disabled = false;
-                	break;
-            	} else{
-            		actButton.disabled = true;
-            	}
+                if (checkGroup[i].checked) {
+                    actButton.disabled = false;
+                    break;
+                } else{
+                    actButton.disabled = true;
+                }
             }
         }
     }
-    
+
 };
 
 gadgetserver.cancelPane = function () {
@@ -193,43 +193,45 @@ gadgetserver.drawOptionsButton = function() {
     //var tabIds = dashboardService.getTabLayout(userId, dashboardName).split(',');
     var tabIds = gadgetserver.tabLayout;
     var options = {minWidth: 120, arrowSrc: 'images/arrow_right.gif'};
-    $('.opts').each(function() {
-        //creating a menu without items
-        var menu = new $.Menu('#' + $(this).attr('id'), null, options);
+    jQuery.noConflict();
 
-        //adding items to the menu
-        menu.addItems([
-            new $.MenuItem({src: 'Duplicate This Gadget', url: 'javascript:gadgets.container.getGadget(' + $(this).attr('id') + ').copyGadget()'}, options),
-            new $.MenuItem({src: ''}), /* separator */
-            new $.MenuItem({src: 'Settings', url: 'javascript:gadgets.container.getGadget(' + $(this).attr('id') + ').handleOpenUserPrefsDialog()'}, options),
-            new $.MenuItem({src: ''}) /* separator */
-        ]);
-        var itemWithSubmenu = new $.MenuItem({src: 'Copy To', url: 'javascript:;'}, options);
+    jQuery('.opts').each(function() {
+            //creating a menu without items
+            var menu = new jQuery.Menu('#' + jQuery(this).attr('id'), null, options);
 
-        var itemArr = new Array();
-        var count = 0;
-        for (var i = 0; i < tabIds.length; i++) {
-            if (userId != "null") {
-                var tabTitle = gadgetserver.getTabTitle(tabIds[i]);
-            } else {
-                var tabTitle = dashboardService.getTabTitle(userId, tabIds[i], dashboardName);
+            //adding items to the menu
+            menu.addItems([
+                new jQuery.MenuItem({src: 'Duplicate This Gadget', url: 'javascript:gadgets.container.getGadget(' + jQuery(this).attr('id') + ').copyGadget()'}, options),
+                new jQuery.MenuItem({src: ''}), /* separator */
+                new jQuery.MenuItem({src: 'Settings', url: 'javascript:gadgets.container.getGadget(' + jQuery(this).attr('id') + ').handleOpenUserPrefsDialog()'}, options),
+                new jQuery.MenuItem({src: ''}) /* separator */
+            ]);
+            var itemWithSubmenu = new jQuery.MenuItem({src: 'Copy To', url: 'javascript:;'}, options);
+
+            var itemArr = new Array();
+            var count = 0;
+            for (var i = 0; i < tabIds.length; i++) {
+                if (userId != "null") {
+                    var tabTitle = gadgetserver.getTabTitle(tabIds[i]);
+                } else {
+                    var tabTitle = dashboardService.getTabTitle(userId, tabIds[i], dashboardName);
+                }
+                if (currentActiveTab != tabIds[i]) {
+                    itemArr[count] = new jQuery.MenuItem({src: tabTitle, url:'javascript:gadgets.container.getGadget(' + jQuery(this).attr('id') + ').moveGadgetToTab(' + tabIds[i] + ')'}, options);
+                    count++;
+                }
             }
-            if (currentActiveTab != tabIds[i]) {
-                itemArr[count] = new $.MenuItem({src: tabTitle, url:'javascript:gadgets.container.getGadget(' + $(this).attr('id') + ').moveGadgetToTab(' + tabIds[i] + ')'}, options);
-                count++;
-            }
+
+            //creating a menu with items (as child of itemWithSubmenu)
+            new jQuery.Menu(itemWithSubmenu, itemArr, options);
+
+            //adding the submenu to the main menu
+            menu.addItem(itemWithSubmenu);
+
+            menu.addItem(new jQuery.MenuItem({src: 'About Gadget', url:'javascript:gadgets.container.getGadget(' + jQuery(this).attr('id') + ').handleABoutGadget()'}, options));
+
         }
-
-        //creating a menu with items (as child of itemWithSubmenu)
-        new $.Menu(itemWithSubmenu, itemArr, options);
-
-        //adding the submenu to the main menu
-        menu.addItem(itemWithSubmenu);
-
-        menu.addItem(new $.MenuItem({src: 'About Gadget', url:'javascript:gadgets.container.getGadget(' + $(this).attr('id') + ').handleABoutGadget()'}, options));
-
-    }
-            )
+    )
 
 };
 

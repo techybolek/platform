@@ -53,6 +53,14 @@
             <parameter name="superTenantService" locked="true">true</parameter>
             <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants</parameter>
         </operation>
+         <operation name="retrievePartialSearchTenants">
+            <parameter name="superTenantService" locked="true">true</parameter>
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants</parameter>
+        </operation>
+        <operation name="retrievePaginatedPartialSearchTenants">
+            <parameter name="superTenantService" locked="true">true</parameter>
+            <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants</parameter>
+        </operation>
         <operation name="getTenant">
             <parameter name="superTenantService" locked="true">true</parameter>
             <parameter name="AuthorizationAction" locked="true">/permission/protected/manage/monitor/tenants</parameter>

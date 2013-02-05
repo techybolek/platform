@@ -22,16 +22,18 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>bam-mediation-data-agent-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.bam.mediation.agent.ui.feature</artifactId>
+    <version>4.0.5</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - BAM Mediation Data Agent UI Feature</name>
     <url>http://wso2.org</url>
 
-    <description>This feature contains the core bundles required for BAM Data Publisher Activity Mediation Server functionality</description>
+    <description>This feature contains the ui bundles required for BAM Data Publisher Mediation Statistics functionality</description>
 
     <dependencies>
         <!--<dependency>
@@ -45,10 +47,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.bam.mediationstats.data.publisher.ui</artifactId>
+            <version>${carbon.patch.release.version405}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.bam.mediationstats.data.publisher.stub</artifactId>
+	    <version>${carbon.patch.release.version405}</version>
         </dependency>
 
     </dependencies>
@@ -68,7 +72,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.bam.mediation.agent.ui</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:console</propertyDef>
@@ -78,8 +82,8 @@
                             <bundles>
                                 <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.bam.activity.mediation.data.publisher.ui</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.activity.mediation.data.publisher.stub</bundleDef>-->
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.mediationstats.data.publisher.ui</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.mediationstats.data.publisher.stub</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.mediationstats.data.publisher.ui:${carbon.patch.release.version405}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.mediationstats.data.publisher.stub:${carbon.patch.release.version405}</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.ui:${wso2carbon.version}</importFeatureDef>
@@ -90,4 +94,10 @@
             </plugin>
         </plugins>
     </build>
+
+    <properties>
+        <carbon.patch.release.version403>4.0.3</carbon.patch.release.version403>
+        <carbon.patch.release.version405>4.0.5</carbon.patch.release.version405>
+    </properties>
+
 </project>

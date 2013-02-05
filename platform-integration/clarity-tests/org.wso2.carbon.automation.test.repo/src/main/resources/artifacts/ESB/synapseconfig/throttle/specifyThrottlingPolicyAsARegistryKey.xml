@@ -18,8 +18,8 @@
                     <log level="custom">
                         <property name="text" value="**Access Denied**"/>
                     </log>
-                    <makefault version="soap12">
-                        <code xmlns:tns="http://www.w3.org/2003/05/soap-envelope" value="tns:Receiver"/>
+                    <makefault version="soap11">
+                        <code xmlns:tns="http://schemas.xmlsoap.org/soap/envelope/" value="tns:Receiver"/>
                         <reason value="**Access Denied**"/>
                     </makefault>
                     <property name="RESPONSE" value="true"/>

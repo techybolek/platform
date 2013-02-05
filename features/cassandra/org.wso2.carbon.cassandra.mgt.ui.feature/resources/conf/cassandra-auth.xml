@@ -15,7 +15,13 @@
  ~ limitations under the License.
 -->
 <Cassandra>
-   <EPR>https://localhost:9443/services/CassandraSharedKeyPublisher</EPR>
+    <!--  local transport -->
+    <EPR>local://services/CassandraSharedKeyPublisher</EPR>
+
+    <!-- HTTP transport -->
+    <!--
+    <EPR>https://localhost:9443/services/CassandraSharedKeyPublisher</EPR>
+    -->
    <User>admin</User>
    <Password>admin</Password>
 </Cassandra>

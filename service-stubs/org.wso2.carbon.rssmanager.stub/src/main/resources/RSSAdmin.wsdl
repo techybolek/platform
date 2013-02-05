@@ -26,6 +26,71 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="isInitializedTenant">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="tenantDomainName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="isInitializedTenantResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="isDatabaseUserExist">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="rssInstanceName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="databaseUsername" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="isDatabaseUserExistResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="isDatabasePrivilegesTemplateExist">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="templateName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="isDatabasePrivilegesTemplateExistResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="isDatabaseExist">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="rssInstanceName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="databaseName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="isDatabaseExistResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="initializeTenant">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
             <xs:element name="getUsersAttachedToDatabase">
                 <xs:complexType>
                     <xs:sequence>
@@ -95,6 +160,20 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="getDatabasesForTenant">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getDatabasesForTenantResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax23:DatabaseMetaData"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
             <xs:element name="getDatabases">
                 <xs:complexType>
                     <xs:sequence/>
@@ -157,6 +236,22 @@
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="return" nillable="true" type="ax23:DatabasePrivilegeTemplate"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getDatabaseForTenant">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="rssInstanceName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="databaseName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getDatabaseForTenantResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax23:DatabaseMetaData"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -273,6 +368,14 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="createDatabaseForTenant">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="database" nillable="true" type="ax23:Database"/>
+                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
             <xs:element name="createDatabase">
                 <xs:complexType>
                     <xs:sequence>
@@ -348,6 +451,7 @@
             </xs:complexType>
             <xs:complexType name="DatabasePrivilegeTemplate">
                 <xs:sequence>
+                    <xs:element minOccurs="0" name="id" type="xs:int"/>
                     <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="privileges" nillable="true" type="ax23:DatabasePrivilegeSet"/>
                     <xs:element minOccurs="0" name="tenantId" type="xs:int"/>
@@ -359,6 +463,7 @@
                     <xs:element minOccurs="0" name="adminUsername" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="dataSource" nillable="true" type="xs:anyType"/>
                     <xs:element minOccurs="0" name="dbmsType" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="id" type="xs:int"/>
                     <xs:element minOccurs="0" name="instanceType" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="serverCategory" nillable="true" type="xs:string"/>
@@ -371,36 +476,51 @@
                     <xs:element minOccurs="0" name="password" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="rssInstanceName" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="tenantId" type="xs:int"/>
+                    <xs:element minOccurs="0" name="type" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="username" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="Database">
                 <xs:sequence>
+                    <xs:element minOccurs="0" name="id" type="xs:int"/>
                     <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="properties" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="rssInstanceName" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="tenantId" type="xs:int"/>
+                    <xs:element minOccurs="0" name="type" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="url" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="UserDatabaseEntry">
                 <xs:sequence>
+                    <xs:element minOccurs="0" name="databaseId" type="xs:int"/>
                     <xs:element minOccurs="0" name="databaseName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="id" type="xs:int"/>
                     <xs:element minOccurs="0" name="privileges" nillable="true" type="ax23:DatabasePrivilegeSet"/>
+                    <xs:element minOccurs="0" name="rssInstanceId" type="xs:int"/>
                     <xs:element minOccurs="0" name="rssInstanceName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="userId" type="xs:int"/>
                     <xs:element minOccurs="0" name="username" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
         </xs:schema>
     </wsdl:types>
+    <wsdl:message name="createDatabaseForTenantRequest">
+        <wsdl:part name="parameters" element="ns:createDatabaseForTenant"/>
+    </wsdl:message>
+    <wsdl:message name="RSSAdminRSSManagerException">
+        <wsdl:part name="parameters" element="ns:RSSAdminRSSManagerException"/>
+    </wsdl:message>
+    <wsdl:message name="isDatabasePrivilegesTemplateExistRequest">
+        <wsdl:part name="parameters" element="ns:isDatabasePrivilegesTemplateExist"/>
+    </wsdl:message>
+    <wsdl:message name="isDatabasePrivilegesTemplateExistResponse">
+        <wsdl:part name="parameters" element="ns:isDatabasePrivilegesTemplateExistResponse"/>
+    </wsdl:message>
     <wsdl:message name="getRSSInstanceRequest">
         <wsdl:part name="parameters" element="ns:getRSSInstance"/>
     </wsdl:message>
     <wsdl:message name="getRSSInstanceResponse">
         <wsdl:part name="parameters" element="ns:getRSSInstanceResponse"/>
-    </wsdl:message>
-    <wsdl:message name="RSSAdminRSSManagerException">
-        <wsdl:part name="parameters" element="ns:RSSAdminRSSManagerException"/>
     </wsdl:message>
     <wsdl:message name="getRSSInstancesRequest">
         <wsdl:part name="parameters" element="ns:getRSSInstances"/>
@@ -429,6 +549,12 @@
     <wsdl:message name="getSystemRSSInstanceCountResponse">
         <wsdl:part name="parameters" element="ns:getSystemRSSInstanceCountResponse"/>
     </wsdl:message>
+    <wsdl:message name="isDatabaseExistRequest">
+        <wsdl:part name="parameters" element="ns:isDatabaseExist"/>
+    </wsdl:message>
+    <wsdl:message name="isDatabaseExistResponse">
+        <wsdl:part name="parameters" element="ns:isDatabaseExistResponse"/>
+    </wsdl:message>
     <wsdl:message name="getDatabasePrivilegesTemplatesRequest">
         <wsdl:part name="parameters" element="ns:getDatabasePrivilegesTemplates"/>
     </wsdl:message>
@@ -447,11 +573,20 @@
     <wsdl:message name="createDatabasePrivilegesTemplateRequest">
         <wsdl:part name="parameters" element="ns:createDatabasePrivilegesTemplate"/>
     </wsdl:message>
+    <wsdl:message name="getDatabaseForTenantRequest">
+        <wsdl:part name="parameters" element="ns:getDatabaseForTenant"/>
+    </wsdl:message>
+    <wsdl:message name="getDatabaseForTenantResponse">
+        <wsdl:part name="parameters" element="ns:getDatabaseForTenantResponse"/>
+    </wsdl:message>
     <wsdl:message name="getDatabasesRequest">
         <wsdl:part name="parameters" element="ns:getDatabases"/>
     </wsdl:message>
     <wsdl:message name="getDatabasesResponse">
         <wsdl:part name="parameters" element="ns:getDatabasesResponse"/>
+    </wsdl:message>
+    <wsdl:message name="initializeTenantRequest">
+        <wsdl:part name="parameters" element="ns:initializeTenant"/>
     </wsdl:message>
     <wsdl:message name="getDatabaseUsersRequest">
         <wsdl:part name="parameters" element="ns:getDatabaseUsers"/>
@@ -470,6 +605,12 @@
     </wsdl:message>
     <wsdl:message name="editRSSInstanceRequest">
         <wsdl:part name="parameters" element="ns:editRSSInstance"/>
+    </wsdl:message>
+    <wsdl:message name="isInitializedTenantRequest">
+        <wsdl:part name="parameters" element="ns:isInitializedTenant"/>
+    </wsdl:message>
+    <wsdl:message name="isInitializedTenantResponse">
+        <wsdl:part name="parameters" element="ns:isInitializedTenantResponse"/>
     </wsdl:message>
     <wsdl:message name="dropRSSInstanceRequest">
         <wsdl:part name="parameters" element="ns:dropRSSInstance"/>
@@ -495,11 +636,23 @@
     <wsdl:message name="getDatabaseUserResponse">
         <wsdl:part name="parameters" element="ns:getDatabaseUserResponse"/>
     </wsdl:message>
+    <wsdl:message name="getDatabasesForTenantRequest">
+        <wsdl:part name="parameters" element="ns:getDatabasesForTenant"/>
+    </wsdl:message>
+    <wsdl:message name="getDatabasesForTenantResponse">
+        <wsdl:part name="parameters" element="ns:getDatabasesForTenantResponse"/>
+    </wsdl:message>
     <wsdl:message name="dropDatabaseRequest">
         <wsdl:part name="parameters" element="ns:dropDatabase"/>
     </wsdl:message>
     <wsdl:message name="createRSSInstanceRequest">
         <wsdl:part name="parameters" element="ns:createRSSInstance"/>
+    </wsdl:message>
+    <wsdl:message name="isDatabaseUserExistRequest">
+        <wsdl:part name="parameters" element="ns:isDatabaseUserExist"/>
+    </wsdl:message>
+    <wsdl:message name="isDatabaseUserExistResponse">
+        <wsdl:part name="parameters" element="ns:isDatabaseUserExistResponse"/>
     </wsdl:message>
     <wsdl:message name="dropDatabasePrivilegesTemplateRequest">
         <wsdl:part name="parameters" element="ns:dropDatabasePrivilegesTemplate"/>
@@ -514,6 +667,15 @@
         <wsdl:part name="parameters" element="ns:createCarbonDataSource"/>
     </wsdl:message>
     <wsdl:portType name="RSSAdminPortType">
+        <wsdl:operation name="createDatabaseForTenant">
+            <wsdl:input message="ns:createDatabaseForTenantRequest" wsaw:Action="urn:createDatabaseForTenant"/>
+            <wsdl:fault message="ns:RSSAdminRSSManagerException" name="RSSAdminRSSManagerException" wsaw:Action="urn:createDatabaseForTenantRSSAdminRSSManagerException"/>
+        </wsdl:operation>
+        <wsdl:operation name="isDatabasePrivilegesTemplateExist">
+            <wsdl:input message="ns:isDatabasePrivilegesTemplateExistRequest" wsaw:Action="urn:isDatabasePrivilegesTemplateExist"/>
+            <wsdl:output message="ns:isDatabasePrivilegesTemplateExistResponse" wsaw:Action="urn:isDatabasePrivilegesTemplateExistResponse"/>
+            <wsdl:fault message="ns:RSSAdminRSSManagerException" name="RSSAdminRSSManagerException" wsaw:Action="urn:isDatabasePrivilegesTemplateExistRSSAdminRSSManagerException"/>
+        </wsdl:operation>
         <wsdl:operation name="getRSSInstance">
             <wsdl:input message="ns:getRSSInstanceRequest" wsaw:Action="urn:getRSSInstance"/>
             <wsdl:output message="ns:getRSSInstanceResponse" wsaw:Action="urn:getRSSInstanceResponse"/>
@@ -546,6 +708,11 @@
             <wsdl:output message="ns:getSystemRSSInstanceCountResponse" wsaw:Action="urn:getSystemRSSInstanceCountResponse"/>
             <wsdl:fault message="ns:RSSAdminRSSManagerException" name="RSSAdminRSSManagerException" wsaw:Action="urn:getSystemRSSInstanceCountRSSAdminRSSManagerException"/>
         </wsdl:operation>
+        <wsdl:operation name="isDatabaseExist">
+            <wsdl:input message="ns:isDatabaseExistRequest" wsaw:Action="urn:isDatabaseExist"/>
+            <wsdl:output message="ns:isDatabaseExistResponse" wsaw:Action="urn:isDatabaseExistResponse"/>
+            <wsdl:fault message="ns:RSSAdminRSSManagerException" name="RSSAdminRSSManagerException" wsaw:Action="urn:isDatabaseExistRSSAdminRSSManagerException"/>
+        </wsdl:operation>
         <wsdl:operation name="getDatabasePrivilegesTemplates">
             <wsdl:input message="ns:getDatabasePrivilegesTemplatesRequest" wsaw:Action="urn:getDatabasePrivilegesTemplates"/>
             <wsdl:output message="ns:getDatabasePrivilegesTemplatesResponse" wsaw:Action="urn:getDatabasePrivilegesTemplatesResponse"/>
@@ -564,10 +731,19 @@
             <wsdl:input message="ns:createDatabasePrivilegesTemplateRequest" wsaw:Action="urn:createDatabasePrivilegesTemplate"/>
             <wsdl:fault message="ns:RSSAdminRSSManagerException" name="RSSAdminRSSManagerException" wsaw:Action="urn:createDatabasePrivilegesTemplateRSSAdminRSSManagerException"/>
         </wsdl:operation>
+        <wsdl:operation name="getDatabaseForTenant">
+            <wsdl:input message="ns:getDatabaseForTenantRequest" wsaw:Action="urn:getDatabaseForTenant"/>
+            <wsdl:output message="ns:getDatabaseForTenantResponse" wsaw:Action="urn:getDatabaseForTenantResponse"/>
+            <wsdl:fault message="ns:RSSAdminRSSManagerException" name="RSSAdminRSSManagerException" wsaw:Action="urn:getDatabaseForTenantRSSAdminRSSManagerException"/>
+        </wsdl:operation>
         <wsdl:operation name="getDatabases">
             <wsdl:input message="ns:getDatabasesRequest" wsaw:Action="urn:getDatabases"/>
             <wsdl:output message="ns:getDatabasesResponse" wsaw:Action="urn:getDatabasesResponse"/>
             <wsdl:fault message="ns:RSSAdminRSSManagerException" name="RSSAdminRSSManagerException" wsaw:Action="urn:getDatabasesRSSAdminRSSManagerException"/>
+        </wsdl:operation>
+        <wsdl:operation name="initializeTenant">
+            <wsdl:input message="ns:initializeTenantRequest" wsaw:Action="urn:initializeTenant"/>
+            <wsdl:fault message="ns:RSSAdminRSSManagerException" name="RSSAdminRSSManagerException" wsaw:Action="urn:initializeTenantRSSAdminRSSManagerException"/>
         </wsdl:operation>
         <wsdl:operation name="getDatabaseUsers">
             <wsdl:input message="ns:getDatabaseUsersRequest" wsaw:Action="urn:getDatabaseUsers"/>
@@ -586,6 +762,11 @@
         <wsdl:operation name="editRSSInstance">
             <wsdl:input message="ns:editRSSInstanceRequest" wsaw:Action="urn:editRSSInstance"/>
             <wsdl:fault message="ns:RSSAdminRSSManagerException" name="RSSAdminRSSManagerException" wsaw:Action="urn:editRSSInstanceRSSAdminRSSManagerException"/>
+        </wsdl:operation>
+        <wsdl:operation name="isInitializedTenant">
+            <wsdl:input message="ns:isInitializedTenantRequest" wsaw:Action="urn:isInitializedTenant"/>
+            <wsdl:output message="ns:isInitializedTenantResponse" wsaw:Action="urn:isInitializedTenantResponse"/>
+            <wsdl:fault message="ns:RSSAdminRSSManagerException" name="RSSAdminRSSManagerException" wsaw:Action="urn:isInitializedTenantRSSAdminRSSManagerException"/>
         </wsdl:operation>
         <wsdl:operation name="dropRSSInstance">
             <wsdl:input message="ns:dropRSSInstanceRequest" wsaw:Action="urn:dropRSSInstance"/>
@@ -613,6 +794,11 @@
             <wsdl:output message="ns:getDatabaseUserResponse" wsaw:Action="urn:getDatabaseUserResponse"/>
             <wsdl:fault message="ns:RSSAdminRSSManagerException" name="RSSAdminRSSManagerException" wsaw:Action="urn:getDatabaseUserRSSAdminRSSManagerException"/>
         </wsdl:operation>
+        <wsdl:operation name="getDatabasesForTenant">
+            <wsdl:input message="ns:getDatabasesForTenantRequest" wsaw:Action="urn:getDatabasesForTenant"/>
+            <wsdl:output message="ns:getDatabasesForTenantResponse" wsaw:Action="urn:getDatabasesForTenantResponse"/>
+            <wsdl:fault message="ns:RSSAdminRSSManagerException" name="RSSAdminRSSManagerException" wsaw:Action="urn:getDatabasesForTenantRSSAdminRSSManagerException"/>
+        </wsdl:operation>
         <wsdl:operation name="dropDatabase">
             <wsdl:input message="ns:dropDatabaseRequest" wsaw:Action="urn:dropDatabase"/>
             <wsdl:fault message="ns:RSSAdminRSSManagerException" name="RSSAdminRSSManagerException" wsaw:Action="urn:dropDatabaseRSSAdminRSSManagerException"/>
@@ -620,6 +806,11 @@
         <wsdl:operation name="createRSSInstance">
             <wsdl:input message="ns:createRSSInstanceRequest" wsaw:Action="urn:createRSSInstance"/>
             <wsdl:fault message="ns:RSSAdminRSSManagerException" name="RSSAdminRSSManagerException" wsaw:Action="urn:createRSSInstanceRSSAdminRSSManagerException"/>
+        </wsdl:operation>
+        <wsdl:operation name="isDatabaseUserExist">
+            <wsdl:input message="ns:isDatabaseUserExistRequest" wsaw:Action="urn:isDatabaseUserExist"/>
+            <wsdl:output message="ns:isDatabaseUserExistResponse" wsaw:Action="urn:isDatabaseUserExistResponse"/>
+            <wsdl:fault message="ns:RSSAdminRSSManagerException" name="RSSAdminRSSManagerException" wsaw:Action="urn:isDatabaseUserExistRSSAdminRSSManagerException"/>
         </wsdl:operation>
         <wsdl:operation name="dropDatabasePrivilegesTemplate">
             <wsdl:input message="ns:dropDatabasePrivilegesTemplateRequest" wsaw:Action="urn:dropDatabasePrivilegesTemplate"/>
@@ -637,6 +828,27 @@
     </wsdl:portType>
     <wsdl:binding name="RSSAdminSoap11Binding" type="ns:RSSAdminPortType">
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="isDatabasePrivilegesTemplateExist">
+            <soap:operation soapAction="urn:isDatabasePrivilegesTemplateExist" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="RSSAdminRSSManagerException">
+                <soap:fault use="literal" name="RSSAdminRSSManagerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="createDatabaseForTenant">
+            <soap:operation soapAction="urn:createDatabaseForTenant" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="RSSAdminRSSManagerException">
+                <soap:fault use="literal" name="RSSAdminRSSManagerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="getRSSInstances">
             <soap:operation soapAction="urn:getRSSInstances" style="document"/>
             <wsdl:input>
@@ -712,6 +924,18 @@
                 <soap:fault use="literal" name="RSSAdminRSSManagerException"/>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="isDatabaseExist">
+            <soap:operation soapAction="urn:isDatabaseExist" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="RSSAdminRSSManagerException">
+                <soap:fault use="literal" name="RSSAdminRSSManagerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="getDatabasePrivilegesTemplates">
             <soap:operation soapAction="urn:getDatabasePrivilegesTemplates" style="document"/>
             <wsdl:input>
@@ -745,6 +969,18 @@
                 <soap:fault use="literal" name="RSSAdminRSSManagerException"/>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="getDatabaseForTenant">
+            <soap:operation soapAction="urn:getDatabaseForTenant" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="RSSAdminRSSManagerException">
+                <soap:fault use="literal" name="RSSAdminRSSManagerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="createDatabasePrivilegesTemplate">
             <soap:operation soapAction="urn:createDatabasePrivilegesTemplate" style="document"/>
             <wsdl:input>
@@ -762,6 +998,15 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
+            <wsdl:fault name="RSSAdminRSSManagerException">
+                <soap:fault use="literal" name="RSSAdminRSSManagerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="initializeTenant">
+            <soap:operation soapAction="urn:initializeTenant" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
             <wsdl:fault name="RSSAdminRSSManagerException">
                 <soap:fault use="literal" name="RSSAdminRSSManagerException"/>
             </wsdl:fault>
@@ -817,6 +1062,18 @@
                 <soap:fault use="literal" name="RSSAdminRSSManagerException"/>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="isInitializedTenant">
+            <soap:operation soapAction="urn:isInitializedTenant" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="RSSAdminRSSManagerException">
+                <soap:fault use="literal" name="RSSAdminRSSManagerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="dropDatabaseUser">
             <soap:operation soapAction="urn:dropDatabaseUser" style="document"/>
             <wsdl:input>
@@ -856,6 +1113,30 @@
                 <soap:fault use="literal" name="RSSAdminRSSManagerException"/>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="getDatabaseUser">
+            <soap:operation soapAction="urn:getDatabaseUser" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="RSSAdminRSSManagerException">
+                <soap:fault use="literal" name="RSSAdminRSSManagerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getDatabasesForTenant">
+            <soap:operation soapAction="urn:getDatabasesForTenant" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="RSSAdminRSSManagerException">
+                <soap:fault use="literal" name="RSSAdminRSSManagerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="dropDatabase">
             <soap:operation soapAction="urn:dropDatabase" style="document"/>
             <wsdl:input>
@@ -865,8 +1146,8 @@
                 <soap:fault use="literal" name="RSSAdminRSSManagerException"/>
             </wsdl:fault>
         </wsdl:operation>
-        <wsdl:operation name="getDatabaseUser">
-            <soap:operation soapAction="urn:getDatabaseUser" style="document"/>
+        <wsdl:operation name="isDatabaseUserExist">
+            <soap:operation soapAction="urn:isDatabaseUserExist" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -919,6 +1200,27 @@
     </wsdl:binding>
     <wsdl:binding name="RSSAdminSoap12Binding" type="ns:RSSAdminPortType">
         <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="isDatabasePrivilegesTemplateExist">
+            <soap12:operation soapAction="urn:isDatabasePrivilegesTemplateExist" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="RSSAdminRSSManagerException">
+                <soap12:fault use="literal" name="RSSAdminRSSManagerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="createDatabaseForTenant">
+            <soap12:operation soapAction="urn:createDatabaseForTenant" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:fault name="RSSAdminRSSManagerException">
+                <soap12:fault use="literal" name="RSSAdminRSSManagerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="getRSSInstances">
             <soap12:operation soapAction="urn:getRSSInstances" style="document"/>
             <wsdl:input>
@@ -994,6 +1296,18 @@
                 <soap12:fault use="literal" name="RSSAdminRSSManagerException"/>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="isDatabaseExist">
+            <soap12:operation soapAction="urn:isDatabaseExist" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="RSSAdminRSSManagerException">
+                <soap12:fault use="literal" name="RSSAdminRSSManagerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="getDatabasePrivilegesTemplates">
             <soap12:operation soapAction="urn:getDatabasePrivilegesTemplates" style="document"/>
             <wsdl:input>
@@ -1027,6 +1341,18 @@
                 <soap12:fault use="literal" name="RSSAdminRSSManagerException"/>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="getDatabaseForTenant">
+            <soap12:operation soapAction="urn:getDatabaseForTenant" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="RSSAdminRSSManagerException">
+                <soap12:fault use="literal" name="RSSAdminRSSManagerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="createDatabasePrivilegesTemplate">
             <soap12:operation soapAction="urn:createDatabasePrivilegesTemplate" style="document"/>
             <wsdl:input>
@@ -1044,6 +1370,15 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
+            <wsdl:fault name="RSSAdminRSSManagerException">
+                <soap12:fault use="literal" name="RSSAdminRSSManagerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="initializeTenant">
+            <soap12:operation soapAction="urn:initializeTenant" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
             <wsdl:fault name="RSSAdminRSSManagerException">
                 <soap12:fault use="literal" name="RSSAdminRSSManagerException"/>
             </wsdl:fault>
@@ -1099,6 +1434,18 @@
                 <soap12:fault use="literal" name="RSSAdminRSSManagerException"/>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="isInitializedTenant">
+            <soap12:operation soapAction="urn:isInitializedTenant" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="RSSAdminRSSManagerException">
+                <soap12:fault use="literal" name="RSSAdminRSSManagerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="dropDatabaseUser">
             <soap12:operation soapAction="urn:dropDatabaseUser" style="document"/>
             <wsdl:input>
@@ -1138,6 +1485,30 @@
                 <soap12:fault use="literal" name="RSSAdminRSSManagerException"/>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="getDatabaseUser">
+            <soap12:operation soapAction="urn:getDatabaseUser" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="RSSAdminRSSManagerException">
+                <soap12:fault use="literal" name="RSSAdminRSSManagerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getDatabasesForTenant">
+            <soap12:operation soapAction="urn:getDatabasesForTenant" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="RSSAdminRSSManagerException">
+                <soap12:fault use="literal" name="RSSAdminRSSManagerException"/>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="dropDatabase">
             <soap12:operation soapAction="urn:dropDatabase" style="document"/>
             <wsdl:input>
@@ -1147,8 +1518,8 @@
                 <soap12:fault use="literal" name="RSSAdminRSSManagerException"/>
             </wsdl:fault>
         </wsdl:operation>
-        <wsdl:operation name="getDatabaseUser">
-            <soap12:operation soapAction="urn:getDatabaseUser" style="document"/>
+        <wsdl:operation name="isDatabaseUserExist">
+            <soap12:operation soapAction="urn:isDatabaseUserExist" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -1201,6 +1572,21 @@
     </wsdl:binding>
     <wsdl:binding name="RSSAdminHttpBinding" type="ns:RSSAdminPortType">
         <http:binding verb="POST"/>
+        <wsdl:operation name="isDatabasePrivilegesTemplateExist">
+            <http:operation location="isDatabasePrivilegesTemplateExist"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="createDatabaseForTenant">
+            <http:operation location="createDatabaseForTenant"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+        </wsdl:operation>
         <wsdl:operation name="getRSSInstances">
             <http:operation location="getRSSInstances"/>
             <wsdl:input>
@@ -1255,6 +1641,15 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="isDatabaseExist">
+            <http:operation location="isDatabaseExist"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="getDatabasePrivilegesTemplates">
             <http:operation location="getDatabasePrivilegesTemplates"/>
             <wsdl:input>
@@ -1279,6 +1674,15 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="getDatabaseForTenant">
+            <http:operation location="getDatabaseForTenant"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="createDatabasePrivilegesTemplate">
             <http:operation location="createDatabasePrivilegesTemplate"/>
             <wsdl:input>
@@ -1293,6 +1697,12 @@
             <wsdl:output>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="initializeTenant">
+            <http:operation location="initializeTenant"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
         </wsdl:operation>
         <wsdl:operation name="getDatabaseUsers">
             <http:operation location="getDatabaseUsers"/>
@@ -1330,6 +1740,15 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="isInitializedTenant">
+            <http:operation location="isInitializedTenant"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="dropDatabaseUser">
             <http:operation location="dropDatabaseUser"/>
             <wsdl:input>
@@ -1357,14 +1776,32 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="getDatabaseUser">
+            <http:operation location="getDatabaseUser"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getDatabasesForTenant">
+            <http:operation location="getDatabasesForTenant"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="dropDatabase">
             <http:operation location="dropDatabase"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
         </wsdl:operation>
-        <wsdl:operation name="getDatabaseUser">
-            <http:operation location="getDatabaseUser"/>
+        <wsdl:operation name="isDatabaseUserExist">
+            <http:operation location="isDatabaseUserExist"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>

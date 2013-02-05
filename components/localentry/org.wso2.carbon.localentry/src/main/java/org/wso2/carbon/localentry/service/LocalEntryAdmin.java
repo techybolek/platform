@@ -251,9 +251,9 @@ public class LocalEntryAdmin extends AbstractServiceBusAdmin {
                 if (oldEntry == null) {
                     handleFault(log, "Unable to update local entry. Non existent");
                 } else {
-                    getSynapseConfiguration().removeEntry(key);
                     Entry entry = EntryFactory.createEntry(elem,
                             getSynapseConfiguration().getProperties());
+                    getSynapseConfiguration().removeEntry(key);
                     getSynapseConfiguration().addEntry(key, entry);
                     entry.setFileName(oldEntry.getFileName());
                     MediationPersistenceManager pm

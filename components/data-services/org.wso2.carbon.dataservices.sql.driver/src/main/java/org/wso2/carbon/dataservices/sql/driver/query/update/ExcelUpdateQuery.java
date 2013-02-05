@@ -18,11 +18,18 @@
  */
 package org.wso2.carbon.dataservices.sql.driver.query.update;
 
-import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataTable;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.wso2.carbon.dataservices.sql.driver.TDriverUtil;
+import org.wso2.carbon.dataservices.sql.driver.TExcelConnection;
+import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataRow;
+import org.wso2.carbon.dataservices.sql.driver.query.ColumnInfo;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 
 public class ExcelUpdateQuery extends UpdateQuery {
 
@@ -47,14 +54,46 @@ public class ExcelUpdateQuery extends UpdateQuery {
     }
 
     private int executeSQL() throws SQLException {
-        int rowCount = 0;
-        //writeRecord(workbook, ((TExcelConnection) getConnection()).getPath());
-        return rowCount;
+        Map<Integer, DataRow> result;
+        if (getCondition().getLhs() == null && getCondition().getRhs() == null) {
+            result = getTargetTable().getRows();
+        } else {
+            result = getCondition().process(getTargetTable());
+        }
+
+        if (!(getConnection() instanceof TExcelConnection)) {
+            throw new SQLException("Connection does not refer to a Excel connection");
+        }
+        Workbook workbook = ((TExcelConnection) getConnection()).getWorkbook();
+        Sheet sheet = workbook.getSheet(getTargetTableName());
+        if (sheet == null) {
+            throw new SQLException("Excel sheet named '" + this.getTargetTableName() +
+                    "' does not exist");
+        }
+
+        ColumnInfo[] headers = TDriverUtil.getHeaders(getConnection(), getTargetTableName());
+        for (Map.Entry<Integer, DataRow> row : result.entrySet()) {
+            Row updatedRow = sheet.getRow(row.getKey() + 1);
+            for (ColumnInfo column : getTargetColumns()) {
+                int columnId = findColumnId(headers, column.getName());
+                updatedRow.getCell(columnId).setCellValue(column.getValue().toString());
+            }
+        }
+        TDriverUtil.writeRecords(workbook, ((TExcelConnection) getConnection()).getPath());
+        return 0;
     }
 
-    private int findColumn(DataTable table, String columnName) throws SQLException {
-        return table.getHeaders().get(columnName);
+    private int findColumnId(ColumnInfo[] headers, String headerName) throws SQLException {
+        ColumnInfo column = null;
+        for (ColumnInfo header : headers) {
+            if (headerName.equalsIgnoreCase(header.getName())) {
+                column = header;
+            }
+        }
+        if (column == null) {
+            throw new SQLException("Column '" + headerName + "' does not exist");
+        }
+        return column.getId();
     }
-
 
 }

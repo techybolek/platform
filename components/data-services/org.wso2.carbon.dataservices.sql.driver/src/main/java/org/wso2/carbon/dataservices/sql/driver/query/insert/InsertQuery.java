@@ -53,7 +53,9 @@ public abstract class InsertQuery extends Query {
         if (tokens == null || tokens.isEmpty()) {
             throw new SQLException("Unable to populate attributes");
         }
+        /* Drops INSERT keyword */
         tokens.poll();
+        /* Drops INTO keyword */
         tokens.poll();
         if (!Constants.TABLE.equalsIgnoreCase(tokens.peek())) {
             throw new SQLException("Table name is missing");

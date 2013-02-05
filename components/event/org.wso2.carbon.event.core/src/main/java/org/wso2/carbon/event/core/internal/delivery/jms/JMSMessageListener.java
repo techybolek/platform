@@ -16,10 +16,10 @@
 
 package org.wso2.carbon.event.core.internal.delivery.jms;
 
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.core.notify.NotificationManager;
 import org.wso2.carbon.event.core.subscription.Subscription;
 import org.wso2.carbon.event.core.exception.EventBrokerException;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -51,10 +51,10 @@ public class JMSMessageListener implements MessageListener {
 
     public void onMessage(Message message) {
         try {
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(this.subscription.getTenantId());
-            SuperTenantCarbonContext.getCurrentContext().setUsername(this.subscription.getOwner());
-            SuperTenantCarbonContext.getCurrentContext().getTenantDomain(true);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getCurrentContext().setTenantId(this.subscription.getTenantId());
+            PrivilegedCarbonContext.getCurrentContext().setUsername(this.subscription.getOwner());
+            PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
             if (message instanceof TextMessage) {
                 TextMessage textMessage = (TextMessage) message;
                 StAXOMBuilder stAXOMBuilder =
@@ -82,7 +82,7 @@ public class JMSMessageListener implements MessageListener {
         } catch (EventBrokerException e) {
             log.error("Can not send the notification ", e);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
 
     }

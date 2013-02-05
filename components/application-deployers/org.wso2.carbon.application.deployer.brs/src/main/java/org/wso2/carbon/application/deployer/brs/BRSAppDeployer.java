@@ -54,7 +54,7 @@ public class BRSAppDeployer implements AppDeploymentHandler {
             }
 
             if (BRS_TYPE.equals(artifact.getType())) {
-                destPath = repo + BRS_DIR;
+                destPath = repo + File.separator+ BRS_DIR;
             } else {
                 continue;
             }

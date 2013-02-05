@@ -24,6 +24,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.hdfs.dataaccess.DataAccessComponentManager;
 import org.wso2.carbon.hdfs.dataaccess.DataAccessService;
+import org.wso2.carbon.hdfs.dataaccess.HDFSUserOperationListener;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.io.IOException;
@@ -38,9 +39,11 @@ public class DataAccessServiceDSComponent {
     private static Log log = LogFactory.getLog(DataAccessServiceDSComponent.class);
 
     private ServiceRegistration serviceRegistration;
+    private ServiceRegistration hdfsUserOperationRegistration;
     //private SharedKeyAccessService sharedKeyAccessService;
     private DataAccessService dataAccessService;
     //private ServiceRegistration axisConfigContextObserverServiceReg;
+    private HDFSUserOperationListener hdfsUserOperationListener;
     private static ConfigurationContextService configCtxService;
 
     protected void activate(ComponentContext componentContext) {
@@ -56,6 +59,10 @@ public class DataAccessServiceDSComponent {
                 DataAccessService.class.getName(),
                 dataAccessService,
                 null);
+        //HDFS operation lister to create hdfs://host/user/<username> folder
+        hdfsUserOperationListener = new HDFSUserOperationListener();
+        hdfsUserOperationRegistration = componentContext.getBundleContext().registerService(
+                HDFSUserOperationListener.class.getName(), hdfsUserOperationListener, null);
 //        axisConfigContextObserverServiceReg = componentContext.getBundleContext().registerService(
 //                Axis2ConfigurationContextObserver.class.getName(),
 //                new CassandraAxis2ConfigurationContextObserver(dataAccessService),
@@ -73,6 +80,7 @@ public class DataAccessServiceDSComponent {
             e.printStackTrace();
         }
         componentContext.getBundleContext().ungetService(serviceRegistration.getReference());
+        componentContext.getBundleContext().ungetService(hdfsUserOperationRegistration.getReference());
         //componentContext.getBundleContext().ungetService(axisConfigContextObserverServiceReg.getReference());
     }
 

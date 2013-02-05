@@ -1,13 +1,9 @@
 <%@ page import="java.util.Map" %>
+<%@ page import="org.wso2.carbon.bam.gadgetgenwizard.ui.GGWUIUtils" %>
 
 
 <%
-    Map parameterMap = request.getParameterMap();
-    for (Object o : parameterMap.keySet()) {
-        String param = (String) o;
-        Object value = parameterMap.get(param);
-        session.setAttribute(param, value);
-    }
+    GGWUIUtils.overwriteSessionAttributes(request, session);
 
     Object sqlParam = session.getAttribute("sql");
     String sql = (sqlParam == null) ? "" : ((String[])sqlParam) [0];
@@ -20,7 +16,7 @@
 
         $("#execute-sql").click(function() {
             $.post("execute_sql_ajaxprocessor.jsp", $("form").serialize(), function(html) {
-                var success = !(html.toLowerCase().match(/error/));
+                var success = !(html.toLowerCase().match(/error executing query/));
                 function getaoColumns(columnNames) {
                     var json = [];
                     for (var i = 0; i < columnNames.length; i++) {
@@ -39,19 +35,22 @@
                     });
                     $("#query-results-holder").show();
                 } else {
-                    CARBON.showErrorDialog(html);
+                    CARBON.showErrorDialog(jsi18n["sql.invalid"] + html);
                 }
             })
         });
+
+        $("#sqllbl").html(jsi18n["sql.label"] + "<span style=\"color: red; \">*</span>");
+        $("#execute-sql").val(jsi18n["preview.sql"]);
     });
 </script>
 <table class="normal">
     <tbody>
     <tr>
-        <td>SQL Statement<font color="red">*</font>
+        <td id="sqllbl">
         </td>
-        <td><input type="text" name="sql" value="<%=sql%>" style="width:200px"/></td>
-        <td><input type="button" id="execute-sql" value="Preview SQL Results"/></td>
+        <td><textarea cols="50" rows="5" class="validate" type="text" name="sql" style="width:400px"><%=sql%></textarea></td>
+        <td><input type="button" id="execute-sql" value=""></td>
     </tr>
     <tr>
         <td colspan="3">

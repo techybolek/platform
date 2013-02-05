@@ -33,7 +33,6 @@ public class BillingTaskConfiguration {
     private ScheduleHelper scheduleHelper = null;
     private Map<String, String> schedulerHelperArgs;
     private String schedulerServiceName;
-    private String subscriptionFilter;
 
     private List<BillingHandler> billingHandlers = new ArrayList<BillingHandler>();
     private List<HandlerConfigBean> handlerArgs = new ArrayList<HandlerConfigBean>(); //key - handler service name
@@ -76,10 +75,7 @@ public class BillingTaskConfiguration {
         
         while (billingConfigChildIt.hasNext()) {
             OMElement childEle = (OMElement) billingConfigChildIt.next();
-            if (new QName(BillingConstants.CONFIG_NS, BillingConstants.SUBSCRIPTION_FILTER_KEY,
-                    BillingConstants.NS_PREFIX).equals(childEle.getQName())) {
-                subscriptionFilter = childEle.getText().trim();
-            } else if (new QName(BillingConstants.CONFIG_NS, BillingConstants.SCHEDULE_CONF_KEY,
+            if (new QName(BillingConstants.CONFIG_NS, BillingConstants.SCHEDULE_CONF_KEY,
                     BillingConstants.NS_PREFIX).equals(childEle.getQName())) {
                 deserializeSchedule(childEle);
             } else if (new QName(BillingConstants.CONFIG_NS, BillingConstants.HANDLERS,
@@ -161,10 +157,6 @@ public class BillingTaskConfiguration {
             scheduleHelper = (ScheduleHelper) constructObject(className);
             scheduleHelper.init(constructorArgs);
         }
-    }
-
-    public String getSubscriptionFilter() {
-        return subscriptionFilter;
     }
 
     public ScheduleHelper getScheduleHelper() throws BillingException {

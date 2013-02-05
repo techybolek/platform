@@ -21,6 +21,7 @@ package org.wso2.carbon.dataservices.sql.driver.parser;
 import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataRow;
 import org.wso2.carbon.dataservices.sql.driver.query.ParamInfo;
 
+import java.sql.SQLException;
 import java.util.*;
 
 public class ParserUtil {
@@ -31,6 +32,8 @@ public class ParserUtil {
     private static List<String> stringFunctions = new EntityList<String>();
     private static List<String> aggregateFunctions = new EntityList<String>();
     private static List<String> dmlTypes = new EntityList<String>();
+
+    private static List<String> conditionalOperators = new EntityList<String>();
 
     static {
         keyWords.add(Constants.COUNT);
@@ -113,7 +116,9 @@ public class ParserUtil {
         delimiters.add(Constants.RIGHT_BRACKET);
         delimiters.add(Constants.HYPHEN);
         delimiters.add(Constants.UNDERSCORE);
-        delimiters.add(Constants.WHITE_SPACE);
+        delimiters.add(Constants.NEW_LINE);
+        delimiters.add(Constants.RETURN);
+        //delimiters.add(Constants.WHITE_SPACE);
 
         aggregateFunctions.add(Constants.AVG);
         aggregateFunctions.add(Constants.MAX);
@@ -131,6 +136,13 @@ public class ParserUtil {
         dmlTypes.add(Constants.UPDATE);
         dmlTypes.add(Constants.DELETE);
 
+        conditionalOperators.add(Constants.AND);
+        conditionalOperators.add(Constants.OR);
+
+    }
+
+    public static List<String> getConditionalOperatorList() {
+        return conditionalOperators;
     }
 
     public static List<String> getKeyWordList() {
@@ -182,32 +194,55 @@ public class ParserUtil {
                 !ParserUtil.isKeyword(token));
     }
 
-    public static Queue<String> getTokens(String inputStream) {
+    public static synchronized Queue<String> getTokens(String sql) throws SQLException {
+        boolean isQuoted = false;
         char[] inputCharacters;
         StringBuilder token = new StringBuilder();
         Queue<String> tokenQueue = new LinkedList<String>();
 
-        inputCharacters = new char[inputStream.length()];
-        inputStream.getChars(0, inputStream.length(), inputCharacters, 0);
+        inputCharacters = new char[sql.length()];
+        sql.getChars(0, sql.length(), inputCharacters, 0);
 
         for (char c : inputCharacters) {
-            if (!ParserUtil.isDelimiter(Character.valueOf(c).toString()) &&
-                    !ParserUtil.isOperator(Character.valueOf(c).toString())) {
-                token.append(c);
-            } else {
+            String tmp = Character.valueOf(c).toString();
+            if (Constants.SINGLE_QUOTATION.equals(tmp)) {
+                isQuoted = !isQuoted;
                 if (token.length() > 0) {
                     tokenQueue.add(token.toString());
                 }
-                if (!Character.valueOf(c).toString().equals(" ")) {
-                    tokenQueue.add(new StringBuilder().append(c).toString());
-                }
+                tokenQueue.add(new StringBuilder().append(c).toString());
                 token = new StringBuilder();
+                continue;
+            }
+            if (isQuoted) {
+                token.append(c);
+            } else {
+                if (!ParserUtil.isControlCharacter(tmp)) {
+                    if (!Constants.WHITE_SPACE.equals(tmp)) {
+                        token.append(c);
+                    } else if (Constants.WHITE_SPACE.equals(tmp)) {
+                        if (token.length() > 0) {
+                            tokenQueue.add(token.toString());
+                        }
+                        token = new StringBuilder();
+                    }
+                } else {
+                    if (token.length() > 0) {
+                        tokenQueue.add(token.toString());
+                    }
+                    tokenQueue.add(new StringBuilder().append(c).toString());
+                    token = new StringBuilder();
+                }
             }
         }
         if (token.length() > 0) {
             tokenQueue.add(token.toString());
         }
         return tokenQueue;
+    }
+
+    public static boolean isControlCharacter(String token) {
+        return ParserUtil.isDelimiter(token) || ParserUtil.isOperator(token);
     }
 
     public static boolean isDMLStatement(String type) {

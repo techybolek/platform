@@ -20,6 +20,7 @@ package org.wso2.carbon.usage.beans;
  */
 public class BandwidthStatistics {
     private String key;
+    private String serverUrl;
     private long incomingBandwidth;
     private long outgoingBandwidth;
 
@@ -49,5 +50,13 @@ public class BandwidthStatistics {
 
     public void setOutgoingBandwidth(long outgoingBandwidth) {
         this.outgoingBandwidth = outgoingBandwidth;
+    }
+
+    public String getServerUrl() {
+        return serverUrl;
+    }
+
+    public void setServerUrl(String serverUrl) {
+        this.serverUrl = serverUrl;
     }
 }

@@ -120,6 +120,7 @@ public class PaypalService {
         //I am setting payment action as sale.
         paymentRequestDetails.setPaymentAction(PaymentActionCodeType.Sale);
 
+        PaymentDetailsType [] paymentDetailsArr = new PaymentDetailsType[1];
         PaymentDetailsType paymentDetails = new PaymentDetailsType();
         BasicAmountType orderTotal = new BasicAmountType();
         orderTotal.set_value(amount);
@@ -128,13 +129,13 @@ public class PaypalService {
 
         //setting custom info - setting the tenant domain
         paymentDetails.setCustom(tenantDetails);
-
-        paymentRequestDetails.setPaymentDetails(paymentDetails);
+        paymentDetailsArr[0] = paymentDetails; 
+        paymentRequestDetails.setPaymentDetails(paymentDetailsArr);
 
         doECRequest.setDoExpressCheckoutPaymentRequestDetails(paymentRequestDetails);
 
         //Calling the caller service and returning the response
-        DoExpressCheckoutPaymentResponseType doECResponse =
+        DoExpressCheckoutPaymentResponseType doECResponse =                                 
                 (DoExpressCheckoutPaymentResponseType) proxy.call(PaymentConstants.DO_EXPRESSCHECKOUT_OPERATION, doECRequest);
         log.debug("DoEC Ack:" + doECResponse.getAck().toString());
 

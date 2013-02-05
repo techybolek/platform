@@ -82,7 +82,25 @@
             SequenceMediator seq = null;
             if (xml != null && !"".equals(xml)) {
                 try {
-                    OMElement elem = new StAXOMBuilder(new ByteArrayInputStream(xml.getBytes())).getDocumentElement();
+                	//spacial case verify any unwanted characters embedded with the xpath expression given
+                	int xpathIndex = xml.indexOf("xpath=");
+            		String xmlout = null;
+            		if (xpathIndex > 0) {
+            			String xpathBegin = xml.substring(xpathIndex);
+            			int xpathBeginIndex = xpathBegin.indexOf("\"");
+            			String xpathVariableStart = xpathBegin.substring(xpathBeginIndex + 1);
+            			int xpathEndIndex = xpathVariableStart.indexOf("\"");
+            			String xpath = xpathVariableStart.substring(0, xpathEndIndex);
+            			int lenthXpath = xpath.length();
+
+            			String xmlBxpath = xml.substring(0, xpathIndex + 7);
+            			String xpathAxpathString = xml.substring(xpathIndex + 7 + lenthXpath, xml.length());
+            			xmlout = xmlBxpath + xpath.replaceAll("<", "&lt").replaceAll(">", "&gt") + xpathAxpathString;
+            		}else{
+            			xmlout =xml;
+            		}
+                	
+                    OMElement elem = new StAXOMBuilder(new ByteArrayInputStream(xmlout.getBytes())).getDocumentElement();
                     OMFactory fac = elem.getOMFactory();
                     elem.addAttribute("name", "__anonSequence__", fac.createOMNamespace("", ""));
                     // changes the name inSequence or outSequence or faultSequence to just sequence

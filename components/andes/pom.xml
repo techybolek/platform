@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -35,15 +35,16 @@
     <url>http://wso2.org</url>
 
             <modules>
-                <module>org.wso2.carbon.andes</module>
-                <module>org.wso2.carbon.andes.commons</module>
-                <module>org.wso2.carbon.andes.authentication</module>
-                <module>org.wso2.carbon.andes.authorization</module>
-		        <module>org.wso2.carbon.andes.cluster.mgt</module>
-		        <module>org.wso2.carbon.andes.cluster.mgt.ui</module>
-                <module>org.wso2.carbon.andes.core</module>
-                <module>org.wso2.carbon.andes.admin</module>
-                <module>org.wso2.carbon.andes.ui</module>
+                <module>org.wso2.carbon.andes/4.0.5</module>
+                <module>org.wso2.carbon.andes.commons/4.0.5</module>
+                <module>org.wso2.carbon.andes.authentication/4.0.5</module>
+                <module>org.wso2.carbon.andes.authorization/4.0.5</module>
+		        <module>org.wso2.carbon.andes.cluster.mgt/4.0.5</module>
+		        <module>org.wso2.carbon.andes.cluster.mgt.ui/4.0.0</module>
+                <module>org.wso2.carbon.andes.core/4.0.5</module>
+                <module>org.wso2.carbon.andes.admin/4.0.5</module>
+                <module>org.wso2.carbon.andes.ui/4.0.0</module>
+
             </modules>
 
     <dependencyManagement>

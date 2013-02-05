@@ -55,21 +55,26 @@ public class BamServerProfileUtils {
         }
     }
 
-    public void addResource(String ip, String authenticationPort, String receiverPort, String userName, String password, boolean isSecure,
+    public void addResource(String urlSet, String ip, String authenticationPort, String receiverPort, String userName, String password, boolean isSecure, boolean isLoadbalanced,
                             String streamConfigurationListString, String bamServerProfileLocation){
 
         String encryptedPassword = this.encryptPassword(password);
-        String isSecureString;
+        String isSecureString, isLoadbalancedString;
         if(isSecure){
             isSecureString = "true";
         } else {
             isSecureString = "false";
         }
+        if(isLoadbalanced){
+            isLoadbalancedString = "true";
+        } else {
+            isLoadbalancedString = "false";
+        }
 
         StreamConfigListBuilder streamConfigListBuilder = new StreamConfigListBuilder();
         List<StreamConfiguration> streamConfigurations = streamConfigListBuilder.getStreamConfigurationListFromString(streamConfigurationListString);
         BamServerConfigXml mediatorConfigurationXml = new BamServerConfigXml();
-        OMElement storeXml = mediatorConfigurationXml.buildServerProfile(ip, authenticationPort, receiverPort, userName, encryptedPassword, isSecureString, streamConfigurations);
+        OMElement storeXml = mediatorConfigurationXml.buildServerProfile(urlSet, ip, authenticationPort, receiverPort, userName, encryptedPassword, isSecureString, isLoadbalancedString, streamConfigurations);
         String stringStoreXml = storeXml.toString();
 
         try {
@@ -152,7 +157,7 @@ public class BamServerProfileUtils {
         if(streamConfiguration != null){
             List<Property> properties = streamConfiguration.getProperties();
             for (Property property : properties) {
-                returnStringBuilder.append(property.getKey() + "::" + property.getValue() + "::");
+                returnStringBuilder.append(property.getKey() + "::" + property.getValue() + "::" + property.getType() + "::");
                 if(property.isExpression()){
                     returnStringBuilder.append("expression");
                 } else {

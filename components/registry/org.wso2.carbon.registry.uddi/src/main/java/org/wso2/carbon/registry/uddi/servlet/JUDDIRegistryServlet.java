@@ -4,13 +4,13 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.juddi.Registry;
+import org.wso2.carbon.registry.core.servlet.UDDIServlet;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 
 
-public class JUDDIRegistryServlet extends HttpServlet {
+public class JUDDIRegistryServlet extends UDDIServlet {
 
     private static final Log log = LogFactory.getLog(JUDDIRegistryServlet.class);
 

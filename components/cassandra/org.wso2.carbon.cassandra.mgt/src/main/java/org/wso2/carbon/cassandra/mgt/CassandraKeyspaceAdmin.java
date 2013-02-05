@@ -35,9 +35,10 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.Constants;
+import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.apache.cassandra.thrift.TokenRange;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,6 +54,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.ServerConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -89,7 +91,7 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
     private static final Log log = LogFactory.getLog(CassandraKeyspaceAdmin.class);
 
     /**
-     * @return
+     * @return cluster name
      * @throws CassandraServerManagementException
      *
      */
@@ -332,7 +334,7 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
         try {
             CassandraAdminComponentManager adminComponentManager = CassandraAdminComponentManager.getInstance();
             UserRealm userRealm = adminComponentManager.getRealmForCurrentTenant();
-            //TODO ask the best way from security team
+            //TODO: improve the authorization process
             AuthorizationManager authorizationManager = userRealm.getAuthorizationManager();
             authorizationManager.clearRoleAuthorization(role, path, ACTION_WRITE);
             authorizationManager.clearRoleAuthorization(role, path, ACTION_READ);
@@ -360,7 +362,6 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
             CassandraAdminComponentManager adminComponentManager = CassandraAdminComponentManager.getInstance();
             UserRealm userRealm = adminComponentManager.getRealmForCurrentTenant();
             AuthorizationManager authorizationManager = userRealm.getAuthorizationManager();
-//            authorizationManager.clearRoleAuthorization(role, path, ACTION_WRITE);
             authorizationManager.clearRoleAuthorization(role, path, ACTION_READ);
             return true;
         } catch (UserStoreException e) {
@@ -387,7 +388,6 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
             UserRealm userRealm = adminComponentManager.getRealmForCurrentTenant();
             AuthorizationManager authorizationManager = userRealm.getAuthorizationManager();
             authorizationManager.clearRoleAuthorization(role, path, ACTION_WRITE);
-//            authorizationManager.clearRoleAuthorization(role, path, ACTION_READ);
             return true;
         } catch (UserStoreException e) {
             throw new CassandraServerManagementException("Error during clear sharing a resource at path :" + path + " and" +
@@ -443,7 +443,7 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
     /**
      * Return the shared roles list  for READ of a given Keyspace name
      *
-     * @param path
+     * @param path resource path
      * @return a list of user roles
      * @throws CassandraServerManagementException
      *
@@ -455,8 +455,7 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
             CassandraAdminComponentManager adminComponentManager = CassandraAdminComponentManager.getInstance();
             UserRealm userRealm = adminComponentManager.getRealmForCurrentTenant();
             AuthorizationManager authorizationManager = userRealm.getAuthorizationManager();
-            String[] readAllowedRoles = authorizationManager.getAllowedRolesForResource(path, ACTION_READ);
-            return readAllowedRoles;
+            return authorizationManager.getAllowedRolesForResource(path, ACTION_READ);
         } catch (UserStoreException e) {
             throw new CassandraServerManagementException("Error retrieving role list for :" + path, e, log);
         }
@@ -467,7 +466,7 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
     /**
      * Return the shared roles list for WRITE of a given Keyspace name
      *
-     * @param path
+     * @param path resource path
      * @return a list of user roles
      * @throws CassandraServerManagementException
      *
@@ -479,8 +478,7 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
             CassandraAdminComponentManager adminComponentManager = CassandraAdminComponentManager.getInstance();
             UserRealm userRealm = adminComponentManager.getRealmForCurrentTenant();
             AuthorizationManager authorizationManager = userRealm.getAuthorizationManager();
-            String[] writeAllowedRoles = authorizationManager.getAllowedRolesForResource(path, ACTION_WRITE);
-            return writeAllowedRoles;
+            return authorizationManager.getAllowedRolesForResource(path, ACTION_WRITE);
         } catch (UserStoreException e) {
             throw new CassandraServerManagementException("Error retrieving role list for :" + path, e, log);
         }
@@ -556,7 +554,7 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
     }
 
     /**
-     * Access the teken range of a keyspace
+     * Access the token range of a keyspace
      *
      * @param keyspace keyspace name
      * @return a list of <code>TokenRangeInformation </code>
@@ -566,7 +564,7 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
     public TokenRangeInformation[] getTokenRange(String keyspace)
             throws CassandraServerManagementException {
         validateKeyspace(keyspace);
-        ThriftCluster thriftCluster = (ThriftCluster) getCluster(null);     // TODO  hector limitation
+        ThriftCluster thriftCluster = (ThriftCluster) getCluster(null);     // hector limitation
         Set<CassandraHost> cassandraHosts = thriftCluster.getKnownPoolHosts(true);  // This returns all endpoints if only auto discovery is set.
         int rpcPort = CassandraHost.DEFAULT_PORT;
         for (CassandraHost cassandraHost : cassandraHosts) {
@@ -586,19 +584,12 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
                     tokenRangeInformation.setStartToken(tokenRange.getStart_token());
                     tokenRangeInformation.setEndToken(tokenRange.getEnd_token());
                     List<String> eps = new ArrayList<String>();
-                    //if public dns is configured in cassandra-cluseter-dns.xml
-                    // //insert public cassandra nodes
-//                            eps.add("css0.stratoslive.wso2.com" + ":" + rpcPort);
-//                            eps.add("css1.stratoslive.wso2.com" + ":" + rpcPort);
-//                            break;
-                    //esle
                     for (String ep : tokenRange.getEndpoints()) {
                         if (ep != null && !"".equals(ep.trim())) {
                             eps.add(ep + ":" + rpcPort); // With hector, each node has the same RPC port.
 
                         }
                     }
-                    //end else
                     if (!eps.isEmpty()) {
                         tokenRangeInformation.setEndpoints(eps.toArray(new String[eps.size()]));
                     }
@@ -673,9 +664,9 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
             KeyspaceDefinition definition =
                     HFactory.createKeyspaceDefinition(keyspaceName.trim(), replicationStrategy, replicationFactor, null);
             if (isAdd) {
-                cluster.addKeyspace(definition);
+                cluster.addKeyspace(definition,true);
             } else {
-                cluster.updateKeyspace(definition);
+                cluster.updateKeyspace(definition,true);
             }
         } catch (HectorException e) {
             throw new CassandraServerManagementException("Error " + (isAdd ? "adding" : "updating") + " a keyspace" +
@@ -880,7 +871,7 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
                             (String) super.getHttpSession()
                                     .getAttribute(USER_ACCESSKEY_ATTR_NAME);
                     String serverURL = getServerURL();
-                    String epr =  serverURL + CASSANDRA_AUTH_SERVICE;
+                    String epr = serverURL + CASSANDRA_AUTH_SERVICE;
                     String username = CASSANDRA_AUTH_USER;
                     String password = CASSANDRA_AUTH_PASSWORD;
                     if (sharedKey == null) {
@@ -896,7 +887,6 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
                                 }
                             }
 
-
                             OMElement cassandraUser = cassandraAuthConfig.getFirstChildWithName(new QName("User"));
                             if (cassandraUser != null) {
                                 String user = cassandraUser.getText();
@@ -904,7 +894,6 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
                                     username = user;
                                 }
                             }
-
 
                             OMElement cassandraPasswd = cassandraAuthConfig.getFirstChildWithName(new QName("Password"));
                             if (cassandraPasswd != null) {
@@ -914,21 +903,36 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
                                 }
                             }
                         }
-                            String targetUser = (String) super.getHttpSession().
-                                    getAttribute(ServerConstants.USER_LOGGED_IN);
-                            String targetDomain = (String) super.getTenantDomain();
-                            if (targetDomain != null) {
-                                targetUser = targetUser + "@" + targetDomain;
+                        String targetUser = (String) super.getHttpSession().
+                                getAttribute(ServerConstants.USER_LOGGED_IN);
+                        String targetDomain = super.getTenantDomain();
+                        if (targetDomain != null) {
+                            targetUser = targetUser + "@" + targetDomain;
+                            String superTenantDomainName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                            if (superTenantDomainName.equals(targetDomain)) {
+                                String[] userInfo = targetUser.split("@");
+                                targetUser = userInfo[0];
                             }
-
+                        }
                         sharedKey = UUID.randomUUID().toString();
                         super.getHttpSession().setAttribute(USER_ACCESSKEY_ATTR_NAME, sharedKey);
                         OMElement payload = getPayload(username, password, targetUser, sharedKey);
-                        ServiceClient serviceClient = new ServiceClient(CassandraAdminDSComponent.getConfigCtxService()
-                                .getClientConfigContext(), null);
-                        Options options = new Options();
+                        ServiceClient serviceClient = new ServiceClient(CassandraAdminDSComponent
+                                                                                .getConfigCtxService()
+                                                                                .getServerConfigContext(), null);
+
+                        //ServiceClient serviceClient = new ServiceClient();
+
+                        serviceClient.setTargetEPR(new EndpointReference(epr));
+                        Options options = serviceClient.getOptions();
                         options.setAction("urn:injectAccessKey");
-                        options.setProperty(Constants.Configuration.TRANSPORT_URL, epr);
+
+                        HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
+                        auth.setUsername(username);
+                        auth.setPassword(password);
+                        auth.setPreemptiveAuthentication(true);
+                        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, auth);
+
                         serviceClient.setOptions(options);
                         serviceClient.sendRobust(payload);
                         serviceClient.cleanupTransport();
@@ -1001,7 +1005,7 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
                 if (inputStream != null) {
                     inputStream.close();
                 }
-            } catch (IOException ingored) {
+            } catch (IOException ignored) {
             }
         }
         return null;
@@ -1009,7 +1013,7 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
 
     private boolean isAuthConfigurationExists() {
         String carbonHome = System.getProperty(ServerConstants.CARBON_HOME);
-        String path = carbonHome + CASSANDRA_AUTH_CONF;
+        String path = carbonHome + File.separator + CASSANDRA_AUTH_CONF;
         if (!new File(path).exists()) {
             log.info("There is no " + CASSANDRA_AUTH_CONF + ". Using the default configuration");
             return false;
@@ -1035,7 +1039,7 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
                 getConfigurationContextService();
         ServerConfigurationService serverConfigurationService = CassandraAdminComponentManager.getInstance().
                 getServerConfigurationService();
-        return CarbonUtils.getServerURL(serverConfigurationService,configurationContext.getServerConfigContext());
+        return CarbonUtils.getServerURL(serverConfigurationService, configurationContext.getServerConfigContext());
 //        String hostName = "localhost";
 //        try {
 //            hostName = new URL(serverUrl).getHost();
@@ -1044,5 +1048,4 @@ public class CassandraKeyspaceAdmin extends AbstractAdmin {
 //        }
 
     }
-
 }

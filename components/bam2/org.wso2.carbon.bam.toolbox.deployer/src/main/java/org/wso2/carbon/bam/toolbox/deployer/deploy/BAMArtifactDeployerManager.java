@@ -26,10 +26,7 @@ import org.wso2.carbon.bam.toolbox.deployer.client.DataPublisher;
 import org.wso2.carbon.bam.toolbox.deployer.client.HiveScriptStoreClient;
 import org.wso2.carbon.bam.toolbox.deployer.exception.BAMComponentNotFoundException;
 import org.wso2.carbon.bam.toolbox.deployer.exception.BAMToolboxDeploymentException;
-import org.wso2.carbon.bam.toolbox.deployer.util.AnalyzerScriptDTO;
-import org.wso2.carbon.bam.toolbox.deployer.util.DashBoardTabDTO;
-import org.wso2.carbon.bam.toolbox.deployer.util.JasperTabDTO;
-import org.wso2.carbon.bam.toolbox.deployer.util.ToolBoxDTO;
+import org.wso2.carbon.bam.toolbox.deployer.util.*;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -101,12 +98,14 @@ public class BAMArtifactDeployerManager {
         try {
             DashboardClient dashboardClient = DashboardClient.getInstance();
             for (DashBoardTabDTO tabDTO : toolBoxDTO.getDashboardTabs()) {
-                int tabID = dashboardClient.addTab(username, tabDTO.getTabName());
-                tabDTO.setTabId(tabID);
-                for (String aGadget : tabDTO.getGadgets()) {
-                    ServiceHolder.getGadgetRepoService().addGadgetEntryToRepo(aGadget.replaceAll(".xml", ""), "conf:/repository/gadget-server/gadgets/" + aGadget, "", null, null, null);
-                    dashboardClient.addNewGadget(username, String.valueOf(tabID),
-                            "/registry/resource/_system/config/repository/gadget-server/gadgets/" + aGadget);
+                if (tabDTO.getGadgets().size() > 0) {
+                    int tabID = dashboardClient.addTab(username, tabDTO.getTabName());
+                    tabDTO.setTabId(tabID);
+                    for (String aGadget : tabDTO.getGadgets()) {
+                        ServiceHolder.getGadgetRepoService().addGadgetEntryToRepo(aGadget.replaceAll(".xml", ""), "conf:/repository/gadget-server/gadgets/" + aGadget, "", null, null, null);
+                        dashboardClient.addNewGadget(username, String.valueOf(tabID),
+                                "/registry/resource/_system/config/repository/gadget-server/gadgets/" + aGadget);
+                    }
                 }
             }
         } catch (BAMComponentNotFoundException e) {
@@ -155,11 +154,11 @@ public class BAMArtifactDeployerManager {
 
     }
 
-    public void deploy(ToolBoxDTO toolBoxDTO, int tenantId, String username, String password)
+    public void deploy(ToolBoxDTO toolBoxDTO, int tenantId, String username)
             throws BAMToolboxDeploymentException {
         if (canDeployDataStreamDefn()) {
             if (null != toolBoxDTO.getStreamDefnParentDirectory()) {
-                deployStreamDefn(toolBoxDTO, username, password);
+                deployStreamDefn(toolBoxDTO);
             }
         }
 
@@ -173,15 +172,16 @@ public class BAMArtifactDeployerManager {
             if (null != toolBoxDTO.getGagetsParentDirectory()) {
                 transferGadgetsFilesToRegistry(new File(toolBoxDTO.getGagetsParentDirectory()), tenantId);
                 deployGadget(toolBoxDTO, username);
-                if (null != toolBoxDTO.getJaggeryAppParentDirectory()) {
-                    deployJaggeryApps(toolBoxDTO);
-                }
             }
 
             if (toolBoxDTO.getJasperParentDirectory() != null) { // Jasper is optional for the moment
                 transferJRXMLFilesToRegistry(new File(toolBoxDTO.getJasperParentDirectory()),
                         tenantId);
             }
+        }
+        //since the jaggery aps can be there without the  gadget.xml also
+        if (null != toolBoxDTO.getJaggeryAppParentDirectory()) {
+            deployJaggeryApps(toolBoxDTO);
         }
     }
 
@@ -193,44 +193,29 @@ public class BAMArtifactDeployerManager {
         } else return true;
     }
 
-    private void deployStreamDefn(ToolBoxDTO toolBoxDTO, String username, String password)
+
+    private void deployStreamDefn(ToolBoxDTO toolBoxDTO)
             throws BAMToolboxDeploymentException {
         DataPublisher client = DataPublisher.getInstance();
-        for (String defn : toolBoxDTO.getEvenStreamDefs()) {
-            String defnPath = toolBoxDTO.getStreamDefnParentDirectory() + File.separator + defn;
+        for (StreamDefnDTO defn : toolBoxDTO.getDataStreamDefs()) {
+            String defnPath = toolBoxDTO.getStreamDefnParentDirectory() + File.separator + defn.getFileName();
             String streamDefn = getStreamDefinition(defnPath);
-            client.createEventDefn(streamDefn, username, password);
+            client.createEventDefn(streamDefn, defn.getUsername(), defn.getPassword());
         }
     }
 
 
     private void deployJaggeryApps(ToolBoxDTO toolBoxDTO) {
-        String jaggeryDeployementDir = toolBoxDTO.getHotDeploymentRootDir() +
-                File.separator + BAMToolBoxDeployerConstants.JAGGERY_DEPLOYMENT_DIR;
+        String jaggeryDeployementDir = toolBoxDTO.getHotDeploymentRootDir()
+                + File.separator + BAMToolBoxDeployerConstants.JAGGERY_DEPLOYMENT_DIR;
         File deployDir = new File(jaggeryDeployementDir);
         if (!deployDir.exists()) {
             deployDir.mkdirs();
         }
-        ArrayList<String> files = getFilesInDir(toolBoxDTO.getJaggeryAppParentDirectory());
-        for (String aJaggeryApp : files) {
-            String srcFile = toolBoxDTO.getJaggeryAppParentDirectory() + File.separator + aJaggeryApp;
-            InputStream in = null;
-            try {
-                in = new FileInputStream(srcFile);
-
-                OutputStream out = new FileOutputStream(jaggeryDeployementDir + File.separator + aJaggeryApp);
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = in.read(buf)) > 0) {
-                    out.write(buf, 0, len);
-                }
-                in.close();
-                out.close();
-            } catch (FileNotFoundException e) {
-                log.error(e);
-            } catch (IOException e) {
-                log.error(e);
-            }
+        try {
+            copyFolder(new File(toolBoxDTO.getJaggeryAppParentDirectory()), new File(jaggeryDeployementDir));
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -248,6 +233,46 @@ public class BAMArtifactDeployerManager {
         }
         return files;
     }
+
+    private void copyFolder(File src, File dest)
+            throws IOException {
+
+        if (src.isDirectory()) {
+            //if directory not exists, create it
+            if (!dest.exists()) {
+                dest.mkdir();
+            }
+
+            //list all the directory contents
+            String files[] = src.list();
+
+            for (String file : files) {
+                //construct the src and dest file structure
+                File srcFile = new File(src, file);
+                File destFile = new File(dest, file);
+                //recursive copy
+                copyFolder(srcFile, destFile);
+            }
+
+        } else {
+            //if file, then copy it
+            //Use bytes stream to support all file types
+            InputStream in = new FileInputStream(src);
+            OutputStream out = new FileOutputStream(dest);
+
+            byte[] buffer = new byte[1024];
+
+            int length;
+            //copy the file content in bytes
+            while ((length = in.read(buffer)) > 0) {
+                out.write(buffer, 0, length);
+            }
+
+            in.close();
+            out.close();
+        }
+    }
+
 
     private boolean canDeployScripts() {
         try {

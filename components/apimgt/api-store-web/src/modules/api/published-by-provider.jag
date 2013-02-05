@@ -1,11 +1,11 @@
 <%
-var getPublishedAPIsByProvider = function (provider) {
+var getPublishedAPIsByProvider = function (provider,loggedUser,currentApi,currentApiVersion) {
     var list, i, length, api, apis,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        apis = store.getPublishedAPIsByProvider(provider);
+        apis = store.getPublishedAPIsByProvider(provider,loggedUser);
         if (log.isDebugEnabled()) {
             log.debug("getPublishedAPIsByProvider : " + stringify(apis));
         }
@@ -13,18 +13,20 @@ var getPublishedAPIsByProvider = function (provider) {
         length = apis.length;
         for (i = 0; i < length; i++) {
             api = apis[i];
-            list.push({
-                          name:api.name,
-                          provider:api.provider,
-                          version:api.version,
-                          updatedTime:api.updatedDate,
-                          description:api.description,
-                          rating:api.rates,
-                          subscribed:api.subscribed,
-                          thumbURL:api.thumbnailurl,
-                          tier:api.tier,
-                          context:api.context
-                      });
+            if(currentApi != api.name ||(currentApi == api.name && currentApiVersion!=api.version)){
+                list.push({
+                              name:api.name,
+                              provider:api.provider,
+                              version:api.version,
+                              updatedTime:api.updatedDate,
+                              description:api.description,
+                              rating:api.rates,
+                              subscribed:api.subscribed,
+                              thumbURL:api.thumbnailurl,
+                              tier:api.tier,
+                              context:api.context
+                          });
+            }
         }
         return {
             error:false,

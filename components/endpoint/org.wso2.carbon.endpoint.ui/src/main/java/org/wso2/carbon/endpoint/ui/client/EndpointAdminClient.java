@@ -34,6 +34,7 @@ import java.rmi.RemoteException;
 
 public class EndpointAdminClient {
 
+    public static final int ENDPOINT_PER_PAGE = 10;
     private EndpointAdminStub stub;
     private static final Log log = LogFactory.getLog(EndpointAdminClient.class);
 
@@ -206,17 +207,34 @@ public class EndpointAdminClient {
     /**
      * Get all endpoints stored in the registry
      *
+     * @param pageNumber page number
+     * @param endpointsPerPage no of endpoints per page
      * @return endpoints in the registry
      * @throws Exception in case of an error
      */
-    public String[] getDynamicEndpoints() throws Exception {
-        String[] endpoints = null;
+    public String[] getDynamicEndpoints(int pageNumber, int endpointsPerPage) throws Exception {
+        String[] result = null;
         try {
-            endpoints = stub.getDynamicEndpoints();
+            String[] allDynamicEndpoints = stub.getDynamicEndpoints();
+            if (allDynamicEndpoints != null) {
+                if (allDynamicEndpoints.length >= (endpointsPerPage * pageNumber + endpointsPerPage)) {
+                    result = new String[endpointsPerPage];
+                } else if ((allDynamicEndpoints.length - (endpointsPerPage * pageNumber)) > 0) {
+                    result = new String[allDynamicEndpoints.length - (endpointsPerPage * pageNumber)];
+                } else {
+                    pageNumber--;
+                    result = new String[endpointsPerPage-1];
+                }
+                for (int i = 0; i < endpointsPerPage; ++i) {
+                    if (result.length > i) {
+                        result[i] = allDynamicEndpoints[endpointsPerPage * pageNumber + i];
+                    }
+                }
+            }
         } catch (Exception e) {
             handleFault(e);
         }
-        return endpoints;
+        return result;
     }
 
     /**
@@ -251,16 +269,34 @@ public class EndpointAdminClient {
     /**
      * Get Metadata of all the Endpoints in the Synapse configuration
      *
+     * @param pageNumber page number
+     * @param endpointsPerPage no of endpoints per page
      * @return EndpointMetaData
      * @throws Exception in case of an error
      */
-    public EndpointMetaData[] getEndpointMetaData() throws Exception {
+    public EndpointMetaData[] getEndpointMetaData(int pageNumber, int endpointsPerPage) throws Exception {
+        EndpointMetaData[] result = null;
         try {
-            return stub.getEndpointsData();
+            EndpointMetaData[] allEndpointMetaData = stub.getEndpointsData();
+            if (allEndpointMetaData != null) {
+                if (allEndpointMetaData.length >= (endpointsPerPage * pageNumber + endpointsPerPage)) {
+                    result = new EndpointMetaData[endpointsPerPage];
+                } else if ((allEndpointMetaData.length - (endpointsPerPage * pageNumber)) > 0){
+                    result = new EndpointMetaData[allEndpointMetaData.length - (endpointsPerPage * pageNumber)];
+                } else {
+                    pageNumber--;
+                    result = new EndpointMetaData[endpointsPerPage-1];
+                }
+                for (int i = 0; i < endpointsPerPage; ++i) {
+                    if (result.length > i) {
+                        result[i] = allEndpointMetaData[endpointsPerPage * pageNumber + i];
+                    }
+                }
+            }
         } catch (Exception e) {
             handleFault(e);
         }
-        return null;
+        return result;
     }
 
     /**
@@ -346,6 +382,36 @@ public class EndpointAdminClient {
         } catch (Exception e) {
             handleFault(e);
         }
+    }
+
+    /**
+     * Get the endpoint count
+     *
+     * @return number of endpoints
+     * @throws Exception
+     */
+    public int getEndpointCount() throws Exception {
+        try {
+            return stub.getEndpointCount();
+        } catch (Exception e) {
+            handleFault(e);
+        }
+        return 0;
+    }
+
+    /**
+     * Get the dynamic endpoint count
+     *
+     * @return number of dynamic endpoints
+     * @throws Exception
+     */
+    public int getDynamicEndpointCount() throws Exception {
+        try {
+            return stub.getDynamicEndpointCount();
+        } catch (Exception e) {
+            handleFault(e);
+        }
+        return 0;
     }
 
 }

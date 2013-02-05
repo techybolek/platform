@@ -79,4 +79,26 @@ public interface ArtifactRepository {
      * @return  List of RepositoryConfigParameters
      */
     public List<RepositoryConfigParameter> getParameters();
+
+    /**
+     * Checkout artifacts from the remote repository with given depth to the local file system
+     *
+     * @param filePath File path of the local repository
+     * @param depth - given depth to get the update
+     * @return true if files were checked out or updated, false otherwise
+     * @throws DeploymentSynchronizerException on error
+     */
+
+    public boolean checkout(String filePath, int depth) throws DeploymentSynchronizerException;
+
+    /**
+     * Invoke the update operation on the specified file in the repository, with given depth
+     *
+     * @param rootPath - root path of the repository of which the dep-sychronizer is registered
+     * @param filePathToUpdate - location of the file in the repository
+     * @param depth Depth given to update, (eg 0 - empty, 3 - infinite)
+     * @return true if files were updated, false otherwise
+     * @throws DeploymentSynchronizerException on error
+     */
+    public boolean update(String rootPath, String filePathToUpdate, int depth) throws DeploymentSynchronizerException;
 }

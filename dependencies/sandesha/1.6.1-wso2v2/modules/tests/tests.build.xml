@@ -1,0 +1,145 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements. See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership. The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License. You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied. See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<project>
+
+	<target name="repo:create" depends="test:aars:create,server:create,client:create,serialize:create,secure:create" />
+		
+	<target name="test:aars:create">
+	</target>
+	
+	<target name="server:create" >
+		
+		<property name="build.repo.dir" value="${build.dir}/repos" />
+		<property name="server.dist.path" value="${build.repo.dir}/server" />
+		<property name="repo.addressing.mar" value="${build.dir}/copiedmars/addressing-${addressing.version}.mar" />
+			
+		<mkdir dir="${server.dist.path}" />
+		<mkdir dir="${server.dist.path}/modules" />
+		<mkdir dir="${server.dist.path}/services" />
+		
+		<copy file="${basedir}/test-resources/server_axis2.xml" todir="${server.dist.path}" />
+		<copy file="${build.dir}/copiedmars/sandesha2-${sandesha2.version}.mar" todir="${server.dist.path}/modules" /> 
+		
+		<copy todir="${server.dist.path}/services" >
+            <fileset dir="../samples/target/aars">
+                <include name="**/*.aar" />
+            </fileset>
+        </copy>
+       
+		<!-- Copying dependent mar files --> 
+        <copy file="${repo.addressing.mar}" toDir="${server.dist.path}/modules/" />
+		
+	</target>
+
+	<target name="client:create">
+
+		<property name="build.repo.dir" value="${build.dir}/repos" />
+		<property name="client.dist.path" value="${build.repo.dir}/client" />
+		<property name="repo.addressing.mar" value="${build.dir}/copiedmars/addressing-${addressing.version}.mar" />
+			
+		<mkdir dir="${client.dist.path}" />
+		<mkdir dir="${client.dist.path}/modules" />
+		
+		<copy file="${basedir}/test-resources/client_axis2.xml" todir="${client.dist.path}" />
+		<copy file="${build.dir}/copiedmars/sandesha2-${sandesha2.version}.mar" todir="${client.dist.path}/modules" />
+		
+		<!-- Copying dependent mar files --> 
+		<copy file="${repo.addressing.mar}" toDir="${client.dist.path}/modules/" />    
+
+	</target>
+	
+	<target name="serialize:create">
+
+		<property name="serialize.client.path" value="${build.dir}/repos/serialize-client"/>
+		<property name="serialize.server.path" value="${build.dir}/repos/serialize-server"/>
+         
+		<property name="serialize.temp.path" value="${build.dir}/temp/serialize" />
+		<mkdir dir="${serialize.temp.path}" />
+				
+		<copy todir="${serialize.client.path}">
+		  <fileset dir="${build.dir}/repos/client">
+		    <exclude name="modules/sandesha2*.mar"/>
+		  </fileset>
+		</copy>
+
+		<copy todir="${serialize.server.path}">
+		  <fileset dir="${build.dir}/repos/server">
+		    <exclude name="modules/sandesha2*.mar"/>
+		  </fileset>
+		</copy>
+
+		<!-- Switch on serialization in the module.xml file -->
+		<unjar src="${build.dir}/copiedmars/sandesha2-${sandesha2.version}.mar" dest="${serialize.temp.path}"/>
+		<replace file="${serialize.temp.path}/META-INF/module.xml" 
+		  token="&lt;!-- &lt;sandesha2:UseMessageSerialization>true&lt;/sandesha2:UseMessageSerialization> -->"
+		  value="&lt;sandesha2:UseMessageSerialization>true&lt;/sandesha2:UseMessageSerialization>"/>
+		<jar jarfile="${serialize.client.path}/modules/sandesha2-UnitTest.mar" basedir="${serialize.temp.path}"/>
+		<jar jarfile="${serialize.server.path}/modules/sandesha2-UnitTest.mar" basedir="${serialize.temp.path}"/>
+		
+		<delete dir="${build.temp.dir}"/>
+
+	</target>
+
+	<target name="secure:create">
+
+		<property name="secure.client.path" value="${build.dir}/repos/secure-client"/>
+		<property name="secure.server.path" value="${build.dir}/repos/secure-server"/>
+         
+		<property name="repo.addressing.mar" value="${build.dir}/copiedmars/addressing-${addressing.version}.mar" />
+		<property name="repo.rampart.mar" value="${build.dir}/copiedmars/rampart-${rampart.version}.mar" />
+		<property name="repo.rampart.core.jar" value="${build.dir}/copiedjars/rampart-core-${rampart.version}.jar" />
+		<property name="repo.rampart.policy.jar" value="${build.dir}/copiedjars/rampart-policy-${rampart.version}.jar" />
+			
+		<property name="secure.temp.path" value="${build.dir}/temp/secure" />
+		<mkdir dir="${secure.temp.path}" />
+				
+		<copy todir="${secure.client.path}">
+		  <fileset dir="${build.dir}/repos/client">
+		    <exclude name="modules/sandesha2*.mar"/>
+		  </fileset>
+		</copy>
+
+		<copy todir="${secure.server.path}">
+		  <fileset dir="${build.dir}/repos/server">
+		    <exclude name="modules/sandesha2*.mar"/>
+		  </fileset>
+		</copy>
+
+		<!-- Replace the security manager in the module.xml file -->
+		<unjar src="${build.dir}/copiedmars/sandesha2-${sandesha2.version}.mar" dest="${secure.temp.path}"/>
+		<replace file="${secure.temp.path}/META-INF/module.xml" 
+			token="dummy.DummySecurityManager"  value="UnitTestSecurityManager"/>
+		<jar jarfile="${secure.client.path}/modules/sandesha2-UnitTest.mar" basedir="${secure.temp.path}"/>
+		<jar jarfile="${secure.server.path}/modules/sandesha2-UnitTest.mar" basedir="${secure.temp.path}"/>
+		
+		<delete dir="${build.temp.dir}"/>
+
+		<copy file="${repo.rampart.mar}" toDir="${secure.client.path}/modules/" />
+		<copy file="${repo.rampart.core.jar}" toDir="${secure.client.path}/modules/" />
+		<copy file="${repo.rampart.policy.jar}" toDir="${secure.client.path}/modules/" />
+				
+		<copy file="${repo.rampart.mar}" toDir="${secure.server.path}/modules/" />
+		<copy file="${repo.rampart.core.jar}" toDir="${secure.server.path}/modules/" />
+		<copy file="${repo.rampart.policy.jar}" toDir="${secure.server.path}/modules/" />
+				
+	</target>
+
+</project>
+
+

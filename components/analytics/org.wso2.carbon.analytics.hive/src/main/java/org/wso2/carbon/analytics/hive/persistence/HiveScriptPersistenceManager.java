@@ -23,7 +23,7 @@ import org.wso2.carbon.analytics.hive.HiveConstants;
 import org.wso2.carbon.analytics.hive.ServiceHolder;
 import org.wso2.carbon.analytics.hive.exception.HiveScriptStoreException;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
@@ -183,7 +183,7 @@ public class HiveScriptPersistenceManager {
         ConfigurationContext superTenantContext = ServiceHolder.getConfigurationContextService().
                 getServerConfigContext();
         UserRegistry superTenantRegistry = ServiceHolder.getRegistryService().
-                getConfigSystemRegistry(SuperTenantCarbonContext.
+                getConfigSystemRegistry(PrivilegedCarbonContext.
                         getCurrentContext(superTenantContext).getTenantId());
 
         checkAndSetTenantId(superTenantRegistry, tenantId);

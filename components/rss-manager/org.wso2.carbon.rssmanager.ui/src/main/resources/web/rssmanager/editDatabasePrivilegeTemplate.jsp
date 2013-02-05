@@ -31,7 +31,7 @@
 
 <fmt:bundle basename="org.wso2.carbon.rssmanager.ui.i18n.Resources">
 <carbon:breadcrumb resourceBundle="org.wso2.carbon.rssmanager.ui.i18n.Resources"
-                   topPage="true" request="<%=request%>" label="rss.manager.header"/>
+                   topPage="true" request="<%=request%>" label="Edit Privilege Template"/>
 
 <%
     String templateName = request.getParameter("privilegeTemplateName");
@@ -56,7 +56,7 @@
 %>
 
 <div id="middle">
-<h2><fmt:message key="rss.manager.add.new.database.privilege.template"/></h2>
+<h2><fmt:message key="rss.manager.edit.database.privilege.template"/></h2>
 
 <div id="workArea">
 <%
@@ -252,7 +252,7 @@
         <td class="buttonRow" colspan="2">
             <input class="button" type="button"
                    value="<fmt:message key="rss.manager.save"/>"
-                    onclick="return createDatabasePrivilegeTemplate('edit')"/>
+                    onclick="return createDatabasePrivilegeTemplate('edit'); return false;"/>
             <%--<input class="button" type="button"--%>
                    <%--value="<fmt:message key="rss.manager.save"/>"--%>
                     <%--onclick="return editDatabasePrivilegeTemplate('<%=templateName%>', 'edit')"/>--%>

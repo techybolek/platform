@@ -37,7 +37,7 @@ import java.util.List;
  * - Notification Recipients
  */
 @Entity
-@Table(name = "GENERIC_HUMAN_ROLE")
+@Table(name = "HT_GENERIC_HUMAN_ROLE")
 public class GenericHumanRole implements GenericHumanRoleDAO {
 
     @Id
@@ -46,13 +46,14 @@ public class GenericHumanRole implements GenericHumanRoleDAO {
     private Long id;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "GHR_TYPE")
     private GenericHumanRoleType type;
 
     @ManyToOne
     private Task task;
 
     @ManyToMany(targetEntity = OrganizationalEntity.class, fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
-    @JoinTable(name = "HUMANROLE_ORGENTITY", joinColumns = {@JoinColumn(name = "HUMANROLE_ID", referencedColumnName = "GHR_ID")}, inverseJoinColumns = {@JoinColumn(name = "ORGENTITY_ID", referencedColumnName = "ORG_ENTITY_ID")})
+    @JoinTable(name = "HT_HUMANROLE_ORGENTITY", joinColumns = {@JoinColumn(name = "HUMANROLE_ID", referencedColumnName = "GHR_ID")}, inverseJoinColumns = {@JoinColumn(name = "ORGENTITY_ID", referencedColumnName = "ORG_ENTITY_ID")})
     private List<OrganizationalEntityDAO> orgEntities = new ArrayList<OrganizationalEntityDAO>();
 
     @Override

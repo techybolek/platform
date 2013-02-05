@@ -36,6 +36,10 @@
 <%@ page import="org.wso2.carbon.logging.view.stub.types.carbon.LogEvent"%>
 <%@ page import="java.util.regex.Matcher"%>
 <%@ page import="java.util.regex.Pattern"%>
+<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.util.Calendar" %>
+<%@ page import="java.util.Date" %>
+<%@ page import="java.util.TimeZone" %>
 <script type="text/javascript" src="js/logviewer.js"></script>
 <script type="text/javascript" src="../admin/dialog/js/dialog.js"></script>
 
@@ -45,10 +49,15 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>View System Logs</title>
+<script type="text/JavaScript">
+		function refresh(time) {
+			setTimeout("location.reload(true);", time);
+		}
+	</script>
 </head>
-<body>
+<body  onload="JavaScript:refresh(120000);">
 <%!private boolean isArchiveFile(String fileName) {
-		String archivePattern = "[a-zA-Z]*\\.gz";
+		String archivePattern = "[a-zA-Z]*\\.log";
 		CharSequence inputStr = fileName;
 		Pattern pattern = Pattern.compile(archivePattern);
 		Matcher matcher = pattern.matcher(inputStr);
@@ -75,13 +84,21 @@
 		int numberOfPages = 0;
 		int noOfRows=0;
 		boolean showMax= false;
+        boolean isSuperTenant = CarbonUIUtil.isSuperTenant(request);
+        boolean isManager = false;
+        String tenantDomain = request.getParameter("tenantDomain");
+        String serviceName = request.getParameter("serviceName");
+        String serviceNames[];
 		LogInfo[] logInfo = null;
-		PaginatedLogInfo paginatedLogInfo;
-		PaginatedLogEvent paginatedLogEvents;
+		PaginatedLogInfo paginatedLogInfo = null;
+		PaginatedLogEvent paginatedLogEvents = null;
 		String parameter = "";
 		String indexParameter = "";
-		showMax = Boolean.parseBoolean(showMaxStr);
-		try {
+        boolean isValidTenant = true;
+        String collapseAdv = request.getParameter("collapse");
+        boolean isCollapse = Boolean.parseBoolean(collapseAdv);
+        showMax = Boolean.parseBoolean(showMaxStr);
+        try {
 			pageNumber = Integer.parseInt(pageNumberStr);
 		} catch (NumberFormatException ignored) {
 			// page number format exception
@@ -94,26 +111,53 @@
 		try {
 			type = CharacterEncoder.getSafeText(request.getParameter("type"));
 			type = (type == null) ? "" : type;
+            if(tenantDomain == null) {
+                tenantDomain = "";
+            }
+            if (serviceName == null) {
+                serviceName = "";
+            }
+            //tenantDomain = (tenantDomain == null) ? "" : tenantDomain;
 			keyword = CharacterEncoder.getSafeText(request.getParameter("keyword"));
 			keyword = (keyword == null) ? "" : keyword;
 			action = CharacterEncoder.getSafeText(request.getParameter("action"));
 			logViewerClient = new LogViewerClient(cookie, backendServerURL, configContext);
-			paginatedLogEvents = logViewerClient.getPaginatedLogEvents(pageNumber, type,
-					keyword);
+            isValidTenant = logViewerClient.isValidTenant(tenantDomain);
+            if(isValidTenant) {
+                paginatedLogEvents = logViewerClient.getPaginatedLogEvents(pageNumber, type,
+                        keyword, tenantDomain, serviceName);
+                paginatedLogInfo = logViewerClient.getLocalLogFiles(pageIndexNumber, tenantDomain, serviceName);
+            }
+
 			if (paginatedLogEvents != null) {
 				noOfRows = paginatedLogEvents.getNumberOfPages() * 15;
 				events = paginatedLogEvents.getLogInfo();
 				numberOfPages = paginatedLogEvents.getNumberOfPages();
 			}
-			paginatedLogInfo = logViewerClient.getLocalLogFiles(pageIndexNumber);
 			if (paginatedLogInfo != null) {
 				logInfo = paginatedLogInfo.getLogInfo();
 				numberOfIndexPages = paginatedLogInfo.getNumberOfPages();
 			}
-
+            isManager = logViewerClient.isManager();
+            serviceNames = logViewerClient.getServiceNames();
 			showLogFiles = (logInfo != null);
-			parameter = "type=" + type + "&keyword=" + keyword;
-			indexParameter = "type=" + type + "&keyword=" + keyword+"&showMax=" + true;
+            if(isManager) {
+                if(isSuperTenant) {
+                    parameter = "type=" + type + "&keyword=" + keyword + "&serviceName=" + serviceName +
+                            "&tenantDomain=" + tenantDomain + "&collapse=" + isCollapse;
+                    indexParameter = "type=" + type + "&keyword=" + keyword+"&showMax=" + true + "&serviceName=" + serviceName +
+                            "&tenantDomain=" + tenantDomain + "&collapse=" + isCollapse;
+                } else {
+                    parameter = "type=" + type + "&keyword=" + keyword + "&serviceName=" + serviceName +
+                            "&collapse=" + isCollapse;
+                    indexParameter = "type=" + type + "&keyword=" + keyword+"&showMax=" + true + "&serviceName=" + serviceName +
+                             "&collapse=" + isCollapse;
+                }
+            } else {
+                parameter = "type=" + type + "&keyword=" + keyword;
+                indexParameter = "type=" + type + "&keyword=" + keyword+"&showMax=" + true;
+            }
+
 		} catch (Exception e) {
 			CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request,
 					e);
@@ -135,8 +179,111 @@
 				<fmt:message key="system.logs" />
 			</h2>
 			<div id="workArea">
-			
-			<%
+
+            <%
+                if (isManager) {
+            %>
+
+    <table border="0" class="styledLeft">
+        <tbody>
+        <tr>
+
+            <%
+            if(isCollapse) {
+            %>
+            <td class="middle-header" colspan="4"><a
+                    class="icon-link"
+                    style="background-image: url(images/minus.gif);"
+                    href="javascript:showQueryPropertiesSearch()"
+                    id="propertySymbolMaxSearch"></a> <fmt:message
+                    key="adv.search" /></td>
+        </tr>
+        <tr id="propertyTableSearch" style= "">
+
+                   <%
+                       } else {
+                   %>
+            <td class="middle-header" colspan="4"><a
+                    class="icon-link"
+                    style="background-image: url(images/plus.gif);"
+                    href="javascript:showQueryPropertiesSearch()"
+                    id="propertySymbolMaxSearch"></a> <fmt:message
+                    key="adv.search" /></td>
+        </tr>
+        <tr id="propertyTableSearch" style= "display: none">
+            <%
+                }
+            %>
+
+
+
+            <td>
+            <table class="normal">
+                <td style="padding-right: 2px !important;"><nobr>
+                                    <fmt:message key="service.name" />
+                    </nobr>
+                    </td>
+                    <td style="padding-right: 0px !important;"><select
+                            name="serviceName" id="serviceName" >
+                        <%
+                            for (String name : serviceNames) {
+                        %>
+                        <%
+                            if (name.equals(serviceName)) {
+                        %>
+                        <option selected="selected" value="<%=name%>">
+                            <%=name%>
+                        </option>
+                        <%
+                        } else {
+                        %>
+                        <option value="<%=name%>">
+                            <%=name%>
+                        </option>
+                        <%
+                            }
+                        %>
+                        <%
+                            }
+                        %>
+
+                    </select></td>
+                    <%
+                        if(isSuperTenant) {
+                        %>
+                    <td style="padding-right: 2px !important;">
+                        <nobr>
+                            <fmt:message key="tenant.domain" />
+                        </nobr>
+                    </td>
+                    <td style="padding-right: 2px !important;"><input
+                            value="<%=tenantDomain%>" id="tenantDomain"
+                            name="tenantDomain" size="20" type="text"></td>
+                    <td><input type="hidden" id="tenantDomain"
+                               name="tenantDomain" value="<%=tenantDomain%>" />
+                    </td>
+                    <%
+                        }
+                    %>
+
+
+            </table>
+
+        </td>
+        </tr>
+
+        </tbody>
+    </table>
+            <%
+                } else {
+            %>
+
+            <input type="hidden" id="serviceName" name="serviceName"
+                   value="<%=serviceName%>" />
+
+            <%
+                }
+
 				if (noOfRows > 40000) {
 			%>
 			<br/>
@@ -154,9 +301,10 @@
                             <td>
                             <table class="normal">
                             <tr>
-                            <td><fmt:message key="view"/></td>
-                            <td><select class="log-select" id="logLevelID"
-                                        onchange="javascript:viewSingleLogLevels(); return false;">
+                                <td style="padding-right: 2px !important;">
+                                    <nobr><fmt:message key="log.level"/></nobr>
+                                </td>
+                            <td><select class="log-select" id="logLevelID" return false>
                                 <%
                                 	String[] logLevels = logViewerClient.getLogLevels();
                                 		if (keyword != null && !keyword.equals("")) {
@@ -184,18 +332,78 @@
                                 		}
                                 %>
                             </select></td>
-                            <td style="width: 100%;"></td>
-                            <td>
-                                <nobr><fmt:message key="search.logs"/></nobr>
-                            </td>
-                                <td style="padding-right: 2px !important;">
-                                    <input onkeypress="submitenter(event)" value="" class="log-select"
-                                        size="40" id="logkeyword" type="text"></td>
-                                <td style="padding-left: 0px !important;"><input type="button"
-                                                                                 value="Search"
-                                                                                 onclick="javascript:searchLogs(); return false;"
-                                                                                 class="button">
+                                <td style="padding-right: 2px !important;"><nobr>
+                                    <fmt:message key="search.logs" />
+                                </nobr>
                                 </td>
+                                <%
+                                    if(isManager && isSuperTenant) {
+                                %>
+                                <td style="padding-right: 2px !important;"><input onkeypress="submitenter(event)"
+                                        value="<%=keyword%>" id="logkeyword"
+                                        size="20" type="text"></td>
+                                <td style="padding-right: 2px !important;">
+                                    <a
+                                            class="icon-link"
+                                            style="background-image: url(images/search.gif);"
+                                            href="javascript:searchLogs()">
+                                            </a>
+                                </td>
+                                <td><input type="hidden" id="keyWord"
+                                           name="keyword" value="<%=keyword%>" />
+
+                                </td>
+                                <%
+                                    } else  if(isManager && !isSuperTenant) {
+
+                                %>
+                                <td style="padding-right: 2px !important;"><input onkeypress="submitenterNormalManager(event)"
+                                                                                  value="<%=keyword%>" id="logkeyword"
+                                                                                  size="20" type="text"></td>
+                                <td style="padding-right: 2px !important;">
+                                    <a
+                                            class="icon-link"
+                                            style="background-image: url(images/search.gif);"
+                                            href="javascript:searchNormalManager()"></a>
+                                </td>
+                                <td><input type="hidden" id="keyWord"
+                                           name="keyword" value="<%=keyword%>" />
+
+                                </td>
+                                <%
+                                    } else if(!isManager) {
+                                        %>
+                                <td style="padding-right: 2px !important;"><input onkeypress="submitenterNormal(event)"
+                                                                                  value="<%=keyword%>" id="logkeyword"
+                                                                                  size="20" type="text"></td>
+                                <td style="padding-right: 2px !important;">
+                                    <a
+                                            class="icon-link"
+                                            style="background-image: url(images/search.gif);"
+                                            href="javascript:searchNormal()"
+                                            ></a>
+                                </td>
+                                <td><input type="hidden" id="keyWord"
+                                           name="keyword" value="<%=keyword%>" />
+
+                                </td>
+                                <td style="width: 37%;"></td>
+                                <td style="padding-right: 2px !important;"><nobr>
+                                    <fmt:message key="current.time" />
+                                </nobr>
+                                </td>
+                                <%
+                                    SimpleDateFormat dateFormat = new SimpleDateFormat("Z");
+                                    String date = dateFormat.format(System.currentTimeMillis());
+                                %>
+                                <td>
+                                    <%= "GMT " + date%>
+                                </td>
+                                <%
+
+                                    }
+                                %>
+
                             </tr>
                             
                         </table>
@@ -229,6 +437,12 @@
 									</tr>
 								</thead>
 							<%
+                                if(!isValidTenant) { %>
+                                <fmt:message key="invalid.tenant" />
+
+                                <%} else {
+
+
 								if (events == null || events.length == 0 || events[0] == null) {
 							%>
 								 <fmt:message key="no.logs" /> 
@@ -253,7 +467,7 @@
 										src="<%=logViewerClient.getImageName(logMessage.getPriority().trim())%>">
 									</td>
 									<td><nobr><%=logMessage.getLogTime()%></nobr></td>
-									<td><%=logMessage.getMessage()%></td>
+									<td><%=CharacterEncoder.getSafeText(logMessage.getMessage())%></td>
 										<%
 											String imgId = "traceSymbolMax" + index;
 										%>
@@ -279,13 +493,14 @@
 										}
 									%>
 								
-									<td colspan="4" width="100%">TID[<%=logMessage.getTenantId()%>] [<%=logMessage.getServerName()%>] [<%=logMessage.getLogTime()%>] <%=logMessage.getPriority().trim()%> {<%=logMessage.getLogger()%>} - <%=logMessage.getMessage()%> 
+									<td colspan="4" width="100%">TID[<%=logMessage.getTenantId()%>] [<%=logMessage.getServerName()%>] [<%=logMessage.getLogTime()%>] <%=logMessage.getPriority().trim()%> {<%=logMessage.getLogger()%>} - <%=CharacterEncoder.getSafeText(logMessage.getMessage())%> 
 										<%=logMessage.getStacktrace()%><br/>
 									</td>
 									</tr>
 							<%
 								}
 									}
+                                }
 							%>
 					
 							</table>
@@ -298,14 +513,30 @@
 				
 				<%
 														if (showLogFiles) {
-													%>
+                %>
 					<tr>
+                        <%
+                            if(showMax) {
+                        %>
 										<td class="middle-header" colspan="2"><a
 											class="icon-link"
-											style="background-image: url(images/plus.gif);"
+											style="background-image: url(images/minus.gif);"
 											href="javascript:showQueryProperties()"
 											id="propertySymbolMax"></a> <fmt:message
 												key="archived.logs" /></td>
+                        <%
+                            } else {
+
+                        %>
+                        <td class="middle-header" colspan="2"><a
+                                class="icon-link"
+                                style="background-image: url(images/plus.gif);"
+                                href="javascript:showQueryProperties()"
+                                id="propertySymbolMax"></a> <fmt:message
+                                key="archived.logs" /></td>
+                        <%
+                            }
+                        %>
 									</tr>
 									    <tr id="propertyTable" style="<%=(showMax) ? "" : "display:none"%>">
 								
@@ -349,8 +580,8 @@
 									<td colspan="4"><fmt:message key="no.logs" /></td>
 									<%
 										} else {
-														String logFile = logMessage.getLogName().replace("0_", "");
-														String logDate = logMessage.getLogDate().replace("0_", "");
+														String logFile = logMessage.getLogName();
+														String logDate = logMessage.getLogDate();
 														String logSize = logMessage.getFileSize();
 									%>
 
@@ -364,7 +595,7 @@
 									    <a class="icon-link"
 										style="background-image: url(images/download.gif);"
 										onclick="startDownload()"
-										href="downloadgz-ajaxprocessor.jsp?logFile=<%=logFile%>&tenantDomain=<%=""%>&serviceName=<%=""%>"><fmt:message
+										href="downloadgz-ajaxprocessor.jsp?logFile=<%=logFile%>&tenantDomain=<%=tenantDomain%>&serviceName=<%=serviceName%>"><fmt:message
 												key="download" /> </a>
 									       <%
 									       	} else {
@@ -372,7 +603,7 @@
 										<a class="icon-link"
 										style="background-image: url(images/download.gif);"
 										onclick="startDownload()"
-										href="download-ajaxprocessor.jsp?logFile=<%=logFile%>&tenantDomain=<%=""%>&serviceName=<%=""%>"><fmt:message
+										href="download-ajaxprocessor.jsp?logFile=<%=logFile%>&tenantDomain=<%=tenantDomain%>&serviceName=<%=serviceName%>"><fmt:message
 												key="download" /> </a>
 										   <%
 										   	}
@@ -407,3 +638,4 @@
 	</fmt:bundle>
 </body>
 </html>
+

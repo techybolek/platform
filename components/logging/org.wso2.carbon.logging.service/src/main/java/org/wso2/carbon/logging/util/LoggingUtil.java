@@ -41,6 +41,7 @@ import org.wso2.carbon.core.util.SystemFilter;
 import org.wso2.carbon.logging.appender.CarbonMemoryAppender;
 import org.wso2.carbon.logging.appenders.CircularBuffer;
 import org.wso2.carbon.logging.internal.DataHolder;
+import org.wso2.carbon.logging.internal.LoggingServiceComponent;
 import org.wso2.carbon.logging.registry.RegistryManager;
 import org.wso2.carbon.logging.service.LogViewerException;
 import org.wso2.carbon.logging.service.data.LogEvent;
@@ -50,8 +51,11 @@ import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.Pageable;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 public class LoggingUtil {
 
@@ -64,33 +68,33 @@ public class LoggingUtil {
 	public static final String SYSTEM_LOG_PATTERN = "[%d] %5p - %x %m {%c}%n";
 	private static final int MAX_LOG_MESSAGES = 200;
 
-	public static LogEvent[] getLogs(String appName) {
-		return tenantAwareLogReader.getLogs(appName);
+	public static LogEvent[] getLogs(String appName, String domain, String serviceKey) {
+		return tenantAwareLogReader.getLogs(appName, domain, serviceKey);
 	}
 
-	public static LogEvent[] searchLog(String type, String keyword, String appName) {
-		return tenantAwareLogReader.searchLog(type, keyword, appName);
+	public static LogEvent[] searchLog(String type, String keyword, String appName, String domain, String serviceKey) {
+		return tenantAwareLogReader.searchLog(type, keyword, appName, domain, serviceKey);
 
 	}
 
-	public static LogEvent[] getLogsForKey(String keyword, String appName) {
-		return tenantAwareLogReader.getLogsForKey(keyword, appName);
+	public static LogEvent[] getLogsForKey(String keyword, String appName, String domain, String serviceKey) {
+		return tenantAwareLogReader.getLogsForKey(keyword, appName, domain, serviceKey);
 	}
 
-	public static LogEvent[] getLogsForType(String type, String appName) {
-		return tenantAwareLogReader.getLogsForType(type, appName);
+	public static LogEvent[] getLogsForType(String type, String appName, String domain, String serviceKey) {
+		return tenantAwareLogReader.getLogsForType(type, appName, domain, serviceKey);
 	}
 
 	public static boolean isStratosService() throws Exception {
 		return loggingReader.isStratosService();
 	}
 
-	public static String[] getApplicationNames() {
-		return tenantAwareLogReader.getApplicationNames();
+	public static String[] getApplicationNames(String domain, String serviceKey) {
+		return tenantAwareLogReader.getApplicationNames(domain, serviceKey);
 	}
 
-	public static String[] getApplicationNamesFromCassandra() throws LogViewerException {
-		return cassandraLogReader.getApplicationNamesFromCassandra();
+	public static String[] getApplicationNamesFromCassandra(String domain, String serverKey) throws LogViewerException {
+		return cassandraLogReader.getApplicationNamesFromCassandra(domain, serverKey);
 	}
 
 	public static void setSystemLoggingParameters(String logLevel, String logPattern)
@@ -120,6 +124,22 @@ public class LoggingUtil {
 		return adminServices.toArray(new String[adminServices.size()]);
 	}
 
+    public static int getTenantIdForDomain(String tenantDomain) throws LogViewerException {
+        int tenantId;
+        TenantManager tenantManager = LoggingServiceComponent.getTenantManager();
+        if (tenantDomain == null || tenantDomain.equals("")) {
+            tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        } else {
+
+            try {
+                tenantId = tenantManager.getTenantId(tenantDomain);
+            } catch (UserStoreException e) {
+                throw new LogViewerException("Cannot find tenant id for the given tenant domain.");
+            }
+        }
+        return tenantId;
+    }
+
 	public static boolean isAdmingService (String serviceName) {
 		String [] adminServices = getAdminServiceNames();
 		for (String adminService : adminServices) {
@@ -133,34 +153,34 @@ public class LoggingUtil {
 		return cassandraLogReader.isLogEventAppenderConfigured();
 	}
 
-	public static LogEvent[] getSortedLogsFromCassandra(String priority, String keyword)
+	public static LogEvent[] getSortedLogsFromCassandra(String priority, String keyword, String domain, String serverKey)
 			throws LogViewerException {
-		return cassandraLogReader.getLogs(priority, keyword);
+		return cassandraLogReader.getLogs(priority, keyword, domain, serverKey);
 	}
 
 	public static LogEvent[] getSortedAppLogsFromCassandra(String priority, String keyword,
-			String appName) throws LogViewerException {
-		return cassandraLogReader.getApplicationLogs(priority, keyword, appName);
+			String appName, String domain, String serverKey) throws LogViewerException {
+		return cassandraLogReader.getApplicationLogs(priority, keyword, appName, domain, serverKey);
 	}
 
 	public static LogEvent[] getAllSystemLogs() {
 		return tenantAwareLogReader.getAllSystemLogs();
 	}
 
-	public static int getNoOfRows() throws LogViewerException {
-		return cassandraLogReader.getNoOfRows();
+	public static int getNoOfRows(String domain, String serverKey) throws LogViewerException {
+		return cassandraLogReader.getNoOfRows(domain, serverKey);
 	}
 
 	public static LogInfo[] getLogsIndex(String tenantDomain, String serviceName) throws Exception {
 		return loggingReader.getLogsIndex(tenantDomain, serviceName);
 	}
 
-	public static LogInfo[] getLocalLogInfo() {
-		return loggingReader.getLocalLogInfo();
+	public static LogInfo[] getLocalLogInfo(String domain, String serverKey) {
+		return loggingReader.getLocalLogInfo(domain, serverKey);
 	}
 
-	public static LogInfo[] getRemoteLogFiles() throws LogViewerException {
-		return fileReader.getRemoteLogFiles();
+	public static LogInfo[] getRemoteLogFiles(String domain, String serverKey) throws LogViewerException {
+		return fileReader.getRemoteLogFiles(domain,serverKey);
 	}
 
 	public static String getSystemLogLevel() throws Exception {
@@ -201,8 +221,8 @@ public class LoggingUtil {
 		}
 	}
 
-	public static DataHandler downloadArchivedLogFiles(String logFile) throws LogViewerException {
-		return fileReader.downloadArchivedLogFiles(logFile);
+	public static DataHandler downloadArchivedLogFiles(String logFile, String domain, String serverKey) throws LogViewerException {
+		return fileReader.downloadArchivedLogFiles(logFile, domain, serverKey);
 	}
 
 	public static boolean isManager() {
@@ -321,6 +341,7 @@ public class LoggingUtil {
 		}
 	}
 
+
 	private static void addAppendersToSet(Enumeration appenders, Set<Appender> appenderSet) {
 		while (appenders.hasMoreElements()) {
 			Appender appender = (Appender) appenders.nextElement();
@@ -427,3 +448,4 @@ public class LoggingUtil {
 		return y;
 	}
 }
+

@@ -26,6 +26,7 @@ import org.apache.rahas.RahasConstants;
 import org.apache.rahas.RahasData;
 import org.apache.rahas.TrustException;
 import org.apache.rahas.impl.SAMLPassiveTokenIssuer;
+import org.apache.rahas.impl.SAMLTokenIssuerConfig;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSSecurityEngineResult;
 import org.apache.ws.security.WSUsernameTokenPrincipal;
@@ -36,6 +37,7 @@ import org.wso2.carbon.identity.sts.passive.PassiveSTSService;
 import org.wso2.carbon.identity.sts.passive.RequestToken;
 import org.wso2.carbon.identity.sts.passive.ResponseToken;
 
+import javax.xml.stream.XMLStreamException;
 import java.util.Vector;
 
 public class SigningRequestProcessor extends RequestProcessor {
@@ -53,67 +55,82 @@ public class SigningRequestProcessor extends RequestProcessor {
         Vector<WSHandlerResult> handlerResultsVector = null;
         OMElement rstr = null;
 
-        try {
+        principal = new WSUsernameTokenPrincipal(request.getUserName(), false);
 
-            principal = new WSUsernameTokenPrincipal(request.getUserName(), false);
+        engineResult = new WSSecurityEngineResult(WSConstants.UT, principal, null, null, null);
 
-            engineResult = new WSSecurityEngineResult(WSConstants.UT, principal, null, null, null);
+        wsResults = new Vector<WSSecurityEngineResult>();
+        wsResults.add(engineResult);
 
-            wsResults = new Vector<WSSecurityEngineResult>();
-            wsResults.add(engineResult);
+        handlerResults = new WSHandlerResult("", wsResults);
 
-            handlerResults = new WSHandlerResult("", wsResults);
+        handlerResultsVector = new Vector<WSHandlerResult>();
+        handlerResultsVector.add(handlerResults);
 
-            handlerResultsVector = new Vector<WSHandlerResult>();
-            handlerResultsVector.add(handlerResults);
+        MessageContext.getCurrentMessageContext().setProperty(WSHandlerConstants.RECV_RESULTS,
+                                                              handlerResultsVector);
 
-            MessageContext.getCurrentMessageContext().setProperty(WSHandlerConstants.RECV_RESULTS,
-                                                                  handlerResultsVector);
-
-            // no claim attributes are requested, not included in request. So add the default claim
-            // attributes if they are available for the realm in request. The request may contain realm or wreply value,
-            // so extract the realm value from wreply. In registry we have a mapping of realms to claims.
-            // Claims are stored as comma separated values.
-            if (request.getAttributes() == null || request.getAttributes().length() == 0) {
-                String realm = request.getRealm();
-                if (realm == null) {
-                    log.warn("Realm is not set in request token.");
-                    String replyTo = request.getReplyTo();
-                    URL url = new URL(replyTo);
-                    if (url != null) {
-                        realm = url.getHost();
-                    } else {
-                        log.warn("Failed to get realm from replyTo address.");
-                    }
-                }
-                if (realm != null) {
+        // no claim attributes are requested, not included in request. So add the default claim
+        // attributes if they are available for the realm in request. The request may contain realm or wreply value,
+        // so extract the realm value from wreply. In registry we have a mapping of realms to claims.
+        // Claims are stored as comma separated values.
+        if (request.getAttributes() == null || request.getAttributes().length() == 0) {
+            String realm = request.getRealm();
+            if (realm == null) {
+                log.warn("Realm is not set in request token.");
+                String replyTo = request.getReplyTo();
+                URL url = new URL(replyTo);
+                realm = url.getHost();
+            }
+            if (realm != null) {
+                try {
                     ClaimDTO claimDTO = new PassiveSTSService().getTrustedServiceClaims(realm);
                     StringBuffer claims = new StringBuffer();
+                    request.setDialect(claimDTO.getClaimDialect());
                     for (String claim : claimDTO.getDefaultClaims()) {
                         claims.append(claim).append(",");
                     }
                     request.setAttributes(claims.toString());
                     log.debug("Default claims were added to request.");
+                } catch (Exception e) {
+                    log.error("Failed to get default claims for trusted service realm " + realm, e);
                 }
             }
+        }
 
 
+        try {
             MessageContext.getCurrentMessageContext().setProperty(RahasConstants.PASSIVE_STS_RST,
-                                                                  getRST(request.getRealm(), request.getAttributes()));
-
-            rahasData = new RahasData(context);
-            issuer = new SAMLPassiveTokenIssuer();
-            issuer.setAudienceRestrictionCondition(request.getRealm());
-            issuer.setConfig(getSAMLTokenIssuerConfig(MessageContext.getCurrentMessageContext()
-                                                              .getAxisService(), true));
-            rstr = issuer.issuePassiveRSTR(rahasData);
-            reponseToken = new ResponseToken();
-            reponseToken.setResults(rstr.toStringWithConsume());
-
+                                                                  getRST(request.getRealm(), request.getAttributes(), request.getDialect()));
         } catch (Exception e) {
+            log.error("Failed to get RST element.", e);
             throw new TrustException("errorWhileProcessingSigninRequest", e);
         }
 
+        SAMLTokenIssuerConfig samlTokenIssuerConfig = null;
+        try {
+            samlTokenIssuerConfig = getSAMLTokenIssuerConfig(MessageContext.getCurrentMessageContext()
+                                                                     .getAxisService(), true);
+        } catch (Exception e) {
+            log.error("Failed to get saml token issuer config.", e);
+            throw new TrustException("errorWhileProcessingSigninRequest", e);
+        }
+
+        rahasData = new RahasData(context);
+        issuer = new SAMLPassiveTokenIssuer();
+        issuer.setAudienceRestrictionCondition(request.getRealm());
+        issuer.setConfig(samlTokenIssuerConfig);
+
+        rstr = issuer.issuePassiveRSTR(rahasData);
+        reponseToken = new ResponseToken();
+        if (rstr != null) {
+            try {
+                reponseToken.setResults(rstr.toStringWithConsume());
+            } catch (XMLStreamException e) {
+                log.error(e.getMessage(), e);
+                throw new TrustException("errorWhileProcessingSigninRequest", e);
+            }
+        }
         return reponseToken;
     }
 

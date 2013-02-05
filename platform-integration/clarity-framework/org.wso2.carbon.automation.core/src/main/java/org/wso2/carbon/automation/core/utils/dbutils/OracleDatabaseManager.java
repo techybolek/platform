@@ -26,7 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 
-public class OracleDatabaseManager {
+public class OracleDatabaseManager implements DatabaseManager {
     private static final Log log = LogFactory.getLog(OracleDatabaseManager.class);
 
     private Connection connection;
@@ -40,6 +40,11 @@ public class OracleDatabaseManager {
         log.info("Connected to database");
     }
 
+    /**
+     *
+     * @param sql
+     * @throws SQLException
+     */
     public void executeUpdate(String sql) throws SQLException {
         Statement st = null;
         try {
@@ -60,6 +65,12 @@ public class OracleDatabaseManager {
 
     }
 
+    /**
+     *
+     * @param sqlFile
+     * @throws SQLException
+     * @throws IOException
+     */
     public void executeUpdate(File sqlFile) throws SQLException, IOException {
         Statement st = null;
         String sql = FileManager.readFile(sqlFile).trim();
@@ -85,6 +96,23 @@ public class OracleDatabaseManager {
         log.debug("Sql execution Success");
     }
 
+    /**
+     *
+     * @param sql
+     * @return
+     * @throws SQLException
+     */
+    public Statement getStatement(String sql) throws SQLException {
+        return connection.createStatement();
+
+    }
+
+    /**
+     *
+     * @param sql
+     * @return
+     * @throws SQLException
+     */
     public ResultSet executeQuery(String sql) throws SQLException {
         ResultSet rs;
         Statement st = connection.createStatement();
@@ -94,6 +122,11 @@ public class OracleDatabaseManager {
 
     }
 
+    /**
+     *
+     * @param sql
+     * @throws SQLException
+     */
     public void execute(String sql) throws SQLException {
         Statement st = null;
         try {
@@ -112,6 +145,10 @@ public class OracleDatabaseManager {
         log.debug("Sql execution Success");
     }
 
+    /**
+     *
+     * @throws SQLException
+     */
     public void disconnect() throws SQLException {
         connection.close();
         log.info("Disconnected from database");

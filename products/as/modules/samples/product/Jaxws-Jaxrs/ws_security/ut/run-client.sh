@@ -72,12 +72,6 @@ do
 done
 CLIENT_CLASSPATH=$CLIENT_CLASSPATH:$CLASSPATH
 
-#for f in "$CARBON_HOME"/repository/components/plugins/*.jar
-#do
- # CLIENT_CLASSPATH=$CLIENT_CLASSPATH:$f
-#done
-#CLIENT_CLASSPATH=$CLIENT_CLASSPATH:$CLASSPATH
-
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin; then
   JAVA_HOME=`cygpath --absolute --windows "$JAVA_HOME"`
@@ -88,8 +82,6 @@ fi
 
 echo Using CARBON_HOME: $CARBON_HOME
 echo Using JAVA_HOME    : $JAVA_HOME
-
-#export JAVA_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -Xms512m -Xmx512m"
 
 CLIENT_CLASSPATH="$CARBON_HOME/samples/Jaxws-Jaxrs/ws_security/ut/temp/classes":$CLIENT_CLASSPATH
 

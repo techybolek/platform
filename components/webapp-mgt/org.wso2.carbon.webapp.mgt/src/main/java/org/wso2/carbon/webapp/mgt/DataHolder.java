@@ -16,10 +16,11 @@
 package org.wso2.carbon.webapp.mgt;
 
 import org.apache.axis2.context.ConfigurationContext;
+import org.wso2.carbon.core.deployment.DeploymentSynchronizer;
 import org.wso2.carbon.tomcat.api.CarbonTomcatService;
+import org.wso2.carbon.url.mapper.HotUpdateService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.url.mapper.HotUpdateService;
 
 /**
  * Holds the some of the data required by the webapps component
@@ -29,6 +30,7 @@ public class DataHolder {
     private static RealmService realmService;
     private static CarbonTomcatService carbonTomcatService;
     private static HotUpdateService hotUpdateService;
+    protected static DeploymentSynchronizer deploymentSynchronizerService;
 
     public static RealmService getRealmService() {
         return realmService;
@@ -61,5 +63,14 @@ public class DataHolder {
 
     public static HotUpdateService getHotUpdateService() {
         return DataHolder.hotUpdateService;
+    }
+
+    public static void setDeploymentSynchronizerService(
+            DeploymentSynchronizer deploymentSynchronizerService) {
+            DataHolder.deploymentSynchronizerService = deploymentSynchronizerService;
+    }
+
+    public static DeploymentSynchronizer getDeploymentSynchronizerService() {
+        return DataHolder.deploymentSynchronizerService;
     }
 }

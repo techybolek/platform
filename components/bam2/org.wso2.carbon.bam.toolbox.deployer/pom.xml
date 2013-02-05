@@ -3,13 +3,15 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>bam2</artifactId>
         <groupId>org.wso2.carbon</groupId>
-        <version>4.0.0-SNAPSHOT</version>
+        <artifactId>bam2</artifactId>
+        <version>4.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
 
     <modelVersion>4.0.0</modelVersion>
+    <version>4.0.5</version>
     <name>WSO2 Carbon - BAM Toolbox Deployer - BE</name>
     <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.bam.toolbox.deployer</artifactId>
@@ -24,7 +26,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.analytics.hive</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>${carbon.patch.release405}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -35,6 +37,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
+            <version>${carbon.patch.release402}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.utils</artifactId>
+            <version>${carbon.patch.release402}</version>
         </dependency>
 
         <dependency>
@@ -42,6 +51,8 @@
             <artifactId>org.wso2.carbon.ndatasource.core</artifactId>
             <version>${wso2carbon.version}</version>
         </dependency>
+
+
         
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -69,7 +80,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.dashboard.mgt.gadgetrepo</artifactId>
-            <version>${wso2carbon.version}</version>
+            <version>${carbon.patch.release401}</version>
         </dependency>
 
     </dependencies>
@@ -114,4 +125,9 @@
         </plugins>
     </build>
 
+    <properties>
+        <carbon.patch.release401>4.0.1</carbon.patch.release401>
+        <carbon.patch.release402>4.0.2</carbon.patch.release402>
+	<carbon.patch.release405>4.0.5</carbon.patch.release405>
+    </properties>
 </project>

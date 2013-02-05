@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2008 WSO2, Inc. (http://wso2.com)
+  ~ Copyright 2013 WSO2, Inc. (http://wso2.com)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -24,17 +24,33 @@
 <body style="font-family: Times New Roman,Times,serif; font-size: 12pt;">
 <h1>OAuth</h1>
 
-<p><img alt="" src="../images/oauth-doc.png"/></p>
-<p>Figure 1: OAuth Management</p>
-
- <p>WSO2 Identity Server supports 2-legged and 3-legged OAuth</p>
-    <p>To enable OAuth support for your client application, first you need to register your application by providing an application name and a callback url</p>
-	<ul>
-		<li><strong>Consumer Key</strong>: OAuth consumer key</li>
-		<li><strong>Consumer Secret</strong>: OAuth consumer secret</li>
-		<li><strong>Access Token Url</strong>: https://localhost:9443/oauth/access-token</li>
-		<li><strong>Authorize Url</strong>: https://localhost:9443/oauth/authorize-url</li>
-		<li><strong>Request Token Url</strong>: https://localhost:9443/oauth/request-token</li>
-	</ul>
+ <p>WSO2 Identity Server 4.0.0 supports OAuth 1.0a and OAuth 2.0 specifications.</p>
+ 
+ <P><h3>To enable OAuth support to your application, you need to register your application first.</h3></P>
+ <p><img alt="" src="../images/doc_register_oauthapp.png"/></p>
+ <p><caption align="bottom">Figure 1: Register New OAuth Application</caption></p>
+ <br /><br /> 
+ 
+ <p><h3>To register your application, you need to provide the OAuth protocol version, application name and the Callback URL of your web application.</h3></p>
+ <p><img alt="" src="../images/doc_add_oauthapp.png"/></p>
+ <p><caption align="bottom">Figure 2: Add New OAuth Application</caption></p>
+ <br /><br />
+ 
+ <p><h3>To view your application configurations, click on the application name.</h3></p>
+ <p><img alt="" src="../images/doc_view_oauthapp.png"/></p>
+ <p><caption align="bottom">Figure 3: View OAuth Application Configurations</caption></p>
+ <br /><br />
+ 
+ <p><h3>You can view application configurations.</h3></p>
+ <p><img alt="" src="../images/doc_edit_oauthapp.png"/></p>
+ <p><caption align="bottom">Figure 4: OAuth Application Configurations</caption></p>
+ <br /><br />
+ 
+ <p><h3>To remove applications.</h3></p>
+ <p><img alt="" src="../images/doc_delete_oauthapp.png"/></p>
+ <p><caption align="bottom">Figure 5: Delete OAuth Application</caption></p>
+ <br /><br />
+ 
+ 
 </body>
 </html>

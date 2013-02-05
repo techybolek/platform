@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.humantask.client.api.*;
 import org.wso2.carbon.humantask.client.api.types.*;
@@ -73,7 +74,6 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
 
 import javax.xml.namespace.QName;
 import java.util.List;
@@ -136,8 +136,8 @@ public class TaskOperationsImpl extends AbstractAdmin
 
     @Override
     public TBatchResponse[] batchStop(URI[] uris) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
@@ -151,8 +151,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public TTaskAbstract[] getMyTaskAbstracts(String s, String s1, String s2, TStatus[] tStatuses,
                                               String s3, String s4, String s5, int i, int i1)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TTaskAbstract[0];
     }
@@ -160,8 +160,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     @Override
     public void stop(final URI taskId) throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             validateTaskId(taskId);
             HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -179,8 +179,8 @@ public class TaskOperationsImpl extends AbstractAdmin
 
     @Override
     public TBatchResponse[] batchComplete(URI[] taskIds, OMElement o) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
@@ -189,8 +189,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void resume(final URI taskId)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             validateTaskId(taskId);
             HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -209,8 +209,8 @@ public class TaskOperationsImpl extends AbstractAdmin
 
     @Override
     public QName[] getRenderingTypes(URI taskId) throws IllegalArgumentFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new QName[0];
     }
@@ -219,8 +219,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void setTaskCompletionDeadlineExpression(URI taskId, NCName ncName, String s)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         validateTaskId(taskId);
         handleUnsupportedOperation();
     }
@@ -229,8 +229,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void setOutput(URI taskIdURI, NCName ncName, OMElement o)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
             if (ncName != null && o != null) {
@@ -257,8 +257,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     @Override
     public TTaskOperations getTaskOperations(URI taskId)
             throws IllegalOperationFault, IllegalArgumentFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         validateTaskId(taskId);
         handleUnsupportedOperation();
         return null;
@@ -266,16 +266,16 @@ public class TaskOperationsImpl extends AbstractAdmin
 
     @Override
     public TBatchResponse[] batchRelease(URI[] taskId) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
 
     @Override
     public TTaskDetails getTaskDetails(URI taskId) throws IllegalArgumentFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         validateTaskId(taskId);
         handleUnsupportedOperation();
         return null;
@@ -285,8 +285,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void forward(URI taskId, TOrganizationalEntity tOrganizationalEntity)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         validateTaskId(taskId);
         handleUnsupportedOperation();
     }
@@ -296,8 +296,8 @@ public class TaskOperationsImpl extends AbstractAdmin
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
         validateTaskId(taskId);
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         // As we do not support sub task with this release.
         return false;
     }
@@ -306,8 +306,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void suspend(final URI taskId)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             validateTaskId(taskId);
             HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -326,9 +326,10 @@ public class TaskOperationsImpl extends AbstractAdmin
 
     @Override
     public TUser[] getAssignableUserList(URI taskIdURI) throws IllegalStateFault, IllegalArgumentFault {
-        final int tenantId = CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId();
-                CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(tenantId);
+        final int tenantId = CarbonContext.getCurrentContext().getTenantId();
+
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+
         try {
             final Long taskId = validateTaskId(taskIdURI);
             return HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -363,8 +364,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void updateComment(final URI taskIdURI, final URI commentId, final String s)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
             HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -383,8 +384,8 @@ public class TaskOperationsImpl extends AbstractAdmin
 
     @Override
     public TTaskAbstract loadTask(URI taskIdURI) throws IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
             TaskDAO task = HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -406,16 +407,16 @@ public class TaskOperationsImpl extends AbstractAdmin
     public TTaskDetails[] getMyTaskDetails(String s, String s1, String s2, TStatus[] tStatuses,
                                            String s3, String s4, String s5, int i, int i1)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TTaskDetails[0];
     }
 
     @Override
     public TBatchResponse[] batchNominate(URI[] uris) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
@@ -424,16 +425,16 @@ public class TaskOperationsImpl extends AbstractAdmin
     public URI[] getSubtaskIdentifiers(URI uri)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new URI[0];
     }
 
     @Override
     public String getOutcome(URI uri) throws IllegalOperationFault, IllegalArgumentFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         validateTaskId(uri);
         handleUnsupportedOperation();
         return null;
@@ -441,8 +442,8 @@ public class TaskOperationsImpl extends AbstractAdmin
 
     @Override
     public Object getRendering(URI uri, QName qName) throws IllegalArgumentFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         validateTaskId(uri);
         handleUnsupportedOperation();
         return null;
@@ -451,8 +452,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     @Override
     public void skip(URI taskIdURI) throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
             HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -470,8 +471,8 @@ public class TaskOperationsImpl extends AbstractAdmin
 
     @Override
     public TBatchResponse[] batchFail(URI[] taskIds, TFault tFault) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
@@ -480,8 +481,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void setTaskCompletionDurationExpression(URI uri, NCName ncName, String s)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
     }
 
@@ -489,8 +490,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void start(final URI taskId)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             validateTaskId(taskId);
             HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -510,8 +511,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void fail(final URI taskIdURI, final TFault tFault)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskID = validateTaskId(taskIdURI);
 
@@ -538,8 +539,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void activate(URI taskIdURI)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskID = validateTaskId(taskIdURI);
 
@@ -560,8 +561,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public URI addComment(final URI taskIdURI, final String commentString)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             validateTaskId(taskIdURI);
             Validate.notEmpty(commentString, "The comment string cannot be empty");
@@ -589,8 +590,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void deleteComment(final URI taskIdURI, final URI commentId)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
 
@@ -612,8 +613,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void delegate(final URI taskId, final TOrganizationalEntity delegatee)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             RecipientNotAllowedException, IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             validateTaskId(taskId);
             if (delegatee == null) {
@@ -643,8 +644,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public TComment[] getComments(URI taskIdURI)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
             return HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -667,8 +668,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public TTaskInstanceData getTaskInstanceData(URI taskId, String s,
                                                  TRenderingTypes[] tRenderingTypeses)
             throws IllegalOperationFault, IllegalArgumentFault, IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return null;
     }
@@ -677,24 +678,24 @@ public class TaskOperationsImpl extends AbstractAdmin
     public TTaskDetails getParentTask(URI taskId)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return null;
     }
 
     @Override
     public TBatchResponse[] batchResume(URI[] taskIds) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
 
     @Override
     public TBatchResponse[] batchRemove(URI[] taskIds) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
@@ -703,8 +704,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public TAttachment[] getAttachment(URI taskIdentifier, URI attachmentIdentifier)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TAttachment[0];
     }
@@ -713,8 +714,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public boolean addAttachment(URI taskIdentifier, String name, String accessType, String contentType, Object attachment)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
                    IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         final Long taskId = validateTaskId(taskIdentifier);
         final String attachmentID = (String) attachment;
 
@@ -751,8 +752,8 @@ public class TaskOperationsImpl extends AbstractAdmin
 
     @Override
     public TAttachmentInfo[] getAttachmentInfos(final URI taskIdentifier) throws IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
 
         final Long taskId = validateTaskId(taskIdentifier);
         try {
@@ -775,8 +776,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     @Override
     public void remove(URI taskId)
             throws IllegalOperationFault, IllegalArgumentFault, IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long notificationId = validateTaskId(taskId);
             HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -801,8 +802,8 @@ public class TaskOperationsImpl extends AbstractAdmin
 
     @Override
     public TBatchResponse[] batchStart(URI[] taskIds) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
@@ -811,8 +812,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public URI instantiateSubtask(URI taskId, String s)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return null;
     }
@@ -820,8 +821,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     @Override
     public TTaskAuthorisationParams loadAuthorisationParams(URI taskIdURI)
             throws IllegalStateFault, IllegalArgumentFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
             return HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -848,8 +849,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public TTaskEventType[] getTaskHistory(URI uri, TTaskHistoryFilter tTaskHistoryFilter, int i,
                                            int i1, boolean b)
             throws IllegalOperationFault, IllegalArgumentFault, IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TTaskEventType[0];
     }
@@ -858,16 +859,16 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void setTaskStartDeadlineExpression(URI uri, NCName ncName, String s)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
     }
 
     @Override
     public TTaskEvents loadTaskEvents(URI taskIdURI)
             throws IllegalArgumentFault, IllegalStateFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
             return HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -892,8 +893,8 @@ public class TaskOperationsImpl extends AbstractAdmin
 
     @Override
     public TBatchResponse[] batchDelegate(URI[] uris, TOrganizationalEntity tOrganizationalEntity) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
@@ -901,8 +902,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     @Override
     public TBatchResponse[] batchSetGenericHumanRole(URI[] uris, String s,
                                                      TOrganizationalEntity tOrganizationalEntity) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
@@ -911,8 +912,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void setGenericHumanRole(URI uri, String s, TOrganizationalEntity tOrganizationalEntity)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         validateTaskId(uri);
         handleUnsupportedOperation();
     }
@@ -921,8 +922,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public Object getInput(final URI taskIdURI, final NCName inputIdentifier)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             validateTaskId(taskIdURI);
             return HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -948,8 +949,8 @@ public class TaskOperationsImpl extends AbstractAdmin
 
     @Override
     public TBatchResponse[] batchSkip(URI[] taskIds) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
@@ -958,8 +959,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void complete(final URI taskIdURI, final String outputStr)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
             HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -980,16 +981,16 @@ public class TaskOperationsImpl extends AbstractAdmin
     public boolean hasSubtasks(URI taskId)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         validateTaskId(taskId);
         return false;
     }
 
     @Override
     public TBatchResponse[] batchActivate(URI[] taskIds) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
@@ -998,8 +999,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void claim(final URI taskIdURI)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
             HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -1018,24 +1019,24 @@ public class TaskOperationsImpl extends AbstractAdmin
     @Override
     public TTaskQueryResultSet query(String s, String s1, String s2, int i, int i1)
             throws IllegalStateFault, IllegalArgumentFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return null;
     }
 
     @Override
     public TBatchResponse[] batchClaim(URI[] uris) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
 
     @Override
     public TBatchResponse[] batchSetPriority(URI[] uris, TPriority tPriority) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
@@ -1044,8 +1045,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void setFault(final URI taskIdURI, final TFault tFault)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
             HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -1071,8 +1072,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void suspendUntil(URI taskId, TTime suspendUntilTime)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         validateTaskId(taskId);
         handleUnsupportedOperation();
     }
@@ -1081,16 +1082,16 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void setTaskStartDurationExpression(URI taskId, NCName ncName, String s)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         validateTaskId(taskId);
         handleUnsupportedOperation();
     }
 
     @Override
     public String getTaskDescription(final URI taskIdURI, final String contentTypeStr) throws IllegalArgumentFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
             return HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -1122,8 +1123,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void deleteAttachment(URI taskId, URI attachmentId)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         validateTaskId(taskId);
         handleUnsupportedOperation();
     }
@@ -1132,8 +1133,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void nominate(final URI taskIdURI, final TOrganizationalEntity nomineeOrgEntity)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
             HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -1155,8 +1156,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void deleteOutput(final URI taskIdURI)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
             HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -1174,16 +1175,16 @@ public class TaskOperationsImpl extends AbstractAdmin
 
     @Override
     public TBatchResponse[] batchForward(URI[] taskIds, TOrganizationalEntity tOrganizationalEntity) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
 
     @Override
     public TBatchResponse[] batchSuspend(URI[] taskIds) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
@@ -1192,8 +1193,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public TTaskDetails[] getSubtasks(URI taskId)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         validateTaskId(taskId);
         handleUnsupportedOperation();
         return new TTaskDetails[0];
@@ -1203,8 +1204,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void deleteFault(final URI taskIdURI)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
             HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -1224,8 +1225,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public Object getOutput(final URI taskIdURI, final NCName partNCName)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
             return HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -1258,8 +1259,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void release(final URI taskId)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             validateTaskId(taskId);
             HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -1280,8 +1281,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public TFault getFault(URI taskIdURI)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         try {
             final Long taskId = validateTaskId(taskIdURI);
             return HumanTaskServiceComponent.getHumanTaskServer().getTaskEngine().getScheduler().
@@ -1309,8 +1310,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public void setPriority(final URI taskIdURI, final TPriority tPriority)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
 
         if (tPriority.getTPriority().intValue() < 1 || tPriority.getTPriority().intValue() > 10) {
             log.warn("The priority value should be between 1 and 10. " +
@@ -1336,8 +1337,8 @@ public class TaskOperationsImpl extends AbstractAdmin
 
     @Override
     public TBatchResponse[] batchSuspendUntil(URI[] taskIds, TTime suspendUntilTime) {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return new TBatchResponse[0];
     }
@@ -1346,8 +1347,8 @@ public class TaskOperationsImpl extends AbstractAdmin
     public URI getParentTaskIdentifier(URI taskId)
             throws IllegalStateFault, IllegalOperationFault, IllegalArgumentFault,
             IllegalAccessFault {
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(CarbonContextHolder.
-                getCurrentCarbonContextHolder().getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(
+                CarbonContext.getCurrentContext().getTenantId());
         handleUnsupportedOperation();
         return null;
 

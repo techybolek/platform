@@ -7,7 +7,7 @@
         <target>
             <inSequence>
                 <send receive="conf:/sequence_conf/test_sequence_build_message_conf.xml" buildmessage="true">
-                    <endpoint key ="local:/endpoints/registry_endpoint.xml"/>
+                    <endpoint key ="conf:/endpoints/registry_endpoint.xml"/>
                 </send>
             </inSequence>
             <outSequence>
@@ -19,7 +19,7 @@
         <target>
             <inSequence>
                 <send receive="conf:/sequence_conf/test_sequence_build_message_conf.xml" buildmessage="false">
-                    <endpoint key ="local:/endpoints/registry_endpoint.xml"/>
+                    <endpoint key ="conf:/endpoints/registry_endpoint.xml"/>
                 </send>
             </inSequence>
             <outSequence>

@@ -82,7 +82,7 @@ public class EntitlementPolicyUploadExecutor extends AbstractFileUploadExecutor 
                     while ((temp=br.readLine()) != null){
                         policyContent += temp;
                     }
-                    if (policyContent != "") {
+                    if (!"".equals(policyContent)) {
                         client.uploadPolicy(policyContent);
                     }
                 }

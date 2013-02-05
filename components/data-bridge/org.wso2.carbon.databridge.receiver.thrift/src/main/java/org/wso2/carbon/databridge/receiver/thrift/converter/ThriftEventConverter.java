@@ -28,8 +28,9 @@ import org.wso2.carbon.databridge.core.EventConverter;
 import org.wso2.carbon.databridge.core.StreamTypeHolder;
 import org.wso2.carbon.databridge.core.exception.EventConversionException;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * the util class that converts Events and its definitions in to various forms
@@ -82,7 +83,7 @@ public final class ThriftEventConverter implements EventConverter {
     }
 
     public List<Event> toEventList(Object eventBundle,
-                                       StreamTypeHolder streamTypeHolder) {
+                                   StreamTypeHolder streamTypeHolder) {
         if (eventBundle instanceof ThriftEventBundle) {
             return createEventList((ThriftEventBundle) eventBundle, streamTypeHolder);
         } else {
@@ -95,7 +96,7 @@ public final class ThriftEventConverter implements EventConverter {
                                         StreamTypeHolder streamTypeHolder) {
 
         IndexCounter indexCounter = new IndexCounter();
-        List<Event> eventList = new LinkedList<Event>();
+        List<Event> eventList = new ArrayList<Event>(thriftEventBundle.getEventNum());
         String streamId = null;
         try {
             for (int i = 0; i < thriftEventBundle.getEventNum(); i++) {
@@ -106,14 +107,20 @@ public final class ThriftEventConverter implements EventConverter {
                 long timeStamp = thriftEventBundle.getLongAttributeList().get(indexCounter.getLongCount());
                 indexCounter.incrementLongCount();
                 event.setTimeStamp(timeStamp);
-                AttributeType[] metaAttributeTypeOrder = streamTypeHolder.getMetaDataType(streamId);
-                AttributeType[] correlationAttributeTypeOrder = streamTypeHolder.getCorrelationDataType(streamId);
-                AttributeType[] payloadAttributeTypeOrder = streamTypeHolder.getPayloadDataType(streamId);
-                event.setMetaData(this.toObjectArray(thriftEventBundle, metaAttributeTypeOrder, indexCounter));
-                event.setCorrelationData(this.toObjectArray(thriftEventBundle, correlationAttributeTypeOrder, indexCounter));
-                event.setPayloadData(this.toObjectArray(thriftEventBundle, payloadAttributeTypeOrder, indexCounter));
+                AttributeType[][] attributeTypeOrder = streamTypeHolder.getDataType(streamId);
+                if (attributeTypeOrder == null) {
+                    throw new EventConversionException("No StreamDefinition for streamId " + streamId + " present in cache ");
+                }
+                event.setMetaData(this.toObjectArray(thriftEventBundle, attributeTypeOrder[0], indexCounter));
+                event.setCorrelationData(this.toObjectArray(thriftEventBundle, attributeTypeOrder[1], indexCounter));
+                event.setPayloadData(this.toObjectArray(thriftEventBundle, attributeTypeOrder[2], indexCounter));
+                if (thriftEventBundle.isSetArbitraryDataMapMap()) {
+                    Map<String, String> arbitraryData = thriftEventBundle.getArbitraryDataMapMap().get(i);
+                    if (null != arbitraryData) {
+                        event.setArbitraryDataMap(arbitraryData);
+                    }
+                }
                 eventList.add(event);
-
             }
         } catch (RuntimeException re) {
             throw new EventConversionException("Error when converting " + streamId + " of event bundle with events " + thriftEventBundle.getEventNum(), re);

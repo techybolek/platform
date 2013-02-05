@@ -1,6 +1,6 @@
 <data name="CSVSampleService" serviceGroup="CSVSample" baseURI="http://ws.wso2.org/dataservice/samples/csv_sample_service">
     
-    <config>
+    <config id="CSVDataSourceConfig">
         <property name="csv_datasource">./samples/resources/Products.csv</property>
         <property name="csv_columnseperator">,</property>
         <property name="csv_startingrow">2</property>
@@ -11,7 +11,7 @@
     <operation name="getProducts">
         <call-query href="productsQuery" />
     </operation>
-    <query id="productsQuery">
+    <query id="productsQuery" useConfig="CSVDataSourceConfig">
         <result element="Products" rowName="Product">
             <element name="ID" column="1" />
             <element name="Category" column="3" />

@@ -20,14 +20,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import org.wso2.carbon.stratos.common.constants.StratosConstants;
-import org.wso2.carbon.stratos.common.util.MeteringAccessValidationUtils;
+import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.stratos.common.constants.StratosConstants;
+import org.wso2.carbon.stratos.common.util.MeteringAccessValidationUtils;
+import org.wso2.carbon.stratos.common.util.StratosConfiguration;
 import org.wso2.carbon.throttling.agent.cache.TenantThrottlingInfo;
 import org.wso2.carbon.throttling.agent.cache.ThrottlingActionInfo;
 import org.wso2.carbon.throttling.agent.cache.ThrottlingInfoCache;
@@ -41,9 +45,8 @@ import org.wso2.carbon.user.core.listener.UserStoreManagerListener;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
-import org.wso2.carbon.stratos.common.util.StratosConfiguration;
+
 import java.io.File;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -91,16 +94,21 @@ public class ThrottlingAgent {
     }
 
     public void init() throws RegistryException {
-        UserRegistry superTenantGovernanceRegistry = registryService.getGovernanceSystemRegistry();
 
-        scheduler.scheduleAtFixedRate(
-                new ThrottlingInfoCacheUpdaterTask(throttlingInfoCache, superTenantGovernanceRegistry), 2, 30,
-                TimeUnit.MINUTES);
+        if("true".equals(ServerConfiguration.getInstance().getFirstProperty("EnableMetering"))){
 
-        PerRegistryRequestListener.registerPerRegistryRequestListener(RegistryContext.getBaseInstance());
-        if (bundleContext != null) {
-            bundleContext.registerService(UserStoreManagerListener.class.getName(),
-                    new PerUserAddListener(), null);
+            UserRegistry superTenantGovernanceRegistry = registryService.getGovernanceSystemRegistry();
+
+            scheduler.scheduleAtFixedRate(
+                    new ThrottlingInfoCacheUpdaterTask(throttlingInfoCache, superTenantGovernanceRegistry), 2, 15,
+                    TimeUnit.MINUTES);
+
+            PerRegistryRequestListener.registerPerRegistryRequestListener(RegistryContext.getBaseInstance());
+            if (bundleContext != null) {
+                bundleContext.registerService(UserStoreManagerListener.class.getName(),
+                        new PerUserAddListener(), null);
+            }
+
         }
         throttlingRuleInvokerTracker = new ServiceTracker(bundleContext, ThrottlingRuleInvoker.class.getName(),
                 null);
@@ -113,6 +121,10 @@ public class ThrottlingAgent {
 
     public void setRegistryService(RegistryService registryService) {
         this.registryService = registryService;
+    }
+
+    public RegistryService getRegistryService(){
+        return this.registryService;
     }
 
     public void setRealmService(RealmService realmService) {
@@ -134,8 +146,7 @@ public class ThrottlingAgent {
     public void updateThrottlingCacheForTenant() throws Exception {
         // TODO: Need to refactor this and updater task
 
-        UserRegistry registry = registryService.getGovernanceUserRegistry();
-        int tenantId = registry.getTenantId();
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
 
         String tenantValidationInfoResourcePath =
                 StratosConstants.TENANT_USER_VALIDATION_STORE_PATH +
@@ -207,9 +218,9 @@ public class ThrottlingAgent {
         return new MultitenancyThrottlingServiceClient(serverUrl, userName, password);
     }
 
-    public void executeManagerThrottlingRules() throws Exception {
+    public void executeManagerThrottlingRules(int tenantId) throws Exception {
         ThrottlingRuleInvoker client = getThrottlingRuleInvoker();
-        client.executeThrottlingRules();
+        client.executeThrottlingRules(tenantId);
     }
 
 
@@ -223,7 +234,7 @@ public class ThrottlingAgent {
 
     public void executeThrottlingRules(int tenantId) {
         try {
-            executeManagerThrottlingRules();
+            executeManagerThrottlingRules(tenantId);
             updateThrottlingCacheForTenant();
         } catch (Exception e) {
             log.error("Error in executing throttling rules");

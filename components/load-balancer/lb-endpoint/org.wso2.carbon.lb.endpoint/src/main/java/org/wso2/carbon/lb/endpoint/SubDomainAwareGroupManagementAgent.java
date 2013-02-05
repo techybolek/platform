@@ -19,6 +19,7 @@ package org.wso2.carbon.lb.endpoint;
 
 import org.apache.axis2.clustering.Member;
 import org.apache.axis2.clustering.management.DefaultGroupManagementAgent;
+import org.apache.synapse.endpoints.dispatch.SALSessions;
 
 /**
  * This GroupManagementAgent can handle group membership based on cluster sub-domains
@@ -41,9 +42,14 @@ public class SubDomainAwareGroupManagementAgent extends DefaultGroupManagementAg
 
     @Override
     public void applicationMemberRemoved(Member member) {
+
+        // remove the sessions bound with this member
+        SALSessions.getInstance().removeSessionsOfMember(member);
+
         String subDomain = member.getProperties().getProperty("subDomain");
         if (subDomain == null || subDomain.equals(this.subDomain)) {
             super.applicationMemberRemoved(member);
         }
     }
+    
 }

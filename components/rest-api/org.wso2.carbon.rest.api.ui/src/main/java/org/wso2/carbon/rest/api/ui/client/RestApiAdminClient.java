@@ -1,9 +1,34 @@
+/*
+ *  Copyright (c) 2008, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.wso2.carbon.rest.api.ui.client;
 
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.*;
 
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMNode;
+import org.apache.axiom.om.OMXMLBuilderFactory;
+import org.apache.axiom.om.impl.llom.OMElementImpl;
+import org.apache.axiom.om.xpath.AXIOMXPath;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -14,6 +39,12 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.rest.api.stub.RestApiAdminStub;
 import org.wso2.carbon.rest.api.stub.types.carbon.APIData;
 import org.wso2.carbon.rest.api.stub.types.carbon.ResourceData;
+import org.apache.synapse.transport.nhttp.ListenerContext;
+import org.apache.synapse.transport.nhttp.NhttpConstants;
+import org.apache.commons.lang.math.NumberUtils;
+import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.TransportInDescription;
+import org.wso2.carbon.CarbonConstants;
 
 public class RestApiAdminClient {
 	
@@ -61,6 +92,24 @@ public class RestApiAdminClient {
 		}
 		return null;
 	}
+	
+	public APIData[] getAPIsForListing(int pageNumber, int itemsPerPage) throws AxisFault{
+		try {
+			return stub.getAPIsForListing(pageNumber, itemsPerPage);
+		} catch (Exception e) {
+			handleException(bundle.getString("failed.to.retrieve.apis"), e);
+		}
+		return null;
+	}
+	
+	public int getAPICount() throws AxisFault{
+		try {
+			return stub.getAPICount();
+		} catch (Exception e) {
+			handleException(bundle.getString("failed.to.get.api.count"), e);
+		}
+		return 0;
+	} 
 	
 	public void deleteApi(String apiName) throws AxisFault{
 		try {
@@ -132,6 +181,44 @@ public class RestApiAdminClient {
 			handleException(bundle.getString("could.not.update.api"), e);
 		}
 	}
+
+     private String ReadWSDLPrefix(String svrURL){
+         try{
+             InputStream in = new FileInputStream("./repository/conf/axis2/axis2.xml");
+             OMElement results = OMXMLBuilderFactory.createOMBuilder(in).getDocumentElement();
+
+             AXIOMXPath xpathExpression = new AXIOMXPath ("/axisconfig/transportReceiver/parameter[@name='WSDLEPRPrefix']");
+             List nodeList = (List) xpathExpression.selectNodes(results);
+
+             if(!nodeList.isEmpty()){
+                 OMNode value = (OMNode) nodeList.get(0);
+                 String server = ((OMElementImpl) value).getText() ;
+
+                 if(server.contains("http") || server.contains("https")){
+                     return server;
+                 }
+             }
+         }catch(Exception e){
+             System.out.println(e.toString());
+         }
+
+         return "";
+     }
+
+     public String getServerContext() throws AxisFault {
+           try {
+                  String returnValue = ReadWSDLPrefix(stub.getServerContext());
+
+                  if(returnValue != ""){
+                           return returnValue;
+                  }else{
+                          return stub.getServerContext();
+                  }
+           } catch (Exception e) {
+                        handleException(bundle.getString("failed.to.get.servercontext"), e);
+           }
+         return null;
+     }
 	
 	private void handleException(String msg, Exception e) throws AxisFault {
         log.error(msg, e);

@@ -25,7 +25,9 @@ import org.apache.axiom.om.OMText;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
+import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifactImpl;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
@@ -89,7 +91,7 @@ public class GovernanceArtifactManager {
      * @throws GovernanceException if the operation failed.
      */
     public GovernanceArtifact newGovernanceArtifact() throws GovernanceException {
-        return GovernanceArtifact.create(registry, UUID.randomUUID().toString());
+        return GovernanceArtifactImpl.create(registry, UUID.randomUUID().toString());
     }
 
     /**
@@ -101,11 +103,14 @@ public class GovernanceArtifactManager {
      * @throws GovernanceException if the operation failed.
      */
     public GovernanceArtifact newGovernanceArtifact(OMElement content) throws GovernanceException {
-        return GovernanceArtifact.create(registry, UUID.randomUUID().toString(), content);
+        return GovernanceArtifactImpl.create(registry, UUID.randomUUID().toString(), content);
     }
 
     /**
-     * Adds the given artifact to the registry.
+     * Adds the given artifact to the registry. Please do not use this method to update an existing
+     * artifact use the update method instead. If this method is used to update an existing
+     * artifact, all existing properties (such as lifecycle details) will be removed from the
+     * existing artifact.
      *
      * @param artifact the artifact.
      *
@@ -129,7 +134,7 @@ public class GovernanceArtifactManager {
                     new String[]{namespace});
         }
 
-        artifact.associateRegistry(registry);
+        ((GovernanceArtifactImpl)artifact).associateRegistry(registry);
         boolean succeeded = false;
         try {
             registry.beginTransaction();
@@ -142,14 +147,14 @@ public class GovernanceArtifactManager {
                     pathExpression, artifact);
 
             if(registry.resourceExists(path)){
-                throw new GovernanceException("Governance artifact already exists.");
+                throw new GovernanceException("Governance artifact " + artifactName + " already exists at " + path);
             }
 
             String artifactId = artifact.getId();
             resource.setUUID(artifactId);
             registry.put(path, resource);
 
-            artifact.updatePath();
+            ((GovernanceArtifactImpl)artifact).updatePath();
 //            artifact.setId(resource.getUUID()); //This is done to get the UUID of a existing resource.
             addRelationships(path, artifact);
 
@@ -306,13 +311,14 @@ public class GovernanceArtifactManager {
             registry.beginTransaction();
             GovernanceArtifact oldArtifact = getGovernanceArtifact(artifact.getId());
             // first check for the old artifact and remove it.
+            String oldPath = null;
             if (oldArtifact != null) {
                 QName oldName = oldArtifact.getQName();
                 if (!oldName.equals(artifact.getQName())) {
+                    String temp = oldArtifact.getPath();
                     // then it is analogue to moving the resource for the new location
-                    String oldPath = oldArtifact.getPath();
                     // so just delete the old path
-                    registry.delete(oldPath);
+                    registry.delete(temp);
 
                     String artifactName = artifact.getQName().getLocalPart();
                     artifact.setAttributes(artifactNameAttribute,
@@ -322,6 +328,8 @@ public class GovernanceArtifactManager {
                         artifact.setAttributes(artifactNamespaceAttribute,
                                 new String[]{namespace});
                     }
+                } else {
+                    oldPath = oldArtifact.getPath();
                 }
             } else {
                 throw new GovernanceException("No artifact found for the artifact id :" + artifact.getId() + ".");
@@ -331,13 +339,23 @@ public class GovernanceArtifactManager {
             Resource resource = registry.newResource();
             resource.setMediaType(mediaType);
             setContent(artifact, resource);
-            String path = GovernanceUtils.getPathFromPathExpression(
+             String path = GovernanceUtils.getPathFromPathExpression(
                     pathExpression, artifact);
 
+            if (oldPath != null) {
+                path = oldPath;
+            }
             if (registry.resourceExists(path)) {
                 Resource oldResource = registry.get(path);
                 Properties properties = (Properties) oldResource.getProperties().clone();
                 resource.setProperties(properties);
+
+                //persisting resource description at artifact update
+                String description = oldResource.getDescription();
+                if(description != null) {
+                    resource.setDescription(description);
+                }
+
                 String oldContent;
                 Object content = oldResource.getContent();
                 if (content instanceof String) {
@@ -359,12 +377,11 @@ public class GovernanceArtifactManager {
                     return;
                 }
             }
-
             resource.setUUID(artifactId);
             registry.put(path, resource);
 //            artifact.setId(resource.getUUID()); //This is done to get the UUID of a existing resource.
-            addRelationships(path, artifact);
-            artifact.updatePath(artifactId);
+            addRelationships(oldPath, artifact);
+            ((GovernanceArtifactImpl)artifact).updatePath(artifactId);
             succeeded = true;
         } catch (RegistryException e) {
             if (e instanceof GovernanceException) {
@@ -444,6 +461,23 @@ public class GovernanceArtifactManager {
     protected void setContent(GovernanceArtifact artifact, Resource resource) throws
             GovernanceException {
         try {
+            if (artifact instanceof GenericArtifact) {
+                byte[] content = ((GenericArtifact) artifact).getContent();
+                if (content != null) {
+                    resource.setContent(content);
+                    String[] attributeKeys = artifact.getAttributeKeys();
+                    if (attributeKeys != null) {
+                        for (String aggregatedKey : attributeKeys) {
+                            if (!aggregatedKey.equals(artifactNameAttribute) &&
+                                    !aggregatedKey.equals(artifactNamespaceAttribute)) {
+                                resource.setProperty(aggregatedKey,
+                                        Arrays.asList(artifact.getAttributes(aggregatedKey)));
+                            }
+                        }
+                    }
+                    return;
+                }
+            }
             OMNamespace namespace = OMAbstractFactory.getOMFactory().
                     createOMNamespace(artifactElementNamespace, "");
             Map<String, OMElement> elementsMap = new HashMap<String, OMElement>();
@@ -527,8 +561,8 @@ public class GovernanceArtifactManager {
                         mediaType));
         Collections.sort(paths, new Comparator<String>() {
             public int compare(String o1, String o2) {
-                long l1 = -1;
-                long l2 = -1;
+                Long l1 = -1l;
+                Long l2 = -1l;
 
                 String temp1 = RegistryUtils.getParentPath(o1);
                 String temp2 = RegistryUtils.getParentPath(o2);
@@ -553,14 +587,15 @@ public class GovernanceArtifactManager {
                     return result;
                 }
                 // Finally by version
-                return (l1 > l2) ? -1 : 1;
+                return l2.compareTo(l1);
             }
         });
-        List<GovernanceArtifact> artifacts = new ArrayList<GovernanceArtifact>();
-        for (String path : paths) {
-            artifacts.add(GovernanceUtils.retrieveGovernanceArtifactByPath(registry, path));
+
+        GovernanceArtifact[] artifacts = new GovernanceArtifact[paths.size()];
+        for (int i = 0; i < paths.size(); i++) {
+            artifacts[i] = GovernanceUtils.retrieveGovernanceArtifactByPath(registry, paths.get(i));
         }
-        return artifacts.toArray(new GovernanceArtifact[artifacts.size()]);
+        return artifacts;
     }
 
     /**
@@ -570,11 +605,12 @@ public class GovernanceArtifactManager {
      * @throws GovernanceException if the operation failed.
      */
     public String[] getAllGovernanceArtifactIds() throws GovernanceException {
-        List<String> artifactIds = new ArrayList<String>();
-        for (GovernanceArtifact artifact : getAllGovernanceArtifacts()) {
-            artifactIds.add(artifact.getId());
+        GovernanceArtifact[] artifacts = getAllGovernanceArtifacts();
+        String[] artifactIds = new String[artifacts.length];
+        for (int i = 0; i < artifacts.length; i++) {
+            artifactIds[i] = artifacts[i].getId();
         }
-        return artifactIds.toArray(new String[artifactIds.size()]);
+        return artifactIds;
     }
 
     private static class AssociationInteger {

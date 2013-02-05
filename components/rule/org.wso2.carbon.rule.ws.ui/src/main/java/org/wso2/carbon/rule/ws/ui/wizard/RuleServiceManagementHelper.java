@@ -78,7 +78,6 @@ public class RuleServiceManagementHelper {
             ruleService.setScope(serviceScope.trim());
 
         }
-        System.out.println(serviceScope);
 
         String generateServicesXML = request.getParameter("generateServiceXML");
         if (generateServicesXML != null) {
@@ -114,14 +113,15 @@ public class RuleServiceManagementHelper {
         List<String> scriptNameList = new ArrayList<String>();
         String ruleScriptType = request.getParameter("ruleSourceType");
         String ruleResourceType = request.getParameter("ruleResouceType");
-        Map<String, String> scriptList = (Map<String, String>) request.getSession().getAttribute("ruleScript");
+        Map<String, String> scriptList =
+                (Map<String, String>) request.getSession().getAttribute(RuleServiceAdminClient.SCRIPTS);
         //TODO add method ruleset.clear() to clear all existing rules
 
         String inlinedSource = request.getParameter("ruleSourceInlined");
-        if (inlinedSource != null && !"".equals(inlinedSource.trim())) {
-
+        if ("inlined".equals(ruleScriptType) && inlinedSource != null && !"".equals(inlinedSource.trim())) {
+            ruleSet.clearRules();
             Rule rule = new Rule();
-            ruleSet.addRule(rule);               http://www.lankaphones.com/samsung-phone-prices-in-sri-lanka.htm
+            ruleSet.addRule(rule);
             rule.setSourceType(Constants.RULE_SOURCE_TYPE_INLINE);
             rule.setResourceType(ruleResourceType);
             rule.setValue(inlinedSource.trim());
@@ -147,103 +147,6 @@ public class RuleServiceManagementHelper {
             }
         }
 
-/*        if ("key".equals(ruleScriptType)) {
-            String registryType = request.getParameter("registryResourcePath");
-            int index = registryType.indexOf("/_system/governance/");
-            int configIndex = registryType.indexOf("/_system/config/");
-            String value = "";
-            if (registryType != null && !"".equals(registryType.trim())) {
-
-                List<Rule> rules = ruleSet.getRules();
-
-
-                Rule rule;
-                if (rules.size() == 0) {
-                    rule = new Rule();
-                    ruleSet.addRule(rule);
-                } else {
-                    rule = rules.get(0);
-                }
-                rule.setSourceType(Constants.RULE_SOURCE_TYPE_REGISTRY);
-                rule.setResourceType(ruleResourceType);
-                if (index >= 0) {
-                    value = "gov:" +
-                            registryType.trim().substring("/_system/governance/".length());
-                } else if (configIndex >= 0) {
-                    value = "conf:" +
-                            registryType.trim().substring("/_system/config/".length());
-                }
-                rule.setValue(value);
-
-            }
-        } else if ("url".equals(ruleScriptType)) {      // ruleSourceURL
-            String ruleSourceURL = request.getParameter("ruleSourceURL");
-            if (ruleSourceURL != null && !"".equals(ruleSourceURL.trim())) {
-                List<Rule> rules = ruleSet.getRules();
-
-                Rule rule;
-                if (rules.size() == 0) {
-                    rule = new Rule();
-                    ruleSet.addRule(rule);
-                } else {
-                    rule = rules.get(0);
-                }
-                rule.setSourceType(Constants.RULE_SOURCE_TYPE_URL);
-                rule.setResourceType(ruleResourceType);
-                rule.setValue(ruleSourceURL.trim());
-            }
-
-        } else if ("upload".equals(ruleScriptType)) {
-            //String filePath = (String) request.getSession().getAttribute("ruleScript");
-            ArrayList<String> filePaths = (ArrayList<String>) request.getSession().getAttribute("ruleScript");
-            if (filePaths != null && filePaths.size() > 0) {
-                List<Rule> rules = ruleSet.getRules();
-                rules.clear();
-                for (String filePath : filePaths) {
-                    Rule rule = new Rule();
-                    rule.setSourceType(Constants.RULE_SOURCE_TYPE_FILE);
-                    rule.setResourceType(ruleResourceType);
-                    rule.setValue(filePath.trim());
-                    rules.add(rule);
-
-                }
-
-            }
-            *//* if (filePath != null && !"".equals(filePath.trim())) {
-              List<Rule> rules = ruleSet.getRules();
-                //Todo : add more than 1 rule
-                Rule rule;
-                if(rules.size() == 0){
-                    rule = new Rule();
-                    ruleSet.addRule(rule);
-                }
-                else
-                {
-                    rule = rules.get(0);
-                }
-                rule.setSourceType(Constants.RULE_SOURCE_TYPE_FILE);
-                rule.setResourceType(ruleResourceType);
-                rule.setValue(filePath.trim());
-            }*//*
-
-        }
-        else {
-            String inlinedSource = request.getParameter("ruleSourceInlined");
-            if (inlinedSource != null && !"".equals(inlinedSource.trim())) {
-                List<Rule> rules = ruleSet.getRules();
-                //Todo : add more than 1 rule
-                Rule rule;
-                if (rules.size() == 0) {
-                    rule = new Rule();
-                    ruleSet.addRule(rule);
-                } else {
-                    rule = rules.get(0);
-                }
-                rule.setSourceType(Constants.RULE_SOURCE_TYPE_INLINE);
-                rule.setResourceType(ruleResourceType);
-                rule.setValue(inlinedSource.trim());
-            }
-        }*/
     }
 
     /**

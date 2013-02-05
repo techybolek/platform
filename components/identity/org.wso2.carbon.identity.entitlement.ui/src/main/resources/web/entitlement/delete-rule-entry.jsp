@@ -24,9 +24,9 @@
     String forwardTo = null;
     String ruleId = CharacterEncoder.getSafeText(request.getParameter("ruleId"));
     if(ruleId != null && !ruleId.equals("")){
-        entitlementPolicyBean.removeBasicRuleElement(ruleId);        
+        entitlementPolicyBean.removeRuleDTO(ruleId);        
     }
-    forwardTo = "create-basic-policy.jsp";
+    forwardTo = "policy-editor.jsp";
 %>
 
 <script type="text/javascript">

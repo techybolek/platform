@@ -36,6 +36,8 @@ public class LifecycleBean {
     private LifecycleActions[] availableActions;
 
     private Property[] lifecycleProperties;
+    
+    private Property[] lifecycleApproval;
 
     private boolean link;
 
@@ -142,4 +144,12 @@ public class LifecycleBean {
     public void setMediaType(String mediaType) {
         this.mediaType = mediaType;
     }
+
+	public void setLifecycleApproval(Property[] lifecycleApproval) {
+		this.lifecycleApproval = lifecycleApproval;
+	}
+
+	public Property[] getLifecycleApproval() {
+		return lifecycleApproval;
+	}
 }

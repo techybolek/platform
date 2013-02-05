@@ -24,8 +24,9 @@ import org.apache.axis2.addressing.EndpointReferenceHelper;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.discovery.DiscoveryConstants;
 import org.wso2.carbon.discovery.DiscoveryException;
@@ -35,14 +36,11 @@ import org.wso2.carbon.discovery.search.DiscoveryServiceFilter;
 import org.wso2.carbon.governance.api.services.ServiceManager;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
 import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.namespace.QName;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
 
 /**
  * Utility class for adding, updating and removing service artifacts stored in the
@@ -52,15 +50,15 @@ import java.util.List;
 public class DiscoveryServiceUtils {
 
     private static Registry getRegistry() throws DiscoveryException {
-        String domain = CarbonContextHolder.getThreadLocalCarbonContextHolder().getTenantDomain();
+        String domain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         if (domain != MultitenantConstants.SUPER_TENANT_DOMAIN_NAME) {
             AxisConfiguration axisConfig = TenantAxisUtils.getTenantAxisConfiguration(domain,
                     ConfigHolder.getInstance().getServerConfigurationContext());
-            return (Registry) SuperTenantCarbonContext.getCurrentContext(axisConfig).
+            return (Registry) PrivilegedCarbonContext.getCurrentContext(axisConfig).
                     getRegistry(RegistryType.SYSTEM_GOVERNANCE);
         }
 
-        return (Registry) SuperTenantCarbonContext.getCurrentContext().
+        return (Registry) PrivilegedCarbonContext.getCurrentContext().
                 getRegistry(RegistryType.SYSTEM_GOVERNANCE);
     }
 
@@ -73,9 +71,15 @@ public class DiscoveryServiceUtils {
      * @param service WS-D target service to be added to the registry
      * @throws Exception if an error occurs while saving the artifacts to the registry
      */
-    public static void addService(TargetService service) throws Exception {
+    public static void addService(TargetService service, Map<String,
+            String> headerMap) throws Exception {
         ServiceManager serviceManager = new ServiceManager(getRegistry());
         String serviceId = service.getEpr().getAddress();
+
+        //This part is use to remove the prefix of Service ID
+        if(serviceId.startsWith(DiscoveryConstants.EPR_ADDRESS_PREFIX)){
+            serviceId = serviceId.replace(DiscoveryConstants.EPR_ADDRESS_PREFIX, "");
+        }
 
         // Delete the existing stuff and start fresh
         Service oldService = serviceManager.getService(serviceId);
@@ -88,8 +92,13 @@ public class DiscoveryServiceUtils {
 
         // Create a new service (Use the discovery namespace)
         if (serviceName == null) {
-            serviceName = DiscoveryConstants.SERVICE_NAME_PREFIX +
-                    new GregorianCalendar().getTimeInMillis();
+            if(headerMap.containsKey(DiscoveryConstants.DISCOVERY_HEADER_SERVICE_NAME)){
+                serviceName = headerMap.
+                        get(DiscoveryConstants.DISCOVERY_HEADER_SERVICE_NAME).replace("/", "_");
+            } else {
+                serviceName = DiscoveryConstants.SERVICE_NAME_PREFIX +
+                        new GregorianCalendar().getTimeInMillis();
+            }
         }
 
         Service newService = serviceManager.newService(new QName(
@@ -138,12 +147,38 @@ public class DiscoveryServiceUtils {
             activate = true;
         }
 
+        if(headerMap.containsKey(DiscoveryConstants.DISCOVERY_HEADER_WSDL_URI) &&
+                headerMap.get(DiscoveryConstants.DISCOVERY_HEADER_WSDL_URI) != ""){
+            newService.setAttribute("interface_wsdlURL",
+                    headerMap.get(DiscoveryConstants.DISCOVERY_HEADER_WSDL_URI));
+        }
+
         // One hot discovered service coming thru....
         serviceManager.addService(newService);
         if (activate) {
-            newService.activate();
+           newService.activate();
         }
-    }    
+    }
+
+    public static void removeService(TargetService service, Map<String,
+            String> headerMap) throws Exception {
+        ServiceManager serviceManager = new ServiceManager(getRegistry());
+        String serviceId = service.getEpr().getAddress();
+
+        Service oldService = serviceManager.getService(serviceId);
+        oldService.deactivate();
+    }
+
+    public static void deactivateService(TargetService service) throws Exception {
+        TargetService targetService = getService(service.getEpr());
+
+        if (targetService == null) {
+            throw new DiscoveryException("Error while updating discovery metadata. No service " +
+                    "exists with the ID: " + service.getEpr().getAddress());
+        }
+
+        removeService(service, Collections.<String, String>emptyMap());
+    }
 
     public static void removeServiceEndpoints(TargetService service) throws Exception {
         TargetService oldService = getService(service.getEpr());
@@ -186,7 +221,7 @@ public class DiscoveryServiceUtils {
             }
         }
 
-        addService(service);
+        addService(service, Collections.<String, String>emptyMap());
     }
 
     public static void remove(TargetService service) throws Exception {
@@ -229,7 +264,7 @@ public class DiscoveryServiceUtils {
 
         // Check whether the inactive services should be skipped when searching
         AxisConfiguration axisConfig;
-        String tenantDomain = SuperTenantCarbonContext.getCurrentContext().getTenantDomain(true);
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
         ConfigurationContext mainCfgCtx = ConfigHolder.getInstance().getServerConfigurationContext();
         if (tenantDomain != MultitenantConstants.SUPER_TENANT_DOMAIN_NAME) {
             axisConfig = TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, mainCfgCtx);
@@ -238,9 +273,7 @@ public class DiscoveryServiceUtils {
         }
         
         Parameter parameter = axisConfig.getParameter(DiscoveryConstants.SKIP_INACTIVE_SERVICES);
-        if (parameter != null && "true".equals(parameter.getValue())) {
-            filter.setSkipInactiveServices(true);
-        }
+        filter.setSkipInactiveServices(parameter == null || "true".equals(parameter.getValue()));
 
         Service[] services = serviceManager.findServices(filter);
         if (services != null && services.length > 0) {
@@ -293,5 +326,4 @@ public class DiscoveryServiceUtils {
 
         return targetService;
     }
-
 }

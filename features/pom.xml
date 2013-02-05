@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>platform-parent</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -67,6 +67,7 @@
          <module>transport-statistics</module>
          <module>data-sources</module>
          <module>mediation-initializer</module>
+         <!--module>mediation-library</module-->
          <module>mediation-statistics</module>
          <module>mediation-tracer</module>
          <module>mediation</module>
@@ -94,59 +95,59 @@
          <module>claim-management</module>
          <module>humantask</module>
          <module>bpel</module>
-         <module>authenticators</module>
-         <module>gadgets</module>
-         <module>tryit</module>
-         <module>xfer</module>
-         <module>mex</module>
-         <module>webapp-mgt</module>
-         <module>jaxws-webapp-mgt</module>
-	 <module>url-mapper</module>
-	 <module>identity</module>
-         <module>application-mgt</module>
-         <module>application-deployers</module>
-         <module>remote-usermgt</module>
-         <module>wsdl-tools</module>
-         <module>transports</module>
-         <module>messagebox</module>
-         <module>qpid</module>
-	     <module>agent</module>
-         <module>data-services</module>
-         <module>ldap-server-manager</module>
-         <module>ldap-server</module>
-         <module>broker</module>
-         <module>broker-manager</module>
-         <module>cep</module>
-         <module>cassandra</module>
-         <module>stratos</module>
-         <module>unified-endpoint</module>
-         <module>csg</module>
-         <module>dbconsole</module>
-         <module>deployment-synchronizer</module>
-         <module>ec2-client</module>
-         <module>esb-mediation</module>
-         <module>rss-manager</module>
-         <module>coordination</module>
-         <module>ntask</module>
-         <module>transaction-manager</module>
-         <module>rest-api</module>
-         <module>apimgt</module>
-	     <module>andes</module>
-	     <module>data-agents</module>
-	     <module>bam2</module>
-	     <module>analytics</module>
-	     <module>gadget-ide</module>
-	     <module>attachment-mgt</module>
-         <module>autoscaler</module>
-         <!--module>autoscaler-service</module-->
-         <module>tenantaware-load-balancer</module>
-         <module>gadgetgen-wizard</module>
-         <module>cassandra-explorer</module>
-         <module>data-bridge</module>
-	     <module>ndatasource</module>
-	     <module>jaggery</module>
-	     <module>bam</module>
-	     <module>appfactory</module>
+        <module>authenticators</module>
+        <module>gadgets</module>
+        <module>tryit</module>
+        <module>xfer/4.0.0</module>
+        <module>mex/4.0.0</module>
+        <module>webapp-mgt</module>
+        <module>jaxws-webapp-mgt</module>
+	<module>url-mapper</module>
+	<module>identity</module>
+        <module>application-mgt</module>
+        <module>application-deployers</module>
+        <module>remote-usermgt</module>
+        <module>wsdl-tools</module>
+        <module>transports</module>
+        <module>messagebox</module>
+        <module>qpid</module>
+        <module>data-services</module>
+        <module>cassandra-jdbc</module>
+        <module>ldap-server-manager</module>
+        <module>ldap-server</module>
+        <module>broker</module>
+        <module>broker-manager</module>
+        <module>cep</module>
+        <module>cassandra</module>
+        <module>stratos</module>
+        <module>unified-endpoint</module>
+		<!--<module>cg</module>-->
+        <module>dbconsole</module>
+        <module>deployment-synchronizer</module>
+        <module>ec2-client</module>
+        <module>esb-mediation</module>
+        <module>rss-manager</module>
+        <module>coordination</module>
+        <module>ntask</module>
+        <module>transaction-manager</module>
+        <module>rest-api</module>
+        <module>apimgt</module>
+	    <module>andes</module>
+	    <module>data-agents</module>
+	    <module>bam2</module>
+	    <module>analytics</module>
+	    <module>gadget-ide</module>
+	    <module>attachment-mgt</module>
+        <module>autoscaler</module>
+        <!--module>autoscaler-service</module-->
+        <module>tenantaware-load-balancer</module>
+        <module>gadgetgen-wizard</module>
+        <module>cassandra-explorer</module>
+        <module>data-bridge</module>
+	    <module>ndatasource</module>
+	    <module>jaggery/0.9.0-ALPHA1</module>
+	    <module>bam</module>
+	    <module>appfactory</module>
         <!-- Add new features above. You should also include your newly-added-feature/s in features/repository/pom.xml  -->
     </modules>
     <build>
@@ -170,7 +171,7 @@
     </scm>
 
     <properties>
-        <wso2carbon.version>4.0.0-SNAPSHOT</wso2carbon.version>
+        <wso2carbon.version>4.0.0</wso2carbon.version>
         <service.mgt.version>${wso2carbon.version}</service.mgt.version>
         <registry.core.feature.version>${wso2carbon.version}</registry.core.feature.version>
         <registry.social.feature.version>${wso2carbon.version}</registry.social.feature.version>
@@ -210,9 +211,9 @@
         <google.step2.wso2.version>1.0.wso2v1</google.step2.wso2.version>
         <google.guice.wso2.version>3.0.wso2v1</google.guice.wso2.version>
         <jdom.wso2.version>1.0.0.wso2v1</jdom.wso2.version>
-        <synapse.version>2.1.0-wso2v6</synapse.version>
+        <synapse.version>2.1.0-wso2v8</synapse.version>
         <scxml.version>0.9.0.wso2v1</scxml.version>
-        <wsdl.validator.version>1.2.0-SNAPSHOT.wso2v1</wsdl.validator.version>
+        <wsdl.validator.version>1.2.0.wso2v1</wsdl.validator.version>
         <zookeeper.wso2.version>3.3.5.wso2v1</zookeeper.wso2.version>
         <quartz2.wso2.version>2.1.1.wso2v1</quartz2.wso2.version>
         <google.guava.wso2.version>12.0.0.wso2v1</google.guava.wso2.version>

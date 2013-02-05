@@ -68,19 +68,27 @@ public class MediationStatisticsComponent {
         PublisherUtils.setMediationStatPublisherAdmin(bamMediationStatsPublisherAdmin);
 
         MediationStatisticsStore mediationStatisticsStore = mediationStatisticsService.getStatisticsStore();
+        int tenantId = mediationStatisticsService.getTenantId();
 
-        BAMMediationStatisticsObserver observer = new BAMMediationStatisticsObserver();
-        mediationStatisticsStore.registerObserver(observer);
-        observer.setTenantId(mediationStatisticsService.getTenantId());
+        if(mediationStatisticsStore!= null){
+            BAMMediationStatisticsObserver observer = new BAMMediationStatisticsObserver();
+            mediationStatisticsStore.registerObserver(observer);
+            observer.setTenantId(tenantId);
+            // 'MediationStat service' will be deployed per tenant (cardinality="1..n")
+            observer.setTenantAxisConfiguration(mediationStatisticsService.getConfigurationContext().
+                    getAxisConfiguration());
+            log.debug("Registering  Observer for tenant: " + mediationStatisticsService.getTenantId());
+        } else {
+            log.warn("Can't register an observer for mediationStatisticsStore. " +
+                    "If you have disabled StatisticsReporter, please enable it in the Carbon.xml");
+        }
+
         //Load previously saved configurations
-        new RegistryPersistenceManager().load();
+        new RegistryPersistenceManager().load(tenantId);
 
-        // 'MediationStat service' will be deployed per tenant (cardinality="1..n")
-        observer.setTenantAxisConfiguration(mediationStatisticsService.getConfigurationContext().
-                getAxisConfiguration());
-        log.info("Registering  Observer for tenant: " + mediationStatisticsService.getTenantId());
+
         activated = true;
-        log.info("BAM MediationStatisticsComponent activate");
+        log.debug("BAM MediationStatisticsComponent activate");
         if (log.isDebugEnabled()) {
             log.debug("BAM Mediation statistics data publisher bundle is activated");
         }

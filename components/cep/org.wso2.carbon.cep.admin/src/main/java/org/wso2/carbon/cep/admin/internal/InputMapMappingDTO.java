@@ -14,12 +14,12 @@ public class InputMapMappingDTO {
     /**
      * Name of the to be converted event class
      */
-    protected String mappingClass ;
+    protected String queryEventType;
 
     /**
      * Properties of the mapping
      * */
-    private MapPropertyDTO[] mapPropertyDTOs;
+    private InputMapPropertyDTO[] inputMapPropertyDTOs;
 
     public String getStream() {
         return stream;
@@ -29,20 +29,20 @@ public class InputMapMappingDTO {
         this.stream = stream;
     }
 
-    public String getMappingClass() {
-        return mappingClass;
+    public String getQueryEventType() {
+        return queryEventType;
     }
 
-    public void setMappingClass(String mappingClass) {
-        this.mappingClass = mappingClass;
+    public void setQueryEventType(String queryEventType) {
+        this.queryEventType = queryEventType;
     }
 
-    public MapPropertyDTO[] getProperties() {
-        return mapPropertyDTOs;
+    public InputMapPropertyDTO[] getProperties() {
+        return inputMapPropertyDTOs;
     }
 
-    public void setProperties(MapPropertyDTO[] mapPropertyDTOs) {
-        this.mapPropertyDTOs = mapPropertyDTOs;
+    public void setProperties(InputMapPropertyDTO[] inputMapPropertyDTOs) {
+        this.inputMapPropertyDTOs = inputMapPropertyDTOs;
     }
 
 

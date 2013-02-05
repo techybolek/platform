@@ -10,9 +10,19 @@ public class EnvironmentSettings {
     private boolean _enableWebContextRoot;
     private boolean _enablecluster;
     private boolean _enableBuilder;
+    private String _environment;
+    private String _mode;
 
     public boolean is_runningOnStratos() {
         return _runningOnStratos;
+    }
+
+    public String executionEnvironment() {
+        return _environment;
+    }
+
+    public String executionMode() {
+        return _mode;
     }
 
     public boolean is_builderEnabled() {
@@ -43,7 +53,8 @@ public class EnvironmentSettings {
         return _enablecluster;
     }
 
-    public void setEnvironmentSettings(boolean enableDipFramework, boolean runningOnStratos,
+    public void setEnvironmentSettings(boolean enableDipFramework, String executionEnvironment,
+                                       String executionMode, boolean runningOnStratos,
                                        boolean enebleSelenium, boolean enableRavana,
                                        boolean enableStratosPort, boolean enableWebContextRoot,
                                        boolean enableCluster, boolean enableBuilder) {
@@ -55,5 +66,8 @@ public class EnvironmentSettings {
         this._enableWebContextRoot = enableWebContextRoot;
         this._enablecluster = enableCluster;
         this._enableBuilder = enableBuilder;
+        this._environment = executionEnvironment;
+        this._mode = executionMode;
     }
+
 }

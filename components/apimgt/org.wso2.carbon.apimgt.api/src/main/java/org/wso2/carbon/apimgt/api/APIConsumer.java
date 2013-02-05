@@ -18,14 +18,7 @@
 
 package org.wso2.carbon.apimgt.api;
 
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIRating;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tag;
+import org.wso2.carbon.apimgt.api.model.*;
 
 import java.util.Set;
 
@@ -223,8 +216,35 @@ public interface APIConsumer extends APIManager {
      * Get a list of published APIs by the given provider.
      *
      * @param providerId , provider id
+     * @param loggedUser logged user
+     * @param limit Maximum number of results to return. Pass -1 to get all.
      * @return set of API
      * @throws APIManagementException if failed to get set of API
      */
-    public Set<API> getPublishedAPIsByProvider(String providerId) throws APIManagementException;
+    public Set<API> getPublishedAPIsByProvider(String providerId,String loggedUser, int limit) throws APIManagementException;/**
+
+     /** Get a list of published APIs by the given provider.
+     *
+     * @param providerId , provider id
+     * @param limit Maximum number of results to return. Pass -1 to get all.
+     * @return set of API
+     * @throws APIManagementException if failed to get set of API
+     */
+    public Set<API> getPublishedAPIsByProvider(String providerId, int limit) throws APIManagementException;
+
+    /**
+     * Check whether an application access token is already persist in database.
+     * @param accessToken
+     * @return
+     * @throws APIManagementException
+     */
+    public boolean isApplicationTokenExists(String accessToken) throws APIManagementException;
+
+    /**
+     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
+     *
+     * @return Set<Tier>
+     * @throws APIManagementException if failed to get the predefined tiers
+     */
+    public Set<Tier> getTiers() throws APIManagementException;
 }

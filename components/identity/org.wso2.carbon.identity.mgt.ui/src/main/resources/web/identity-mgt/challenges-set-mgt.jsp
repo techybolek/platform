@@ -29,16 +29,15 @@
 <%@ page import="java.util.HashSet" %>
 <%@ page import="org.wso2.carbon.identity.mgt.stub.dto.ChallengeQuestionDTO" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.wso2.carbon.identity.mgt.ui.IdentityManagementClient" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="org.wso2.carbon.identity.mgt.ui.IdentityManagementAdminClient" %>
 <script type="text/javascript" src="extensions/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
 
 <%
-    session.removeAttribute(IdentityManagementClient.CHALLENGE_QUESTION);
+    session.removeAttribute(IdentityManagementAdminClient.CHALLENGE_QUESTION);
     List<ChallengeQuestionDTO> challenges = null;
     HashSet<String> questionSetNames = new HashSet<String>();
-
 
     try {
         String cookie = (String) session
@@ -48,8 +47,8 @@
         ConfigurationContext configContext = (ConfigurationContext) config
                 .getServletContext()
                 .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
-        IdentityManagementClient client =
-                new IdentityManagementClient(cookie, backendServerURL, configContext);
+        IdentityManagementAdminClient client =
+                new IdentityManagementAdminClient(cookie, backendServerURL, configContext);
 
         ChallengeQuestionDTO[] questionDTOs = client.getChallengeQuestions();
 
@@ -60,7 +59,7 @@
                 }
             }
             challenges = new ArrayList<ChallengeQuestionDTO>(Arrays.asList(questionDTOs));
-            session.setAttribute(IdentityManagementClient.CHALLENGE_QUESTION, challenges);
+            session.setAttribute(IdentityManagementAdminClient.CHALLENGE_QUESTION, challenges);
         }
     } catch (Exception e) {
         CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR,

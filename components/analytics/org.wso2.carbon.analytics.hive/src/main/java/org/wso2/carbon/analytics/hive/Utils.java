@@ -25,6 +25,8 @@ public class Utils {
 
     public static final int HIVE_SERVER_DEFAULT_PORT = 21000;
 
+    public static boolean connectRSS = false;
+
     public static int getPortOffset() {
         String portOffset = ServerConfiguration.getInstance().getFirstProperty(
                 CARBON_CONFIG_PORT_OFFSET_NODE);
@@ -35,6 +37,14 @@ public class Utils {
         } catch (Exception e) {
             return CARBON_DEFAULT_PORT_OFFSET;
         }
+    }
+
+    public static boolean canConnectToRSS(){
+      return Utils.connectRSS;
+    }
+
+    public static void setConnectRSS(boolean connectRSS){
+      Utils.connectRSS = connectRSS;
     }
 
 }

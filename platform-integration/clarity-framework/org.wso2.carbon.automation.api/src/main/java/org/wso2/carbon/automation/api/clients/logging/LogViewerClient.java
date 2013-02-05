@@ -20,6 +20,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.api.clients.utils.AuthenticateStub;
+import org.wso2.carbon.logging.view.stub.LogViewerLogViewerException;
 import org.wso2.carbon.logging.view.stub.LogViewerStub;
 import org.wso2.carbon.logging.view.stub.types.carbon.LogEvent;
 
@@ -35,32 +36,54 @@ public class LogViewerClient {
     private LogViewerStub logViewerStub;
     String serviceName = "LogViewer";
 
-    public LogViewerClient(String sessionCookie, String backEndUrl)
+    public LogViewerClient(String backEndUrl, String sessionCookie)
             throws AxisFault {
         String endpoint = backEndUrl + serviceName;
         logViewerStub = new LogViewerStub(endpoint);
+        logViewerStub._getServiceClient().getOptions().setTimeOutInMilliSeconds(300000);
         AuthenticateStub.authenticateStub(sessionCookie, logViewerStub);
     }
 
 
     public LogViewerClient(String backEndURL, String userName, String password)
             throws AxisFault {
-         String endpoint = backEndURL + serviceName;
+        String endpoint = backEndURL + serviceName;
         logViewerStub = new LogViewerStub(endpoint);
+        logViewerStub._getServiceClient().getOptions().setTimeOutInMilliSeconds(300000);
         AuthenticateStub.authenticateStub(userName, password, logViewerStub);
     }
-
 
     /**
      * Getting system logs
      *
      * @param logType   Log type (INFO,WARN,ERROR,DEBUG)
-     * @param searchKey searching keyward
+     * @param searchKey searching keyword
+     * @param domain    - tenant domain
+     * @param serverKey - server key defined at carbon.xml
      * @return logMessage array
      * @throws RemoteException Exception
      */
-    public LogEvent[] getLogs(String logType, String searchKey) throws RemoteException {
-        return logViewerStub.getLogs(logType, searchKey);
+    public LogEvent[] getLogs(String logType, String searchKey, String domain, String serverKey)
+            throws RemoteException {
+        return logViewerStub.getLogs(logType, searchKey, domain, serverKey);
+    }
+
+    public String[] getServiceNames() throws RemoteException, LogViewerLogViewerException {
+        try {
+            return logViewerStub.getServiceNames();
+        } catch (LogViewerLogViewerException e) {
+            log.error("Unable to get service name list");
+            throw new LogViewerLogViewerException("Unable to get service name list");
+        }
+    }
+
+    public LogEvent[] getAllSystemLogs() throws RemoteException {
+        try {
+            return logViewerStub.getAllSystemLogs();
+        } catch (RemoteException e) {
+            log.error("Fail to get all logs ", e);
+            throw new RemoteException("Fail to get all system logs ", e);
+        }
     }
 
 

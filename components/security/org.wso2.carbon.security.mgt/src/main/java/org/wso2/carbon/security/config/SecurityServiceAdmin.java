@@ -235,12 +235,14 @@ public class SecurityServiceAdmin {
             Map.Entry entry = (Map.Entry) o;
             AxisEndpoint point = (AxisEndpoint) entry.getValue();
             AxisBinding binding = point.getBinding();
-            binding.getPolicySubject().detachPolicyComponent(uuid);
-            String bindingName = binding.getName().getLocalPart();
-            if (lst.contains(bindingName)) {
-                continue;
-            } else {
-                lst.add(bindingName);
+            if(binding.getPolicySubject().getAttachedPolicyComponent(uuid) != null){
+                binding.getPolicySubject().detachPolicyComponent(uuid);            
+                String bindingName = binding.getName().getLocalPart();
+                if (lst.contains(bindingName)) {
+                    continue;
+                } else {
+                    lst.add(bindingName);
+                }
             }
             // Add the new policy to the registry
         }

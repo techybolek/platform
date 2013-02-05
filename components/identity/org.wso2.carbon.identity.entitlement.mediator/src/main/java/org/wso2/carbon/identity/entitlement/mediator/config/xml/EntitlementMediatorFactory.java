@@ -23,6 +23,8 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.config.xml.AbstractMediatorFactory;
+import org.apache.synapse.config.xml.SequenceMediatorFactory;
+import org.apache.synapse.config.xml.XMLConfigConstants;
 import org.wso2.carbon.identity.entitlement.mediator.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.mediator.EntitlementMediator;
 
@@ -33,6 +35,10 @@ import java.util.Properties;
  * remoteServiceUserName="administrator" remoteServicePassword="administrator" />
  */
 public class EntitlementMediatorFactory extends AbstractMediatorFactory {
+
+    public static final String OBLIGATIONS = "obligations";
+
+    public static final String ADVICE = "advice";
 
     /**
      * {@inheritDoc}
@@ -48,23 +54,23 @@ public class EntitlementMediatorFactory extends AbstractMediatorFactory {
         OMAttribute remoteServiceUserName = null;
         OMAttribute remoteServicePassword = null;
         OMAttribute callbackClass = null;
-        OMAttribute decisionCaching = null;
-        OMAttribute decisionCachingInterval = null;
+        OMAttribute cacheType = null;
+        OMAttribute invalidationInterval = null;
         OMAttribute maxCacheEntries = null;
         OMAttribute basicAuth = null;
         OMAttribute thriftHost = null;
         OMAttribute thriftPort = null;
         OMAttribute reuseSession = null;
-        OMAttribute clientClass = null;
+        OMAttribute client = null;
 
         mediator = new EntitlementMediator();
 
-        remoteServiceUrl = element.getAttribute(EntitlementConstants.ATTR_NAME_SERVICE_EPR);
+        remoteServiceUrl = element.getAttribute(EntitlementConstants.ATTR_SERVER_URL);
         if (remoteServiceUrl != null && remoteServiceUrl.getAttributeValue() != null) {
             mediator.setRemoteServiceUrl(remoteServiceUrl.getAttributeValue());
         }
 
-        remoteServiceUserName = element.getAttribute(EntitlementConstants.ATTR_NAME_USER);
+        remoteServiceUserName = element.getAttribute(EntitlementConstants.ATTR_USER_NAME);
         if (remoteServiceUserName != null && remoteServiceUserName.getAttributeValue() != null) {
             mediator.setRemoteServiceUserName(remoteServiceUserName.getAttributeValue());
         }
@@ -79,25 +85,20 @@ public class EntitlementMediatorFactory extends AbstractMediatorFactory {
             mediator.setCallbackClass(callbackClass.getAttributeValue());
         }
 
-        decisionCaching = element.getAttribute(EntitlementConstants.ATTR_DECISION_CACHING);
-        if (decisionCaching != null && decisionCaching.getAttributeValue() != null) {
-            mediator.setDecisionCaching(decisionCaching.getAttributeValue());
+        cacheType = element.getAttribute(EntitlementConstants.ATTR_CACHE_TYPE);
+        if (cacheType != null && cacheType.getAttributeValue() != null) {
+            mediator.setCacheType(cacheType.getAttributeValue());
         }
 
-        decisionCachingInterval = element.getAttribute(EntitlementConstants.ATTR_DECISION_CACHING_INTERVAL);
-        if (decisionCachingInterval != null && decisionCachingInterval.getAttributeValue() != null) {
-            mediator.setDecisionCachingInterval(Integer.
-                    parseInt(decisionCachingInterval.getAttributeValue()));
+        invalidationInterval = element.getAttribute(EntitlementConstants.ATTR_INVALIDATION_INTERVAL);
+        if (invalidationInterval != null && invalidationInterval.getAttributeValue() != null) {
+            mediator.setInvalidationInterval(Integer.
+                    parseInt(invalidationInterval.getAttributeValue()));
         }
 
-        maxCacheEntries = element.getAttribute(EntitlementConstants.ATTR_MAX_DECISION_CACHING_ENTRIES);
+        maxCacheEntries = element.getAttribute(EntitlementConstants.ATTR_MAX_CACHE_ENTRIES);
         if (maxCacheEntries != null && maxCacheEntries.getAttributeValue() != null) {
             mediator.setMaxCacheEntries(Integer.parseInt(maxCacheEntries.getAttributeValue()));
-        }
-
-        basicAuth = element.getAttribute(EntitlementConstants.ATTR_BASIC_AUTH);
-        if (basicAuth != null && basicAuth.getAttributeValue() != null) {
-            mediator.setBasicAuth(basicAuth.getAttributeValue());
         }
 
         thriftHost = element.getAttribute(EntitlementConstants.ATTR_THRIFT_HOST);
@@ -115,10 +116,72 @@ public class EntitlementMediatorFactory extends AbstractMediatorFactory {
             mediator.setReuseSession(reuseSession.getAttributeValue());
         }
 
-        clientClass = element.getAttribute(EntitlementConstants.ATTR_CLIENT_CLASS);
-        if (clientClass != null && clientClass.getAttributeValue() != null) {
-            mediator.setClientClass(clientClass.getAttributeValue());
+        client = element.getAttribute(EntitlementConstants.ATTR_CLIENT);
+        if (client != null && client.getAttributeValue() != null) {
+            mediator.setClient(client.getAttributeValue());
         }        
+
+        SequenceMediatorFactory mediatorFactory = new SequenceMediatorFactory();
+        OMAttribute onReject = element.getAttribute(
+                new QName(XMLConfigConstants.NULL_NAMESPACE, XMLConfigConstants.ONREJECT));
+        if (onReject != null) {
+            String onRejectValue = onReject.getAttributeValue();
+            if (onRejectValue != null) {
+                mediator.setOnRejectSeqKey(onRejectValue.trim());
+            }
+        } else {
+            OMElement onRejectMediatorElement = element.getFirstChildWithName(
+                    new QName(XMLConfigConstants.SYNAPSE_NAMESPACE, XMLConfigConstants.ONREJECT));
+            if (onRejectMediatorElement != null) {
+                mediator.setOnRejectMediator(mediatorFactory.createAnonymousSequence(
+                        onRejectMediatorElement, properties));
+            }
+        }
+        OMAttribute onAccept = element.getAttribute(
+                new QName(XMLConfigConstants.NULL_NAMESPACE, XMLConfigConstants.ONACCEPT));
+        if (onAccept != null) {
+            String onAcceptValue = onAccept.getAttributeValue();
+            if (onAcceptValue != null) {
+                mediator.setOnAcceptSeqKey(onAcceptValue);
+            }
+        } else {
+            OMElement onAcceptMediatorElement = element.getFirstChildWithName(
+                    new QName(XMLConfigConstants.SYNAPSE_NAMESPACE, XMLConfigConstants.ONACCEPT));
+            if (onAcceptMediatorElement != null) {
+                mediator.setOnAcceptMediator(mediatorFactory.createAnonymousSequence(
+                        onAcceptMediatorElement, properties));
+            }
+        }
+        OMAttribute obligations = element.getAttribute(
+                new QName(XMLConfigConstants.NULL_NAMESPACE, OBLIGATIONS));
+        if (obligations != null) {
+            String obligationsValue = obligations.getAttributeValue();
+            if (obligationsValue != null) {
+                mediator.setObligationsSeqKey(obligationsValue.trim());
+            }
+        } else {
+            OMElement obligationsMediatorElement = element.getFirstChildWithName(
+                    new QName(XMLConfigConstants.SYNAPSE_NAMESPACE, OBLIGATIONS));
+            if (obligationsMediatorElement != null) {
+                mediator.setObligationsMediator(mediatorFactory.createAnonymousSequence(
+                        obligationsMediatorElement, properties));
+            }
+        }
+        OMAttribute advice = element.getAttribute(
+                new QName(XMLConfigConstants.NULL_NAMESPACE, ADVICE));
+        if (advice != null) {
+            String adviceValue = advice.getAttributeValue();
+            if (adviceValue != null) {
+                mediator.setAdviceSeqKey(adviceValue.trim());
+            }
+        } else {
+            OMElement adviceMediatorElement = element.getFirstChildWithName(
+                    new QName(XMLConfigConstants.SYNAPSE_NAMESPACE, ADVICE));
+            if (adviceMediatorElement != null) {
+                mediator.setAdviceMediator(mediatorFactory.createAnonymousSequence(
+                        adviceMediatorElement, properties));
+            }
+        }
 
         return mediator;
     }

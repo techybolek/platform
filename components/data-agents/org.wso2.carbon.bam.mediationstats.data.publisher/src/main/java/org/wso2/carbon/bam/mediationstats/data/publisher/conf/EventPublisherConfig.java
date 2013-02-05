@@ -16,28 +16,29 @@
 package org.wso2.carbon.bam.mediationstats.data.publisher.conf;
 
 
-import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
+import org.wso2.carbon.databridge.agent.thrift.AsyncDataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.conf.AgentConfiguration;
+import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
 
 public class EventPublisherConfig {
 
-    DataPublisher dataPublisher;
-    AgentConfiguration agentConfiguration;
+    private AsyncDataPublisher dataPublisher;
+    private AgentConfiguration agentConfiguration;
+    private LoadBalancingDataPublisher loadBalancingDataPublisher;
 
-    public DataPublisher getDataPublisher() {
+    public AsyncDataPublisher getDataPublisher() {
         return dataPublisher;
     }
 
-    public void setDataPublisher(DataPublisher dataPublisher) {
+    public void setDataPublisher(AsyncDataPublisher dataPublisher) {
         this.dataPublisher = dataPublisher;
     }
 
-    public AgentConfiguration getAgentConfiguration() {
-        return agentConfiguration;
+    public LoadBalancingDataPublisher getLoadBalancingDataPublisher() {
+        return loadBalancingDataPublisher;
     }
 
-    public void setAgentConfiguration(AgentConfiguration agentConfiguration) {
-        this.agentConfiguration = agentConfiguration;
+    public void setLoadBalancingDataPublisher(LoadBalancingDataPublisher loadBalancingDataPublisher) {
+        this.loadBalancingDataPublisher = loadBalancingDataPublisher;
     }
-
 }

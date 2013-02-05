@@ -19,17 +19,17 @@
 package org.wso2.carbon.cassandra.dataaccess;
 
 import me.prettyprint.hector.api.Cluster;
-import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Multi-tenant aware <code>ClusterRepository</code> implementation
  */
 public class MultitenantClusterRepository implements ClusterRepository {
 
-    private Map<Integer, BasicClusterRepository> clusters = new HashMap<Integer, BasicClusterRepository>();
+    private Map<String, BasicClusterRepository> clusters = new ConcurrentHashMap<String, BasicClusterRepository>();
 
     /**
      * Get the <code>ClusterRepository</code> of the current tenant and retrieve the hector cluster with the given name
@@ -39,7 +39,7 @@ public class MultitenantClusterRepository implements ClusterRepository {
      * @return <code>Cluster </code> instance or null
      */
     public Cluster getCluster(String owner, String clusterName) {
-        BasicClusterRepository clusterRepository = getClusterRepository();
+        BasicClusterRepository clusterRepository = getClusterRepository(owner);
         if (clusterRepository != null) {
             return clusterRepository.getCluster(owner, clusterName);
         }
@@ -54,10 +54,10 @@ public class MultitenantClusterRepository implements ClusterRepository {
      * @param cluster     <code>Cluster </code> instance
      */
     public void putCluster(String owner, String clusterName, Cluster cluster) {
-        BasicClusterRepository clusterRepository = getClusterRepository();
+        BasicClusterRepository clusterRepository = getClusterRepository(owner);
         if (clusterRepository == null) {
             clusterRepository = new BasicClusterRepository();
-            clusters.put(CarbonContext.getCurrentContext().getTenantId(), clusterRepository);
+            clusters.put(owner, clusterRepository);
         }
         clusterRepository.putCluster(owner, clusterName, cluster);
     }
@@ -69,7 +69,7 @@ public class MultitenantClusterRepository implements ClusterRepository {
      * @param clusterName name of the hector cluster
      */
     public void removeCluster(String owner, String clusterName) {
-        BasicClusterRepository clusterRepository = getClusterRepository();
+        BasicClusterRepository clusterRepository = getClusterRepository(owner);
         if (clusterRepository != null) {
             clusterRepository.removeCluster(owner, clusterName);
         }
@@ -81,8 +81,9 @@ public class MultitenantClusterRepository implements ClusterRepository {
      * @param owner Owners of the hector clusters
      */
     public void removeClusters(String owner) {
-        int tenantID = Integer.parseInt(owner);
-        BasicClusterRepository clusterRepository = clusters.remove(tenantID);
+//        int tenantID = Integer.parseInt(owner);
+        String tenantDomain = MultitenantUtils.getTenantDomain(owner);
+        BasicClusterRepository clusterRepository = clusters.remove(tenantDomain);
         if (clusterRepository != null) {
             clusterRepository.removeAllClusters();
         }
@@ -90,12 +91,13 @@ public class MultitenantClusterRepository implements ClusterRepository {
 
     /**
      * Remove all the created by the users of the current tenant
+     * @param owner owner of the cluster repo
      */
-    public void removeMyClusters() {
-        BasicClusterRepository clusterRepository = removeClusterRepository();
+    public void removeMyClusters(String owner) {
+        BasicClusterRepository clusterRepository = removeClusterRepository(owner);
         if (clusterRepository != null) {
             //clusterRepository.removeAllClusters();
-            clusterRepository.removeMyClusters();
+            clusterRepository.removeMyClusters(owner);
         }
     }
 
@@ -112,20 +114,25 @@ public class MultitenantClusterRepository implements ClusterRepository {
     /**
      * A helper method to get ClusterRepository of the current tenant
      *
+     * @param owner owner of the cluster repo
      * @return <code>ClusterRepository</code>
      */
-    private BasicClusterRepository getClusterRepository() {
-        int tenantID = CarbonContext.getCurrentContext().getTenantId();
-        return clusters.get(tenantID);
+    private BasicClusterRepository getClusterRepository(String owner) {
+        String tenantDomain = MultitenantUtils.getTenantDomain(owner);
+//        int tenantID = CarbonContext.getCurrentContext().getTenantId();
+        return clusters.get(tenantDomain);
     }
 
     /**
      * A helper method to remove ClusterRepository of the current tenant
      *
+     * @param owner owner of the cluster repo
      * @return <code>ClusterRepository</code>
      */
-    private BasicClusterRepository removeClusterRepository() {
-        int tenantID = CarbonContext.getCurrentContext().getTenantId();
-        return clusters.remove(tenantID);
+    private BasicClusterRepository removeClusterRepository(String owner) {
+        String tenantDomain = MultitenantUtils.getTenantDomain(owner);
+
+//        int tenantID = CarbonContext.getCurrentContext().getTenantId();
+        return clusters.remove(tenantDomain);
     }
 }

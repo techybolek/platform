@@ -22,7 +22,7 @@ public final class WebappsConstants {
     public static final String WEBAPP_PREFIX = "webapps";
     public static final String WEBAPP_DEPLOYMENT_FOLDER = "webapps";
     public static final String WEBAPP_EXTENSION = "war";
-    public static final String WEBAPP_INFO_JSP_PAGE = "/webapp-mgt/webapp_info.jsp";
+    public static final String WEBAPP_INFO_JSP_PAGE = "/webapp-list/webapp_info.jsp";
     public static final int MAX_DEPTH = 10;
     public static final String ALL_WEBAPP_FILTER_PROP = "all";
     public static final String WEBAPP_FILTER_PROP = "webapp";
@@ -33,6 +33,11 @@ public final class WebappsConstants {
     public static final int VALVE_INDEX = 0;
     public static final String JAGGERY_APPS_PREFIX = "jaggeryapps";
     public static final String JAX_WEBAPPS_PREFIX = "jaxwebapps";
+    public static final String APP_FILE_NAME = "AppFileName";
+
+    public static final String TOMCAT_GENERIC_WEBAPP_DEPLOYER = "tomcatGenericWebappsDeplyer";
+    public static final String TOMCAT_JAGGERY_WEBAPP_DEPLOYER = "tomcatJaggeryWebappsDeplyer";
+    public static final String TOMCAT_JAX_WEBAPP_DEPLOYER = "tomcatJaxWebappsDeplyer";
 
     /**
      * This is to filter out custom webapp types. If a custom webapp deployer is added, it should
@@ -46,6 +51,10 @@ public final class WebappsConstants {
         public static final String ALL = "all";
 
         private WebappState() {}
+    }
+
+    public enum ApplicationOpType {
+        STOP, START, RELOAD
     }
 
     private WebappsConstants() {

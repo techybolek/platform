@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.transport.passthru;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.*;
 import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
@@ -82,6 +84,12 @@ public class TargetResponse {
      * @param conn the client connection
      */
     public void start(NHttpClientConnection conn) {
+    	
+//    	if(response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_MODIFIED){
+//    		TargetContext.updateState(conn, ProtocolState.RESPONSE_BODY);
+//        	return;
+//        }
+    	
         TargetContext.updateState(conn, ProtocolState.RESPONSE_HEAD);
         
         if (expectResponseBody) {
@@ -95,14 +103,14 @@ public class TargetResponse {
                 entity.setChunked(true);
             }
             response.setEntity(entity);
+            
         } else {            
             if (!connStrategy.keepAlive(response, conn.getContext())) {
                 try {
                     // this is a connection we should not re-use
                     TargetContext.updateState(conn, ProtocolState.CLOSING);
-                    targetConfiguration.getConnections().releaseConnection(conn);
+                    targetConfiguration.getConnections().shutdownConnection(conn);
                     
-                    conn.close();
                 } catch (Exception ignore) {
 
                 }
@@ -121,15 +129,19 @@ public class TargetResponse {
      * @return number of bites read
      */
     public int read(NHttpClientConnection conn, ContentDecoder decoder) throws IOException {
-        int bytes = pipe.produce(decoder);
+    	
+    	int bytes=0;
+    	
+    	if(pipe != null){
+    		bytes = pipe.produce(decoder);
+    	}
 
         // Update connection state
         if (decoder.isCompleted()) {
             TargetContext.updateState(conn, ProtocolState.RESPONSE_DONE);
-
-            targetConfiguration.getMetrics().notifyReceivedMessageSize(
-                    conn.getMetrics().getReceivedBytesCount());
-
+            
+            targetConfiguration.getMetrics().notifyReceivedMessageSize(conn.getMetrics().getReceivedBytesCount());
+            
             if (!this.connStrategy.keepAlive(response, conn.getContext())) {
                 TargetContext.updateState(conn, ProtocolState.CLOSED);
 
@@ -138,6 +150,7 @@ public class TargetResponse {
                 targetConfiguration.getConnections().releaseConnection(conn);
             }
         }
+        
         return bytes;
     }
 

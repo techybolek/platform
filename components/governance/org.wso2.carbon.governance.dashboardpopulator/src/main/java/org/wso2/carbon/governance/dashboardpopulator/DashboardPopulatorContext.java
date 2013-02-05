@@ -18,17 +18,17 @@ package org.wso2.carbon.governance.dashboardpopulator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 
 public class DashboardPopulatorContext {
-    private static Log log = LogFactory.getLog(DashboardPopulatorContext.class);
-
     private static RegistryService registryService = null;
 
-    private static UserRealm userRealm = null;
+    private static Log log = LogFactory.getLog(DashboardPopulatorContext.class);
+
+    public static RegistryService getRegistryService() {
+        return registryService;
+    }
 
     public static void setRegistryService(RegistryService registryService) {
         DashboardPopulatorContext.registryService = registryService;
@@ -36,7 +36,7 @@ public class DashboardPopulatorContext {
 
     public static UserRegistry getRegistry() throws DashboardPopulatorException {
         if (registryService == null) {
-            throw new DashboardPopulatorException("Registry is null");
+            throw new DashboardPopulatorException("Registry service is null");
         }
         try {
             return registryService.getSystemRegistry();

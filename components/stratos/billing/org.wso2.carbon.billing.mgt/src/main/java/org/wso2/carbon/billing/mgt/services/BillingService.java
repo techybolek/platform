@@ -118,6 +118,31 @@ public class BillingService extends AbstractAdmin {
     }
 
     /**
+     * Adds a payment record to the BC_REGISTRATION_PAYMENT table. Sends a notification email
+     * after adding the record
+     *
+     * @param payment   the Payment object which contains the payment record details
+     * @param amount    the registration fee paid
+     * @param usagePlan the registered usage plan
+     * @return the payment id for the added record
+     * @throws Exception thrown if an error occurs while adding the record
+     */
+    public int addRegistrationPayment(Payment payment, String amount, String usagePlan)
+            throws Exception {
+        BillingManager billingManager = Util.getBillingManager();
+        BillingEngine billingEngine =
+                billingManager.getBillingEngine(StratosConstants.MULTITENANCY_VIEWING_TASK_ID);
+        Cash cashAmount = new Cash(amount);
+        payment.setAmount(cashAmount);
+        int paymentId = billingEngine.addRegistrationPayment(payment, usagePlan);
+        if (paymentId > 0) {
+            payment.setId(paymentId);
+            sendRegistrationPaymentReceivedEmail(payment);
+        }
+        return paymentId;
+    }
+
+    /**
      * Adds a payment record for invoice adjustment purposes
      * @param payment is the Payment object which contains the adjustment details
      * @param amount is the adjustment amount (had to pass this as a string)
@@ -526,4 +551,56 @@ public class BillingService extends AbstractAdmin {
             throw new Exception(msg);
         }
     }
+
+
+    private void sendRegistrationPaymentReceivedEmail(Payment payment) throws Exception {
+        BillingManager billingManager = Util.getBillingManager();
+        BillingEngine billingEngine = billingManager.getBillingEngine(StratosConstants.MULTITENANCY_VIEWING_TASK_ID);
+
+        String tenantDomain = payment.getDescription().split(" ")[0];
+        int tenantId = Util.getTenantManager().getTenantId(tenantDomain);
+        Tenant tenant = (Tenant) Util.getTenantManager().getTenant(tenantId);
+
+        Map<String, String> mailParameters = new HashMap<String, String>();
+        mailParameters.put("date", new SimpleDateFormat("dd-MMM-yyyy").format(payment.getDate()));
+        mailParameters.put("transaction-id", payment.getDescription().split(" ")[1]);
+        mailParameters.put("amount", payment.getAmount().toString());
+        mailParameters.put("invoice-id", "Registration - " + tenantDomain);
+        mailParameters.put("tenant-domain", tenantDomain);
+
+        String customerName = null;
+        String customerEmail = tenant.getEmail();
+        try {
+            customerName = ClaimsMgtUtil.getFirstName(Util.getRealmService(), tenantId);
+            if (customerName != null) {
+                mailParameters.put("customer-name", customerName);
+            } else {
+                mailParameters.put("customer-name", "");
+            }
+
+        } catch (Exception e) {
+            log.error("Could not get tenant information for tenant: " +
+                      customerName + "\n" + e.getMessage());
+            mailParameters.put("customer-name", "");
+        }
+
+        //sending the mail to the customer
+        billingEngine.sendPaymentReceivedEmail(
+                customerEmail,
+                BillingConstants.REGISTRATION_PAYMENT_RECEIVED_EMAIL_CUSTOMER_FILE,
+                mailParameters);
+
+        String financeEmail = CommonUtil.getStratosConfig().getFinanceNotificationEmail();
+        //customer's first name is not important to finance team. Therefore it is
+        //being replace with the domain name
+        mailParameters.put("customer-name", customerName);
+        billingEngine.sendPaymentReceivedEmail(
+                financeEmail,
+                BillingConstants.PAYMENT_RECEIVED_EMAIL_WSO2_FILE,
+                mailParameters
+        );
+
+
+    }
+
 }

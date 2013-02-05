@@ -86,10 +86,10 @@ public class ExternalContentHandler extends Handler {
     // http://svn.apache.org/repos/asf/maven/scm/trunk/maven-scm-client/src/main/java/org/apache/maven/scm/client/cli/MavenScmCli.java
 
     public Resource get(RequestContext requestContext) throws RegistryException {
-        if (!CommonUtil.isUpdateLockAvailable()) {
+        if (!CommonUtil.isSCMLockAvailable()) {
             return null;
         }
-        CommonUtil.acquireUpdateLock();
+        CommonUtil.acquireSCMLock();
         try {
             Registry registry = requestContext.getRegistry();
             Resource resource = registry.get(requestContext.getResourcePath().getPath());
@@ -131,15 +131,15 @@ public class ExternalContentHandler extends Handler {
             requestContext.setProcessingComplete(true);
             return resource;
         } finally {
-            CommonUtil.releaseUpdateLock();
+            CommonUtil.releaseSCMLock();
         }
     }
 
     public void put(RequestContext requestContext) throws RegistryException {
-        validateUpdateInProgress();
-        if (!CommonUtil.isUpdateLockAvailable()) {
+        if (!CommonUtil.isSCMLockAvailable()) {
             return;
         }
+        validateUpdateInProgress();
         String path = RegistryUtils.getRelativePathToOriginal(
                 requestContext.getResourcePath().getPath(), mountPath);
         preparePut(path, requestContext);
@@ -156,15 +156,15 @@ public class ExternalContentHandler extends Handler {
             } else {
                 filesystemManager.createOrUpdateFile(path, (byte[])content);
             }
-            resource.setContent("");
+            //resource.setContent("");
         }
     }
 
     public void delete(RequestContext requestContext) throws RegistryException {
-        validateUpdateInProgress();
-        if (!CommonUtil.isUpdateLockAvailable()) {
+        if (!CommonUtil.isSCMLockAvailable()) {
             return;
         }
+        validateUpdateInProgress();
         String path = RegistryUtils.getRelativePathToOriginal(
                 requestContext.getResourcePath().getPath(), mountPath);
         filesystemManager.delete(path);

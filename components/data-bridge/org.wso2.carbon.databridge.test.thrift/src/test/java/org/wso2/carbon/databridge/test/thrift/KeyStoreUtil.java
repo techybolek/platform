@@ -31,6 +31,9 @@ public class KeyStoreUtil {
         if (!filePath.exists()) {
             filePath = new File("resources");
         }
+        if (!filePath.exists()) {
+            filePath = new File("org.wso2.carbon.databridge.test.thrift/4.0.6/src/test/resources");
+        }
         String trustStore = filePath.getAbsolutePath();
         System.setProperty("javax.net.ssl.trustStore", trustStore + "/client-truststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
@@ -44,6 +47,9 @@ public class KeyStoreUtil {
         }
         if (!filePath.exists()) {
             filePath = new File("resources");
+        }
+        if (!filePath.exists()) {
+            filePath = new File("org.wso2.carbon.databridge.test.thrift/4.0.6/src/test/resources");
         }
         String keyStore = filePath.getAbsolutePath();
         System.setProperty("Security.KeyStore.Location", keyStore + "/wso2carbon.jks");

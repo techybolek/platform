@@ -42,7 +42,7 @@
         } catch (CassandraExplorerAdminCassandraExplorerException e) { %>
     <script type="text/javascript">
         jQuery(document).ready(function () {
-            CARBON.showErrorDialog('No Exsisting Connection available.<br> Please connect to a Cluster First.', function () {
+            CARBON.showErrorDialog('Connection Error.<br>Please retry with correct connection details.', function () {
                 CARBON.closeWindow();
                 location.href = "cassandra_connect.jsp";
             }, function () {
@@ -100,10 +100,10 @@
                                class="icon-link"><%=columnFamilies[i]%>
                             </a>
                         </td>
-                        <%--<td width="30%">
-                            <a href="#" onclick="viewExplorer('<%=keyspace%>','<%=columnFamilies[i]%>')"
-                               style="background-image:url(images/column_familiy.png);" class="icon-link">Summary View</a>
-                        </td>--%>
+                            <%--<td width="30%">
+                                <a href="#" onclick="viewExplorer('<%=keyspace%>','<%=columnFamilies[i]%>')"
+                                   style="background-image:url(images/column_familiy.png);" class="icon-link">Summary View</a>
+                            </td>--%>
 
                     </tr>
                     <%

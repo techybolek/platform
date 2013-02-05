@@ -15,8 +15,6 @@
  */
 package org.wso2.carbon.bam.service.data.publisher.data;
 
-import org.wso2.carbon.statistics.services.util.OperationStatistics;
-import org.wso2.carbon.statistics.services.util.ServiceStatistics;
 import org.wso2.carbon.statistics.services.util.SystemStatistics;
 
 import java.sql.Timestamp;
@@ -33,26 +31,17 @@ public class EventData {
     private String referer;
     private String requestURL;
 
-/*    private String serviceName;
-private String operationName;
-
-private String userAgent;
-private String remoteAddress;
-private String host;
-private String contentType;
-private String referer;
-private String requestURL;
-private Timestamp timestamp;*/
-
     private SystemStatistics systemStatistics;
-    private ServiceStatistics serviceStatistics;
-    private OperationStatistics operationStatistics;
 
     private String activityId;
-    private String inMessageId;
+    private String direction;
+    private String messageId;
+    private String soapHeader;
+    private String soapBody;
+/*    private String inMessageId;
     private String inMsgBody;
     private String outMessageId;
-    private String outMsgBody;
+    private String outMsgBody;*/
     
     public String getServiceName() {
         return serviceName;
@@ -134,22 +123,6 @@ private Timestamp timestamp;*/
         this.systemStatistics = systemStatistics;
     }
 
-    public ServiceStatistics getServiceStatistics() {
-        return serviceStatistics;
-    }
-
-    public void setServiceStatistics(ServiceStatistics serviceStatistics) {
-        this.serviceStatistics = serviceStatistics;
-    }
-
-    public OperationStatistics getOperationStatistics() {
-        return operationStatistics;
-    }
-
-    public void setOperationStatistics(OperationStatistics operationStatistics) {
-        this.operationStatistics = operationStatistics;
-    }
-
     public String getActivityId() {
         return activityId;
     }
@@ -158,31 +131,39 @@ private Timestamp timestamp;*/
         this.activityId = activityId;
     }
 
-    public String getInMessageId() {
-        return inMessageId;
+    public String getMessageId() {
+        return messageId;
     }
 
-    public void setInMessageId(String inMessageId) {
-        this.inMessageId = inMessageId;
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
     }
 
-    public String getInMessageBody() {
-        return inMsgBody;
+    public String getSOAPBody() {
+        return soapBody;
     }
 
-    public void setInMessageBody(String inMsgBody) {
-        this.inMsgBody = inMsgBody;
+    public void setSOAPBody(String soapBody) {
+        this.soapBody = soapBody;
     }
 
-/*    public String getMessageDirection() {
-        return messageDirection;
+    public void setMessageDirection(String direction) {
+        this.direction = direction;
     }
 
-    public void setMessageDirection(String messageDirection) {
-        this.messageDirection = messageDirection;
-    }*/
+    public String getMessageDirection() {
+        return direction;
+    }
 
-    public String getOutMessageId() {
+    public void setSOAPHeader(String soapHeader) {
+        this.soapHeader = soapHeader;
+    }
+
+    public String getSOAPHeader() {
+        return soapHeader;
+    }
+    
+/*    public String getOutMessageId() {
         return outMessageId;
     }
 
@@ -196,5 +177,5 @@ private Timestamp timestamp;*/
 
     public void setOutMessageBody(String outMsgBody) {
         this.outMsgBody = outMsgBody;
-    }
+    }*/
 }

@@ -16,12 +16,15 @@
 package org.wso2.carbon.url.mapper.internal.util;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.description.AxisService;
 import org.apache.catalina.*;
 import org.apache.catalina.core.StandardHost;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.ApplicationContext;
+import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.tomcat.api.CarbonTomcatService;
+import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 import org.wso2.carbon.tomcat.ext.valves.CarbonContextCreatorValve;
 import org.wso2.carbon.tomcat.ext.valves.CompositeValve;
 import org.wso2.carbon.url.mapper.clustermessage.util.VirtualHostClusterUtil;
@@ -67,9 +70,10 @@ public class HostUtil {
 			if (mappings != null) {
 				for (MappingData mapping : mappings) {
 					String hostName = mapping.getMappingName();
-					if (!mapping.isServiceMapping() && webAppName.equals(mapping.getUrl())) {
+                    String appName = registryManager.getAppNameFromRegistry(hostName);
+					if (appName != null && !appName.equalsIgnoreCase("service") && webAppName.equals(mapping.getUrl())) {
 						hostNames.add(hostName);
-					}
+                    }
 				}
 			}
 			return hostNames;
@@ -213,41 +217,23 @@ public class HostUtil {
 	 * @param hostName
 	 *            name of the host
 	 * @return
-	 * @throws UrlMapperException
+	 * @throws org.wso2.carbon.url.mapper.internal.exception.UrlMapperException
 	 */
 	public static String getApplicationContextForHost(String hostName) throws UrlMapperException {
 		try {
 			String appContext = registryManager.getApplicationContextForHost(hostName);
-			ApplicationContext.getCurrentApplicationContext().putUrlMappingForApplication(hostName,
+			URLMappingHolder.getInstance().putUrlMappingForApplication(hostName,
                     appContext);
+            if(appContext != null && appContext.startsWith("/services/")) {
+                addServiceParameter(appContext);
+
+            }
 			return appContext;
 		} catch (Exception e) {
 			log.error("Failed to retrieve the servicename from the host " + hostName, e);
 			throw new UrlMapperException("Failed to retrieve the servicename from the host "
 					+ hostName, e);
 		}
-	}
-
-	public static int getTenantIdForHost(String hostName) throws UrlMapperException {
-		int tenantId;
-		try {
-			tenantId = MultitenantConstants.SUPER_TENANT_ID;
-			String tenantDomain = registryManager.getTenantDomainForHost(hostName);
-			TenantManager tenantManager = DataHolder.getInstance().getRealmService()
-					.getTenantManager();
-			try {
-				tenantId = tenantManager.getTenantId(tenantDomain);
-			} catch (UserStoreException e) {
-				log.error("error in getting tenant id when adding host to tomcat engine", e);
-				throw new UrlMapperException(
-						"error in getting tenant id when adding host to tomcat engine");
-			}
-		} catch (Exception e) {
-			log.error("Failed to retrieve the tenant domain from the host " + hostName, e);
-			throw new UrlMapperException("Failed to retrieve the tenant domain from the host "
-					+ hostName, e);
-		}
-		return tenantId;
 	}
 
 	public static String getHttpPort() throws UrlMapperException {
@@ -272,13 +258,12 @@ public class HostUtil {
 	 * @throws org.wso2.carbon.url.mapper.internal.exception.UrlMapperException
 	 *             When adding directory throws an Exception
 	 */
-	public static void addWebAppToHost(String hostName, String uri) throws UrlMapperException {
+	public static void addWebAppToHost(String hostName, String uri, String appType) throws UrlMapperException {
 		int tenantId;
 		String tenantDomain;
 		String webAppsDir;
 		// if the request if from tenant
-		{
-			if (MultitenantUtils.getTenantDomainFromRequestURL(uri) != null) {
+		if (MultitenantUtils.getTenantDomainFromRequestURL(uri) != null) {
 				tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(uri);
 				TenantManager tenantManager = DataHolder.getInstance().getRealmService()
 						.getTenantManager();
@@ -292,29 +277,45 @@ public class HostUtil {
 				// getting the web app .war file name from the uri
 
 				// path of web app for the tenant in the server
-				webAppsDir = CarbonUtils.getCarbonTenantsDirPath() + "/" + tenantId + "/"
-						+ UrlMapperConstants.HostProperties.WEB_APPS + "/";
-				webAppPath = getWebappPath(webAppsDir, uri);
+				webAppsDir = CarbonUtils.getCarbonTenantsDirPath() + "/" + tenantId + "/";
+                webAppPath = getWebappPath(webAppsDir, uri, appType);
 
 			} else {
 				tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-				webAppsDir = CarbonUtils.getCarbonRepository()
-						+ UrlMapperConstants.HostProperties.WEB_APPS + "/";
-				webAppPath = getWebappPath(webAppsDir, uri);
+				webAppsDir = CarbonUtils.getCarbonRepository();
+                webAppPath = getWebappPath(webAppsDir, uri, appType);
 
 			}
-		}
-		Host host = addHostToEngine(hostName);
 		try {
-
+            CarbonTomcatService tomcatService = DataHolder.getInstance().getCarbonTomcatService();
+            String defaultHost = tomcatService.getTomcat().getEngine().getDefaultHost();
+            Host host = addHostToEngine(hostName);
 			// deploying the copied webapp as the root in our own host directory
-			Context contextForHost = DataHolder.getInstance().getCarbonTomcatService()
-					.addWebApp(host, "/", webAppPath);
-			log.info("Deployed webapp on host: " + contextForHost);
+            if(UrlMapperConstants.HostProperties.JAGGERY_APP.equalsIgnoreCase(appType)) {
+                LifecycleListener[] listeners = tomcatService.getTomcat().getEngine().
+                        findChild(defaultHost).findChild(uri).findLifecycleListeners();
+                for(LifecycleListener listener : listeners) {
+                    if(listener.getClass().getName().contains(UrlMapperConstants.HostProperties.JAGGERY_LISTENER)) {
+                        Context jaggeryContext = tomcatService.addWebApp(host, "/", webAppPath, listener);
+                        log.info("Deployed JaggeryApp on host: " + jaggeryContext);
+                        break;
+                    }
+                }
+            } else {
+                Context contextForHost = tomcatService
+                        .addWebApp(host, "/", webAppPath);
+                if(UrlMapperConstants.HostProperties.JAX_APP.equalsIgnoreCase(appType)) {
+                    log.info("Deployed JAXRS on host: " + contextForHost);
+                    //registering services context in url-mapping.
+                } else {
+                    log.info("Deployed webapp on host: " + contextForHost);
+                }
+            }
+
 			// add entry to registry with the tenant domain if exist in the uri
 			// if adding virtual host is successful.
-			registryManager.addHostToRegistry(hostName, uri, tenantDomain);
-			ApplicationContext.getCurrentApplicationContext().putUrlMappingForApplication(hostName,
+			registryManager.addHostToRegistry(hostName, uri, tenantDomain, appType);
+			URLMappingHolder.getInstance().putUrlMappingForApplication(hostName,
 					uri);
             //adding host to cluster message
             VirtualHostClusterUtil.addVirtualHostsToCluster(hostName, uri, webAppPath);
@@ -325,20 +326,31 @@ public class HostUtil {
 		}
 	}
 
-	public static String getWebappPath(String webappsDir, String uri) {
-		String webAppFile;
-		String webAppPath;
-		webAppFile = getContextFromUri(uri) + UrlMapperConstants.HostProperties.WAR;
-		webAppPath = webappsDir + webAppFile;
-		File warFile = new File(webAppPath);
+	public static String getWebappPath(String webappsDir, String uri, String appType) {
+        String webAppFile = getContextFromUri(uri) + UrlMapperConstants.HostProperties.WAR;
+
+		String appPath = null;
+        
+		if(UrlMapperConstants.HostProperties.WEBAPP.equalsIgnoreCase(appType)) {
+            appPath = webappsDir + UrlMapperConstants.HostProperties.WEB_APPS + "/" + webAppFile;
+        } else if(UrlMapperConstants.HostProperties.JAGGERY_APP.equalsIgnoreCase(appType)) {
+            appPath = webappsDir + UrlMapperConstants.HostProperties.JAGGERY_APPS + "/" + webAppFile;
+        } else if(UrlMapperConstants.HostProperties.JAX_APP.equalsIgnoreCase(appType)) {
+            appPath = webappsDir + UrlMapperConstants.HostProperties.JAX_WEBAPPS + "/" + webAppFile;
+        }
+        File warFile = new File(appPath);
+
 		if (warFile.exists()) {
-			// it is war
-			return webAppPath;
+            return appPath;
 		} else {
-			webAppPath = webappsDir + getContextFromUri(uri);
-			return webAppPath;
-		}
-	}
+            appPath = appPath.substring(0, appPath.indexOf(".war"));
+            File dir = new File(appPath);
+            if(dir.isDirectory()) {
+            return appPath;
+            }
+	    }
+        return null;
+    }
 
 	/**
 	 * add host to engine.
@@ -395,9 +407,15 @@ public class HostUtil {
 	 */
 	public static void editHostInEngine(String webAppName, String newHost, String oldHost)
 			throws UrlMapperException {
-		removeHostForCluster(oldHost);
-		deleteResourceToRegistry(oldHost);
-		addWebAppToHost(newHost, webAppName);
+        try {
+            String appType = registryManager.getAppNameFromRegistry(oldHost);
+            removeHostForCluster(oldHost);
+            deleteResourceToRegistry(oldHost);
+            addWebAppToHost(newHost, webAppName, appType);
+        } catch (Exception e) {
+            log.error("error while getting app name from registry", e);
+        }
+
     }
 
 	/**
@@ -431,7 +449,7 @@ public class HostUtil {
 						host.stop();
 						host.destroy();
 						engine.removeChild(host);
-                        ApplicationContext.getCurrentApplicationContext().removeUrlMappingMap(hostName);
+                        URLMappingHolder.getInstance().removeUrlMappingMap(hostName);
                         log.info("Unloaded host from the engine: " + host);
 						break;
 					}
@@ -469,7 +487,7 @@ public class HostUtil {
 		try {
 			urlMappins = getMappingsPerEppr(epr);
 			for (String urlmapping : urlMappins) {
-				ApplicationContext.getCurrentApplicationContext().removeUrlMappingMap(urlmapping);
+				URLMappingHolder.getInstance().removeUrlMappingMap(urlmapping);
 				HostUtil.deleteResourceToRegistry(urlmapping);
 			}
 		} catch (UrlMapperException e) {
@@ -488,7 +506,7 @@ public class HostUtil {
 		try {
 			urlMappins = getMappingsPerEppr(epr);
 			for (String urlmapping : urlMappins) {
-				ApplicationContext.getCurrentApplicationContext().removeUrlMappingMap(urlmapping);
+				URLMappingHolder.getInstance().removeUrlMappingMap(urlmapping);
 			}
 		} catch (UrlMapperException e) {
 			log.error("error while getting url mapping for service", e);
@@ -506,7 +524,7 @@ public class HostUtil {
 		try {
 			urlMappins = getMappingsPerEppr(epr);
 			for (String urlmapping : urlMappins) {
-				ApplicationContext.getCurrentApplicationContext().putUrlMappingForApplication(
+				URLMappingHolder.getInstance().putUrlMappingForApplication(
 						urlmapping, getServiceEndpoint(epr));
 			}
 		} catch (UrlMapperException e) {
@@ -521,7 +539,7 @@ public class HostUtil {
 	 * @param url
 	 * @throws UrlMapperException
 	 */
-	public static void addDomainToServiceEpr(String hostName, String url) throws UrlMapperException {
+	public static void addDomainToServiceEpr(String hostName, String url, String appType) throws UrlMapperException {
 
 		// if the request if from tenant
 		String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -534,17 +552,46 @@ public class HostUtil {
 		}
 		try {
 			// add entry to registry with the tenant domain if exist in the uri
-			registryManager.addEprToRegistry(hostName, url, tenantDomain);
-			ApplicationContext.getCurrentApplicationContext().putUrlMappingForApplication(hostName,
+			registryManager.addEprToRegistry(hostName, url, tenantDomain, appType);
+			URLMappingHolder.getInstance().putUrlMappingForApplication(hostName,
 					url);
             log.info("mapping added to service:***********: " + hostName + "******: " + url );
             //adding mapping to cluster message
             VirtualHostClusterUtil.addServiceMappingToCluster(hostName, url);
+            addServiceParameter(url);
 		} catch (Exception e) {
 			log.error("error in adding the domain to the resitry", e);
 			throw new UrlMapperException("error in adding the domain to the resitry");
 		}
 	}
+
+    public static void addServiceParameter(String url)  {
+        AxisService axisService;
+        if(url.contains("/t/")) {
+            ConfigurationContext configurationContext = TenantAxisUtils.
+                    getTenantConfigurationContext(MultitenantUtils.getTenantDomainFromUrl(url),
+                            DataHolder.getInstance().getServerConfigContext());
+            try {
+                axisService = configurationContext.getAxisConfiguration().getService(getServiceName(url).
+                        substring(0, getServiceName(url).indexOf("/") ));
+                axisService.addParameter("custom-mapping", "true");
+            } catch (AxisFault axisFault) {
+                log.error("error while getting Axis2 service instance" , axisFault);
+            }
+
+        } else {
+            try {
+                    axisService = DataHolder.getInstance().getServerConfigContext().
+                        getAxisConfiguration().getService(getServiceName(url).
+                        substring(0, getServiceName(url).indexOf("/")));
+                axisService.addParameter("custom-mapping", "true");
+            } catch (AxisFault axisFault) {
+                log.error("error while getting Axis2 service instance" , axisFault);
+            }
+
+        }
+    }
+
 
 	/**
 	 * update endpoint in the registry for host
@@ -559,10 +606,11 @@ public class HostUtil {
 			throws UrlMapperException {
 		try {
 			String epr = getServiceNameForHost(oldHost);
+            String appType = registryManager.getAppNameFromRegistry(oldHost);
 			deleteResourceToRegistry(oldHost);
-            ApplicationContext.getCurrentApplicationContext().removeUrlMappingMap(oldHost);
+            URLMappingHolder.getInstance().removeUrlMappingMap(oldHost);
             VirtualHostClusterUtil.deleteServiceMappingToCluster(oldHost);
-			addDomainToServiceEpr(newHost, epr);
+			addDomainToServiceEpr(newHost, epr, appType);
 		} catch (Exception e) {
 			log.error("error in updating the domain to the resitry", e);
 			throw new UrlMapperException("error in updating the domain to the resitry");
@@ -650,7 +698,7 @@ public class HostUtil {
                 serviceContext = UrlMapperConstants.SERVICE_URL_PATTERN + "/" + serviceName;
                 urlMappings = getMappingsPerEppr(serviceContext);
                 for(String urlMapping : urlMappings) {
-                    ApplicationContext.getCurrentApplicationContext().putUrlMappingForApplication
+                    URLMappingHolder.getInstance().putUrlMappingForApplication
                             (urlMapping, serviceContext);
                 }
             } else {
@@ -659,7 +707,7 @@ public class HostUtil {
                                         tenantDomain + "/" + serviceName;
                 urlMappings = getMappingsPerEppr(serviceContext);
                 for(String urlMapping : urlMappings) {
-                    ApplicationContext.getCurrentApplicationContext().putUrlMappingForApplication
+                    URLMappingHolder.getInstance().putUrlMappingForApplication
                             (urlMapping, serviceContext);
                 }
             }
@@ -672,11 +720,11 @@ public class HostUtil {
     
     public static void removeUrlMappingFromMap(int tenantId, String serviceName) {
         if(tenantId == MultitenantConstants.SUPER_TENANT_ID) {
-            List<String> urlMappings = ApplicationContext.getCurrentApplicationContext().
+            List<String> urlMappings = URLMappingHolder.getInstance().
                     getUrlMappingsPerApplication(UrlMapperConstants.SERVICE_URL_PATTERN
                             + "/" + serviceName);
             for(String urlMapping : urlMappings) {
-                ApplicationContext.getCurrentApplicationContext().
+                URLMappingHolder.getInstance().
                         removeUrlMappingMap(urlMapping);
                 try {
                     VirtualHostClusterUtil.deleteServiceMappingToCluster(urlMapping);
@@ -686,11 +734,11 @@ public class HostUtil {
             }
         } else {
             String tenantDomain = getTenantDomainFromTID(tenantId);
-            List<String> urlMappings = ApplicationContext.getCurrentApplicationContext().
+            List<String> urlMappings = URLMappingHolder.getInstance().
                     getUrlMappingsPerApplication(UrlMapperConstants.SERVICE_URL_PATTERN
                             + "/t/" + tenantDomain + "/" + serviceName);
             for(String urlMapping : urlMappings) {
-                ApplicationContext.getCurrentApplicationContext().
+                URLMappingHolder.getInstance().
                         removeUrlMappingMap(urlMapping);
                 try {
                     VirtualHostClusterUtil.deleteServiceMappingToCluster(urlMapping);
@@ -712,7 +760,7 @@ public class HostUtil {
         }
         return tenantDomain;
     }
-
+    
     public static String getUrlSuffix() {
         return urlSuffix;
     }

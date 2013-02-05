@@ -107,7 +107,7 @@ public class XMLWriterHelper {
                 value.getUdt() == null) {
 			xmlWriter.writeNamespace(DBConstants.XSI_PREFIX, DBConstants.XSI_NAMESPACE);
 			xmlWriter.writeAttribute(DBConstants.XSI_PREFIX, 
-					DBConstants.XSD_NAMESPACE, "nil", "true");
+					DBConstants.XSI_NAMESPACE, "nil", "true");
 		} else {
             if (value.getValueType() == ParamValue.PARAM_VALUE_ARRAY) {
                 for (ParamValue val : value.getArrayValue()) {

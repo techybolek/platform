@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -41,6 +42,10 @@ public class SqlDatabaseManager implements DatabaseManager {
         log.debug("Connected to database");
     }
 
+    /**
+     * @param sql
+     * @throws SQLException
+     */
     public void executeUpdate(String sql) throws SQLException {
         Statement st = null;
         try {
@@ -61,6 +66,11 @@ public class SqlDatabaseManager implements DatabaseManager {
 
     }
 
+    /**
+     * @param sqlFile
+     * @throws SQLException
+     * @throws IOException
+     */
     public void executeUpdate(File sqlFile) throws SQLException, IOException {
         Statement st = null;
         String sql = FileManager.readFile(sqlFile).trim();
@@ -86,11 +96,34 @@ public class SqlDatabaseManager implements DatabaseManager {
         log.debug("Sql execution Success");
     }
 
+    /**
+     * @param sql
+     * @return
+     * @throws SQLException
+     */
+    public ResultSet executeQuery(String sql) throws SQLException {
+        ResultSet rs;
+        Statement st = connection.createStatement();
+        log.debug(sql);
+        rs = st.executeQuery(sql);
+        return rs;
+
+    }
+
+    /**
+     * @param sql
+     * @return
+     * @throws SQLException
+     */
     public Statement getStatement(String sql) throws SQLException {
         return connection.createStatement();
 
     }
 
+    /**
+     * @param sql
+     * @throws SQLException
+     */
     public void execute(String sql) throws SQLException {
         Statement st = null;
         try {
@@ -109,6 +142,9 @@ public class SqlDatabaseManager implements DatabaseManager {
         log.debug("Sql execution Success");
     }
 
+    /**
+     * @throws SQLException
+     */
     public void disconnect() throws SQLException {
         connection.close();
         log.debug("Disconnected from database");

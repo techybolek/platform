@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -37,11 +37,11 @@ import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
  */
 public class BearerTokenValidator implements OAuth2TokenValidator {
 
-    private static Log log = LogFactory.getLog(BearerTokenValidator.class);
+	private static Log log = LogFactory.getLog(BearerTokenValidator.class);
 
-    private TokenMgtDAO tokenMgtDAO = new TokenMgtDAO();
+	private TokenMgtDAO tokenMgtDAO = new TokenMgtDAO();
 
-    public static final String TOKEN_TYPE = "bearer";
+	public static final String TOKEN_TYPE = "bearer";
 
     public OAuth2TokenValidationResponseDTO validate(
             OAuth2TokenValidationRequestDTO validationReqDTO)
@@ -116,6 +116,7 @@ public class BearerTokenValidator implements OAuth2TokenValidator {
         }
 
         tokenRespDTO.setValid(true);
+        tokenRespDTO.setConsumerKey(accessTokenDO.getConsumerKey());
         tokenRespDTO.setAuthorizedUser(accessTokenDO.getAuthzUser());
         tokenRespDTO.setExpiryTime(validityPeriodInMillis / 1000);
         tokenRespDTO.setScope(accessTokenDO.getScope());

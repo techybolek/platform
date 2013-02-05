@@ -22,6 +22,7 @@ import org.wso2.carbon.registry.common.CommonConstants;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -58,7 +59,7 @@ public class CommonUtil {
                 allAssociations.addAll(getAllDependenciesRecursive(dependency.getDestinationPath(), registry));
             }
         }
-        allAssociations.add(path);
+        allAssociations.add(RegistryUtils.getAbsolutePath(registry.getRegistryContext(),path));
         return  allAssociations;
     }
 

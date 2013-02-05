@@ -21,13 +21,13 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.api.clients.utils.AuthenticateStub;
-import org.wso2.carbon.user.mgt.common.ClaimValue;
 import org.wso2.carbon.user.mgt.stub.DeleteUserUserAdminExceptionException;
 import org.wso2.carbon.user.mgt.stub.GetAllRolesNamesUserAdminExceptionException;
 import org.wso2.carbon.user.mgt.stub.GetUsersOfRoleUserAdminExceptionException;
 import org.wso2.carbon.user.mgt.stub.ListUsersUserAdminExceptionException;
 import org.wso2.carbon.user.mgt.stub.UpdateUsersOfRoleUserAdminExceptionException;
 import org.wso2.carbon.user.mgt.stub.UserAdminStub;
+import org.wso2.carbon.user.mgt.stub.types.carbon.ClaimValue;
 import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 
 import java.rmi.RemoteException;

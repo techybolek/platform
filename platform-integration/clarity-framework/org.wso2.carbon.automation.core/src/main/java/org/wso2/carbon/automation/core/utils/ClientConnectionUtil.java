@@ -33,7 +33,7 @@ import java.net.Socket;
 public final class ClientConnectionUtil {
 
     private static final Log log = LogFactory.getLog(ClientConnectionUtil.class);
-    private static final long TIMEOUT = 60000;
+    private static final long TIMEOUT = 180000;
 
     /**
      * Wait for sometime until it is possible to login to the Carbon server
@@ -44,8 +44,7 @@ public final class ClientConnectionUtil {
         long startTime = System.currentTimeMillis();
         EnvironmentBuilder environmentBuilder = new EnvironmentBuilder();
         boolean loginFailed = true;
-        UserInfo userInfo = UserListCsvReader.getUserInfo(ProductConstant.ADMIN_USER_ID);
-
+        UserInfo userInfo = UserListCsvReader.getUserInfo(ProductConstant.SUPER_ADMIN_USER_ID);
         while (loginFailed && (System.currentTimeMillis() - startTime) < TIMEOUT) {
             log.info("Waiting to login to Carbon server...");
             try {

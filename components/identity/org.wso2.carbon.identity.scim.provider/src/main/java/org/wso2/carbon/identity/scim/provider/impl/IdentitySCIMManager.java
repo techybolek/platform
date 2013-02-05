@@ -17,9 +17,15 @@
 */
 package org.wso2.carbon.identity.scim.provider.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.scim.common.utils.SCIMCommonConstants;
+import org.wso2.carbon.identity.scim.common.utils.SCIMCommonUtils;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
@@ -42,11 +48,6 @@ import org.wso2.charon.core.extensions.UserManager;
 import org.wso2.charon.core.protocol.ResponseCodeConstants;
 import org.wso2.charon.core.protocol.endpoints.AbstractResourceEndpoint;
 import org.wso2.charon.core.schema.SCIMConstants;
-//import org.wso2.carbon.identity.scim.consumer.extensions.CommonExtension;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class IdentitySCIMManager implements CharonManager {
     /*private static AuthenticationHandler authenticationHandler;
@@ -89,15 +90,11 @@ public class IdentitySCIMManager implements CharonManager {
         registerCoders();
 
         //Define endpoint urls to be used in Location Header
-        endpointURLs.put(SCIMConstants.USER_ENDPOINT, USERS_URL);
-        endpointURLs.put(SCIMConstants.GROUP_ENDPOINT, GROUPS_URL);
+        endpointURLs.put(SCIMConstants.USER_ENDPOINT, SCIMCommonUtils.getSCIMUserURL());
+        endpointURLs.put(SCIMConstants.GROUP_ENDPOINT, SCIMCommonUtils.getSCIMGroupURL());
 
         //register endpoint URLs in AbstractResourceEndpoint since they are called with in the API
         registerEndpointURLs();
-
-        //register a default user manager
-        //UserManager userManager = new InMemroyUserManager(0, "wso2.com");
-        //userManagers.put(0, userManager);
     }
 
     /**
@@ -158,9 +155,7 @@ public class IdentitySCIMManager implements CharonManager {
 
     public UserManager getUserManager(String userName) throws CharonException {
         SCIMUserManager scimUserManager = null;
-        //CommonExtension commonExtension = null;
         String tenantLessUserName = null;
-        //TODO:identify tenant id by username
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
         //TODO: use util method to get tenantless username
         String[] userNameArray = userName.split("@");
@@ -169,24 +164,37 @@ public class IdentitySCIMManager implements CharonManager {
         } else {
             tenantLessUserName = userName;
         }
+
         try {
             //get super tenant context and get realm service which is an osgi service
             RealmService realmService = (RealmService)
-                    SuperTenantCarbonContext.getCurrentContext().getOSGiService(RealmService.class);
+                    PrivilegedCarbonContext.getCurrentContext().getOSGiService(RealmService.class);
             if (realmService != null) {
                 int tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
                 //get tenant's user realm
                 UserRealm userRealm = realmService.getTenantUserRealm(tenantId);
-                //get claim manager for manipulating attributes
-                ClaimManager claimManager = (ClaimManager) userRealm.getClaimManager();
+                ClaimManager claimManager;
                 if (userRealm != null) {
+                    //get claim manager for manipulating attributes
+                    claimManager = (ClaimManager) userRealm.getClaimManager();
                     //check whether the user who is trying to obtain the realm is authorized
                     boolean isUserAuthorized = userRealm.getAuthorizationManager().isUserAuthorized(
-                            tenantLessUserName, "/permission/admin/configure/security", "ui.execute");
+                            tenantLessUserName, SCIMCommonConstants.PROVISIONING_ADMIN_PERMISSION,
+                            SCIMCommonConstants.RESOURCE_TO_BE_AUTHORIZED);
                     if (!isUserAuthorized) {
                         String error = "User is not authorized to perform provisioning";
                         log.error(error);
                         throw new CharonException(error);
+                    }
+                    /*if the authenticated & authorized user is not set in the carbon context, set it,
+                    coz we are going to refer it later to identify the SCIM providers registered for a particular consumer.*/
+                    String authenticatedUser = PrivilegedCarbonContext.getCurrentContext().getUsername();
+                    if (authenticatedUser == null) {
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantLessUserName);
+                        if(log.isDebugEnabled()){
+                            log.debug("User read from carbon context is null, hence setting " +
+                                      "authenticated user: " + tenantLessUserName);
+                        }
                     }
                     scimUserManager = new SCIMUserManager((UserStoreManager) userRealm.getUserStoreManager(),
                                                           userName, claimManager);

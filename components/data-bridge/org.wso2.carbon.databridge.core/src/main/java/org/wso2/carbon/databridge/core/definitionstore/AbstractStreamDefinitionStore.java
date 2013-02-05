@@ -24,7 +24,6 @@ import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
 import org.wso2.carbon.databridge.commons.utils.EventDefinitionConverterUtils;
 import org.wso2.carbon.databridge.core.Utils.DataBridgeUtils;
-import org.wso2.carbon.databridge.core.exception.StreamDefinitionNotFoundException;
 import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
 
 import java.util.ArrayList;
@@ -43,20 +42,20 @@ public abstract class AbstractStreamDefinitionStore implements StreamDefinitionS
     }
 
     public StreamDefinition getStreamDefinition(Credentials credentials, String name,
-                                                     String version)
-            throws StreamDefinitionNotFoundException, StreamDefinitionStoreException {
+                                                String version)
+            throws StreamDefinitionStoreException {
         String streamId = getStreamIdFromStore(credentials, constructNameVersionKey(name, version));
         if (streamId == null) {
-            throw new StreamDefinitionNotFoundException("No definitions exist on " + credentials.getUsername() + " for " + constructNameVersionKey(name, version));
+            return null;
         }
         return getStreamDefinition(credentials, streamId);
     }
 
     public StreamDefinition getStreamDefinition(Credentials credentials, String streamId)
-            throws StreamDefinitionNotFoundException, StreamDefinitionStoreException {
+            throws StreamDefinitionStoreException {
         StreamDefinition streamDefinition = getStreamDefinitionFromStore(credentials, streamId);
         if (streamDefinition == null) {
-            throw new StreamDefinitionNotFoundException("No definitions exist on " + credentials.getUsername() + " for " + streamId);
+            return null;
         }
         return streamDefinition;
     }
@@ -64,24 +63,22 @@ public abstract class AbstractStreamDefinitionStore implements StreamDefinitionS
     public void saveStreamDefinition(Credentials credentials,
                                      StreamDefinition streamDefinition)
             throws DifferentStreamDefinitionAlreadyDefinedException,
-                   StreamDefinitionStoreException {
+            StreamDefinitionStoreException {
         StreamDefinition existingDefinition;
-        try {
-            existingDefinition = getStreamDefinition(credentials, streamDefinition.getName(), streamDefinition.getVersion());
-        } catch (StreamDefinitionNotFoundException e) {
+        existingDefinition = getStreamDefinition(credentials, streamDefinition.getName(), streamDefinition.getVersion());
+        if (existingDefinition == null) {
             saveStreamIdToStore(credentials, constructNameVersionKey(streamDefinition.getName(), streamDefinition.getVersion()), streamDefinition.getStreamId());
             saveStreamDefinitionToStore(credentials, streamDefinition.getStreamId(), streamDefinition);
             return;
         }
         if (!existingDefinition.equals(streamDefinition)) {
             throw new DifferentStreamDefinitionAlreadyDefinedException("Another Stream with same name and version exi" +
-                                                                       "st :" + EventDefinitionConverterUtils
+                    "st :" + EventDefinitionConverterUtils
                     .convertToJson(existingDefinition));
         }
     }
 
-    public Collection<StreamDefinition> getAllStreamDefinitions(Credentials credentials)
-    {
+    public Collection<StreamDefinition> getAllStreamDefinitions(Credentials credentials) {
         try {
             return getAllStreamDefinitionsFromStore(credentials);
         } catch (StreamDefinitionStoreException e) {
@@ -91,13 +88,30 @@ public abstract class AbstractStreamDefinitionStore implements StreamDefinitionS
     }
 
     public String getStreamId(Credentials credentials, String streamName, String streamVersion)
-            throws StreamDefinitionNotFoundException, StreamDefinitionStoreException {
-        String streamId = getStreamIdFromStore(credentials, constructNameVersionKey(streamName, streamVersion));
-        if (streamId == null) {
-            throw new StreamDefinitionNotFoundException("No stream id found for " + streamId + " " + streamVersion);
-        }
-        return streamId;
+            throws StreamDefinitionStoreException {
+        return getStreamIdFromStore(credentials, constructNameVersionKey(streamName, streamVersion));
     }
+
+    public boolean deleteStreamDefinition(Credentials credentials, String streamId) {
+
+        StreamDefinition streamDefinition = null;
+        try {
+            streamDefinition = getStreamDefinitionFromStore(credentials, streamId);
+        } catch (Exception e) {
+            log.warn("Error when removing stream definition of " + streamId, e);
+            return false;
+        }
+        if (streamDefinition == null) {
+            return false;
+        }
+        removeStreamDefinition(credentials, streamId);
+        return removeStreamId(credentials, constructNameVersionKey(streamDefinition.getName(), streamDefinition.getVersion()));
+
+    }
+
+    protected abstract boolean removeStreamId(Credentials credentials, String streamIdKey);
+
+    protected abstract boolean removeStreamDefinition(Credentials credentials, String streamId);
 
     protected abstract void saveStreamIdToStore(Credentials credentials, String streamIdKey,
                                                 String streamId)
@@ -112,7 +126,7 @@ public abstract class AbstractStreamDefinitionStore implements StreamDefinitionS
             throws StreamDefinitionStoreException;
 
     public abstract StreamDefinition getStreamDefinitionFromStore(Credentials credentials,
-                                                                       String streamId)
+                                                                  String streamId)
             throws StreamDefinitionStoreException;
 
     protected abstract Collection<StreamDefinition> getAllStreamDefinitionsFromStore(

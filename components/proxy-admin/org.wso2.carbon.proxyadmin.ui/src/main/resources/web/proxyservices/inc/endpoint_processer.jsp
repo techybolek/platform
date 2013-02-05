@@ -28,6 +28,7 @@
             String targetURL = request.getParameter("targetURL");
             if (targetURL != null && !"".equals(targetURL)) {
                 try {
+                	targetURL = targetURL.replaceAll("&", "&amp;");
                     URI url = new URI(targetURL);
                     proxy.setEndpointXML("<endpoint xmlns=\"http://ws.apache.org/ns/synapse\"><address uri=\"" + url.toString() + "\"/></endpoint>");
                 } catch (URISyntaxException e) {

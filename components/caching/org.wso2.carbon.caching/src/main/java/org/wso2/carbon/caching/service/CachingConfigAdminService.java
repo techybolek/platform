@@ -413,7 +413,8 @@ public class CachingConfigAdminService extends AbstractAdmin {
                 if ((adminParamValue != null && adminParamValue.length() != 0 &&
                         Boolean.parseBoolean(adminParamValue.trim())) ||
                         (hiddenParamValue != null && hiddenParamValue.length() != 0 &&
-                                Boolean.parseBoolean(hiddenParamValue.trim()))) {
+                                Boolean.parseBoolean(hiddenParamValue.trim())) ||
+                        service.isClientSide() ) {
                     continue;
                 }
                 this.engageCachingForService(service.getName(), confData);

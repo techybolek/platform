@@ -16,23 +16,20 @@
 
 package org.wso2.carbon.attachment.mgt.util;
 
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.attachment.mgt.configuration.AttachmentMgtConfigurationConstants;
 import org.wso2.carbon.attachment.mgt.core.exceptions.AttachmentMgtException;
+import org.wso2.carbon.attachment.mgt.server.internal.AttachmentServerHolder;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.NetworkUtils;
-import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.io.File;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -88,12 +85,18 @@ public class URLGeneratorUtil extends AbstractAdmin {
             throw new AttachmentMgtException(e.getLocalizedMessage(), e);
         }
 
-        log.warn("Port is hardcoded.");
         int port = 9443;
-        /*int port = CarbonUtils.getTransportProxyPort(getConfigContext(), scheme);
-        if (port == -1) {
-            port = CarbonUtils.getTransportPort(getConfigContext(), scheme);
-        }*/
+
+        try {
+            ConfigurationContext serverConfigContext =
+                    AttachmentServerHolder.getInstance().getConfigurationContextService().getServerConfigContext();
+            port = CarbonUtils.getTransportProxyPort(serverConfigContext, scheme);
+            if (port == -1) {
+                port = CarbonUtils.getTransportPort(serverConfigContext, scheme);
+            }
+        } catch (Exception ex) {
+            log.warn("Using default port settings");
+        }
 
         String webContext = ServerConfiguration.getInstance().getFirstProperty("WebContextRoot");
         if (webContext == null || webContext.equals("/")) {
@@ -102,7 +105,7 @@ public class URLGeneratorUtil extends AbstractAdmin {
 
         String tenantDomain = String.valueOf(MultitenantConstants.SUPER_TENANT_ID);
         try {
-            tenantDomain = SuperTenantCarbonContext.getCurrentContext().getTenantDomain(true);
+            tenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
         } catch (Throwable e) {
             tenantDomain = null;
         }

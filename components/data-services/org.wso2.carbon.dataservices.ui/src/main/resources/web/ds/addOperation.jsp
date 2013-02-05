@@ -202,7 +202,6 @@
                   onsubmit="return validateAddOperationForm();">
                 <!--hidden fields -->
                 <input type="hidden" name="oldOperationName" value="<%=operationName%>">
-                <input type="hidden" name="operationDesc" value="<%=operationDesc%>">
                 <input type="hidden" name="disableStreaming" value="<%=enableStreaming%>">
 
                 <table class="styledLeft">

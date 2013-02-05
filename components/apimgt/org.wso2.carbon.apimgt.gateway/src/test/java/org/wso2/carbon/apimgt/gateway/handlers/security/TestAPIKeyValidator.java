@@ -26,8 +26,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class TestAPIKeyValidator extends APIKeyValidator {
-    
+public class TestAPIKeyValidator {   //extends APIKeyValidator
+    /*
     private int counter = 0;
     private Map<String,APIKeyValidationInfoDTO> userInfo = new HashMap<String, APIKeyValidationInfoDTO>();
 
@@ -155,4 +155,5 @@ public class TestAPIKeyValidator extends APIKeyValidator {
 
         }
     }
+    */
 }

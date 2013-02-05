@@ -55,6 +55,7 @@ public class StratosConfiguration {
     private String managerServiceUrl = "";
     private String adminUserName = "";
     private String adminPassword = "";
+    private String ssoLoadingMessage="";
 
     /**
      * @return Stratos Manager service url
@@ -305,5 +306,14 @@ public class StratosConfiguration {
     public void setChargeOnRegistration(boolean chargeOnRegistration) {
         this.chargeOnRegistration = chargeOnRegistration;
     }
+
+    public String getSsoLoadingMessage() {
+        return ssoLoadingMessage;
+    }
+
+    public void setSsoLoadingMessage(String ssoLoadingMessage) {
+        this.ssoLoadingMessage = ssoLoadingMessage;
+    }
+    
 }
 

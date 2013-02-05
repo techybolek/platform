@@ -29,8 +29,6 @@ import java.util.*;
  */
 public class OutputElementGroup extends OutputElement {
 
-    private String name;
-
     private List<StaticOutputElement> attributeEntries;
 
     private List<StaticOutputElement> elementEntries;
@@ -42,8 +40,6 @@ public class OutputElementGroup extends OutputElement {
     private List<OutputElement> allElements;
 
     private Result parentResult;
-
-    private String arrayName;
 
     /**
      * Thread local variables are kept to manage content filtering,
@@ -60,9 +56,7 @@ public class OutputElementGroup extends OutputElement {
 
     public OutputElementGroup(String name, String namespace, Set<String> requiredRoles, 
     		String arrayName) {
-        super(namespace, requiredRoles);
-        this.name = name;
-        this.arrayName = arrayName;
+        super(name, namespace, requiredRoles, arrayName);
         this.allElements = new ArrayList<OutputElement>();
         this.elementEntries = new ArrayList<StaticOutputElement>();
         this.callQueryGroupEntries = new ArrayList<CallQueryGroup>();
@@ -85,14 +79,6 @@ public class OutputElementGroup extends OutputElement {
 
     public void setParentResult(Result parentResult) {
         this.parentResult = parentResult;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getArrayName() {
-        return arrayName;
     }
 
     @Override
@@ -184,13 +170,8 @@ public class OutputElementGroup extends OutputElement {
     }
 
     public void addElementEntry(StaticOutputElement el) throws DataServiceFault {
-        if (!this.getElementEntries().contains(el)) {
-            this.getElementEntries().add(el);
-            this.getAllElements().add(el);
-        } else {
-            throw new DataServiceFault("Error while adding elements. " +
-                    "Cannot use same element name more than once");
-        }
+        this.getElementEntries().add(el);
+        this.getAllElements().add(el);
     }
 
     public void addCallQueryGroupEntry(CallQueryGroup callQueryGroup) {

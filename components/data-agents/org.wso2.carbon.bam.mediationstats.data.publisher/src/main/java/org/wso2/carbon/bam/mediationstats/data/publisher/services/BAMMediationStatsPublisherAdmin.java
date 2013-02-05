@@ -18,6 +18,9 @@ package org.wso2.carbon.bam.mediationstats.data.publisher.services;
 
 import org.wso2.carbon.bam.mediationstats.data.publisher.conf.MediationStatConfig;
 import org.wso2.carbon.bam.mediationstats.data.publisher.conf.RegistryPersistenceManager;
+import org.wso2.carbon.bam.mediationstats.data.publisher.util.MediationDataPublisherConstants;
+import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 
 public class BAMMediationStatsPublisherAdmin extends AbstractAdmin {
@@ -29,11 +32,29 @@ public class BAMMediationStatsPublisherAdmin extends AbstractAdmin {
     }
 
     public void configureEventing(MediationStatConfig mediationStatConfig) {
-        registryPersistenceManager.update(mediationStatConfig);
+        registryPersistenceManager.update(mediationStatConfig,
+                                          CarbonContext.getCurrentContext().getTenantId());
     }
 
     public MediationStatConfig getEventingConfigData() {
-        return registryPersistenceManager.getEventingConfigData();
+        return registryPersistenceManager.getEventingConfigData(CarbonContext.getCurrentContext().getTenantId());
+    }
+
+     public boolean isCloudDeployment(){
+        String[] cloudDeploy = ServerConfiguration.getInstance().
+                getProperties(MediationDataPublisherConstants.CLOUD_DEPLOYMENT_PROP);
+        return null != cloudDeploy && Boolean.parseBoolean(cloudDeploy[cloudDeploy.length - 1]);
+    }
+
+    public String getServerConfigBAMServerURL(){
+        String[] bamServerUrl =
+                ServerConfiguration.getInstance().
+                        getProperties(MediationDataPublisherConstants.SERVER_CONFIG_BAM_URL);
+        if(null != bamServerUrl){
+           return bamServerUrl[bamServerUrl.length-1];
+        }else {
+           return MediationDataPublisherConstants.DEFAULT_BAM_SERVER_URL;
+        }
     }
 
 }

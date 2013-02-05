@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.identity.relyingparty.ui.client;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -25,7 +24,6 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Policy;
@@ -34,15 +32,10 @@ import org.wso2.carbon.identity.base.IdentityBaseUtil;
 import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.relyingparty.stub.RelyingPartyServiceStub;
 import org.wso2.carbon.identity.relyingparty.stub.dto.ClaimDTO;
-import org.wso2.carbon.identity.relyingparty.stub.dto.InfoCardAuthInfoDTO;
-import org.wso2.carbon.identity.relyingparty.stub.dto.InfoCardDTO;
-import org.wso2.carbon.identity.relyingparty.stub.dto.InfoCardSignInDTO;
 import org.wso2.carbon.identity.relyingparty.stub.dto.OpenIDAuthInfoDTO;
 import org.wso2.carbon.identity.relyingparty.stub.dto.OpenIDDTO;
 import org.wso2.carbon.identity.relyingparty.stub.dto.OpenIDSignInDTO;
 import org.wso2.carbon.identity.relyingparty.ui.openid.OpenIDAuthenticationRequest;
-import org.wso2.carbon.ui.util.CarbonUIAuthenticationUtil;
-import org.wso2.carbon.utils.ServerConstants;
 
 import com.google.step2.Step2;
 
@@ -94,23 +87,7 @@ public class RelyingPartyServiceClient {
         }
     }
 
-    /**
-     * @param infocard
-     *            InfoCard to be used for authentication
-     * @return whether Authentication was successful
-     * @throws AxisFault
-     *             if error occurs while calling the back-end service
-     */
-    public InfoCardSignInDTO signInWithInfoCard(InfoCardDTO infocard) throws AxisFault {
-        try {
-            return stub.signInWithInfoCard(infocard);
-        } catch (Exception e) {
-            handleException("Error ouccured while siging in with InfoCard", e);
-        }
-        return null;
-    }
-
-    public String getCookie() {
+   public String getCookie() {
         return (String) stub._getServiceClient().getServiceContext()
                 .getProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING);
     }
@@ -185,20 +162,6 @@ public class RelyingPartyServiceClient {
             log.error(e.getMessage(), e);
             throw new Exception(e.getMessage(), e);
         }
-    }
-
-    /**
-     * @return
-     * @throws AxisFault
-     */
-    public InfoCardAuthInfoDTO getInfoCardAuthInfo() throws AxisFault {
-        try {
-            return stub.getInfoCardAuthInfo();
-        } catch (Exception e) {
-            handleException(
-                    "Error ouccured retrieving information card authnetication information", e);
-        }
-        return null;
     }
 
     /**

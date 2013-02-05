@@ -18,29 +18,74 @@
  */
 package org.wso2.carbon.dataservices.sql.driver.processor.reader;
 
+import org.wso2.carbon.dataservices.sql.driver.query.ColumnInfo;
+
 import java.sql.SQLException;
 import java.util.Map;
 
 /**
  * This interface represents a data table the parser will work on.
  */
-public interface DataTable {
+public abstract class DataTable {
 
-	String getTableName();
-	
-	Map<String, Integer> getHeaders() throws SQLException;
-	
-	Map<String, Integer> getHeaderTypes() throws SQLException;
-	
-	Map<Integer, DataRow> getRows() throws SQLException;
+    private String tableName;
+
+    private ColumnInfo[] headers;
+
+    private boolean hasHeader;
+
+    public DataTable(String tableName, boolean hasHeader) {
+        this.tableName = tableName;
+        this.hasHeader = hasHeader;
+    }
+
+    public DataTable(String tableName, ColumnInfo[] headers) {
+        this.tableName = tableName;
+        this.headers = headers;
+        try {
+            if (this.getHeaders() != null && this.getHeaders().length > 0) {
+                this.hasHeader = true;
+            }
+        } catch (SQLException e) {
+            //do nothing
+        }
+    }
+
+	public abstract Map<Integer, DataRow> getRows() throws SQLException;
 		
-	void addRow(DataRow dataRow) throws SQLException;
+	public abstract void addRow(DataRow dataRow) throws SQLException;
 	
-	void updateRows(DataRow... dataRows) throws SQLException;
+	public abstract void updateRows(DataRow... dataRows) throws SQLException;
 	
-	void deleteRows(int... rowIds) throws SQLException;
+	public abstract void deleteRows(int... rowIds) throws SQLException;
 	
-	Map<Integer, DataRow> applyCondition(String column, String value, 
+	public abstract Map<Integer, DataRow> applyCondition(String column, String value,
 			String operator) throws SQLException;
-	
+
+    public String getTableName() {
+        return tableName;
+    }
+
+	public ColumnInfo[] getHeaders() throws SQLException {
+        return headers;
+    }
+
+    public void setHeaders(ColumnInfo[] headers) {
+        this.headers = headers;
+    }
+
+    public boolean hasHeader() {
+        return hasHeader;
+    }
+
+    public ColumnInfo getHeader(String name) throws SQLException {
+        ColumnInfo result = null;
+        for (ColumnInfo column : this.getHeaders()) {
+            if (column.getName().equalsIgnoreCase(name)) {
+                result = column;
+            }
+        }
+        return result;
+    }
+
 }

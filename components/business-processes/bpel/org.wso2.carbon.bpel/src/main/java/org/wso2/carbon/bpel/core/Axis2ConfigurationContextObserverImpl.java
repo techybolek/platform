@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.bpel.core.ode.integration.BPELServerImpl;
 import org.wso2.carbon.bpel.core.ode.integration.store.ProcessStoreImpl;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -40,16 +40,16 @@ public class Axis2ConfigurationContextObserverImpl extends
     }
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
-        int tenantId = SuperTenantCarbonContext.getCurrentContext(
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(
                 configurationContext).getTenantId();
         try {
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantId);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
 
         } catch (Exception e) {
             log.error("Error in setting tenant details ", e);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 

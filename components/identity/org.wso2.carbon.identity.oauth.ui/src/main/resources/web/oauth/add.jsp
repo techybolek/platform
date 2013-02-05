@@ -1,5 +1,5 @@
 <!--
- ~ Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ ~ Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  ~
  ~ WSO2 Inc. licenses this file to you under the Apache License,
  ~ Version 2.0 (the "License"); you may not use this file except
@@ -70,17 +70,17 @@
 			<td class="formRow">
 				<table class="normal" >
                             <tr>
-                                <td class="leftCol-small"><fmt:message key='oauth.version'/><font class="required">*</font></td>
+                                <td class="leftCol-small"><fmt:message key='oauth.version'/><span class="required">*</span> </td>
                                 <td><input name="oauthVersion" type="radio" value="<%=OAuthConstants.OAuthVersions.VERSION_1A%>" />1.0a
                                     <input name="oauthVersion" type="radio" value="<%=OAuthConstants.OAuthVersions.VERSION_2%>" CHECKED />2.0</td>
                             </tr>
 		                    <tr>
-		                        <td class="leftCol-small"><fmt:message key='application.name'/><font class="required">*</font></td>
+		                        <td class="leftCol-small"><fmt:message key='application.name'/><span class="required">*</span></td>
 		                        <td><input class="text-box-big" id="application" name="application"
 		                                   type="text" /></td>
 		                    </tr>
 		                    <tr>
-		                        <td class="leftCol-small"><fmt:message key='callback'/><font class="required">*</font></td>
+		                        <td class="leftCol-small"><fmt:message key='callback'/><span class="required">*</span></td>
 		                        <td><input class="text-box-big" id="callback" name="callback"
 		                                   type="text" /></td>
 		                    </tr>

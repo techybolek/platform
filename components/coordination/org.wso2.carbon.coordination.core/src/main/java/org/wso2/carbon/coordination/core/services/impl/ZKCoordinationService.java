@@ -88,12 +88,12 @@ public class ZKCoordinationService implements CoordinationService, Watcher {
 			        		ZNODE_CLEANUP_TASK_INTERVAL, ZNODE_CLEANUP_TASK_INTERVAL,
 			        		TimeUnit.MILLISECONDS);
 			    }
-			    log.info("Coordination service connection established with ZooKeeper.");
+			    log.debug("Coordination service connection established with ZooKeeper.");
 		    } catch (IOException e) {
 			    new CoordinationException(ExceptionCode.IO_ERROR, e);
 		    }
 		} else {
-			log.info("Coordination service disabled.");
+			log.debug("Coordination service disabled.");
 		}
 	}
 	

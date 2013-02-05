@@ -19,10 +19,10 @@ function validateTemplateEndpoint(isAnonymous,isFromTemplateEditor) {
         CARBON.showWarningDialog(jsi18n['name.field.cannot.be.empty']);
         return false;
     }
-    if (isEmptyField('address')) {
+    /*if (isEmptyField('address')) {
         CARBON.showWarningDialog(jsi18n['address.field.cannot.be.empty']);
         return false;
-    }
+    }*/
     if (isEmptyField('target.template')) {
         CARBON.showWarningDialog(jsi18n['target.template.empty.error']);
         return false;

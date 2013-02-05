@@ -25,6 +25,7 @@ import org.wso2.carbon.billing.core.utilities.DataSourceHolder;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.TenantManager;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -884,7 +885,8 @@ public class DataAccessObject {
      * Get all the active subscriptions for a particular filter.
      * Customers and Items are just dummy objects that only have a valid id.
      *
-     * @param filter the name of the filter.
+     * @param filter the name of the filter (This is not used.Will be removed from
+     *               the signature in the future trunk).
      * @return the array of the subscriptions.
      * @throws BillingException throws if there is an error.
      */
@@ -943,7 +945,7 @@ public class DataAccessObject {
                 // we will fill the payment details too
             }
         } catch (SQLException e) {
-            String msg = "Failed to get the active subscriptions for filter: " + filter + ".";
+            String msg = "Failed to get the active subscriptions.";
             log.error(msg, e);
             throw new BillingException(msg, e);
 
@@ -1419,6 +1421,65 @@ public class DataAccessObject {
         }
     }
 
+    public int addRegistrationPayment(Payment payment, String usagePlan) throws BillingException {
+        Connection conn = Transaction.getConnection();
+        PreparedStatement ps = null;
+        ResultSet result = null;
+        int paymentId = INVALID;
+        String tenantDomain = payment.getDescription().split(" ")[0];
+        try {
+            int tenantId = Util.getRealmService().getTenantManager().getTenantId(tenantDomain);
+            String sql = "INSERT INTO BC_REGISTRATION_PAYMENT (BC_DATE, BC_AMOUNT, " +
+                         "BC_DESCRIPTION, BC_USAGE_PLAN, BC_TENANT_ID) " +
+                         "VALUES (?, ?, ?, ?, ?)";
+            ps = conn.prepareStatement(sql, new String[]{"BC_ID"});
+
+            // inserting the data
+            long paymentTime = System.currentTimeMillis();
+            ps.setTimestamp(1, new Timestamp(paymentTime));
+            ps.setString(2, payment.getAmount().serializeToString());
+            ps.setString(3, payment.getDescription().split(" ")[1]);
+            ps.setString(4, usagePlan);
+            ps.setInt(5, tenantId);
+            ps.executeUpdate();
+            result = ps.getGeneratedKeys();
+            if (result.next()) {
+                paymentId = result.getInt(1);
+                payment.setId(paymentId);
+            }
+        } catch (SQLException e) {
+            String msg = "Failed to insert the registration payment record, id: " + paymentId + ".";
+            log.error(msg, e);
+            throw new BillingException(msg, e);
+
+        } catch (UserStoreException e) {
+            String msg = "Failed to get tenant id of registration payment for: " + tenantDomain + ".";
+            log.error(msg, e);
+            throw new BillingException(msg, e);
+        } finally {
+            try {
+                if (ps != null) {
+                    ps.close();
+                }
+            } catch (SQLException ex) {
+                String msg = RegistryConstants.RESULT_SET_PREPARED_STATEMENT_CLOSE_ERROR
+                        + ex.getMessage();
+                log.error(msg, ex);
+                throw new BillingException(msg, ex);
+            }
+
+            try {
+                if (result != null) {
+                    result.close();
+                }
+            } catch (SQLException ex) {
+                String msg = RegistryConstants.RESULT_SET_PREPARED_STATEMENT_CLOSE_ERROR;
+                log.error(msg, ex);
+            }
+        }
+        return paymentId;
+    }
+
     public List<Subscription> getFilteredActiveSubscriptionsForCustomer(String filter, Customer customer)
             throws BillingException {
         Connection conn = Transaction.getConnection();
@@ -1468,7 +1529,7 @@ public class DataAccessObject {
                 subscriptions.add(subscription);
             }
         } catch (SQLException e) {
-            String msg = "Failed to get the active subscriptions for filter: " + filter + "," +
+            String msg = "Failed to get the active subscriptions for " +
                     "customer = " + customer.getName() + ".";
             log.error(msg, e);
             throw new BillingException(msg, e);

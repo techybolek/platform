@@ -23,7 +23,6 @@ import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.WSDL2Constants;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -76,8 +75,6 @@ public class InOutMEPHandler extends AbstractHandler {
                     axisOperation.getParameter(StatisticsConstants.IN_OPERATION_COUNTER);
                 if (inOpCounter != null) {
                     ((AtomicInteger) inOpCounter.getValue()).incrementAndGet();
-                    updateCurrentInvocationOperationAndServiceStatistics(outMsgContext,
-                                                                         StatisticsConstants.CURRENT_IN_OPERATION_AND_SERVICE_COUNTER,1);
                 } else {
                     log.error(StatisticsConstants.IN_OPERATION_COUNTER +
                               " has not been set for operation " +
@@ -90,15 +87,6 @@ public class InOutMEPHandler extends AbstractHandler {
                     axisOperation.getParameter(StatisticsConstants.OUT_OPERATION_COUNTER);
                 if (outOpCounter != null) {
                     ((AtomicInteger) outOpCounter.getValue()).incrementAndGet();
-                    updateCurrentInvocationOperationAndServiceStatistics(
-                            outMsgContext,
-                            StatisticsConstants.CURRENT_OUT_OPERATION_AND_SERVICE_COUNTER,
-                            1);
-                    updateCurrentInvocationOperationAndServiceStatistics(
-                            outMsgContext,
-                            StatisticsConstants.CURRENT_OPERATION_AND_SERVICE_FAULT_COUNTER,
-                            0);
-
                 } else {
                     log.error(StatisticsConstants.OUT_OPERATION_COUNTER +
                               " has not been set for operation " +
@@ -113,16 +101,6 @@ public class InOutMEPHandler extends AbstractHandler {
         return InvocationResponse.CONTINUE;
     }
 
-    private void updateCurrentInvocationOperationAndServiceStatistics(MessageContext outMsgContext,
-                                                                      String operationServiceCounterName, int value)
-            throws AxisFault {
-        //Set count 1
-        Parameter currentOperationAndServiceCounterParam = new Parameter();
-        currentOperationAndServiceCounterParam.setName(operationServiceCounterName);
-        currentOperationAndServiceCounterParam.setValue(value);
-        outMsgContext.getAxisOperation().addParameter(currentOperationAndServiceCounterParam);
-        outMsgContext.getAxisService().addParameter(currentOperationAndServiceCounterParam);
-    }
 
     private void updateStatistics(MessageContext outMsgContext) throws AxisFault {
         // Process System Request count
@@ -150,24 +128,13 @@ public class InOutMEPHandler extends AbstractHandler {
      */
     private void updateCurrentInvocationGlobalStatistics(MessageContext outMsgContext) throws AxisFault {
 
-        AxisConfiguration axisConfiguration = outMsgContext.getConfigurationContext().getAxisConfiguration();
-
         //Set request count 1
-        Parameter globalCurrentRequestCounterParam = new Parameter();
-        globalCurrentRequestCounterParam.setName(StatisticsConstants.GLOBAL_CURRENT_REQUEST_COUNTER);
-        globalCurrentRequestCounterParam.setValue(1);
-        axisConfiguration.addParameter(globalCurrentRequestCounterParam);
+        outMsgContext.setProperty(StatisticsConstants.GLOBAL_CURRENT_REQUEST_COUNTER,1);
 
         //Set response count 1
-        Parameter globalCurrentResponseCounterParam = new Parameter();
-        globalCurrentResponseCounterParam.setName(StatisticsConstants.GLOBAL_CURRENT_RESPONSE_COUNTER);
-        globalCurrentResponseCounterParam.setValue(1);
-        axisConfiguration.addParameter(globalCurrentResponseCounterParam);
+        outMsgContext.setProperty(StatisticsConstants.GLOBAL_CURRENT_RESPONSE_COUNTER,1);
 
         //Set fault count 0
-        Parameter globalCurrentFaultCounterParam = new Parameter();
-        globalCurrentFaultCounterParam.setName(StatisticsConstants.GLOBAL_CURRENT_FAULT_COUNTER);
-        globalCurrentFaultCounterParam.setValue(0);
-        axisConfiguration.addParameter(globalCurrentFaultCounterParam);
+        outMsgContext.setProperty(StatisticsConstants.GLOBAL_CURRENT_FAULT_COUNTER,0);
     }
 }

@@ -26,7 +26,7 @@
     <link rel="stylesheet" type="text/css" href="../resources/css/registry.css"/>
 
     <carbon:breadcrumb
-            label="Create RSS instance"
+            label="Create RSS Instance"
             resourceBundle="org.wso2.carbon.rssmanager.ui.i18n.Resources"
             topPage="false"
             request="<%=request%>"/>
@@ -37,7 +37,8 @@
         <div id="workArea">
 
             <form method="post" action="#" name="createRSSInstanceForm"
-                  id="createRSSInstanceForm" onsubmit="return validateRSSInstanceProperties('create')">
+                  id="createRSSInstanceForm"
+                  onsubmit="return validateRSSInstanceProperties('create')">
                 <table class="styledLeft">
                     <tr>
                         <td>
@@ -47,8 +48,7 @@
                                             key="rss.manager.instance.name"/><font
                                             color='red'>*</font></td>
                                     <td><input value="" id="rssInstanceName"
-                                               name="rssInstanceName"
-                                               size="30" type="text"></td>
+                                               name="rssInstanceName" class="longInput"></td>
                                 </tr>
                                 <tr>
                                     <td class="leftCol-med"><fmt:message
@@ -87,34 +87,80 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td align="left"><fmt:message
+                                    <td align="leftCol-med"><fmt:message
                                             key="rss.manager.instance.url"/><font
                                             color='red'>*</font></td>
                                     <td><input value="" id="serverUrl"
                                                name="serverUrl"
-                                               size="60" type="text"></td>
+                                               class="longInput"></td>
                                 </tr>
                                 <tr>
-                                    <td class="leftCol-med"><fmt:message
+                                    <td align="leftCol-med"><fmt:message
+                                            key="rss.manager.datasource.class.name"/><font
+                                            color='red'>*</font></td>
+                                    <td>
+                                        <input id="dataSourceClassName" name="dataSourceClassName" class="longInput"
+                                               value=""/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="leftCol-med"><fmt:message
                                             key="rss.manager.instance.username"/><font
                                             color='red'>*</font></td>
-                                    <td><input value="" id="username"
-                                               name="username"
-                                               size="30" type="text"></td>
+                                    <td>
+                                        <input id="username" name="username" class="longInput"
+                                               value=""/>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td align="left"><fmt:message
+                                    <td align="leftCol-med"><fmt:message
                                             key="rss.manager.instance.password"/><font
                                             color='red'>*</font></td>
-                                    <td><input value="" id="password"
-                                               name="password"
-                                               size="30" type="password"></td>
+                                    <td>
+                                        <input id="password" name="password" class="longInput"
+                                               value=""/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="leftCol-med">
+                                        <fmt:message key="rss.manager.datasource.properties"/>
+                                    </td>
+                                    <td>
+                                        <div id="nameValueAdd">
+                                            <a class="icon-link"
+                                               href="#addNameLink"
+                                               onclick="addDataSourceProperties();"
+                                               style="background-image: url(../admin/images/add.gif);">
+                                                <fmt:message key="rss.manager.add.property"/></a>
+
+                                            <div style="clear:both;"></div>
+                                        </div>
+                                        <div>
+                                            <table cellpadding="0" cellspacing="0" border="0"
+                                                   class="styledLeft"
+                                                   id="dsPropertyTable"
+                                                   style="display:none;">
+                                                <thead>
+                                                <tr>
+                                                    <th style="width:40%"><fmt:message
+                                                            key="rss.manager.prop.name"/></th>
+                                                    <th style="width:40%"><fmt:message
+                                                            key="rss.manager.prop.value"/></th>
+                                                    <th style="width:20%"><fmt:message
+                                                            key="rss.manager.prop.action"/></th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                            </table>
+
+                                        </div>
+                                    </td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
                     <tr>
-
                         <td class="buttonRow" colspan="3">
                             <div id="connectionStatusDiv" style="display: none;"></div>
                             <input class="button" type="button"
@@ -123,7 +169,7 @@
 
                             <input class="button" type="button"
                                    value="<fmt:message key="rss.manager.save"/>"
-                                   onclick="return validateRSSInstanceProperties('create');"/>
+                                   onclick="if(validateRSSInstanceProperties()) {dispatchRSSInstanceCreateRequest('create');} return false;"/>
 
                             <input class="button" type="button"
                                    value="<fmt:message key="rss.manager.cancel"/>"

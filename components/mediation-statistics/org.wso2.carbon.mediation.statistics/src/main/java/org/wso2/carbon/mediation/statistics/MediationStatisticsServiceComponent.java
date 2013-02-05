@@ -21,7 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.framework.ServiceRegistration;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.initializer.services.SynapseEnvironmentService;
 import org.wso2.carbon.mediation.initializer.services.SynapseRegistrationsService;
 import org.wso2.carbon.mediation.statistics.persistence.PersistingStatisticsObserver;
@@ -106,8 +106,20 @@ public class MediationStatisticsServiceComponent {
      * @param synEnvService information about synapse runtime
      */
     private void createStatisticsStore(SynapseEnvironmentService synEnvService) {
+    	
+    	//Ignoring statistics report observers registration if {StatisticsReporterDisabled =true}
+		ServerConfiguration config = ServerConfiguration.getInstance();
+		String confstatisticsReporterDisabled = config.getFirstProperty("StatisticsReporterDisabled");
+		if (!"".equals(confstatisticsReporterDisabled)) {
+			boolean disabled = new Boolean(confstatisticsReporterDisabled);
+			if (disabled) {
+				return;
+			}
+
+		}
+          
         ConfigurationContext cfgCtx = synEnvService.getConfigurationContext();
-        int tenantId = SuperTenantCarbonContext.
+        int tenantId = PrivilegedCarbonContext.
                 getCurrentContext(cfgCtx).getTenantId();
         
         MediationStatisticsStore mediationStatStore = new MediationStatisticsStore();

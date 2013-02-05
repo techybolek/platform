@@ -258,4 +258,14 @@ public interface APIProvider extends APIManager {
      */
     public void deleteAPI(APIIdentifier identifier) throws APIManagementException;
 
+    /**
+     * Search API
+     *
+     * @param searchTerm  Search Term
+     * @param searchType  Search Type
+     * @return   Set of APIs
+     * @throws APIManagementException
+     */
+    public List<API> searchAPIs(String searchTerm, String searchType, String providerId) throws APIManagementException;
+
 }

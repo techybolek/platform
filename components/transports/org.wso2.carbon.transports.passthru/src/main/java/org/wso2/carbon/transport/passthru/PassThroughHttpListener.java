@@ -90,6 +90,13 @@ public class PassThroughHttpListener implements TransportListener {
 
         log.info("Initializing Pass-through HTTP/S Listener...");
 
+        //updating port of transportIn otherwise cluster nodes will not see offset calculated port
+        int portOffset = Integer.parseInt(System.getProperty("portOffset", "0"));
+        Parameter portParam = transportInDescription.getParameter("port");
+        int port = Integer.parseInt(portParam.getValue().toString());
+        port = port + portOffset;
+        portParam.setValue(String.valueOf(port));
+        portParam.getParameterElement().setText(String.valueOf(port));
         Object obj = cfgCtx.getProperty(PassThroughConstants.PASS_THROUGH_TRANSPORT_WORKER_POOL);
         WorkerPool workerPool = null;
         if (obj != null) {

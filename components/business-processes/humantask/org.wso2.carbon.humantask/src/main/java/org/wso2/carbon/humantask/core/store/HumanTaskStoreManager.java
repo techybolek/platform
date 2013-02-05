@@ -57,5 +57,19 @@ public class HumanTaskStoreManager {
         return tenantTaskStoreMap.get(tenantId);
     }
 
+    /**
+     * Tenant unloading logic for human tasks.
+     *
+     * @param tenantId : tenant id  being unloaded.
+     */
+    public void unloadTenantTaskStore(int tenantId) {
+        if (tenantTaskStoreMap.get(tenantId) != null) {
+            HumanTaskStore taskStore = tenantTaskStoreMap.get(tenantId);
+            for(HumanTaskBaseConfiguration taskBaseConfig : taskStore.getTaskConfigurations()) {
+                taskStore.removeAxisServiceForTaskConfiguration(taskBaseConfig);
+            }
 
+            tenantTaskStoreMap.remove(tenantId);
+        }
+    }
 }

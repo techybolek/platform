@@ -111,3 +111,57 @@ function hideDivs(){
 
 }
 
+
+function cacheMediatorValidate() {
+
+	var cacheTimeout = document.getElementsByName("cacheTimeout");
+	var maxMsgSize = document.getElementsByName("maxMsgSize");
+	var maxSize = document.getElementsByName("maxSize");
+
+	if (cacheTimeout[0].value != null) {
+		if (!isNumber(cacheTimeout[0].value)) {
+			CARBON.showErrorDialog(cachejsi18n["mediator.cache.cachetimeout.error.only.integers"]);
+			return false
+		}
+		var ct = parseInt(cacheTimeout[0].value);
+
+		if (ct < 0) {
+			CARBON.showErrorDialog(cachejsi18n["mediator.cache.cachetimeout.negative.error"]);
+			return false;
+		}
+	}
+
+	if (maxMsgSize[0].value != null) {
+		if (!isNumber(maxMsgSize[0].value)) {
+			CARBON.showErrorDialog(cachejsi18n["mediator.cache.maxmessage.error.only.integers"]);
+			return false
+		}
+		var ct = parseInt(maxMsgSize[0].value);
+
+		if (ct < 0) {
+			CARBON.showErrorDialog(cachejsi18n["mediator.cache.maxmessage.negative.error"]);
+			return false;
+		}
+	}
+
+	if (maxSize[0].value != null) {
+		if (!isNumber(maxSize[0].value)) {
+			CARBON.showErrorDialog(cachejsi18n["mediator.cache.maximumsize.error.only.integers"]);
+			return false
+		}
+		var ct = parseInt(maxSize[0].value);
+
+		if (ct < 0) {
+			CARBON.showErrorDialog(cachejsi18n["mediator.cache.maximumsize.negative.error"]);
+			return false;
+		}
+	}
+
+	return true;
+
+}
+
+function isNumber(n) {
+	return !isNaN(parseFloat(n)) && isFinite(n);
+}
+

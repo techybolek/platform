@@ -17,6 +17,8 @@
 package org.wso2.carbon.apimgt.impl.template;
 
 import junit.framework.TestCase;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,7 +64,7 @@ public class TemplateBuilderTest extends TestCase {
         String output = builder.getConfigStringForTemplate();
         String expected = "<api xmlns=\"http://ws.apache.org/ns/synapse\" name=\"TestAPI\" context=\"/test\" " +
                 "version=\"1.0.0\" version-type=\"url\"><resource url-mapping=\"/*\" methods=\"GET\"><inSequence>" +
-                "<class name=\"org.wso2.carbon.apimgt.gateway.mediators.TokenPasser\"/><filter source=\"$ctx:AM_KEY_TYPE\" regex=\"PRODUCTION\"><then><send><endpoint name=\"TestAPI_APIEndpoint_0\">" +
+                "<property name=\"POST_TO_URI\" value=\"true\" scope=\"axis2\"/><filter source=\"$ctx:AM_KEY_TYPE\" regex=\"PRODUCTION\"><then><send><endpoint name=\"TestAPI_APIEndpoint_0\">" +
                 "<address uri=\"http://wso2.org\"/></endpoint></send></then><else><sequence key=\"_sandbox_key_error_\"/>" +
                 "</else></filter></inSequence><outSequence><send/></outSequence></resource><handlers>" +
                 "<handler class=\"org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageHandler\"/>" +
@@ -70,7 +72,11 @@ public class TemplateBuilderTest extends TestCase {
                 "<handler class=\"org.wso2.carbon.apimgt.handlers.throttling.APIThrottleHandler\">" +
                 "<property name=\"id\" value=\"A\"/><property name=\"policyKey\" value=\"conf:/basic-throttle-policy.xml\"/>" +
                 "</handler></handlers></api>";
-        assertEquals(expected, output);
+
+        String formattedOutput = AXIOMUtil.stringToOM(output).getText();
+        String formattedExpected = AXIOMUtil.stringToOM(expected).getText();
+
+        assertEquals(formattedExpected, formattedOutput);
     }
 
     public void testURLEncode() throws Exception {
@@ -110,7 +116,7 @@ public class TemplateBuilderTest extends TestCase {
         String output = builder.getConfigStringForTemplate();
         String expected = "<api xmlns=\"http://ws.apache.org/ns/synapse\" name=\"TestAPI\" context=\"/test\" " +
                 "version=\"1.0.0\" version-type=\"url\"><resource url-mapping=\"/*\" methods=\"GET\"><inSequence>" +
-                "<class name=\"org.wso2.carbon.apimgt.gateway.mediators.TokenPasser\"/><filter source=\"$ctx:AM_KEY_TYPE\" regex=\"PRODUCTION\"><then><send><endpoint name=\"TestAPI_APIEndpoint_0\">" +
+                "<property name=\"POST_TO_URI\" value=\"true\" scope=\"axis2\"/><filter source=\"$ctx:AM_KEY_TYPE\" regex=\"PRODUCTION\"><then><send><endpoint name=\"TestAPI_APIEndpoint_0\">" +
                 "<address uri=\"http://search.wso2.com/search.json?q=blue%20angels&amp;rpp=5&amp;include_entities=true&amp;result_type=mixed\"/></endpoint></send></then><else><sequence key=\"_sandbox_key_error_\"/>" +
                 "</else></filter></inSequence><outSequence><send/></outSequence></resource><handlers>" +
                 "<handler class=\"org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageHandler\"/>" +
@@ -118,7 +124,11 @@ public class TemplateBuilderTest extends TestCase {
                 "<handler class=\"org.wso2.carbon.apimgt.handlers.throttling.APIThrottleHandler\">" +
                 "<property name=\"id\" value=\"A\"/><property name=\"policyKey\" value=\"conf:/basic-throttle-policy.xml\"/>" +
                 "</handler></handlers></api>";
-        assertEquals(expected, output);
+
+        String formattedOutput = AXIOMUtil.stringToOM(output).getText();
+        String formattedExpected = AXIOMUtil.stringToOM(expected).getText();
+
+        assertEquals(formattedExpected, formattedOutput);
     }
 
     public void testAdvancedAPI() throws Exception {
@@ -158,7 +168,7 @@ public class TemplateBuilderTest extends TestCase {
         String output = builder.getConfigStringForTemplate();
         String expected = "<api xmlns=\"http://ws.apache.org/ns/synapse\" name=\"TestAPI\" context=\"/test\" " +
                 "version=\"1.0.0\" version-type=\"url\"><resource url-mapping=\"/*\" methods=\"GET\"><inSequence>" +
-                "<class name=\"org.wso2.carbon.apimgt.gateway.mediators.TokenPasser\"/><filter source=\"$ctx:AM_KEY_TYPE\" regex=\"PRODUCTION\"><then><send><endpoint name=\"TestAPI_APIEndpoint_0\">" +
+                "<property name=\"POST_TO_URI\" value=\"true\" scope=\"axis2\"/><filter source=\"$ctx:AM_KEY_TYPE\" regex=\"PRODUCTION\"><then><send><endpoint name=\"TestAPI_APIEndpoint_0\">" +
                 "<address uri=\"http://wso2.org\"/></endpoint></send></then><else><send><endpoint " +
                 "name=\"TestAPI_APISandboxEndpoint_0\"><address uri=\"http://staging.wso2.org\"/></endpoint>" +
                 "</send></else></filter></inSequence><outSequence><send/></outSequence></resource><handlers>" +
@@ -167,6 +177,10 @@ public class TemplateBuilderTest extends TestCase {
                 "<handler class=\"org.wso2.carbon.apimgt.handlers.throttling.APIThrottleHandler\">" +
                 "<property name=\"id\" value=\"A\"/><property name=\"policyKey\" value=\"conf:/basic-throttle-policy.xml\"/>" +
                 "</handler></handlers></api>";
-        assertEquals(expected, output);
+
+        String formattedOutput = AXIOMUtil.stringToOM(output).getText();
+        String formattedExpected = AXIOMUtil.stringToOM(expected).getText();
+
+        assertEquals(formattedExpected, formattedOutput);
     }
 }

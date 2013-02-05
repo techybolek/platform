@@ -23,6 +23,7 @@ import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.indexing.indexer.Indexer;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -56,7 +57,8 @@ public class RegistryConfigLoader {
     public RegistryConfigLoader() {
         try {
             FileInputStream fileInputStream = new FileInputStream(getConfigFile());
-            StAXOMBuilder builder = new StAXOMBuilder(fileInputStream);
+            StAXOMBuilder builder = new StAXOMBuilder(
+                    CarbonUtils.replaceSystemVariablesInXml(fileInputStream));
             OMElement configElement = builder.getDocumentElement();
             OMElement indexingConfig = configElement.getFirstChildWithName(
                     new QName("indexingConfiguration"));
@@ -123,6 +125,8 @@ public class RegistryConfigLoader {
         } catch (XMLStreamException e) {
             String msg = "error building registry.xml, check for badly formed xml";
             log.error(msg, e);
+        } catch (CarbonException e) {
+            log.error("An error occurred during system variable replacement", e);
         }
     }
 

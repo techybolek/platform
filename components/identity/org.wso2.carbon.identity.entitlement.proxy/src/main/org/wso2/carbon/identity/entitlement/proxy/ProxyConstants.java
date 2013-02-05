@@ -23,6 +23,13 @@ public final class ProxyConstants {
     public static final String JSON = "json";
     public static final String SOAP = "soap";
     public static final String THRIFT = "thrift";
+    public static final String BASIC_AUTH = "basicAuth";
+    public static final String WS_XACML = "wsXacml";
+
+    public static final String DECISION_CACHE = "DECISION_CACHE";
+    public static final int MAX_CACHE_SIZE = 10000;
+
+    public final static String SESSION_TIME_OUT = "50977";
 
     public static final String SUBJECT_ID = "urn:oasis:names:tc:xacml:1.0:subject:subject-id";
 

@@ -1,4 +1,8 @@
-<% jagg.template("ui/dialogs", function(inputs, outputs, jagg) { %>
+<% jagg.template("ui/dialogs", function(inputs, outputs, jagg){
+var i18n = require("i18n");
+var localeResourcesBasePath="/site/conf/locales/jaggery/";
+i18n.init(request,localeResourcesBasePath);
+%>
 <script type="text/javascript">
         var isSecure = <%=outputs.isSecure%>;
         var showLogin = <%=session.get("showLogin")%>;
@@ -24,7 +28,7 @@
     <form id="mainLoginForm">
         <div class="modal-header">
             <button class="close" data-dismiss="modal">x</button>
-            <h3>Login</h3>
+            <h3><%=i18n.localize("login")%></h3>
         </div>
 
         <!--Error message viewer-->
@@ -33,15 +37,15 @@
         </div>
 
         <div class="modal-body">
-            <label>Username:</label>
-            <input type="text" id="username" name="name" class="span3" placeholder="Enter your user name."/>
-            <label>Password:</label>
+            <label><%=i18n.localize("username")%>:</label>
+            <input type="text" id="username" name="name" class="span3" placeholder="<%=i18n.localize("usernamePlcHolder")%>"/>
+            <label><%=i18n.localize("password")%>:</label>
             <input type="password" id="password" name="pass" class="span3"/>
 
         </div>
         <div class="modal-footer">
-            <a href="#" class="btn" data-dismiss="modal">Cancel</a>
-            <a href="#" class="btn btn-primary" id="loginBtn">Login</a>
+            <a href="#" class="btn btn-primary" id="loginBtn"><%=i18n.localize("login")%></a>
+            <a href="#" class="btn" data-dismiss="modal"><%=i18n.localize("cancel")%></a>
         </div>
     </form>
     <% } else { %>

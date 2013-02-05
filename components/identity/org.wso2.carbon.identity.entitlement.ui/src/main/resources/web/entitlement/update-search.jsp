@@ -26,7 +26,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.AttributeValueDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.AttributeDTO" %>
 <jsp:useBean id="entitlementPolicyBean" type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
              class="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean" scope="session"/>
 <jsp:setProperty name="entitlementPolicyBean" property="*" />
@@ -72,11 +72,11 @@
      environmentId = (String)session.getAttribute("environmentId");
      environmentDataType = (String)session.getAttribute("environmentDataType");
 
-     List<AttributeValueDTO> attributeValueDTOs = new ArrayList<AttributeValueDTO>();
+     List<AttributeDTO> attributeValueDTOs = new ArrayList<AttributeDTO>();
 
      if(resourceNames != null && !"".equals(resourceNames)){
-         AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-         attributeValueDTO.setAttribute(resourceNames);
+         AttributeDTO attributeValueDTO = new AttributeDTO();
+         attributeValueDTO.setAttributeValue(resourceNames);
          attributeValueDTO.setAttributeType(EntitlementPolicyConstants.RESOURCE_ELEMENT);
          attributeValueDTO.setAttributeDataType(resourceDataType);
          attributeValueDTO.setAttributeId(resourceId);
@@ -84,8 +84,8 @@
      }
 
      if(subjectNames != null && !"".equals(subjectNames)){
-         AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-         attributeValueDTO.setAttribute(subjectNames);
+         AttributeDTO attributeValueDTO = new AttributeDTO();
+         attributeValueDTO.setAttributeValue(subjectNames);
          attributeValueDTO.setAttributeType(EntitlementPolicyConstants.SUBJECT_ELEMENT);
          attributeValueDTO.setAttributeId(subjectId);
          attributeValueDTO.setAttributeDataType(subjectDataType);
@@ -93,8 +93,8 @@
      }
 
      if(actionNames != null && !"".equals(actionNames)){
-         AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-         attributeValueDTO.setAttribute(actionNames);
+         AttributeDTO attributeValueDTO = new AttributeDTO();
+         attributeValueDTO.setAttributeValue(actionNames);
          attributeValueDTO.setAttributeType(EntitlementPolicyConstants.ACTION_ELEMENT);
          attributeValueDTO.setAttributeId(actionId);
          attributeValueDTO.setAttributeDataType(actionDataType);
@@ -102,8 +102,8 @@
      }
 
      if(environmentNames != null && !"".equals(environmentNames)){
-         AttributeValueDTO attributeValueDTO = new AttributeValueDTO();
-         attributeValueDTO.setAttribute(environmentNames);
+         AttributeDTO attributeValueDTO = new AttributeDTO();
+         attributeValueDTO.setAttributeValue(environmentNames);
          attributeValueDTO.setAttributeType(EntitlementPolicyConstants.ENVIRONMENT_ELEMENT);
          attributeValueDTO.setAttributeId(environmentId);
          attributeValueDTO.setAttributeDataType(environmentDataType);
@@ -115,7 +115,7 @@
         if(attributeValueDTOs.size() > 0){
             EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
                     serverURL, configContext);
-            results = client.getAdvanceSearchResult(attributeValueDTOs.toArray(new AttributeValueDTO[attributeValueDTOs.size()]));
+            results = client.getAdvanceSearchResult(attributeValueDTOs.toArray(new AttributeDTO[attributeValueDTOs.size()]));
         }
 
     } catch (Exception e) {

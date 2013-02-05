@@ -18,15 +18,18 @@
 
 package org.wso2.carbon.identity.entitlement.internal;
 
+import org.wso2.carbon.identity.entitlement.dto.ModuleDataHolder;
+import org.wso2.carbon.identity.entitlement.pap.PolicyEditorDataFinderModule;
 import org.wso2.carbon.identity.entitlement.pip.PIPAttributeFinder;
 import org.wso2.carbon.identity.entitlement.pip.PIPExtension;
 import org.wso2.carbon.identity.entitlement.pip.PIPResourceFinder;
-import org.wso2.carbon.identity.entitlement.policy.PolicyMetaDataFinderModule;
+import org.wso2.carbon.identity.entitlement.policy.collection.PolicyCollection;
+import org.wso2.carbon.identity.entitlement.policy.finder.CarbonPolicyFinderModule;
+import org.wso2.carbon.identity.entitlement.policy.publisher.PolicyPublisherModule;
+import org.wso2.carbon.identity.entitlement.policy.store.CarbonPolicyStore;
 
 import javax.xml.validation.Schema;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * keeps track of the configuration found in entitlement-config.xml
@@ -52,12 +55,36 @@ public class EntitlementConfigHolder {
     private Map<PIPResourceFinder, Properties> resourceFinders  = new HashMap<PIPResourceFinder, Properties>();
 
     /**
-     * This will be fired by PolicyMetaDataFinder, whenever it wants to retrieve an attribute values to build the
+     * This will be fired by PolicyEditorDataFinder, whenever it wants to retrieve an attribute values to build the
      * XACML policy
      */
-    private Map<PolicyMetaDataFinderModule, Properties> policyMetaDataFinderModules  =
-                                                        new HashMap<PolicyMetaDataFinderModule, Properties>();
+    private Map<PolicyEditorDataFinderModule, Properties> policyMetaDataFinderModules  =
+                                                        new HashMap<PolicyEditorDataFinderModule, Properties>();
 
+    /**
+     * Will be fired by PolicyPublisher, whenever it wants to publish a policy
+     */
+    private Map<PolicyPublisherModule, Properties> policyPublisherModules =
+                                                new HashMap<PolicyPublisherModule, Properties>();
+
+    /**
+     * Will be fired by CarbonPolicyFinder, whenever it wants to find policies
+     */
+    private Map<CarbonPolicyFinderModule, Properties> policyFinderModules =
+                                                new HashMap<CarbonPolicyFinderModule, Properties>();
+
+    /**
+     * This holds all the policies of entitlement engine
+     */
+    private Map<PolicyCollection, Properties> policyCollections =
+                                                new HashMap<PolicyCollection, Properties>();
+
+    /**
+     * This holds all the policy storing logic of entitlement engine
+     */
+    private Map<CarbonPolicyStore, Properties> policyStore =
+                                                new HashMap<CarbonPolicyStore, Properties>();
+    
     /**
      * This holds the policy schema against its version
      */
@@ -66,7 +93,13 @@ public class EntitlementConfigHolder {
     /**
      * Holds all caching related configurations
      */
-    private Properties cachingProperties;
+    private Properties engineProperties;
+
+    /**
+     * Holds the properties of all modules.
+     */
+    private Map<String ,List<ModuleDataHolder>> modulePropertyHolderMap =
+                                                new HashMap<String, List<ModuleDataHolder>>();
 
 
     
@@ -94,21 +127,21 @@ public class EntitlementConfigHolder {
         this.resourceFinders.put(resourceFinder, properties);
     }
 
-    public Map<PolicyMetaDataFinderModule, Properties> getPolicyMetaDataFinderModules() {
+    public Map<PolicyEditorDataFinderModule, Properties> getPolicyMetaDataFinderModules() {
         return policyMetaDataFinderModules;
     }
 
-    public void addPolicyMetaDataFinderModules(PolicyMetaDataFinderModule metaDataFinderModule,
+    public void addPolicyMetaDataFinderModules(PolicyEditorDataFinderModule metaDataFinderModule,
                                                Properties properties) {
         this.policyMetaDataFinderModules.put(metaDataFinderModule, properties);
     }
 
-    public Properties getCachingProperties() {
-        return cachingProperties;
+    public Properties getEngineProperties() {
+        return engineProperties;
     }
 
-    public void setCachingProperties(Properties cachingProperties) {
-        this.cachingProperties = cachingProperties;
+    public void setEngineProperties(Properties engineProperties) {
+        this.engineProperties = engineProperties;
     }
 
     public Map<String, Schema> getPolicySchemaMap() {
@@ -117,5 +150,53 @@ public class EntitlementConfigHolder {
 
     public void setPolicySchema(String schemaNS, Schema schema) {
         this.policySchemaMap.put(schemaNS, schema);
+    }
+
+    public Map<PolicyPublisherModule, Properties> getPolicyPublisherModules() {
+        return policyPublisherModules;
+    }
+
+    public void addPolicyPublisherModule(PolicyPublisherModule policyPublisherModules,
+                                                                            Properties properties) {
+        this.policyPublisherModules.put(policyPublisherModules, properties);
+    }
+
+    public List<ModuleDataHolder> getModulePropertyHolders(String type) {
+        return modulePropertyHolderMap.get(type);
+    }
+        
+    public void addModulePropertyHolder(String type, ModuleDataHolder holder) {
+        if(this.modulePropertyHolderMap.get(type) == null){
+            List<ModuleDataHolder> holders = new ArrayList<ModuleDataHolder>();
+            holders.add(holder);
+            this.modulePropertyHolderMap.put(type, holders);
+        } else {
+            this.modulePropertyHolderMap.get(type).add(holder);    
+        }
+    }
+
+    public Map<CarbonPolicyFinderModule, Properties> getPolicyFinderModules() {
+        return policyFinderModules;
+    }
+
+    public void addPolicyFinderModule(CarbonPolicyFinderModule policyFinderModule,
+                                                                            Properties properties) {
+        this.policyFinderModules.put(policyFinderModule, properties);
+    }
+
+    public Map<PolicyCollection, Properties> getPolicyCollections() {
+        return policyCollections;
+    }
+
+    public void addPolicyCollection(PolicyCollection collection, Properties properties) {
+        this.policyCollections.put(collection, properties);
+    }
+
+    public Map<CarbonPolicyStore, Properties> getPolicyStore() {
+        return policyStore;
+    }
+
+    public void addPolicyStore(CarbonPolicyStore policyStore, Properties properties) {
+        this.policyStore.put(policyStore, properties);
     }
 }

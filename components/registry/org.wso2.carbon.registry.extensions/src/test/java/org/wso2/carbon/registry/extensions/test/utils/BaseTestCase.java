@@ -17,20 +17,16 @@
 package org.wso2.carbon.registry.extensions.test.utils;
 
 import junit.framework.TestCase;
-
-import java.io.File;
-import java.io.InputStream;
-import java.io.FileInputStream;
-
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.config.RegistryConfiguration;
 import org.wso2.carbon.registry.core.config.RegistryContext;
-import org.wso2.carbon.registry.core.config.RegistryConfigurationProcessor;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.internal.RegistryCoreServiceComponent;
 import org.wso2.carbon.registry.core.jdbc.realm.InMemoryRealmService;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
+
+import java.io.File;
+import java.io.InputStream;
 
 public class BaseTestCase extends TestCase {
 
@@ -45,7 +41,7 @@ public class BaseTestCase extends TestCase {
         }
 
         // The line below is responsible for initializing the cache.
-        CarbonContextHolder.getCurrentCarbonContextHolder();
+        CarbonContext.getCurrentContext();
 
         String carbonHome = System.getProperty("carbon.home");
         System.out.println("carbon home " + carbonHome);

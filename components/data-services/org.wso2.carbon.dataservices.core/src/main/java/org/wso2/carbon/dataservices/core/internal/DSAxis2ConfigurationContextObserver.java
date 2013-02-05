@@ -21,7 +21,7 @@ package org.wso2.carbon.dataservices.core.internal;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
 public class DSAxis2ConfigurationContextObserver extends AbstractAxis2ConfigurationContextObserver {
@@ -30,11 +30,11 @@ public class DSAxis2ConfigurationContextObserver extends AbstractAxis2Configurat
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
 
-		int tenantId = SuperTenantCarbonContext.getCurrentContext(
+		int tenantId = PrivilegedCarbonContext.getCurrentContext(
 				configurationContext).getTenantId();
         try {
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantId);
+        	PrivilegedCarbonContext.startTenantFlow();
+        	PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
 
 //            AxisConfiguration axisConfigOfCurrentTenant = configurationContext.getAxisConfiguration();
 //            DeploymentEngine axisDeploymentEngine =
@@ -48,7 +48,7 @@ public class DSAxis2ConfigurationContextObserver extends AbstractAxis2Configurat
         } catch (Exception e) {
             log.error("Error in setting tenant details ", e);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+        	PrivilegedCarbonContext.endTenantFlow();
         }
     }
     

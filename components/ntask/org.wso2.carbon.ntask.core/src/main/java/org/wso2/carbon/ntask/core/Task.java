@@ -30,7 +30,7 @@ public interface Task {
 	
 	/**
 	 * This method is called once after properties are set in the task,
-	 * should be used for one time initialization.
+	 * and right before the task is executed.
 	 */
 	public void init();
 	

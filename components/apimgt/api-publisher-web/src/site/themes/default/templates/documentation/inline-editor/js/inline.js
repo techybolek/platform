@@ -24,7 +24,7 @@ function loadDefaultTinyMCEContent(provider,apiName, version, docName) {
                       tinyMCE.activeEditor.setContent(docContent);
                   } else {
                       $('#inlineError').show('fast');
-                      $('#inlineSpan').html('<strong>Sorry. The content of this document cannot be loaded.</strong><br />'+result.message);
+                      $('#inlineSpan').html('<strong>'+ i18n.t('errorMsgs.inlineContent')+'</strong><br />'+result.message);
                   }
               }, "json");
 
@@ -37,7 +37,11 @@ function saveContent(provider, apiName, apiVersion, docName, mode) {
     jagg.post("/site/blocks/documentation/ajax/docs.jag", { action:"addInlineContent",provider:provider,apiName:apiName,version:apiVersion,docName:docName,content:contentDoc},
               function (result) {
                   if (result.error) {
-                      jagg.message({content:result.message,type:"error"});
+                      if (result.message == "AuthenticateError") {
+                          jagg.showLogin();
+                      } else {
+                          jagg.message({content:result.message,type:"error"});
+                      }
                   } else {
                       if (mode == "save") {
                          /* $('#messageModal').html($('#confirmation-data').html());
@@ -50,17 +54,13 @@ function saveContent(provider, apiName, apiVersion, docName, mode) {
                           /*});
                           $('#messageModal').modal();*/
                       } else {
-                          $('#messageModal').html($('#confirmation-data').html());
-                          $('#messageModal h3.modal-title').html('Document Content Addition Successful');
-                          $('#messageModal div.modal-body').html('\n\n Successfully applied the changes you have done to the documentation.');
-                          $('#messageModal a.btn-primary').html('OK');
-                          $('#messageModal a.btn-other').hide();
-                          $('#messageModal a.btn-primary').click(function() {
-                              window.location.reload();
-                          });
-                          $('#messageModal').modal();
-
+                           $('#docAddMessage').show();
+                           setTimeout("alert()", 3000);
                       }
                   }
               }, "json");
+}
+
+var alert=function alertMsg() {
+    $('#docAddMessage').hide("fast");
 }

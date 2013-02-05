@@ -32,6 +32,7 @@ import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.config.SynapsePropertiesLoader;
+import org.apache.synapse.config.xml.EntryFactory;
 import org.apache.synapse.config.xml.ProxyServiceFactory;
 import org.apache.synapse.config.xml.SequenceMediatorFactory;
 import org.apache.synapse.config.xml.XMLConfigConstants;
@@ -72,7 +73,9 @@ public class ConfigurationValidator {
 						validateSequence(child, errors);
 						configSequenceList.add(name);
 					}
-				}
+				} else if(XMLConfigConstants.ENTRY_ELT.equals(child.getQName())){
+                    validateLocalEntry(child, errors);
+                }
             }
         }
 
@@ -107,6 +110,14 @@ public class ConfigurationValidator {
             EndpointFactory.getEndpointFromElement(endpointElement, false, new Properties());
         } catch (Exception e) {
             errors.add(newValidationError(endpointElement, e.getMessage()));
+        }
+    }
+    
+    private void validateLocalEntry(OMElement entryElement, List<ValidationError> errors){
+        try {
+            EntryFactory.createEntry(entryElement, new Properties());
+        } catch (Exception e) {
+            errors.add(newValidationError(entryElement, e.getMessage()));
         }
     }
 

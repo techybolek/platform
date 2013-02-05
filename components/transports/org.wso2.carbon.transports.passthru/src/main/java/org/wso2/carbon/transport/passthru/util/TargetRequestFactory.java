@@ -70,8 +70,8 @@ public class TargetRequestFactory {
                             request.addHeader((String) entry.getKey(), (String) entry.getValue());
                         } else {
                             if(msgContext.getProperty("REQUEST_HOST_HEADER") != null) {
-                                   request.addHeader((String) entry.getKey(),
-                                           (String)msgContext.getProperty("REQUEST_HOST_HEADER"));
+                                request.addHeader((String) entry.getKey(),
+                                        (String)msgContext.getProperty("REQUEST_HOST_HEADER"));
                             }
                         }
                     }

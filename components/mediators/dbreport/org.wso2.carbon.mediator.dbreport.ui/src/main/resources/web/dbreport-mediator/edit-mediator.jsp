@@ -26,6 +26,9 @@
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.Iterator" %>
 <%@ page import="java.util.Set" %>
+<%@ page import="java.util.List" %>
+<%@ page import="org.wso2.carbon.mediator.dbreport.DBReportMediatorClient" %>
+<%@page import="org.wso2.carbon.ui.CarbonUIMessage"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
@@ -92,7 +95,25 @@
 
     otherPropSet = otherProps.keySet();
     otherPropIt = otherPropSet.iterator();
+
+
+DBReportMediatorClient client=null;
+List<String> sourceList =null;
+
+try{
+client = DBReportMediatorClient.getInstance(config, session);
+sourceList = client.getAllDataSourceInformations();
+}catch(Exception e){
+response.setStatus(500);
+CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
+session.setAttribute(CarbonUIMessage.ID, uiMsg);
 %>
+<jsp:include page="../admin/error.jsp?<%=e.getMessage()%>"/>
+<%
+    return;
+    }
+%>
+
 
 <fmt:bundle basename="org.wso2.carbon.mediator.dbreport.ui.i18n.Resources">
 <carbon:jsi18n
@@ -146,34 +167,53 @@
                     <label><fmt:message key="mediator.dbreport.source.exist"/></label>
                 </td>
             </tr>
+
             <tr id="dataSourceSelect" <%=!displayExisistingDs ? "style=\"display:none\";" : ""%>>
                 <td style="width:150px"><fmt:message key="mediator.dbreport.dsName"/></td>
                 <td>
                     <table>
                         <tbody>
-                            <tr>
-                                <td>
-                                    <input type="text" name="dsName" style="width:300px"
-                                           id="dsName" value="<%=dsName%>" disabled="true"/>
-                                    <input type="hidden" name="dsName_hidden"
-                                           style="width:300px"
-                                           id="dsName_hidden" value="<%=dsName%>"/>
-                                </td>
-                                <td>
-                                    <a class="icon-link icon-link-dbreport"
-                                       href="#addNameLink"
-                                       onclick="loadDataSources();"><fmt:message key="mediator.dbreport.source.load"/>
-                                    </a>
-                                </td>
-                                <td>
-                                    <select id='existingDataSource' name="existingDataSource" style="display:none" onchange="dsSelectOnChange()">
-                                    </select>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td>
+                                <select name="data_source" id="data_source">
+                                    <option value="" selected="selected">--SELECT--</option>
+                                    <%
+                                        if (sourceList != null) {
+                                    %>
+                                    <%
+                                        for (String name : sourceList) {
+                                    %>
+                                    <%
+                                        if (name.equals(dsName)) {
+                                    %>
+                                    <option  value=<%=name%> selected><%=name%> </option>
+                                    <%
+                                    } else {
+                                    %>
+                                    <option  value=<%=name%>><%=name%> </option>
+                                    <%
+                                        }
+                                    %>
+                                    <%
+                                        }
+                                    %>
+
+                                    <%
+                                    } else {
+                                    %>
+                                    <font color="red"><fmt:message key="empty.source"/></font>
+                                    <%
+                                        }
+                                    %>
+                                </select>
+
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                 </td>
             </tr>
+
             <tr id="mediator.dbr.driver_row" <%=!isPool ? "style=\"display:none;\"" : ""%>>
                 <td style="width:150px">
                     <fmt:message key="mediator.dbreport.driver"/>
@@ -192,7 +232,7 @@
                     <fmt:message key="mediator.dbreport.dsName"/>
                     <font style="color: red; font-size: 8pt;"> *</font>
                 </td>
-                <td><input type="text" style="width:300px" name="data_source" id="data_source" value="<%=dsName%>"/></td>
+                <td><input type="text" style="width:300px" name="ext_data_source" id="ext_data_source" value="<%=dsName%>"/></td>
             </tr>
             <tr id='mediator.dbr.url' <%=!displayCommonProps ? "style=\"display:none;\"" : ""%>>
                 <td>
@@ -437,6 +477,7 @@
     <input type="hidden" id="hidden_stmt" name="hidden_stmt" value="<%=dbReportMediator.getStatementList().size() + 1%>">
     <div id="nsEditor" style="display:none;"/>
     </td></tr>
+</table>
 </div>
 </fmt:bundle>
 

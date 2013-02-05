@@ -1,7 +1,0 @@
-<project name="CreateServices" default="main">
-    <target name="main">
-        <subant target="">
-            <fileset dir="." includes="*/build.xml" excludes="clients/build.xml"/>
-        </subant>
-    </target>
-</project>

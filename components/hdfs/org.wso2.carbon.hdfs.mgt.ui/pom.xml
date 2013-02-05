@@ -21,11 +21,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>hdfs</artifactId>
-	<version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.hdfs.mgt.ui</artifactId>
+    <version>4.0.5</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - HDFS Management UI</name>
     <url>http://wso2.org</url>
@@ -44,10 +46,10 @@
                         <Import-Package>
                             org.wso2.carbon.hdfs.mgt.stub.*;version="${carbon.platform.package.import.version.range}",
                             javax.servlet.*;version="2.4.0",
-                            *;resolution:=optional 
-			</Import-Package>
+                            *;resolution:=optional
+                        </Import-Package>
                         <Export-Package>
-				 org.wso2.carbon.hdfs.mgt.ui.*;version="${carbon.platform.package.export.version}"
+                            org.wso2.carbon.hdfs.mgt.ui.*;version="${carbon.platform.package.export.version}"
                         </Export-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
@@ -72,7 +74,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.hdfs.mgt.stub</artifactId>
-	    <version>${wso2carbon.version}</version>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>

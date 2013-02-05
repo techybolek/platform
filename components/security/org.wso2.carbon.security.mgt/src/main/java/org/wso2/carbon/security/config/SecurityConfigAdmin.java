@@ -17,19 +17,17 @@
 package org.wso2.carbon.security.config;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
+import net.sf.jsr107cache.Cache;
+import net.sf.jsr107cache.CacheException;
+import net.sf.jsr107cache.CacheManager;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.description.AxisBinding;
-import org.apache.axis2.description.AxisEndpoint;
-import org.apache.axis2.description.AxisModule;
-import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.*;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axis2.engine.AxisEvent;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Policy;
@@ -47,6 +45,8 @@ import org.apache.ws.secpolicy.model.Token;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.caching.core.CacheInvalidator;
+import org.wso2.carbon.caching.core.StringCacheKey;
 import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.Resources;
 import org.wso2.carbon.core.persistence.PersistenceException;
@@ -54,30 +54,20 @@ import org.wso2.carbon.core.persistence.PersistenceFactory;
 import org.wso2.carbon.core.persistence.PersistenceUtils;
 import org.wso2.carbon.core.persistence.file.ModuleFilePersistenceManager;
 import org.wso2.carbon.core.persistence.file.ServiceGroupFilePersistenceManager;
-import org.wso2.carbon.core.util.CryptoException;
-import org.wso2.carbon.core.util.CryptoUtil;
-import org.wso2.carbon.core.util.KeyStoreManager;
-import org.wso2.carbon.core.util.KeyStoreUtil;
-import org.wso2.carbon.core.util.ParameterUtil;
+import org.wso2.carbon.core.util.*;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.utils.Transaction;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.security.SecurityConfigException;
-import org.wso2.carbon.security.SecurityConstants;
-import org.wso2.carbon.security.SecurityScenario;
-import org.wso2.carbon.security.SecurityScenarioDatabase;
-import org.wso2.carbon.security.SecurityServiceHolder;
+import org.wso2.carbon.security.*;
 import org.wso2.carbon.security.config.service.KerberosConfigData;
 import org.wso2.carbon.security.config.service.SecurityConfigData;
 import org.wso2.carbon.security.config.service.SecurityScenarioData;
-import org.wso2.carbon.security.util.RahasUtil;
-import org.wso2.carbon.security.util.RampartConfigUtil;
-import org.wso2.carbon.security.util.SecurityTokenStore;
-import org.wso2.carbon.security.util.ServerCrypto;
-import org.wso2.carbon.security.util.ServicePasswordCallbackHandler;
+import org.wso2.carbon.security.internal.SecurityMgtServiceComponent;
+import org.wso2.carbon.security.pox.POXSecurityHandler;
+import org.wso2.carbon.security.util.*;
 import org.wso2.carbon.user.core.AuthorizationManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
@@ -88,17 +78,9 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.security.KeyStore;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Admin service for configuring Security scenarios
@@ -229,11 +211,20 @@ public class SecurityConfigAdmin {
             String policyResourcePath = serviceXPath+"/"+Resources.POLICIES+"/"+Resources.POLICY;
 
             if (!serviceGroupFilePM.elementExists(serviceGroupId, policyResourcePath)) {
-                if(!isTransactionStarted) {
-                    serviceGroupFilePM.rollbackTransaction(serviceGroupId); //no need to commit because no writes happened.
+                if(service.getPolicySubject() != null &&
+                        service.getPolicySubject().getAttachedPolicyComponents() != null){
+                    Iterator iterator = service.getPolicySubject().
+                                                    getAttachedPolicyComponents().iterator();
+                    if(!iterator.hasNext()){
+                        if(!isTransactionStarted) {
+                            serviceGroupFilePM.rollbackTransaction(serviceGroupId); //no need to commit because no writes happened.
+                        }
+                        return data;
+                    }
                 }
-                return data;
             }
+
+
             /**
              * First check whether there's a custom policy engaged from registry. If it is not
              * the case, we check whether a default scenario is applied.
@@ -280,13 +271,13 @@ public class SecurityConfigAdmin {
 
     public void disableSecurityOnService(String serviceName) throws SecurityConfigException {
         AxisService service = axisConfig.getServiceForActivation(serviceName);
+        if (service == null) {
+            throw new SecurityConfigException("AxisService is Null");
+        }
+        
         String serviceGroupId = service.getAxisServiceGroup().getServiceGroupName();
         boolean isProxyService = PersistenceUtils.isProxyService(service);
-        try {
-            if (service == null) {
-                throw new SecurityConfigException("AxisService is Null");
-            }
-
+        try {           
             String serviceXPath = PersistenceUtils.getResourcePath(service);
 
             boolean transactionStarted1 = serviceGroupFilePM.isTransactionStarted(serviceGroupId);
@@ -453,33 +444,33 @@ public class SecurityConfigAdmin {
 
                     persistenceFactory.getServicePM().deleteServiceProperty(service, Resources.ServiceProperties.IS_UT_ENABLED);
 
-                    List<String> transports = getAllTransports();
-                    setServiceTransports(serviceName, transports);
+//                    List<String> transports = getAllTransports();
+//                    setServiceTransports(serviceName, transports);
 
                     // Fire the transport binding added event
-                    AxisEvent event = new AxisEvent(CarbonConstants.AxisEvent.TRANSPORT_BINDING_ADDED,
-                            service);
-                    axisConfig.notifyObservers(event, service);
+//                    AxisEvent event = new AxisEvent(CarbonConstants.AxisEvent.TRANSPORT_BINDING_ADDED,
+//                            service);
+//                    axisConfig.notifyObservers(event, service);
 
                     persistenceFactory.getServicePM().setServiceProperty(service,
-                            Resources.ServiceProperties.EXPOSED_ON_ALL_TANSPORTS, Boolean.TRUE.toString());
+                            Resources.ServiceProperties.EXPOSED_ON_ALL_TANSPORTS, Boolean.FALSE.toString());
 
-                    for (String trans : transports) {
-                        if (trans.endsWith("https")) {
-                            continue;
-                        }
+//                    for (String trans : transports) {
+//                        if (trans.endsWith("https")) {
+//                            continue;
+//                        }
                         //in registry - kasung
-                        String transPath = RegistryResources.TRANSPORTS + trans;
-                        if (registry.resourceExists(transPath)) {
-                            persistenceFactory.getServicePM().updateServiceAssociation(service,
-                                    transPath, Resources.Associations.EXPOSED_TRANSPORTS);
-                        } else {
-                            String msg = "Transport path " + transPath + " does not exist in the registry";
-                            log.error(msg);
-                            serviceGroupFilePM.rollbackTransaction(serviceGroupId);
-                            throw new AxisFault(msg);
-                        }
-                    }
+//                        String transPath = RegistryResources.TRANSPORTS + trans + "/listener";
+//                        if (registry.resourceExists(transPath)) {
+//                            persistenceFactory.getServicePM().updateServiceAssociation(service,
+//                                    transPath, Resources.Associations.EXPOSED_TRANSPORTS);
+//                        } else {
+//                            String msg = "Transport path " + transPath + " does not exist in the registry";
+//                            log.error(msg);
+//                            serviceGroupFilePM.rollbackTransaction(serviceGroupId);
+//                            throw new AxisFault(msg);
+//                        }
+//                    }
 
                     if (!transactionStarted) {
                         serviceGroupFilePM.commitTransaction(serviceGroupId);
@@ -641,7 +632,7 @@ public class SecurityConfigAdmin {
         if (service == null) {
             throw new SecurityConfigException("nullService");
         }
-
+        
         String serviceGroupId = service.getAxisServiceGroup().getServiceGroupName();
         try {
 
@@ -670,6 +661,19 @@ public class SecurityConfigAdmin {
             if (!transactionStarted) {
                 serviceGroupFilePM.commitTransaction(serviceGroupId);
             }
+            
+            Cache cache = CacheManager.getInstance().getCache(POXSecurityHandler.POX_ENABLED);
+            cache.remove(serviceName);
+            
+            CacheInvalidator invalidator = SecurityMgtServiceComponent.getCacheInvalidator();
+            try {
+                invalidator.invalidateCache(POXSecurityHandler.POX_ENABLED, new StringCacheKey(serviceName));
+            } catch (CacheException e1) {
+                String msg = "Failed to propagate changes immediately. It will take time to update nodes in cluster";
+                log.error(msg, e1);
+                throw new SecurityConfigException(msg, e1);
+            }
+            
         } catch (PersistenceException e) {
             StringBuilder str = new StringBuilder("Error persisting security scenario ").
                     append(scenarioId).append(" for service ").append(serviceName);
@@ -691,6 +695,7 @@ public class SecurityConfigAdmin {
         if (service == null) {
             throw new SecurityConfigException("nullService");
         }
+        
         String serviceGroupId = service.getAxisServiceGroup().getServiceGroupName();
 
         try {
@@ -738,6 +743,19 @@ public class SecurityConfigAdmin {
             if (service.getFileName() != null) {
                 updateSecScenarioInGhostFile(service.getFileName().getPath(), serviceName, scenrioId);
             }
+            
+            Cache cache = CacheManager.getInstance().getCache(POXSecurityHandler.POX_ENABLED);
+            cache.remove(serviceName);
+            
+            CacheInvalidator invalidator = SecurityMgtServiceComponent.getCacheInvalidator();
+            try {
+                invalidator.invalidateCache(POXSecurityHandler.POX_ENABLED, new StringCacheKey(serviceName));
+            } catch (CacheException e1) {
+                String msg = "Failed to propagate changes immediately. It will take time to update nodes in cluster";
+                log.error(msg, e1);
+                throw new SecurityConfigException(msg, e1);
+            }
+            
         } catch (RegistryException e) {
             log.error(e.getMessage(), e);
             serviceGroupFilePM.rollbackTransaction(serviceGroupId);
@@ -803,7 +821,7 @@ public class SecurityConfigAdmin {
                     scenarioId.equals(SecurityConstants.POLICY_FROM_REG_SCENARIO)) {
                 Parameter pathParam = new Parameter(SecurityConstants.SECURITY_POLICY_PATH,
                         policyPath);
-                pathParam.setLocked(true);
+                //pathParam.setLocked(true); this causes errors at proxy redeployments 
                 service.addParameter(pathParam);
                 persistenceFactory.getServicePM().updateServiceParameter(service, pathParam);
 //                persistParameter(serviceGroupId, pathParam, serviceXPath);
@@ -1064,7 +1082,6 @@ public class SecurityConfigAdmin {
                                 UserCoreConstants.INVOKE_SERVICE_PERMISSION);
                 }
             }
-
             if (isRahasEngaged) {
                 setRahasParameters(service, privateStore);
             } else {
@@ -1206,7 +1223,17 @@ public class SecurityConfigAdmin {
 
                 rampartConfig.setTimestampTTL(Integer.toString(ttl));
                 rampartConfig.setTimestampMaxSkew(Integer.toString(timeSkew));
-                rampartConfig.setTokenStoreClass(SecurityTokenStore.class.getName());
+                //adding this class as default one.
+                //rampartConfig.setTokenStoreClass("org.wso2.carbon.identity.sts.store.DBTokenStore");
+
+                //this will check for TokenStoreClassName property under Security in carbon.xml
+                //if it is not found, default token store class will be set
+                String tokenStoreClassName = ServerConfiguration.getInstance().getFirstProperty("Security.TokenStoreClassName");
+                if(tokenStoreClassName==null){
+                    rampartConfig.setTokenStoreClass(SecurityTokenStore.class.getName());
+                }else{
+                    rampartConfig.setTokenStoreClass(tokenStoreClassName);
+                }
             }
         }
     }
@@ -1489,10 +1516,18 @@ public class SecurityConfigAdmin {
             String policyElementPath = servicePath+"/"+Resources.POLICIES+"/"+Resources.POLICY;
 
             if (!serviceGroupFilePM.elementExists(serviceGroupId, policyElementPath)) {
-                if(!isTransactionStarted) {
-                    serviceGroupFilePM.rollbackTransaction(serviceGroupId);
-                }
-                return scenario;
+
+                if(service.getPolicySubject() != null &&
+                        service.getPolicySubject().getAttachedPolicyComponents() != null){
+                    Iterator iterator = service.getPolicySubject().
+                                                    getAttachedPolicyComponents().iterator();
+                    if(!iterator.hasNext()){
+                        if(!isTransactionStarted) {
+                            serviceGroupFilePM.rollbackTransaction(serviceGroupId); //no need to commit because no writes happened.
+                        }
+                        return scenario;
+                    }
+                }                
             } else {
                 // if there are no policies under the collection, no need to proceed
                 List policyElements = serviceGroupFilePM.getAll(serviceGroupId, policyElementPath);
@@ -1524,7 +1559,7 @@ public class SecurityConfigAdmin {
                 java.util.Collection policies = binding.getPolicySubject()
                         .getAttachedPolicyComponents();
                 Iterator policyComponents = policies.iterator();
-                String policyId = "";
+                String policyId = null;
                 while (policyComponents.hasNext()) {
                     PolicyComponent currentPolicyComponent = (PolicyComponent) policyComponents
                             .next();
@@ -1533,9 +1568,10 @@ public class SecurityConfigAdmin {
                     } else if (currentPolicyComponent instanceof PolicyReference) {
                         policyId = ((PolicyReference) currentPolicyComponent).getURI().substring(1);
                     }
-
-                    // Check whether this is a security scenario
-                    scenario = SecurityScenarioDatabase.getByWsuId(policyId);
+                    if(policyId != null){
+                        // Check whether this is a security scenario
+                        scenario = SecurityScenarioDatabase.getByWsuId(policyId);
+                    }
                 }
 
                 // If a scenario is NOT applied to at least one non HTTP
@@ -1553,7 +1589,7 @@ public class SecurityConfigAdmin {
                 java.util.Collection policies = service.getPolicySubject()
                         .getAttachedPolicyComponents();
                 Iterator policyComponents = policies.iterator();
-                String policyId = "";
+                String policyId = null;
                 while (policyComponents.hasNext()) {
                     PolicyComponent currentPolicyComponent = (PolicyComponent) policyComponents
                             .next();
@@ -1561,9 +1597,13 @@ public class SecurityConfigAdmin {
                         policyId = ((Policy) currentPolicyComponent).getId();
                     } else if (currentPolicyComponent instanceof PolicyReference) {
                         policyId = ((PolicyReference) currentPolicyComponent).getURI().substring(1);
+                    } else {
+                        continue;
                     }
-                    // Check whether this is a security scenario
-                    scenario = SecurityScenarioDatabase.getByWsuId(policyId);
+                    if(policyId != null){
+                        // Check whether this is a security scenario
+                        scenario = SecurityScenarioDatabase.getByWsuId(policyId);
+                    }
                 }
             }
 

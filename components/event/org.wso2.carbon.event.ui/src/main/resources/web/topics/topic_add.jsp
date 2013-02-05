@@ -69,7 +69,8 @@
                 </thead>
                 <tbody>
                 <tr>
-                    <td><fmt:message key="topic"/></td>
+                    <td><fmt:message key="topic"/><span
+                            class="required">*</span></td>
                     <td><input type="text" id="topic"></td>
                 </tr>
                 <tr>

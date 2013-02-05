@@ -27,7 +27,7 @@ public class RestApiAdminUtils {
         }
 
         if(apiData.getHost() != null){
-            api.addAttribute("host", apiData.getHost(), nullNS);
+            api.addAttribute("hostname", apiData.getHost(), nullNS);
         }
 
         if(apiData.getPort() != -1){

@@ -20,11 +20,11 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.bam.mediationstats.data.publisher.conf.MediationStatConfig;
+import org.wso2.carbon.bam.mediationstats.data.publisher.conf.RegistryPersistenceManager;
 import org.wso2.carbon.bam.mediationstats.data.publisher.data.MediationData;
 import org.wso2.carbon.bam.mediationstats.data.publisher.publish.Publisher;
 import org.wso2.carbon.bam.mediationstats.data.publisher.util.MediationDataPublisherConstants;
 import org.wso2.carbon.bam.mediationstats.data.publisher.util.PublisherUtils;
-import org.wso2.carbon.bam.mediationstats.data.publisher.util.TenantMediationStatConfigData;
 import org.wso2.carbon.mediation.statistics.MediationStatisticsObserver;
 import org.wso2.carbon.mediation.statistics.MediationStatisticsSnapshot;
 import org.wso2.carbon.mediation.statistics.MessageTraceLog;
@@ -38,7 +38,7 @@ public class BAMMediationStatisticsObserver implements MediationStatisticsObserv
 
     private static final Log log = LogFactory.getLog(BAMMediationStatisticsObserver.class);
     private AxisConfiguration axisConfiguration;
-    private int tenantId = 0;
+    private int tenantId = -1234;
 
     public BAMMediationStatisticsObserver() {
     }
@@ -70,9 +70,7 @@ public class BAMMediationStatisticsObserver implements MediationStatisticsObserv
     private void updateStatisticsInternal(StatisticsRecord update, Map<String, Object> errorMap)
             throws Exception {
         int tenantID = getTenantId();
-        Map<Integer, MediationStatConfig> tenantSpecificMediationStatConfig = TenantMediationStatConfigData.
-                getTenantSpecificEventingConfigData();
-        MediationStatConfig mediationStatConfig = tenantSpecificMediationStatConfig.get(tenantID);
+        MediationStatConfig mediationStatConfig = new RegistryPersistenceManager().getEventingConfigData(tenantID);
 
         if (mediationStatConfig == null || !mediationStatConfig.isEnableMediationStats()) {
             return;
@@ -81,35 +79,35 @@ public class BAMMediationStatisticsObserver implements MediationStatisticsObserv
 
         switch (update.getType()) {
             case SEQUENCE:
-                processSequenceData(update, tenantID, errorMap);
+                processSequenceData(update, mediationStatConfig, errorMap);
                 break;
             case PROXYSERVICE:
-                processProxyData(update, tenantID, errorMap);
+                processProxyData(update, mediationStatConfig, errorMap);
                 break;
             case ENDPOINT:
-                processEndpointData(update, tenantID, errorMap);
+                processEndpointData(update, mediationStatConfig, errorMap);
                 break;
         }
 
     }
 
-    private void processEndpointData(StatisticsRecord latestEntityRecord, int tenantID,
+    private void processEndpointData(StatisticsRecord latestEntityRecord, MediationStatConfig mediationStatConfig,
                                      Map<String, Object> errorMap) {
         if (latestEntityRecord == null) {
             return;
         }
-        process(latestEntityRecord, errorMap, tenantID);
+        process(latestEntityRecord, errorMap, mediationStatConfig);
     }
 
-    private void processProxyData(StatisticsRecord update, int tenantID,
+    private void processProxyData(StatisticsRecord update, MediationStatConfig mediationStatConfig,
                                   Map<String, Object> errorMap) {
         if (update == null) {
             return;
         }
-        process(update, errorMap, tenantID);
+        process(update, errorMap, mediationStatConfig);
     }
 
-    private void processSequenceData(StatisticsRecord entitySnapshot, int tenantID,
+    private void processSequenceData(StatisticsRecord entitySnapshot, MediationStatConfig mediationStatConfig,
                                      Map<String, Object> errorMap)
             throws Exception {
 
@@ -117,11 +115,11 @@ public class BAMMediationStatisticsObserver implements MediationStatisticsObserv
             return;
         }
 
-        process(entitySnapshot, errorMap, tenantID);
+        process(entitySnapshot, errorMap, mediationStatConfig);
     }
 
     private void process(StatisticsRecord entitySnapshot, Map<String, Object> errorMap,
-                         int tenantID) {
+                         MediationStatConfig mediationStatConfig) {
         MediationData mediationData = new MediationData();
         java.util.Date currentDate = new java.util.Date();
         java.sql.Timestamp timestamp = new java.sql.Timestamp(currentDate.getTime());
@@ -155,7 +153,7 @@ public class BAMMediationStatisticsObserver implements MediationStatisticsObserv
             mediationData.setErrorMap(errorMap);
         }
 
-        Publisher.process(mediationData, tenantID);
+        Publisher.process(mediationData, mediationStatConfig);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 20012, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c), WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package org.wso2.carbon.bpel.bam.publisher;
 import javax.xml.namespace.QName;
 import java.lang.String;
 
-public class BAMPublisherConstants {
+public final class BAMPublisherConstants {
     public static final String BAM_PUBLISHER_NS = "http://wso2.org/bps/monitoring/publisher";
 
     public static final String SERVER = "Server";
@@ -48,12 +48,6 @@ public class BAMPublisherConstants {
             BAMPublisherConstants.NON_RECOVERABLE_ERROR);
 
 
-
-
-
-
-//    public static final String PROCESS_VARIABLE_NAME = "VariableName";
-//    public static final String PROCESS_VARIABLE_VALUE = "VariableValue";
 
     public static final String CONFIG_RESOURCE_PATH =
             "repository/components/org.wso2.carbon.bpel.bam.publisher/bam_publisher_info";

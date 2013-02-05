@@ -18,7 +18,7 @@
 
 <thriftAgentConfiguration xmlns="http://wso2.org/carbon/databridge/agent/thrift">
 
-    <bufferedEventsSize>200</bufferedEventsSize>
+    <bufferedEventsSize>20000</bufferedEventsSize>
 
     <poolSize>50</poolSize>
 
@@ -33,7 +33,8 @@
     <secureMinIdleTimeInPool>5000</secureMinIdleTimeInPool>
 
     <maxMessageBundleSize>100</maxMessageBundleSize>
-
+    <asyncDataPublisherBufferedEventSize>10000</asyncDataPublisherBufferedEventSize>
+    <loadBalancingReconnectionInterval>30</loadBalancingReconnectionInterval>
     <!--<trustStore>
         .../wso2cep-1.0.0-SNAPSHOT/repository/resources/security/client-truststore.jks
     </trustStore>

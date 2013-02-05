@@ -18,16 +18,21 @@
 package org.wso2.carbon.identity.entitlement.filter;
 
 
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.wso2.carbon.identity.entitlement.filter.callback.BasicAuthCallBackHandler;
 import org.wso2.carbon.identity.entitlement.filter.callback.EntitlementFilterCallBackHandler;
 import org.wso2.carbon.identity.entitlement.filter.exception.EntitlementFilterException;
-import org.wso2.carbon.identity.entitlement.proxy.PDPConfig;
-import org.wso2.carbon.identity.entitlement.proxy.PDPProxy;
+import org.wso2.carbon.identity.entitlement.proxy.PEPProxy;
+import org.wso2.carbon.identity.entitlement.proxy.PEPProxyConfig;
+import org.wso2.carbon.identity.entitlement.proxy.exception.EntitlementProxyException;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,98 +41,121 @@ public class EntitlementFilter implements Filter {
 
     private static final Log log = LogFactory.getLog(EntitlementFilter.class);
 
-    private String domainID ="EntitlementFilter";
+    private FilterConfig filterConfig = null;
+    private PEPProxy pepProxy;
+    private String client;
+    private String remoteServiceUrl;
     private String remoteServiceUserName;
     private String remoteServicePassword;
-    private String remoteServiceURL;
-    private String transportType;
-    private String subjectScope;
-    private String subjectAttributeName;
-    private String decisionCaching;
-    private String authRedirectURL;
-
-    private FilterConfig filterConfig = null;
-    private PDPProxy pClient;
-    private int maxCacheEntries;
     private String thriftHost;
     private String thriftPort;
+    private String reuseSession;
+    private String cacheType;
+    private int invalidationInterval;
+    private int maxCacheEntries;
+    private String subjectScope;
+    private String subjectAttributeName;
+    private String authRedirectURL;
 
-    @Override
-    /**
+  /**
      * In this init method the required attributes are taken from web.xml, if there are not provided they will be set to default.
      * authRedirectURL attribute have to provided
      */
+    @Override
     public void init(FilterConfig filterConfig) throws EntitlementFilterException {
 
         this.filterConfig = filterConfig;
 
-        remoteServiceUserName = filterConfig.getServletContext().getInitParameter(EntitlementConstants.USER);
+        //This Attributes are mandatory So have to be specified in the web.xml
+        authRedirectURL = filterConfig.getInitParameter(EntitlementConstants.AUTH_REDIRECT_URL);
+        remoteServiceUserName = filterConfig.getServletContext().getInitParameter(EntitlementConstants.USERNAME);
         remoteServicePassword = filterConfig.getServletContext().getInitParameter(EntitlementConstants.PASSWORD);
-        remoteServiceURL = filterConfig.getServletContext().getInitParameter(EntitlementConstants.REMOTE_SERVICE_URL);
-        transportType = filterConfig.getServletContext().getInitParameter(EntitlementConstants.TRANSPORT);
-        if(transportType==null){
-            transportType=EntitlementConstants.defaultTransportType;
+        remoteServiceUrl = filterConfig.getServletContext().getInitParameter(EntitlementConstants.REMOTE_SERVICE_URL);
+
+        //This Attributes are not mandatory
+        client = filterConfig.getServletContext().getInitParameter(EntitlementConstants.CLIENT);
+        if(client == null){
+            client = EntitlementConstants.defaultClient;
         }
         subjectScope = filterConfig.getServletContext().getInitParameter(EntitlementConstants.SUBJECT_SCOPE);
-        if(subjectScope==null){
-            subjectScope=EntitlementConstants.defaultSubjectScope;
+        if(subjectScope == null){
+            subjectScope = EntitlementConstants.defaultSubjectScope;
         }
         subjectAttributeName = filterConfig.getServletContext().getInitParameter(EntitlementConstants.SUBJECT_ATTRIBUTE_NAME);
-        decisionCaching = filterConfig.getInitParameter(EntitlementConstants.DECISION_CACHING);
-        if(decisionCaching==null){
-            decisionCaching=EntitlementConstants.defaultDecisionCaching;
+        if(subjectAttributeName==null){
+            subjectAttributeName=EntitlementConstants.defaultSubjectAttributeName;
         }
-        maxCacheEntries = Integer.parseInt(filterConfig.getInitParameter(EntitlementConstants.MAX_CACHE_ENTRIES));
-        if(filterConfig.getInitParameter(EntitlementConstants.MAX_CACHE_ENTRIES)==null){
-            maxCacheEntries=Integer.parseInt(EntitlementConstants.defaultMaxCacheEntries);
+        cacheType = filterConfig.getInitParameter(EntitlementConstants.CACHE_TYPE);
+        if(cacheType==null){
+            cacheType=EntitlementConstants.defaultCacheType;
+        }
+        if(filterConfig.getInitParameter(EntitlementConstants.MAX_CACHE_ENTRIES) != null){
+            maxCacheEntries = Integer.parseInt(filterConfig.getInitParameter(EntitlementConstants.MAX_CACHE_ENTRIES));
+        } else {
+            maxCacheEntries = 0;
+        }
+        if(filterConfig.getInitParameter(EntitlementConstants.INVALIDATION_INTERVAL) != null){
+            invalidationInterval = Integer.parseInt(filterConfig.getInitParameter(EntitlementConstants.INVALIDATION_INTERVAL));
+        } else {
+            invalidationInterval = 0;
         }
 
-        //This Attribute is Mandatory So have to be specified in the web.xml
-        authRedirectURL = filterConfig.getInitParameter(EntitlementConstants.AUTH_REDIRECT_URL);
+        if(filterConfig.getInitParameter(EntitlementConstants.THRIFT_HOST) != null){
+            thriftHost = filterConfig.getInitParameter(EntitlementConstants.THRIFT_HOST);
+        } else {
+            thriftHost = EntitlementConstants.defaultThriftHost;
+        }
+
+        if(filterConfig.getInitParameter(EntitlementConstants.THRIFT_PORT) != null){
+            thriftPort = filterConfig.getInitParameter(EntitlementConstants.THRIFT_PORT);
+        } else {
+            thriftPort = EntitlementConstants.defaultThriftPort;
+        }
 
         //Initializing the PDP Proxy
         //If you are not using a WSO2 product please uncomment these lines to use provided keystore
         //System.setProperty("javax.net.ssl.trustStore","wso2carbon.jks");
         //System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
 
-        pClient= PDPProxy.getInstance();
-        Map<String, String[]> appToPDPMap=new HashMap<String, String[]>();
+        Map<String,Map<String,String>> appToPDPClientConfigMap = new HashMap<String, Map<String,String>>();
+        Map<String,String> clientConfigMap = new HashMap<String, String>();
 
-        String configArr[];
-
-        if("thrift".equals(transportType)){
-            thriftHost = filterConfig.getInitParameter(EntitlementConstants.THRIFT_HOST);
-            thriftPort = filterConfig.getInitParameter(EntitlementConstants.THRIFT_PORT);
-
-            if(thriftPort==null){
-                thriftPort=EntitlementConstants.DEFAULT_THRIFT_PORT;
-            }
-
-            configArr=new String[6];
-            configArr[0] = remoteServiceURL;
-            configArr[1] = remoteServiceUserName;
-            configArr[2] = remoteServicePassword;
-            configArr[3] = transportType;
-            configArr[4] = thriftHost;
-            configArr[5] = thriftPort;
-
-        }else{
-            configArr=new String[4];
-            configArr[0] = remoteServiceURL;
-            configArr[1] = remoteServiceUserName;
-            configArr[2] = remoteServicePassword;
-            configArr[3] = transportType;
+        if(client !=null && client.equals(EntitlementConstants.SOAP)){
+            clientConfigMap.put(EntitlementConstants.CLIENT, client);
+            clientConfigMap.put(EntitlementConstants.SERVER_URL, remoteServiceUrl);
+            clientConfigMap.put(EntitlementConstants.USERNAME, remoteServiceUserName);
+            clientConfigMap.put(EntitlementConstants.PASSWORD, remoteServicePassword);
+            clientConfigMap.put(EntitlementConstants.REUSE_SESSION, reuseSession);
+        }else if(client !=null && client.equals(EntitlementConstants.BASIC_AUTH)){
+            clientConfigMap.put(EntitlementConstants.CLIENT, client);
+            clientConfigMap.put(EntitlementConstants.SERVER_URL, remoteServiceUrl);
+            clientConfigMap.put(EntitlementConstants.USERNAME, remoteServiceUserName);
+            clientConfigMap.put(EntitlementConstants.PASSWORD, remoteServicePassword);
+        }else if(client !=null && client.equals(EntitlementConstants.THRIFT)){
+            clientConfigMap.put(EntitlementConstants.CLIENT, client);
+            clientConfigMap.put(EntitlementConstants.SERVER_URL, remoteServiceUrl);
+            clientConfigMap.put(EntitlementConstants.USERNAME, remoteServiceUserName);
+            clientConfigMap.put(EntitlementConstants.PASSWORD, remoteServicePassword);
+            clientConfigMap.put(EntitlementConstants.REUSE_SESSION, reuseSession);
+            clientConfigMap.put(EntitlementConstants.THRIFT_HOST, thriftHost);
+            clientConfigMap.put(EntitlementConstants.THRIFT_PORT, thriftPort);
+        } else if(client == null){
+            clientConfigMap.put(EntitlementConstants.SERVER_URL, remoteServiceUrl);
+            clientConfigMap.put(EntitlementConstants.USERNAME, remoteServiceUserName);
+            clientConfigMap.put(EntitlementConstants.PASSWORD, remoteServicePassword);
+        } else {
+            log.error("EntitlementMediator initialization error: Unsupported client");
+            throw new EntitlementFilterException("EntitlementMediator initialization error: Unsupported client");
         }
 
-        appToPDPMap.put("EntitlementFilter", configArr) ;
-        PDPConfig pConfig=new PDPConfig(appToPDPMap,"EntitlementFilter","enable".equals(decisionCaching),maxCacheEntries);
-        pConfig.setAppToPDPMap(appToPDPMap);
+        appToPDPClientConfigMap.put("EntitlementMediator", clientConfigMap);
+        PEPProxyConfig config = new PEPProxyConfig(appToPDPClientConfigMap,"EntitlementMediator", cacheType, invalidationInterval, maxCacheEntries);
 
         try {
-            pClient.init(pConfig);
-        } catch (Exception e) {
-            log.error("Error while initializing the PDP Proxy" + e);
-            throw new EntitlementFilterException("Error while initializing the PDP Proxy", e);
+            pepProxy = new PEPProxy(config);
+        } catch (EntitlementProxyException e) {
+            log.error("Error while initializing the PEP Proxy" + e);
+            throw new EntitlementFilterException("Error while initializing the Entitlement PEP Proxy");
         }
     }
 
@@ -135,7 +163,7 @@ public class EntitlementFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
                          FilterChain filterChain) throws EntitlementFilterException {
 
-        String decision = EntitlementConstants.DENY;
+        String simpleDecision = EntitlementConstants.DENY;
         String userName;
         String action;
         String resource;
@@ -147,29 +175,43 @@ public class EntitlementFilter implements Filter {
 
         if(((HttpServletRequest) servletRequest).getRequestURI().contains("/updateCacheAuth.do")) {
             try {
-                pClient.cleanCache();
+                pepProxy.clear();
             } catch (Exception e) {
                 log.error("Error while Making the Decision " , e);
             }
 
         } else {
             try {
-                decision=pClient.getActualDecision(userName, resource, action, env,domainID);
+                String decision = pepProxy.getDecision(userName, resource, action, env);
+                OMElement decisionElement = AXIOMUtil.stringToOM(decision);
+                simpleDecision = decisionElement.getFirstChildWithName(new QName("Result")).
+                        getFirstChildWithName(new QName("Decision")).getText();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new EntitlementFilterException("Exception while making the decision : " + e);
             }
         }
-        System.out.println("Entitlement Decision for User :"+userName+" is :"+decision);
-        completeAuthorization(decision, servletRequest, servletResponse, filterConfig, filterChain);
-
+        completeAuthorization(simpleDecision, servletRequest, servletResponse, filterConfig, filterChain);
     }
 
     @Override
     public void destroy() {
-        decisionCaching = null;
-        pClient.cleanCache();
-        pClient=null;
+
+        filterConfig = null;
+        pepProxy = null;
+        client = null;
+        remoteServiceUrl = null;
+        remoteServiceUserName = null;
+        remoteServicePassword = null;
+        thriftHost = null;
+        thriftPort = null;
+        reuseSession = null;
+        cacheType = null;
+        invalidationInterval = 0;
+        maxCacheEntries = 0;
+        subjectScope = null;
+        subjectAttributeName = null;
+        authRedirectURL = null;
     }
 
     private String findUserName(HttpServletRequest request, String subjectScope,
@@ -181,7 +223,7 @@ public class EntitlementFilter implements Filter {
             subject = request.getParameter(subjectAttributeName);
         } else if (subjectScope.equals(EntitlementConstants.REQUEST_ATTIBUTE)) {
             subject = (String) request.getAttribute(subjectAttributeName);
-        } else if (subjectScope.equals(EntitlementConstants.Basic_Auth)) {
+        } else if (subjectScope.equals(EntitlementConstants.BASIC_AUTH)) {
             EntitlementFilterCallBackHandler callBackHandler = new BasicAuthCallBackHandler(request);
             subject=callBackHandler.getUserName();
         } else {
@@ -217,28 +259,28 @@ public class EntitlementFilter implements Filter {
         try {
             if (decision.equals(EntitlementConstants.PERMIT)) {
                 if (((HttpServletRequest) servletRequest).getRequestURI().contains("/updateCacheAuth.do")) {
-                    try {
-                        init(filterConfig);
-                    } catch (EntitlementFilterException e) {
-                        throw new EntitlementFilterException("Error while updating PEP cache", e);
-                    }
+                    pepProxy.clear();
                     log.info("PEP cache has been updated");
                     servletResponse.getWriter().print("PEP cache has been updated");
                 } else {
                     filterChain.doFilter(servletRequest, servletResponse);
                 }
             } else if (decision.equals(EntitlementConstants.DENY)) {
-                log.info("User not authorized to perform the action");
-                servletRequest.getRequestDispatcher(authRedirectURL)
-                        .forward(servletRequest, servletResponse);
+                log.debug("User not authorized to perform the action");
+                servletRequest.getRequestDispatcher(authRedirectURL).
+                        forward(servletRequest, servletResponse);
             } else if (decision.equals(EntitlementConstants.NOT_APPLICABLE)) {
-                log.info("No applicable policies found");
-                servletRequest.getRequestDispatcher(authRedirectURL)
-                        .forward(servletRequest, servletResponse);
+                log.debug("No applicable policies found");
+                servletRequest.getRequestDispatcher(authRedirectURL).
+                        forward(servletRequest, servletResponse);
+            } else if (decision.equals(EntitlementConstants.INDETERMINATE)) {
+                log.debug("Indeterminate");
+                servletRequest.getRequestDispatcher(authRedirectURL).
+                        forward(servletRequest, servletResponse);
             } else {
                 log.error("Unrecognized decision returned from PDP");
-                servletRequest.getRequestDispatcher(authRedirectURL)
-                        .forward(servletRequest, servletResponse);
+                servletRequest.getRequestDispatcher(authRedirectURL).
+                        forward(servletRequest, servletResponse);
             }
         } catch (Exception e) {
             log.error("Error occurred while completing authorization", e);

@@ -88,6 +88,6 @@ public class BAMKey {
     }
 
     public enum BAMKeyType {
-        META, CORRELATION, PAYLOAD
+        META, CORRELATION, PAYLOAD, NONE
     }
 }

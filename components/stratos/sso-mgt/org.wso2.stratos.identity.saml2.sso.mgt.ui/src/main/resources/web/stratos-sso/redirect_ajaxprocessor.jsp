@@ -1,3 +1,5 @@
+<%@page import="org.wso2.carbon.identity.base.IdentityConstants"%>
+<%@page import="org.wso2.carbon.identity.core.util.IdentityUtil"%>
 <%@page import="org.wso2.carbon.identity.sso.saml.ui.SAMLSSOProviderConstants" %>
 <%@page import="org.wso2.carbon.identity.sso.saml.ui.session.mgt.FESessionBean" %>
 <%@ page import="org.wso2.carbon.identity.sso.saml.ui.session.mgt.FESessionManager" %>
@@ -6,6 +8,8 @@
 <%@ page import="java.net.URLDecoder" %>
 <%@page import="org.wso2.carbon.utils.multitenancy.MultitenantConstants"%>
 <%@page import="org.wso2.carbon.utils.multitenancy.MultitenantUtils"%>
+<%@ page import="org.wso2.carbon.stratos.common.util.StratosConfiguration" %>
+<%@ page import="org.wso2.carbon.stratos.common.util.CommonUtil" %>
 
 <html>
 <head>
@@ -67,8 +71,17 @@
 </head>
 <body>
 <%
+    StratosConfiguration stratosConfig = CommonUtil.getStratosConfig();
+    if(stratosConfig == null){
+        stratosConfig = CommonUtil.loadStratosConfiguration();
+    }
+    
+    String loadUrl = stratosConfig.getSsoLoadingMessage();
+    if("".equals(loadUrl)){
+        loadUrl = "Loading...";
+    }
     String assertionConsumerURL = (String) request.getAttribute(SAMLSSOProviderConstants.ASSRTN_CONSUMER_URL);
-    String assertion = (String) request.getAttribute(SAMLSSOProviderConstants.ASSERTION_STR);
+    String samlResponse = (String) request.getAttribute(SAMLSSOProviderConstants.SAML_RESP);
     String relayState = (String) request.getAttribute(SAMLSSOProviderConstants.RELAY_STATE);
     String subject = (String) request.getAttribute(SAMLSSOProviderConstants.SUBJECT);
     
@@ -82,13 +95,18 @@
         postURL = assertionConsumerURL.substring(0,assertionConsumerURL.lastIndexOf("/"));
     }
 
+    // the fix for the LB SSO issue
+    if("true".equals(IdentityUtil.getProperty((IdentityConstants.ServerConfig.SSO_TENANT_PARTITIONING_ENABLED)))){
+        assertionConsumerURL = assertionConsumerURL+"?"+MultitenantConstants.TENANT_DOMAIN+"="+domain;
+    }
+    
     relayState = URLDecoder.decode(relayState, "UTF-8");
     relayState = relayState.replaceAll("&", "&amp;").replaceAll("\"", "&quot;").replaceAll("'", "&apos;").
             replaceAll("<", "&lt;").replaceAll(">", "&gt;").replace("\n", "");
 %>
 
 
-<div class="loading-text">Loading WSO2 StratosLive...</div>
+<div class="loading-text"><%=loadUrl%></div>
 <div class="dots-pane" id="dotsContainer">
     <div class="dots"></div>
     <div class="dots"></div>
@@ -136,9 +154,8 @@
 
 
 <form method="post" action="<%=assertionConsumerURL%>" class="redirectForm">
-	<input type="hidden" name="SAMLResponse" value="<%=assertion%>"/>
+	<input type="hidden" name="SAMLResponse" value="<%=samlResponse%>"/>
 	<input type="hidden" name="RelayState" value="<%=relayState%>"/>
-	<input type="hidden" name="<%=MultitenantConstants.TENANT_DOMAIN%>" value="<%=domain%>"/>
 </form>
 
 <script type="text/javascript">

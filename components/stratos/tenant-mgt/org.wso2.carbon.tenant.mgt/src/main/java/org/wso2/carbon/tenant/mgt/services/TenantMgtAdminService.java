@@ -139,6 +139,32 @@ public class TenantMgtAdminService extends AbstractAdmin {
         }
         return tenantList;
     }
+    
+    /**
+     * Get the list of the tenants
+     *
+     * @return List<TenantInfoBean>
+     * @throws Exception UserStorException
+     */
+    private List<TenantInfoBean> searchPartialTenantsDomains(String domain) throws Exception {
+        TenantManager tenantManager = TenantMgtServiceComponent.getTenantManager();
+        Tenant[] tenants;
+        try {
+        	domain = domain.trim();
+            tenants = (Tenant[]) tenantManager.getAllTenantsForTenantDomainStr(domain);
+        } catch (UserStoreException e) {
+            String msg = "Error in retrieving the tenant information.";
+            log.error(msg, e);
+            throw new Exception(msg, e);
+        }
+
+        List<TenantInfoBean> tenantList = new ArrayList<TenantInfoBean>();
+        for (Tenant tenant : tenants) {
+            TenantInfoBean bean = TenantMgtUtil.getTenantInfoBeanfromTenant(tenant.getId(), tenant);
+            tenantList.add(bean);
+        }
+        return tenantList;
+    }
 
     /**
      * Retrieve all the tenants
@@ -150,7 +176,34 @@ public class TenantMgtAdminService extends AbstractAdmin {
         List<TenantInfoBean> tenantList = getAllTenants();
         return tenantList.toArray(new TenantInfoBean[tenantList.size()]);
     }
+    
+    /**
+     * Retrieve all the tenants which matches the partial search domain
+     *
+     * @return tenantInfoBean[]
+     * @throws Exception if failed to get Tenant Manager
+     */
+    public TenantInfoBean[] retrievePartialSearchTenants(String domain) throws Exception {
+        List<TenantInfoBean> tenantList = searchPartialTenantsDomains(domain);
+        return tenantList.toArray(new TenantInfoBean[tenantList.size()]);
+    }
 
+    /**
+     * Method to retrieve all the partial search domain tenants paginated
+     *
+     * @param pageNumber Number of the page.
+     * @return PaginatedTenantInfoBean
+     * @throws Exception if failed to getTenantManager;
+     */
+    public PaginatedTenantInfoBean retrievePaginatedPartialSearchTenants(String domain,int pageNumber) throws Exception {
+        List<TenantInfoBean> tenantList = searchPartialTenantsDomains(domain);
+
+        // Pagination
+        PaginatedTenantInfoBean paginatedTenantInfoBean = new PaginatedTenantInfoBean();
+        DataPaginator.doPaging(pageNumber, tenantList, paginatedTenantInfoBean);
+        return paginatedTenantInfoBean;
+    }
+    
     /**
      * Method to retrieve all the tenants paginated
      *
@@ -276,13 +329,10 @@ public class TenantMgtAdminService extends AbstractAdmin {
                 throw new Exception(msg, e);
             }
         }
-        Map<String, String> claimsMap = new HashMap<String, String>(); // map of claims
-        claimsMap.put(UserCoreConstants.ClaimTypeURIs.GIVEN_NAME, tenantInfoBean.getFirstname());
-        claimsMap.put(UserCoreConstants.ClaimTypeURIs.SURNAME, tenantInfoBean.getLastname());
 
-        userStoreManager = TenantMgtUtil.getUserStoreManager(tenant, tenant.getId());
-        userStoreManager.setUserClaimValues(tenantInfoBean.getAdmin(), claimsMap,
-                                            UserCoreConstants.DEFAULT_PROFILE);
+        tenant.setAdminFirstName(tenantInfoBean.getFirstname());
+        tenant.setAdminLastName(tenantInfoBean.getLastname());
+        TenantMgtUtil.addClaimsToUserStoreManager(tenant);
 
         // filling the email value
         if (tenantInfoBean.getEmail() != null && !tenantInfoBean.getEmail().equals("")) {

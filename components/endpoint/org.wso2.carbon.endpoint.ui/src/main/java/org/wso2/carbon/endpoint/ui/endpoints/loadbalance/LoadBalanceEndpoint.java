@@ -186,4 +186,8 @@ public class LoadBalanceEndpoint extends ListEndpoint {
     public void build(Template template, DefinitionFactory factory) {
     }
 
+    @Override
+    public boolean isRetryAvailable() {
+        return true;
+    }
 }

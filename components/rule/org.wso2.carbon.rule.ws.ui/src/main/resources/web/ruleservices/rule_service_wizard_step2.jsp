@@ -54,9 +54,9 @@
     boolean isURL = false;
 
 
-    Map<String, String> scriptList = (Map<String, String>) request.getSession().getAttribute("ruleScript");
+    Map<String, String> scriptList = (Map<String, String>) session.getAttribute(RuleServiceAdminClient.SCRIPTS);
 
-    if (serviceDescription != null) {
+    if (serviceDescription != null && scriptList == null) {
         RuleSet ruleSet = serviceDescription.getRuleSet();
         if (ruleSet != null) {
             scriptList = new HashMap<String, String>();
@@ -77,7 +77,7 @@
             }
             if (!sourceType.equals("inline")) {
                 isInLined = false;
-                request.getSession().setAttribute("ruleScript", scriptList);
+                session.setAttribute(RuleServiceAdminClient.SCRIPTS, scriptList);
 
                 if (sourceType.equals("file"))
                     isPath = true;
@@ -98,13 +98,37 @@
     String scriptListHeaderDisplay = "display:none;";
     if (scriptList != null && !scriptList.isEmpty()) {
         isInLined = false;
-        isPath = true;
         ruleScriptListDisplay = "";
         scriptListHeaderDisplay = "";
-        //TODO check the scriptlist 0 val and select the type
+        String tempType = "inline";
+
+        List<String> tempPaths = new ArrayList<String>(scriptList.keySet());
+        for (String scriptName : tempPaths) {
+            String sourceType = scriptList.get(scriptName);
+            if (!sourceType.equals("inline")) {
+                tempType = sourceType;
+                break;
+            }
+
+
+        }
+        if (tempType.equals("file"))
+            isPath = true;
+        else if (tempType.equals("registry"))
+            isRegistry = true;
+        else if (tempType.equals("url"))
+            isURL = true;
+        else {
+            isInLined = true;
+            ruleScriptListDisplay = "display:none;";
+            scriptListHeaderDisplay = "display:none;";
+
+        }
+
 
     }
     ruleValueZero = isInLined ? ruleValueZero : "";
+
     String ruleSourceDisplay = isInLined ? "" : "display:none;";
     String ruleUploadDisplay = isPath ? "" : "display:none;";
     String ruleKeyDisplay = isRegistry ? "" : "display:none;";
@@ -126,17 +150,6 @@
         width: 700px;
         overflow: hidden;
     }
-
-    /*   .listTable tr td {
-        border-collapse: collapse;
-        margin-left: 2px;
-        width: 80%;
-        table-layout: fixed;
-        border: 1px solid #CCCCCC !important;
-    }
-    .listTable tr td {
-        border: 1px solid #CCCCCC !important;
-    }*/
 
     a.fact-selector-icon-link {
         background-image: url("../rule_service/images/facts-selector.gif");
@@ -166,6 +179,8 @@
         var fileName = document.ruleScriptUpload.ruleFilename.value;
         if (fileName == '') {
             CARBON.showErrorDialog('<fmt:message key="select.rule.script"/>');
+        } else if (fileName.lastIndexOf(".drl") == -1) {
+            CARBON.showErrorDialog('<fmt:message key="select.valid.rule.script"/>');
         } else {
             document.ruleScriptUpload.submit();
         }
@@ -181,6 +196,9 @@
                 CARBON.showErrorDialog('<fmt:message key="inlined.script.empty"/>');
                 return false;
             }
+            deleteAllRuleFiles();
+
+
         } else {
             document.getElementById('ruleSourceType').value = "key";
             var ruleScriptCount = document.getElementById("ruleScriptCount");
@@ -476,7 +494,7 @@
                             <tbody id="ruleScriptListTBody">
 
                             <%
-                                int i = 0   ;
+                                int i = 0;
                                 List<String> paths = null;
                                 if (scriptList != null && !scriptList.isEmpty()) {
                                     paths = new ArrayList<String>(scriptList.keySet());
@@ -485,7 +503,7 @@
                                 if (paths != null && !paths.isEmpty()) {
                                     for (String scriptName : paths) {
                                         String sourceType = scriptList.get(scriptName);
-
+                                        if (!sourceType.equals("inline")) {
 
                             %>
                             <tr id="ruleScriptListRaw<%=i%>">
@@ -508,7 +526,8 @@
                                         key="delete"/></a></td>
                             </tr>
                             <%
-                                        i++;
+                                            i++;
+                                        }
                                     }
 
                                 } %>

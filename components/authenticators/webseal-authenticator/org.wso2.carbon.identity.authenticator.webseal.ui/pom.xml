@@ -19,11 +19,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>webseal-authenticator</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
     
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.identity.authenticator.ui.webseal</artifactId>
+    <artifactId>org.wso2.carbon.identity.authenticator.webseal.ui</artifactId>
+    <version>4.0.2</version>
     <packaging>bundle</packaging>
     <name>WebSeal Authenticator - UI bundle</name>
     <description>WebSeal Authenticator - UI bundle</description>
@@ -33,6 +35,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
+            <version>4.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -45,18 +48,22 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ui</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core.services</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
+            <version>4.0.2</version>
         </dependency>
 	<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.authenticator.webseal.stub</artifactId>
+	    <version>4.0.2</version>
         </dependency>
     </dependencies>
 
@@ -75,15 +82,15 @@
                          <Private-Package>org.wso2.carbon.identity.authenticator.webseal.ui.internal</Private-Package>
                          <Export-Package>
                             !org.wso2.carbon.identity.authenticator.webseal.ui.internal,
-                            org.wso2.carbon.identity.authenticator.webseal.ui.*;version="1.0.0",
+                            org.wso2.carbon.identity.authenticator.webseal.ui.*
                          </Export-Package>
                          <Import-Package>
                              !org.wso2.carbon.identity.authenticator.webseal.ui,
                              javax.xml.namespace.*;version="0.0.0",
                              *;resolution:=optional
                          </Import-Package>
-			 <Embed-Dependency>org.wso2.carbon.identity.authenticator.webseal.stub;scope=compile|runtime;inline=true</Embed-Dependency>
                          <Carbon-Component>UIBundle</Carbon-Component>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                      </instructions>
                 </configuration>
             </plugin>

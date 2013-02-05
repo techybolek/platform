@@ -139,7 +139,7 @@ public class PartitionInfo extends DomainNameEntry {
      */
     public String getAdminDomainName () {
         StringBuilder builder = new StringBuilder("uid=");
-        builder.append(this.getPartitionAdministrator().getAdminUID());
+        builder.append(this.getPartitionAdministrator().getAdminUserName());
         builder.append(",");
         builder.append(ConfigurationConstants.USER_SUB_CONTEXT);
         builder.append(",");

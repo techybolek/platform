@@ -125,44 +125,11 @@ var lifecyleOperationStarted = false;
                 onSuccess: function(transport) {
                     var returnValue = transport.responseText;
                     if (returnValue.search(/----IsInUse----/) != -1) {
-                        CARBON.showErrorDialog(org_wso2_carbon_governance_lcm_ui_jsi18n["unable.to.save.lifecycle.in.use"]);
+                    	CARBON.showConfirmationDialog(lifecycleName + " " +org_wso2_carbon_governance_lcm_ui_jsi18n["lifecycle.operation.edit.warn"],function() {
+                    		saveLCPlayLoad(lifecycleName, isNew,override);           		          		
+                    	},function() {	});
                     } else {
-                        var payloadVar = editAreaLoader.getValue("payload");
-                        if (payloadVar != "") {
-                            new Ajax.Request('../lcm/save_lcm-ajaxprocessor.jsp', {
-                                method: 'post',
-                                parameters: {lifecycleName: lifecycleName, isNew: isNew, payload: payloadVar, updateOverride: override},
-                                onSuccess: function(transport) {
-                                    if (!transport) {
-                                        lifecyleOperationStarted = false;
-                                        return;
-                                    }
-                                    var message = org_wso2_carbon_governance_lcm_ui_jsi18n["configuration.saved"];
-                                    lifecyleOperationStarted = false;
-                                    CARBON.showInfoDialog(message, function() {
-                                        window.location = "lcm.jsp?region=region3&item=governance_lcm_menu";
-                                    });
-                                },
-                                onFailure: function(transport) {
-                                    var responseText = transport.responseText;
-
-                                    if (responseText.lastIndexOf("Another user has already modified this resource") != -1) {
-                                        CARBON.showConfirmationDialog("Another user has already modified this resource. Do you want to continue",
-                                            function(){
-                                                saveLC(lifecycleName, isNew, "true");
-                                            }
-                                            , false
-                                            , false)
-                                    }
-                                    else {
-                                        CARBON.showErrorDialog(transport.responseText);
-                                    }
-                                }
-                            });
-                        } else {
-                            var message = org_wso2_carbon_governance_lcm_ui_jsi18n["configuration.empty"];
-                            CARBON.showWarningDialog(message);
-                        }
+                    	saveLCPlayLoad(lifecycleName, isNew,override);
                     }
                 },
                 onFailure: function(transport) {
@@ -172,3 +139,44 @@ var lifecyleOperationStarted = false;
         }, org_wso2_carbon_governance_lcm_ui_jsi18n["session.timed.out"]);
         lifecyleOperationStarted = false;
     }
+    
+    function saveLCPlayLoad(lifecycleName, isNew,override) {
+        var payloadVar = editAreaLoader.getValue("payload");
+        if (payloadVar != "") {
+            new Ajax.Request('../lcm/save_lcm-ajaxprocessor.jsp', {
+                method: 'post',
+                parameters: {lifecycleName: lifecycleName, isNew: isNew, payload: payloadVar, updateOverride: override},
+                onSuccess: function(transport) {
+                    if (!transport) {
+                        lifecyleOperationStarted = false;
+                        return;
+                    }
+                   // var message = org_wso2_carbon_governance_lcm_ui_jsi18n["configuration.saved"];
+                    lifecyleOperationStarted = false;
+                    window.location = "lcm.jsp?region=region3&item=governance_lcm_menu";
+                   // CARBON.showInfoDialog(message, function() {
+                   //     window.location = "lcm.jsp?region=region3&item=governance_lcm_menu";
+                   // });
+                },
+                onFailure: function(transport) {
+                    var responseText = transport.responseText;
+
+                    if (responseText.lastIndexOf("Another user has already modified this resource") != -1) {
+                        CARBON.showConfirmationDialog("Another user has already modified this resource. Do you want to continue",
+                            function(){
+                                saveLC(lifecycleName, isNew, "true");
+                            }
+                            , false
+                            , false)
+                    }
+                    else {
+                        CARBON.showErrorDialog(transport.responseText);
+                    }
+                }
+            });
+        } else {
+            var message = org_wso2_carbon_governance_lcm_ui_jsi18n["configuration.empty"];
+            CARBON.showWarningDialog(message);
+        }
+    }
+    

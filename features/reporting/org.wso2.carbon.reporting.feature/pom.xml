@@ -22,13 +22,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>reporting-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.reporting.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Reporting Feature</name>
+    <version>4.0.2</version>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for Reporting</description>
 
@@ -48,13 +50,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.reporting.ui.feature</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.patch.release.version401}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.reporting.template.ui.feature</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.patch.release.version401}</version>
             <type>zip</type>
         </dependency>
     </dependencies>
@@ -74,18 +76,18 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.reporting</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core:${wso2carbon.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.reporting.server.feature
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.reporting.server.feature:${project.version}
                                 </includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.reporting.template.server.feature
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.reporting.template.server.feature:${project.version}
                                 </includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.reporting.ui.feature
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.reporting.ui.feature:${carbon.patch.release.version401}
                                 </includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.reporting.template.ui.feature
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.reporting.template.ui.feature:${carbon.patch.release.version401}
                                 </includedFeatureDef>
                             </includedFeatures>
                         </configuration>
@@ -94,5 +96,9 @@
             </plugin>
         </plugins>
     </build>
+
+     <properties>
+        <carbon.patch.release.version401>4.0.1</carbon.patch.release.version401>
+    </properties>
 
 </project>

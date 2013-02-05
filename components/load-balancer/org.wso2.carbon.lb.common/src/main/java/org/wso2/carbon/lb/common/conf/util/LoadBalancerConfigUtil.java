@@ -1,12 +1,12 @@
 /*
  * Copyright 2004,2005 The Apache Software Foundation.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,8 +39,9 @@ public final class LoadBalancerConfigUtil {
 
     /**
      * handles the exception
-     *
-     * @param msg exception message
+     * 
+     * @param msg
+     *            exception message
      */
     public static void handleException(String msg) {
         log.error(msg);
@@ -49,9 +50,11 @@ public final class LoadBalancerConfigUtil {
 
     /**
      * handles the exception
-     *
-     * @param msg exception message
-     * @param e   exception
+     * 
+     * @param msg
+     *            exception message
+     * @param e
+     *            exception
      */
     public static void handleException(String msg, Exception e) {
         log.error(msg, e);
@@ -60,8 +63,9 @@ public final class LoadBalancerConfigUtil {
 
     /**
      * Replaces the variables
-     *
-     * @param text input string
+     * 
+     * @param text
+     *            input string
      * @return output String
      */
     public static String replaceVariables(String text) {
@@ -73,16 +77,16 @@ public final class LoadBalancerConfigUtil {
         // and are assumed to be System properties
         if ((indexOfStartingChars = text.indexOf("${")) != -1 &&
             (indexOfClosingBrace = text.indexOf("}")) != -1) { // Is a property used?
-            String var = text.substring(indexOfStartingChars + 2,
-                                        indexOfClosingBrace);
+            String var = text.substring(indexOfStartingChars + 2, indexOfClosingBrace);
 
             String propValue = System.getProperty(var);
             if (propValue == null) {
                 propValue = System.getenv(var);
             }
             if (propValue != null) {
-                text = text.substring(0, indexOfStartingChars) + propValue +
-                       text.substring(indexOfClosingBrace + 1);
+                text =
+                       text.substring(0, indexOfStartingChars) + propValue +
+                               text.substring(indexOfClosingBrace + 1);
             }
         }
         return text;
@@ -104,8 +108,8 @@ public final class LoadBalancerConfigUtil {
                 userData = encoder.encode(bytes);
             }
         } catch (Exception e) {
-            LoadBalancerConfigUtil.handleException("Cannot read data from payload file " + payloadFileName,
-                    e);
+            LoadBalancerConfigUtil.handleException("Cannot read data from payload file " +
+                                                   payloadFileName, e);
 
         }
         return userData;
@@ -113,10 +117,12 @@ public final class LoadBalancerConfigUtil {
 
     /**
      * Returns the contents of the file in a byte array
-     *
-     * @param file - Input File
+     * 
+     * @param file
+     *            - Input File
      * @return Bytes from the file
-     * @throws java.io.IOException, if retrieving the file contents failed.
+     * @throws java.io.IOException
+     *             , if retrieving the file contents failed.
      */
     public static byte[] getBytesFromFile(File file) throws IOException {
         if (!file.exists()) {
@@ -146,8 +152,8 @@ public final class LoadBalancerConfigUtil {
             // Read in the bytes
             int offset = 0;
             int numRead;
-            while (offset < bytes.length
-                    && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
+            while (offset < bytes.length &&
+                   (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
                 offset += numRead;
             }
 
@@ -162,100 +168,121 @@ public final class LoadBalancerConfigUtil {
 
         return bytes;
     }
-    
+
     /**
      * @deprecated
-     * Extract the domain part given a string which is in 
-     * &lt;sub_domain&gt;#&lt;domain&gt; format. 
-     * @param str in &lt;sub_domain&gt;#&lt;domain&gt; format.
-     * @return the domain part. If # is not present this will return the trimmed 
-     * input string.
+     *             Extract the domain part given a string which is in
+     *             &lt;sub_domain&gt;#&lt;domain&gt; format.
+     * @param str
+     *            in &lt;sub_domain&gt;#&lt;domain&gt; format.
+     * @return the domain part. If # is not present this will return the trimmed
+     *         input string.
      */
     public static String getDomain(String str) {
         str = str.trim();
-        if(!str.contains(Constants.SUB_DOMAIN_DELIMITER)){
+        if (!str.contains(Constants.SUB_DOMAIN_DELIMITER)) {
             return str;
         }
-        return str.substring(str.indexOf(Constants.SUB_DOMAIN_DELIMITER)+1);
+        return str.substring(str.indexOf(Constants.SUB_DOMAIN_DELIMITER) + 1);
     }
-    
+
     /**
-     * @deprecated 
-     * Extract the sub_domain part given a string which is in 
-     * &lt;sub_domain&gt;#&lt;domain&gt; format. 
-     * @param str in &lt;sub_domain&gt;#&lt;domain&gt; format.
-     * @return the sub_domain part. If # is not present this will return 
-     * <code>null</code>.
+     * @deprecated
+     *             Extract the sub_domain part given a string which is in
+     *             &lt;sub_domain&gt;#&lt;domain&gt; format.
+     * @param str
+     *            in &lt;sub_domain&gt;#&lt;domain&gt; format.
+     * @return the sub_domain part. If # is not present this will return <code>null</code>.
      */
     public static String getSubDomain(String str) {
         str = str.trim();
-        if(!str.contains(Constants.SUB_DOMAIN_DELIMITER)){
+        if (!str.contains(Constants.SUB_DOMAIN_DELIMITER)) {
             return null;
         }
-        return str.substring(0,str.indexOf(Constants.SUB_DOMAIN_DELIMITER));
+        return str.substring(0, str.indexOf(Constants.SUB_DOMAIN_DELIMITER));
     }
 
+    // public static EC2InstanceManager createEC2InstanceManager(String accessKey,
+    // String secretKey,
+    // String instanceMgtEPR) {
+    // AWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
+    // AmazonEC2Client ec2Client = new AmazonEC2Client(awsCredentials);
+    // ec2Client.setEndpoint(instanceMgtEPR);
+    // return new EC2InstanceManager(ec2Client);
+    // }
 
-//        public static EC2InstanceManager createEC2InstanceManager(String accessKey,
-//                                                              String secretKey,
-//                                                              String instanceMgtEPR) {
-//        AWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
-//        AmazonEC2Client ec2Client = new AmazonEC2Client(awsCredentials);
-//        ec2Client.setEndpoint(instanceMgtEPR);
-//        return new EC2InstanceManager(ec2Client);
-//    }
+    public static List<TenantDomainContext> getTenantDomainContexts(String tenantRange, String domain, String subDomain) {
+        
+        List<TenantDomainContext> ctxts = new ArrayList<TenantDomainContext>();
+        List<Integer> tenantIds = getTenantIds(tenantRange);
+        
+        // iterate through all tenant ids under this host
+        for (Integer tId : tenantIds) {
 
-  /**
-  * This method will read the tenant range string and return a list of tenant ids
-  * which is derived from tenant range string.
-  *
-  * @param tenantRange
-  * @return list of tenant ids.
-  */
- public static List<Integer> getTenantIds(String tenantRange) {
+            // create a new TenantDomainContext
+            TenantDomainContext tenantCtxt =
+                                             new TenantDomainContext(
+                                                                     tId,
+                                                                     domain,
+                                                                     subDomain);
+            // add it to the list
+            ctxts.add(tenantCtxt);
+        }
+        
+        return ctxts;
+        
+    }
+    
+    /**
+     * This method will read the tenant range string and return a list of tenant ids
+     * which is derived from tenant range string.
+     * 
+     * @param tenantRange
+     * @return list of tenant ids.
+     */
+    public static List<Integer> getTenantIds(String tenantRange) {
 
-     List<Integer> tenantIds = new ArrayList<Integer>();
+        List<Integer> tenantIds = new ArrayList<Integer>();
 
-     String[] parsedLine = tenantRange.trim().split("-");
+        String[] parsedLine = tenantRange.trim().split("-");
 
-     if (parsedLine[0].equalsIgnoreCase("*")) {
-         tenantIds.add(0);
-         
-     } else if (parsedLine.length == 1) {
-         try {
-             int tenantId = Integer.parseInt(tenantRange);
-             tenantIds.add(tenantId);
+        if (parsedLine[0].equalsIgnoreCase("*")) {
+            tenantIds.add(0);
 
-         } catch (NumberFormatException e) {
-             String msg = "Invalid tenant range is specified " + tenantRange;
-             log.error(msg, e);
-             throw new RuntimeException(msg, e);
-         }
-     } else if (parsedLine.length == 2) {
-         try {
+        } else if (parsedLine.length == 1) {
+            try {
+                int tenantId = Integer.parseInt(tenantRange);
+                tenantIds.add(tenantId);
 
-             int startIndex = Integer.parseInt(parsedLine[0]);
-             int endIndex = Integer.parseInt(parsedLine[1]);
+            } catch (NumberFormatException e) {
+                String msg = "Invalid tenant range is specified : " + tenantRange;
+                log.error(msg, e);
+                throw new RuntimeException(msg, e);
+            }
+        } else if (parsedLine.length == 2) {
+            try {
 
-             for (int tenantId = startIndex; tenantId <= endIndex; tenantId++) {
+                int startIndex = Integer.parseInt(parsedLine[0]);
+                int endIndex = Integer.parseInt(parsedLine[1]);
 
-                 tenantIds.add(tenantId);
-             }
+                for (int tenantId = startIndex; tenantId <= endIndex; tenantId++) {
 
-         } catch (NumberFormatException e) {
-             String msg = "Invalid tenant range is specified for domain " + tenantRange;
-             log.error(msg, e);
-             throw new RuntimeException(msg, e);
-         }
+                    tenantIds.add(tenantId);
+                }
 
-     } else {
-         String msg = "Invalid tenant range is specified for domain " + tenantRange;
-         log.error(msg);
-         throw new RuntimeException(msg);
-     }
+            } catch (NumberFormatException e) {
+                String msg = "Invalid tenant range is specified : " + tenantRange;
+                log.error(msg, e);
+                throw new RuntimeException(msg, e);
+            }
 
-     return tenantIds;
- }
+        } else {
+            String msg = "Invalid tenant range is specified : " + tenantRange;
+            log.error(msg);
+            throw new RuntimeException(msg);
+        }
 
+        return tenantIds;
+    }
 
 }

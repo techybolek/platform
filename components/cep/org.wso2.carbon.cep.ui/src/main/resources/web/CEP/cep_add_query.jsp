@@ -1,12 +1,4 @@
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.ExpressionDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.OutputDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.OutputElementMappingDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.OutputTupleMappingDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.OutputMapMappingDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.OutputXMLMappingDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.QueryDTO" %>
-<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.XMLPropertyDTO" %>
-<%@ page import="java.util.HashSet" %>
+<%@ page import="org.wso2.carbon.cep.stub.admin.internal.xsd.*" %>
 <%@ page import="java.util.LinkedList" %>
 <%@ page import="java.util.List" %>
 <%
@@ -15,28 +7,6 @@
 
     if (queryName != null) {
         queryName = queryName.trim();
-    }
-
-    HashSet propertyHashSet = (HashSet) session.getAttribute("outputXMLPropertyHashSet");
-    OutputElementMappingDTO elementMapping = null;
-    if (propertyHashSet != null) {
-        String nameSpace = request.getParameter("nameSpace");
-        String documentElement = request.getParameter("documentElement");
-
-        if (nameSpace != null) {
-            nameSpace = nameSpace.trim();
-        }
-        if (documentElement != null) {
-            documentElement = documentElement.trim();
-        }
-
-        elementMapping = new OutputElementMappingDTO();
-        elementMapping.setNamespace(nameSpace.trim());
-        elementMapping.setDocumentElement(documentElement.trim());
-
-        XMLPropertyDTO[] properties = new XMLPropertyDTO[propertyHashSet.size()];
-        propertyHashSet.toArray(properties);
-        elementMapping.setProperties(properties);
     }
 
     List metaDataPropertyList = (List) session.getAttribute("outputTupleMetaDataPropertyList");
@@ -48,24 +18,30 @@
         if (tupleMapping == null) {
             tupleMapping = new OutputTupleMappingDTO();
         }
-        String[] properties = new String[metaDataPropertyList.size()];
-        metaDataPropertyList.toArray(properties);
+        OutputTuplePropertyDTO[] properties = new OutputTuplePropertyDTO[metaDataPropertyList.size()];
+        for (int i = 0, propertiesLength = properties.length; i < propertiesLength; i++) {
+            properties[i]=(OutputTuplePropertyDTO)metaDataPropertyList.get(i);
+        }
         tupleMapping.setMetaDataProperties(properties);
     }
     if (correlationDataPropertyList != null) {
         if (tupleMapping == null) {
             tupleMapping = new OutputTupleMappingDTO();
         }
-        String[] properties = new String[correlationDataPropertyList.size()];
-        correlationDataPropertyList.toArray(properties);
+        OutputTuplePropertyDTO[] properties = new OutputTuplePropertyDTO[correlationDataPropertyList.size()];
+        for (int i = 0, propertiesLength = properties.length; i < propertiesLength; i++) {
+            properties[i]=(OutputTuplePropertyDTO)correlationDataPropertyList.get(i);
+        }
         tupleMapping.setCorrelationDataProperties(properties);
     }
     if (payloadDataPropertyList != null) {
         if (tupleMapping == null) {
             tupleMapping = new OutputTupleMappingDTO();
         }
-        String[] properties = new String[payloadDataPropertyList.size()];
-        payloadDataPropertyList.toArray(properties);
+        OutputTuplePropertyDTO[] properties = new OutputTuplePropertyDTO[payloadDataPropertyList.size()];
+        for (int i = 0, propertiesLength = properties.length; i < propertiesLength; i++) {
+            properties[i]=(OutputTuplePropertyDTO)payloadDataPropertyList.get(i);
+        }
         tupleMapping.setPayloadDataProperties(properties);
     }
 
@@ -77,9 +53,11 @@
         if (mapMapping == null) {
             mapMapping = new OutputMapMappingDTO();
         }
-        String[] properties = new String[mapPropertyList.size()];
-        mapPropertyList.toArray(properties);
-        mapMapping.setProperties(properties);
+        OutputMapPropertyDTO[] properties = new OutputMapPropertyDTO[mapPropertyList.size()];
+        for (int i = 0, propertiesLength = properties.length; i < propertiesLength; i++) {
+            properties[i]=(OutputMapPropertyDTO)mapPropertyList.get(i);
+        }
+        mapMapping.setMapProperties(properties);
     }
 
     String outputTopicName = request.getParameter("outputTopic");
@@ -101,32 +79,40 @@
         xmlMapping.setMappingXMLText(xmlMappingText);
     }
 
+    String textMappingText = request.getParameter("textMappingText");
+    OutputTextMappingDTO textMapping = null;
+    if (textMappingText != null && !textMappingText.equals("")) {
+        textMappingText = textMappingText.trim();
+
+        textMapping = new OutputTextMappingDTO();
+        textMapping.setMappingText(textMappingText);
+    }
+
     OutputDTO output = null;
     if (outputTopicName != null && !outputTopicName.equals("")) {
         output = new OutputDTO();
         output.setTopic(outputTopicName);
         output.setBrokerName(brokerName);
         if (outputMapping.equals("xml")) {
-            output.setOutputElementMapping(null);
             output.setOutputTupleMapping(null);
             output.setOutputMapMapping(null);
             output.setOutputXmlMapping(xmlMapping);
-        } else if (outputMapping.equals("element")) {
-            output.setOutputElementMapping(elementMapping);
+            output.setOutputTextMapping(null);
+        } else if (outputMapping.equals("text")) {
             output.setOutputTupleMapping(null);
             output.setOutputMapMapping(null);
             output.setOutputXmlMapping(null);
+            output.setOutputTextMapping(textMapping);
         } else if (outputMapping.equals("map")) {
-            output.setOutputElementMapping(null);
             output.setOutputTupleMapping(null);
             output.setOutputMapMapping(mapMapping);
             output.setOutputXmlMapping(null);
+            output.setOutputTextMapping(null);
         } else {  //tuple
-            tupleMapping.setStreamId(outputTopicName);
-            output.setOutputElementMapping(null);
             output.setOutputTupleMapping(tupleMapping);
             output.setOutputMapMapping(null);
             output.setOutputXmlMapping(null);
+            output.setOutputTextMapping(null);
         }
     }
 
@@ -173,6 +159,7 @@
     query.setOutput(output);
 
     session.removeAttribute("outputXMLPropertyHashSet");
+    session.removeAttribute("outputTextPropertyHashSet");
     session.removeAttribute("outputMapPropertyList");
     session.removeAttribute("outputTuplePayloadDataPropertyList");
     session.removeAttribute("outputTupleCorrelationDataPropertyList");

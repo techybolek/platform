@@ -20,21 +20,16 @@ package org.wso2.carbon.rssmanager.core.internal.dao;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
 import org.wso2.carbon.rssmanager.core.RSSManagerException;
 import org.wso2.carbon.rssmanager.core.entity.*;
 import org.wso2.carbon.rssmanager.core.internal.util.RSSConfig;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * DAO implementation for DSSDAO interface.
@@ -43,11 +38,10 @@ public class RSSDAOImpl implements RSSDAO {
 
     private static Log log = LogFactory.getLog(RSSDAOImpl.class);
 
-    @Override
     public void createRSSInstance(RSSInstance rssInstance) throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         try {
-            String sql = "INSERT INTO RM_SERVER_INSTANCE (name, server_url, dbms_type, instance_type, server_category, admin_username, admin_password, tenant_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO RM_SERVER_INSTANCE (NAME, SERVER_URL, DBMS_TYPE, INSTANCE_TYPE, SERVER_CATEGORY, ADMIN_USERNAME, ADMIN_PASSWORD, TENANT_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, rssInstance.getName());
             stmt.setString(2, rssInstance.getServerURL());
@@ -56,12 +50,12 @@ public class RSSDAOImpl implements RSSDAO {
             stmt.setString(5, rssInstance.getServerCategory());
             stmt.setString(6, rssInstance.getAdminUsername());
             stmt.setString(7, rssInstance.getAdminPassword());
-            stmt.setInt(8, CarbonContext.getCurrentContext().getTenantId());
-            stmt.executeUpdate();
+            stmt.setInt(8, this.getCurrentTenantId());
+            stmt.execute();
             stmt.close();
         } catch (SQLException e) {
             throw new RSSManagerException("Error occurred while creating the RSS instance '" +
-                    rssInstance.getName() + "'", e);
+                    rssInstance.getName() + "' : " + e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -73,39 +67,10 @@ public class RSSDAOImpl implements RSSDAO {
         }
     }
 
-    @Override
-    public List<RSSInstance> getAllTenantSpecificRSSInstances() throws RSSManagerException {
-        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
-        try {
-            String sql = "SELECT name, server_url, dbms_type, instance_type, server_category, admin_username, admin_password, tenant_id FROM RM_SERVER_INSTANCE WHERE tenant_id = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, CarbonContext.getCurrentContext().getTenantId());
-            ResultSet rs = stmt.executeQuery();
-            List<RSSInstance> result = new ArrayList<RSSInstance>();
-            while (rs.next()) {
-                result.add(this.createRSSInstanceFromRS(rs));
-            }
-            rs.close();
-            stmt.close();
-            return result;
-        } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while retrieving all RSS instances", e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                log.error(e);
-            }
-        }
-    }
-
-    @Override
     public void updateRSSInstance(RSSInstance rssInstance) throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         try {
-            String sql = "UPDATE RM_SERVER_INSTANCE SET server_url = ?, dbms_type = ?, instance_type = ?, server_category = ?, admin_username = ?, admin_password = ? WHERE name = ? AND tenant_id = ?";
+            String sql = "UPDATE RM_SERVER_INSTANCE SET SERVER_URL = ?, DBMS_TYPE = ?, INSTANCE_TYPE = ?, SERVER_CATEGORY = ?, ADMIN_USERNAME = ?, ADMIN_PASSWORD = ? WHERE NAME = ? AND TENANT_ID = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, rssInstance.getServerURL());
             stmt.setString(2, rssInstance.getDbmsType());
@@ -114,12 +79,12 @@ public class RSSDAOImpl implements RSSDAO {
             stmt.setString(5, rssInstance.getAdminUsername());
             stmt.setString(6, rssInstance.getAdminPassword());
             stmt.setString(7, rssInstance.getName());
-            stmt.setInt(8, CarbonContext.getCurrentContext().getTenantId());
+            stmt.setInt(8, this.getCurrentTenantId());
             stmt.executeUpdate();
             stmt.close();
         } catch (SQLException e) {
             throw new RSSManagerException("Error occurred while editing the RSS instance '" +
-                    rssInstance.getName() + "'", e);
+                    rssInstance.getName() + "' : " + e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -131,15 +96,15 @@ public class RSSDAOImpl implements RSSDAO {
         }
     }
 
-    @Override
+
     public RSSInstance getRSSInstance(String rssInstanceName) throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         RSSInstance rssInstance = null;
         try {
-            String sql = "SELECT name, server_url, dbms_type, instance_type, server_category, tenant_id FROM RM_SERVER_INSTANCE WHERE name = ? AND tenant_id = ?";
+            String sql = "SELECT * FROM RM_SERVER_INSTANCE WHERE NAME = ? AND TENANT_ID = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, rssInstanceName);
-            stmt.setInt(2, CarbonContext.getCurrentContext().getTenantId());
+            stmt.setInt(2, this.getCurrentTenantId());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 rssInstance = this.createRSSInstanceFromRS(rs);
@@ -149,7 +114,7 @@ public class RSSDAOImpl implements RSSDAO {
             return rssInstance;
         } catch (SQLException e) {
             throw new RSSManagerException("Error occurred while retrieving the configuration of " +
-                    "RSS instance '" + rssInstanceName + "'", e);
+                    "RSS instance '" + rssInstanceName + "' : " + e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -161,88 +126,28 @@ public class RSSDAOImpl implements RSSDAO {
         }
     }
 
-    @Override
-    public List<DatabaseUser> getUsersByDatabase(String databaseName) throws RSSManagerException {
-        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
-        List<DatabaseUser> users = new ArrayList<DatabaseUser>();
-        try {
-            String sql = "SELECT d.username, d.db_username, d.rss_instance_name FROM RM_DATABASE_USER d, RM_USER_DATABASE_ENTRY u WHERE u.database_name=? AND d.username=u.username AND d.tenant_id=?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, databaseName);
-            stmt.setInt(2, CarbonContext.getCurrentContext().getTenantId());
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                users.add(this.createDatabaseUserFromRS(rs));
-            }
-            rs.close();
-            stmt.close();
-            return users;
-        } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while retrieving the users attached to " +
-                    "the database '" + databaseName + "'", e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                log.error(e);
-            }
-        }
-    }
-
-    @Override
-    public Database getDatabase(String databaseName) throws RSSManagerException {
-        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
-        Database database = null;
-        try {
-            int tenantID = CarbonContext.getCurrentContext().getTenantId();
-            String sql = "SELECT d.name, d.tenant_id, r.name, r.server_url, r.tenant_id FROM RM_SERVER_INSTANCE r, RM_DATABASE d WHERE r.name=(SELECT rss_instance_name FROM RM_DATABASE WHERE tenant_id=? AND name=?) AND d.tenant_id=? AND d.name=? AND d.rss_instance_name=r.name";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, tenantID);
-            stmt.setString(2, databaseName);
-            stmt.setInt(3, tenantID);
-            stmt.setString(4, databaseName);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                database = this.createDatabaseFromRS(rs);
-            }
-            rs.close();
-            stmt.close();
-            return database;
-        } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while retrieving the configuration of " +
-                    "database '" + databaseName + "'", e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                log.error(e);
-            }
-        }
-    }
-
-    @Override
-    public DatabaseUser getDatabaseUser(String username) throws RSSManagerException {
+    public DatabaseUser getDatabaseUser(RSSInstance
+            rssInstance, String username) throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         DatabaseUser user = new DatabaseUser();
         try {
-            String sql = "SELECT username, rss_instance_name FROM RM_DATABASE_USER WHERE username = ? AND tenant_id = ?";
+            String sql = "SELECT u.USERNAME, s.NAME AS RSS_INSTANCE_NAME, u.TENANT_ID, u.TYPE FROM RM_SERVER_INSTANCE s, RM_DATABASE_USER u WHERE s.ID = u.RSS_INSTANCE_ID AND s.NAME = ? AND s.TENANT_ID = ? AND u.USERNAME = ? AND u.TENANT_ID = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, username);
-            stmt.setInt(2, CarbonContext.getCurrentContext().getTenantId());
+            stmt.setString(1, rssInstance.getName());
+            stmt.setInt(2, rssInstance.getTenantId());
+            stmt.setString(3, username);
+            stmt.setInt(4, this.getCurrentTenantId());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 user = this.createDatabaseUserFromRS(rs);
             }
             rs.close();
             stmt.close();
+
             return user;
         } catch (SQLException e) {
             throw new RSSManagerException("Error while occurred while retrieving information of " +
-                    "the database user '" + user.getUsername() + "'", e);
+                    "the database user '" + user.getUsername() + "' : " + e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -254,124 +159,43 @@ public class RSSDAOImpl implements RSSDAO {
         }
     }
 
-    @Override
-    public void createDatabase(Database database) throws RSSManagerException {
-        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
+    public void incrementSystemRSSDatabaseCount() throws RSSManagerException {
+        Connection conn = null;
         try {
-            conn.setAutoCommit(false);
-            String sql = "INSERT INTO RM_DATABASE (name, rss_instance_name, tenant_id) VALUES (?, ?, ?)";
+            conn = RSSConfig.getInstance().getRSSDBConnection();
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            String sql = "SELECT * FROM RM_SYSTEM_DATABASE_COUNT";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, database.getName());
-            stmt.setString(2, database.getRssInstanceName());
-            stmt.setInt(3, CarbonContext.getCurrentContext().getTenantId());
+            ResultSet rs = stmt.executeQuery();
+            if (!rs.next()) {
+                sql = "INSERT INTO RM_SYSTEM_DATABASE_COUNT (COUNT) VALUES (0)";
+                stmt = conn.prepareStatement(sql);
+                stmt.executeUpdate();
+            }
+            sql = "UPDATE RM_SYSTEM_DATABASE_COUNT SET COUNT = COUNT + 1";
+            stmt = conn.prepareStatement(sql);
             stmt.executeUpdate();
-            this.setDatabaseInstanceProperties(conn, database);
 
-            conn.commit();
+            rs.close();
             stmt.close();
         } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while creating the database " +
-                    database.getName() + "'", e);
+            throw new RSSManagerException("Error occurred while incrementing system RSS " +
+                    "database count : " + e.getMessage(), e);
         } finally {
-            try {
-                if (conn != null) {
+            if (conn != null) {
+                try {
                     conn.close();
-                }
-            } catch (SQLException e) {
-                log.error(e);
-            }
-        }
-    }
-
-    private void setDatabaseInstanceProperties(Connection conn, Database database) throws
-            SQLException {
-        Map<String, String> existingProps = this.getDatabaseProperties(conn, database.getName());
-        Map<String, String> newProps = database.getProperties();
-        Map<String, String> toBeRemovedProps = new HashMap<String, String>(existingProps);
-        if (newProps != null) {
-            Map<String, String> toBeAddedProps = new HashMap<String, String>(newProps);
-            String lhs, rhs;
-            for (String key : newProps.keySet()) {
-                if (existingProps.containsKey(key)) {
-                    lhs = existingProps.get(key);
-                    rhs = newProps.get(key);
-                    if (lhs == null) {
-                        if (rhs == null) {
-                            toBeAddedProps.remove(key);
-                            toBeRemovedProps.remove(key);
-                        }
-                    } else if (lhs.equals(rhs)) {
-                        toBeAddedProps.remove(key);
-                        toBeRemovedProps.remove(key);
-                    }
+                } catch (SQLException e) {
+                    log.error(e);
                 }
             }
-            for (String key : toBeRemovedProps.keySet()) {
-                this.deleteDatabaseProperty(conn, database.getName(), key);
-            }
-            for (Map.Entry<String, String> entry : toBeAddedProps.entrySet()) {
-                this.addDatabaseProperty(conn, database.getName(), entry.getKey(),
-                        entry.getValue());
-            }
         }
     }
 
-    private void addDatabaseProperty(Connection conn, String databaseName, String key,
-                                     String value) throws SQLException {
-        String sql = "INSERT INTO RM_DATABASE_PROPERTY (name, value, database_name) VALUES (?, ?, ?)";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, key);
-        stmt.setString(2, value);
-        stmt.setString(3, databaseName);
-        stmt.executeUpdate();
-        stmt.close();
-    }
-
-    private void deleteDatabaseProperty(
-            Connection conn, String databaseName, String key) throws SQLException {
-        String sql = "DELETE FROM RM_DATABASE_PROPERTY WHERE name = ? AND database_name = ?";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, key);
-        stmt.setString(2, databaseName);
-        stmt.executeUpdate();
-        stmt.close();
-    }
-
-    private Map<String, String> getDatabaseProperties(
-            Connection conn, String databaseName) throws SQLException {
-        Map<String, String> props = new HashMap<String, String>();
-        String sql = "SELECT name, value FROM RM_DATABASE_PROPERTY WHERE database_name = ?";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, databaseName);
-        ResultSet rs = stmt.executeQuery();
-        while (rs.next()) {
-            props.put(rs.getString("name"), rs.getString("value"));
-        }
-        rs.close();
-        stmt.close();
-        return props;
-    }
-
-    private RSSInstance createRSSInstanceFromRS(ResultSet rs) throws SQLException {
-        String name = rs.getString("name");
-        String serverURL = rs.getString("server_url");
-        String instanceType = rs.getString("instance_type");
-        String serverCategory = rs.getString("server_category");
-        String adminUsername = rs.getString("admin_username");
-        String adminPassword = rs.getString("admin_password");
-        String dbmsType = rs.getString("dbms_type");
-        int tenantId = rs.getInt("tenant_id");
-        return new RSSInstance(name, serverURL, dbmsType, instanceType, serverCategory,
-                adminUsername, adminPassword, tenantId);
-    }
-
-    @Override
     public List<RSSInstance> getAllSystemRSSInstances() throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT name, " +
-                    "server_url, dbms_type, instance_type, server_category, admin_username, admin_password, tenant_id" +
-                    " FROM RM_SERVER_INSTANCE WHERE instance_type = ? AND tenant_id = ?");
+            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM RM_SERVER_INSTANCE WHERE INSTANCE_TYPE = ? AND TENANT_ID = ?");
             stmt.setString(1, RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
             stmt.setInt(2, MultitenantConstants.SUPER_TENANT_ID);
             ResultSet rs = stmt.executeQuery();
@@ -381,10 +205,11 @@ public class RSSDAOImpl implements RSSDAO {
             }
             rs.close();
             stmt.close();
+
             return result;
         } catch (SQLException e) {
             throw new RSSManagerException("Error occurred while retrieving system RSS " +
-                    "instances", e);
+                    "instances : " + e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -396,26 +221,26 @@ public class RSSDAOImpl implements RSSDAO {
         }
     }
 
-    @Override
-    public void dropRSSInstance(String rssInstanceName) throws RSSManagerException {
+    public void dropRSSInstance(String rssInstanceName, int tenantId) throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
+        RSSInstance rssInstance = this.getRSSInstance(rssInstanceName);
         try {
             List<DatabaseUser> users =
-                    this.getDatabaseUsersByRSSInstance(conn, rssInstanceName);
+                    this.getDatabaseUsersByRSSInstance(conn, rssInstance);
             if (users.size() > 0) {
                 for (DatabaseUser user : users) {
-                    this.dropDatabaseUser(rssInstanceName, user.getUsername());
+                    this.dropDatabaseUser(rssInstance, user.getUsername(), tenantId);
                 }
             }
-            String sql = "DELETE FROM RM_SERVER_INSTANCE WHERE name = ? AND tenant_id = ?";
+            String sql = "DELETE FROM RM_SERVER_INSTANCE WHERE NAME = ? AND TENANT_ID = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, rssInstanceName);
-            stmt.setInt(2, CarbonContext.getCurrentContext().getTenantId());
+            stmt.setInt(2, tenantId);
             stmt.executeUpdate();
             stmt.close();
         } catch (SQLException e) {
             throw new RSSManagerException("Error occurred while dropping the RSS instance '" +
-                    rssInstanceName + "'", e);
+                    rssInstanceName + "' : " + e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -428,11 +253,12 @@ public class RSSDAOImpl implements RSSDAO {
     }
 
     private List<DatabaseUser> getDatabaseUsersByRSSInstance(
-            Connection conn, String rssInstanceName) throws SQLException {
-        String sql = "SELECT username, rss_instance_name, tenant_id FROM RM_DATABASE_USER WHERE rss_instance_name=? AND tenant_id = ?";
+            Connection conn, RSSInstance rssInstance) throws SQLException {
+        String sql = "SELECT u.USERNAME AS USERNAME, s.NAME AS RSS_INSTANCE_NAME, u.TENANT_ID, u.TYPE AS TYPE AS TENANT_ID FROM RM_SERVER_INSTANCE s, RM_DATABASE_USER u WHERE s.ID = u.RSS_SERVER_INSTANCE AND u.TENANT_ID = ? AND s.NAME = ? AND s.TENANT_ID = ?";
         PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, rssInstanceName);
-        stmt.setInt(2, CarbonContext.getCurrentContext().getTenantId());
+        stmt.setInt(1, this.getCurrentTenantId());
+        stmt.setString(2, rssInstance.getName());
+        stmt.setInt(2, this.getCurrentTenantId());
         ResultSet rs = stmt.executeQuery();
         List<DatabaseUser> users = new ArrayList<DatabaseUser>();
         while (rs.next()) {
@@ -443,11 +269,11 @@ public class RSSDAOImpl implements RSSDAO {
         return users;
     }
 
-    @Override
+
     public List<Database> getAllDatabases(int tid) throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         try {
-            String sql = "SELECT d.name, d.tenant_id, r.name, r.server_url, r.tenant_id FROM RM_SERVER_INSTANCE r, RM_DATABASE d WHERE r.name IN (SELECT rss_instance_name FROM RM_DATABASE) AND r.name=d.rss_instance_name AND d.tenant_id=?";
+            String sql = "SELECT d.ID AS DATABASE_ID, d.NAME, d.TENANT_ID, s.NAME AS RSS_INSTANCE_NAME, s.SERVER_URL, s.TENANT_ID AS RSS_INSTANCE_TENANT_ID, d.TYPE  FROM RM_SERVER_INSTANCE s, RM_DATABASE d WHERE s.ID = d.RSS_INSTANCE_ID AND d.TENANT_ID = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tid);
             ResultSet rs = stmt.executeQuery();
@@ -462,7 +288,8 @@ public class RSSDAOImpl implements RSSDAO {
             stmt.close();
             return result;
         } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while retrieving all databases", e);
+            throw new RSSManagerException("Error occurred while retrieving all databases : " +
+                    e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -474,29 +301,28 @@ public class RSSDAOImpl implements RSSDAO {
         }
     }
 
-    @Override
-    public List<Database> getAllDatabasesByRSSInstance(String rssInstanceName) throws
-            RSSManagerException {
+    public Database getDatabase(RSSInstance rssInstance, String databaseName) throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
-        List<Database> dbs = new ArrayList<Database>();
+        Database database = null;
         try {
-            String sql = "SELECT rss_instance_name, name, tenant_id FROM RM_DATABASE WHERE rss_instance_name = ? AND tenant_id = ?";
+            int tenantID = this.getCurrentTenantId();
+            String sql = "SELECT d.ID AS DATABASE_ID, d.NAME, d.TENANT_ID, s.NAME AS RSS_INSTANCE_NAME, s.SERVER_URL, s.TENANT_ID AS RSS_INSTANCE_TENANT_ID, d.TYPE FROM RM_SERVER_INSTANCE s, RM_DATABASE d WHERE s.ID = d.RSS_INSTANCE_ID AND d.NAME = ? AND d.TENANT_ID = ? AND s.NAME = ? AND s.TENANT_ID = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, rssInstanceName);
-            stmt.setInt(2, CarbonContext.getCurrentContext().getTenantId());
+            stmt.setString(1, databaseName);
+            stmt.setInt(2, tenantID);
+            stmt.setString(3, rssInstance.getName());
+            stmt.setInt(4, rssInstance.getTenantId());
             ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Database db = this.createDatabaseFromRS(rs);
-                if (db != null) {
-                    dbs.add(db);
-                }
+            if (rs.next()) {
+                database = this.createDatabaseFromRS(rs);
             }
             rs.close();
             stmt.close();
-            return dbs;
+
+            return database;
         } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while retrieving database list " +
-                    "created in the RSS instance '" + rssInstanceName + "'");
+            throw new RSSManagerException("Error occurred while retrieving the configuration of " +
+                    "database '" + databaseName + "' : " + e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -508,21 +334,59 @@ public class RSSDAOImpl implements RSSDAO {
         }
     }
 
-    @Override
-    public void dropDatabase(String rssInstanceName, String databaseName)
-            throws RSSManagerException {
+    public void createDatabase(Database database) throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         try {
-            String sql = "DELETE FROM RM_DATABASE WHERE name = ? AND tenant_id = ? AND rss_instance_name = ?";
+            int rssInstanceTenantId =
+                    (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(database.getType())) ?
+                            MultitenantConstants.SUPER_TENANT_ID : this.getCurrentTenantId();
+
+            String sql = "INSERT INTO RM_DATABASE SET NAME = ?, RSS_INSTANCE_ID = (SELECT ID FROM RM_SERVER_INSTANCE WHERE NAME = ? AND TENANT_ID = ?), TENANT_ID = ?, TYPE = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, database.getName());
+            stmt.setString(2, database.getRssInstanceName());
+            stmt.setInt(3, rssInstanceTenantId);
+            stmt.setInt(4, this.getCurrentTenantId());
+            stmt.setString(5, database.getType());
+            stmt.executeUpdate();
+            stmt.close();
+
+            //this.setDatabaseInstanceProperties(conn, database);
+        } catch (SQLException e) {
+            throw new RSSManagerException("Error occurred while creating the database " +
+                    database.getName() + "' : " + e.getMessage(), e);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                log.error(e);
+            }
+        }
+    }
+
+    public void dropDatabase(RSSInstance rssInstance, String databaseName, int tenantId)
+            throws RSSManagerException {
+        Connection conn = null;
+        try {
+            conn = RSSConfig.getInstance().getRSSDBConnection();
+            String sql = "DELETE FROM RM_DATABASE WHERE NAME = ? AND TENANT_ID = ? AND RSS_INSTANCE_ID = (SELECT ID FROM RM_SERVER_INSTANCE WHERE NAME = ? AND TENANT_ID = ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, databaseName);
-            stmt.setInt(2, CarbonContext.getCurrentContext().getTenantId());
-            stmt.setString(3, rssInstanceName);
+            stmt.setInt(2, tenantId);
+            if (RSSConfig.getInstance().getRssManager().getRSSInstancePool().
+                    isSystemRSSInstance(rssInstance.getName())) {
+                stmt.setString(3, rssInstance.getName());
+            } else {
+                stmt.setString(3, RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
+            }
+            stmt.setInt(4, rssInstance.getTenantId());
             stmt.executeUpdate();
             stmt.close();
         } catch (SQLException e) {
             throw new RSSManagerException("Error occurred while dropping the database '" +
-                    databaseName + "'", e);
+                    databaseName + "' : " + e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -534,22 +398,105 @@ public class RSSDAOImpl implements RSSDAO {
         }
     }
 
-    @Override
-    public void createDatabaseUser(DatabaseUser user) throws RSSManagerException {
-        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
-        String sql = "INSERT INTO RM_DATABASE_USER (username, rss_instance_name, tenant_id) VALUES (?, ?, ?)";
+    public void createDatabaseUser(RSSInstance rssInstance, DatabaseUser user) throws RSSManagerException {
+        Connection conn = null;
         try {
+            conn = RSSConfig.getInstance().getRSSDBConnection();
+            String sql = "INSERT INTO RM_DATABASE_USER SET USERNAME = ?, RSS_INSTANCE_ID = (SELECT ID FROM RM_SERVER_INSTANCE WHERE NAME = ? AND TENANT_ID = ?), TYPE = ?, TENANT_ID = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, user.getUsername());
-            stmt.setString(2, user.getRssInstanceName());
-            stmt.setInt(3, CarbonContext.getCurrentContext().getTenantId());
-            
+            stmt.setString(2, rssInstance.getName());
+            stmt.setInt(3, rssInstance.getTenantId());
+            stmt.setString(4, user.getType());
+            stmt.setInt(5, this.getCurrentTenantId());
             stmt.execute();
             stmt.close();
+
         } catch (Throwable e) {
-            log.error(e.getMessage(), e);
             throw new RSSManagerException("Error occurred while creating the database user '" +
-                    user.getUsername() + "'");
+                    user.getUsername() + "' : " + e.getMessage());
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    log.error(e);
+                }
+            }
+        }
+    }
+
+
+    public void dropDatabaseUser(RSSInstance rssInstance, String username, int tenantId) throws RSSManagerException {
+        Connection conn = null;
+        try {
+            conn = RSSConfig.getInstance().getRSSDBConnection();
+            String sql = "DELETE FROM RM_DATABASE_USER WHERE USERNAME = ? AND RSS_INSTANCE_ID = ? AND TENANT_ID = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, username);
+            stmt.setInt(2, rssInstance.getId());
+            stmt.setInt(3, tenantId);
+            stmt.executeUpdate();
+            stmt.close();
+        } catch (SQLException e) {
+            throw new RSSManagerException("Error occurred while dropping the database user '" +
+                    username + "' : " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    log.error(e);
+                }
+            }
+        }
+    }
+
+    public List<DatabaseUser> getAllDatabaseUsers(int tid) throws RSSManagerException {
+        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
+        List<DatabaseUser> users = new ArrayList<DatabaseUser>();
+        try {
+            String sql = "SELECT u.USERNAME, s.NAME AS RSS_INSTANCE_NAME, u.TENANT_ID, u.TYPE FROM RM_SERVER_INSTANCE s, RM_DATABASE_USER u WHERE s.ID = u.RSS_INSTANCE_ID AND u.TENANT_ID = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, tid);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                users.add(this.createDatabaseUserFromRS(rs));
+            }
+            rs.close();
+            stmt.close();
+            return users;
+        } catch (SQLException e) {
+            throw new RSSManagerException("Error occurred while retrieving the database users : " +
+                    e.getMessage(), e);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                log.error(e);
+            }
+        }
+    }
+
+    public List<DatabaseUser> getSystemCreatedDatabaseUsers() throws RSSManagerException {
+        List<DatabaseUser> users = new ArrayList<DatabaseUser>();
+        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
+        try {
+            String sql = "SELECT u.USERNAME, u.TYPE, u.TENANT_ID, s.NAME AS RSS_INSTANCE_NAME FROM RM_SERVER_INSTANCE s, RM_DATABASE_USER u WHERE s.ID = u.RSS_INSTANCE_ID AND u.TYPE = ? AND u.TENANT_ID = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
+            stmt.setInt(2, this.getCurrentTenantId());
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                DatabaseUser user = this.createDatabaseUserFromRS(rs);
+                users.add(user);
+            }
+            return users;
+        } catch (SQLException e) {
+            throw new RSSManagerException("Error occurred while retrieving the system created " +
+                    "database user list : " + e.getMessage(), e);
         } finally {
             if (conn != null) {
                 try {
@@ -562,318 +509,446 @@ public class RSSDAOImpl implements RSSDAO {
     }
 
     @Override
-    public void dropDatabaseUser(String rssInstanceName, String username) throws
-            RSSManagerException {
+    public List<String> getSystemUsersAssignedToDatabase(
+            RSSInstance rssInstance, String databaseName) throws RSSManagerException {
+        List<String> users = new ArrayList<String>();
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         try {
-            String sql = "DELETE FROM RM_DATABASE_USER WHERE username = ? AND rss_instance_name = ? AND tenant_id = ?";
+            String sql = "SELECT DISTINCT u.USERNAME FROM RM_DATABASE_USER u, RM_USER_DATABASE_ENTRY e WHERE u.ID = e.DATABASE_USER_ID AND u.TYPE = ? AND u.TENANT_ID = ? AND e.DATABASE_ID = (SELECT ID FROM RM_DATABASE WHERE RSS_INSTANCE_ID = ? AND NAME = ? AND TENANT_ID = ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, username);
-            stmt.setString(2, rssInstanceName);
-            stmt.setInt(3, CarbonContext.getCurrentContext().getTenantId());
-            stmt.executeUpdate();
-            stmt.close();
-        } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while dropping the database user '" +
-                    username + "'", e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                log.error(e);
-            }
-        }
-    }
-
-    @Override
-    public void updateDatabaseUser(DatabaseUser user) throws RSSManagerException {
-        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
-        try {
-            String sql = "UPDATE RM_DATABASE_USER SET rss_instance_name = ? WHERE username = ? and tenant_id = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, user.getRssInstanceName());
-            stmt.setString(2, user.getUsername());
-            stmt.setInt(3, CarbonContext.getCurrentContext().getTenantId());
-            stmt.executeUpdate();
-            stmt.close();
-        } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while updating the database user '" +
-                    user.getUsername() + "'", e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                log.error(e);
-            }
-        }
-    }
-
-    @Override
-    public List<DatabaseUser> getAllDatabaseUsers(int tid) throws RSSManagerException {
-        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
-        List<DatabaseUser> users = new ArrayList<DatabaseUser>();
-        try {
-            String sql = "SELECT username, rss_instance_name, tenant_id FROM RM_DATABASE_USER WHERE tenant_id = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, tid);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                users.add(this.createDatabaseUserFromRS(rs));
-            }
-            rs.close();
-            stmt.close();
-            return users;
-        } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while retrieving the database users ", e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                log.error(e);
-            }
-        }
-    }
-
-    @Override
-    public List<DatabaseUser> getUsersByRSSInstance(String rssInstanceName) throws
-            RSSManagerException {
-        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
-        List<DatabaseUser> users = new ArrayList<DatabaseUser>();
-        try {
-            String sql = "SELECT username, rss_instance_name, tenant_id FROM RM_DATABASE_USER WHERE tenant_id = ? AND rss_instance_name = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, CarbonContext.getCurrentContext().getTenantId());
-            stmt.setString(2, rssInstanceName);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                users.add(this.createDatabaseUserFromRS(rs));
-            }
-            rs.close();
-            stmt.close();
-            return users;
-        } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while retrieving the database users ", e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                log.error(e);
-            }
-        }
-    }
-
-    @Override
-    public List<String> getAvailableUsersToBeAssigned(
-            String rssInstanceName, String databaseName) throws RSSManagerException {
-        List<String> availableUsers = new ArrayList<String>();
-        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
-        String sql = "(SELECT username FROM RM_DATABASE_USER WHERE rss_instance_name = ? AND tenant_id = ?) INTERSECT (SELECT username, rss_instance_name FROM RM_USER_DATABASE_ENTRY WHERE rss_instance_name = ? AND database_name = ?)";
-        try {
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, rssInstanceName);
-            stmt.setInt(2, CarbonContext.getCurrentContext().getTenantId());
-            stmt.setString(3, rssInstanceName);
+            stmt.setString(1, RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
+            stmt.setInt(2, this.getCurrentTenantId());
+            stmt.setInt(3, rssInstance.getId());
             stmt.setString(4, databaseName);
+            stmt.setInt(5, this.getCurrentTenantId());
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                availableUsers.add(rs.getString("username"));
+                String user = rs.getString("USERNAME");
+                users.add(user);
             }
-            rs.close();
-            stmt.close();
+            return users;
         } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while retrieving the users assigned " +
-                    "to the database '" + databaseName + "'", e);
+            throw new RSSManagerException("Error occurred while retrieving the system created " +
+                    "database user list : " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    log.error(e);
+                }
+            }
         }
-        return availableUsers;
     }
 
     @Override
-    public List<String> getUsersAssignedToDatabase(
-            String rssInstanceName, String databaseName) throws RSSManagerException {
+    public DatabasePrivilegeSet getSystemUserDatabasePrivileges(RSSInstance rssInstance,
+                                                                String databaseName, String username) throws RSSManagerException {
+        DatabasePrivilegeSet privileges = null;
+        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
+        try {
+            String sql = "SELECT * FROM RM_USER_DATABASE_PRIVILEGE WHERE USER_DATABASE_ENTRY_ID = (SELECT ID FROM RM_USER_DATABASE_ENTRY WHERE DATABASE_ID = (SELECT ID FROM RM_DATABASE WHERE NAME = ? AND RSS_INSTANCE_ID = ? AND TENANT_ID = ?) AND DATABASE_USER_ID = (SELECT ID FROM RM_DATABASE_USER WHERE USERNAME = ? AND RSS_INSTANCE_ID = ? AND TENANT_ID = ?))";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, databaseName);
+            stmt.setInt(2, rssInstance.getId());
+            stmt.setInt(3, this.getCurrentTenantId());
+            stmt.setString(4, username);
+            stmt.setInt(5, rssInstance.getId());
+            stmt.setInt(6, this.getCurrentTenantId());
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                privileges = this.createUserDatabasePrivilegeSetFromRS(rs);
+            }
+
+            return privileges;
+        } catch (SQLException e) {
+            throw new RSSManagerException("Error occurred while retrieving the database " +
+                    "privileges assigned to the user '" + username + "' upon the database '" +
+                    databaseName + "' : " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    log.error(e);
+                }
+            }
+        }
+    }
+
+    public RSSInstance findRSSInstanceDatabaseBelongsTo(String rssInstanceName,
+                                                        String databaseName) throws RSSManagerException {
+        RSSInstance rssInstance = null;
+        if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) {
+            Connection conn = RSSConfig.getInstance().getRSSDBConnection();
+            String sql = "SELECT s.ID, s.NAME, s.SERVER_URL, s.DBMS_TYPE, s.INSTANCE_TYPE, s.SERVER_CATEGORY, s.TENANT_ID, s.ADMIN_USERNAME, s.ADMIN_PASSWORD FROM RM_SERVER_INSTANCE s, RM_DATABASE d WHERE s.ID = d.RSS_INSTANCE_ID AND d.TYPE = ? AND d.TENANT_ID = ? AND d.NAME = ?";
+            try {
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
+                stmt.setInt(2, this.getCurrentTenantId());
+                stmt.setString(3, databaseName);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    rssInstance = this.createRSSInstanceFromRS(rs);
+                }
+                rs.close();
+                stmt.close();
+
+            } catch (SQLException e) {
+                throw new RSSManagerException("Error occurred while retrieving the RSS instance " +
+                        "to which the database '" + databaseName + "' belongs to : " +
+                        e.getMessage(), e);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        log.error(e);
+                    }
+                }
+            }
+        } else {
+            rssInstance = this.getRSSInstance(rssInstanceName);
+        }
+        return rssInstance;
+    }
+
+    public boolean isDatabaseExist(String rssInstanceName, String databaseName) throws
+            RSSManagerException {
+        boolean isExist = false;
+        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
+        if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) {
+            String sql = "SELECT d.ID AS DATABASE_ID FROM RM_SERVER_INSTANCE s, RM_DATABASE d WHERE s.ID = d.RSS_INSTANCE_ID AND d.TYPE = ? AND d.TENANT_ID = ? AND d.NAME = ?";
+            try {
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
+                stmt.setInt(2, this.getCurrentTenantId());
+                stmt.setString(3, databaseName);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    int databaseId = rs.getInt("DATABASE_ID");
+                    if (databaseId > 0) {
+                        isExist = true;
+                    }
+                }
+                rs.close();
+                stmt.close();
+                return isExist;
+            } catch (SQLException e) {
+                throw new RSSManagerException("Error occurred while retrieving the RSS instance " +
+                        "to which the database '" + databaseName + "' belongs to : " +
+                        e.getMessage(), e);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        log.error(e);
+                    }
+                }
+            }
+        } else {
+            String sql = "SELECT d.ID AS DATABASE_ID FROM RM_SERVER_INSTANCE s, RM_DATABASE d WHERE s.ID = d.RSS_INSTANCE_ID AND s.NAME = ? AND d.TYPE = ? AND d.TENANT_ID = ? AND d.NAME = ?";
+            try {
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, rssInstanceName);
+                stmt.setString(2, RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
+                stmt.setInt(3, this.getCurrentTenantId());
+                stmt.setString(4, databaseName);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    int databaseId = rs.getInt("DATABASE_ID");
+                    if (databaseId > 0) {
+                        isExist = true;
+                    }
+                }
+                rs.close();
+                stmt.close();
+                return isExist;
+            } catch (SQLException e) {
+                throw new RSSManagerException("Error occurred while retrieving the RSS instance " +
+                        "to which the database '" + databaseName + "' belongs to : " +
+                        e.getMessage(), e);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        log.error(e);
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean isDatabaseUserExist(String rssInstanceName, String databaseUsername) throws
+            RSSManagerException {
+        boolean isExist = false;
+        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
+        if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) {
+            String sql = "SELECT u.ID AS DATABASE_USER_ID FROM RM_SERVER_INSTANCE s, RM_DATABASE_USER u WHERE s.ID = u.RSS_INSTANCE_ID AND u.TYPE = ? AND u.TENANT_ID = ? AND u.USERNAME = ?";
+            try {
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
+                stmt.setInt(2, this.getCurrentTenantId());
+                stmt.setString(3, databaseUsername);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    int databaseId = rs.getInt("DATABASE_USER_ID");
+                    if (databaseId > 0) {
+                        isExist = true;
+                    }
+                }
+                rs.close();
+                stmt.close();
+                return isExist;
+            } catch (SQLException e) {
+                throw new RSSManagerException("Error occurred while checking the existence of " +
+                        "the database user '" + databaseUsername + "' : " + e.getMessage(), e);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        log.error(e);
+                    }
+                }
+            }
+        } else {
+            String sql = "SELECT u.ID AS DATABASE_USER_ID FROM RM_SERVER_INSTANCE s, RM_DATABASE_USER u WHERE s.ID = u.RSS_INSTANCE_ID AND s.NAME = ? AND u.TYPE = ? AND u.TENANT_ID = ? AND u.USERNAME = ?";
+            try {
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, rssInstanceName);
+                stmt.setString(2, RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
+                stmt.setInt(3, this.getCurrentTenantId());
+                stmt.setString(4, databaseUsername);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    int databaseId = rs.getInt("DATABASE_USER_ID");
+                    if (databaseId > 0) {
+                        isExist = true;
+                    }
+                }
+                rs.close();
+                stmt.close();
+                return isExist;
+            } catch (SQLException e) {
+                throw new RSSManagerException("Error occurred while checking the existence of " +
+                        "the database user '" + databaseUsername + "' : " + e.getMessage(), e);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        log.error(e);
+                    }
+                }
+            }
+        }
+    }
+
+    public RSSInstance findRSSInstanceDatabaseUserBelongsTo(String rssInstanceName,
+                                                            String username) throws RSSManagerException {
+        RSSInstance rssInstance = null;
+        if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(rssInstanceName)) {
+            Connection conn = RSSConfig.getInstance().getRSSDBConnection();
+            String sql = "SELECT s.ID, s.NAME, s.SERVER_URL, s.DBMS_TYPE, s.INSTANCE_TYPE, s.SERVER_CATEGORY, s.ADMIN_USERNAME, s.ADMIN_PASSWORD, s.TENANT_ID FROM RM_SERVER_INSTANCE s, RM_DATABASE_USER u WHERE s.ID = u.RSS_INSTANCE_ID AND u.TYPE = ? AND u.TENANT_ID = ? AND u.USERNAME = ?";
+            try {
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
+                stmt.setInt(2, this.getCurrentTenantId());
+                stmt.setString(3, username);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    rssInstance = this.createRSSInstanceFromRS(rs);
+                }
+                rs.close();
+                stmt.close();
+            } catch (SQLException e) {
+                throw new RSSManagerException("Error occurred while retrieving the RSS instance " +
+                        "to which the database user '" + username + "' belongs to : " +
+                        e.getMessage(), e);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        log.error(e);
+                    }
+                }
+            }
+        } else {
+            rssInstance = this.getRSSInstance(rssInstanceName);
+        }
+        return rssInstance;
+    }
+
+    public List<DatabaseUser> getUsersByRSSInstance(RSSInstance rssInstance) throws
+            RSSManagerException {
+        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
+        List<DatabaseUser> users = new ArrayList<DatabaseUser>();
+        try {
+            String sql = "SELECT u.USERNAME, s.NAME AS RSS_INSTANCE_NAME, u.TENANT_ID, u.TYPE FROM RM_SERVER_INSTANCE s, RM_DATABASE_USER u WHERE s.ID = u.RSS_INSTANCE_ID AND s.NAME = ? AND s.TENANT_ID = ? AND u.TENANT_ID = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, rssInstance.getName());
+            stmt.setInt(2, rssInstance.getTenantId());
+            stmt.setInt(3, this.getCurrentTenantId());
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                users.add(this.createDatabaseUserFromRS(rs));
+            }
+            rs.close();
+            stmt.close();
+
+            return users;
+        } catch (SQLException e) {
+            throw new RSSManagerException("Error occurred while retrieving the database users : " +
+                    e.getMessage(), e);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                log.error(e);
+            }
+        }
+    }
+
+    public List<String> getUsersAssignedToDatabase(RSSInstance rssInstance,
+                                                   String databaseName) throws RSSManagerException {
         List<String> attachedUsers = new ArrayList<String>();
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
-        String sql = "SELECT username FROM RM_USER_DATABASE_ENTRY WHERE rss_instance_name = ? AND database_name = ? AND tenant_id = ?";
         try {
+            String sql = "SELECT p.USERNAME FROM RM_USER_DATABASE_ENTRY e, (SELECT t.ID AS DATABASE_ID, u.ID AS DATABASE_USER_ID, u.USERNAME FROM RM_DATABASE_USER u,(SELECT d.RSS_INSTANCE_ID, d.NAME, d.ID FROM RM_SERVER_INSTANCE s, RM_DATABASE d WHERE s.ID = d.RSS_INSTANCE_ID AND s.NAME = ? AND s.TENANT_ID = ? AND d.NAME = ? AND d.TENANT_ID = ?) t WHERE u.RSS_INSTANCE_ID = t.RSS_INSTANCE_ID AND TENANT_ID = ?) p WHERE e.DATABASE_USER_ID = p.DATABASE_USER_ID AND e.DATABASE_ID = p.DATABASE_ID";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, rssInstanceName);
-            stmt.setString(2, databaseName);
-            stmt.setInt(3, CarbonContext.getCurrentContext().getTenantId());
+            stmt.setString(1, rssInstance.getName());
+            stmt.setInt(2, rssInstance.getTenantId());
+            stmt.setString(3, databaseName);
+            stmt.setInt(4, this.getCurrentTenantId());
+            stmt.setInt(5, this.getCurrentTenantId());
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                attachedUsers.add(rs.getString("username"));
+                attachedUsers.add(rs.getString("USERNAME"));
             }
             rs.close();
             stmt.close();
         } catch (SQLException e) {
             throw new RSSManagerException("Error occurred while retrieving the users assigned " +
-                    "to the database '" + databaseName + "'", e);
+                    "to the database '" + databaseName + "' : " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    log.error(e);
+                }
+            }
         }
         return attachedUsers;
     }
 
-
-    @Override
-    public void addUserDatabaseEntry(UserDatabaseEntry userDBEntry)
-            throws RSSManagerException {
-        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
+    public UserDatabaseEntry createUserDatabaseEntry(RSSInstance rssInstance, Database database,
+                                                     String username) throws RSSManagerException {
+        Connection conn = null;
+        UserDatabaseEntry ude = new UserDatabaseEntry(-1, -1, username, database.getId(), database.getName(),
+                rssInstance.getId(), rssInstance.getName());
         try {
-            conn.setAutoCommit(false);
-            String sql = "INSERT INTO RM_USER_DATABASE_ENTRY (username, database_name, rss_instance_name, tenant_id) VALUES (?, ?, ?, ?)";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, userDBEntry.getUsername());
-            stmt.setString(2, userDBEntry.getDatabaseName());
-            stmt.setString(3, userDBEntry.getRssInstanceName());
-            stmt.setInt(4, CarbonContext.getCurrentContext().getTenantId());
-            stmt.executeUpdate();
-            this.setUserDatabasePrivileges(conn, userDBEntry);
+            conn = RSSConfig.getInstance().getRSSDBConnection();
+            String sql = "INSERT INTO RM_USER_DATABASE_ENTRY SET DATABASE_USER_ID = (SELECT ID FROM RM_DATABASE_USER WHERE RSS_INSTANCE_ID = ? AND TENANT_ID = ? AND USERNAME = ?), DATABASE_ID = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            stmt.setInt(1, rssInstance.getId());
+            stmt.setInt(2, this.getCurrentTenantId());
+            stmt.setString(3, username);
+            stmt.setInt(4, database.getId());
+            int rowsCreated = stmt.executeUpdate();
 
-            conn.commit();
+            if (rowsCreated == 0) {
+                throw new RSSManagerException("Failed to attach database user '" +
+                        username + "' was not attached to the database '" +
+                        database.getName() + "'");
+            }
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                ude.setId(rs.getInt(1));
+            }
             stmt.close();
+            return ude;
         } catch (SQLException e) {
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                log.error(e1);
-            }
-            throw new RSSManagerException("Error occurred while adding new user-database-entry", e);
+            throw new RSSManagerException("Error occurred while adding new user-database-entry : " +
+                    e.getMessage(), e);
         } finally {
-            try {
-                if (conn != null) {
+            if (conn != null) {
+                try {
                     conn.close();
+                } catch (SQLException e) {
+                    log.error(e);
                 }
-            } catch (SQLException e) {
-                log.error(e);
             }
         }
     }
 
-    private DatabaseUser createDatabaseUserFromRS(ResultSet rs) throws SQLException {
-        String username = rs.getString("username");
-        String rssInstName = rs.getString("rss_instance_name");
-        int tenantId = rs.getInt("tenant_id");
-        return new DatabaseUser(username, null, rssInstName, tenantId);
-    }
-
-    @Override
-    public void updateUserDatabaseEntry(UserDatabaseEntry userDBEntry)
+    public void deleteUserDatabaseEntry(RSSInstance rssInstance, String username)
             throws RSSManagerException {
-        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
+        Connection conn = null;
         try {
-            conn.setAutoCommit(false);
-            this.updateUserDatabasePrivileges(conn, userDBEntry);
-            conn.commit();
-        } catch (SQLException e) {
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                log.error(e1);
-            }
-            throw new RSSManagerException("Error occurred while updating user-database-entry", e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                log.error(e);
-            }
-        }
-    }
-
-    @Override
-    public void deleteUserDatabaseEntry(String rssInstanceName, String username)
-            throws RSSManagerException {
-        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
-        try {
-            conn.setAutoCommit(false);
-            /* delete permissions first */
-            String sql = "DELETE FROM RM_USER_DATABASE_PRIVILEGE WHERE username = ? AND rss_instance_name = ? AND tenant_id = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, username);
-            stmt.setString(2, rssInstanceName);
-            stmt.setInt(3, CarbonContext.getCurrentContext().getTenantId());
-            stmt.executeUpdate();
-
             /* now delete the user-database-entry */
-            sql = "DELETE FROM RM_USER_DATABASE_ENTRY WHERE username = ? AND rss_instance_name = ? AND tenant_id = ?";
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, username);
-            stmt.setString(2, rssInstanceName);
-            stmt.setInt(3, CarbonContext.getCurrentContext().getTenantId());
-            stmt.executeUpdate();
-            conn.commit();
-        } catch (SQLException e) {
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                log.error(e);
-            }
-            throw new RSSManagerException("Error occurred while deleting user-database-entry", e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                log.error(e);
-            }
-        }
-    }
-
-    @Override
-    public void incrementSystemRSSDatabaseCount() throws RSSManagerException {
-        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
-        try {
-            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-            conn.setAutoCommit(false);
-            String sql = "SELECT * FROM RM_SYSTEM_DATABASE_COUNT";
+            conn = RSSConfig.getInstance().getRSSDBConnection();
+            String sql = "DELETE FROM RM_USER_DATABASE_ENTRY WHERE DATABASE_USER_ID = (SELECT ID FROM RM_DATABASE_USER WHERE RSS_INSTANCE_ID = ? AND USERNAME = ? AND TENANT_ID = ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery();
-            if (!rs.next()) {
-                sql = "INSERT INTO RM_SYSTEM_DATABASE_COUNT (count) VALUES (0)";
-                stmt = conn.prepareStatement(sql);
-                stmt.executeUpdate();
-            }
-            sql = "UPDATE RM_SYSTEM_DATABASE_COUNT SET count = count + 1";
-            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, rssInstance.getId());
+            stmt.setString(2, username);
+            stmt.setInt(3, this.getCurrentTenantId());
             stmt.executeUpdate();
-            conn.commit();
-
-            rs.close();
             stmt.close();
         } catch (SQLException e) {
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                log.error(e1);
-            }
-            throw new RSSManagerException("Error occurred while incrementing system RSS " +
-                    "database count", e);
+            throw new RSSManagerException("Error occurred while deleting user-database-entry : " +
+                    e.getMessage(), e);
         } finally {
-            try {
-                if (conn != null) {
+            if (conn != null) {
+                try {
                     conn.close();
+                } catch (SQLException e) {
+                    log.error(e);
                 }
-            } catch (SQLException e) {
-                log.error(e);
             }
         }
     }
 
-    @Override
+    public void deleteUserDatabasePrivileges(RSSInstance rssInstance,
+                                             String username) throws RSSManagerException {
+        Connection conn = null;
+        try {
+            conn = RSSConfig.getInstance().getRSSDBConnection();
+            /* delete permissions first */
+            String sql = "DELETE FROM RM_USER_DATABASE_PRIVILEGE WHERE USER_DATABASE_ENTRY_ID IN (SELECT ID FROM RM_USER_DATABASE_ENTRY WHERE DATABASE_USER_ID = (SELECT ID FROM RM_DATABASE_USER WHERE RSS_INSTANCE_ID = ? AND USERNAME = ? AND TENANT_ID = ?))";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, rssInstance.getId());
+            stmt.setString(2, username);
+            stmt.setInt(3, this.getCurrentTenantId());
+            stmt.executeUpdate();
+            stmt.close();
+        } catch (SQLException e) {
+            throw new RSSManagerException("Error occurred while deleting user database " +
+                    "privileges of the database user '" + username + "' : " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    log.error(e);
+                }
+            }
+        }
+    }
+
     public int getSystemRSSDatabaseCount() throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         int count = 0;
         try {
-            String sql = "SELECT count FROM RM_SYSTEM_DATABASE_COUNT";
+            String sql = "SELECT COUNT FROM RM_SYSTEM_DATABASE_COUNT";
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -881,10 +956,11 @@ public class RSSDAOImpl implements RSSDAO {
             }
             rs.close();
             stmt.close();
+
             return count;
         } catch (SQLException e) {
             throw new RSSManagerException("Error occurred while retrieving system RSS database " +
-                    "count", e);
+                    "count : " + e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -896,30 +972,32 @@ public class RSSDAOImpl implements RSSDAO {
         }
     }
 
-    @Override
-    public DatabasePrivilegeSet getUserDatabasePrivileges(String rssInstanceName,
+    public DatabasePrivilegeSet getUserDatabasePrivileges(RSSInstance rssInstance,
                                                           String databaseName, String username)
             throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         DatabasePrivilegeSet privileges = new DatabasePrivilegeSet();
         PreparedStatement stmt;
         try {
-            String sql = "SELECT select_priv, insert_priv, update_priv, delete_priv, create_priv, drop_priv, grant_priv, references_priv, index_priv, alter_priv, create_tmp_table_priv, lock_tables_priv, create_view_priv, show_view_priv, create_routine_priv, alter_routine_priv, execute_priv, event_priv, trigger_priv FROM RM_USER_DATABASE_PRIVILEGE WHERE username = ? AND database_name = ? AND rss_instance_name = ?";
+            String sql = "SELECT * FROM RM_USER_DATABASE_PRIVILEGE WHERE USER_DATABASE_ENTRY_ID = (SELECT ID FROM RM_USER_DATABASE_ENTRY WHERE DATABASE_ID = (SELECT ID FROM RM_DATABASE WHERE NAME = ? AND RSS_INSTANCE_ID = ? AND TENANT_ID = ?) AND DATABASE_USER_ID = (SELECT ID FROM RM_DATABASE_USER WHERE USERNAME = ? AND RSS_INSTANCE_ID = ? AND TENANT_ID = ?))";
             stmt = conn.prepareStatement(sql);
-            stmt.setString(1, username);
-            stmt.setString(2, databaseName);
-            stmt.setString(3, rssInstanceName);
+            stmt.setString(1, databaseName);
+            stmt.setInt(2, rssInstance.getId());
+            stmt.setInt(3, this.getCurrentTenantId());
+            stmt.setString(4, username);
+            stmt.setInt(5, rssInstance.getTenantId());
+            stmt.setInt(6, this.getCurrentTenantId());
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 privileges = this.createUserDatabasePrivilegeSetFromRS(rs);
             }
             rs.close();
             stmt.close();
+
             return privileges;
         } catch (SQLException e) {
-            log.error(e);
             throw new RSSManagerException("Error occurred while retrieving user permissions " +
-                    "granted for the database user '" + username + "'", e);
+                    "granted for the database user '" + username + "' : " + e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -932,13 +1010,10 @@ public class RSSDAOImpl implements RSSDAO {
 
     }
 
-    @Override
     public List<RSSInstance> getAllRSSInstances(int tid) throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         try {
-            String sql = "SELECT name, " +
-                    "server_url, dbms_type, instance_type, server_category, tenant_id, admin_username, admin_password " +
-                    "FROM RM_SERVER_INSTANCE WHERE tenant_id = ?";
+            String sql = "SELECT * FROM RM_SERVER_INSTANCE WHERE TENANT_ID = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tid);
             ResultSet rs = stmt.executeQuery();
@@ -950,7 +1025,8 @@ public class RSSDAOImpl implements RSSDAO {
             stmt.close();
             return result;
         } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while retrieving all RSS instances", e);
+            throw new RSSManagerException("Error occurred while retrieving all RSS instances : " +
+                    e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -962,26 +1038,31 @@ public class RSSDAOImpl implements RSSDAO {
         }
     }
 
-    @Override
-    public List<UserDatabaseEntry> getUserDatabaseEntriesByDatabase(
-            String rssInstanceName, String databaseName) throws RSSManagerException {
+    public void removeUserDatabaseEntriesByDatabase(
+            RSSInstance rssInstance, String databaseName, int tenantId) throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         try {
-            String sql = "SELECT username, database_name, rss_instance_name FROM RM_USER_DATABASE_ENTRY where database_name = ? AND rss_instance_name = ? ";
+            String sql = "SELECT DISTINCT d.ID FROM RM_USER_DATABASE_ENTRY e, RM_DATABASE d WHERE d.ID = e.DATABASE_ID AND d.NAME = ? AND d.RSS_INSTANCE_ID = ? AND d.TENANT_ID = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, databaseName);
-            stmt.setString(2, rssInstanceName);
+            stmt.setInt(2, rssInstance.getId());
+            stmt.setInt(3, tenantId);
             ResultSet rs = stmt.executeQuery();
-            List<UserDatabaseEntry> result = new ArrayList<UserDatabaseEntry>();
-            while (rs.next()) {
-                result.add(this.createUserDatabaseEntry(rs));
+            int databaseId = -1;
+            if (rs.next()) {
+                databaseId = rs.getInt("ID");
             }
             rs.close();
             stmt.close();
-            return result;
+
+            sql = "DELETE FROM RM_USER_DATABASE_ENTRY WHERE DATABASE_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, databaseId);
+            stmt.execute();
+            stmt.close();
         } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while retrieving User database " +
-                    "entries", e);
+            throw new RSSManagerException("Error occurred while removing the user database " +
+                    "entries : " + e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -993,74 +1074,140 @@ public class RSSDAOImpl implements RSSDAO {
         }
     }
 
-    private UserDatabaseEntry createUserDatabaseEntry(ResultSet rs) throws SQLException {
-        String databaseName = rs.getString("database_name");
-        String username = rs.getString("username");
-        String rssInstanceName = rs.getString("rss_instance_name");
-        return new UserDatabaseEntry(username, databaseName, rssInstanceName);
-    }
-
-    public void updateDatabaseUserPermission(Connection conn,
-                                             String permName,
-                                             String permValue,
-                                             String username,
-                                             String databaseName) throws RSSManagerException {
-        try {
-            PreparedStatement stmt = conn.prepareStatement("UPDATE RM_USER_DATABASE_PRIVILEGE " +
-                    "SET perm_value=? WHERE username=? AND database_name=? AND perm_name=?");
-            stmt.setString(1, permValue);
-            stmt.setString(2, username);
-            stmt.setString(3, databaseName);
-            stmt.setString(4, permName);
-            stmt.executeUpdate();
-            stmt.close();
-        } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while updating user database " +
-                    "permission", e);
-        }
-    }
-
-    @Override
-    public void updateDatabaseUser(DatabasePermissions permissions, String username,
-                                   String databaseName) throws RSSManagerException {
+    public void removeUserDatabaseEntriesByDatabaseUser(
+            RSSInstance rssInstance, String username, int tenantId) throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
-        List<String> permissionNames =
-                this.getExistingDatabasePermissions(conn, username, databaseName);
-        for (Map.Entry entry : permissions.getPrivilegeMap().entrySet()) {
-            String permName = entry.getKey().toString();
-            if (permissionNames.contains(permName)) {
-                String permValue = entry.getValue().toString();
-                this.updateDatabaseUserPermission(conn, permName, permValue, username,
-                        databaseName);
+        try {
+            String sql = "SELECT DISTINCT u.ID FROM RM_USER_DATABASE_ENTRY e, RM_DATABASE_USER u WHERE u.ID = e.DATABASE_USER_ID AND u.USERNAME = ? AND u.RSS_INSTANCE_ID = ? AND u.TENANT_ID = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, username);
+            stmt.setInt(2, rssInstance.getId());
+            stmt.setInt(3, tenantId);
+            ResultSet rs = stmt.executeQuery();
+            int databaseId = -1;
+            if (rs.next()) {
+                databaseId = rs.getInt("ID");
+            }
+            rs.close();
+            stmt.close();
+
+            sql = "DELETE FROM RM_USER_DATABASE_ENTRY WHERE DATABASE_USER_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, databaseId);
+            stmt.execute();
+            stmt.close();
+
+        } catch (SQLException e) {
+            throw new RSSManagerException("Error occurred while removing the user database " +
+                    "entries : " + e.getMessage(), e);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                log.error(e);
             }
         }
     }
 
-    @Override
-    public void createDatabasePrivilegesTemplate(
+    public void deleteUserDatabasePrivilegeEntriesByDatabaseUser(RSSInstance rssInstance, String username,
+                                                                 int tenantId) throws RSSManagerException {
+        Connection conn = null;
+        try {
+            /* delete permissions first */
+            conn = RSSConfig.getInstance().getRSSDBConnection();
+            String sql = "DELETE FROM RM_USER_DATABASE_PRIVILEGE WHERE USER_DATABASE_ENTRY_ID IN (SELECT ID FROM RM_USER_DATABASE_ENTRY WHERE DATABASE_USER_ID = (SELECT ID FROM RM_DATABASE_USER WHERE RSS_INSTANCE_ID = ? AND USERNAME = ? AND TENANT_ID = ?))";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, rssInstance.getId());
+            stmt.setString(2, username);
+            stmt.setInt(3, tenantId);
+            stmt.executeUpdate();
+            stmt.close();
+        } catch (SQLException e) {
+            throw new RSSManagerException("Error occurred while deleting user database " +
+                    "privileges assigned to the database user '" + username + "' : " +
+                    e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    log.error(e);
+                }
+            }
+        }
+    }
+
+    public void updateDatabaseUser(DatabasePrivilegeSet privileges, RSSInstance rssInstance,
+                                   DatabaseUser user, String databaseName) throws RSSManagerException {
+        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
+        try {
+            String sql = "UPDATE RM_USER_DATABASE_PRIVILEGE SET SELECT_PRIV = ?, INSERT_PRIV = ?, UPDATE_PRIV = ?, DELETE_PRIV = ?, CREATE_PRIV = ?, DROP_PRIV = ?, GRANT_PRIV = ?, REFERENCES_PRIV = ?, INDEX_PRIV = ?, ALTER_PRIV = ?, CREATE_TMP_TABLE_PRIV = ?, LOCK_TABLES_PRIV = ?, CREATE_VIEW_PRIV = ?, SHOW_VIEW_PRIV = ?, CREATE_ROUTINE_PRIV = ?, ALTER_ROUTINE_PRIV = ?, EXECUTE_PRIV = ?, EVENT_PRIV = ?, TRIGGER_PRIV = ? WHERE USER_DATABASE_ENTRY_ID = (SELECT ID FROM RM_USER_DATABASE_ENTRY WHERE DATABASE_ID = (SELECT ID FROM RM_DATABASE WHERE NAME = ? AND TENANT_ID = ? AND RSS_INSTANCE_ID = ?) AND DATABASE_USER_ID = (SELECT ID FROM RM_DATABASE_USER WHERE USERNAME = ? AND TENANT_ID = ? AND RSS_INSTANCE_ID = ?))";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, privileges.getSelectPriv());
+            stmt.setString(2, privileges.getInsertPriv());
+            stmt.setString(3, privileges.getUpdatePriv());
+            stmt.setString(4, privileges.getDeletePriv());
+            stmt.setString(5, privileges.getCreatePriv());
+            stmt.setString(6, privileges.getDropPriv());
+            stmt.setString(7, privileges.getGrantPriv());
+            stmt.setString(8, privileges.getReferencesPriv());
+            stmt.setString(9, privileges.getIndexPriv());
+            stmt.setString(10, privileges.getAlterPriv());
+            stmt.setString(11, privileges.getCreateTmpTablePriv());
+            stmt.setString(12, privileges.getLockTablesPriv());
+            stmt.setString(13, privileges.getCreateViewPriv());
+            stmt.setString(14, privileges.getShowViewPriv());
+            stmt.setString(15, privileges.getCreateRoutinePriv());
+            stmt.setString(16, privileges.getAlterRoutinePriv());
+            stmt.setString(17, privileges.getExecutePriv());
+            stmt.setString(18, privileges.getEventPriv());
+            stmt.setString(19, privileges.getTriggerPriv());
+            stmt.setString(20, databaseName);
+            stmt.setInt(21, this.getCurrentTenantId());
+            stmt.setInt(22, rssInstance.getId());
+            stmt.setString(23, user.getUsername());
+            stmt.setInt(24, this.getCurrentTenantId());
+            stmt.setInt(25, rssInstance.getId());
+            stmt.executeUpdate();
+            stmt.close();
+        } catch (SQLException e) {
+            throw new RSSManagerException("Error occurred while updating database privileges " +
+                    "of the user '" + user.getUsername() + "' : " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    log.error(e);
+                }
+            }
+        }
+    }
+
+    public DatabasePrivilegeTemplate createDatabasePrivilegesTemplate(
             DatabasePrivilegeTemplate template) throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         try {
-            conn.setAutoCommit(false);
-
-            String sql = "INSERT INTO RM_DB_PRIVILEGE_TEMPLATE(name, tenant_id) VALUES(?, ?)";
-            PreparedStatement stmt = conn.prepareStatement(sql);
+            String sql = "INSERT INTO RM_DB_PRIVILEGE_TEMPLATE(NAME, TENANT_ID) VALUES(?, ?)";
+            PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, template.getName());
-            stmt.setInt(2, CarbonContext.getCurrentContext().getTenantId());
-            stmt.execute();
+            stmt.setInt(2, this.getCurrentTenantId());
+            int rowsCreated = stmt.executeUpdate();
 
-            this.setDatabasePrivilegeTemplateProperties(conn, template);
-
-            conn.commit();
-            stmt.close();
-        } catch (SQLException e) {
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                log.error(e1);
+            if (rowsCreated == 0) {
+                throw new RSSManagerException("Database privilege was not created");
             }
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                template.setId(rs.getInt(1));
+            }
+            stmt.close();
+            return template;
+        } catch (SQLException e) {
             throw new RSSManagerException("Error occurred while creating database privilege " +
-                    "template '" + template.getName() + "'", e);
+                    "template '" + template.getName() + "' : " + e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -1072,128 +1219,148 @@ public class RSSDAOImpl implements RSSDAO {
         }
     }
 
-    private void setDatabasePrivilegeTemplateProperties(
-            Connection conn, DatabasePrivilegeTemplate template) throws SQLException {
+    public boolean isDatabasePrivilegeTemplateExist(String templateName) throws RSSManagerException {
+        Connection conn = null;
+        boolean isExist = false;
+        try {
+            conn = RSSConfig.getInstance().getRSSDBConnection();
+            String sql = "SELECT ID FROM RM_DB_PRIVILEGE_TEMPLATE WHERE NAME = ? AND TENANT_ID = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, templateName);
+            stmt.setInt(2, this.getCurrentTenantId());
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                int templateId = rs.getInt("ID");
+                if (templateId > 0) {
+                   isExist = true;
+                }
+            }
+            return isExist;
+        } catch (SQLException e) {
+            throw new RSSManagerException("Error occurred while checking the existence " +
+                    "of database privilege template '" + templateName + "' : " + e.getMessage(), e);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                log.error(e);
+            }
+        }
+    }
+
+    public void setDatabasePrivilegeTemplateProperties(
+            DatabasePrivilegeTemplate template) throws RSSManagerException {
         DatabasePrivilegeSet privileges = template.getPrivileges();
+        Connection conn = null;
+        try {
+            conn = RSSConfig.getInstance().getRSSDBConnection();
+            String sql = "INSERT INTO RM_DB_PRIVILEGE_TEMPLATE_ENTRY(TEMPLATE_ID, SELECT_PRIV, INSERT_PRIV, UPDATE_PRIV, DELETE_PRIV, CREATE_PRIV, DROP_PRIV, GRANT_PRIV, REFERENCES_PRIV, INDEX_PRIV, ALTER_PRIV, CREATE_TMP_TABLE_PRIV, LOCK_TABLES_PRIV, CREATE_VIEW_PRIV, SHOW_VIEW_PRIV, CREATE_ROUTINE_PRIV, ALTER_ROUTINE_PRIV, EXECUTE_PRIV, EVENT_PRIV, TRIGGER_PRIV) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, template.getId());
+            stmt.setString(2, privileges.getSelectPriv());
+            stmt.setString(3, privileges.getInsertPriv());
+            stmt.setString(4, privileges.getUpdatePriv());
+            stmt.setString(5, privileges.getDeletePriv());
+            stmt.setString(6, privileges.getCreatePriv());
+            stmt.setString(7, privileges.getDropPriv());
+            stmt.setString(8, privileges.getGrantPriv());
+            stmt.setString(9, privileges.getReferencesPriv());
+            stmt.setString(10, privileges.getIndexPriv());
+            stmt.setString(11, privileges.getAlterPriv());
+            stmt.setString(12, privileges.getCreateTmpTablePriv());
+            stmt.setString(13, privileges.getLockTablesPriv());
+            stmt.setString(14, privileges.getCreateViewPriv());
+            stmt.setString(15, privileges.getShowViewPriv());
+            stmt.setString(16, privileges.getCreateRoutinePriv());
+            stmt.setString(17, privileges.getAlterRoutinePriv());
+            stmt.setString(18, privileges.getExecutePriv());
+            stmt.setString(19, privileges.getEventPriv());
+            stmt.setString(20, privileges.getTriggerPriv());
+            stmt.executeUpdate();
 
-        String sql = "INSERT INTO RM_DB_PRIVILEGE_TEMPLATE_ENTRY(template_name, tenant_id, select_priv, insert_priv, update_priv, delete_priv, create_priv, drop_priv, grant_priv, references_priv, index_priv, alter_priv, create_tmp_table_priv, lock_tables_priv, create_view_priv, show_view_priv, create_routine_priv, alter_routine_priv, execute_priv, event_priv, trigger_priv) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, template.getName());
-        stmt.setInt(2, CarbonContext.getCurrentContext().getTenantId());
-        stmt.setString(3, privileges.getSelectPriv());
-        stmt.setString(4, privileges.getInsertPriv());
-        stmt.setString(5, privileges.getUpdatePriv());
-        stmt.setString(6, privileges.getDeletePriv());
-        stmt.setString(7, privileges.getCreatePriv());
-        stmt.setString(8, privileges.getDropPriv());
-        stmt.setString(9, privileges.getGrantPriv());
-        stmt.setString(10, privileges.getReferencesPriv());
-        stmt.setString(11, privileges.getIndexPriv());
-        stmt.setString(12, privileges.getAlterPriv());
-        stmt.setString(13, privileges.getCreateTmpTablePriv());
-        stmt.setString(14, privileges.getLockTablesPriv());
-        stmt.setString(15, privileges.getCreateViewPriv());
-        stmt.setString(16, privileges.getShowViewPriv());
-        stmt.setString(17, privileges.getCreateRoutinePriv());
-        stmt.setString(18, privileges.getAlterRoutinePriv());
-        stmt.setString(19, privileges.getExecutePriv());
-        stmt.setString(20, privileges.getEventPriv());
-        stmt.setString(21, privileges.getTriggerPriv());
-        stmt.executeUpdate();
-        
-        stmt.close();
+            stmt.close();
+        } catch (SQLException e) {
+            throw new RSSManagerException("Error occurred setting database privilege template " +
+                    "properties : " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    log.error(e);
+                }
+            }
+        }
     }
 
-    private void setUserDatabasePrivileges(
-            Connection conn, UserDatabaseEntry entry) throws SQLException {
-        DatabasePrivilegeSet privileges = entry.getPrivileges();
-
-        String sql = "INSERT INTO RM_USER_DATABASE_PRIVILEGE(username, database_name, rss_instance_name, tenant_id, select_priv, insert_priv, update_priv, delete_priv, create_priv, drop_priv, grant_priv, references_priv, index_priv, alter_priv, create_tmp_table_priv, lock_tables_priv, create_view_priv, show_view_priv, create_routine_priv, alter_routine_priv, execute_priv, event_priv, trigger_priv) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, entry.getUsername());
-        stmt.setString(2, entry.getDatabaseName());
-        stmt.setString(3, entry.getRssInstanceName());
-        stmt.setInt(4, CarbonContext.getCurrentContext().getTenantId());
-        stmt.setString(5, privileges.getSelectPriv());
-        stmt.setString(6, privileges.getInsertPriv());
-        stmt.setString(7, privileges.getUpdatePriv());
-        stmt.setString(8, privileges.getDeletePriv());
-        stmt.setString(9, privileges.getCreatePriv());
-        stmt.setString(10, privileges.getDropPriv());
-        stmt.setString(11, privileges.getGrantPriv());
-        stmt.setString(12, privileges.getReferencesPriv());
-        stmt.setString(13, privileges.getIndexPriv());
-        stmt.setString(14, privileges.getAlterPriv());
-        stmt.setString(15, privileges.getCreateTmpTablePriv());
-        stmt.setString(16, privileges.getLockTablesPriv());
-        stmt.setString(17, privileges.getCreateViewPriv());
-        stmt.setString(18, privileges.getShowViewPriv());
-        stmt.setString(19, privileges.getCreateRoutinePriv());
-        stmt.setString(20, privileges.getAlterRoutinePriv());
-        stmt.setString(21, privileges.getExecutePriv());
-        stmt.setString(22, privileges.getEventPriv());
-        stmt.setString(23, privileges.getTriggerPriv());
-        stmt.executeUpdate();
-        stmt.close();
+    public void setUserDatabasePrivileges(
+            UserDatabaseEntry entry, DatabasePrivilegeTemplate template) throws RSSManagerException {
+        DatabasePrivilegeSet privileges = template.getPrivileges();
+        Connection conn = null;
+        try {
+            conn = RSSConfig.getInstance().getRSSDBConnection();
+            String sql = "INSERT INTO RM_USER_DATABASE_PRIVILEGE(USER_DATABASE_ENTRY_ID, SELECT_PRIV, INSERT_PRIV, UPDATE_PRIV, DELETE_PRIV, CREATE_PRIV, DROP_PRIV, GRANT_PRIV, REFERENCES_PRIV, INDEX_PRIV, ALTER_PRIV, CREATE_TMP_TABLE_PRIV, LOCK_TABLES_PRIV, CREATE_VIEW_PRIV, SHOW_VIEW_PRIV, CREATE_ROUTINE_PRIV, ALTER_ROUTINE_PRIV, EXECUTE_PRIV, EVENT_PRIV, TRIGGER_PRIV) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, entry.getId());
+            stmt.setString(2, privileges.getSelectPriv());
+            stmt.setString(3, privileges.getInsertPriv());
+            stmt.setString(4, privileges.getUpdatePriv());
+            stmt.setString(5, privileges.getDeletePriv());
+            stmt.setString(6, privileges.getCreatePriv());
+            stmt.setString(7, privileges.getDropPriv());
+            stmt.setString(8, privileges.getGrantPriv());
+            stmt.setString(9, privileges.getReferencesPriv());
+            stmt.setString(10, privileges.getIndexPriv());
+            stmt.setString(11, privileges.getAlterPriv());
+            stmt.setString(12, privileges.getCreateTmpTablePriv());
+            stmt.setString(13, privileges.getLockTablesPriv());
+            stmt.setString(14, privileges.getCreateViewPriv());
+            stmt.setString(15, privileges.getShowViewPriv());
+            stmt.setString(16, privileges.getCreateRoutinePriv());
+            stmt.setString(17, privileges.getAlterRoutinePriv());
+            stmt.setString(18, privileges.getExecutePriv());
+            stmt.setString(19, privileges.getEventPriv());
+            stmt.setString(20, privileges.getTriggerPriv());
+            stmt.executeUpdate();
+            stmt.close();
+        } catch (SQLException e) {
+            throw new RSSManagerException("Error occurred while setting user database " +
+                    "privileges for the database user '" + entry.getUsername() + "' on database '" +
+                    entry.getDatabaseName() + "' : " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    log.error(e);
+                }
+            }
+        }
     }
 
-    private void updateUserDatabasePrivileges(Connection conn,
-                                             UserDatabaseEntry userDBEntry) throws SQLException {
-        DatabasePrivilegeSet privileges = userDBEntry.getPrivileges();
-
-        String sql = "UPDATE RM_DB_PRIVILEGE_TEMPLATE_ENTRY SET select_priv = ?, insert_priv = ?, update_priv = ?, delete_priv = ?, create_priv = ?, drop_priv = ?, grant_priv = ?, references_priv = ?, index_priv = ?, alter_priv = ?, create_tmp_table_priv = ?, lock_tables_priv = ?, create_view_priv = ?, show_view_priv = ?, create_routine_priv = ?, alter_routine_priv = ?, execute_priv = ?, event_priv = ?, trigger_priv = ? WHERE username = ? AND database_name = ? AND rss_instance_name = ? AND tenant_id = ?";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, privileges.getSelectPriv());
-        stmt.setString(2, privileges.getInsertPriv());
-        stmt.setString(3, privileges.getUpdatePriv());
-        stmt.setString(4, privileges.getDeletePriv());
-        stmt.setString(5, privileges.getCreatePriv());
-        stmt.setString(6, privileges.getDropPriv());
-        stmt.setString(7, privileges.getGrantPriv());
-        stmt.setString(8, privileges.getReferencesPriv());
-        stmt.setString(9, privileges.getIndexPriv());
-        stmt.setString(10, privileges.getAlterPriv());
-        stmt.setString(11, privileges.getCreateTmpTablePriv());
-        stmt.setString(12, privileges.getLockTablesPriv());
-        stmt.setString(13, privileges.getCreateViewPriv());
-        stmt.setString(14, privileges.getShowViewPriv());
-        stmt.setString(15, privileges.getCreateRoutinePriv());
-        stmt.setString(16, privileges.getAlterRoutinePriv());
-        stmt.setString(17, privileges.getExecutePriv());
-        stmt.setString(18, privileges.getEventPriv());
-        stmt.setString(19, privileges.getTriggerPriv());
-        stmt.setString(20, userDBEntry.getUsername());
-        stmt.setString(21, userDBEntry.getDatabaseName());
-        stmt.setString(22, userDBEntry.getRssInstanceName());
-        stmt.setInt(23, CarbonContext.getCurrentContext().getTenantId());
-
-        stmt.executeUpdate();
-        stmt.close();
-    }
-
-    @Override
+    /**
+     * Drops a database privilege template carriying the given name which belongs to the currently
+     * logged in tenant.
+     *
+     * @param templateName Name of the database privilege template to be deleted
+     * @throws RSSManagerException Is thrown in case of an unexpected error such as database access
+     *                             failure, etc.
+     */
     public void dropDatabasePrivilegesTemplate(String templateName) throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         try {
-            conn.setAutoCommit(false);
-
-            this.removeDatabasePrivilegesTemplateEntries(conn, templateName);
-            String sql = "DELETE FROM RM_DB_PRIVILEGE_TEMPLATE WHERE name = ? AND tenant_id = ?";
+            int tenantId = this.getCurrentTenantId();
+            String sql = "DELETE FROM RM_DB_PRIVILEGE_TEMPLATE WHERE NAME = ? AND TENANT_ID = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, templateName);
-            stmt.setInt(2, CarbonContext.getCurrentContext().getTenantId());
+            stmt.setInt(2, tenantId);
             stmt.executeUpdate();
-            conn.commit();
-
             stmt.close();
         } catch (SQLException e) {
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                log.error(e1);
-            }
             throw new RSSManagerException("Error occurred while dropping the database privilege " +
-                    "template '" + templateName + "'", e);
+                    "template '" + templateName + "' : " + e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -1205,23 +1372,50 @@ public class RSSDAOImpl implements RSSDAO {
         }
     }
 
-    private void removeDatabasePrivilegesTemplateEntries(
-            Connection conn, String templateName) throws SQLException {
-        String sql = "DELETE FROM RM_DB_PRIVILEGE_TEMPLATE_ENTRY WHERE template_name=?";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, templateName);
-        stmt.executeUpdate();
+    /**
+     * Remotes the permission entries assigned to a particular database privilege template.
+     *
+     * @param templateName Name of the database template associated with the permissions
+     * @param tenantId     Id of the currently logged in tenant
+     * @throws RSSManagerException Is thrown if any unexpected error occurs
+     */
+    public void removeDatabasePrivilegesTemplateEntries(String templateName, int tenantId) throws RSSManagerException {
+        Connection conn = null;
+        try {
+            conn = RSSConfig.getInstance().getRSSDBConnection();
+            String sql = "DELETE FROM RM_DB_PRIVILEGE_TEMPLATE_ENTRY WHERE TEMPLATE_ID = (SELECT ID FROM RM_DB_PRIVILEGE_TEMPLATE WHERE NAME = ? AND TENANT_ID = ?)";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, templateName);
+            stmt.setInt(2, tenantId);
+            stmt.executeUpdate();
 
-        stmt.close();
+            stmt.close();
+        } catch (SQLException e) {
+            throw new RSSManagerException("Error occurred while removing database privilege " +
+                    "template entries : " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    log.error(e);
+                }
+            }
+        }
     }
 
-    @Override
+    /**
+     * Updates the database permissions enabled in a particular database privilege template.
+     *
+     * @param template Name of the associated database privilege template
+     * @throws RSSManagerException Is thrown if any unexpected error occurs
+     */
     public void editDatabasePrivilegesTemplate(
             DatabasePrivilegeTemplate template) throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         DatabasePrivilegeSet privileges = template.getPrivileges();
         try {
-            String sql = "UPDATE RM_DB_PRIVILEGE_TEMPLATE_ENTRY SET select_priv = ?, insert_priv = ?, update_priv = ?, delete_priv = ?, create_priv = ?, drop_priv = ?, grant_priv = ?, references_priv = ?, index_priv = ?, alter_priv = ?, create_tmp_table_priv = ?, lock_tables_priv = ?, create_view_priv = ?, show_view_priv = ?, create_routine_priv = ?, alter_routine_priv = ?, execute_priv = ?, event_priv = ?, trigger_priv = ? WHERE template_name = ? AND tenant_id = ?";
+            String sql = "UPDATE RM_DB_PRIVILEGE_TEMPLATE_ENTRY SET SELECT_PRIV = ?, INSERT_PRIV = ?, UPDATE_PRIV = ?, DELETE_PRIV = ?, CREATE_PRIV = ?, DROP_PRIV = ?, GRANT_PRIV = ?, REFERENCES_PRIV = ?, INDEX_PRIV = ?, ALTER_PRIV = ?, CREATE_TMP_TABLE_PRIV = ?, LOCK_TABLES_PRIV = ?, CREATE_VIEW_PRIV = ?, SHOW_VIEW_PRIV = ?, CREATE_ROUTINE_PRIV = ?, ALTER_ROUTINE_PRIV = ?, EXECUTE_PRIV = ?, EVENT_PRIV = ?, TRIGGER_PRIV = ? WHERE TEMPLATE_ID = (SELECT ID FROM RM_DB_PRIVILEGE_TEMPLATE WHERE NAME = ? AND TENANT_ID = ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, privileges.getSelectPriv());
             stmt.setString(2, privileges.getInsertPriv());
@@ -1243,13 +1437,12 @@ public class RSSDAOImpl implements RSSDAO {
             stmt.setString(18, privileges.getEventPriv());
             stmt.setString(19, privileges.getTriggerPriv());
             stmt.setString(20, template.getName());
-            stmt.setInt(21, CarbonContext.getCurrentContext().getTenantId());
+            stmt.setInt(21, this.getCurrentTenantId());
             stmt.executeUpdate();
-
             stmt.close();
         } catch (SQLException e) {
             throw new RSSManagerException("Error occurred while editing the database privilege " +
-                    "template '" + template.getName() + "'", e);
+                    "template '" + template.getName() + "' : " + e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -1261,13 +1454,21 @@ public class RSSDAOImpl implements RSSDAO {
         }
     }
 
-    @Override
+    /**
+     * Retrieves all the database privilege template entries created by the tenant which carries
+     * the given id.
+     *
+     * @param tid Id of the logged in tenant
+     * @return The list of database privilege templates belong to the given
+     *         tenant
+     * @throws RSSManagerException Is thrown if any unexpected error occurs
+     */
     public List<DatabasePrivilegeTemplate> getAllDatabasePrivilegesTemplates(int tid) throws
             RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         PreparedStatement stmt;
         try {
-            String sql = "SELECT name, tenant_id FROM RM_DB_PRIVILEGE_TEMPLATE WHERE tenant_id = ?";
+            String sql = "SELECT p.ID, p.NAME, p.TENANT_ID, e.SELECT_PRIV, e.INSERT_PRIV, e.UPDATE_PRIV, e.DELETE_PRIV, e.CREATE_PRIV, e.DROP_PRIV, e.GRANT_PRIV, e.REFERENCES_PRIV, e.INDEX_PRIV, e.ALTER_PRIV, e.CREATE_TMP_TABLE_PRIV, e.LOCK_TABLES_PRIV, e.CREATE_VIEW_PRIV, e.SHOW_VIEW_PRIV, e.CREATE_ROUTINE_PRIV, e.ALTER_ROUTINE_PRIV, e.EXECUTE_PRIV, e.EVENT_PRIV, e.TRIGGER_PRIV FROM RM_DB_PRIVILEGE_TEMPLATE p, RM_DB_PRIVILEGE_TEMPLATE_ENTRY e WHERE p.ID = e.TEMPLATE_ID AND p.TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tid);
             ResultSet rs = stmt.executeQuery();
@@ -1277,10 +1478,11 @@ public class RSSDAOImpl implements RSSDAO {
             }
             rs.close();
             stmt.close();
+
             return result;
         } catch (SQLException e) {
             throw new RSSManagerException("Error occurred while retrieving database privilege " +
-                    "templates", e);
+                    "templates : " + e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -1292,27 +1494,35 @@ public class RSSDAOImpl implements RSSDAO {
         }
     }
 
-    @Override
+    /**
+     * Retrieves the database privilege information associated with the template which carries the
+     * given template name.
+     *
+     * @param templateName Name of the database privilege template to be retrieved
+     * @return Database privilege template information
+     * @throws RSSManagerException Is thrown if any unexpected error occurs
+     */
     public DatabasePrivilegeTemplate getDatabasePrivilegesTemplate(
             String templateName) throws RSSManagerException {
         Connection conn = RSSConfig.getInstance().getRSSDBConnection();
         PreparedStatement stmt;
         DatabasePrivilegeTemplate template = null;
         try {
-            String sql = "SELECT name, tenant_id FROM RM_DB_PRIVILEGE_TEMPLATE WHERE name = ? AND tenant_id=?";
+            String sql = "SELECT p.ID, p.NAME, p.TENANT_ID, e.SELECT_PRIV, e.INSERT_PRIV, e.UPDATE_PRIV, e.DELETE_PRIV, e.CREATE_PRIV, e.DROP_PRIV, e.GRANT_PRIV, e.REFERENCES_PRIV, e.INDEX_PRIV, e.ALTER_PRIV, e.CREATE_TMP_TABLE_PRIV, e.LOCK_TABLES_PRIV, e.CREATE_VIEW_PRIV, e.SHOW_VIEW_PRIV, e.CREATE_ROUTINE_PRIV, e.ALTER_ROUTINE_PRIV, e.EXECUTE_PRIV, e.EVENT_PRIV, e.TRIGGER_PRIV FROM RM_DB_PRIVILEGE_TEMPLATE p, RM_DB_PRIVILEGE_TEMPLATE_ENTRY e WHERE p.ID = e.TEMPLATE_ID AND p.NAME = ? AND p.TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, templateName);
-            stmt.setInt(2, CarbonContext.getCurrentContext().getTenantId());
+            stmt.setInt(2, this.getCurrentTenantId());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 template = this.createDatabasePrivilegeTemplateFromRS(rs);
             }
             rs.close();
             stmt.close();
+
             return template;
         } catch (SQLException e) {
             throw new RSSManagerException("Error occurred while retrieving database privilege " +
-                    "template information", e);
+                    "template information : " + e.getMessage(), e);
         } finally {
             try {
                 if (conn != null) {
@@ -1324,101 +1534,120 @@ public class RSSDAOImpl implements RSSDAO {
         }
     }
 
-    private DatabasePrivilegeSet getUserPrivilegeGroupEntries(String templateName, int tenantId)
-            throws SQLException, RSSManagerException {
-        Connection conn = RSSConfig.getInstance().getRSSDBConnection();
-        PreparedStatement stmt = conn.prepareStatement("SELECT select_priv, insert_priv, update_priv, delete_priv, create_priv, drop_priv, grant_priv, references_priv, index_priv, alter_priv, create_tmp_table_priv, lock_tables_priv, create_view_priv, show_view_priv, create_routine_priv, alter_routine_priv, execute_priv, event_priv, trigger_priv " +
-                "FROM RM_DB_PRIVILEGE_TEMPLATE_ENTRY WHERE template_name = ? AND tenant_id = ?");
-        stmt.setString(1, templateName);
-        stmt.setInt(2, tenantId);
-        ResultSet rs = stmt.executeQuery();
-        DatabasePrivilegeSet privileges = new DatabasePrivilegeSet();
-        if (rs.next()) {
-            privileges = this.createUserDatabasePrivilegeSetFromRS(rs);
-        }
-        rs.close();
-        stmt.close();
-        return privileges;
-    }
-
+    /**
+     * Extracts the assigned values for the database permissions from a result set.
+     *
+     * @param rs Result set carrying the database permission information
+     * @return Database privilege set wrapping the returned result
+     * @throws SQLException Is thrown if any unexpected error occurs while retrieving the values
+     *                      from the result set
+     */
     private DatabasePrivilegeSet createUserDatabasePrivilegeSetFromRS(ResultSet rs) throws
             SQLException {
         DatabasePrivilegeSet privileges = new DatabasePrivilegeSet();
-        privileges.setSelectPriv(rs.getString("select_priv"));
-        privileges.setInsertPriv(rs.getString("insert_priv"));
-        privileges.setUpdatePriv(rs.getString("update_priv"));
-        privileges.setDeletePriv(rs.getString("delete_priv"));
-        privileges.setCreatePriv(rs.getString("create_priv"));
-        privileges.setDropPriv(rs.getString("drop_priv"));
-        privileges.setGrantPriv(rs.getString("grant_priv"));
-        privileges.setReferencesPriv(rs.getString("references_priv"));
-        privileges.setIndexPriv(rs.getString("index_priv"));
-        privileges.setAlterPriv(rs.getString("alter_priv"));
-        privileges.setCreateTmpTablePriv(rs.getString("create_tmp_table_priv"));
-        privileges.setLockTablesPriv(rs.getString("lock_tables_priv"));
-        privileges.setCreateViewPriv(rs.getString("create_view_priv"));
-        privileges.setShowViewPriv(rs.getString("show_view_priv"));
-        privileges.setCreateRoutinePriv(rs.getString("create_routine_priv"));
-        privileges.setAlterRoutinePriv(rs.getString("alter_routine_priv"));
-        privileges.setExecutePriv(rs.getString("execute_priv"));
-        privileges.setEventPriv(rs.getString("event_priv"));
-        privileges.setTriggerPriv(rs.getString("trigger_priv"));
+        privileges.setSelectPriv(rs.getString("SELECT_PRIV"));
+        privileges.setInsertPriv(rs.getString("INSERT_PRIV"));
+        privileges.setUpdatePriv(rs.getString("UPDATE_PRIV"));
+        privileges.setDeletePriv(rs.getString("DELETE_PRIV"));
+        privileges.setCreatePriv(rs.getString("CREATE_PRIV"));
+        privileges.setDropPriv(rs.getString("DROP_PRIV"));
+        privileges.setGrantPriv(rs.getString("GRANT_PRIV"));
+        privileges.setReferencesPriv(rs.getString("REFERENCES_PRIV"));
+        privileges.setIndexPriv(rs.getString("INDEX_PRIV"));
+        privileges.setAlterPriv(rs.getString("ALTER_PRIV"));
+        privileges.setCreateTmpTablePriv(rs.getString("CREATE_TMP_TABLE_PRIV"));
+        privileges.setLockTablesPriv(rs.getString("LOCK_TABLES_PRIV"));
+        privileges.setCreateViewPriv(rs.getString("CREATE_VIEW_PRIV"));
+        privileges.setShowViewPriv(rs.getString("SHOW_VIEW_PRIV"));
+        privileges.setCreateRoutinePriv(rs.getString("CREATE_ROUTINE_PRIV"));
+        privileges.setAlterRoutinePriv(rs.getString("ALTER_ROUTINE_PRIV"));
+        privileges.setExecutePriv(rs.getString("EXECUTE_PRIV"));
+        privileges.setEventPriv(rs.getString("EVENT_PRIV"));
+        privileges.setTriggerPriv(rs.getString("TRIGGER_PRIV"));
 
         return privileges;
     }
 
+    /**
+     * Extracts the database privilege template information from a result set.
+     *
+     * @param rs Result set carrying the database privilege template information
+     * @return Database privilege template object wrapping the returned result
+     * @throws SQLException        Is thrown if any unexpected error occurs while retrieving the
+     *                             values from the result set
+     * @throws RSSManagerException Is thrown if any unexpected error occurs while retrieving the
+     *                             values from the result set
+     */
     private DatabasePrivilegeTemplate createDatabasePrivilegeTemplateFromRS(ResultSet rs) throws
             SQLException, RSSManagerException {
-        String templateName = rs.getString("name");
-        int tid = rs.getInt("tenant_id");
-        DatabasePrivilegeSet privileges = this.getUserPrivilegeGroupEntries(templateName, tid);
-        return new DatabasePrivilegeTemplate(templateName, privileges);
-    }
+        int id = rs.getInt("ID");
+        String templateName = rs.getString("NAME");
+        DatabasePrivilegeSet privileges = new DatabasePrivilegeSet();
+        privileges.setSelectPriv(rs.getString("SELECT_PRIV"));
+        privileges.setInsertPriv(rs.getString("INSERT_PRIV"));
+        privileges.setUpdatePriv(rs.getString("UPDATE_PRIV"));
+        privileges.setDeletePriv(rs.getString("DELETE_PRIV"));
+        privileges.setCreatePriv(rs.getString("CREATE_PRIV"));
+        privileges.setDropPriv(rs.getString("DROP_PRIV"));
+        privileges.setGrantPriv(rs.getString("GRANT_PRIV"));
+        privileges.setReferencesPriv(rs.getString("REFERENCES_PRIV"));
+        privileges.setIndexPriv(rs.getString("INDEX_PRIV"));
+        privileges.setAlterPriv(rs.getString("ALTER_PRIV"));
+        privileges.setCreateTmpTablePriv(rs.getString("CREATE_TMP_TABLE_PRIV"));
+        privileges.setLockTablesPriv(rs.getString("LOCK_TABLES_PRIV"));
+        privileges.setCreateViewPriv(rs.getString("CREATE_VIEW_PRIV"));
+        privileges.setShowViewPriv(rs.getString("SHOW_VIEW_PRIV"));
+        privileges.setCreateRoutinePriv(rs.getString("CREATE_ROUTINE_PRIV"));
+        privileges.setAlterRoutinePriv(rs.getString("ALTER_ROUTINE_PRIV"));
+        privileges.setExecutePriv(rs.getString("EXECUTE_PRIV"));
+        privileges.setEventPriv(rs.getString("EVENT_PRIV"));
+        privileges.setTriggerPriv(rs.getString("TRIGGER_PRIV"));
 
-    private List<String> getExistingDatabasePermissions(
-            Connection conn, String username, String databaseName) throws RSSManagerException {
-        try {
-            String sql = "SELECT perm_name " +
-                    "FROM RM_USER_DATABASE_PRIVILEGE WHERE username=? AND database_name=?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, username);
-            stmt.setString(2, databaseName);
-            ResultSet rs = stmt.executeQuery();
-            List<String> permNames = new ArrayList<String>();
-            while (rs.next()) {
-                permNames.add(rs.getString("perm_name"));
-            }
-            rs.close();
-            stmt.close();
-            return permNames;
-        } catch (SQLException e) {
-            throw new RSSManagerException("Error occurred while retrieving existing database " +
-                    "permissions granted for the database user '" + username + "'", e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                log.error(e);
-            }
-        }
+        return new DatabasePrivilegeTemplate(id, templateName, privileges);
     }
 
     private Database createDatabaseFromRS(ResultSet rs) throws SQLException,
             RSSManagerException {
-        String dbName = rs.getString(1);
-        int dbTenantId = rs.getInt(2);
-        String rssName = rs.getString(3);
-        String rssServerUrl = rs.getString(4);
-        int rssTenantId = rs.getInt(5);
+        int id = rs.getInt("DATABASE_ID");
+        String dbName = rs.getString("NAME");
+        int dbTenantId = rs.getInt("TENANT_ID");
+        String rssName = rs.getString("RSS_INSTANCE_NAME");
+        String rssServerUrl = rs.getString("SERVER_URL");
+        int rssTenantId = rs.getInt("RSS_INSTANCE_TENANT_ID");
+        String type = rs.getString("TYPE");
 
         if (rssTenantId == MultitenantConstants.SUPER_TENANT_ID &&
                 dbTenantId != MultitenantConstants.SUPER_TENANT_ID) {
             rssName = RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE;
         }
         String url = rssServerUrl + "/" + dbName;
-        return new Database(dbName, rssName, url, rssTenantId);
+        return new Database(id, dbName, rssName, url, type, rssTenantId);
+    }
+
+    private RSSInstance createRSSInstanceFromRS(ResultSet rs) throws SQLException {
+        int id = rs.getInt("ID");
+        String name = rs.getString("NAME");
+        String serverURL = rs.getString("SERVER_URL");
+        String instanceType = rs.getString("INSTANCE_TYPE");
+        String serverCategory = rs.getString("SERVER_CATEGORY");
+        String adminUsername = rs.getString("ADMIN_USERNAME");
+        String adminPassword = rs.getString("ADMIN_PASSWORD");
+        String dbmsType = rs.getString("DBMS_TYPE");
+        int tenantId = rs.getInt("TENANT_ID");
+        return new RSSInstance(id, name, serverURL, dbmsType, instanceType, serverCategory,
+                adminUsername, adminPassword, tenantId);
+    }
+
+    private DatabaseUser createDatabaseUserFromRS(ResultSet rs) throws SQLException {
+        String username = rs.getString("USERNAME");
+        String rssInstName = rs.getString("RSS_INSTANCE_NAME");
+        int tenantId = rs.getInt("TENANT_ID");
+        String type = rs.getString("TYPE");
+        return new DatabaseUser(username, null, rssInstName, type, tenantId);
+    }
+
+    private int getCurrentTenantId() {
+        return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
     }
 
 }

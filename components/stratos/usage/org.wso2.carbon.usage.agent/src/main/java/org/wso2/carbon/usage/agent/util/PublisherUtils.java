@@ -24,10 +24,20 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
-import org.wso2.carbon.event.core.EventBroker;
-import org.wso2.carbon.event.core.Message;
-import org.wso2.carbon.event.core.exception.EventBrokerException;
+import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.databridge.agent.thrift.Agent;
+import org.wso2.carbon.databridge.agent.thrift.AsyncDataPublisher;
+import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
+import org.wso2.carbon.databridge.agent.thrift.conf.AgentConfiguration;
+import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
+import org.wso2.carbon.databridge.commons.Event;
+import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
+import org.wso2.carbon.databridge.commons.exception.NoStreamDefinitionExistException;
+import org.wso2.carbon.databridge.commons.exception.TransportException;
+import org.wso2.carbon.statistics.services.util.SystemStatistics;
+import org.wso2.carbon.stratos.common.util.CommonUtil;
+import org.wso2.carbon.stratos.common.util.StratosConfiguration;
 import org.wso2.carbon.usage.agent.beans.BandwidthUsage;
 import org.wso2.carbon.usage.agent.exception.UsageException;
 import org.wso2.carbon.user.api.Tenant;
@@ -36,7 +46,11 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.math.BigInteger;
+import java.net.MalformedURLException;
 import java.net.SocketException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * this class provide utility methods to publish usage statistics
@@ -45,6 +59,18 @@ public class PublisherUtils {
     private static Log log = LogFactory.getLog(PublisherUtils.class);
     private static final String TRANSPORT = "https";
     private static ConfigurationContextService configurationContextService;
+    private static Agent agent;
+    private static DataPublisher dataPublisher;
+    private static AsyncDataPublisher asyncDataPublisher;
+    private static String streamId;
+    private static final String usageEventStream = "org.wso2.carbon.usage.agent";
+    private static final String usageEventStreamVersion = "1.0.0";
+    
+    private static final String reqStatEventStream="org.wso2.carbon.service.request.stats";
+    private static final String reqStatEventStreamVersion="1.0.0";
+    private static String reqStatEventStreamId;
+    
+    private static Map<Integer, String> serverUrlMap = new HashMap<Integer, String>();
 
 
     /**
@@ -108,76 +134,135 @@ public class PublisherUtils {
 
         return serverName;
     }
+    
+    public static String getServerUrl(int tenantId){
+
+        String serverUrl = serverUrlMap.get(tenantId);
+        if(serverUrl!=null){
+            return serverUrl;
+        }
+
+        if(serverUrl==null){
+            try{
+                serverUrl = updateServerName(tenantId);
+            }catch (UsageException e) {
+                log.error("Could not create the server url for tenant id: " + tenantId, e);
+            }
+        }
+
+        if(serverUrl!=null && !"".equals(serverUrl)){
+            serverUrlMap.put(tenantId, serverUrl);
+        }
+        return serverUrl;
+    }
+
+    public static void defineUsageEventStream() throws Exception {
+
+        createDataPublisher();
+
+        if(dataPublisher == null){
+            return;
+        }
+
+        try {
+
+            streamId = dataPublisher.findStream(usageEventStream, usageEventStreamVersion);
+            log.info("Event stream with stream ID: " + streamId + " found.");
+
+        } catch (NoStreamDefinitionExistException e) {
+
+            log.info("Defining the event stream because it was not found in BAM");
+            try {
+                defineStream();    
+            } catch (Exception ex) {
+                String msg = "An error occurred while defining the even stream for Usage agent. " + e.getMessage();
+                log.warn(msg);
+            }
+
+        }
+
+    }
+    
+    private static void defineStream() throws Exception {
+        streamId = dataPublisher.
+                defineStream("{" +
+                        "  'name':'" + usageEventStream +"'," +
+                        "  'version':'" + usageEventStreamVersion +"'," +
+                        "  'nickName': 'usage.agent'," +
+                        "  'description': 'Tenant usage data'," +
+                        "  'metaData':[" +
+                        "          {'name':'clientType','type':'STRING'}" +
+                        "  ]," +
+                        "  'payloadData':[" +
+                        "          {'name':'ServerName','type':'STRING'}," +
+                        "          {'name':'TenantID','type':'STRING'}," +
+                        "          {'name':'Type','type':'STRING'}," +
+                        "          {'name':'Value','type':'LONG'}" +
+                        "  ]" +
+                        "}");
+        
+    }
+    
+    private static void defineRequestStatEventStream() throws Exception{
+        reqStatEventStreamId = dataPublisher.
+                defineStream("{" +
+                        "  'name':'" + reqStatEventStream +"'," +
+                        "  'version':'" + reqStatEventStreamVersion +"'," +
+                        "  'nickName': 'service.request.stats'," +
+                        "  'description': 'Tenants service request statistics'," +
+                        "  'metaData':[" +
+                        "          {'name':'clientType','type':'STRING'}" +
+                        "  ]," +
+                        "  'payloadData':[" +
+                        "          {'name':'ServerName','type':'STRING'}," +
+                        "          {'name':'TenantID','type':'STRING'}," +
+                        "          {'name':'RequestCount','type':'INT'}," +
+                        "          {'name':'ResponseCount','type':'INT'}," +
+                        "          {'name':'FaultCount','type':'INT'}," +
+                        "          {'name':'ResponseTime','type':'LONG'}" +
+                        "  ]" +
+                        "}");
+    }
+
+    public static void createDataPublisher(){
+
+        ServerConfiguration serverConfig =  CarbonUtils.getServerConfiguration();
+        String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
+        String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
+        String bamServerUrl = serverConfig.getFirstProperty("BamServerURL");
+        String adminUsername = CommonUtil.getStratosConfig().getAdminUserName();
+        String adminPassword = CommonUtil.getStratosConfig().getAdminPassword();
+
+        System.setProperty("javax.net.ssl.trustStore", trustStorePath);
+        System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+
+        try {
+            dataPublisher = new DataPublisher(bamServerUrl, adminUsername, adminPassword);
+        } catch (Exception e) {
+            log.warn("Unable to create a data publisher to " + bamServerUrl +
+                    ". Usage Agent will not function properly. " + e.getMessage());
+        }
+
+    }
 
     /**
-     * this method generate the payload according to the following format.
-     * <p/>
-     * soapenv:Body xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
-     * <svrusrdata:Event xmlns:svrusrdata="http://wso2.org/ns/2009/09/bam/server/user-defined/data">
-     *  <svrusrdata:ServerUserDefinedData>
-     *    <svrusrdata:TenantID>1</svrusrdata:TenantID>
-     *    <svrusrdata:ServerName>localhost:port/</svrusrdata:ServerName>
-     *      <svrusrdata:Data>
-     *          <svrusrdata:Key>registryOutgoingBw</svrusrdata:Key>
-     *          <svrusrdata:Value>0</svrusrdata:Value>
-     *      </svrusrdata:Data>
-     *    </svrusrdata:ServerUserDefinedData>
-     * </svrusrdata:Event>
-     * </soapenv:Body>
-     *
-     * @param usage  BandwidthUsage
-     * @return eventElement
-     * @throws Exception
+     * Creates an async data publisher using the existing data publisher object
      */
-    //TODO Refactor: This should go inside BAM: common package
-    public static OMElement getEventPayload(BandwidthUsage usage) throws Exception {
+    public static void createAsynDataPublisher(){
+        if(dataPublisher==null){
+            createDataPublisher();
+        }
 
-        String measurement = usage.getMeasurement();
-        String value = Long.toString(usage.getValue());
-        int tenantId = usage.getTenantId();
+        if(dataPublisher==null){
+            log.warn("Cannot create the async data publisher because the data publisher is null");
+            return;
+        }
 
-        OMFactory factory = OMAbstractFactory.getOMFactory();
-
-        // add the xml namespace
-        OMNamespace statNamespace = factory.createOMNamespace(
-                UsageAgentConstants.STATISTICS_DATA_NS_URI,
-                UsageAgentConstants.STATISTICS_DATA_NS_PREFIX);
-        OMElement eventElement = factory.createOMElement(
-                UsageAgentConstants.STATISTICS_DATA_ELEMENT_NAME_EVENT, statNamespace);
-        OMElement serviceInvocationDataElement = factory.createOMElement(
-                UsageAgentConstants.STATISTICS_DATA_ELEMENT_NAME_SERVICE_STATISTICS_DATA,
-                statNamespace);
-        eventElement.addChild(serviceInvocationDataElement);
-
-        // add server name data element
-        OMElement serverNameElement = factory.createOMElement(
-                UsageAgentConstants.STATISTICS_DATA_ELEMENT_NAME_SERVER_NAME, statNamespace);
-        String serverName = PublisherUtils.updateServerName(usage.getTenantId());
-        factory.createOMText(serverNameElement, serverName);
-        serviceInvocationDataElement.addChild(serverNameElement);
-
-        // add tenant id data element
-        OMElement tenantElement = factory.createOMElement(
-                UsageAgentConstants.STATISTICS_DATA_ELEMENT_NAME_TENANT_ID, statNamespace);
-        factory.createOMText(tenantElement, Integer.toString(tenantId));
-        serviceInvocationDataElement.addChild(tenantElement);
-
-        // add data element to carry key, value pair
-        OMElement dataElement = factory.createOMElement(
-                UsageAgentConstants.ELEMENT_NAME_DATA, statNamespace);
-        serviceInvocationDataElement.addChild(dataElement);
-
-        OMElement keyElement = factory.createOMElement(
-                UsageAgentConstants.ELEMENT_NAME_KEY, statNamespace);
-        factory.createOMText(keyElement, measurement);
-        dataElement.addChild(keyElement);
-
-        OMElement valueElement = factory.createOMElement(
-                UsageAgentConstants.ELEMENT_NAME_VALUE, statNamespace);
-        factory.createOMText(valueElement, value);
-        dataElement.addChild(valueElement);
-
-        return eventElement;
+        try {
+            asyncDataPublisher = new AsyncDataPublisher(dataPublisher);
+        } catch (Exception e) {
+            log.error("Could not create an async data publisher using the data publisher", e);
+        }
     }
 
 
@@ -190,34 +275,104 @@ public class PublisherUtils {
      */
     public static void publish(BandwidthUsage usage) throws UsageException {
 
-        OMElement statMessage;
-        Message message;
+        if(dataPublisher==null){
+            log.info("Creating data publisher for usage data publishing");
+            createDataPublisher();
 
-        // get the event payload
+            //If we cannot create a data publisher we should give up
+            //this means data will not be published
+            if(dataPublisher == null){
+                return;
+            }
+        }
+
+        if(streamId == null){
+            try{
+                streamId = dataPublisher.findStream(usageEventStream, usageEventStreamVersion);
+            }catch (NoStreamDefinitionExistException e){
+                log.info("Defining the event stream because it was not found in BAM");
+                try{
+                    defineStream();
+                } catch(Exception ex){
+                    String msg = "Error occurred while defining the event stream for publishing usage data. " + ex.getMessage();
+                    log.error(msg);
+                    //We do not want to proceed without an event stream. Therefore we return.
+                    return;
+                }
+            }catch (Exception exc){
+                log.error("Error occurred while searching for stream id. " + exc.getMessage());
+                //We do not want to proceed without an event stream. Therefore we return.
+                return;
+            }
+        }
+
         try {
-            statMessage = PublisherUtils.getEventPayload(usage);
-            message = new Message();
-            message.setMessage(statMessage);
+
+            Event usageEvent = new Event(streamId, System.currentTimeMillis(), new Object[]{"external"}, null,
+                                        new Object[]{getServerUrl(usage.getTenantId()),
+                                                    Integer.toString(usage.getTenantId()),
+                                                    usage.getMeasurement(),
+                                                    usage.getValue()});
+
+            dataPublisher.publish(usageEvent);
+
         } catch (Exception e) {
-            log.error("Failed to get usage event payload", e);
-            return;
+            log.error("Error occurred while publishing usage event to BAM. " + e.getMessage(), e);
+            throw new UsageException(e.getMessage(), e);
         }
 
-        // get the topic of the event to be published
-        String topic = UsageAgentConstants.BANDWIDTH_USAGE_TOPIC;
-        EventBroker eventBrokerService = Util.getEventBrokerService();
-        // publish the event
-        try {
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-            SuperTenantCarbonContext.getCurrentContext().getTenantDomain(true);
-            // use publishRobust since collect data  and send after summarize 
-            eventBrokerService.publishRobust(message, topic);
-        } catch (EventBrokerException e) {
-            log.error("SystemStatisticsHandler - Unable to send notification for stat threshold", e);
-        } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+    }
+    
+    public static void publish(SystemStatistics statistics, int tenantId) throws Exception {
+
+        if(dataPublisher==null){
+            log.info("Creating data publisher for service-stats publishing");
+            createDataPublisher();
+
+            //If we cannot create a data publisher we should give up
+            //this means data will not be published
+            if(dataPublisher == null){
+                return;
+            }
         }
+
+        if(reqStatEventStreamId == null){
+            try{
+                reqStatEventStreamId = dataPublisher.findStream(reqStatEventStream, reqStatEventStreamVersion);
+            }catch (NoStreamDefinitionExistException e){
+                log.info("Defining the event stream because it was not found in BAM");
+                try{
+                    defineRequestStatEventStream();
+                } catch(Exception ex){
+                    String msg = "Error occurred while defining the event stream for publishing usage data. " + ex.getMessage();
+                    log.error(msg);
+                    //We do not want to proceed without an event stream. Therefore we return.
+                    return;
+                }
+            }catch (Exception exc){
+                log.error("Error occurred while searching for stream id. " + exc.getMessage());
+                //We do not want to proceed without an event stream. Therefore we return.
+                return;
+            }
+        }
+
+        try {
+
+            Event usageEvent = new Event(reqStatEventStreamId, System.currentTimeMillis(), new Object[]{"external"}, null,
+                    new Object[]{getServerUrl(tenantId),
+                            Integer.toString(tenantId),
+                            statistics.getCurrentInvocationRequestCount(),
+                            statistics.getCurrentInvocationResponseCount(),
+                            statistics.getCurrentInvocationFaultCount(),
+                            statistics.getCurrentInvocationResponseTime()});
+
+            dataPublisher.publish(usageEvent);
+
+        } catch (Exception e) {
+            log.error("Error occurred while publishing usage event to BAM. " + e.getMessage(), e);
+            throw new UsageException(e.getMessage(), e);
+        }
+
     }
 
     /**

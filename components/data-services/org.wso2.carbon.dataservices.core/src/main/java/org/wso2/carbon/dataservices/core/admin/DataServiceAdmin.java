@@ -22,9 +22,7 @@ import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.CellFeed;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
-import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisService;
@@ -35,12 +33,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.dataservices.common.DBConstants;
 import org.wso2.carbon.dataservices.core.DBDeployer;
 import org.wso2.carbon.dataservices.core.DBUtils;
 import org.wso2.carbon.dataservices.core.DataServiceFault;
-import org.wso2.carbon.dataservices.core.description.config.CarbonDataSourceConfig;
+import org.wso2.carbon.dataservices.core.description.config.SQLCarbonDataSourceConfig;
 import org.wso2.carbon.dataservices.core.description.config.GSpreadConfig;
 import org.wso2.carbon.dataservices.core.engine.DataService;
 import org.wso2.carbon.dataservices.core.engine.DataServiceSerializer;
@@ -48,9 +46,6 @@ import org.wso2.carbon.dataservices.core.script.DSGenerator;
 import org.wso2.carbon.dataservices.core.script.PaginatedTableInfo;
 import org.wso2.carbon.dataservices.core.sqlparser.SQLParserUtil;
 import org.wso2.carbon.utils.Pageable;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
-import org.wso2.securevault.SecretResolver;
-import org.wso2.securevault.SecretResolverFactory;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -90,7 +85,11 @@ public class DataServiceAdmin extends AbstractAdmin {
 			// Service could be a fault one. Loading contents directly from
 			// repository
 			URL repositoryURL = getAxisConfig().getRepository();
-			filePath = repositoryURL.getPath() + DBDeployer.DEPLOYMENT_FOLDER_NAME + File.separator
+            String  repositoryURLPath = repositoryURL.getPath();
+            if (repositoryURLPath != null && !repositoryURLPath.endsWith("/")) {
+                repositoryURLPath = repositoryURLPath + "/";
+            }
+			filePath = repositoryURLPath + DBDeployer.DEPLOYMENT_FOLDER_NAME + File.separator
 					+ serviceId + "." + DBConstants.DBS_FILE_EXTENSION;
 		}
 
@@ -195,13 +194,13 @@ public class DataServiceAdmin extends AbstractAdmin {
 	 * @return String; state
 	 */
 	public String testJDBCConnection(String driverClass, String jdbcURL, String username,
-			String password,String protectedTokens,String passwordProvider) {
+			String password, String passwordAlias) {
 		int tenantId =
-                SuperTenantCarbonContext.getCurrentContext(this.getConfigContext()).getTenantId();
+				PrivilegedCarbonContext.getCurrentContext(this.getConfigContext()).getTenantId();
 		Connection connection = null;
 		try {
-			SuperTenantCarbonContext.startTenantFlow();
-            CarbonContextHolder.getCurrentCarbonContextHolder().setTenantId(tenantId);
+			PrivilegedCarbonContext.startTenantFlow();
+			PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
 
 			String resolvePwd = "";
 			if (driverClass == null || driverClass.length() == 0) {
@@ -214,35 +213,9 @@ public class DataServiceAdmin extends AbstractAdmin {
 				log.debug(message);
 				return message;
 			}
-			if (protectedTokens.equals("null")) {
-				protectedTokens = "";
-			}
-			if (passwordProvider.equals("null")) {
-				passwordProvider = "";
-			}
-			if (!(DBUtils.isEmptyString(protectedTokens) && DBUtils
-					.isEmptyString(passwordProvider))) {
-				OMFactory fac = OMAbstractFactory.getOMFactory();
-				OMElement dataEl = fac.createOMElement("data", null);
-				OMElement passwordManagerEl = fac.createOMElement(
-						"passwordManager", null);
-				OMElement protectedTokensEl = fac.createOMElement(
-						"protectedTokens", null);
-				protectedTokensEl.setText(protectedTokens);
-				OMElement passwordProviderEl = fac.createOMElement(
-						"passwordProvider", null);
-				passwordProviderEl.setText(passwordProvider);
-				passwordManagerEl.addChild(protectedTokensEl);
-				passwordManagerEl.addChild(passwordProviderEl);
-				dataEl.addChild(passwordManagerEl);
-				SecretResolver secretResolver = SecretResolverFactory.create(
-						dataEl, false);
-				if (secretResolver != null
-						&& secretResolver.isTokenProtected(password)) {
-					resolvePwd = secretResolver.resolve(password);
-				} else {
-					resolvePwd = password;
-				}
+			
+			if (passwordAlias != null && !passwordAlias.equals("")) {
+				resolvePwd = DBUtils.loadFromSecureVault(passwordAlias);
 			} else {
 				resolvePwd = password;
 			}
@@ -269,7 +242,7 @@ public class DataServiceAdmin extends AbstractAdmin {
 				} catch (SQLException ignored) {
 				}
 			}
-			SuperTenantCarbonContext.endTenantFlow();
+			PrivilegedCarbonContext.endTenantFlow();
 		}
 	}
 
@@ -290,7 +263,7 @@ public class DataServiceAdmin extends AbstractAdmin {
 	 * @return string State
 	 */
 	public String testGSpreadConnection(String user, String password, String visibility,
-			String documentURL, String protectedTokens, String passwordProvider) {
+			String documentURL, String passwordAlias) {
 		String resolvePwd;
 		if (DBUtils.isEmptyString(documentURL)) {
 			String message = "Document URL is empty";
@@ -306,29 +279,9 @@ public class DataServiceAdmin extends AbstractAdmin {
 			log.warn(message);
 			return message;
 		}
-		if (protectedTokens == null) {
-			protectedTokens = "";
-		}
-		if (passwordProvider == null) {
-			passwordProvider = "";
-		}
-		if (!(DBUtils.isEmptyString(protectedTokens) && DBUtils.isEmptyString(passwordProvider))) {
-			OMFactory fac = OMAbstractFactory.getOMFactory();
-			OMElement dataEl = fac.createOMElement("data", null);
-			OMElement passwordManagerEl = fac.createOMElement("passwordManager", null);
-    		OMElement protectedTokensEl = fac.createOMElement("protectedTokens", null);
-    		protectedTokensEl.setText(protectedTokens);
-    		OMElement passwordProviderEl = fac.createOMElement("passwordProvider", null);
-    		passwordProviderEl.setText(passwordProvider);
-    		passwordManagerEl.addChild(protectedTokensEl);
-    		passwordManagerEl.addChild(passwordProviderEl);
-            dataEl.addChild(passwordManagerEl);
-            SecretResolver secretResolver = SecretResolverFactory.create(dataEl, false);
-            if (secretResolver.isInitialized() && secretResolver.isTokenProtected(password)) {
-                resolvePwd = secretResolver.resolve(password);
-            } else {
-                resolvePwd = password;
-            }
+		
+		if (passwordAlias != null && !passwordAlias.equals("")) {
+			resolvePwd = DBUtils.loadFromSecureVault(passwordAlias);
 		} else {
 			resolvePwd = password;
 		}
@@ -401,8 +354,17 @@ public class DataServiceAdmin extends AbstractAdmin {
 	}
 
 	public String[] getCarbonDataSourceNames() {
-		List<String> list = CarbonDataSourceConfig.getCarbonDataSourceNames();
+		List<String> list = SQLCarbonDataSourceConfig.getCarbonDataSourceNames();
 		return list.toArray(new String[list.size()]);
+	}
+	
+	public String[] getCarbonDataSourceNamesForTypes(String[] types) {
+		List<String> list = SQLCarbonDataSourceConfig.getCarbonDataSourceNamesForType(types);
+		return list.toArray(new String[list.size()]);
+	}
+	
+	public String getCarbonDataSourceType(String dsName) {
+		return SQLCarbonDataSourceConfig.getCarbonDataSourceType(dsName);
 	}
 
 	public String[] getOutputColumnNames(String sql) throws Exception {

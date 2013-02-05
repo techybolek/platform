@@ -19,16 +19,17 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ page import="org.wso2.carbon.registry.activities.ui.clients.ActivityServiceClient" %>
-<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="org.wso2.carbon.registry.activities.ui.report.beans.ActivityReportBean" %>
 <%@ page import="org.wso2.carbon.registry.common.beans.ActivityBean" %>
+<%@ page import="org.wso2.carbon.registry.common.ui.UIConstants" %>
 <%@ page import="org.wso2.carbon.registry.common.ui.utils.UIUtil" %>
 <%@ page import="org.wso2.carbon.registry.core.RegistryConstants" %>
-<%@ page import="org.wso2.carbon.registry.common.ui.UIConstants" %>
 
-<%@ page import="org.wso2.carbon.registry.activities.ui.report.beans.ActivityReportBean" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
+<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="java.net.URLEncoder" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
-<%@ page import="java.net.URLEncoder" %>
 
 <fmt:bundle basename="org.wso2.carbon.registry.activities.ui.i18n.Resources">
 
@@ -77,7 +78,7 @@
             activities = UIUtil.getChildren(start, itemsPerPage, allActivities);
     %>
     <%
-        if (activities!=null && activities.length > 0) {
+        if ( CarbonUIUtil.isContextRegistered(config, "/reporting/") && activities!=null && activities.length > 0) {
     %>
             <carbon:report
                     component="org.wso2.carbon.registry.activities"
@@ -98,6 +99,7 @@
         </tr>
         </thead>
         <%
+            boolean isUserAuthorized = CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/resources/browse");
             for (int i = 0; i < activities.length; i++) {
                 String implodedActivity = activities[i];
                 if (implodedActivity == null) {
@@ -122,9 +124,18 @@
                     try {
                         path = URLEncoder.encode(path, "UTF-8");
                     } catch (Exception ignore) {}
-                    activity = "<a href='#" + explodedActivity[1] + "'>" + explodedActivity[2] + "</a>"
-                            + explodedActivity[3] + "<a href='../resources/resource.jsp?region=region3&item=resource_browser_menu&viewType=std&path=" + path + "'>" + explodedActivity[5]
-                            + "</a>" + explodedActivity[6];
+                    if(isUserAuthorized){
+                        activity = "<a href='../userprofile/index.jsp?username=" +
+                                explodedActivity[1] + "&fromUserMgt=false'>" + explodedActivity[2
+                                ] + "</a>"
+                                + explodedActivity[3] + "<a href='../resources/resource.jsp?region=region3&item=resource_browser_menu&viewType=std&path=" + path + "'>" + explodedActivity[5]
+                                + "</a>" + explodedActivity[6];
+                    }   else {
+                        activity = "<a href='#" + explodedActivity[1] + "'>" + explodedActivity[2] + "</a>"
+                                + explodedActivity[3] +  explodedActivity[5]
+                                + explodedActivity[6];
+                    }
+
                 }
                 if (explodedActivity.length > 7 && explodedActivity[7] != null) {
                     activity += "<br/>" + explodedActivity[7];

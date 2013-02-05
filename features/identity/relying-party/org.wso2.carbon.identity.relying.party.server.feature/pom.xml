@@ -21,11 +21,13 @@
 	<parent>
 		<groupId>org.wso2.carbon</groupId>
 		<artifactId>identity-relyingparty-feature</artifactId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>org.wso2.carbon.identity.relying.party.server.feature</artifactId>
+	<version>4.0.6</version>
 	<packaging>pom</packaging>
 	<name>Identity Relying Party Server Feature</name>
 	<url>http://wso2.org</url>
@@ -35,14 +37,17 @@
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.identity.relyingparty</artifactId>
+			<version>4.0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.identity.provider</artifactId>
+			<version>4.0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openid4java.wso2</groupId>
 			<artifactId>openid4java-nodeps</artifactId>
+			<version>0.9.6.wso2v2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.igniterealtime.smack.wso2</groupId>
@@ -100,13 +105,13 @@
                                 </properties>
                             </adviceFile>
 							<bundles>
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.relyingparty</bundleDef>
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.provider</bundleDef>
+								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.relyingparty:4.0.6</bundleDef>
+								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.provider:4.0.6</bundleDef>
 								<bundleDef>org.openid4java.wso2:openid4java-nodeps</bundleDef>
 								<bundleDef>org.igniterealtime.smack.wso2:smack</bundleDef>
 							</bundles>
 							<importFeatures>
-								<importFeatureDef>org.wso2.carbon.identity.core.server:${identity.core.feature.version}</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.identity.core.server:4.0.6</importFeatureDef>
 							</importFeatures>
 						</configuration>
 					</execution>

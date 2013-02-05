@@ -28,5 +28,5 @@
 
     <parameter name="adminService" locked="true">true</parameter>
     <parameter name="hiddenService" locked="true">true</parameter>
-    <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/resources/govern/metadata/list</parameter>
+    <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/resources/govern/generic/list</parameter>
 </serviceGroup>

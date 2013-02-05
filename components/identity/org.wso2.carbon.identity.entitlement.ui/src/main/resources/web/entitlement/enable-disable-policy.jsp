@@ -21,6 +21,10 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil"%>
 <%@ page import="org.wso2.carbon.utils.ServerConstants"%>
 
+<%@page
+	import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementPolicyAdminServiceClient"%>
+<%@page import="java.util.ResourceBundle"%>
+<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PolicyDTO" %>
 <%
 	String serverURL = CarbonUIUtil.getServerURL(config
 			.getServletContext(), session);
@@ -39,13 +43,18 @@
 	if ((request.getParameter("policyid") != null)) {
 
 		try {
-			EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);
+			EntitlementPolicyAdminServiceClient client =
+                    new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);
 			dto = client.getLightPolicy(policyid);
 			if ("enable".equals(action)){
 				dto.setActive(true);
-			}else {
+			} else if("disable".equals(action)) {
 				dto.setActive(false);
-			}
+			} else if("promote".equals(action)){
+                dto.setPromoteStatus(2);
+            } else if("depromote".equals(action)){
+                dto.setPromoteStatus(3);
+            }
 			client.updatePolicy(dto);
 			//session.setAttribute("entitlementpolicy", dto.getPolicy());
 			forwardTo = "index.jsp?region=region1&item=policy_menu";
@@ -60,10 +69,6 @@
 	}
 %>
 
-<%@page
-	import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementPolicyAdminServiceClient"%>
-<%@page import="java.util.ResourceBundle"%>
-<%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PolicyDTO" %>
 <script
 	type="text/javascript">
     function forward() {

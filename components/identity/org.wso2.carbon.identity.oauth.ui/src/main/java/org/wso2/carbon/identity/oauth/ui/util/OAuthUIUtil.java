@@ -50,6 +50,9 @@ public class OAuthUIUtil {
 
         // get the servlet context from the OAuth version.
         String oauthServletContext = "/oauth2";
+        if ("/token".equals(endpointType)) {
+        	oauthServletContext = "/oauth2endpoints";
+        }
         if(oauthVersion.equals(OAuthConstants.OAuthVersions.VERSION_1A)){
             oauthServletContext = "/oauth";
         }

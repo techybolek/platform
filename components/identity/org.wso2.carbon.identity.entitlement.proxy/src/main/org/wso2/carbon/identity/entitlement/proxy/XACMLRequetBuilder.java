@@ -33,7 +33,7 @@ public class XACMLRequetBuilder {
 
     private static Log log = LogFactory.getLog(XACMLRequetBuilder.class);
 
-    public static String buildXACML3Request(org.wso2.carbon.identity.entitlement.proxy.Attribute[] attributes) {
+    public static String buildXACML3Request(Attribute[] attributes) {
 
         OMFactory factory = OMAbstractFactory.getOMFactory();
 
@@ -43,7 +43,7 @@ public class XACMLRequetBuilder {
         requestXML.addAttribute("ReturnPolicyIdList", "false", null);
 
         HashSet<String> catagorySet = new HashSet<String>();
-        for (org.wso2.carbon.identity.entitlement.proxy.Attribute attribute : attributes) {
+        for (Attribute attribute : attributes) {
             if (!catagorySet.contains(attribute.getCategory())) {
                 catagorySet.add(attribute.getCategory());
                 OMElement attributesXML = factory.createOMElement("Attributes", null);

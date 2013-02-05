@@ -21,10 +21,9 @@
 <%@ page import="org.wso2.carbon.registry.resource.ui.clients.ResourceServiceClient" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.registry.resource.ui.clients.CustomUIHandler" %>
-<%@ page import="org.wso2.carbon.registry.common.utils.RegistryUtil" %>
 <%@ page import="org.wso2.carbon.registry.resource.ui.Utils" %>
 <%@ page import="org.wso2.carbon.registry.resource.stub.beans.xsd.ContentBean" %>
-<%@ page import="java.util.regex.Pattern" %>
+<script type="text/javascript" src="../resources/js/resource_util.js"></script>
 
 <%
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
@@ -34,10 +33,12 @@
         boolean isRemote = false;
         boolean isLink = false;
         ResourceServiceClient client;
-
+        boolean hasDependencies = false;
 
         try {
             client = new ResourceServiceClient(cookie, config, session);
+            hasDependencies = client.hasAssociations(request.getParameter("path"),"depends");
+
             cb = client.getContent(request);
             if (client.getProperty(cb.getPathWithVersion(), "registry.realpath") != null) {
                 isRemote = true;
@@ -211,8 +212,8 @@ if(!cb.getAbsent().equals("true")){
        <%
             } else {
         %>
-	    <a href="javascript:sessionAwareFunction(function() {window.location = '<%=Utils.getResourceDownloadURL(request, path)%>'}, org_wso2_carbon_registry_resource_ui_jsi18n['session.timed.out']);"
-		           target="_self"><img src="../resources/images/icon-download.jpg" alt="" align="top"> <fmt:message key="download"/></a>
+	    <a onclick="javascript:downloadWithDependencies('<%=Utils.getResourceDownloadURL(request, path)%>',<%=String.valueOf(hasDependencies)%>)"
+		           class="registryWriteOperation"><img src="../resources/images/icon-download.jpg" alt="" align="top"> <fmt:message key="download"/></a>
 	    <% }
             %>
         </td>

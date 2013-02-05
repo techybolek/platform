@@ -28,6 +28,7 @@ import com.google.gdata.client.GoogleService;
 import com.google.gdata.client.Service.GDataRequest;
 import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
 import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
+import com.google.gdata.client.authn.oauth.OAuthParameters.OAuthType;
 
 /**
  * This is a demo client which demonstrate the use of 2-legged-oauth. In this example we will talk to a service in
@@ -44,7 +45,7 @@ import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
 public class TwoLeggedOAuthDemo {
 
     // Identity server, service URL (Always use IP address)
-    private static final String IDENTITY_SERVER = "https://127.0.0.1:9443/";
+    private static final String IDENTITY_SERVER = "https://127.0.0.1:9444/";
 
      // Identity server, Host Name (Always use IP address)
     private static final String IDENTITY_SERVER_HOST_NAME = "127.0.0.1";
@@ -64,8 +65,11 @@ public class TwoLeggedOAuthDemo {
         //User password
         String PASSWORD = "admin";
 
-        //Consumer secret used for this communication
-        String CONSUMER_SECRET = "123123$$#$##$";
+        // Consumer key given for this client
+        String CONSUMER_KEY = null;
+        
+        //Consumer secret given for this client
+        String CONSUMER_SECRET = null;
 
         //The client that is going to talk to IS (The actual service invoked is
         // https://localhost:9443/services/AuthenticationAdmin?wsdl)
@@ -106,8 +110,15 @@ public class TwoLeggedOAuthDemo {
              * User can register a consumer secret with IS.
              */
 			if (client.authenticate(USER_NAME, PASSWORD, IDENTITY_SERVER_HOST_NAME)) {
-			    client.registerOAuthConsumer(CONSUMER_SECRET);
-			    System.out.println("User - " + USER_NAME + " successfully authenticated.");
+				System.out.println("\n User-" + USER_NAME + " successfully authenticated.");
+				
+			    String[] registeredData = client.registerOAuthConsumer();
+			    // if the registration was successful, consumer key and secrete will be returned
+			    if(registeredData != null && registeredData.length == 2){
+			    	CONSUMER_KEY = registeredData[0];
+			    	CONSUMER_SECRET = registeredData[1];
+			    	System.out.println("\n Consumer registerd successfully ! \n Key: " + CONSUMER_KEY + " \n Secret: "+CONSUMER_SECRET );
+			    }
 			} else {
 			    System.out.println("Invalid credentials");
 			    return;
@@ -116,9 +127,12 @@ public class TwoLeggedOAuthDemo {
             GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
 
             // Setting user name as consumer key
-            oauthParameters.setOAuthConsumerKey(USER_NAME);
+            oauthParameters.setOAuthConsumerKey(CONSUMER_KEY);
             // Setting above assigned consumer secret
             oauthParameters.setOAuthConsumerSecret(CONSUMER_SECRET);
+            
+            // setting 2-legged OAuth flag
+            oauthParameters.setOAuthType(OAuthType.TWO_LEGGED_OAUTH);
 
             // We will be using HMAC-SHA1 signature. Google API has a class to do that
             OAuthHmacSha1Signer signer = new OAuthHmacSha1Signer();
@@ -132,9 +146,8 @@ public class TwoLeggedOAuthDemo {
              * We will be calling test service's echoString method. As parameter we are sending "Hello World"
              * The parameter name is "in".
              */
-            String param = "HelloWorld";
-            String baseString = ESB_SERVER + "services/OAuthProxy/echoString" + "?xoauth_requestor_id="
-                    + USER_NAME + "&in=" + param;
+            String param = "WSO2";
+            String baseString = ESB_SERVER + "services/OAuthTest/greet?name="+ param;
 
             /**
              * Invoking the request. And writing the response output.

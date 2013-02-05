@@ -14,6 +14,7 @@
   ~  limitations under the License.
   --%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="carbon" uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.endpoint.stub.types.common.ConfigurationObject" %>
@@ -26,20 +27,27 @@
 <%@ page import="java.util.ResourceBundle" %>
 <%
     String isloadPage = request.getParameter("loadpage");
+    String pageNumberStr = request.getParameter("pageNumber");
+
+    int endpointPageNumber = 0;
+    if (pageNumberStr != null) {
+        endpointPageNumber = Integer.parseInt(pageNumberStr);
+    }
+    int numberOfPages = 0;
 
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
-        ConfigurationContext configContext =
-                (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
-        String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+    ConfigurationContext configContext =
+            (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+    String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
 
-        EndpointAdminClient client;
-        EndpointMetaData[] ePMetaData = null;
-        try {
-            client = new EndpointAdminClient(cookie, serverURL, configContext);
-        } catch (Exception e) {
-            CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request, e);
-            return;
-        }
+    EndpointAdminClient client;
+    EndpointMetaData[] ePMetaData = null;
+    try {
+        client = new EndpointAdminClient(cookie, serverURL, configContext);
+    } catch (Exception e) {
+        CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request, e);
+        return;
+    }
 
     if (isloadPage == null || "".equals(isloadPage)) {
         String endpointName = request.getParameter("endpointName");
@@ -49,7 +57,8 @@
             String result = deleteEndpoint(client, endpointName, request);
             if (!result.equals("")) {
 %>
-<div>Dep Error:</div><%=result%>
+<div>Dep Error:</div>
+<%=result%>
 <%
             }
         }
@@ -97,7 +106,18 @@
     }
 %>
 <%
-    ePMetaData = client.getEndpointMetaData();
+    ePMetaData = client.getEndpointMetaData(endpointPageNumber,EndpointAdminClient.ENDPOINT_PER_PAGE);
+    if (ePMetaData != null && ePMetaData.length == 0 && endpointPageNumber != 0 ) {
+        endpointPageNumber--;
+        ePMetaData = client.getEndpointMetaData(endpointPageNumber,EndpointAdminClient.ENDPOINT_PER_PAGE);
+    }
+    int epCount = client.getEndpointCount();
+
+    if (epCount % EndpointAdminClient.ENDPOINT_PER_PAGE == 0) {
+        numberOfPages = epCount / EndpointAdminClient.ENDPOINT_PER_PAGE;
+    } else {
+        numberOfPages = epCount / EndpointAdminClient.ENDPOINT_PER_PAGE + 1;
+    }
 %>
 
 <fmt:bundle basename="org.wso2.carbon.endpoint.ui.i18n.Resources">
@@ -114,7 +134,12 @@
     </script>
     <p><fmt:message key="endpoints.synapse.text"/></p>
     <br/>
-
+    <carbon:paginator pageNumber="<%=endpointPageNumber%>" numberOfPages="<%=numberOfPages%>"
+                  page="index.jsp" pageNumberParameterName="pageNumber"
+                  resourceBundle="org.wso2.carbon.endpoint.ui.i18n.Resources"
+                  prevKey="prev" nextKey="next"
+                  parameters="<%=""%>" />
+    <br/>
     <table class="styledLeft" cellpadding="1" id="endpointListTable">
         <thead>
         <tr>
@@ -239,6 +264,11 @@
         </tbody>
     </table>
     <br/>
+    <carbon:paginator pageNumber="<%=endpointPageNumber%>" numberOfPages="<%=numberOfPages%>"
+                          page="index.jsp" pageNumberParameterName="pageNumber"
+                          resourceBundle="org.wso2.carbon.endpoint.ui.i18n.Resources"
+                          prevKey="prev" nextKey="next"
+                          parameters="<%=""%>" />
     <% } %>
 
 </fmt:bundle>

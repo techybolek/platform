@@ -37,6 +37,7 @@ public class InputStreamHandler implements Runnable {
     private static final String STREAM_TYPE_IN = "inputStream";
     private static final String STREAM_TYPE_ERROR = "errorStream";
 
+
     private static final Log log = LogFactory.getLog(InputStreamHandler.class);
 
     public InputStreamHandler(String name, InputStream is) {
@@ -53,20 +54,24 @@ public class InputStreamHandler implements Runnable {
     public void run() {
         InputStreamReader inputStreamReader = null;
         try {
+
             inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
             while (true) {
-                String s = bufferedReader.readLine();
-                if (s == null) {
-                    break;
-                }
-                if (STREAM_TYPE_IN.equals(streamType)) {
-                    stringBuilder.append(s + "\n");
-                    log.info(s);
-                } else if (STREAM_TYPE_ERROR.equals(streamType)) {
-                    stringBuilder.append(s + "\n");
-                    log.error(s);
+                if (bufferedReader.ready()) {
+                    String s = bufferedReader.readLine();
+                    stringBuilder.setLength(0);
+                    if (s == null) {
+                        break;
+                    }
+                    if (STREAM_TYPE_IN.equals(streamType)) {
+                        stringBuilder.append(s).append("\n");
+                        log.info(s);
+                    } else if (STREAM_TYPE_ERROR.equals(streamType)) {
+                        stringBuilder.append(s).append("\n");
+                        log.error(s);
+                    }
                 }
             }
         } catch (Exception ex) {

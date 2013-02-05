@@ -19,6 +19,7 @@ package org.wso2.carbon.registry.relations.services;
 
 import org.wso2.carbon.registry.admin.api.relations.IRelationService;
 import org.wso2.carbon.registry.common.services.RegistryAbstractAdmin;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
@@ -42,6 +43,11 @@ public class RelationService extends RegistryAbstractAdmin implements IRelationS
             return;
         }
         if(todo.equals("add")){
+                if (associationPaths.startsWith(RegistryConstants.ROOT_PATH) &&
+                        !registry.resourceExists(associationPaths)) {
+                    throw new RegistryException("The given association path " + associationPaths +
+                            " does not exist.");
+                }
                 registry.addAssociation(path, associationPaths, type);
             } else {
                 registry.removeAssociation(path, associationPaths, type);

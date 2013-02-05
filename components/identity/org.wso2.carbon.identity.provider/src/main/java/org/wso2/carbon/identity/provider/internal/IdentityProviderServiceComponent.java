@@ -19,13 +19,11 @@ package org.wso2.carbon.identity.provider.internal;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openid4java.server.ServerAssociationStore;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.provider.IdentityAttributeService;
 import org.wso2.carbon.identity.provider.IdentityAttributeServiceStore;
 import org.wso2.carbon.identity.provider.IdentityProviderUtil;
-import org.wso2.carbon.identity.provider.openid.CarbonServerAssociationStore;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -57,7 +55,6 @@ public class IdentityProviderServiceComponent {
     private static ConfigurationContext configContext;
     private static RealmService realmService;    
     private static RegistryService registryService;
-    private static ServerAssociationStore associationStore;
 
     public static RealmService getRealmService() {
         return realmService;
@@ -80,7 +77,6 @@ public class IdentityProviderServiceComponent {
         try {
             ctxt.getBundleContext().registerService(IdentityProviderUtil.class.getName(),
                     new IdentityProviderUtil(), null);
-            associationStore = new CarbonServerAssociationStore();
         } catch (Throwable e) {
             log.error("Failed to initialize Identity Provider", e);
         }
@@ -230,7 +226,4 @@ public class IdentityProviderServiceComponent {
         return registryService;
     }
 
-    public static ServerAssociationStore getAssociationStore() {
-        return associationStore;
-    }
 }

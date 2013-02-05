@@ -20,6 +20,7 @@ public class LoggingConfig {
 	private String user;
 	private String password;
 	private String colFamily;
+	private String archivedHDFSPath;
 	private String url;
 	private boolean isCassandraServerAvailable;
 	private String cluster;
@@ -27,11 +28,16 @@ public class LoggingConfig {
 	private String publisherUser;
 	private String publisherPassword;
 	private String archivedHost;
+    private String consistencyLevel;
 	private String archivedUser;
 	private String archivedPassword;
 	private String archivedPort;
 	private String archivedRealm;
 	private String hiveQuery;
+    private boolean isAutoDiscoveryEnable;
+    private int autoDiscoveryDelay;
+    private boolean retryDownedHostsEnable;
+    private int retryDownedHostsQueueSize;
 
 	public LoggingConfig() {
 
@@ -173,4 +179,53 @@ public class LoggingConfig {
 	public void setHiveQuery(String hiveQuery) {
 		this.hiveQuery = hiveQuery;
 	}
+
+	public String getArchivedHDFSPath() {
+		return archivedHDFSPath;
+	}
+
+	public void setArchivedHDFSPath(String archivedHDFSPath) {
+		this.archivedHDFSPath = archivedHDFSPath;
+	}
+
+    public String getConsistencyLevel() {
+        return consistencyLevel;
+    }
+
+    public void setConsistencyLevel(String consistencyLevel) {
+        this.consistencyLevel = consistencyLevel;
+    }
+
+    public boolean isAutoDiscoveryEnable() {
+        return isAutoDiscoveryEnable;
+    }
+
+    public void setAutoDiscoveryEnable(boolean autoDiscoveryEnable) {
+        isAutoDiscoveryEnable = autoDiscoveryEnable;
+    }
+
+
+    public int getAutoDiscoveryDelay() {
+        return autoDiscoveryDelay;
+    }
+
+    public void setAutoDiscoveryDelay(int autoDiscoveryDelay) {
+        this.autoDiscoveryDelay = autoDiscoveryDelay;
+    }
+
+    public boolean isRetryDownedHostsEnable() {
+        return retryDownedHostsEnable;
+    }
+
+    public void setRetryDownedHostsEnable(boolean retryDownedHostsEnable) {
+        this.retryDownedHostsEnable = retryDownedHostsEnable;
+    }
+
+    public int getRetryDownedHostsQueueSize() {
+        return retryDownedHostsQueueSize;
+    }
+
+    public void setRetryDownedHostsQueueSize(int retryDownedHostsQueueSize) {
+        this.retryDownedHostsQueueSize = retryDownedHostsQueueSize;
+    }
 }

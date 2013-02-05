@@ -28,7 +28,7 @@ import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.mail.MailConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.email.verification.internal.EmailVerificationServiceComponent;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -81,8 +81,8 @@ public class EmailSender extends Thread {
         userParams.put("domain-name", userParameters.get("tenantDomain"));
         userParams.put("first-name", userParameters.get("first-name"));
         try {
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantDomain(tenantDomain, true);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getCurrentContext().setTenantDomain(tenantDomain, true);
 
             if (config.getSubject().length() == 0) {
                 headerMap.put(MailConstants.MAIL_HEADER_SUBJECT,
@@ -121,7 +121,7 @@ public class EmailSender extends Thread {
         } catch (AxisFault e) {
             log.error("Failed Sending Email", e);
         }  finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -130,11 +130,11 @@ public class EmailSender extends Thread {
         String targetEpr = config.getTargetEpr();
         String tenantDomain = this.tenantDomain;
         if (tenantDomain == null) {
-            SuperTenantCarbonContext.getCurrentContext().getTenantDomain(true);
+            PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
         }
         if (tenantDomain != null && targetEpr.indexOf("/carbon") > 0 &&
             MultitenantUtils.getTenantDomainFromRequestURL(targetEpr) == null &&
-                SuperTenantCarbonContext.getCurrentContext().getTenantId(true)!= MultitenantConstants.SUPER_TENANT_ID) {
+            PrivilegedCarbonContext.getCurrentContext().getTenantId(true)!= MultitenantConstants.SUPER_TENANT_ID) {
             targetEpr = targetEpr.replace("/carbon", "/" +
                                                      MultitenantConstants.TENANT_AWARE_URL_PREFIX + "/" + tenantDomain + "/carbon");
         }

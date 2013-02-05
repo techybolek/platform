@@ -15,10 +15,12 @@
  */
 package org.wso2.carbon.jaxws.webapp.deployer;
 
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.DeploymentException;
 import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.webapp.mgt.AbstractWebappDeployer;
 import org.wso2.carbon.webapp.mgt.TomcatGenericWebappsDeployer;
 import org.wso2.carbon.webapp.mgt.WebappsConstants;
@@ -29,6 +31,12 @@ import org.wso2.carbon.webapp.mgt.WebappsConstants;
 public class JaxwsWebappDeployer extends AbstractWebappDeployer {
 
     private static final Log log = LogFactory.getLog(JaxwsWebappDeployer.class);
+
+    @Override
+    public void init(ConfigurationContext configCtx) {
+        super.init(configCtx);
+        configCtx.setProperty(WebappsConstants.TOMCAT_JAX_WEBAPP_DEPLOYER, tomcatWebappDeployer);
+    }
 
     @Override
     public void deploy(DeploymentFileData deploymentFileData) throws DeploymentException {

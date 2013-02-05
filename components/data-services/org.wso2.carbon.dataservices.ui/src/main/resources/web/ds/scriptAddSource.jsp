@@ -15,6 +15,7 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
+<%@page import="org.wso2.carbon.dataservices.common.DBConstants"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ page import="org.wso2.carbon.CarbonError" %>
@@ -38,7 +39,7 @@
     session.setAttribute("totalSchemaList","");
     session.setAttribute("schemaList", "");
     String sourceId = (String)session.getAttribute("datasource");
-    String[] sourceList=null;
+    String[] sourceList = null;
     String datasource = request.getParameter("datasource");
     String dbName = request.getParameter("dbName");
     dbName = (dbName == null) ? "" : dbName;
@@ -47,7 +48,8 @@
         ConfigurationContext configContext =(ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
         String cookie = (String) session.getAttribute(org.wso2.carbon.utils.ServerConstants.ADMIN_SERVICE_COOKIE);
         DataServiceAdminClient client = new DataServiceAdminClient(cookie,backendServerURL,configContext);
-        sourceList = client.getCarbonDataSourceNames();
+        String[] types = {DBConstants.DataSourceTypes.RDBMS};
+        sourceList = client.getCarbonDataSourceNamesForTypes(types);
     }catch(AxisFault e){
         CarbonError carbonError = new CarbonError();
         carbonError.addError("Error occurred while saving data service configuration.");

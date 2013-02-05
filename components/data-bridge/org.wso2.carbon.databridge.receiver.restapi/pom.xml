@@ -5,13 +5,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>data-bridge</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.databridge.receiver.restapi</artifactId>
     <name>WSO2 Carbon - Data Bridge Receiver - REST API webapp</name>
+    <version>4.0.7</version>
     <packaging>war</packaging>
 
 
@@ -19,14 +21,21 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.databridge.core</artifactId>
-            <version>${wso2carbon.version.databridge}</version>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>${wso2carbon.version.databridge}</version>
+            <version>${carbon.platform.patch.version.405}</version>
+            <scope>provided</scope>
+        </dependency>
+
+         <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.utils</artifactId>
+             <version>${carbon.platform.patch.version.405}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -143,6 +152,7 @@
 
     <properties>
         <cxf.wso2.version.databridge>${cxf.orbit.version}</cxf.wso2.version.databridge>
+        <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
         <!--<cxf.test.version>2.6.0</cxf.test.version>-->
         <!--<httpclient.test.version>3.1</httpclient.test.version>-->
         <!--<jaxrs.test.version>1.1.1</jaxrs.test.version>-->

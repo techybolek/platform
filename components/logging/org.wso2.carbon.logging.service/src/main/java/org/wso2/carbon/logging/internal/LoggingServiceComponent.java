@@ -35,26 +35,26 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 /**
  * @scr.component name="org.wso2.carbon.logging.services" immediate="true"
  * @scr.reference name="org.wso2.carbon.registry.service"
- *                interface="org.wso2.carbon.registry.core.service.RegistryService"
- *                cardinality="1..1" policy="dynamic" bind="setRegistryService"
- *                unbind="unsetRegistryService"
+ * interface="org.wso2.carbon.registry.core.service.RegistryService"
+ * cardinality="1..1" policy="dynamic" bind="setRegistryService"
+ * unbind="unsetRegistryService"
  * @scr.reference name="user.realmservice.default"
- *                interface="org.wso2.carbon.user.core.service.RealmService"
- *                cardinality="1..1" policy="dynamic" bind="setRealmService"
- *                unbind="unsetRealmService"
+ * interface="org.wso2.carbon.user.core.service.RealmService"
+ * cardinality="1..1" policy="dynamic" bind="setRealmService"
+ * unbind="unsetRealmService"
  * @scr.reference name="config.context.service"
- * 				  interface="org.wso2.carbon.utils.ConfigurationContextService"
- *                cardinality="1..1" policy="dynamic"  bind="setConfigurationContextService"
- * 				  unbind="unsetConfigurationContextService"
+ * interface="org.wso2.carbon.utils.ConfigurationContextService"
+ * cardinality="1..1" policy="dynamic"  bind="setConfigurationContextService"
+ * unbind="unsetConfigurationContextService"
  */
 public class LoggingServiceComponent {
     private static Log log = LogFactory.getLog(LoggingServiceComponent.class);
 
     private RegistryService registryService;
-    
-	private static RealmService realmService;
-    
-    protected void activate(ComponentContext ctxt){
+
+    private static RealmService realmService;
+
+    protected void activate(ComponentContext ctxt) {
         try {
             initLoggingConfiguration();
             BundleContext bundleContext = ctxt.getBundleContext();
@@ -62,13 +62,13 @@ public class LoggingServiceComponent {
             log.error("Cannot  initialize logging configuration", e);
         }
     }
-    
+
     public RealmService getRealmService() {
         return realmService;
     }
 
     protected void setRealmService(RealmService realmService) {
-    	LoggingServiceComponent.realmService = realmService;
+        LoggingServiceComponent.realmService = realmService;
     }
 
     protected void unsetRealmService(RealmService realmService) {
@@ -78,11 +78,11 @@ public class LoggingServiceComponent {
     public static TenantManager getTenantManager() {
         return realmService.getTenantManager();
     }
-    
+
     public static RealmConfiguration getBootstrapRealmConfiguration() {
         return realmService.getBootstrapRealmConfiguration();
     }
-    
+
     protected void setConfigurationContextService(ConfigurationContextService contextService) {
         DataHolder.getInstance().setServerConfigContext(contextService.getServerConfigContext());
     }
@@ -90,8 +90,8 @@ public class LoggingServiceComponent {
     protected void unsetConfigurationContextService(ConfigurationContextService contextService) {
         DataHolder.getInstance().setServerConfigContext(null);
     }
-    
-    protected void deactivate(ComponentContext ctxt){
+
+    protected void deactivate(ComponentContext ctxt) {
 
     }
 
@@ -111,17 +111,18 @@ public class LoggingServiceComponent {
     /**
      * Reads the database and check whether log setting already there. if so update the logger
      * settings with the database settings else update the data to data base
+     *
      * @throws Exception If an error occurs when loading loggin config
      */
     private void initLoggingConfiguration() throws Exception {
 
         //checking whether log4j.properies file is changed.
-    	 File confFolder = new File(CarbonUtils.getCarbonConfigDirPath());
-         String loggingPropFilePath = confFolder.getAbsolutePath() + File.separator +
-                 "log4j.properties";
-       // URL url = Thread.currentThread().getContextClassLoader().getResource("log4j.properties");
-         File log4jFile = new File(loggingPropFilePath);
-        
+        File confFolder = new File(CarbonUtils.getCarbonConfigDirPath());
+        String loggingPropFilePath = confFolder.getAbsolutePath() + File.separator +
+                "log4j.properties";
+        // URL url = Thread.currentThread().getContextClassLoader().getResource("log4j.properties");
+        File log4jFile = new File(loggingPropFilePath);
+
         if (!log4jFile.isFile()) {
             LoggingUtil.removeAllLoggersAndAppenders();
             LoggingUtil.updateConfigurationProperty(LoggingConstants.LOG4J_FILE_FOUND, "false");
@@ -131,7 +132,7 @@ public class LoggingServiceComponent {
         }
 
         long currentLastModified = log4jFile.lastModified();
-        
+
         String lmStr =
                 new RegistryManager().
                         getConfigurationProperty(LoggingConstants.LOG4J_FILE_LAST_MODIFIED);
@@ -140,7 +141,7 @@ public class LoggingServiceComponent {
         if (previousLastModified != currentLastModified) {
             //log4j.properties file is changed..
             LoggingUtil.updateConfigurationProperty(LoggingConstants.LOG4J_FILE_LAST_MODIFIED,
-                                                    Long.toString(currentLastModified));
+                    Long.toString(currentLastModified));
             //Remove all the entries in the registry
             LoggingUtil.removeAllLoggersAndAppenders();
         } else {

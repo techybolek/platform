@@ -19,7 +19,11 @@ var getLastAccessTime = function(name) {
                               }
                           }
                       } else {
-                          jagg.message({content:json.message,type:"error"});
+                          if (json.message == "AuthenticateError") {
+                              jagg.showLogin();
+                          } else {
+                              jagg.message({content:json.message,type:"error"});
+                          }
                       }
                   });
     return lastAccessTime;
@@ -39,7 +43,11 @@ var getResponseTime = function(name) {
                               }
                           }
                       } else {
-                          jagg.message({content:json.message,type:"error"});
+                          if (json.message == "AuthenticateError") {
+                              jagg.showLogin();
+                          } else {
+                              jagg.message({content:json.message,type:"error"});
+                          }
                       }
                   });
     return responseTime;
@@ -63,14 +71,19 @@ $(document).ready(function() {
         }});
 
     });
+    // Converting dates from timestamp to date string
+    jagg.printDate();
 });
-
+var t_on = {
+            'versionChart':1,
+            'versionUserChart':1
+            };
 function pushDataForTabs(clickedTab){
      if (clickedTab == "versions") {
 
             jagg.fillProgress('versionChart');jagg.fillProgress('versionUserChart');
-            var api=$("#item-info h2")[0].innerHTML;
-            var apiName = $.trim(api.split("-")[0]);
+            var apiName = $("#infoAPIName").val();
+            var version = $("#infoAPIVersion").val();
             var provider = $("#item-info #spanProvider").text();
             jagg.post("/site/blocks/usage/ajax/usage.jag", { action:"getProviderAPIVersionUsage", provider:provider,apiName:apiName },
                       function (json) {
@@ -104,12 +117,17 @@ function pushDataForTabs(clickedTab){
                               } else {
                                   $('#versionTable').hide();
                                   $('#versionChart').css("fontSize", 14);
-                                  $('#versionChart').append($('<span class="label label-info">No Data Found ...</span>'));
+                                  $('#versionChart').append($('<span class="label label-info">'+i18n.t("errorMsgs.noData")+'</span>'));
                               }
 
                           } else {
-                              jagg.message({content:json.message,type:"error"});
+                              if (json.message == "AuthenticateError") {
+                                  jagg.showLogin();
+                              } else {
+                                  jagg.message({content:json.message,type:"error"});
+                              }
                           }
+                          t_on['versionChart'] = 0;
                       }, "json");
 
 
@@ -120,8 +138,8 @@ function pushDataForTabs(clickedTab){
                               $('#versionUserChart').empty();
                               $('#versionUserTable').find("tr:gt(0)").remove();
                               for (var i = 0; i < length; i++) {
-                                  data[i] = [json.usage[i].version, parseInt(json.usage[i].count)];
-                                  $('#versionUserTable').append($('<tr><td>' + json.usage[i].version + '</td><td>' + json.usage[i].count + '</td></tr>'));
+                                  data[i] = [json.usage[i].apiVersion, parseInt(json.usage[i].count)];
+                                  $('#versionUserTable').append($('<tr><td>' + json.usage[i].apiVersion + '</td><td>' + json.usage[i].count + '</td></tr>'));
                               }
                               if (length > 0) {
                                   $('#versionUserTable').show();
@@ -143,21 +161,25 @@ function pushDataForTabs(clickedTab){
                               } else {
                                   $('#versionUserTable').hide();
                                   $('#versionUserChart').css("fontSize", 14);
-                                  $('#versionUserChart').append($('<span class="label label-info">No Data Found ...</span>'));
+                                  $('#versionUserChart').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
                               }
 
                           } else {
-                              jagg.message({content:json.message,type:"error"});
+                              if (json.message == "AuthenticateError") {
+                                  jagg.showLogin();
+                              } else {
+                                  jagg.message({content:json.message,type:"error"});
+                              }
                           }
+                          t_on['versionUserChart'] = 0;
                       }, "json");
 
         }
 
         if (clickedTab == "users") {
             jagg.fillProgress('userVersionChart');jagg.fillProgress('userChart');
-             var api=$("#item-info h2")[0].innerHTML;
-             var name = $.trim(api.split("-")[0]);
-             var version = $.trim(api.split("-")[1]);
+            var name = $("#infoAPIName").val();
+            var version = $("#infoAPIVersion").val();
             var provider = $("#item-info #spanProvider").text();
             jagg.post("/site/blocks/usage/ajax/usage.jag", { action:"getProviderAPIUserUsage", provider:provider,apiName:name },
                       function (json) {
@@ -191,11 +213,15 @@ function pushDataForTabs(clickedTab){
                               } else {
                                   $('#userTable').hide();
                                   $('#userChart').css("fontSize", 14);
-                                  $('#userChart').append($('<span class="label label-info">No Data Found ...</span>'));
+                                  $('#userChart').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
                               }
 
                           } else {
-                              jagg.message({content:json.message,type:"error"});
+                              if (json.message == "AuthenticateError") {
+                                  jagg.showLogin();
+                              } else {
+                                  jagg.message({content:json.message,type:"error"});
+                              }
                           }
                       }, "json");
 
@@ -231,11 +257,15 @@ function pushDataForTabs(clickedTab){
                               } else {
                                   $('#userVersionTable').hide();
                                   $('#userVersionChart').css("fontSize", 14);
-                                  $('#userVersionChart').append($('<span class="label label-info">No Data Found ...</span>'));
+                                  $('#userVersionChart').append($('<span class="label label-info">'+i18n.t('errorMsgs.noData')+'</span>'));
                               }
 
                           } else {
-                              jagg.message({content:json.message,type:"error"});
+                              if (json.message == "AuthenticateError") {
+                                  jagg.showLogin();
+                              } else {
+                                  jagg.message({content:json.message,type:"error"});
+                              }
                           }
                       }, "json");
 
@@ -250,18 +280,18 @@ function pushDataForTabs(clickedTab){
                 var row1 = doc.createElement("tr");
                 var cell1 = doc.createElement("td");
                 cell1.setAttribute("class", "span4");
-                cell1.innerHTML = "Response Time (Across all versions)";
+                cell1.innerHTML = i18n.t('titles.responseTimeGraph');
                 var cell2 = doc.createElement("td");
-                cell2.innerHTML = responseTime != null ? responseTime : "Data unavailable";
+                cell2.innerHTML = responseTime != null ? responseTime : i18n.t('errorMsgs.unavailableData');
                 row1.appendChild(cell1);
                 row1.appendChild(cell2);
 
                 var row2 = doc.createElement("tr");
                 var cell3 = doc.createElement("td");
                 cell3.setAttribute("class", "span4");
-                cell3.innerHTML = "Last access time (Across all versions)";
+                cell3.innerHTML = i18n.t('titles.lastAccessTimeGraph');
                 var cell4 = doc.createElement("td");
-                cell4.innerHTML = lastAccessTime != null ? lastAccessTime : "Data unavailable";
+                cell4.innerHTML = lastAccessTime != null ? lastAccessTime : i18n.t('errorMsgs.unavailableData');
                 row2.appendChild(cell3);
                 row2.appendChild(cell4);
 

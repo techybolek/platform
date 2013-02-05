@@ -27,14 +27,14 @@ import java.util.Date;
  * Task Deadline.
  */
 @Entity
-@Table(name = "DEADLINE")
+@Table(name = "HT_DEADLINE")
 public class Deadline implements DeadlineDAO {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "DEADLINE_NAME", nullable = false)
     private String name;
 
     @Column(name = "DEADLINE_DATE", nullable = false)

@@ -16,11 +16,9 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 
-import org.apache.commons.pool.BasePoolableObjectFactory;
-import org.apache.commons.pool.ObjectPool;
-import org.apache.commons.pool.impl.StackObjectPool;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
 /**
@@ -32,42 +30,49 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
  */
 public class WSAPIKeyDataStore implements APIKeyDataStore {
 
-    private ObjectPool clientPool;
-
-    public WSAPIKeyDataStore() throws APISecurityException {
-        clientPool = new StackObjectPool(new BasePoolableObjectFactory() {
-            @Override
-            public Object makeObject() throws Exception {
-                return new APIKeyValidatorClient();
-            }
-        });
-    }
+    private static final APIKeyValidatorClientPool clientPool = APIKeyValidatorClientPool.getInstance();
 
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
                                                  String apiKey) throws APISecurityException {
         APIKeyValidatorClient client = null;
         try {
-            client = (APIKeyValidatorClient) clientPool.borrowObject();
-            return client.getAPIKeyData(context, apiVersion, apiKey);
-
+            client = clientPool.get();
+            return client.getAPIKeyData(context, apiVersion, apiKey, APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
         } catch (Exception e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error while accessing backend services for API key validation", e);
         } finally {
             try {
                 if (client != null) {
-                    clientPool.returnObject(client);
+                    clientPool.release(client);
                 }
             } catch (Exception ignored) {
             }
         }
     }
 
-    public void cleanup() {
+    public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
+                                                 String apiKey,String requiredAuthenticationLevel)
+            throws APISecurityException {
+        APIKeyValidatorClient client = null;
         try {
-            clientPool.close();
-        } catch (Exception ignored) {
-
+            client = clientPool.get();
+            return client.getAPIKeyData(context, apiVersion, apiKey,requiredAuthenticationLevel);
+        } catch (Exception e) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Error while accessing backend services for API key validation", e);
+        } finally {
+            try {
+                if (client != null) {
+                    clientPool.release(client);
+                }
+            } catch (Exception ignored) {
+            }
         }
+    }
+
+
+    public void cleanup() {
+
     }
 }

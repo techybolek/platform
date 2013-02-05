@@ -71,7 +71,7 @@
 
             <ul class="nav actions login-sign-up pull-right">
                 <li>
-                    <button id="logout-link" class="btn btn-danger" onClick="window.location.href='../appmgt/sign_up.jag'">Sign Up</button>
+                    <button id="logout-link" class="btn btn-danger" onClick="window.location.href='../appmgt/site/pages/register.jag'">Sign Up</button>
                 </li>
             </ul>
 

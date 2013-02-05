@@ -28,14 +28,11 @@
     <property name="src" value="src"/>
     <property name="repo.jaxwebapps" value="jaxwebapps"/>
 
-    <ant antfile="${wso2appserver.home}/bin/build.xml"/>
-
-    <path id="axis2.class.path">
+    <path id="as.samples.jaxws">
         <pathelement path="${java.class.path}"/>
-        <fileset dir="${wso2appserver.home}">
-            <include name="repository/lib/*.jar"/>
-	    <include name="repository/components/plugins/*.jar"/>
-        </fileset>
+        <fileset dir="${dependencies}">
+            <include name="**"/>
+	</fileset>
     </path>
 
     <path id="cxf.classpath">
@@ -56,7 +53,7 @@
 	<mkdir dir="${webapps}"/>
 	<mkdir dir="${genCode}"/>
 
-	<unzip src="${wso2appserver.home}/repository/components/plugins/cxf-bundle_2.6.1.wso2v1.jar" dest="${dependencies}">
+	<unzip src="${wso2appserver.home}/repository/components/plugins/cxf-bundle_2.6.1.wso2v2.jar" dest="${dependencies}">
         <patternset>
         	<include name="xmlsec-1.5.2.jar"/>
 		<include name="xmlschema-core-2.0.2.jar"/>
@@ -70,15 +67,14 @@
         </unzip>
 	<copy toDir="${dependencies}">
             <fileset dir="${wso2appserver.home}/repository/components/plugins/">
-                <include name="cxf-bundle_2.6.1.wso2v1.jar"/>
+                <include name="cxf-bundle_2.6.1.wso2v2.jar"/>
 		<include name="opensaml2_2.4.1.wso2v1.jar"/>
 		<include name="commons-collections_3.2.0.wso2v1.jar"/>
 		<include name="commons-lang_2.6.0.wso2v1.jar"/>
-		<include name="wsdl4j_1.6.2.wso2v3.jar"/>
-		<include name="jaxb_2.1.7.wso2v1.jar"/>
+		<include name="wsdl4j_1.6.2.wso2v4.jar"/>
+
 	        <include name="spring.framework_3.1.0.wso2v1.jar"/>
-		<include name="org.wso2.carbon.logging_4.0.0.SNAPSHOT.jar"/>
-		<include name="wsdl4j_1.6.2.wso2v3.jar"/>
+		<include name="org.wso2.carbon.logging_4.0.0.jar"/>
             </fileset>
         </copy>
 
@@ -105,7 +101,7 @@
         <javac debug="on" destdir="${classes}">
             <src path="${src}"/>
 	    <src path="${genCode}"/>
-            <classpath refid="axis2.class.path"/>
+            <classpath refid="as.samples.jaxws"/>
         </javac>
     </target>
     
@@ -118,8 +114,8 @@
 	<copy toDir="${classes}">
             <fileset dir="${src}/main/resources"/>
         </copy>
-        <war destfile="${webapps}/${warName}" webxml="${wso2appserver.home}/samples/Jaxws-Jaxrs/web.xml">
-             <fileset dir="../../css"/>
+        <war destfile="${webapps}/${warName}" webxml="src/main/webapp/WEB-INF/web.xml">
+             <fileset file="src/main/webapp/servicelist.css"/>
              <classes dir="${classes}"/>
 	     <webinf dir="${src}/main/webapp/WEB-INF"/>
         </war>

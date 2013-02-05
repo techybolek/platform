@@ -18,12 +18,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <artifactId>bam2</artifactId>
         <groupId>org.wso2.carbon</groupId>
-        <version>4.0.0-SNAPSHOT</version>
+        <artifactId>bam2</artifactId>
+        <version>4.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <modelVersion>4.0.0</modelVersion>	
+    <modelVersion>4.0.0</modelVersion>
+    <version>4.0.5</version>
     <artifactId>org.wso2.carbon.bam.toolbox.deployer.ui</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon Component  - BAM Tool Box Deployer - UI</name>
@@ -34,7 +36,6 @@
          <dependency>
              <groupId>org.wso2.carbon</groupId>
              <artifactId>org.wso2.carbon.ui</artifactId>
-             <version>4.0.0-SNAPSHOT</version>
          </dependency>
          <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -47,7 +48,7 @@
          <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.bam.toolbox.deployer.stub</artifactId>
-             <version>4.0.0-SNAPSHOT</version>
+            <version>4.0.1</version>
         </dependency>
     </dependencies>
     

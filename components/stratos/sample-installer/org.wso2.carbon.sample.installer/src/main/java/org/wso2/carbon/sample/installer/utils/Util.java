@@ -24,34 +24,24 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import org.wso2.carbon.stratos.common.config.CloudServiceConfig;
-import org.wso2.carbon.stratos.common.config.CloudServiceConfigParser;
-import org.wso2.carbon.stratos.common.util.CloudServicesUtil;
-import org.wso2.carbon.stratos.common.util.CommonUtil;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
-import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.sample.installer.beans.SampleInformation;
 import org.wso2.carbon.sample.installer.config.SampleConfig;
 import org.wso2.carbon.sample.installer.config.SamplesDescConfig;
+import org.wso2.carbon.stratos.common.config.CloudServiceConfig;
+import org.wso2.carbon.stratos.common.config.CloudServiceConfigParser;
+import org.wso2.carbon.stratos.common.util.CloudServicesUtil;
+import org.wso2.carbon.stratos.common.util.CommonUtil;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ArchiveManipulator;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.servlet.http.HttpSession;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.io.*;
+import java.util.*;
 
 /**
  * Utilities for the Service Activation Module for Tenants.
@@ -152,8 +142,8 @@ public class Util {
     public static String generateAppArchiveForTenant(String source, HttpSession session,
                                                      String propertyFile)
             throws IOException {
-        SuperTenantCarbonContext carbonContext =
-                SuperTenantCarbonContext.getCurrentContext();
+        PrivilegedCarbonContext carbonContext =
+                PrivilegedCarbonContext.getCurrentContext();
         int tenantId = carbonContext.getTenantId();
         if (tenantId <= 0) {
             return source;

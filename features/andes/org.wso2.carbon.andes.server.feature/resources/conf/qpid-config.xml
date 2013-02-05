@@ -45,7 +45,6 @@
         </protectio>
         <transport>nio</transport>
         <port>5672</port>
-        <sslport>8672</sslport>
         <socketReceiveBuffer>32768</socketReceiveBuffer>
         <socketSendBuffer>32768</socketSendBuffer>
     </connector>
@@ -114,19 +113,27 @@
             <ReferenceTime>2012-02-29 08:08:08</ReferenceTime>
         </coordination>
         <tuning>
-            <!--When messages content is received , it first look in the cache and otherwise seek in the database. This
-            is a FIFO cache of limited size-->
-            <messageReadCacheSize>500</messageReadCacheSize>
             <messageBatchSizes>
+            	<!-- message delivery from server to the client will be paused temporily if number of delivered but unacknowledged message count reaches this size. 
+            	Should be set considering message consume rate-->
+            	<maxNumberOfUnackedMessages>50</maxNumberOfUnackedMessages>
+            	
                 <!--Message Batch size moved to  Subscriber queues from the Global Queue at once. Increasing this values
                 increase the chance of breaking in order delivery guarantee but performance will be improved-->
                 <messageBatchSizeForSubscribersQueues>20</messageBatchSizeForSubscribersQueues>
 
-                <!--Message Batch size Taken in to memory for a one time to deliver to subscribers,
-                If this time is large it will improve the performance but reduce consistency -->
-                <messageBatchSizeForSubscribers>10</messageBatchSizeForSubscribers>
+                <!--Message Batch size Taken in to memory for a one time to deliver to subscribers -->
+                <messageBatchSizeForSubscribers>
+                	<!--initially this value will be taken as the batch size of messages to read into memory. This should be a value between man and min values below--> 
+                	<default>50</default>
+                	<!--dynamically broker will increase batch size upto this value if there are many messages. Consider size of a message when increasing-->   
+                	<max>300</max>
+                	<!--broker will try to read at least this number of messages into memory-->
+                	<min>20</min>
+                </messageBatchSizeForSubscribers>
 
-		<!--Maximum number of message taken it to memory when transering from interal queues to subscriber queues. We need to increase   the             memory allocation from the broker if we are to increase this.Increasing this will increase the consumer throughout-->                
+		<!--Maximum number of message taken it to memory when transering from interal queues to subscriber queues. 
+		We need to increase the memory allocation from the broker if we are to increase this.Increasing this will increase the consumer throughout-->                
                 <globalQueueWorkerMessageBatchSize>700</globalQueueWorkerMessageBatchSize>
 		
                 <!--Max number of Messages chunks to buffer before message contents are written to the cassandra -->
@@ -136,7 +143,7 @@
                 <medataDatePublisherMessageBatchSize>200</medataDatePublisherMessageBatchSize>
 
             </messageBatchSizes>
-            <threading>
+            <threading>            	
                 <!-- This the the Thread pool size which will be used by the Sender Task to send messages asynchronously
                 to the subscriber.  You will have to consider the value of parameter messageBatchSizeForSubscribers
                 when configuring this pool size -->
@@ -151,6 +158,10 @@
 
                 <!-- Max wait time(in seconds)  for a acknowledgement for a given message from the client  -->
                 <maxAckWaitTime>10</maxAckWaitTime>
+                
+                <!-- Time (in miliseconds) to wait until older messages in queues start being delivered-->
+                <queueMsgDeliveryCurserResetTimeInterval>60000</queueMsgDeliveryCurserResetTimeInterval>
+                
                 <!-- Max wait time(in seconds)  for a acknowledgement for Batch of messages that that is sent from
                 subscribers -->
                 <maxAckWaitTimeForBatch>120</maxAckWaitTimeForBatch>
@@ -178,9 +189,8 @@
                 <virtualHostSyncTaskInterval>3600</virtualHostSyncTaskInterval>
             </waitTimes>
         </tuning>
-
+        
     </clustering>
-
 
 </broker>
 

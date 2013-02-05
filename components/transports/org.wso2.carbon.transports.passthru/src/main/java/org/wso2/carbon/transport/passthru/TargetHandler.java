@@ -91,16 +91,18 @@ public class TargetHandler implements NHttpClientHandler {
                 return;
             }
 
-            if (connState != ProtocolState.REQUEST_READY &&
-                    connState != ProtocolState.RESPONSE_DONE) {
+            if (connState != ProtocolState.REQUEST_READY) {
                 handleInvalidState(conn, "Request not started");
+                return;
             }
 
             TargetRequest request = TargetContext.getRequest(conn);
 
-            request.start(conn);
+			if (request != null) {
+				request.start(conn);
 
-            targetConfiguration.getMetrics().incrementMessagesSent();
+				targetConfiguration.getMetrics().incrementMessagesSent();
+			}
         } catch (IOException e) {
             logIOException(conn, e);
             TargetContext.updateState(conn, ProtocolState.CLOSED);
@@ -135,9 +137,11 @@ public class TargetHandler implements NHttpClientHandler {
         ProtocolState connState = null;
         try {
             connState = TargetContext.getState(conn);
+            
             if (connState != ProtocolState.REQUEST_HEAD &&
-                    connState != ProtocolState.REQUEST_DONE) {
+            		connState != ProtocolState.REQUEST_DONE) {
                 handleInvalidState(conn, "Writing message body");
+                return;
             }
 
             TargetRequest request = TargetContext.getRequest(conn);
@@ -188,6 +192,7 @@ public class TargetHandler implements NHttpClientHandler {
             connState = TargetContext.getState(conn);
             if (connState != ProtocolState.REQUEST_DONE) {
                 handleInvalidState(conn, "Receiving response");
+                return;
             }
 
             HttpResponse response = conn.getHttpResponse();
@@ -239,9 +244,16 @@ public class TargetHandler implements NHttpClientHandler {
         ProtocolState connState;
         try {
             connState = TargetContext.getState(conn);
+            
+            if(connState.compareTo(ProtocolState.RESPONSE_HEAD) < 0){
+            	return;
+            }
+            
             if (connState != ProtocolState.RESPONSE_HEAD &&
                     connState != ProtocolState.RESPONSE_BODY) {
+            	
                 handleInvalidState(conn, "Response received");
+                return;
             }
 
             TargetContext.updateState(conn, ProtocolState.RESPONSE_BODY);
@@ -449,10 +461,12 @@ public class TargetHandler implements NHttpClientHandler {
 
         log.warn(action + " while the handler is in an inconsistent state " +
                 TargetContext.getState(conn));
-        TargetContext.updateState(conn, ProtocolState.CLOSED);
-        targetConfiguration.getConnections().shutdownConnection(conn);
 
         MessageContext requestMsgCtx = TargetContext.get(conn).getRequestMsgCtx();
+        
+        TargetContext.updateState(conn, ProtocolState.CLOSED);
+        targetConfiguration.getConnections().shutdownConnection(conn); 
+        
         if (requestMsgCtx != null) {
             targetErrorHandler.handleError(requestMsgCtx,
                     ErrorCodes.SND_INVALID_STATE,

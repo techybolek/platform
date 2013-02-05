@@ -20,18 +20,18 @@
     <parent>
     	<groupId>org.wso2.carbon</groupId>
     	<artifactId>stratos-components</artifactId>
-    	<version>2.0.0-SNAPSHOT</version>
+    	<version>2.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>stratos-sso-mgt</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.0</version>
     <packaging>pom</packaging>
     <name>WSO2 Stratos - SAML2 SSO Management Aggregator Component</name>
 
     <modules>
-        <module>org.wso2.stratos.identity.saml2.sso.mgt</module>
-        <module>org.wso2.stratos.identity.saml2.sso.mgt.ui</module>
+        <module>org.wso2.stratos.identity.saml2.sso.mgt/2.0.0</module>
+        <module>org.wso2.stratos.identity.saml2.sso.mgt.ui/2.0.0</module>
     </modules>
 </project>

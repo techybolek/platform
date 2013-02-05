@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -29,6 +29,8 @@ public class RefreshTokenValidationDataDO {
 
     private String[] scope;
 
+    private String refreshTokenState;
+
     public String getAccessToken() {
         return accessToken;
     }
@@ -51,5 +53,13 @@ public class RefreshTokenValidationDataDO {
 
     public void setScope(String[] scope) {
         this.scope = scope;
+    }
+
+    public String getRefreshTokenState() {
+        return refreshTokenState;
+    }
+
+    public void setRefreshTokenState(String refreshTokenState) {
+        this.refreshTokenState = refreshTokenState;
     }
 }

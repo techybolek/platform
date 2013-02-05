@@ -18,6 +18,7 @@
 <%@ page import="org.apache.axiom.om.OMElement" %>
 <%@ page import="org.wso2.carbon.endpoint.ui.endpoints.loadbalance.LoadBalanceEndpoint" %>
 <%@ page import="org.wso2.carbon.endpoint.ui.util.ListEndpointDesignerHelper" %>
+<%@ page import="org.wso2.carbon.endpoint.ui.util.EndpointConfigurationHelper" %>
 
 <%
     String updatePage = request.getParameter("updatePage");
@@ -31,6 +32,8 @@
             if (sessionTimeout != null) {
                 editingEndpoint.setSessionTimeout(Long.parseLong(sessionTimeout));
             }
+        } else {
+            editingEndpoint.setSessionType(null);
         }
     } else {
         LoadBalanceEndpoint endpoint = (LoadBalanceEndpoint) ListEndpointDesignerHelper.getEditingListEndpoint(session);
@@ -47,15 +50,21 @@
         }
         if (algo != null && algo.equals("other") && algoClassName != null) {
             endpoint.setAlgorithmClassName(algoClassName);
+        } else {
+            endpoint.setAlgorithmClassName(EndpointConfigurationHelper.ROUNDROBIN_ALGO_CLASS_NAME);
         }
         if (sessionType != null && !sessionType.equals("SelectAValue")) {
             endpoint.setSessionType(sessionType);
             if (sessionTimeout != null) {
                 endpoint.setSessionTimeout(Long.parseLong(sessionTimeout));
             }
+        } else {
+            endpoint.setSessionType(null);
         }
         if (properties != null) {
             endpoint.setProperties(properties);
+        } else {
+           endpoint.setProperties(null);
         }
 
         OMElement endpointElement = endpoint.serialize(null);

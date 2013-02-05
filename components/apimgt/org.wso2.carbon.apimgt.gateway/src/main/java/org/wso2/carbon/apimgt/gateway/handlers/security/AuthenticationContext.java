@@ -24,9 +24,13 @@ public class AuthenticationContext {
 
     private boolean authenticated;
     private String username;
+    private String applicationTier;
     private String tier;
     private String apiKey;
     private String keyType;
+    private String callerToken;
+    private String applicationId;
+    private String applicationName;
 
     public boolean isAuthenticated() {
         return authenticated;
@@ -66,5 +70,37 @@ public class AuthenticationContext {
 
     public void setKeyType(String keyType) {
         this.keyType = keyType;
+    }
+
+    public String getCallerToken() {
+        return callerToken;
+    }
+
+    public void setCallerToken(String callerToken) {
+        this.callerToken = callerToken;
+    }
+
+    public String getApplicationTier() {
+        return applicationTier;
+    }
+
+    public void setApplicationTier(String applicationTier) {
+        this.applicationTier = applicationTier;
+    }
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+    }
+
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
     }
 }

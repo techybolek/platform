@@ -18,50 +18,35 @@
  */
 package org.wso2.carbon.rssmanager.core.entity;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Class to represent a Database Instance created by an RSS Server.
  */
 public class Database {
 
-	private String name;
+    private int id;
+
+    private String name;
 
     private String url;
-	
-	private String rssInstanceName;
+
+    private String rssInstanceName;
+
+    private String type;
 
     private int tenantId = -1;
-	
-	private Map<String, String> properties;
 
-	public Database(String name, String rssInstanceName) {
-		this.name = name;
-		this.rssInstanceName = rssInstanceName;
-		this.properties = new HashMap<String, String>();
-        this.tenantId = tenantId;
-	}
-
-    public Database(String name, String rssInstanceName, String url, int tenantId) {
-		this.name = name;
-		this.rssInstanceName = rssInstanceName;
+    public Database(int id, String name, String rssInstanceName, String url, String type, int tenantId) {
+        this.id = id;
+        this.name = name;
+        this.rssInstanceName = rssInstanceName;
         this.url = url;
+        this.type = type;
         this.tenantId = tenantId;
-		this.properties = new HashMap<String, String>();
-	}
+    }
 
     public Database() {
-
     }
-	
-	public Map<String, String> getProperties() {
-		return properties;
-	}
 
-	public void setProperties(Map<String, String> properties) {
-		this.properties = properties;
-	}
 
     public String getName() {
         return name;
@@ -95,4 +80,20 @@ public class Database {
         this.tenantId = tenantId;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+    
 }

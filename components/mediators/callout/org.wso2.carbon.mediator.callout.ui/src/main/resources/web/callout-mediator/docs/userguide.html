@@ -44,21 +44,28 @@ the Axis2 configuration, and samples/axis2Client/client_repo as the
 client repository unless these are specified separately
 </p>
 <h3>Adding a callout mediator</h3>
-As shown in figure 1 go to <span style="font-weight: bold;">Advanced</span>
-and click <span style="font-weight: bold;">Callout</span>.
-<div class="image"><img src="images/add-callout.png" alt=""/>
+<p>As shown in Figure 1 go to <span style="font-weight: bold;">Advanced</span>
+and click <span style="font-weight: bold;">Callout</span>.</p>
+<div class="image"><img src="images/add_callout.png" alt=""/>
 <p>Figure 1: Adding a callout mediator
 </p>
 </div>
 <h3>Configuring Callout options</h3>
-Figure 2 shows all the Callout specific options that can be tweaked.
-<div class="image"><img src="images/callout-options.png" alt=""/>
+<p>Figure 2 shows all the Callout specific options that can be tweaked.</p>
+<div class="image"><img src="images/callout_option_1.png" alt=""/><br/><img src="images/callout_option_2.png" alt=""/>
 <p>Figure 2: Callout mediator specific options
 </p>
 </div>
 Callout mediator specific options,
 <ul>
-<li>ServiceURL -</li><li>Action -</li><li>Axis2 Repository -</li><li>Axis2 XML -</li><li>Source -</li><li>Target -</li>
+    <li><b>ServiceURL</b> - URL of the service.</li>
+    <li><b>Action</b> - SOAP action.</li>
+    <li><b>Axis2 Repository</b> - Full path to Axis2 Repository Location. This is the place where services and modules are located.</li>
+    <li><b>Axis2 XML</b> - Full path to Axis2 XML file location.</li>
+    <li><b>Source</b> - Payload for the request message. This can  be specified as an XPath expression or the name of a message context
+        property which contains the source payload.</li>
+    <li><b>Target</b> - Specifies a node, at which the resulting payload will be attached into the current message,
+        or the name of a property using which the response will be attached to the current message context as a property.</li>
 </ul>
 </div>
 </body></html>

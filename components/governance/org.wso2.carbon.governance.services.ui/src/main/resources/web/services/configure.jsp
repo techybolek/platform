@@ -134,7 +134,7 @@
 <div id="middle">
     <h2><fmt:message key="configure.services"/></h2>
     <div id="workArea">
-        <form id="services.config.form" method="post" action="save_service_ui_ajaxprocessor.jsp">
+        <form id="services.config.form" method="post" action="save_service_ui.jsp">
             <table class="styledLeft" cellspacing="0" cellpadding="0">
                 <thead>
                 <tr>

@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.oauth.ui.internal;
 
 import org.osgi.service.http.HttpService;
 import org.wso2.carbon.base.api.ServerConfigurationService;
+import org.wso2.carbon.identity.oauth2.OAuth2Service;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 /**
@@ -32,6 +33,7 @@ public class OAuthUIServiceComponentHolder {
     private ConfigurationContextService configurationContextService;
     private ServerConfigurationService serverConfigurationService;
     private HttpService httpService;
+    private OAuth2Service oauth2Service;
 
     private OAuthUIServiceComponentHolder(){
     }
@@ -54,6 +56,14 @@ public class OAuthUIServiceComponentHolder {
 
     public void setServerConfigurationService(ServerConfigurationService serverConfigurationService) {
         this.serverConfigurationService = serverConfigurationService;
+    }
+
+    public OAuth2Service getOAuth2Service() {
+        return oauth2Service;
+    }
+
+    public void setOAuth2Service(OAuth2Service oauth2Service) {
+        this.oauth2Service = oauth2Service;
     }
 
     public HttpService getHttpService() {

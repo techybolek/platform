@@ -23,11 +23,13 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.regex.Pattern" %>
 <%@ page import="java.net.URLDecoder" %>
+<%@ page import="org.wso2.carbon.registry.core.utils.RegistryUtils" %>
 <%
     try {
         boolean isViewVersion = false;
         boolean preserveOriginal = true;
         boolean viewDependencies = true;
+        boolean viewPreserveOriginal = false;
         String displayMediaType = "";
         String currentEnvironment = "";
         String[] preserveOrigParam = null;
@@ -58,6 +60,8 @@
                             displayMediaType = joinedParam.split("=")[1];
                         } else if(joinedParam.split("=")[0].equals("showDependencies")){
                             viewDependencies = Boolean.parseBoolean(joinedParam.split("=")[1]);
+                        } else if(joinedParam.split("=")[0].equals("viewPreserveOriginal")){
+                            viewPreserveOriginal = Boolean.parseBoolean(joinedParam.split("=")[1]);
                         }else if(joinedParam.split("=")[0].equals("currentEnvironment")){
                             currentEnvironment = joinedParam.split("=")[1];
                         }
@@ -72,6 +76,8 @@
                         displayMediaType = parameter.split("=")[1];
                     } else if(parameter.split("=")[0].equals("showDependencies")){
                         viewDependencies = Boolean.parseBoolean(parameter.split("=")[1]);
+                    } else if(parameter.split("=")[0].equals("viewPreserveOriginal")){
+                        viewPreserveOriginal = Boolean.parseBoolean(parameter.split("=")[1]);
                     }else if(parameter.split("=")[0].equals("currentEnvironment")){
                         currentEnvironment = parameter.split("=")[1];
                     }
@@ -190,7 +196,13 @@
             <%
                 for (String association : associations) {
                     String assoName = association.substring(association.lastIndexOf("/") + 1);
-                    if (currentEnvironment == null || association.startsWith(currentEnvironment)) {
+                    String tmp;
+                    if(association.equals("/")) {
+                        tmp = association;
+                    } else {
+                        tmp = association.substring(association.indexOf("/_system"));
+                    }
+                    if (currentEnvironment == null || tmp.startsWith(currentEnvironment)) {
             %>
             <tr>
                 <td>
@@ -207,12 +219,16 @@
                         otherDependencies.add(association);
                     }
                 }
+                if(viewPreserveOriginal){
             %>
             <tr>
                 <td colspan="2"><fmt:message key="preserve.original"/>: <input type="checkbox" name="preserveOriginal"
                         <% if (preserveOriginal) {%> checked="checked" <%} %> value="true"
                                                                                id="preserveOriginal"/></td>
             </tr>
+            <%
+                }
+            %>
             <tr>
                 <td colspan="2">
                     <input class="button registryWriteOperation" type="button" id="<fmt:message key="proceed"/>"

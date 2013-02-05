@@ -127,7 +127,7 @@ public abstract class AbstractPIPResourceFinder implements PIPResourceFinder{
 
     @Override
     public boolean overrideDefaultCache() {
-        Properties properties = EntitlementServiceComponent.getEntitlementConfig().getCachingProperties();
+        Properties properties = EntitlementServiceComponent.getEntitlementConfig().getEngineProperties();
         if ("true".equals(properties.getProperty(EntitlementConstants.RESOURCE_CACHING))) {
             abstractResourceCache = EntitlementUtil
                     .getCommonCache(EntitlementConstants.PIP_ABSTRACT_RESOURCE_CACHE);

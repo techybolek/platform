@@ -21,7 +21,7 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.dashboard.common.DashboardConstants;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
@@ -43,7 +43,7 @@ public class GadgetServerUserManagementService extends AbstractAdmin {
     }
 
     private int getTenantId() {
-        return SuperTenantCarbonContext.getCurrentContext().getTenantId();
+        return PrivilegedCarbonContext.getCurrentContext().getTenantId();
     }
 
     /**
@@ -116,7 +116,7 @@ public class GadgetServerUserManagementService extends AbstractAdmin {
         Boolean response = false;
 
         try {
-            int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
+            int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
             Registry registry = GadgetServerUserManagementContext.getRegistry(tenantId);
 
             Resource regAdminDataResource;
@@ -152,7 +152,7 @@ public class GadgetServerUserManagementService extends AbstractAdmin {
         Boolean response = false;
 
         try {
-            int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
+            int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
             Registry registry = GadgetServerUserManagementContext.getRegistry(tenantId);
 
             Resource regAdminDataResource;

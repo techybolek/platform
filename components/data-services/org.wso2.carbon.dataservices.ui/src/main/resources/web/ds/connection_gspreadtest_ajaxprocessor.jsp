@@ -28,9 +28,8 @@
 	String password = request.getParameter("password");
 	String documentURL = request.getParameter("documentURL");
    	String visibility = request.getParameter("visibility");
-    String protectedTokens = request.getParameter("protectedTokens");
-    String passwordProvider = request.getParameter("passwordProvider");
-
+    String passwordAlias = request.getParameter("passwordAlias");
+    
 	String backendServerURL = CarbonUIUtil
 			.getServerURL(config.getServletContext(), session);
 	ConfigurationContext configContext = (ConfigurationContext) config.getServletContext()
@@ -40,7 +39,7 @@
 			configContext);
 	String message = "";
 	try {
-		message = client.testGSpreadConnection(userName,password,visibility,documentURL, protectedTokens,passwordProvider) ;
+		message = client.testGSpreadConnection(userName,password,visibility,documentURL, passwordAlias) ;
 		response.setContentType("text/xml; charset=UTF-8");
 		// Set standard HTTP/1.1 no-cache headers.
 		response.setHeader("Cache-Control",

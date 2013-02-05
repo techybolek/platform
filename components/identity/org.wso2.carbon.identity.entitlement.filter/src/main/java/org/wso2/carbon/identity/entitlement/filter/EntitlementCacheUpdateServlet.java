@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.identity.entitlement.filter;
 
+import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -47,7 +48,7 @@ public class EntitlementCacheUpdateServlet extends HttpServlet {
     private ConfigurationContext configCtx;
     private String remoteServiceUserName;
     private String remoteServicePassword;
-    private String remoteServiceURL;
+    private String remoteServiceUrl;
     private String authCookie;
     private ServletConfig servletConfig;
     private String authentication;
@@ -66,8 +67,8 @@ public class EntitlementCacheUpdateServlet extends HttpServlet {
         }
         httpsPort = config.getInitParameter(EntitlementConstants.HTTPS_PORT);
         authentication = config.getInitParameter(EntitlementConstants.AUTHENTICATION);
-        remoteServiceURL = config.getServletContext().getInitParameter(EntitlementConstants.REMOTE_SERVICE_URL);
-        remoteServiceUserName = config.getServletContext().getInitParameter(EntitlementConstants.USER);
+        remoteServiceUrl = config.getServletContext().getInitParameter(EntitlementConstants.REMOTE_SERVICE_URL);
+        remoteServiceUserName = config.getServletContext().getInitParameter(EntitlementConstants.USERNAME);
         remoteServicePassword = config.getServletContext().getInitParameter(EntitlementConstants.PASSWORD);
         authenticationPage = config.getInitParameter(EntitlementConstants.AUTHENTICATION_PAGE);
         authenticationPageURL = config.getInitParameter(EntitlementConstants.AUTHENTICATION_PAGE_URL);
@@ -111,7 +112,7 @@ public class EntitlementCacheUpdateServlet extends HttpServlet {
         if (authentication.equals(EntitlementConstants.WSO2_IS)) {
 
             AuthenticationAdminStub authStub;
-            String authenticationAdminServiceURL = remoteServiceURL+"AuthenticationAdmin";
+            String authenticationAdminServiceURL = remoteServiceUrl +"AuthenticationAdmin";
             try {
                 authStub = new AuthenticationAdminStub(configCtx, authenticationAdminServiceURL);
                 ServiceClient client = authStub._getServiceClient();
@@ -153,7 +154,7 @@ public class EntitlementCacheUpdateServlet extends HttpServlet {
     }
 
     private void redirectToHTTPS (HttpServletRequest req, HttpServletResponse resp) throws EntitlementCacheUpdateServletException{
-        String serverName = req.getServerName();
+            String serverName = req.getServerName();
             String contextPath = req.getContextPath();
             String servletPath = req.getServletPath();
             String redirectURL = "https://" + serverName + ":" + httpsPort + contextPath
@@ -168,39 +169,42 @@ public class EntitlementCacheUpdateServlet extends HttpServlet {
 
     private void doAuthentication(HttpServletRequest req, HttpServletResponse resp) throws EntitlementCacheUpdateServletException{
         String username = req.getParameter("username");
-            String password = req.getParameter("password");
-            String remoteIp = req.getServerName();
+        String password = req.getParameter("password");
+        String remoteIp = req.getServerName();
 
-            if (authenticate(username, password, remoteIp)) {
+        if (authenticate(username, password, remoteIp)) {
 
-                RequestDispatcher requestDispatcher = req.getRequestDispatcher("/updateCacheAuth.do");
-                String subjectScope = servletConfig.getServletContext().getInitParameter("subjectScope");
-                String subjectAttributeName = servletConfig.getServletContext().getInitParameter("subjectAttributeName");
+            RequestDispatcher requestDispatcher = req.getRequestDispatcher("/updateCacheAuth.do");
+            String subjectScope = servletConfig.getServletContext().getInitParameter("subjectScope");
+            String subjectAttributeName = servletConfig.getServletContext().getInitParameter("subjectAttributeName");
 
-                if (subjectScope.equals(EntitlementConstants.REQUEST_PARAM)) {
+            if (subjectScope.equals(EntitlementConstants.REQUEST_PARAM)) {
 
-                    requestDispatcher = req.getRequestDispatcher("/updateCacheAuth.do?" + subjectAttributeName + "=" + username);
+                requestDispatcher = req.getRequestDispatcher("/updateCacheAuth.do?" + subjectAttributeName + "=" + username);
 
-                } else if (subjectScope.equals(EntitlementConstants.REQUEST_ATTIBUTE)) {
+            } else if (subjectScope.equals(EntitlementConstants.REQUEST_ATTIBUTE)) {
 
-                    req.setAttribute(subjectAttributeName, username);
+                req.setAttribute(subjectAttributeName, username);
 
-                } else if (subjectScope.equals(EntitlementConstants.SESSION)) {
+            } else if (subjectScope.equals(EntitlementConstants.SESSION)) {
 
-                    req.getSession().setAttribute(subjectAttributeName, username);
-
-                }
-
-                try{
-                    requestDispatcher.forward(req, resp);
-                }catch (Exception e){
-                    log.error("Error occurred while dispatching request to /updateCacheAuth.do", e);
-                    throw new EntitlementCacheUpdateServletException("Error occurred while dispatching request to /updateCacheAuth.do", e);
-                }
+                req.getSession().setAttribute(subjectAttributeName, username);
 
             } else {
-                showAuthPage(req,resp);
+
+                resp.setHeader("Authorization", Base64Utils.encode((username + ":" + password).getBytes()));
             }
+
+            try{
+                requestDispatcher.forward(req, resp);
+            }catch (Exception e){
+                log.error("Error occurred while dispatching request to /updateCacheAuth.do", e);
+                throw new EntitlementCacheUpdateServletException("Error occurred while dispatching request to /updateCacheAuth.do", e);
+            }
+
+        } else {
+            showAuthPage(req,resp);
+        }
     }
 
     private void showAuthPage (HttpServletRequest req, HttpServletResponse resp) throws EntitlementCacheUpdateServletException{

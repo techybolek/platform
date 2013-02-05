@@ -1,7 +1,6 @@
 package org.wso2.carbon.databridge.commons;
 
 import junit.framework.Assert;
-import org.json.JSONException;
 import org.junit.Test;
 import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
 import org.wso2.carbon.databridge.commons.utils.EventDefinitionConverterUtils;
@@ -63,6 +62,25 @@ public class MultipleDefinitionConversionTest {
             "          {'name':'price','type':'float'}" +
             "  ]" +
             "}";
+    private String definition3 = "{" +
+            "  'name':'org.wso2.esb.MediatorStatistics'," +
+            "  'version':'2.3.1'," +
+            "  'nickName': 'Stock Quote Information'," +
+            "  'description': 'Some Desc'," +
+            "  'tags':['foo', 'bar']," +
+            "  'metaData':[" +
+            "          {'name':'ipAdd','type':'STRING'}" +
+            "  ]," +
+            "  'payloadData':[" +
+            "          {'name':'symbol','type':'sTring'}," +
+            "          {'name':'price','type':'DOUBLE'}," +
+            "          {'name':'volume','type':'int'}," +
+            "          {'name':'max','type':'douBLE'}," +
+            "          {'name':'min','type':'double'}" +
+//            "  ]" +
+            "  ]," +
+            "  'correlationData':[]" +
+            "}";
 
     @Test
     public void multipleDefnConversionFromJSON()
@@ -71,19 +89,11 @@ public class MultipleDefinitionConversionTest {
         String multipleDefns = combineJSONEventDefinitons();
 
 
-//        StreamDefinition convertedStreamDefinition1 =
-//                EventDefinitionConverterUtils.convertFromJson(definition1);
-//        StreamDefinition convertedstreamDefinition2 =
-//                EventDefinitionConverterUtils.convertFromJson(definition2);
-//
-//        List<StreamDefinition> convertedEventDefns = new ArrayList<StreamDefinition>();
-//        convertedEventDefns.add(convertedStreamDefinition1);
-//        convertedEventDefns.add(convertedstreamDefinition2);
-
         List<StreamDefinition> actualStreamDefinitions =
                 EventDefinitionConverterUtils.convertMultipleEventDefns(multipleDefns);
         StreamDefinition actualStreamDefinition1 = actualStreamDefinitions.get(0);
         StreamDefinition actualStreamDefinition2 = actualStreamDefinitions.get(1);
+        StreamDefinition actualStreamDefinition3 = actualStreamDefinitions.get(2);
 
 //        System.out.println(gson.toJson(streamDefinition1));
 
@@ -126,72 +136,36 @@ public class MultipleDefinitionConversionTest {
         expectedEventDefinitions2.setCorrelationData(correlation2);
         expectedEventDefinitions2.setTags(tags);
 
+        StreamDefinition expectedEventDefinitions3 =
+                new StreamDefinition("org.wso2.esb.MediatorStatistics", "2.3.1",
+                        actualStreamDefinition3.getStreamId());
+        List<Attribute> meta3 = new ArrayList<Attribute>(1);
+        meta3.add(new Attribute("ipAdd", AttributeType.STRING));
+        expectedEventDefinitions3.setMetaData(meta3);
+        List<Attribute> payload3 = new ArrayList<Attribute>(5);
+        payload3.add(new Attribute("symbol", AttributeType.STRING));
+        payload3.add(new Attribute("price", AttributeType.DOUBLE));
+        payload3.add(new Attribute("volume", AttributeType.INT));
+        payload3.add(new Attribute("max", AttributeType.DOUBLE));
+        payload3.add(new Attribute("min", AttributeType.DOUBLE));
+        expectedEventDefinitions3.setPayloadData(payload3);
+        List<String> tags3 = new ArrayList<String>();
+        tags3.add("foo");
+        tags3.add("bar");
+        expectedEventDefinitions3.setTags(tags3);
+
         List<StreamDefinition> expectedEventDefns = new ArrayList<StreamDefinition>();
         expectedEventDefns.add(expectedEventDefinitions1);
         expectedEventDefns.add(expectedEventDefinitions2);
+        expectedEventDefns.add(expectedEventDefinitions3);
 
         Assert.assertEquals(actualStreamDefinitions, expectedEventDefns);
 
     }
 
     private String combineJSONEventDefinitons() {
-        return "["+ definition1 + ", " + definition2 + "]";
+        return "["+ definition1 + ", " + definition2 + ", " + definition3 + "]";
     }
-
-    @Test
-    public void multipleStreamDefnToJSON() throws MalformedStreamDefinitionException, JSONException {
-       StreamDefinition actualStreamDefinition1 =
-                new StreamDefinition("org.wso2.esb.MediatorStatistics", "2.3.0");
-
-//        List<Attribute> meta = new ArrayList<Attribute>(1);
-//        meta.add(new Attribute("ipAdd", AttributeType.STRING));
-//        actualStreamDefinition1.setMetaData(meta);
-//        List<Attribute> payload = new ArrayList<Attribute>(5);
-//        payload.add(new Attribute("symbol", AttributeType.STRING));
-//        payload.add(new Attribute("price", AttributeType.DOUBLE));
-//        payload.add(new Attribute("volume", AttributeType.INT));
-//        payload.add(new Attribute("max", AttributeType.DOUBLE));
-//        payload.add(new Attribute("min", AttributeType.DOUBLE));
-//        actualStreamDefinition1.setPayloadData(payload);
-//        List<String> tags = new ArrayList<String>();
-//        tags.add("foo");
-//        tags.add("bar");
-//        actualStreamDefinition1.setTags(tags);
-//
-//        StreamDefinition actualStreamDefinition2 =
-//                new StreamDefinition("org.wso2.esb.MediatorStatistics", "3.0.0");
-//        List<Attribute> meta2 = new ArrayList<Attribute>(1);
-//        meta2.add(new Attribute("ipAdd", AttributeType.STRING));
-//        actualStreamDefinition2.setMetaData(meta2);
-//        List<Attribute> payload2 = new ArrayList<Attribute>(5);
-//        payload2.add(new Attribute("symbol", AttributeType.FLOAT));
-//        payload2.add(new Attribute("price", AttributeType.FLOAT));
-//        payload2.add(new Attribute("volume", AttributeType.STRING));
-//        payload2.add(new Attribute("max", AttributeType.DOUBLE));
-//        payload2.add(new Attribute("min", AttributeType.DOUBLE));
-//        actualStreamDefinition2.setPayloadData(payload2);
-//        List<Attribute> correlation2 = new ArrayList<Attribute>(5);
-//        correlation2.add(new Attribute("symbol", AttributeType.STRING));
-//        correlation2.add(new Attribute("price", AttributeType.FLOAT));
-//        actualStreamDefinition2.setCorrelationData(correlation2);
-//        actualStreamDefinition2.setTags(tags);
-//
-//        List<StreamDefinition> streamDefinitions = new ArrayList<StreamDefinition>();
-//        streamDefinitions.add(actualStreamDefinition1);
-//        streamDefinitions.add(actualStreamDefinition2);
-//
-//        String actualJSONEventDefinitions = EventDefinitionConverterUtils.convertToJson(streamDefinitions);
-//
-//        // inject stream ids from the actual definitions, as they will be unique otherwise
-//        JSONObject jsonDefn1 = new JSONObject(definition1);
-//        jsonDefn1.put(EBCommonsConstants.STREAM_ID, actualStreamDefinition1.getStreamId());
-//        JSONObject jsonDefn2 = new JSONObject(definition2);
-//        jsonDefn2.put(EBCommonsConstants.STREAM_ID, actualStreamDefinition2.getStreamId());
-//
-//
-//        assertEquals(new JSONArray(actualJSONEventDefinitions), (new JSONArray()).put(jsonDefn1).put(jsonDefn2));
-    }
-
 
 
 }

@@ -26,7 +26,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.admin.service.utils.AuthenticateStub;
-import org.wso2.carbon.rssmanager.ui.stub.RSSAdminRSSManagerExceptionException;
+import org.wso2.carbon.rssmanager.ui.stub.RSSAdminRSSDAOExceptionException;
 import org.wso2.carbon.rssmanager.ui.stub.RSSAdminStub;
 import org.wso2.carbon.rssmanager.ui.stub.types.*;
 
@@ -51,70 +51,53 @@ public class RSSAdminConsoleService {
         consoleAdminStub = new RSSAdminStub(endPoint);
     }
 
-    public void createDatabase(String sessionCookie, String databaseName, String rssInstanceName)
-            throws RemoteException {
+    public void createDatabase(String sessionCookie, String databaseName, int rssInstanceId)
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
         AuthenticateStub.authenticateStub(sessionCookie, consoleAdminStub);
         if (log.isDebugEnabled()) {
             log.debug("Database Name :" + databaseName);
-            log.debug("RSSInstanceId :" + rssInstanceName);
+            log.debug("RSSInstanceId :" + rssInstanceId);
         }
-        Database database = new Database();
-        database.setName(databaseName);
-        database.setRssInstanceName(rssInstanceName);
+        consoleAdminStub.createDatabase(serializeDatabaseInstanceData(databaseName, String.valueOf(rssInstanceId), "0").toString());
+        log.info("Database Created");
 
-        try {
-            consoleAdminStub.createDatabase(database);
-            log.info("Database Created");
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            String msg = "Error occurred while creating database '" + databaseName + "'";
-            log.error(msg, e);
-            throw new RemoteException(msg, e);
-        }
+
     }
 
-    public void dropDatabase(String sessionCookie, String rssInstanceName, String databaseName)
-            throws RemoteException {
+    public void dropDatabase(String sessionCookie, int databaseId)
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
         AuthenticateStub.authenticateStub(sessionCookie, consoleAdminStub);
         if (log.isDebugEnabled()) {
-            log.debug("RSS Instance Name :" + rssInstanceName);
-            log.debug("Database Instance Name :" + databaseName);
+            log.debug("Database InstanceId :" + databaseId);
         }
-        try {
-            consoleAdminStub.dropDatabase(rssInstanceName, databaseName);
-            log.info("Database Dropped");
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            String msg = "Error occurred while dropping the database '" + databaseName + "'";
-            log.error(msg, e);
-            throw new RemoteException(msg, e);
-        }
+        consoleAdminStub.dropDatabase(databaseId);
+        log.info("Database Dropped");
+
+
     }
 
-    public DatabaseMetaData[] getDatabaseInstanceList(String sessionCookie)
-            throws RemoteException {
+    public DatabaseInstanceEntry[] getDatabaseInstanceList(String sessionCookie)
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
         AuthenticateStub.authenticateStub(sessionCookie, consoleAdminStub);
-        DatabaseMetaData[] databaseList;
-        try {
-            databaseList = consoleAdminStub.getDatabases();
-            log.info("Database instance list received");
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            String msg = "Error occurred while retrieving the database list";
-            log.error(msg, e);
-            throw new RemoteException(msg, e);
+        DatabaseInstanceEntry[] databaseList;
+        databaseList = consoleAdminStub.getDatabaseInstanceList();
+        if (log.isDebugEnabled()) {
+            log.debug("Database Instance list: " + databaseList);
         }
+        log.info("Database instance list received");
+
         return databaseList;
     }
 
-    public DatabaseMetaData getDatabaseInstance(String sessionCookie, String rssInstanceName,
-                                                String databaseName)
-            throws RemoteException {
-        DatabaseMetaData[] databaseList = getDatabaseInstanceList(sessionCookie);
-        DatabaseMetaData dbInstance = null;
+    public DatabaseInstanceEntry getDatabaseInstance(String sessionCookie, String databaseName)
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
+        DatabaseInstanceEntry[] databaseList = getDatabaseInstanceList(sessionCookie);
+        DatabaseInstanceEntry dbInstance = null;
         if (databaseList == null) {
             return null;
         }
-        for (DatabaseMetaData dbEntry : databaseList) {
-            if (dbEntry.getName().equals(databaseName) &
-                    dbEntry.getRssInstanceName().equals(rssInstanceName)) {
+        for (DatabaseInstanceEntry dbEntry : databaseList) {
+            if (dbEntry.getDbName().equals(databaseName)) {
                 dbInstance = dbEntry;
                 break;
             }
@@ -124,40 +107,35 @@ public class RSSAdminConsoleService {
     }
 
     public void createPrivilegeGroup(String sessionCookie, String privilegeGroupName)
-            throws RemoteException {
-        DatabasePrivilegeTemplate template = new DatabasePrivilegeTemplate();
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
+        PrivilegeGroup privilegeGroup = new PrivilegeGroup();
 
-        template.setName(privilegeGroupName);
-        template.setPrivileges(getAllDatabasePermission());
+        privilegeGroup.setPrivGroupName(privilegeGroupName);
+        privilegeGroup.setPrivs(getAllDatabasePermission());
 
         AuthenticateStub.authenticateStub(sessionCookie, consoleAdminStub);
         if (log.isDebugEnabled()) {
             log.debug("Privilege Group Name: " + privilegeGroupName);
         }
 
-        try {
-            consoleAdminStub.createDatabasePrivilegesTemplate(template);
-            log.info("Privilege Group Added");
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            String msg = "Error occurred while creating the database privilege template '" +
-                    template.getName();
-            log.error(msg, e);
-            throw new RemoteException(msg, e);
-        }
+        consoleAdminStub.createPrivilegeGroup(privilegeGroup);
+        log.info("Privilege Group Added");
+
+
     }
 
-    public DatabasePrivilegeTemplate getPrivilegeGroup(String sessionCookie, String privilegeGroupName)
-            throws RemoteException {
-        DatabasePrivilegeTemplate[] privilegeGroups = getUserPrivilegeGroups(sessionCookie);
-        DatabasePrivilegeTemplate userPrivilegeGroup = null;
+    public PrivilegeGroup getPrivilegeGroup(String sessionCookie, String privilegeGroupName)
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
+        PrivilegeGroup[] privilegeGroups = getUserPrivilegeGroups(sessionCookie);
+        PrivilegeGroup userPrivilegeGroup = null;
         if (privilegeGroups == null) {
             return null;
         }
         if (log.isDebugEnabled()) {
             log.debug("privilege group name :" + privilegeGroupName);
         }
-        for (DatabasePrivilegeTemplate priGroup : privilegeGroups) {
-            if (priGroup.getName().equals(privilegeGroupName)) {
+        for (PrivilegeGroup priGroup : privilegeGroups) {
+            if (priGroup.getPrivGroupName().equals(privilegeGroupName)) {
                 userPrivilegeGroup = priGroup;
                 log.info("Privilege group found");
                 break;
@@ -168,192 +146,154 @@ public class RSSAdminConsoleService {
 
     }
 
-    public void deletePrivilegeGroup(String sessionCookie, String templateName)
-            throws RemoteException {
+    public void deletePrivilegeGroup(String sessionCookie, int privilegeGroupId)
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
         AuthenticateStub.authenticateStub(sessionCookie, consoleAdminStub);
         if (log.isDebugEnabled()) {
-            log.debug("privilege group name :" + templateName);
+            log.debug("privilege group id :" + privilegeGroupId);
         }
-        try {
-            consoleAdminStub.dropDatabasePrivilegesTemplate(templateName);
-            log.info("privilege group removed");
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            String msg = "Error occurred while dropping database privilege template '" +
-                    templateName + "'";
-            log.error(msg, e);
-            throw new RemoteException(msg, e);
-        }
+
+        consoleAdminStub.removePrivilegeGroup(privilegeGroupId);
+        log.info("privilege group removed");
+
     }
 
-    public DatabasePrivilegeTemplate[] getUserPrivilegeGroups(String sessionCookie)
-            throws RemoteException {
+    public PrivilegeGroup[] getUserPrivilegeGroups(String sessionCookie)
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
         AuthenticateStub.authenticateStub(sessionCookie, consoleAdminStub);
-        DatabasePrivilegeTemplate[] DatabasePrivilegeTemplate;
-        try {
-            DatabasePrivilegeTemplate = consoleAdminStub.getDatabasePrivilegesTemplates();
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            String msg = "Error occurred while retrieving the list of database privilege templates";
-            log.error(msg, e);
-            throw new RemoteException(msg, e);
-        }
-        return DatabasePrivilegeTemplate;
+        PrivilegeGroup[] privilegeGroup;
+        privilegeGroup = consoleAdminStub.getPrivilegeGroups();
+
+        return privilegeGroup;
+
     }
 
 
-    public String getDatabaseUser(String sessionCookie, String rssInstanceName,
-                                                String username)
-            throws RemoteException {
-        String[] databaseUsers =
-                getUsersByDatabaseInstanceId(sessionCookie, rssInstanceName, username);
-        DatabaseUserMetaData dbUser = null;
+    public DatabaseUserEntry getDatabaseUser(String sessionCookie, String userName,
+                                             int databaseInstanceId)
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
+        DatabaseUserEntry[] databaseUsers = getUsersByDatabaseInstanceId(sessionCookie, databaseInstanceId);
+        DatabaseUserEntry dbUser = null;
         if (databaseUsers == null) {
             return null;
         }
         if (log.isDebugEnabled()) {
-            log.debug("Username " + username);
+            log.debug("User name " + userName);
         }
-        for (String user : databaseUsers) {
-            if (username.equals(user)) {
+        for (DatabaseUserEntry user : databaseUsers) {
+            if (userName.equals(user.getUsername())) {
+                dbUser = user;
                 log.info("User Found on database");
-                return user;
+                break;
             }
         }
-        return null;
+        return dbUser;
     }
 
-    public DatabaseMetaData getDatabase(String sessionCookie, String rssInstanceName,
-                                        String databaseName)
-            throws RemoteException {
+    public DatabaseInstanceEntry getDatabaseInstanceById(String sessionCookie, int rssInstanceId,
+                                                         int databaseInstanceId)
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
         AuthenticateStub.authenticateStub(sessionCookie, consoleAdminStub);
-        DatabaseMetaData DatabaseMetaData;
-        try {
-            DatabaseMetaData = consoleAdminStub.getDatabase(rssInstanceName, databaseName);
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            String msg = "Error occurred while retrieving the configuration of the database '" +
-                    databaseName + "'";
-            log.error(msg, e);
-            throw new RemoteException(msg, e);
-        }
-        return DatabaseMetaData;
+        DatabaseInstanceEntry databaseInstanceEntry;
+        databaseInstanceEntry = consoleAdminStub.getDatabaseInstanceById(databaseInstanceId);
+        return databaseInstanceEntry;
     }
 
-    public RSSInstanceMetaData[] getRSSInstanceList(String sessionCookie)
-            throws RemoteException {
+    public RSSInstanceEntry[] getRSSInstanceList(String sessionCookie)
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
         AuthenticateStub.authenticateStub(sessionCookie, consoleAdminStub);
-        RSSInstanceMetaData[] rssInstance;
+        RSSInstanceEntry[] rssInstance;
 
-        try {
-            rssInstance = consoleAdminStub.getRSSInstances();
-            log.info("RSS Instance retrieved");
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            String msg = "Error occurred while retrieving the RSS instance list";
-            log.error(msg, e);
-            throw new RemoteException(msg, e);
-        }
+        rssInstance = consoleAdminStub.getRSSInstanceList();
+        log.info("RSS Instance found");
 
         return rssInstance;
     }
 
-    public RSSInstanceMetaData getRSSInstanceById(String sessionCookie, String rssInstanceName)
-            throws RemoteException {
+    public RSSInstance getRSSInstanceById(String sessionCookie, int rssInstanceId)
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
         AuthenticateStub.authenticateStub(sessionCookie, consoleAdminStub);
-        RSSInstanceMetaData rssInstance;
+        RSSInstance rssInstance;
 
-        try {
-            rssInstance = consoleAdminStub.getRSSInstance(rssInstanceName);
-            log.info("RSS Instance found");
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            String msg = "Error occurred while retrieving the configuration of the RSS instance '" +
-                    rssInstanceName + "'";
-            log.error(msg, e);
-            throw new RemoteException(msg, e);
-        }
+        rssInstance = consoleAdminStub.getRSSInstanceDataById(rssInstanceId);
+        log.info("RSS Instance found");
+
+        return rssInstance;
+    }
+
+    public RSSInstanceEntry getRoundRobinAssignedRSSInstance(String sessionCookie)
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
+        AuthenticateStub.authenticateStub(sessionCookie, consoleAdminStub);
+        RSSInstanceEntry rssInstance;
+
+        rssInstance = consoleAdminStub.getRoundRobinAssignedRSSInstance();
+        log.info("RSS Instance found");
+
         return rssInstance;
     }
 
     public void createUser(String sessionCookie, String userName, String password,
-                           String rssInstanceName)
-            throws RemoteException {
+                           int databaseInstanceId, int privilegeGroupId)
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
         AuthenticateStub.authenticateStub(sessionCookie, consoleAdminStub);
         DatabaseUser user = new DatabaseUser();
         user.setUsername(userName);
         user.setPassword(password);
-        user.setRssInstanceName(rssInstanceName);
         if (log.isDebugEnabled()) {
-            log.debug("Username " + userName);
-            log.debug("RSS Instance Name " + rssInstanceName);
+            log.debug("userName " + userName);
+            log.debug("databaseInstanceId " + databaseInstanceId);
+            log.debug("privilegeGroupId " + privilegeGroupId);
         }
-        try {
-            consoleAdminStub.createDatabaseUser(user);
-            log.info("User Created");
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            String msg = "Error occurred while creating the database user '" + userName + "'";
-            log.error(msg, e);
-            throw new RemoteException(msg, e);
-        }
+        consoleAdminStub.createUser(user, privilegeGroupId, databaseInstanceId);
+        log.info("User Created");
     }
 
-    public void deleteUser(String sessionCookie, String rssInstanceName, String username)
-            throws RemoteException {
+    public void deleteUser(String sessionCookie, int userId, int databaseInstanceId)
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
         AuthenticateStub.authenticateStub(sessionCookie, consoleAdminStub);
         if (log.isDebugEnabled()) {
-            log.debug("RSS Instance Name " + rssInstanceName);
-            log.debug("Username " + username);
+            log.debug("UserId " + userId);
         }
-        try {
-            consoleAdminStub.dropDatabaseUser(rssInstanceName, username);
-            log.info("User Deleted");
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            String msg = "Error occurred while dropping the database user '" + username + "'";
-            log.error(msg, e);
-            throw new RemoteException(msg, e);
-        }
+        consoleAdminStub.dropUser(userId, databaseInstanceId);
+        log.info("User Deleted");
 
 
     }
 
-    public String[] getUsersByDatabaseInstanceId(
-            String sessionCookie, String rssInstanceName, String databaseName)
-            throws RemoteException {
+    public DatabaseUserEntry[] getUsersByDatabaseInstanceId(String sessionCookie,
+                                                            int databaseInstanceId)
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
         AuthenticateStub.authenticateStub(sessionCookie, consoleAdminStub);
-        String[] userList;
+        DatabaseUserEntry[] userList;
         if (log.isDebugEnabled()) {
-            log.debug("RSS Instance Name " + rssInstanceName);
-            log.debug("Database Name " + databaseName);
+            log.debug("databaseInstanceId " + databaseInstanceId);
         }
 
-        try {
-            userList = consoleAdminStub.getUsersAttachedToDatabase(rssInstanceName, databaseName);
-            log.info("User List received");
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            String msg = "Error occurred while retrieving the database user list attached to " +
-                    "the database '" + databaseName + "'";
-            log.error(msg, e);
-            throw new RemoteException(msg, e);
-        }
+        userList = consoleAdminStub.getUsersByDatabaseInstanceId(databaseInstanceId);
+        log.info("User List received");
 
         return userList;
     }
 
-//    public String createCarbonDSFromDatabaseUserEntry(String sessionCookie, int databaseInstanceId,
-//                                                      int dbUserId)
-//            throws RemoteException {
-//        AuthenticateStub.authenticateStub(sessionCookie, consoleAdminStub);
-//        String carbonDataSource;
-//        if (log.isDebugEnabled()) {
-//            log.debug("databaseInstanceId " + databaseInstanceId);
-//        }
-//
-//        carbonDataSource = consoleAdminStub.createCarbonDSFromDatabaseUserEntry(databaseInstanceId, dbUserId);
-//        log.debug(carbonDataSource);
-//        carbonDataSource = carbonDataSource.substring((carbonDataSource.indexOf(" '") + 2), carbonDataSource.indexOf("' "));
-//        if (log.isDebugEnabled()) {
-//            log.debug("Data Source Name : " + carbonDataSource);
-//        }
-//        log.info("Data Source Created");
-//
-//        return carbonDataSource;
-//    }
+    public String createCarbonDSFromDatabaseUserEntry(String sessionCookie, int databaseInstanceId,
+                                                      int dbUserId)
+            throws RSSAdminRSSDAOExceptionException, RemoteException {
+        AuthenticateStub.authenticateStub(sessionCookie, consoleAdminStub);
+        String carbonDataSource;
+        if (log.isDebugEnabled()) {
+            log.debug("databaseInstanceId " + databaseInstanceId);
+        }
+
+        carbonDataSource = consoleAdminStub.createCarbonDSFromDatabaseUserEntry(databaseInstanceId, dbUserId);
+        log.debug(carbonDataSource);
+        carbonDataSource = carbonDataSource.substring((carbonDataSource.indexOf(" '") + 2), carbonDataSource.indexOf("' "));
+        if (log.isDebugEnabled()) {
+            log.debug("Data Source Name : " + carbonDataSource);
+        }
+        log.info("Data Source Created");
+
+        return carbonDataSource;
+    }
 
     private static OMElement serializeDatabaseInstanceData(String dbName, String rssInstId,
                                                            String dbInstId) {
@@ -376,30 +316,87 @@ public class RSSAdminConsoleService {
         return dbEl;
     }
 
-    private static DatabasePrivilegeSet getAllDatabasePermission() {
+    private DatabasePrivilege[] getAllDatabasePermission() {
 
-        DatabasePrivilegeSet privileges = new DatabasePrivilegeSet();
-        privileges.setSelectPriv("Y");
-        privileges.setInsertPriv("Y");
-        privileges.setUpdatePriv("Y");
-        privileges.setDeletePriv("Y");
-        privileges.setCreatePriv("Y");
-        privileges.setAlterPriv("Y");
-        privileges.setCreateTmpTablePriv("Y");
-        privileges.setLockTablesPriv("Y");
-        privileges.setCreateRoutinePriv("Y");
-        privileges.setAlterRoutinePriv("Y");
-        privileges.setCreateViewPriv("Y");
-        privileges.setShowViewPriv("Y");
-        privileges.setExecutePriv("Y");
-        privileges.setEventPriv("Y");
-        privileges.setTriggerPriv("Y");
-        privileges.setDropPriv("Y");
-        privileges.setReferencesPriv("Y");
-        privileges.setGrantPriv("Y");
-        privileges.setIndexPriv("Y");
+        DatabasePrivilege[] databasePrivilegeList = new DatabasePrivilege[19];
 
-        return privileges;
+        databasePrivilegeList[0] = new DatabasePrivilege();
+        databasePrivilegeList[0].setPrivName("Alter_priv");
+        databasePrivilegeList[0].setPrivValue("Y");
+
+        databasePrivilegeList[1] = new DatabasePrivilege();
+        databasePrivilegeList[1].setPrivName("Alter_routine_priv");
+        databasePrivilegeList[1].setPrivValue("Y");
+
+        databasePrivilegeList[2] = new DatabasePrivilege();
+        databasePrivilegeList[2].setPrivName("Create_priv");
+        databasePrivilegeList[2].setPrivValue("Y");
+
+        databasePrivilegeList[3] = new DatabasePrivilege();
+        databasePrivilegeList[3].setPrivName("Create_routine_priv");
+        databasePrivilegeList[3].setPrivValue("Y");
+
+        databasePrivilegeList[4] = new DatabasePrivilege();
+        databasePrivilegeList[4].setPrivName("Create_tmp_table_priv");
+        databasePrivilegeList[4].setPrivValue("Y");
+
+        databasePrivilegeList[5] = new DatabasePrivilege();
+        databasePrivilegeList[5].setPrivName("Create_view_priv");
+        databasePrivilegeList[5].setPrivValue("Y");
+
+        databasePrivilegeList[6] = new DatabasePrivilege();
+        databasePrivilegeList[6].setPrivName("Delete_priv");
+        databasePrivilegeList[6].setPrivValue("Y");
+
+        databasePrivilegeList[7] = new DatabasePrivilege();
+        databasePrivilegeList[7].setPrivName("Drop_priv");
+        databasePrivilegeList[7].setPrivValue("Y");
+
+        databasePrivilegeList[8] = new DatabasePrivilege();
+        databasePrivilegeList[8].setPrivName("Event_priv");
+        databasePrivilegeList[8].setPrivValue("Y");
+
+        databasePrivilegeList[9] = new DatabasePrivilege();
+        databasePrivilegeList[9].setPrivName("Execute_priv");
+        databasePrivilegeList[9].setPrivValue("Y");
+
+        databasePrivilegeList[10] = new DatabasePrivilege();
+        databasePrivilegeList[10].setPrivName("Grant_priv");
+        databasePrivilegeList[10].setPrivValue("Y");
+
+        databasePrivilegeList[11] = new DatabasePrivilege();
+        databasePrivilegeList[11].setPrivName("Index_priv");
+        databasePrivilegeList[11].setPrivValue("Y");
+
+        databasePrivilegeList[12] = new DatabasePrivilege();
+        databasePrivilegeList[12].setPrivName("Insert_priv");
+        databasePrivilegeList[12].setPrivValue("Y");
+
+        databasePrivilegeList[13] = new DatabasePrivilege();
+        databasePrivilegeList[13].setPrivName("Lock_tables_priv");
+        databasePrivilegeList[13].setPrivValue("Y");
+
+        databasePrivilegeList[14] = new DatabasePrivilege();
+        databasePrivilegeList[14].setPrivName("References_priv");
+        databasePrivilegeList[14].setPrivValue("Y");
+
+        databasePrivilegeList[15] = new DatabasePrivilege();
+        databasePrivilegeList[15].setPrivName("Select_priv");
+        databasePrivilegeList[15].setPrivValue("Y");
+
+        databasePrivilegeList[16] = new DatabasePrivilege();
+        databasePrivilegeList[16].setPrivName("Show_view_priv");
+        databasePrivilegeList[16].setPrivValue("Y");
+
+        databasePrivilegeList[17] = new DatabasePrivilege();
+        databasePrivilegeList[17].setPrivName("Trigger_priv");
+        databasePrivilegeList[17].setPrivValue("Y");
+
+        databasePrivilegeList[18] = new DatabasePrivilege();
+        databasePrivilegeList[18].setPrivName("Update_priv");
+        databasePrivilegeList[18].setPrivValue("Y");
+
+        return databasePrivilegeList;
 
     }
 

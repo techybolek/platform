@@ -19,16 +19,8 @@
 package org.wso2.carbon.bam.activity.mediation.data.publisher.mediator;
 
 
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMAttribute;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
-import org.apache.axiom.soap.SOAP11Constants;
-import org.apache.axiom.soap.SOAP12Constants;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPFactory;
-import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.apache.axiom.om.*;
+import org.apache.axiom.soap.*;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.synapse.MessageContext;
@@ -39,7 +31,7 @@ import org.wso2.carbon.bam.activity.mediation.data.publisher.util.ActivityPublis
 import org.wso2.carbon.bam.activity.mediation.data.publisher.util.ActivityPublisherUtils;
 import org.wso2.carbon.bam.activity.mediation.data.publisher.util.TenantActivityConfigData;
 import org.wso2.carbon.bam.data.publisher.util.BAMDataPublisherConstants;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.xml.namespace.QName;
 import java.util.Iterator;
@@ -63,7 +55,7 @@ public class MessageActivityMediator extends AbstractMediator {
         }
 
         AxisConfiguration axisConfiguration = msgCtx.getConfigurationContext().getAxisConfiguration();
-        int tenantID = SuperTenantCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+        int tenantID = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
         Map<Integer, ActivityConfigData> tenantSpecificActivity = TenantActivityConfigData.getTenantSpecificEventingConfigData();
         ActivityConfigData activityConfigData = tenantSpecificActivity.get(tenantID);
 

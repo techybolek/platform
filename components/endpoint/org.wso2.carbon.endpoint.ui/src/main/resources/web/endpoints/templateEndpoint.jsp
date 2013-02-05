@@ -24,6 +24,7 @@
 <%@ page import="org.wso2.carbon.endpoint.ui.client.EndpointAdminClient" %>
 <%@ page import="org.wso2.carbon.endpoint.ui.endpoints.template.TemplateEndpoint" %>
 <%@ page import="org.wso2.carbon.endpoint.ui.util.EndpointConfigurationHelper" %>
+<%@ page import="org.wso2.carbon.mediation.templates.ui.EndpointTemplateAdminClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
@@ -135,7 +136,6 @@
             OMElement endpointElement = AXIOMUtil.stringToOM(anonymousEndpointXML);
             endpoint = new TemplateEndpoint();
             endpoint.build(endpointElement, true);
-
         } catch (XMLStreamException e) {
             session.removeAttribute("anonEpXML");
 %>
@@ -145,8 +145,9 @@
 </script>
 <%
             }
+        } else {
+            endpoint = new TemplateEndpoint();
         }
-        endpoint = new TemplateEndpoint();
     } else {
         endpoint = new TemplateEndpoint();
         session.setAttribute("action", "add");
@@ -177,6 +178,19 @@
 
     Set<String> paramSet = parameterMap.keySet();
     String propertyTableStyle = parameterMap.size() == 0 ? "display:none;" : "";
+
+    if (paramSet.size() == 1 || paramSet.size() == 2) {
+        propertyTableStyle = "display:none;";
+        for (String param : paramSet) {
+            if (!param.equals("name") && !param.equals("uri")) {
+                propertyTableStyle = "";
+            }
+        }
+    }
+
+    EndpointTemplateAdminClient templateAdminClient = new EndpointTemplateAdminClient(config, session);
+    String[] templateNameList = templateAdminClient.getAllTempalateNames();
+
 %>
 
 <div id="middle">
@@ -213,7 +227,7 @@
             <tbody>
 
             <tr style="<%=!isAnonymous?"":"display:none"%>">
-                <td width="180px"><fmt:message key="endpointName"/> <span
+                <td width="180px"><fmt:message key="template.endpointName"/> <span
                         class="required">*</span></td>
                 <td><input name="endpointName" id="endpointName"
                            value="<%=templateEpName%>"
@@ -224,8 +238,7 @@
                 </td>
             </tr>
             <tr>
-                <td class="leftCol-small"><fmt:message key="address"/><span
-                        class="required"> *</span>
+                <td class="leftCol-small"><fmt:message key="template.endpoint.address"/>
                 </td>
                 <td><input id="address" name="address" type="text"
                            value="<%=validAddressURL%>" size="75"/>
@@ -246,10 +259,28 @@
                 </td>
             </tr>
             <tr>
+                <td>
+                    <fmt:message key="template.available.templates"/>
+                </td>
+                <td>
+                    <select name="templateSelector" id="templateSelector" onchange="onTemplateSelectionChange()">
+                        <option value="default">Select From Templates</option>
+                        <%
+                            if (templateNameList != null) {
+                                for (String templateName : templateNameList) {%>
+                                    <option value="<%=templateName%>"><%=templateName%></option>
+                                    <%
+                                }
+                            }
+                            %>
+                    </select>
+                </td>
+            </tr>
+            <tr>
                 <td colspan="2">
 
                     <div style="margin-top:0px;">
-                        <table id="propertytable" style="<%=propertyTableStyle%>;"
+                        <table id="propertytable" style="<%=propertyTableStyle%>;" name="propertytable"
                                class="styledLeft">
                             <thead>
                             <tr>
@@ -268,9 +299,11 @@
                             <%
                                 int i = 0;
                                 for (String param : paramSet) {
-
                                     String paramName = param;
                                     String paramValue = parameterMap.get(paramName);
+                                    if (paramName.equals("name") || paramName.equals("uri")) { // hide default parameters
+                                        continue;
+                                    }
                             %>
                             <tr id="propertyRaw<%=i%>">
                                 <td><input type="text" name="propertyName<%=i%>"

@@ -112,7 +112,7 @@ public abstract class AbstractDirectoryTestCase extends TestCase {
 
         AdminGroupInfo groupInfo = new AdminGroupInfo("cn", "member", "admin");
         AdminInfo adminInfo =
-            new AdminInfo("amilaj", "Amila", "Jayasekara", "amilaj@wso2.com", "iceage", PasswordAlgorithm.SHA,
+            new AdminInfo("uid", "amilaj", "Amila", "Jayasekara", "amilaj@wso2.com", "iceage", PasswordAlgorithm.SHA,
                           groupInfo);
         PartitionInfo partitionInfo = new PartitionInfo("example", "example.com", "dc=example,dc=com", adminInfo);
         partitionInfo.setKdcEnabled(kdcEnabled);

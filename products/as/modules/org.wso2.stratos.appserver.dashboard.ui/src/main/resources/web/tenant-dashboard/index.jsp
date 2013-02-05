@@ -108,7 +108,7 @@
                           <%
 							if (hasWebAppMgtPermission) {
 						%>
-                        <a class="tip-title" href="../webapp-mgt/index.jsp?region=region1&item=webapps_list_menu">Web Applications</a> <br />
+                        <a class="tip-title" href="../webapp-list/index.jsp?region=region1&item=webapps_list_menu">Web Applications</a> <br />
 						<%
 							} else {
 						%>

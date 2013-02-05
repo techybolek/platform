@@ -1,5 +1,5 @@
 <!--
- ~ Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ ~ Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  ~
  ~ WSO2 Inc. licenses this file to you under the Apache License,
  ~ Version 2.0 (the "License"); you may not use this file except
@@ -15,34 +15,38 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
+<%@page import="org.apache.axis2.context.ConfigurationContext"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
            prefix="carbon" %>
-<%@page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@page import="org.wso2.carbon.ui.CarbonUIUtil" %>
-<%@page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@page import="org.wso2.carbon.CarbonConstants" %>
-<%@page import="org.wso2.carbon.CarbonError" %>
-<%@page import="java.lang.Exception" %>
+<%@page import="org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO" %>
+<%@page import="org.wso2.carbon.identity.oauth.ui.OAuthConstants" %>
+<%@page import="org.wso2.carbon.identity.oauth.ui.client.OAuthAdminClient" %>
+<%@page import="org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil" %>
+<%@page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 
-<%@page import="java.util.ResourceBundle"%>
-<%@page import="org.wso2.carbon.identity.oauth.ui.client.OAuthAdminClient"%>
+<%@page import="org.wso2.carbon.ui.CarbonUIUtil"%>
+<%@page import="org.wso2.carbon.ui.util.CharacterEncoder"%>
 <script type="text/javascript" src="extensions/js/vui.js"></script>
 <script type="text/javascript" src="../extensions/core/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
 
 <jsp:include page="../dialog/display_messages.jsp"/>
-<%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 
 <%
-    String consumerkey = (String) request.getParameter("consumerkey");
+    String consumerkey = CharacterEncoder.getSafeText(request.getParameter("consumerkey"));
     OAuthConsumerAppDTO app = null;
     String forwardTo = null;
     String[] profileConfigs = null;
 	String BUNDLE = "org.wso2.carbon.identity.oauth.ui.i18n.Resources";
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
+	String id = null;
+	String secret = null;
 	
     try {
+
         String cookie = (String) session
                 .getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         String backendServerURL = CarbonUIUtil.getServerURL(config
@@ -53,7 +57,14 @@
         OAuthAdminClient client = new OAuthAdminClient(cookie,
                 backendServerURL, configContext);
         app = client.getOAuthApplicationData(consumerkey);
-    } catch (Exception e) {
+        if (OAuthConstants.OAuthVersions.VERSION_2.equals(app.getOAuthVersion())){
+            id = resourceBundle.getString("consumerkey.oauth20");
+            secret = resourceBundle.getString("consumersecret.oauth20");
+        } else {
+            id = resourceBundle.getString("consumerkey.oauth10a");
+            secret = resourceBundle.getString("consumersecret.oauth10a");
+        }
+     } catch (Exception e) {
     	String message = resourceBundle.getString("error.while.loading.app.data");
         CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.ERROR, request);
         forwardTo = "../admin/error.jsp";
@@ -76,10 +87,7 @@
 </script>
 
 
-<%@page import="org.wso2.carbon.user.core.UserCoreConstants" %>
-<%@ page import="org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO" %>
-<%@ page import="org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil" %>
-<%@ page import="org.wso2.carbon.identity.oauth.ui.OAuthConstants" %>
+<%@page import="java.util.ResourceBundle" %>
 <fmt:bundle basename="org.wso2.carbon.identity.oauth.ui.i18n.Resources">
     <carbon:breadcrumb label="app.settings"
                        resourceBundle="org.wso2.carbon.identity.oauth.ui.i18n.Resources"
@@ -132,32 +140,45 @@
 		                                   type="text" value="<%=app.getCallbackUrl()%>" /></td>
 		                    </tr>
 		                     <tr>
-		                        <td class="leftCol-small"><fmt:message key='consumerkey'/></td>
+		                        <td class="leftCol-small"><%=id%></td>
 		                        <td><%=app.getOauthConsumerKey()%>
 		                        <input id="consumerkey" name="consumerkey"
 		                                   type="hidden" value="<%=app.getOauthConsumerKey()%>" /></td>
 		                    </tr>
 		                     <tr>
-		                        <td class="leftCol-small"><fmt:message key='consumersecret'/></td>
+		                        <td class="leftCol-small"><%=secret%></td>
 		                        <td><%=app.getOauthConsumerSecret()%>
 		                        <input id="consumersecret" name="consumersecret"
 		                                   type="hidden" value="<%=app.getOauthConsumerSecret()%>" /></td>
 		                    </tr>
 		                    <tr>
 		                        <td class="leftCol-small"><fmt:message key='accesstoken'/></td>
-		                        <td><%=OAuthUIUtil.getAbsoluteEndpointURL(
+                                 <%if (OAuthConstants.OAuthVersions.VERSION_2.equals(app.getOAuthVersion())){ %>
+                                   <td><%=OAuthUIUtil.getAbsoluteEndpointURL(
+                                        OAuthConstants.ACCESS_TOKEN_URL_OAUTH20, app.getOAuthVersion(), request)%></td>
+                                 <%} else { %>
+                                 <td><%=OAuthUIUtil.getAbsoluteEndpointURL(
                                         OAuthConstants.ACCESS_TOKEN_URL, app.getOAuthVersion(), request)%></td>
+                                 <%}%>
+                                        
 		                    </tr>
 	                    	<tr>
 		                        <td class="leftCol-small"><fmt:message key='authorizeurl'/></td>
+		                        <%if (OAuthConstants.OAuthVersions.VERSION_2.equals(app.getOAuthVersion())){ %>
 		                        <td><%=OAuthUIUtil.getAbsoluteEndpointURL(
+                                        OAuthConstants.AUTHORIZE_TOKEN_URL_OAUTH20, app.getOAuthVersion(), request)%></td>
+                                <%} else { %>
+                                 <td><%=OAuthUIUtil.getAbsoluteEndpointURL(
                                         OAuthConstants.AUTHORIZE_TOKEN_URL, app.getOAuthVersion(), request)%></td>
+                                 <%}%>
 		                    </tr>
+		                       <%if (OAuthConstants.OAuthVersions.VERSION_1A.equals(app.getOAuthVersion())){ %>		                    
 		                      <tr>
 		                        <td class="leftCol-small"><fmt:message key='requesttokenurl'/></td>
 		                        <td><%=OAuthUIUtil.getAbsoluteEndpointURL(
                                         OAuthConstants.REQUEST_TOKEN_URL, app.getOAuthVersion(), request)%></td>
 		                    </tr>
+		                    <% } %>
 				</table>
 			</td>
 		    </tr>

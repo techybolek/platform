@@ -46,7 +46,7 @@ public class FaultMediator extends AbstractMediator {
     /** Make a POX fault */
     public static final int POX = 3;
     /** Holds the SOAP version to be used to make the fault, if specified */
-    private int soapVersion;
+    private int soapVersion = 1;
     /** Whether to mark the created fault as a response or not */
     private boolean markAsResponse = true;
     /** Whether it is required to serialize the response attribute or not */

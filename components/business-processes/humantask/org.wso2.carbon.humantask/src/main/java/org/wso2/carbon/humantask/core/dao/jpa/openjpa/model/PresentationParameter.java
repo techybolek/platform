@@ -23,24 +23,25 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "PRESENTATION_PARAM")
+@Table(name = "HT_PRESENTATION_PARAM")
 public class PresentationParameter implements PresentationParameterDAO, Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "NAME")
+    @Column(name = "PARAM_NAME")
     private String name;
 
     /**
      * Value will be stored as a string. Also type will be persisted. When getting back the
      * value caller must convert it back to correct type with correct value.
      */
-    @Column(name = "VALUE")
+    @Column(name = "PARAM_VALUE", length = 2000)
     private String value;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "PARAM_TYPE")
     private Type type;
 
     @ManyToOne

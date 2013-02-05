@@ -246,7 +246,7 @@
             response.setHeader("Pragma", "no-cache");
 
             PrintWriter pw = response.getWriter();
-            msg = "Database user " + username + " has been successfully attached to the " +
+            msg = "Database user '" + username + "' has been successfully attached to the " +
                     "database '"+ databaseName + "'";
             pw.write(msg);
             pw.flush();
@@ -271,7 +271,7 @@
             response.setHeader("Pragma", "no-cache");
 
             PrintWriter pw = response.getWriter();
-            msg = "Database user " + username + " has been successfully detached from the " +
+            msg = "Database user '" + username + "' has been successfully detached from the " +
                     "database '"+ databaseName + "'";
             pw.write(msg);
             pw.flush();

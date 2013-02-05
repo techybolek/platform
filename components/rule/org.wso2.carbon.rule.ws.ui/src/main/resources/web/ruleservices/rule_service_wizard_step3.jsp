@@ -18,6 +18,7 @@
 <%@ page import="org.wso2.carbon.rule.ws.ui.wizard.RuleServiceAdminClient" %>
 <%@ page import="org.wso2.carbon.rule.ws.ui.wizard.RuleServiceManagementHelper" %>
 <%@ page import="org.wso2.carbon.rule.common.RuleService" %>
+<%@ page import="java.util.ArrayList" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <script type="text/javascript" src="js/rule-services.js"></script>
@@ -30,7 +31,12 @@
 
     RuleServiceManagementHelper.saveStep2(ruleService, request);
     String[] classes = ruleServiceAdminClient.getAllFacts(ruleService, session);
-    String[] factArchiveList = ruleServiceAdminClient.getFactArchiveList(ruleService,session);
+    ArrayList<String> factArchiveList = (ArrayList<String>) session.getAttribute(RuleServiceAdminClient.FACTS);
+    if(factArchiveList == null){
+        factArchiveList  = ruleServiceAdminClient.getFactArchiveList(ruleService,session);
+        session.setAttribute(RuleServiceAdminClient.FACTS, factArchiveList);
+    }
+
     int classesCount = 0;
     if (classes != null && classes.length != 0 && classes.length > 1) {
         classesCount = classes.length; // Check the reason for (classes.length - 1)
@@ -103,7 +109,7 @@
                     <td>
                         <table id="factArchiveListTable" class="normal">
                                 <%
-                                    if(factArchiveList != null) {
+                                    if(factArchiveList != null && !factArchiveList.isEmpty()) {
                                         for(String factArchieName : factArchiveList){
 
                                 %>

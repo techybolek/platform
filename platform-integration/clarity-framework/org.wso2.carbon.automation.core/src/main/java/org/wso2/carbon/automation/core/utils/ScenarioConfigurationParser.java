@@ -78,11 +78,16 @@ public class ScenarioConfigurationParser {
     private static void readConfig() throws Exception {
         //get test configuration file path
         List<String> serverList = getServerList();
+
         assert serverList != null : "server list not provided, cannot start servers";
         for (String server : serverList) {
 
-            String testConfigFilePath = ProductConstant.getResourceLocations(server) + File.separator +
-                                        "config" + File.separator + "testconfig.xml";
+            /*String testConfigFilePath = ProductConstant.getResourceLocations(server) + File.separator +
+                                        "config" + File.separator + "testconfig.xml";*/
+
+            String testConfigFilePath = ProductConstant.getSystemSettingsLocation() + File.separator + "testconfig.xml";
+
+            System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx---"+testConfigFilePath);
             //parse the test configuration xml file
             OMElement documentElement;
             FileInputStream inputStream = null;
@@ -232,8 +237,13 @@ public class ScenarioConfigurationParser {
 
     private static List<String> getServerList() {
         if (System.getProperty("server.list") != null) {
-            return Arrays.asList(System.getProperty("server.list").split(","));
+
+           // return Arrays.asList(System.getProperty("server.list").split(","));
+            System.out.println("--------------------------------eeeeeee----"+System.getProperty("server.list"));
+            return Arrays.asList("ESB");
+
         }
-        return null;
+        System.out.println("--------------------------------eeeeeee----"+System.getProperty("server.list"));
+        return Arrays.asList("ESB");
     }
 }

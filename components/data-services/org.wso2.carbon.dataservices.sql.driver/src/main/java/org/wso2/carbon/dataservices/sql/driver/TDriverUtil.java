@@ -26,6 +26,7 @@ import com.google.gdata.util.ServiceException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.wso2.carbon.dataservices.sql.driver.parser.Constants;
 import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataTable;
 import org.wso2.carbon.dataservices.sql.driver.query.ColumnInfo;
 import org.wso2.carbon.dataservices.sql.driver.query.ParamInfo;
@@ -40,9 +41,25 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 public class TDriverUtil {
+
+    private static List<String> driverProperties = new ArrayList<String>();
+
+    static {
+        driverProperties.add(Constants.DRIVER_PROPERTIES.FILE_PATH);
+        driverProperties.add(Constants.DRIVER_PROPERTIES.SHEET_NAME);
+        driverProperties.add(Constants.DRIVER_PROPERTIES.VISIBILITY);
+        driverProperties.add(Constants.DRIVER_PROPERTIES.HAS_HEADER);
+        driverProperties.add(Constants.DRIVER_PROPERTIES.USER);
+        driverProperties.add(Constants.DRIVER_PROPERTIES.PASSWORD);
+        driverProperties.add(Constants.DRIVER_PROPERTIES.DATA_SOURCE_TYPE);
+        driverProperties.add(Constants.DRIVER_PROPERTIES.MAX_COLUMNS);
+    }
+
+    public static List<String> getAvailableDriverProperties() {
+        return driverProperties;
+    }
 
     public static ColumnInfo[] getHeaders(Connection connection,
                                           String tableName) throws SQLException {
@@ -71,9 +88,6 @@ public class TDriverUtil {
             throw new SQLException("Invalid connection type");
         }
         Workbook workbook = ((TExcelConnection) connection).getWorkbook();
-        if (workbook == null) {
-            throw new SQLException("TExcelConnection is not properly initialized");
-        }
         Sheet sheet = workbook.getSheet(tableName);
         if (sheet == null) {
             throw new SQLException("Sheet '" + tableName + "' does not exist");
@@ -94,14 +108,7 @@ public class TDriverUtil {
     private static ColumnInfo[] getCustomHeaders(Connection connection,
             String sheetName) throws SQLException {
     	DataTable table = ((TCustomConnection) connection).getDataSource().getDataTable(sheetName);
-    	Map<String, Integer> headers = table.getHeaders();
-    	Map<String, Integer> headerTypes = table.getHeaderTypes();
-    	ColumnInfo[] result = new ColumnInfo[headers.size()];
-    	for (Map.Entry<String, Integer> header : headers.entrySet()) {
-    		result[header.getValue()] = new ColumnInfo(header.getValue(), header.getKey(), 
-    				sheetName, headerTypes.get(header.getKey()));
-    	}
-    	return result;
+    	return table.getHeaders();
     }
     
     private static ColumnInfo[] getGSpreadHeaders(Connection connection,
@@ -156,8 +163,12 @@ public class TDriverUtil {
 
     public static WorksheetEntry getCurrentWorkSheetEntry(Connection connection,
                                                           String sheetName) throws SQLException {
-        WorksheetFeed worksheetFeed = ((TGSpreadConnection) connection).getWorksheetFeed();
-        for (WorksheetEntry entry : worksheetFeed.getEntries()) {
+    	SpreadsheetEntry spreadsheetEntry = ((TGSpreadConnection) connection).getSpreadSheetFeed().getEntries().get(0);
+        WorksheetQuery worksheetQuery =
+                TDriverUtil.createWorkSheetQuery(spreadsheetEntry.getWorksheetFeedUrl());
+        WorksheetFeed worksheetFeed = getFeed(((TGSpreadConnection) connection).getSpreadSheetService(), worksheetQuery,
+                WorksheetFeed.class);
+    	for (WorksheetEntry entry : worksheetFeed.getEntries()) {
             if (sheetName.equals(entry.getTitle().getPlainText())) {
                 return entry;
             }

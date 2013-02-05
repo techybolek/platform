@@ -27,7 +27,7 @@ public class BucketDTO {
     /**
      * engine provider to use with this bucket
      */
-    private CEPEngineProviderConfigPropertyDTO[] engineProviderConfigProperty;
+    private CEPEngineProviderConfigPropertyDTO[] engineProviderConfigProperty = new CEPEngineProviderConfigPropertyDTO[0];
 
     /**
      * query list of this bucket.

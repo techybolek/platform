@@ -52,7 +52,7 @@
             function update() {
                 var respJson = null;
                 $.ajax({
-                    url: "../../gadgetgen/<xsl:value-of select="gg:gadget-filename" />.jag",
+                    url: "<xsl:value-of select="gg:jaggeryAppUrl" /><xsl:value-of select="gg:gadget-filename" />.jag",
 
                     dataType: 'json',
                     //GET method is used
@@ -100,7 +100,7 @@
     <xsl:template name="BarChart">
         $("#ui-element").html('');
         plot = $.jqplot('ui-element', [respJson], {
-                    title: 'Product vs Total Amount',
+                    title: '<xsl:value-of select="gg:bar-title" />',
                     series:[{renderer:$.jqplot.BarRenderer}],
                     axes: {
                         xaxis: {

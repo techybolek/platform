@@ -28,7 +28,7 @@ import org.wso2.andes.server.security.access.ObjectType;
 import org.wso2.andes.server.security.access.Operation;
 import org.wso2.carbon.andes.authorization.andes.QpidAuthorizationHandler;
 import org.wso2.carbon.andes.authorization.internal.AuthorizationServiceDataHolder;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -114,7 +114,7 @@ public class QpidAuthorizationPlugin extends AbstractPlugin {
         try {
 
             // Get username from tenant username
-            SuperTenantCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.startTenantFlow();
             switch (operation) { // These operations do not need users associated with them
                 case UNBIND:
                     return QpidAuthorizationHandler.handleUnbindQueue(properties);
@@ -144,10 +144,10 @@ public class QpidAuthorizationPlugin extends AbstractPlugin {
 
             if (username.indexOf(DOMAIN_NAME_SEPARATOR) > -1){
                 String tenantDomain = username.substring(username.indexOf(DOMAIN_NAME_SEPARATOR) + 1);
-                SuperTenantCarbonContext.getCurrentContext().setTenantDomain(tenantDomain);
-                SuperTenantCarbonContext.getCurrentContext().getTenantId(true);
+                PrivilegedCarbonContext.getCurrentContext().setTenantDomain(tenantDomain);
+                PrivilegedCarbonContext.getCurrentContext().getTenantId(true);
             } else {
-                SuperTenantCarbonContext.getCurrentContext().setTenantId(0);
+                PrivilegedCarbonContext.getCurrentContext().setTenantId(0);
             }
 
             int domainNameSeparatorIndex = username.indexOf(DOMAIN_NAME_SEPARATOR);
@@ -175,7 +175,7 @@ public class QpidAuthorizationPlugin extends AbstractPlugin {
         } catch (Exception e) {
             logger.error("Error while invoking QpidAuthorizationHandler", e);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
         
         return Result.DENIED;

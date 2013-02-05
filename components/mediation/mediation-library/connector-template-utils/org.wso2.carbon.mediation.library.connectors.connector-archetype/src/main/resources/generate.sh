@@ -6,6 +6,6 @@ if [ -z "$CONNECTOR_HOME" ]; then
 fi
 
 #install archetype for MEdiatoion connectors
-mvn install -f "$CONNECTOR_HOME/utilities/org.wso2.carbon.mediation.library.connectors.connector-archetype/pom.xml"
+mvn install -f "$CONNECTOR_HOME/org.wso2.carbon.mediation.library.connectors.connector-archetype/pom.xml"
 
 mvn archetype:generate -DarchetypeCatalog=local -DarchetypeGroupId=org.wso2.carbon  -DarchetypeArtifactId=org.wso2.carbon.mediation.library.connectors.connector-archetype

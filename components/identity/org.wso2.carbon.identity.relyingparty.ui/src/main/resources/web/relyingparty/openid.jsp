@@ -59,40 +59,41 @@
 
     try {
         String dialect = null;
+        String openid = CharacterEncoder.getSafeText(request.getParameter("openIdUrl"));
         
-        String openid = CharacterEncoder.getSafeText(request.getParameter("openIdUrl")).trim();
         if(openid == null) {
             openid = request.getParameter("gAppDomainOpenId");
        		request.getSession().setAttribute("GAppDomain", openid);
        		dialect = IdentityConstants.OPENID_AX_DIALECT;
         }
-        OpenIDAuthenticationRequest openIDAuthRequest = null;
 
         openid = openid.trim();
 
+        // creating RelyingPartyService client
         String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
         ConfigurationContext configContext =
                 (ConfigurationContext) config.getServletContext().getAttribute(
                         CarbonConstants.CONFIGURATION_CONTEXT);
-        String cookie = null;
-        cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+        String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         RelyingPartyServiceClient client =
                 new RelyingPartyServiceClient(cookie, serverURL, configContext);
 
-        openIDAuthRequest = client.getOpenIDAuthInfo(request, response, dialect);
-        // do openid login
+        // creating authentication request for the given openid
+        OpenIDAuthenticationRequest openIDAuthRequest = client.getOpenIDAuthInfo(request, response, dialect);
         openIDAuthRequest.setOpenIDUrl(openid);
+        
+        // computing the return to URL		
         String returnUrl = OpenIDConsumer.getInstance().getAdminConsoleURL(request) +
                 "relyingparty/openid_accept.jsp";
 
         if (cssLocation != null) {
-
             returnUrl = returnUrl + "?forwardPage=" + URLEncoder.encode(forwardPage, "UTF-8") +
                     "&css=" + URLEncoder.encode(cssLocation, "UTF-8") + "&title=" +
                     URLEncoder.encode(pageTitle, "UTF-8");
         }
-
         openIDAuthRequest.setReturnUrl(returnUrl);
+        
+        // get the URL encoded authentication request message and forward to OP
         forwardTo = OpenIDConsumer.getInstance().doOpenIDAuthentication(openIDAuthRequest);
         response.sendRedirect(forwardTo);
     } catch (Exception e) {

@@ -88,23 +88,35 @@ public class NodeBuilderTest extends TestCase {
         Assert.assertEquals("*", c.getProperty("tenant_range"));
         
         String nodeStr = "appserver {\n" +
-                "hosts\tappserver.cloud-test.wso2.com,as.cloud-test.wso2.com;\n" +
-                "payload\tresources/cluster_node.zip;\n" +
-        		"availability_zone\tus-east-1c;\n" +
-        		"domains {\n" +
-        		"wso2.as1.domain {\n" +
-        		"tenant_range\t1-100;\n" +
-        		"}\n" +
-        		"wso2.as2.domain {\n" +
-        		"tenant_range\t101-200;\n" +
-        		"}\n" +
-        		"wso2.as3.domain {\n" +
-        		"tenant_range\t*;\n" +
-        		"}\n" +
-        		"}\n" +
+                "\thosts\tappserver.cloud-test.wso2.com,as.cloud-test.wso2.com;\n" +
+                "\tpayload\tresources/cluster_node.zip;\n" +
+        		"\tavailability_zone\tus-east-1c;\n" +
+        		"\tdomains {\n" +
+        		"\t\twso2.as1.domain {\n" +
+        		"\t\t\ttenant_range\t1-100;\n" +
+        		"\t\t}\n" +
+        		"\t\twso2.as2.domain {\n" +
+        		"\t\t\ttenant_range\t101-200;\n" +
+        		"\t\t}\n" +
+        		"\t\twso2.as3.domain {\n" +
+        		"\t\t\ttenant_range\t*;\n" +
+        		"\t\t}\n" +
+        		"\t}\n" +
         		"}";
         
         assertEquals(nodeStr, a.toString());
+        
+        // test equals method
+        assertEquals(true, a.equals(a));
+        assertEquals(false, a.equals(b));
+        assertEquals(false, c.equals(b));
+        
+        // test buildNode(String)
+        c = NodeBuilder.buildNode(nodeStr);
+        
+        assertEquals(c.getName(), "appserver");
+        assertEquals(c.getChildNodes().size(), 1);
+        assertEquals(c.getProperty("availability_zone"), "us-east-1c");
 
     }
 

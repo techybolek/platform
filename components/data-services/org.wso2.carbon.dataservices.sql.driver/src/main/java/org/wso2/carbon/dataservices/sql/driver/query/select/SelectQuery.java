@@ -18,7 +18,6 @@
  */
 package org.wso2.carbon.dataservices.sql.driver.query.select;
 
-import org.wso2.carbon.dataservices.sql.driver.TDriverUtil;
 import org.wso2.carbon.dataservices.sql.driver.TResultSet;
 import org.wso2.carbon.dataservices.sql.driver.parser.Constants;
 import org.wso2.carbon.dataservices.sql.driver.parser.ParserUtil;
@@ -36,22 +35,29 @@ import java.util.*;
 
 public abstract class SelectQuery extends ConditionalQuery {
 
-    private List<ColumnInfo> targetColumns;
+    private ColumnInfo[] targetColumns;
 
     private String targetTableName;
 
     private DataTable targetTable;
 
-    private ColumnInfo[] columns;
+    private boolean isAllColumnsSelected;
 
     public SelectQuery(Statement stmt) throws SQLException {
         super(stmt);
-        this.targetColumns = new ArrayList<ColumnInfo>();
-        this.preProcessTokens(getProcessedTokens());
+        this.isAllColumnsSelected = this.checkAllColumnsSelected(getProcessedTokens());
+        this.targetColumns = this.extractTargetColumns(getProcessedTokens());
+        this.targetTableName = this.extractTargetTableName(getProcessedTokens());
+        this.populateConditions(getProcessedTokens());
         this.targetTable = DataReaderFactory.createDataReader(getConnection()).getDataTable(
                 getTargetTableName());
-        this.columns = TDriverUtil.getHeaders(stmt.getConnection(), getTargetTableName());
-        this.preProcessColumns(getColumns(), getTargetColumns());
+        /* Handling the scenario where the user selects ALL ('*') columns to be in the SELECT
+           query result. Here, the need of differed assignment of the targetColumns field is needed
+           as the tableName is not present at the time the column processing is initially done */
+        if (isAllColumnsSelected()) {
+            this.targetColumns = this.getTargetTable().getHeaders();
+        }
+        this.processTargetColumnIds();
     }
 
     @Override
@@ -62,39 +68,50 @@ public abstract class SelectQuery extends ConditionalQuery {
 
     public synchronized ResultSet executeSQL() throws SQLException {
         Map<Integer, DataRow> result;
-        FixedDataTable table = new FixedDataTable(getTargetTableName(), getTargetTable().getHeaders());
+        FixedDataTable table =
+                new FixedDataTable(getTargetTableName(), this.getTargetTable().getHeaders());
+
         if (getCondition().getLhs() == null && getCondition().getRhs() == null) {
             result = getTargetTable().getRows();
         } else {
             result = getCondition().process(getTargetTable());
         }
-        table.setData(result);
+        table.setData(filterColumns(result));
         return new TResultSet(getStatement(), table, getTargetColumns());
     }
 
-    private void preProcessColumns(ColumnInfo[] columns, ColumnInfo[] targetColumns) {
-        int columnIndex = 0;
-        for (ColumnInfo column : columns) {
-            if (columnIndex < getTargetColumns().length) {
-                for (ColumnInfo targetColumn : targetColumns) {
-                    if (column.getName().equals(targetColumn.getName())) {
-                        targetColumn.setSqlType(column.getSqlType());
-                        columnIndex++;
-                    }
-                }
+    private Map<Integer, DataRow> filterColumns(Map<Integer, DataRow> rows) throws SQLException {
+        Map<Integer, DataRow> filteredData = new HashMap<Integer, DataRow>();
+        for (Map.Entry<Integer, DataRow> entry : rows.entrySet()) {
+            DataRow row = entry.getValue();
+            DataRow filteredRow = new DataRow(entry.getValue().getRowId());
+            for (ColumnInfo column : this.getTargetColumns()) {
+                filteredRow.addCell(column.getOrdinal(), row.getCell(column.getId()));
             }
+            filteredData.put(filteredRow.getRowId(), filteredRow);
         }
+        return filteredData;
     }
 
-    private void preProcessTokens(Queue<String> tokens) throws SQLException {
-        //Drops SELECT keyword
-        tokens.poll();
-        if (Constants.ASTERISK.equalsIgnoreCase(tokens.peek())) {
-            this.targetColumns = Arrays.asList(getColumns()); 
+    private ColumnInfo[] extractTargetColumns(Queue<String> tokens) throws SQLException {
+        List<ColumnInfo> columns = new ArrayList<ColumnInfo>();
+        if (this.isAllColumnsSelected()) {
+            /* Drops ASTERISK */
+            tokens.poll();
         } else {
-            processTargetColumns(tokens, 0);
+            this.processTargetColumns(tokens, 1, columns);
         }
-        //Drops FROM keyword
+        return columns.toArray(new ColumnInfo[columns.size()]);
+    }
+
+    private boolean checkAllColumnsSelected(Queue<String> tokens) {
+        /* Drops SELECT keyword */
+        tokens.poll();
+        return Constants.ASTERISK.equalsIgnoreCase(tokens.peek());
+    }
+
+    private String extractTargetTableName(Queue<String> tokens) throws SQLException {
+        /* Drops FROM keyword */
         tokens.poll();
         if (!Constants.TABLE.equals(tokens.peek())) {
             throw new SQLException("'TABLE' keyword is expected");
@@ -103,7 +120,10 @@ public abstract class SelectQuery extends ConditionalQuery {
         if (!ParserUtil.isStringLiteral(tokens.peek())) {
             throw new SQLException("Syntax Error : String literal is expected");
         }
-        targetTableName = tokens.poll();
+        return tokens.poll();
+    }
+
+    private void populateConditions(Queue<String> tokens) throws SQLException {
         if (tokens.isEmpty()) {
             return;
         }
@@ -115,7 +135,15 @@ public abstract class SelectQuery extends ConditionalQuery {
         this.processConditions(tokens, getCondition());
     }
 
-    private void processTargetColumns(Queue<String> tokens, int paramCount) throws SQLException {
+    private void processTargetColumnIds() throws SQLException {
+        for (ColumnInfo column : this.getTargetColumns()) {
+            ColumnInfo header = this.getTargetTable().getHeader(column.getName());
+            column.setId(header.getId());
+        }
+    }
+
+    private void processTargetColumns(Queue<String> tokens, int count,
+                                      List<ColumnInfo> columns) throws SQLException {
         if (!Constants.COLUMN.equals(tokens.peek())) {
             throw new SQLException("Syntax Error : 'COLUMN' keyword is expected");
         }
@@ -123,14 +151,14 @@ public abstract class SelectQuery extends ConditionalQuery {
         if (!ParserUtil.isStringLiteral(tokens.peek())) {
             throw new SQLException("Syntax Error : String literal is expected");
         }
-        targetColumns.add(new ColumnInfo(tokens.poll()));
+        columns.add(new ColumnInfo(tokens.poll(), count));
         if (Constants.COLUMN.equals(tokens.peek())) {
-            processTargetColumns(tokens, paramCount + 1);
+            processTargetColumns(tokens, count + 1, columns);
         }
     }
 
     public ColumnInfo[] getTargetColumns() {
-        return targetColumns.toArray(new ColumnInfo[targetColumns.size()]);
+        return targetColumns;
     }
 
     public DataTable getTargetTable() {
@@ -141,8 +169,8 @@ public abstract class SelectQuery extends ConditionalQuery {
         return targetTableName;
     }
 
-    private ColumnInfo[] getColumns() {
-        return columns;
+    public boolean isAllColumnsSelected() {
+        return isAllColumnsSelected;
     }
 
 }

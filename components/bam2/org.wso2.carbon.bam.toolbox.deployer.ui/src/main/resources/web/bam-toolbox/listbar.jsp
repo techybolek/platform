@@ -37,15 +37,66 @@
     }
 </script>
 
+<%
+    String toolBoxSearchString = request.getParameter("toolboxSearchString");
+%>
+
 <script type="text/javascript">
     window.onload = setupRefresh;
+    var isMessageBox = false;
+    var lastSearchStr = <% if(null== toolBoxSearchString){
+    %> '';
+    <%
+    }else {
+    %>
+    '<%=toolBoxSearchString%>';
+    <%
+    }
+    %>
+
 
     function setupRefresh() {
-        setTimeout("refreshPage();", 10000); // milliseconds
+        setInterval("refreshPage();", 10000); // milliseconds
     }
     function refreshPage() {
-        window.location = location.href;
+        if (!isSelected() && !isMessageBox && !isSearchStringTyped()) {
+            window.location = location.href;
+        }
     }
+
+    function isSelected() {
+        var counter = 0,
+                i = 0,
+                fieldsStr = '',
+                input_obj = document.getElementsByTagName('input');
+
+        for (i = 0; i < input_obj.length; i++) {
+            if (input_obj[i].type === 'checkbox' && input_obj[i].checked === true) {
+                counter++;
+                fieldsStr = fieldsStr + ',' + input_obj[i].value;
+            }
+        }
+        if (counter > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function isSearchStringTyped() {
+        lastSearchStr = trimText(lastSearchStr);
+        if (null != document.getElementById('toolboxSearchString')) {
+            var currSearchStr = trimText(document.searchForm.toolboxSearchString.value);
+            if (lastSearchStr != currSearchStr) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
 </script>
 
 <carbon:breadcrumb label="available.bam.tools"
@@ -59,7 +110,6 @@
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
 
     String toolBoxType = request.getParameter("toolType");
-    String toolBoxSearchString = request.getParameter("toolboxSearchString");
 
     BAMToolBoxDeployerClient client = new BAMToolBoxDeployerClient(cookie, serverURL, configContext);
     String[] deployedTools = null;
@@ -150,6 +200,7 @@
         if ('' == fieldsStr) {
             CARBON.showErrorDialog("No tools has been selected to undeploy!!");
         } else {
+            isMessageBox = true;
             CARBON.showConfirmationDialog("Do you want to undeploy selected tools?", function() {
                 document.location.href = "undeploy.jsp?" + "toolBoxNames=" + fieldsStr;
             });
@@ -157,7 +208,13 @@
     }
 
     function searchServices() {
+        var searchStr = document.searchForm.toolboxSearchString.value;
+        document.searchForm.toolboxSearchString.value = trimText(searchStr);
         document.searchForm.submit();
+    }
+
+    function trimText(text) {
+        return text.replace(/(?:(?:^|\n)\s+|\s+(?:$|\n))/g, '').replace(/\s+/g, ' ');
     }
 
 </script>
@@ -235,7 +292,7 @@
                                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                 <fmt:message key="search.toolbox"/>
                                 <input type="text" name="toolboxSearchString"
-                                       value="<%= toolBoxSearchString != null? toolBoxSearchString : ""%>"/>&nbsp;
+                                       id ="toolboxSearchString" value="<%= toolBoxSearchString != null? toolBoxSearchString : ""%>"/>&nbsp;
                             </nobr>
                         </td>
                         <td style="border:0; !important">

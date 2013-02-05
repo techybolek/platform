@@ -56,7 +56,7 @@ public class EsbEndpointSetter {
         boolean changed = false;
         while (children.hasNext()) {
             node = (OMNode) children.next();
-            if (((OMElementImpl) node).getLocalName().equals("endpoint")) {
+            if (((OMElementImpl) node).getLocalName().equals("end6point")) {
                 this.replaceElement(node, attribute, attribute2);
             } else if (((OMElementImpl) node).getLocalName().equals("loadbalance")) {
                 Iterator loadBalanceIterator = ((OMElementImpl) node).getChildElements();
@@ -199,8 +199,10 @@ public class EsbEndpointSetter {
     private String getUrl(String endpoint) throws IOException, XMLStreamException {
         String newEndPoint = endpoint;
 
-        DataHandler dh = new DataHandler(new URL("file://" + ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + File.separator +
-                                                 "artifacts" + File.separator + "ESB" + File.separator + "endpointlookup.xml"));
+        DataHandler dh = new DataHandler(new URL("file://" + ProductConstant.
+                SYSTEM_TEST_RESOURCE_LOCATION + File.separator +
+                                                 "artifacts" + File.separator +
+                                                 "ESB" + File.separator + "endpointlookup.xml"));
         XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(dh.getInputStream());
         StAXOMBuilder builder = new StAXOMBuilder(parser);
         OMElement endPointElem = builder.getDocumentElement();
@@ -211,7 +213,8 @@ public class EsbEndpointSetter {
             Iterator urlList = ((OMElementImpl) productNode).getChildrenWithLocalName("url");
             while (urlList.hasNext()) {
                 OMNode urlNode = (OMNode) urlList.next();
-                String endpointType = ((OMElementImpl) urlNode).getAttribute(new QName("type")).getAttributeValue();
+                String endpointType = ((OMElementImpl) urlNode).getAttribute(new QName("type"))
+                        .getAttributeValue();
                 userId = ((OMElementImpl) urlNode).getAttribute(new QName("user")).getAttributeValue();
                 String codedEndpoint = ((OMElementImpl) urlNode).getText();
                 if (codedEndpoint.toLowerCase().contains("https")) {
@@ -265,12 +268,16 @@ public class EsbEndpointSetter {
         if (!containsHttps) {
             assert properties != null;
             if (properties.getEnvironmentSettings().is_runningOnStratos()) {
-                url = productUrlGeneratorUtil.getHttpServiceURLOfStratos(properties.getProductVariables().getHttpPort(), properties.getProductVariables().getNhttpPort(), properties.getProductVariables().getHostName(), properties, info);
+                url = productUrlGeneratorUtil.getHttpServiceURLOfStratos(properties.
+                        getProductVariables().getHttpPort(), properties.getProductVariables().
+                        getNhttpPort(), properties.getProductVariables().getHostName(), properties, info);
                 String service = oldUrl.substring(oldUrl.indexOf("services/") + 9);
                 url = url + File.separator + service;
 
             } else {
-                url = productUrlGeneratorUtil.getHttpServiceURLOfProduct(properties.getProductVariables().getHttpPort(), properties.getProductVariables().getNhttpPort(), properties.getProductVariables().getHostName(), properties);
+                url = productUrlGeneratorUtil.getHttpServiceURLOfProduct(properties.
+                        getProductVariables().getHttpPort(), properties.getProductVariables().
+                        getNhttpPort(), properties.getProductVariables().getHostName(), properties);
                 String service = oldUrl.substring(oldUrl.indexOf("services/"));
                 url = url + File.separator + service;
             }

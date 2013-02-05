@@ -1,5 +1,12 @@
 package org.wso2.carbon.logging.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Appender;
@@ -7,33 +14,43 @@ import org.apache.log4j.Logger;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.logging.appender.CarbonMemoryAppender;
+import org.wso2.carbon.logging.service.LogViewerException;
 import org.wso2.carbon.logging.service.data.LogEvent;
 import org.wso2.carbon.utils.logging.TenantAwareLoggingEvent;
 import org.wso2.carbon.utils.logging.TenantAwarePatternLayout;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 
 public class TenantAwareLogReader {
 
 	private static Log log = LogFactory.getLog(TenantAwareLogReader.class);
 
-	private boolean isCurrentTenantId(String tenantId) {
-		String currTenantId = String.valueOf(CarbonContext.getCurrentContext().getTenantId());
-		return currTenantId.equals(tenantId);
+	private boolean isCurrentTenantId(String tenantId, String domain) {
+        String currTenantId;
+        if (domain.equals("")) {
+            currTenantId = String.valueOf(CarbonContext.getCurrentContext().getTenantId());
+            return currTenantId.equals(tenantId);
+        }else {
+            try {
+                currTenantId = String.valueOf(LoggingUtil.getTenantIdForDomain(domain));
+                return currTenantId.equals(tenantId);
+            } catch (LogViewerException e) {
+
+            }
+        }
+       return false;
 	}
 
-	private boolean isCurrentProduct(String productName) {
-		String currProductName = ServerConfiguration.getInstance().getFirstProperty("Name");
-		return currProductName.equals(productName);
+	private boolean isCurrentProduct(String productName, String serviceKey) {
+        if(serviceKey.equals("")) {
+            String currProductName = ServerConfiguration.getInstance().getFirstProperty("ServerKey");
+            return currProductName.equals(productName);
+        } else {
+            return productName.equals(serviceKey);
+        }
+
 	}
 
-	public LogEvent[] getLogs(String appName) {
-		if (log.isTraceEnabled()) {
-			log.trace("Just to see wether tracing works");
-		}
+	public LogEvent[] getLogs(String appName, String domain, String serviceKey) {
+		
 		int DEFAULT_NO_OF_LOGS = 100;
 		int definedamount;
 		Appender appender = Logger.getRootLogger().getAppender(
@@ -64,7 +81,7 @@ public class TenantAwareLogReader {
 					TenantAwarePatternLayout productPattern = new TenantAwarePatternLayout("%S");
 					String productName = productPattern.format(logEvt);
 					String tenantId = tenantIdPattern.format(logEvt);
-					if (isCurrentTenantId(tenantId) && isCurrentProduct(productName)) {
+					if (isCurrentTenantId(tenantId, domain) && isCurrentProduct(productName, serviceKey)) {
 						if (appName == null || appName.equals("")) {
 							resultList.add(createLogEvent(logEvt));
 						} else {
@@ -87,11 +104,11 @@ public class TenantAwareLogReader {
 		}
 	}
 
-	public LogEvent[] searchLog(String type, String keyword, String appName) {
+	public LogEvent[] searchLog(String type, String keyword, String appName, String domain, String serviceKey) {
 		if ("ALL".equalsIgnoreCase(type)) {
-			return getLogsForKey(keyword, appName);
+			return getLogsForKey(keyword, appName, domain, serviceKey);
 		} else {
-			LogEvent[] filerByType = getLogsForType(type, appName);
+			LogEvent[] filerByType = getLogsForType(type, appName, domain, serviceKey);
 			List<LogEvent> resultList = new ArrayList<LogEvent>();
 			if (filerByType != null) {
 				for (int i = 0; i < filerByType.length; i++) {
@@ -122,7 +139,7 @@ public class TenantAwareLogReader {
 		return reverseList;
 	}
 
-	public LogEvent[] getLogsForKey(String keyword, String appName) {
+	public LogEvent[] getLogsForKey(String keyword, String appName, String domain, String serviceKey) {
 		int DEFAULT_NO_OF_LOGS = 100;
 		int definedAmount;
 		Appender appender = Logger.getRootLogger().getAppender(
@@ -160,7 +177,7 @@ public class TenantAwareLogReader {
 							&& (result.toLowerCase().indexOf(keyword.toLowerCase()) > -1);
 					boolean isInLogger = logger != null
 							&& (logger.toLowerCase().indexOf(keyword.toLowerCase()) > -1);
-					if (isCurrentTenantId(tenantId) && isCurrentProduct(productName)
+					if (isCurrentTenantId(tenantId, domain) && isCurrentProduct(productName, serviceKey)
 							&& (isInLogMessage || isInLogger)) {
 						if (appName == null || appName.equals("")) {
 							resultList.add(createLogEvent(logEvt));
@@ -187,9 +204,9 @@ public class TenantAwareLogReader {
 		}
 	}
 
-	public String[] getApplicationNames() {
+	public String[] getApplicationNames(String domain, String serviceKey) {
 		List<String> appList = new ArrayList<String>();
-		LogEvent allLogs[] = getLogs("");
+		LogEvent allLogs[] = getLogs("", domain, serviceKey);
 		for (LogEvent event : allLogs) {
 			if (event.getAppName() != null && !event.getAppName().equals("")
 					&& !event.getAppName().equals("NA")
@@ -199,10 +216,20 @@ public class TenantAwareLogReader {
 				appList.add(event.getAppName());
 			}
 		}
-		return appList.toArray(new String[appList.size()]);
+		return getSortedApplicationNames(appList);
 	}
 
-	public LogEvent[] getLogsForType(String type, String appName) {
+	private  String[] getSortedApplicationNames(List<String> applicationNames) {
+		Collections.sort(applicationNames, new Comparator<String>() {
+			public int compare(String s1, String s2) {
+				return s1.toLowerCase().compareTo(s2.toLowerCase());
+			}
+
+		});
+		return (String[]) applicationNames.toArray(new String[applicationNames.size()]);
+	}
+	
+	public LogEvent[] getLogsForType(String type, String appName, String domain, String serviceName) {
 		int DEFAULT_NO_OF_LOGS = 100;
 		int definedAmount;
 		Appender appender = Logger.getRootLogger().getAppender(
@@ -234,7 +261,7 @@ public class TenantAwareLogReader {
 					String priority = logEvt.getLevel().toString();
 					String productName = productPattern.format(logEvt);
 					String tenantId = tenantIdPattern.format(logEvt);
-					if ((priority.toString().equals(type) && isCurrentTenantId(tenantId) && isCurrentProduct(productName))) {
+					if ((priority.toString().equals(type) && isCurrentTenantId(tenantId, domain) && isCurrentProduct(productName, serviceName))) {
 						if (appName == null || appName.equals("")) {
 							resultList.add(createLogEvent(logEvt));
 						} else {

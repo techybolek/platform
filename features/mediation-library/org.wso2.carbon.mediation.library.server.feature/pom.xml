@@ -21,9 +21,10 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>mediation-library-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.1</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
-
+    <version>4.0.2</version>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.mediation.library.server.feature</artifactId>
     <packaging>pom</packaging>
@@ -32,20 +33,20 @@
     <description>This feature contains the core bundles required for Back-end Mediation Library functionality</description>
     
     <dependencies>
-        <dependency>
+        <!--dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
-            <version>${wso2carbon.version.mediation.library}</version>
-        </dependency>
+            <version>${project.version}</version>
+        </dependency-->
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediation.library.connectors.core</artifactId>
-            <version>${wso2carbon.version.mediation.library}</version>
+            <version>4.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediation.library</artifactId>
-            <version>${wso2carbon.version.mediation.library}</version>
+            <version>4.0.2</version>
         </dependency>
 
     </dependencies>
@@ -65,7 +66,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.mediation.library.server</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
@@ -74,11 +75,11 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.library</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.library.connectors.core</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.library.connectors.core:4.0.1</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.apache.synapse.wso2:${synapse.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.mediation.initializer.server:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.apache.synapse.wso2:${synapse.patch.release.version}</importFeatureDef>
+                                <!--importFeatureDef>org.wso2.carbon.mediation.initializer.server:${wso2carbon.patch.release.version}</importFeatureDef-->
                             </importFeatures>
                         </configuration>
                     </execution>

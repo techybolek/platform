@@ -27,28 +27,25 @@
 <jsp:include page="../dialog/display_messages.jsp"/>
 <jsp:include page="../highlighter/header.jsp"/>
 <%
-    String resourceNames = "";
-    String subjectNames = "";
-    String actionNames = "";
-    String environmentNames = "";
+    String resourceNames;
+    String subjectNames;
+    String actionNames;
+    String environmentNames;
 
-    resourceNames = (String)session.getAttribute("resourceNames");
-    subjectNames = (String)session.getAttribute("subjectNames");
-    actionNames = (String)session.getAttribute("actionNames");
-    environmentNames = (String)session.getAttribute("environmentNames");
-    String clearAttributes = (String)request.getParameter("clearAttributes");
-
+    String clearAttributes = request.getParameter("clearAttributes");
     if("true".equals(clearAttributes)){
-        resourceNames = null;
-        subjectNames = null;
-        actionNames = null;
-        environmentNames = null;
         session.removeAttribute("resourceNames");
         session.removeAttribute("subjectNames");
         session.removeAttribute("attributeId");
         session.removeAttribute("environmentNames");
         session.removeAttribute("actionNames");
     }
+
+    resourceNames = (String)session.getAttribute("resourceNames");
+    subjectNames = (String)session.getAttribute("subjectNames");
+    actionNames = (String)session.getAttribute("actionNames");
+    environmentNames = (String)session.getAttribute("environmentNames");
+
 %>
 
 
@@ -69,9 +66,25 @@
 
 <script type="text/javascript">
 
-    function submitForm(){
-        document.requestForm.action = "eval-policy-submit.jsp?";
-        document.requestForm.submit();
+    function submitForm(withPDP){
+        if(validateForm()){
+            if(withPDP){
+                document.requestForm.action = "eval-policy-submit.jsp?withPDP=true";
+                document.requestForm.submit();
+            } else {
+                document.requestForm.action = "eval-policy-submit.jsp?";
+                document.requestForm.submit();
+            }
+        }
+    }
+
+    function validateForm(){
+        if(document.requestForm.subjectNames.value != '' || document.forms[0].resourceNames.value != '' ||
+           document.requestForm.actionNames.value != '' || document.forms[0].environmentNames.value != ''){
+            return true;
+        }
+        CARBON.showWarningDialog("<fmt:message key='empty.form'/>");
+        return false;
     }
 
     function clearForm(){
@@ -174,7 +187,8 @@
 
         <tr>
             <td class="buttonRow" colspan="3">
-                <input type="button" onclick="submitForm();" value="<fmt:message key="evaluate"/>"  class="button"/>
+                <input type="button" onclick="submitForm(false);" value="<fmt:message key="test.evaluate"/>"  class="button"/>
+                <input type="button" onclick="submitForm(true);" value="<fmt:message key="pdp.evaluate"/>"  class="button"/>
                 <input type="button" onclick="createRequest();" value="<fmt:message key="create.request"/>"  class="button"/>
                 <input type="button" onclick="clearForm();" value="<fmt:message key="clear"/>"  class="button"/>
             </td>

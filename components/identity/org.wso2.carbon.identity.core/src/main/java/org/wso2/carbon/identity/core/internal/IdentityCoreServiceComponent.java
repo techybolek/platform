@@ -64,8 +64,6 @@ public class IdentityCoreServiceComponent {
             IdentityUtil.populateProperties();
             IdentityUserMgtListener userMgtListener = new IdentityUserMgtListener();
             ctxt.getBundleContext().registerService(UserStoreManagerListener.class.getName(), userMgtListener, null);
-            ctxt.getBundleContext().registerService(IdentityUtil.class.getName(),
-                    new IdentityUtil(), null);
             bundleContext = ctxt.getBundleContext();
 
             // initialize the identity persistence manager, if it is not already initialized.
@@ -85,7 +83,10 @@ public class IdentityCoreServiceComponent {
                     log.debug("Identity Database schema initialization check was skipped.");
                 }
             }
-
+            //taking the service registration after DB initialization.
+            ctxt.getBundleContext().registerService(IdentityUtil.class.getName(),
+                    new IdentityUtil(), null);
+            
         } catch (Throwable e) {
             log.error("Error occurred while populating identity configuration properties", e);
         }

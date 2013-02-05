@@ -1,4 +1,5 @@
 $(document).ready(function () {
+
     $("select[name='tiers-list']").change(function() {
         var selectedIndex = document.getElementById('tiers-list').selectedIndex;
         var api = jagg.api;
@@ -20,12 +21,12 @@ $(document).ready(function () {
         }
         var applicationId = $("#application-list").val();
         if (applicationId == "-") {
-            jagg.message({content:"Please select an application before subscribing",type:"info"});
+            jagg.message({content:i18n.t('info.appSelect'),type:"info"});
             return;
         }
         var api = jagg.api;
         var tier=$("#tiers-list").val();
-        $(this).html('Please wait...').attr('disabled', 'disabled');
+        $(this).html(i18n.t('info.wait')).attr('disabled', 'disabled');
 
         jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
             action:"addSubscription",
@@ -39,10 +40,10 @@ $(document).ready(function () {
             $("#subscribe-button").removeAttr('disabled');
             if (result.error == false) {
                 $('#messageModal').html($('#confirmation-data').html());
-                $('#messageModal h3.modal-title').html('Subscription Successful');
-                $('#messageModal div.modal-body').html('\n\nCongratulations! You have successfully subscribed to the API. Please go to \'My Subscriptions\' page to review your subscription and generate API keys.');
-                $('#messageModal a.btn-primary').html('Go to My Subscriptions');
-                $('#messageModal a.btn-other').html('Stay on this page');
+                $('#messageModal h3.modal-title').html(i18n.t('info.subscription'));
+                $('#messageModal div.modal-body').html('\n\n'+i18n.t('info.subscriptionSuccess'));
+                $('#messageModal a.btn-primary').html(i18n.t('info.gotoSubsPage'));
+                $('#messageModal a.btn-other').html(i18n.t('info.stayPage'));
                 $('#messageModal a.btn-other').click(function() {
                     window.location.reload();
                 });
@@ -105,6 +106,7 @@ $(document).ready(function () {
     }, function (api) {
 
     }, jagg.api);
+
 
 });
 

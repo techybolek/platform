@@ -304,6 +304,12 @@ public class SequenceAdmin extends AbstractServiceBusAdmin {
         final Lock lock = getLock();
         try {
             lock.lock();
+
+            /**The SynapseXPathFactory adds all namespaces defined in the upper levels of the xpath element to the xpath.
+                        *Remove the sequence element from its parent to avoid inheritance of unwanted namespaces (ex: namespace of
+                        *the admin service operation)*/
+            sequenceElement.detach();
+
             if (sequenceElement != null && sequenceElement.getLocalName().equals(
                     XMLConfigConstants.SEQUENCE_ELT.getLocalPart())) {
                 String sequenceName = sequenceElement.getAttributeValue(new QName("name"));

@@ -33,7 +33,7 @@ import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.provider.openid.stub.dto.OpenIDProviderInfoDTO;
 import org.wso2.carbon.identity.provider.openid.ui.client.OpenIDAdminClient;
 import org.wso2.carbon.identity.provider.openid.ui.handlers.OpenIDHandler;
-import org.wso2.carbon.identity.provider.openid.ui.handlers.OpenIDUtil;
+import org.wso2.carbon.identity.provider.openid.ui.util.OpenIDUtil;
 import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -93,7 +93,7 @@ public class OpenIDUserServlet extends HttpServlet {
                             +"<td colspan=\"2\" id=\"header\">"
                                 +"<div id=\"header-div\">"
                                     +"<div class=\"right-logo\">Management Console</div>"
-                                    +"<div class=\"left-logo\"><a class=\"header-home\" href=\"../carbon/admin/index.jsp\"><img height=\"32\" width=\"300\" src=\"../carbon/admin/images/1px.gif\"/></a>"
+                                    +"<div class=\"left-logo\"><a class=\"header-home\" href=\"../carbon/admin/index.jsp\"><img height=\"32\" width=\"300\" src=\"../admin/images/1px.gif\"/></a>"
                                     +"</div>"
                                 +"</div>"
                             +"</td>"

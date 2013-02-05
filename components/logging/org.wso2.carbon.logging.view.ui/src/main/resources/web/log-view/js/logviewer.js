@@ -76,15 +76,216 @@ function viewSingleLogLevel() {
 }
 
 function getTenantSpecificIndex () {
-	var tenantDomain = document.getElementById("tenantDomain").value;
-	var serviceName = document.getElementById("serviceName").value;
-	location.href = "syslog_index.jsp?tenantDomain="+tenantDomain+"&serviceName="+serviceName;
+    var loglevel = document.getElementById("logLevelID");
+    var loglevel_index = null;
+    var loglevel_value = null;
+    var tenantDomain = document.getElementById("tenantDomain").value;
+    var serviceName = document.getElementById("serviceName");
+    var servicelevel_idex = null;
+    var service_value = null;
+    if (loglevel != null)
+    {
+        loglevel_index = loglevel.selectedIndex;
+        if (loglevel_index != null) {
+            loglevel_value = loglevel.options[loglevel_index].value;
+        }
+        if (loglevel_value == "Custom") {
+            loglevel_value = "ALL";
+        }
+    }
+    if(serviceName !=  null)
+    {
+        servicelevel_idex = serviceName.selectedIndex;
+        if(servicelevel_idex != null) {
+            service_value = serviceName.options[servicelevel_idex].value;
+        }
+    }
+    var keyword = document.getElementById("logkeyword");
+    if (keyword != null && keyword != undefined && keyword.value != null && keyword.value != undefined) {
+        if (keyword.value == "") {
+            if(serviceName != null) {
+                location.href = "index.jsp?type=" + loglevel_value + "&tenantDomain=" + tenantDomain;
+            } else {
+                location.href = "index.jsp?type=" + loglevel_value + "&tenantDomain=" + tenantDomain + "&serviceName="+serviceName;
+            }
+        } else {
+            if(serviceName != null) {
+                location.href = "index.jsp?type=" + loglevel_value + "&tenantDomain="+
+                    tenantDomain+"&serviceName="+serviceName+"&keyword=" + keyword.value;
+            } else {
+                location.href = "index.jsp?type=" + loglevel_value + "&tenantDomain="+
+                    tenantDomain +"&keyword=" + keyword.value;
+            }
+        }
+    } else {
+        return;
+    }
+
+}
+
+function getTenantApplicationSpecificIndex() {
+    var loglevel = document.getElementById("logLevelID");
+    var appName = document.getElementById("appName");
+    var loglevel_index = null;
+    var loglevel_value = null;
+    var appName_index = null;
+    var appName_value = null;
+    var servicelevel_idex = null;
+    var service_value = null;
+    var tenantDomain = document.getElementById("tenantDomain");
+    var serviceName = document.getElementById("serviceName");
+    if (loglevel != null)
+    {
+        loglevel_index = loglevel.selectedIndex;
+        if (loglevel_index != null) {
+            loglevel_value = loglevel.options[loglevel_index].value;
+        }
+    }
+
+    if (appName != null)
+    {
+        appName_index = appName.selectedIndex;
+        if (appName_index != null) {
+            appName_value = appName.options[appName_index].value;
+        }
+    }
+
+    if(serviceName !=  null)
+    {
+        servicelevel_idex = serviceName.selectedIndex;
+        if(servicelevel_idex != null) {
+            service_value = serviceName.options[servicelevel_idex].value;
+        }
+    }
+
+    if (loglevel_value == "Custom") {
+        loglevel_value = "ALL";
+    }
+    var keyword = document.getElementById("logkeyword");
+    if (keyword != null && keyword != undefined ) {
+        if(keyword.value == "") {
+            if(serviceName != null) {
+                location.href = "application_log_viewer.jsp?type=" + loglevel_value + "&serviceName="+service_value
+                    + "&appName="+appName_value + "&tenantDomain=" + tenantDomain.value;
+            } else {
+                location.href = "application_log_viewer.jsp?type=" + loglevel_value + "&appName="+appName_value +
+                    "&tenantDomain=" + tenantDomain.value ;
+            }
+        } else {
+            if(serviceName != null) {
+                location.href = "application_log_viewer.jsp?type="+loglevel_value + "&keyword=" + keyword.value +
+                    "&serviceName="+service_value + "&appName="+appName_value;
+            } else {
+                location.href = "application_log_viewer.jsp?type="+loglevel_value + "&keyword=" + keyword.value +
+                    "&appName="+appName_value;
+            }
+        }
+    } else {
+        return;
+    }
+
+
+}
+
+function getTenantProductSpecificIndex() {
+    var loglevel = document.getElementById("logLevelID");
+    var appName = document.getElementById("appName");
+    var loglevel_index = null;
+    var loglevel_value = null;
+    var appName_index = null;
+    var appName_value = null;
+    var servicelevel_idex = null;
+    var service_value = null;
+    var tenantDomain = document.getElementById("tenantDomain");
+    var serviceName = document.getElementById("serviceName");
+    if (loglevel != null)
+    {
+        loglevel_index = loglevel.selectedIndex;
+        if (loglevel_index != null) {
+            loglevel_value = loglevel.options[loglevel_index].value;
+        }
+    }
+
+    if(serviceName !=  null)
+    {
+        servicelevel_idex = serviceName.selectedIndex;
+        if(servicelevel_idex != null) {
+            service_value = serviceName.options[servicelevel_idex].value;
+        }
+    }
+
+    if (appName != null)
+    {
+        appName_index = appName.selectedIndex;
+        if (appName_index != null) {
+            appName_value = appName.options[appName_index].value;
+        }
+    }
+    if (loglevel_value == "Custom") {
+        loglevel_value = "ALL";
+    }
+    var keyword = document.getElementById("logkeyword");
+    if (keyword != null && keyword != undefined) {
+        if (keyword.value == "") {
+            if(tenantDomain != null && tenantDomain != undefined ) {
+                location.href = "application_log_viewer.jsp?type=" + loglevel_value +"&appName="+appName_value+
+                    "&tenantDomain=" + tenantDomain.value + "&serviceName=" + service_value;
+            } else {
+                location.href = "application_log_viewer.jsp?type=" + loglevel_value +"&appName="+appName_value+
+                     "&serviceName=" + service_value;
+            }
+        } else {
+            if(tenantDomain != null && tenantDomain != undefined ) {
+                location.href = "application_log_viewer.jsp?type=" + loglevel_value +"&appName="+appName_value+
+                    "&tenantDomain=" + tenantDomain.value + "&serviceName=" + service_value + "&keyword=" + keyword.value;
+            } else {
+                location.href = "application_log_viewer.jsp?type=" + loglevel_value +"&appName="+appName_value+
+                    "&serviceName=" + service_value + "&keyword=" + keyword.value;
+            }
+        }
+    } else {
+        return;
+    }
 }
 
 function getProductTenantSpecificIndex() {
-	var tenantDomain = document.getElementById("tenantDomain").value;
-	var serviceName = document.getElementById("serviceName").value;
-	location.href = "syslog_index.jsp?tenantDomain="+tenantDomain+"&serviceName="+serviceName;
+    var loglevel = document.getElementById("logLevelID");
+    var loglevel_index = null;
+    var loglevel_value = null;
+    var tenantDomain = document.getElementById("tenantDomain");
+
+    var serviceName = document.getElementById("serviceName");
+    if (loglevel != null)
+    {
+        loglevel_index = loglevel.selectedIndex;
+        if (loglevel_index != null) {
+            loglevel_value = loglevel.options[loglevel_index].value;
+        }
+        if (loglevel_value == "Custom") {
+            loglevel_value = "ALL";
+        }
+    }
+    var keyword = document.getElementById("logkeyword");
+    if (keyword != null && keyword != undefined) {
+        if (keyword.value == "") {
+            if(tenantDomain != null && tenantDomain != undefined ) {
+                location.href = "index.jsp?type=" + loglevel_value + "&tenantDomain="+tenantDomain.value + "&serviceName="+serviceName.value;
+            } else {
+                location.href = "index.jsp?type=" + loglevel_value + "&serviceName=" + serviceName.value;
+            }
+
+        } else {
+            if(tenantDomain != null && tenantDomain != undefined ) {
+                location.href = "index.jsp?type=" + loglevel_value + "&serviceName=" + serviceName.value +
+                    "&tenantDomain=" + tenantDomain.value + "&keyword=" + keyword.value;
+            } else {
+                location.href = "index.jsp?type=" + loglevel_value + "&serviceName=" + serviceName.value +
+                    "&keyword=" + keyword.value;
+            }
+        }
+    } else {
+        return;
+    }
 }
 
 function submitenter(e) {
@@ -102,7 +303,7 @@ function submitenter(e) {
 	}
 }
 
-function appSubmitenter(e) {
+function submitenterNormal(e) {
     var keycode;
     if (window.event) {
         keycode = window.event.keyCode;
@@ -110,7 +311,36 @@ function appSubmitenter(e) {
         keycode = e.which;
     }
     if (keycode == 13) {
-        searchAppLogs();
+        searchNormal();
+        return true;
+    } else {
+        return true;
+    }
+}
+
+function submitenterNormalManager(e) {
+    var keycode;
+    if (window.event) {
+        keycode = window.event.keyCode;
+    } else if (e) {
+        keycode = e.which;
+    }
+    if (keycode == 13) {
+        searchNormalManager();
+        return true;
+    } else {
+        return true;
+    }
+}
+function submitenterTenant(e) {
+    var keycode;
+    if (window.event) {
+        keycode = window.event.keyCode;
+    } else if (e) {
+        keycode = e.which;
+    }
+    if (keycode == 13) {
+        getTenantSpecificIndex ();
         return true;
     } else {
         return true;
@@ -186,7 +416,7 @@ function searchLogBottomLogs() {
 	}
 	var keyword = document.getElementById("keyword");
 	if (keyword != null && keyword != undefined && keyword.value != null
-			&& keyword.value != undefined) {
+        && keyword.value != undefined) {
 		if (keyword.value == "") {
 			location.href = "view.jsp?type=ALL&logIndex=" + log_index+"&logFile="+logFile+"&tenantDomain="+tenantDomain+"&serviceName="+serviceName;
 		} else {
@@ -199,8 +429,15 @@ function searchLogBottomLogs() {
 }
 function searchLogs() {
     var loglevel = document.getElementById("logLevelID");
+    var tenantDomain = document.getElementById("tenantDomain");
+    var serviceName = document.getElementById("serviceName");
     var loglevel_index = null;
     var loglevel_value = null;
+    var servicelevel_idex = null;
+    var service_value = null;
+    var collapseVal = document.getElementById("propertyTableSearch");
+    var collapse = "false";
+
     if (loglevel != null)
     {
         loglevel_index = loglevel.selectedIndex;
@@ -211,10 +448,82 @@ function searchLogs() {
 			loglevel_value = "ALL";
 		}
     }
+    if(collapseVal.style.display == "") {
+        collapse = "true";
+    }
+
+    if(serviceName !=  null)
+    {
+        servicelevel_idex = serviceName.selectedIndex;
+        if(servicelevel_idex != null) {
+            service_value = serviceName.options[servicelevel_idex].value;
+        }
+    }
+    var propertyTab = document.getElementById('propertyTable');
+    var propertySymbolMax =  document.getElementById('propertySymbolMax');
+
+    var keyword = document.getElementById("logkeyword");
+    if (keyword != null && keyword != undefined) {
+        if (keyword.value == "") {
+            if(tenantDomain != null && tenantDomain != undefined ) {
+                if(serviceName != null) {
+                    location.href = "index.jsp?type="+loglevel_value+"&tenantDomain=" + tenantDomain.value +
+                        "&serviceName="+service_value + "&collapse=" + collapse;
+                } else {
+                    location.href = "index.jsp?type="+loglevel_value+"&tenantDomain=" + tenantDomain.value +
+                        "&collapse=" + collapse;
+                }
+            } else {
+                if(serviceName != null) {
+                    location.href = "index.jsp?type="+loglevel_value+"&serviceName=" + service_value + "&collapse=" + collapse;
+                } else {
+                    location.href = "index.jsp?type=" + loglevel_value + "&collapse=" + collapse;
+                }
+            }
+        } else {
+            if(tenantDomain != null && tenantDomain != undefined ) {
+                if(serviceName != null) {
+                    location.href = "index.jsp?type="+loglevel_value + "&tenantDomain="+tenantDomain.value  +
+                        "&serviceName=" + service_value+ "&keyword="+ keyword.value + "&collapse=" + collapse;
+                } else {
+                    location.href = "index.jsp?type=" + loglevel_value + "&tenantDomain="+tenantDomain.value +
+                        "&keyword=" + keyword.value + "&collapse=" + collapse;
+                }
+
+            } else {
+                if(serviceName != null) {
+                    location.href = "index.jsp?type="+loglevel_value + "&serviceName="+service_value +
+                        "&keyword=" + keyword.value + "&collapse=" + collapse;
+                } else {
+                    location.href = "index.jsp?type="+loglevel_value +
+                        "&keyword=" + keyword.value + "&collapse=" + collapse;
+                }
+
+            }
+        }
+    } else {
+        return ;
+    }
+}
+
+function searchNormal() {
+    var loglevel = document.getElementById("logLevelID");
+    var loglevel_index = null;
+    var loglevel_value = null;
+    if (loglevel != null)
+    {
+        loglevel_index = loglevel.selectedIndex;
+        if (loglevel_index != null) {
+            loglevel_value = loglevel.options[loglevel_index].value;
+        }
+        if (loglevel_value == "Custom") {
+            loglevel_value = "ALL";
+        }
+    }
     var keyword = document.getElementById("logkeyword");
     if (keyword != null && keyword != undefined && keyword.value != null && keyword.value != undefined) {
         if (keyword.value == "") {
-            location.href = "index.jsp?type=ALL";
+            location.href = "index.jsp?type=" + loglevel_value;
         } else {
             location.href = "index.jsp?type=" + loglevel_value + "&keyword=" + keyword.value;
         }
@@ -222,6 +531,50 @@ function searchLogs() {
         return;
     }
 }
+
+function searchNormalManager() {
+    var loglevel = document.getElementById("logLevelID");
+    var serviceName = document.getElementById("serviceName");
+    var servicelevel_idex = null;
+    var service_value = null;
+    var loglevel_index = null;
+    var loglevel_value = null;
+    var collapseVal = document.getElementById("propertyTableSearch");
+    var collapse = "false";
+    if (loglevel != null)
+    {
+        loglevel_index = loglevel.selectedIndex;
+        if (loglevel_index != null) {
+            loglevel_value = loglevel.options[loglevel_index].value;
+        }
+        if (loglevel_value == "Custom") {
+            loglevel_value = "ALL";
+        }
+    }
+    if(collapseVal.style.display == "") {
+        collapse = "true";
+    }
+
+    if(serviceName !=  null)
+    {
+        servicelevel_idex = serviceName.selectedIndex;
+        if(servicelevel_idex != null) {
+            service_value = serviceName.options[servicelevel_idex].value;
+        }
+    }
+    var keyword = document.getElementById("logkeyword");
+    if (keyword != null && keyword != undefined && keyword.value != null && keyword.value != undefined) {
+        if (keyword.value == "") {
+            location.href = "index.jsp?type=" + loglevel_value + "&serviceName=" + service_value + "&collapse=" + collapse;
+        } else {
+            location.href = "index.jsp?type=" + loglevel_value + "&keyword=" + keyword.value +
+                                "&serviceName=" + service_value + "&collapse=" + collapse;
+        }
+    } else {
+        return ;
+    }
+}
+
 
 function showQueryProperties() {
     var propertyTab = document.getElementById('propertyTable');
@@ -235,6 +588,46 @@ function showQueryProperties() {
     }
 }
 
+function showQueryPropertiesSearch() {
+    var propertyTab = document.getElementById('propertyTableSearch');
+    var propertySymbolMax =  document.getElementById('propertySymbolMaxSearch');
+    if(propertyTab.style.display == 'none') {
+        propertyTab.style.display = '';
+        propertySymbolMax.setAttribute('style','background-image:url(images/minus.gif);');
+    } else {
+        propertyTab.style.display = 'none';
+        propertySymbolMax.setAttribute('style','background-image:url(images/plus.gif);');
+    }
+}
+function appSubmitenter(e) {
+    var keycode;
+    if (window.event) {
+        keycode = window.event.keyCode;
+    } else if (e) {
+        keycode = e.which;
+    }
+    if (keycode == 13) {
+        searchAppLogs();
+        return true;
+    } else {
+        return true;
+    }
+}
+
+function appSubmitenterTenant(e) {
+    var keycode;
+    if (window.event) {
+        keycode = window.event.keyCode;
+    } else if (e) {
+        keycode = e.which;
+    }
+    if (keycode == 13) {
+        getTenantApplicationSpecificIndex();
+        return true;
+    } else {
+        return true;
+    }
+}
 function searchAppLogs() {
     var loglevel = document.getElementById("logLevelID");
     var appName = document.getElementById("appName");
@@ -250,19 +643,19 @@ function searchAppLogs() {
         }
     }
     if (loglevel_value == "Custom") {
-		loglevel_value = "ALL";
-	}
+        loglevel_value = "ALL";
+    }
     if (appName != null)
     {
-    	appName_index = appName.selectedIndex;
+        appName_index = appName.selectedIndex;
         if (appName_index != null) {
-        	appName_value = appName.options[appName_index].value;
+            appName_value = appName.options[appName_index].value;
         }
     }
     var keyword = document.getElementById("logkeyword");
-    if (keyword != null && keyword != undefined && keyword.value != null && keyword.value != undefined) {
+    if (keyword != null && keyword != undefined) {
         if (keyword.value == "") {
-            location.href = "application_log_viewer.jsp?type=ALL&appName="+appName_value;;
+            location.href = "application_log_viewer.jsp?type=" + loglevel_value + "&appName="+appName_value;
         } else {
             location.href = "application_log_viewer.jsp?type=" + loglevel_value + "&keyword=" + keyword.value+"&appName="+appName_value;
         }
@@ -271,7 +664,91 @@ function searchAppLogs() {
     }
 }
 
-function searchLog() {
+function searchAppLogsAdv() {
+    var loglevel = document.getElementById("logLevelID");
+    var appName = document.getElementById("appName");
+
+    var tenantDomain = document.getElementById("tenantDomain");
+    var serviceName = document.getElementById("serviceName");
+
+    var servicelevel_idex = null;
+    var service_value = null;
+    var loglevel_index = null;
+    var loglevel_value = null;
+    var appName_index = null;
+    var appName_value = null;
+    if (loglevel != null)
+    {
+        loglevel_index = loglevel.selectedIndex;
+        if (loglevel_index != null) {
+            loglevel_value = loglevel.options[loglevel_index].value;
+        }
+    }
+    if (loglevel_value == "Custom") {
+        loglevel_value = "ALL";
+    }
+    if (appName != null)
+    {
+        appName_index = appName.selectedIndex;
+        if (appName_index != null) {
+            appName_value = appName.options[appName_index].value;
+        }
+    }
+
+    if(serviceName !=  null)
+    {
+        servicelevel_idex = serviceName.selectedIndex;
+        if(servicelevel_idex != null) {
+            service_value = serviceName.options[servicelevel_idex].value;
+        }
+    }
+    var keyword = document.getElementById("logkeyword");
+    if (keyword != null && keyword != undefined) {
+        if (keyword.value == "") {
+            if(tenantDomain != null && tenantDomain != undefined ) {
+                if(serviceName != null) {
+                    location.href = "application_log_viewer.jsp?type="+loglevel_value+"&tenantDomain=" +
+                        tenantDomain.value + "&serviceName="+service_value + "&appName=" + appName_value;
+                } else {
+                    location.href = "application_log_viewer.jsp?type="+loglevel_value+"&tenantDomain=" +
+                        tenantDomain.value + "&appName=" + appName_value;
+                }
+            } else {
+                if(serviceName != null) {
+                    location.href = "application_log_viewer.jsp?type="+loglevel_value+"&serviceName=" + service_value +
+                        "&appName=" + appName_value;
+                } else {
+                    location.href = "application_log_viewer.jsp?type=" + loglevel_value + "&appName=" + appName_value;
+                }
+            }
+        } else {
+            if(tenantDomain != null && tenantDomain != undefined ) {
+                if(serviceName != null) {
+                    location.href = "application_log_viewer.jsp?type="+loglevel_value + "&tenantDomain="+
+                        tenantDomain.value  +
+                        "&serviceName=" + service_value+ "&keyword="+ keyword.value + "&appName=" + appName_value;
+                } else {
+                    location.href = "application_log_viewer.jsp?type=" + loglevel_value + "&tenantDomain="+tenantDomain.value +
+                        "&keyword=" + keyword.value + "&appName=" + appName_value;
+                }
+
+            } else {
+                if(serviceName != null) {
+                    location.href = "application_log_viewer.jsp?type="+loglevel_value + "&serviceName="+service_value +
+                        "&keyword=" + keyword.value + "&appName=" + appName_value;
+                } else {
+                    location.href = "application_log_viewer.jsp?type="+loglevel_value +
+                        "&keyword=" + keyword.value + "&appName=" + appName_value;
+                }
+
+            }
+        }
+    } else {
+        return;
+    }
+}
+
+function searchLog111() {
     var loglevel = document.getElementById("logLevelID");
 	var logFile = document.getElementById("logFile").value;
 	var serviceName = document.getElementById("serviceName").value;
@@ -441,3 +918,4 @@ function showTrace(obj) {
         traceSymbolMax.setAttribute('style','background-image:url(images/plus.gif);');
     }
 }
+

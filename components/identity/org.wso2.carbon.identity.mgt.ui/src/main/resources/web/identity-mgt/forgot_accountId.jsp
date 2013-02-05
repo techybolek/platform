@@ -22,6 +22,7 @@
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
 <fmt:bundle basename="org.wso2.carbon.identity.mgt.ui.i18n.Resources">
+    
     <script type="text/javascript">
         function cancel(){
             location.href = "../admin/login.jsp";
@@ -31,24 +32,22 @@
     <link href="css/forgot-password.css" rel="stylesheet" type="text/css" media="all"/>
 
     <div id="middle">
-        <h2>
-          To retrieve your WSO2 Identity Server account id, following information are needed to match
-            with our user account records
-        </h2>
+        <h2><fmt:message key="account.id.recovery"/></h2>
+        <p><fmt:message key="account.id.recovery.message"/></p>
     </div>
     <div>
     <form action="forgot_accountId_finish.jsp" id="accountId"  method="post">        
         <table>
             <tbody>
             <tr>
-                <td>Email Address : </td>
+                <td><fmt:message key="email.address"/></td>
                 <td>
                     <input type="text" tabindex="2" name="emailAddress" id="emailAddress">
                 </td>
             </tr>
             <br/>
             <tr>
-                <td>Last name : </td>
+                <td><fmt:message key="last.name"/></td>
                 <td>
                     <input type="text" tabindex="2" name="lastName" id="lastName">
                 </td>

@@ -1,4 +1,16 @@
 $(document).ready(function () {
+	jagg.post("/site/blocks/comment/comment-add/ajax/comment-add.jag", {
+        action:"isCommentActivated"}, function (result) {
+        if (result.error == false) {
+            var allow=result.allow;
+            if(!allow){
+            $("#comment-add").hide();	
+            }
+        } else {
+            jagg.message({content:result.message,type:"error"});
+        }
+    }, "json");
+	
     $("#comment-add-button").click(function () {
         var comment = $("#comment-text").val();
         if(comment.length > 450){
@@ -24,7 +36,8 @@ $(document).ready(function () {
     $("#comment-text").charCount({
 			allowed: 450,
 			warning: 420,
-			counterText: 'Characters left: '
+			counterText: i18n.t('Characters left: ')
 		});
     $("#comment-text").val('');
+    $("#comment-text").prev().addClass('counter').removeClass('warning').html(i18n.t('Characters left: ')+'450');
 });

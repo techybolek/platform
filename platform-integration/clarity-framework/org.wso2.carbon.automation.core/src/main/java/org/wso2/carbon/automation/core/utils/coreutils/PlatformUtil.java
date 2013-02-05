@@ -23,6 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.core.ProductConstant;
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * contain utility methods for all platform wide settings
  */
@@ -49,7 +52,9 @@ public class PlatformUtil {
             location = System.getProperty("mb.carbon.zip");
         } else if (ProductConstant.CEP_SERVER_NAME.equalsIgnoreCase(productName)) {
             location = System.getProperty("cep.carbon.zip");
-        } else if (ProductConstant.GS_SERVER_NAME.equalsIgnoreCase(productName)) {
+        }else if (ProductConstant.SS_SERVER_NAME.equalsIgnoreCase(productName)) {
+            location = System.getProperty("ss.carbon.zip");
+        }else if (ProductConstant.GS_SERVER_NAME.equalsIgnoreCase(productName)) {
             location = System.getProperty("gs.carbon.zip");
         } else if (ProductConstant.BRS_SERVER_NAME.equalsIgnoreCase(productName)) {
             location = System.getProperty("brs.carbon.zip");
@@ -81,5 +86,12 @@ public class PlatformUtil {
             log.debug("javax.net.ssl.trustStorePassword :" + System.getProperty("javax.net.ssl.trustStorePassword"));
             log.debug("javax.net.ssl.trustStoreType :" + System.getProperty("javax.net.ssl.trustStoreType"));
         }
+    }
+
+    public static List<String> getServerList() {
+        if (System.getProperty("server.list") != null) {
+            return Arrays.asList(System.getProperty("server.list").split(","));
+        }
+        return null;
     }
 }

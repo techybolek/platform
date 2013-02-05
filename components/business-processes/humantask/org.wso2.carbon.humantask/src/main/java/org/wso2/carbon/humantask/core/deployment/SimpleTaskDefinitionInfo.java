@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.humantask.core.deployment;
 
+import org.wso2.carbon.humantask.core.dao.TaskPackageStatus;
 import org.wso2.carbon.humantask.core.dao.TaskType;
 
 import java.io.File;
@@ -52,6 +53,22 @@ public class SimpleTaskDefinitionInfo {
      * The human task definition file.
      */
     private File humanTaskDefinitionFile;
+
+    /**
+     * The status of the package containing this task definition
+     */
+    private TaskPackageStatus packageStatus;
+
+    /**
+     * boolean flag to indicate the error status of the task def.
+     */
+    private boolean erroneous;
+
+    /**
+     * Deployment errors if there are any.
+     */
+    private String deploymentError;
+
 
     /**
      * @return : The package name.
@@ -129,5 +146,48 @@ public class SimpleTaskDefinitionInfo {
      */
     public void setHumanTaskDefinitionFile(File humanTaskDefinitionFile) {
         this.humanTaskDefinitionFile = humanTaskDefinitionFile;
+    }
+
+    /**
+     * @return : The status of the package containing this definition.
+     */
+    public TaskPackageStatus getPackageStatus() {
+        return packageStatus;
+    }
+
+    /**
+     *
+     * @param packageStatus : The status of the package.to set.
+     */
+    public void setPackageStatus(TaskPackageStatus packageStatus) {
+        this.packageStatus = packageStatus;
+    }
+
+    /**
+     * @return : true if the task configuration failed to deploy.
+     */
+    public boolean isErroneous() {
+        return erroneous;
+    }
+
+    /**
+     * @param erroneous : the error status
+     */
+    public void setErroneous(boolean erroneous) {
+        this.erroneous = erroneous;
+    }
+
+    /**
+     * @return : The deployment error if there's any.
+     */
+    public String getDeploymentError() {
+        return deploymentError;
+    }
+
+    /**
+     * @param deploymentError : The deployment error to set
+     */
+    public void setDeploymentError(String deploymentError) {
+        this.deploymentError = deploymentError;
     }
 }

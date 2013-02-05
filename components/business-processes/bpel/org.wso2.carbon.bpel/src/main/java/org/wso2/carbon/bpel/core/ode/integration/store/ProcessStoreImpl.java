@@ -241,6 +241,26 @@ public class ProcessStoreImpl implements ProcessStore, MultiTenantProcessStore {
         }
     }
 
+    public void updateProcessAndDUMapsForSalve(Integer tenantId,
+                                        String duName,
+                                        Collection<QName> pids) {
+        for (QName pid : pids) {
+            ProcessConfigurationImpl processConf =
+                    (ProcessConfigurationImpl) getProcessConfiguration(pid);
+            if (processConf != null && processConf.isUndeploying()) {
+                processToTenantMap.remove(pid);
+            }
+            removeProcessConfiguration(pid, tenantId);
+        } // Moving to bindingcontextimpl to fix a issue when getting tenant id to deactivate service
+
+        deploymentUnits.remove(duName);
+        for (QName pid : pids) {
+            processes.remove(pid);
+        }
+        deploymentUnitToTenantMap.remove(duName);
+        deploymentUnitToProcessesMap.remove(duName);
+    }
+
     public void removeFromProcessToTenantMap(QName pid) {
         processToTenantMap.remove(pid);
     }

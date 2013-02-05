@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.commons.Credentials;
 import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
 import org.wso2.carbon.databridge.core.conf.DataBridgeConfiguration;
-import org.wso2.carbon.databridge.core.internal.authentication.session.AgentSession;
+import org.wso2.carbon.databridge.core.Utils.AgentSession;
 import org.wso2.carbon.databridge.core.internal.authentication.session.SessionBean;
 import org.wso2.carbon.databridge.core.internal.authentication.session.SessionCache;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;

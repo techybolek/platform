@@ -34,11 +34,21 @@ public abstract class TConnection implements Connection {
 
     private String password;
 
+    private boolean hasHeader = true;
+
+    private int maxColumns = -1;
+
     public TConnection(Properties props) {
-        this.type = props.getProperty(Constants.DATA_SOURCE_TYPE).toUpperCase();
-        this.path = props.getProperty(Constants.FILE_PATH);
-        this.username = props.getProperty(Constants.USER);
-        this.password = props.getProperty(Constants.PASSWORD);
+        this.type = props.getProperty(Constants.DRIVER_PROPERTIES.DATA_SOURCE_TYPE).toUpperCase();
+        this.path = props.getProperty(Constants.DRIVER_PROPERTIES.FILE_PATH);
+        this.username = props.getProperty(Constants.DRIVER_PROPERTIES.USER);
+        this.password = props.getProperty(Constants.DRIVER_PROPERTIES.PASSWORD);
+        if (props.getProperty(Constants.DRIVER_PROPERTIES.HAS_HEADER) != null) {
+            this.hasHeader = Boolean.parseBoolean(props.getProperty(Constants.DRIVER_PROPERTIES.HAS_HEADER));
+        }
+        if (props.getProperty(Constants.DRIVER_PROPERTIES.MAX_COLUMNS) != null) {
+            this.maxColumns = Integer.parseInt(props.getProperty(Constants.DRIVER_PROPERTIES.MAX_COLUMNS));
+        }
     }
 
     public String getType() {
@@ -55,6 +65,14 @@ public abstract class TConnection implements Connection {
 
     public String getPassword() {
         return password;
+    }
+
+    public boolean hasHeader() {
+        return hasHeader;
+    }
+
+    public int getMaxColumns() {
+        return maxColumns;
     }
 
     public String nativeSQL(String sql) throws SQLException {

@@ -32,7 +32,7 @@ import org.wso2.carbon.bam.activity.mediation.data.publisher.queue.ActivityQueue
 import org.wso2.carbon.bam.data.publisher.util.BAMDataPublisherConstants;
 import org.wso2.carbon.bam.data.publisher.util.PublisherConfiguration;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.statistics.MessageTraceLog;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
@@ -83,7 +83,7 @@ public class ActivityPublisherUtils {
         MessageActivity activity = null;
         org.apache.axis2.context.MessageContext msgCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
         AxisConfiguration axisConfiguration = msgCtx.getConfigurationContext().getAxisConfiguration();
-        int tenantID = SuperTenantCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+        int tenantID = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
 
         activity = new MessageActivity();
 

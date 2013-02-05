@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.wso2.carbon.dataservices.core.DataServiceFault;
-import org.wso2.carbon.dataservices.core.custom.datasource.CustomDataSource.FilterOperator;
+import org.wso2.carbon.dataservices.core.custom.datasource.TabularDataBasedDS.FilterOperator;
 
 /**
  * This represents a data table in a custom data source.
@@ -40,7 +40,7 @@ public interface DataTable {
 	 * Returns all the data in the table.
 	 * @param start The 0-based starting index of the results to be returned
 	 * @param length The length of the result set size to be limited to, -1 if unlimited
-	 * @return The list of data rows
+	 * @return A map of data rows, keyed by a unique value to identify the row
 	 * @throws DatListaServiceFault Thrown if any error occurs 
 	 */
 	Map<Long, DataRow> getData(long start, long length) throws DataServiceFault;

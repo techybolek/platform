@@ -20,22 +20,22 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
     </parent>
 
     <groupId>org.wso2.carbon</groupId>
     <artifactId>apimgt</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <name>API Management</name>
     <modules>
-        <module>org.wso2.carbon.apimgt.api</module>
-        <module>org.wso2.carbon.apimgt.impl</module>
-        <module>org.wso2.carbon.apimgt.hostobjects</module>
-        <module>org.wso2.carbon.apimgt.keymgt</module>
-	<module>org.wso2.carbon.apimgt.keymgt.client</module>
-        <module>org.wso2.carbon.apimgt.gateway</module>
+        <module>org.wso2.carbon.apimgt.api/1.0.5</module>
+        <module>org.wso2.carbon.apimgt.impl/1.0.5</module>
+        <module>org.wso2.carbon.apimgt.hostobjects/1.0.5</module>
+        <module>org.wso2.carbon.apimgt.keymgt/1.0.6</module>
+	<module>org.wso2.carbon.apimgt.keymgt.client/1.0.5</module>
+        <module>org.wso2.carbon.apimgt.gateway/1.0.5</module>
         <module>org.wso2.carbon.apimgt.usage</module>
     </modules>
     <build>
@@ -61,14 +61,14 @@
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
+                <checksumPolicy>fail</checksumPolicy>
             </releases>
         </repository>
     </repositories>
     
     <properties>
-        <hostobjects.version>1.0.0-SNAPSHOT</hostobjects.version>
-        <jaggery.version>1.0.0-SNAPSHOT</jaggery.version>
+        <hostobjects.version>1.0.0</hostobjects.version>
+        <jaggery.version>1.0.0</jaggery.version>
         <identity.version>${wso2carbon.version}</identity.version>
         <wso2carbon.version.identity>${wso2carbon.version}</wso2carbon.version.identity>
         <axis2.wso2.version.identity>${axis2.wso2.version}</axis2.wso2.version.identity>

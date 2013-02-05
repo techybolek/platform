@@ -16,6 +16,16 @@
 
 package org.wso2.carbon.security.pox;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.jsr107cache.Cache;
+import net.sf.jsr107cache.CacheManager;
+
 import org.apache.axiom.om.impl.dom.jaxp.DocumentBuilderFactoryImpl;
 import org.apache.axiom.om.util.Base64;
 import org.apache.axiom.soap.SOAPHeader;
@@ -37,18 +47,10 @@ import org.apache.ws.security.message.WSSecHeader;
 import org.apache.ws.security.message.WSSecTimestamp;
 import org.apache.ws.security.message.WSSecUsernameToken;
 import org.w3c.dom.Document;
-import org.wso2.carbon.core.RegistryResources;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.security.SecurityServiceHolder;
 import org.wso2.carbon.base.ServerConfiguration;
-
-import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import org.wso2.carbon.security.SecurityConstants;
+import org.wso2.carbon.security.config.SecurityConfigAdmin;
+import org.wso2.carbon.security.config.service.SecurityScenarioData;
 
 /**
  * Handler to convert the HTTP basic auth information into
@@ -57,6 +59,8 @@ import java.util.Map;
 public class POXSecurityHandler implements Handler {
 
     private static Log log = LogFactory.getLog(POXSecurityHandler.class);
+    private static String POX_SECURITY_MODULE = "POXSecurityModule";
+    public static final String POX_ENABLED = "pox-security";
 
     private HandlerDescription description;
 
@@ -77,12 +81,18 @@ public class POXSecurityHandler implements Handler {
      * @see org.apache.axis2.engine.Handler#invoke(org.apache.axis2.context.MessageContext)
      */
     public InvocationResponse invoke(MessageContext msgCtx) throws AxisFault {
+        if (msgCtx != null && !msgCtx.isEngaged(POX_SECURITY_MODULE)){
+            return InvocationResponse.CONTINUE;
+        }
+
         if (msgCtx == null || msgCtx.getIncomingTransportName() == null) {
             return InvocationResponse.CONTINUE;
         }
 
+        String basicAuthHeader = getBasicAuthHeaders(msgCtx);
          //this handler only intercepts
-        if (!(msgCtx.isDoingREST() || isSOAPWithoutSecHeader(msgCtx)) || !msgCtx.getIncomingTransportName().equals("https")) {
+        if (!(msgCtx.isDoingREST() || isSOAPWithoutSecHeader(msgCtx)) ||
+                !msgCtx.getIncomingTransportName().equals("https") || (basicAuthHeader == null)) {
             return InvocationResponse.CONTINUE;
         }
 
@@ -96,64 +106,62 @@ public class POXSecurityHandler implements Handler {
             return InvocationResponse.CONTINUE;
         }
 
+        
         // We do not add details of admin services to the registry, hence if a rest call comes to a
         // admin service that does not require authentication we simply skip it
-        String requiresAuthentication = (String) service.getParameterValue("DoAuthentication");
-        if (requiresAuthentication != null) {
-            if (JavaUtils.isFalseExplicitly(requiresAuthentication)) {
+        String isAdminService = (String) service.getParameterValue("adminService");
+        if (isAdminService != null) {
+            if (JavaUtils.isTrueExplicitly(isAdminService)) {
                 return InvocationResponse.CONTINUE;
             }
         }
 
-        try {
-            int tenantID = SuperTenantCarbonContext.getCurrentContext(msgCtx).getTenantId();
-            
-            Registry registry = SecurityServiceHolder.getRegistryService().getConfigSystemRegistry(tenantID);
-            String servicePath = RegistryResources.SERVICE_GROUPS
-                    + service.getAxisServiceGroup().getServiceGroupName()
-                    + RegistryResources.SERVICES + service.getName();
-            Resource serviceResource = null;
-            if (registry.resourceExists(servicePath)) {
-                serviceResource = registry.get(servicePath);
-            } else {
-                return InvocationResponse.CONTINUE;
-            }
+        String isPox = null;
 
-            if (serviceResource != null) {
-                if (serviceResource.getProperty(RegistryResources.ServiceProperties.IS_UT_ENABLED) == null) {
-                    //TODO: We specifically have to check for UT auth
-                    return InvocationResponse.CONTINUE;
+        Cache cache = CacheManager.getInstance().getCache(POX_ENABLED);
+
+        if(cache != null){
+            if(cache.getCacheEntry(service.getName()) != null){
+                isPox = (String) cache.getCacheEntry(service.getName()).getValue();
+            }
+        }
+
+        if (isPox != null && JavaUtils.isFalseExplicitly(isPox)) {
+            return InvocationResponse.CONTINUE;
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Admin service check failed OR cache miss");
+        }
+
+        try {
+            SecurityConfigAdmin securityAdmin = new SecurityConfigAdmin(msgCtx.getConfigurationContext().getAxisConfiguration());
+            SecurityScenarioData data = securityAdmin.getCurrentScenario(service.getName());
+            if (data != null && data.getScenarioId().equals(SecurityConstants.USERNAME_TOKEN_SCENARIO_ID)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Processing POX security");
                 }
             } else {
+                if(cache != null){
+                    cache.put(service.getName(), "false");
+                }
                 return InvocationResponse.CONTINUE;
             }
-
             // Set the DOM impl to DOOM
             DocumentBuilderFactoryImpl.setDOOMRequired(true);
-            Map map = (Map) msgCtx.getProperty(MessageContext.TRANSPORT_HEADERS);
-            String tmp = (String) map.get("Authorization");
-
-            if (tmp == null){
-                tmp = (String) map.get("authorization");
-            }
-
             String username = null;
             String password = null;
-
-            if (tmp != null) {
-                tmp = tmp.trim();
-            }
-            if (tmp != null && tmp.startsWith("Basic ")) {
-                tmp = new String(Base64.decode(tmp.substring(6)));
-                int i = tmp.indexOf(':');
+            if (basicAuthHeader != null && basicAuthHeader.startsWith("Basic ")) {
+                basicAuthHeader = new String(Base64.decode(basicAuthHeader.substring(6)));
+                int i = basicAuthHeader.indexOf(':');
                 if (i == -1) {
-                    username = tmp;
+                    username = basicAuthHeader;
                 } else {
-                    username = tmp.substring(0, i);
+                    username = basicAuthHeader.substring(0, i);
                 }
 
                 if (i != -1) {
-                    password = tmp.substring(i + 1);
+                    password = basicAuthHeader.substring(i + 1);
                     if (password != null && password.equals("")) {
                         password = null;
                     }
@@ -162,14 +170,6 @@ public class POXSecurityHandler implements Handler {
 
             if (username == null || password == null || password.trim().length() == 0
                     || username.trim().length() == 0) {
-               /* 
-                
-                The following does not work. CarbonServlet does not implement AxisServlet functionality
-                
-                msgCtx.setProperty(org.apache.axis2.Constants.HTTP_RESPONSE_STATE, String
-                        .valueOf(HttpServletResponse.SC_UNAUTHORIZED));
-                msgCtx.setProperty(org.apache.axis2.Constants.HTTP_BASIC_AUTH_REALM,
-                          ServerConfiguration.getInstance().getFirstProperty("Name"));*/
                 
                 
                 String servername = ServerConfiguration.getInstance().getFirstProperty("Name");
@@ -228,6 +228,7 @@ public class POXSecurityHandler implements Handler {
         }
         return InvocationResponse.CONTINUE;
     }
+
     /**
      *
      * @param msgCtx   message going through the handler chain
@@ -252,6 +253,27 @@ public class POXSecurityHandler implements Handler {
             }
         }
         return true;
+    }
+
+    /**
+     * Utility method to return basic auth transport headers if present
+     * @return
+     */
+    private String getBasicAuthHeaders(MessageContext msgCtx) {
+
+        Map map = (Map) msgCtx.getProperty(MessageContext.TRANSPORT_HEADERS);
+        if(map == null) {
+            return null;
+        }
+        String tmp =   (String) map.get("Authorization");
+        if (tmp == null) {
+            tmp = (String) map.get("authorization");
+        }
+        if (tmp != null && tmp.trim().startsWith("Basic ")) {
+            return tmp;
+        } else {
+            return null;
+        }
     }
 
     public void flowComplete(MessageContext msgContext) {

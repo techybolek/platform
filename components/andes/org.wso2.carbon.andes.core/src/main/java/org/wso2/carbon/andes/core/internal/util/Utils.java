@@ -17,8 +17,6 @@
 */
 package org.wso2.carbon.andes.core.internal.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.andes.core.QueueManagerException;
 import org.wso2.carbon.andes.core.internal.ds.QueueManagerServiceValueHolder;
 import org.wso2.carbon.context.CarbonContext;
@@ -26,10 +24,12 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserStoreException;
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.andes.core.types.Queue;
+
 
 public class Utils {
-
-    private static final Log log = LogFactory.getLog(Utils.class);
 
     public static String getTenantAwareCurrentUserName() {
         String username = CarbonContext.getCurrentContext().getUsername();
@@ -53,11 +53,9 @@ public class Utils {
     }
 
     public static String getTenantBasedQueueName(String queueName) {
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        if (tenantId > 0) {
-            String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
-            tenantDomain = tenantDomain.replace(".", "-");
-            queueName = tenantDomain + "-" + queueName;
+        String tenantDomain = CarbonContext.getCurrentContext().getTenantDomain();
+        if (tenantDomain != null && (!tenantDomain.equals(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))) {
+            queueName = tenantDomain + "/" + queueName;
         }
         return queueName;
     }
@@ -92,6 +90,34 @@ public class Utils {
         return isAdmin;
     }
 
+    /**
+     * filter queues to suit the tenant domain
+     * @param fullList
+     * @return List<Queue>
+     */
+    public static List<Queue> filterDomainSpecificQueues(List<Queue> fullList) {
+        String domainName = CarbonContext.getCurrentContext().getTenantDomain();
+        ArrayList<Queue> tenantFilteredQueues = new ArrayList<Queue>();
+        if(domainName != null && !CarbonContext.getCurrentContext().getTenantDomain().
+                equals(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            for (Queue aQueue : fullList) {
+                if(aQueue.getQueueName().startsWith(domainName)) {
+                    tenantFilteredQueues.add(aQueue);
+                }
+            }
+        }
+        //for super tenant load all queues not specific to a domain. That means queues created by external
+        //JMS clients are visible, and those names should not have "/" in their queue names
+        else if(domainName != null && CarbonContext.getCurrentContext().getTenantDomain().
+                equals(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)){
+            for (Queue aQueue : fullList) {
+                if(!aQueue.getQueueName().contains("/")) {
+                    tenantFilteredQueues.add(aQueue);
+                }
+            }
+        }
 
+        return tenantFilteredQueues;
+    }
 
 }

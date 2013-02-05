@@ -154,11 +154,12 @@
         </tr>
   <tr>
     <td class="buttonRow" colspan="2">
-        <input class="button" type="button" value="<fmt:message key="cancel"/>"
-               onclick="redirectToMainConfiguration(document.getElementById('queryId').value)"/>
-        
+              
         <input class="button" type="submit" value="<fmt:message key="save"/>"
                onclick="document.dataForm.action = 'sqlDialectProcessor.jsp';return validateSQLDialectForm();"/>
+               
+        <input class="button" type="button" value="<fmt:message key="cancel"/>"
+               onclick="redirectToMainConfiguration(document.getElementById('queryId').value)"/>
     </td>
   </tr>
 </table>

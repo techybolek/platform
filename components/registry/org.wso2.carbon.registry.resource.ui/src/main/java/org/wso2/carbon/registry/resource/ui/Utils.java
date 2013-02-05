@@ -23,6 +23,8 @@ import org.wso2.carbon.registry.resource.stub.beans.xsd.CollectionContentBean;
 import org.wso2.carbon.registry.resource.stub.beans.xsd.ResourceTreeEntryBean;
 import org.wso2.carbon.registry.resource.ui.clients.ResourceServiceClient;
 import org.wso2.carbon.ui.CarbonUIUtil;
+import org.wso2.carbon.registry.relations.stub.beans.xsd.DependenciesBean;
+import org.wso2.carbon.registry.relations.stub.beans.xsd.AssociationBean;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -210,6 +212,46 @@ public class Utils {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static boolean hasDependencies(DependenciesBean dependenciesBean,String srcPath){
+        boolean hasDependencies = false;
+            if(srcPath == null){
+             return false;
+            }
+
+            AssociationBean[] associations = dependenciesBean.getAssociationBeans();
+            if(dependenciesBean != null && dependenciesBean.getAssociationBeans().length > 0) {
+                for(AssociationBean associationBean: associations) {
+                    if("depends".equals(associationBean.getAssociationType())
+                            && associationBean.getSourcePath().equals(srcPath) ) {
+                        hasDependencies = true;
+                        break;
+                    }
+                }
+            }
+      return hasDependencies;
+    }
+
+    public static String[][] getProperties(HttpServletRequest request) {
+        return getProperties(request.getParameter("properties"));
+    }
+
+    public static String[][] getProperties(String propertyString) {
+        if (propertyString != null && propertyString.trim().length() > 0) {
+            String[] keySetWithValues = propertyString.split("\\^\\|\\^");
+            String[][] propertyArray = new String[keySetWithValues.length][2];
+
+            for (int i = 0; i < keySetWithValues.length; i++) {
+                String keySetWithValue = keySetWithValues[i];
+                String[] keyAndValue = keySetWithValue.split("\\^\\^");
+                propertyArray[i][0] = keyAndValue[0];
+                propertyArray[i][1] = keyAndValue[1];
+            }
+
+            return propertyArray;
+        }
+        return new String[0][];
     }
 
 }

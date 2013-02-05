@@ -27,6 +27,7 @@ import org.wso2.carbon.humantask.TDeadlines;
 import org.wso2.carbon.humantask.TPresentationElements;
 import org.wso2.carbon.humantask.TPriorityExpr;
 import org.wso2.carbon.humantask.core.HumanTaskConstants;
+import org.wso2.carbon.humantask.core.dao.TaskPackageStatus;
 import org.wso2.carbon.humantask.core.utils.HumanTaskNamespaceContext;
 
 import javax.wsdl.Definition;
@@ -78,6 +79,12 @@ public abstract class HumanTaskBaseConfiguration {
 
     private List<EndpointConfiguration> endpointConfigs = new ArrayList<EndpointConfiguration>();
 
+    private TaskPackageStatus packageStatus = TaskPackageStatus.ACTIVE;
+
+    private boolean isErroneous = false;
+
+    private String deploymentError = "NONE";
+
     public HumanTaskBaseConfiguration() {
     }
 
@@ -94,6 +101,7 @@ public abstract class HumanTaskBaseConfiguration {
         this.tenantAxisConf = tenantAxisConf;
         this.packageName = packageName;
         this.humanTaskDefinitionFile = humanTaskDefinitionFile;
+        this.packageStatus = TaskPackageStatus.ACTIVE;
 
         if (humanInteractionsDocument.getHumanInteractions().getExpressionLanguage() != null) {
             this.defaultExpressionLanguage = humanInteractionsDocument.getHumanInteractions().
@@ -250,6 +258,30 @@ public abstract class HumanTaskBaseConfiguration {
      */
     public void setHumanTaskDefinitionFile(File humanTaskDefinitionFile) {
         this.humanTaskDefinitionFile = humanTaskDefinitionFile;
+    }
+
+    public TaskPackageStatus getPackageStatus() {
+        return packageStatus;
+    }
+
+    public void setPackageStatus(TaskPackageStatus packageStatus) {
+        this.packageStatus = packageStatus;
+    }
+
+    public boolean isErroneous() {
+        return isErroneous;
+    }
+
+    public void setErroneous(boolean erroneous) {
+        isErroneous = erroneous;
+    }
+
+    public String getDeploymentError() {
+        return deploymentError;
+    }
+
+    public void setDeploymentError(String deploymentError) {
+        this.deploymentError = deploymentError;
     }
 
     public EndpointConfiguration getEndpointConfiguration(String serviceName, String portName) {

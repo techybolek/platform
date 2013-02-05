@@ -21,6 +21,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.framework.BundleContext;
+import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.core.services.authentication.CarbonServerAuthenticator;
+import org.wso2.carbon.identity.authenticator.webseal.WebSealAuthenticator;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.core.common.IAuthenticationAdmin;
@@ -31,6 +34,8 @@ import org.wso2.carbon.core.services.filedownload.FileDownloadService;
 import org.wso2.carbon.core.services.fileupload.FileUploadService;
 import org.wso2.carbon.core.services.callback.LoginSubscriptionManagerService;
 import org.wso2.carbon.core.services.callback.LoginSubscriptionManagerServiceImpl;
+
+import java.util.Hashtable;
 
 /**
  * @scr.component name="webseal.authenticator.dscomponent" immediate="true"
@@ -45,36 +50,17 @@ import org.wso2.carbon.core.services.callback.LoginSubscriptionManagerServiceImp
  */
 public class WebSealAuthenticatorDSComponent {
 
-    private static LoginSubscriptionManagerServiceImpl loginSubscriptionManagerServiceImpl =
-            new LoginSubscriptionManagerServiceImpl();
-
     private static final Log log = LogFactory.getLog(WebSealAuthenticatorDSComponent.class);
 
     protected void activate(ComponentContext ctxt) {
-        try {
-            BundleContext bc = ctxt.getBundleContext();
-            bc.registerService(IAuthenticationAdmin.class.getName(), new AuthenticationAdmin(), null);
-            bc.registerService(IFileUpload.class.getName(), new FileUploadService(), null);
-            bc.registerService(IFileDownload.class.getName(), new FileDownloadService(), null);
-            bc.registerService(LoginSubscriptionManagerService.class.getName(),
-                    loginSubscriptionManagerServiceImpl, null);
 
-            log.debug("Carbon Core Services bundle is activated ");
-        } catch (Throwable e) {
-            log.error("Failed to activate Carbon Core Services bundle ", e);
-        }
-    }
-
-    protected void deactivate(ComponentContext ctxt) {
-        log.debug("Carbon Core Services bundle is deactivated ");
-    }
-   
-    protected void setRegistryService(RegistryService registryService) {
-        WebSealAuthBEDataHolder.getInstance().setRegistryService(registryService);
-    }
-
-    protected void unsetRegistryService(RegistryService registryService) {
-        WebSealAuthBEDataHolder.getInstance().setRegistryService(null);
+        WebSealAuthenticator authenticator = new WebSealAuthenticator();
+        Hashtable<String, String> props = new Hashtable<String, String>();
+        props.put(CarbonConstants.AUTHENTICATOR_TYPE, authenticator.getAuthenticatorName());
+        ctxt.getBundleContext().registerService(CarbonServerAuthenticator.class.getName(),
+                                                authenticator, props);
+        WebSealAuthBEDataHolder.getInstance().setBundleContext(ctxt.getBundleContext());
+        log.info("WebSeal Authenticator BE Bundle activated successfully..");
     }
 
     protected void setRealmService(RealmService realmService) {
@@ -83,5 +69,13 @@ public class WebSealAuthenticatorDSComponent {
 
     protected void unsetRealmService(RealmService realmService) {
         WebSealAuthBEDataHolder.getInstance().setRealmService(null);
+    }
+
+    protected void setRegistryService(RegistryService registryService) {
+        WebSealAuthBEDataHolder.getInstance().setRegistryService(registryService);
+    }
+
+    protected void unsetRegistryService(RegistryService registryService) {
+        WebSealAuthBEDataHolder.getInstance().setRegistryService(null);
     }
 }

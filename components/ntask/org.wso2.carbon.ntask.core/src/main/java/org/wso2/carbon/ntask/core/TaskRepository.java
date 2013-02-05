@@ -35,7 +35,7 @@ public interface TaskRepository {
 	 * Returns task information of a given task name
 	 * @param taskName The task name
 	 * @return The task information object
-	 * @throws TaskException
+	 * @throws TaskException if the task cannot be found
 	 */
 	public TaskInfo getTask(String taskName) throws TaskException;
 	
@@ -49,14 +49,39 @@ public interface TaskRepository {
 	/**
 	 * Deletes existing task information from the repository.
 	 * @param taskName The task name
+	 * @return true if the task was found and deleted
 	 * @throws TaskException
 	 */
-	public void deleteTask(String taskName) throws TaskException;
+	public boolean deleteTask(String taskName) throws TaskException;
 	
 	/**
 	 * Returns the type of the tasks represented by this task manager.
 	 * @return The type of the tasks
 	 */
 	public String getTasksType();
+	
+	/**
+	 * Returns the tenant id of the tasks represented by this task manager.
+	 * @return The tenant id of the tasks
+	 */
+	public int getTenantId();
+	
+	/**
+	 * Sets a task metadata property to a given task name with a given property key.
+	 * @param taskName The name of the task the metadata property to be assigned to
+	 * @param key The key of the metadata property
+	 * @param value The value of the metadata property
+	 * @throws TaskException
+	 */
+	public void setTaskMetadataProp(String taskName, String key, String value) throws TaskException;
+	
+	/**
+	 * Returns the task metadata property value, if the task does not exist, this will return null.
+	 * @param taskName The name of the task to retrieve the metadata property from
+	 * @param key The key of the metadata propery
+	 * @return The metadata property value
+	 * @throws TaskException
+	 */
+	public String getTaskMetadataProp(String taskName, String key) throws TaskException;
 	
 }

@@ -15,6 +15,8 @@
   ~  limitations under the License.
   --%>
 
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon"%>
 <%@ page import="org.wso2.carbon.mediator.cache.CacheMediator" %>
 <%@ page import="org.wso2.carbon.mediator.service.ui.Mediator" %>
 <%@ page import="org.wso2.carbon.sequences.ui.util.SequenceEditorHelper" %>
@@ -33,6 +35,7 @@
 %>
 
 <fmt:bundle basename="org.wso2.carbon.mediator.cache.ui.i18n.Resources">
+<carbon:jsi18n resourceBundle="org.wso2.carbon.mediator.cache.ui.i18n.JSResources" request="<%=request%>" i18nObjectName="cachejsi18n" />
 <div>
     <script type="text/javascript" src="../cache-mediator/js/mediator-util.js"></script>
     

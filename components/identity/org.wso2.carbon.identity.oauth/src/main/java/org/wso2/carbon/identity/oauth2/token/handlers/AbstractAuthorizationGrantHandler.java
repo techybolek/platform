@@ -1,5 +1,5 @@
 /*
-*Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *WSO2 Inc. licenses this file to you under the Apache License,
 *Version 2.0 (the "License"); you may not use this file except
@@ -23,6 +23,7 @@ import org.apache.amber.oauth2.as.issuer.OAuthIssuer;
 import org.apache.amber.oauth2.as.issuer.OAuthIssuerImpl;
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.apache.amber.oauth2.common.message.types.GrantType;
+import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.caching.core.CacheKey;
@@ -44,6 +45,7 @@ import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.UUID;
 
 public abstract class AbstractAuthorizationGrantHandler implements AuthorizationGrantHandler {
 
@@ -61,7 +63,7 @@ public abstract class AbstractAuthorizationGrantHandler implements Authorization
         tokenPersistencePreprocessor = OAuthServerConfiguration
                 .getInstance().getTokenPersistencePreprocessor();
         // Set the cache instance if caching is enabled.
-        if(OAuthServerConfiguration.getInstance().isCacheEnabled()){
+        if (OAuthServerConfiguration.getInstance().isCacheEnabled()) {
             cacheEnabled = true;
             oauthCache = OAuthCache.getInstance();
         }
@@ -84,75 +86,176 @@ public abstract class AbstractAuthorizationGrantHandler implements Authorization
 
     public OAuth2AccessTokenRespDTO issue(OAuthTokenReqMessageContext tokReqMsgCtx)
             throws IdentityOAuth2Exception {
-        OAuth2AccessTokenRespDTO tokenRespDTO = new OAuth2AccessTokenRespDTO();
+
+        OAuth2AccessTokenRespDTO tokenRespDTO;
         OAuth2AccessTokenReqDTO oAuth2AccessTokenReqDTO = tokReqMsgCtx.getOauth2AccessTokenReqDTO();
 
-        String accessToken;
-        String refreshToken;
+        String consumerKey = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId();
+        String authorizedUser = tokReqMsgCtx.getAuthorizedUser();
+        CacheKey cacheKey = new OAuthCacheKey(consumerKey + ":" + authorizedUser);
+        String userStoreDomain = null;
 
-        try {
-            accessToken = oauthIssuerImpl.accessToken();
-            refreshToken = oauthIssuerImpl.refreshToken();
-        } catch (OAuthSystemException e) {
-            throw new IdentityOAuth2Exception("Error when generating the tokens.", e);
+        //select the user store domain when multiple user stores are configured.
+        if (OAuth2Util.checkAccessTokenPartitioningEnabled() &&
+                OAuth2Util.checkUserNameAssertionEnabled()) {
+            userStoreDomain = OAuth2Util.getUserStoreDomainFromUserId
+                    (tokReqMsgCtx.getAuthorizedUser());
         }
 
-        Timestamp timestamp = new Timestamp(new Date().getTime());
+        synchronized ((consumerKey + ":" + authorizedUser).intern()) {
+            try {
+                //TODO Need to refactor this logic
+                //First serve from the cache
+                if (cacheEnabled) {
+                    AccessTokenDO newAccessTokenDO = (AccessTokenDO) oauthCache.getValueFromCache(cacheKey);
+                    if (newAccessTokenDO != null) {
+                        AccessTokenDO accessTokenDO = OAuth2Util.validateAccessTokenDO(newAccessTokenDO);
+                        if (accessTokenDO != null) {
+                            tokenRespDTO = new OAuth2AccessTokenRespDTO();
+                            tokenRespDTO.setAccessToken(accessTokenDO.getAccessToken());
+                            tokenRespDTO.setRefreshToken(accessTokenDO.getRefreshToken());
+                            tokenRespDTO.setExpiresIn(accessTokenDO.getValidityPeriod());
+                            if (log.isDebugEnabled()) {
+                                log.debug("Access Token info retrieved from the cache and served to client with client id : " +
+                                        oAuth2AccessTokenReqDTO.getClientId());
+                            }
+                            oauthCache.addToCache(cacheKey, accessTokenDO);
+                            return tokenRespDTO;
+                        } else {
+                            oauthCache.clearCacheEntry(cacheKey);
+                            String tokenState = tokenMgtDAO.getAccessTokenState(consumerKey, authorizedUser, OAuth2Util.USER_TYPE_FOR_USER_TOKEN);
+                            if (tokenState.equals(OAuth2Constants.TokenStates.TOKEN_STATE_REVOKED)) {
+                                tokenMgtDAO.setAccessTokenState(consumerKey, authorizedUser,OAuth2Constants.TokenStates.TOKEN_STATE_REVOKED,
+                                                                UUID.randomUUID().toString(), OAuth2Util.USER_TYPE_FOR_USER_TOKEN, userStoreDomain);
+                            } else {//Token is expired. Mark it as expired on database
+                                tokenMgtDAO.setAccessTokenState(consumerKey, authorizedUser, OAuth2Constants.TokenStates.TOKEN_STATE_EXPIRED,
+                                                                UUID.randomUUID().toString(), OAuth2Util.USER_TYPE_FOR_USER_TOKEN, userStoreDomain);
+                            }
+                        }
+                    }
+                }
 
-        // Default Validity Period (in seconds)
-        long validityPeriod = OAuthServerConfiguration.getInstance()
-                .getDefaultAccessTokenValidityPeriodInSeconds();
-
-        // if a VALID validity period is set through the callback, then use it
-        long callbackValidityPeriod = tokReqMsgCtx.getValidityPeriod();
-        if ((callbackValidityPeriod != OAuth2Constants.UNASSIGNED_VALIDITY_PERIOD)
-                && callbackValidityPeriod > 0) {
-            validityPeriod = callbackValidityPeriod;
-        }
-
-        validityPeriod = validityPeriod * 1000;
-
-        // Get the secured versions of the tokens to persist and to cache.
-        String preprocessedAccessToken = tokenPersistencePreprocessor
-                .getPreprocessedToken(accessToken);
-        String preprocessedRefreshToken = tokenPersistencePreprocessor
-                .getPreprocessedToken(refreshToken);
-
-        AccessTokenDO accessTokenDO = new AccessTokenDO(tokReqMsgCtx.getAuthorizedUser(),
-                tokReqMsgCtx.getScope(), timestamp, validityPeriod);
-        accessTokenDO.setRefreshToken(preprocessedRefreshToken);
-        accessTokenDO.setTokenState(OAuth2Constants.TokenStates.TOKEN_STATE_ACTIVE);
-
-        // add the access token info to the cache, if it's enabled.
-        if(cacheEnabled){
-            CacheKey cacheKey = new OAuthCacheKey(preprocessedAccessToken);
-            oauthCache.addToCache(cacheKey, accessTokenDO);
-
-            if(log.isDebugEnabled()){
-                log.debug("Access Token info was added to the cache for the client id : " +
-                        oAuth2AccessTokenReqDTO.getClientId());
+                //Check if previously issued token exists in database
+                tokenRespDTO = tokenMgtDAO.getValidAccessTokenIfExist(oAuth2AccessTokenReqDTO.getClientId(),
+                        tokReqMsgCtx.getAuthorizedUser(), userStoreDomain);
+                if (tokenRespDTO != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Retrieving existing valid access token for client ID" + oAuth2AccessTokenReqDTO.getClientId());
+                    }
+                    if (cacheEnabled) {
+                        AccessTokenDO accessTokenDO = new AccessTokenDO(consumerKey, tokReqMsgCtx.getAuthorizedUser(),
+                                tokReqMsgCtx.getScope(), new Timestamp(System.currentTimeMillis()), tokenRespDTO.getExpiresIn());
+                        accessTokenDO.setRefreshToken(tokenRespDTO.getRefreshToken());
+                        accessTokenDO.setTokenState(OAuth2Constants.TokenStates.TOKEN_STATE_ACTIVE);
+                        accessTokenDO.setAccessToken(tokenRespDTO.getAccessToken());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Access Token info was added to the cache for the client id : " +
+                                    oAuth2AccessTokenReqDTO.getClientId());
+                        }
+                        oauthCache.addToCache(cacheKey, accessTokenDO);
+                    }
+                    return tokenRespDTO;
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Marking old token as expired for client Id : "
+                                + consumerKey + " AuthorizedUser : " + authorizedUser);
+                    }
+                    //TODO : Read token state from a constant
+                    //TODO : This should move to validation check of getValidAccessTokenIfExist() method
+                    String tokenState = tokenMgtDAO.getAccessTokenState(consumerKey, authorizedUser, OAuth2Util.USER_TYPE_FOR_USER_TOKEN);
+                    if (tokenState.equals(OAuth2Constants.TokenStates.TOKEN_STATE_REVOKED)) {
+                        tokenMgtDAO.setAccessTokenState(consumerKey, authorizedUser, OAuth2Constants.TokenStates.TOKEN_STATE_REVOKED, UUID.randomUUID().toString(), OAuth2Util.USER_TYPE_FOR_USER_TOKEN, userStoreDomain);
+                    } else {//Token is expired. Mark it as expired on database
+                        tokenMgtDAO.setAccessTokenState(consumerKey, authorizedUser, OAuth2Constants.TokenStates.TOKEN_STATE_EXPIRED,
+                                                        UUID.randomUUID().toString(), OAuth2Util.USER_TYPE_FOR_USER_TOKEN, userStoreDomain);
+                    }
+                }
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error while getting existing token for client ID" + oAuth2AccessTokenReqDTO.getClientId());
+                }
             }
+
+            //No valid access token is found in cache or database.
+            //Need to issue a new access token.
+            if (log.isDebugEnabled()) {
+                log.debug("Issuing a new access token for "
+                        + consumerKey + " AuthorizedUser : " + authorizedUser);
+            }
+            String accessToken;
+            String refreshToken;
+
+            try {
+                accessToken = oauthIssuerImpl.accessToken();
+                refreshToken = oauthIssuerImpl.refreshToken();
+            } catch (OAuthSystemException e) {
+                throw new IdentityOAuth2Exception("Error when generating the tokens.", e);
+            }
+
+            if (OAuth2Util.checkUserNameAssertionEnabled()) {
+                String userName = tokReqMsgCtx.getAuthorizedUser();
+                //use ':' for token & userStoreDomain separation
+                String accessTokenStrToEncode = accessToken + ":" + userName;
+                accessToken = Base64Utils.encode(accessTokenStrToEncode.getBytes());
+
+                String refreshTokenStrToEncode = refreshToken + ":" + userName;
+                refreshToken = Base64Utils.encode(refreshTokenStrToEncode.getBytes());
+            }
+
+            Timestamp timestamp = new Timestamp(new Date().getTime());
+            // Default Validity Period (in seconds)
+            long validityPeriod = OAuthServerConfiguration.getInstance()
+                    .getDefaultAccessTokenValidityPeriodInSeconds();
+
+            // if a VALID validity period is set through the callback, then use it
+            long callbackValidityPeriod = tokReqMsgCtx.getValidityPeriod();
+            if ((callbackValidityPeriod != OAuth2Constants.UNASSIGNED_VALIDITY_PERIOD)
+                    && callbackValidityPeriod > 0) {
+                validityPeriod = callbackValidityPeriod;
+            }
+
+            // validityPeriod = validityPeriod * 1000;
+            // Get the secured versions of the tokens to persist and to cache.
+            String preprocessedAccessToken = tokenPersistencePreprocessor
+                    .getPreprocessedToken(accessToken);
+            String preprocessedRefreshToken = tokenPersistencePreprocessor
+                    .getPreprocessedToken(refreshToken);
+
+            AccessTokenDO accessTokenDO = new AccessTokenDO(consumerKey, tokReqMsgCtx.getAuthorizedUser(),
+                    tokReqMsgCtx.getScope(), timestamp, validityPeriod);
+            accessTokenDO.setRefreshToken(preprocessedRefreshToken);
+            accessTokenDO.setTokenState(OAuth2Constants.TokenStates.TOKEN_STATE_ACTIVE);
+            accessTokenDO.setAccessToken(preprocessedAccessToken);
+
+            // store new token
+            tokenMgtDAO.storeAccessToken(preprocessedAccessToken,
+                    oAuth2AccessTokenReqDTO.getClientId(),
+                    accessTokenDO, userStoreDomain);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Persisted an access token with " +
+                        "Client ID : " + oAuth2AccessTokenReqDTO.getClientId() +
+                        "authorized user : " + tokReqMsgCtx.getAuthorizedUser() +
+                        "timestamp : " + timestamp +
+                        "validity period : " + validityPeriod +
+                        "scope : " + OAuth2Util.buildScopeString(tokReqMsgCtx.getScope()) +
+                        "Token State : " + OAuth2Constants.TokenStates.TOKEN_STATE_ACTIVE);
+            }
+
+            //update cache with newly added token
+            if (cacheEnabled) {
+                oauthCache.addToCache(cacheKey, accessTokenDO);
+                if (log.isDebugEnabled()) {
+                    log.debug("Access Token info was added to the cache for the client id : " +
+                            oAuth2AccessTokenReqDTO.getClientId());
+                }
+            }
+            tokenRespDTO = new OAuth2AccessTokenRespDTO();
+            tokenRespDTO.setAccessToken(accessToken);
+            tokenRespDTO.setRefreshToken(refreshToken);
+            tokenRespDTO.setExpiresIn(validityPeriod);
+            return tokenRespDTO;
         }
-
-        // store the new token
-        tokenMgtDAO.storeAccessToken(preprocessedAccessToken,
-                oAuth2AccessTokenReqDTO.getClientId(),
-                accessTokenDO);
-
-        if (log.isDebugEnabled()) {
-            log.debug("Persisted an access token with " +
-                    "Client ID : " + oAuth2AccessTokenReqDTO.getClientId() +
-                    "authorized user : " + tokReqMsgCtx.getAuthorizedUser() +
-                    "timestamp : " + timestamp +
-                    "validity period : " + validityPeriod +
-                    "scope : " + OAuth2Util.buildScopeString(tokReqMsgCtx.getScope()) +
-                    "Token State : " + OAuth2Constants.TokenStates.TOKEN_STATE_ACTIVE);
-        }
-
-        tokenRespDTO.setAccessToken(accessToken);
-        tokenRespDTO.setRefreshToken(refreshToken);
-        tokenRespDTO.setExpiresIn(validityPeriod/1000);
-        return tokenRespDTO;
     }
 
     public boolean authorizeAccessDelegation(OAuthTokenReqMessageContext tokReqMsgCtx)

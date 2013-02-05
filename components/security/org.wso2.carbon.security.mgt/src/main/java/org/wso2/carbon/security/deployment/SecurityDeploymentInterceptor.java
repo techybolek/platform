@@ -28,19 +28,23 @@ import org.apache.axis2.engine.AxisEvent;
 import org.apache.axis2.engine.AxisObserver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.neethi.Policy;
+import org.apache.neethi.PolicyComponent;
+import org.apache.neethi.PolicyEngine;
+import org.apache.neethi.PolicyReference;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.useradmin.Authorization;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.RegistryResources;
 import org.wso2.carbon.core.Resources;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.wso2.carbon.core.persistence.PersistenceFactory;
 import org.wso2.carbon.core.persistence.PersistenceUtils;
 import org.wso2.carbon.core.persistence.file.ModuleFilePersistenceManager;
 import org.wso2.carbon.core.persistence.file.ServiceGroupFilePersistenceManager;
-import org.wso2.carbon.core.util.AnonymousSessionUtil;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
@@ -56,6 +60,8 @@ import org.wso2.carbon.security.util.RahasUtil;
 import org.wso2.carbon.security.util.ServerCrypto;
 import org.wso2.carbon.security.util.ServicePasswordCallbackHandler;
 import org.wso2.carbon.security.util.XmlConfiguration;
+import org.wso2.carbon.user.api.AuthorizationManager;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
@@ -166,27 +172,82 @@ public class SecurityDeploymentInterceptor implements AxisObserver {
                 }
                 String policyResourcePath = PersistenceUtils.getResourcePath(axisService)+
                         "/"+Resources.POLICIES+"/"+Resources.POLICY;
-                int tenantID = SuperTenantCarbonContext.getCurrentContext(axisService).getTenantId();
-                if (!serviceGroupFilePM.elementExists(serviceGroupId, policyResourcePath)) {
-                    // do nothing, because no policy
-                    if(!isTransactionStarted) {
-                        serviceGroupFilePM.rollbackTransaction(serviceGroupId);
-                    }
-                    return;
-                }
+                int tenantID = PrivilegedCarbonContext.getCurrentContext(axisService).getTenantId();
 
                 List policies = serviceGroupFilePM.getAll(serviceGroupId, policyResourcePath);
+
                 SecurityScenario scenario = null;
-                for (Object node : policies) {
-                    OMElement policyWrapperElement = (OMElement) node;
-                    String policyId = PersistenceUtils.getPolicyUUIDFromWrapperOM(policyWrapperElement);
-                    if (policyId != null) {
-                        scenario = SecurityScenarioDatabase.getByWsuId(policyId);
-                        if (scenario != null) {
-                            break;
+                if(policies == null || policies.size() == 0){
+                    if(axisService.getPolicySubject() != null &&
+                            axisService.getPolicySubject().getAttachedPolicyComponents() != null){
+                        Iterator iterator = axisService.getPolicySubject().
+                                                        getAttachedPolicyComponents().iterator();
+                        String policyId = null;
+                        while(iterator.hasNext()){
+                            PolicyComponent currentPolicyComponent = (PolicyComponent) iterator.next();
+                            if (currentPolicyComponent instanceof Policy) {
+                                policyId = ((Policy) currentPolicyComponent).getId();
+                            } else if (currentPolicyComponent instanceof PolicyReference) {
+                                policyId = ((PolicyReference) currentPolicyComponent).getURI().substring(1);
+                            }
+                            if(policyId != null){
+                                scenario = SecurityScenarioDatabase.getByWsuId(policyId);
+                                if(scenario == null){
+                                    // if there is no security scenario id,  put default id
+                                    SecurityScenario securityScenario = new SecurityScenario();
+                                    securityScenario.setScenarioId(SecurityConstants.CUSTOM_SECURITY_SCENARIO);
+                                    securityScenario.setWsuId(policyId);
+                                    securityScenario.setGeneralPolicy(false);
+                                    securityScenario.setSummary(SecurityConstants.CUSTOM_SECURITY_SCENARIO_SUMMARY);
+                                    SecurityScenarioDatabase.put(policyId, securityScenario);
+                                    scenario = securityScenario;
+                                }
+                            }
                         }
                     } else {
-                        log.error("Policy UUID is not found though a policy element exist.");
+                        // do nothing, because no policy
+                        if(!isTransactionStarted) {
+                            serviceGroupFilePM.rollbackTransaction(serviceGroupId);
+                        }
+                        return;
+                    }
+                } else {
+                    for (Object node : policies) {
+                        OMElement policyWrapperElement = (OMElement) node;
+                        Policy policy = null;
+                        try{
+                            policy = PolicyEngine.getPolicy(policyWrapperElement.
+                                    getFirstChildWithName(new QName(PolicyEngine.POLICY_NAMESPACE,
+                                    PolicyEngine.POLICY)));
+                        } catch (Exception e){
+                            // just ignore, we want to make sure this is security policy    
+                        }
+                        if(policy != null){
+                            String policyId = PersistenceUtils.getPolicyUUIDFromWrapperOM(policyWrapperElement);
+                            if (policyId != null) {
+                                scenario = SecurityScenarioDatabase.getByWsuId(policyId);
+                                if (scenario != null) {
+                                    break;
+                                } else {
+                                    // if there is no security scenario id,  put default id
+                                    // before that check whether this is actually a security policy
+                                    // by comparing UUID that is used to persist them
+
+                                    SecurityScenario securityScenario = new SecurityScenario();
+                                    securityScenario.setScenarioId(SecurityConstants.CUSTOM_SECURITY_SCENARIO);
+                                    securityScenario.setWsuId(policyId);
+                                    securityScenario.setGeneralPolicy(false);
+                                    securityScenario.setSummary(SecurityConstants.CUSTOM_SECURITY_SCENARIO_SUMMARY);
+                                    scenario = securityScenario;
+                                    if(!("RMPolicy".equals(policyId) || "WSO2CachingPolicy".equals(policyId)
+                                            || "WSO2ServiceThrottlingPolicy".equals(policyId))){
+                                        SecurityScenarioDatabase.put(policyId, securityScenario);    
+                                    }
+                                }
+                            } else {
+                                log.error("Policy UUID is not found though a policy element exist.");
+                            }
+                        }
                     }
                 }
 
@@ -258,6 +319,7 @@ public class SecurityDeploymentInterceptor implements AxisObserver {
                     scenarioResource.
                             setContentStream(bundleContext.getBundle().
                                     getResource("scenarios/" + scenarioId + "-policy.xml").openStream());
+                    scenarioResource.setMediaType("application/policy+xml");
                     if (!registry.resourceExists(resourceUri)) {
                         registry.put(resourceUri, scenarioResource);
                     }
@@ -307,10 +369,9 @@ public class SecurityDeploymentInterceptor implements AxisObserver {
             String serviceName = service.getName();
             ServiceGroupFilePersistenceManager sfpm = persistenceFactory.getServiceGroupFilePM();
 
-            SuperTenantCarbonContext carbonContext = SuperTenantCarbonContext.getCurrentContext(service);
-            int tenantID = carbonContext.getTenantId();
-            String tenantDomain = carbonContext.getTenantDomain(true);
-            
+            PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getCurrentContext(service);
+            int tenantId = carbonContext.getTenantId();
+
             String registryServicePath = RegistryResources.SERVICE_GROUPS
                     + service.getAxisServiceGroup().getServiceGroupName()
                     + RegistryResources.SERVICES + serviceName;
@@ -318,11 +379,9 @@ public class SecurityDeploymentInterceptor implements AxisObserver {
             String serviceXPath = Resources.ServiceProperties.ROOT_XPATH+
                     PersistenceUtils.getXPathAttrPredicate(Resources.NAME, serviceName);
 
-            UserRealm userRealm = AnonymousSessionUtil.getRealmByTenantDomain(
-                    SecurityServiceHolder.getRegistryService(), SecurityServiceHolder.getRealmService(), tenantDomain);
+            UserRealm userRealm = SecurityServiceHolder.getRegistryService().getUserRealm(tenantId);
 
-//            UserRegistry configRegistry = SecurityServiceHolder.getRegistryService().getConfigSystemRegistry(tenantID);
-            UserRegistry govRegistry = SecurityServiceHolder.getRegistryService().getGovernanceSystemRegistry(tenantID);
+            UserRegistry govRegistry = SecurityServiceHolder.getRegistryService().getGovernanceSystemRegistry(tenantId);
 
             ServicePasswordCallbackHandler handler = new ServicePasswordCallbackHandler(
                     persistenceFactory, serviceGroupId, serviceName, serviceXPath, registryServicePath, govRegistry, userRealm);
@@ -332,16 +391,41 @@ public class SecurityDeploymentInterceptor implements AxisObserver {
             param.setValue(handler);
             service.addParameter(param);
 
-            if (!secScenario.getScenarioId().equals(SecurityConstants.USERNAME_TOKEN_SCENARIO_ID)) {
+            if (!SecurityConstants.USERNAME_TOKEN_SCENARIO_ID.equals(secScenario.getScenarioId())) {
                 Parameter param2 = new Parameter();
                 param2.setName("disableREST"); // TODO Find the constant
                 param2.setValue(Boolean.TRUE.toString());
                 service.addParameter(param2);
             }
 
+            Parameter allowRolesParameter = service.getParameter("allowRoles");
+            
+            if(allowRolesParameter!= null && allowRolesParameter.getValue() != null){
+
+                AuthorizationManager manager = userRealm.getAuthorizationManager();
+                String resourceName = serviceGroupId + "/" + serviceName;
+                String[] roles = manager.getAllowedRolesForResource(resourceName,
+                                                    UserCoreConstants.INVOKE_SERVICE_PERMISSION);
+                if(roles != null){
+                    for (String role : roles) {
+                        manager.clearRoleAuthorization(role, resourceName,
+                                                    UserCoreConstants.INVOKE_SERVICE_PERMISSION);
+                    }
+                }
+
+                String value = (String) allowRolesParameter.getValue();
+                String[] allowRoles = value.split(",") ;
+                if(allowRoles != null){
+                    for(String role : allowRoles){
+                        userRealm.getAuthorizationManager().authorizeRole(role, resourceName,
+                                                        UserCoreConstants.INVOKE_SERVICE_PERMISSION);
+                    }
+                }
+            }
 
             OMElement serviceElement = (OMElement) sfpm.get(serviceGroupId, serviceXPath);
-            if (serviceElement.getAttributeValue(new QName(SecurityConstants.PROP_RAHAS_SCT_ISSUER)) != null) {
+            if (serviceElement != null &&
+                serviceElement.getAttributeValue(new QName(SecurityConstants.PROP_RAHAS_SCT_ISSUER)) != null) {
 
 
                 Object[] pvtStores = sfpm.getAll(serviceGroupId, Resources.ServiceProperties.ROOT_XPATH+

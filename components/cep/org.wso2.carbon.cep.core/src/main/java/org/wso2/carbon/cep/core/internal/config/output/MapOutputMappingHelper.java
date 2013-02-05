@@ -16,21 +16,19 @@
 
 package org.wso2.carbon.cep.core.internal.config.output;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.cep.core.exception.CEPConfigurationException;
 import org.wso2.carbon.cep.core.internal.util.CEPConstants;
 import org.wso2.carbon.cep.core.mapping.output.mapping.MapOutputMapping;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.cep.core.mapping.output.property.MapOutputProperty;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 
 public class MapOutputMappingHelper {
     private static final Log log = LogFactory.getLog(MapOutputMappingHelper.class);
@@ -39,90 +37,47 @@ public class MapOutputMappingHelper {
         MapOutputMapping mapOutputMapping = new MapOutputMapping();
 
 
-        List<String> propertyList = null;
-        for (Iterator iterator = mapMappingElement.getChildrenWithName(new QName(CEPConstants.CEP_CONF_NAMESPACE,
-                                                                           CEPConstants.CEP_CONF_ELE_PROPERTY)); iterator.hasNext(); ) {
-            if (propertyList == null) {
-                propertyList = new ArrayList<String>();
-            }
-            OMElement propertyElement = (OMElement) iterator.next();
-            propertyList.add(propertyElement.getAttributeValue(new QName(CEPConstants.CEP_CONF_ATTR_NAME)));
-        }
-        mapOutputMapping.setPropertyList(propertyList);
-
-        return mapOutputMapping;
-
-    }
-
-    public static void addMapMappingToRegistry(Registry registry,
-                                               MapOutputMapping outputMapping,
-                                               String queryPath)
-            throws CEPConfigurationException {
-
-
-        try {
-            String mapMappingPathString = CEPConstants.CEP_REGISTRY_BS +
-                                          CEPConstants.CEP_REGISTRY_OUTPUT +
-                                          CEPConstants.CEP_REGISTRY_BS +
-                                          CEPConstants.CEP_REGISTRY_MAP_MAPPING;
-            Resource mapMappingResource = registry.newCollection();
-
-            List<String> metaDataProperties = outputMapping.getPropertyList();
-            if (metaDataProperties != null) {
-//                Resource mapping = registry.newResource();
-                for (int i = 0, metaDataPropertiesSize = metaDataProperties.size(); i < metaDataPropertiesSize; i++) {
-                    String property = metaDataProperties.get(i);
-                    mapMappingResource.addProperty(i + "", property);
+        List<MapOutputProperty> outputPropertyList = null;
+        if (mapMappingElement.getChildrenWithName(new QName(CEPConstants.CEP_CONF_NAMESPACE,
+                CEPConstants.CEP_CONF_ELE_PROPERTY)) != null) {
+            for (Iterator iterator = mapMappingElement.getChildrenWithName(new QName(CEPConstants.CEP_CONF_NAMESPACE,
+                    CEPConstants.CEP_CONF_ELE_PROPERTY)); iterator.hasNext(); ) {
+                if (outputPropertyList == null) {
+                    outputPropertyList = new ArrayList<MapOutputProperty>();
                 }
-                registry.put(queryPath + mapMappingPathString, mapMappingResource);
+                OMElement propertyElement = (OMElement) iterator.next();
+
+                String name = (propertyElement.getAttributeValue(new QName(CEPConstants.CEP_CONF_ATTR_NAME)));
+                String valueOf = (propertyElement.getAttributeValue(new QName(CEPConstants.CEP_CONF_ATTR_VALUE_OF)));
+                outputPropertyList.add(new MapOutputProperty(name, valueOf));
             }
-
-        } catch (Exception e) {
-            String errorMessage = "Can not add map mapping to the registry ";
-            log.error(errorMessage, e);
-            throw new CEPConfigurationException(errorMessage, e);
         }
+        mapOutputMapping.setPropertyList(outputPropertyList);
 
-    }
-
-    public static void modifyMapMappingInRegistry(Registry registry,
-                                                  MapOutputMapping outputMapping,
-                                                  String queryPath)
-            throws CEPConfigurationException {
-        //todo
-
-    }
-
-    public static MapOutputMapping loadMapMappingFromRegistry(Registry registry,
-                                                              String mappingPath)
-            throws CEPConfigurationException {
-        MapOutputMapping mapOutputMapping = null;
-        try {
-            mapOutputMapping = new MapOutputMapping();
-
-            Resource resource = registry.get(mappingPath);
-
-            List<String> dataList = loadProperties(resource);
-            mapOutputMapping.setPropertyList(dataList);
-
-        } catch (RegistryException e) {
-            String errorMessage = "Can not load tuple mapping from registry ";
-            log.error(errorMessage, e);
-            throw new CEPConfigurationException(errorMessage, e);
-        }
         return mapOutputMapping;
 
     }
 
-    private static List<String> loadProperties(Resource mappingResources) {
-        List<String> dataList = new ArrayList<String>();
-        Properties properties = mappingResources.getProperties();
-        int i = 0;
-        while (properties.get(i + "") != null) {
-            dataList.add(((List) properties.get(i + "")).get(0).toString());
-            i++;
-        }
-        return dataList;
-    }
 
+    public static OMElement mapOutputMappingToOM(MapOutputMapping outputMapping) {
+        OMFactory factory = OMAbstractFactory.getOMFactory();
+        OMElement queryMapOutputMapping = factory
+                .createOMElement(new QName(CEPConstants.CEP_CONF_NAMESPACE,
+                                           CEPConstants.CEP_CONF_ELE_MAP_MAPPING,
+                                           CEPConstants.CEP_CONF_CEP_NAME_SPACE_PREFIX));
+        if (outputMapping.getPropertyList() != null) {
+            for (MapOutputProperty mapOutputProperty : outputMapping.getPropertyList()) {
+
+                OMElement property = factory.createOMElement(new QName(
+                        CEPConstants.CEP_CONF_NAMESPACE,
+                        CEPConstants.CEP_CONF_ELE_PROPERTY,
+                        CEPConstants.CEP_CONF_CEP_NAME_SPACE_PREFIX));
+                property.addAttribute(CEPConstants.CEP_CONF_ATTR_NAME, mapOutputProperty.getName(), null);
+                property.addAttribute(CEPConstants.CEP_CONF_ATTR_VALUE_OF, mapOutputProperty.getValueOf(), null);
+                queryMapOutputMapping.addChild(property);
+            }
+        }
+        return queryMapOutputMapping;
+
+    }
 }

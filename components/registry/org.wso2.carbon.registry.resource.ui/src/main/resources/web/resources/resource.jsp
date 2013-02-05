@@ -241,6 +241,17 @@
                         </div>
                         <% } %>
 
+                        <%-- Lifecycle History UI --%>
+                        <% if (lifecyclesFound && CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/resources/govern/lifecycles")) {
+                            String resourcePath =
+                                    "../history/lifecyclesHistory_ajaxprocessor.jsp?path=" + RegistryUtil.getPath(request).replaceAll("&","%26");
+                        %>
+                        <div id="lifecyclesHistoryDiv">
+                            <jsp:include page="<%=resourcePath%>"/>
+                        </div>
+                        <% } %>
+                        <%-- end of Lifecycle History UI--%>
+
                         <% if (infoFound) {
                             String infoPath = "../info/info_ajaxprocessor.jsp?path=" + RegistryUtil.getPath(request).replaceAll("&","%26");
                         %>

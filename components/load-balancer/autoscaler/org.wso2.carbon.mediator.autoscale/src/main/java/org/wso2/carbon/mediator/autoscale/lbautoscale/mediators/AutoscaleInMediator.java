@@ -29,6 +29,7 @@ import org.wso2.carbon.lb.common.conf.util.TenantDomainContext;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.context.AppDomainContext;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.util.AutoscaleConstants;
 import org.wso2.carbon.mediator.autoscale.lbautoscale.util.AutoscaleUtil;
+import org.wso2.carbon.mediator.autoscale.lbautoscale.util.AutoscalerTaskDSHolder;
 
 import java.util.Map;
 
@@ -43,9 +44,9 @@ public class AutoscaleInMediator extends AbstractMediator implements ManagedLife
 
     private LoadBalancerConfiguration lbConfig;
 
-    public AutoscaleInMediator(LoadBalancerConfiguration lbconf) {
+    public AutoscaleInMediator() {
 
-        this.lbConfig = lbconf;
+        this.lbConfig = AutoscalerTaskDSHolder.getInstance().getWholeLoadBalancerConfig();
     }
 
     public boolean mediate(MessageContext synCtx) {
@@ -72,16 +73,20 @@ public class AutoscaleInMediator extends AbstractMediator implements ManagedLife
         HostContext ctxt = lbConfig.getHostContextMap().get(targetHost);
 
         if (ctxt == null) {
-            throwException("Host Context is null for host: " + targetHost);
+        	// we don't need to do anything 
+        	return true;
+//            throwException("Host Context is null for host: " + targetHost);
         }
 
         TenantDomainContext tenantCtxt = ctxt.getTenantDomainContext(tenantId);
 
         if (tenantCtxt == null) {
 
-            throwException("Tenant Domain Context is null for host: " + targetHost +
+            log.warn("Tenant Domain Context is null for host: " + targetHost +
                            " - tenant id: " + tenantId);
 
+            //FIXME temporary fix 
+            return true;
         }
 
         // gets the corresponding domain

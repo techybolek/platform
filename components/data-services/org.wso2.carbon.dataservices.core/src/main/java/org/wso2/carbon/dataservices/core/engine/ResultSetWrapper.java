@@ -93,7 +93,8 @@ public class ResultSetWrapper implements ResultSet {
         return this.getResultSet().getDouble(columnIndex);
     }
 
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
         return this.getResultSet().getBigDecimal(columnIndex, scale);
     }
@@ -123,7 +124,8 @@ public class ResultSetWrapper implements ResultSet {
         return this.getResultSet().getAsciiStream(columnIndex);
     }
 
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public InputStream getUnicodeStream(int columnIndex) throws SQLException {
         return this.getResultSet().getUnicodeStream(columnIndex);
     }
@@ -173,7 +175,8 @@ public class ResultSetWrapper implements ResultSet {
         return this.getResultSet().getDouble(columnLabel);
     }
 
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public BigDecimal getBigDecimal(String columnLabel, int scale) throws SQLException {
         return this.getResultSet().getBigDecimal(columnLabel, scale);
     }
@@ -203,7 +206,8 @@ public class ResultSetWrapper implements ResultSet {
         return this.getResultSet().getAsciiStream(columnLabel);
     }
 
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public InputStream getUnicodeStream(String columnLabel) throws SQLException {
         return this.getResultSet().getUnicodeStream(columnLabel);
     }

@@ -22,14 +22,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>extensions-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.registry.extensions.feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - Registry Extensions Feature</name>
-    <version>4.0.0-SNAPSHOT</version>
+    <name>WSO2 Carbon - Registry Extensions Feature - 4.0.5</name>
+    <version>4.0.8</version>
     <url>http://wso2.org</url>
     <description>
         Includes Mechanisms to Extend the Registry, and also some useful extensions for handling
@@ -40,13 +41,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.extensions.server.feature</artifactId>
-            <version>${project.version}</version>
+            <version>4.0.8</version>
             <type>zip</type>
             </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.extensions.ui.feature</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.platform.version}</version>
             <type>zip</type>
             </dependency>
     </dependencies>
@@ -66,13 +67,13 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.registry.extensions</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.registry.core:${registry.core.feature.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.extensions.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.extensions.ui.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.extensions.ui.feature:${carbon.platform.version}</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

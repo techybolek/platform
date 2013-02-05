@@ -33,7 +33,9 @@ import java.util.Arrays;
 @SuppressWarnings({"UnusedDeclaration"})
 public class AdminInfo extends DomainNameEntry {
     
-    private String adminUID;
+    private String usernameAttribute;
+    
+    private String adminUserName;
 
     private String adminCommonName;
 
@@ -49,16 +51,18 @@ public class AdminInfo extends DomainNameEntry {
 
     private PasswordAlgorithm passwordAlgorithm = PasswordAlgorithm.PLAIN_TEXT;
 
-    public AdminInfo(String adminUID, String adminCommonName, String adminLastName,
+    public AdminInfo(String attribute, String adminUserName, String adminCommonName,
+                     String adminLastName,
                      String adminEmail, String password,
                      PasswordAlgorithm algorithm, AdminGroupInfo groupInformation) {
-        this.adminUID = adminUID;
+        this.adminUserName = adminUserName;
         this.adminCommonName = adminCommonName;
         this.adminLastName = adminLastName;
         this.adminEmail = adminEmail;
         this.adminPassword = password;
         this.passwordAlgorithm = algorithm;
         this.groupInformation = groupInformation;
+        this.usernameAttribute = attribute;
 
         this.objectClassList.addAll(Arrays.asList("top", "person", "organizationalPerson", "inetOrgPerson"));
     }
@@ -78,14 +82,14 @@ public class AdminInfo extends DomainNameEntry {
         this.adminPassword = adminPassword;
     }
 
-    public String getAdminUID() {
-        return adminUID;
+    public String getAdminUserName() {
+        return adminUserName;
     }
 
-    public void setAdminUID(String adminUID) {
+    public void setAdminUserName(String adminUID) {
         if (adminUID == null) return;
 
-        this.adminUID = adminUID;
+        this.adminUserName = adminUID;
     }
 
     public String getAdminCommonName() {
@@ -137,4 +141,14 @@ public class AdminInfo extends DomainNameEntry {
 
         this.passwordAlgorithm = passwordAlgorithm;
     }
+
+    public String getUsernameAttribute() {
+        return usernameAttribute;
+    }
+
+    public void setUsernameAttribute(String usernameAttribute) {
+        this.usernameAttribute = usernameAttribute;
+    }
+    
+    
 }

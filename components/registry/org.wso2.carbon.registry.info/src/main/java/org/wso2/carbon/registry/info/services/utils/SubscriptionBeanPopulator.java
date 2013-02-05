@@ -16,29 +16,29 @@
 
 package org.wso2.carbon.registry.info.services.utils;
 
-import java.util.*;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.core.exception.EventBrokerException;
 import org.wso2.carbon.event.core.subscription.Subscription;
 import org.wso2.carbon.event.ws.internal.builders.exceptions.InvalidMessageException;
 import org.wso2.carbon.event.ws.internal.builders.utils.BuilderUtils;
-import org.wso2.carbon.registry.core.ActionConstants;
-import org.wso2.carbon.registry.core.ResourcePath;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.registry.eventing.RegistryEventingConstants;
-import org.wso2.carbon.registry.common.eventing.RegistryEvent;
 import org.wso2.carbon.registry.common.beans.SubscriptionBean;
 import org.wso2.carbon.registry.common.beans.utils.SubscriptionInstance;
+import org.wso2.carbon.registry.common.eventing.RegistryEvent;
+import org.wso2.carbon.registry.core.ActionConstants;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.ResourcePath;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.AccessControlConstants;
+import org.wso2.carbon.registry.eventing.RegistryEventingConstants;
 import org.wso2.carbon.registry.info.Utils;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.registry.core.utils.AccessControlConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+
+import java.util.*;
 
 public class SubscriptionBeanPopulator {
 
@@ -316,21 +316,15 @@ public class SubscriptionBeanPopulator {
 
     private static boolean hasPermissionToSubscribeViaEmail(UserRegistry userRegistry, String path, String endpoint) {
         if (endpoint != null) {
-            String address = endpoint.toLowerCase();
-            if (address.startsWith("digest://")) {
+            String address = endpoint;
+            if (address.toLowerCase().startsWith("digest://")) {
                 address = address.substring(11);
             }
-            if (address.startsWith("user://")) {
-                String userToSubscribe = endpoint.substring(7).trim();
-                if (!userRegistry.getUserName().equals(userToSubscribe) &&
-                    !isAuthorized(userRegistry, path, AccessControlConstants.AUTHORIZE)) {
-                    return false;
-                }
-            } else if (address.startsWith("role://")) {
-                String roleToSubscribe = endpoint.substring(7).trim();
+            if (address.toLowerCase().startsWith("role://")) {
+                String roleToSubscribe = address.substring(7).trim();
                 String[] rolesOfUser = getRolesOfUser(userRegistry, userRegistry.getUserName());
                 return Arrays.asList(rolesOfUser).contains(roleToSubscribe) ||
-                        isAdmin(userRegistry, rolesOfUser);
+                       isAdmin(userRegistry, rolesOfUser);
             }
         }
         return true;
@@ -424,9 +418,9 @@ public class SubscriptionBeanPopulator {
                 if (callerTenantId != MultitenantConstants.SUPER_TENANT_ID &&
                         callerTenantId > -1) {
                     try {
-                        SuperTenantCarbonContext.startTenantFlow();
-                        SuperTenantCarbonContext currentContext =
-                                SuperTenantCarbonContext.getCurrentContext();
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext currentContext =
+                                PrivilegedCarbonContext.getCurrentContext();
                         currentContext.setTenantId(callerTenantId, true);
                         String tenantDomain = currentContext.getTenantDomain();
                         if (tenantDomain != null &&
@@ -434,7 +428,7 @@ public class SubscriptionBeanPopulator {
                             name = name + "@" + tenantDomain;
                         }
                     } finally {
-                        SuperTenantCarbonContext.endTenantFlow();
+                        PrivilegedCarbonContext.endTenantFlow();
                     }
                 }
                 subscription.setOwner(name);

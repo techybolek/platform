@@ -27,31 +27,35 @@
     String forwardTo = "";
     if (session.getAttribute("resource") == null) { // sending to anonSequenceHandler.jsp
         resourceData = (ResourceData) session.getAttribute("resourceData");
-        if ("in".equals(request.getParameter("sequence"))) {
-            resourceData.setInSequenceKey(null);
-        } else if ("out".equals(request.getParameter("sequence"))) {
-            resourceData.setOutSequenceKey(null);
-        } else if ("fault".equals(request.getParameter("sequence"))) {
-            resourceData.setFaultSequenceKey(null);
+        if (resourceData != null) {
+            if ("in".equals(request.getParameter("sequence"))) {
+                resourceData.setInSequenceKey(null);
+            } else if ("out".equals(request.getParameter("sequence"))) {
+                resourceData.setOutSequenceKey(null);
+            } else if ("fault".equals(request.getParameter("sequence"))) {
+                resourceData.setFaultSequenceKey(null);
+            }
+
+            String param, op;
+            if ((param = request.getParameter("return")) != null) {
+                if ((op = request.getParameter("sequence")) != null && !"".equals(op)) {
+                    forwardTo = param + "?sequence=" + op + "&index=" + request.getParameter("index");
+                }
+            }
+            forwardTo += "&originator=designToData.jsp&ordinal=1";
+            session.setAttribute("resource", resourceData);
         }
 
-        String param, op;
-        if ((param = request.getParameter("return")) != null) {
-            if ((op = request.getParameter("sequence")) != null && !"".equals(op)) {
-                forwardTo = param + "?sequence=" + op + "&index=" + request.getParameter("index");
-            }
-        }
-        forwardTo += "&originator=designToData.jsp&ordinal=1";
-        session.setAttribute("resource", resourceData);
     } else {  // returning from anonSequenceHandler.jsp
         resourceData = (ResourceData) session.getAttribute("resource");
         APIData apiData = (APIData) session.getAttribute("apiData");
-        assert resources != null;
-        apiData.setResources(resources.toArray(new ResourceData[resources.size()]));
-        forwardTo = "manageAPI.jsp?" + "mode=" + session.getAttribute("mode") + "&apiName=" + apiData.getName() + "&resourceIndex=" + index;
-        ///
-        session.setAttribute("resourceData", resourceData);
-        session.removeAttribute("resource");
+        if (resourceData != null && apiData != null) {
+            apiData.setResources(resources.toArray(new ResourceData[resources.size()]));
+            forwardTo = "manageAPI.jsp?" + "mode=" + session.getAttribute("mode") + "&apiName=" + apiData.getName() + "&resourceIndex=" + index;
+            ///
+            session.setAttribute("resourceData", resourceData);
+            session.removeAttribute("resource");
+        }
     }
     session.setAttribute("fromSourceView", true);
     session.setAttribute("index", index);

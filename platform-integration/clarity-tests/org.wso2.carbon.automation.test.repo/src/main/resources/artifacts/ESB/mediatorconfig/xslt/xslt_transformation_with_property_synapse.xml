@@ -3,7 +3,7 @@
     <registry provider="org.wso2.carbon.mediation.registry.WSO2Registry">
         <parameter name="cachableDuration">15000</parameter>
     </registry>
-    <localEntry key="response_transform.xslt">
+    <localEntry key="response_transform1.xslt">
         <xsl:stylesheet version="2.0"
                         xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                         xmlns:fn="http://www.w3.org/2005/02/xpath-functions"
@@ -30,7 +30,7 @@
             </xsl:template>
         </xsl:stylesheet>
     </localEntry>
-    <localEntry key="request_transform.xslt">
+    <localEntry key="request_transform1.xslt">
         <xsl:stylesheet version="2.0"
                         xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                         xmlns:fn="http://www.w3.org/2005/02/xpath-functions"
@@ -55,7 +55,7 @@
             </xsl:template>
         </xsl:stylesheet>
     </localEntry>
-    <endpoint name="StockQuoteService">
+    <endpoint name="StockQuoteEp">
         <address uri="http://localhost:9000/services/SimpleStockQuoteService"/>
     </endpoint>
     <sequence name="xsltMediatorSequence" onError="fault">
@@ -65,7 +65,7 @@
             </log>
             <property name="REQUEST_SYMBOL" value="WSO2" scope="default"/>
             <log level="full"/>
-            <xslt key="request_transform.xslt">
+            <xslt key="request_transform1.xslt">
                 <property xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope"
                           xmlns:ns="http://org.apache.synapse/xsd" name="REQUEST_SYMBOL"
                           expression="get-property('REQUEST_SYMBOL')"/>
@@ -75,7 +75,7 @@
             </log>
             <log level="full"/>
             <send>
-                <endpoint key="StockQuoteService"/>
+                <endpoint key="StockQuoteEp"/>
             </send>
         </in>
         <out>
@@ -84,7 +84,7 @@
             </log>
             <log level="full"/>
             <property name="LAST_PRICE" value="37.50"/>
-            <xslt key="response_transform.xslt">
+            <xslt key="response_transform1.xslt">
                 <property name="LAST_PRICE" value="37.50"/>
             </xslt>
             <log level="custom">

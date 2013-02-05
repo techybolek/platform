@@ -4,7 +4,7 @@ var updateDocumentation = function (api, doc) {
             provider = jagg.module("manager").getAPIProviderObj();
     try {
         var success = provider.updateDocumentation(api.provider, api.name, api.version,
-                                                doc.name, doc.type, doc.summary, doc.sourceType, doc.sourceUrl);
+                                                doc.name, doc.type, doc.summary, doc.sourceType, doc.sourceUrl, doc.fileContent, doc.otherTypeName);
         if (log.isDebugEnabled()) {
             log.debug("updateNewDocumentation : " + doc.sourceType);
         }

@@ -64,7 +64,8 @@
                                                 key="carbonapps.upload.car.label"/></label>
                                     </td>
                                     <td>
-                                        <input type="file" id="filename" name="filename" size="50"/>
+                                        <input type="file" id="filename" name="filename"
+                                               size="100"/>
                                     </td>
                                 </tr>
                             </table>

@@ -39,6 +39,7 @@ public class SecurityConstants {
             + "org.wso2.carbon.security.mgt/policy";
     
     //Basic scenarios
+    public static final String CUSTOM_SECURITY_SCENARIO = "customScenario";    
     public static final String USERNAME_TOKEN_SCENARIO_ID = "scenario1";
     public static final String CONFIDENTIALITY_SCENARIO_ID = "scenario5";
     public static final String INTEGRITY_SCENARIO_ID = "scenario4";
@@ -46,7 +47,8 @@ public class SecurityConstants {
     public static final String SCENARIO_DISABLE_SECURITY = "DisableSecurity";
     public static final String POLICY_FROM_REG_SCENARIO = "policyFromRegistry";
 
-   
+    public static final String CUSTOM_SECURITY_SCENARIO_SUMMARY = "Custom security policy"; 
+
     public final static String PROP_USER_STORE = "service.userstore";
       
     public static final String EMPTY_SERVICE_VERSION = "SNAPSHOT";

@@ -16,22 +16,12 @@
 
 package org.wso2.carbon.governance.dashboardpopulator.internal;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.governance.dashboardpopulator.DashboardPopulatorContext;
-import org.wso2.carbon.governance.dashboardpopulator.GadgetPopulator;
-import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.utils.ServerConstants;
-import org.wso2.carbon.user.core.UserRealm;
-
-import java.io.InputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
 /**
  * @scr.component name="org.wso2.carbon.governance.dashboardpopulator" immediate="true"
@@ -45,60 +35,11 @@ import java.io.FileReader;
 public class DashboardPopulatorServiceComponent {
 
     private static final Log log = LogFactory.getLog(DashboardPopulatorServiceComponent.class);
-
-    private static final String REGISTRY_SYSTEM_DASHBOARDS_ROOT = "/system/dashboards";
     
     protected void activate(ComponentContext context) {
-        try {
-            log.debug("Dashboard Populator for Governance - bundle is activated ");
-
-            String dashboardDiskRoot = System.getProperty(ServerConstants.CARBON_HOME) + File
-                    .separator + "resources" + File.separator + "dashboard";
-
-            String dashboardConfigFile = dashboardDiskRoot + File.separator + "dashboard.xml";
-            String gadgetsDiskLocation = dashboardDiskRoot + File.separator + "gadgets";
-
-            // Check whether the system dasboard is already available if not populate
-            Registry registry = DashboardPopulatorContext.getRegistry();
-            if (!registry.resourceExists(REGISTRY_SYSTEM_DASHBOARDS_ROOT)) {
-
-                // Creating an OMElement from file
-                File dashboardConfigXml = new File(dashboardConfigFile);
-
-                if (dashboardConfigXml.exists()) {
-                    StAXOMBuilder sab = new StAXOMBuilder(new FileInputStream(dashboardConfigFile));
-                    OMElement dashboardsRootEl = sab.getDocument().getOMDocumentElement();
-
-                    FileReader dashboardConfigXmlReader = new FileReader(dashboardConfigXml);
-
-                    // Restoring from file
-                    registry.restore(REGISTRY_SYSTEM_DASHBOARDS_ROOT, dashboardConfigXmlReader);
-
-                    log.info("Successfully populated the default Dashboards.");
-
-                } else {
-                    log.info("Couldn't find a Dashboard at '" + dashboardConfigFile +
-                            "'. Giving up.");
-                }
-            }
-
-            // Check whether Gadgets are stored. If not store
-            if (!registry.resourceExists(GadgetPopulator.SYSTEM_GADGETS_PATH)) {
-
-                File gadgetsDir = new File(gadgetsDiskLocation);
-                if (gadgetsDir.exists()) {
-                    GadgetPopulator.beginFileTansfer(gadgetsDir);
-
-                    log.info("Successfully populated the default Gadgets.");
-                } else {
-                    log.info("Couldn't find contents at '" + gadgetsDiskLocation +
-                            "'. Giving up.");
-                }
-            }
-
-        } catch (Exception e) {
-            log.debug("Failed to activate Dashboard Populator for Governance bundle ");
-        }
+        DashboardPopulatorAxis2ConfigurationContextObserver observer =
+                new DashboardPopulatorAxis2ConfigurationContextObserver();
+        context.getBundleContext().registerService(Axis2ConfigurationContextObserver.class.getName(),observer,null);
     }
 
     protected void deactivate(ComponentContext context) {
@@ -106,12 +47,12 @@ public class DashboardPopulatorServiceComponent {
     }
 
     protected void setRegistryService(RegistryService registryService) {
-        log.debug("Setting the Registry Service");
+        log.debug("Set the Registry Service");
         DashboardPopulatorContext.setRegistryService(registryService);
     }
 
     protected void unsetRegistryService(RegistryService registryService) {
-        log.debug("Unsetting the Registry Service");
+        log.debug("Unset the Registry Service");
         DashboardPopulatorContext.setRegistryService(null);
     }
 }

@@ -23,7 +23,7 @@ import org.apache.axis2.clustering.ClusteringMessage;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.ApplicationContext;
+import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 
 /**
  *  Cluster command to delete service mapping from url-mapper
@@ -43,9 +43,9 @@ public class ServiceMappingDeleteRequest extends ClusteringMessage {
 
     @Override
     public void execute(ConfigurationContext configurationContext) throws ClusteringFault {
-        ApplicationContext applicationContext = ApplicationContext.getCurrentApplicationContext();
-        if(applicationContext.isUrlMappingExists(mapping)) {
-            applicationContext.removeUrlMappingMap(mapping);
+        URLMappingHolder urlMappingHolder = URLMappingHolder.getInstance();
+        if(urlMappingHolder.isUrlMappingExists(mapping)) {
+            urlMappingHolder.removeUrlMappingMap(mapping);
         }
         log.info("mapping removed to service:***********: " + mapping);
     }

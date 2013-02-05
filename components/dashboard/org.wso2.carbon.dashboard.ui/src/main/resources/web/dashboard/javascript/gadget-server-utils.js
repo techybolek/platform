@@ -113,8 +113,8 @@ function sessionAwareShowAddGadgetsPage(gadgetGrp){
     if (userId != "null") {
         // Run the task (showAddGadgetsPage) if the session is valid (Success case)
         sessionAwareFunction(function() { showAddGadgetsPage(gadgetGrp); },
-                             'Session timed out. Please login again',
-                             sessionFailureFunction );
+            'Session timed out. Please login again',
+            sessionFailureFunction );
     }
     // if unsigned user
     else {
@@ -188,17 +188,17 @@ function getUrlForView(view) {
 function disableButton(){
     var inputVal = document.getElementById("carbon-ui-dialog-input").value;
     if (inputVal == "") {
-        $("#button-ok").hide();
+        jQuery("#button-ok").hide();
 
     } else {
-        $("#button-ok").show();
+        jQuery("#button-ok").show();
     }
 }
 function onKeyPressed(ev) {
     var enterKey = 13;
     var e = ev || event;
     if (e.keyCode ==enterKey) {
-        $("#button-ok").click();
+        jQuery("#button-ok").click();
     }
 }
 
@@ -212,27 +212,27 @@ function showInputWizard(message, handleNext, handleCancel, closeCallback,txtMsg
         gheight = 420;
     }
     var strInput = "<div style='margin:20px;'><p>" + message + "</p><br/>" +
-            "<input type='text' id='carbon-ui-dialog-input' size='40' onchange='disableButton()' onkeyup='onKeyPressed(event)' value='"+txtMsg+"' name='carbon-dialog-inputval'>" +
-            "<br>" +
-            "<table class='tablayout'><tr><td><input type='radio' name='layout' value='1' /></td>" +
-            "<td><input type='radio' name='layout' value='2' /></td>" +
-            "<td><input type='radio' name='layout' value='3' checked/></td>" +
-            "<td><input type='radio' name='layout' value='4' /></td>" +
-            "<td><input type='radio' name='layout' value='5' /></td>" +
-            "<td><input type='radio' name='layout' value='6' /></td></tr>" +
-            "<tr>" +
-            "<td><img name='img1'  title='One vertical columns tab' src='images/1.png' style='margin-right:20px;'/></td>" +
-            "<td><img name='img2' title='Two vertical columns tab' src='images/2.png' style='margin-right:20px;'/></td>" +
-            "<td><img name='img3' title='Three vertical columns tab' src='images/3.png' style='margin-right:20px;'/></td>" +
-            "<td><img name='img4' title='One column Two rows (33/67) tab' src='images/4.png' style='margin-right:20px;'/></td>" +
-            "<td><img name='img5' title='Two vertical columns (33/67) tab' src='images/5.png' style='margin-right:20px;'/></td>" +
-            "<td><img name='img6' title='Two vertical columns (67/33) tab' src='images/6.png' style='margin-right:20px;'/></td>" +
-            "</table>" +
-            "</div>";
+        "<input type='text' id='carbon-ui-dialog-input' size='40' onchange='disableButton()' onkeyup='onKeyPressed(event)' value='"+txtMsg+"' name='carbon-dialog-inputval'>" +
+        "<br>" +
+        "<table class='tablayout'><tr><td><input type='radio' name='layout' value='1' /></td>" +
+        "<td><input type='radio' name='layout' value='2' /></td>" +
+        "<td><input type='radio' name='layout' value='3' checked/></td>" +
+        "<td><input type='radio' name='layout' value='4' /></td>" +
+        "<td><input type='radio' name='layout' value='5' /></td>" +
+        "<td><input type='radio' name='layout' value='6' /></td></tr>" +
+        "<tr>" +
+        "<td><img name='img1'  title='One vertical columns tab' src='images/1.png' style='margin-right:20px;'/></td>" +
+        "<td><img name='img2' title='Two vertical columns tab' src='images/2.png' style='margin-right:20px;'/></td>" +
+        "<td><img name='img3' title='Three vertical columns tab' src='images/3.png' style='margin-right:20px;'/></td>" +
+        "<td><img name='img4' title='One column Two rows (33/67) tab' src='images/4.png' style='margin-right:20px;'/></td>" +
+        "<td><img name='img5' title='Two vertical columns (33/67) tab' src='images/5.png' style='margin-right:20px;'/></td>" +
+        "<td><img name='img6' title='Two vertical columns (67/33) tab' src='images/6.png' style='margin-right:20px;'/></td>" +
+        "</table>" +
+        "</div>";
     var strDialog = "<div id='dialog' title='"+wizardTitle+"'>" + strInput + "</div>";
-
+    jQuery.noConflict();
     jQuery("#dcontainer").html(strDialog);
-    $("#dialog").dialog({
+    jQuery("#dialog").dialog({
         close:function() {
             jQuery(this).dialog('destroy').remove();
             jQuery("#dcontainer").empty();
@@ -246,23 +246,23 @@ function showInputWizard(message, handleNext, handleCancel, closeCallback,txtMsg
             text: "OK",
             click: function() {
                 var inputVal = document.getElementById("carbon-ui-dialog-input").value;
-                var layout = $('input[type=radio]:checked').val();
+                var layout = jQuery('input[type=radio]:checked').val();
                 handleNext(inputVal, layout);
                 jQuery(this).dialog("destroy").remove();
                 jQuery("#dcontainer").empty();
                 return false;
             }
-            },
+        },
             {
-            id: "button-cancel",
-            text: "Cancel",
-            click: function() {
-               jQuery(this).dialog("destroy").remove();
-               jQuery("#dcontainer").empty();
-                handleCancel();
+                id: "button-cancel",
+                text: "Cancel",
+                click: function() {
+                    jQuery(this).dialog("destroy").remove();
+                    jQuery("#dcontainer").empty();
+                    handleCancel();
+                }
             }
-            }
-            ],
+        ],
 
         height:gheight,
         width:500,
@@ -291,11 +291,11 @@ function showInputDialog(message, handleOk, handleCancel,closeCallback,txtMsg,wi
         gheight = 270;
     }
     var strInput = "<div style='margin:20px;'><p>" + message + "</p><br/>" +
-            "<input type='text' id='carbon-ui-dialog-input' onchange='disableButton()' size='40' onkeyup='onKeyPressed(event)'  name='carbon-dialog-inputval' value='"+txtMsg+"' </div>";
+        "<input type='text' id='carbon-ui-dialog-input' onchange='disableButton()' size='40' onkeyup='onKeyPressed(event)'  name='carbon-dialog-inputval' value='"+txtMsg+"' </div>";
     var strDialog = "<div id='dialog' title='"+wizardTitle+"'>" + strInput + "</div>";
 
     jQuery("#dcontainer").html(strDialog);
-    $("#dialog").dialog({
+    jQuery("#dialog").dialog({
         close:function() {
             jQuery(this).dialog('destroy').remove();
             jQuery("#dcontainer").empty();
@@ -308,23 +308,23 @@ function showInputDialog(message, handleOk, handleCancel,closeCallback,txtMsg,wi
             id: "button-ok",
             text: "OK",
             click: function() {
-                 var inputVal = document.getElementById("carbon-ui-dialog-input").value;
+                var inputVal = document.getElementById("carbon-ui-dialog-input").value;
                 handleOk(inputVal);
                 jQuery(this).dialog("destroy").remove();
                 jQuery("#dcontainer").empty();
                 return false;
             }
-            },
+        },
             {
-            id: "button-cancel",
-            text: "Cancel",
-            click: function() {
-                jQuery(this).dialog("destroy").remove();
-                jQuery("#dcontainer").empty();
-                handleCancel();
+                id: "button-cancel",
+                text: "Cancel",
+                click: function() {
+                    jQuery(this).dialog("destroy").remove();
+                    jQuery("#dcontainer").empty();
+                    handleCancel();
+                }
             }
-            }
-            ],
+        ],
 
         height:gheight,
         width:450,
@@ -340,7 +340,7 @@ function confirmDialog(message, handleYes, gId,wizardTitle) {
      * parameter.
      */
     var strDialog = "<div id='dialog' title='"+wizardTitle+"'><div id='messagebox-confirm'><p>" +
-            message + "</p></div></div>";
+        message + "</p></div></div>";
 
     handleYes = handleYes || function() {
         return true

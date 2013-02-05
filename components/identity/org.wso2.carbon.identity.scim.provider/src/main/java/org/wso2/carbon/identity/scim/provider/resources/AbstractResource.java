@@ -21,10 +21,19 @@ import org.wso2.charon.core.schema.SCIMConstants;
 
 public class AbstractResource {
     public String identifyOutputFormat(String format) {
-        if (format == null || ("*/*").equals(format)) {
+        if (format == null || ("*/*").equals(format) || ((format != null) && (format.startsWith(SCIMConstants.APPLICATION_JSON)))) {
             return SCIMConstants.APPLICATION_JSON;
         } else {
             return format;
         }
     }
+    
+	public String identifyInputFormat(String format) {
+		if (format == null || ("*/*").equals(format) ||
+		    ((format != null) && (format.startsWith(SCIMConstants.APPLICATION_JSON)))) {
+			return SCIMConstants.APPLICATION_JSON;
+		} else {
+			return format;
+		}
+	}
 }

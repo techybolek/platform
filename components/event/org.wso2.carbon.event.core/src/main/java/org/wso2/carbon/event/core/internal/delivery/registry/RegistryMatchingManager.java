@@ -61,14 +61,9 @@ public class RegistryMatchingManager implements MatchingManager {
         // same path we can get all the subscriptions by getting all the chlid
         // resources under to topoic name.
 
-        String topicResourcePath = this.subscriptionStoragePath;
-        if (!topicName.startsWith("/")) {
-            topicResourcePath += "/";
-        }
+        String topicResourcePath =  JavaUtil.getResourcePath(topicName, this.subscriptionStoragePath);
 
-        topicResourcePath += topicName;
-
-        if (!topicName.endsWith("/")) {
+        if (!topicResourcePath.endsWith("/")) {
             topicResourcePath += "/";
         }
 

@@ -12,58 +12,7 @@
             </onComplete>
         </aggregate>
     </sequence>
-    <sequence name="cloningMessages">
-        <clone sequential="true">
-            <target sequence="anon">
-                <sequence>
-                    <log level="full">
-                        <property name="clone3" value="clone3_target1"/>
-                    </log>
-                    <send>
-                        <endpoint>
-                            <address uri="https://localhost:8243/services/StockQuoteProxy"/>
-                        </endpoint>
-                    </send>
-                </sequence>
-            </target>
-            <target sequence="anon">
-                <sequence>
-                    <log level="full">
-                        <property name="clone3" value="clone3_target2"/>
-                    </log>
-                    <send>
-                        <endpoint>
-                           <address uri="https://localhost:8243/services/StockQuoteProxy"/>
-                        </endpoint>
-                    </send>
-                </sequence>
-            </target>
-            <target sequence="anon">
-                <sequence>
-                    <log level="full">
-                        <property name="clone3" value="clone3_target3"/>
-                    </log>
-                    <send>
-                        <endpoint>
-                            <address uri="https://localhost:8243/services/StockQuoteProxy"/>
-                        </endpoint>
-                    </send>
-                </sequence>
-            </target>
-            <target sequence="anon">
-                <sequence>
-                    <log level="full">
-                        <property name="clone3" value="clone3_target4"/>
-                    </log>
-                    <send>
-                        <endpoint>
-                           <address uri="https://localhost:8243/services/StockQuoteProxy"/>
-                        </endpoint>
-                    </send>
-                </sequence>
-            </target>
-        </clone>
-    </sequence>
+
     <sequence name="fault">
         <log level="full">
             <property name="MESSAGE" value="Executing default 'fault' sequence"/>
@@ -86,13 +35,12 @@
     <proxy name="StockQuoteProxy" transports="https">
         <target>
             <endpoint>
-                <address uri="http://localhost:9000/services/SimpleStockQuoteService" format="pox"/>
+                <address uri="http://localhost:9000/services/SimpleStockQuoteService"/>
             </endpoint>
             <outSequence>
                 <send/>
             </outSequence>
         </target>
-        <publishWSDL uri="file:repository/samples/resources/proxy/sample_proxy_1.wsdl"/>
     </proxy>
 </definitions>
 

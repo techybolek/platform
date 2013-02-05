@@ -28,7 +28,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.jaxen.JaxenException;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.ws.internal.exception.EventBrokerException;
 import org.wso2.carbon.event.ws.internal.exception.WSEventException;
 import org.wso2.carbon.event.ws.internal.receivers.PublishOnlyMessageReceiver;
@@ -46,7 +46,7 @@ public class EventBrokerUtils {
                                                       int tenantId) throws EventBrokerException {
         MessageContext mc = new MessageContext();
         mc.setConfigurationContext(new ConfigurationContext(new AxisConfiguration()));
-        SuperTenantCarbonContext.getCurrentContext(mc).setTenantId(tenantId);
+        PrivilegedCarbonContext.getCurrentContext(mc).setTenantId(tenantId);
         SOAPFactory soapFactory = new SOAP12Factory();
         SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
         envelope.getBody().addChild(payload);

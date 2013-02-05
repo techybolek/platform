@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
- ~ Copyright (c) 2009-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ ~ Copyright (c) 2009-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  ~
  ~ Licensed under the Apache License, Version 2.0 (the "License");
  ~ you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>identity</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.identity.oauth.ui</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.6</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Identity OAuth UI</name>
     <description>User Identity Provider UI component for WSO2 Carbon</description>
@@ -38,11 +39,17 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.identity.oauth</artifactId>
+             <version>4.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ui</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.core</artifactId>
+	    <version>4.0.5</version>	
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -51,16 +58,17 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
+	        <version>4.0.6</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.oauth.common</artifactId>
-            <version>${identity.version}</version>
+            <version>4.0.6</version>
         </dependency>
         <dependency>
             <groupId>org.apache.amber.wso2</groupId>
             <artifactId>amber</artifactId>
-            <version>${orbit.version.amber}</version>
+            <version>0.22.1358727.wso2v2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf.wso2</groupId>
@@ -89,6 +97,7 @@
                             javax.servlet; version=2.4.0,
                             javax.servlet.http; version=2.4.0,
                             javax.xml.stream.*; version=1.0.1,
+                            org.wso2.carbon.identity.oauth2,
                             org.wso2.carbon.identity.oauth.stub.*;version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.identity.oauth2.stub.*;version="${carbon.platform.package.import.version.range}",
                             *;resolution:=optional

@@ -17,6 +17,9 @@
  -->
 <serviceGroup>
     <service name="DiscoveryProxy" scope="application">
+        <transports>
+            <transport>https</transport>
+        </transports>
     	<schema schemaNamespace="http://docs.oasis-open.org/ws-dd/ns/discovery/2009/01"/>
         <operation name="Hello">
             <actionMapping>http://docs.oasis-open.org/ws-dd/ns/discovery/2009/01/Hello</actionMapping>

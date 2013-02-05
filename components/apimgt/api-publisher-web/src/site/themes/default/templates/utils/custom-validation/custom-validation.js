@@ -16,12 +16,16 @@ $(document).ready(function() {
 
     $.validator.addMethod('selected', function(value, element) {
         return value!="";
-    }, 'Select a value for the tier.');
+    },'Select a value for the tier.');
 
     $.validator.addMethod('validRegistryName', function(value, element) {
         var illegalChars = /([~!@#;%^*+={}\|\\<>\"\'\/,])/;
         return !illegalChars.test(value);
-    }, 'The Name contains one or more illegal characters (~ ! @ #  ; % ^ * + = { } | &lt; &gt;, \' / " \\ ) .');
+    }, 'Name contains one or more illegal characters  (~ ! @ #  ; % ^ * + = { } | &lt; &gt;, \' / " \\ ) .');
+
+    $.validator.addMethod('noSpace', function(value, element) {
+        return !/\s/g.test(value);
+    },'Name contains white spaces.');
 
 
 });

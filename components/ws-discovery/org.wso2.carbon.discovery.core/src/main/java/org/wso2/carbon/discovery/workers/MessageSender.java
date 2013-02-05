@@ -16,30 +16,30 @@
 
 package org.wso2.carbon.discovery.workers;
 
+import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
-import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.Parameter;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.util.JavaUtils;
+import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.util.UIDGenerator;
+import org.apache.axis2.util.JavaUtils;
 import org.apache.neethi.Policy;
 import org.apache.rampart.RampartMessageData;
-import org.wso2.carbon.discovery.config.Config;
-import org.wso2.carbon.discovery.DiscoveryException;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.discovery.DiscoveryConstants;
+import org.wso2.carbon.discovery.DiscoveryException;
 import org.wso2.carbon.discovery.DiscoveryOMUtils;
-import org.wso2.carbon.discovery.util.Util;
-import org.wso2.carbon.discovery.util.DiscoveryMgtUtils;
-import org.wso2.carbon.discovery.util.ConfigHolder;
+import org.wso2.carbon.discovery.config.Config;
 import org.wso2.carbon.discovery.messages.Notification;
 import org.wso2.carbon.discovery.messages.TargetService;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
-import org.wso2.carbon.context.RegistryType;
+import org.wso2.carbon.discovery.util.ConfigHolder;
+import org.wso2.carbon.discovery.util.DiscoveryMgtUtils;
+import org.wso2.carbon.discovery.util.Util;
 import org.wso2.carbon.registry.core.Registry;
 
 import javax.xml.namespace.QName;
@@ -95,6 +95,19 @@ public class MessageSender {
             targetService.setXAddresses(xAddres);
             targetService.setMetadataVersion(config.getMetadataVersion());
 
+            if(notificationType == DiscoveryConstants.NOTIFICATION_TYPE_HELLO){
+                serviceClient.addStringHeader(
+                        new QName(DiscoveryConstants.DISCOVERY_HEADER_ELEMENT_NAMESPACE,
+                                DiscoveryConstants.DISCOVERY_HEADER_SERVICE_NAME,
+                                DiscoveryConstants.DISCOVERY_HEADER_ELEMENT_NAMESPACE_PREFIX),
+                        getNameForService(service));
+                serviceClient.addStringHeader(new QName(
+                        DiscoveryConstants.DISCOVERY_HEADER_ELEMENT_NAMESPACE,
+                        DiscoveryConstants.DISCOVERY_HEADER_WSDL_URI,
+                        DiscoveryConstants.DISCOVERY_HEADER_ELEMENT_NAMESPACE_PREFIX),
+                        Util.getWsdlInformation(service.getName(), service.getAxisConfiguration()));
+            }
+
             Notification notification = new Notification(notificationType, targetService);
             serviceClient.fireAndForget(DiscoveryOMUtils.toOM(notification,
                     OMAbstractFactory.getOMFactory()));
@@ -102,7 +115,7 @@ public class MessageSender {
 
         } catch (Exception e) {
             throw new DiscoveryException("Error while sending the WS-Discovery notification " +
-                    "for the service " + service.getName(), e);
+                    "for the service " + getNameForService(service), e);
         }
     }
 
@@ -163,12 +176,16 @@ public class MessageSender {
             // Get the unique id from the registry.
             // Use the service to get hold of the Carbon context of the tenant
             // to which the service belongs
-            Registry registry = (Registry)SuperTenantCarbonContext.getCurrentContext(service).
+            Registry registry = (Registry) PrivilegedCarbonContext.getCurrentContext(service).
                     getRegistry(RegistryType.SYSTEM_CONFIGURATION);
-            uniqueID = DiscoveryMgtUtils.getExistingServiceIdOrUpdate(service.getName(),
+            uniqueID = DiscoveryMgtUtils.getExistingServiceIdOrUpdate(getNameForService(service),
                     UIDGenerator.generateURNString(), registry);
         }
         return uniqueID;
+    }
+
+    private String getNameForService(AxisService service) {
+        return service.getName().replace("/", "-");
     }
 
     private ServiceClient initServiceClient(String epr, int notificationType,
@@ -185,7 +202,7 @@ public class MessageSender {
 
         serviceClient.engageModule("addressing");
 
-        Registry registry = (Registry)SuperTenantCarbonContext.getCurrentContext(axisConf).getRegistry(
+        Registry registry = (Registry)PrivilegedCarbonContext.getCurrentContext(axisConf).getRegistry(
                 RegistryType.SYSTEM_CONFIGURATION);
         Policy policy = DiscoveryMgtUtils.getClientSecurityPolicy(registry);
         if (policy != null) {

@@ -24,9 +24,17 @@ import org.wso2.carbon.attachment.mgt.core.dao.AttachmentDAO;
 import org.wso2.carbon.attachment.mgt.core.exceptions.AttachmentMgtException;
 
 import javax.activation.DataHandler;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import java.io.IOException;
-import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * OpenJPA based DAO impl for the Attachment
@@ -45,9 +53,10 @@ public class AttachmentDAOImpl implements AttachmentDAO {
 
     @Column(name = "CREATED_TIME", nullable = false, columnDefinition = "Timestamp NOT NULL WITH DEFAULT",
             insertable = false, updatable = false)
-    private Timestamp createdTime;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdTime;
 
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "ATTACHMENT_NAME", nullable = false)
     private String name;
 
     @Column(name = "CREATED_BY", nullable = false)
@@ -56,13 +65,12 @@ public class AttachmentDAOImpl implements AttachmentDAO {
     @Column(name = "CONTENT_TYPE", nullable = false)
     private String contentType;
 
-    @Column(name = "URL", nullable = false)
+    @Column(name = "ATTACHMENT_URL", nullable = false)
     private String url;
 
     @Lob
-    @Column(name = "CONTENT")
-    //private InputStream content;    //TODO: Here didn't use a byte[], Check whether it's OK
-    private byte[] content;    //TODO: Here didn't use a byte[], Check whether it's OK
+    @Column(name = "ATTACHMENT_CONTENT")
+    private byte[] content;
 
 
     @Override
@@ -76,12 +84,12 @@ public class AttachmentDAOImpl implements AttachmentDAO {
     }
 
     @Override
-    public Timestamp getCreatedTime() {
+    public Date getCreatedTime() {
         return createdTime;
     }
 
     @Override
-    public void setCreatedTime(Timestamp createdTime) {
+    public void setCreatedTime(Date createdTime) {
         this.createdTime = createdTime;
     }
 
@@ -127,10 +135,6 @@ public class AttachmentDAOImpl implements AttachmentDAO {
 
     @Override
     public DataHandler getContent() {
-        //DataHandler data= new DataHandler(this.content, this.contentType);
-        //FileDataSource dataSource = new FileDataSource(new File("/home/denis/Desktop/camera-specs.txt"));
-        //DataHandler data = new DataHandler(dataSource);
-
         ByteArrayDataSource rawData= new ByteArrayDataSource(this.content);
         return new DataHandler(rawData);
     }

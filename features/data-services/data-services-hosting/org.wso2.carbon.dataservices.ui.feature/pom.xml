@@ -22,11 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>data-services-hosting-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.dataservices.ui.feature</artifactId>
+    <version>4.0.5</version>
     <packaging>pom</packaging>
     <name>Data Service Hosting UI Feature</name>
     <url>http://wso2.org</url>
@@ -36,12 +38,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.dataservices.ui</artifactId>
-            <version>${carbon.platform.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.dataservices.stub</artifactId>
-            <version>${carbon.platform.version}</version>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -51,7 +53,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.dataservices.common</artifactId>
-            <version>${carbon.platform.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -62,7 +64,7 @@
       	 <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ndatasource.ui.feature</artifactId>
-            <version>${carbon.platform.version}</version>
+            <version>4.0.1</version>
             <type>zip</type>
         </dependency>
 
@@ -83,7 +85,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.dataservices.ui</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:console</propertyDef>
@@ -97,8 +99,8 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.dataservices.fileupload.stub</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.service.mgt.ui</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.ndatasource.ui</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.service.mgt.ui:${carbon.platform.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.ndatasource.ui:${carbon.platform.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

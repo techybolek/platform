@@ -18,10 +18,16 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
+    <parent>
+        <groupId>org.wso2.appserver</groupId>
+        <artifactId>wso2appserver-samples</artifactId>
+        <version>5.1.0</version>
+    </parent>
+
+    <version>5.1.0</version>
     <modelVersion>4.0.0</modelVersion>
     <groupId>Entitlement_Sample_WebApp</groupId>
     <artifactId>Entitlement_Sample_WebApp</artifactId>
-    <version>1.0</version>
     <packaging>war</packaging>
 
     <build>
@@ -38,6 +44,7 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.2</version>
                 <configuration>
+		    <packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>
                     <webXml>./src/main/webapp/WEB-INF/web.xml</webXml>
                     <warName>${project.artifactId}</warName>
                     <webResources>
@@ -113,9 +120,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.identity.entitlement.filter</artifactId>
-            <version>4.0.0-SNAPSHOT</version>
+            <groupId>commons-codec.wso2</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.4.0.wso2v1</version>
         </dependency>
     </dependencies>
 

@@ -47,7 +47,9 @@ public class ExtensionsSymLinkHandler extends Handler {
             Resource resource = requestContext.getRegistry().get(requestContext.getResourcePath().getPath());
             String symlinkPath = resource.getProperty("registry.resource.symlink.path");
             if (symlinkPath != null) {
-                requestContext.getRegistry().delete(symlinkPath);
+                if(requestContext.getRegistry().resourceExists(symlinkPath)){
+                    requestContext.getRegistry().delete(symlinkPath);
+                }
             }
         } finally {
             CommonUtil.releaseUpdateLock();

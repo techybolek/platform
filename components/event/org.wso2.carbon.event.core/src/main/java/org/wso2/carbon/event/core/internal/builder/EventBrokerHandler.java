@@ -22,7 +22,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.core.EventBroker;
 import org.wso2.carbon.event.core.EventBundleNotificationService;
 import org.wso2.carbon.event.core.qpid.QpidServerDetails;
@@ -49,9 +49,9 @@ public class EventBrokerHandler implements EventBundleNotificationService {
         try {
             // set incarnate this thread to supper tenat since carbon contexes can only be
             // run is supertenants
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-            SuperTenantCarbonContext.getCurrentContext().setUsername(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getCurrentContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+            PrivilegedCarbonContext.getCurrentContext().setUsername(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
 
             EventBroker eventBroker = EventBrokerBuilder.createEventBroker();
             this.eventServiceRegistration =
@@ -69,7 +69,7 @@ public class EventBrokerHandler implements EventBundleNotificationService {
         } catch (EventBrokerConfigurationException e) {
             log.error("Can not create the event broker", e);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 

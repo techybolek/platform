@@ -18,17 +18,17 @@
  */
 package org.wso2.carbon.dataservices.sql.driver.query.update;
 
-import org.wso2.carbon.dataservices.sql.driver.TDriverUtil;
 import org.wso2.carbon.dataservices.sql.driver.parser.Constants;
 import org.wso2.carbon.dataservices.sql.driver.parser.ParserUtil;
 import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataReaderFactory;
 import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataTable;
 import org.wso2.carbon.dataservices.sql.driver.query.ColumnInfo;
 import org.wso2.carbon.dataservices.sql.driver.query.ConditionalQuery;
-import org.wso2.carbon.dataservices.sql.driver.query.ParamInfo;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 
 public abstract class UpdateQuery extends ConditionalQuery {
@@ -37,23 +37,21 @@ public abstract class UpdateQuery extends ConditionalQuery {
 
     private DataTable targetTable;
 
-    private ParamInfo[] targetColumns;
-
-    private ColumnInfo[] columns;
+    private ColumnInfo[] targetColumns;
 
     public UpdateQuery(Statement stmt) throws SQLException {
         super(stmt);
-        this.targetColumns = new ParamInfo[getParameters().length];
-        preprocessTokens(getProcessedTokens());
-        this.targetTable = 
+        this.targetTableName = this.extractTargetTableName(getProcessedTokens());
+        this.targetColumns = this.extractUpdatedColumns(getProcessedTokens());
+        this.populateConditions(getProcessedTokens());
+        this.targetTable =
                 DataReaderFactory.createDataReader(getConnection()).getDataTable(
                         getTargetTableName());
-        this.columns = TDriverUtil.getHeaders(stmt.getConnection(), getTargetTableName());
     }
 
-    private void preprocessTokens(Queue<String> tokens) throws SQLException {
-        //Dropping UPDATE token
-    	tokens.poll();
+    private String extractTargetTableName(Queue<String> tokens) throws SQLException {
+        /* Dropping UPDATE token */
+        tokens.poll();
         if (!Constants.TABLE.equals(tokens.peek())) {
             throw new SQLException("Syntax Error : 'TABLE' keyword is expected");
         }
@@ -61,93 +59,63 @@ public abstract class UpdateQuery extends ConditionalQuery {
         if (!ParserUtil.isStringLiteral(tokens.peek())) {
             throw new SQLException("Syntax Error : String literal is expected");
         }
-        this.targetTableName = tokens.poll();
-        //Dropping SET token
-        tokens.poll();
-        processUpdatedColumns(tokens, 0);
-        if (Constants.WHERE.equals(tokens.peek())) {
-        	tokens.poll();
-        	this.processConditions(tokens, getCondition());
-        }
+        return tokens.poll();
     }
 
-    private void processUpdatedColumns(Queue<String> tokens,
+    private ColumnInfo[] extractUpdatedColumns(Queue<String> tokens) throws SQLException {
+        /* Dropping SET token */
+        tokens.poll();
+        List<ColumnInfo> updatedColumns = new ArrayList<ColumnInfo>();
+        this.processUpdatedColumns(tokens, updatedColumns, 0);
+        return updatedColumns.toArray(new ColumnInfo[updatedColumns.size()]);
+    }
+
+    private void populateConditions(Queue<String> tokens) throws SQLException {
+        if (tokens.isEmpty()) {
+            return;
+        }
+        /* drops WHERE */
+        tokens.poll();
+        this.processConditions(tokens, getCondition());
+    }
+
+    private void processUpdatedColumns(Queue<String> tokens, List<ColumnInfo> updatedColumns,
                                        int targetColCount) throws SQLException {
-    	/* drop COLUMN */
-    	tokens.poll();
+        /* drops COLUMN */
+        tokens.poll();
         if (!ParserUtil.isStringLiteral(tokens.peek())) {
             throw new SQLException("Syntax Error : String literal is expected");
         }
-        this.targetColumns[targetColCount] = new ParamInfo(targetColCount, tokens.poll());
-        //getTargetColumns().put(targetColCount, tokens.poll());
-        processColumnValues(tokens, targetColCount, false, false, true);
-    }
+        ColumnInfo updatedColumn = new ColumnInfo(tokens.poll(), targetColCount);
+        /* drops OPERATOR */
+        tokens.poll();
+        /* drops '=' */
+        tokens.poll();
+        /* drops PARAM_VALUE */
+        tokens.poll();
+        /* sets the value of the target column */
+        updatedColumn.setValue(this.extractColumnValue(tokens));
+        updatedColumns.add(updatedColumn);
 
-    private void processColumnValues(Queue<String> tokens,
-                                     int valCount,
-                                     boolean isParameterized,
-                                     boolean isEnd, boolean isInit) throws SQLException {
-        if (!isEnd) {
-            if (!Constants.PARAM_VALUE.equals(tokens.peek())) {
-                throw new SQLException("Syntax Error : 'PARAM_VALUE' is expected");
-            }
-            tokens.poll();
-            if (!ParserUtil.isStringLiteral(tokens.peek())) {
-                throw new SQLException("Syntax Error : String literal expected");
-            }
-            if ("?".equals(tokens.peek())) {
-                if (isInit) {
-                    isParameterized = true;
-                    isInit = false;
-                }
-                if (!isParameterized) {
-                    throw new SQLException("Both parameters and inline parameter values are not " +
-                            "allowed to exist together");
-                }
-                isParameterized = true;
-                //this.findParam(valCount).setValue(tokens.poll());
-                this.findTargetParam(valCount).setValue(tokens.poll());
-            } else if (Constants.SINGLE_QUOTATION.equals(tokens.peek())) {
-                if (isInit) {
-                    isInit = false;
-                    isParameterized = false;
-                }
-                if (isParameterized) {
-                    throw new SQLException("Both parameters and inline parameter values are not " +
-                            "allowed to exist together");
-                }
-                tokens.poll();
-                StringBuilder b = new StringBuilder();
-                while (Constants.SINGLE_QUOTATION.equals(tokens.peek()) || tokens.isEmpty()) {
-                    b.append(tokens.poll());
-                }
-                this.findTargetParam(valCount).setValue(tokens.poll());
-                //this.findParam(valCount).setValue(tokens.poll());
-                tokens.poll();
-            } else if (ParserUtil.isStringLiteral(tokens.peek())) {
-                if (isInit) {
-                    isInit = false;
-                    isParameterized = false;
-                }
-                if (isParameterized) {
-                    throw new SQLException("Both parameters and inline parameter values are not " +
-                            "allowed to exist together");
-                }
-                this.findTargetParam(valCount).setValue(tokens.poll());
-                //this.findParam(valCount).setValue(tokens.poll());
-            }
-            if (!Constants.PARAM_VALUE.equals(tokens.peek())) {
-                isEnd = true;
-            } else {
-                tokens.poll();
-            }
-            if (tokens.isEmpty() || Constants.WHERE.equals(tokens.peek())) {
-            	return;
-            }
-            processUpdatedColumns(tokens, valCount + 1);
+        if (!tokens.isEmpty() && !Constants.WHERE.equalsIgnoreCase(tokens.peek())) {
+            processUpdatedColumns(tokens, updatedColumns, targetColCount + 1);
         }
     }
-    
+
+    private String extractColumnValue(Queue<String> tokens) throws SQLException {
+        StringBuilder value = new StringBuilder();
+        if ("?".equalsIgnoreCase(tokens.peek()) || ParserUtil.isStringLiteral(tokens.peek())) {
+            value.append(tokens.poll());
+        } else if (Constants.SINGLE_QUOTATION.equalsIgnoreCase(tokens.peek())) {
+            while (!Constants.SINGLE_QUOTATION.equals(tokens.peek())) {
+                value.append(tokens.poll());
+            }
+            /* drops the ending SINGLE QUOTE */
+            tokens.poll();
+        }
+        return value.toString();
+    }
+
     public DataTable getTargetTable() {
         return targetTable;
     }
@@ -156,33 +124,8 @@ public abstract class UpdateQuery extends ConditionalQuery {
         return targetTableName;
     }
 
-    public ParamInfo[] getTargetColumns() {
+    public ColumnInfo[] getTargetColumns() {
         return targetColumns;
-    }
-
-    public ColumnInfo[] getColumns() {
-        return columns;
-    }
-
-    public ParamInfo findTargetParam(int index) {
-        ParamInfo param = null;
-        for (ParamInfo paramInfo : getTargetColumns()) {
-            if (paramInfo.getOrdinal() == index) {
-                param = paramInfo;
-                break;
-            }
-        }
-        return param;
-    }
-
-    public int extractColumnId(String column) {
-        int columnId = -1;
-        for (ColumnInfo columnInfo : getColumns()) {
-            if (columnInfo.getName().equals(column)) {
-                columnId = columnInfo.getId();
-            }
-        }
-        return columnId;
     }
 
 }

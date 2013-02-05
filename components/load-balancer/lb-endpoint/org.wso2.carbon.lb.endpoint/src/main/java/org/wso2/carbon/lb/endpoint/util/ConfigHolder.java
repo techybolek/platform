@@ -16,11 +16,15 @@
 
 package org.wso2.carbon.lb.endpoint.util;
 
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.config.SynapseConfiguration;
-import org.wso2.carbon.lb.endpoint.LoadBalanceEndpointException;
+import org.wso2.carbon.lb.common.conf.LoadBalancerConfiguration;
+import org.wso2.carbon.lb.common.service.LoadBalancerConfigurationService;
+import org.wso2.carbon.lb.endpoint.TenantAwareLoadBalanceEndpointException;
+import org.wso2.carbon.lb.endpoint.TenantLoadBalanceMembershipHandler;
 import org.wso2.carbon.mediation.dependency.mgt.services.DependencyManagementService;
 import org.wso2.carbon.mediation.initializer.services.SynapseEnvironmentService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -38,10 +42,14 @@ public class ConfigHolder {
     private static final Log log = LogFactory.getLog(ConfigHolder.class);
 
     private SynapseConfiguration synapseConfiguration;
+    private ConfigurationContext configCtxt;
     private AxisConfiguration axisConfiguration;
     private UserRegistry configRegistry;
     private UserRegistry governanceRegistry;
     private DependencyManagementService dependencyManager;
+    private TenantLoadBalanceMembershipHandler tenantMembershipHandler;
+    private LoadBalancerConfigurationService lbConfigService;
+    
 
     private Map<Integer, SynapseEnvironmentService> synapseEnvironmentServices =
             new HashMap<Integer, SynapseEnvironmentService>();
@@ -66,7 +74,7 @@ public class ConfigHolder {
         return instance;
     }
 
-    public SynapseConfiguration getSynapseConfiguration() throws LoadBalanceEndpointException {
+    public SynapseConfiguration getSynapseConfiguration() throws TenantAwareLoadBalanceEndpointException{
         assertNull("SynapseConfiguration", synapseConfiguration);
         return synapseConfiguration;
     }
@@ -75,7 +83,7 @@ public class ConfigHolder {
         this.synapseConfiguration = synapseConfiguration;
     }
 
-    public AxisConfiguration getAxisConfiguration() throws LoadBalanceEndpointException {
+    public AxisConfiguration getAxisConfiguration() throws TenantAwareLoadBalanceEndpointException {
         assertNull("AxisConfiguration", axisConfiguration);
         return axisConfiguration;
     }
@@ -84,7 +92,7 @@ public class ConfigHolder {
         this.axisConfiguration = axisConfiguration;
     }
 
-    public UserRegistry getConfigRegistry() throws LoadBalanceEndpointException {
+    public UserRegistry getConfigRegistry() throws TenantAwareLoadBalanceEndpointException {
         assertNull("Registry", configRegistry);
         return configRegistry;
     }
@@ -101,11 +109,11 @@ public class ConfigHolder {
         this.dependencyManager = dependencyManager;
     }
 
-    private void assertNull(String name, Object object) throws LoadBalanceEndpointException {
+    private void assertNull(String name, Object object) throws TenantAwareLoadBalanceEndpointException {
         if (object == null) {
             String message = name + " reference in the proxy admin config holder is null";
             log.error(message);
-            throw new LoadBalanceEndpointException(message);
+            throw new TenantAwareLoadBalanceEndpointException(message);
         }
     }
 
@@ -133,4 +141,29 @@ public class ConfigHolder {
     public Map<Integer, SynapseEnvironmentService> getSynapseEnvironmentServices() {
         return synapseEnvironmentServices;
     }
+    
+    public void setTenantLoadBalanceMembershipHandler(TenantLoadBalanceMembershipHandler handler) {
+        tenantMembershipHandler = handler;
+    }
+    
+    public TenantLoadBalanceMembershipHandler getTenantLoadBalanceMembershipHandler() {
+        return tenantMembershipHandler;
+    }
+
+    public ConfigurationContext getConfigCtxt() {
+        return configCtxt;
+    }
+
+    public void setConfigCtxt(ConfigurationContext configCtxt) {
+        this.configCtxt = configCtxt;
+    }
+    
+    public void setLbConfigService(LoadBalancerConfigurationService lbConfigSer) {
+        this.lbConfigService = lbConfigSer;
+    }
+
+    public LoadBalancerConfiguration getLbConfig() {
+        return (LoadBalancerConfiguration) lbConfigService.getLoadBalancerConfig();
+    }
+
 }

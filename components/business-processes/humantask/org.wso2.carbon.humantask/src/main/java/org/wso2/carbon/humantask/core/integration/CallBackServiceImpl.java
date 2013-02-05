@@ -45,7 +45,7 @@ import javax.wsdl.extensions.http.HTTPBinding;
 import javax.wsdl.extensions.soap.SOAPBinding;
 import javax.wsdl.extensions.soap12.SOAP12Binding;
 import javax.xml.namespace.QName;
-
+import org.wso2.carbon.utils.CarbonUtils;
 /**
  * Axis based implementation of CallBackService interface
  */
@@ -92,7 +92,8 @@ public class CallBackServiceImpl implements CallBackService {
             uep.setUepId(this.serviceName.getLocalPart());
             uep.setAddressingEnabled(true);
             uep.setAddressingVersion(UnifiedEndpointConstants.ADDRESSING_VERSION_FINAL);
-            uep.setAddress(AxisServiceUtils.getEPRfromWSDL(wsdl, serviceName, portName));
+            uep.setAddress(CarbonUtils.resolveSystemProperty(
+                    AxisServiceUtils.getEPRfromWSDL(wsdl, serviceName, portName)));
         }
     }
 

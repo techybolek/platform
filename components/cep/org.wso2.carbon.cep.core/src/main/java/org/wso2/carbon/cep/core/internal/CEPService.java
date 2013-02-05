@@ -22,17 +22,20 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.cep.core.Bucket;
 import org.wso2.carbon.cep.core.BucketBasicInfo;
 import org.wso2.carbon.cep.core.CEPServiceInterface;
-import org.wso2.carbon.cep.core.Query;
 import org.wso2.carbon.cep.core.backend.CEPBackEndRuntime;
 import org.wso2.carbon.cep.core.backend.CEPBackEndRuntimeFactory;
 import org.wso2.carbon.cep.core.backend.CEPEngineProvider;
 import org.wso2.carbon.cep.core.exception.CEPConfigurationException;
 import org.wso2.carbon.cep.core.internal.ds.CEPServiceValueHolder;
-import org.wso2.carbon.cep.core.internal.registry.CEPRegistryInvoker;
+import org.wso2.carbon.cep.core.internal.persistance.CEPResourcePersister;
+import org.wso2.carbon.cep.core.internal.util.CEPConstants;
+import org.wso2.carbon.cep.core.internal.util.NotDeployedBucket;
 import org.wso2.carbon.cep.core.mapping.input.Input;
 import org.wso2.carbon.cep.core.mapping.input.mapping.InputMapping;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,29 +55,107 @@ public class CEPService implements CEPServiceInterface {
      * buckets are added then we keep such buckets to deploy when the corresponding
      * cep back end runtime get registered with the cep service.
      */
-    private List<Bucket> unDeployedBuckets;
+    private List<NotDeployedBucket> notDeployedBuckets;
 
     private AxisConfiguration axisConfiguration;
 
     public CEPService() throws CEPConfigurationException {
         this.cepEngineProviderMap = new ConcurrentHashMap<String, CEPEngineProvider>();
-        this.unDeployedBuckets = new ArrayList<Bucket>();
+        this.notDeployedBuckets = new ArrayList<NotDeployedBucket>();
         this.tenantSpecificCEPBuckets = new ConcurrentHashMap<Integer, Map<String, CEPBucket>>();
     }
 
-    public void registerCEPEngineProvider(CEPEngineProvider cepEngineProvider)
-            throws CEPConfigurationException {
+    public void registerCEPEngineProvider(CEPEngineProvider cepEngineProvider) {
         this.cepEngineProviderMap.put(cepEngineProvider.getName(), cepEngineProvider);
         //deploy the undeployed buckets if they use this cep engine provider
-        for (Bucket bucket : unDeployedBuckets) {
-            if (bucket.getEngineProvider().equals(cepEngineProvider.getName())) {
-                addBucket(bucket, cepEngineProvider, axisConfiguration);
+        for (NotDeployedBucket notDeployedBucket : notDeployedBuckets) {
+            if (notDeployedBucket.getBucket().getEngineProvider().equals(cepEngineProvider.getName())) {
+                try {
+                    deployBucket(notDeployedBucket.getBucket(), cepEngineProvider, axisConfiguration, notDeployedBucket.getPath());
+                } catch (CEPConfigurationException e) {
+                    log.error("Can not add bucket " + notDeployedBucket.getBucket().getName() + " to " + cepEngineProvider.getName() + " back end runtime ", e);
+                }
             }
+        }
+
+    }
+
+    public void addBucket(Bucket bucket, AxisConfiguration axisConfiguration)
+            throws CEPConfigurationException {
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        Map<String, CEPBucket> buckets = this.tenantSpecificCEPBuckets.get(tenantId);
+        if (buckets != null && buckets.containsKey(bucket.getName())) {
+            throw new CEPConfigurationException("A bucket with name " + bucket.getName() + " already exist!");
+        }
+        String bucketPath = createCEPBucketDirectories(bucket, axisConfiguration);
+        try {
+            CEPResourcePersister.save(bucket, bucketPath);
+        } catch (Throwable e) {
+            log.error(e.getMessage(), e);
         }
     }
 
-    public void addBucket(Bucket bucket, AxisConfiguration axisConfiguration) throws CEPConfigurationException {
+    private String createCEPBucketDirectories(Bucket bucket, AxisConfiguration axisConfiguration)
+            throws CEPConfigurationException {
+        File directory = new File(axisConfiguration.getRepository().getPath());
+        if (!directory.exists()) {
+            if (directory.mkdir()) {
+                throw new CEPConfigurationException("Cannot create directory to add tenant specific bucket :" + bucket.getName());
+            }
+        }
+        directory = new File(directory.getAbsolutePath() + File.separator + CEPConstants.CEP_BUCKETS_REPO);
+        if (!directory.exists()) {
+            if (!directory.mkdir()) {
+                throw new CEPConfigurationException("Cannot create directory " + CEPConstants.CEP_BUCKETS_REPO + " to add tenant specific bucket :" + bucket.getName());
+            }
+        }
+        return directory.getAbsolutePath() + File.separator + bucket.getName() + ".xml";
+    }
 
+    public void editBucket(Bucket newBucket) throws CEPConfigurationException {
+        try {
+            int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+            Map<String, CEPBucket> existingBuckets = this.tenantSpecificCEPBuckets.get(tenantId);
+            CEPBucket existingBucket = existingBuckets.remove(newBucket.getName());
+            if (existingBucket != null) {
+                existingBucket.delete();
+                CEPResourcePersister.save(newBucket, existingBucket.getBucketPath());
+            } else {
+                log.error("No bucket with name " + newBucket.getName() + " is found to Edit");
+            }
+        } catch (Throwable e) {
+            log.error(e.getMessage(), e);
+        }
+
+    }
+
+    public boolean removeBucket(String bucketName) throws CEPConfigurationException {
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        Map<String, CEPBucket> buckets = this.tenantSpecificCEPBuckets.get(tenantId);
+        CEPBucket bucket = buckets.remove(bucketName);
+        if (bucket != null) {
+            bucket.delete();
+            CEPResourcePersister.delete(bucket.getBucketPath());
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    public Bucket getBucket(String bucketName) throws CEPConfigurationException {
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+
+        Bucket bucket = this.tenantSpecificCEPBuckets.get(tenantId).get(bucketName).getBucket();
+        if (bucket == null) {
+            throw new CEPConfigurationException("Bucket " + bucketName + " does not exist");
+        }
+        return bucket;
+    }
+
+    public boolean deployBucket(Bucket bucket,
+                                AxisConfiguration axisConfiguration, String bucketPath)
+            throws CEPConfigurationException {
         CEPEngineProvider cepEngineProvider;
         this.axisConfiguration = axisConfiguration;
         if (bucket.getEngineProvider() == null) {
@@ -85,22 +166,33 @@ public class CEPService implements CEPServiceInterface {
             cepEngineProvider = this.cepEngineProviderMap.get(bucket.getEngineProvider());
             if (cepEngineProvider == null) {
                 // we save this bucket to unDeployed Buckets list and simply return
-                this.unDeployedBuckets.add(bucket);
-                return;
+                this.notDeployedBuckets.add(new NotDeployedBucket(bucket, bucketPath));
+                log.info("Bucket " + bucket.getName() + ", is scheduled for deployment");
+                return false;
             }
         }
-
-        addBucket(bucket, cepEngineProvider, axisConfiguration);
+        return deployBucket(bucket, cepEngineProvider, axisConfiguration, bucketPath);
     }
 
-    private void addBucket(Bucket bucket,
-                           CEPEngineProvider cepEngineProvider,
-                           AxisConfiguration axisConfiguration)
+    private boolean deployBucket(Bucket bucket, CEPEngineProvider cepEngineProvider,
+                                 AxisConfiguration axisConfiguration, String bucketPath)
             throws CEPConfigurationException {
+
         try {
             int tenantId = CarbonContext.getCurrentContext().getTenantId();
+
+            Map<String, CEPBucket> buckets = this.tenantSpecificCEPBuckets.get(tenantId);
+            if (buckets == null) {
+                buckets = new ConcurrentHashMap<String, CEPBucket>();
+                this.tenantSpecificCEPBuckets.put(tenantId, buckets);
+            } else if (buckets.containsKey(bucket.getName())) {
+                log.info("Bucket " + bucket.getName() + " is not deployed hence bucket already exists.");
+                return false;
+//                throw new CEPConfigurationException("Error, bucket cannot be deployed, a bucket with name " + bucket.getName() + " already exist!");
+            }
+
             String owner = CarbonContext.getCurrentContext().getUsername();
-            if(owner != null && owner.length() > 0){
+            if (owner != null && owner.length() > 0) {
                 bucket.setOwner(owner);
             }
 
@@ -115,21 +207,14 @@ public class CEPService implements CEPServiceInterface {
             }
 
             CEPBackEndRuntime cepBackEndRuntime =
-                    cepBackEndRuntimeFactory.createCEPBackEndRuntime(bucket.getName(),bucket.getProviderConfiguration(), inputMappings, tenantId);
+                    cepBackEndRuntimeFactory.createCEPBackEndRuntime(bucket.getName(), bucket.getProviderConfigurationProperties(), inputMappings, tenantId);
 
-            CEPBucket cepBucket = new CEPBucket(cepBackEndRuntime, bucket, axisConfiguration);
+            CEPBucket cepBucket = new CEPBucket(cepBackEndRuntime, bucket, axisConfiguration, bucketPath);
             cepBucket.init();
-            CEPRegistryInvoker.addBucketsToRegistry(bucket, tenantId);
 
-            Map<String, CEPBucket> buckets = this.tenantSpecificCEPBuckets.get(tenantId);
-            if (buckets == null) {
-                buckets = new ConcurrentHashMap<String, CEPBucket>();
-                buckets.put(bucket.getName(), cepBucket);
-                this.tenantSpecificCEPBuckets.put(tenantId, buckets);
-            } else {
-                buckets.put(bucket.getName(), cepBucket);
-            }
-            log.debug("Added bucket to the cep engine successfully");
+
+            buckets.put(bucket.getName(), cepBucket);
+            log.info("Added bucket " + bucket.getName() + " to the cep engine successfully");
 
         } catch (InstantiationException e) {
             String errorMessage = "Can not instantiate factory class ";
@@ -140,86 +225,28 @@ public class CEPService implements CEPServiceInterface {
             log.error(errorMessage, e);
             throw new CEPConfigurationException(errorMessage, e);
         }
+        return true;
     }
 
+    public boolean unDeployBucket(String bucketName, int tenantId)
+            throws CEPConfigurationException {
 
-    public void editBucket(Bucket newBucket) throws CEPConfigurationException {
-        try {
-            int tenantId = CarbonContext.getCurrentContext().getTenantId();
-            Map<String, CEPBucket> existingBuckets = this.tenantSpecificCEPBuckets.get(tenantId);
-            CEPBucket existingBucket = existingBuckets.get(newBucket.getName());
-
-            //adding new inputs
-            for (Input input : newBucket.getInputs()) {
-                if (!existingBucket.getBucket().getInputs().contains(input)) {
-                    existingBucket.processInput(input);
-                    existingBucket.getBucket().addInput(input);
-                }
-            }
-            //removing old inputs
-            List<Input> inputsToRemove = new ArrayList<Input>();
-            for (Input input : existingBucket.getBucket().getInputs()) {
-                if (!newBucket.getInputs().contains(input)) {
-                    existingBucket.unSubscribeFromInput(input);
-                    inputsToRemove.add(input);
-                }
-            }
-
-            // remove the non existing inputs
-            for (Input inputToRemove : inputsToRemove){
-                existingBucket.getBucket().getInputs().remove(inputToRemove);
-            }
-
-            //adding new queries
-            for (Query query : newBucket.getQueries()) {
-                if(!existingBucket.getBucket().getQueries().contains(query)){
-                    existingBucket.processQuery(query);
-                    existingBucket.getBucket().addQuery(query);
-                }
-            }
-            
-            //removing old queries
-            Map<Integer, Query> existingQueries = existingBucket.getBucket().getQueriesMap();
-            for (Map.Entry<Integer, Query> existingEntry : existingQueries.entrySet()) {
-
-                if(!newBucket.getQueries().contains(existingEntry.getValue())){
-                    existingBucket.removeQuery(existingEntry.getValue());
-                    existingQueries.remove(existingEntry.getKey());
-                }
-            }
-
-            CEPRegistryInvoker.modifyBucketInRegistry(existingBucket.getBucket(), tenantId);
-        } catch (CEPConfigurationException e) {
-            String errorMessage = "Can not edit the existing bucket";
-            log.error(errorMessage, e);
-            throw new CEPConfigurationException(errorMessage, e);
-        }
-
-    }
-
-    public Bucket getBucket(String bucketName) throws CEPConfigurationException {
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        return this.tenantSpecificCEPBuckets.get(tenantId).get(bucketName).getBucket();
-    }
-
-    public boolean removeBucket(String bucketName) throws CEPConfigurationException {
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
         Map<String, CEPBucket> buckets = this.tenantSpecificCEPBuckets.get(tenantId);
-        if (buckets.containsKey(bucketName)) {
-            CEPBucket cepBucket = buckets.remove(bucketName);
+        CEPBucket cepBucket = buckets.remove(bucketName);
+        if (cepBucket != null) {
             cepBucket.delete();
-            CEPRegistryInvoker.removeBucketFromRegistry(bucketName, tenantId);
             return true;
         } else {
             return false;
         }
+
     }
 
     public boolean removeAllBuckets() throws CEPConfigurationException {
         try {
             int tenantId = CarbonContext.getCurrentContext().getTenantId();
-            Map <String, CEPBucket> tenantBuckets = this.tenantSpecificCEPBuckets.get(tenantId);
-            for (CEPBucket cepBucket : tenantBuckets.values()){
+            Map<String, CEPBucket> tenantBuckets = this.tenantSpecificCEPBuckets.get(tenantId);
+            for (CEPBucket cepBucket : tenantBuckets.values()) {
                 removeBucket(cepBucket.getBucket().getName());
             }
             return true;
@@ -255,7 +282,11 @@ public class CEPService implements CEPServiceInterface {
     @Override
     public String[] getCEPEngineProviderConfigNames(String providerName)
             throws CEPConfigurationException {
-       return cepEngineProviderMap.get(providerName).getConfigurationPropertyNames().toArray(new String[cepEngineProviderMap.get(providerName).getConfigurationPropertyNames().size()]);
+        if (cepEngineProviderMap.get(providerName).getConfigurationPropertyNames() != null) {
+            return cepEngineProviderMap.get(providerName).getConfigurationPropertyNames().toArray(new String[cepEngineProviderMap.get(providerName).getConfigurationPropertyNames().size()]);
+        } else {
+            return new String[0];
+        }
     }
 
     public String[] getCEPBrokerNames() throws CEPConfigurationException {
@@ -267,79 +298,11 @@ public class CEPService implements CEPServiceInterface {
         return brokerNames;
     }
 
-    public boolean removeQuery(String bucketName, String queryName)
-            throws CEPConfigurationException {
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        Map<String, CEPBucket> buckets = this.tenantSpecificCEPBuckets.get(tenantId);
-        if (buckets.containsKey(bucketName)) {
-            CEPBucket cepBucket = buckets.get(bucketName);
-            if (cepBucket.getBucket().getQuery(queryName) != null) {
-                cepBucket.removeQuery(cepBucket.getBucket().getQuery(queryName));
-                cepBucket.getBucket().removeQuery(queryName);
-                CEPRegistryInvoker.removeQueryFromRegistry(bucketName, queryName, tenantId);
+    public void shutdown() {
+        for (Map<String, CEPBucket> map : tenantSpecificCEPBuckets.values()) {
+            for (CEPBucket cepBucket : map.values()) {
+                cepBucket.shutdown();
             }
-            return true;
-        } else {
-            return false;
         }
     }
-
-    public boolean removeAllQueries(String bucketName)
-            throws CEPConfigurationException {
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        Map<String, CEPBucket> buckets = this.tenantSpecificCEPBuckets.get(tenantId);
-        if (buckets.containsKey(bucketName)) {
-            CEPBucket cepBucket = buckets.get(bucketName);
-            cepBucket.removeAllQueries();
-            cepBucket.getBucket().getQueries().clear();
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public boolean editQuery(String bucketName, Query query)
-            throws CEPConfigurationException {
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        Map<String, CEPBucket> buckets = this.tenantSpecificCEPBuckets.get(tenantId);
-        if (buckets.containsKey(bucketName)) {
-            CEPBucket cepBucket = buckets.get(bucketName);
-            cepBucket.editQuery(query);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public boolean removeInput(String bucketName, String inputTopic)
-            throws CEPConfigurationException {
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        Map<String, CEPBucket> buckets = this.tenantSpecificCEPBuckets.get(tenantId);
-        if (buckets.containsKey(bucketName)) {
-            CEPBucket cepBucket = buckets.get(bucketName);
-            if (cepBucket.getBucket().getInput(inputTopic) != null) {
-                cepBucket.unSubscribeFromInput(cepBucket.getBucket().getInput(inputTopic));
-                cepBucket.getBucket().removeInput(inputTopic);
-                CEPRegistryInvoker.removeInputFromRegistry(bucketName, inputTopic, tenantId);
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public boolean removeAllInputs(String bucketName)
-            throws CEPConfigurationException {
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        Map<String, CEPBucket> buckets = this.tenantSpecificCEPBuckets.get(tenantId);
-        if (buckets.containsKey(bucketName)) {
-            CEPBucket cepBucket = buckets.get(bucketName);
-            cepBucket.unSubscribeFromAllInputs();
-            cepBucket.getBucket().getInputs().clear();
-            return true;
-        } else {
-            return false;
-        }
-    }
-
 }

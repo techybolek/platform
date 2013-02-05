@@ -21,72 +21,59 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.util.xpath.SynapseXPath;
-import org.jaxen.JaxenException;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
-import org.wso2.carbon.databridge.agent.thrift.Agent;
-import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
-import org.wso2.carbon.databridge.agent.thrift.conf.AgentConfiguration;
+import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.databridge.agent.thrift.AsyncDataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
-import org.wso2.carbon.databridge.commons.Event;
-import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
-import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
-import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
-import org.wso2.carbon.databridge.commons.exception.StreamDefinitionException;
-import org.wso2.carbon.databridge.commons.exception.TransportException;
+import org.wso2.carbon.databridge.agent.thrift.lb.DataPublisherHolder;
+import org.wso2.carbon.databridge.agent.thrift.lb.LoadBalancingDataPublisher;
+import org.wso2.carbon.databridge.agent.thrift.lb.ReceiverGroup;
+import org.wso2.carbon.databridge.agent.thrift.util.DataPublisherUtil;
+import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.mediator.bam.config.BamMediatorException;
-import org.wso2.carbon.mediator.bam.config.stream.Property;
-import org.wso2.carbon.mediator.bam.config.stream.StreamEntry;
-import org.wso2.carbon.mediator.bam.util.BamMediatorConstants;
-
-import java.net.MalformedURLException;
+import org.wso2.carbon.mediator.bam.config.BamServerConfig;
+import org.wso2.carbon.mediator.bam.config.stream.StreamConfiguration;
+import org.wso2.carbon.mediator.bam.builders.CorrelationDataBuilder;
+import org.wso2.carbon.mediator.bam.builders.MetaDataBuilder;
+import org.wso2.carbon.mediator.bam.builders.PayloadDataBuilder;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This is the main class of the Event Stream that extract data from mediator and send events.
  */
 public class Stream {
     private static final Log log = LogFactory.getLog(Stream.class);
-
-    private String streamName;
-    private String streamVersion;
-    private String streamNickName;
-    private String streamDescription;
-    private List<Property> properties;
-    private List<StreamEntry> streamEntries;
-    private String streamId;
-    private DataPublisher dataPublisher;
-    private boolean security;
-    private String serverIp;
-    private String authenticationPort;
-    private String receiverPort;
-    private String userName;
-    private String password;
-    private ActivityIDSetter activityIDSetter;
+    public static final String ENABLE_MEDIATION_STATS = "EnableMediationStats";
+    public static final String CLOUD_DEPLOYMENT_PROP = "IsCloudDeployment";
+    public static final String SERVER_CONFIG_BAM_URL = "BamServerURL";
+    public static final String DEFAULT_BAM_SERVER_URL = "tcp://127.0.0.1:7611";
+    private AsyncDataPublisher asyncDataPublisher;
+    private StreamDefinitionBuilder streamDefinitionBuilder;
+    private LoadBalancingDataPublisher loadBalancingDataPublisher;
+    private boolean isPublisherCreated;
+    private BamServerConfig bamServerConfig;
+    private StreamConfiguration streamConfiguration;
+    private PayloadDataBuilder payloadDataBuilder;
+    private MetaDataBuilder metaDataBuilder;
+    private CorrelationDataBuilder correlationDataBuilder;
 
     public Stream () {
-        streamName = "";
-        streamVersion = "";
-        streamNickName = "";
-        streamDescription = "";
-        properties = new ArrayList<Property>();
-        streamEntries = new ArrayList<StreamEntry>();
-        streamId = null;
-        dataPublisher = null;
-        security = true;
-        serverIp = "";
-        authenticationPort = "";
-        receiverPort = "";
-        userName = "";
-        password = "";
-        activityIDSetter = new ActivityIDSetter();
+        streamDefinitionBuilder = new StreamDefinitionBuilder();
+        loadBalancingDataPublisher = null;
+        isPublisherCreated = false;
+        payloadDataBuilder = new PayloadDataBuilder();
+        metaDataBuilder = new MetaDataBuilder();
+        correlationDataBuilder = new CorrelationDataBuilder();
     }
 
-    public void sendEvents(MessageContext messageContext) throws BamMediatorException{
-        this.activityIDSetter.setActivityIdInSOAPHeader(messageContext);
+    public void sendEvents(MessageContext messageContext) throws BamMediatorException {
+        ActivityIDSetter activityIDSetter = new ActivityIDSetter();
+        activityIDSetter.setActivityIdInSOAPHeader(messageContext);
         try {
-            logMessage(messageContext);
+            if (!isPublisherCreated) {
+                initializeDataPublisher(this);
+                isPublisherCreated = true;
+            }
+            this.publishEvent(messageContext);
         } catch (BamMediatorException e) {
             String errorMsg = "Problem occurred while logging events in the BAM Mediator. " + e.getMessage();
             log.error(errorMsg, e);
@@ -94,255 +81,131 @@ public class Stream {
         }
     }
 
-    private void logMessage(MessageContext messageContext)
-            throws BamMediatorException {
-
-        org.apache.axis2.context.MessageContext msgCtx = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        AxisConfiguration axisConfiguration = msgCtx.getConfigurationContext().getAxisConfiguration();
-        int tenantId = SuperTenantCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
-        boolean direction = (!messageContext.isResponse() && !messageContext.isFaultResponse());
-        String service = msgCtx.getAxisService().getName();
-        String operation = msgCtx.getAxisOperation().getName().getLocalPart();
-
-        if (streamId == null) {
-            Agent agent = this.createAgent();
-            this.createDataPublisher(agent);
-            this.defineEventStream();
-        }
-
-        //Publish event for a valid stream
-        if (streamId != null && !streamId.isEmpty()) {
-            if(log.isDebugEnabled()){
-                log.debug("Stream ID: " + streamId);
+    private synchronized static void initializeDataPublisher(Stream stream) throws BamMediatorException {
+        try {
+            if(!stream.isPublisherCreated){
+                stream.createDataPublisher();
+                stream.setStreamDefinitionToDataPublisher();
+                stream.isPublisherCreated = true;
             }
-            // Event for each message
-            Event event = new Event(streamId, System.currentTimeMillis(),
-                                    this.createMetadata(tenantId),
-                                    this.createCorrelationData(messageContext),
-                                    this.createPayloadData(messageContext, direction, service, operation)
-            );
-            try {
-                dataPublisher.publish(event);
-            } catch (AgentException e) {
-                String errorMsg = "Problem with Agent while publishing. " + e.getMessage();
-                log.error(errorMsg, e);
-                throw new BamMediatorException(errorMsg, e);
-            }
-        } else {
-            if(log.isDebugEnabled()){
-                log.debug("streamId is empty.");
-            }
+        } catch (BamMediatorException e) {
+            String errorMsg = "Problem initializing the Data Publisher or Stream Definition. " + e.getMessage();
+            log.error(errorMsg, e);
+            throw new BamMediatorException(errorMsg, e);
         }
     }
 
-    private void createDataPublisher(Agent agent) throws BamMediatorException{
-        try {
-            if(this.security){
-                dataPublisher = new DataPublisher("ssl://" + this.serverIp + ":" + this.authenticationPort, "ssl://" + this.serverIp + ":" + this.authenticationPort, this.userName, this.password, agent);
+    private void createDataPublisher() throws BamMediatorException {
+        if(this.isCloudDeployment()){ // In Stratos environment
+            asyncDataPublisher = new AsyncDataPublisher(this.getServerConfigBAMServerURL(),
+                                                        this.bamServerConfig.getUsername(),
+                                                        this.bamServerConfig.getPassword());
+        } else { // In normal Carbon environment
+            if(this.bamServerConfig.isLoadbalanced()){
+                ArrayList<ReceiverGroup> allReceiverGroups = new ArrayList<ReceiverGroup>();
+                ArrayList<String> receiverGroupUrls = DataPublisherUtil.getReceiverGroups(this.bamServerConfig.getUrlSet());
+
+                for (String aReceiverGroupURL : receiverGroupUrls) {
+                    ArrayList<DataPublisherHolder> dataPublisherHolders = new ArrayList<DataPublisherHolder>();
+                    String[] urls = aReceiverGroupURL.split(",");
+                    for (String aUrl : urls) {
+                        DataPublisherHolder aNode = new DataPublisherHolder(null, aUrl.trim(), this.bamServerConfig.getUsername(),
+                                                                            this.bamServerConfig.getPassword());
+                        dataPublisherHolders.add(aNode);
+                    }
+                    ReceiverGroup group = new ReceiverGroup(dataPublisherHolders);
+                    allReceiverGroups.add(group);
+                }
+                this.loadBalancingDataPublisher = new LoadBalancingDataPublisher(allReceiverGroups);
+
             } else {
-                dataPublisher = new DataPublisher("ssl://" + this.serverIp + ":" + this.authenticationPort, "tcp://" + this.serverIp + ":" + this.receiverPort, this.userName, this.password, agent);
+                if(this.bamServerConfig.isSecure()){
+                    asyncDataPublisher = new AsyncDataPublisher("ssl://" + this.bamServerConfig.getIp() + ":" + this.bamServerConfig.getAuthenticationPort(),
+                                                                "ssl://" + this.bamServerConfig.getIp() + ":" + this.bamServerConfig.getAuthenticationPort(),
+                                                                this.bamServerConfig.getUsername(), this.bamServerConfig.getPassword());
+                } else {
+                    asyncDataPublisher = new AsyncDataPublisher("ssl://" + this.bamServerConfig.getIp() + ":" + this.bamServerConfig.getAuthenticationPort(),
+                                                                "tcp://" + this.bamServerConfig.getIp() + ":" + this.bamServerConfig.getReceiverPort(),
+                                                                this.bamServerConfig.getUsername(), this.bamServerConfig.getPassword());
+                }
             }
-        } catch (MalformedURLException e) {
-            String errorMsg = "Given URLs are incorrect. " + e.getMessage();
-            log.error(errorMsg, e);
-            throw new BamMediatorException(errorMsg, e);
-        } catch (AgentException e) {
-            String errorMsg = "Problem while creating the Agent. " + e.getMessage();
-            log.error(errorMsg, e);
-            throw new BamMediatorException(errorMsg, e);
-        } catch (AuthenticationException e) {
-            String errorMsg = "Authentication failed. " + e.getMessage();
-            log.error(errorMsg, e);
-            throw new BamMediatorException(errorMsg, e);
-        } catch (TransportException e) {
-            String errorMsg = "Transport layer problem. " + e.getMessage();
-            log.error(errorMsg, e);
-            throw new BamMediatorException(errorMsg, e);
         }
 
         log.info("Data Publisher Created.");
     }
 
-    private void defineEventStream() throws BamMediatorException{
-        StreamIDBuilder streamIDBuilder = new StreamIDBuilder();
+    private String getServerConfigBAMServerURL(){
+        String[] bamServerUrl = ServerConfiguration.getInstance().getProperties(SERVER_CONFIG_BAM_URL);
+        if(null != bamServerUrl){
+            return bamServerUrl[bamServerUrl.length-1];
+        }else {
+            return DEFAULT_BAM_SERVER_URL;
+        }
+    }
+
+    private boolean isCloudDeployment(){
+        String[] cloudDeploy = ServerConfiguration.getInstance().getProperties(CLOUD_DEPLOYMENT_PROP);
+        return null != cloudDeploy && Boolean.parseBoolean(cloudDeploy[cloudDeploy.length - 1]);
+    }
+
+    private void setStreamDefinitionToDataPublisher() throws BamMediatorException {
         try {
-            streamId = dataPublisher.defineStream(streamIDBuilder.createStreamID
-                    (this.streamName, this.streamVersion, this.streamNickName, this.streamDescription,
-                     this.properties, this.streamEntries));
-        } catch (AgentException e) {
-            String errorMsg = "Problem while creating the Agent. " + e.getMessage();
-            log.error(errorMsg, e);
-            throw new BamMediatorException(errorMsg, e);
-        } catch (MalformedStreamDefinitionException e) {
-            String errorMsg = "Stream definition is incorrect. " + e.getMessage();
-            log.error(errorMsg, e);
-            throw new BamMediatorException(errorMsg, e);
-        } catch (StreamDefinitionException e) {
-            String errorMsg = "Problem with Stream Definition. " + e.getMessage();
-            log.error(errorMsg, e);
-            throw new BamMediatorException(errorMsg, e);
-        } catch (DifferentStreamDefinitionAlreadyDefinedException e) {
-            String errorMsg = "Already there is a different Stream Definition exists for the Name and Version. " + e.getMessage();
-            log.error(errorMsg, e);
-            throw new BamMediatorException(errorMsg, e);
-        }
-        log.info("Event Stream Defined.");
-    }
-
-    private Object[] createPayloadData(MessageContext messageContext,
-                                       boolean direction, String service, String operation) throws BamMediatorException{
-        int numOfProperties = properties.size();
-        int numOfEntities = streamEntries.size();
-        int i = 0;
-
-        Object[] payloadData = new Object[numOfProperties + numOfEntities + BamMediatorConstants.NUM_OF_CONST_PAYLOAD_PARAMS];
-        payloadData[i++] = direction ?
-                         BamMediatorConstants.DIRECTION_IN : BamMediatorConstants.DIRECTION_OUT;
-        payloadData[i++] = service;
-        payloadData[i++] = operation;
-        payloadData[i++] = messageContext.getMessageID();
-        payloadData[i++] = this.getHttpIp(messageContext, "wso2statistics.request.received.time");
-        payloadData[i++] = this.getHttpIp(messageContext, "HTTP_METHOD");
-        payloadData[i++] = this.getHttpIp(messageContext, "CHARACTER_SET_ENCODING");
-        payloadData[i++] = this.getHttpIp(messageContext, "REMOTE_ADDR");
-        payloadData[i++] = this.getHttpIp(messageContext, "TransportInURL");
-        payloadData[i++] = this.getHttpIp(messageContext, "messageType");
-        payloadData[i++] = this.getHttpIp(messageContext, "REMOTE_HOST");
-        payloadData[i] = this.getHttpIp(messageContext, "SERVICE_PREFIX");
-
-        for (i=0; i<numOfProperties; i++) {
-            payloadData[BamMediatorConstants.NUM_OF_CONST_PAYLOAD_PARAMS + i] =
-                    this.producePropertyValue(properties.get(i), messageContext);
-        }
-
-        for (i=0; i<numOfEntities; i++) {
-            payloadData[BamMediatorConstants.NUM_OF_CONST_PAYLOAD_PARAMS + numOfProperties + i] =
-                    this.produceEntityValue(streamEntries.get(i).getValue(), messageContext);
-        }
-
-        return payloadData;
-    }
-
-    private Agent createAgent(){
-        AgentConfiguration agentConfiguration = new AgentConfiguration();
-        /*String keyStorePath = this.ksLocation;
-        String keyStorePassword = this.ksPassword;
-        agentConfiguration.setTrustStore(keyStorePath);
-        agentConfiguration.setTrustStorePassword(keyStorePassword);
-        System.setProperty("javax.net.ssl.trustStore", keyStorePath);
-        System.setProperty("javax.net.ssl.trustStorePassword", keyStorePassword);*/
-        return new Agent(agentConfiguration);
-    }
-
-
-    private Object getHttpIp(MessageContext messageContext, String propertyName){
-        org.apache.axis2.context.MessageContext msgCtx =
-                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        String output = (String)msgCtx.getLocalProperty(propertyName);
-        if(output != null && !output.equals("")){
-            return output;
-        } else {
-            return "";
-        }
-    }
-
-    private Object[] createMetadata(int tenantId){
-        Object[] metaData = new Object[BamMediatorConstants.NUM_OF_CONST_META_PARAMS];
-        int i = 0;
-        metaData[i] = tenantId;
-        return metaData;
-    }
-
-    private Object[] createCorrelationData(MessageContext messageContext){
-        Object[] correlationData = new Object[BamMediatorConstants.NUM_OF_CONST_CORRELATION_PARAMS];
-        int i= 0;
-        correlationData[i] = messageContext.getProperty(BamMediatorConstants.MSG_ACTIVITY_ID);
-        return correlationData;
-    }
-
-    private Object producePropertyValue(Property property, MessageContext messageContext){
-        try {
-            if(property.isExpression()){
-                SynapseXPath synapseXPath = new SynapseXPath(property.getValue());
-                return synapseXPath.stringValueOf(messageContext);
+            StreamDefinition streamDef = this.streamDefinitionBuilder.buildStreamDefinition(this.streamConfiguration);
+            if(this.bamServerConfig.isLoadbalanced()){
+                loadBalancingDataPublisher.addStreamDefinition(streamDef);
             } else {
-                return property.getValue();
+                asyncDataPublisher.addStreamDefinition(streamDef);
             }
-        } catch (JaxenException e) {
-            String errorMsg = "SynapseXPath cannot be created for the Stream Property. " + e.getMessage();
+        } catch (BamMediatorException e) {
+            String errorMsg = "Error while creating the Asynchronous/LoadBalancing Data Publisher" +
+                              "or while creating the Stream Definition. " + e.getMessage();
             log.error(errorMsg, e);
+            throw new BamMediatorException(errorMsg, e);
         }
-        return "";
     }
+    
+    private void publishEvent(MessageContext messageContext) throws BamMediatorException {
+        org.apache.axis2.context.MessageContext msgCtx = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        AxisConfiguration axisConfiguration = msgCtx.getConfigurationContext().getAxisConfiguration();
+        try{
+            Object[] metaData = this.metaDataBuilder.createMetadata(messageContext, axisConfiguration);
+            Object[] correlationData = this.correlationDataBuilder.createCorrelationData(messageContext);
+            Object[] payloadData = this.payloadDataBuilder.createPayloadData(messageContext, msgCtx,
+                                                                             this.streamConfiguration);
 
-    private Object produceEntityValue(String valueName, MessageContext messageContext){
-        if(valueName.startsWith("$")){ // When entity value is a mediator parameter
-            if("$SOAPHeader".equals(valueName)){
-                return messageContext.getEnvelope().getHeader().toString();
-            } else if ("$SOAPBody".equals(valueName)){
-                return messageContext.getEnvelope().getBody().toString();
+            if(this.bamServerConfig.isLoadbalanced()){
+                loadBalancingDataPublisher.publish(this.streamConfiguration.getName(),
+                                                   this.streamConfiguration.getVersion(), metaData,
+                                                   correlationData, payloadData);
             } else {
-                return "Invalid Entity Parameter !";
+                if (!asyncDataPublisher.canPublish()) {
+                    asyncDataPublisher.reconnect();
+                }
+                asyncDataPublisher.publish(this.streamConfiguration.getName(),
+                                           this.streamConfiguration.getVersion(),
+                                           metaData, correlationData, payloadData);
             }
-        } else {
-            return valueName;
+
+        } catch (AgentException e){
+            String errorMsg = "Agent error occurred while sending the event. " + e.getMessage();
+            log.error(errorMsg, e);
+            throw new BamMediatorException(errorMsg, e);
+        } catch (Exception e){
+            String errorMsg = "Error occurred while sending the event. " + e.getMessage();
+            log.error(errorMsg, e);
+            throw new BamMediatorException(errorMsg, e);
         }
     }
 
-    public String getStreamName() {
-        return streamName;
+    public void setBamServerConfig(BamServerConfig bamServerConfig) {
+        this.bamServerConfig = bamServerConfig;
     }
 
-    public void setStreamName(String streamName) {
-        this.streamName = streamName;
+    public void setStreamConfiguration(StreamConfiguration streamConfiguration) {
+        this.streamConfiguration = streamConfiguration;
     }
 
-    public String getStreamVersion() {
-        return streamVersion;
+    public StreamConfiguration getStreamConfiguration() {
+        return streamConfiguration;
     }
-
-    public void setStreamVersion(String streamVersion) {
-        this.streamVersion = streamVersion;
-    }
-
-    public void setStreamNickName(String streamNickName) {
-        this.streamNickName = streamNickName;
-    }
-
-    public void setStreamDescription(String streamDescription) {
-        this.streamDescription = streamDescription;
-    }
-
-    public void setProperties(List<Property> properties) {
-        this.properties = properties;
-    }
-
-    public void setStreamEntries(List<StreamEntry> streamEntries) {
-        this.streamEntries = streamEntries;
-    }
-
-    public void setSecurity(boolean security) {
-        this.security = security;
-    }
-
-    public void setAuthenticationPort(String authenticationPort) {
-        this.authenticationPort = authenticationPort;
-    }
-
-    public void setReceiverPort(String receiverPort) {
-        this.receiverPort = receiverPort;
-    }
-
-    public void setServerIp(String serverIp) {
-        this.serverIp = serverIp;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
 }

@@ -16,25 +16,21 @@
 ~ under the License.
 -->
 
-<link href="css/forgot-password.css" rel="stylesheet" type="text/css" media="all"/>
-<script type="text/javascript" src="../googleanalytics/js/googleAnalyticsProcessor.js"></script>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
+<carbon:jsi18n
+        resourceBundle="org.wso2.carbon.identity.mgt.ui.i18n.Resources"
+        request="<%=request%>"/>
 
+<fmt:bundle basename="org.wso2.carbon.identity.mgt.ui.i18n.Resources">
 <div id="middle">
 
-    <h2>
-        Account Unlocked Successfully
-    </h2>
+    <h2><fmt:message key="account.unlock"/></h2>
 
-    <p>
-        You have successfully unlocked the your account.
-    </p>
+    <p><fmt:message key="account.unlock.message"/></p>
+    <p><fmt:message key="login.account"/><a href="/carbon/admin/login.jsp"><fmt:message key="login.account.page"/></a></p>
 </div>
-
-<div id="workArea">
-    Now you can login to your account from the
-    <a href="/carbon/admin/login.jsp"> <b>login page</b></a>,
-    using your password.
-</div>
+</fmt:bundle> 
 
 
 

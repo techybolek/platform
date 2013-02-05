@@ -35,7 +35,7 @@ import java.util.Properties;
 
 public class TGSpreadConnection extends TConnection {
 
-    private String visibility = "private";
+    private String visibility = Constants.ACCESS_MODE_PRIVATE;
 
     private SpreadsheetService service;
 
@@ -47,22 +47,28 @@ public class TGSpreadConnection extends TConnection {
 
     public TGSpreadConnection(Properties props) throws SQLException {
         super(props);
-        this.spreadSheetName = props.getProperty(Constants.SHEET_NAME);
+        this.spreadSheetName = props.getProperty(Constants.DRIVER_PROPERTIES.SHEET_NAME);
         if (spreadSheetName == null) {
             throw new SQLException("Spread Sheet name is not provided");
         }
-        this.visibility = props.getProperty(Constants.VISIBILITY);
-        this.visibility = (visibility != null) ? visibility : "private";
+        this.visibility = props.getProperty(Constants.DRIVER_PROPERTIES.VISIBILITY);
+        this.visibility = (visibility != null) ? visibility : Constants.ACCESS_MODE_PRIVATE;
+        if (!this.checkVisibility(visibility)) {
+            throw new SQLException("Invalid access mode '" + visibility +"' is provided");
+        }
         this.service = new SpreadsheetService(Constants.SPREADSHEET_SERVICE_NAME);
         this.service.setCookieManager(null);
-        try {
-            this.service.setUserCredentials(this.getUsername(), this.getPassword());
-            this.service.setUserToken(((GoogleAuthTokenFactory.UserToken)
-                    service.getAuthTokenFactory().
-                    getAuthToken()).getValue());
-        } catch (AuthenticationException e) {
-            throw new SQLException("Error occurred while authenticating user to access the " +
-                    "spread sheet", e);
+
+        if (Constants.ACCESS_MODE_PRIVATE.equals(visibility)) {
+            try {
+                this.service.setUserCredentials(this.getUsername(), this.getPassword());
+                this.service.setUserToken(((GoogleAuthTokenFactory.UserToken)
+                        service.getAuthTokenFactory().
+                                getAuthToken()).getValue());
+            } catch (AuthenticationException e) {
+                throw new SQLException("Error occurred while authenticating user to access the " +
+                        "spread sheet", e);
+            }
         }
         this.spreadSheetFeed = this.extractSpreadSheetFeed();
         this.worksheetFeed = this.extractWorkSheetFeed();
@@ -88,6 +94,11 @@ public class TGSpreadConnection extends TConnection {
         return spreadSheetFeed;
     }
 
+    private boolean checkVisibility(String visibility) {
+        return (Constants.ACCESS_MODE_PRIVATE.equals(visibility) ||
+                Constants.ACCESS_MODE_PUBLIC.equals(visibility));
+    }
+    
     @Override
     public Statement createStatement() throws SQLException {
         return null;
@@ -124,8 +135,8 @@ public class TGSpreadConnection extends TConnection {
 
     @Override
     public CallableStatement prepareCall(String sql, int resultSetType,
-                                              int resultSetConcurrency,
-                                              int resultSetHoldability) throws SQLException {
+                                         int resultSetConcurrency,
+                                         int resultSetHoldability) throws SQLException {
         throw new SQLFeatureNotSupportedException("CallableStatements are not supported");
     }
 
@@ -161,7 +172,7 @@ public class TGSpreadConnection extends TConnection {
 
     private SpreadsheetFeed extractSpreadSheetFeed() throws SQLException {
         URL spreadSheetFeedUrl;
-         try {
+        try {
             spreadSheetFeedUrl =
                     new URL(Constants.SPREADSHEET_FEED_BASE_URL + getVisibility() + "/full");
         } catch (MalformedURLException e) {
@@ -169,10 +180,8 @@ public class TGSpreadConnection extends TConnection {
         }
         SpreadsheetQuery spreadSheetQuery =
                 TDriverUtil.createSpreadSheetQuery(this.getSpreadSheetName(), spreadSheetFeedUrl);
-
         return TDriverUtil.getFeed(getSpreadSheetService(), spreadSheetQuery,
                 SpreadsheetFeed.class);
-
     }
-    
+
 }

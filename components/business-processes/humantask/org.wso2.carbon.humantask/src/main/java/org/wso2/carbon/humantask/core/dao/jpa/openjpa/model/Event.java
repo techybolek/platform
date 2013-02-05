@@ -38,25 +38,25 @@ import java.util.Date;
  * Row presentation of a human task event.
  */
 @Entity
-@Table(name = "EVENT")
+@Table(name = "HT_EVENT")
 public class Event implements EventDAO {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "TIMESTAMP", nullable = false)
+    @Column(name = "EVENT_TIMESTAMP", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date timeStamp;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "TYPE", nullable = false)
+    @Column(name = "EVENT_TYPE", nullable = false)
     private TaskEventType type;
 
-    @Column(name = "DETAILS", nullable = true)
+    @Column(name = "EVENT_DETAILS", nullable = true)
     private String details;
 
-    @Column(name = "USER", nullable = false)
+    @Column(name = "EVENT_USER", nullable = false)
     private String user;
 
     @Enumerated(EnumType.STRING)

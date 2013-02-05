@@ -17,7 +17,7 @@
  */
 
 package org.wso2.carbon.identity.entitlement.ui;
-import org.wso2.carbon.identity.entitlement.stub.dto.AttributeValueTreeNodeDTO;
+import org.wso2.carbon.identity.entitlement.stub.dto.AttributeTreeNodeDTO;
 import org.wso2.carbon.identity.entitlement.ui.dto.*;
 import java.util.*;
 
@@ -57,11 +57,17 @@ public class EntitlementPolicyBean {
 
 	private String subjectType;
 
+    private BasicPolicyEditorDTO basicPolicyEditorDTO;
+
 	private Map<String, String> subjectTypeMap = new HashMap<String, String>();
 
 	private Map<String, String> categoryMap = new HashMap<String, String>();
 
 	private Map<String, String> targetFunctionMap = new HashMap<String, String>();
+
+	private Map<String, String> attributeIdMap = new HashMap<String, String>();
+
+	private Map<String, String> attributeIdDataTypeMap = new HashMap<String, String>();
 
 	private Map<String, String> ruleFunctionMap = new HashMap<String, String>();
 
@@ -105,6 +111,10 @@ public class EntitlementPolicyBean {
 
 	private List<RuleDTO> ruleDTOs = new ArrayList<RuleDTO>();
 
+	private List<ExtendAttributeDTO> extendAttributeDTOs = new ArrayList<ExtendAttributeDTO>();
+
+	private List<ObligationDTO> obligationDTOs = new ArrayList<ObligationDTO>();
+
 	private List<SubElementDTO> subElementDTOs = new ArrayList<SubElementDTO>();
 
 	private List<AttributeValueElementDTO> attributeValueElementDTOs = new ArrayList<AttributeValueElementDTO>();
@@ -113,8 +123,8 @@ public class EntitlementPolicyBean {
 
 	private List<AttributeSelectorDTO> attributeSelectorDTOs = new ArrayList<AttributeSelectorDTO>();
 
-    private Map<String, Set<AttributeValueTreeNodeDTO>> attributeValueNodeMap =
-                                            new HashMap<String, Set<AttributeValueTreeNodeDTO>>();
+    private Map<String, Set<AttributeTreeNodeDTO>> attributeValueNodeMap =
+                                            new HashMap<String, Set<AttributeTreeNodeDTO>>();
 
     private String ruleElementOrder;
 
@@ -196,6 +206,16 @@ public class EntitlementPolicyBean {
         targetDTO = null;
 
         ruleDTOs.clear();
+
+        extendAttributeDTOs.clear();
+
+        obligationDTOs.clear();
+
+        attributeIdDataTypeMap.clear();
+
+        basicPolicyEditorDTO = null;
+
+        basicTargetElementDTO = null;
         
 	}
 
@@ -986,6 +1006,29 @@ public class EntitlementPolicyBean {
 		}
 	}
 
+    public List<ExtendAttributeDTO> getExtendAttributeDTOs() {
+        return extendAttributeDTOs;
+    }
+
+    public void setExtendAttributeDTOs(List<ExtendAttributeDTO> extendAttributeDTOs) {
+        this.extendAttributeDTOs = extendAttributeDTOs;
+    }
+
+    public List<ObligationDTO> getObligationDTOs() {
+        return obligationDTOs;
+    }
+
+    public void setObligationDTOs(List<ObligationDTO> obligationDTOs) {
+        this.obligationDTOs = obligationDTOs;
+    }
+
+	public void addObligationDTO(ObligationDTO obligationDTO) {
+		this.obligationDTOs.add(obligationDTO);
+	}
+
+    public void addExtendAttributeDTO(ExtendAttributeDTO extendAttributeDTO) {
+        this.extendAttributeDTOs.add(extendAttributeDTO);
+    }
 
 ///////////////////////////    ////////
 	public BasicTargetElementDTO getBasicTargetElementDTO() {
@@ -1143,16 +1186,16 @@ public class EntitlementPolicyBean {
         this.ruleDescription = ruleDescription;
     }
 
-    public Set<AttributeValueTreeNodeDTO> getAttributeValueNodeMap(String attributeType) {
-        return attributeValueNodeMap.get(attributeType);
+    public Set<AttributeTreeNodeDTO> getAttributeValueNodeMap(String category) {
+        return attributeValueNodeMap.get(category);
     }
 
-    public void putAttributeValueNodeMap(String category, AttributeValueTreeNodeDTO attributeValueNodeMap) {
-        Set<AttributeValueTreeNodeDTO> dtoSet = this.attributeValueNodeMap.get(category);
+    public void putAttributeValueNodeMap(String category, AttributeTreeNodeDTO attributeValueNodeMap) {
+        Set<AttributeTreeNodeDTO> dtoSet = this.attributeValueNodeMap.get(category);
         if(dtoSet != null){
             dtoSet.add(attributeValueNodeMap);
         } else {
-            Set<AttributeValueTreeNodeDTO> newDtoSet = new HashSet<AttributeValueTreeNodeDTO>();
+            Set<AttributeTreeNodeDTO> newDtoSet = new HashSet<AttributeTreeNodeDTO>();
             newDtoSet.add(attributeValueNodeMap);
             this.attributeValueNodeMap.put(category, newDtoSet);
         }
@@ -1196,6 +1239,14 @@ public class EntitlementPolicyBean {
 
     public void setTargetFunctionMap(Map<String, String> targetFunctionMap) {
         this.targetFunctionMap = targetFunctionMap;
+    }
+
+    public Map<String, String> getAttributeIdMap() {
+        return attributeIdMap;
+    }
+
+    public void setAttributeIdMap(Map<String, String> attributeIdMap) {
+        this.attributeIdMap = attributeIdMap;
     }
 
     public Set<String> getPreFunctions() {
@@ -1242,5 +1293,21 @@ public class EntitlementPolicyBean {
             newDtoSet.add(defaultAttributeId);
             this.defaultAttributeIdMap.put(category, newDtoSet);
         }
+    }
+
+    public BasicPolicyEditorDTO getBasicPolicyEditorDTO() {
+        return basicPolicyEditorDTO;
+    }
+
+    public void setBasicPolicyEditorDTO(BasicPolicyEditorDTO basicPolicyEditorDTO) {
+        this.basicPolicyEditorDTO = basicPolicyEditorDTO;
+    }
+
+    public Map<String, String> getAttributeIdDataTypeMap() {
+        return attributeIdDataTypeMap;
+    }
+
+    public void setAttributeIdDataTypeMap(Map<String, String> attributeIdDataTypeMap) {
+        this.attributeIdDataTypeMap = attributeIdDataTypeMap;
     }
 }

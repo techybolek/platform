@@ -51,10 +51,10 @@
 		tenantDomain = (tenantDomain == null) ? "" : tenantDomain;
 		serviceName = (serviceName == null) ? "WSO2 Stratos Manager" : serviceName;
 		logViewerClient = new LogViewerClient(cookie, backendServerURL, configContext);
-	    logViewerClient.downloadArchivedLogFiles(fileName,response); 
+	    logViewerClient.downloadArchivedLogFiles(fileName,response, tenantDomain, serviceName);
 	   
-		out.flush();
-         out.close();
+		//out.flush();
+       //  out.close();
 	} catch (Exception e) {
 		CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request,
 				e);

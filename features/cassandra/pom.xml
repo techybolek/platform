@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-features</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -33,15 +33,12 @@
 
 
     <modules>
-        <module>org.wso2.carbon.cassandra.server.feature</module>
-        <module>org.wso2.carbon.cassandra.client.feature</module>
-        <module>org.wso2.carbon.cassandra.dataaccess.feature</module>
-        <module>org.wso2.carbon.cassandra.mgt.feature</module>
-        <module>org.wso2.carbon.cassandra.mgt.ui.feature</module>
-	 <module>org.wso2.carbon.cassandra.cluster.feature</module>
-        <module>org.wso2.carbon.cassandra.cluster.mgt.feature</module>
-        <module>org.wso2.carbon.cassandra.cluster.mgt.ui.feature</module>
-        <module>org.wso2.carbon.cassandra.feature</module>
+        <module>org.wso2.carbon.cassandra.server.feature/4.0.0</module>
+        <module>org.wso2.carbon.cassandra.client.feature/4.0.0</module>
+        <module>org.wso2.carbon.cassandra.dataaccess.feature/4.0.0</module>
+        <module>org.wso2.carbon.cassandra.mgt.feature/4.0.0</module>
+        <module>org.wso2.carbon.cassandra.mgt.ui.feature/4.0.0</module>
+        <module>org.wso2.carbon.cassandra.feature/4.0.0</module>
     </modules>
 
     <dependencyManagement>
@@ -117,26 +114,6 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.cassandra.mgt.stub</artifactId>
-                <version>${wso2carbon.version.cassandra}</version>
-            </dependency>
-	    <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.cassandra.cluster.mgt.stub</artifactId>
-                <version>${wso2carbon.version.cassandra}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.cassandra.cluster.mgt.ui</artifactId>
-                <version>${wso2carbon.version.cassandra}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.cassandra.cluster.mgt</artifactId>
-                <version>${wso2carbon.version.cassandra}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.cassandra.cluster</artifactId>
                 <version>${wso2carbon.version.cassandra}</version>
             </dependency>
             <dependency>
@@ -279,7 +256,7 @@
         <simple-json.version>1.1.wso2v1</simple-json.version>
         <!--jetty.version>6.1.26</jetty.version-->
         <jackson.version>1.9.2</jackson.version>
-        <jamm.version>0.2.5.wso2v1</jamm.version>
+        <jamm.version>0.2.5.wso2v2</jamm.version>
         <antlr.version>3.2.0.wso2v1</antlr.version>
 	<metrics-core.version>2.0.3.wso2v1</metrics-core.version>
 	<snaptree.version>0.1.wso2v1</snaptree.version>

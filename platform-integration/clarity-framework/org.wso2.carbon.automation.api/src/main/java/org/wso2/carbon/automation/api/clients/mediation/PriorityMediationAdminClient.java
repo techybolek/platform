@@ -31,33 +31,45 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
+import java.rmi.RemoteException;
 
 public class PriorityMediationAdminClient {
-    String backendUrl = null;
-    String SessionCookie = null;
-    PriorityMediationAdminStub priorityMediationAdmin;
-    private static final Log log = LogFactory.getLog(PriorityMediationAdminClient.class);
 
-    public PriorityMediationAdminClient(String backendUrl, String sessionCookie) {
-        this.backendUrl = backendUrl;
-        this.SessionCookie = sessionCookie;
+    private static final Log log = LogFactory.getLog(PriorityMediationAdminClient.class);
+    private PriorityMediationAdminStub priorityMediationAdmin;
+    private final String serviceName = "PriorityMediationAdmin";
+
+    public PriorityMediationAdminClient(String backEndUrl, String sessionCookie) throws AxisFault {
+        String endPoint = backEndUrl + serviceName;
+        priorityMediationAdmin = new PriorityMediationAdminStub(endPoint);
+        AuthenticateStub.authenticateStub(sessionCookie, priorityMediationAdmin);
     }
 
-    private PriorityMediationAdminStub setPriorityExecutorStub() throws AxisFault {
-        final String priorityAdminServiceUrl = backendUrl + "PriorityMediationAdmin";
-        PriorityMediationAdminStub priorityMediator = null;
-        priorityMediator = new PriorityMediationAdminStub(priorityAdminServiceUrl);
-        AuthenticateStub.authenticateStub(SessionCookie, priorityMediator);
-        return priorityMediator;
+    public PriorityMediationAdminClient(String backEndUrl, String userName, String password)
+            throws AxisFault {
+        String endPoint = backEndUrl + serviceName;
+        priorityMediationAdmin = new PriorityMediationAdminStub(endPoint);
+        AuthenticateStub.authenticateStub(userName, password, priorityMediationAdmin);
     }
 
     public void addPriorityMediator(String name, DataHandler dh)
             throws IOException, XMLStreamException {
-        priorityMediationAdmin = this.setPriorityExecutorStub();
         XMLStreamReader parser =
                 XMLInputFactory.newInstance().createXMLStreamReader(dh.getInputStream());
         StAXOMBuilder builder = new StAXOMBuilder(parser);
         OMElement messageProcessorElem = builder.getDocumentElement();
         priorityMediationAdmin.add(name, messageProcessorElem);
+    }
+
+    public void addPriorityMediator(String name, OMElement priorityElement) throws RemoteException {
+        priorityMediationAdmin.add(name, priorityElement);
+    }
+
+    public void remove(String name) throws RemoteException {
+        priorityMediationAdmin.remove(name);
+    }
+
+    public String[] getExecutorList() throws RemoteException {
+        return priorityMediationAdmin.getExecutorList();
     }
 }

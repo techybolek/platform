@@ -36,8 +36,11 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.*;
 
@@ -69,7 +72,7 @@ public class IdentityManagementService {
             try {
                 CaptchaUtil.processCaptchaInfoBean(captchaInfoBean);
             } catch (Exception e) {
-                log.error(e.getMessage(), e);
+                log.error(e.getMessage());
                 bean.setError("Captcha validation is failed");
                 bean.setVerified(false);
                 return bean;
@@ -80,7 +83,7 @@ public class IdentityManagementService {
             Utils.processUserId(userMgtBean);
             tenantId = Utils.getTenantId(userMgtBean.getTenantDomain());
         } catch (IdentityMgtException e) {
-            log.error(e.getMessage(), e);
+            log.error(e.getMessage());
             bean.setError("Unexpected error has occurred");
             bean.setVerified(false);
             return bean;
@@ -109,7 +112,7 @@ public class IdentityManagementService {
                 resource.setVersionableChange(false);
                 registry.put(identityKeyMgtPath, resource);
             } catch (Exception e) {
-                log.error(e.getMessage(), e);
+                log.error(e.getMessage());
                 bean.setError("Unexpected error has occurred");
                 bean.setVerified(false);
                 return bean;
@@ -117,9 +120,12 @@ public class IdentityManagementService {
 
             bean.setVerified(true);
             bean.setKey(userKey);
+            log.info("User verification successful for user : " + userMgtBean.getUserId() +
+                                            " from tenant domain " + userMgtBean.getTenantDomain());
             return bean;
         } else {
-            log.error("User verification failed");
+            log.error("User verification failed for user : " + userMgtBean.getUserId() +
+                                            " from tenant domain " + userMgtBean.getTenantDomain());
             bean.setError("User verification failed");
             bean.setVerified(false);
             return bean;
@@ -166,6 +172,7 @@ public class IdentityManagementService {
         return dto.isEmailSent();
     }
 
+
     /**
      * process temporary password for given user
      *
@@ -178,7 +185,7 @@ public class IdentityManagementService {
         Utils.processUserId(userMgtBean);
 
         if(!Utils.verifyUserId(userMgtBean)){
-            log.warn("Invalid user is trying to recover the password");
+            log.warn("Invalid user is trying to recover the password : " + userMgtBean.getUserId());
             return false;
         }
         userMgtBean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_TEMPORARY_PASSWORD);
@@ -200,6 +207,9 @@ public class IdentityManagementService {
     public boolean processAccountRecovery(UserMgtBean userMgtBean) throws IdentityMgtException {
 
         userMgtBean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_ACCOUNT_ID);
+        if(userMgtBean.getTenantDomain() == null){
+            userMgtBean.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        }
         int tenantId = Utils.getTenantId(userMgtBean.getTenantDomain());
         String userName = Utils.verifyUserEvidences(userMgtBean);
         if(userName != null){
@@ -218,7 +228,7 @@ public class IdentityManagementService {
      * @param confirmationKey key
      * @return verified result as a bean
      */
-    public static VerificationBean confirmUserAccount(String confirmationKey) {
+    public VerificationBean confirmUserAccount(String confirmationKey) {
         return Utils.verifyConfirmationKey(confirmationKey);
     }
 
@@ -259,21 +269,19 @@ public class IdentityManagementService {
                 if ((actualSecretKey != null) && (actualSecretKey.equals(userMgtBean.getSecretKey()))) {
                     success = PasswordUtil.updatePassword(userMgtBean);
                     registry.delete(resource.getPath());
-                        if(userMgtBean.getTenantDomain() == null){
-                            log.info("Credential is updated for user : " + userMgtBean.getUserId());
-                        } else {
-                            log.info("Credential is updated for tenant domain : " +
-                                                                    userMgtBean.getTenantDomain());
-                        }
+                    log.info("Credential is updated for user : " + userMgtBean.getUserId() +
+                            " and tenant domain : " + userMgtBean.getTenantDomain());
                 } else {
-                    log.warn("Invalid user tried to update credential");
+                    log.warn("Invalid user tried to update credential with user Id : " + userMgtBean.getUserId() +
+                            " and tenant domain : " + userMgtBean.getTenantDomain());
                 }
             } else {
-                log.warn("Invalid user tried to update credential");
+                log.warn("Invalid user tried to update credential with user Id  : " + userMgtBean.getUserId() + 
+                        " with tenant domain : " + userMgtBean.getTenantDomain());
             }
-
         } catch (Exception e) {
-            log.error("Error while updating credential" , e);
+            log.error("Error while updating credential for user : " + userMgtBean.getUserId() +
+                " in tenant domain : " +  userMgtBean.getTenantDomain() , e);           
         } finally{
             if(registry != null){
                 try {
@@ -322,20 +330,20 @@ public class IdentityManagementService {
                             Utils.getTenantId(userMgtBean.getTenantDomain()),
                             UserCoreConstants.USER_UNLOCKED);
                     registry.delete(resource.getPath());
-                        if(userMgtBean.getTenantDomain() == null){
-                            log.info("Account is unlocked for : " + userMgtBean.getUserId());
-                        } else {
-                            log.info("Account is unlocked for tenant domain : " +
-                                                                    userMgtBean.getTenantDomain());
-                        }
+                    success = true;
+                    log.info("Account is unlocked for : " + userMgtBean.getUserId()
+                            + " in tenant domain : " + userMgtBean.getTenantDomain());
                 } else {
-                    log.warn("Invalid user tried to unlock account");
+                    log.warn("Invalid user tried to unlock account with user id : " + userMgtBean.getUserId() +
+                    " and tenant domain : " +  userMgtBean.getTenantDomain());
                 }
             } else {
-                log.warn("Invalid user tried to unlock account");
+                log.warn("Invalid user tried to unlock account with user id : " + userMgtBean.getUserId() +
+                " and tenant domain : " +  userMgtBean.getTenantDomain());
             }
         } catch (Exception e) {
-            log.error("Error while unlocking account" , e);
+            log.error("Error while unlocking account for user : " + userMgtBean.getUserId() +
+                " in tenant domain : " +  userMgtBean.getTenantDomain() , e);
         }finally {
             if(registry != null){
                 try {
@@ -386,7 +394,7 @@ public class IdentityManagementService {
                                                         getRecoveryProcessor().getQuestionProcessor();
 
         return processor.getChallengeQuestionsOfUser(userMgtBean.getUserId(),
-                                                Utils.getTenantId(userMgtBean.getTenantDomain()));
+                                                Utils.getTenantId(userMgtBean.getTenantDomain()), false);
     }
 
     /**
@@ -514,47 +522,6 @@ public class IdentityManagementService {
                 Utils.getTenantId(userMgtBean.getTenantDomain()), challengesDTOs);
     }
 
-
-    /**
-     * get all promoted user challenges
-     *
-     * @return array of user challenges
-     * @throws IdentityMgtException  if fails
-     */
-    public UserChallengesSetDTO[] getAllPromotedUserChallenge() throws IdentityMgtException {
-
-        ChallengeQuestionProcessor processor = IdentityMgtServiceComponent.
-                                                        getRecoveryProcessor().getQuestionProcessor();
-        List<UserChallengesSetDTO> challengeQuestionSetDTOs = new ArrayList<UserChallengesSetDTO>();
-        List<ChallengeQuestionDTO> questionDTOs =  processor.getAllChallengeQuestions();
-        Map<String, List<UserChallengesDTO>> listMap = new HashMap<String, List<UserChallengesDTO>>();
-        for(ChallengeQuestionDTO dto : questionDTOs){
-
-            List<UserChallengesDTO>  dtoList = listMap.get(dto.getQuestionSetId());
-            if(dtoList == null){
-                dtoList = new ArrayList<UserChallengesDTO>();
-            }
-
-            UserChallengesDTO userChallengesDTO = new UserChallengesDTO();
-            userChallengesDTO.setSetId(dto.getQuestionSetId());
-            userChallengesDTO.setQuestion(dto.getQuestion());
-            userChallengesDTO.setOrder(dto.getOrder());
-
-            dtoList.add(userChallengesDTO);
-            listMap.put(dto.getQuestionSetId(), dtoList);
-        }
-
-        for(Map.Entry<String, List<UserChallengesDTO>> listEntry : listMap.entrySet()){
-            UserChallengesSetDTO dto = new UserChallengesSetDTO();
-            dto.setId(listEntry.getKey());
-            List<UserChallengesDTO>  dtoList  = listEntry.getValue();
-            dto.setChallengesDTOs(dtoList.toArray(new UserChallengesDTO[dtoList.size()]));
-            challengeQuestionSetDTOs.add(dto);
-        }
-
-        return challengeQuestionSetDTOs.toArray(new UserChallengesSetDTO[challengeQuestionSetDTOs.size()]);
-    }
-
     /**
      * returns the recovery data for password recovery request.
      *
@@ -629,35 +596,6 @@ public class IdentityManagementService {
     }
 
     /**
-     * get all challenge questions
-     *
-     * @return array of questions
-     * @throws IdentityMgtException if fails
-     */
-    public ChallengeQuestionDTO[] getAllChallengeQuestions() throws IdentityMgtException {
-
-        ChallengeQuestionProcessor processor = IdentityMgtServiceComponent.
-                                                        getRecoveryProcessor().getQuestionProcessor();
-        List<ChallengeQuestionDTO> questionDTOs = processor.getAllChallengeQuestions();
-        return questionDTOs.toArray(new ChallengeQuestionDTO[questionDTOs.size()]);
-
-    }
-
-    /**
-     * set all challenge questions
-     *
-     * @param challengeQuestionDTOs  array of questions
-     * @throws IdentityMgtException if fails
-     */
-    public void setChallengeQuestions(ChallengeQuestionDTO[] challengeQuestionDTOs)
-                                                                    throws IdentityMgtException {
-
-        ChallengeQuestionProcessor processor = IdentityMgtServiceComponent.
-                                                        getRecoveryProcessor().getQuestionProcessor();
-        processor.setChallengeQuestions(challengeQuestionDTOs);
-    }
-
-    /**
      * set challenges of user
      *
      * @param userMgtBean  userMgtBean bean class that contains user and tenant Information
@@ -680,5 +618,33 @@ public class IdentityManagementService {
 
         processor.setChallengesOfUser(userMgtBean.getUserId(), Utils.
                                     getTenantId(userMgtBean.getTenantDomain()), challengesDTOs);
+    }
+
+
+    public boolean authenticate(String userId, String password){
+
+        try {
+            int tenantId = Utils.getTenantId(MultitenantUtils.getTenantDomain(userId));
+            UserStoreManager userStoreManager = IdentityMgtServiceComponent.
+                            getRealmService().getTenantUserRealm(tenantId).getUserStoreManager();
+            return userStoreManager.authenticate(userId, password);
+        } catch (Exception e) {
+            // ignore authentication exceptions and only log error 
+            log.error(e.getMessage());
+        }
+
+        return false;
+    }
+
+    public void updateEmail(){
+
+
+    }
+
+
+    public void verifyEmail(){
+
+
+        
     }
 }

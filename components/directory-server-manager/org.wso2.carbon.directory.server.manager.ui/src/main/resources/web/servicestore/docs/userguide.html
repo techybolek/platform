@@ -53,7 +53,9 @@ Users can use "WSO2 Identity Server" as a KDC and implement Kerberos security to
 
 <p>
     To use KDC in "Identity Server" you need to use embedded LDAP which ships with "WSO2 Identity Server". Thus, by
-default KDC server is disabled. To enable KDC server go to "Identity Server" home directory and navigate to repository/conf
+default KDC server is disabled. To enable KDC server you need to enable KDS server in two places. First locate the configuration
+    section "UserStoreManager" in repository/conf/user-mgt.xml and set the property "kdcEnabled" to true.
+    Then go to "Identity Server" home directory and navigate to repository/conf
 folder. There you will find a file called <b>embedded-ldap.xml</b>. Open embedded-ldap.xml and find &lt;KDCServer/&gt; XML tag.
 You will configuration XML element called "enabled". Set its value to "true".
 
@@ -73,6 +75,7 @@ You will configuration XML element called "enabled". Set its value to "true".
     &lt;Property name="preAuthenticationTimeStampEnabled"&gt;true&lt;/Property&gt;<br/>
   &lt;/KDCServer&gt;<br/>
 </p>
+
 
 <h3>Service Principals</h3>
 

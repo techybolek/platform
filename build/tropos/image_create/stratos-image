@@ -1,7 +1,4 @@
-#!/bin/bash
-
-# Die on any error:
-set -e
+#/bin/bash
 
 work_dir=""
 new_image=""
@@ -11,7 +8,6 @@ software=""
 new_image_size="" #In GB
 action=""
 original_image=""
-image_type="qcow2"
 
 function help {
     echo "Usage: stratos-image [optional arguments] <action> <mandatory arguments>"
@@ -26,30 +22,14 @@ function help {
     echo ""
     echo "            -r : Image root - This is where the base image is mounted. Default is /tmp"
     echo "            -t : Template for the new image. Default is no template"
-    echo "            -s : Softwared to be copied to the new image, separated by colon(:). Default is none"
+    echo "            -s : Softwared to be copied to the new image. Default is none"
     echo "            -n : Image size of the new image in GB. Default is the size of the base image"
-    echo "            -v : Image type. This is one of qcow2 or row"
     echo ""
     echo "    Usage for action pack:"
-    echo "        stratos-image -r <image root> -t <image template> pack <new image archive name in tar.gz format>"
+    echo "        stratos-image -r <image root> -t <image template pack <new image archive name in tar.gz format>"
     echo ""
     echo "            -r : Image root - This is where the base image is mounted. Default is /tmp"
     echo "            -t : Template for the new image. Default is no template"
-    echo "            -v : Image type. This is one of qcow2 or row"
-    echo ""
-    echo "    Usage for action mount:"
-    echo "        stratos-image -r <image root> -t <image template> mount <path to original image>"
-    echo ""
-    echo "            -r : Image root - This is where the base image is mounted. Default is /tmp"
-    echo "            -t : Template for the new image. Default is no template"
-    echo "            -v : Image type. This is one of qcow2 or row"
-    echo ""
-    echo "    Usage for action unmount:"
-    echo "        stratos-image -r <image root> -t <image template>  unmount"
-    echo ""
-    echo "            -r : Image root - This is where the base image is mounted. Default is /tmp"
-    echo "            -t : Template for the new image. Default is no template"
-    echo "            -v : Image type. This is one of qcow2 or row"
     echo ""
 }
 
@@ -60,7 +40,7 @@ if [[ ( -z $action || ( -n $action && $action == "help" ) ) ]]; then
     exit 1
 fi
 
-if [[ ( -z $action || ( -n $action && !( $action == "create" || $action == "pack" || $action == "mount" || $action == "unmount" ) ) ) ]]; then
+if [[ ( -z $action || ( -n $action && !( $action == "create" || $action == "pack" ) ) ) ]]; then
         echo "Mandatory parameter action with value create or pack should be provided"
         echo "    create : Mount the base image and customize it according to the given arguments"
         echo "    pack : Archive the newly created image and unmount the base image"
@@ -70,13 +50,12 @@ if [[ ( -z $action || ( -n $action && !( $action == "create" || $action == "pack
 
 if [[ ( -n $action && $action == "create" && -z $original_image ) ]]; then
         echo "Usage:"
-        echo "    stratos-image -r <image root> -t <image template> -s <software> -n <new image size> -v <image type> create <path to original image>"
+        echo "    stratos-image -r <image root> -t <image template> -s <software> -n <new image size> create <path to original image>"
         echo ""
         echo "        -r : Image root - This is where the base image is mounted. Default is /tmp"
         echo "        -t : Template for the new image. Default is no template"
-        echo "        -s : Softwared to be copied to the new image, separated by colon(:). Default is none"
+        echo "        -s : Softwared to be copied to the new image. Default is none"
         echo "        -n : Image size of the new image in GB. Default is the size of the base image"
-        echo "        -v : Image type. qcow2 or raw. Default is qcow2"
         echo ""
         exit 1
 fi
@@ -87,31 +66,12 @@ if [[ ( -n $action && $action == "pack" && -z $new_image ) ]]; then
         echo ""
         echo "        -r : Image root - This is where the base image is mounted. Default is /tmp"
         echo "        -t : Template for the new image. Default is no template"
-        echo "        -v : Image type. qcow2 or raw. Default is qcow2"
-        echo ""
-        exit 1
-fi
-
-if [[ ( -n $action && $action == "mount" && -z $original_image ) ]]; then
-        echo "Usage:"
-        echo "    stratos-image -r <image root> -t <image template> -v <image type> mount <path to original image>"
-        echo ""
-        echo "        -r : Image root - This is where the base image is mounted. Default is /tmp"
-        echo "        -t : Template for the new image. Default is no template"
-        echo "        -v : Image type. qcow2 or raw. Default is qcow2"
         echo ""
         exit 1
 fi
 
 }
-
-# Make sure the user is running as root.
-if [ "$UID" -ne "0" ]; then
-	echo ; echo "  You must be root to run $0.  (Try running 'sudo bash' first.)" ; echo 
-	exit 69
-fi
-
-while getopts r:t:s:n:v: opts
+while getopts r:t:s:n: opts
 do
   case $opts in
     r)
@@ -126,9 +86,6 @@ do
     n)
         new_image_size=${OPTARG}
         ;;
-    v)
-        image_type=${OPTARG}
-        ;;
     *)
         help
         exit 1
@@ -141,8 +98,6 @@ if [[ $action == "create" ]]; then
     original_image=$2
 elif [[ $action == "pack" ]]; then
     new_image=$2
-elif [[ $action == "mount" ]]; then
-    original_image=$2
 fi
 
 image_validate
@@ -150,14 +105,6 @@ image_validate
 work_dir="$image_root/$image_template"
 img_dir="$work_dir/image"
 
-if [[ $action == "create" ]]; then
-    if [ $image_type="qcow2" ]; then
-        let "new_image_size=$new_image_size*1024*1024*1024"
-        new_image_size=+$new_image_size
-    else
-        new_image_size=$new_image_size"G"
-    fi
-fi
 
 if [[ $action == "create" ]]; then
 
@@ -172,37 +119,25 @@ if [[ $action == "create" ]]; then
     fi
 
     pushd $img_dir
-    type=`echo $original_image|awk -F . '{print $NF}'`
-    if [[ $type == "zip" ]]; then
-        zip -rq $original_image
-    elif [[ $type == "gz" || $type == "tgz" ]]; then
-        tar -zxf $original_image
-    else
-        cp -f $original_image ./
-    fi
+    tar -zxf $original_image
     popd
-    echo $img_dir
+
     image_image=`ls $img_dir/*.img`
-    echo $image_image
     if [ -z $new_image_size ]; then
         echo "Image will not be resized since new image size is not provided"
     else
         echo "Resizing the original image"
-        if [ $image_type = "qcow2" ]; then
-            qemu-img resize $image_image $new_image_size
-        else
-            fsck.ext3 -f $image_image
-            resize2fs $image_image $new_image_size
-        fi
+        fsck.ext3 -f $image_image
+        resize2fs $image_image $new_image_size
     fi
 
     echo "Mount the original image"
-    ./image_action.sh action=mount image-template=$image_template image-root=$image_root image-image=$image_image image-type=$image_type
+    ./image_action.sh action=mount image-template=$image_template image-root=$image_root image-image=$image_image
     echo "Original image mounted"
 
     if [[ !( $image_template == "default" ) ]]; then
     	echo "Customizing the original image"
-    	./image_action.sh action=create image-template=$image_template image-root=$image_root software=$software image-type=$image_type
+    	./image_action.sh action=create image-template=$image_template image-root=$image_root software=$software
     fi
 
 fi
@@ -210,56 +145,10 @@ fi
 if [[ $action == "pack" ]]; then
     echo "Archiving the new image"
     pushd $work_dir/image
-    type=`echo $new_image|awk -F . '{print $NF}'`
-    if [[ $type == "zip" ]]; then
-        zip -rq $new_image ./*
-    elif [[ $type == "gz" || $type == "tgz" ]]; then
-        tar -zcf $new_image ./*
-    elif [[ $type == "img" ]]; then
-        mv *.img $new_image
-    fi
-
+    tar -zcf $new_image ./*
     popd
     echo "Unmounting"
-    ./image_action.sh action=unmount image-template=$image_template image-root=$image_root image-type=$image_type
+    ./image_action.sh action=unmount image-template=$image_template image-root=$image_root
 fi
-
-if [[ $action == "mount" ]]; then
-    if [ -d ./$work_dir ]; then
-        rm -rf ./$work_dir
-    fi
-
-    mkdir -p $work_dir
-
-    if [ ! -d $img_dir ]; then
-        mkdir -p $img_dir
-    fi
-
-    pushd $img_dir
-    type=`echo $original_image|awk -F . '{print $NF}'`
-    if [[ $type == "zip" ]]; then
-        zip -rq $original_image
-    elif [[ $type == "gz" || $type == "tgz" ]]; then
-        tar -zxf $original_image
-    else
-        cp -f $original_image ./
-    fi
-    popd
-    echo $img_dir
-    image_image=`ls $img_dir/*.img`
-    echo $image_image
-
-    echo "Mount the image"
-    ./image_action.sh action=mount image-template=$image_template image-root=$image_root image-image=$image_image image-type=$image_type
-    echo "Mounted the image"
-fi
-
-if [[ $action == "unmount" ]]; then
-    echo "Unmount the image"
-
-    ./image_action.sh action=unmount image-template=$image_template image-root=$image_root image-type=$image_type
-    echo "Unmounted the image"
-fi
-
 echo "Done"
 

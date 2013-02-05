@@ -1,4 +1,4 @@
-<!--
+    <!--
  ~ Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  ~
  ~ WSO2 Inc. licenses this file to you under the Apache License,
@@ -17,6 +17,7 @@
  -->
 <%@ page import="org.wso2.carbon.rule.ws.ui.wizard.RuleServiceAdminClient" %>
 <%@ page import="org.wso2.carbon.rule.common.RuleService" %>
+<%@ page import="java.util.ArrayList" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%
@@ -26,5 +27,8 @@
     String filename = request.getParameter("factArchiveName");
     if (filename != null) {
         ruleServiceAdminClient.deleteFactArchive(ruleService,filename, session);
+        ArrayList<String> factArchiveList = (ArrayList<String>) session.getAttribute(RuleServiceAdminClient.FACTS);
+        factArchiveList.remove(filename);
+        session.setAttribute(RuleServiceAdminClient.FACTS, factArchiveList);
     }
 %>

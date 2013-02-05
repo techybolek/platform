@@ -32,7 +32,7 @@
 
 <fmt:bundle basename="org.wso2.carbon.rssmanager.ui.i18n.Resources">
     <carbon:breadcrumb resourceBundle="org.wso2.carbon.rssmanager.ui.i18n.Resources"
-                       topPage="true" request="<%=request%>" label="admin.console.header"/>
+                       topPage="true" request="<%=request%>" label="Database Users"/>
 
     <div id="middle">
         <h2><fmt:message key="rss.manager.users"/></h2>
@@ -64,6 +64,7 @@
                     <thead>
                     <tr>
                         <th width="20%"><fmt:message key="rss.manager.user"/></th>
+                        <th><fmt:message key="rss.manager.instance.name"/></th>
                         <th width="60%"><fmt:message key="rss.manager.actions"/></th>
                     </tr>
                     </thead>
@@ -75,16 +76,8 @@
                     <tr>
                         <td id="<%=user.getUsername()%>"><%=user.getUsername()%>
                         </td>
+                        <td><%=user.getRssInstanceName()%></td>
                         <td>
-                                <%--<a class="icon-link"--%>
-                                <%--style="background-image: url(../rssmanager/images/db-exp.png);"--%>
-                                <%--onclick="submitExploreForm('<%=user.getUsername()%>', '<%=db.getDbUrl()%>','<%=RSSManagerHelper.getJdbcDriverName(db.getDbUrl())%>')"--%>
-                                <%--href="#"><fmt:message key="rss.manager.explore.database"/>--%>
-                                <%--</a>--%>
-                                <%--<a class="icon-link"--%>
-                                <%--style="background-image:url(../rssmanager/images/data-sources-icon.gif);"--%>
-                                <%--onclick="createDataSource('<%=db.getDbInstanceId()%>','<%=user.getUserId()%>')"--%>
-                                <%--href="#"><fmt:message key="rss.manager.create.datasource"/></a>--%>
                             <a class="icon-link"
                                style="background-image:url(../admin/images/delete.gif);"
                                onclick="dropDatabaseUser('<%=user.getRssInstanceName()%>', '<%=user.getUsername()%>')"
@@ -114,7 +107,7 @@
                 <div id="connectionStatusDiv" style="display: none;"></div>
                 <a class="icon-link"
                    style="background-image:url(../admin/images/add.gif);"
-                   href="javascript:submitAddForm()"><fmt:message key="rss.manager.add.new.user"/></a>
+                   href="javascript:submitAddForm()"><fmt:message key="rss.manager.add.user"/></a>
                 
                 <div style="clear:both;"></div>
             </form>

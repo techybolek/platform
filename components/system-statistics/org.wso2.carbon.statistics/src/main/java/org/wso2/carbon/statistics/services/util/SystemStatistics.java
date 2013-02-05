@@ -17,13 +17,14 @@
 package org.wso2.carbon.statistics.services.util;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.AxisServiceGroup;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.SystemFilter;
 import org.wso2.carbon.statistics.services.SystemStatisticsUtil;
 import org.wso2.carbon.utils.NetworkUtils;
@@ -52,7 +53,7 @@ public class SystemStatistics {
     private long minResponseTime;
     private long maxResponseTime;
     private String wso2wsasVersion;
-    private SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
+    private SimpleDateFormat dateFormatter;
     private String javaVersion;
 
     private static final long GB_IN_BYTES = 1024 * 1024 * 1024;
@@ -62,18 +63,31 @@ public class SystemStatistics {
 
     private SystemStatisticsUtil statService;
 
-    public SystemStatistics() throws AxisFault {
+    public SystemStatistics(AxisConfiguration configuration) throws AxisFault {
         try {
+            dateFormatter = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
             statService = new SystemStatisticsUtil();
             javaVersion = System.getProperty("java.version");
+            update(configuration);
         } catch (Exception e) {
             throw AxisFault.makeFault(e);
         }
     }
 
+    public SystemStatistics(MessageContext messageContext) throws AxisFault {
+        try {
+            statService = new SystemStatisticsUtil();
+            javaVersion = System.getProperty("java.version");
+            update(messageContext);
+        } catch (Exception e) {
+            throw AxisFault.makeFault(e);
+        }
+    }
+
+    //This is for supporting old API
     public void update(AxisConfiguration axisConfig) throws AxisFault {
 
-        int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
+        int tenantId =  PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         Parameter systemStartTime =
                 axisConfig.getParameter(CarbonConstants.SERVER_START_TIME);
         long startTime = 0;
@@ -83,7 +97,7 @@ public class SystemStatistics {
         Date stTime = new Date(startTime);
 
         // only super admin can view serverStartTime and systemUpTime
-        if(tenantId == MultitenantConstants.SUPER_TENANT_ID){
+        if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
             serverStartTime = dateFormatter.format(stTime);
             systemUpTime = (getTime((System.currentTimeMillis() - startTime) / 1000));
         }
@@ -95,19 +109,14 @@ public class SystemStatistics {
             maxResponseTime = statService.getMaxSystemResponseTime(axisConfig);
             minResponseTime = statService.getMinSystemResponseTime(axisConfig);
 
-            currentInvocationResponseTime = statService.getCurrentSystemResponseTime(axisConfig);
-            currentInvocationResponseCount = statService.getCurrentSystemResponseCount(axisConfig);
-            currentInvocationRequestCount = statService.getCurrentSystemRequestCount(axisConfig);
-            currentInvocationFaultCount = statService.getCurrentSystemFaultCount(axisConfig);
-
         } catch (Exception e) {
             throw AxisFault.makeFault(e);
         }
 
         Runtime runtime = Runtime.getRuntime();
 
-          // only super admin can view usedMemory and totalMemory
-        if(tenantId == MultitenantConstants.SUPER_TENANT_ID ){
+        // only super admin can view usedMemory and totalMemory
+        if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
             usedMemory = formatMemoryValue(runtime.totalMemory() - runtime.freeMemory());
             totalMemory = formatMemoryValue(runtime.totalMemory());
         }
@@ -115,12 +124,12 @@ public class SystemStatistics {
 
         int activeServices = 0;
         for (Iterator services = axisConfig.getServices().values().iterator();
-             services.hasNext();) {
+             services.hasNext(); ) {
             AxisService axisService = (AxisService) services.next();
             AxisServiceGroup asGroup = (AxisServiceGroup) axisService.getParent();
             if (axisService.isActive() &&
-                    !axisService.isClientSide() &&
-                    !SystemFilter.isFilteredOutService(asGroup)) {
+                !axisService.isClientSide() &&
+                !SystemFilter.isFilteredOutService(asGroup)) {
                 activeServices++;
             }
         }
@@ -132,6 +141,23 @@ public class SystemStatistics {
                 serverName = NetworkUtils.getLocalHostname();
             }
         } catch (SocketException ignored) {
+        }
+    }
+
+    /* This method use by data publishers to get update about current invocation. we need to use message context instead of
+    AxisConfiguration, because in concurrent execution if we save values as axis parameters these values might get overwrite
+    by another thread. */
+
+    public void update(MessageContext messageContext) throws AxisFault {
+        try {
+
+            currentInvocationResponseTime = statService.getCurrentSystemResponseTime(messageContext);
+            currentInvocationResponseCount = statService.getCurrentSystemResponseCount(messageContext);
+            currentInvocationRequestCount = statService.getCurrentSystemRequestCount(messageContext);
+            currentInvocationFaultCount = statService.getCurrentSystemFaultCount(messageContext);
+
+        } catch (Exception e) {
+            throw AxisFault.makeFault(e);
         }
     }
 
@@ -280,4 +306,5 @@ public class SystemStatistics {
     public void setJavaVersion(String javaVersion) {
         this.javaVersion = javaVersion;
     }
+
 }

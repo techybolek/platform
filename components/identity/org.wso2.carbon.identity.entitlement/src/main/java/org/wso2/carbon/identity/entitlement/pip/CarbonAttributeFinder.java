@@ -18,30 +18,25 @@
 
 package org.wso2.carbon.identity.entitlement.pip;
 
-import java.io.StringWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.wso2.balana.attr.AttributeDesignator;
 import org.wso2.balana.ctx.Status;
-import net.sf.jsr107cache.Cache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Node;
-import org.wso2.carbon.caching.core.identity.IdentityCacheEntry;
-import org.wso2.carbon.caching.core.identity.IdentityCacheKey;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
+import org.wso2.carbon.identity.entitlement.cache.PIPAttributeCache;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 
 import org.wso2.balana.ctx.EvaluationCtx;
@@ -50,13 +45,9 @@ import org.wso2.balana.attr.AttributeValue;
 import org.wso2.balana.attr.BagAttribute;
 import org.wso2.balana.cond.EvaluationResult;
 import org.wso2.balana.finder.AttributeFinderModule;
+import org.wso2.carbon.identity.entitlement.pdp.EntitlementEngine;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 /**
  * CarbonAttributeFinder registers with sun-xacml engine as an AttributeFinderModule and delegate
@@ -70,9 +61,8 @@ public class CarbonAttributeFinder extends AttributeFinderModule {
 
 	private Map<String, List<PIPAttributeFinder>> attrFinders = new HashMap<String, List<PIPAttributeFinder>>();
 	private static Log log = LogFactory.getLog(CarbonAttributeFinder.class);
-	private Cache attributeFinderCache = null;
-	private boolean isAttributeCachingEnabled = false;
-	private int tenantId;
+	private PIPAttributeCache attributeFinderCache = null;
+	protected int tenantId;
 
 	public CarbonAttributeFinder(int tenantId) {
 		this.tenantId = tenantId;
@@ -86,13 +76,12 @@ public class CarbonAttributeFinder extends AttributeFinderModule {
 	public void init() {
 		Map<PIPAttributeFinder, Properties> designators = EntitlementServiceComponent.getEntitlementConfig()
 				.getDesignators();
-        Properties properties = EntitlementServiceComponent.getEntitlementConfig().getCachingProperties();  
+        Properties properties = EntitlementServiceComponent.getEntitlementConfig().getEngineProperties();
 		if ("true".equals(properties.getProperty(EntitlementConstants.ATTRIBUTE_CACHING))) {
-			attributeFinderCache = EntitlementUtil
-					.getCommonCache(EntitlementConstants.PIP_ATTRIBUTE_CACHE);
-			isAttributeCachingEnabled = true;
+            attributeFinderCache = PIPAttributeCache.getInstance();
+            attributeFinderCache.clearCache(tenantId);
 		}
-
+        // clear decision cache
         if(designators != null && !designators.isEmpty()){
             Set<PIPAttributeFinder> pipAttributeFinders = designators.keySet();
             for (Iterator iterator = pipAttributeFinders.iterator(); iterator.hasNext();) {
@@ -142,21 +131,17 @@ public class CarbonAttributeFinder extends AttributeFinderModule {
 
 
 		if (finders == null || finders.size() == 0) {
-			try {
-				refreshAttributeFindersForNewAttributeId();
-			} catch (Exception e) {
-				log.warn("Error while refreshing attribute finders");
-			}
+//          there is a API for refresh attribute finder so remove this              
+//			try {
+//				refreshAttributeFindersForNewAttributeId();
+//			} catch (Exception e) {
+//				log.warn("Error while refreshing attribute finders");
+//			}
 			finders = attrFinders.get(attributeId.toString());
 			if (finders == null || finders.size() == 0) {
 				log.info("No attribute designators defined for the attribute "
 						+ attributeId.toString());
-				ArrayList<String> code = new ArrayList<String>();
-				code.add(Status.STATUS_MISSING_ATTRIBUTE);
-				Status status = new Status(code,
-						"No attribute designators defined for the attribute "
-								+ attributeId.toString());
-				return new EvaluationResult(status);
+                return new EvaluationResult(BagAttribute.createEmptyBag(attributeType));
 			}
 		}
 
@@ -171,28 +156,19 @@ public class CarbonAttributeFinder extends AttributeFinderModule {
 				}
 
 				Set<String> attrs = null;
-				IdentityCacheKey cacheKey = null;
+				String key = null;
 
-				if (isAttributeCachingEnabled && !pipAttributeFinder.overrideDefaultCache()) {
+				if (attributeFinderCache != null && !pipAttributeFinder.overrideDefaultCache()) {
 
-                    String key = attributeType.toString() + attributeId.toString() + category.toString() +
-                                 domToString(context.getRequestRoot());
+                    key = attributeType.toString() + attributeId.toString() + category.toString() +
+                                 encodeContext(context);
 
                     if(issuer != null){
                         key += issuer;
                     }
 
 					if (key != null) {
-						cacheKey = new IdentityCacheKey(tenantId, key);
-						IdentityCacheEntry entry = (IdentityCacheEntry) attributeFinderCache
-								.get(cacheKey);
-						if (entry != null) {
-                            String[] values= entry.getCacheEntryArray();
-                            attrs = new HashSet<String>(Arrays.asList(values));
-							if (log.isDebugEnabled()) {
-								log.debug("Carbon Attribute Cache Hit");
-							}
-						}
+						attrs =  attributeFinderCache.getFromCache(tenantId, key);
 					}
 				}
 
@@ -202,12 +178,15 @@ public class CarbonAttributeFinder extends AttributeFinderModule {
 					}
 					attrs = pipAttributeFinder.getAttributeValues(attributeType, attributeId, category,
                                                                     issuer, context);
-					if (isAttributeCachingEnabled && cacheKey != null
-							&& !pipAttributeFinder.overrideDefaultCache()) {
-						IdentityCacheEntry cacheEntry = new IdentityCacheEntry(attrs.toArray(new String[attrs.size()]));
-						attributeFinderCache.put(cacheKey, cacheEntry);
+					if (attributeFinderCache != null && key != null
+							                    && !pipAttributeFinder.overrideDefaultCache()) {
+						attributeFinderCache.addToCache(tenantId, key, attrs);
 					}
-				}
+				} else {
+					if (log.isDebugEnabled()) {
+						log.debug("Carbon Attribute Cache Hit");
+					}                    
+                }
 
 				if (attrs != null) {
 					for (Iterator iterAttr = attrs.iterator(); iterAttr.hasNext();) {
@@ -260,19 +239,6 @@ public class CarbonAttributeFinder extends AttributeFinderModule {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.wso2.balana.finder.AttributeFinderModule#getSupportedDesignatorTypes()
-	 */
-	public Set getSupportedDesignatorTypes() {
-		HashSet<Integer> set = new HashSet<Integer>();
-		set.add(Integer.valueOf(AttributeDesignator.ENVIRONMENT_TARGET));
-		set.add(Integer.valueOf(AttributeDesignator.SUBJECT_TARGET));
-		set.add(Integer.valueOf(AttributeDesignator.ACTION_TARGET));
-		set.add(Integer.valueOf(AttributeDesignator.RESOURCE_TARGET));
-		return set;
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -314,8 +280,7 @@ public class CarbonAttributeFinder extends AttributeFinderModule {
 	 * Enables attribute cache
 	 */
 	public void enableAttributeCache() {
-		attributeFinderCache = EntitlementUtil
-				.getCommonCache(EntitlementConstants.PIP_ATTRIBUTE_CACHE);
+		attributeFinderCache = PIPAttributeCache.getInstance();
 	}
 
 	/**
@@ -323,26 +288,24 @@ public class CarbonAttributeFinder extends AttributeFinderModule {
 	 */
 	public void clearAttributeCache() {
 		if (attributeFinderCache != null) {
-			attributeFinderCache.clear();
+			attributeFinderCache.clearCache(tenantId);                                         
 			if (log.isDebugEnabled()) {
 				log.debug("Attribute value cache is cleared for tenant " + tenantId);
 			}
+            // clear decision cache
+            EntitlementEngine.getInstance().clearDecisionCache(false);
 		}
 	}
 
     /**
      * Converts DOM object to String. This is a helper method for creating cache key
-     * @param node  Node value
+     * @param evaluationCtx EvaluationCtx
      * @return String Object
      * @throws TransformerException Exception throws if fails
      */
-    private String domToString(Node node) throws TransformerException {
-        TransformerFactory transFactory = TransformerFactory.newInstance();
-        Transformer transformer = transFactory.newTransformer();
-        StringWriter buffer = new StringWriter();
-        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        transformer.transform(new DOMSource(node),
-              new StreamResult(buffer));
-        return buffer.toString();
+    private String encodeContext(EvaluationCtx evaluationCtx) throws TransformerException {
+        OutputStream stream = new ByteArrayOutputStream();
+        evaluationCtx.getRequestCtx().encode(stream);
+        return stream.toString();
     }
 }

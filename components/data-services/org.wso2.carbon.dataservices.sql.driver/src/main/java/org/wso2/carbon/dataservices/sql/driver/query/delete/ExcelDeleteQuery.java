@@ -52,7 +52,7 @@ public class ExcelDeleteQuery extends DeleteQuery {
         TExcelConnection excelCon = (TExcelConnection)getConnection();
         Sheet currentWorkSheet = excelCon.getWorkbook().getSheet(getTargetTableName());
         for (Integer rowId : this.getResultantRows().keySet()) {
-            currentWorkSheet.removeRow(currentWorkSheet.getRow(rowId));
+            currentWorkSheet.removeRow(currentWorkSheet.getRow(rowId + 1));
         }
         TDriverUtil.writeRecords(excelCon.getWorkbook(), excelCon.getPath());
         return this.getResultantRows().size();

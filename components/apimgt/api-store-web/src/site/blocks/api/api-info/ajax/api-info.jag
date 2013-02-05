@@ -38,7 +38,23 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-    } else {
+    }  else  if (action == "isRatingActivated") {
+        
+        mod = jagg.module("rating");
+        result = mod.isRatingActivated();
+
+        if (result.error) {
+            obj = {
+                error:result.error               
+            };
+        } else {
+            obj = {
+                error:false,
+                allow:result.allow
+            }
+        }
+        print(obj);
+      } else {
         print({
             error:true,
             message:msg.error.invalidAction(action)

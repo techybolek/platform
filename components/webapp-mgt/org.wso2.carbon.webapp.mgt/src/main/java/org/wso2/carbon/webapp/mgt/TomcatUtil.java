@@ -97,19 +97,23 @@ public class TomcatUtil {
     }
     
     public static String getApplicationNameFromContext(String contextName) {
-        String appName;
-        if(contextName.contains("t#") && contextName.contains("#webapps#")) {
-            String[] temp = contextName.split("#");
-            appName = temp[temp.length - 1];
-        } else if (contextName.contains("/t/") && contextName.contains("/webapps/")){
-            String[] temp = contextName.split("/");
-            appName = temp[temp.length - 1];
+        String appName = null;
+        if(contextName.contains(WebappsConstants.WEBAPP_PREFIX)
+                || contextName.contains(WebappsConstants.JAGGERY_APPS_PREFIX)
+                || contextName.contains(WebappsConstants.JAX_WEBAPPS_PREFIX)) {
+            if(contextName.startsWith("#")) {
+                String[] temp = contextName.split("#");
+                appName = temp[temp.length - 1];
+            } else if(contextName.startsWith("/")) {
+                String[] temp = contextName.split("/");
+                appName = temp[temp.length - 1];
+            }
         } else {
             appName = contextName;
         }
         return appName;
     }
-    
+
     public static Boolean isVirtualHostRequest(String requestedHostName) {
         Boolean isVirtualHostRequest = false;
         HotUpdateService hotUpdate = DataHolder.getHotUpdateService();

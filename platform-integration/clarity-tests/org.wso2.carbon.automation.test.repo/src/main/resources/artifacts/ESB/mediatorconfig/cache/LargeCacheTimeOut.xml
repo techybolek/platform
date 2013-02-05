@@ -9,7 +9,7 @@
     </sequence>
     <sequence name="main" trace="disable">
         <in>
-            <cache id="" scope="per-host" collector="false" hashGenerator="org.wso2.caching.digest.DOMHASHGenerator" timeout="1800">
+            <cache id="" scope="per-host" collector="false" hashGenerator="org.wso2.caching.digest.DOMHASHGenerator" timeout="180">
                 <implementation type="memory" maxSize="1000"/>
             </cache>
             <send>

@@ -97,7 +97,7 @@ public class SessionHostObjectTestCase {
                      "<ws:removeValueResponse xmlns:ws=\"http://services.mashup.wso2.org/session"
                      + "Test?xsd\"><return xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:js"
                      + "=\"http://www.wso2.org/ns/jstype\" xmlns:xsi=\"http://www.w3.org/2001/XML"
-                     + "Schema-instance\" js:type=\"xml\" xsi:type=\"xs:anyType\"><success /></ret"
+                     + "Schema-instance\" js:type=\"xml\" xsi:type=\"xs:anyType\"><success/></ret"
                      + "urn></ws:removeValueResponse>"
         );
     }
@@ -119,7 +119,7 @@ public class SessionHostObjectTestCase {
                      "<ws:clearSessionResponse xmlns:ws=\"http://services.mashup.wso2.org/session"
                      + "Test?xsd\"><return xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:js"
                      + "=\"http://www.wso2.org/ns/jstype\" xmlns:xsi=\"http://www.w3.org/2001/XML"
-                     + "Schema-instance\" js:type=\"xml\" xsi:type=\"xs:anyType\"><success /></re"
+                     + "Schema-instance\" js:type=\"xml\" xsi:type=\"xs:anyType\"><success/></re"
                      + "turn></ws:clearSessionResponse>"
         );
     }

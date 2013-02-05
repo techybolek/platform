@@ -79,6 +79,10 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
                 destPath = synapseRepo + SynapseAppDeployerConstants.MESSAGE_STORE_FOLDER;
             } else if (SynapseAppDeployerConstants.MESSAGE_PROCESSOR_TYPE.endsWith(artifact.getType())) {
                 destPath = synapseRepo + SynapseAppDeployerConstants.MESSAGE_PROCESSOR_FOLDER;
+            } else if (SynapseAppDeployerConstants.API_TYPE.endsWith(artifact.getType())) {
+                destPath = synapseRepo + SynapseAppDeployerConstants.APIS_FOLDER;
+            } else if (SynapseAppDeployerConstants.TEMPLATE_TYPE.endsWith(artifact.getType())) {
+                destPath = synapseRepo + SynapseAppDeployerConstants.TEMPLATES_FOLDER;
             } else {
                 continue;
             }
@@ -133,6 +137,10 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
                 destPath = synapseRepo + SynapseAppDeployerConstants.MESSAGE_STORE_FOLDER;
             } else if(SynapseAppDeployerConstants.MESSAGE_PROCESSOR_TYPE.equals(artifact.getType())){
                 destPath = synapseRepo + SynapseAppDeployerConstants.MESSAGE_PROCESSOR_FOLDER;
+            } else if(SynapseAppDeployerConstants.API_TYPE.equals(artifact.getType())){
+                destPath = synapseRepo + SynapseAppDeployerConstants.APIS_FOLDER;
+            } else if(SynapseAppDeployerConstants.TEMPLATE_TYPE.equals(artifact.getType())){
+                destPath = synapseRepo + SynapseAppDeployerConstants.TEMPLATES_FOLDER;
             } else {
                 continue;
             }

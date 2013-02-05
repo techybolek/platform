@@ -70,6 +70,8 @@
 
     if ((request.getSession().getAttribute("logged-user") == null) && (dashboardName == null)) {
         userLogedIn = false;
+        response.sendRedirect(request.getContextPath() + "/admin/login.jsp");
+        return;
     }
     DashboardServiceClient dashboardServiceClient = null;
     DashboardUtilServiceClient dashboardUtilServiceClient = null;
@@ -78,6 +80,7 @@
     DashboardUtilBean dashboardUtilBean = null;
 
     boolean isReadOnlyMode = false;
+
 
     backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     String adminConsoleURL = CarbonUIUtil.getAdminConsoleURL(request);
@@ -103,17 +106,19 @@
             isReadOnlyMode = dashboardContentBean.getReadOnlyMode();
         }
     } catch (Exception e) {
-        CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
-        session.setAttribute(CarbonUIMessage.ID, uiMsg);
-        e.printStackTrace();
+        response.sendRedirect(request.getContextPath() + "/admin/login.jsp");
+//        CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
+//        session.setAttribute(CarbonUIMessage.ID, uiMsg);
+//        e.printStackTrace();
+
 %>
-<jsp:include page="../admin/error.jsp"/>
+
+
 <%
         return;
-
     }
     String tenantdomainFromReq = (String) request.getAttribute(CarbonConstants.TENANT_DOMAIN);
-    if ((loggeduser == null || !dashboardUtilBean.isSessionValidSpecified()) && !dashboardUtilBean.isAnonModeActiveSpecified()) {
+    if ((null == loggeduser || !dashboardUtilBean.isSessionValidSpecified()) && !dashboardUtilBean.isAnonModeActiveSpecified()) {
         response.sendRedirect(DashboardUiUtils.getLoginUrl("../gsusermgt/login.jsp", DashboardUiUtils.getHttpsPort(adminConsoleURL), request));
     }
 

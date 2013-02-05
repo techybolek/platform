@@ -113,6 +113,16 @@ function validateTextForIllegal(fld,fldName) {
 
         <div id="workArea">
             <script type="text/javascript">
+	            function validateTextForIllegal(fld,fldName) {
+	
+	                var illegalChars = /([?#^\|<>\"\'])/;
+	                var illegalCharsInput = /(\<[a-zA-Z0-9\s\/]*>)/;
+	                if (illegalChars.test(fld.value) || illegalCharsInput.test(fld.value)) {
+	                   return false;
+	                } else {
+	                   return true;
+	                }
+	            }
                 function validate() {
                     // JS injection validation for name fields
 

@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
@@ -32,13 +33,23 @@ public class JDBCAPIKeyDataStore implements APIKeyDataStore {
     private ApiMgtDAO dao;
 
     public JDBCAPIKeyDataStore() throws APISecurityException {
-            dao = new ApiMgtDAO();
+        dao = new ApiMgtDAO();
     }
 
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
                                                  String apiKey) throws APISecurityException {
         try {
-            return dao.validateKey(context, apiVersion, apiKey);
+            return dao.validateKey(context, apiVersion, apiKey, APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+        } catch (APIManagementException e) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Error while looking up API key data in the database", e);
+        }
+    }
+
+    public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
+                                                 String apiKey,String requiredAuthenticationLevel) throws APISecurityException {
+        try {
+            return dao.validateKey(context, apiVersion, apiKey,requiredAuthenticationLevel);
         } catch (APIManagementException e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error while looking up API key data in the database", e);

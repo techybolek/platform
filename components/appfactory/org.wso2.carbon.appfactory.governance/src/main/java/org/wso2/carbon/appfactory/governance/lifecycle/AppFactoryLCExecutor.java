@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2006, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.wso2.carbon.appfactory.governance.lifecycle;
 
 import org.apache.axiom.om.OMElement;
@@ -9,7 +25,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.appfactory.common.AppFactoryConfiguration;
 import org.wso2.carbon.appfactory.common.AppFactoryConstants;
-import org.wso2.carbon.appfactory.svn.repository.mgt.util.Util;
+import org.wso2.carbon.appfactory.common.AppFactoryException;
+import org.wso2.carbon.appfactory.governance.internal.ServiceReferenceHolder;
 import org.wso2.carbon.governance.registry.extensions.executors.ServiceVersionExecutor;
 import org.wso2.carbon.governance.registry.extensions.executors.utils.ExecutorConstants;
 import org.wso2.carbon.governance.registry.extensions.interfaces.Execution;
@@ -24,7 +41,6 @@ import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.wso2.carbon.governance.registry.extensions.executors.utils.Utils.addNewId;
 import static org.wso2.carbon.governance.registry.extensions.executors.utils.Utils.populateParameterMap;
 
 
@@ -78,13 +94,14 @@ public class AppFactoryLCExecutor implements Execution {
 
         // new path will holds "/$Application/$Stage/$Version/appinfo"
         newPath = resourcePath.substring((AppFactoryConstants.REGISTRY_GOVERNANCE_PATH +
-                AppFactoryConstants.REGISTRY_APPLICATION_PATH).length());
+                                          AppFactoryConstants.REGISTRY_APPLICATION_PATH).length());
 
         // 0th element is "", 1st element is app name , 2nd element is $Stage ,
         // 3rd element $Version, 4th element is appinfo
         String newPathArray[] = newPath.split("/");
 
         String currentAppName = newPathArray[1];
+        String currentAppStage = newPathArray[2];
         String currentAppVersion = newPathArray[3];
         String currentAppInfo = newPathArray[4];
 
@@ -95,9 +112,24 @@ public class AppFactoryLCExecutor implements Execution {
             // Append version from here
             if (version != null) {
                 newPath = "/" + currentAppName + "/" + targetState + "/" + version + "/" + currentAppInfo;
+
+                // make newPath a absolute path
+                newPath = AppFactoryConstants.REGISTRY_GOVERNANCE_PATH +
+                          AppFactoryConstants.REGISTRY_APPLICATION_PATH + newPath;
+
+                try {
+                    requestContext.getRegistry().copy(resourcePath, newPath);
+
+                    Resource newResource = requestContext.getRegistry().get(newPath);
+                    requestContext.setResource(newResource);
+                    requestContext.setResourcePath(new ResourcePath(newPath));
+                } catch (RegistryException e) {
+                    log.error("Can not perform transition", e);
+                }
+
             } else {
                 log.error("Can not find application version. " +
-                        "Application version is required to perform lifecycle operation");
+                          "Application version is required to perform lifecycle operation");
                 return false;
             }
         } else {
@@ -109,58 +141,65 @@ public class AppFactoryLCExecutor implements Execution {
                 newPath = "/" + currentAppName + "/" + targetState + "/" + currentAppVersion + "/" + currentAppInfo;
             }
 
-        }
+            // make newPath a absolute path
+            newPath = AppFactoryConstants.REGISTRY_GOVERNANCE_PATH +
+                      AppFactoryConstants.REGISTRY_APPLICATION_PATH + newPath;
 
-        // make newPath a absolute path
-        newPath = AppFactoryConstants.REGISTRY_GOVERNANCE_PATH +
-                AppFactoryConstants.REGISTRY_APPLICATION_PATH + newPath;
+            try {
 
-        if ("Development".equals(currentState)) {
-            branchRepositoryOnNewAppVersion(applicationId, revision, currentAppVersion, version);
-        } else if ("Production".equals(targetState)) {
-            tagRepositoryOnNewAppVersion(applicationId, revision, currentAppVersion, version);
-        }
+                requestContext.getRegistry().move(resourcePath, newPath);
+
+                Resource newResource = requestContext.getRegistry().get(newPath);
+                requestContext.setResource(newResource);
+                requestContext.setResourcePath(new ResourcePath(newPath));
 
 
-        try {
-            requestContext.getRegistry().copy(resourcePath, newPath);
-            Resource newResource = requestContext.getRegistry().get(newPath);
-
-            if (newResource.getUUID() != null) {
-                addNewId(requestContext.getRegistry(), newResource, newPath);
+            } catch (RegistryException e) {
+                log.error("Can not perform transition", e);
             }
 
-            requestContext.setResource(newResource);
-            requestContext.setResourcePath(new ResourcePath(newPath));
+        }
 
+        try {
 
-            // Executing the BPEL
-            executeBPEL(applicationId, revision, version, targetState, build);
+            if (requestContext.getAction().equals("Promote")) {
+                // Executing the BPEL
+                log.debug("Executing BPEL to perform Promote action");
+                executeBPEL(applicationId, revision, version, targetState, build);
+
+            } else {
+                // Demote
+                log.debug("Executing Application deletion for " + requestContext.getAction() + " action");
+                // currentAppName equals to applicationID (derived from current registry path)
+                LCCommons.executeAppDeletion(currentAppStage, currentAppName);
+
+            }
 
             return true;
-        } catch (RegistryException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (Exception e) {
+            log.error("Error occurred", e);  //To change body of catch statement use File | Settings | File Templates.
             return false;
-        }
+       }
 
     }
 
     /**
      * This method will execute the BPEL as a web service in asynchronous way
-     * @param applicationId  : application key
-     * @param revision : svn revision
-     * @param version : version of the application
-     * @param stage : stage (i.e. Development, QA, Production)
-     * @param build : build status (this will hold true/false)
+     *
+     * @param applicationId : application key
+     * @param revision      : svn revision
+     * @param version       : version of the application
+     * @param stage         : stage (i.e. Development, QA, Production)
+     * @param build         : build status (this will hold true/false)
      */
     private void executeBPEL(final String applicationId, final String revision,
                              final String version, final String stage, final String build) {
 
 
-        AppFactoryConfiguration configuration = Util.getConfiguration();
+        AppFactoryConfiguration configuration = ServiceReferenceHolder.getInstance().getAppFactoryConfiguration();
 
         // get the deployToStage EPR from "appfactory.xml"
-        final String EPR = configuration.getFirstProperty(AppFactoryConstants.ENDPOINT_DEPLOY_TO_STAGE);
+        final String EPR = configuration.getFirstProperty(AppFactoryConstants.BPS_SERVER_URL) + "DeployToStage";
 
         new Thread(new Runnable() {
             public void run() {
@@ -205,96 +244,5 @@ public class AppFactoryLCExecutor implements Execution {
         return new StAXOMBuilder(new ByteArrayInputStream(payload.getBytes())).getDocumentElement();
     }
 
-    private static boolean branchRepositoryOnNewAppVersion(String applicationId, String revision,
-                                                           String currentVersion,
-                                                           String targetVersion) {
 
-        AppFactoryConfiguration configuration = Util.getConfiguration();
-        final String EPR = configuration.getFirstProperty(AppFactoryConstants.REVISION_CONTROLLER_SERVICE_EPR);
-        final String currentVersionFinal = currentVersion;
-        final String targetVersionFinal = targetVersion;
-        final String revisionFinal = revision;
-        final String appId = applicationId;
-        new Thread(new Runnable() {
-            public void run() {
-
-                try {
-                    //Create a service client
-                    ServiceClient client = new ServiceClient();
-
-                    //Set the endpoint address
-                    client.getOptions().setTo(new EndpointReference(EPR));
-                    client.getOptions().setAction("branch");
-                    AppFactoryConfiguration configuration = Util.getConfiguration();
-                    String username = configuration.getFirstProperty(AppFactoryConstants.SERVER_ADMIN_NAME);
-                    String password = configuration.getFirstProperty(AppFactoryConstants.SERVER_ADMIN_PASSWORD);
-
-                    CarbonUtils.setBasicAccessSecurityHeaders(username, password, client);
-
-                    //Make the request and get the response
-                    String payload = "<p:branch xmlns:p=\"http://services.core.appfactory.carbon.wso2.org\">\n" +
-                                     "      <xs:appId xmlns:xs=\"http://services.core.appfactory.carbon.wso2.org\">" + appId + "</xs:appId>\n" +
-                                     "      <xs:currentVersion xmlns:xs=\"http://services.core.appfactory.carbon.wso2.org\">" + currentVersionFinal + "</xs:currentVersion>\n" +
-                                     "      <xs:targetVersion xmlns:xs=\"http://services.core.appfactory.carbon.wso2.org\">" + targetVersionFinal + "</xs:targetVersion>\n" +
-                                     "      <xs:currentRevision xmlns:xs=\"http://services.core.appfactory.carbon.wso2.org\">" + revisionFinal + "</xs:currentRevision>\n" +
-                                     "   </p:branch>";
-                    client.fireAndForget(new StAXOMBuilder(new ByteArrayInputStream(payload.getBytes())).getDocumentElement());
-                } catch (AxisFault e) {
-                    log.error(e);
-                    e.printStackTrace();
-                } catch (XMLStreamException e) {
-                    log.error(e);
-                }
-            }
-        }).start();
-        return true;
-    }
-
-    private static boolean tagRepositoryOnNewAppVersion(String applicationId, String revision,
-                                                        String currentVersion,
-                                                        String targetVersion) {
-
-        AppFactoryConfiguration configuration = Util.getConfiguration();
-        final String EPR = configuration.getFirstProperty(AppFactoryConstants.REVISION_CONTROLLER_SERVICE_EPR);
-        final String currentVersionFinal = currentVersion;
-        final String targetVersionFinal = targetVersion;
-        final String revisionFinal = revision;
-        final String appId = applicationId;
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException ignored) {
-                }
-                try {
-                    //Create a service client
-                    ServiceClient client = new ServiceClient();
-
-                    //Set the endpoint address
-                    client.getOptions().setTo(new EndpointReference(EPR));
-                    client.getOptions().setAction("tag");
-                    AppFactoryConfiguration configuration = Util.getConfiguration();
-                    String username = configuration.getFirstProperty(AppFactoryConstants.SERVER_ADMIN_NAME);
-                    String password = configuration.getFirstProperty(AppFactoryConstants.SERVER_ADMIN_PASSWORD);
-
-                    CarbonUtils.setBasicAccessSecurityHeaders(username, password, client);
-
-                    //Make the request and get the response
-                    String payload = "<p:tag xmlns:p=\"http://services.core.appfactory.carbon.wso2.org\">\n" +
-                                     "      <xs:appId xmlns:xs=\"http://services.core.appfactory.carbon.wso2.org\">" + appId + "</xs:appId>\n" +
-                                     "      <xs:currentVersion xmlns:xs=\"http://services.core.appfactory.carbon.wso2.org\">" + currentVersionFinal + "</xs:currentVersion>\n" +
-                                     "      <xs:targetVersion xmlns:xs=\"http://services.core.appfactory.carbon.wso2.org\">" + targetVersionFinal + "</xs:targetVersion>\n" +
-                                     "      <xs:currentRevision xmlns:xs=\"http://services.core.appfactory.carbon.wso2.org\">" + revisionFinal + "</xs:currentRevision>\n" +
-                                     "   </p:tag>";
-                    client.sendReceive(new StAXOMBuilder(new ByteArrayInputStream(payload.getBytes())).getDocumentElement());
-                } catch (AxisFault e) {
-                    log.error(e);
-                    e.printStackTrace();
-                } catch (XMLStreamException e) {
-                    log.error(e);
-                }
-            }
-        }).start();
-        return true;
-    }
 }

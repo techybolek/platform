@@ -94,7 +94,7 @@
 <div id="middle">
 <h2><fmt:message key="service.list"/></h2>
 <div id="workArea">
- <%if(bean.getSize() != 0 || filter){%>
+ <%if(bean.getSize() != 0 || filter) {%>
     <p style="padding:5px">
     <form id="filterByNameForm" action="service_name_filter_ajaxprocessor.jsp"
           onsubmit="return submitFilterByNameForm();" method="post">
@@ -166,15 +166,23 @@
             } else {
                 numberOfPages = bean.getNames().length / itemsPerPage + 1;
             }
+            boolean isBrowseAuthorized = CarbonUIUtil.isUserAuthorized(request,
+                    "/permission/admin/manage/resources/browse");
+            boolean isLCAvailable = false;
+            for(int i=(pageNumber - 1) * itemsPerPage;i<pageNumber * itemsPerPage && i<bean.getNames().length;i++) {
+                if (bean.getLCName()[i]!=null && !bean.getLCName()[i].equals("")) {
+                    isLCAvailable = true;
+                    break;
+                }
+            }
         %>
         <thead>
         <tr>
                 <th><fmt:message key="service.name"/></th>
                 <th><fmt:message key="service.version"/></th>
                 <th><fmt:message key="service.namespace"/></th>
-                <th><fmt:message key="service.LC.info"/></th>
-                <% if (CarbonUIUtil.isUserAuthorized(request,
-                    "/permission/admin/manage/resources/browse")) {%><th><fmt:message key="actions"/></th><%} %>
+                <% if (isLCAvailable) {%><th><fmt:message key="service.LC.info"/></th><%} %>
+                <% if (isBrowseAuthorized) {%><th><fmt:message key="actions"/></th><%} %>
             </tr>
         </thead>
         <tbody>
@@ -189,18 +197,18 @@
               String version = bean.getVersion()[i];
                 %>
             <tr>
-                <% if (CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/resources/browse")) { %>
+                <% if (isBrowseAuthorized) { %>
                 <td><%=bean.getNames()[i]%></td>
                 <td><a href="../resources/resource.jsp?region=region3&item=resource_browser_menu&path=<%=urlCompletePath%>"><%=version%></a></td>
                 <td><%=bean.getNamespace()[i]%></td>
                 <%
-                    if(!(bean.getLCName()[i].equals("")) && !(bean.getLCState()[i].equals(""))){
+                    if(isLCAvailable && bean.getLCName()[i]!=null && !bean.getLCName()[i].equals("")){
                 %>
                 <td><%=bean.getLCName()[i]+" / "+bean.getLCState()[i]%></td>
                 <%
                     }else{
                 %>
-                <td></td>
+                <% if (isLCAvailable) {%><td></td><%} %>
                 <%
                     }
                 %>
@@ -215,19 +223,22 @@
                            style="background-image:url(./images/delete-desable.gif);color:#aaa !important;cursor:default;">
                             <fmt:message key="delete"/></a>
                     <%} %>
+                    <a onclick="downloadDependencies('<%=completePath%>')"  href="#"
+                               class="icon-link registryWriteOperation" style="background-image:url(../resources/images/icon-download.jpg);"><fmt:message key="download"/></a>
+
             </td>
 		<% } else { %>
                 <td><%=bean.getNames()[i]%></td>
                 <td><%=version%></td>
                 <td><%=bean.getNamespace()[i]%></td>
                 <%
-                    if(!(bean.getLCName()[i].equals("")) && !(bean.getLCState()[i].equals(""))){
+                    if(isLCAvailable && bean.getLCName()[i]!=null && !bean.getLCName()[i].equals("")){
                 %>
                 <td><%=bean.getLCName()[i]+" / "+bean.getLCState()[i]%></td>
                 <%
                 }else{
                 %>
-                <td></td>
+                <% if (isLCAvailable) {%><td></td><%} %>
                 <%
                     }
                  }

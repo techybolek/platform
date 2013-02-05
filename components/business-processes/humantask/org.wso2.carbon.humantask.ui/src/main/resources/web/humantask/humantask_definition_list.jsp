@@ -8,6 +8,7 @@
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.humantask.stub.mgt.types.TaskDefinition_type0" %>
 <%@ page import="org.wso2.carbon.humantask.stub.mgt.types.UndeployStatus_type0" %>
+<%@ page import="org.wso2.carbon.humantask.stub.mgt.types.TaskStatusType" %>
 <!--
 ~ Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 ~
@@ -140,7 +141,7 @@
 
 <fmt:bundle basename="org.wso2.carbon.humantask.ui.i18n.Resources">
     <carbon:breadcrumb
-            label="humantask.packages"
+            label="humantask.deployed.tasks"
             resourceBundle="org.wso2.carbon.humantask.ui.i18n.Resources"
             topPage="true"
             request="<%=request%>"/>
@@ -184,14 +185,46 @@
                         %>
                         <tr>
                             <td>
+                                <%
+                                    if(!TaskStatusType.UNDEPLOYING.equals(taskDef.getState())) {
+                                %>
+
                                 <a href="humantask_package_dashboard.jsp?packageName=<%=taskDef.getPackageName()%>"><%=taskDef.getPackageName()%>
-                                </a></td>
-                            <td>
-                                <a href="./task_definition_info.jsp?taskDefId=<%=taskDef.getTaskName()%>"><%=taskDef.getTaskName()%>
-                                </a></td>
-                            <td><%=taskDef.getType().toString()%>
+                                </a>
+
+                                <%
+                                    } else {
+                                %>
+                                    <%=taskDef.getPackageName()%>
+                                <%
+                                    }
+                                %>
+
                             </td>
-                            <td><%=taskDef.getState().toString()%>
+                            <td>
+
+                                <%
+                                    if(!TaskStatusType.UNDEPLOYING.equals(taskDef.getState())) {
+                                %>
+
+                                <a href="./task_definition_info.jsp?taskDefId=<%=taskDef.getTaskName()%>"><%=taskDef.getTaskName()%>
+                                </a>
+
+                                <%
+                                    } else {
+                                %>
+                                    <%=taskDef.getTaskName()%>
+                                <%
+                                    }
+                                %>
+                            </td>
+
+                            <td>
+                                <%=taskDef.getType().toString()%>
+                            </td>
+
+                            <td>
+                                <%=taskDef.getState().toString()%>
                             </td>
                         </tr>
                         <%

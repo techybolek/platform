@@ -6,7 +6,7 @@
 	<endpoint name="ep1">
 		<address uri="http://localhost:9001/services/SimpleStockQuoteService" />
 	</endpoint>
-	<sequence name="aggregateMessages">
+	<sequence name="aggregateMessages5">
 		<aggregate id="iterate1">
 			<completeCondition>
 				<messageCount min="-1" max="-1" />
@@ -18,7 +18,7 @@
 			</onComplete>
 		</aggregate>
 	</sequence>
-	<sequence name="iterateMessages">
+	<sequence name="iterateMessages5">
 		<iterate id="iterate1" expression="//m0:getQuote/m0:request"
 			preservePayload="true" attachPath="//m0:getQuote" xmlns:m0="http://services.samples">
 			<target>
@@ -40,10 +40,10 @@
 	</sequence>
 	<sequence name="main">
 		<in>
-			<sequence key="iterateMessages" />
+			<sequence key="iterateMessages5" />
 		</in>
 		<out>
-			<sequence key="aggregateMessages" />
+			<sequence key="aggregateMessages5" />
 		</out>
 		<description>The main sequence for the message mediation</description>
 	</sequence>

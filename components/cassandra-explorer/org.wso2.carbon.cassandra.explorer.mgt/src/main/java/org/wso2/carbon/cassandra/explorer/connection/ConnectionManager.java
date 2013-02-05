@@ -19,19 +19,15 @@
 
 package org.wso2.carbon.cassandra.explorer.connection;
 
-import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.ThriftCluster;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
-import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.context.ServiceContext;
 import org.wso2.carbon.cassandra.explorer.exception.CassandraExplorerException;
 import org.wso2.carbon.cassandra.explorer.session.ExplorerSessionManager;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +35,10 @@ import java.util.Map;
 public class ConnectionManager {
 
     private static final String EXPLORER_CLUSTER_CONNECTION = "connection";
+
+    private static int maxResultCount = 10000;
+
+    private static final String EXPLORER_MAX_RESULT_COUNT="maxResultCount";
 
     public ConnectionManager(String clusterName, String connectionUrl,
                              Map<String, String> credentials) throws CassandraExplorerException {
@@ -86,5 +86,11 @@ public class ConnectionManager {
                 != null);
     }
 
+    public static int getMaxResultCount(){
+       return  (Integer) ExplorerSessionManager.getSessionObject(EXPLORER_MAX_RESULT_COUNT);
+    }
 
+    public static void setMaxResultCount(int maxResultCount){
+          ExplorerSessionManager.setSessionObject(EXPLORER_MAX_RESULT_COUNT,maxResultCount);
+    }
 }

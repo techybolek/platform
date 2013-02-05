@@ -5,7 +5,8 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>rss-manager</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -13,6 +14,7 @@
     <artifactId>org.wso2.carbon.rssmanager.ui</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - RSS Manager UI</name>
+    <version>4.0.6</version>
     <description>WSO2 Carbon - RSS Manager UI</description>
     <url>http://wso2.org</url>
 
@@ -36,7 +38,7 @@
                             javax.xml.namespace.*;version="0.0.0",
                             *;resolution:=optional,
                             !org.wso2.carbon.rssmanager.ui.i18n,
-                            org.wso2.carbon.rssmanager.ui.*;version="${carbon.platform.package.export.version}",
+                            org.wso2.carbon.rssmanager.ui.*,
                             org.wso2.carbon.dbconsole.ui.*
                         </Import-Package>
                         <Carbon-Component>UIBundle</Carbon-Component>
@@ -60,13 +62,18 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rssmanager.stub</artifactId>
-            <version>${carbon.platform.version}</version>
+            <version>${carbon.platform.patch.version.406}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rssmanager.common</artifactId>
-            <version>${carbon.platform.version}</version>
+            <version>${carbon.platform.patch.version.405}</version>
         </dependency>
     </dependencies>
+
+    <properties>
+           <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
+           <carbon.platform.patch.version.406>4.0.6</carbon.platform.patch.version.406>
+       </properties>
 
 </project>

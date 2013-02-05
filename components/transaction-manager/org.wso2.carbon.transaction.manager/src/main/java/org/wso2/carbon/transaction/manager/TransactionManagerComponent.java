@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.transaction.manager.exception.TransactionManagerException;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -73,7 +73,8 @@ public class TransactionManagerComponent {
         if (log.isDebugEnabled()) {
             log.debug("Transaction Manager bundle is activated ");
         }
-
+        bundleContext.registerService(TransactionManagerDummyService.class.getName(),
+                new TransactionManagerDummyService(), null);
     }
 
     protected void deactivate(ComponentContext ctxt) {
@@ -155,11 +156,11 @@ public class TransactionManagerComponent {
     }
     
     protected static void bindTransactionManagerWithJNDIForTenant(int tid) {
-        SuperTenantCarbonContext.startTenantFlow();
-        SuperTenantCarbonContext.getCurrentContext().setTenantId(tid);
+    	PrivilegedCarbonContext.startTenantFlow();
+    	PrivilegedCarbonContext.getCurrentContext().setTenantId(tid);
 
         try {
-            Context currentCtx = SuperTenantCarbonContext.getCurrentContext().getJNDIContext();
+            Context currentCtx = PrivilegedCarbonContext.getCurrentContext().getJNDIContext();
             Context javaCtx = null;
             try {
                 javaCtx = (Context) currentCtx.lookup("java:comp");
@@ -190,7 +191,7 @@ public class TransactionManagerComponent {
         } catch (Exception e) {
            log.error("Error in binding transaction manager for tenant: " + tid, e);
         } finally {
-            SuperTenantCarbonContext.endTenantFlow();
+        	PrivilegedCarbonContext.endTenantFlow();
         }
     }
 }

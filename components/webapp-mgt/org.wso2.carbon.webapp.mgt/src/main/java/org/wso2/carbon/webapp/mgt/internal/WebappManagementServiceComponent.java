@@ -22,6 +22,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.ArtifactUnloader;
+import org.wso2.carbon.core.deployment.DeploymentSynchronizer;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.tomcat.ext.valves.CarbonTomcatValve;
 import org.wso2.carbon.tomcat.ext.valves.TomcatValveContainer;
@@ -29,7 +30,16 @@ import org.wso2.carbon.url.mapper.UrlMapperValve;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
-import org.wso2.carbon.webapp.mgt.*;
+import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
+import org.wso2.carbon.utils.deployment.GhostMetaArtifactsLoader;
+import org.wso2.carbon.webapp.mgt.DataHolder;
+import org.wso2.carbon.webapp.mgt.GhostWebappDeployerValve;
+import org.wso2.carbon.webapp.mgt.TenantLazyLoaderValve;
+import org.wso2.carbon.webapp.mgt.WebApplication;
+import org.wso2.carbon.webapp.mgt.WebApplicationsHolder;
+import org.wso2.carbon.webapp.mgt.WebContextParameter;
+import org.wso2.carbon.webapp.mgt.WebappsConstants;
+import org.wso2.carbon.webapp.mgt.multitenancy.GhostWebappMetaArtifactsLoader;
 import org.wso2.carbon.webapp.mgt.multitenancy.WebappUnloader;
 import org.wso2.carbon.webapp.mgt.utils.GhostWebappDeployerUtils;
 
@@ -47,32 +57,38 @@ import java.util.List;
  * cardinality="1..1" policy="dynamic" bind="setRealmService"  unbind="unsetRealmService"
  * @scr.reference name="registry.service" interface="org.wso2.carbon.registry.core.service.RegistryService"
  * cardinality="1..1" policy="dynamic"  bind="setRegistryService" unbind="unsetRegistryService"
+ * @scr.reference name="depsych.service" interface="org.wso2.carbon.core.deployment.DeploymentSynchronizer"
+ * cardinality="0..1" policy="dynamic"  bind="setDeploymentSynchronizerService" unbind="unsetDeploymentSynchronizerService"
  */
 public class WebappManagementServiceComponent {
     private static final Log log = LogFactory.getLog(WebappManagementServiceComponent.class);
-
 
     protected void activate(ComponentContext ctx) {
         try {
             // Register the valves with Tomcat
             ArrayList<CarbonTomcatValve> valves = new ArrayList<CarbonTomcatValve>();
             valves.add(new TenantLazyLoaderValve());
-            valves.add(new GhostWebappDeployerValve());
+            if (GhostDeployerUtils.isGhostOn()) {
+                valves.add(new GhostWebappDeployerValve());
+                // registering WebappUnloader as an OSGi service
+                WebappUnloader webappUnloader = new WebappUnloader();
+                ctx.getBundleContext().registerService(ArtifactUnloader.class.getName(),
+                                                       webappUnloader, null);
+                GhostWebappMetaArtifactsLoader artifactsLoader = new GhostWebappMetaArtifactsLoader();
+                ctx.getBundleContext().registerService(GhostMetaArtifactsLoader.class.getName(),
+                                                       artifactsLoader, null);
+
+            } else {
+                setServerURLParam(DataHolder.getServerConfigContext());
+            }
             //adding TenantLazyLoaderValve first in the TomcatContainer if Url mapping available
-            if(DataHolder.getHotUpdateService() != null &&
-                    TomcatValveContainer.isValveExits(new UrlMapperValve())) {
+            if (DataHolder.getHotUpdateService() != null &&
+                TomcatValveContainer.isValveExits(new UrlMapperValve())) {
                 TomcatValveContainer.addValves(WebappsConstants.VALVE_INDEX, valves);
             } else {
                 TomcatValveContainer.addValves(valves);
             }
-            // registering WebappUnloader as an OSGi service
-            WebappUnloader webappUnloader = new WebappUnloader();
-            ctx.getBundleContext().registerService(ArtifactUnloader.class.getName(),
-                                                   webappUnloader, null);
 
-            if (!GhostWebappDeployerUtils.isGhostOn()) {
-               setServerURLParam(DataHolder.getServerConfigContext());
-            }
         } catch (Throwable e) {
             log.error("Error occurred while activating WebappManagementServiceComponent", e);
         }
@@ -103,6 +119,14 @@ public class WebappManagementServiceComponent {
     }
 
     protected void unsetRegistryService(RegistryService registryService) {
+    }
+
+    protected void setDeploymentSynchronizerService(DeploymentSynchronizer depSynchService) {
+        DataHolder.setDeploymentSynchronizerService(depSynchService);
+    }
+
+    protected void unsetDeploymentSynchronizerService(DeploymentSynchronizer depSynchService) {
+        DataHolder.setDeploymentSynchronizerService(null);
     }
 
     private void setServerURLParam(ConfigurationContext configurationContext) {

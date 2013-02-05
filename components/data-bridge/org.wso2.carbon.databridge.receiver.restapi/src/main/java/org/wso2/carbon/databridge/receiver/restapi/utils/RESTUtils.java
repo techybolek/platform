@@ -1,7 +1,7 @@
 package org.wso2.carbon.databridge.receiver.restapi.utils;
 
 import org.apache.commons.codec.binary.Base64;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Credentials;
 import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
 import org.wso2.carbon.databridge.core.DataBridgeReceiverService;
@@ -47,7 +47,7 @@ public class RESTUtils {
     public static boolean authenticate(HttpServletRequest request) throws AuthenticationException {
         Credentials credentials = extractAuthHeaders(request);
         DataBridgeReceiverService dataBridgeReceiverService =
-                (DataBridgeReceiverService) SuperTenantCarbonContext.getCurrentContext()
+                (DataBridgeReceiverService) PrivilegedCarbonContext.getCurrentContext()
                         .getOSGiService(DataBridgeReceiverService.class);
         String sessionId = dataBridgeReceiverService.login(credentials.getUsername(), credentials.getPassword());
         HttpSession session = request.getSession(true);

@@ -55,8 +55,8 @@ public class MultitenancyThrottlingServiceClient implements ThrottlingRuleInvoke
     }
 
 
-    public void executeThrottlingRules() throws Exception {
-        stub.executeThrottlingRules();
+    public void executeThrottlingRules(int tenantId) throws Exception {
+        stub.executeThrottlingRules(tenantId);
     }
 
 }

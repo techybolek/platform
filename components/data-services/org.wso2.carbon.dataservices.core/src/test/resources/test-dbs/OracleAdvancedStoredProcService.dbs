@@ -55,6 +55,17 @@
          <element name="city" column="city" />
       </result>
    </query>
+
+   <query id="stored_procedure_with_ref_cursors_query">
+      <sql>call getCustomersByNumber(:id, :my_rc, :name)</sql>
+      <result element="Customers" rowName="Customer">
+         <element column="contactFirstName" name="contactFirstName" xsdType="string"/>
+         <element column="phone" name="phone" xsdType="string"/>
+      </result>
+      <param name="id" sqlType="INTEGER"/>
+      <param name="my_rc" sqlType="ORACLE_REF_CURSOR" type="OUT"/>
+      <param name="name" sqlType="STRING" type="OUT"/>
+   </query>
    
    <operation name="stored_procedure_with_out_params_op">
       <call-query href="stored_procedure_with_out_params_query">
@@ -69,6 +80,12 @@
    <operation name="stored_procedure_with_inout_params_result_set_op">
       <call-query href="stored_procedure_with_inout_params_result_set_query">
          <with-param name="customerNumber" query-param="customerNumber" />
+      </call-query>
+   </operation>
+
+   <operation name="stored_procedure_with_ref_cursors_op">
+      <call-query href="stored_procedure_with_ref_cursors_query">
+         <with-param name="id" query-param="id" />
       </call-query>
    </operation>
       

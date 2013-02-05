@@ -64,6 +64,7 @@
         session.removeAttribute("proxy");
         session.removeAttribute("pageNum");
     }
+    boolean switchimmed = "true".equals(request.getParameter("sourceView"));
 
     /* These four values should be populated from the registry values */
     String faultRegKey = "";
@@ -163,8 +164,12 @@
                     tbody += "<tr><td>" + tp + "</td><td><input name=\"" + tp + "\" type=\"checkbox\" value=\"" + tp + "\"unchecked/></td></tr>";
                 }
             } else {
-                // selects all the available transports since no transport is specified in the proxy service
-                tbody += "<tr><td>" + tp + "</td><td><input name=\"" + tp + "\" type=\"checkbox\" value=\"" + tp + "\"checked/></td></tr>";
+                // selects http/https ransports since no transport is specified in the proxy service
+                tbody += "<tr><td>" + tp + "</td><td><input name=\"" + tp + "\" type=\"checkbox\" value=\"" + tp + "\"";
+                        if(tp.startsWith("http")) {
+                            tbody += "checked";
+                        }
+                tbody += "/></td></tr>";
             }
         }
     }
@@ -297,9 +302,9 @@
             }
         }
     }
-	
-	givenParams = givenParams.replaceAll("\\\\", "\\\\\\\\");
 
+	givenParams = givenParams.replaceAll("\\\\", "\\\\\\\\");
+	
     // sets pinned servers
     String pinnedServers = "";
     String [] servers;
@@ -451,6 +456,7 @@
     var pageNum = <%=pageNum.intValue()%>;
     
     function init() {
+        
         setSelected('faultSeqOp', '<%=whichFaultSeq%>');
         setSelected('inSeqOp', '<%=whichInSeq%>');
         setSelected('outSeqOp', '<%=whichOutSeq%>');
@@ -465,6 +471,10 @@
         showHideEpOpsOnLoad();
         showPageOnLoad();
         showHidePublishWsdlOptionsOnLoad();
+        if (<%=switchimmed%>) {
+          sourceView();
+          return;
+        }
     }
 
     function showHidePublishWsdlOptionsOnLoad() {

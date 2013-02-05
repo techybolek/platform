@@ -22,9 +22,7 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.wso2.carbon.core.services.authentication.AuthenticationAdminStub;
-import org.wso2.carbon.identity.oauth.dto.xsd.OAuthConsumerDTO;
 import org.wso2.carbon.identity.samples.oauth.admin.OAuthAdminServiceStub;
-import org.wso2.carbon.identity.samples.oauth.admin.OAuthServiceStub;
 
 
 public class AuthenticationServiceClient {
@@ -53,7 +51,7 @@ public class AuthenticationServiceClient {
         return authenticate;
     }
 
-    public void registerOAuthConsumer(String consumerSecret) throws Exception {
+    public String[] registerOAuthConsumer() throws Exception {
         String serviceURL = null;
         ServiceClient client = null;
         Options option = null;
@@ -65,10 +63,10 @@ public class AuthenticationServiceClient {
         option = client.getOptions();
         option.setManageSession(true);
         option.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, authCookie);
-        oauth.registerOAuthConsumer(consumerSecret);
+        return oauth.registerOAuthConsumer();
     }
 
-    public boolean validateAuthenticationRequest(String shortLivedToken, OAuthConsumerDTO consumer)
+    /*public boolean validateAuthenticationRequest(String shortLivedToken, OAuthConsumerDTO consumer)
             throws Exception {
         String serviceURL = null;
         ServiceClient client = null;
@@ -82,6 +80,6 @@ public class AuthenticationServiceClient {
         option.setManageSession(true);
         option.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, authCookie);
         return oauth.validateAuthenticationRequest(consumer, shortLivedToken);
-    }
+    }*/
 
 }

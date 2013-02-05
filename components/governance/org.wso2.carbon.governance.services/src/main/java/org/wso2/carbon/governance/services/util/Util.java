@@ -39,19 +39,7 @@ public class Util {
 
     private static final Log log = LogFactory.getLog(Util.class);
 
-    private static RegistryService registryService;
-
     private static Validator serviceSchemaValidator = null;
-
-    public static synchronized void setRegistryService(RegistryService service) {
-        if (registryService == null) {
-            registryService = service;
-        }
-    }
-
-    public static RegistryService getRegistryService() {
-        return registryService;
-    }
 
     public static String getServiceConfig(Registry registry)throws Exception{
         return RegistryUtils.decodeBytes((byte[])registry.get(RegistryConstants.GOVERNANCE_SERVICES_CONFIG_PATH +
@@ -96,8 +84,8 @@ public class Util {
     }
 
     public static String getServicesSchemaLocation(){
-        return CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator +
-                "conf" + File.separator + "service-ui-config.xsd";
+        return CarbonUtils.getCarbonHome() + File.separator + "repository"+File.separator +"resources"+ File.separator +
+                "service-ui-config.xsd";
     }
 
     public static void validateOMContent(OMElement element) throws RegistryException {

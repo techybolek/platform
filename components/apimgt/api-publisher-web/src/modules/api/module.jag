@@ -51,9 +51,8 @@ jagg.module("api", {
     },
     hasPublishPermission:function () {
         return jagg.require(jagg.getModulesDir() + "api/check-permissions.jag").hasPublishPermission.apply(this, arguments);
-    }
-
-
+    }   
+ 
 
 });
 %>

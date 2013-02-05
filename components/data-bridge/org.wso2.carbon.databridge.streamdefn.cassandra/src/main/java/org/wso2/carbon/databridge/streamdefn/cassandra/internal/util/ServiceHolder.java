@@ -1,8 +1,7 @@
 package org.wso2.carbon.databridge.streamdefn.cassandra.internal.util;
 
 import org.wso2.carbon.cassandra.dataaccess.DataAccessService;
-import org.wso2.carbon.databridge.streamdefn.cassandra.datastore.CassandraConnector;
-import org.wso2.carbon.databridge.streamdefn.cassandra.subscriber.BAMEventSubscriber;
+import org.wso2.carbon.databridge.persistence.cassandra.datastore.CassandraConnector;
 import org.wso2.carbon.identity.authentication.AuthenticationService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -31,7 +30,6 @@ public class ServiceHolder {
 
     private static CassandraConnector cassandraConnector;
 
-    private static BAMEventSubscriber bamEventSubscriber;
 
     private static ConfigurationContextService configurationContextService;
 
@@ -74,14 +72,6 @@ public class ServiceHolder {
 
     public static void setRegistryService(RegistryService registryService) {
         ServiceHolder.registryService = registryService;
-    }
-
-    public static BAMEventSubscriber getBamEventSubscriber() {
-        return bamEventSubscriber;
-    }
-
-    public static void setBamEventSubscriber(BAMEventSubscriber bamEventSubscriber) {
-        ServiceHolder.bamEventSubscriber = bamEventSubscriber;
     }
 
     public static ConfigurationContextService getConfigurationContextService() {

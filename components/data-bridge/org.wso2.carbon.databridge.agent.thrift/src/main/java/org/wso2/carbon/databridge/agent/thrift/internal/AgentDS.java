@@ -21,16 +21,15 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.databridge.agent.thrift.Agent;
-import org.wso2.carbon.databridge.agent.thrift.conf.AgentConfiguration;
-import org.wso2.carbon.databridge.agent.thrift.internal.utils.AgentBuilder;
+import org.wso2.carbon.databridge.agent.thrift.AgentHolder;
 
 /**
  * @scr.component name="agentservice.component" immediate="true"
  */
 public class AgentDS {
     private static Log log = LogFactory.getLog(AgentDS.class);
-    private Agent agent;
     private ServiceRegistration serviceRegistration;
+    private boolean agentLoaded = false;
 
     /**
      * initialize the agent here.
@@ -38,19 +37,19 @@ public class AgentDS {
      * @param context
      */
     protected void activate(ComponentContext context) {
-        if (agent == null) {
-            AgentConfiguration agentConfiguration = new AgentConfiguration();
-            agent = new Agent(AgentBuilder.loadAgentConfiguration(agentConfiguration));
+        if (!agentLoaded) {
             serviceRegistration = context.getBundleContext().
-                    registerService(Agent.class.getName(), agent, null);
+                    registerService(Agent.class.getName(), AgentHolder.getOrCreateAgent(), null);
             log.info("Successfully deployed Agent Client");
+            agentLoaded = true;
         }
     }
 
 
     protected void deactivate(ComponentContext context) {
         context.getBundleContext().ungetService(serviceRegistration.getReference());
-        agent.shutdown();
+        AgentHolder.getAgent().shutdown();
+        AgentHolder.setAgentConfiguration(null);
         if (log.isDebugEnabled()) {
             log.debug("Successfully stopped agent");
         }

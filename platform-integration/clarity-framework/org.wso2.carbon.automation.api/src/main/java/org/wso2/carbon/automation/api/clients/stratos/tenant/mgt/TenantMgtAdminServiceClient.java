@@ -51,8 +51,7 @@ public class TenantMgtAdminServiceClient {
         AuthenticateStub.authenticateStub(userName, password, tenantMgtAdminServiceStub);
     }
 
-    public void addTenant(String domainName, String password,
-                          String firstName, String usagePlan)
+    public void addTenant(String domainName, String password, String firstName, String usagePlan)
             throws TenantMgtAdminServiceExceptionException, RemoteException {
 
         Date date = new Date();

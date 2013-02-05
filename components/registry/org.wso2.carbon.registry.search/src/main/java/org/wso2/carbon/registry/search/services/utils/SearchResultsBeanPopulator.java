@@ -28,6 +28,9 @@ import org.wso2.carbon.registry.common.ResourceData;
 import org.wso2.carbon.registry.common.TagCount;
 import org.wso2.carbon.registry.common.utils.CommonUtil;
 
+import java.lang.String;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Calendar;
 
@@ -36,13 +39,19 @@ public class SearchResultsBeanPopulator {
         SearchResultsBean searchResultsBean = new SearchResultsBean();
 
         try {
+            ResourceData[] resourceDataList;
             if (searchType.equalsIgnoreCase("Tag")) {
-                String tag = criteria;
-                searchResultsBean.setResourceDataList(searchByTags(tag, userRegistry));
+                resourceDataList = searchByTags(criteria, userRegistry);
             } else {
-                String content = criteria;
-                searchResultsBean.setResourceDataList(searchByContent(content, userRegistry));
+                resourceDataList = searchByContent(criteria, userRegistry);
             }
+            Arrays.sort(resourceDataList, new Comparator<ResourceData>() {
+                public int compare(ResourceData o1, ResourceData o2) {
+                    return o1.getResourcePath().toLowerCase().compareTo(
+                            o2.getResourcePath().toLowerCase());
+                }
+            });
+            searchResultsBean.setResourceDataList(resourceDataList);
 
         } catch (RegistryException e) {
 
@@ -80,7 +89,10 @@ public class SearchResultsBeanPopulator {
 
                 try {
                     Resource child = registry.get(resultPath);
-
+                    String actualPath = child.getProperty("registry.actualpath");
+                    if (actualPath != null && registry.resourceExists(actualPath)) {
+                        child = registry.get(actualPath);
+                    }
                     resourceData.setResourceType(child instanceof Collection ?
                             "collection" : "resource");
                     resourceData.setAuthorUserName(child.getAuthorUserName());
@@ -145,7 +157,10 @@ public class SearchResultsBeanPopulator {
 
                 try {
                     Resource child = registry.get(paths[i]);
-
+                    String actualPath = child.getProperty("registry.actualpath");
+                    if (actualPath != null && registry.resourceExists(actualPath)) {
+                        child = registry.get(actualPath);
+                    }
                     resourceData.setResourceType(child instanceof Collection ?
                             "collection" : "resource");
                     resourceData.setAuthorUserName(child.getAuthorUserName());

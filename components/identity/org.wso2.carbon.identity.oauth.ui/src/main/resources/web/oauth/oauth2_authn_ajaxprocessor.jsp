@@ -1,5 +1,5 @@
 <!--
-~ Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+~ Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 ~
 ~ WSO2 Inc. licenses this file to you under the Apache License,
 ~ Version 2.0 (the "License"); you may not use this file except
@@ -15,8 +15,9 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
-<%@ page import="org.wso2.carbon.identity.oauth.ui.OAuth2Parameters" %>
+<%@page import="org.wso2.carbon.identity.oauth.ui.OAuth2Parameters"%>
 <%@ page import="org.wso2.carbon.identity.oauth.ui.OAuthConstants" %>
+<%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ page import="java.util.Set" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -43,7 +44,7 @@
         return;
     }
 
-    String authStatus = request.getParameter("auth_status");
+    String authStatus = CharacterEncoder.getSafeText(request.getParameter("auth_status"));
 %>
 <!DOCTYPE html>
 <html lang="en">

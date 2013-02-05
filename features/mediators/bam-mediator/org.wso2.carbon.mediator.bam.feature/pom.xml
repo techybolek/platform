@@ -22,13 +22,15 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>bam-mediator-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.mediator.bam.feature</artifactId>
+    <version>4.0.5</version>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - BAM Mediator Aggregated Feature</name>
+    <name>WSO2 Carbon - BAM Mediator Aggregate Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for BAM Mediator functionality</description>
 
@@ -36,29 +38,29 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediator.bam.server.feature</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.platform.patch.version.405}</version>
             <type>zip</type>
-	    </dependency>
+        </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediator.bam.ui.feature</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.platform.patch.version.405}</version>
             <type>zip</type>
-	    </dependency>
+        </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediator.bam.config.server.feature</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.platform.patch.version.405}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediator.bam.config.ui.feature</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.platform.patch.version.405}</version>
             <type>zip</type>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -73,19 +75,29 @@
                             <goal>p2-feature-gen</goal>
                         </goals>
                         <configuration>
-                            <id>org.wso2.carbon.bam</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
-                            <!--importFeatures>
-                                <importFeatureDef>org.wso2.carbon.mediation.initializer:${mediation.initializer.feature.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.databridge.agent.thrift.server:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.databridge.commons.thrift.server:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.databridge.commons.server:${wso2carbon.version}</importFeatureDef>
-                            </importFeatures-->
+                            <id>org.wso2.carbon.mediator.bam</id>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <importFeatures>
+                                <importFeatureDef>
+                                    org.wso2.carbon.core:${carbon.platform.patch.version.401}
+                                </importFeatureDef>
+                                <importFeatureDef>
+                                    org.wso2.carbon.databridge.datapublisher:${carbon.platform.patch.version.402}
+                                </importFeatureDef>
+                            </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.mediator.bam.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.mediator.bam.ui.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.mediator.bam.config.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.mediator.bam.config.ui.feature</includedFeatureDef>
+                                <includedFeatureDef>
+                                    org.wso2.carbon:org.wso2.carbon.mediator.bam.server.feature:${carbon.platform.patch.version.405}
+                                </includedFeatureDef>
+                                <includedFeatureDef>
+                                    org.wso2.carbon:org.wso2.carbon.mediator.bam.ui.feature:${carbon.platform.patch.version.405}
+                                </includedFeatureDef>
+                                <includedFeatureDef>
+                                    org.wso2.carbon:org.wso2.carbon.mediator.bam.config.server.feature:${carbon.platform.patch.version.405}
+                                </includedFeatureDef>
+                                <includedFeatureDef>
+                                    org.wso2.carbon:org.wso2.carbon.mediator.bam.config.ui.feature:${carbon.platform.patch.version.405}
+                                </includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>
@@ -93,5 +105,11 @@
             </plugin>
         </plugins>
     </build>
+
+    <properties>
+        <carbon.platform.patch.version.401>4.0.1</carbon.platform.patch.version.401>
+        <carbon.platform.patch.version.402>4.0.2</carbon.platform.patch.version.402>
+        <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
+    </properties>
 
 </project>

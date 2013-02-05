@@ -43,6 +43,13 @@ public interface PIPAttributeFinder {
 	public void init(Properties properties) throws Exception;
 
     /**
+     * gets name of this module
+     *
+     * @return name as String
+     */
+    public String getModuleName();    
+
+    /**
 	 * Will be fired by CarbonAttributeFinder whenever it finds an attribute supported by this
 	 * module. This method has given the flexibility for users to implement more advance use cases
      * within PIP attribute finder. Here PIP attribute finder have been given access for <code>EvaluationCtx</code>

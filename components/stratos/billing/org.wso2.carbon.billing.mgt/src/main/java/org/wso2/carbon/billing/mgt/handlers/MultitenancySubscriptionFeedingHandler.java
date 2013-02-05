@@ -81,9 +81,8 @@ public class MultitenancySubscriptionFeedingHandler implements BillingHandler {
 
     private void feedSubscriptions(BillingEngineContext handlerContext) throws BillingException {
         // get the subscriptions of the customer.
-        String filter = handlerContext.getTaskConfiguration().getSubscriptionFilter();
         Customer customer = handlerContext.getCustomer();
-        List<Subscription> subscriptions = getSubscriptions(filter, customer); //if the customer is null
+        List<Subscription> subscriptions = getSubscriptions(null, customer); //if the customer is null
                                                                                // this will get subscriptions
                                                                               // of all customers
 
@@ -184,7 +183,7 @@ public class MultitenancySubscriptionFeedingHandler implements BillingHandler {
     /**
      * Gets subscriptions of customer(s)
      * @param filter currently there is a filter "multitenancy" defined in the billing-config.xml
-     * This will be removed in the future
+     * This will be removed in the future trunk
      * @param customer if the customer is null it gets subscriptions of all customers
      * @return
      * @throws BillingException
@@ -220,7 +219,7 @@ public class MultitenancySubscriptionFeedingHandler implements BillingHandler {
             dataAccessObject.commitTransaction();
         }catch (Exception e){
             dataAccessObject.rollbackTransaction();
-            String msg = "Error occurred while getting subscription: " + filter;
+            String msg = "Error occurred while getting subscriptions";
             if(customer != null) {
                 msg = msg + " for customer: " + customer.getName();
             }

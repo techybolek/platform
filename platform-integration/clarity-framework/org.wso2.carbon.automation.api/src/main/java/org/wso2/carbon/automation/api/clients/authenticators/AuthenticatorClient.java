@@ -31,9 +31,8 @@ import org.wso2.carbon.authenticator.stub.LogoutAuthenticationExceptionException
 import java.rmi.RemoteException;
 
 
-public class AuthenticatorClient {
+public class    AuthenticatorClient {
     private static final Log log = LogFactory.getLog(AuthenticatorClient.class);
-
     private AuthenticationAdminStub authenticationAdminStub;
 
     public AuthenticatorClient(String backendUrl) throws AxisFault {

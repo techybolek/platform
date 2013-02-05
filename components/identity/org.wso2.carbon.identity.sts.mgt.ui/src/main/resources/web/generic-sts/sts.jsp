@@ -23,6 +23,10 @@
 
 
 <%@page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="org.wso2.carbon.utils.CarbonUtils" %>
+<%@ page import="org.wso2.carbon.utils.NetworkUtils" %>
+<%@ page import="org.wso2.carbon.CarbonConstants" %>
+<%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 
 
 <jsp:include page="../dialog/display_messages.jsp"/>
@@ -89,8 +93,16 @@
     String keyAlias = null;
     String cookie = null;
     String serverUrl = null;
+    ConfigurationContext configurationContext = (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
     try {
-        serverUrl = CarbonUIUtil.getServerURL(config.getServletContext(), session) + "wso2carbon-sts";
+        if(CarbonUtils.isRunningOnLocalTransportMode()){
+            String mgtTransport = CarbonUtils.getManagementTransport();
+            int mgtTransportPort =  CarbonUtils.getTransportPort(configurationContext,mgtTransport);
+            String ip = NetworkUtils.getLocalHostname();
+            serverUrl = mgtTransport + "://" + ip + ":" + mgtTransportPort + "/services/wso2carbon-sts";
+        }else{
+            serverUrl = CarbonUIUtil.getServerURL(config.getServletContext(), session) + "wso2carbon-sts";
+        }
         cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         sts = new CarbonSTSClient(config, session, cookie);
 

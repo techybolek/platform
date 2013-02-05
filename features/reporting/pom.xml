@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-features</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -32,11 +32,11 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.reporting.feature</module>
-        <module>org.wso2.carbon.reporting.server.feature</module>
-        <module>org.wso2.carbon.reporting.ui.feature</module>
-        <module>org.wso2.carbon.reporting.template.server.feature</module>
-        <module>org.wso2.carbon.reporting.template.ui.feature</module>
+        <module>org.wso2.carbon.reporting.feature/4.0.0</module>
+        <module>org.wso2.carbon.reporting.server.feature/4.0.0</module>
+        <module>org.wso2.carbon.reporting.ui.feature/4.0.0</module>
+        <module>org.wso2.carbon.reporting.template.server.feature/4.0.0</module>
+        <module>org.wso2.carbon.reporting.template.ui.feature/4.0.0</module>
     </modules>
 
     <dependencyManagement>
@@ -65,6 +65,16 @@
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.reporting.stub</artifactId>
                 <version>${wso2carbon.version.reporting}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.bam.presentation.stub</artifactId>
+                <version>${wso2carbon.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.bam.analyzer.stub</artifactId>
+                <version>${wso2carbon.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
@@ -123,13 +133,13 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.ndatasource.core</artifactId>
+                <artifactId>org.wso2.carbon.datasource</artifactId>
                 <version>${wso2carbon.version.datasource}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.ndatasource.rdbms</artifactId>
-                <version>${wso2carbon.version}</version>
+                <artifactId>org.wso2.carbon.datasource.ui</artifactId>
+                <version>${wso2carbon.version.datasource}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>

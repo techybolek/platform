@@ -96,8 +96,8 @@ public class ResponsePopulator {
                     address.setPhone(addressType.getPhone());
                 }
                 ecdr.setAddress(address);
-
-                PaymentDetailsType paymentDetails = responseDetails.getPaymentDetails();
+                PaymentDetailsType [] paymentDetailsArr = responseDetails.getPaymentDetails();
+                PaymentDetailsType paymentDetails = paymentDetailsArr[0];
                 if(paymentDetails!=null){
                     BasicAmountType bat = paymentDetails.getOrderTotal();
                     if(bat!=null){
@@ -133,8 +133,9 @@ public class ResponsePopulator {
             DoExpressCheckoutPaymentResponseDetailsType responseDetails =
                     response.getDoExpressCheckoutPaymentResponseDetails();
             tr.setToken(responseDetails.getToken());
-            tr.setTransactionId(responseDetails.getPaymentInfo().getTransactionID());
-            PaymentInfoType paymentInfo = responseDetails.getPaymentInfo();
+            tr.setTransactionId(responseDetails.getPaymentInfo()[0].getTransactionID());
+            PaymentInfoType [] paymentInfoArr = responseDetails.getPaymentInfo();
+            PaymentInfoType paymentInfo = paymentInfoArr[0];
             //TODO: I am not sure whether this is the correct amount value
             tr.setAmount(paymentInfo.getGrossAmount().get_value());
             tr.setPaymentStatus(paymentInfo.getPaymentStatus().toString());

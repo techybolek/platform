@@ -22,10 +22,12 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>humantask</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
+    <version>4.0.6</version>
     <artifactId>org.wso2.carbon.humantask</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Human Task Engine</name>
@@ -36,6 +38,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.attachment.mgt</artifactId>
+            <version>4.0.5</version>
         </dependency>
 
         <dependency>
@@ -49,6 +52,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
+            <version>4.0.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.utils</artifactId>
+            <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlbeans.wso2</groupId>
@@ -65,6 +74,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.datasource</artifactId>
+            <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
@@ -77,6 +87,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.extensions</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>commons-dbcp.wso2</groupId>
@@ -101,14 +112,17 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.humantask.skeleton</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.unifiedendpoint.core</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ntask.core</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -148,17 +162,6 @@
                                     <fileset
                                             file="${basedir}/target/h2.sql"/>
                                 </sql>
-                                <!--sql
-                                        driver="org.apache.derby.jdbc.EmbeddedDriver"
-                                        url="jdbc:derby:${basedir}/target/database/jpadb;create=true"
-                                        userid="sa" password="" autocommit="true" print="true"
-                                        >
-                                    <classpath>
-                                        <path refid="h2.classpath"/>
-                                    </classpath>
-                                    <fileset
-                                            file="${basedir}/target/derby.sql"/>
-                                </sql-->
                                 <echo
                                         message="##################### END ############################"/>
                             </tasks>
@@ -360,7 +363,7 @@
                             version="${carbon.platform.package.export.version}",
                             org.wso2.carbon.humantask.skeleton.mgt.services.*;
                             version="${carbon.platform.package.export.version}",
-                            org.wso2.carbon.bpel.common.*; version="${project.version}",
+                            org.wso2.carbon.bpel.common.*; version="4.0.0",
                             org.apache.axis2.*; version="${axis2.osgi.version.range}",
                             *;resolution:=optional
                         </Import-Package>

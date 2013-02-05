@@ -22,11 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-service-stubs</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
     
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.hdfs.mgt.stub</artifactId>
+    <version>4.0.2</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - HDFS Management Stub</name>
     <url>http://wso2.org</url>
@@ -59,7 +61,9 @@
                                     <arg line="-uri src/main/resources/HDFSAdmin.wsdl -u -uw
                                     -o target/generated-code -p org.wso2.carbon.hdfs.mgt.stub.fs
                                     -ns2p http://mgt.hdfs.carbon.wso2.org=org.wso2.carbon.hdfs.mgt.stub.fs,http://mgt.hdfs.carbon.wso2.org/xsd=org.wso2.carbon.hdfs.mgt.stub.fs.xsd,http://org.apache.axis2/xsd=org.wso2.carbon.hdfs.mgt.stub.fs.axis2.xsd"/>
-                                    <classpath refid="wsdl2java.classpath"/>
+				    <classpath refid="maven.dependency.classpath"/>
+                                    <classpath refid="maven.compile.classpath"/>
+                                    <classpath refid="maven.runtime.classpath"/>	
                                 </java>
                                </tasks>
                         </configuration>

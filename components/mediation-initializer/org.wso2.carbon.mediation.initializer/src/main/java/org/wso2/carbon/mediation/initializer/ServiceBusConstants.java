@@ -49,6 +49,7 @@ public final class ServiceBusConstants {
     public static final String WORKER_INTERVAL = MEDIATION_CONF + ".WorkerInterval";
 
     public static final String DISABLED = "disabled";
+    public static final String ENABLED = "enabled";
 
     // Types of functional components
     public static final int ITEM_TYPE_PROXY_SERVICE = 0;

@@ -37,7 +37,7 @@
 
 <fmt:bundle basename="org.wso2.carbon.rssmanager.ui.i18n.Resources">
     <carbon:breadcrumb resourceBundle="org.wso2.carbon.rssmanager.ui.i18n.Resources"
-                       topPage="true" request="<%=request%>" label="Create database user"/>
+                       topPage="true" request="<%=request%>" label="Create Database User"/>
 
     <%
         String username = request.getParameter("username");
@@ -107,24 +107,27 @@
                         </select></td>
                     </tr>
                     <tr>
-                        <td><fmt:message key="rss.manager.permissions.username"/></td>
+                        <td><fmt:message key="rss.manager.permissions.username"/><font
+                                color='red'>*</font></td>
                         <td><input type="text" id="username" name="username" value="<%=username%>"/><font color='black'><%=(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) ? "" : "_" + Base64.encode(RSSManagerHelper.intToByteArray(tenantDomain.hashCode()))%></font>
                         </td>
                     </tr>
                     <tr>
-                        <td><fmt:message key="rss.manager.permissions.password"/></td>
+                        <td><fmt:message key="rss.manager.permissions.password"/><font
+                                color='red'>*</font></td>
                         <td><input type="password" id="password" name="password"
                                    value="<%=password%>"/></td>
                     </tr>
                     <tr>
-                        <td><fmt:message key="rss.manager.default.user.repeat.password"/></td>
+                        <td><fmt:message key="rss.manager.default.user.repeat.password"/><font
+                                color='red'>*</font></td>
                         <td><input type="password" id="repeatPassword" name="repeatPassword"/></td>
                     </tr>
                     <div id="connectionStatusDiv" style="display: none;"></div>
                     <tr>
                         <td class="buttonRow" colspan="2">
                             <input class="button" type="button"
-                                   onclick="return createDatabaseUser();"
+                                   onclick="return createDatabaseUser();return false;"
                                    value="<fmt:message key="rss.manager.save"/>"/>
 
                             <input class="button" type="button"

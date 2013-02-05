@@ -106,7 +106,7 @@
 %>
 <fmt:bundle basename="org.wso2.carbon.registry.search.ui.i18n.Resources">
     <%
-        if (resourceDataList != null && resourceDataList.length > 0) {
+        if (CarbonUIUtil.isContextRegistered(config, "/reporting/") && resourceDataList != null && resourceDataList.length > 0) {
     %>
     <carbon:report
             component="org.wso2.carbon.registry.search"

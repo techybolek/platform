@@ -77,7 +77,6 @@
 <div id="workArea">
     <script type="text/javascript">
         function validateSubmit() {
-            if (document.addxmppconfigform.enablexmppmultifact.checked) {
                 var value = document.getElementsByName("username")[0].value;
                 if (value == '') {
                     CARBON.showWarningDialog('<fmt:message key="username.required"/>');
@@ -106,9 +105,15 @@
                     CARBON.showWarningDialog('<fmt:message key="pin.mismatch"/>');
                     return false;
                 }
-            }
 
             document.addxmppconfigform.submit();
+        }
+        function clearInputs() {
+        	document.addxmppconfigform.server.value = "";
+        	document.addxmppconfigform.username.value = "";
+        	document.addxmppconfigform.usercode.value = "";
+        	document.addxmppconfigform.reusercode.value = "";
+        	document.addxmppconfigform.enablePIN.checked=false;
         }
     </script>
     <script>
@@ -120,18 +125,18 @@
             document.addxmppconfigform.usercode.readOnly = (chkbx.checked) ? false : true;
             document.addxmppconfigform.reusercode.readOnly = (chkbx.checked) ? false : true;
 
-        }
+        }        
     </script>
 
 
     <form name="addxmppconfigform" action="add-xmpp-settings.jsp" method="POST" target="_self">
-        <table>
+        <!-- table>
             <tr>
                 <td><input type="checkbox" name="enablexmppmultifact" VALUE="true" onclick="disableFields(this);">Enable
                     <fmt:message key='xmpp.based.multifactor.authentication'/>
                 </td>
             </tr>
-        </table>
+        </table-->
         <table style="width: 100%" class="styledLeft">
             <thead>
             <tr>
@@ -149,26 +154,28 @@
             </tr>
             <tr>
                 <td class="leftCol-small"><fmt:message key='user.name'/><span class="required">*</span></td>
-                <td><input type="text" name="username" id="username" readonly="readonly" value="<%=defaultIM%>"/></td>
+                <td><input type="text" name="username" id="username" value="<%=defaultIM%>"/></td>
             </tr>
 
             <tr>
                 <td class="leftCol-small"><fmt:message key='pin.number'/><span class="required">*</span></td>
-                <td><input type="password" name="usercode" id="usercode" readonly="readonly"/></td>
+                <td><input type="password" name="usercode" id="usercode" /></td>
             </tr>
             <tr>
                 <td class="leftCol-small"><fmt:message key='retype.pin.number'/><span class="required">*</span></td>
-                <td><input type="password" name="reusercode" id="reusercode" readonly="readonly"/></td>
+                <td><input type="password" name="reusercode" id="reusercode" /></td>
             </tr>
             <tr>
-                <td colspan="2"><input type="checkbox" name="enablePIN" VALUE="true" readonly="readonly">
+                <td colspan="2"><input type="checkbox" name="enablePIN" VALUE="true" >
                     <fmt:message key='use.pin.for.authentication'/>
                 </td>
             </tr>
             <tr>
                 <td colspan="2" class="buttonRow">
                     <input name="adduser" type="button" id="addbutton" class="button"
-                           value="<fmt:message key='add'/>" onclick="validateSubmit();" disabled="disabled"/>
+                           value="<fmt:message key='add'/>" onclick="validateSubmit();"/>
+                    <input name="clearButton" type="button" id="clearButton" class="button"
+                           value="<fmt:message key='clear'/>" onclick="clearInputs()"/>
                 </td>
             </tr>
             </tbody>
@@ -220,23 +227,30 @@
             document.editxmppconfigform.reupdatedUsercode.readOnly = (chkbx.checked) ? false : true;
             document.editxmppconfigform.EnablePIN.readOnly = (chkbx.checked) ? false : true;
         }
+        function clearInputs() {
+        	document.editxmppconfigform.updatedUsername.value = "";
+            document.editxmppconfigform.server.value = "";
+            document.editxmppconfigform.updatedUsercode.value = "";
+            document.editxmppconfigform.reupdatedUsercode.value = "";
+            document.editxmppconfigform.EnablePIN.checked=false;
+        }
     </script>
     <form name="editxmppconfigform" action="edit-xmpp-settings.jsp" method="POST" target="_self">
-        <table style="width: 100%" class="styledLeft">
+        <!-- table style="width: 100%" class="styledLeft">
             <tr>
                 <td><input type="checkbox" name="enablexmppmultifact" VALUE="true"
                            onclick="disableFields(this);" <%if(isXmppEnabled){ out.print("checked");}%>>
                       <fmt:message key='enable.xmpp.authentication'/>
                 </td>
             </tr>
-         </table>
-                <table style="width: 100%" class="styledLeft">
-                    <thead>
+         </table-->
+            <table style="width: 100%" class="styledLeft">
+               <thead>
                     <tr>
                         <th colspan="2"><fmt:message key='update.xmpp.configuration'/></th>
                     </tr>
-                    </thead>
-                    <tbody>
+               </thead>
+               <tbody>
                     <tr>
                         <td class="leftCol-small"><fmt:message key='xmpp.provider'/></td>
                         <td>
@@ -282,13 +296,19 @@
                             <fmt:message key='use.pin.for.authentication'/>
                         </td>
                     </tr>
+                     <tr>
+                		<td colspan="2"><input type="checkbox" name="enablexmppmultifact" VALUE="true"
+                           <%if(isXmppEnabled){ out.print("checked");}%>>
+                      		<fmt:message key='enable.xmpp.authentication'/>
+                		</td>
+            		 </tr>
                     <tr>
                         <td class="buttonRow" colspan="2">
                             <input name="adduser" type="button" class="button"
                                    value="<fmt:message key='save'/>" onclick="validateEdit();"/>
-                        </td>
+                		</td>                		
                     </tr>
-                    </tbody>
+               </tbody>
                 </table>
                  
     </form>

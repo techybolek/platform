@@ -1,0 +1,61 @@
+package org.wso2.siddhi.core.query.processor.handler.chain;
+/*
+*  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
+
+import org.wso2.siddhi.core.event.*;
+import org.wso2.siddhi.core.query.processor.handler.chain.filter.FilterHandler;
+
+import java.util.List;
+
+public class MultipleHandlerChain implements HandlerChain {
+    private List<FilterHandler> filterHandlerList;
+
+    public MultipleHandlerChain(List<FilterHandler> filterHandlerList) {
+        this.filterHandlerList = filterHandlerList;
+    }
+
+
+    @Override
+    public AtomicEvent process(AtomicEvent atomicEvent) {
+        for (FilterHandler filterHandler : filterHandlerList) {
+            atomicEvent = filterHandler.process(atomicEvent);
+            if (atomicEvent == null) {
+                return null;
+            }
+        }
+        return atomicEvent;
+    }
+
+
+    @Override
+    public BundleEvent process(BundleEvent bundleEvent) {
+        BundleEvent resultEvent = bundleEvent.getNewInstance();
+
+        for (AtomicEvent atomicEvent : bundleEvent.getEvents()) {
+            AtomicEvent result = process(atomicEvent);
+            if (result != null) {
+                if (bundleEvent instanceof ListEvent) {
+                    ((ListEvent) resultEvent).addEvent((Event) result);
+                } else {
+                    ((ListAtomicEvent) resultEvent).addEvent(result);
+                }
+            }
+        }
+        return resultEvent;
+    }
+}

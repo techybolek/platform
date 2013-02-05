@@ -10,7 +10,7 @@ public class DataSource {
     private String _rssDbUser;
     private String _rssDbPassword;
 
-    public String getM_dbDriverName() {
+    public String get_dbDriverName() {
         return _dbDriverName;
     }
 

@@ -42,6 +42,7 @@ import org.wso2.carbon.utils.ServerConstants;
 import javax.activation.DataHandler;
 import javax.servlet.http.HttpServletRequest;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 
 /**
  * WS Client calling the rule service admin
@@ -53,6 +54,7 @@ public class RuleServiceAdminClient {
     private RuleServiceAdminStub ruleServiceAdminStub;
     public static final String RULE_SERVIE = "ruleservice";
     public static final String FACTS = "facts";
+    public static final String SCRIPTS = "scripts";
     private static final OMFactory OM_FACTORY = OMAbstractFactory.getOMFactory();
     private static final OMNamespace NULL_NS = OM_FACTORY.createOMNamespace("", "");
 
@@ -203,6 +205,25 @@ public class RuleServiceAdminClient {
            }
     }
 
+    public void deleteAllRuleFiles( RuleService ruleService,  javax.servlet.http.HttpSession session){
+         String serviceName = ruleService.getName();
+        try {
+               String[] ruleFileList = getRuleFileList(ruleService,session);
+               if(ruleFileList.length >0){
+                   for(String filename : ruleFileList){
+                       deleteRuleFile(ruleService, filename, session);
+                   }
+
+               }
+           } catch (Exception e) {
+           throw new RuleServiceClientException("Error getting all rule files for rule service : " +
+                        serviceName);
+
+           }
+
+
+    }
+
     /**
      * Gets all facts belong to the service with the given name
      *
@@ -245,7 +266,7 @@ public class RuleServiceAdminClient {
      * @param session                HttpSession
      * @return A string array of the factArchives names
      */
-    public String[] getFactArchiveList(RuleService ruleService,
+    public ArrayList<String> getFactArchiveList(RuleService ruleService,
                                 javax.servlet.http.HttpSession session) {
         String serviceName = ruleService.getName();
 //        String[] archiveList = (String[]) session.getAttribute("allArchives");
@@ -254,8 +275,14 @@ public class RuleServiceAdminClient {
 //        } else {
             try {
                 String[] archiveList = ruleServiceAdminStub.getFactArchiveList(serviceName);
+                ArrayList<String> archiveArrayList= new ArrayList<String>();
+                if(archiveList != null)  {
+                for(String fileName : archiveList){
+                    archiveArrayList.add(fileName);
+                }
+                }
                 session.setAttribute("allArchives", archiveList);
-                return archiveList;
+                return archiveArrayList;
             } catch (Exception e) {
                 throw new RuleServiceClientException("Error getting all facts archives for rule service : " +
                         serviceName);

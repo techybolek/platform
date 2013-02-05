@@ -24,9 +24,7 @@
 		<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
         <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
         <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
-        <%@ page import="org.wso2.carbon.utils.multitenancy.CarbonContextHolder" %>
-        <%@ page import="org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext" %>
-        <script type="text/javascript" src="js/mapping_validator.js"></script>
+      <script type="text/javascript" src="js/mapping_validator.js"></script>
         <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
         <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <!--         <script type="text/javascript" src="../admin/dialog/js/dialog.js"></script> -->
@@ -35,6 +33,8 @@
 <%
 	String requestType = request.getParameter("type");
 	String carbonEndpoint = request.getParameter("carbonEndpoint");
+	String appType = request.getParameter("apptype");
+	String servletContext = request.getParameter("servletContext");
 	String backendServerURL = CarbonUIUtil
 			.getServerURL(config.getServletContext(), session);
 	ConfigurationContext configContext = (ConfigurationContext) config.getServletContext()
@@ -43,13 +43,14 @@
 	
 	UrlMapperServiceClient hostAdmin = new UrlMapperServiceClient(cookie, backendServerURL,
 			configContext);
-	String hosts[];
-	String port= hostAdmin.getHttpPort();
+	String hosts[] = null;
+	String port= hostAdmin.getHttpPort ();
 	String prefix = hostAdmin.getPrefix();
 	String referance ="";
-	boolean isService=false;
+	boolean isJaxrs = false;
+	String jaxContext = "";
 	try {
-		if (carbonEndpoint.contains("services")) {
+		if ("service".equalsIgnoreCase(appType)) {
 			String urlParts[] = carbonEndpoint.split(":\\d{4}");
 			if (urlParts.length>1) {
 				referance = urlParts[1];
@@ -57,9 +58,8 @@
 			hosts = hostAdmin.getHostForEpr(carbonEndpoint);
 			
 		} else {
-			hosts = hostAdmin.getHostForWebApp(carbonEndpoint);
-			referance = carbonEndpoint;port  = hostAdmin.getHttpPort();
-			isService=true;
+		   referance = carbonEndpoint;
+		   hosts = hostAdmin.getHostForWebApp(carbonEndpoint);
 		}
 	} catch (Exception e) {
 		CarbonUIMessage.sendCarbonUIMessage(e.getLocalizedMessage(), CarbonUIMessage.ERROR,
@@ -79,23 +79,24 @@
 		topPage="true" request="<%=request%>" />
 		<div id="middle">
 		<script type="text/javascript">
+
 			function    showSucessMessage(msg,myepr,inputVal) {
 				var failMsg = new RegExp("Failed to");
-                var hostPrefix = new RegExp("wso2.com");
-                msg += ": " + inputVal;
-            	if (msg.match(failMsg)) //if match sucess 
+                var deleteMsg = new RegExp("is successfully deleted");
+                var suffix = '<%=hostAdmin.getPrefix()%>';
+                if (msg.match(failMsg)) //if match sucess
 				{
-                    msg += ""; // + "\n" + "Please try below:"
-                                //+ inputVal + "app" + ".wso2.com" + inputVal + "123" + ".wso2.com";
-                    CARBON.showErrorDialog(msg);
-				} else if (!msg.match(hostPrefix)) {
                     msg += "";
+                    CARBON.showErrorDialog(msg);
+				} else if(msg.match(deleteMsg)) {
+                    msg = inputVal + " " + msg;
                     CARBON.showInfoDialog(msg, function(){
-                                            document.location.href = "index.jsp?&carbonEndpoint=" + myepr;
+                    document.location.href = "index.jsp?&carbonEndpoint=" + myepr + "&apptype=<%=appType%>&servletContext=<%=servletContext%>";
                     });
-				} else {
+                } else {
+                    msg = inputVal + suffix + " " + msg;
                     CARBON.showInfoDialog(msg, function(){
-                    document.location.href = "index.jsp?&carbonEndpoint=" + myepr;
+                    document.location.href = "index.jsp?&carbonEndpoint=" + myepr + "&apptype=<%=appType%>&servletContext=<%=servletContext%>";
                     });
                 }
 			}
@@ -109,7 +110,8 @@
                 jQuery.ajax({
                                 type: "POST",
                                 url: "contextMapper_ajaxprocessor.jsp",
-                                data: "type=add&carbonEndpoint=" + myepr + "&userEndpoint=" + inputVal + "&endpointType=Endpoint_1",
+                                data: "type=add&carbonEndpoint=" + myepr + "&userEndpoint=" + inputVal +
+                                            "&endpointType=Endpoint_1&apptype=<%=appType%>&servletContext=<%=servletContext%>",
                                 success: function(msg){
                                     showSucessMessage(msg,myepr,inputVal);
                                 }
@@ -119,7 +121,7 @@
             }
         });
     }   
-</script> 
+</script>
 
  <script type="text/javascript">
    function edit(myepr,host){
@@ -129,7 +131,8 @@
             jQuery.ajax({
                             type: "POST",
                             url: "contextMapper_ajaxprocessor.jsp",
-                            data: "type=edit&carbonEndpoint=" + myepr + "&userEndpoint=" + inputVal +  "&oldHost=" + host + "&endpointType=Endpoint_1",
+                            data: "type=edit&carbonEndpoint=" + myepr + "&userEndpoint=" + inputVal +
+    "&oldHost=" + host + "&endpointType=Endpoint_1&apptype=<%=appType%>&servletContext=<%=servletContext%>",
                             success: function(msg){
                             	showSucessMessage(msg,myepr,inputVal);
                             }
@@ -146,7 +149,8 @@
             jQuery.ajax({
                             type: "POST",
                             url: "contextMapper_ajaxprocessor.jsp",
-                            data: "type=delete&carbonEndpoint=" + myepr +"&userEndpoint=" + host + "&endpointType=Endpoint_1",
+                            data: "type=delete&carbonEndpoint=" + myepr +"&userEndpoint=" + host
+    + "&endpointType=Endpoint_1&apptype=<%=appType%>&servletContext=<%=servletContext%>",
                             success: function(msg){
                             	showSucessMessage(msg,myepr,host);
                             }
@@ -163,66 +167,117 @@
 		<b><fmt:message
 					key="url.mapping.for" /> <%=referance%>
 			</b><br/><br/>
-		
-						 <%   if (hosts == null || hosts.length == 0) {
-						  %>
-								<fmt:message key="no.mappings.found" />
-									<%
-										} else {
-									%>
-							<table class="styledLeft">
-								<thead>
-									<tr>
-										<th><b><fmt:message key="host.name" /> </b></th>
-										<th><b><fmt:message key="action" /> </b></th>
-									</tr>
-								</thead>
-								<%
-									int index = -1;
-										for (String host : hosts) {
-											++index;
-											if (index % 2 != 0) {
-								%>
-								<tr>
-									<%
-										} else {
-									%>		
-								<tr bgcolor="#eeeffb">
-									<%
-										}
-												if (hosts == null || hosts.length == 0) {
-									%>
-									<td colspan="2"><fmt:message key="no.mappings.found" /></td>
-									<%
-										} else { 
-										if(isService) {
-										//	host=host+":"+port;
-											String url = "http://"+host+":"+port+"/";
-											%>
-											<td><a href="<%=url%>" target="_blank"> <%=host%></a></td><%
-										} else {
-											%>
-											<td><%=host%></td><%
-										}
-									%>
-								
-									<td>
-										<a class="icon-link"
-										style="background-image: url(images/edit.gif);"
-										onclick="edit('<%=carbonEndpoint%>','<%=host%>');"
-										title="Edit"><fmt:message key="edit" /></a> <a class="icon-link"
-										style="background-image: url(images/delete.gif);"
-										onclick="deleteHost('<%=carbonEndpoint%>','<%=host%>');"
-										title="Delete"><fmt:message key="delete" /></a>							     
-									</td>
-									<%
-										}
-									%>
-								</tr>
-								<%
-									} 
-										}
-								%>
+                <%
+                if (hosts == null || hosts.length == 0) {
+                %>
+                    <fmt:message key="no.mappings.found" />
+                <%
+                } else {
+                %>
+                    <table class="styledLeft">
+                        <thead>
+                            <tr>
+                                <th><b><fmt:message key="host.name" /> </b></th>
+                            <% if("service".equalsIgnoreCase(appType)) {
+                            %>
+                                <th colspan="5"><b><fmt:message key="action" /> </b></th>
+                            <% } else { %>
+                                 <th colspan="3"><b><fmt:message key="action" /> </b></th>
+                            <%}%>
+                            </tr>
+                        </thead>
+                    <%
+                    int index = -1;
+                    for (String host : hosts) {
+                        ++index;
+                        if (index % 2 != 0) {
+                    %>
+                        <tr>
+                            <%
+                                } else {
+                            %>
+                            <tr bgcolor="#eeeffb">
+                                <%
+                                }
+                                if (hosts == null || hosts.length == 0) {
+                                    %>
+                                    <td colspan="3"><fmt:message key="no.mappings.found" /></td>
+                                    <%
+                                } else {
+                                    if("jaxWebapp".equalsIgnoreCase(appType)) {
+
+                                        String url = "http://"+host+":"+port + servletContext;
+                                        %>
+                                        <td>
+                                            <%=host%>
+                                        </td>
+                                        <td>
+                                            <a href="<%=url%>" target="_blank"
+                                            style='background:url(images/goto_url.gif) no-repeat;padding-left:20px;display:block;white-space: nowrap;height:16px;'>
+                                                Find Services
+                                            </a>
+                                        </td>
+                                        <%
+                                    } else if("service".equalsIgnoreCase(appType)) {
+                                        String url = "http://"+host+":" + port + "/";
+                                        %>
+                                        <td>
+                                            <%=host%>
+                                        </td>
+                                        <td>
+                                            <a href="<%=url + "?wsdl"%>" class="icon-link" target="_blank" style="background-image:url(images/wsdl.gif);" >
+                                                <fmt:message key="wsdl.one"/>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a href="<%=url + "?wsdl2"%>" class="icon-link" target="_blank" style="background-image:url(images/wsdl.gif);" >
+                                                <fmt:message key="wsdl.two"/>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a href="<%=url + "?tryit"%>" class="icon-link" target="_blank" style="background-image:url(images/tryit.gif);" >
+                                                <fmt:message key="try.this.service"/>
+                                            </a>
+                                        </td>
+                                        <%
+                                    } else if("jaggeryWebapp".equalsIgnoreCase(appType) || "webapp".equalsIgnoreCase(appType)) {
+                                        String url = "http://" + host + ":" + port + "/";
+                                        %>
+                                        <td>
+                                            <%=host%>
+                                        </td>
+                                        <td>
+                                            <a href="<%=url%>" target="_blank"
+                                                style='background:url(images/goto_url.gif) no-repeat;padding-left:20px;display:block;white-space: nowrap;height:16px;'>
+                                                <fmt:message key="go.to.url"/>
+                                            </a>
+                                        </td>
+                                        <%
+                                    }
+
+
+                                %>
+
+                                <td>
+                                    <a class="icon-link"
+                                    style="background-image: url(images/edit.gif);"
+                                    onclick="edit('<%=carbonEndpoint%>','<%=host%>');"
+                                    title="Edit"><fmt:message key="edit" /></a>
+                                </td>
+                                <td>
+                                    <a class="icon-link"
+                                    style="background-image: url(images/delete.gif);"
+                                    onclick="deleteHost('<%=carbonEndpoint%>','<%=host%>');"
+                                    title="Delete"><fmt:message key="delete" /></a>
+                                </td>
+                                <%
+                                }
+                                %>
+                            </tr>
+                <%
+                    }
+                }
+                %>
 
         <%
             if(!hostAdmin.isMappingLimitExceeded(carbonEndpoint)) {

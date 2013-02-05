@@ -40,4 +40,13 @@ public class HiveConstants {
 
     public static final String TASK_TENANT_ID_KEY = "__TENANT_ID_PROP__";
 
+    public static final String ENABLE_PROFILE_PROPERTY = "profile.analyzer";
+    public static final String HIVE_RSS_CONFIG_FILE_PATH = "advanced/hive-rss-config.xml";
+    public static final String HIVE_RSS_CONFIG_SERVER_URL = "rss-server-url";
+    public static final String HIVE_RSS_CONFIG_USERNAME = "rss-server-admin-userName";
+    public static final String HIVE_RSS_CONFIG_PASSWORD = "rss-server-admin-password";
+    public static final String HIVE_RSS_CONFIG_DEFAULT_USERNAME = "admin";
+    public static final String HIVE_RSS_CONFIG_DEFAULT_PASSWORD = "admin";
+    public static final String HIVE_RSS_CONFIG_DEFAULT_SERVER_URL = "services/RSSAdmin";
+    public static final String DEFAULT_SERVER_URL = "https://127.0.0.1:9443/";
 }

@@ -18,15 +18,35 @@
 
 package org.wso2.carbon.apimgt.keymgt.service;
 
+import org.apache.axis2.AxisFault;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.ApplicationKeysDTO;
+import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
+import org.wso2.carbon.caching.core.CacheKey;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.oauth.cache.OAuthCache;
+import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This service class exposes the functionality required by the application developers who will be
@@ -45,7 +65,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @return  Access Token
      * @throws APIKeyMgtException Error when getting the AccessToken from the underlying token store.
      */
-    public String getAccessToken(String userId, APIInfoDTO apiInfoDTO, 
+    public String getAccessToken(String userId, APIInfoDTO apiInfoDTO,
                                  String applicationName, String tokenType) throws APIKeyMgtException,
             APIManagementException, IdentityException {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
@@ -55,7 +75,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             String tenantAwareUserId = MultitenantUtils.getTenantAwareUsername(userId);
             int tenantId = IdentityUtil.getTenantIdOFUser(userId);
 
-            String[] credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId);
+            String[] credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName);
 
             accessToken = apiMgtDAO.registerAccessToken(credentials[0],applicationName,
                     tenantAwareUserId, tenantId, apiInfoDTO, tokenType);
@@ -83,7 +103,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             //get the tenant id for the corresponding domain
             String tenantAwareUserId = MultitenantUtils.getTenantAwareUsername(userId);
             int tenantId = IdentityUtil.getTenantIdOFUser(userId);
-            credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId);
+            credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName);
             accessToken = apiMgtDAO.registerApplicationAccessToken(credentials[0], applicationName,
                     tenantAwareUserId, tenantId, tokenType);
 
@@ -114,12 +134,112 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         return ApiMgtDAO.getSubscribedAPIsOfUser(userId);
     }
 
-    public String renewAccessToken(String userId, APIInfoDTO apiInfoDTO) {
-        return null;
+    public String renewAccessToken(String tokenType, String oldAccessToken)
+            throws Exception {
+        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        return apiMgtDAO.refreshAccessToken(tokenType, oldAccessToken);
+
     }
 
     public void unsubscribeFromAPI(String userId, APIInfoDTO apiInfoDTO) {
 
     }
 
+    /**
+     * Revoke Access tokens by Access token string.This will change access token status to revoked and
+     * remove cached access tokens from memory
+     *
+     * @param key Access Token String to be revoked
+     * @throws APIManagementException on error in revoking
+     * @throws AxisFault              on error in clearing cached key
+     */
+    public void revokeAccessToken(String key,String consumerKey,String authorizedUser) throws APIManagementException, AxisFault {
+        ApiMgtDAO dao=new ApiMgtDAO();
+        dao.revokeAccessToken(key);
+        clearOAuthCache(consumerKey,authorizedUser);
+    }
+
+    /**
+     * Revoke All access tokens associated with an application.This will change access tokens status to revoked and
+     * remove cached access tokens from memory
+     *
+     * @param application Application object associated with keys to be removed
+     * @throws APIManagementException on error in revoking
+     * @throws AxisFault              on error in revoking cached keys
+     */
+    public void revokeAccessTokenForApplication(Application application) throws APIManagementException, AxisFault {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        boolean gatewayExists = config.getFirstProperty(APIConstants.API_GATEWAY_SERVER_URL) != null;
+        Set<SubscribedAPI> apiSet = null;
+        Set<String> keys = null;
+        ApiMgtDAO dao;
+        dao = new ApiMgtDAO();
+        if (gatewayExists) {
+            keys = dao.getApplicationKeys(application.getId());
+            apiSet = dao.getSubscribedAPIs(application.getSubscriber());
+        }
+        List<APIKeyMapping> mappings = new ArrayList<APIKeyMapping>();
+        for (String key : keys) {
+            dao.revokeAccessToken(key);
+            for (SubscribedAPI api : apiSet) {
+                APIKeyMapping mapping = new APIKeyMapping();
+                API apiDefinition = APIKeyMgtUtil.getAPI(api.getApiId());
+                mapping.setApiVersion(api.getApiId().getVersion());
+                mapping.setContext(apiDefinition.getContext());
+                mapping.setKey(key);
+                mappings.add(mapping);
+            }
+        }
+        if (mappings.size() > 0) {
+            APIAuthenticationAdminClient client = new APIAuthenticationAdminClient();
+            client.invalidateKeys(mappings);
+
+        }
+    }
+
+
+    /**
+     * Revoke all access tokens associated by subscriber user.This will change access token status to revoked and
+     * remove cached access tokens from memory
+     *
+     * @param subscriber Subscriber associated with the keys to be removed
+     * @throws APIManagementException on error in revoking keys
+     * @throws AxisFault              on error in clearing cached keys
+     */
+    public void revokeAccessTokenBySubscriber(Subscriber subscriber) throws
+            APIManagementException, AxisFault {
+        ApiMgtDAO dao;
+        dao = new ApiMgtDAO();
+        Application[] applications = dao.getApplications(subscriber);
+        for (Application app : applications) {
+            revokeAccessTokenForApplication(app);
+        }
+    }
+
+    /**
+     * Revoke all access tokens associated with the given tier.This will change access token status to revoked and
+     * remove cached access tokens from memory
+     *
+     * @param tierName Tier associated with keys to be removed
+     * @throws APIManagementException on error in revoking keys
+     * @throws AxisFault              on error in clearing cached keys
+     */
+    public void revokeKeysByTier(String tierName) throws APIManagementException, AxisFault {
+        ApiMgtDAO dao;
+        dao = new ApiMgtDAO();
+        Application[] applications = dao.getApplicationsByTier(tierName);
+        for (Application application : applications) {
+            revokeAccessTokenForApplication(application);
+        }
+    }
+
+    public void clearOAuthCache(String consumerKey, String authorizedUser) {
+        OAuthCache oauthCache;
+        CacheKey cacheKey = new OAuthCacheKey(consumerKey + ":" + authorizedUser);
+        if (OAuthServerConfiguration.getInstance().isCacheEnabled()) {
+            oauthCache = OAuthCache.getInstance();
+            oauthCache.clearCacheEntry(cacheKey);
+        }
+    }
 }

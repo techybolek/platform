@@ -16,6 +16,8 @@
  ~ under the License.
  -->
 
+<%@page import="java.util.Properties"%>
+<%@page import="org.wso2.carbon.dataservices.common.DBConstants.CustomDataSource"%>
 <%@page import="org.apache.axis2.context.ConfigurationContext"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -35,7 +37,8 @@
 <%@ page import="java.util.Iterator" %>
 <%@ page import="javax.xml.bind.JAXBException" %>
 <%@ page import="java.util.List" %>
-
+<%@ page import="java.util.regex.Pattern" %>
+<%@ page import="java.util.regex.Matcher" %>
 
 <fmt:bundle basename="org.wso2.carbon.dataservices.ui.i18n.Resources">
 <script type="text/javascript" src="../ajax/js/prototype.js"></script>
@@ -49,10 +52,9 @@
         topPage="false"
         request="<%=request%>"/>
 
-<jsp:useBean id="dataService" class="org.wso2.carbon.dataservices.ui.beans.Data" scope="session">
-</jsp:useBean>
-<jsp:useBean id="newConfig" class="org.wso2.carbon.dataservices.ui.beans.Config" scope="session">
-</jsp:useBean>
+<jsp:useBean id="dataService" class="org.wso2.carbon.dataservices.ui.beans.Data" scope="session"></jsp:useBean>
+<jsp:useBean id="newConfig" class="org.wso2.carbon.dataservices.ui.beans.Config" scope="session"></jsp:useBean>
+<jsp:useBean id="backupConfigProps" class="java.util.ArrayList" scope="session"></jsp:useBean>
 <script type="text/javascript" src="js/ui-validations.js"></script>
 <script type="text/javascript">
 
@@ -289,7 +291,13 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
             config.addProperty(DBConstants.RDBMS.DYNAMIC_USER_AUTH_MAPPING, dynamicUserConfig);
         }
     } else if (DBConstants.DataSourceTypes.EXCEL.equals(selectedType)) {
-    	 if (config.getPropertyValue(DBConstants.Excel.DATASOURCE) == null) {
+    	if (config.getPropertyValue(DBConstants.RDBMS.DRIVER_CLASSNAME) == null) {
+			 config.addProperty(DBConstants.RDBMS.DRIVER_CLASSNAME, "");
+		 }
+   	 if (config.getPropertyValue(DBConstants.RDBMS.URL) == null) {
+			 config.addProperty(DBConstants.RDBMS.URL, "");
+		 } 
+    	if (config.getPropertyValue(DBConstants.Excel.DATASOURCE) == null) {
 			 config.addProperty(DBConstants.Excel.DATASOURCE, "");
 		 }
     } else if (DBConstants.DataSourceTypes.RDF.equals(selectedType)) {
@@ -330,19 +338,31 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
 			 config.addProperty(DBConstants.JNDI.PASSWORD, "");
 		 }
     } else if (DBConstants.DataSourceTypes.GDATA_SPREADSHEET.equals(selectedType)) {
+    	if (config.getPropertyValue(DBConstants.RDBMS.DRIVER_CLASSNAME) == null) {
+			 config.addProperty(DBConstants.RDBMS.DRIVER_CLASSNAME, "");
+		}
+		if (config.getPropertyValue(DBConstants.RDBMS.URL) == null) {
+			 config.addProperty(DBConstants.RDBMS.URL, "");
+		}
+		if (config.getPropertyValue(DBConstants.RDBMS.USERNAME) == null) {
+			 config.addProperty(DBConstants.RDBMS.USERNAME, "");
+		}
+		if (config.getPropertyValue(DBConstants.RDBMS.PASSWORD) == null) {
+			 config.addProperty(DBConstants.RDBMS.PASSWORD, "");
+		}
     	if (config.getPropertyValue(DBConstants.GSpread.DATASOURCE) == null) {
 			 config.addProperty(DBConstants.GSpread.DATASOURCE, "");
-		 }
-		 if (config.getPropertyValue(DBConstants.GSpread.VISIBILITY) == null) {
+		}
+		if (config.getPropertyValue(DBConstants.GSpread.VISIBILITY) == null) {
 			 config.addProperty(DBConstants.GSpread.VISIBILITY, "");
-		 }
-		 if (config.getPropertyValue(DBConstants.GSpread.USERNAME) == null) {
+		}
+		if (config.getPropertyValue(DBConstants.GSpread.USERNAME) == null) {
 			 config.addProperty(DBConstants.GSpread.USERNAME, "");
-		 }
-		 if (config.getPropertyValue(DBConstants.GSpread.PASSWORD) == null) {
+		}
+		if (config.getPropertyValue(DBConstants.GSpread.PASSWORD) == null) {
 			 config.addProperty(DBConstants.GSpread.PASSWORD, "");
-		 }
-    } else if (DBConstants.DataSourceTypes.CARBON.equals(selectedType)) {
+		}
+	} else if (DBConstants.DataSourceTypes.CARBON.equals(selectedType)) {
     	if (config.getPropertyValue(DBConstants.CarbonDatasource.NAME) == null) {
 			 config.addProperty(DBConstants.CarbonDatasource.NAME, "");
 		 }
@@ -363,8 +383,99 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
         if (config.getPropertyValue(DBConstants.RDBMS.DRIVER_CLASSNAME) == null) {
             config.addProperty(DBConstants.RDBMS.DRIVER_CLASSNAME, "org.apache.cassandra.cql.jdbc.CassandraDriver");
         }
+    } else if (DBConstants.DataSourceTypes.CUSTOM.equals(selectedType)) {
+    	if (config.getPropertyValue(DBConstants.CustomDataSource.DATA_SOURCE_QUERY_CLASS) == null) {
+    		ArrayList<Property> properties = null;
+    		if (config.getPropertyValue(DBConstants.CustomDataSource.DATA_SOURCE_PROPS) instanceof ArrayList) {
+    			properties = (ArrayList<Property>)config.getPropertyValue(DBConstants.CustomDataSource.DATA_SOURCE_PROPS);
+    		}
+    		config.removeProperty(DBConstants.CustomDataSource.DATA_SOURCE_PROPS);
+            config.addProperty(DBConstants.CustomDataSource.DATA_SOURCE_QUERY_CLASS, "");
+            config.addProperty(DBConstants.CustomDataSource.DATA_SOURCE_PROPS, properties);
+        }
+        if (config.getPropertyValue(DBConstants.CustomDataSource.DATA_SOURCE_TABULAR_CLASS) == null) {
+        	ArrayList<Property> properties = null;
+    		if (config.getPropertyValue(DBConstants.CustomDataSource.DATA_SOURCE_PROPS) instanceof ArrayList) {
+    			properties = (ArrayList<Property>)config.getPropertyValue(DBConstants.CustomDataSource.DATA_SOURCE_PROPS);
+    		}
+    		config.removeProperty(DBConstants.CustomDataSource.DATA_SOURCE_PROPS);
+            config.addProperty(DBConstants.CustomDataSource.DATA_SOURCE_TABULAR_CLASS, "");
+            config.addProperty(DBConstants.CustomDataSource.DATA_SOURCE_PROPS, properties);
+        }
+    	if (config.getPropertyValue(DBConstants.CustomDataSource.DATA_SOURCE_PROPS) == null) {
+            config.addProperty(DBConstants.CustomDataSource.DATA_SOURCE_PROPS, "");
+        }
     }
 	return config;
+}
+
+/* private Config addRDBMSProps(Config config, String selectedType, HttpServletRequest request) {
+	if (DBConstants.DataSourceTypes.RDBMS.equals(selectedType)) {
+		
+	}
+} */
+
+//Change datasource type to Excel or GSpread if RDBMS
+//datasource represents query Mode Excel or GSpread source
+private String getDataSourceType(String jdbcUrl) {
+	Pattern p = Pattern.compile("jdbc:wso2:[a-zA-Z0-9]+");
+    Matcher m = p.matcher(jdbcUrl);
+    while (m.find()) {
+        if (DBConstants.DSSQLDriverPrefixes.EXCEL_PREFIX.equals(m.group())) {
+            return DBConstants.DataSourceTypes.EXCEL;
+        } else if (DBConstants.DSSQLDriverPrefixes.GSPRED_PREFIX.equals(m.group())) {
+            return DBConstants.DataSourceTypes.GDATA_SPREADSHEET;
+        } 
+    }
+    return DBConstants.DataSourceTypes.RDBMS;
+}
+
+private String getExcelGspreadUrl(String excelGspreadJDBCUrl, String dsType) {
+	if (dsType.equals("GDATA_SPREADSHEET")) {
+		String gSpreadPrexixesString = DBConstants.DSSQLDriverPrefixes.GSPRED_PREFIX + ":" + 
+				DBConstants.DSSQLDriverPrefixes.FILE_PATH + "=";
+		int gSpreadPrexixesLength = gSpreadPrexixesString.length();
+		int endIndex = excelGspreadJDBCUrl.indexOf(";");
+		return excelGspreadJDBCUrl.substring(gSpreadPrexixesLength, endIndex);
+	} else {
+		String excelPrexixesString = DBConstants.DSSQLDriverPrefixes.EXCEL_PREFIX + ":" + 
+				DBConstants.DSSQLDriverPrefixes.FILE_PATH + "=";
+		int excelPrexixesLength = excelPrexixesString.length();
+		return excelGspreadJDBCUrl.substring(excelPrexixesLength);
+	}
+}
+
+private String getVisibility(String gSpreadJDBCUrl) {
+	String params[] = gSpreadJDBCUrl.split(";");
+	if (params.length >= 1) {
+		String subParams[] = params[1].split("=");
+		if (subParams.length > 1 && subParams[0].equals("visibility")) {
+			return subParams[1];
+		} 
+		if (params.length > 1)
+		subParams = params[2].split("=");
+		if (subParams.length > 1 && subParams[0].equals("visibility")) {
+			return subParams[1];
+		} 
+	}
+	return "";
+	
+} 
+
+private String getSheetName(String gSpreadJDBCUrl) {
+	String params[] = gSpreadJDBCUrl.split(";");
+	if (params.length >= 1) {
+		String subParams[] = params[1].split("=");
+		if (subParams.length > 1 && subParams[0].equals("sheetName")) {
+			return subParams[1];
+		} 
+		if (params.length > 1)
+		subParams = params[2].split("=");
+		if (subParams.length > 1 && subParams[0].equals("sheetName")) {
+			return subParams[1];
+		} 
+	}
+	return "";
 }
 %>
 
@@ -384,6 +495,8 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
     String flag = request.getParameter("flag");
     String ds = request.getParameter("ds");
     String visibility = request.getParameter("visibility");
+    String sheetName = "";
+    String customDSType = "";
     // Service name with the path
     String detailedServiceName = request.getParameter("detailedServiceName");
     String dynamicUserAuthClass = request.getParameter("dynamicUserAuthClass");
@@ -398,6 +511,11 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
     boolean readOnly = false;
     if (flag == null) {
         flag = "";
+    }
+    if (!"edit_changed".equals(flag)) {
+    	backupConfigProps.clear();
+    } else {
+    	flag = "edit";
     }
     if (configId != null && configId.trim().length() > 0) {
         Config dsConfig = dataService.getConfig(configId);
@@ -458,8 +576,9 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
                     newConfig.addProperty(DBConstants.RDBMS.DYNAMIC_USER_AUTH_MAPPING, dynamicUserConfig);
 
                 } else if (DBConstants.DataSourceTypes.EXCEL.equals(selectedType)) {
+                	newConfig.addProperty(DBConstants.RDBMS.DRIVER_CLASSNAME, "");
+                    newConfig.addProperty(DBConstants.RDBMS.URL, "");
                     newConfig.addProperty(DBConstants.Excel.DATASOURCE, "");
-
                 } else if (DBConstants.DataSourceTypes.RDF.equals(selectedType)) {
                     newConfig.addProperty(DBConstants.RDF.DATASOURCE, "");
 
@@ -479,10 +598,14 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
                     newConfig.addProperty(DBConstants.JNDI.PASSWORD, "");
 
                 } else if (DBConstants.DataSourceTypes.GDATA_SPREADSHEET.equals(selectedType)) {
-                    newConfig.addProperty(DBConstants.GSpread.DATASOURCE, "");
-                    newConfig.addProperty(DBConstants.GSpread.VISIBILITY, "");
-                    newConfig.addProperty(DBConstants.GSpread.USERNAME, "");
-                    newConfig.addProperty(DBConstants.GSpread.PASSWORD, "");
+                	newConfig.addProperty(DBConstants.RDBMS.DRIVER_CLASSNAME, "");
+                    newConfig.addProperty(DBConstants.RDBMS.URL, "");
+                    newConfig.addProperty(DBConstants.RDBMS.USERNAME, "");
+                    newConfig.addProperty(DBConstants.RDBMS.PASSWORD, "");
+                	newConfig.addProperty(DBConstants.GSpread.DATASOURCE, "");
+	                newConfig.addProperty(DBConstants.GSpread.VISIBILITY, "");
+	                newConfig.addProperty(DBConstants.GSpread.USERNAME, "");
+	                newConfig.addProperty(DBConstants.GSpread.PASSWORD, "");
                 } else if (DBConstants.DataSourceTypes.CARBON.equals(selectedType)) {
                     newConfig.addProperty(DBConstants.CarbonDatasource.NAME, "");
 
@@ -493,6 +616,11 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
                     newConfig.addProperty(DBConstants.RDBMS.USERNAME,"");
                     newConfig.addProperty(DBConstants.RDBMS.PASSWORD,"");
                     newConfig.addProperty(DBConstants.RDBMS.DRIVER_CLASSNAME, "org.apache.cassandra.cql.jdbc.CassandraDriver");
+                }  else if (DBConstants.DataSourceTypes.CUSTOM.equals(selectedType)) {
+                	ArrayList<Property> property = new ArrayList<Property>();
+                    newConfig.addProperty(DBConstants.CustomDataSource.DATA_SOURCE_QUERY_CLASS,"");
+                    newConfig.addProperty(DBConstants.CustomDataSource.DATA_SOURCE_TABULAR_CLASS,"");
+                    newConfig.addProperty(DBConstants.CustomDataSource.DATA_SOURCE_PROPS,property);
                 }
 
             }
@@ -503,6 +631,14 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
             }
             if(dsConfig.getPropertyValue("gspread_visibility") instanceof String) {
                 visibility = (String)dsConfig.getPropertyValue("gspread_visibility");
+            }
+            
+            if(dsConfig.getPropertyValue(CustomDataSource.DATA_SOURCE_QUERY_CLASS) != null &&
+            		dsConfig.getPropertyValue(CustomDataSource.DATA_SOURCE_QUERY_CLASS).toString().trim().length() > 0) {
+                customDSType = DBConstants.DataSourceTypes.CUSTOM_QUERY;
+            } else if (dsConfig.getPropertyValue(CustomDataSource.DATA_SOURCE_TABULAR_CLASS) != null &&
+            		dsConfig.getPropertyValue(CustomDataSource.DATA_SOURCE_TABULAR_CLASS).toString().trim().length() > 0) {
+            	customDSType = DBConstants.DataSourceTypes.CUSTOM_TABULAR;
             }
 
             readOnly = true;
@@ -604,10 +740,13 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
     }
 
     Iterator propertyIterator = null;
-    String dataSourceType = "";
+    String dataSourceType = request.getParameter("selectedType");
+    dataSourceType = dataSourceType == null ? "" : dataSourceType;
     String rdbmsEngineType = "#";
     String passwordAlias = "";
     boolean useSecretAlias = false;
+    boolean useQueryMode = false;
+    boolean customConClassAdded = false; 
     try {
         if (configId != null && configId.trim().length() > 0) {
             Config dsConfig = dataService.getConfig(configId);
@@ -616,14 +755,51 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
                 dsConfig = newConfig;
             }
             if (dsConfig != null) {
-                dataSourceType = dsConfig.getDataSourceType();
+            	/* only if this is not set by the request parameter, set it */
+            	if ("".equals(dataSourceType)) {
+                    dataSourceType = dsConfig.getDataSourceType();
+            	} else {
+            		/* 'backupConfigProps' is used to keep the original config properties, when the user
+            		   switches the data source type when editing, so if the user cancels it, we can restore
+            		   the original values using this list */
+            		if (backupConfigProps.isEmpty()) {
+            		    backupConfigProps.addAll(dsConfig.getProperties());
+            		}
+            		dsConfig.getProperties().clear();
+            	}
+                //Check whether Data Source is Excel or GSpread in Query Mode and change the dataSourceType
+                if ("RDBMS".equals(dataSourceType)) {
+                	if (dsConfig.getPropertyValue(DBConstants.RDBMS.URL) instanceof String) {
+                        String jdbcUrl = dsConfig.getPropertyValue(DBConstants.RDBMS.URL).toString();
+                        if ((jdbcUrl != null) && jdbcUrl.trim().length() > 0) {
+                        	dataSourceType = getDataSourceType(jdbcUrl);
+                        		if (dataSourceType.equals(DBConstants.DataSourceTypes.GDATA_SPREADSHEET) || 
+                        			dataSourceType.equals(DBConstants.DataSourceTypes.EXCEL)) {
+                        			useQueryMode = true;
+                        			if (dataSourceType.equals(DBConstants.DataSourceTypes.GDATA_SPREADSHEET)) {
+                        				sheetName = getSheetName((String)dsConfig.getPropertyValue("url"));
+                        				visibility = getVisibility((String)dsConfig.getPropertyValue("url"));
+                        			}
+                        		}
+                        } else {
+                        	if (dsConfig.getPropertyValue(DBConstants.Excel.DATASOURCE) != null) {
+                        		dataSourceType = DBConstants.DataSourceTypes.EXCEL;
+                        	} else if (dsConfig.getPropertyValue(DBConstants.GSpread.DATASOURCE) != null) {
+                        		dataSourceType = DBConstants.DataSourceTypes.GDATA_SPREADSHEET;
+                        	}
+                        }
+                    }
+                }
                 if (dataSourceType == null) {
                     dataSourceType = "";
                 }
                 if (selectedType == null) {
-                    selectedType = dsConfig.getDataSourceType();
+                    selectedType = dataSourceType;
                 }
                 dsConfig = addNotAvailableFunctions(dsConfig, selectedType,request);
+                /* if (useQueryMode) {
+                	dsConfig = addRDBMSProps(dsConfig, selectedType,request);
+                } */
                 ArrayList configProperties = dsConfig.getProperties();
                 propertyIterator = configProperties.iterator();
 
@@ -686,8 +862,7 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
 </h2>
 
 <div id="workArea">
-<form method="post" action="dataSourceProcessor.jsp" name="dataForm"
-      onsubmit="return validateAddDataSourceForm();">
+<form method="post" action="dataSourceProcessor.jsp" name="dataForm">
 <table id="mainTable" class="styledLeft noBorders" cellspacing="0" width="100%">
 <thead>
   <tr>
@@ -713,7 +888,7 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
             <input type="hidden" id="passwordProvider" name="passwordProvider"
                    value="<%=passwordProvider%>"/>
             <input type="hidden" id="isXAType" name="isXAType" value="<%=isXAType%>"/>
-             <input type="hidden" id="flag" name="flag" value="<%=flag%>"/>
+            <input type="hidden" id="flag" name="flag" value="<%=flag%>"/>
             <input type="hidden" id="propertyCount" name="propertyCount" value="0"/>
             <% if(dataSourceType.equals("Cassandra")) {%>
                 <input type="hidden" id="driverClassName" name="driverClassName" value="org.apache.cassandra.cql.jdbc.CassandraDriver" />
@@ -815,6 +990,13 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
                     } else {%>
                     <option value="WEB_CONFIG">Web Data Source</option>
                     <%}%>
+                    
+                    <% if (dataSourceType.equals("CUSTOM")) { %>
+                    <option value="CUSTOM" selected="selected">Custom Data Source</option>
+                    <%
+                    } else {%>
+                    <option value="CUSTOM">Custom Data Source</option>
+                    <%}%>
                 </select>
                 <% if ("RDBMS".equals(dataSourceType)) {
                     isXAAvailable = true;
@@ -841,8 +1023,40 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
                 <% } %>
             </td>
         </tr>
-
-
+        <% if ("GDATA_SPREADSHEET".equals(dataSourceType) || "EXCEL".equals(dataSourceType)) { %>
+	        <tr id="useQueryModeTr">
+	        	<td><label><fmt:message key="use.query.mode"/></label>
+	        	</td>
+	        	<td>
+	        		<%if(useQueryMode) { %>
+	        			<input type="checkbox" id="useQueryMode" name="useQueryMode" onclick="showGsExcelProperties(this, '<%=dataSourceType%>')" 
+	        			checked/>
+	        		<%} else { %>
+	        			<input type="checkbox" id="useQueryMode" name="useQueryMode" onclick="showGsExcelProperties(this, '<%=dataSourceType%>')"/>
+	        		<%} %>
+	        		<input type="hidden" id="useQueryModeValue" name="useQueryModeValue" value='<%=useQueryMode %>'/>
+	        	</td>
+	        </tr>
+	    <%} %>
+	    <%if(useQueryMode && "GDATA_SPREADSHEET".equals(dataSourceType)) { %>
+	    	<tr id="sheetNameTr">
+	        	<td><label><fmt:message key="sheetName"/><font
+                    color="red">*</font></label>
+	        	</td>
+	        	<td>
+	        		<input type="text" id="sheetName" name="sheetName" value='<%=sheetName %>'/>
+	        	</td>
+	     </tr>
+	    <%} else { %>
+		    <tr id="sheetNameTr" style="display:none">
+		        	<td><label><fmt:message key="sheetName"/><font
+	                    color="red">*</font></label>
+		        	</td>
+		        	<td>
+		        		<input type="text" id="sheetName" name="sheetName"/>
+		        	</td>
+		     </tr>
+	     <%} %>
 
 <div id="complexTypeRowId" style="<%=!(isXAType)  ? "" : "display:none"%>">
 <% if ("RDBMS".equals(dataSourceType) && !isXAType) {%>
@@ -1066,7 +1280,21 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
         </select>
     </td>
 </tr>
-<%}%>
+
+<%} else if("CUSTOM".equals(dataSourceType)) {%>
+	<tr>
+	<td colspan="2">
+		<%if (customDSType.equals(DBConstants.DataSourceTypes.CUSTOM_QUERY)) { %>
+			<input type="radio" name="customType" id="custom_tabular" value="tabular" onclick="changeCustomDsType()"/> Custom Tabular Data Source 
+			<input type="radio" name="customType" value="query" id="custom_query" onclick="changeCustomDsType()" checked/> Custom Query Data Source
+		<%} else { %>
+			<input type="radio" name="customType" id="custom_tabular" value="tabular" onclick="changeCustomDsType()" checked/> Custom Tabular Data Source 
+			<input type="radio" name="customType" value="query" id="custom_query" onclick="changeCustomDsType()"/> Custom Query Data Source
+		<%} %>
+		<input type="hidden" id="customTypeValue" name="customTypeValue" value="<%=customDSType %>"/>
+	</td>
+	</tr>
+<%} %>
 
 </div>
 </tr>
@@ -1110,7 +1338,7 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
         }%>
         <tr>
                 <td colspan="2">
-                    <a class="icon-link" style="background-image:url(../admin/images/add.gif);" onclick=" addXAPropertyFields(document,document.getElementById('propertyCount').value);" ><fmt:message key="add.new.xa.datasource.properties"/></a>
+                    <a class="icon-link" style="background-image:url(../admin/images/add.gif);" onclick="addXAPropertyFields(document,document.getElementById('propertyCount').value);" ><fmt:message key="add.new.xa.datasource.properties"/></a>
                 </td>
                 
             </tr>
@@ -1122,6 +1350,44 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
                 	</table>
                 </td>
             </tr>
+        <%} else if (propertyName.equals(CustomDataSource.DATA_SOURCE_PROPS)){ 
+        		Iterator<Property> iterator = ((ArrayList<Property>)property.getValue()).iterator();
+             	while (iterator.hasNext()) {
+                	Property availableProperty = iterator.next();
+        %>
+        <tr>
+                    <td><label><%=availableProperty.getName()%></label></td>
+                    <td>
+                        <input type="text" size="50" id="<%=availableProperty.getName()%>" name="<%=availableProperty.getName()%>"
+                               value="<%=availableProperty.getValue()%>"/>
+                        <% if(availableProperty.isUseSecretAlias()) {%>
+                        <input type="checkbox" id="useSecretAliasFor<%=availableProperty.getName()%>" name="useSecretAliasFor<%=availableProperty.getName()%>" 
+                        						onclick="getUseSecretAliasValueForProperty(this,'useSecretAliasFor<%=availableProperty.getName()%>')"
+                        						checked/>
+                        <% } else {%>
+                        <input type="checkbox" id="useSecretAliasFor<%=availableProperty.getName()%>" name="useSecretAliasFor<%=availableProperty.getName()%>" 
+                        						onclick="getUseSecretAliasValueForProperty(this,'useSecretAliasFor<%=availableProperty.getName()%>')"
+                        						/>
+                        <%} %>
+	               		<fmt:message key="usePasswordAlias"/>
+	               	</td>
+                    
+                </tr>
+            <%  }%>
+        <tr>
+                <td colspan="2">
+                    <a class="icon-link" style="background-image:url(../admin/images/add.gif);" onclick="addXAPropertyFields(document,document.getElementById('propertyCount').value);" ><fmt:message key="add.new.xa.datasource.properties"/></a>
+                </td>
+                
+            </tr>
+            <tr>
+            	<td id="externalDSProperties" style="display:none" colspan="2">
+                	<table id="externalDSPropertiesTable">
+                	<tbody>
+                	</tbody>
+                	</table>
+                </td>
+            </tr>	
         <%}
         } %>
 
@@ -1177,7 +1443,15 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
             ||propertyName.equals(DBConstants.RDBMS.SUSPECT_TIMEOUT)
             ||propertyName.equals(DBConstants.RDBMS.ALTERNATE_USERNAME_ALLOWED)
             ||propertyName.equals(DBConstants.RDBMS.DYNAMIC_USER_AUTH_CLASS)
-            ||propertyName.equals(DBConstants.RDBMS.DYNAMIC_USER_AUTH_MAPPING))) {%>
+            ||propertyName.equals(DBConstants.RDBMS.DYNAMIC_USER_AUTH_MAPPING)
+            ||propertyName.equals(DBConstants.CustomDataSource.DATA_SOURCE_PROPS) 
+            ||propertyName.equals(DBConstants.CustomDataSource.DATA_SOURCE_QUERY_CLASS)
+            ||propertyName.equals(DBConstants.CustomDataSource.DATA_SOURCE_TABULAR_CLASS)) && 
+            	!(propertyName.equals(DBConstants.GSpread.DATASOURCE) && useQueryMode) &&
+            	!(propertyName.equals("gspread_visibility") && useQueryMode) &&
+            	!(propertyName.equals("gspread_username") && useQueryMode) &&
+            	!(propertyName.equals("gspread_password") && useQueryMode)
+            ){%>
     <td class="leftCol-small" style="white-space: nowrap;">
         <fmt:message key="<%=propertyName%>"/><%=(isFieldMandatory(propertyName)?"<font color=\"red\">*</font>":"")%>
     </td>
@@ -1203,27 +1477,33 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
             <% } %>
         </select>
         <% } else if (propertyName.equals("gspread_visibility")) { %>
-        <select id="<%=propertyName%>" name="<%=propertyName%>" onchange="javascript:gspreadVisibiltyOnChange(this,document);return false;">
-            <% if (propertyValue.equals("private")) { %>
-            <option value="private" selected="selected">Private</option>
-            <% } else { %>
-            <option value="private">Private</option>
-            <% } %>
-            <% if (propertyValue.equals("public") || propertyValue.equals("")) { %>
-            <option value="public" selected="selected">Public</option>
-            <% } else { %>
-            <option value="public">Public</option>
-            <% } %>
-        </select>
+	        <%if (!useQueryMode) { %>
+		        <select id="<%=propertyName%>" name="<%=propertyName%>" onchange="javascript:gspreadVisibiltyOnChange(this,document);return false;">
+		            <% if (propertyValue.equals("private")) { %>
+		            <option value="private" selected="selected">Private</option>
+		            <% } else { %>
+		            <option value="private">Private</option>
+		            <% } %>
+		            <% if (propertyValue.equals("public") || propertyValue.equals("")) { %>
+		            <option value="public" selected="selected">Public</option>
+		            <% } else { %>
+		            <option value="public">Public</option>
+		            <% } %>
+		        </select>
+		     <%} %>
          <% } else if (propertyName.equals(RDBMS.DRIVER_CLASSNAME)
                     ||propertyName.equals(RDBMS.URL)
                     ||propertyName.equals(RDBMS.USERNAME)
          		    ||propertyName.equals(RDBMS.PASSWORD)
-         		    ||propertyName.equals(RDBMS.DATASOURCE_CLASSNAME)) {
+         		    ||propertyName.equals(RDBMS.DATASOURCE_CLASSNAME)
+         		    ||propertyName.equals(CustomDataSource.DATA_SOURCE_QUERY_CLASS)
+         		    ||propertyName.equals(CustomDataSource.DATA_SOURCE_TABULAR_CLASS)) {
          		  if ((propertyName.equals(RDBMS.DRIVER_CLASSNAME)
          		    ||propertyName.equals(RDBMS.URL)
          		    ||propertyName.equals(RDBMS.USERNAME)
          		    || propertyName.equals(RDBMS.PASSWORD)) && !isXAType) {
+         			  
+         			  if (!(dataSourceType.equals("GDATA_SPREADSHEET") || dataSourceType.equals("EXCEL"))) {
          		%>
                  <tr>
                      <% if((dataSourceType.equals("Cassandra") && propertyName.equals(RDBMS.URL))) { %>
@@ -1264,7 +1544,76 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
                     <% } } } %>
 
 
-                 <% }  else if (propertyName.equals(RDBMS.DATASOURCE_CLASSNAME) && isXAType) {  %>
+                 <% } else if (flag.equals("edit") && useQueryMode){ %>
+                 	<%if (propertyName.equals(RDBMS.URL)) { %>
+                 		<tr>
+                 			<td class="leftCol-small" style="white-space: nowrap;">
+                 				<%if (dataSourceType.equals("GDATA_SPREADSHEET")) {%>
+        							<fmt:message key="<%=DBConstants.GSpread.DATASOURCE%>"/><%=(isFieldMandatory(DBConstants.GSpread.DATASOURCE)?"<font color=\"red\">*</font>":"")%>
+        						<%} else { %>
+        							<fmt:message key="<%=DBConstants.Excel.DATASOURCE%>"/><%=(isFieldMandatory(DBConstants.Excel.DATASOURCE)?"<font color=\"red\">*</font>":"")%>
+        						<%} %>
+    						</td>
+                 			<td>
+                 				<%if (dataSourceType.equals("GDATA_SPREADSHEET")) {%>
+                 					<input type="text" size="50" id="<%=DBConstants.GSpread.DATASOURCE %>" name="<%=DBConstants.GSpread.DATASOURCE %>" value="<%=getExcelGspreadUrl(propertyValue, dataSourceType)%>" />
+                 				<%} else { %>
+                 					<input type="text" size="50" id="<%=DBConstants.Excel.DATASOURCE %>" name="<%=DBConstants.Excel.DATASOURCE %>" value="<%=getExcelGspreadUrl(propertyValue, dataSourceType)%>" />
+                 				<%} %>
+                 			</td>
+                 		</tr>
+	                 		<%if (dataSourceType.equals("GDATA_SPREADSHEET")) {%>
+	                 		<tr>
+	                 			<td class="leftCol-small" style="white-space: nowrap;">
+					        		<fmt:message key="<%=DBConstants.GSpread.VISIBILITY%>"/><%=(isFieldMandatory(DBConstants.GSpread.VISIBILITY)?"<font color=\"red\">*</font>":"")%>
+					        	</td>
+					        	<td>
+			                 		<select id="<%=DBConstants.GSpread.VISIBILITY%>" name="<%=DBConstants.GSpread.VISIBILITY%>" onchange="javascript:gspreadVisibiltyOnChangeQMode(this,document);return false;">
+							            <% if (getVisibility(propertyValue).equals("private")) { %>
+							            <option value="private" selected="selected">Private</option>
+							            <% } else { %>
+							            <option value="private">Private</option>
+							            <% } %>
+							            <% if (getVisibility(propertyValue).equals("public") || propertyValue.equals("")) { %>
+							            <option value="public" selected="selected">Public</option>
+							            <% } else { %>
+							            <option value="public">Public</option>
+							            <% } %>
+					        		</select>
+					        	</td>
+					        </tr>
+					     <%} %>
+                 	<%} else if (propertyName.equals(RDBMS.USERNAME) && dataSourceType.equals("GDATA_SPREADSHEET")) { %>
+                 		<tr id="tr:querymode_gspread_username"  style='display:<%=(!visibility.equals("public")?"":"none") %>'>
+                 			<td class="leftCol-small" style="white-space: nowrap;">
+                 				<fmt:message key="<%=DBConstants.GSpread.USERNAME%>"/><%=(isFieldMandatory(DBConstants.GSpread.USERNAME)?"<font color=\"red\">*</font>":"")%>
+        					</td>
+                 			<td><input type="text" size="50" id="<%=DBConstants.GSpread.USERNAME %>" name="<%=DBConstants.GSpread.USERNAME %>" value="<%=propertyValue%>" /></td>
+                 		</tr>
+                 	<%} else if (propertyName.equals(RDBMS.PASSWORD) && dataSourceType.equals("GDATA_SPREADSHEET")) { %>
+                 		<tr id="tr:querymode_gspread_password" style='display:<%=(!visibility.equals("public")?"":"none") %>'>
+                 			<td class="leftCol-small" style="white-space: nowrap;">
+        						<fmt:message key="<%=DBConstants.GSpread.PASSWORD%>"/><%=(isFieldMandatory(DBConstants.GSpread.PASSWORD)?"<font color=\"red\">*</font>":"")%>
+        					</td>
+                 			<td>
+                 			<%if(useSecretAlias) {%>
+                 				<input type="text" size="50" id="pwdalias" name="pwdalias" value="<%=propertyValue%>">
+                 				<input type="password" size="50" id="<%=DBConstants.GSpread.PASSWORD %>" name="<%=DBConstants.GSpread.PASSWORD %>" value="<%=propertyValue%>" style="display:none"/>
+                 				<input type="checkbox" id="useSecretAlias" name="useSecretAlias" onclick="getUseSecretAliasValue(this, '<%=DBConstants.GSpread.PASSWORD%>')" checked/>
+	               				<fmt:message key="usePasswordAlias"/>
+                 			<%} else {%>
+                 				<input type="text" size="50" id="pwdalias" name="pwdalias" value="<%=propertyValue%>" style="display:none">
+                 				<input type="password" size="50" id="<%=DBConstants.GSpread.PASSWORD %>" name="<%=DBConstants.GSpread.PASSWORD %>" value="<%=propertyValue%>" />
+                 				<input type="checkbox" id="useSecretAlias" name="useSecretAlias" onclick="getUseSecretAliasValue(this, '<%=DBConstants.GSpread.PASSWORD%>')"/>
+	               				<fmt:message key="usePasswordAlias"/>
+                 			<%} %>
+                 			<input type="hidden" id="useSecretAliasValue" name="useSecretAliasValue" size="50" value="<%=useSecretAlias%>">
+                 			</td>
+                 		</tr>
+                 	<%} %>
+                 <% }%> 
+                 
+                 <%}  else if (propertyName.equals(RDBMS.DATASOURCE_CLASSNAME) && isXAType) {  %>
                     <tr>
                         <td><label><fmt:message key="xa.datasource.class"/><font color="red">*</font></label>
                         </td>
@@ -1272,7 +1621,38 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
                             <input type="text" size="50" id="<%=propertyName%>" name="<%=propertyName%>" value="<%=propertyValue%>" />
                         </td>
                     </tr>
-                 <%}}  else if (propertyName.equals("carbon_datasource_name")) { %>
+                 <%} else if (propertyName.equals(CustomDataSource.DATA_SOURCE_QUERY_CLASS) && customDSType.equals(DBConstants.DataSourceTypes.CUSTOM_QUERY)) {
+                	 customConClassAdded = true;
+               	  %>
+                    <tr>
+                        <td><label><fmt:message key="custom.datasource.class"/><font color="red">*</font></label>
+                        </td>
+                        <td>
+                            <input type="text" size="50" id="customDataSourceClass" name="customDataSourceClass" value="<%=propertyValue%>" />
+                        </td>
+                    </tr>
+                  <%} else if (propertyName.equals(CustomDataSource.DATA_SOURCE_TABULAR_CLASS) && customDSType.equals(DBConstants.DataSourceTypes.CUSTOM_TABULAR)) {
+                	  customConClassAdded = true;
+                  %>
+                    <tr>
+                        <td><label><fmt:message key="custom.datasource.class"/><font color="red">*</font></label>
+                        </td>
+                        <td>
+                            <input type="text" size="50" id="customDataSourceClass" name="customDataSourceClass" value="<%=propertyValue%>" />
+                        </td>
+                    </tr>
+                  <%} else if ((propertyName.equals(CustomDataSource.DATA_SOURCE_TABULAR_CLASS) ||
+                		  propertyName.equals(CustomDataSource.DATA_SOURCE_QUERY_CLASS)) && !customConClassAdded){
+                	  customConClassAdded = true;
+                   %>
+                    <tr>
+                        <td><label><fmt:message key="custom.datasource.class"/><font color="red">*</font></label>
+                        </td>
+                        <td>
+                            <input type="text" size="50" id="customDataSourceClass" name="customDataSourceClass" value="<%=propertyValue%>" />
+                        </td>
+                    </tr>
+                 <%} }  else if (propertyName.equals("carbon_datasource_name")) { %>
         <select id="<%=propertyName%>" name="<%=propertyName%>">
             <option value="" selected="selected">--SELECT--</option>
             <%
@@ -1294,7 +1674,7 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
               String configEle = "";
               if (propertyValue != null) {
                    //propertyValue = scraperString;
-                       if(propertyValue.startsWith("<config>")) {
+                       if(propertyValue.trim().startsWith("<config>")) {
                            configEle = propertyValue;
                            checked = true;
                        } else {
@@ -1314,32 +1694,38 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
         <td id="gov_reg" ><a onclick="showResourceTree('<%=propertyName%>', setValueGov, '/_system/governance')" style="background-image:url(images/registry_picker.gif);" class="icon-link" href="#" > Govenance Registry </a></td>
 
         <% } else {
-        	if(propertyName.equals("gspread_password")||propertyName.equals("jndi_password")) {%>
-        <%if(useSecretAlias) {%>
-	               <input type="text" size="50" id="pwdalias" name="pwdalias" value="<%=propertyValue%>">
-	               <input type="password" size="50" id="<%=propertyName%>" name="<%=propertyName%>" value="<%=propertyValue%>" style="display:none"/>
-	               <input type="checkbox" id="useSecretAlias" name="useSecretAlias" onclick="getUseSecretAliasValue(this, '<%=propertyName%>')" checked/>
-	               <fmt:message key="usePasswordAlias"/>
-	        <%} else { %>
-	               	<input type="text" size="50" id="pwdalias" name="pwdalias" value="<%=propertyValue%>" style="display:none">
-	               	<input type="password" size="50" id="<%=propertyName%>" name="<%=propertyName%>" value="<%=propertyValue%>"/>
-	               	<input type="checkbox" id="useSecretAlias" name="useSecretAlias" onclick="getUseSecretAliasValue(this, '<%=propertyName%>')"/>
-	               	<fmt:message key="usePasswordAlias"/>
-	        <%} %>
-	               		<input type="hidden" id="useSecretAliasValue" name="useSecretAliasValue" size="50" value="<%=useSecretAlias%>">
+        	if(propertyName.equals("gspread_password") || propertyName.equals("jndi_password")) {%>
+        	
+        	<%if ((propertyName.equals("gspread_password") && !useQueryMode)) { %>
+		        <%if(useSecretAlias) {%>
+			               <input type="text" size="50" id="pwdalias" name="pwdalias" value="<%=propertyValue%>">
+			               <input type="password" size="50" id="<%=propertyName%>" name="<%=propertyName%>" value="<%=propertyValue%>" style="display:none"/>
+			               <input type="checkbox" id="useSecretAlias" name="useSecretAlias" onclick="getUseSecretAliasValue(this, '<%=propertyName%>')" checked/>
+			               <fmt:message key="usePasswordAlias"/>
+			        <%} else { %>
+			               	<input type="text" size="50" id="pwdalias" name="pwdalias" value="<%=propertyValue%>" style="display:none">
+			               	<input type="password" size="50" id="<%=propertyName%>" name="<%=propertyName%>" value="<%=propertyValue%>"/>
+			               	<input type="checkbox" id="useSecretAlias" name="useSecretAlias" onclick="getUseSecretAliasValue(this, '<%=propertyName%>')"/>
+			               	<fmt:message key="usePasswordAlias"/>
+			        <%} %>
+			               	<input type="hidden" id="useSecretAliasValue" name="useSecretAliasValue" size="50" value="<%=useSecretAlias%>">
+			  <%} %>
         </td>
 
          <%} else if (propertyName.equals("rdf_datasource")
                     ||propertyName.equals("excel_datasource")
                     ||propertyName.equals("csv_datasource")) {%>
+                    		<%if (!(propertyName.equals("excel_datasource") && useQueryMode)) {%>
         	                <tr>
         	                <td><fmt:message key="<%=propertyName%>"/><%=(isFieldMandatory(propertyName)?"<font color=\"red\">*</font>":"")%></td>
                             <td><input type="text" size="50" id="<%=propertyName%>" name="<%=propertyName%>" value="<%=propertyValue%>" />
-                             </td>
-                                <td><a onclick="showResourceTree('<%=propertyName%>', setValueConf, '/_system/config')" style="background-image:url(images/registry_picker.gif);" class="icon-link" href="#"> Configuration Registry </a></td>
+                            </td>
+                               <td><a onclick="showResourceTree('<%=propertyName%>', setValueConf, '/_system/config')" style="background-image:url(images/registry_picker.gif);" class="icon-link" href="#"> Configuration Registry </a></td>
            	   					<td><a onclick="showResourceTree('<%=propertyName%>', setValueGov, '/_system/governance')" style="background-image:url(images/registry_picker.gif);" class="icon-link" href="#"> Govenance Registry </a></td>
                              </tr>
+                        <%} %>
        <%} else if (propertyName.equals(RDBMS.DATASOURCE_PROPS)){}
+       else if (propertyName.equals(CustomDataSource.DATA_SOURCE_PROPS)){}
        else if (!(propertyName.equals(DBConstants.RDBMS.DEFAULT_TX_ISOLATION)
     		||propertyName.equals(DBConstants.RDBMS.TEST_ON_RETURN)
     		||propertyName.equals(DBConstants.RDBMS.TEST_WHILE_IDLE)
@@ -1376,7 +1762,11 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
             ||propertyName.equals(DBConstants.RDBMS.SUSPECT_TIMEOUT)
             ||propertyName.equals(DBConstants.RDBMS.ALTERNATE_USERNAME_ALLOWED)
             ||propertyName.equals(DBConstants.RDBMS.DYNAMIC_USER_AUTH_CLASS)
-            ||propertyName.equals(DBConstants.RDBMS.DYNAMIC_USER_AUTH_MAPPING))){ %>
+            ||propertyName.equals(DBConstants.RDBMS.DYNAMIC_USER_AUTH_MAPPING)
+            ||propertyName.equals(DBConstants.CustomDataSource.DATA_SOURCE_PROPS) 
+            ||propertyName.equals(DBConstants.CustomDataSource.DATA_SOURCE_QUERY_CLASS)
+            ||propertyName.equals(DBConstants.CustomDataSource.DATA_SOURCE_TABULAR_CLASS)) && !(propertyName.equals(DBConstants.GSpread.DATASOURCE) && useQueryMode)
+            && !(propertyName.equals(DBConstants.GSpread.USERNAME) && useQueryMode)){ %>
             <input type="text" size="50" id="<%=propertyName%>" name="<%=propertyName%>"
                                value="<%=propertyValue%>"/>
        <%}%>
@@ -1416,7 +1806,7 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
                             dataSourceType = "";
                         }
                         if (selectedType == null) {
-                            selectedType = dsConfig.getDataSourceType();
+                            selectedType = dataSourceType;
                         }
                         dsConfig = addNotAvailableFunctions(dsConfig, selectedType,request);
                         ArrayList configProperties = dsConfig.getProperties();
@@ -1700,9 +2090,15 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
                 }
 
 
-                var protectedTokens = document.getElementById('protectedTokens').value;
-                var passwordProvider = document.getElementById('passwordProvider').value;
-                var url = 'connection_test_ajaxprocessor.jsp?driver=' + encodeURIComponent(driver) + '&jdbcUrl=' + encodeURIComponent(jdbcUrl) + '&userName=' + encodeURIComponent(userName) + '&password=' + encodeURIComponent(password) + '&protectedTokens=' + encodeURIComponent(protectedTokens) + '&passwordProvider=' + encodeURIComponent(passwordProvider);
+                var useAlias = document.getElementById('useSecretAliasValue').value;
+                if (useAlias == 'true') {
+                	if (document.getElementById('pwdalias') != null) {
+                		var pwdalias = document.getElementById('pwdalias').value;
+                	}
+                    var url = 'connection_test_ajaxprocessor.jsp?driver=' + encodeURIComponent(driver) + '&jdbcUrl=' + encodeURIComponent(jdbcUrl) + '&userName=' + encodeURIComponent(userName) + '&password=' + encodeURIComponent(password) + '&passwordAlias=' +pwdalias ;
+                } else {
+                	var url = 'connection_test_ajaxprocessor.jsp?driver=' + encodeURIComponent(driver) + '&jdbcUrl=' + encodeURIComponent(jdbcUrl) + '&userName=' + encodeURIComponent(userName) + '&password=' + encodeURIComponent(password);
+                }
                 jQuery('#connectionTestMsgDiv').load(url, displayMsg);
                 return false;
             }
@@ -1728,9 +2124,16 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
                 var visibility =  document.getElementById("gspread_visibility").options[document.getElementById("gspread_visibility").selectedIndex].value;
                 var userName = leftTrim(rightTrim(document.getElementById('gspread_username').value));
                 var password = document.getElementById('gspread_password').value;
-                var protectedTokens = document.getElementById('protectedTokens').value;
-                var passwordProvider = document.getElementById('passwordProvider').value;
-                var url = 'connection_gspreadtest_ajaxprocessor.jsp?userName=' + encodeURIComponent(userName) + '&password=' + encodeURIComponent(password) + '&visibility=' + encodeURIComponent(visibility) + '&documentURL=' + encodeURIComponent(documentURL)+ '&protectedTokens=' + encodeURIComponent(protectedTokens) + '&passwordProvider=' + encodeURIComponent(passwordProvider);
+                var useAlias = document.getElementById('useSecretAliasValue').value;
+                                
+                if (useAlias == 'true') {
+                	if (document.getElementById('pwdalias') != null) {
+                		var pwdalias = document.getElementById('pwdalias').value;
+                	}
+                	var url = 'connection_gspreadtest_ajaxprocessor.jsp?userName=' + encodeURIComponent(userName) + '&password=' + encodeURIComponent(password) + '&visibility=' + encodeURIComponent(visibility) + '&documentURL=' + encodeURIComponent(documentURL)+ '&passwordAlias=' + passwordAlias;
+                } else {
+                	var url = 'connection_gspreadtest_ajaxprocessor.jsp?userName=' + encodeURIComponent(userName) + '&password=' + encodeURIComponent(password) + '&visibility=' + encodeURIComponent(visibility) + '&documentURL=' + encodeURIComponent(documentURL);
+                }
                 jQuery('#spreadsheetConnectionTestMsgDiv').load(url, displayMsg4GoogleSpreadsheet);
                 return false;
             }
@@ -1752,9 +2155,8 @@ private Config addNotAvailableFunctions(Config config,String selectedType, HttpS
         </script>
 
   <%} %>
-        <input class="button" name="save_button" type="submit" value="<fmt:message key="save"/>"/>
-        <input class="button" name="cancel_button" type="button" value="<fmt:message key="cancel"/>"
-               onclick="location.href = 'dataSources.jsp?ordinal=1'"/>
+        <input class="button" name="save_button" type="submit" onclick="return validateAddDataSourceForm();" value="<fmt:message key="save"/>"/>
+        <input class="button" name="cancel_button" type="submit" value="<fmt:message key="cancel"/>"/>
     </td>
 </tr>
 </table>

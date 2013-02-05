@@ -135,7 +135,7 @@
                     <tr id="dssTaskClassRow" name="dssTaskClassRow" >
                         <td>DataService Task Class</td>
                         <td><input id="dssTaskClass" name="dssTaskClass" class="longInput"
-                                   type="text" value="<%=taskClass%>"/></td>
+                                   type="text" value="<%=taskClass%>" readonly/></td>
                     </tr>
                     <%} else {%>
                     <tr id="dsTaskService">
@@ -190,7 +190,7 @@
                                    onclick="return validateTaskInputs();"/>
                             <input class="button" type="button"
                                    value="<fmt:message key="dataservices.task.cancel.button.text"/>"
-                                   onclick="document.location.href='tasks.jsp?ordinal=0';"/>
+                                   onclick="document.location.href='tasks.jsp?region=region1&item=ds_task_menu&ordinal=0';"/>
                         </td>
                     </tr>
                     </tbody>

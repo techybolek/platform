@@ -68,7 +68,7 @@ public class AttributeRequestProcessor extends RequestProcessor {
             MessageContext.getCurrentMessageContext().setProperty(WSHandlerConstants.RECV_RESULTS,
                     handlerResultsVector);
             MessageContext.getCurrentMessageContext().setProperty(RahasConstants.PASSIVE_STS_RST,
-                    getRST(request.getRealm(), request.getAttributes()));
+                    getRST(request.getRealm(), request.getAttributes(), request.getDialect()));
 
             rahasData = new RahasData(context);
             issuer = new SAMLPassiveTokenIssuer();

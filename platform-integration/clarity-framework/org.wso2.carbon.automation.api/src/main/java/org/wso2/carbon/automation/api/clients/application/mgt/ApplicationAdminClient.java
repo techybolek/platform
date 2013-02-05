@@ -18,6 +18,7 @@
 package org.wso2.carbon.automation.api.clients.application.mgt;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.ServiceClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.application.mgt.stub.ApplicationAdminExceptionException;
@@ -54,30 +55,24 @@ public class ApplicationAdminClient {
 
     }
 
-    public String[] listAllApplications(String sessionCookie)
+    public String[] listAllApplications()
             throws ApplicationAdminExceptionException,
                    RemoteException {
-
         String[] appList;
-        AuthenticateStub.authenticateStub(sessionCookie, applicationAdminStub);
         appList = applicationAdminStub.listAllApplications();
         return appList;
     }
 
-    public ApplicationMetadata getMetaData(String sessionCookie, String appName)
+    public ApplicationMetadata getMetaData(String appName)
             throws ApplicationAdminExceptionException, RemoteException {
-
         ApplicationMetadata appList;
-
-        AuthenticateStub.authenticateStub(sessionCookie, applicationAdminStub);
         appList = applicationAdminStub.getAppData(appName);
         return appList;
     }
 
-    public String[] deleteMatchingApplication(String sessionCookie, String appName)
+    public String[] deleteMatchingApplication(String appName)
             throws ApplicationAdminExceptionException, RemoteException {
         String[] appList;
-        AuthenticateStub.authenticateStub(sessionCookie, applicationAdminStub);
         appList = applicationAdminStub.listAllApplications();
 
         for (String anAppList : appList) {
@@ -86,5 +81,12 @@ public class ApplicationAdminClient {
             }
         }
         return appList;
+    }
+
+    public ServiceClient getServiceClient()
+    {
+        ServiceClient serviceClient;
+        serviceClient = applicationAdminStub._getServiceClient();
+        return serviceClient;
     }
 }

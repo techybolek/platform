@@ -18,12 +18,15 @@ package org.wso2.carbon.attachment.mgt.test;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.attachment.mgt.core.service.AttachmentManagerService;
 import org.wso2.carbon.attachment.mgt.server.internal.AttachmentServerHolder;
 import org.wso2.carbon.attachment.mgt.skeleton.AttachmentMgtException;
 import org.wso2.carbon.attachment.mgt.skeleton.types.TAttachment;
+import org.wso2.carbon.utils.ConfigurationContextService;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
@@ -49,10 +52,21 @@ public class AttachmentMgtDAOBasicOperationsTest extends TestCase {
      */
     private TAttachment dummyAttachment;
 
+    private static final String AXIS2_XML_FILE_PATH =  "src" + File.separator + "test" + File
+            .separator + "resources" + File.separator + "axis2.xml";
 
     @Override
     protected void setUp() throws Exception {
         //Setup the MockAttachment-Server
+        try {
+            ConfigurationContext context  =
+                    ConfigurationContextFactory.createConfigurationContextFromFileSystem( null , AXIS2_XML_FILE_PATH);
+            ConfigurationContextService service = new ConfigurationContextService(context, null);
+            AttachmentServerHolder.getInstance().setConfigurationContextService(service);
+
+        }catch (Exception e) {
+
+        }
         server = new MockAttachmentServer();
 
         attachmentServerHolder = AttachmentServerHolder.getInstance();

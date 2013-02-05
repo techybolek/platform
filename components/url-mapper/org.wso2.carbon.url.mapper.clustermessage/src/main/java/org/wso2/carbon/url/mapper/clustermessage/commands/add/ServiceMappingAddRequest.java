@@ -23,7 +23,7 @@ import org.apache.axis2.clustering.ClusteringMessage;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.ApplicationContext;
+import org.wso2.carbon.tomcat.ext.utils.URLMappingHolder;
 
 /**
  *  Cluster command to add service mapping from url-mapper
@@ -46,7 +46,7 @@ public class ServiceMappingAddRequest extends ClusteringMessage {
 
     @Override
     public void execute(ConfigurationContext configurationContext) throws ClusteringFault {
-        ApplicationContext.getCurrentApplicationContext().putUrlMappingForApplication(mapping, epr);
+        URLMappingHolder.getInstance().putUrlMappingForApplication(mapping, epr);
         log.info("mapping added to service:***********: " + mapping + "******: " + epr);
     }
 }

@@ -24,7 +24,7 @@ import java.util.Date;
 
 import org.testng.Assert;
 import org.wso2.carbon.automation.api.clients.governance.LifeCycleManagementClient;
-import org.wso2.carbon.automation.utils.governance.utils.FileReader;
+import org.wso2.carbon.automation.core.utils.fileutils.FileManager;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.beans.xsd.LifecycleBean;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.stub.util.xsd.Property;
 import org.wso2.carbon.governance.lcm.stub.LifeCycleManagementServiceExceptionException;
@@ -66,7 +66,7 @@ public class LifeCycleUtils {
      public static void createNewLifeCycle(String lifeCycleName
              , LifeCycleManagementClient lifeCycleManagerAdminService, String filePath)
              throws IOException, LifeCycleManagementServiceExceptionException, InterruptedException {
-         String lifeCycleConfiguration = FileReader.readFile(filePath).replace("IntergalacticServiceLC", lifeCycleName);
+         String lifeCycleConfiguration = FileManager.readFile(filePath).replace("IntergalacticServiceLC", lifeCycleName);
          Assert.assertTrue(lifeCycleManagerAdminService.addLifeCycle(lifeCycleConfiguration)
                  , "Adding New LifeCycle Failed");
          Thread.sleep(2000);

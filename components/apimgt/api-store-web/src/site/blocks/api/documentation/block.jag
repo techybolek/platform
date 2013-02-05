@@ -11,8 +11,9 @@ jagg.block("api/documentation", {
     },
 
     getOutputs:function(inputs) {
-        var i, obj, result, length, doc, docs, documentations = {}, api = inputs.api;
-        result = jagg.module("documentation").getAllDocumentations(api);
+        var i, obj, result, length, doc, docs, documentations = {},user=jagg.getUser(),username="",api = inputs.api;
+        if(user!=null){username=user.username;}
+        result = jagg.module("documentation").getAllDocumentations(api,username);
         docs = result.documentations;
         if(docs!=null){
         length = docs.length;

@@ -2,11 +2,14 @@
     "theme" : {
         "base" : "fancy"
     },
-    "context" : "/store",
-    "recentAPIsCount" : 5,
-    "topRatedCount" : 5,
-    "defaultUser" : {
-        "username" : "admin",
-        "password" : "admin"
+    "context" : "/store",    
+    "ssoConfiguration" : {
+        "enabled" : "false",
+        "issuer" : "API_STORE",
+        "identityProviderURL" : "",
+        "keyStorePassword" : "",
+        "identityAlias" : "",
+        "keyStoreName" : ""
     }
+
 }

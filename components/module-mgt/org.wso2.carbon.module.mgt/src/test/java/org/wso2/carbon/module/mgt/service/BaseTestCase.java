@@ -17,7 +17,7 @@
 package org.wso2.carbon.module.mgt.service;
 
 import junit.framework.TestCase;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
+import org.wso2.carbon.context.CarbonContext;
 
 import java.io.File;
 
@@ -33,6 +33,6 @@ public class BaseTestCase extends TestCase {
         }
 
         // The line below is responsible for initializing the cache.
-        CarbonContextHolder.getCurrentCarbonContextHolder();
+        CarbonContext.getCurrentContext();
     }
 }

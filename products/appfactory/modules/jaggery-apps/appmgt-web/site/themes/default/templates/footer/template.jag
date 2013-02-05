@@ -1,7 +1,0 @@
-<% jagg.template("footer", function(inputs, outputs, jagg) { %>
-	
-<footer>
-    <p>&copy; WSO2 2012</p>
-</footer>
-
-<% }); %>

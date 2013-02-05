@@ -23,7 +23,6 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.rssmanager.ui.stub.types.DatabaseMetaData" %>
-<%@ page import="org.wso2.carbon.rssmanager.common.RSSManagerHelper" %>
 
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -33,7 +32,7 @@
 
 <fmt:bundle basename="org.wso2.carbon.rssmanager.ui.i18n.Resources">
     <carbon:breadcrumb resourceBundle="org.wso2.carbon.rssmanager.ui.i18n.Resources"
-                       topPage="true" request="<%=request%>" label="admin.console.header"/>
+                       topPage="true" request="<%=request%>" label="Attached Database Users"/>
 
     <div id="middle">
         <h2><fmt:message key="rss.manager.attached.database.users"/></h2>
@@ -51,7 +50,7 @@
             String databaseName = request.getParameter("databaseName");
             rssInstanceName = (rssInstanceName != null) ? rssInstanceName : (String) session.getAttribute("rssInstanceName");
             databaseName = (databaseName != null) ? databaseName : (String) session.getAttribute("databaseName");
-            
+
             try {
                 client = new RSSManagerClient(cookie, backendServerURL, configContext, request.getLocale());
                 database = client.getDatabase(rssInstanceName, databaseName);
@@ -86,22 +85,24 @@
                         <td id="<%=username%>"><%=username%>
                         </td>
                         <td>
-                            <a class="icon-link"
-                               style="background-image: url(../rssmanager/images/db-exp.png);"
-                               onclick="submitExploreForm('<%=username%>', '<%=(database != null) ? database.getUrl() : ""%>','<%=(database != null) ? RSSManagerHelper.getDatabaseDriver(database.getUrl()) : ""%>')"
-                               href="#"><fmt:message key="rss.manager.explore.database"/>
-                            </a>
+                           <%--<% if(enableDbConsole = true){%>--%>
+                            <%--<a class="icon-link"--%>
+                               <%--style="background-image: url(../rssmanager/images/db-exp.png);"--%>
+                               <%--onclick="submitExploreForm('<%=username%>', '<%=(database != null) ? database.getUrl() : ""%>','<%=(database != null) ? RSSManagerHelper.getDatabaseDriver(database.getUrl()) : ""%>')"--%>
+                               <%--href="#"><fmt:message key="rss.manager.explore.database"/>--%>
+                            <%--</a>--%>
+                            <%--<% }%>--%>
                             <a class="icon-link"
                                style="background-image:url(../rssmanager/images/data-sources-icon.gif);"
-                               onclick="createDataSource('<%=databaseName%>', '<%=username%>')"
+                               onclick="createDataSource('<%=database.getRssInstanceName()%>','<%=databaseName%>', '<%=username%>')"
                                href="#"><fmt:message key="rss.manager.create.datasource"/></a>
                             <a class="icon-link"
                                style="background-image:url(../admin/images/edit.gif);"
-                               href="javascript:submitEditForm('<%=database.getRssInstanceName()%>','<%=username%>')">
+                               href="javascript:submitEditForm('<%=database.getRssInstanceName()%>','<%=database.getName()%>','<%=username%>')">
                                 <fmt:message key="rss.manager.edit.user"/></a>
                             <a class="icon-link"
                                style="background-image:url(../admin/images/delete.gif);"
-                               onclick="detachDatabaseUser('<%=database.getRssInstanceName()%>', '<%=databaseName%>', '<%=username%>')"
+                               onclick="detachDatabaseUser('<%=database.getRssInstanceName()%>', '<%=databaseName%>', '<%=username%>'); return false;"
                                href="#"><fmt:message
                                     key="rss.manager.detach.database.user"/></a>
                         </td>
@@ -145,8 +146,9 @@
                 <input type="hidden" id="databaseName" name="databaseName"/>
             </form>
             <script type="text/javascript">
-                function submitEditForm(rssInstanceName, username) {
+                function submitEditForm(rssInstanceName, databaseName, username) {
                     document.getElementById('rssInstanceName').value = rssInstanceName;
+                    document.getElementById('databaseName1').value = databaseName;
                     document.getElementById('username').value = username;
                     document.getElementById('flag').value = 'edit';
                     document.getElementById('editForm').submit();
@@ -154,6 +156,7 @@
             </script>
             <form action="editDatabaseUser.jsp" method="post" id="editForm">
                 <input id="rssInstanceName" name="rssInstanceName" type="hidden"/>
+                <input id="databaseName1" name="databaseName" type="hidden"/>
                 <input id="username" name="username" type="hidden"/>
                 <input id="flag" name="flag" type="hidden"/>
             </form>

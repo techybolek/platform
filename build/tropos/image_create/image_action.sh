@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Die on any error:
 set -e
 
@@ -7,10 +8,14 @@ action=""
 image_template=""
 image_root=""
 software=""
-image_type=""
-loopdevice="/dev/loop3"
-nbddevice="/dev/nbd2"
-nbdmount="/dev/nbd2p1"
+
+# Make sure the user is running as root.
+
+if [ "$UID" -ne "0" ]; then
+	echo ; echo "  You must be root to run $0.  (Try running 'sudo bash' first.)" ; echo 
+	exit 69
+fi
+
 
 function image_validate {
     if [ -z $action ]; then
@@ -69,33 +74,23 @@ for var in $@; do
         software="$value"
         echo "software:" $software
     fi
-    
-    if [ $key = "image-type" ]; then
-        image_type="$value"
-        echo "image_type:" $image_type
-    fi
 
 done
 
 image_validate
-
 work_dir="$image_root/$image_template"
 if [[ (-n $action) && ($action == "unmount") ]]; then
     echo "# unmount $image_template"
     if [ -d $work_dir/$image_template ]; then
-        if [ $image_type == "qcow2" ]; then
-            umount $work_dir/$image_template
-        else
-            echo 'this action unmount image!'
-            umount $work_dir/$image_template/dev
-            umount $work_dir/$image_template/proc
-            umount $work_dir/$image_template/sys
-            umount $work_dir/$image_template
-            if [ -d $work_dir/$image_template/dev ]; then
-                umount -l $work_dir/$image_template
-            fi
-            losetup -d $loopdevice
+        echo 'this action unmount image!'
+        umount $work_dir/$image_template/dev
+        umount $work_dir/$image_template/proc
+        umount $work_dir/$image_template/sys
+        umount $work_dir/$image_template
+        if [ -d $work_dir/$image_template/dev ]; then
+            umount -l $work_dir/$image_template
         fi
+        losetup -d /dev/loop2
         #rm -rf $work_dir/$image_template
     fi
     #if [ -d "./$image_template" ]; then
@@ -110,19 +105,11 @@ if [[ (-n $action) && ($action == "mount") ]]; then
         mkdir -p $work_dir/$image_template
     fi
     #cp -f $image_image $work_dir/
-    if [ $image_type == "qcow2" ]; then
-        modprobe nbd max_part=8
-        qemu-nbd -c $nbddevice $image_image
-        mount $nbdmount $work_dir/$image_template
-    else
-        #loopdevice=`losetup -f`
-        echo "Available loop device is $loopdevice"
-        losetup $loopdevice $image_image
-        mount $loopdevice $work_dir/$image_template 
-        mount -o bind /dev $work_dir/$image_template/dev
-        mount -o bind /proc $work_dir/$image_template/proc
-        mount -o bind /sys $work_dir/$image_template/sys
-    fi
+    losetup /dev/loop2 $image_image
+    mount /dev/loop2 $work_dir/$image_template 
+    mount -o bind /dev $work_dir/$image_template/dev
+    mount -o bind /proc $work_dir/$image_template/proc
+    mount -o bind /sys $work_dir/$image_template/sys
     exit 0
 fi
 

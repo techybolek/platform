@@ -18,14 +18,24 @@ package org.wso2.carbon.governance.registry.extensions.utils;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
-import org.wso2.carbon.registry.api.Registry;
-import org.wso2.carbon.registry.api.RegistryException;
-import org.wso2.carbon.registry.api.Resource;
+import org.wso2.carbon.governance.api.util.GovernanceConstants;
+import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.config.RegistryContext;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.CurrentSession;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.registry.extensions.utils.CommonConstants;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.FileUtil;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -136,27 +146,85 @@ public class CommonUtil {
 
     }
 
-
-//    The following method is commented out since this is an utility method and
-//    we are not able to get the registry.xml from the client side.
-
-
-/*
-    private static File getConfigFile() throws org.wso2.carbon.registry.core.exceptions.RegistryException {
-        String configPath = CarbonUtils.getRegistryXMLPath();
-        if (configPath != null) {
-            File registryXML = new File(configPath);
-            if (!registryXML.exists()) {
-                String msg = "Registry configuration file (registry.xml) file does " +
-                        "not exist in the path " + configPath;
-                throw new org.wso2.carbon.registry.core.exceptions.RegistryException(msg);
+    public static void addRxtConfigs(Registry systemRegistry, int tenantId) throws RegistryException {
+        String rxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator +
+                "resources" + File.separator + "rxts";
+        File file = new File(rxtDir);
+        if(!file.exists()){
+            return;
+        }
+        //create a FilenameFilter
+        FilenameFilter filenameFilter = new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                //if the file extension is .rxt return true, else false
+                return name.endsWith(".rxt");
             }
-            return registryXML;
-        } else {
-            String msg = "Cannot find registry.xml";
-            throw new org.wso2.carbon.registry.core.exceptions.RegistryException(msg);
+        };
+        String[] rxtFilePaths = file.list(filenameFilter);
+        if(rxtFilePaths.length == 0){
+            return;
+        }
+        for (String rxtPath : rxtFilePaths) {
+            String resourcePath = GovernanceConstants.RXT_CONFIGS_PATH +
+                    RegistryConstants.PATH_SEPARATOR + rxtPath;
+            int currentTenantId = CurrentSession.getTenantId();
+            CurrentSession.setTenantId(tenantId);
+            RegistryContext registryContext = systemRegistry.getRegistryContext();
+            String absolutePath = RegistryUtils.getAbsolutePath(registryContext, resourcePath);
+            if (registryContext.isSystemResourcePathRegistered(absolutePath)) {
+                CurrentSession.setTenantId(currentTenantId);
+                continue;
+            } else {
+                registryContext.registerSystemResourcePath(absolutePath);
+                CurrentSession.setTenantId(currentTenantId);
+            }
+            try {
+                if(!systemRegistry.resourceExists(GovernanceConstants.RXT_CONFIGS_PATH)) {
+                    Collection collection =  systemRegistry.newCollection();
+                    systemRegistry.put(GovernanceConstants.RXT_CONFIGS_PATH,collection);
+                }
+
+                  Resource rxtCollection = systemRegistry.get(GovernanceConstants.RXT_CONFIGS_PATH);
+                  String rxtName = resourcePath.substring(resourcePath.lastIndexOf("/")+1).split("\\.")[0];
+                  String propertyaName = "registry." + rxtName;
+                    if(rxtCollection.getProperty(propertyaName) == null) {
+                        rxtCollection.setProperty(propertyaName,"true");
+                        systemRegistry.put(GovernanceConstants.RXT_CONFIGS_PATH,rxtCollection);
+
+                        String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
+                        Resource resource = systemRegistry.newResource();
+                        resource.setContent(rxt.getBytes());
+                        resource.setMediaType(CommonConstants.RXT_MEDIA_TYPE);
+                        systemRegistry.put(resourcePath, resource);
+                    }
+
+
+            } catch (IOException e) {
+                String msg = "Failed to read rxt files";
+                throw new RegistryException(msg, e);
+            } catch (RegistryException e) {
+                String msg = "Failed to add rxt to registry ";
+                throw new RegistryException(msg, e);
+            }
         }
     }
-*/
 
+    // handling the possibility that handlers are not called within each other.
+    private static ThreadLocal<Boolean> clearMetaDataInProgress = new ThreadLocal<Boolean>() {
+        protected Boolean initialValue() {
+            return false;
+        }
+    };
+
+    public static boolean isMetaDataClearLockAvailable() {
+        return !clearMetaDataInProgress.get();
+    }
+
+    public static void acquireMetaDataClearLock() {
+        clearMetaDataInProgress.set(true);
+    }
+
+    public static void releaseMetaDataClearLock() {
+        clearMetaDataInProgress.set(false);
+    }
 }

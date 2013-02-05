@@ -1,6 +1,6 @@
 package org.wso2.carbon.databridge.receiver.restapi;
 
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.core.AbstractDataReceiver;
 import org.wso2.carbon.databridge.core.DataBridgeReceiverService;
 
@@ -24,7 +24,7 @@ public class RestDataReceiver extends AbstractDataReceiver {
 
     @Override
     protected DataBridgeReceiverService getDatabridgeReceiver() {
-        return (DataBridgeReceiverService) SuperTenantCarbonContext.getCurrentContext()
+        return (DataBridgeReceiverService) PrivilegedCarbonContext.getCurrentContext()
                 .getOSGiService(DataBridgeReceiverService.class);
     }
 }

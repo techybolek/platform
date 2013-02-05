@@ -88,6 +88,7 @@
                         async: false,
                         success: function(msg) {
                         }});
+                    updatePaymentTable(resp, amount, selectedUsagePlan);
                     location.href = 'registration_payment_completed.jsp?paymentStatus=' + resp.paymentStatus + '&transactionID=' +
                                     resp.transactionID + '&pendingReason=' + resp.pendingReason +
                                     '&amount=' + amount + '&invoiceId=' ;
@@ -100,12 +101,12 @@
         });
     }
 
-    function updatePaymentTable(paymentresponse, amount){
+    function updatePaymentTable(paymentresponse, amount, usagePlan){
         var transactionId = paymentresponse.transactionID;
         jQuery.ajax({
             type: 'GET',
-            url: '../tenant-billing/add_payment-ajaxprocessor.jsp',
-            data: 'transactionId=' + transactionId + '&amount=' + amount + '&invoiceId=',
+            url: '../tenant-billing/add_registration_payment-ajaxprocessor.jsp',
+            data: 'transactionId=' + transactionId + '&amount=' + amount + '&usagePlan=' + usagePlan,
             async: false,
             success: function(msg) {
                 updatePaymentTableResponse = eval('(' + msg + ')');

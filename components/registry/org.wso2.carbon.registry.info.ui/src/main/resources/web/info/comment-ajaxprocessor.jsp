@@ -25,6 +25,7 @@
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.wso2.carbon.registry.common.beans.CommentBean" %>
 <%@ page import="org.wso2.carbon.registry.common.beans.utils.Comment" %>
+<%@ page import="org.wso2.carbon.registry.info.ui.Utils" %>
 <carbon:jsi18n resourceBundle="org.wso2.carbon.registry.info.ui.i18n.JSResources"
 		request="<%=request%>" namespace="org.wso2.carbon.registry.info.ui" />
 <script type="text/javascript" src="../info/js/info.js"></script>
@@ -35,7 +36,9 @@
             InfoServiceClient client = new InfoServiceClient(cookie, config, session);
             CommentBean comment;
             try {
-                client.addComment(request);
+                if (!"true".equals(Utils.getParameter(request, "list"))) {
+                    client.addComment(request);
+                }
                 comment = client.getComments(request);
             } catch (Exception e) {
                 response.setStatus(500);

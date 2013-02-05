@@ -47,9 +47,8 @@ import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
-import java.lang.String;
-import java.util.*;
 import java.net.URL;
+import java.util.*;
 
 public class WSRegistryServiceClient implements Registry {
 	private static final Log log = LogFactory.getLog(WSRegistryServiceClient.class);
@@ -767,16 +766,23 @@ public class WSRegistryServiceClient implements Registry {
         }
     }
 
-    /*
-     * TODO (Dummy Impl until implemented)
-     * 
-     * (non-Javadoc)
-     * @see org.wso2.carbon.registry.core.Registry#removeVersionHistory(java.lang.String, java.lang.String)
+
+    /**
+     *
+     * @param path                Path of the resource
+     * @param regVersion          Version ID
+     * @return                    Succeed or not
+     * @throws RegistryException  If operation fails
      */
-    
     public boolean removeVersionHistory(String path, long regVersion)
     		throws RegistryException {
-    	throw new UnsupportedOperationException("Unsupported Operation");
+        try {
+            return stub.removeVersionHistory(path, regVersion);
+        } catch (Exception e) {
+            String msg = "Failed to remove version: " + regVersion + " of the resource " + path;
+            log.error(msg, e);
+            throw new RegistryException(msg, e);
+        }
     }
     
     public void beginTransaction() throws RegistryException {

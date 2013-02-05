@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.url.mapper.internal.util.HostUtil;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.PreAxisConfigurationPopulationObserver;
@@ -64,7 +64,7 @@ public class UrlMappingDeploymentInterceptor implements AxisObserver {
 
     public void serviceUpdate(AxisEvent axisEvent, AxisService axisService) {
         Parameter mapping = axisService.getParameter("custom-mapping");
-        int tenantId = SuperTenantCarbonContext.getCurrentContext(
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(
                 axisService.getAxisConfiguration()).getTenantId();
         if(mapping == null) {
             return;
@@ -75,7 +75,7 @@ public class UrlMappingDeploymentInterceptor implements AxisObserver {
                         HostUtil.addServiceUrlMapping(tenantId, axisService.getName());
                     }
                 } else if(axisEvent.getEventType() == 0 || axisEvent.getEventType() == 2) {
-                    tenantId = SuperTenantCarbonContext.
+                    tenantId = PrivilegedCarbonContext.
                             getCurrentContext(axisService.getAxisConfiguration()).getTenantId();
                     HostUtil.removeUrlMappingFromMap(tenantId, axisService.getName());
                 }

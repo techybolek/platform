@@ -21,6 +21,7 @@
 package org.wso2.carbon.databridge.commons;
 
 import java.util.Arrays;
+import java.util.Map;
 
 public class Event {
 
@@ -31,6 +32,8 @@ public class Event {
     private Object[] metaData;
     private Object[] correlationData;
     private Object[] payloadData;
+    private Map<String, String> arbitraryDataMap = null;
+
 
     public Event() {
 
@@ -39,11 +42,23 @@ public class Event {
     public Event(String streamId, long timeStamp, Object[] metaDataArray,
                  Object[] correlationDataArray,
                  Object[] payloadDataArray) {
-        this.streamId=streamId;
-        this.timeStamp=timeStamp;
-        this.metaData=metaDataArray;
-        this.correlationData=correlationDataArray;
-        this.payloadData=payloadDataArray;
+        this.streamId = streamId;
+        this.timeStamp = timeStamp;
+        this.metaData = metaDataArray;
+        this.correlationData = correlationDataArray;
+        this.payloadData = payloadDataArray;
+    }
+
+    public Event(String streamId, long timeStamp, Object[] metaDataArray,
+                 Object[] correlationDataArray,
+                 Object[] payloadDataArray,
+                 Map<String, String> arbitraryDataMap) {
+        this.streamId = streamId;
+        this.timeStamp = timeStamp;
+        this.metaData = metaDataArray;
+        this.correlationData = correlationDataArray;
+        this.payloadData = payloadDataArray;
+        this.arbitraryDataMap = arbitraryDataMap;
     }
 
 
@@ -87,14 +102,25 @@ public class Event {
         this.payloadData = payloadData;
     }
 
+
+    public Map<String, String> getArbitraryDataMap() {
+        return arbitraryDataMap;
+    }
+
+    public void setArbitraryDataMap(Map<String, String> arbitraryDataMap) {
+        this.arbitraryDataMap = arbitraryDataMap;
+    }
+
+
     @Override
     public String toString() {
         return "Event{" +
-               EBCommonsConstants.STREAM_ID + "='" + streamId + '\'' +
+                EBCommonsConstants.STREAM_ID + "='" + streamId + '\'' +
                 ", " + EBCommonsConstants.TIME_STAMP + "=" + timeStamp +
-               ", " + EBCommonsConstants.META_DATA + "=" + (metaData == null ? null : Arrays.asList(metaData)) +
-               ", " + EBCommonsConstants.CORRELATION_DATA + "=" + (correlationData == null ? null : Arrays.asList(correlationData)) +
-               ", " +  EBCommonsConstants.PAYLOAD_DATA  + "=" + (payloadData == null ? null : Arrays.asList(payloadData)) +
-               '}';
+                ", " + EBCommonsConstants.META_DATA + "=" + (metaData == null ? null : Arrays.asList(metaData)) +
+                ", " + EBCommonsConstants.CORRELATION_DATA + "=" + (correlationData == null ? null : Arrays.asList(correlationData)) +
+                ", " + EBCommonsConstants.PAYLOAD_DATA + "=" + (payloadData == null ? null : Arrays.asList(payloadData)) +
+                ", " + EBCommonsConstants.ARBITRARY_DATA_MAP + "=" + arbitraryDataMap +
+                '}';
     }
 }

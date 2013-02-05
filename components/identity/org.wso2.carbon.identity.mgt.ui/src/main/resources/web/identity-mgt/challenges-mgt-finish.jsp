@@ -28,7 +28,7 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Iterator" %>
-<%@ page import="org.wso2.carbon.identity.mgt.ui.IdentityManagementClient" %>
+<%@ page import="org.wso2.carbon.identity.mgt.ui.IdentityManagementAdminClient" %>
 <script type="text/javascript" src="extensions/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
 
@@ -38,7 +38,7 @@
 
     if(removeSetId != null && removeSetId.trim().length() > 0){
         List<ChallengeQuestionDTO> retrievedChallenges = (List<ChallengeQuestionDTO>) session.
-                getAttribute(IdentityManagementClient.CHALLENGE_QUESTION);
+                getAttribute(IdentityManagementAdminClient.CHALLENGE_QUESTION);
 
         if(retrievedChallenges != null){
             Iterator<ChallengeQuestionDTO> iterator = retrievedChallenges.iterator();
@@ -78,8 +78,8 @@
         ConfigurationContext configContext = (ConfigurationContext) config
                 .getServletContext()
                 .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
-        IdentityManagementClient proxy =
-                            new IdentityManagementClient(cookie, backendServerURL, configContext);
+        IdentityManagementAdminClient proxy =
+                            new IdentityManagementAdminClient(cookie, backendServerURL, configContext);
         if(challenges.size() > 0){
             proxy.setChallengeQuestions(challenges.toArray(new ChallengeQuestionDTO[challenges.size()]));
         }

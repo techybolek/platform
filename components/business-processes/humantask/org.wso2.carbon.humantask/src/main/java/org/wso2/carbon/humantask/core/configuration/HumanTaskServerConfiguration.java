@@ -69,7 +69,7 @@ public class HumanTaskServerConfiguration {
 
     private String taskCleanupCronExpression;
 
-//    private boolean enableTaskEventPersistence = false;
+    private boolean uiRenderingEnabled = false;
 
 
     /**
@@ -89,7 +89,7 @@ public class HumanTaskServerConfiguration {
     }
 
     public HumanTaskServerConfiguration() {
-        this.dataSourceName = "htds";
+        this.dataSourceName = "bpsds";
         this.daoConnectionFactoryClass = "org.wso2.carbon.humantask.dao.jpa.openjpa.HumanTaskDAOConnectionFactoryImpl";
         this.dataSourceJNDIRepoInitialContextFactory = "com.sun.jndi.rmi.registry.RegistryContextFactory";
         this.dataSourceJNDIRepoProviderURL = "rmi://localhost:2199";
@@ -141,6 +141,10 @@ public class HumanTaskServerConfiguration {
 
         if(tHumanTaskServerConfig.getTaskEventListeners() != null) {
            initEventListeners(tHumanTaskServerConfig.getTaskEventListeners());
+        }
+
+        if(tHumanTaskServerConfig.getUIRenderingEnabled()) {
+            uiRenderingEnabled = true;
         }
     }
 
@@ -359,5 +363,9 @@ public class HumanTaskServerConfiguration {
         return StringUtils.isNotEmpty(this.taskCleanupCronExpression) &&
                 CronExpression.isValidExpression(taskCleanupCronExpression) &&
                 removableTaskStatuses.size() > 0;
+    }
+
+    public boolean isUiRenderingEnabled() {
+        return uiRenderingEnabled;
     }
 }

@@ -18,7 +18,8 @@
  */
 package org.wso2.carbon.registry.handler.listener;
 
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.services.callback.LoginListener;
 import org.wso2.carbon.core.services.callback.LoginEvent;
 import org.wso2.carbon.registry.core.Registry;
@@ -41,13 +42,13 @@ public class HandlerLoader implements LoginListener {
                 return;
             }
             initializedTenants.add(loginEvent.getTenantId());
-            SuperTenantCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.startTenantFlow();
             try {
-                SuperTenantCarbonContext.getCurrentContext().setTenantId(loginEvent.getTenantId());
-                SuperTenantCarbonContext.getCurrentContext().setUsername(loginEvent.getUsername());
+                PrivilegedCarbonContext.getCurrentContext().setTenantId(loginEvent.getTenantId());
+                PrivilegedCarbonContext.getCurrentContext().setUsername(loginEvent.getUsername());
                 CommonUtil.addDefaultHandlersIfNotAvailable(configSystemRegistry);
             } finally {
-                SuperTenantCarbonContext.endTenantFlow();
+                PrivilegedCarbonContext.endTenantFlow();
             }
         } catch (Exception e) {
             String msg = "Error in adding the default handlers";

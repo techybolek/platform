@@ -22,8 +22,12 @@
 <%@ page import="org.wso2.carbon.utils.ServerConstants"%>
 
 <%
-
+    boolean evaluatedWithPDP = false;
     String policyRequest = CharacterEncoder.getSafeText(request.getParameter("txtRequest"));
+    String withPDP = CharacterEncoder.getSafeText(request.getParameter("withPDP"));
+    if("true".equals(withPDP)){
+        evaluatedWithPDP = true; 
+    }
     String forwardTo = request.getParameter("forwardTo");
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     ConfigurationContext configContext =
@@ -74,7 +78,7 @@
         rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:environment:environment-id");
         rowDTO.setCategory("urn:oasis:names:tc:xacml:3.0:attribute-category:environment");
         rowDTOs.add(rowDTO);
-        session.setAttribute("environmentNames",environmentNames);
+        session.setAttribute("environmentNames", environmentNames);
     }
 
     RequestElementDTO requestElementDTO = new RequestElementDTO();
@@ -83,7 +87,8 @@
     EntitlementPolicyCreator entitlementPolicyCreator = new EntitlementPolicyCreator();
 
     try {
-
+    	EntitlementAdminServiceClient adminClient =
+                                new EntitlementAdminServiceClient(cookie, serverURL, configContext);
     	EntitlementServiceClient client = new EntitlementServiceClient(cookie, serverURL, configContext);
         if(policyRequest == null || policyRequest.trim().length() < 1){
             String createdRequest = entitlementPolicyCreator.createBasicRequest(requestElementDTO);
@@ -91,7 +96,11 @@
                 policyRequest = createdRequest.trim().replaceAll("><", ">\n<");
             }
         }
-        resp = client.getDecision(policyRequest);
+        if(evaluatedWithPDP){
+            resp = client.getDecision(policyRequest);
+        } else {
+            resp = adminClient.getDecision(policyRequest);            
+        }
         session.setAttribute("txtRequest", policyRequest);
     	CarbonUIMessage.sendCarbonUIMessage(resp, CarbonUIMessage.INFO, request);
     	if (forwardTo == null) {
@@ -108,7 +117,6 @@
 
 <%@page import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementServiceClient"%>
 <%@page import="java.util.ResourceBundle"%>
-<%@page import="org.wso2.carbon.identity.entitlement.ui.dto.BasicRequestDTO" %>
 <%@page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyCreator" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.RowDTO" %>
@@ -116,6 +124,7 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.RequestElementDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementAdminServiceClient" %>
 <script
 	type="text/javascript">
     function forward() {

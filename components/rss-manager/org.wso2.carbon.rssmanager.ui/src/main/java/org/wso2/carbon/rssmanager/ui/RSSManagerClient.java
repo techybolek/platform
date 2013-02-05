@@ -25,11 +25,9 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.rssmanager.ui.stub.RSSAdminRSSManagerExceptionException;
 import org.wso2.carbon.rssmanager.ui.stub.RSSAdminStub;
 import org.wso2.carbon.rssmanager.ui.stub.types.*;
 
-import java.rmi.RemoteException;
 import java.util.*;
 
 public class RSSManagerClient {
@@ -61,9 +59,7 @@ public class RSSManagerClient {
         try {
             stub.dropDatabasePrivilegesTemplate(templateName);
         } catch (Exception e) {
-            handleException(bundle.getString(
-                    "rss.manager.failed.to.drop.database.privilege.template") + " '" +
-                    templateName + "'", e);
+            handleException(e.getMessage(), e);
         }
     }
 
@@ -72,9 +68,7 @@ public class RSSManagerClient {
         try {
             stub.editDatabasePrivilegesTemplate(template);
         } catch (Exception e) {
-            handleException(bundle.getString(
-                    "rss.manager.failed.to.edit.database.privilege.template") +
-                    " '" + template.getName() + "'", e);
+            handleException(e.getMessage(), e);
         }
     }
 
@@ -83,9 +77,7 @@ public class RSSManagerClient {
         try {
             stub.createDatabasePrivilegesTemplate(template);
         } catch (Exception e) {
-            handleException(bundle.getString(
-                    "rss.manager.failed.to.create.database.privilege.template") +
-                    " '" + template.getName() + "'", e);
+            handleException(e.getMessage(), e);
         }
     }
 
@@ -97,8 +89,7 @@ public class RSSManagerClient {
                 templates = Arrays.asList(stub.getDatabasePrivilegesTemplates());
             }
         } catch (Exception e) {
-            handleException(bundle.getString(
-                    "rss.manager.failed.to.retrieve.database.privilege.template.list"), e);
+            handleException(e.getMessage(), e);
         }
         return templates;
     }
@@ -108,8 +99,7 @@ public class RSSManagerClient {
         try {
             stub.editDatabaseUserPrivileges(privileges, user, databaseName);
         } catch (Exception e) {
-            handleException(bundle.getString("rss.manager.failed.to.edit.user") + " : " +
-                    user.getUsername(), e);
+            handleException(e.getMessage(), e);
         }
     }
 
@@ -117,8 +107,7 @@ public class RSSManagerClient {
         try {
             stub.createDatabase(database);
         } catch (Exception e) {
-            handleException(bundle.getString("rss.manager.failed.to.create.database") + " '" +
-                    database.getName() + "'", e);
+            handleException(e.getMessage(), e);
         }
     }
 
@@ -130,8 +119,7 @@ public class RSSManagerClient {
                 databases = Arrays.asList(tmp);
             }
         } catch (Exception e) {
-            handleException(bundle.getString(
-                    "rss.manager.failed.to.retrieve.database.instance.list"), e);
+            handleException(e.getMessage(), e);
         }
         return databases;
     }
@@ -141,8 +129,7 @@ public class RSSManagerClient {
         try {
             return stub.getDatabase(rssInstanceName, databaseName);
         } catch (Exception e) {
-            handleException(bundle.getString(
-                    "rss.manager.failed.to.retrieve.database.instance.data"), e);
+            handleException(e.getMessage(), e);
         }
         return null;
     }
@@ -151,7 +138,7 @@ public class RSSManagerClient {
         try {
             stub.dropDatabase(rssInstanceName, databaseName);
         } catch (Exception e) {
-            handleException(bundle.getString("rss.manager.failed.to.drop.database"), e);
+            handleException(e.getMessage(), e);
         }
     }
 
@@ -163,8 +150,7 @@ public class RSSManagerClient {
                 rssInstances = Arrays.asList(tmp);
             }
         } catch (Exception e) {
-            handleException(bundle.getString(
-                    "rss.manager.failed.to.retrieve.RSS.instance.list"), e);
+            handleException(e.getMessage(), e);
         }
         return rssInstances;
     }
@@ -193,8 +179,7 @@ public class RSSManagerClient {
         try {
             stub.editRSSInstance(rssIns);
         } catch (Exception e) {
-            handleException(bundle.getString("rss.manager.failed.to.edit.database.server.instance")
-                    + " : " + rssIns.getName(), e);
+            handleException(e.getMessage(), e);
         }
     }
 
@@ -204,8 +189,7 @@ public class RSSManagerClient {
         try {
             user = stub.getDatabaseUser(rssInstanceName, username);
         } catch (Exception e) {
-            handleException(bundle.getString(
-                    "rss.manager.failed.to.retrieve.database.user.data"), e);
+            handleException(e.getMessage(), e);
         }
         return user;
     }
@@ -214,7 +198,7 @@ public class RSSManagerClient {
         try {
             stub.dropDatabaseUser(rssInstanceName, username);
         } catch (Exception e) {
-            handleException(bundle.getString("rss.manager.failed.to.drop.database.user"), e);
+            handleException(e.getMessage(), e);
         }
     }
 
@@ -222,7 +206,7 @@ public class RSSManagerClient {
         try {
             stub.createCarbonDataSource(entry);
         } catch (Exception e) {
-            handleException(bundle.getString("rss.manager.failed.to.create.carbon.datasource"), e);
+            handleException(e.getMessage(), e);
         }
     }
 
@@ -230,7 +214,7 @@ public class RSSManagerClient {
         try {
             stub.createDatabaseUser(user);
         } catch (Exception e) {
-            handleException(bundle.getString("rss.manager.failed.to.create.database.user"), e);
+            handleException(e.getMessage(), e);
         }
     }
 
@@ -240,8 +224,7 @@ public class RSSManagerClient {
         try {
             tempalte = stub.getDatabasePrivilegesTemplate(templateName);
         } catch (Exception e) {
-            handleException(bundle.getString(
-                    "rss.manager.failed.to.retrieve.database.privilege.template.data"), e);
+            handleException(e.getMessage(), e);
         }
         return tempalte;
     }
@@ -256,8 +239,7 @@ public class RSSManagerClient {
         try {
             rssIns = stub.getRSSInstance(rssInstanceName);
         } catch (Exception e) {
-            handleException(bundle.getString(
-                    "rss.manager.failed.to.retrieve.database.server.instance.properties"), e);
+            handleException(e.getMessage(), e);
         }
         return rssIns;
     }
@@ -266,10 +248,8 @@ public class RSSManagerClient {
         DatabaseUserMetaData[] users = new DatabaseUserMetaData[0];
         try {
             users = stub.getDatabaseUsers();
-        } catch (RemoteException e) {
-            handleException(bundle.getString("rss.manager.failed.to.retrieve.database.users"), e);
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            handleException(bundle.getString("rss.manager.failed.to.retrieve.database.users"), e);
+        } catch (Exception e) {
+            handleException(e.getMessage(), e);
         }
         return users;
     }
@@ -277,14 +257,8 @@ public class RSSManagerClient {
     public void dropRSSInstance(String rssInstanceName) throws AxisFault {
         try {
             stub.dropRSSInstance(rssInstanceName);
-        } catch (RemoteException e) {
-            handleException(bundle.getString(
-                    "rss.manager.failed.to.drop.database.server.instance") + " '" +
-                    rssInstanceName + "'", e);
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            handleException(bundle.getString(
-                    "rss.manager.failed.to.drop.database.server.instance") + " '" +
-                    rssInstanceName + "'", e);
+        } catch (Exception e) {
+            handleException(e.getMessage(), e);
         }
     }
 
@@ -292,12 +266,8 @@ public class RSSManagerClient {
         int count = 0;
         try {
             count = stub.getSystemRSSInstanceCount();
-        } catch (RemoteException e) {
-            handleException(bundle.getString(
-                    "rss.manager.failed.to.retrieve.system.rss.instance.count"), e);
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            handleException(bundle.getString(
-                    "rss.manager.failed.to.retrieve.system.rss.instance.count"), e);
+        } catch (Exception e) {
+            handleException(e.getMessage(), e);
         }
         return count;
     }
@@ -306,10 +276,8 @@ public class RSSManagerClient {
                                      String templateName) throws AxisFault {
         try {
             stub.attachUserToDatabase(rssInstanceName, databaseName, username, templateName);
-        } catch (RemoteException e) {
-            handleException("", e);
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            handleException("", e);
+        } catch (Exception e) {
+            handleException(e.getMessage(), e);
         }
     }
 
@@ -317,10 +285,8 @@ public class RSSManagerClient {
                                        String username) throws AxisFault {
         try {
             stub.detachUserFromDatabase(rssInstanceName, databaseName, username);
-        } catch (RemoteException e) {
-            handleException("", e);
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            handleException("", e);
+        } catch (Exception e) {
+            handleException(e.getMessage(), e);
         }
     }
 
@@ -329,16 +295,8 @@ public class RSSManagerClient {
         String[] users = new String[0];
         try {
             users = stub.getUsersAttachedToDatabase(rssInstanceName, databaseName);
-        } catch (RemoteException e) {
-            String msg =
-                    bundle.getString("rss.manager.failed.to.retrieve.users.attached.to.the.database")
-                            + " '" + databaseName + "'";
-            handleException(msg, e);
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            String msg =
-                    bundle.getString("rss.manager.failed.to.retrieve.users.attached.to.the.database")
-                            + " '" + databaseName + "'";
-            handleException(msg, e);
+        } catch (Exception e) {
+            handleException(e.getMessage(), e);
         }
         return users;
     }
@@ -348,16 +306,8 @@ public class RSSManagerClient {
         String[] users = new String[0];
         try {
             users = stub.getAvailableUsersToAttachToDatabase(rssInstanceName, databaseName);
-        } catch (RemoteException e) {
-            String msg =
-                    bundle.getString("rss.manager.failed.to.retrieve.available.database.users") +
-                            " '" + databaseName + "'";
-            handleException(msg, e);
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            String msg =
-                    bundle.getString("rss.manager.failed.to.retrieve.available.database.users") +
-                            " '" + databaseName + "'";
-            handleException(msg, e);
+        } catch (Exception e) {
+             handleException(e.getMessage(), e);
         }
         return users;
     }
@@ -367,17 +317,9 @@ public class RSSManagerClient {
             String rssInstanceName, String databaseName, String username) throws AxisFault {
         DatabasePrivilegeSet privileges = null;
         try {
-            privileges = stub.getUserDatabasePermissions(rssInstanceName, username, databaseName);
-        } catch (RemoteException e) {
-            String msg =
-                    bundle.getString("rss.manager.failed.to.retrieve.database.permissions.granted.to.the.user") +
-                            " '" + username + "' on the database '" + databaseName + "'";
-            handleException(msg, e);
-        } catch (RSSAdminRSSManagerExceptionException e) {
-            String msg =
-                    bundle.getString("rss.manager.failed.to.retrieve.database.permissions.granted.to.the.user") +
-                            " '" + username + "' on the database '" + databaseName + "'";
-            handleException(msg, e);
+            privileges = stub.getUserDatabasePermissions(rssInstanceName, databaseName, username);
+        } catch (Exception e) {
+            handleException(e.getMessage(), e);
         }
         return privileges;
     }

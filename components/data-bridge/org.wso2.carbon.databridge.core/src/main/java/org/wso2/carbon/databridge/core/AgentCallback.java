@@ -34,8 +34,8 @@ public interface AgentCallback {
     /**
      * will get called  when types are defined
      *
-     * @param streamDefinition   TypeDefinition of event streams
-     * @param credentials of the credential defining the event stream definition
+     * @param streamDefinition TypeDefinition of event streams
+     * @param credentials      of the credential defining the event stream definition
      */
     void definedStream(StreamDefinition streamDefinition, Credentials credentials);
 

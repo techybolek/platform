@@ -72,11 +72,11 @@ public class SVNRepositoryMgtServiceComponent {
         }
         try {
             BundleContext bundleContext = context.getBundleContext();
-            Hashtable<String, String> ht = new Hashtable<String, String>();
+            /*Hashtable<String, String> ht = new Hashtable<String, String>();
             ht.put("type", "svn");
             SVNManager repositoryManager = new SVNManager();
             bundleContext.registerService(RevisionControlDriver.class.getName(), repositoryManager,ht);
-
+*/
             //SVNArtifactStorage svnArtifactStorage = new SVNArtifactStorage();
             //bundleContext.registerService(ArtifactStorage.class.getName(), svnArtifactStorage, null);
 
@@ -84,9 +84,9 @@ public class SVNRepositoryMgtServiceComponent {
             FileArtifactStorage fileArtifactStorage = new FileArtifactStorage();
             bundleContext.registerService(ArtifactStorage.class.getName(), fileArtifactStorage, null);
 
-            RepositoryManagerHolder holder = RepositoryManagerHolder.getInstance();
+        /*    RepositoryManagerHolder holder = RepositoryManagerHolder.getInstance();
             RepositoryManager repositoryManagerOld = holder.getRepositoryManager();
-            bundleContext.registerService(RepositoryManager.class.getName(),repositoryManagerOld,null);
+            bundleContext.registerService(RepositoryManager.class.getName(),repositoryManagerOld,null);*/
 
         } catch (Throwable e) {
             log.error("Error in registering Repository Management Service  ", e);

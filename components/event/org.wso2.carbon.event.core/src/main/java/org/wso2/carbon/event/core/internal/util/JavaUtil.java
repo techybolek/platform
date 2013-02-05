@@ -77,6 +77,7 @@ public class JavaUtil {
     public static Subscription getSubscription(Resource subscriptionResource) {
 
         Subscription subscription = new Subscription();
+        subscription.setTenantId(CarbonContext.getCurrentContext().getTenantId());
         Properties properties = subscriptionResource.getProperties();
         if ((properties != null) && (!properties.isEmpty())) {
             for (Enumeration enumeration = properties.propertyNames(); enumeration.hasMoreElements();) {

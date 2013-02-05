@@ -17,27 +17,34 @@
 */
 package org.wso2.carbon.identity.sso.saml.ui;
 
+import java.io.ByteArrayOutputStream;
+
+import org.apache.axiom.util.UIDGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.axiom.om.util.UUIDGenerator;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLVersion;
-import org.opensaml.saml2.core.*;
-import org.opensaml.saml2.core.impl.*;
+import org.opensaml.saml2.core.Issuer;
+import org.opensaml.saml2.core.Response;
+import org.opensaml.saml2.core.Status;
+import org.opensaml.saml2.core.StatusCode;
+import org.opensaml.saml2.core.StatusMessage;
+import org.opensaml.saml2.core.impl.IssuerBuilder;
+import org.opensaml.saml2.core.impl.ResponseBuilder;
+import org.opensaml.saml2.core.impl.StatusBuilder;
+import org.opensaml.saml2.core.impl.StatusCodeBuilder;
+import org.opensaml.saml2.core.impl.StatusMessageBuilder;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.util.Base64;
-import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.io.Marshaller;
-import org.wso2.carbon.identity.base.*;
-import org.wso2.carbon.identity.base.IdentityException;
+import org.opensaml.xml.io.MarshallerFactory;
+import org.opensaml.xml.util.Base64;
 import org.w3c.dom.Element;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSSerializer;
-import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
-
-import java.io.ByteArrayOutputStream;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSOutput;
+import org.w3c.dom.ls.LSSerializer;
+import org.wso2.carbon.identity.base.IdentityException;
 
 public class ErrorResponseBuilder {
 
@@ -57,7 +64,7 @@ public class ErrorResponseBuilder {
         response.setIssuer(getIssuer());
         response.setStatus(buildStatus());
         response.setVersion(SAMLVersion.VERSION_20);
-        response.setID(UUIDGenerator.getUUID());
+        response.setID(UIDGenerator.generateUID());
 
         try {
             return encode(marshall(response));

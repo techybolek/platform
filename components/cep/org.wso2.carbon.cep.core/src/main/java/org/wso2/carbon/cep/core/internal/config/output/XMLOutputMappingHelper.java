@@ -16,26 +16,18 @@
 
 package org.wso2.carbon.cep.core.internal.config.output;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.axiom.om.OMElement;
-import org.wso2.carbon.cep.core.mapping.output.mapping.XMLOutputMapping;
-import org.wso2.carbon.cep.core.internal.util.CEPConstants;
-import org.wso2.carbon.cep.core.exception.CEPConfigurationException;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
+import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.cep.core.internal.util.CEPConstants;
+import org.wso2.carbon.cep.core.mapping.output.mapping.XMLOutputMapping;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * This class will help to build the Output Mapping from a given OMELement
@@ -55,59 +47,6 @@ public class XMLOutputMappingHelper {
         return xmlOutMapping;
     }
 
-    public static void addXMLMappingToRegistry(Registry registry, String queryPath, XMLOutputMapping xmlOutMapping) throws CEPConfigurationException {
-        try {
-            Resource xmlMappingResource = registry.newResource();
-            xmlMappingResource.setContent(xmlOutMapping.getMappingXMLText());
-            registry.put(queryPath +
-                    CEPConstants.CEP_REGISTRY_BS +
-                    CEPConstants.CEP_REGISTRY_OUTPUT +
-                    CEPConstants.CEP_REGISTRY_BS +
-                    CEPConstants.CEP_REGISTRY_XML_MAPPING
-                    , xmlMappingResource);
-        } catch (RegistryException e) {
-            String errorMessage = "Can not add xml mapping to the registry ";
-            log.error(errorMessage, e);
-            throw new CEPConfigurationException(errorMessage, e);
-        }
-    }
-
-    public static void modifyXMLMappingInRegistry(Registry registry, String queryPath, XMLOutputMapping xmlOutMapping) throws CEPConfigurationException {
-        try {
-            Resource xmlMappingResource = registry.newResource();
-            xmlMappingResource.setContent(xmlOutMapping.getMappingXMLText());
-            registry.put(queryPath +
-                    CEPConstants.CEP_REGISTRY_BS +
-                    CEPConstants.CEP_REGISTRY_OUTPUT +
-                    CEPConstants.CEP_REGISTRY_BS +
-                    CEPConstants.CEP_REGISTRY_XML_MAPPING
-                    , xmlMappingResource);
-        } catch (RegistryException e) {
-            String errorMessage = "Can not modify xml mapping in registry ";
-            log.error(errorMessage, e);
-            throw new CEPConfigurationException(errorMessage, e);
-        }
-    }
-
-    public static XMLOutputMapping loadXMLMappingFromRegistry(Registry registry, String mappingName) throws CEPConfigurationException {
-        XMLOutputMapping xmlOutputMapping = null;
-        try {
-            xmlOutputMapping = new XMLOutputMapping();
-
-            Resource outputdetailsResource = registry.get(mappingName);
-            String content = new String((byte[]) outputdetailsResource.getContent());
-            xmlOutputMapping.setMappingXMLText(content);
-        } catch (RegistryException e) {
-            String errorMessage = "Can not load xml mapping from registry ";
-            log.error(errorMessage, e);
-            throw new CEPConfigurationException(errorMessage, e);
-        }
-
-        return xmlOutputMapping;
-    }
-
-    
-
 	public static OMElement xmlOutputMappingToOM(
 			XMLOutputMapping xmlOutputMapping) {
 		OMFactory factory = OMAbstractFactory.getOMFactory();
@@ -116,8 +55,13 @@ public class XMLOutputMappingHelper {
 				CEPConstants.CEP_CONF_ELE_XML_MAPPING,
 				CEPConstants.CEP_CONF_CEP_NAME_SPACE_PREFIX));
 		String mappingXMLText = xmlOutputMapping.getMappingXMLText();
-		factory.createOMText(queryXMLOutputMapping, mappingXMLText,
-				XMLStreamReader.CDATA);
+        try {
+            queryXMLOutputMapping.addChild(AXIOMUtil.stringToOM(mappingXMLText));
+        } catch (XMLStreamException e) {
+            log.error("XML mapping is not in XML format :" +mappingXMLText);
+            factory.createOMText(queryXMLOutputMapping, mappingXMLText,
+                                 XMLStreamReader.CDATA);
+        }
 		return queryXMLOutputMapping;
 }
 

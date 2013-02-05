@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.sts.internal;
 
+import org.osgi.framework.Bundle;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.user.core.service.RealmService;
 
 /**
  * This class is used as a singleton data holder for STSService component.
@@ -27,6 +29,10 @@ public class STSServiceDataHolder {
     private static STSServiceDataHolder instance = new STSServiceDataHolder();
 
     private RegistryService registryService;
+
+    private RealmService realmService;
+
+    private Bundle bundle;
 
     private STSServiceDataHolder(){
     }
@@ -41,5 +47,21 @@ public class STSServiceDataHolder {
 
     public void setRegistryService(RegistryService registryService) {
         this.registryService = registryService;
+    }
+
+    public RealmService getRealmService() {
+        return realmService;
+    }
+
+    public void setRealmService(RealmService realmService) {
+        this.realmService = realmService;
+    }
+
+    public Bundle getBundle() {
+        return bundle;
+    }
+
+    public void setBundle(Bundle bundle) {
+        this.bundle = bundle;
     }
 }

@@ -75,7 +75,7 @@ public class OpenIDUtil {
 		URL url = null;
 
 		serverConfig = ServerConfiguration.getInstance();
-		openIDUserUrl = serverConfig.getFirstProperty(IdentityConstants.OPENID_USER);
+		openIDUserUrl = serverConfig.getFirstProperty(IdentityConstants.ServerConfig.OPENID_SERVER_URL);
 
 		user = normalizeUrlEncoding(user);
 

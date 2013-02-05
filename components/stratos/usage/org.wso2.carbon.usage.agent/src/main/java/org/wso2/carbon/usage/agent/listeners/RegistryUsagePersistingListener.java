@@ -45,6 +45,8 @@ import java.net.URLConnection;
 
 /**
  * Handler that intercept the registry calls
+ * Currently this handler is not registered because there is a similar handler RegistryUsageHandler
+ * After examining properly this class will be deleted.
  */
 public class RegistryUsagePersistingListener extends Handler {
 
@@ -293,7 +295,10 @@ public class RegistryUsagePersistingListener extends Handler {
 
     public static void registerRegistryUsagePersistingListener(RegistryContext registryContext)
             throws RegistryException {
-        HandlerManager handlerManager = registryContext.getHandlerManager();
+
+        //This was commented out because there is a similar class RegistryUsageListener
+        //After examiming properly this class will be deleted
+        /*HandlerManager handlerManager = registryContext.getHandlerManager();
         RegistryUsagePersistingListener handler = new RegistryUsagePersistingListener();
         URLMatcher anyUrlMatcher = new URLMatcher();
         anyUrlMatcher.setPattern(".*");
@@ -302,5 +307,6 @@ public class RegistryUsagePersistingListener extends Handler {
 
         handlerManager.addHandlerWithPriority(applyingFilters, anyUrlMatcher, handler,
                 HandlerLifecycleManager.DEFAULT_REPORTING_HANDLER_PHASE);
+        */
     }
 }

@@ -13,6 +13,11 @@ public class Input {
     private String topic;
 
     /**
+     * Subscription Id of the broker
+     */
+    private String subscriptionId;
+
+    /**
      * Name of the broker used for Input
      */
     private String brokerName;
@@ -24,13 +29,24 @@ public class Input {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Input)) {
+            return false;
+        }
 
         Input input = (Input) o;
 
-        if (brokerName != null ? !brokerName.equals(input.brokerName) : input.brokerName != null) return false;
-        if (topic != null ? !topic.equals(input.topic) : input.topic != null) return false;
+        if (brokerName != null ? !brokerName.equals(input.brokerName) : input.brokerName != null) {
+            return false;
+        }
+        if (inputMapping != null ? !inputMapping.equals(input.inputMapping) : input.inputMapping != null) {
+            return false;
+        }
+        if (topic != null ? !topic.equals(input.topic) : input.topic != null) {
+            return false;
+        }
 
         return true;
     }
@@ -65,5 +81,13 @@ public class Input {
 
     public void setInputMapping(InputMapping inputMapping) {
         this.inputMapping = inputMapping;
+    }
+
+    public String getSubscriptionId() {
+        return subscriptionId;
+    }
+
+    public void setSubscriptionId(String subscriptionId) {
+        this.subscriptionId = subscriptionId;
     }
 }

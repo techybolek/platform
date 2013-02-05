@@ -11,15 +11,11 @@ import org.wso2.carbon.automation.core.utils.frameworkutils.productvariables.Rav
 import org.wso2.carbon.automation.core.utils.frameworkutils.productvariables.Selenium;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -57,16 +53,25 @@ public class EnvironmentSetter implements Framework {
     }
 
     public EnvironmentSettings getEnvironmentSettings() {
+        boolean enebleStratosPort = false;
+        boolean runOnStratos = false;
         boolean enabledRavana = Boolean.parseBoolean(prop.getProperty("ravana.test", "true"));
         boolean enableDeploymentFramework = Boolean.parseBoolean(prop.getProperty("deployment.framework.enable", "false"));
         boolean enableSelenium = Boolean.parseBoolean(prop.getProperty("remote.selenium.web.driver.start", "false"));
-        boolean runOnStratos = Boolean.parseBoolean(prop.getProperty("stratos.test", "false"));
-        boolean enebleStratosPort = Boolean.parseBoolean(prop.getProperty("port.enable"));
+        if (System.getProperty("integration.stratos.cycle") == null) {
+            runOnStratos = Boolean.parseBoolean(prop.getProperty("stratos.test", "false"));
+            enebleStratosPort = Boolean.parseBoolean(prop.getProperty("port.enable"));
+        } else {
+            runOnStratos = Boolean.valueOf(System.getProperty("integration.stratos.cycle"));
+            enebleStratosPort = Boolean.valueOf(System.getProperty("integration.stratos.cycle"));
+        }
         boolean enableWebContextRoot = Boolean.parseBoolean(prop.getProperty("carbon.web.context.enable", "false"));
         boolean enableCluster = Boolean.parseBoolean(prop.getProperty("cluster.enable", "false"));
         boolean enableBuilder = Boolean.parseBoolean(prop.getProperty("builder.enable", "false"));
+        String executionEnvironment = (prop.getProperty("execution.environment", "integration"));
+        String executionMode = (prop.getProperty("execution.mode", "user"));
         environmentSettings.setEnvironmentSettings
-                (enableDeploymentFramework, runOnStratos, enableSelenium, enabledRavana,
+                (enableDeploymentFramework, executionEnvironment, executionMode, runOnStratos, enableSelenium, enabledRavana,
                  enebleStratosPort, enableWebContextRoot, enableCluster, enableBuilder);
         return environmentSettings;
     }
@@ -75,17 +80,21 @@ public class EnvironmentSetter implements Framework {
         String keystorePath;
         String keyStrorePassword;
         String deploymentFrameworkPath = (prop.getProperty("deployment.framework.home", "/"));
-        List<String> productList = Arrays.asList((prop.getProperty("product.list", "AS").split(",")));
+        List<String> productList = Arrays.asList((System.getProperty("server.list").split(",")));
         int deploymentDelay = Integer.parseInt(prop.getProperty("service.deployment.delay", "1000"));
         String ldapUserName = (prop.getProperty("ldap.username", "admin"));
         String ldapPasswd = (prop.getProperty("ldap.password", "admin"));
         if (Boolean.parseBoolean(prop.getProperty("stratos.test"))) {
-            keystorePath = ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + File.separator +
-                           "keystores" + File.separator + "stratos" + File.separator + "wso2carbon.jks";
+            keystorePath = ProductConstant.SYSTEM_TEST_SETTINGS_LOCATION +
+                           "keystores" + File.separator + "stratos" + File.separator +
+                           (prop.getProperty("truststore.name", "wso2carbon.jks"));
+
             keyStrorePassword = (prop.getProperty("truststore.password", "wso2carbon"));
         } else {
-            keystorePath = ProductConstant.SYSTEM_TEST_RESOURCE_LOCATION + File.separator +
-                           "keystores" + File.separator + "products" + File.separator + "wso2carbon.jks";
+            keystorePath = ProductConstant.SYSTEM_TEST_SETTINGS_LOCATION +
+                           "keystores" + File.separator + "products" + File.separator +
+                           (prop.getProperty("truststore.name", "wso2carbon.jks"));
+
             keyStrorePassword = (prop.getProperty("truststore.password", "wso2carbon"));
         }
         environmentVariables.setEnvironmentVariables(deploymentFrameworkPath, productList,
@@ -157,6 +166,9 @@ public class EnvironmentSetter implements Framework {
         }
         if (prop.getProperty("brs.carbon.home") != null) {
             coverageHome.put(ProductConstant.BRS_SERVER_NAME, prop.getProperty("brs.carbon.home"));
+        }
+        if (prop.getProperty("ss.carbon.home") != null) {
+            coverageHome.put(ProductConstant.SS_SERVER_NAME, prop.getProperty("ss.carbon.home"));
         }
         if (prop.getProperty("cep.carbon.home") != null) {
             coverageHome.put(ProductConstant.CEP_SERVER_NAME, prop.getProperty("cep.carbon.home"));

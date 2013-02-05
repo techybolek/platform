@@ -111,6 +111,10 @@
         }
     }
 
+    function searchBuckets() {
+        document.searchForm.submit();
+    }
+
 </script>
 
 <%
@@ -134,9 +138,14 @@
         pageNumberInt = Integer.parseInt(pageNumberAsStr);
     }
 
+    String bucketSearchString = request.getParameter("bucketSearchString");
+    if (bucketSearchString == null) {
+        bucketSearchString = "";
+    }
+
     session.removeAttribute("editingBucket");
     session.removeAttribute("bucket");
-    BucketBasicInfoDTO[] availableBuckets = stub.getAllBucketNames(pageNumberInt * 10, 10);
+    BucketBasicInfoDTO[] availableBuckets = stub.getAllBucketNames(pageNumberInt * 10, 10, bucketSearchString);
     session.setAttribute("availableBuckets", availableBuckets);
 
     int bucketCount = stub.getAllBucketCount();
@@ -145,7 +154,8 @@
         //this is to make sure it works with defualt values
         pageCount = 1;
     }
-    String parameters = "serviceTypeFilter=" + "&serviceGroupSearchString=";
+
+
     boolean isAuthorizedForViewBuckets =
             CarbonUIUtil.isUserAuthorized(request, "/permission/admin/manage/cep/viewBucket");
     boolean isAuthorizedForDeleteBuckets =
@@ -157,6 +167,51 @@
     <h2><img src="images/cep-buckets.gif" alt=""/> <fmt:message key="buckets"/></h2>
 
     <div id="workArea">
+        <form action="cep_deployed_buckets.jsp" name="searchForm">
+            <table class="styledLeft">
+
+                <tr>
+                    <td style="border:0;padding-bottom:10px; !important">
+                        <nobr>
+                            <%= bucketCount%> <fmt:message key="deploy.buckets"/>.&nbsp;
+                        </nobr>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="border:0; !important">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>
+                        <table style="border:0; !important">
+                            <tbody>
+                            <tr style="border:0; !important">
+                                <td style="border:0; !important">
+                                    <nobr>
+                                        &nbsp;&nbsp;&nbsp;
+                                        <fmt:message key="search.bucket"/>
+                                        <input type="text" name="bucketSearchString"
+                                               value="<%= bucketSearchString != null? bucketSearchString : ""%>"/>&nbsp;
+                                    </nobr>
+                                </td>
+                                <td style="border:0; !important">
+                                    <a class="icon-link" href="#" style="background-image: url(images/search.gif);"
+                                       onclick="javascript:searchBuckets(); return false;"
+                                       alt="<fmt:message key="search"/>"></a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </form>
+
+        <%
+            String parameters = "bucketSearchString=" + bucketSearchString;
+        %>
+
+        <p>&nbsp;</p>
         <carbon:paginator pageNumber="<%=pageNumberInt%>" numberOfPages="<%=pageCount%>"
                           page="cep_deployed_buckets.jsp" pageNumberParameterName="pageNumber"
                           resourceBundle="org.wso2.carbon.cep.ui.i18n.Resources"
@@ -179,6 +234,8 @@
         <%
             }
         %>
+
+        <p>&nbsp;</p>
 
         <form name="bucketsForm" action="cep_delete_buckets_ajaxprocessor.jsp" method="post">
             <input type="hidden" name="pageNumber" value="<%= pageNumberInt%>"/>

@@ -65,7 +65,9 @@ public final class DeploymentUtil {
         } else if (baseConfiguration instanceof TaskConfiguration) {
             taskInfo.setTaskType(TaskType.TASK);
         }
-
+        taskInfo.setPackageStatus(baseConfiguration.getPackageStatus());
+        taskInfo.setErroneous( baseConfiguration.isErroneous());
+        taskInfo.setDeploymentError(baseConfiguration.getDeploymentError());
         return taskInfo;
     }
 }

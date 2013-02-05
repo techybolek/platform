@@ -23,7 +23,6 @@
 <%@ page import="org.json.simple.JSONObject" %>
 <%@ page import="org.codehaus.jackson.JsonEncoding" %>
 <%@ page import="org.json.simple.JSONArray" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%
@@ -43,10 +42,7 @@
     try {
         cassandraExplorerAdminClient =
                 new CassandraExplorerAdminClient(config.getServletContext(), session);
-    } catch (Exception e) {
-        CarbonUIMessage uiMsg = new CarbonUIMessage(CarbonUIMessage.ERROR, e.getMessage(), e);
-        session.setAttribute(CarbonUIMessage.ID, uiMsg);
-    }
+
     Column[] columns;
     int noOfTotalColumns;
     int noOfFilteredColumns;
@@ -77,8 +73,8 @@
         for (int i = 0; i < columns.length; i++) {
             if (columns[i] != null) {
                 JSONArray columnValueArray = new JSONArray();
-                columnValueArray.add( StringEscapeUtils.escapeXml(columns[i].getName()));
-                columnValueArray.add(StringEscapeUtils.escapeXml(columns[i].getValue()));
+                columnValueArray.add( columns[i].getName());
+                columnValueArray.add(columns[i].getValue());
                 columnValueArray.add((new Date(columns[i].getTimeStamp())).toString());
                 valuesArray.add(columnValueArray);
                 }
@@ -86,5 +82,9 @@
     }
     jsonObject.put("aaData",valuesArray);
     response.getWriter().print(jsonObject.toJSONString());
-
-%>
+    } catch (Exception e) {%>
+<script type="text/javascript">
+    location.href = "cassandra_connect.jsp";
+</script>
+<% }
+  %>

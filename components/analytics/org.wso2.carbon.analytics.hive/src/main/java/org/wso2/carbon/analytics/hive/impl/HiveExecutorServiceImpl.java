@@ -15,86 +15,55 @@
  */
 package org.wso2.carbon.analytics.hive.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hive.metastore.HiveContext;
+import org.wso2.carbon.analytics.hive.HiveConstants;
+import org.wso2.carbon.analytics.hive.Utils;
 import org.wso2.carbon.analytics.hive.dto.QueryResult;
 import org.wso2.carbon.analytics.hive.dto.QueryResultRow;
 import org.wso2.carbon.analytics.hive.dto.ScriptResult;
 import org.wso2.carbon.analytics.hive.exception.HiveExecutionException;
+import org.wso2.carbon.analytics.hive.extension.AbstractHiveAnalyzer;
+import org.wso2.carbon.analytics.hive.multitenancy.HiveRSSMetastoreManager;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
-import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.utils.CarbonUtils;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.io.*;
+import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class HiveExecutorServiceImpl implements HiveExecutorService {
 
-    static String asScript = "CREATE EXTERNAL TABLE IF NOT EXISTS AppServerStats (key STRING, service_name STRING,operation_name STRING,\n" +
-                             "\trequest_count INT,response_count INT,fault_count INT, response_time BIGINT,remote_address STRING,\n" +
-                             "\tpayload_timestamp BIGINT,host STRING) STORED BY \n" +
-                             "\t'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES ( \"cassandra.host\" = \"127.0.0.1\",\n" +
-                             "\t\"cassandra.port\" = \"9160\",\"cassandra.ks.name\" = \"EVENT_KS\",\n" +
-                             "\t\"cassandra.ks.username\" = \"admin\",\"cassandra.ks.password\" = \"admin\",\n" +
-                             "\t\"cassandra.cf.name\" = \"org_wso2_bam_stats_dsf\",\n" +
-                             "\t\"cassandra.columns.mapping\" = \":key,payload_service_name,payload_operation_name,payload_request_count,payload_response_count,payload_fault_count, payload_response_time,meta_remote_address, payload_timestamp,meta_host\" );\n" +
-                             "\n" +
-                             "CREATE EXTERNAL TABLE IF NOT EXISTS AppServerStatsPerServer(host STRING, total_request_count INT,total_response_count INT,\n" +
-                             "\ttotal_fault_count INT,avg_response_time DOUBLE) STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler' TBLPROPERTIES ( \n" +
-                             "\t'mapred.jdbc.driver.class' = 'com.mysql.jdbc.Driver',\n" +
-                             "\t'mapred.jdbc.url' = 'jdbc:mysql://localhost:3306/testdb',\n" +
-                             "\t'mapred.jdbc.username' = 'root','mapred.jdbc.password' = 'root',\n" +
-                             "\t'hive.jdbc.update.on.duplicate' = 'true',\n" +
-                             "\t'hive.jdbc.primary.key.fields' = 'host','hive.jdbc.table.create.query' = 'CREATE TABLE AppServerStatsPerServer ( host VARCHAR(100) NOT NULL PRIMARY KEY,total_request_count  INT,total_response_count INT,total_fault_count INT,avg_response_time DOUBLE)' );\n" +
-                             "\n" +
-                             "insert overwrite table AppServerStatsPerServer select host, sum(request_count) as total_request_count,sum(response_count) as total_response_count, sum(fault_count) as total_fault_count,avg(response_time) as avg_response_time from AppServerStats group by host;\n" +
-                             "\n" +
-                             "\n" +
-                             "CREATE EXTERNAL TABLE IF NOT EXISTS AppServerStatsPerMonth(host STRING, total_request_count INT,total_response_count INT,\n" +
-                             "\ttotal_fault_count INT,avg_response_time DOUBLE, month INT,year INT) \n" +
-                             "\tSTORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler' TBLPROPERTIES ( \n" +
-                             "\t'mapred.jdbc.driver.class' = 'com.mysql.jdbc.Driver',\n" +
-                             "\t'mapred.jdbc.url' = 'jdbc:mysql://localhost:3306/testdb',\n" +
-                             "\t'mapred.jdbc.username' = 'root','mapred.jdbc.password' = 'root',\n" +
-                             "\t'hive.jdbc.update.on.duplicate' = 'true',\n" +
-                             "\t'hive.jdbc.primary.key.fields' = 'host','hive.jdbc.table.create.query' = 'CREATE TABLE AppServerStatsPerServerPerMonth ( host VARCHAR(100) NOT NULL PRIMARY KEY,total_request_count INT,total_response_count INT,\n" +
-                             "\ttotal_fault_count INT,avg_response_time DOUBLE, month INT,year INT)' );\n" +
-                             "\n" +
-                             "insert overwrite table AppServerStatsPerMonth select host, sum(request_count) as total_request_count, sum(response_count) as total_response_count,sum(fault_count) as total_fault_count,avg(response_time) as avg_response_time, month(from_unixtime(payload_timestamp,'yyyy-MM-dd HH:mm:ss.SSS' )) as month, year(from_unixtime(payload_timestamp,'yyyy-MM-dd HH:mm:ss.SSS' )) as year from AppServerStats group by month(from_unixtime(payload_timestamp,'yyyy-MM-dd HH:mm:ss.SSS' )),year(from_unixtime(payload_timestamp,'yyyy-MM-dd HH:mm:ss.SSS' )),host;\n" +
-                             "\n" +
-                             "\n" +
-                             "\n" +
-                             "CREATE EXTERNAL TABLE IF NOT EXISTS AppServerStatsPerYear(host STRING, total_request_count INT, total_response_count INT, \n" +
-                             "total_fault_count INT,avg_response_time DOUBLE,year INT) STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler' \n" +
-                             "TBLPROPERTIES ( 'mapred.jdbc.driver.class' = 'com.mysql.jdbc.Driver' , \n" +
-                             "'mapred.jdbc.url' = 'jdbc:mysql://localhost:3306/testdb' , \n" +
-                             "'mapred.jdbc.username' = 'root' , 'mapred.jdbc.password' = 'root' , 'hive.jdbc.update.on.duplicate' = 'true' , \n" +
-                             "'hive.jdbc.primary.key.fields' = 'host' , 'hive.jdbc.table.create.query' = 'CREATE TABLE AppServerStatsPerServerPerYear ( host VARCHAR(100) NOT NULL PRIMARY KEY, total_request_count  INT, total_response_count INT, total_fault_count INT, avg_response_time DOUBLE, year INT)' );\n" +
-                             "\n" +
-                             "insert overwrite table AppServerStatsPerYear select host,sum(request_count) as total_request_count, sum(response_count) as total_response_count,sum(fault_count) as total_fault_count, avg(response_time) as total_response_time, year(from_unixtime(payload_timestamp,'yyyy-MM-dd HH:mm:ss.SSS')) as year from AppServerStats group by year(from_unixtime(payload_timestamp,'yyyy-MM-dd HH:mm:ss.SSS')),host;";
-
-
     private static final Log log = LogFactory.getLog(HiveExecutorServiceImpl.class);
+
+    private static boolean IS_PROFILING_ENABLED = false;
+
+    private static DateFormat dateFormat = new SimpleDateFormat("yy/MM/dd HH:mm:ss");
 
     static {
         try {
             Class.forName("org.apache.hadoop.hive.jdbc.HiveDriver");
         } catch (ClassNotFoundException e) {
             log.fatal("Hive JDBC Driver not found in the class path. Hive query execution will" +
-                      " fail..", e);
+                    " fail..", e);
+        }
+
+        try {
+            IS_PROFILING_ENABLED = Boolean.parseBoolean(System.getProperty(
+                    HiveConstants.ENABLE_PROFILE_PROPERTY));
+        } catch (Exception ignored) {
+            // Ignore malformed switch values and defaults to false
         }
     }
 
@@ -104,8 +73,11 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
      * @throws HiveExecutionException
      */
     public QueryResult[] execute(String script) throws HiveExecutionException {
-
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        String tenantDomain =  PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
+        int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
+        if (Utils.canConnectToRSS()  && null != HiveRSSMetastoreManager.getInstance()) {
+            HiveRSSMetastoreManager.getInstance().prepareRSSMetaStore(tenantDomain, tenantId);
+        }
         if (script != null) {
 
             ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
@@ -254,6 +226,9 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
         }
 
         public ScriptResult call() {
+
+            HiveContext.startTenantFlow(tenantId);
+
             Connection con;
             try {
                 con = DriverManager.getConnection("jdbc:hive://", null, null);
@@ -308,9 +283,15 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
                 String[] cmdLines = formattedScript.split(";\\r?\\n|;"); // Tokenize with ;[new-line]
 
-                HiveContext.startTenantFlow(tenantId);
-
                 ScriptResult result = new ScriptResult();
+
+                Date startDateTime = null;
+                long startTime = 0;
+                if (IS_PROFILING_ENABLED) {
+                    startTime = System.currentTimeMillis();
+                    startDateTime = new Date();
+                }
+
                 for (String cmdLine : cmdLines) {
 
                     String trimmedCmdLine = cmdLine.trim();
@@ -320,7 +301,12 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                     trimmedCmdLine = trimmedCmdLine.replaceAll("\n", " ");
                     trimmedCmdLine = trimmedCmdLine.replaceAll("\t", " ");
 
-                    if (!"".equals(trimmedCmdLine)) {
+                    if ("".equals(trimmedCmdLine)) {
+                        continue;
+                    }
+
+                    if (!(trimmedCmdLine.startsWith("class") ||
+                            trimmedCmdLine.startsWith("CLASS"))) { // Normal hive query
                         QueryResult queryResult = new QueryResult();
 
                         queryResult.setQuery(trimmedCmdLine);
@@ -344,12 +330,19 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                             QueryResultRow resultRow = new QueryResultRow();
 
                             List<String> columnValues = new ArrayList<String>();
-                            for (int i = 1; i <= columnCount; i++) {
-                                Object resObj = rs.getObject(i);
-                                if (null != resObj) {
-                                    columnValues.add(rs.getObject(i).toString());
-                                } else {
-                                    columnValues.add("");
+
+                            Object resObject = rs.getObject(1);
+
+                            if (resObject.toString().contains("\t")) {
+                                columnValues = Arrays.asList(resObject.toString().split("\t"));
+                            } else {
+                                for (int i = 1; i <= columnCount; i++) {
+                                    Object resObj = rs.getObject(i);
+                                    if (null != resObj) {
+                                        columnValues.add(rs.getObject(i).toString());
+                                    } else {
+                                        columnValues.add("");
+                                    }
                                 }
                             }
 
@@ -360,9 +353,79 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
                         queryResult.setResultRows(results.toArray(new QueryResultRow[]{}));
                         result.addQueryResult(queryResult);
+                    } else { // Class analyzer for executing custom logic
+                        String[] tokens = trimmedCmdLine.split("\\s+");
+                        if (tokens != null && tokens.length >= 2) {
+                            String className = tokens[1];
+
+                            Class clazz = null;
+                            try {
+                                clazz = Class.forName(className, true,
+                                        this.getClass().getClassLoader());
+                            } catch (ClassNotFoundException e) {
+                                log.error("Unable to find custom analyzer class..", e);
+                            }
+
+                            if (clazz != null) {
+                                Object analyzer = null;
+                                try {
+                                    analyzer = clazz.newInstance();
+                                } catch (InstantiationException e) {
+                                    log.error("Unable to instantiate custom analyzer class..", e);
+                                } catch (IllegalAccessException e) {
+                                    log.error("Unable to instantiate custom analyzer class..", e);
+                                }
+
+                                if (analyzer instanceof AbstractHiveAnalyzer) {
+                                    AbstractHiveAnalyzer hiveAnalyzer =
+                                            (AbstractHiveAnalyzer) analyzer;
+                                    hiveAnalyzer.execute();
+                                } else {
+                                    log.error("Custom analyzers should extend AbstractHiveAnalyzer..");
+                                }
+                            }
+                        }
                     }
 
                 }
+
+                StringBuffer sb = new StringBuffer();
+                if (IS_PROFILING_ENABLED) {
+                    long endTime = System.currentTimeMillis();
+                    long duration = endTime - startTime;
+
+                    long seconds = duration / 1000;
+
+                    long secondsInMinute = seconds % 60;
+                    long minutesInHours = ((seconds % 3600) / 60);
+                    long hoursInDays = ((seconds % 86400) / 3600);
+                    long daysInYears = ((seconds % 2592000) / 86400);
+                    long months = seconds / 2592000;
+
+                    sb.append("Start Time : " + dateFormat.format(startDateTime) + "\n");
+                    sb.append("End Time : " + dateFormat.format(new Date()) + "\n");
+                    sb.append("Duration [MM/DD hh:mm:ss] : " + months + "/" + daysInYears + " " +
+                            hoursInDays + ":" + minutesInHours + ":" + secondsInMinute + "\n");
+                    sb.append("==========================================\n");
+
+                    synchronized (this) {
+                        File file = new File(CarbonUtils.getCarbonHome() + File.separator +
+                                "analyzer-perf.txt");
+
+                        try {
+                            OutputStream stream = null;
+                            try {
+                                stream = new BufferedOutputStream(new FileOutputStream(file, true));
+                                IOUtils.copy(IOUtils.toInputStream(sb.toString()), stream);
+                            } finally {
+                                IOUtils.closeQuietly(stream);
+                            }
+                        } catch (IOException e) {
+                            log.error(e.getMessage(), e);
+                        }
+                    }
+                }
+
 
                 HiveContext.endTenantFlow();
 

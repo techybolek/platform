@@ -17,6 +17,7 @@ package org.wso2.carbon.ntask.core;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -26,7 +27,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.wso2.carbon.ntask.common.TaskConstants;
 import org.wso2.carbon.ntask.common.TaskConstants.TaskMisfirePolicy;
 import org.wso2.carbon.ntask.core.impl.FixedLocationResolver;
-import org.wso2.carbon.ntask.core.impl.RoundRobinTaskLocationResolver;
+import org.wso2.carbon.ntask.core.impl.RandomTaskLocationResolver;
 
 /**
  * This class represents a task job definition. 
@@ -48,12 +49,14 @@ public class TaskInfo implements Serializable {
 	
 	private TriggerInfo triggerInfo;
 	
+	@Deprecated
 	public TaskInfo() {
+		this.locationResolverClass = RandomTaskLocationResolver.class.getName();
 	}
 	
 	/**
-	 * TaskInfo constructor, uses the RoundRobinTaskLocationResolver class to resolve the task location,
-	 * which is simply picking the server in a round robit fashion for the task.
+	 * TaskInfo constructor, uses the RandomTaskLocationResolver class to resolve the task location,
+	 * which is simply picking a random server for the task.
 	 * @param name The name of the task
 	 * @param taskClass The task implementation class
 	 * @param properties The properties that will be passed into the task implementation at runtime
@@ -61,7 +64,7 @@ public class TaskInfo implements Serializable {
 	 */
 	public TaskInfo(String name, String taskClass, Map<String, String> properties,
 			TriggerInfo triggerInfo) {
-		this(name, taskClass, properties, RoundRobinTaskLocationResolver.class.getName(), triggerInfo);
+		this(name, taskClass, properties, RandomTaskLocationResolver.class.getName(), triggerInfo);
 	}
 	
 	/**
@@ -94,7 +97,10 @@ public class TaskInfo implements Serializable {
 			String locationResolverClass, TriggerInfo triggerInfo) {
 		this.name = name;
 		this.taskClass = taskClass;
-		this.properties = properties;
+		this.properties = new HashMap<String, String>();
+		if (properties != null) {
+			this.properties.putAll(properties);
+		}
 		this.locationResolverClass = locationResolverClass;
 		this.triggerInfo = triggerInfo;
 		if (this.getTriggerInfo() == null) {

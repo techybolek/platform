@@ -121,7 +121,7 @@ public class BillingTenantMgtListenerImpl implements TenantMgtListener{
     }
 
     public void onTenantInitialActivation(int tenantId) throws StratosException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        onTenantActivation(tenantId);
     }
 
     public void onTenantActivation(int tenantId) throws StratosException {

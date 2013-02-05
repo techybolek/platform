@@ -55,7 +55,8 @@
                 </thead>
                 <tbody>
                 <tr>
-                    <td class="formRaw"><fmt:message key="queue"/></td>
+                    <td class="formRaw"><fmt:message key="queue"/><span
+                            class="required">*</span></td>
                     <td><input type="text" id="queue"></td>
                 </tr>
                 <tr>

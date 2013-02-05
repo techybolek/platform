@@ -17,28 +17,19 @@
  */
 package org.wso2.carbon.um.ws.service;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
-import javax.xml.namespace.QName;
-
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.SOAPHeader;
-import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.um.ws.service.internal.UMRemoteServicesDSComponent;
+import org.wso2.carbon.um.ws.service.dao.ClaimDTO;
+import org.wso2.carbon.um.ws.service.dao.PermissionDTO;
 import org.wso2.carbon.user.core.Permission;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.claim.Claim;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.mgt.common.ClaimValue;
 
@@ -65,14 +56,15 @@ public class UserStoreManagerService extends AbstractAdmin {
                 profileName));
     }
 
-    public void addRole(String roleName, String[] userList, Permission[] permissions)
+    public void addRole(String roleName, String[] userList, PermissionDTO[] permissions)
             throws UserStoreException {
-        getUserStoreManager().addRole(roleName, userList, permissions);
+        getUserStoreManager().addRole(roleName, userList, convertDTOToPermission(permissions));
     }
 
-    public Claim[] getUserClaimValues(String userName, String profileName)
+    public ClaimDTO [] getUserClaimValues(String userName, String profileName)
             throws UserStoreException {
-        return getUserStoreManager().getUserClaimValues(userName, profileName);
+        return convertClaimToClaimDTO(getUserStoreManager().getUserClaimValues(userName,
+                profileName));
     }
 
     public boolean authenticate(String userName, String credential) throws UserStoreException {
@@ -144,6 +136,10 @@ public class UserStoreManagerService extends AbstractAdmin {
         return getUserStoreManager().getTenantId();
     }
 
+    public String[] getUserList(String claimUri, String claimValue, String profile)
+                                                                        throws UserStoreException {
+        return getUserStoreManager().getUserList(claimUri, claimValue, profile);
+    }
 
     public int getTenantIdofUser(String username) throws UserStoreException {
 
@@ -244,6 +240,35 @@ public class UserStoreManagerService extends AbstractAdmin {
             i++;
         }
         return claims;
+    }
+
+    private ClaimDTO[] convertClaimToClaimDTO(Claim[] claims){
+
+        List<ClaimDTO> ClaimDTOs = new ArrayList<ClaimDTO>();
+        for(Claim claim : claims){
+            ClaimDTO claimDTO = new ClaimDTO();
+            claimDTO.setClaimUri(claim.getClaimUri());
+            claimDTO.setValue(claim.getValue());
+            claimDTO.setDescription(claim.getDescription());
+            claimDTO.setDialectURI(claim.getDialectURI());
+            claimDTO.setDisplayOrder(claim.getDisplayOrder());
+            claimDTO.setRegEx(claim.getRegEx());
+            claimDTO.setSupportedByDefault(claim.isSupportedByDefault());
+            claimDTO.setRequired(claim.isRequired());
+            ClaimDTOs.add(claimDTO);
+        }
+        return ClaimDTOs.toArray(new ClaimDTO[ClaimDTOs.size()]);
+    }
+
+    private Permission[] convertDTOToPermission(PermissionDTO[] permissionDTOs){
+
+        List<Permission> permissions = new ArrayList<Permission>();
+        for(PermissionDTO permissionDTO : permissionDTOs){
+            Permission permission = new Permission(permissionDTO.getResourceId(),
+                    permissionDTO.getAction());
+            permissions.add(permission);
+        }
+        return permissions.toArray(new Permission[permissions.size()]);
     }
 
     public String[][] getProperties(Tenant tenant) throws UserStoreException {

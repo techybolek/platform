@@ -18,7 +18,7 @@
  */
 package org.wso2.carbon.dataservices.sql.driver.parser;
 
-public class Constants {
+public final class Constants {
 
     public static final String SEMI_COLON = ";";
     public static final String EQUAL = "=";
@@ -131,13 +131,23 @@ public class Constants {
     public static final String GSPRED_PREFIX = "gspread";
     public static final String PROVIDER_PREFIX = "wso2";
 
-    public static final String FILE_PATH = "filePath";
-    public static final String DATA_SOURCE_TYPE = "dsType";
-    public static final String USER = "USER";
-    public static final String PASSWORD = "PASSWORD";
-    public static final String VISIBILITY = "visibility";
-    public static final String SHEET_NAME = "sheetName";
+    public static final class DRIVER_PROPERTIES {
+        public static final String FILE_PATH = "filePath";
+        public static final String DATA_SOURCE_TYPE = "dsType";
+        public static final String USER = "USER";
+        public static final String PASSWORD = "PASSWORD";
+        public static final String VISIBILITY = "visibility";
+        public static final String SHEET_NAME = "sheetName";
+        public static final String HAS_HEADER = "hasHeader";
+        public static final String MAX_COLUMNS = "maxColumns";
+    }
 
     public static final String OUTER = "OUTER";
+
+    public static final String ACCESS_MODE_PRIVATE = "private";
+    public static final String ACCESS_MODE_PUBLIC = "public";
+
+    public static final String RETURN = "\r";
+    public static final String NEW_LINE = "\n";
 
 }

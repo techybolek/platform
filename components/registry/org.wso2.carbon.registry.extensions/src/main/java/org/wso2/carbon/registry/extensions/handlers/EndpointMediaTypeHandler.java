@@ -31,10 +31,7 @@ import org.wso2.carbon.registry.extensions.utils.CommonUtil;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
 
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class EndpointMediaTypeHandler extends Handler {
     private static final Log log = LogFactory.getLog(EndpointMediaTypeHandler.class);
@@ -59,20 +56,6 @@ public class EndpointMediaTypeHandler extends Handler {
         }
         EndpointUtils.setEndpointLocation(endpointLocation); 
 
-        String absoluteEndpointLocation = RegistryUtils.getAbsolutePath(
-                RegistryContext.getBaseInstance(),
-                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                    endpointLocation);
-        AuthorizationUtils.addAuthorizeRoleListener(
-                RegistryConstants.ADD_ENDPOINT_AUTHORIZE_ROLE_LISTENER_EXECUTION_ORDER_ID,
-                absoluteEndpointLocation,
-                UserMgtConstants.UI_ADMIN_PERMISSION_ROOT + "manage/resources/govern/metadata/add",
-                UserMgtConstants.EXECUTE_ACTION);
-        AuthorizationUtils.addAuthorizeRoleListener(
-                RegistryConstants.LIST_ENDPOINT_AUTHORIZE_ROLE_LISTENER_EXECUTION_ORDER_ID,
-                absoluteEndpointLocation,
-                UserMgtConstants.UI_ADMIN_PERMISSION_ROOT + "manage/resources/govern/metadata/list",
-                UserMgtConstants.EXECUTE_ACTION, new String[]{ActionConstants.GET});
         this.endpointLocationElement = endpointLocationElement;
     }
 
@@ -107,17 +90,45 @@ public class EndpointMediaTypeHandler extends Handler {
                 resourceContent = RegistryUtils.decodeBytes((byte[])resourceContentObj);
             }
 
-            String urlToPath = EndpointUtils.deriveEndpointFromUrl(resourceContent);            
+            String endpointUrl = EndpointUtils.deriveEndpointFromContent(resourceContent);
+            String urlToPath = EndpointUtils.deriveEndpointFromUrl(endpointUrl);
 
             // so here the absolute path.
             String basePath = RegistryUtils.getAbsolutePath(registry.getRegistryContext(),
                     org.wso2.carbon.registry.core.RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
                     EndpointUtils.getEndpointLocation());
+            if(basePath.endsWith(RegistryConstants.PATH_SEPARATOR)){
+                if(urlToPath.startsWith(RegistryConstants.PATH_SEPARATOR)){
+                    urlToPath = urlToPath.replaceFirst(RegistryConstants.PATH_SEPARATOR,"");
+                }
+            }else{
+                if(!urlToPath.startsWith(RegistryConstants.PATH_SEPARATOR)){
+                    urlToPath = RegistryConstants.PATH_SEPARATOR + urlToPath;
+                }
+            }
             String path = basePath + urlToPath;
 
             String endpointId = resource.getUUID();
             if (registry.resourceExists(path)) {
                 Resource oldResource = registry.get(path);
+                //Set the old resource properties to new resource
+                //https://wso2.org/jira/browse/REGISTRY-799
+                Properties properties = oldResource.getProperties();
+                if (properties != null) {
+                    Set keySet = properties.keySet();
+                    if (keySet != null) {
+                        for (Object keyObj : keySet) {
+                            String key = (String) keyObj;
+                            List values = (List) properties.get(key);
+                            if (values != null) {
+                                for (Object valueObj : values) {
+                                    String value = (String) valueObj;
+                                    resource.addProperty(key, value);
+                                }
+                            }
+                        }
+                    }
+                }
                 byte[] oldContent = (byte[])oldResource.getContent();
                 if (oldContent != null && !RegistryUtils.decodeBytes(oldContent).equals(resourceContent)) {
                     // oops somebody trying to update the endpoint resource content. that should not happen
@@ -184,7 +195,7 @@ public class EndpointMediaTypeHandler extends Handler {
                 throw new RegistryException("The resource path is not available.");
             }
             checkEndpointDependency(registry, path);
-            Resource resource = registry.get(path);
+//            Resource resource = registry.get(path);
         } finally {
             CommonUtil.releaseDeleteLock();
         }
@@ -247,7 +258,8 @@ public class EndpointMediaTypeHandler extends Handler {
                 if (sourceContent == null) {
                     return;
                 }
-                String endpointUrl = RegistryUtils.decodeBytes(sourceContent);
+                String endpointUrl = EndpointUtils.
+                        deriveEndpointFromContent(RegistryUtils.decodeBytes(sourceContent));
                 String endpointEnv = sourceResource.getProperty(CommonConstants.ENDPOINT_ENVIRONMENT_ATTR);
                 if (endpointEnv == null) {
                     endpointEnv = "";
@@ -287,7 +299,8 @@ public class EndpointMediaTypeHandler extends Handler {
                 if (sourceContent == null) {
                     return;
                 }
-                String endpointUrl = RegistryUtils.decodeBytes(sourceContent);
+                String endpointUrl = EndpointUtils.
+                        deriveEndpointFromContent(RegistryUtils.decodeBytes(sourceContent));
                 String endpointEnv = sourceResource.getProperty(CommonConstants.ENDPOINT_ENVIRONMENT_ATTR);
                 if (endpointEnv == null) {
                     endpointEnv = "";

@@ -19,13 +19,29 @@
 
 package org.wso2.carbon.discovery.proxy;
 
-import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMAbstractFactory;
-import org.wso2.carbon.discovery.DiscoveryOMUtils;
-import org.wso2.carbon.discovery.DiscoveryException;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.soap.SOAPHeader;
+import org.apache.axis2.context.MessageContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.discovery.DiscoveryConstants;
+import org.wso2.carbon.discovery.DiscoveryException;
+import org.wso2.carbon.discovery.DiscoveryOMUtils;
+import org.wso2.carbon.discovery.messages.Notification;
+import org.wso2.carbon.discovery.messages.Probe;
+import org.wso2.carbon.discovery.messages.QueryMatch;
+import org.wso2.carbon.discovery.messages.Resolve;
+import org.wso2.carbon.discovery.messages.TargetService;
 import org.wso2.carbon.discovery.util.DiscoveryServiceUtils;
-import org.wso2.carbon.discovery.messages.*;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
 
 /**
  * Web Services Dynamic Discovery proxy implementation. This service implementation
@@ -35,20 +51,77 @@ import org.wso2.carbon.discovery.messages.*;
  */
 public class DiscoveryProxy {
 
+    private static final int DEFAULT_RETRY_TIMEOUT_SEC = 10;
+    private static final int DEFAULT_INITIAL_DELAY_SEC = 10;
+    private static final int RETRY_COUNT = 5;
+
+    private static final Log log = LogFactory.getLog(DiscoveryProxy.class);
+
     public void Hello(OMElement helloElement) throws DiscoveryException {
-        Notification hello = DiscoveryOMUtils.getHelloFromOM(helloElement);
-        try {
-            DiscoveryServiceUtils.addService(hello.getTargetService());
-        } catch (Exception e) {
-            throw new DiscoveryException("Error while persisting the " +
-                    "service description", e);
+        final Notification hello = DiscoveryOMUtils.getHelloFromOM(helloElement);
+        final Map<String, String> headerMap = extractHeader();
+        submitServiceForDiscovery(hello, headerMap);
+    }
+
+    private void submitServiceForDiscovery(final Notification hello,
+                                           final Map<String, String> headerMap) {
+        CarbonContext context = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        final String tenantDomain = context.getTenantDomain();
+        final String username = context.getUsername();
+        final int tenantId = context.getTenantId();
+        // We need to copy the current thread's context details into the thread local context.
+        Runnable runnable = new Runnable() {
+            public void run() {
+                try {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext localHolder =
+                            PrivilegedCarbonContext.getCurrentContext();
+                    localHolder.setTenantDomain(tenantDomain);
+                    if (username != null) {
+                        localHolder.setUsername(username);
+                    }
+                    localHolder.setTenantId(tenantId);
+                    // Initially, we wait for a delay before beginning to discover the service. This is
+                    // to leave room for service deployment.
+                    Thread.sleep(DEFAULT_INITIAL_DELAY_SEC * 1000);
+                    for (int i = 0; i < RETRY_COUNT; i++) {
+                        try {
+                            DiscoveryServiceUtils.addService(hello.getTargetService(), headerMap);
+                            break;
+                        } catch (RegistryException ignore) {
+                            // If the WSDL import failed, it might be due to service not being deployed. So,
+                            // we'll retry.
+                            final long timeout = DEFAULT_RETRY_TIMEOUT_SEC *
+                                                 (long) Math.pow(2, i);
+                            log.info("Service Discovery Failed. Retrying after " + timeout + "s.");
+                            Thread.sleep(timeout * 1000);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Error while persisting the service description", e);
+                } finally {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+            }
+        };
+        Executors.newSingleThreadExecutor().submit(runnable);
+    }
+
+    private Map<String, String> extractHeader() {
+        Map<String, String> map = new HashMap<String, String>();
+        SOAPHeader header = MessageContext.getCurrentMessageContext().getEnvelope().getHeader();
+        List<OMElement> elementList =
+                header.getHeaderBlocksWithNSURI(DiscoveryConstants.DISCOVERY_HEADER_ELEMENT_NAMESPACE);
+        for (OMElement element : elementList) {
+            map.put(element.getLocalName(), element.getText());
         }
+        return map;
     }
 
     public void Bye(OMElement byeElement) throws DiscoveryException {
         Notification bye = DiscoveryOMUtils.getByeFromOM(byeElement);
         try {
-            DiscoveryServiceUtils.removeServiceEndpoints(bye.getTargetService());
+            DiscoveryServiceUtils.deactivateService(bye.getTargetService());
         } catch (Exception e) {
             throw new DiscoveryException("Error while persisting the " +
                     "service description", e);

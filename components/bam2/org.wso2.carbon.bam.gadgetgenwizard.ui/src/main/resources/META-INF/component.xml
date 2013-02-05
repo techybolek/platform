@@ -21,14 +21,14 @@
             <id>bam_menu_gadget_gen_wizard</id>
             <i18n-key>bam.gadgetgenwizard</i18n-key>
             <i18n-bundle>org.wso2.carbon.bam.gadgetgenwizard.ui.i18n.Resources</i18n-bundle>
-            <parent-menu>monitor_menu</parent-menu>
+            <parent-menu>tools_menu</parent-menu>
             <link>../gadgetgenwizard/index.jsp</link>
-            <region>region4</region>
-            <order>21</order>
-            <style-class>monitor</style-class>
+            <region>region5</region>
+            <order>51</order>
+            <style-class>tools</style-class>
             <icon>../gadgetgenwizard/images/gadgetgen-wizard.png
             </icon>
-            <require-permission>/permission/admin/bam/view</require-permission>
+            <require-permission>/permission/admin</require-permission>
         </menu>
     </menus>
 </component>

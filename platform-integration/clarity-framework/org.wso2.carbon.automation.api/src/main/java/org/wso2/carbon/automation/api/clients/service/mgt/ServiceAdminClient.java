@@ -35,6 +35,7 @@ public class ServiceAdminClient {
     private final String serviceName = "ServiceAdmin";
     private ServiceAdminStub serviceAdminStub;
 
+
     public ServiceAdminClient(String backEndUrl, String sessionCookie) throws AxisFault {
 
         String endPoint = backEndUrl + serviceName;
@@ -53,14 +54,27 @@ public class ServiceAdminClient {
     public void deleteService(String[] serviceGroup) throws RemoteException {
 
         serviceAdminStub.deleteServiceGroups(serviceGroup);
-    }
-
-    public void deleteFaultyService(String artifactPath)
-            throws RemoteException {
-        serviceAdminStub.deleteFaultyServiceGroup(artifactPath);
-
 
     }
+
+    public boolean deleteFaultyService(String archiveName) throws RemoteException {
+        try {
+            return serviceAdminStub.deleteFaultyServiceGroup(archiveName);
+        } catch (RemoteException e) {
+            log.error("Faulty service deletion fails", e);
+            throw new RemoteException("Faulty service deletion fails", e);
+        }
+    }
+
+    public boolean deleteFaultyServiceByServiceName(String serviceName) throws RemoteException {
+        try {
+            return serviceAdminStub.deleteFaultyServiceGroup(getFaultyData(serviceName).getArtifact());
+        } catch (RemoteException e) {
+            log.error("Faulty service deletion fails", e);
+            throw new RemoteException("Faulty service deletion fails", e);
+        }
+    }
+
 
     public void deleteAllNonAdminServiceGroups() throws RemoteException {
 
@@ -71,10 +85,28 @@ public class ServiceAdminClient {
     public ServiceMetaDataWrapper listServices(String serviceName)
             throws RemoteException {
         ServiceMetaDataWrapper serviceMetaDataWrapper;
-
         serviceMetaDataWrapper = serviceAdminStub.listServices("ALL", serviceName, 0);
-
+        serviceAdminStub.getFaultyServiceArchives(0);
         return serviceMetaDataWrapper;
+    }
+
+    public ServiceMetaDataWrapper listServices(String serviceName, String filerType)
+            throws RemoteException {
+        ServiceMetaDataWrapper serviceMetaDataWrapper;
+        serviceMetaDataWrapper = serviceAdminStub.listServices(filerType, serviceName, 0);
+        serviceAdminStub.getFaultyServiceArchives(0);
+        return serviceMetaDataWrapper;
+    }
+
+    public FaultyServicesWrapper getFaultyServiceArchives(int pageNumber) throws RemoteException {
+        FaultyServicesWrapper faultyServicesWrapper;
+        try {
+            faultyServicesWrapper = serviceAdminStub.getFaultyServiceArchives(pageNumber);
+        } catch (RemoteException e) {
+            log.error("Unable to get faulty service Archives", e);
+            throw new RemoteException("Unable to get faulty service Archives", e);
+        }
+        return faultyServicesWrapper;
     }
 
 
@@ -173,7 +205,6 @@ public class ServiceAdminClient {
         serviceMetaDataWrapper = listServices(serviceName);
         serviceMetaDataList = serviceMetaDataWrapper.getServices();
         if (serviceMetaDataList != null && serviceMetaDataList.length > 0) {
-
             for (ServiceMetaData serviceData : serviceMetaDataList) {
                 if (serviceData != null && serviceData.getName().equalsIgnoreCase(serviceName)) {
                     return serviceData.getServiceGroupName();
@@ -182,6 +213,7 @@ public class ServiceAdminClient {
         }
         return null;
     }
+
 
     public boolean isServiceFaulty(String serviceName) throws RemoteException {
         boolean serviceState = false;

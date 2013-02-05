@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.rssmanager.core.internal.util;
 
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.logging.Log;
@@ -31,18 +32,19 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.sql.DataSource;
+import javax.xml.namespace.QName;
 import java.io.File;
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Represents a WSO2 RSS configuration.
  */
 public class RSSConfig {
-
-    private List<RSSInstance> systemRSSInstances;
-
+    
     private DataSource dataSource;
 
     private String rssType;
@@ -51,12 +53,15 @@ public class RSSConfig {
 
     private static RSSConfig currentRSSConfig;
 
+    private List<RSSInstance> systemRSSInstances;
+
     private static final Log log = LogFactory.getLog(RSSConfig.class);
 
     /**
      * Retrieves the RSS config reading the rss-instance configuration file.
      *
      * @return RSSConfig
+     * @throws RSSManagerException Is thrown if the RSS configuration is not initialized properly
      */
     public static synchronized RSSConfig getInstance() throws RSSManagerException {
         if (currentRSSConfig == null) {
@@ -67,8 +72,7 @@ public class RSSConfig {
 
     public static void init() throws RSSManagerException {
         String rssConfigXMLPath = CarbonUtils.getCarbonConfigDirPath()
-                + File.separator + "etc" + File.separator
-                + RSSManagerConstants.RSS_CONFIG_XML_NAME;
+                + File.separator + "etc" + File.separator + RSSManagerConstants.RSS_CONFIG_XML_NAME;
         try {
             currentRSSConfig = new RSSConfig(AXIOMUtil.stringToOM(
                     new String(CarbonUtils.getBytesFromFile(new File(rssConfigXMLPath)))));
@@ -79,6 +83,26 @@ public class RSSConfig {
 
     @SuppressWarnings("unchecked")
     private RSSConfig(OMElement configEl) throws RSSManagerException {
+        /* Initializing the RSS manager type being used */
+        this.initRSSManager(configEl);
+        /* Initializing RSS manager metadata repository */
+        this.intiRSSManagerMetaDataRepository(configEl);
+
+        this.systemRSSInstances = new ArrayList<RSSInstance>();
+        OMElement systemRSSInstancesEl =
+                (OMElement) configEl.getChildrenWithLocalName("system-rss-instances").next();
+        if (systemRSSInstancesEl != null) {
+            Iterator<OMElement> instances =
+                    systemRSSInstancesEl.getChildrenWithLocalName("system-rss-instance");
+            while (instances.hasNext()) {
+                RSSInstance rssInstance = this.createRSSInstanceFromXMLConfig(instances.next());
+                this.getSystemRSSInstances().add(rssInstance);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void initRSSManager(OMElement configEl) throws RSSManagerException {
         Iterator<OMElement> tmpItr = configEl.getChildrenWithLocalName("rss-type");
         if (!tmpItr.hasNext()) {
             throw new RSSManagerException("RSS type is missing");
@@ -86,8 +110,11 @@ public class RSSConfig {
         OMElement rssTypeEl = tmpItr.next();
         this.rssType = rssTypeEl.getText().trim();
         this.rssManager = RSSManagerFactory.getRSSManager(this.getRssType());
+    }
 
-        tmpItr = configEl.getChildrenWithLocalName("rss-mgt-repository");
+    @SuppressWarnings("unchecked")
+    private void intiRSSManagerMetaDataRepository(OMElement configEl) throws RSSManagerException {
+        Iterator<OMElement> tmpItr = configEl.getChildrenWithLocalName("rss-mgt-repository");
         if (!tmpItr.hasNext()) {
             throw new RSSManagerException("RSS management repository configuration is missing");
         }
@@ -100,18 +127,6 @@ public class RSSConfig {
         }
         OMElement dsEl = tmpItr.next();
         this.dataSource = RSSManagerUtil.createDataSource(dsEl);
-
-        /* populate WSO2 RSS instances */
-        this.systemRSSInstances = new ArrayList<RSSInstance>();
-        OMElement systemRSSInstancesEl =
-                (OMElement) configEl.getChildrenWithLocalName("system-rss-instances").next();
-        if (systemRSSInstancesEl != null) {
-            Iterator<OMElement> instances =
-                    systemRSSInstancesEl.getChildrenWithLocalName("system-rss-instance");
-            while (instances.hasNext()) {
-                this.systemRSSInstances.add(this.createRSSInstanceFromXMLConfig(instances.next()));
-            }
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -146,58 +161,58 @@ public class RSSConfig {
                     "instance is missing");
         }
         OMElement adminDSConfigEl = tmpItr.next();
-        tmpItr = adminDSConfigEl.getChildrenWithLocalName("url");
+        tmpItr = adminDSConfigEl.getChildrenWithLocalName("dataSourceClassName");
         if (!tmpItr.hasNext()) {
-            throw new RSSManagerException("Server instance URL is missing in RSS database " +
-                    "definition");
+            throw new RSSManagerException("Administrative datasource class name is missing in " +
+                    "RSS datasource definition");
         }
-        tmpEl = tmpItr.next();
-        String serverURL;
-        try {
-            serverURL = RSSManagerUtil.validateRSSInstanceUrl(tmpEl.getText().trim());
-        } catch (Exception e) {
-            throw new RSSManagerException("Malformed RSS instance URL");
+        OMElement dsClassNameEl = tmpItr.next();
+        String dsClassName = dsClassNameEl.getText();
+
+        tmpItr = adminDSConfigEl.getChildrenWithLocalName("dataSourceProps");
+        if (!tmpItr.hasNext()) {
+            throw new RSSManagerException("Administrative datasource properties are not " +
+                    "configured properly");
+        }
+        OMElement dsPropsEl = tmpItr.next();
+        tmpItr = dsPropsEl.getChildrenWithLocalName("property");
+        if (!tmpItr.hasNext()) {
+           throw new RSSManagerException("No datasource properties found");
+        }
+        Properties xaProps = new Properties();
+        while (tmpItr.hasNext()) {
+            OMElement propEl = tmpItr.next();
+            OMAttribute nameAttr = propEl.getAttribute(new QName("name"));
+            xaProps.setProperty(nameAttr.getAttributeValue(), propEl.getText());
         }
 
-        tmpItr = adminDSConfigEl.getChildrenWithLocalName("username");
-        if (!tmpItr.hasNext()) {
-            throw new RSSManagerException("Server instance admin username is missing in RSS " +
-                    "database definition");
-        }
-        tmpEl = tmpItr.next();
-        String adminUsername = tmpEl.getText().trim();
+        DataSource dataSource = RSSManagerUtil.createDataSource(xaProps, dsClassName);
 
-        tmpItr = adminDSConfigEl.getChildrenWithLocalName("password");
-        if (!tmpItr.hasNext()) {
-            throw new RSSManagerException("Server instance service admin password is missing " +
-                    "in RSS database definition");
-        }
-        tmpEl = tmpItr.next();
-        String adminPassword = tmpEl.getText().trim();
+        return this.createRSSInstance(name, dbmsType, serverCategory,
+                MultitenantConstants.SUPER_TENANT_ID, RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE,
+                xaProps, dataSource);
+    }
 
-        return new RSSInstance(name, serverURL, dbmsType,
-                RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE, serverCategory, adminUsername,
-                adminPassword, MultitenantConstants.SUPER_TENANT_ID);
+    private RSSInstance createRSSInstance(String name, String dbmsType, String serverCategory,
+                                         int tenantId, String instanceType, Properties xaProps,
+                                         DataSource dataSource) {
+        String serverUrl = xaProps.getProperty(RSSManagerConstants.RSS_DS_PROPERTIES.URL);
+        String adminUsername = xaProps.getProperty(RSSManagerConstants.RSS_DS_PROPERTIES.USER);
+        String adminPassword = xaProps.getProperty(RSSManagerConstants.RSS_DS_PROPERTIES.PASSWORD);
+
+        return new RSSInstance(-1, name, serverUrl, dbmsType, instanceType, serverCategory, 
+                adminUsername, adminPassword, tenantId, dataSource);
     }
 
     public Connection getRSSDBConnection() throws RSSManagerException {
         if (this.getDataSource() == null) {
             throw new RSSManagerException("RSS manager repository datasource is not initialized");
         }
-        try {
-            return this.getDataSource().getConnection();
-        } catch (SQLException e) {
-            throw new RSSManagerException("Error acquiring a connection from RSS metadata " +
-                    "repository datasource", e);
-        }
+        return this.getRssManager().createConnection(this.getDataSource());
     }
 
     public DataSource getDataSource() {
         return dataSource;
-    }
-
-    public List<RSSInstance> getSystemRSSInstances() {
-        return systemRSSInstances;
     }
 
     public String getRssType() {
@@ -206,6 +221,10 @@ public class RSSConfig {
 
     public RSSManager getRssManager() {
         return rssManager;
+    }
+
+    public List<RSSInstance> getSystemRSSInstances() {
+        return systemRSSInstances;
     }
 
 }

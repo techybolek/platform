@@ -17,13 +17,14 @@
 package org.wso2.carbon.cep.siddhi;
 
 import junit.framework.TestCase;
+import org.wso2.carbon.broker.core.exception.BrokerConfigException;
 import org.wso2.carbon.cep.core.Expression;
 import org.wso2.carbon.cep.core.backend.CEPBackEndRuntime;
 import org.wso2.carbon.cep.core.exception.CEPConfigurationException;
 import org.wso2.carbon.cep.core.exception.CEPEventProcessingException;
 import org.wso2.carbon.cep.core.mapping.input.mapping.InputMapping;
 import org.wso2.carbon.cep.core.mapping.input.mapping.TupleInputMapping;
-import org.wso2.carbon.cep.core.mapping.property.TupleProperty;
+import org.wso2.carbon.cep.core.mapping.input.property.TupleInputProperty;
 import org.wso2.carbon.cep.siddhi.backend.SiddhiBackEndRuntimeFactory;
 import org.wso2.carbon.databridge.commons.Event;
 
@@ -33,25 +34,27 @@ import java.util.List;
 public class TestSiddhiBackendRuntime extends TestCase {
 
     public void testBAMEvent()
-            throws CEPConfigurationException, CEPEventProcessingException, InterruptedException {
+            throws CEPConfigurationException, CEPEventProcessingException, InterruptedException, BrokerConfigException {
 
         SiddhiBackEndRuntimeFactory factory = new SiddhiBackEndRuntimeFactory();
 
         //inputMapping
         TupleInputMapping mapping = new TupleInputMapping();
         mapping.setStream("Event");
-        TupleProperty property = null;
+        TupleInputProperty property = null;
 
-        property = new TupleProperty();
+        property = new TupleInputProperty();
         property.setName("hostName");
+        property.setInputName("hostName");
         property.setType("java.lang.String");
-        property.setDataType("metaData");
+        property.setInputName("metaData");
         mapping.addProperty(property);
 
-        property = new TupleProperty();
+        property = new TupleInputProperty();
         property.setName("requestCount");
+        property.setInputName("requestCount");
         property.setType("java.lang.Integer");
-        property.setDataType("payloadData");
+        property.setInputDataType("payloadData");
         mapping.addProperty(property);
 
         List<InputMapping> inputMappings = new ArrayList<InputMapping>();
@@ -65,7 +68,6 @@ public class TestSiddhiBackendRuntime extends TestCase {
         expression.setText("from Event[requestCount >=requestCount]#window.length(5) " +
                            " insert into OutputStream  requestCount,hostName, sum(requestCount) as totalRequestCount" +
                            " having totalRequestCount>1");
-        expression.setType("inline");
 
         siddhiBackendRuntime.addQuery("bamquery", expression, new DummyCEPListener(null, 0, null, 0));
 
@@ -81,21 +83,21 @@ public class TestSiddhiBackendRuntime extends TestCase {
     }
 
     public void testQuery()
-            throws CEPConfigurationException, CEPEventProcessingException, InterruptedException {
+            throws CEPConfigurationException, CEPEventProcessingException, InterruptedException, BrokerConfigException {
 
 
         SiddhiBackEndRuntimeFactory factory = new SiddhiBackEndRuntimeFactory();
 
         TupleInputMapping mapping2 = new TupleInputMapping();
         mapping2.setStream("testEvent");
-        TupleProperty property2 = null;
+        TupleInputProperty property2 = null;
 
-        property2 = new TupleProperty();
+        property2 = new TupleInputProperty();
         property2.setName("minimumResponseTime");
         property2.setType("java.lang.Double");
         mapping2.addProperty(property2);
 
-        property2 = new TupleProperty();
+        property2 = new TupleInputProperty();
         property2.setName("maximumResponseTime");
         property2.setType("java.lang.Double");
         mapping2.addProperty(property2);
@@ -110,7 +112,6 @@ public class TestSiddhiBackendRuntime extends TestCase {
         expression2.setText("from testEvent[maximumResponseTime > -1]#window.length(5)" +
                             " insert into ResponseStream  minimumResponseTime, maximumResponseTime, avg(maximumResponseTime) as avgMaximumResponseTime" +
                             " having  avgMaximumResponseTime > 100");
-        expression2.setType("inline");
         esperBackendRuntime.addQuery("bamquery", expression2, new DummyCEPListener(null, 0, null, 1));
 
         Event event = new Event();
@@ -123,33 +124,37 @@ public class TestSiddhiBackendRuntime extends TestCase {
     }
 
     public void testStockTweet() throws InterruptedException,
-                                        CEPEventProcessingException, CEPConfigurationException {
+            CEPEventProcessingException, CEPConfigurationException, BrokerConfigException {
 
         SiddhiBackEndRuntimeFactory esperBackendRuntimeFactory = new SiddhiBackEndRuntimeFactory();
 
         TupleInputMapping allStockQuotesMapping = new TupleInputMapping();
         allStockQuotesMapping.setStream("allStockQuotes");
 
-        TupleProperty symbol = new TupleProperty();
+        TupleInputProperty symbol = new TupleInputProperty();
         symbol.setName("symbol");
+        symbol.setInputName("symbol");
         symbol.setType("java.lang.String");
         allStockQuotesMapping.addProperty(symbol);
 
-        TupleProperty price = new TupleProperty();
+        TupleInputProperty price = new TupleInputProperty();
         price.setName("price");
+        price.setInputName("price");
         price.setType("java.lang.Double");
         allStockQuotesMapping.addProperty(price);
 
         TupleInputMapping twitterFeed = new TupleInputMapping();
         twitterFeed.setStream("twitterFeed");
 
-        TupleProperty company = new TupleProperty();
+        TupleInputProperty company = new TupleInputProperty();
         company.setName("company");
+        company.setInputName("company");
         company.setType("java.lang.String");
         twitterFeed.addProperty(company);
 
-        TupleProperty wordCount = new TupleProperty();
+        TupleInputProperty wordCount = new TupleInputProperty();
         wordCount.setName("wordCount");
+        wordCount.setInputName("wordCount");
         wordCount.setType("java.lang.Integer");
         twitterFeed.addProperty(wordCount);
 
@@ -180,19 +185,16 @@ public class TestSiddhiBackendRuntime extends TestCase {
 
         Expression fastStockStreamExpression = new Expression();
         fastStockStreamExpression.setText(fastStocksStream);
-        fastStockStreamExpression.setType("inline");
 
         cepBackEndRuntime.addQuery("fastStocksStream", fastStockStreamExpression, null);
 
         Expression wordCountStreamExpression = new Expression();
         wordCountStreamExpression.setText(workCountStream);
-        wordCountStreamExpression.setType("inline");
 
         cepBackEndRuntime.addQuery("workCountStream", wordCountStreamExpression, null);
 
         Expression selectFastMovingHighWordCountExpression = new Expression();
         selectFastMovingHighWordCountExpression.setText(selectFastMovingHighWordCount);
-        selectFastMovingHighWordCountExpression.setType("inline");
 
         DummyCEPListener testCEPListner = new DummyCEPListener(null, 0, null, 2);
 

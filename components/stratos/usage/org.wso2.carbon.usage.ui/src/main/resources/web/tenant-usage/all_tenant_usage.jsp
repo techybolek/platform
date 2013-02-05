@@ -130,7 +130,7 @@
                                 %>
                                 <th><fmt:message key="number.of.users"/></th>
                                 <th><fmt:message key="storage.usage"/></th><%}%>
-                                <th><fmt:message key="registry.total.bandwidth"/></th>
+                                <%--<th><fmt:message key="registry.total.bandwidth"/></th>--%>
                                 <th><fmt:message key="service.total.bandwidth"/></th>
                                 <th><fmt:message key="webapp.total.bandwidth"/></th>
                                 <th><fmt:message key="service.total.request"/></th>
@@ -165,8 +165,8 @@
                                 <%
                                     }
                                 %>
-                                <td><%=regBandwidth%>
-                                </td>
+                                <%--<td><%=regBandwidth%>
+                                </td>--%>
                                 <td><%=svcBandwidth%>
                                 </td>
                                 <td><%=webBandwidth%>

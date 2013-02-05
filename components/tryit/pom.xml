@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
 	<relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -34,8 +34,8 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.tryit</module>
-        <module>org.wso2.carbon.tryit.ui</module>
+        <module>org.wso2.carbon.tryit/4.0.0</module>
+        <module>org.wso2.carbon.tryit.ui/4.0.0</module>
     </modules>
 
     <dependencyManagement>
@@ -55,11 +55,6 @@
                 <artifactId>org.wso2.carbon.ui</artifactId>
                 <version>${wso2carbon.version.tryit}</version>
             </dependency>
-			<dependency>
-		        <groupId>xalan.wso2</groupId>
-		        <artifactId>xalan</artifactId>
-		        <version>${xalan.wso2.version}</version>
-		    </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -67,7 +62,6 @@
         <wso2carbon.version.tryit>${wso2carbon.version}</wso2carbon.version.tryit>
         <axis2.osgi.version.range.tryit>${axis2.osgi.version.range}</axis2.osgi.version.range.tryit>
         <axiom.osgi.version.range.tryit>${axiom.osgi.version.range}</axiom.osgi.version.range.tryit>
-		<xalan.wso2.version>2.7.1.wso2v1</xalan.wso2.version>
     </properties>
     
 </project>

@@ -68,7 +68,7 @@
             }
     %>
     <script type="text/javascript">
-        forward("tasks.jsp");
+        forward("tasks.jsp?region=region1&item=ds_task_menu");
     </script>
     <%
     } catch (Exception e) {

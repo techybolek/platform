@@ -13,6 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   --%>
+<%@page import="org.wso2.carbon.utils.multitenancy.MultitenantConstants"%>
+<%@page import="org.wso2.carbon.context.PrivilegedCarbonContext"%>
 <%@page import="java.util.Set"%>
 <%@page import="java.util.HashSet"%>
 <%@page import="org.wso2.carbon.rest.api.stub.types.carbon.APIData"%>
@@ -45,30 +47,41 @@
 
 	String apiName = request.getParameter("apiName");
 	String apiContext = request.getParameter("apiContext");
+	String hostname = request.getParameter("hostname");
+	String port = request.getParameter("port");
+	
+	if(port == null || "".equals(port)){
+		port = "-1";
+	}
 	
 	List<ResourceData> resourceList = 
 			(ArrayList<ResourceData>)session.getAttribute("apiResources");
 	
-	if(resourceList != null){
-		//Using a set so duplicates are ignored.
-		Set<String> urlPatterns = new HashSet<String>();
-		
-		for(ResourceData resource : resourceList){
-			//Assign whichever (uri-template or url-mapping) is not null nor empty.
-			String urlPattern = resource.getUriTemplate() == null || "".equals(resource.getUriTemplate()) ? 
-								resource.getUrlMapping() : resource.getUriTemplate();
-			
-			//If any other resource has the same url pattern.
-			if(!urlPatterns.add(urlPattern)){
-				response.setStatus(454);
-				return;
-			}
-		}	
+	if(resourceList != null) {
+        for (int i = 0; i < resourceList.size() - 1; ++i) {
+            ResourceData a = resourceList.get(i);
+            for (int j = i + 1; j < resourceList.size(); ++j) {
+                ResourceData b = resourceList.get(j);
+                if (a.getUrlMapping() != null &&
+                    a.getUrlMapping().equals(b.getUrlMapping())) {
+                    for (String aMethod : a.getMethods()) {
+                        for (String bMethod : b.getMethods()) {
+                            if (aMethod != null && aMethod.equals(bMethod)) {
+                                response.setStatus(454);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
 	}
 	
 	APIData apiData = new APIData();
 	apiData.setName(apiName);
 	apiData.setContext(apiContext);
+	apiData.setHost(hostname);
+	apiData.setPort(Integer.parseInt(port));
 	ResourceData resources[] = new ResourceData[resourceList.size()];
 	apiData.setResources(resourceList.toArray(resources));
     try {
@@ -79,6 +92,13 @@
                     response.setStatus(452);
                     return;
                 }
+            }
+            
+            String tenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain();
+			boolean superTenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain);
+			
+			if(!superTenant){
+				apiContext = "/t/" + tenantDomain + apiContext;
             }
             for (String name : names) {
                 APIData data = client.getApiByNane(name);

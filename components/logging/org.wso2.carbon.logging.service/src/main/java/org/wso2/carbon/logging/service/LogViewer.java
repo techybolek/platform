@@ -65,12 +65,12 @@ public class LogViewer {
 		}
 	}
 
-	public PaginatedLogInfo getLocalLogFiles(int pageNumber) throws LogViewerException {
+	public PaginatedLogInfo getLocalLogFiles(int pageNumber, String domain, String serverKey) throws LogViewerException {
 		LogInfo[] logs = null;
 		if (LoggingUtil.isLogEventAppenderConfigured()) {
-			logs = LoggingUtil.getRemoteLogFiles();
+			logs = LoggingUtil.getRemoteLogFiles(domain, serverKey);
 		} else if (isFileAppenderConfiguredForST()) {
-			logs = LoggingUtil.getLocalLogInfo();
+			logs = null;
 
 		}
 		if (logs != null) {
@@ -83,8 +83,8 @@ public class LogViewer {
 		}
 	}
 
-	public DataHandler downloadArchivedLogFiles(String logFile) throws Exception {
-		return LoggingUtil.downloadArchivedLogFiles(logFile);
+	public DataHandler downloadArchivedLogFiles(String logFile, String domain, String serverKey) throws Exception {
+		return LoggingUtil.downloadArchivedLogFiles(logFile, domain, serverKey);
 	}
 
 	 public boolean isValidTenantDomain(String tenantDomain) {
@@ -97,8 +97,26 @@ public class LogViewer {
 
 	
 	 public boolean isManager() {
-	 return LoggingUtil.isManager();
+	    return LoggingUtil.isManager();
 	 }
+    
+    public boolean isValidTenant(String domain) {
+        int tenantId;
+        if(domain == null || domain.equals("")) {
+            tenantId = CarbonContext.getCurrentContext().getTenantId();
+        }
+        try {
+             tenantId = LoggingUtil.getTenantIdForDomain(domain);
+        } catch (LogViewerException e) {
+            log.error("error while getting tennat id from tenant domain", e);
+            return false;
+        }
+        
+        if(tenantId == MultitenantConstants.INVALID_TENANT_ID) {
+            return false;
+        }
+        return true;
+    }
 
 	public int getLineNumbers(String logFile) throws Exception {
 		return LoggingUtil.getLineNumbers(logFile);
@@ -109,11 +127,11 @@ public class LogViewer {
 		return LoggingUtil.getLogLinesFromFile(logFile, maxLogs, start, end);
 	}
 
-	public String[] getApplicationNames() throws LogViewerException {
+	public String[] getApplicationNames(String domain, String serverKey) throws LogViewerException {
 		if (LoggingUtil.isLogEventAppenderConfigured()) {
-			return LoggingUtil.getApplicationNamesFromCassandra();
+			return LoggingUtil.getApplicationNamesFromCassandra(domain, serverKey);
 		} else {
-			return LoggingUtil.getApplicationNames();
+			return LoggingUtil.getApplicationNames(domain, serverKey);
 		}
 	}
 
@@ -143,41 +161,41 @@ public class LogViewer {
 		return LoggingUtil.getAllSystemLogs();
 	}
 
-	public PaginatedLogEvent getPaginatedLogEvents(int pageNumber, String type, String keyword)
-			throws LogViewerException {
+    public PaginatedLogEvent getPaginatedLogEvents(int pageNumber, String type, String keyword, String domain, String serverKey)
+            throws LogViewerException {
 
-		LogEvent list[];
-		if (!LoggingUtil.isLogEventAppenderConfigured()) {
-			list = getLogs(type, keyword);
-		} else {
-			list = LoggingUtil.getSortedLogsFromCassandra(type, keyword);
-		}
-		if (list != null) {
-			List<LogEvent> logMsgList = Arrays.asList(list);
-			PaginatedLogEvent paginatedLogEvent = new PaginatedLogEvent();
-			DataPaginator.doPaging(pageNumber, logMsgList, paginatedLogEvent);
-			return paginatedLogEvent;
-		} else {
-			return null;
-		}
+        LogEvent list[];
+        if (!LoggingUtil.isLogEventAppenderConfigured()) {
+            list = getLogs(type, keyword, domain, serverKey);
+        } else {
+            list = LoggingUtil.getSortedLogsFromCassandra(type, keyword, domain, serverKey);
+        }
+        if (list != null) {
+            List<LogEvent> logMsgList = Arrays.asList(list);
+            PaginatedLogEvent paginatedLogEvent = new PaginatedLogEvent();
+            DataPaginator.doPaging(pageNumber, logMsgList, paginatedLogEvent);
+            return paginatedLogEvent;
+        } else {
+            return null;
+        }
 
-	}
+    }
 
-	public int getNoOfLogEvents() throws LogViewerException {
+	public int getNoOfLogEvents(String domain, String serverKey) throws LogViewerException {
 		if (LoggingUtil.isLogEventAppenderConfigured()) {
-			return LoggingUtil.getNoOfRows();
+			return LoggingUtil.getNoOfRows(domain, serverKey);
 		} else {
 			return -1;
 		}
 	}
 
 	public PaginatedLogEvent getPaginatedApplicationLogEvents(int pageNumber, String type,
-			String keyword, String applicationName) throws Exception {
+			String keyword, String applicationName, String domain, String serverKey) throws Exception {
 		LogEvent list[];
 		if (LoggingUtil.isLogEventAppenderConfigured()) {
-			list = LoggingUtil.getSortedAppLogsFromCassandra(type, keyword, applicationName);
+			list = LoggingUtil.getSortedAppLogsFromCassandra(type, keyword, applicationName, domain, serverKey);
 		} else {
-			list = getApplicationLogs(type, keyword, applicationName);
+			list = getApplicationLogs(type, keyword, applicationName, domain, serverKey);
 		}
 		if (list != null) {
 			List<LogEvent> logMsgList = Arrays.asList(list);
@@ -189,52 +207,53 @@ public class LogViewer {
 		}
 	}
 
-	public LogEvent[] getLogs(String type, String keyword) {
+	public LogEvent[] getLogs(String type, String keyword, String domain, String serverKey) {
 
 		if (keyword == null || keyword.equals("")) {
 			// keyword is null
 			if (type == null || type.equals("") || type.equalsIgnoreCase("ALL")) {
-				return LoggingUtil.getLogs("");
+				return LoggingUtil.getLogs("", domain, serverKey);
 			} else {
 				// type is NOT null and NOT equal to ALL Application Name is not
 				// needed
-				return LoggingUtil.getLogsForType(type, "");
+				return LoggingUtil.getLogsForType(type, "", domain, serverKey);
 			}
 		} else {
 			// keyword is NOT null
 			if (type == null || type.equals("")) {
 				// type is null
-				return LoggingUtil.getLogsForKey(keyword, "");
+				return LoggingUtil.getLogsForKey(keyword, "", domain, serverKey);
 			} else {
 				// type is NOT null and keyword is NOT null, but type can be
 				// equal to ALL
-				return LoggingUtil.searchLog(type, keyword, "");
+				return LoggingUtil.searchLog(type, keyword, "", domain, serverKey);
 			}
 		}
 	}
 
-	public LogEvent[] getApplicationLogs(String type, String keyword, String appName) {
+    
+	public LogEvent[] getApplicationLogs(String type, String keyword, String appName, String domain, String serverKey) {
 		if (keyword == null || keyword.equals("")) {
 			// keyword is null
 			if (type == null || type.equals("") || type.equalsIgnoreCase("ALL")) {
-				return LoggingUtil.getLogs(appName);
+				return LoggingUtil.getLogs(appName, domain, serverKey);
 			} else {
 				// type is NOT null and NOT equal to ALL
-				return LoggingUtil.getLogsForType(type, appName);
+				return LoggingUtil.getLogsForType(type, appName, domain, serverKey);
 			}
 		} else {
 			// keyword is NOT null
 			if (type == null || type.equals("")) {
 				// type is null
-				return LoggingUtil.getLogsForKey(keyword, appName);
+				return LoggingUtil.getLogsForKey(keyword, appName, domain, serverKey);
 			} else {
 				// type is NOT null and keyword is NOT null, but type can be
 				// equal to ALL
-				return LoggingUtil.searchLog(type, keyword, appName);
+				return LoggingUtil.searchLog(type, keyword, appName, domain, serverKey);
 			}
 		}
 	}
-
+    
 	public boolean clearLogs() {
 		Appender appender = Logger.getRootLogger().getAppender(
 				LoggingConstants.WSO2CARBON_MEMORY_APPENDER);

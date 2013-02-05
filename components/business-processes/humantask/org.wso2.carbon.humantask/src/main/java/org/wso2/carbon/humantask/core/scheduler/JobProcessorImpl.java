@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.humantask.*;
 import org.wso2.carbon.humantask.core.api.scheduler.Scheduler;
 import org.wso2.carbon.humantask.core.dao.*;
@@ -33,7 +34,6 @@ import org.wso2.carbon.humantask.core.store.HumanTaskBaseConfiguration;
 import org.wso2.carbon.humantask.core.store.TaskConfiguration;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
 
 import javax.xml.namespace.QName;
 import java.util.*;
@@ -82,7 +82,7 @@ public class JobProcessorImpl implements Scheduler.JobProcessor {
         TaskDAO task = HumanTaskServiceComponent.getHumanTaskServer().getDaoConnectionFactory().
                 getConnection().getTask(taskId);
 
-        CarbonContextHolder.getThreadLocalCarbonContextHolder().setTenantId(task.getTenantId());
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(task.getTenantId());
 
         TaskConfiguration taskConf = (TaskConfiguration) HumanTaskServiceComponent.getHumanTaskServer().
                 getTaskStoreManager().getHumanTaskStore(task.getTenantId()).

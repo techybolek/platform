@@ -37,7 +37,7 @@ public abstract class ConditionalQuery extends Query {
     public Condition getCondition() {
         return condition;
     }
-    
+
     public void processConditions(Queue<String> tokens, Condition rootCondition) {
         if (Constants.COLUMN.equals(tokens.peek())) {
             rootCondition.setLhs(new Condition());
@@ -46,7 +46,7 @@ public abstract class ConditionalQuery extends Query {
             tokens.poll();
             rootCondition.getLhs().setOperator(tokens.poll());
             tokens.poll();
-            rootCondition.getLhs().setValue(tokens.poll());
+            rootCondition.getLhs().setValue(getColumnValue(tokens));
             if (tokens.isEmpty()) {
                 return;
             }
@@ -70,6 +70,28 @@ public abstract class ConditionalQuery extends Query {
             rootCondition.setRhs(new Condition());
             this.processConditions(tokens, rootCondition.getRhs());
         }
+    }
+
+    /**
+     * Column values can be specified with/without single quotes. The following snippet
+     * handles those two instances where the column values are specified within/without
+     * single quotes.
+     *
+     * @param tokens    Input tokens
+     * @return          Extracted column value
+     */
+    private String getColumnValue(Queue<String> tokens) {
+        StringBuilder value = new StringBuilder();
+        if (Constants.SINGLE_QUOTATION.equalsIgnoreCase(tokens.peek())) {
+            tokens.poll();
+            while (!Constants.SINGLE_QUOTATION.equalsIgnoreCase(tokens.peek())) {
+                value.append(tokens.poll());
+            }
+            tokens.poll();
+        } else {
+            value.append(tokens.poll());
+        }
+        return value.toString();
     }
 
 }

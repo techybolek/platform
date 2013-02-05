@@ -15,14 +15,16 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
-<%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<fmt:bundle basename="org.wso2.carbon.admin.mgt.ui.i18n.Resources">
-<div id="middle">
+<%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
-    <div id="workArea">
-     You have already click the link that post to you to configure your user account or
-        it must have been expired. Please try again or please report contact admin of WSO2 Identity Server
-    </div>
+<carbon:jsi18n
+        resourceBundle="org.wso2.carbon.identity.mgt.ui.i18n.Resources"
+        request="<%=request%>"/>
+
+<fmt:bundle basename="org.wso2.carbon.identity.mgt.ui.i18n.Resources">
+<div id="middle">
+    <h2><fmt:message key="expire.link"/></h2>
+    <p><fmt:message key="expire.link.message"/></p>
 </div>
 </fmt:bundle>

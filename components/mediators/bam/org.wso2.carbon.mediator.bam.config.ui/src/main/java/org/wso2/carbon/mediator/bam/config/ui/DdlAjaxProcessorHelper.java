@@ -23,6 +23,9 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.util.Locale;
 
@@ -52,16 +55,31 @@ public class DdlAjaxProcessorHelper {
         StringBuilder serverProfileNamesString = new StringBuilder("");
         try {
             String[] serverProfileNames = client.getServerProfilePathList(serverProfilePath);
-            for (String serverProfileName : serverProfileNames) {
-                serverProfileNamesString.append("<option>" +
-                                                serverProfileName.split("/")[serverProfileName.split("/").length-1] +
-                                                "</option>");
+            if (serverProfileNames!= null) {
+                for (String serverProfileName : serverProfileNames) {
+                    serverProfileNamesString.append("<option>" +
+                                                    serverProfileName.split("/")[serverProfileName.split("/").length-1] +
+                                                    "</option>");
+                }
             }
         } catch (RemoteException e) {
             String errorMsg = "Error while getting Server Profile Name List. " + e.getMessage();
             log.error(errorMsg, e);
         }
         return serverProfileNamesString.toString();
+    }
+
+    public String backendServerExists(String ip, String port){
+        try {
+            new Socket(ip, Integer.parseInt(port));
+            return "true";
+        } catch (UnknownHostException e) {
+            return "false";
+        } catch (IOException e) {
+            return "false";
+        } catch (Exception e) {
+            return "false";
+        }
     }
 
 }

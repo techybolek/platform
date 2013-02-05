@@ -1,5 +1,0 @@
-<% jagg.template("layout/base", function(inputs, outputs, jagg) { %>
-	
-    <% jagg.includeBlocks(outputs.middle); %>
-
-<% }); %>

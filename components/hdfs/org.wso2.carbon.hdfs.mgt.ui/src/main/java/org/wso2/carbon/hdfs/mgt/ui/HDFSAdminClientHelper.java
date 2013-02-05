@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class HDFSAdminClientHelper {
 
-     public static void uploadFile(HttpServletRequest request, HttpSession session)
+    public static void uploadFile(HttpServletRequest request, HttpSession session)
             throws FileUploadException {
 
         if (ServletFileUpload.isMultipartContent(request)) {
@@ -52,11 +52,6 @@ public class HDFSAdminClientHelper {
                     fileComment = fileItemTemp.getString();
                 }
             }
-
-
         }
     }
-
-
-
 }

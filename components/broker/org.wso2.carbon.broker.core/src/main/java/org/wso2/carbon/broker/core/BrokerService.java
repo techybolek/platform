@@ -60,14 +60,14 @@ public interface BrokerService {
      * @throws org.wso2.carbon.broker.core.exception.BrokerEventProcessingException
      *          - if problem happen when subscribing
      */
-    void subscribe(BrokerConfiguration brokerConfiguration,
+    String subscribe(BrokerConfiguration brokerConfiguration,
                    String topicName,
                    BrokerListener brokerListener,
                    AxisConfiguration axisConfiguration) throws BrokerEventProcessingException;
 
 
     /**
-     * publishes the message using the givne broker proxy to the given topic.
+     * publishes the message using the given broker proxy to the given topic.
      *
      * @param brokerConfiguration - Configuration Details of the broker
      * @param topicName           - topic to publish
@@ -80,6 +80,15 @@ public interface BrokerService {
                  Object object) throws BrokerEventProcessingException;
 
     /**
+     * publish testConnection message using the given broker proxy.
+     *
+     * @param brokerConfiguration - Configuration Details of the broker
+     * @throws org.wso2.carbon.broker.core.exception.BrokerEventProcessingException
+     *          - if problem happen when publishing
+     */
+    void testConnection(BrokerConfiguration brokerConfiguration) throws BrokerEventProcessingException;
+
+    /**
      * un subscribes from the broker.
      *
      * @param topicName           - topic name to which previously subscribed
@@ -89,7 +98,7 @@ public interface BrokerService {
      */
     void unsubscribe(String topicName,
                      BrokerConfiguration brokerConfiguration,
-                     AxisConfiguration axisConfiguration)
+                     AxisConfiguration axisConfiguration,String subscriptionId)
             throws BrokerEventProcessingException;
 
 }

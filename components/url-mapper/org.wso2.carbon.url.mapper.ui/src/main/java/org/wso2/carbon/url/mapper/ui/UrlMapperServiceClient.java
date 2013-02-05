@@ -127,9 +127,9 @@ public class UrlMapperServiceClient {
         }
     }
 
-    public void addServiceDomain(String host, String epr) throws Exception {
+    public void addServiceDomain(String host, String epr, String appType) throws Exception {
         try {
-            stub.addServiceDomain(host, epr);
+            stub.addServiceDomain(host, epr, appType);
         } catch (Exception e) {
             String msg = "Error occurred while adding new domain to " + epr
                     + ". Backend service may be unavailable";
@@ -153,14 +153,14 @@ public class UrlMapperServiceClient {
      * @param context the context of the web app from the appserver localhost
      * @throws Exception throws when exception in adding virtual host or webapp
      */
-    public void addWebAppToHost(String appId, String context) throws Exception {
+    public void addWebAppToHost(String appId, String context, String appType) throws Exception {
         try {
             String hostName = appId;
             boolean isDomain = isMappingExist(hostName);
 
             if (isDomain) {
             } else {
-                stub.addWebAppToHost(hostName, context);
+                stub.addWebAppToHost(hostName, context, appType);
             }
         } catch (Exception e) {
             String msg = "Error occurred while adding webb app to host. Backend service may be unavailable";
@@ -198,5 +198,4 @@ public class UrlMapperServiceClient {
             throw e;
         }
     }
-
 }

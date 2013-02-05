@@ -44,11 +44,11 @@ var isContextExist = function (context,oldContext) {
     }
 };
 
-var isURLValid = function (url) {
+var isURLValid = function (type,url) {
     var result, log = new Log(),
             provider = jagg.module("manager").getAPIProviderObj();
     try {
-        result = provider.isURLValid(url);
+        result = provider.isURLValid(type,url);
         if (log.isDebugEnabled()) {
             log.debug("Invoke isURLValid" );
         }

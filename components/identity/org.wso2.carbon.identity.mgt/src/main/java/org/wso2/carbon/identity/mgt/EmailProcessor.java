@@ -60,7 +60,7 @@ public class EmailProcessor {
         emailSender = new EmailSender();
     }
 
-    public RecoveryDataDTO processEmail(Map<String, String> data) throws IdentityMgtException {
+    public RecoveryDataDTO processEmail(Map<String, String> data, boolean recoveryData) throws IdentityMgtException {
 
         EmailConfig emailConfig = null;
         RecoveryDataDTO emailDataDTO  = new RecoveryDataDTO();
@@ -83,28 +83,31 @@ public class EmailProcessor {
         }
 
         try {
-            String confirmationKey = UUID.randomUUID().toString();
+            String confirmationKey = null;
+            if(recoveryData){
+                confirmationKey = UUID.randomUUID().toString();
 
-            Registry registry = IdentityMgtServiceComponent.getRegistryService().
-                    getConfigSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
-            Resource resource = registry.newResource();
+                Registry registry = IdentityMgtServiceComponent.getRegistryService().
+                        getConfigSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
+                Resource resource = registry.newResource();
 
-            if(emailConfig.getRedirectPath() != null){
-                resource.setProperty(IdentityMgtConstants.REDIRECT_PATH, emailConfig.getRedirectPath());
-            }
-
-            for (Map.Entry<String, String>  entry: data.entrySet()) {
-                //can not store password in to registry
-                if(IdentityMgtConstants.TEMPORARY_PASSWORD.equals(entry.getKey())){
-                    continue;
+                if(emailConfig.getRedirectPath() != null){
+                    resource.setProperty(IdentityMgtConstants.REDIRECT_PATH, emailConfig.getRedirectPath());
                 }
-                resource.setProperty(entry.getKey(), entry.getValue());
+
+                for (Map.Entry<String, String>  entry: data.entrySet()) {
+                    //can not store password in to registry
+                    if(IdentityMgtConstants.TEMPORARY_PASSWORD.equals(entry.getKey())){
+                        continue;
+                    }
+                    resource.setProperty(entry.getKey(), entry.getValue());
+                }
+
+                resource.setVersionableChange(false);
+                String confirmationKeyPath = IdentityMgtConstants.IDENTITY_MANAGEMENT_DATA + "/" + confirmationKey;
+                registry.put(confirmationKeyPath, resource);
+
             }
-
-            resource.setVersionableChange(false);
-            String confirmationKeyPath = IdentityMgtConstants.IDENTITY_MANAGEMENT_DATA + "/" + confirmationKey;
-            registry.put(confirmationKeyPath, resource);
-
             emailDataDTO.setEmailSent(false);
             emailDataDTO.setConfirmation(confirmationKey);
             emailDataDTO.setEmail(emailAddress);

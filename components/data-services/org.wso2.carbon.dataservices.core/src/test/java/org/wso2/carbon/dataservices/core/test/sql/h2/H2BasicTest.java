@@ -46,9 +46,5 @@ public class H2BasicTest extends AbstractBasicServiceTest {
 	public void testH2BasicArrayInputTypes() {
 		this.basicArrayInputTypes();
 	}
-	
-	public void testH2BasicDecimalOutputTypes() {
-		this.basicDecimalOutputType();
-	}
 
 }

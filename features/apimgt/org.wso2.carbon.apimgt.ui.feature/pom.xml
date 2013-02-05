@@ -22,12 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.ui.feature</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.7</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Api management UI Feature</name>
     <url>http://wso2.org</url>
@@ -38,7 +39,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
-            <version>${carbon.platform.version}</version>
+            <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -55,6 +56,30 @@
 
     <build>
         <plugins>
+             <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/resources</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>resources</directory>
+                                    <includes>
+                                        <include>p2.inf</include>
+                                        <include>build.properties</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.wso2.maven</groupId>
                 <artifactId>carbon-p2-plugin</artifactId>
@@ -68,10 +93,10 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.apimgt.ui</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
-                                    <propertyDef>org.wso2.carbon.p2.category.type:server
+                                    <propertyDef>org.wso2.carbon.p2.category.type:console
                                     </propertyDef>
                                     <propertyDef>org.eclipse.equinox.p2.type.group:false
                                     </propertyDef>
@@ -85,8 +110,8 @@
                                 <!--<importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.core</importBundleDef>-->
                             </importBundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.ui:${wso2carbon.version}</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.um.ws.service.client:${wso2carbon.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.ui:4.0.6</importFeatureDef>
+				                <importFeatureDef>org.wso2.carbon.um.ws.service.client:${wso2carbon.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

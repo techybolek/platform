@@ -103,8 +103,10 @@ public class IdentityConfigParser {
                 if (identityConfigXml.exists()) {
                     inStream = new FileInputStream(identityConfigXml);
                 }
-
-                if (inStream == null) {
+                /*Following seems a wrong use of a class inside internal package (IdentityCoreServiceComponent),
+                outside that package which causes hard to troubleshoot CNF errors in certain occasions.
+                Besides, identity.xml is not present in the */
+                /*if (inStream == null) {
                     URL url;
                     BundleContext bundleContext = IdentityCoreServiceComponent.getBundleContext();
                     if (bundleContext != null) {
@@ -124,7 +126,7 @@ public class IdentityConfigParser {
                                     " or user does not have sufficient permission to access the resource.";
                         }
                     }
-                }
+                }*/
             }
 
             if (inStream == null) {

@@ -22,9 +22,7 @@
         <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
         <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
         <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
-        <%@ page import="org.wso2.carbon.utils.multitenancy.CarbonContextHolder" %>
-        <%@ page
-                import="org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext" %>
+      
         <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
         <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
                    prefix="carbon" %>
@@ -45,21 +43,23 @@
 			configContext);
 	String usergivenEndpoint = request.getParameter("userEndpoint");
 	String oldHost = request.getParameter("oldHost");
+	String appType = request.getParameter("apptype");
+
 	if (requestType.equalsIgnoreCase("edit")) {
 		try {
 			if (carbonEndpoint.contains("services")) {
                 if (hostAdmin.isMappingExist(usergivenEndpoint)) {
-                     %>Failed to add URL Mapping. Mapping already exist.<%
+                     %>Failed to add URL Mapping. Mapping already exists.<%
                 } else {
                     hostAdmin.editServiceDomain(usergivenEndpoint,oldHost);
-                    %>URL Mapping successfully edited.<%
+                    %>is successfully edited.<%
                 }
 			} else {
 			    if (hostAdmin.isMappingExist(usergivenEndpoint)) {
-                     %>Failed to add URL Mapping. Mapping already exist.<%
+                     %>Failed to add URL Mapping. Mapping already exists.<%
                 } else {
                     hostAdmin.editHost(carbonEndpoint,usergivenEndpoint, oldHost);
-                    %>URL Mapping successfully edited.<%
+                    %>is successfully edited.<%
 				}
 			}
 
@@ -73,7 +73,7 @@
 			} else {
 				hostAdmin.deleteHost(usergivenEndpoint);
 			}
-			%>URL Mapping successfully deleted<%
+			%>is successfully deleted<%
 	} catch (Exception e) {
 			%>Failed to delete URL Mapping<%
 	}
@@ -82,40 +82,40 @@
 		
 		String endpointType = request.getParameter("endpointType");
 
-		if (carbonEndpoint.contains("services")) {
+		if ("service".equalsIgnoreCase(appType)) {
 			if (carbonEndpoint != null && usergivenEndpoint != null && endpointType != null) {
 				try {
 					if (hostAdmin.isMappingExist(usergivenEndpoint)) {
-					 %>Failed to add URL Mapping. Mapping already exist.<%
+					 %>Failed to add URL Mapping. Mapping already exists.<%
 					} else if (hostAdmin.isMappingLimitExceeded(carbonEndpoint))  {
-						 %>Failed to add URL Mapping. URL Mapping limit exceeded.<%
+						 %>Failed to add URL Mapping. URL Mapping is limit exceeded.<%
 					} else {
-							hostAdmin.addServiceDomain(usergivenEndpoint, carbonEndpoint);
-							%>URL Mapping successfully inserted<%
+							hostAdmin.addServiceDomain(usergivenEndpoint, carbonEndpoint, appType);
+							%>is successfully inserted<%
 					}
 
 				} catch (Exception e) {
-				  %>Failed to add URL Mapping. Mapping already exist.<%
+				  %>Failed to add URL Mapping. Mapping already exists.<%
 				}
 			} else {
 
 			}
 
-		} else if (requestType.contains("webapps") || !requestType.contains("services")) {
+		} else if ("jaxWebapp".equalsIgnoreCase(appType) || "jaggeryWebapp".equalsIgnoreCase(appType) || "webapp".equalsIgnoreCase(appType)) {
 
-			if (carbonEndpoint != null && usergivenEndpoint != null && endpointType != null) {
+			if (carbonEndpoint != null && usergivenEndpoint != null && endpointType != null && appType != null) {
 				try {
 					if (hostAdmin.isMappingExist(usergivenEndpoint)) {
 						%>Failed to add URL Mapping. Mapping already exist.<%
 						} else if (hostAdmin.isMappingLimitExceeded(carbonEndpoint))  {
-							 %>Failed to add URL Mapping. URL Mapping limit exceeded.<%
+							 %>Failed to add URL Mapping. URL Mapping limit is exceeded.<%
 						} else {
-							hostAdmin.addWebAppToHost(usergivenEndpoint, carbonEndpoint);
-							%>URL Mapping successfully inserted<%
+							hostAdmin.addWebAppToHost(usergivenEndpoint, carbonEndpoint, appType);
+							%>is successfully inserted<%
 						}
 
 				} catch (Exception e) {
-					%>Failed to add URL Mapping. Mapping already exist.<%
+					%>Failed to add URL Mapping. Mapping already exists.<%
 				}
 			} else {
 

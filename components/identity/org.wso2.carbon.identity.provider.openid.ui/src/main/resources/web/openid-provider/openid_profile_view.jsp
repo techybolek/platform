@@ -15,106 +15,103 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
-           prefix="carbon" %>
-<%@ page import="org.apache.axis2.context.ConfigurationContext" %>
-<%@ page import="org.openid4java.message.ParameterList" %>
-<%@ page import="org.wso2.carbon.CarbonConstants" %>
-<%@ page import="org.wso2.carbon.identity.base.IdentityConstants" %>
-<%@ page import="org.wso2.carbon.identity.provider.openid.stub.dto.OpenIDClaimDTO" %>
-
-
+<%@page import="org.wso2.carbon.identity.provider.openid.ui.util.OpenIDUtil"%>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
+           
+<%@page import="org.apache.axis2.context.ConfigurationContext" %>
+<%@page import="org.apache.xml.serialize.OutputFormat" %>
+<%@page import="org.apache.xml.serialize.XMLSerializer" %>
+<%@page import="org.openid4java.message.ParameterList" %>
+<%@page import="org.wso2.carbon.CarbonConstants" %>
+<%@page import="org.wso2.carbon.identity.base.IdentityConstants" %>
+<%@page import="org.wso2.carbon.identity.provider.openid.ui.client.OpenIDAdminClient" %>
+<%@page import="org.wso2.carbon.identity.provider.openid.ui.OpenIDConstants" %>
 <%@page import="org.wso2.carbon.identity.provider.openid.stub.dto.OpenIDUserProfileDTO" %>
-<%@page
-        import="org.wso2.carbon.identity.provider.openid.ui.client.OpenIDAdminClient" %>
-<%@page
-        import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@page import="org.wso2.carbon.identity.provider.openid.stub.dto.OpenIDClaimDTO" %>
+<%@page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@page import="org.wso2.carbon.ui.CarbonUIUtil" %>
-<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@ page import="java.util.ResourceBundle" %>
+<%@page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@page import="java.io.StringWriter" %>
+<%@page import="java.util.Iterator" %>
+<%@page import="java.util.Map" %>
+<%@page import="java.util.ResourceBundle"%>
 
-<link media="all" type="text/css"
-      rel="stylesheet" href="css/registration.css"/>
-
+<link media="all" type="text/css" rel="stylesheet" href="css/registration.css"/>
+      
 <script type="text/javascript">
 
-    function Set_Cookie(name, value, expires, path, domain, secure) {
-        // set time, it's in milliseconds
-        var today = new Date();
-        today.setTime(today.getTime());
+  function Set_Cookie( name, value, expires, path, domain, secure )
+  {
+  // set time, it's in milliseconds
+  var today = new Date();
+  today.setTime( today.getTime() );
 
-        /*
-         if the expires variable is set, make the correct
-         expires time, the current script below will set
-         it for x number of days, to make it for hours,
-         delete * 24, for minutes, delete * 60 * 24
-         */
-        if (expires) {
-            expires = expires * 1000 * 60 * 60 * 24;
-        }
-        var expires_date = new Date(today.getTime() + (expires));
+  /*
+  if the expires variable is set, make the correct
+  expires time, the current script below will set
+  it for x number of days, to make it for hours,
+  delete * 24, for minutes, delete * 60 * 24
+  */
+  if ( expires )
+  {
+  expires = expires * 1000 * 60 * 60 * 24;
+  }
+  var expires_date = new Date( today.getTime() + (expires) );
 
-        document.cookie = name + "=" + value +
-                ( ( expires ) ? ";expires=" + expires_date.toGMTString() : "" ) +
-                ( ( path ) ? ";path=" + path : "" ) +
-                ( ( domain ) ? ";domain=" + domain : "" ) +
-                ( ( secure ) ? ";secure" : "" );
-    }
+  document.cookie = name + "=" +value+
+  ( ( expires ) ? ";expires=" + expires_date.toGMTString() : "" ) +
+  ( ( path ) ? ";path=" + path : "" ) +
+  ( ( domain ) ? ";domain=" + domain : "" ) +
+  ( ( secure ) ? ";secure" : "" );
+  }
 
-    function Get_Cookie(name) {
-        var start = document.cookie.indexOf(name + "=");
-        var len = start + name.length + 1;
-        if (( !start ) &&
-                ( name != document.cookie.substring(0, name.length) )) {
-            return null;
-        }
-        if (start == -1) return null;
-        var end = document.cookie.indexOf(";", len);
-        if (end == -1) end = document.cookie.length;
-        return unescape(document.cookie.substring(len, end));
-    }
+  function Get_Cookie( name ) {
+	  var start = document.cookie.indexOf( name + "=" );
+	  var len = start + name.length + 1;
+	  if ( ( !start ) &&
+	  ( name != document.cookie.substring( 0, name.length ) ) )
+	  {
+	  return null;
+	  }
+	  if ( start == -1 ) return null;
+	  var end = document.cookie.indexOf( ";", len );
+	  if ( end == -1 ) end = document.cookie.length;
+	  return unescape( document.cookie.substring( len, end ) );
+  }
+	    
 
-
-    //this deletes the cookie when called
-    function Delete_Cookie(name, path, domain) {
-        if (Get_Cookie(name)) document.cookie = name + "=" +
-                ( ( path ) ? ";path=" + path : "") +
-                ( ( domain ) ? ";domain=" + domain : "" ) +
-                ";expires=Thu, 01-Jan-1970 00:00:01 GMT";
-    }
-
+//this deletes the cookie when called
+  function Delete_Cookie( name, path, domain ) {
+  if ( Get_Cookie( name ) ) document.cookie = name + "=" +
+  ( ( path ) ? ";path=" + path : "") +
+  ( ( domain ) ? ";domain=" + domain : "" ) +
+  ";expires=Thu, 01-Jan-1970 00:00:01 GMT";
+  }
+    
 </script>
 
 <%
-    OpenIDUserProfileDTO[] profiles = null;
+	OpenIDUserProfileDTO[] profiles = null;
     String BUNDLE = "org.wso2.carbon.identity.provider.openid.ui.i18n.Resources";
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
     if (session.getAttribute("profiles") == null) {
         ParameterList requestedClaims = null;
-
-        String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
-        ConfigurationContext configContext =
-                (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
-        String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         String forwardTo = null;
-
         String isPhishingResistance = (String) session.getAttribute("papePhishingResistance");
         String isMultiFactorAuthEnabled = (String) session.getAttribute("multiFactorAuth");
-
-
         String infoCardAuthStatus = (String) session.getAttribute("infoCardAuthenticated");
         boolean infoCardAuthenticated = false;
         if (infoCardAuthStatus != null && infoCardAuthStatus.equals("true")) {
             infoCardAuthenticated = true;
         }
 
-
         String openid = (request.getParameter("openid") != null) ? request.getParameter("openid") : (String) session.getAttribute("openId");
-   
         try {
-            OpenIDAdminClient client = new OpenIDAdminClient(configContext, serverURL,null);
+        	// we get the openid admin client from the session. This is created once per session
+            OpenIDAdminClient client = OpenIDUtil.getOpenIDAdminClient(session);
+           
             if (infoCardAuthenticated || session.getAttribute("isOpenIDAuthenticated")!=null) {
                 requestedClaims = (ParameterList) session.getAttribute(IdentityConstants.OpenId.PARAM_LIST);
                 profiles = client.getUserProfiles(openid,requestedClaims);
@@ -133,30 +130,28 @@
             	String message = resourceBundle.getString("invalid.credentials");
                 CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request, new Exception(message));
 %>
-<script type="text/javascript">
-    location.href = "openid_auth.jsp";
-</script>
-<% return;
-}
-} catch (Exception e) {
+                <script type="text/javascript">
+                    location.href = "openid_auth.jsp";
+                </script>
+<%              return;
+             }
+         } catch (Exception e) {
 %>
-<script type="text/javascript">
-    location.href = "../admin/login.jsp";
-</script>
-<% return;
-}
-finally {
-    session.removeAttribute("papePhishingResistance");
-    session.removeAttribute("multiFactorAuth");
-    session.removeAttribute("infoCardBasedMultiFacotrAuth");
-    session.removeAttribute("xmppBasedMultiFacotrAuth");
-    session.removeAttribute("infoCardAuthenticated");
-	session.removeAttribute("isOpenIDAuthenticated");
-}
-}
-    else{
+                <script type="text/javascript">
+                    location.href = "../admin/login.jsp";
+                  </script>
+<%          return;
+         } finally {
+        	    session.removeAttribute("papePhishingResistance");
+			    session.removeAttribute("multiFactorAuth");
+			    session.removeAttribute("infoCardBasedMultiFacotrAuth");
+			    session.removeAttribute("xmppBasedMultiFacotrAuth");
+			    session.removeAttribute("infoCardAuthenticated");
+				session.removeAttribute("isOpenIDAuthenticated");
+		}
+    } else {
        profiles = (OpenIDUserProfileDTO[])session.getAttribute("profiles");
-}
+    }
 %>
 <fmt:bundle
         basename="org.wso2.carbon.identity.provider.openid.ui.i18n.Resources">
@@ -184,8 +179,13 @@ finally {
                     session.setAttribute("profile", request.getParameter("selectedProfile"));
                     session.setAttribute("userApproved","true");
                  %>
+                 	document.getElementById("hasApprovedAlways").value = "false";
                     document.profile.submit();
                 }
+                function approvedAlways() {
+                    document.getElementById("hasApprovedAlways").value = "true";
+                    document.profile.submit();
+                }                
             </script>
 
 
@@ -239,6 +239,7 @@ finally {
                                 OpenIDUserProfileDTO[] profileSet = (OpenIDUserProfileDTO[]) session.getAttribute("profiles");
                                 String selectedProfile = (request.getParameter("selectedProfile") != null)?request
                                         .getParameter("selectedProfile"):(String)session.getAttribute("selectedProfile");
+                                session.removeAttribute("profiles");
                                 for (int i = 0; i < profileSet.length; i++) {
                                     OpenIDUserProfileDTO profile = profileSet[i];
                                     if (profile.getProfileName().equals(selectedProfile)) {
@@ -271,12 +272,14 @@ finally {
                 <table width="100%" class="styledLeft">
                     <tbody>
                     <tr>
-                        <td class="buttonRow" colspan="2"><input type="button"
-                                                                 class="button" id="approve" name="approve"
-                                                                 onclick="javascript: approved(); return false;"
-                                                                 value="<fmt:message key='approve'/>"/>
-                            <input class="button" type="reset" value="<fmt:message key='cancel'/>"
-                                   onclick="javascript:document.location.href='../admin/login.jsp'"/>
+                        <td class="buttonRow" colspan="2">
+                        	<input type="button" class="button" id="approve" name="approve"
+                                             onclick="javascript: approved(); return false;"
+                                             value="<fmt:message key='approve'/>"/>
+                       		<input type="button" class="button" id="chkApprovedAlways" onclick="javascript: approvedAlways();" value="<fmt:message key='approve.always'/>"/>
+                       		<input type="hidden" id="hasApprovedAlways" name="hasApprovedAlways" value="false" />
+                       		<input class="button" type="reset" value="<fmt:message key='cancel'/>"
+                               onclick="javascript:document.location.href='../admin/login.jsp'"/>
                        </td>
                     </tr>
                     </tbody>

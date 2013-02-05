@@ -53,6 +53,20 @@
         topPage="true"
         request="<%=request%>"/>
 
+<%
+String pageNumberStr = request.getParameter("pageNumber");
+    String dynamicPageNumberStr = request.getParameter("dynamicPageNumber");
+
+    int endpointPageNumber = 0;
+    int dynamicEnpointPageNumber = 0;
+    if (pageNumberStr != null) {
+        endpointPageNumber = Integer.parseInt(pageNumberStr);
+    }
+    if(dynamicPageNumberStr!=null){
+        dynamicEnpointPageNumber = Integer.parseInt(dynamicPageNumberStr);
+    }
+%>
+
 
 <script type="text/javascript">
 
@@ -206,7 +220,7 @@ function deleteEndpoint(endpointName) {
 }
 
 function loadEndpointsAfterDeletion() {
-    var url = "ajaxprocessors/deleteEndpoint-ajaxprocessor.jsp?loadpage=true";
+    var url = "ajaxprocessors/deleteEndpoint-ajaxprocessor.jsp?loadpage=true&pageNumber=<%=endpointPageNumber%>";
     jQuery("#tabs-1").load(url, null, function (responseText, status, XMLHttpRequest) {
         if (status != "success") {
             CARBON.showErrorDialog(jsi18n["endpoint.design.load.error"]);
@@ -216,7 +230,7 @@ function loadEndpointsAfterDeletion() {
 
 function deleteDynamicEndpoint(key) {
     CARBON.showConfirmationDialog("<fmt:message key="do.you.want.to.delete.the.endpoint"/> " + key + "?", function() {
-        var url = "ajaxprocessors/deleteDynamicEndpoint-ajaxprocessor.jsp?endpointName=" + key;
+        var url = "ajaxprocessors/deleteDynamicEndpoint-ajaxprocessor.jsp?endpointName=" + key+"&dynamicPageNumber=<%=dynamicEnpointPageNumber%>";
         jQuery("#tabs-2").load(url, null, function (responseText, status, XMLHttpRequest) {
             if (status != "success") {
                 CARBON.showErrorDialog(jsi18n["endpoint.design.load.error"]);
@@ -256,6 +270,9 @@ function editDynamicEndpoint(key) {
 </script>
 
 <%
+    int numberOfPages = 0;
+    int numberOfDynamicPages = 0;
+
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     ConfigurationContext configContext =
             (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
@@ -267,8 +284,23 @@ function editDynamicEndpoint(key) {
     try {
         client = new EndpointAdminClient(cookie, serverURL, configContext);
 
-        ePMetaData = client.getEndpointMetaData();
-        dynamicEndpoints = client.getDynamicEndpoints();
+        ePMetaData = client.getEndpointMetaData(endpointPageNumber,EndpointAdminClient.ENDPOINT_PER_PAGE);
+        dynamicEndpoints = client.getDynamicEndpoints(dynamicEnpointPageNumber,EndpointAdminClient.ENDPOINT_PER_PAGE);
+
+        int epCount = client.getEndpointCount();
+        int dynamicEpCount = client.getDynamicEndpointCount();
+
+        if (epCount % EndpointAdminClient.ENDPOINT_PER_PAGE == 0) {
+            numberOfPages = epCount / EndpointAdminClient.ENDPOINT_PER_PAGE;
+        } else {
+            numberOfPages = epCount / EndpointAdminClient.ENDPOINT_PER_PAGE + 1;
+        }
+
+        if (dynamicEpCount % EndpointAdminClient.ENDPOINT_PER_PAGE == 0) {
+            numberOfDynamicPages = dynamicEpCount / EndpointAdminClient.ENDPOINT_PER_PAGE;
+        } else {
+            numberOfDynamicPages = dynamicEpCount / EndpointAdminClient.ENDPOINT_PER_PAGE + 1;
+        }
 
     } catch (Exception e) {
         CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request, e);
@@ -357,6 +389,12 @@ function editDynamicEndpoint(key) {
         isDefinedSequenceFound = true;
     </script>
     <p><fmt:message key="endpoints.synapse.text"/></p>
+    <br/>
+    <carbon:paginator pageNumber="<%=endpointPageNumber%>" numberOfPages="<%=numberOfPages%>"
+                  page="index.jsp" pageNumberParameterName="pageNumber"
+                  resourceBundle="org.wso2.carbon.endpoint.ui.i18n.Resources"
+                  prevKey="prev" nextKey="next"
+                  parameters="<%=""%>" />
     <br/>
 
     <table class="styledLeft" cellpadding="1" id="endpointListTable">
@@ -484,6 +522,11 @@ function editDynamicEndpoint(key) {
         </tbody>
     </table>
     <br/>
+    <carbon:paginator pageNumber="<%=endpointPageNumber%>" numberOfPages="<%=numberOfPages%>"
+                          page="index.jsp" pageNumberParameterName="pageNumber"
+                          resourceBundle="org.wso2.carbon.endpoint.ui.i18n.Resources"
+                          prevKey="prev" nextKey="next"
+                          parameters="<%=""%>" />
     <% } %>
 </div>
 
@@ -502,6 +545,12 @@ function editDynamicEndpoint(key) {
     </script>
     <p><fmt:message key="endpoints.dynamic.text"/></p>
     <br/>
+    <carbon:paginator pageNumber="<%=dynamicEnpointPageNumber%>"
+                      numberOfPages="<%=numberOfDynamicPages%>"
+                      page="index.jsp" pageNumberParameterName="dynamicPageNumber"
+                      resourceBundle="org.wso2.carbon.endpoint.ui.i18n.Resources"
+                      prevKey="prev" nextKey="next"
+                      parameters="<%=""%>"/>
     <br/>
     <table class="styledLeft" cellspacing="1" id="dynamicEndpointsTable">
         <thead>
@@ -550,6 +599,11 @@ function editDynamicEndpoint(key) {
         </tbody>
     </table>
     <br/>
+    <carbon:paginator pageNumber="<%=dynamicEnpointPageNumber%>" numberOfPages="<%=numberOfDynamicPages%>"
+                          page="index.jsp" pageNumberParameterName="dynamicPageNumber"
+                          resourceBundle="org.wso2.carbon.endpoint.ui.i18n.Resources"
+                          prevKey="prev" nextKey="next"
+                          parameters="<%=""%>"/>
     <%
         }
     %>

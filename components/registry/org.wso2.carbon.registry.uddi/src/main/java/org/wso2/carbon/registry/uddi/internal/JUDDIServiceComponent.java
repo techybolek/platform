@@ -20,9 +20,12 @@ import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.apache.axis2.context.ConfigurationContext;
+import org.wso2.carbon.registry.core.servlet.UDDIServlet;
 import org.wso2.carbon.registry.uddi.deployer.JUDDIJAXWSDeployer;
+import org.wso2.carbon.registry.uddi.servlet.JUDDIRegistryServlet;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
@@ -48,6 +51,7 @@ public class JUDDIServiceComponent {
     private static final String UDDI_SYSTEM_PROPERTY = "uddi";
 
     JUDDIJAXWSDeployer uddiJAXWSDeployer;
+    private ServiceRegistration serviceRegistration = null;
 
 
     /**
@@ -60,6 +64,9 @@ public class JUDDIServiceComponent {
     protected void activate(ComponentContext ctxt) {
         if(ENABLE.equals(System.getProperty(UDDI_SYSTEM_PROPERTY))){
             deployUDDIService();
+            serviceRegistration =
+                    ctxt.getBundleContext().registerService(UDDIServlet.class.getName(),
+                            new JUDDIRegistryServlet(), null);
         }
     }
 
@@ -108,7 +115,10 @@ public class JUDDIServiceComponent {
      * @param ctxt
      */
     protected void deactivate(ComponentContext ctxt) {
-
+        if (serviceRegistration != null) {
+            serviceRegistration.unregister();
+            serviceRegistration = null;
+        }
     }
 
 

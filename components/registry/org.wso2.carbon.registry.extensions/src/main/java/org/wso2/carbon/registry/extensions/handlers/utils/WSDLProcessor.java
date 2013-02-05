@@ -174,7 +174,7 @@ public class WSDLProcessor {
     public String addWSDLToRegistry(
             RequestContext context,
             String wsdlURL,
-            Resource metadata, boolean isPut, boolean addService, boolean skipValidation)
+            Resource metadata, boolean isPut, boolean addService, boolean skipValidation,boolean disableSymLinkCreation)
             throws RegistryException {
         boolean evaluateExports = true;
         boolean isDefaultEnvironment =true;
@@ -291,20 +291,20 @@ public class WSDLProcessor {
         String masterWSDLPath;
         if (!isDefaultEnvironment) {
             schemaProcessor.saveSchemasToRegistry(context, currentSchemaLocation,
-                    null, null,masterVersion,dependeinciesList);
+                    null, null,masterVersion,dependeinciesList,disableSymLinkCreation);
             updateWSDLSchemaLocations();
             masterWSDLPath = saveWSDLsToRepositoryNew(context, symlinkLocation, metadata,currentEndpointLocation
-                    ,dependeinciesList,masterVersion);// 3rd parameter is false, for importing WSDLs.
+                    ,dependeinciesList,masterVersion,disableSymLinkCreation);// 3rd parameter is false, for importing WSDLs.
 
             addPolicyImportys(context);
 
             saveAssociations();
         } else {
             schemaProcessor.saveSchemasToRegistry(context, getChrootedSchemaLocation(registryContext),
-                    null, null);
+                    null, null,disableSymLinkCreation);
             updateWSDLSchemaLocations();
 
-            masterWSDLPath = saveWSDLsToRepositoryNew(context, symlinkLocation, metadata);// 3rd parameter is false, for importing WSDLs.
+            masterWSDLPath = saveWSDLsToRepositoryNew(context, symlinkLocation, metadata,disableSymLinkCreation);// 3rd parameter is false, for importing WSDLs.
 
             addPolicyImportys(context);
 
@@ -658,7 +658,8 @@ public class WSDLProcessor {
     }
 
     @SuppressWarnings("unchecked")
-    private String saveWSDLsToRepositoryNew(RequestContext context, String symlinkLocation, Resource metaDataResource)
+    private String saveWSDLsToRepositoryNew(RequestContext context, String symlinkLocation,
+                                            Resource metaDataResource,boolean disableSymLinkCreation)
             throws RegistryException {
         String masterWSDLPath = null;
         try {
@@ -715,7 +716,9 @@ public class WSDLProcessor {
                 }
 
 //                TODO symlink
-                symlinkLocation = createLinks(symlinkLocation, wsdlInfo, wsdlPath, newWSDLUpload);
+                if(!disableSymLinkCreation) {
+                    symlinkLocation = createLinks(symlinkLocation, wsdlInfo, wsdlPath, newWSDLUpload);
+                }
 
                 identifyAssociationsNew(wsdlInfo);
             }
@@ -876,7 +879,7 @@ public class WSDLProcessor {
                 }}
     @SuppressWarnings("unchecked")
     private String saveWSDLsToRepositoryNew(RequestContext context, String symlinkLocation, Resource metaDataResource
-            ,String endpointEnvironment,List<String> dependenciesList,String version)
+            ,String endpointEnvironment,List<String> dependenciesList,String version,boolean disableSymLinkCreation)
             throws RegistryException {
         String masterWSDLPath = null;
         try {
@@ -945,7 +948,9 @@ public class WSDLProcessor {
                             systemRegistry,endpointEnvironment,dependenciesList,version);
                 }
 
-                symlinkLocation = createLinks(symlinkLocation, wsdlInfo, wsdlPath, newWSDLUpload);
+                if(!disableSymLinkCreation) {
+                    symlinkLocation = createLinks(symlinkLocation, wsdlInfo, wsdlPath, newWSDLUpload);
+                }
 
                 identifyAssociationsNew(wsdlInfo);
             }

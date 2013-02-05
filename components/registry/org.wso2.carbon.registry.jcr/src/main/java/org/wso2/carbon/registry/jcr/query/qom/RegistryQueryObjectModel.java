@@ -22,6 +22,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.jcr.RegistryNode;
 import org.wso2.carbon.registry.jcr.RegistrySession;
 import org.wso2.carbon.registry.jcr.query.RegistryQueryResult;
+import org.wso2.carbon.registry.jcr.util.query.qom.QOMUtil;
 
 import javax.jcr.*;
 import javax.jcr.lock.LockException;
@@ -30,6 +31,8 @@ import javax.jcr.query.InvalidQueryException;
 import javax.jcr.query.QueryResult;
 import javax.jcr.query.qom.*;
 import javax.jcr.version.VersionException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 
 
@@ -49,10 +52,10 @@ public class RegistryQueryObjectModel implements QueryObjectModel {
 
         this.source = source;
         this.constraint = constraint;
-        if(orderings != null) {
+        if (orderings != null) {
             this.orderings = Arrays.copyOf(orderings, orderings.length);
         }
-        if(columns != null) {
+        if (columns != null) {
             this.columns = Arrays.copyOf(columns, columns.length);
         }
         this.session = (RegistrySession) session;
@@ -171,15 +174,61 @@ public class RegistryQueryObjectModel implements QueryObjectModel {
 
     }
 
-    public List evaluateComparison(List set, Constraint constraint) {  //mine
-        List result = new ArrayList();
-        result.add(new RegistryNode("a", session));
-//        DynamicOperand operand1 = ((RegistryComparison) constraint).getOperand1();
-//        StaticOperand operand2 = ((RegistryComparison) constraint).getOperand2();
-//        String operator = ((RegistryComparison) constraint).getOperator();
+    public List evaluateComparison(List set, Constraint constraint) throws RepositoryException{  //mine
+        Operand operand1 = ((RegistryComparison) constraint).getOperand1();
+        Operand operand2 = ((RegistryComparison) constraint).getOperand2();
+        Value scalarOperandValue = null;
+        Value[] dynamicOperandValues = null;
+        List resultSet = new ArrayList();
 
-        return result;
+        String operator = ((RegistryComparison) constraint).getOperator();
+
+        try {
+            ValueFactory valueFactory = session.getValueFactory();
+
+            for (Object obj : set) {
+                Node node = (Node) obj;
+
+                if (operand1 instanceof PropertyValue) {
+                    String propName = ((PropertyValue) operand1).getPropertyName();
+                    dynamicOperandValues = QOMUtil.getPropertyValueFromName(propName, node);
+                    if(dynamicOperandValues == null) {
+                      continue;
+                    }
+
+                } else if (operand1 instanceof Literal) {
+                    dynamicOperandValues[0] = ((Literal) operand1).getLiteralValue();
+                } else if (operand1 instanceof BindVariableValue) {
+                    dynamicOperandValues[0] = valueFactory.createValue(((BindVariableValue) operand1).getBindVariableName());
+                }
+
+                if (operand2 instanceof Literal) {
+                    scalarOperandValue = ((Literal) operand2).getLiteralValue();
+                } else if (operand2 instanceof BindVariableValue) {
+                    scalarOperandValue = valueFactory.createValue(((BindVariableValue) operand2).getBindVariableName());
+                } else if (operand2 instanceof PropertyValue) {
+                    String propName = ((PropertyValue) operand2).getPropertyName();
+                    scalarOperandValue = QOMUtil.getPropertyValueFromName(propName, node)[0];
+                }
+
+
+                for (Value value : dynamicOperandValues) {
+                    boolean comparison = QOMUtil.evalComparison(value, scalarOperandValue,operator);
+                    if (comparison) {
+                        resultSet.add(node);
+                    }
+                }
+
+            }
+
+        } catch (RepositoryException e) {
+            throw new RepositoryException("Error while executing query comparison " + e.getMessage());
+        }
+
+        return resultSet;
     }
+
+
 
     /**
      * Tests whether the selector  node is a child of a node reachable by absolute path path.
@@ -246,7 +295,7 @@ public class RegistryQueryObjectModel implements QueryObjectModel {
     }
 
     public List evaluateFullTextSearch(List set, Constraint constraint) {  //mine
-
+        // TODO
         return null;
     }
 

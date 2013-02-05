@@ -90,4 +90,40 @@ public abstract class InputMapping {
     public void setEventDefinition(Object eventDef) {
         eventStreamDefinition =(StreamDefinition)eventDef;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof InputMapping)) {
+            return false;
+        }
+
+        InputMapping that = (InputMapping) o;
+
+        if (eventStreamDefinition != null ? !eventStreamDefinition.equals(that.eventStreamDefinition) : that.eventStreamDefinition != null) {
+            return false;
+        }
+        if (mappingClass != null ? !mappingClass.equals(that.mappingClass) : that.mappingClass != null) {
+            return false;
+        }
+        if (stream != null ? !stream.equals(that.stream) : that.stream != null) {
+            return false;
+        }
+        if (writeMethodMap != null ? !writeMethodMap.equals(that.writeMethodMap) : that.writeMethodMap != null) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = stream != null ? stream.hashCode() : 0;
+        result = 31 * result + (mappingClass != null ? mappingClass.hashCode() : 0);
+        result = 31 * result + (writeMethodMap != null ? writeMethodMap.hashCode() : 0);
+        result = 31 * result + (eventStreamDefinition != null ? eventStreamDefinition.hashCode() : 0);
+        return result;
+    }
 }

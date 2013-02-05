@@ -56,13 +56,11 @@
 
     List<SubElementDTO> subElementDTOs = entitlementPolicyBean.getTargetElementDTOs();
     List<RuleElementDTO> ruleElementDTOs = entitlementPolicyBean.getRuleElements();
-    BasicTargetElementDTO basicTargetElementDTO = entitlementPolicyBean.getBasicTargetElementDTO();
-    List <BasicRuleElementDTO> basicRuleElementDTOs = entitlementPolicyBean.getBasicRuleElementDTOs();
-
 
     //new
     List<RuleDTO> ruleDTOs = entitlementPolicyBean.getRuleDTOs();
     BasicTargetDTO targetDTO = entitlementPolicyBean.getTargetDTO();
+    List<ObligationDTO> obligationDTOs = entitlementPolicyBean.getObligationDTOs();
 
     ///
 
@@ -82,8 +80,13 @@
 
     try {
         if (ruleDTOs != null && ruleDTOs.size() > 0 || targetDTO != null){
-            PolicyEditorUtil.processPolicyData(targetDTO, ruleDTOs, entitlementPolicyBean);
-            policy = policyCreator.createBasicPolicy(policyElement, ruleDTOs, targetDTO);
+            policyMetaData = PolicyEditorUtil.processPolicyData(targetDTO, ruleDTOs, obligationDTOs,
+                                                            ruleElementOrder, entitlementPolicyBean);
+            policy = policyCreator.createBasicPolicy(policyElement, ruleDTOs, targetDTO, obligationDTOs);
+            policyDTO.setPolicyEditor(EntitlementPolicyConstants.BASIC_POLICY_EDITOR);
+            if(policyMetaData != null){
+                policyDTO.setBasicPolicyEditorMetaData(policyMetaData);
+            }
 
             //create policy meta data that helps to edit the policy using basic editor
 //            policyMetaData = PolicyCreatorUtil.createPolicyMetaData(basicTargetElementDTO,

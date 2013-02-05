@@ -24,7 +24,9 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
 import org.wso2.carbon.registry.common.eventing.NotificationService;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.resource.download.DownloadManagerService;
 import org.wso2.carbon.registry.resource.services.utils.CommonUtil;
+import org.wso2.carbon.registry.resource.services.utils.ContentUtil;
 import org.wso2.carbon.registry.resource.servlets.ResourceServlet;
 
 import javax.servlet.Servlet;
@@ -41,6 +43,9 @@ import java.util.Hashtable;
  * @scr.reference name="registry.notification.service"
  * interface="org.wso2.carbon.registry.common.eventing.NotificationService" cardinality="0..1"
  * policy="dynamic" bind="setRegistryNotificationService" unbind="unsetRegistryNotificationService"
+ * @scr.reference name="registry.download.service"
+ * interface="org.wso2.carbon.registry.resource.download.DownloadManagerService" cardinality="0..1"
+ * policy="dynamic" bind="setDownloadManagerService" unbind="unsetDownloadManagerService"
  */
 public class RegistryMgtUIResourceServiceComponent {
 
@@ -114,5 +119,14 @@ public class RegistryMgtUIResourceServiceComponent {
     protected void unsetHttpService(HttpService httpService) {
         this.httpService = null;
     }
+
+    protected void setDownloadManagerService(DownloadManagerService downloadManagerService) {
+        ContentUtil.setDownloadManagerService(downloadManagerService);
+    }
+
+    protected void unsetDownloadManagerService(DownloadManagerService downloadManagerService) {
+        ContentUtil.setDownloadManagerService(null);
+    }
+
 }
 

@@ -22,15 +22,15 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.registry.extensions.handlers.utils.HandlerConstants;
+import org.wso2.carbon.governance.registry.extensions.internal.GovernanceRegistryExtensionsComponent;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.internal.RegistryCoreServiceComponent;
-import org.wso2.carbon.registry.core.jdbc.handlers.Handler;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
+import org.wso2.carbon.registry.core.session.CurrentSession;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.extensions.utils.CommonUtil;
 
@@ -41,19 +41,23 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.UUID;
 
-public class PolicyUriHandler extends Handler {
+public class PolicyUriHandler{
     private static final Log log = LogFactory.getLog(PolicyUriHandler.class);
-    private Registry systemGovernanceRegistry;
-
-    public PolicyUriHandler() throws RegistryException {
-        this.systemGovernanceRegistry = RegistryCoreServiceComponent.getRegistryService().getGovernanceSystemRegistry();
-    }
+    private Registry governanceUserRegistry;
+    private Registry registry;
 
     public void importResource(RequestContext requestContext, String sourceURL) throws RegistryException {
         if (!CommonUtil.isUpdateLockAvailable()) {
             return;
         }
         CommonUtil.acquireUpdateLock();
+        log.debug("Processing Policy URI started");
+
+        registry = requestContext.getRegistry();
+        int tenantId = CurrentSession.getTenantId();
+        String userName = CurrentSession.getUser();
+        this.governanceUserRegistry = GovernanceRegistryExtensionsComponent.getRegistryService().getGovernanceUserRegistry(userName, tenantId);
+
         try {
 
             InputStream inputStream;
@@ -67,6 +71,7 @@ public class PolicyUriHandler extends Handler {
                 throw new RegistryException("The URL " + sourceURL + " is incorrect.", e);
             }
             addPolicyToRegistry(requestContext, inputStream, sourceURL);
+            log.debug("Processing Policy URI finished");
         } finally {
             CommonUtil.releaseUpdateLock();
         }
@@ -80,7 +85,6 @@ public class PolicyUriHandler extends Handler {
         } else {
             policyResource = requestContext.getResource();
         }
-        Registry registry = requestContext.getRegistry();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         int nextChar;
         try {
@@ -115,16 +119,12 @@ public class PolicyUriHandler extends Handler {
             policyId = UUID.randomUUID().toString();
             policyResource.setUUID(policyId);
         }
-//        CommonUtil.addGovernanceArtifactEntryWithAbsoluteValues(
-//                CommonUtil.getUnchrootedSystemRegistry(requestContext),
-//                policyId, policyPath);
 
         String relativeArtifactPath = RegistryUtils.getRelativePath(registry.getRegistryContext(), policyPath);
         // adn then get the relative path to the GOVERNANCE_BASE_PATH
         relativeArtifactPath = RegistryUtils.getRelativePathToOriginal(relativeArtifactPath,
                 RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
-        addPolicyToRegistry(requestContext, policyPath, sourceURL,
-                policyResource, registry);
+        addPolicyToRegistry(policyPath, sourceURL, policyResource);
         ((ResourceImpl)policyResource).setPath(relativeArtifactPath);
 
         requestContext.setProcessingComplete(true);
@@ -133,18 +133,15 @@ public class PolicyUriHandler extends Handler {
     /**
      * Method that gets called instructing a policy to be added the registry.
      *
-     * @param context  the request context for this request.
      * @param path     the path to add the resource to.
      * @param url      the path from which the resource was imported from.
      * @param resource the resource to be added.
-     * @param registry the registry instance to use.
      *
      * @throws org.wso2.carbon.registry.core.exceptions.RegistryException if the operation failed.
      */
-    protected void addPolicyToRegistry(RequestContext context, String path, String url,
-                                       Resource resource, Registry registry) throws RegistryException {
+    protected void addPolicyToRegistry(String path, String url, Resource resource) throws RegistryException {
         String source = getSource(path);
-        GenericArtifactManager genericArtifactManager = new GenericArtifactManager(systemGovernanceRegistry, "uri");
+        GenericArtifactManager genericArtifactManager = new GenericArtifactManager(governanceUserRegistry, "uri");
         GenericArtifact policy = genericArtifactManager.newGovernanceArtifact(new QName(source));
         policy.setId(resource.getUUID());
         policy.setAttribute("overview_name", source);

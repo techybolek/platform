@@ -25,7 +25,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.*;
 import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.core.persistence.ModulePersistenceManager;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.persistence.PersistenceUtils;
 import org.wso2.carbon.core.persistence.ServiceGroupPersistenceManager;
 import org.wso2.carbon.core.persistence.ServicePersistenceManager;
@@ -77,9 +77,9 @@ public class TestModuleAdminService extends BaseTestCase {
                     .createConfigurationContextFromFileSystem(REPO_PATH);
             axisConfig = configContext.getAxisConfiguration();
 
-            SuperTenantCarbonContext.getCurrentContext(axisConfig).setRegistry(
+            PrivilegedCarbonContext.getCurrentContext(axisConfig).setRegistry(
                     RegistryType.SYSTEM_CONFIGURATION, registry);
-            SuperTenantCarbonContext.getCurrentContext(axisConfig).setRegistry(
+            PrivilegedCarbonContext.getCurrentContext(axisConfig).setRegistry(
                     RegistryType.SYSTEM_CONFIGURATION, governanceRegistry);
 
             // The following line of code is kept for backward compatibility. Remove this once we

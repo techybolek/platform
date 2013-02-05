@@ -195,14 +195,14 @@
     if (isAuthenticatedForInstanceManagement || isAuthenticatedForInstanceMonitor) {
         try {
             instanceInfo = client.getInstanceInfo(Long.parseLong(instanceId));
-//            client.getInstanceInfoWithEvents(Long.parseLong(instanceId));
-//            ActivityLifeCycleEventsType events = client.getActivityLifeCycleFilter(Long.parseLong(instanceId));
-//            ActivityLifeCycleEventsListType eventList = events.getEventInfoList();
-//            if (eventList != null) {
-//                infoArray = eventList.getEventInfo();
-//            } else {
-//                infoArray = null;
-//            }
+            client.getInstanceInfoWithEvents(Long.parseLong(instanceId));
+            ActivityLifeCycleEventsType events = client.getActivityLifeCycleFilter(Long.parseLong(instanceId));
+            ActivityLifeCycleEventsListType eventList = events.getEventInfoList();
+            if (eventList != null) {
+                infoArray = eventList.getEventInfo();
+            } else {
+                infoArray = null;
+            }
 
         } catch (Exception e) {
             response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -396,8 +396,8 @@
                                             &nbsp;]
                                             &nbsp;
                                             [&nbsp;
-                                            <a href='#' class="bpel-icon-link" style="background-image:url(images/delete.gif);" onclick="BPEL.instance.deleteInstance(<%=instanceInfo.getIid()%>);"><fmt:message
-                                                    key="delete"/></a>
+                                            <a href='#' class="bpel-icon-link" style="background-image:url(images/delete.gif);" onclick="BPEL.instance.deleteInstance(<%=instanceInfo.getIid()%>);">
+                                                <fmt:message key="delete"/></a>
                                             &nbsp;]
                                             <%
                                                     }
@@ -461,25 +461,6 @@
                                 <%
                                     }
                                 %>
-                                    <%--<%--%>
-                                    <%--if (iInfoWithActivities.getFailures() != null) {--%>
-                                    <%--%>--%>
-                                    <%--<tr>--%>
-                                    <%--<td colspan="2">TODO: Failures</td>--%>
-                                    <%--</tr>--%>
-                                    <%--<%--%>
-                                    <%--}--%>
-                                    <%--%>--%>
-
-                                    <%--<%--%>
-                                    <%--if (iInfoWithActivities.getFaultInfo() != null) {--%>
-                                    <%--%>--%>
-                                    <%--<tr>--%>
-                                    <%--<td colspan="2">TODO: Fault Info</td>--%>
-                                    <%--</tr>--%>
-                                    <%--<%--%>
-                                    <%--}--%>
-                                    <%--%>--%>
                                 </tbody>
                             </table>
                         </td>
@@ -598,7 +579,7 @@
 
                         </td>
                     </tr>
-                    <%--<tr>
+                    <tr>
                         <td colspan="2">
                             <strong style="padding-bottom:5px;margin-bottom:5px;margin-top:10px;"><fmt:message
                                     key="activity.information"/></strong>
@@ -612,7 +593,7 @@
                                     <th><fmt:message key="activity.name"/></th>
                                     <th><fmt:message key="activity.type"/></th>
                                     <th><fmt:message key="scope.id"/></th>
-                                    &lt;%&ndash;<th><fmt:message key="scope.name"/></th>&ndash;%&gt;
+                                    <th><fmt:message key="scope.name"/></th>
                                     <th><fmt:message key="event.type"/></th>
                                     <th><fmt:message key="timestamp"/></th>
                                     <th><fmt:message key="line.number"/></th>
@@ -641,9 +622,8 @@
                                         <td class="activity-id"><%=info.getActivityId()%></td>
                                         <td><%=info.getActivityName()%></td>
                                         <td style="background-image: url('images/<%=info.getActivityType()%>.gif'); background-repeat: no-repeat; padding-left: 25px ! important; background-position: 3px 50%;"><%=info.getActivityType()%></td>
-                                        &lt;%&ndash;<td style="background-image: url('images/view.gif'); background-repeat: no-repeat; padding-left: 25px ! important; background-position: 3px 50%;"><%=info.getActivityType()%></td>&ndash;%&gt;
                                         <td title="<%=info.getScopeName()%>"><%=info.getScopeId()%></td>
-                                        &lt;%&ndash;<td><%=info.getScopeName()%></td>&ndash;%&gt;
+                                        <td><%=info.getScopeName()%></td>
                                         <td><%=info.getType()%></td>
                                         <td><%=info.getTimestamp().getTime().toString()%></td>
                                         <td><%=info.getLineNumber()%></td>
@@ -691,8 +671,8 @@
     }
 %>
         </td>
-    </tr>--%>
-<tr>
+    </tr>
+<%--<tr>
     <td colspan="3">
         <table class="styledLeft" id="bpiProcessInstanceVisualizationTable"
                style="margin-left: 0px;" width="100%">
@@ -720,7 +700,7 @@
             </tr>
         </table>
     </td>
-</tr>
+</tr> --%>
 <%
         } //no activities found
     } else { //else no rootscope available, due to clean-up of variable info

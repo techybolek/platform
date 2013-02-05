@@ -155,6 +155,10 @@ public class SkipAdminServiceHandler extends AbstractHandler {
         if (relConf.getServices().contains(service.getName())) {
             return true;
         }
+        
+        if("__SynapseService".equals(service.getName())){
+            return false;
+        }
 
         AxisServiceGroup axisServiceGroup = (AxisServiceGroup) service.getParent();
         String adminParamValue =

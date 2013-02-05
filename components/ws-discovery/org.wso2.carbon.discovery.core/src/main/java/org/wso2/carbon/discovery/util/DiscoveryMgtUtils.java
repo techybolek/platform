@@ -27,8 +27,8 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.rampart.RampartMessageData;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.wso2.carbon.core.util.ParameterUtil;
 import org.wso2.carbon.discovery.DiscoveryConstants;
 import org.wso2.carbon.discovery.DiscoveryException;
@@ -39,16 +39,8 @@ import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.net.ConnectException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.UnknownHostException;
+import java.io.*;
+import java.net.*;
 
 /**
  * Utility class which handles WS-Discovery management activities such as managing
@@ -364,7 +356,7 @@ public class DiscoveryMgtUtils {
 
         String path = DISCOVERY_CONFIG_ROOT + DISCOVERY_PUBLISHER_CONFIG;
 
-        Registry registry = SuperTenantCarbonContext.getCurrentContext(axisConfig).
+        Registry registry = PrivilegedCarbonContext.getCurrentContext(axisConfig).
                 getRegistry(RegistryType.SYSTEM_CONFIGURATION);
         if (registry.resourceExists(path)) {
             Resource publisherConfig = registry.get(path);
@@ -404,7 +396,7 @@ public class DiscoveryMgtUtils {
             return parameter.getValue().toString();
         }
 
-        Registry registry = SuperTenantCarbonContext.getCurrentContext(axisConfig).
+        Registry registry = PrivilegedCarbonContext.getCurrentContext(axisConfig).
                 getRegistry(RegistryType.SYSTEM_CONFIGURATION);
         return getDiscoveryProxyURL(registry);
     }

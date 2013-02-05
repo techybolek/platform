@@ -24,7 +24,6 @@ import org.apache.axiom.om.impl.jaxp.OMSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.dataservices.common.DBConstants;
-import org.wso2.carbon.registry.core.service.RegistryService;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
@@ -54,28 +53,16 @@ public class XSLTTransformer {
     public XSLTTransformer(String xsltPath) throws TransformerConfigurationException,
             DataServiceFault, IOException {
         this.xsltPath = xsltPath;
+        TransformerFactory tFactory = TransformerFactory.newInstance();
         if (!(xsltPath.startsWith(DBConstants.CONF_REGISTRY_PATH_PREFIX) ||
                 xsltPath.startsWith(DBConstants.GOV_REGISTRY_PATH_PREFIX))) {
-            TransformerFactory tFactory = TransformerFactory.newInstance();
             this.transformer = tFactory.newTransformer(
                     new StreamSource(DBUtils.getInputStreamFromPath(this.getXsltPath())));
+        } else {
+        	this.transformer = tFactory.newTransformer(new StreamSource(
+        			DBUtils.getInputStreamFromPath(this.getXsltPath())));
         }
         this.xmlInputFactory = DBUtils.getXMLInputFactory();
-    }
-
-    /**
-     * Read the XSLT file from the registry, when the service
-     * becomes active.
-     */
-    public void setRegistryService(RegistryService registryService) {
-        TransformerFactory tFactory = TransformerFactory.newInstance();
-        try {
-            this.transformer = tFactory.newTransformer(new StreamSource(DBUtils
-                    .getInputStreamFromPath(this.getXsltPath())));
-        } catch (Exception e) {
-            log.error("Error getting XSLT path from the registry", e);
-        }
-
     }
 
     public String getXsltPath() {
@@ -102,11 +89,7 @@ public class XSLTTransformer {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             Source xmlSource = new OMSource(inputXML);
-            if (this.getTransformer() != null) {
-                this.getTransformer().transform(xmlSource, new StreamResult(outputStream));
-            } else {
-                throw new DataServiceFault("XSLT transformer not initialized");
-            }
+            this.getTransformer().transform(xmlSource, new StreamResult(outputStream));
             ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
             XMLStreamReader reader = this.getXmlInputFactory().createXMLStreamReader(inputStream);
             StAXOMBuilder builder = new StAXOMBuilder(reader);

@@ -5,11 +5,15 @@ import org.apache.axis2.deployment.AbstractDeployer;
 import org.apache.axis2.deployment.DeploymentException;
 import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.catalina.Host;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.CarbonException;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.deployment.DeploymentSynchronizer;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.deployment.GhostDeployerUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.webapp.mgt.utils.GhostWebappDeployerUtils;
 
@@ -21,11 +25,13 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
 
     private static final Log log = LogFactory.getLog(AbstractWebappDeployer.class);
     protected String webappsDir;
+    protected String extension;
     protected TomcatGenericWebappsDeployer tomcatWebappDeployer;
     protected final List<WebContextParameter> servletContextParameters = new ArrayList<WebContextParameter>();
     protected ConfigurationContext configContext;
     protected AxisConfiguration axisConfig;
     protected WebApplicationsHolder webappsHolder;
+    private boolean isGhostOn;
 
     public void init(ConfigurationContext configCtx) {
         this.configContext = configCtx;
@@ -35,10 +41,10 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
         if (!webappsDirFile.exists() && !webappsDirFile.mkdirs()) {
             log.warn("Could not create directory " + webappsDirFile.getAbsolutePath());
         }
-        SuperTenantCarbonContext carbonContext = SuperTenantCarbonContext.
+        PrivilegedCarbonContext privilegedCarbonContext = PrivilegedCarbonContext.
                 getCurrentContext(configCtx);
-        int tenantId = carbonContext.getTenantId();
-        String tenantDomain = carbonContext.getTenantDomain();
+        int tenantId = privilegedCarbonContext.getTenantId();
+        String tenantDomain = privilegedCarbonContext.getTenantDomain();
         String webContextPrefix = (tenantDomain != null) ?
                 "/" + MultitenantConstants.TENANT_AWARE_URL_PREFIX + "/" + tenantDomain + "/" + this.webappsDir + "/" :
                 "";
@@ -52,7 +58,7 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
 
         tomcatWebappDeployer = createTomcatGenericWebappDeployer(webContextPrefix, tenantId, tenantDomain);
         configCtx.setProperty(CarbonConstants.SERVLET_CONTEXT_PARAMETER_LIST, servletContextParameters);
-        configCtx.setProperty(CarbonConstants.TOMCAT_GENERIC_WEBAPP_DEPLOYER, tomcatWebappDeployer);
+        isGhostOn = GhostDeployerUtils.isGhostOn();
     }
 
     protected abstract TomcatGenericWebappsDeployer createTomcatGenericWebappDeployer(
@@ -65,7 +71,7 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
         // files are getting deployed again, which will cause conflict at tomcat level.
         if (!isSkippedWebapp(deploymentFileData.getFile())) {
             String webappName = deploymentFileData.getFile().getName();
-            if (!GhostWebappDeployerUtils.isGhostOn()) {
+            if (!isGhostOn) {
                 deployThisWebApp(deploymentFileData);
             } else {
                 // Check the ghost file
@@ -81,21 +87,28 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
 
                     if (webApplication != null) {
                         GhostWebappDeployerUtils.updateLastUsedTime(webApplication);
-                        GhostWebappDeployerUtils.serializeWebApp(webApplication, axisConfig, absoluteFilePath);
+                        //skip ghost meta file generation for worker nodes
+                        if(!CarbonUtils.isWorkerNode()) {
+                            GhostWebappDeployerUtils.serializeWebApp(webApplication, axisConfig, absoluteFilePath);
+                        }
                     }
                 } else {
                     // load the ghost webapp
                     WebApplication ghostWebApplication = GhostWebappDeployerUtils.createGhostWebApp(
-                            ghostFile, deploymentFileData.getFile(), tomcatWebappDeployer, axisConfig);
-                    ghostWebApplication.setServletContextParameters(servletContextParameters);
+                            ghostFile, deploymentFileData.getFile(), tomcatWebappDeployer,
+                            configContext);
                     String ghostWebappFileName = deploymentFileData.getFile().getName();
+                    if (!webappsHolder.getStartedWebapps().containsKey(ghostWebappFileName)) {
+//                        ghostWebApplication.setServletContextParameters(servletContextParameters);
 
-                    WebApplicationsHolder webappsHolder = (WebApplicationsHolder) configContext.
-                            getProperty(CarbonConstants.WEB_APPLICATIONS_HOLDER);
+                        WebApplicationsHolder webappsHolder = (WebApplicationsHolder) configContext.
+                                getProperty(CarbonConstants.WEB_APPLICATIONS_HOLDER);
 
-                    log.info("Deploying Ghost webapp : " + ghostWebappFileName);
-                    webappsHolder.getStartedWebapps().put(ghostWebappFileName, ghostWebApplication);
-                    webappsHolder.getFaultyWebapps().remove(ghostWebappFileName);
+                        log.info("Deploying Ghost webapp : " + ghostWebappFileName);
+                        webappsHolder.getStartedWebapps().put(ghostWebappFileName,
+                                                              ghostWebApplication);
+                        webappsHolder.getFaultyWebapps().remove(ghostWebappFileName);
+                    }
 
                     // TODO:  add webbapp to eventlistners
                 }
@@ -130,31 +143,32 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
     }
 
     public void undeploy(String fileName) throws DeploymentException {
-        try {
-            File webappToUndeploy = new File(fileName);
-            tomcatWebappDeployer.undeploy(webappToUndeploy);
-            if (GhostWebappDeployerUtils.isGhostOn() &&
-                    !GhostWebappDeployerUtils.skipUndeploy(fileName)) {
-                // Remove the corresponding ghost file and dummy context directory
-                File ghostFile = GhostWebappDeployerUtils.getGhostFile(fileName, axisConfig);
-                File dummyContextDir = GhostWebappDeployerUtils.
-                        getDummyContextFile(fileName, axisConfig);
-                if (ghostFile != null && ghostFile.exists() && !ghostFile.delete()) {
-                    log.error("Error while deleting Ghost webapp file : " +
-                            ghostFile.getAbsolutePath());
-                }
-                if (dummyContextDir != null && dummyContextDir.exists() &&
-                        !dummyContextDir.delete()) {
-                    log.error("Error while deleting dummy context file : " +
-                            dummyContextDir.getAbsolutePath());
+        File webappToUndeploy = new File(fileName);
+        if (isHotUpdating(webappToUndeploy)) {
+            handleUndeployment(fileName, webappToUndeploy);
+            DeploymentSynchronizer depSynchService = DataHolder.
+                    getDeploymentSynchronizerService();
+
+            if (fileName.contains(File.separator + "webapps" + File.separator) &&
+                !fileName.contains("tenants")) {
+                String fileToCommit = fileName.substring(0, fileName.lastIndexOf("webapps"));
+                try {
+                    if (CarbonUtils.isDepSyncEnabled() && !CarbonUtils.isWorkerNode()
+                        && depSynchService != null && depSynchService.isAutoCommitOn(fileToCommit) &&
+                        fileName.endsWith(".war")) {
+                        try {
+                            depSynchService.commit(fileToCommit, fileToCommit + "webapps" + File.separator);
+                        } catch (Exception e) {
+                            log.error("Error occurred while committing : " + fileToCommit, e);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Error occurred while committing : " + fileToCommit, e);
                 }
             }
-        } catch (CarbonException e) {
-            String msg = "Error occurred during undeploying webapp: " + fileName;
-            log.error(msg, e);
-            throw new DeploymentException(msg, e);
+        } else {
+            handleUndeployment(fileName, webappToUndeploy);
         }
-        super.undeploy(fileName);
     }
 
     @Override
@@ -169,7 +183,7 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
             }
         }
 
-        if (GhostWebappDeployerUtils.isGhostOn() && webappsHolder != null) {
+        if (isGhostOn && webappsHolder != null) {
             for (WebApplication webApplication : webappsHolder.getStartedWebapps().values()) {
                 try {
                     tomcatWebappDeployer.lazyUnload(webApplication.getWebappFile());
@@ -183,17 +197,60 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
     }
 
     private boolean isSkippedWebapp(File webappFile) {
-        if (webappFile.isDirectory()) {
-            String webapFilePath = webappFile.getPath();
-            // check for .svn and .meta files to be skipped. these are created by depsynch
-            if (webapFilePath.endsWith(".svn") || webapFilePath.endsWith(".meta")) {
-                return true;
-            }
-            File warFile = new File(webapFilePath + ".war");
-            return warFile.exists();
+        String webappFilePath = webappFile.getPath();
+        boolean isSkipped = true;
+        // Here we are checking WebappDeployer with .war extension or null extension
+        // If foo.war and foo dir is found, then we will allow directory based WebappDeployer to deploy that webapp.
+        // If only foo.war is found then .war based WebappDeployer will deploy that webapp
+        if ("war".equals(extension)) {
+            webappFilePath = webappFilePath.substring(0, webappFilePath.lastIndexOf("."));
+            File explodedFile = new File(webappFilePath);
+            isSkipped = explodedFile.exists();
         } else {
-            return false;
+            // return false if jaxwebapp or jaggery app is being deployed
+            if (webappFilePath.contains("jaxwebapps") || webappFilePath.contains("jaggeryapps")) {
+                return false;
+            }
+            Host host = DataHolder.getCarbonTomcatService().getTomcat().getHost();
+            String webappContext = "/" + webappFile.getName();
+            if (host.findChild(webappContext) == null && webappFile.isDirectory()) {
+                isSkipped = false;
+            }
         }
+        return isSkipped;
+    }
+
+    private boolean isHotUpdating(File file) {
+        return file.exists();
+    }
+
+    private void handleUndeployment(String fileName, File webappToUndeploy)
+            throws DeploymentException {
+        try {
+
+            tomcatWebappDeployer.undeploy(webappToUndeploy);
+            if (isGhostOn && !GhostWebappDeployerUtils.skipUndeploy(fileName)) {
+                // Remove the corresponding ghost file and dummy context directory
+                File ghostFile = GhostWebappDeployerUtils.getGhostFile(fileName, axisConfig);
+                File dummyContextDir = GhostWebappDeployerUtils.
+                        getDummyContextFile(fileName, axisConfig);
+                if (ghostFile != null && ghostFile.exists() && !ghostFile.delete()) {
+                    log.error("Error while deleting Ghost webapp file : " +
+                              ghostFile.getAbsolutePath());
+                }
+                if (dummyContextDir != null && dummyContextDir.exists() &&
+                    !dummyContextDir.delete()) {
+                    log.error("Error while deleting dummy context file : " +
+                              dummyContextDir.getAbsolutePath());
+                }
+            }
+
+        } catch (CarbonException e) {
+            String msg = "Error occurred during undeploying webapp: " + fileName;
+            log.error(msg, e);
+            throw new DeploymentException(msg, e);
+        }
+        super.undeploy(fileName);
     }
 
 }

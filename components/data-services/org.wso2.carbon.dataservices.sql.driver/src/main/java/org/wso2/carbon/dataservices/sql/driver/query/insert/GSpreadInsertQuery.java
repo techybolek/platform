@@ -18,8 +18,8 @@
  */
 package org.wso2.carbon.dataservices.sql.driver.query.insert;
 
-import com.google.gdata.data.spreadsheet.CellEntry;
-import com.google.gdata.data.spreadsheet.CellFeed;
+import com.google.gdata.data.spreadsheet.ListEntry;
+import com.google.gdata.data.spreadsheet.ListFeed;
 import com.google.gdata.data.spreadsheet.WorksheetEntry;
 import com.google.gdata.util.ServiceException;
 import org.wso2.carbon.dataservices.sql.driver.TDriverUtil;
@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 
 public class GSpreadInsertQuery extends InsertQuery {
 
@@ -43,7 +42,7 @@ public class GSpreadInsertQuery extends InsertQuery {
     }
 
     private void processParameters(ColumnInfo[] columns) {
-       for (ColumnInfo column : columns) {
+        for (ColumnInfo column : columns) {
             for (ParamInfo param : getParameters()) {
                 if (param.getOrdinal() == column.getId()) {
                     param.setName(column.getName());
@@ -75,35 +74,28 @@ public class GSpreadInsertQuery extends InsertQuery {
         if (currentWorkSheet == null) {
             throw new SQLException("WorkSheet '" + getTargetTableName() + "' does not exist");
         }
-        CellFeed cellFeed = TDriverUtil.getCellFeed(getConnection(), currentWorkSheet);
-        int lastRowId = getLastRowId(cellFeed);
 
+        ListFeed listFeed = TDriverUtil.getListFeed(getConnection(), currentWorkSheet);
+        ListEntry row = new ListEntry();
         for (ColumnInfo column : TDriverUtil.getHeaders(getConnection(), getTargetTableName())) {
             ParamInfo matchingParam = TDriverUtil.findParam(column, getParameters());
-            CellEntry cell;
             if (matchingParam != null) {
-                cell = new CellEntry(lastRowId + 1, column.getId() + 1,
+                row.getCustomElements().setValueLocal(column.getName(),
                         matchingParam.getValue().toString());
             } else {
-                cell = new CellEntry(lastRowId + 1, column.getId(), null);
-            }
-            try {
-                cellFeed.insert(cell);
-            } catch (ServiceException e) {
-                throw new SQLException("Error occurred while writing the record to GSpread " +
-                        "worksheet", e);
-            } catch (IOException e) {
-                throw new SQLException("Error occurred while writing the record to GSpread " +
-                        "worksheet", e);
+                row.getCustomElements().setValueLocal(column.getName(), null);
             }
         }
+        try {
+            listFeed.insert(row);
+        } catch (ServiceException e) {
+            throw new SQLException("Error occurred while writing the record to GSpread " +
+                    "worksheet", e);
+        } catch (IOException e) {
+            throw new SQLException("Error occurred while writing the record to GSpread " +
+                    "worksheet", e);
+        }
         return count;
-    }
-
-    private int getLastRowId(CellFeed cellFeed) {
-        List<CellEntry> cells = cellFeed.getEntries();
-        CellEntry lastCell = cells.get(cells.size() - 1);
-        return TDriverUtil.getRowIndex(lastCell.getId());
     }
 
 }

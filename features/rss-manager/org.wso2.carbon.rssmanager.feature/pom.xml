@@ -5,12 +5,13 @@
     <parent>
         <artifactId>rss-manager-feature</artifactId>
         <groupId>org.wso2.carbon</groupId>
-        <version>4.0.0-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
+        <version>4.0.0</version>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon</groupId>
+    <version>4.0.6</version>
     <artifactId>org.wso2.carbon.rssmanager.feature</artifactId>
     <name>RSS Manager Feature</name>
     <packaging>pom</packaging>
@@ -21,13 +22,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rssmanager.server.feature</artifactId>
-            <version>${carbon.platform.version}</version>
+            <version>${carbon.platform.patch.version.406}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rssmanager.ui.feature</artifactId>
-            <version>${carbon.platform.version}</version>
+            <version>${carbon.platform.patch.version.406}</version>
             <type>zip</type>
         </dependency>
     </dependencies>
@@ -47,15 +48,18 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.rssmanager</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.eclipse.equinox.p2.type.group:true</propertyDef>
                                 </properties>
                             </adviceFile>
+                            <importFeatures>
+                               <importFeatureDef>org.wso2.carbon.transaction.manager:${carbon.platform.patch.version.405}</importFeatureDef>
+			    </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.rssmanager.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.rssmanager.ui.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.rssmanager.server.feature:${carbon.platform.patch.version.406}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.rssmanager.ui.feature:${carbon.platform.patch.version.406}</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>
@@ -63,4 +67,10 @@
             </plugin>
         </plugins>
     </build>
+
+   <properties>
+           <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
+           <carbon.platform.patch.version.406>4.0.6</carbon.platform.patch.version.406>
+       </properties>
+
 </project>

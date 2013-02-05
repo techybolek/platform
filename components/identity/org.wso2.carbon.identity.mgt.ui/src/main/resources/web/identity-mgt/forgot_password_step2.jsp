@@ -20,7 +20,6 @@
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.identity.mgt.ui.IdentityManagementClient" %>
-<%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.captcha.mgt.beans.xsd.CaptchaInfoBean" %>
 <%@ page import="org.wso2.carbon.identity.mgt.stub.beans.VerificationBean" %>
 
@@ -28,11 +27,10 @@
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 
 <fmt:bundle basename="org.wso2.carbon.identity.mgt.ui.i18n.Resources">
-    <link href="css/forgot-password.css" rel="stylesheet" type="text/css" media="all"/>
-
     <%
         String userName = request.getParameter("userName");
         String userKey = null;
+        String forward = "index.jsp";
         try {
             String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(),
                     session);
@@ -48,23 +46,27 @@
             if(verificationBean.getVerified() && verificationBean.getKey() != null){
                 userKey = verificationBean.getKey();
             } else{
-                response.sendRedirect("forgot_password_step1.jsp");
+                forward = "fail_user_verification.jsp";
+    %>
+                <script type="text/javascript">
+                    location.href = "<%=forward%>";
+                </script>
+    <%
             }
 
         } catch (Exception e) {
-            CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR,
-                request);
+            forward = "fail_user_verification.jsp";
     %>
-            <script type="text/javascript">
-                location.href = "index.jsp";
-            </script>
+                <script type="text/javascript">
+                    location.href = "<%=forward%>";
+                </script>
     <%
-            return;
         }
     %>
+
     <div id="middle">
         <h2>
-            How do you want to reset your password?
+            <fmt:message key="password.recovery.options"/>
         </h2>
     </div>
 

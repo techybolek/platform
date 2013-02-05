@@ -5,8 +5,8 @@ jagg.module("search", {
         return jagg.require(jagg.getModulesDir() + "search/search.jag").searchAPIs.apply(this, arguments);
     },
 
-    searchAllAPIs:function () {
-        return jagg.require(jagg.getModulesDir() + "search/search.jag").searchAllAPIs.apply(this, arguments);
+    searchAccessTokens:function () {
+        return jagg.require(jagg.getModulesDir() + "search/search.jag").searchAccessTokens.apply(this, arguments);
     }
 
 

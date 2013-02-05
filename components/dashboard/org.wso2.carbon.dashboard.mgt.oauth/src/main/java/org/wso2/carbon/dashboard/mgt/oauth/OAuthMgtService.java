@@ -6,7 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shindig.gadgets.GadgetException;
 import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.dashboard.common.DashboardConstants;
 import org.wso2.carbon.dashboard.common.OAuthUtils;
 import org.wso2.carbon.dashboard.common.oauth.RegistryBasedOAuthStore;
@@ -121,7 +121,7 @@ public class OAuthMgtService extends AbstractAdmin {
                 reg.put(DashboardConstants.OAUTH_KEY_STORE + "/" + entry.getService(), res);
             }
 
-            int tenantId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
+            int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
             RegistryBasedOAuthStore store = (RegistryBasedOAuthStore) OAuthUtils.
                     getOauthStoreProvider().getStore(tenantId);
             try {

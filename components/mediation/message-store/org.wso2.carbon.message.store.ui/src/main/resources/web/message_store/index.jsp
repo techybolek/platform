@@ -32,6 +32,7 @@
         request="<%=request%>"/>
 
 <link type="text/css" href="../dialog/js/jqueryui/tabs/ui.all.css" rel="stylesheet"/>
+<link type="text/css" href="css/customStyle.css" rel="stylesheet"/>
 <script type="text/javascript" src="../dialog/js/jqueryui/tabs/jquery-1.2.6.min.js"></script>
 <script type="text/javascript" src="../dialog/js/jqueryui/tabs/jquery-ui-1.6.custom.min.js"></script>
 <script type="text/javascript" src="../dialog/js/jqueryui/tabs/jquery.cookie.js"></script>
@@ -228,10 +229,11 @@
                         <td><%= size%>
                         </td>
 
-                        <td><a onclick="editRow(this.parentNode.parentNode.rowIndex,'<%= type%>')" href="#"
-                               class="icon-link"
-                               style="background-image:url(../admin/images/edit.gif);"><fmt:message
-                                key="edit"/></a>
+                        <td>
+                            <a onclick="<%=("org.apache.synapse.message.store.InMemoryMessageStore".equals(type.trim()))?"return false":"editRow(this.parentNode.parentNode.rowIndex,"+"'" + type + "');"%>"
+                               class="<%=("org.apache.synapse.message.store.InMemoryMessageStore".equals(type.trim()))?"icon-link-disabled":"icon-link"%>"
+                               style="background-image:url(../admin/images/edit.gif);" href="#"><fmt:message
+                                    key="edit"/></a>
                             <a href="#" onclick="deleteRow(this.parentNode.parentNode.rowIndex)"
                                id="delete_link" class="icon-link"
                                style="background-image:url(../admin/images/delete.gif);"><fmt:message

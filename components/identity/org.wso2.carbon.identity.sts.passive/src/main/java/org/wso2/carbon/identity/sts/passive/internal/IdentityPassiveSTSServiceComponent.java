@@ -51,8 +51,15 @@ public class IdentityPassiveSTSServiceComponent {
      * @param ctxt
      */
     protected void activate(ComponentContext ctxt) {
-        if (log.isDebugEnabled()) {
-            log.info("Identity Provider bundle is activated");
+        InMemoryTrustedServiceStore trustedServiceStore = new InMemoryTrustedServiceStore();
+        try {
+            trustedServiceStore.addTrustedServices(
+                    new RegistryBasedTrustedServiceStore().getAllTrustedServices());
+            if (log.isDebugEnabled()) {
+                log.info("Identity Provider bundle is activated");
+            }
+        } catch (Exception e) {
+            log.error("Failed to load passive sts realms(trusted service realms) into memory.");
         }
     }
 

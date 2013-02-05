@@ -1,8 +1,30 @@
+/*
+*Copyright (c) 2005-2013, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*WSO2 Inc. licenses this file to you under the Apache License,
+*Version 2.0 (the "License"); you may not use this file except
+*in compliance with the License.
+*You may obtain a copy of the License at
+*
+*http://www.apache.org/licenses/LICENSE-2.0
+*
+*Unless required by applicable law or agreed to in writing,
+*software distributed under the License is distributed on an
+*"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+*KIND, either express or implied.  See the License for the
+*specific language governing permissions and limitations
+*under the License.
+*/
+
 package org.wso2.carbon.identity.oauth;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xml.security.utils.Base64;
+import org.wso2.carbon.caching.core.CacheKey;
+import org.wso2.carbon.identity.oauth.cache.OAuthCache;
+import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 
 import javax.crypto.Mac;
@@ -36,6 +58,15 @@ public final class OAuthUtil {
         } catch (Exception e) {
             log.error("Error when generating a random number.", e);
             throw new IdentityOAuthAdminException("Error when generating a random number.", e);
+        }
+    }
+
+    public static void clearOAuthCache(String consumerKey, String authorizedUser) {
+        OAuthCache oauthCache;
+        CacheKey cacheKey = new OAuthCacheKey(consumerKey + ":" + authorizedUser);
+        if (OAuthServerConfiguration.getInstance().isCacheEnabled()) {
+            oauthCache = OAuthCache.getInstance();
+            oauthCache.clearCacheEntry(cacheKey);
         }
     }
 

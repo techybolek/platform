@@ -16,14 +16,18 @@
 package org.wso2.carbon.governance.api.services;
 
 import org.apache.axiom.om.OMElement;
+import org.wso2.carbon.governance.api.cache.ArtifactCache;
+import org.wso2.carbon.governance.api.cache.ArtifactCacheManager;
 import org.wso2.carbon.governance.api.common.GovernanceArtifactManager;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.services.dataobjects.Service;
+import org.wso2.carbon.governance.api.services.dataobjects.ServiceImpl;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.extensions.utils.CommonUtil;
 
 import javax.xml.namespace.QName;
@@ -72,7 +76,7 @@ public class ServiceManager {
      * @throws GovernanceException if the operation failed.
      */
     public Service newService(QName qName) throws GovernanceException {
-        Service service = new Service(manager.newGovernanceArtifact()) {};
+        ServiceImpl service = new ServiceImpl(manager.newGovernanceArtifact()) {};
         service.setQName(qName);
         return service;
     }
@@ -86,7 +90,7 @@ public class ServiceManager {
      * @throws GovernanceException if the operation failed.
      */
     public Service newService(OMElement content) throws GovernanceException {
-        Service service = new Service(manager.newGovernanceArtifact(content)) {};
+        ServiceImpl service = new ServiceImpl(manager.newGovernanceArtifact(content)) {};
         String serviceName = CommonUtil.getServiceName(content);
         String serviceNamespace = CommonUtil.getServiceNamespace(content);
         if (serviceName != null && !serviceName.equals("")) {
@@ -99,7 +103,10 @@ public class ServiceManager {
     }
 
     /**
-     * Adds the given service artifact to the registry.
+     * Adds the given service artifact to the registry. Please do not use this method to update an
+     * existing artifact use the update method instead. If this method is used to update an existing
+     * artifact, all existing properties (such as lifecycle details) will be removed from the
+     * existing artifact.
      *
      * @param service the service artifact.
      *
@@ -120,6 +127,11 @@ public class ServiceManager {
      */
     public void updateService(Service service) throws GovernanceException {
         manager.updateGovernanceArtifact(service);
+        ArtifactCache artifactCache =
+                ArtifactCacheManager.getCacheManager().getTenantArtifactCache(((UserRegistry)registry).getTenantId());
+        if (artifactCache != null) {
+                artifactCache.addArtifact(service.getPath(),service);
+        }
     }
 
     /**
@@ -131,11 +143,23 @@ public class ServiceManager {
      * @throws GovernanceException if the operation failed.
      */
     public Service getService(String serviceId) throws GovernanceException {
-        GovernanceArtifact governanceArtifact = manager.getGovernanceArtifact(serviceId);
+        GovernanceArtifact governanceArtifact;
+        String path = GovernanceUtils.getArtifactPath(registry, serviceId);
+        ArtifactCache cache = ArtifactCacheManager.getCacheManager().getTenantArtifactCache(((UserRegistry)registry).getTenantId());
+        if (cache != null) {
+            governanceArtifact = cache.getArtifact(path);
+            if (governanceArtifact != null) {
+                return new ServiceImpl(governanceArtifact) {};
+            }
+        }
+        governanceArtifact = manager.getGovernanceArtifact(serviceId);
         if (governanceArtifact == null) {
             return null;
         }
-        return new Service(governanceArtifact) {};
+        if (cache != null) {
+            cache.addArtifact(governanceArtifact.getPath(), governanceArtifact);
+        }
+        return new ServiceImpl(governanceArtifact) {};
     }
 
     /**
@@ -191,11 +215,11 @@ public class ServiceManager {
 
     // Method to obtain services from governance artifacts.
     private Service[] getServices(GovernanceArtifact[] governanceArtifacts) {
-        List<Service> services = new ArrayList<Service>(governanceArtifacts.length);
-        for (GovernanceArtifact governanceArtifact : governanceArtifacts) {
-            services.add(new Service(governanceArtifact) {});
+        Service[] services = new Service[governanceArtifacts.length];
+        for (int i = 0; i < governanceArtifacts.length; i++) {
+            services[i] = new ServiceImpl(governanceArtifacts[i]) {};
         }
-        return services.toArray(new Service[services.size()]);
+        return services;
     }
 
     /**

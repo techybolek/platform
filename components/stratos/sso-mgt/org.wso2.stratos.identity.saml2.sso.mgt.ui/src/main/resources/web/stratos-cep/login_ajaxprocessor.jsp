@@ -96,28 +96,28 @@
     </script>
 		<div id="login-content">
 					<div class="main-text">
-						WSO2 CEP brings Complex Event processing capabilities to SOA. It can be used to receive events from any ws-event or jms broker and to publish events to any such broker. 
+                        WSO2 CEP is a extremely high performing complex event processor that identifies the most meaningful events within the event cloud, analyzes their impacts, and acts on them in real time by triggering output events.
 					</div>
 					<div class="clear"></div>
 					<div class="feature feature-left">
 						<img src="../carbon/stratos-cep/images/feature-01-icon.gif"/>
-						<h2>Bring CEP to SOA</h2>
+						<h2>Real-Time Processing</h2>
 						<p>
-							Bring CEP to SOA by processing XML events and produce results as XML events
+                            Contains different queries for processing input event streams and trigger output events in real-time.
 						</p>
 					</div>
 					<div class="feature">
 						<img src="../carbon/stratos-cep/images/feature-02-icon.gif"/>
-						<h2>Registry Storage</h2>
+						<h2>Enterprise Integration</h2>
 						<p>
-							Ability to define different event streams, queries and out put streams and store them in the registry as a bucket.
+                            Receive and publish multiple events types via brokers such as, Local, WS-Event, JMS and Agent.
 						</p>
 					</div>
 					<div class="feature">
 					 	<img src="../carbon/stratos-cep/images/feature-03-icon.gif"/>
-						<h2>Esper<sup>TM</sup> and Fusion</h2>
+						<h2>Monitoring CEP</h2>
 						<p>
-							Support Esper<sup>TM</sup> and fusion back end runtimes.
+                            Shows real-time query execution statistics of all CEP operations in pre Bucket, per Broker and per Topic based charts.
 						</p>
 					</div>
 					<div class="clear"></div>
@@ -226,7 +226,7 @@
 						</td>
 						</tr>
 					</table>
-					<div class="espermsg">Esper<sup>TM</sup> is a registered trademark of EsperTech.</div>
+					<%--<div class="espermsg">Esper<sup>TM</sup> is a registered trademark of EsperTech.</div>--%>
 					<div class="clear"></div>
 				<div id="footer">
 					<div class="powered">

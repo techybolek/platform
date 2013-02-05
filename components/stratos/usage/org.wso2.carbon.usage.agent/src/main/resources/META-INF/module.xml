@@ -17,17 +17,34 @@
  -->
 <module name="metering" class="org.wso2.carbon.usage.agent.listeners.axis2.RequestMeteringModule">
    <InFlow>
-        <handler name="InFlowMeteringHandler"
-                 class="org.wso2.carbon.usage.agent.listeners.axis2.RequestMeteringHandler">
-        <order phase="OpPhase" after="AuthorizationHandler"/>
-        </handler>
+
+       <!--<handler name="InFlowMeteringHandler"
+                class="org.wso2.carbon.usage.agent.listeners.StatisticsInHandler">
+           <order phase="OpPhase"/>
+       </handler>-->
    </InFlow>
 
    <InFaultFlow>
-        <handler name="FaultInFlowMeteringHandler"
-                 class="org.wso2.carbon.usage.agent.listeners.axis2.RequestMeteringHandler">
-        <order phase="OpPhase" after="AuthorizationHandler"/>
-        </handler>
+
+       <!--<handler name="InFlowMeteringHandler"
+                class="org.wso2.carbon.usage.agent.listeners.StatisticsInHandler">
+           <order phase="OpPhase"/>
+       </handler>-->
    </InFaultFlow>
+
+    <OutFlow>
+        <handler name="OutFlowMeteringHandler"
+                 class="org.wso2.carbon.usage.agent.listeners.StatisticsOutHandler">
+            <order phase="StatReporting"/>
+        </handler>
+    </OutFlow>
+
+    <OutFaultFlow>
+        <handler name="OutFlowMeteringHandler"
+                 class="org.wso2.carbon.usage.agent.listeners.StatisticsOutHandler">
+            <order phase="StatReporting"/>
+        </handler>
+
+    </OutFaultFlow>
    <parameter name="adminModule" locked="true">true</parameter>
 </module>

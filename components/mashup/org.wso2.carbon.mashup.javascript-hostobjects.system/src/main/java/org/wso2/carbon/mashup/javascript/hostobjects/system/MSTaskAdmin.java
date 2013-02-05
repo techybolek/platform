@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.mashup.javascript.hostobjects.system;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,12 +108,27 @@ public class MSTaskAdmin extends AbstractAdmin {
     public void deleteTask(String taskName) throws AxisFault {
         try {
             TaskManager tm = SystemHostObjectServiceComponent.getTaskService().getTaskManager(
-                    MSTaskConstants.MS_TASK_TYPE);
-            tm.deleteTask(taskName);
+            MSTaskConstants.MS_TASK_TYPE);
+            String newTaskName = getTaskName(taskName);
+            if(taskName != null && tm.isTaskScheduled(taskName)){
+                tm.deleteTask(newTaskName);
+            }
         } catch (Exception e) {
             log.error(e);
             throw new AxisFault("Error deleting task: " + taskName, e);
         }
+    }
+    
+    public String getTaskName(String taskName)  {
+    	String newTaskName = null;
+       if(taskName.contains("/") && File.separator.equals("\\"))
+       {
+    	   newTaskName = taskName.replace("/", File.separator);
+    	   return newTaskName;
+       }else {
+    	   return taskName;
+       }
+       
     }
 
     public boolean isTaskScheduled(String taskName) throws AxisFault {

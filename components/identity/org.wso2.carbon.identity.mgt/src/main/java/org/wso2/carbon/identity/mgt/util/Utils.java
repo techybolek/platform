@@ -2,6 +2,8 @@ package org.wso2.carbon.identity.mgt.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.neethi.Policy;
+import org.apache.neethi.PolicyEngine;
 import org.wso2.carbon.caching.core.identity.IdentityCacheEntry;
 import org.wso2.carbon.caching.core.identity.IdentityCacheKey;
 import org.wso2.carbon.identity.mgt.IdentityMgtException;
@@ -24,6 +26,7 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.ByteArrayInputStream;
 import java.util.Properties;
 
 /**
@@ -51,7 +54,7 @@ public class Utils {
         if(userMgtBean.getTenantDomain() == null || userMgtBean.getTenantDomain().trim().length() < 1){
             domainName = MultitenantUtils.getTenantDomain(userId);
         } else {
-            domainName = userMgtBean.getTenantDomain();
+            domainName = userMgtBean.getTenantDomain(); // TODO
         }
 
         userId = MultitenantUtils.getTenantAwareUsername(userId);
@@ -217,7 +220,7 @@ public class Utils {
         int tenantId;
         TenantManager tenantManager = IdentityMgtServiceComponent.getRealmService().getTenantManager();
         
-        if (domain == null || domain.trim().length() < 1) {
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(domain)) {
             tenantId = MultitenantConstants.SUPER_TENANT_ID;
             if (log.isDebugEnabled()) {
                 String msg = "Domain is not defined implicitly. So it is Super Tenant domain.";
@@ -226,7 +229,7 @@ public class Utils {
         } else {
             try {
                 tenantId = tenantManager.getTenantId(domain);
-                if (tenantId < 1) {
+                if (tenantId < 1 && tenantId != MultitenantConstants.SUPER_TENANT_ID) {
                     String msg = "This action can not be performed by the users in non-existing domains.";
                     log.error(msg);
                     throw new IdentityMgtException(msg);
@@ -254,8 +257,10 @@ public class Utils {
 
         if(UserCoreConstants.USER_LOCKED.equals(status)){
             accountStatus = UserCoreConstants.USER_LOCKED;
+            lockUserAccount(userId, tenantId);
         } else {
             accountStatus = UserCoreConstants.USER_UNLOCKED;
+            unlockUserAccount(userId, tenantId);
         }
 
         try {
@@ -277,10 +282,12 @@ public class Utils {
      */
     public static void persistAccountStatus(String userId, String status) throws IdentityMgtException {
 
+        int tenantId = 0;
         String accountStatus;
         String domainName = MultitenantUtils.getTenantDomain(userId);
-        int tenantId = getTenantId(domainName);;
+        tenantId = getTenantId(domainName);
         userId = MultitenantUtils.getTenantAwareUsername(userId);
+
         if(UserCoreConstants.USER_LOCKED.equals(status)){
             accountStatus = UserCoreConstants.USER_LOCKED;
         } else {
@@ -333,7 +340,9 @@ public class Utils {
                 }
                 registry.delete(resource.getPath());
                 success = true;
+                log.info("confirmation is success for key : " + confirmationKey);
             } else {
+                log.warn("invalid confirmation key : " + confirmationKey);
                 verificationBean.setError("Invalid confirmation key");
             }
         } catch (RegistryException e) {
@@ -376,14 +385,20 @@ public class Utils {
                                                                                 getTenantManager();
 
             if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
-                return userStoreManager.isExistingUser(userId);
+                if(userStoreManager.isExistingUser(userId)){
+                    String accountStatus = userStoreManager.
+                        getUserClaimValue(userId, UserCoreConstants.ClaimTypeURIs.ACCOUNT_STATUS, null);
+                    if(!UserCoreConstants.USER_LOCKED.equals(accountStatus)){
+                        return true;
+                    }
+                }
             } else if (tenantId > 0) {
                 if(userStoreManager.isExistingUser(userId)){
                     return userId.equals(tenantManager.getTenant(tenantId).getAdminName());
                 } else {
                     // tenant users are not allowed to recover their account. 
-                    log.info("Tenant user from tenant domain : " + userMgtBean.getTenantDomain()
-                                                            + " is trying to verify his user account");
+                    log.warn("Tenant user from tenant domain : " + userMgtBean.getTenantDomain()
+                                                            + " is trying to recover his user account");
                     return false;
                 }
             }
@@ -459,11 +474,56 @@ public class Utils {
 
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, userName);
         IdentityCacheEntry cacheEntry = new IdentityCacheEntry(-10);
-        LoginAttemptCache.getCacheInstance().addToCache(cacheKey, cacheEntry);
+        LoginAttemptCache.getInstance().getCache().put(cacheKey, cacheEntry);
     }
     
     public static void unlockUserAccount(String userName, int tenantId){
 
-        LoginAttemptCache.getCacheInstance().clearCacheEntry(userName, tenantId);
+        LoginAttemptCache.getInstance().clearCacheEntry(userName);
+    }
+
+    public static String getChallengeSeparator(){
+        
+        String value = IdentityMgtServiceComponent.getRealmService().
+                            getBootstrapRealmConfiguration().getUserStoreProperty("challengeQuestionSeparator");
+        if(value != null && value.trim().length() == 1){
+            return value;
+        } else {
+            return IdentityMgtConstants.CHALLENGES_SEPARATOR;
+        }
+    }
+
+    public static Policy getSecurityPolicy(){
+
+        String policyString = "        <wsp:Policy wsu:Id=\"UTOverTransport\" xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2004/09/policy\"\n" +
+                "                    xmlns:wsu=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd\">\n" +
+                "          <wsp:ExactlyOne>\n" +
+                "            <wsp:All>\n" +
+                "              <sp:TransportBinding xmlns:sp=\"http://schemas.xmlsoap.org/ws/2005/07/securitypolicy\">\n" +
+                "                <wsp:Policy>\n" +
+                "                  <sp:TransportToken>\n" +
+                "                    <wsp:Policy>\n" +
+                "                      <sp:HttpsToken RequireClientCertificate=\"true\"/>\n" +
+                "                    </wsp:Policy>\n" +
+                "                  </sp:TransportToken>\n" +
+                "                  <sp:AlgorithmSuite>\n" +
+                "                    <wsp:Policy>\n" +
+                "                      <sp:Basic256/>\n" +
+                "                    </wsp:Policy>\n" +
+                "                  </sp:AlgorithmSuite>\n" +
+                "                  <sp:Layout>\n" +
+                "                    <wsp:Policy>\n" +
+                "                      <sp:Lax/>\n" +
+                "                    </wsp:Policy>\n" +
+                "                  </sp:Layout>\n" +
+                "                  <sp:IncludeTimestamp/>\n" +
+                "                </wsp:Policy>\n" +
+                "              </sp:TransportBinding>\n" +
+                "            </wsp:All>\n" +
+                "          </wsp:ExactlyOne>\n" +
+                "        </wsp:Policy>";
+
+        return PolicyEngine.getPolicy(new ByteArrayInputStream(policyString.getBytes()));
+
     }
 }

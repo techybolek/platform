@@ -49,15 +49,4 @@
         </log>
         <drop/>
     </sequence>
-    <sequence name="main">
-        <in>
-            <log level="full"/>
-            <filter source="get-property('To')" regex="http://localhost:9000.*">
-                <send/>
-            </filter>
-        </in>
-        <out>
-            <send/>
-        </out>
-    </sequence>
 </definitions>

@@ -6,6 +6,7 @@ public class HadoopCarbonMessageContext {
 	private ConfigurationContext cfgCtx;
 	private String cookie;
 	private String krb5TicketCache;
+
 	public HadoopCarbonMessageContext(ConfigurationContext cfgCtx, String cookie) {
 		this.cfgCtx = cfgCtx;
 		this.cookie = cookie;

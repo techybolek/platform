@@ -20,34 +20,44 @@ package org.wso2.carbon.rssmanager.core.internal.util;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.Base64;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.ndatasource.core.DataSourceMetaInfo;
+import org.wso2.carbon.ndatasource.core.utils.DataSourceUtils;
 import org.wso2.carbon.ndatasource.rdbms.RDBMSConfiguration;
 import org.wso2.carbon.ndatasource.rdbms.RDBMSDataSource;
-import org.wso2.carbon.rssmanager.common.RSSManagerHelper;
 import org.wso2.carbon.rssmanager.common.RSSManagerConstants;
+import org.wso2.carbon.rssmanager.common.RSSManagerHelper;
 import org.wso2.carbon.rssmanager.core.RSSManagerException;
-import org.wso2.carbon.rssmanager.core.internal.RSSManagerServiceComponent;
 import org.wso2.carbon.rssmanager.core.entity.*;
-import org.wso2.carbon.rssmanager.core.entity.datasource.DSXMLConfiguration;
-import org.wso2.carbon.rssmanager.core.entity.datasource.RDBMSDSXMLConfiguration;
+import org.wso2.carbon.rssmanager.core.entity.datasource.RSSRDBMSConfiguration;
+import org.wso2.carbon.rssmanager.core.internal.RSSManagerServiceComponent;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.tenant.TenantManager;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
 
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
+import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 public class RSSManagerUtil {
 
     public static TransactionManager transactionManager;
+     private static final Log log= LogFactory.getLog(RSSManagerUtil.class);
 
     public static TransactionManager getTransactionManager() {
         return transactionManager;
@@ -108,13 +118,19 @@ public class RSSManagerUtil {
      */
     public static String getFullyQualifiedDatabaseName(String databaseName) {
         String tenantDomain =
-                CarbonContextHolder.getCurrentCarbonContextHolder().getTenantDomain();
+                null;
+        try {
+            tenantDomain =
+                    RSSManagerServiceComponent.getTenantManager().getDomain(
+                            PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+        } catch (UserStoreException ignore) {
+        }
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             return databaseName + "_" + RSSManagerHelper.processDomainName(tenantDomain);
         }
         return databaseName;
     }
-    
+
     /**
      * Returns the fully qualified username of a particular database user. For an ordinary tenant,
      * the tenant domain will be appended to the username together with an underscore and the given
@@ -124,7 +140,7 @@ public class RSSManagerUtil {
      * @return Fully qualified username of the database user.
      */
     public static String getFullyQualifiedUsername(String username) {
-        String tenantDomain = CarbonContextHolder.getCurrentCarbonContextHolder().getTenantDomain();
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
 
             /* The maximum number of characters allowed for the username in mysql system tables is
@@ -167,81 +183,10 @@ public class RSSManagerUtil {
     }
 
     public static DataSource createDataSource(OMElement dsEl) throws RSSManagerException {
-        Properties dsProps = RSSManagerUtil.populateDataSourceProperties(dsEl);
-
-        RDBMSConfiguration dsConfig = new RDBMSConfiguration();
-        dsConfig.setDriverClassName(dsProps.getProperty(RSSManagerConstants.DRIVER_NAME));
-        if (dsConfig.getDriverClassName() == null) {
-            return null;
-        }
-        dsConfig.setUrl(dsProps.getProperty(RSSManagerConstants.URL));
-        dsConfig.setUsername(dsProps.getProperty(RSSManagerConstants.USER_NAME));
-        dsConfig.setPassword(dsProps.getProperty(RSSManagerConstants.PASSWORD));
-
-        if (dsProps.getProperty(RSSManagerConstants.MAX_ACTIVE) != null
-                && !dsProps.getProperty(RSSManagerConstants.MAX_ACTIVE).equals("")) {
-            dsConfig.setMaxActive(Integer.parseInt(dsProps.getProperty(
-                    RSSManagerConstants.MAX_ACTIVE)));
-        } else {
-            dsConfig.setMaxActive(RSSManagerConstants.DEFAULT_MAX_ACTIVE);
-        }
-
-        if (dsProps.getProperty(RSSManagerConstants.MIN_IDLE) != null
-                && !dsProps.getProperty(RSSManagerConstants.MIN_IDLE).equals("")) {
-            dsConfig.setMinIdle(Integer.parseInt(dsProps.getProperty(
-                    RSSManagerConstants.MIN_IDLE)));
-        } else {
-            dsConfig.setMinIdle(RSSManagerConstants.DEFAULT_MIN_IDLE);
-        }
-
-        if (dsProps.getProperty(RSSManagerConstants.MAX_IDLE) != null
-                && !dsProps.getProperty(RSSManagerConstants.MAX_IDLE).equals("")) {
-            dsConfig.setMinIdle(Integer.parseInt(dsProps.getProperty(
-                    RSSManagerConstants.MAX_IDLE)));
-        } else {
-            dsConfig.setMinIdle(RSSManagerConstants.DEFAULT_MAX_IDLE);
-        }
-
-        if (dsProps.getProperty(RSSManagerConstants.MAX_WAIT) != null
-                && !dsProps.getProperty(RSSManagerConstants.MAX_WAIT).equals("")) {
-            dsConfig.setMaxWait(Integer.parseInt(dsProps.getProperty(
-                    RSSManagerConstants.MAX_WAIT)));
-        } else {
-            dsConfig.setMaxWait(RSSManagerConstants.DEFAULT_MAX_WAIT);
-        }
-
-        if (dsProps.getProperty(RSSManagerConstants.TEST_WHILE_IDLE) != null
-                && !dsProps.getProperty(
-                RSSManagerConstants.TEST_WHILE_IDLE).equals("")) {
-            dsConfig.setTestWhileIdle(Boolean.parseBoolean(dsProps.getProperty(
-                    RSSManagerConstants.TEST_WHILE_IDLE)));
-        }
-
-        if (dsProps.getProperty(RSSManagerConstants.TIME_BETWEEN_EVICTION_RUNS_MILLIS) != null
-                && !dsProps.getProperty(
-                RSSManagerConstants.TIME_BETWEEN_EVICTION_RUNS_MILLIS).equals("")) {
-            dsConfig.setTimeBetweenEvictionRunsMillis(Integer.parseInt(
-                    dsProps.getProperty(
-                            RSSManagerConstants.TIME_BETWEEN_EVICTION_RUNS_MILLIS)));
-        }
-
-        if (dsProps.getProperty(RSSManagerConstants.MIN_EVIC_TABLE_IDLE_TIME_MILLIS) != null
-                && !dsProps.getProperty(
-                RSSManagerConstants.MIN_EVIC_TABLE_IDLE_TIME_MILLIS).equals("")) {
-            dsConfig.setMinEvictableIdleTimeMillis(Integer.parseInt(dsProps.getProperty(
-                    RSSManagerConstants.MIN_EVIC_TABLE_IDLE_TIME_MILLIS)));
-        }
-
-
-        if (dsProps.getProperty(RSSManagerConstants.VALIDATION_QUERY) != null) {
-            dsConfig.setValidationQuery(dsProps.getProperty(
-                    RSSManagerConstants.VALIDATION_QUERY));
-        }
+        RDBMSConfiguration dsConfig = populateDataSourceProperties(dsEl);
         try {
-            dsConfig.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
-            DataSource dataSource = (new RDBMSDataSource(dsConfig)).getDataSource();
-            ((org.apache.tomcat.jdbc.pool.DataSource)dataSource).setRollbackOnReturn(true);
-            return dataSource;
+            dsConfig.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;org.wso2.carbon.ndatasource.rdbms.ConnectionRollbackOnReturnInterceptor");
+            return (new RDBMSDataSource(dsConfig)).getDataSource();
         } catch (DataSourceException e) {
             throw new RuntimeException("Error in creating data source: " + e.getMessage(), e);
         }
@@ -252,27 +197,36 @@ public class RSSManagerUtil {
             RDBMSDataSource dataSource = new RDBMSDataSource(config);
             return dataSource.getDataSource();
         } catch (DataSourceException e) {
-            throw new RuntimeException("Error in creating data sourc: " + e.getMessage(), e);
+            throw new RuntimeException("Error in creating data source: " + e.getMessage(), e);
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static Properties populateDataSourceProperties(OMElement dsEl) throws RSSManagerException {
-        Properties props = new Properties();
-        Iterator<OMElement> propItr = dsEl.getChildElements();
-        if (!propItr.hasNext()) {
-            throw new RSSManagerException("RSS management repository database configuration " +
-                    "is missing");
+    public static DataSource createDataSource(Properties properties, String dataSourceClassName) {
+        RDBMSConfiguration config = new RDBMSConfiguration();
+        config.setDataSourceClassName(dataSourceClassName);
+        List<RDBMSConfiguration.DataSourceProperty> dsProps = new ArrayList<RDBMSConfiguration.DataSourceProperty>();
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            RDBMSConfiguration.DataSourceProperty property =
+                    new RDBMSConfiguration.DataSourceProperty();
+            property.setName((String) entry.getKey());
+            property.setValue((String) entry.getValue());
+            dsProps.add(property);
         }
-        while (propItr.hasNext()) {
-            OMElement propEl = propItr.next();
-            String propValue = propEl.getText();
-            if (propValue != null) {
-                propValue = propValue.trim();
-            }
-            props.put(propEl.getLocalName(), propValue);
+        config.setDataSourceProps(dsProps);
+        return createDataSource(config);
+    }
+
+    public static RDBMSConfiguration populateDataSourceProperties(OMElement dsEl) throws
+            RSSManagerException {
+        try {
+            JAXBContext ctx = JAXBContext.newInstance(RSSRDBMSConfiguration.class);
+            Unmarshaller um = ctx.createUnmarshaller();
+            ByteArrayInputStream bis = new ByteArrayInputStream(dsEl.toString().getBytes());
+            return (RSSRDBMSConfiguration) um.unmarshal(bis);
+        } catch (JAXBException e) {
+            throw new RSSManagerException("Error occurred while de-serializing datasource " +
+                    "configuration", e);
         }
-        return props;
     }
 
     public static RSSInstanceMetaData convertRSSInstanceToMetadata(RSSInstance rssIns) throws
@@ -290,7 +244,11 @@ public class RSSManagerUtil {
             RSSManagerException {
         DatabaseMetaData metadata = new DatabaseMetaData();
         metadata.setName(database.getName());
-        metadata.setRssInstanceName(database.getRssInstanceName());
+        if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(database.getType())) {
+            metadata.setRssInstanceName(RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
+        } else {
+            metadata.setRssInstanceName(database.getRssInstanceName());
+        }
         metadata.setUrl(database.getUrl());
         metadata.setRssTenantDomain(getTenantDomainFromTenantId(database.getTenantId()));
         return metadata;
@@ -300,7 +258,11 @@ public class RSSManagerUtil {
             RSSManagerException {
         DatabaseUserMetaData metadata = new DatabaseUserMetaData();
         metadata.setUsername(user.getUsername());
-        metadata.setRssInstanceName(user.getRssInstanceName());
+        if (RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE.equals(user.getType())) {
+            metadata.setRssInstanceName(RSSManagerConstants.WSO2_RSS_INSTANCE_TYPE);
+        } else {
+            metadata.setRssInstanceName(user.getRssInstanceName());
+        }
         metadata.setTenantDomain(getTenantDomainFromTenantId(user.getTenantId()));
         return metadata;
     }
@@ -310,36 +272,39 @@ public class RSSManagerUtil {
     }
 
     private static DataSourceMetaInfo.DataSourceDefinition createDSXMLDefinition(
-            DSXMLConfiguration rdbmsConfig) throws RSSManagerException {
+            RDBMSConfiguration rdbmsConfiguration) throws RSSManagerException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
-            rdbmsConfig.getDSMarshaller().marshal(rdbmsConfig, out);
+            createMarshaller().marshal(rdbmsConfiguration, out);
         } catch (JAXBException e) {
             String msg = "Error occurred while marshalling datasource configuration";
             throw new RSSManagerException(msg, e);
         }
         DataSourceMetaInfo.DataSourceDefinition defn =
                 new DataSourceMetaInfo.DataSourceDefinition();
+        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
         defn.setType(RSSManagerConstants.RDBMS_DATA_SOURCE_TYPE);
-        defn.setDsXMLConfiguration(out.toString());
-        
+        try {
+            defn.setDsXMLConfiguration(DataSourceUtils.convertToDocument(in).getDocumentElement());
+        } catch (DataSourceException e) {
+            throw new RSSManagerException(e.getMessage(), e);
+        }
         return defn;
     }
-    
+
     public static DataSourceMetaInfo createDSMetaInfo(Database database,
                                                       String username) throws RSSManagerException {
         DataSourceMetaInfo metaInfo = new DataSourceMetaInfo();
-
-        RDBMSDSXMLConfiguration config = new RDBMSDSXMLConfiguration();
+        RDBMSConfiguration rdbmsConfiguration = new RDBMSConfiguration();
         String url = database.getUrl();
         String driverClassName = RSSManagerHelper.getDatabaseDriver(url);
-        config.setUrl(url);
-        config.setDriverClassName(driverClassName);
-        config.setUsername(username);
+        rdbmsConfiguration.setUrl(url);
+        rdbmsConfiguration.setDriverClassName(driverClassName);
+        rdbmsConfiguration.setUsername(username);
 
-        metaInfo.setDefinition(createDSXMLDefinition(config));
+        metaInfo.setDefinition(createDSXMLDefinition(rdbmsConfiguration));
         metaInfo.setName(database.getName());
-        
+
         return metaInfo;
     }
 
@@ -356,6 +321,17 @@ public class RSSManagerUtil {
             }
         }
         return "";
+    }
+
+    private static Marshaller createMarshaller() throws RSSManagerException {
+        JAXBContext ctx;
+        try {
+            ctx = JAXBContext.newInstance(RDBMSConfiguration.class);
+            return ctx.createMarshaller();
+        } catch (JAXBException e) {
+            throw new RSSManagerException("Error creating rdbms data source configuration " +
+                    "info marshaller: " + e.getMessage(), e);
+        }
     }
 
 }

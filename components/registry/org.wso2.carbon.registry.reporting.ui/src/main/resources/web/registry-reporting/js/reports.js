@@ -4,6 +4,16 @@ function addReport() {
         CARBON.showWarningDialog(reason);
         return;
     }
+    reason = validateEmpty($('reportTemplate'), org_wso2_carbon_registry_reporting_ui_jsi18n["report.template"]);
+    if (reason.length != 0) {
+        CARBON.showWarningDialog(reason);
+        return;
+    }
+    reason = validateEmpty($('reportClass'), org_wso2_carbon_registry_reporting_ui_jsi18n["report.class"]);
+    if (reason.length != 0) {
+        CARBON.showWarningDialog(reason);
+        return;
+    }
 
     var reportName = $('reportName').value;
     var reportTemplate = $('reportTemplate').value;
@@ -128,6 +138,15 @@ function scheduleReport() {
     if (reason.length == 0) {
         reason = validateEmpty($('resourcePath'), org_wso2_carbon_registry_reporting_ui_jsi18n["resource.path"]);
     }
+    if (reason.length == 0) {
+        reason = validateIllegal($('resourcePath'), org_wso2_carbon_registry_reporting_ui_jsi18n["resource.path"]);
+    }
+    if (reason.length == 0) {
+        reason = validateResourcePathAndLength($('resourcePath'));
+    }
+    if (reason.length == 0) {
+        reason = validateConnection($('registryURL').value, $('username').value, $('password').value);
+    }
     if (reason.length != 0) {
         CARBON.showWarningDialog(reason);
         return;
@@ -180,6 +199,26 @@ function scheduleReport() {
             }
         });
     }, org_wso2_carbon_registry_reporting_ui_jsi18n["session.timed.out"]);
+}
+
+function validateConnection(registryURL, username, password) {
+    var error = "";
+    new Ajax.Request('../registry-reporting/connection_valid_ajaxprocessor.jsp',
+    {
+        method:'post',
+        parameters: {registryURL: registryURL, username: username, password: password, random:getRandom()},
+        asynchronous:false,
+        onSuccess: function(transport) {
+            var returnValue = transport.responseText;
+            if (returnValue.search(/----ConnectionExists----/) == -1){
+                error = org_wso2_carbon_registry_reporting_ui_jsi18n["unable.to.connect"]+ " <strong>" + registryURL + "</strong>.";
+            }
+        },
+        onFailure: function() {
+
+        }
+    });
+    return error;
 }
 
 function submitPage(page, pageNumber){

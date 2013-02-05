@@ -17,6 +17,7 @@
 package org.wso2.carbon.cep.siddhi;
 
 import junit.framework.Assert;
+import org.wso2.carbon.broker.core.exception.BrokerConfigException;
 import org.wso2.carbon.cep.core.mapping.output.Output;
 import org.wso2.carbon.cep.core.listener.CEPEventListener;
 
@@ -27,8 +28,8 @@ public class DummyCEPListener extends CEPEventListener {
 
     int testNumber = 0;
 
-    public DummyCEPListener(Output output,  int tenantId, String userName, int testNumber) {
-        super(output, tenantId, userName);
+    public DummyCEPListener(Output output,  int tenantId, String userName, int testNumber) throws BrokerConfigException {
+        super(output, tenantId, userName, null);
         this.testNumber = testNumber;
     }
 

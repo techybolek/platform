@@ -17,6 +17,10 @@
 */
 package org.wso2.carbon.identity.sso.saml.processors;
 
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.clustering.state.Replicator;
 import org.apache.commons.logging.Log;
@@ -34,120 +38,146 @@ import org.wso2.carbon.identity.sso.saml.session.SSOSessionCommand;
 import org.wso2.carbon.identity.sso.saml.session.SSOSessionPersistenceManager;
 import org.wso2.carbon.identity.sso.saml.session.SessionInfoData;
 import org.wso2.carbon.identity.sso.saml.util.SAMLSSOUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
-import java.util.Map;
 
 public class LogoutRequestProcessor {
 
     private static Log log = LogFactory.getLog(LogoutRequestProcessor.class);
 
+	/**
+	 * 
+	 * @param logoutRequest
+	 * @param sessionId
+	 * @param queryString
+	 * @return
+	 * @throws IdentityException
+	 */
+	public SAMLSSOReqValidationResponseDTO process(LogoutRequest logoutRequest, String sessionId,
+	                                               String queryString) throws IdentityException {
 
-    public SAMLSSOReqValidationResponseDTO process(LogoutRequest logoutRequest, String sessionId) throws IdentityException {
+		try {
+			SAMLSSOReqValidationResponseDTO reqValidationResponseDTO =
+			                                                           new SAMLSSOReqValidationResponseDTO();
+			reqValidationResponseDTO.setLogOutReq(true);
 
-        try {
-            SAMLSSOReqValidationResponseDTO reqValidationResponseDTO = new SAMLSSOReqValidationResponseDTO();
-            reqValidationResponseDTO.setLogOutReq(true);
+			String subject = null;
 
-            String subject = null;
+			// Only if the logout request is received.
+			if (logoutRequest != null) {
+				if (logoutRequest.getIssuer() == null) {
+					String message = "Issuer should be mentioned in the Logout Request";
+					log.error(message);
+					return buildErrorResponse(logoutRequest.getID(),
+					                          SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR, message);
+				}
 
-            //Only if the logout request is received.
-            if (logoutRequest != null) {
-                if (logoutRequest.getIssuer() == null) {
-                    String message = "Issuer should be mentioned in the Logout Request";
-                    log.error(message);
-                    return buildErrorResponse(logoutRequest.getID(), SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR, message);
-                }
+				// TODO : Check for BaseID and EncryptedID as well.
+				if (logoutRequest.getNameID() != null) {
+					NameID nameID = logoutRequest.getNameID();
+					subject = nameID.getValue();
+				} else {
+					String message = "Subject Name should be specified in the Logout Request";
+					log.error(message);
+					return buildErrorResponse(logoutRequest.getID(),
+					                          SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR, message);
+				}
 
-                // TODO : Check for BaseID and EncryptedID as well.
-                if (logoutRequest.getNameID() != null) {
-                    NameID nameID = logoutRequest.getNameID();
-                    subject = nameID.getValue();
-                } else {
-                    String message = "Subject Name should be specified in the Logout Request";
-                    log.error(message);
-                    return buildErrorResponse(logoutRequest.getID(), SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR, message);
-                }
+				if (logoutRequest.getSessionIndexes() == null) {
+					String message =
+					                 "At least one Session Index should be present in the Logout Request";
+					log.error(message);
+					return buildErrorResponse(logoutRequest.getID(),
+					                          SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR, message);
+				}
+			}
 
-                if (logoutRequest.getSessionIndexes() == null) {
-                    String message = "At least one Session Index should be present in the Logout Request";
-                    log.error(message);
-                    return buildErrorResponse(logoutRequest.getID(), SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR, message);
-                }
-            }
+			// Get the sessions from the SessionPersistenceManager and prepare
+			// the logout responses
+			SSOSessionPersistenceManager ssoSessionPersistenceManager =
+			                                                            SSOSessionPersistenceManager.getPersistenceManager();
+			SessionInfoData sessionInfoData =
+			                                  ssoSessionPersistenceManager.getSessionInfo(sessionId);
 
-            //Get the sessions from the SessionPersistenceManager and prepare the logout responses
-            SSOSessionPersistenceManager ssoSessionPersistenceManager = SSOSessionPersistenceManager.getPersistenceManager();
-            SessionInfoData sessionInfoData = ssoSessionPersistenceManager.getSessionInfo(sessionId);
+			if (sessionInfoData == null) {
+				String message =
+				                 "No Established Sessions corresponding to Session Indexes provided.";
+				log.error(message);
+				return buildErrorResponse(logoutRequest.getID(),
+				                          SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR, message);
+			}
+			subject = sessionInfoData.getSubject();
+			String issuer = logoutRequest.getIssuer().getValue();
+			Map<String, SAMLSSOServiceProviderDO> sessionsList =
+			                                                     sessionInfoData.getServiceProviderList();
+			SAMLSSOServiceProviderDO logoutReqIssuer = sessionsList.get(issuer);
 
-            if (sessionInfoData == null) {
-                String message = "No Established Sessions corresponding to Session Indexes provided.";
-                log.error(message);
-                return buildErrorResponse(logoutRequest.getID(), SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR,
-                        message);
-            }
-            subject = sessionInfoData.getSubject();
-            String issuer = logoutRequest.getIssuer().getValue();
-            Map<String, SAMLSSOServiceProviderDO> sessionsList = sessionInfoData.getServiceProviderList();
-            SAMLSSOServiceProviderDO logoutReqIssuer = sessionsList.get(issuer);
+			// validate the signature, if it is set.
+			if (logoutReqIssuer.getCertAlias() != null) {
+				boolean isSignatureValid =
+				                           SAMLSSOUtil.validateLogoutRequestSignature(logoutRequest,
+				                                                                      logoutReqIssuer.getCertAlias(),
+				                                                                      subject,
+				                                                                      queryString);
+				if (!isSignatureValid) {
+					String message = "The signature contained in the Assertion is not valid.";
+					log.error(message);
+					return buildErrorResponse(logoutRequest.getID(),
+					                          SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR, message);
+				}
+			}
 
-            // validate the signature, if it is set.
-            if(logoutReqIssuer.getCertAlias() != null){
-                boolean isSignatureValid = SAMLSSOUtil.validateAssertionSignature(logoutRequest, logoutReqIssuer.getCertAlias(),
-                                                       MultitenantUtils.getTenantDomain(subject));
-                if (!isSignatureValid) {
-                    String message = "The signature contained in the Assertion is not valid.";
-                    log.error(message);
-                    return buildErrorResponse(logoutRequest.getID(), SAMLSSOConstants.StatusCodes.REQUESTOR_ERROR,
-                            message);
-                }
-            }
+			SingleLogoutMessageBuilder logoutMsgBuilder = new SingleLogoutMessageBuilder();
+			Map<String, String> rpSessionsList = sessionInfoData.getRPSessionsList();
+			SingleLogoutRequestDTO[] singleLogoutReqDTOs =
+			                                               new SingleLogoutRequestDTO[sessionsList.size() - 1];
+			LogoutRequest logoutReq =
+			                          logoutMsgBuilder.buildLogoutRequest(subject,
+			                                                              sessionId,
+			                                                              SAMLSSOConstants.SingleLogoutCodes.LOGOUT_USER);
+			String logoutReqString = SAMLSSOUtil.encode(SAMLSSOUtil.marshall(logoutReq));
+			int index = 0;
+			for (String key : sessionsList.keySet()) {
+				if (!key.equals(issuer)) {
+					SingleLogoutRequestDTO logoutReqDTO = new SingleLogoutRequestDTO();
+					logoutReqDTO.setAssertionConsumerURL(sessionsList.get(key).getLogoutURL());
+					if (sessionsList.get(key).getLogoutURL() == null ||
+					    sessionsList.get(key).getLogoutURL().length() == 0) {
+						logoutReqDTO.setAssertionConsumerURL(sessionsList.get(key)
+						                                                 .getAssertionConsumerUrl());
+					}
+					logoutReqDTO.setLogoutResponse(logoutReqString);
+					logoutReqDTO.setRpSessionId(rpSessionsList.get(key));
+					singleLogoutReqDTOs[index] = logoutReqDTO;
+					index++;
+				} else {
+					reqValidationResponseDTO.setIssuer(sessionsList.get(key).getIssuer());
+					reqValidationResponseDTO.setAssertionConsumerURL(sessionsList.get(key)
+					                                                             .getAssertionConsumerUrl());
+					if (sessionsList.get(key).getLogoutURL() != null &&
+					    sessionsList.get(key).getLogoutURL().length() > 0) {
+						reqValidationResponseDTO.setAssertionConsumerURL(sessionsList.get(key)
+						                                                             .getLogoutURL());
+					}
+				}
+			}
+			reqValidationResponseDTO.setLogoutRespDTO(singleLogoutReqDTOs);
 
-            SingleLogoutMessageBuilder logoutMsgBuilder = new SingleLogoutMessageBuilder();
-            Map<String, String> rpSessionsList = sessionInfoData.getRPSessionsList();
-            SingleLogoutRequestDTO[] singleLogoutReqDTOs = new SingleLogoutRequestDTO[sessionsList.size()-1];
-            LogoutRequest logoutReq = logoutMsgBuilder.buildLogoutRequest(subject, sessionId,
-                    SAMLSSOConstants.SingleLogoutCodes.LOGOUT_USER);
-            String logoutReqString = SAMLSSOUtil.encode(SAMLSSOUtil.marshall(logoutReq));
-            int index = 0;
-            for (String key : sessionsList.keySet()) {
-                if (!key.equals(issuer)) {
-                    SingleLogoutRequestDTO logoutReqDTO = new SingleLogoutRequestDTO();
-                    logoutReqDTO.setAssertionConsumerURL(sessionsList.get(key).getLogoutURL());
-                    if (sessionsList.get(key).getLogoutURL() == null ||
-                        sessionsList.get(key).getLogoutURL().length() == 0) {
-                        logoutReqDTO.setAssertionConsumerURL(sessionsList.get(key).getAssertionConsumerUrl());
-                    }
-                    logoutReqDTO.setLogoutResponse(logoutReqString);
-                    logoutReqDTO.setRpSessionId(rpSessionsList.get(key));
-                    singleLogoutReqDTOs[index] = logoutReqDTO;
-                    index ++;
-                }
-                else {
-                    reqValidationResponseDTO.setIssuer(sessionsList.get(key).getIssuer());
-                    reqValidationResponseDTO.setAssertionConsumerURL(sessionsList.get(key).getAssertionConsumerUrl());
-                    if(sessionsList.get(key).getLogoutURL() != null && sessionsList.get(key).getLogoutURL().length() > 0){
-                        reqValidationResponseDTO.setAssertionConsumerURL(sessionsList.get(key).getLogoutURL());
-                    }
-                }
-            }
-            reqValidationResponseDTO.setLogoutRespDTO(singleLogoutReqDTOs);
+			if (logoutRequest != null) {
+				LogoutResponse logoutResponse =
+				                                logoutMsgBuilder.buildLogoutResponse(logoutRequest.getID(),
+				                                                                     SAMLSSOConstants.StatusCodes.SUCCESS_CODE,
+				                                                                     null);
+				reqValidationResponseDTO.setLogoutResponse(SAMLSSOUtil.encode(SAMLSSOUtil.marshall(logoutResponse)));
+				reqValidationResponseDTO.setValid(true);
+			}
 
-            if (logoutRequest != null) {
-                LogoutResponse logoutResponse = logoutMsgBuilder.buildLogoutResponse(logoutRequest.getID(),
-                        SAMLSSOConstants.StatusCodes.SUCCESS_CODE, null);
-                reqValidationResponseDTO.setLogoutResponse(SAMLSSOUtil.encode(SAMLSSOUtil.marshall(logoutResponse)));
-                reqValidationResponseDTO.setValid(true);
-            }
-
-            ssoSessionPersistenceManager.removeSession(sessionId, issuer);
-            replicateSessionInfo(sessionId, issuer);
-            return reqValidationResponseDTO;
-        } catch (Exception e) {
-            log.error("Error Processing the Logout Request", e);
-            throw new IdentityException("Error Processing the Logout Request", e);
-        }
-    }
+			ssoSessionPersistenceManager.removeSession(sessionId, issuer);
+			replicateSessionInfo(sessionId, issuer);
+			return reqValidationResponseDTO;
+		} catch (Exception e) {
+			log.error("Error Processing the Logout Request", e);
+			throw new IdentityException("Error Processing the Logout Request", e);
+		}
+	}
 
     private SAMLSSOReqValidationResponseDTO buildErrorResponse(String id, String status, String statMsg) throws Exception {
         SAMLSSOReqValidationResponseDTO reqValidationResponseDTO = new SAMLSSOReqValidationResponseDTO();

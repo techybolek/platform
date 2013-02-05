@@ -1,6 +1,0 @@
-<module name="svnClient" expose="true" xmlns="http://wso2.org/projects/jaggery/module.xml">
-		<hostObject>
-			<className>org.wso2.carbon.hostobjects.svnclient.SVNClientHostObject</className>
-			<name>SVNClient</name>
-		</hostObject>
-</module>

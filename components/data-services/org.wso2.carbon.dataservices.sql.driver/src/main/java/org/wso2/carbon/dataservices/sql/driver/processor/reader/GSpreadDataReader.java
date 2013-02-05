@@ -18,15 +18,16 @@
  */
 package org.wso2.carbon.dataservices.sql.driver.processor.reader;
 
-import com.google.gdata.data.spreadsheet.CellEntry;
-import com.google.gdata.data.spreadsheet.CellFeed;
-import com.google.gdata.data.spreadsheet.WorksheetEntry;
-import com.google.gdata.data.spreadsheet.WorksheetFeed;
+import com.google.gdata.data.spreadsheet.*;
+import org.wso2.carbon.dataservices.sql.driver.TConnection;
 import org.wso2.carbon.dataservices.sql.driver.TDriverUtil;
 import org.wso2.carbon.dataservices.sql.driver.TGSpreadConnection;
+import org.wso2.carbon.dataservices.sql.driver.parser.Constants;
+import org.wso2.carbon.dataservices.sql.driver.query.ColumnInfo;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
 
 public class GSpreadDataReader extends AbstractFixedDataReader {
@@ -37,7 +38,6 @@ public class GSpreadDataReader extends AbstractFixedDataReader {
 
     public void populateData() throws SQLException {
         int tmp = -1;
-        DataRow dataRow = null;
 
         TGSpreadConnection gsConnection = (TGSpreadConnection) getConnection();
         WorksheetFeed workSheetFeed = gsConnection.getWorksheetFeed();
@@ -46,23 +46,22 @@ public class GSpreadDataReader extends AbstractFixedDataReader {
         }
         List<WorksheetEntry> workSheets = workSheetFeed.getEntries();
         for (WorksheetEntry workSheet : workSheets) {
+            DataRow dataRow = null;
             CellFeed cellFeed = TDriverUtil.getCellFeed(gsConnection, workSheet);
-            List<CellEntry> cells = cellFeed.getEntries();
 
-            Map<String, Integer> headers = this.extractHeaders(workSheet);
+            ColumnInfo[] headers = this.extractHeaders(workSheet);
             DataTable result = new FixedDataTable(workSheet.getTitle().getPlainText(), headers);
-
-            for (CellEntry cell : cells) {
+            for (CellEntry cell : cellFeed.getEntries()) {
                 int rowId = TDriverUtil.getRowIndex(cell.getId());
                 if (tmp != rowId && rowId != 1) {
                     if (dataRow != null) {
-                        result.addRow(this.fillUpEmptyCells(dataRow, headers.values()));
+                        result.addRow(this.fillUpEmptyCells(dataRow, headers));
                     }
                     dataRow = new DataRow(rowId - 1);
                     tmp = rowId;
                 }
                 int columnId = TDriverUtil.getColumnIndex(cell.getId());
-                if (columnId > headers.size()) {
+                if (columnId > headers.length) {
                     continue;
                 }
                 if (rowId != 1 && dataRow != null) {
@@ -71,54 +70,73 @@ public class GSpreadDataReader extends AbstractFixedDataReader {
                                     cell.getContent().getType(),
                                     cell.getTextContent().getContent().getPlainText());
 
-                    dataRow.addCell(dataCell);
+                    dataRow.addCell(dataCell.getColumnId(), dataCell);
                 }
+            }
+            /* adding the last row of the sheet */
+            if (dataRow != null) {
+                result.addRow(this.fillUpEmptyCells(dataRow, headers));
             }
             this.getData().put(result.getTableName(), result);
         }
     }
-
+    
     /**
      * Google gdata-client spreadsheet API only returns the non-empty cells that exist in the
      * spreadsheet document that is being queried. This method fills up the data rows with the
      * dummy cells containing null as cell value in place of the missing empty rows.
-     * @param row       Data row to be modified
-     * @param columns   Column indices of the header row
-     * @return          Processed data row to add empty data cells
+     *
+     * @param row     Data row to be modified
+     * @param columns Column indices of the header row
+     * @return Processed data row to add empty data cells
      */
-    private DataRow fillUpEmptyCells(DataRow row, Collection<Integer> columns) {
-        List<Integer> existingColumns = new ArrayList<Integer>();
-        for (DataCell cell : row.getCells()) {
-            existingColumns.add(cell.getColumnId());
-        }
-        for (Integer column : columns) {
-            if (!existingColumns.contains(column - 1)) {
-                row.addCell(new DataCell(column - 1, -1, null));
+    private DataRow fillUpEmptyCells(DataRow row, ColumnInfo[] columns) {
+        DataRow fixedRow = new DataRow(row.getRowId());
+        Set<Integer> existingColumns = row.getCells().keySet();
+        for (ColumnInfo column : columns) {
+            if (existingColumns.contains(column.getId())) {
+                fixedRow.addCell(column.getId(), row.getCell(column.getId()));
+            } else {
+                fixedRow.addCell(column.getId(), new DataCell(column.getId(), -1, null));
             }
         }
-        return row;
+        return fixedRow;
     }
 
     /**
      * Extracts out the header elements of the spreadsheet entry that is being queried.
-     * @param currentWorkSheet  Worksheet being queried
-     * @return                  Map containing the header names and their indices
-     * @throws SQLException     Is thrown if an error occurs while extracting the spreadsheet
-     *                          cell feed 
+     *
+     * @param currentWorkSheet Worksheet being queried
+     * @return Map containing the header names and their indices
+     * @throws SQLException Is thrown if an error occurs while extracting the spreadsheet
+     *                      cell feed
      */
-    private Map<String, Integer> extractHeaders(WorksheetEntry currentWorkSheet) throws
+    private ColumnInfo[] extractHeaders(WorksheetEntry currentWorkSheet) throws
             SQLException {
-        Map<String, Integer> headers = new HashMap<String, Integer>();
+        List<ColumnInfo> headers = new ArrayList<ColumnInfo>();
+
+        /* If hasHeader property is set to false, populate header map with column names following
+         * the format 'COLUMN' + 'i' where i corresponds to the column id */
+        if (!((TConnection) getConnection()).hasHeader()) {
+            int maxColumns = ((TConnection) getConnection()).getMaxColumns();
+            for (int i = 1; i < maxColumns + 1; i++) {
+                headers.add(new ColumnInfo(i, Constants.COLUMN + i,
+                        currentWorkSheet.getTitle().getPlainText(), -1, i));
+            }
+            return headers.toArray(new ColumnInfo[headers.size()]);
+        }
 
         CellFeed cellFeed = TDriverUtil.getCellFeed(getConnection(), currentWorkSheet);
         for (CellEntry cell : cellFeed.getEntries()) {
             if (!TDriverUtil.getCellPosition(cell.getId()).startsWith("R1")) {
                 break;
             }
-            headers.put(cell.getTextContent().getContent().getPlainText(),
-                    TDriverUtil.getColumnIndex(cell.getId()) - 1);
+            int columnIndex = TDriverUtil.getColumnIndex(cell.getId()) - 1;
+            headers.add(new ColumnInfo(
+                    columnIndex, cell.getTextContent().getContent().getPlainText(),
+                    currentWorkSheet.getTitle().getPlainText(), Types.VARCHAR, columnIndex));
         }
-        return headers;
+        return headers.toArray(new ColumnInfo[headers.size()]);
     }
 
 }

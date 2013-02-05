@@ -57,4 +57,5 @@ public final class UIGeneratorConstants {
     public static final String IS_RICH_TEXT = "isRichText";
 
     public static final String READONLY_ATTRIBUTE = "readonly";
+    public static final String PATH_START_WITH ="startWith";
 }

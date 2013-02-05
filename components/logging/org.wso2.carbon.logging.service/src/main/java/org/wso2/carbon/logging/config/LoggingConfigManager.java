@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Iterator;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 
@@ -145,34 +146,65 @@ public class LoggingConfigManager {
 					} else if (LoggingConstants.CassandraConfigProperties.URL
 							.equals(element.getLocalName())) {
 						config.setUrl(element.getText());
-					} else if (LoggingConstants.CassandraConfigProperties.COLUMN_FAMILY
-							.equals(element.getLocalName())) {
-						config.setColFamily(element.getText());
-					} else if (LoggingConstants.CassandraConfigProperties.KEYSPACE
-							.equals(element.getLocalName())) {
-						config.setKeyspace(element.getText());
 					} else if (LoggingConstants.CassandraConfigProperties.USER_NAME
 							.equals(element.getLocalName())) {
 						config.setUser(element.getText());
 					} else if (LoggingConstants.CassandraConfigProperties.PASSWORD
 							.equals(element.getLocalName())) {
 						config.setPassword(element.getText());
-					} else if (LoggingConstants.CassandraConfigProperties.CLUSTER
-							.equals(element.getLocalName())) {
-						config.setCluster(element.getText());
-					} else if (LoggingConstants.CassandraConfigProperties.PUBLISHER_URL
-							.equals(element.getLocalName())) {
-						config.setPublisherURL(element.getText());
-					}  else if (LoggingConstants.CassandraConfigProperties.PUBLISHER_USER
-							.equals(element.getLocalName())) {
-						config.setPublisherUser(element.getText());
-					} else if (LoggingConstants.CassandraConfigProperties.PUBLISHER_PASSWORD
-							.equals(element.getLocalName())) {
-						config.setPublisherPassword(element.getText());
 					} else if (LoggingConstants.CassandraConfigProperties.ARCHIVED_HOST
 							.equals(element.getLocalName())) {
 						config.setArchivedHost(element.getText());
-					} else if (LoggingConstants.CassandraConfigProperties.ARCHIVED_USER
+                    } else if (LoggingConstants.CassandraConfigProperties.CONSISTENCY_LEVEL
+                            .equals(element.getLocalName())) {
+                        config.setConsistencyLevel(element.getText());
+                    } else if (LoggingConstants.CassandraConfigProperties.AUTO_DISCOVERY
+                            .equals(element.getLocalName())) {
+
+                        String autoDiscoveryEnable = element.getAttributeValue(
+                                new QName(LoggingConstants.CassandraConfigProperties.AUTO_DISCOVERY_ENABLE));
+                        boolean isAutoDiscoveryEnable = false;
+                        if (autoDiscoveryEnable.trim().equalsIgnoreCase("true")) {
+                            isAutoDiscoveryEnable = true;
+                        }
+                        config.setAutoDiscoveryEnable(isAutoDiscoveryEnable);
+
+                        String delay = element.getAttributeValue(
+                                new QName(LoggingConstants.CassandraConfigProperties.AUTO_DISCOVERY_DELAY));
+                        if (delay != null && !"".equals(delay.trim())) {
+                            int delayAsInt = -1;
+                            try {
+                                delayAsInt = Integer.parseInt(delay.trim());
+                            } catch (NumberFormatException ignored) {
+                            }
+                            if (delayAsInt > 0) {
+                                config.setAutoDiscoveryDelay(delayAsInt);
+                            }
+                        }
+                    } else if (LoggingConstants.CassandraConfigProperties.RETRY_DOWNED_HOSTS
+                            .equals(element.getLocalName())) {
+
+                        String retryDownedEnable = element.getAttributeValue(
+                                new QName(LoggingConstants.CassandraConfigProperties.RETRY_DOWNED_HOSTS_ENABLE));
+                        boolean isRetryDownedHostsEnable = false;
+                        if (retryDownedEnable.trim().equalsIgnoreCase("true")) {
+                            isRetryDownedHostsEnable = true;
+                        }
+                        config.setRetryDownedHostsEnable(isRetryDownedHostsEnable);
+
+                        String queue = element.getAttributeValue(
+                                new QName(LoggingConstants.CassandraConfigProperties.RETRY_DOWNED_HOSTS_QUEUE));
+                        if (queue != null && !"".equals(queue.trim())) {
+                            int queueAsInt = -1;
+                            try {
+                                queueAsInt = Integer.parseInt(queue.trim());
+                            } catch (NumberFormatException ignored) {
+                            }
+                            if (queueAsInt > 0) {
+                                config.setRetryDownedHostsQueueSize(queueAsInt);
+                            }
+                        }
+                    } else if (LoggingConstants.CassandraConfigProperties.ARCHIVED_USER
 							.equals(element.getLocalName())) {
 						config.setArchivedUser(element.getText());
 					} else if (LoggingConstants.CassandraConfigProperties.ARCHIVED_PASSWORD
@@ -184,11 +216,15 @@ public class LoggingConfigManager {
 					} else if (LoggingConstants.CassandraConfigProperties.ARCHIVED_REALM
 							.equals(element.getLocalName())) {
 						config.setArchivedRealm(element.getText());
-					} else if (LoggingConstants.CassandraConfigProperties.HIVE_QUERY
+					} else if (LoggingConstants.CassandraConfigProperties.ARCHIVED_HDFS_PATH
 							.equals(element.getLocalName())) {
-						config.setHiveQuery(element.getText());
+						config.setArchivedHDFSPath(element.getText());
 					}
 				}
+                //setting the default valus to config
+                config.setColFamily("log");
+                config.setCluster("admin");
+                config.setKeyspace("EVENT_KS");
 				return config;
 			} catch (Exception e) {
 				String msg = "Error in loading Stratos Configurations File: "

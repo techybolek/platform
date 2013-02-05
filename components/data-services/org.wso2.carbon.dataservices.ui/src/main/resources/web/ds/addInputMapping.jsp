@@ -311,7 +311,7 @@ paramType.equals("") ? "" : "display:none"%>"
 <tr>
     <td class="leftCol-small"><fmt:message key="dataservices.validator"/></td>
     <td><select id="validatorList" name="validatorList"
-    		onchange="changeAddValidatorFields(this,document);">
+                onchange="changeAddValidatorFields(this,document);">
         <option value="#">--Select--</option>
         <option value="validateLongRange">Long Range Validator</option>
         <option value="validateDoubleRange">Double Range Validator</option>

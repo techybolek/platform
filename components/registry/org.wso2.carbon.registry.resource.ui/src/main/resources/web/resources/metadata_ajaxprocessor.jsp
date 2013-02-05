@@ -23,6 +23,7 @@
 <%@ page import="org.wso2.carbon.registry.resource.ui.Utils" %>
 <%@ page import="org.wso2.carbon.registry.resource.stub.common.xsd.WebResourcePath" %>
 <%@ page import="org.wso2.carbon.registry.resource.stub.beans.xsd.MetadataBean" %>
+<%@ page import="org.wso2.carbon.registry.resource.ui.processors.TempEditMediaTypeProcessor"%>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@ page import="org.wso2.carbon.registry.core.RegistryConstants" %>
 <%@ page import="org.wso2.carbon.registry.common.ui.utils.UIUtil" %>
@@ -162,7 +163,7 @@
                         style="background-image:url(../resources/images/back.gif)"
                         class="icon-link"
                         onclick="document.location.href = '../resources/versions.jsp?path=' + '<%=metadata.getPath()%>'.replace('&', '%26')+ '&ordinal=1&screenWidth=' + screen.width;">
-                    <fmt:message key="back.to.versions.of"/> <%=versionRestoreActivepath%>
+                    <fmt:message key="back.to.versions.of"/> <%=metadata.getPath()%>
                 </a>
 
                 <% if (metadata.getPutAllowed()) {
@@ -171,9 +172,9 @@
                         decodedPath = URLDecoder.decode(decodedPath, "UTF-8");
                     } catch (Exception ignore) {}
                     String encodedActivePath = versionRestoreActivepath;
-                    try {
-                        encodedActivePath = URLEncoder.encode(encodedActivePath, "UTF-8");
-                    } catch (Exception ignore) {}
+//                    try {
+//                        encodedActivePath = URLEncoder.encode(encodedActivePath, "UTF-8");
+//                    } catch (Exception ignore) {}
                 %>
                 <%
                     if(Boolean.valueOf(metadata.getDeleteLocked()) || Boolean.valueOf(metadata.getWriteLocked())) {
@@ -239,7 +240,8 @@
             <td><fmt:message key="media.type1"/>:</td>
             <td colspan="2">
                      <div style="width:100%">
-                    <div id="toggleSaveMediaType_view" style="float:left;line-height: 25px;"><% if (metadata.getMediaType() != null && metadata.getMediaType().length() != 0) { %><%=MediaTypesUtils.getHumanReadableMediaTypeFromMimeType(metadata.getMediaType())%><% } else { %>
+                    <div id="toggleSaveMediaType_view" style="float:left;line-height: 25px;"><% if (metadata.getMediaType() != null && metadata.getMediaType().length() != 0) { String mediaType = MediaTypesUtils.getHumanReadableMediaTypeFromMimeType(metadata.getMediaType());
+TempEditMediaTypeProcessor.setMediaTypeBeforeUpdate(mediaType);%><%=mediaType%><% } else { %>
                             <fmt:message key="unknown"/><% } %>
                             </div>
                             <input style="display:none;float:left" id="toggleSaveMediaType_edit" value="<% if (metadata.getMediaType() != null && metadata.getMediaType().length() != 0) { %><%=MediaTypesUtils.getHumanReadableMediaTypeFromMimeType(metadata.getMediaType())%><% } else { %><fmt:message key="unknown"/><% } %>" />

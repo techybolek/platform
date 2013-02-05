@@ -130,7 +130,7 @@
                         <td class="buttonRow" colspan="2">
                             <input class="button" type="button"
                                    value="<fmt:message key="rss.manager.create"/>"
-                                   onclick="return createDatabase()"/>
+                                   onclick="return createDatabase();return false;"/>
 
                             <input class="button" type="button"
                                    value="<fmt:message key="rss.manager.cancel"/>"

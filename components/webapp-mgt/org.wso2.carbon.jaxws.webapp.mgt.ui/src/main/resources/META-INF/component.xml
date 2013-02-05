@@ -18,38 +18,14 @@
 <component xmlns="http://products.wso2.org/carbon">
     <menus>
         <menu>
-            <id>jax_webapps_menu</id>
+            <id>jax_webapps_add_menu</id>
             <i18n-key>jax.webappmgt.services.menu</i18n-key>
             <i18n-bundle>org.wso2.carbon.jaxws.webapp.mgt.ui.i18n.Resources</i18n-bundle>
-            <parent-menu>manage_menu</parent-menu>
-            <link>#</link>
-            <region>region1</region>
-            <order>4</order>
-            <icon>../jax-webapp-mgt/images/jax_type.gif</icon>
-            <style-class>home</style-class>
-            <require-permission>/permission/admin/manage/manage/webapp</require-permission>
-        </menu>
-        <menu>
-            <id>jax_webapps_list_menu</id>
-            <i18n-key>jax.webappmgt.listservices.menu</i18n-key>
-            <i18n-bundle>org.wso2.carbon.jaxws.webapp.mgt.ui.i18n.Resources</i18n-bundle>
-            <parent-menu>jax_webapps_menu</parent-menu>
-            <link>../jax-webapp-mgt/index.jsp</link>
-            <region>region1</region>
-            <order>3</order>
-            <icon>../jax-webapp-mgt/images/list.gif</icon>
-            <style-class>home</style-class>
-            <require-permission>/permission/admin/manage/manage/webapp</require-permission>
-        </menu>
-        <menu>
-            <id>jax_webapps_add_menu</id>
-            <i18n-key>jax.webappmgt.add.webapp.menu</i18n-key>
-            <i18n-bundle>org.wso2.carbon.jaxws.webapp.mgt.ui.i18n.Resources</i18n-bundle>
-            <parent-menu>jax_webapps_menu</parent-menu>
+            <parent-menu>webapps_add_menu</parent-menu>
             <link>../jax-webapp-mgt/upload.jsp</link>
             <region>region1</region>
-            <order>10</order>
-            <icon>../jax-webapp-mgt/images/add.gif</icon>
+            <order>5</order>
+            <icon>../jax-webapp-mgt/images/jax_type.gif</icon>
             <style-class>home</style-class>
             <require-permission>/permission/admin/manage/add/webapp</require-permission>
         </menu>

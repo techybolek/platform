@@ -17,9 +17,6 @@
 */
 package org.wso2.carbon.identity.sts.mgt.ui.client;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.http.HttpSession;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -30,6 +27,9 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.identity.sts.mgt.stub.generic.STSAdminServiceStub;
 import org.wso2.carbon.identity.sts.mgt.stub.service.util.xsd.TrustedServiceData;
 import org.wso2.carbon.ui.CarbonUIUtil;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.http.HttpSession;
 
 public class CarbonSTSClient {
 
@@ -111,7 +111,7 @@ public class CarbonSTSClient {
         try {
             if (endpoint != null && endpoint.trim().length() > 0 && keyAlias != null
                     && keyAlias.trim().length() > 0) {
-                stub.addTrustedService(endpoint, keyAlias);
+                stub.addTrustedService(endpoint.trim(), keyAlias);
             }
         } catch (Exception e) {
             log.error("Error while adding trusted services", e);

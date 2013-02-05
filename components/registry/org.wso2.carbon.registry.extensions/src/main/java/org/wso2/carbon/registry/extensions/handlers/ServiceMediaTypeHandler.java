@@ -22,6 +22,7 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.registry.common.utils.artifact.manager.ArtifactManager;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.Handler;
@@ -55,6 +56,7 @@ public class ServiceMediaTypeHandler extends Handler {
     private List<String> smartLifecycleLinks = new LinkedList<String>();
 
     private String defaultServiceVersion = CommonConstants.SERVICE_VERSION_DEFAULT_VALUE;
+    private boolean disableSymlinkCreation = true;
 
     public void setDefaultServiceVersion(String defaultServiceVersion) {
         this.defaultServiceVersion = defaultServiceVersion;
@@ -68,6 +70,14 @@ public class ServiceMediaTypeHandler extends Handler {
                 smartLifecycleLinks.add(confElement.getText());
             }
         }
+    }
+
+    public boolean isDisableSymlinkCreation() {
+        return disableSymlinkCreation;
+    }
+
+    public void setDisableSymlinkCreation(String disableSymlinkCreation) {
+        this.disableSymlinkCreation = Boolean.toString(true).equals(disableSymlinkCreation);
     }
 
     public void put(RequestContext requestContext) throws RegistryException {
@@ -162,16 +172,17 @@ public class ServiceMediaTypeHandler extends Handler {
                     // difference over here with a little fix to the Governance API end. - Janaka.
 
 
-                    //We have fixed this assuming that the temp path where services are stored is under /_system/governance/[serviceName]
+                    //We have fixed this assuming that the temp path where services are stored is under
+                    // /_system/governance/[serviceName]
                     //Hence if we are to change that location, then we need to change the following code segment as well
                     String tempPath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH
                             + RegistryConstants.PATH_SEPARATOR + resourceName;
 
                     if (!originalServicePath.equals(tempPath)) {
-                        String path = RegistryUtils.getRelativePathToOriginal(servicePath, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
-                        if(!ServiceUtils.getModifiedList().contains(path)){
-                            ServiceUtils.addToModifiedList(path);
-                        }
+                        String path = RegistryUtils.getRelativePathToOriginal(servicePath,
+                                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
+                        ArtifactManager.getArtifactManager().getTenantArtifactRepository().
+                                    addArtifact(path);
                         return;
                     }
                     requestContext.setProcessingComplete(true);
@@ -212,13 +223,30 @@ public class ServiceMediaTypeHandler extends Handler {
                     log.error(msg);
                     throw new RegistryException(msg, e);
                 }
+            } else if ("true".equals(resource.getProperty("registry.WSDLImport"))) {
+                resource.removeProperty("registry.WSDLImport");                	
             }
 //            CommonUtil.addGovernanceArtifactEntryWithAbsoluteValues(
 //                    CommonUtil.getUnchrootedSystemRegistry(requestContext),
 //                    serviceId, servicePath);
 
+            String wsdlURL = CommonUtil.getWSDLURL(serviceInfoElement);
+            if (previousServiceInfoElement != null) {
+                String oldWSDL = CommonUtil.getWSDLURL(previousServiceInfoElement);
+                if ((!"".equals(oldWSDL) && "".equals(wsdlURL))
+                        || (!"".endsWith(oldWSDL) && !oldWSDL.equals(wsdlURL))) {
+                    try {
+                        registry.removeAssociation(servicePath, oldWSDL, CommonConstants.DEPENDS);
+                        registry.removeAssociation(oldWSDL, servicePath, CommonConstants.USED_BY);
+                        EndpointUtils.removeEndpointEntry(oldWSDL, serviceInfoElement, registry);
+                        resource.setContent(RegistryUtils.decodeBytes((serviceInfoElement.toString()).getBytes()));
+                    } catch (RegistryException e) {
+                        throw new RegistryException("Failed to remove endpoints from Service UI : "+serviceName,e);
+                    }
+                }
+            }
+
                 boolean alreadyAdded = false;
-                String wsdlURL = CommonUtil.getWSDLURL(serviceInfoElement);
                 if (wsdlURL != null && (wsdlURL.startsWith("http://") || wsdlURL.startsWith("https://"))) {
                     wsdl = buildWSDLProcessor(requestContext);
                     RequestContext context = new RequestContext(registry, requestContext.getRepository(),
@@ -227,7 +255,7 @@ public class ServiceMediaTypeHandler extends Handler {
                     context.setSourceURL(wsdlURL);
                     context.setResource(new ResourceImpl());
                     String wsdlPath = wsdl.addWSDLToRegistry(context, wsdlURL, null, false, false,
-                            disableWSDLValidation);
+                            disableWSDLValidation,disableSymlinkCreation);
                     if (wsdlPath == null) {
                         // we will get the null value, if this is called within addWSDLToRegistry
                         return;
@@ -285,6 +313,7 @@ public class ServiceMediaTypeHandler extends Handler {
                         registry.addAssociation(wsdlPath, servicePath, CommonConstants.USED_BY);
                     }
                 }
+
             if (!alreadyAdded) {
                 // we are adding the resource anyway.
                 ((ResourceImpl) resource).prepareContentForPut();
@@ -319,11 +348,6 @@ public class ServiceMediaTypeHandler extends Handler {
                 environment = currentRelativePath + endpointEnv;
             }
 */
-            // Fixing CARBON-11713
-            if(previousServiceInfoElement != null) {
-                EndpointUtils.removeObsoleteWsdlEndpoint(previousServiceInfoElement, serviceInfoElement, servicePath,
-                        registry);
-            }
 
             if (servicePath.contains(registry.getRegistryContext().getServicePath())) {
                 EndpointUtils.saveEndpointsFromServices(servicePath, serviceInfoElement, registry,
@@ -366,7 +390,7 @@ public class ServiceMediaTypeHandler extends Handler {
             }
 
             String path = RegistryUtils.getRelativePathToOriginal(servicePath, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
-            ServiceUtils.addToModifiedList(path);
+            ArtifactManager.getArtifactManager().getTenantArtifactRepository().addArtifact(path);
         } finally {
             CommonUtil.releaseUpdateLock();
         }

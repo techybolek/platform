@@ -5,11 +5,7 @@
  */
 package org.wso2.carbon.databridge.commons.thrift.data;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Collections;
+import java.util.*;
 
 public class ThriftAttribute implements org.apache.thrift.TBase<ThriftAttribute, ThriftAttribute._Fields>, java.io.Serializable, Cloneable {
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("ThriftAttribute");

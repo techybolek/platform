@@ -19,7 +19,6 @@
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ page import="org.wso2.carbon.statistics.ui.Utils" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
-<%@ page import="org.wso2.carbon.utils.multitenancy.CarbonContextHolder" %>
 
 <fmt:bundle basename="org.wso2.carbon.statistics.ui.i18n.Resources">
 <carbon:breadcrumb

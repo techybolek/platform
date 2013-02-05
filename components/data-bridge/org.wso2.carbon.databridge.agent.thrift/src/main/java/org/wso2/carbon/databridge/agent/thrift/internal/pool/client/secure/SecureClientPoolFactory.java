@@ -23,6 +23,9 @@ package org.wso2.carbon.databridge.agent.thrift.internal.pool.client.secure;
 
 
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -31,12 +34,16 @@ import org.apache.thrift.transport.TSSLTransportFactory;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.wso2.carbon.databridge.agent.thrift.conf.ReceiverConfiguration;
-import org.wso2.carbon.databridge.commons.thrift.service.secure.ThriftSecureEventTransmissionService;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentSecurityException;
 import org.wso2.carbon.databridge.agent.thrift.internal.utils.AgentConstants;
+import org.wso2.carbon.databridge.commons.thrift.service.secure.ThriftSecureEventTransmissionService;
 import org.wso2.carbon.databridge.commons.thrift.utils.HostAddressFinder;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.net.SocketException;
+
 
 public class SecureClientPoolFactory extends BaseKeyedPoolableObjectFactory {
 
@@ -89,11 +96,43 @@ public class SecureClientPoolFactory extends BaseKeyedPoolableObjectFactory {
             TProtocol protocol = new TBinaryProtocol(receiverTransport);
             return new ThriftSecureEventTransmissionService.Client(protocol);
         } else {
-            THttpClient client = new THttpClient("https://" + keyElements[3] + "/thriftAuthenticator");
-            TProtocol protocol = new TCompactProtocol(client);
-            ThriftSecureEventTransmissionService.Client authClient = new ThriftSecureEventTransmissionService.Client(protocol);
-            client.open();
-            return authClient;
+            try {
+                TrustManager easyTrustManager = new X509TrustManager() {
+                    public void checkClientTrusted(
+                            java.security.cert.X509Certificate[] x509Certificates,
+                            String s)
+                            throws java.security.cert.CertificateException {
+                    }
+
+                    public void checkServerTrusted(
+                            java.security.cert.X509Certificate[] x509Certificates,
+                            String s)
+                            throws java.security.cert.CertificateException {
+                    }
+
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+                };
+                String[] hostNameAndPort = keyElements[3].split(AgentConstants.HOSTNAME_AND_PORT_SEPARATOR);
+
+                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, new TrustManager[]{easyTrustManager}, null);
+                SSLSocketFactory sf = new SSLSocketFactory(sslContext);
+                sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+                Scheme httpsScheme = new Scheme("https", sf, Integer.parseInt(hostNameAndPort[1]));
+
+                DefaultHttpClient client = new DefaultHttpClient();
+                client.getConnectionManager().getSchemeRegistry().register(httpsScheme);
+
+                THttpClient tclient = new THttpClient("https://" + keyElements[3] + "/thriftAuthenticator", client);
+                TProtocol protocol = new TCompactProtocol(tclient);
+                ThriftSecureEventTransmissionService.Client authClient = new ThriftSecureEventTransmissionService.Client(protocol);
+                tclient.open();
+                return authClient;
+            } catch (Exception e) {
+                throw new AgentSecurityException("Cannot create Secure client for " + keyElements[3], e);
+            }
         }
     }
 

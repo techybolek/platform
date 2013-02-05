@@ -21,6 +21,7 @@
         String remoteServiceUserName = null;
 		String remoteServicePassword = null;
 		String remoteServiceUrl = null;
+        String param = null;
 
 		remoteServiceUserName = request.getParameter("remoteServiceUserName");
 		remoteServicePassword = request.getParameter("remoteServicePassword");
@@ -36,11 +37,120 @@
         entMediator.setRemoteServiceUserName(remoteServiceUserName);
         entMediator.setRemoteServicePassword(remoteServicePassword);
 
+        param = request.getParameter("onacceptgroup");
+        if (param != null && !param.equals("")) {
+            if (param.equals("onAcceptSequenceKey")) {
+                String key = request.getParameter("mediator.entitlement.acceptKey");
+                entMediator.setOnAcceptSeqKey(key);
+                for (int i = 0; i < entMediator.getList().size(); i++) {
+                    Mediator m = entMediator.getChild(i);
+                    if (m instanceof OnAcceptMediator) {
+                        entMediator.removeChild(i);
+                    }
+                }
+            } else if (param.equals("onAcceptSequence")) {
+                boolean onAcceptPresent = false;
+                entMediator.setOnAcceptSeqKey(null);
+                for (int i = 0; i < entMediator.getList().size(); i++) {
+                    Mediator m = entMediator.getChild(i);
+                    if (m instanceof OnAcceptMediator) {
+                        onAcceptPresent = true;
+                    }
+                }
+                if (!onAcceptPresent) {
+                    entMediator.addChild(new OnAcceptMediator());
+                }
+            }
+        }
+
+        param = request.getParameter("onrejectgroup");
+        if (param != null && !param.equals("")) {
+            if (param.equals("onRejectSequenceKey")) {
+                String key = request.getParameter("mediator.entitlement.rejectKey");
+                entMediator.setOnRejectSeqKey(key);
+                for (int i = 0; i < entMediator.getList().size(); i++) {
+                    Mediator m = entMediator.getChild(i);
+                    if (m instanceof OnRejectMediator) {
+                        entMediator.removeChild(i);
+                    }
+                }
+            } else if (param.equals("onRejectSequence")) {
+                boolean onRejectPresent = false;
+                entMediator.setOnRejectSeqKey(null);
+                for (int i = 0; i < entMediator.getList().size(); i++) {
+                    Mediator m = entMediator.getChild(i);
+                    if (m instanceof OnRejectMediator) {
+                        onRejectPresent = true;
+                    }
+                }
+                if (!onRejectPresent) {
+                    entMediator.addChild(new OnRejectMediator());
+                }
+            }
+        }
+
+        param = request.getParameter("obligationsgroup");
+        if (param != null && !param.equals("")) {
+            if (param.equals("obligationsSequenceKey")) {
+                String key = request.getParameter("mediator.entitlement.obligationsKey");
+                entMediator.setObligationsSeqKey(key);
+                for (int i = 0; i < entMediator.getList().size(); i++) {
+                    Mediator m = entMediator.getChild(i);
+                    if (m instanceof ObligationsMediator) {
+                        entMediator.removeChild(i);
+                    }
+                }
+            } else if (param.equals("obligationsSequence")) {
+                boolean obligationsPresent = false;
+                entMediator.setObligationsSeqKey(null);
+                for (int i = 0; i < entMediator.getList().size(); i++) {
+                    Mediator m = entMediator.getChild(i);
+                    if (m instanceof ObligationsMediator) {
+                        obligationsPresent = true;
+                    }
+                }
+                if (!obligationsPresent) {
+                    entMediator.addChild(new ObligationsMediator());
+                }
+            }
+        }
+
+        param = request.getParameter("advicegroup");
+        if (param != null && !param.equals("")) {
+            if (param.equals("adviceSequenceKey")) {
+                String key = request.getParameter("mediator.entitlement.adviceKey");
+                entMediator.setAdviceSeqKey(key);
+                for (int i = 0; i < entMediator.getList().size(); i++) {
+                    Mediator m = entMediator.getChild(i);
+                    if (m instanceof AdviceMediator) {
+                        entMediator.removeChild(i);
+                    }
+                }
+            } else if (param.equals("adviceSequence")) {
+                boolean advicePresent = false;
+                entMediator.setAdviceSeqKey(null);
+                for (int i = 0; i < entMediator.getList().size(); i++) {
+                    Mediator m = entMediator.getChild(i);
+                    if (m instanceof AdviceMediator) {
+                        advicePresent = true;
+                    }
+                }
+                if (!advicePresent) {
+                    entMediator.addChild(new AdviceMediator());
+                }
+            }
+        }
+
     } catch (Exception e) {
         session.setAttribute("sequence.error.message", e.getMessage());
 %>
         
-<%@page import="org.wso2.carbon.mediator.entitlement.EntitlementMediator"%><script type="text/javascript">
+<%@page import="org.wso2.carbon.mediator.entitlement.EntitlementMediator"%>
+<%@ page import="org.wso2.carbon.mediator.entitlement.OnAcceptMediator" %>
+<%@ page import="org.wso2.carbon.mediator.entitlement.OnRejectMediator" %>
+<%@ page import="org.wso2.carbon.mediator.entitlement.ObligationsMediator" %>
+<%@ page import="org.wso2.carbon.mediator.entitlement.AdviceMediator" %>
+<script type="text/javascript">
             document.location.href = "../sequences/design_sequence.jsp?ordinal=1";
         </script>
         <%

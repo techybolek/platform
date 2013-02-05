@@ -62,47 +62,77 @@
 
     <script type="text/javascript">
         function validate() {
-          var value = document.getElementsByName("<%=XKMSMgtConstants.SERVER_AUTHENTICATION_CODE%>")[0].value;
-          if (value == '') {
+          var serverAuthCode = document.getElementsByName("<%=XKMSMgtConstants.SERVER_AUTHENTICATION_CODE%>")[0].value;
+          if (serverAuthCode == '') {
              CARBON.showWarningDialog('<fmt:message key="server.authentication.code.is.required"/>');
              return false;
            }
 
-          var value = document.getElementsByName("<%=XKMSMgtConstants.KEY_STORE_LOCATION%>")[0].value;
+          var value = document.getElementsByName("<%=XKMSMgtConstants.CONFIRM_SERVER_AUTHENTICATION_CODE%>")[0].value;
+          if (value != serverAuthCode) {
+             CARBON.showWarningDialog('<fmt:message key="server.authentication.codes.do.not.match"/>');
+             return false;
+           }
+
+          value = document.getElementsByName("<%=XKMSMgtConstants.KEY_STORE_LOCATION%>")[0].value;
           if (value == '') {
              CARBON.showWarningDialog('<fmt:message key="keystore.location.is.required"/>');
              return false;
            }
 
-          var value = document.getElementsByName("<%=XKMSMgtConstants.KEY_STORE_PASSWORD%>")[0].value;
-          if (value == '') {
+          var keyStorePass = document.getElementsByName("<%=XKMSMgtConstants.KEY_STORE_PASSWORD%>")[0].value;
+          if (keyStorePass == '') {
              CARBON.showWarningDialog('<fmt:message key="keystore.password.is.required"/>');
              return false;
            }
 
-          var value = document.getElementsByName("<%=XKMSMgtConstants.SERVER_CERT_ALIACE%>")[0].value;
+          value = document.getElementsByName("<%=XKMSMgtConstants.CONFIRM_KEY_STORE_PASSWORD%>")[0].value;
+          if (value != keyStorePass) {
+             CARBON.showWarningDialog('<fmt:message key="keystore.passwords.do.not.match"/>');
+             return false;
+           }
+
+          value = document.getElementsByName("<%=XKMSMgtConstants.SERVER_CERT_ALIAS%>")[0].value;
           if (value == '') {
              CARBON.showWarningDialog('<fmt:message key="server.certificate.alias.is.required"/>');
              return false;
            }
 
-            var value = document.getElementsByName("<%=XKMSMgtConstants.SERVER_KEY_PASSWORD%>")[0].value;
-            if (value == '') {
+            var serverKeyPass = document.getElementsByName("<%=XKMSMgtConstants.SERVER_KEY_PASSWORD%>")[0].value;
+            if (serverKeyPass == '') {
                 CARBON.showWarningDialog('<fmt:message key="server.key.password.is.required"/>');
                 return false;
             }
 
-          var value = document.getElementsByName("<%=XKMSMgtConstants.ISSUER_CERT_ALIACE%>")[0].value;
+            value = document.getElementsByName("<%=XKMSMgtConstants.CONFIRM_SERVER_KEY_PASSWORD%>")[0].value;
+            if (value != serverKeyPass) {
+                CARBON.showWarningDialog('<fmt:message key="server.key.passwords.do.not.match"/>');
+                return false;
+            }
+
+          value = document.getElementsByName("<%=XKMSMgtConstants.ISSUER_CERT_ALIAS%>")[0].value;
           if (value == '') {
              CARBON.showWarningDialog('<fmt:message key="issuer.certificate.alias.is.required"/>');
              return false;
            }
 
-          var value = document.getElementsByName("<%=XKMSMgtConstants.ISSUER_KEY_PASSWORD%>")[0].value;
-          if (value == '') {
+          var issuerKeyPass = document.getElementsByName("<%=XKMSMgtConstants.ISSUER_KEY_PASSWORD%>")[0].value;
+          if (issuerKeyPass == '') {
              CARBON.showWarningDialog('<fmt:message key="issuer.key.password.is.required"/>');
              return false;
-           }          
+           }
+
+          value = document.getElementsByName("<%=XKMSMgtConstants.CONFIRM_ISSUER_KEY_PASSWORD%>")[0].value;
+          if (value != issuerKeyPass) {
+             CARBON.showWarningDialog('<fmt:message key="issuer.key.passwords.do.not.match"/>');
+             return false;
+           }
+
+          if (document.getElementsByName("<%=XKMSMgtConstants.DEFAULT_PRIVATE_KEY_PASSWORD%>")[0].value !=
+              document.getElementsByName("<%=XKMSMgtConstants.CONFIRM_DEFAULT_PRIVATE_KEY_PASSWORD%>")[0].value) {
+             CARBON.showWarningDialog('<fmt:message key="default.private.key.passwords.do.not.match"/>');
+             return false;
+           }
           document.xkms_params.submit();
         }
     </script>
@@ -125,7 +155,13 @@
 				                    <tr>
 				                        <td><fmt:message key='server.authentication.code'/><span class="required">*</span></td>
 				                        <td><input type="password" class="text-box-big" id="<%=XKMSMgtConstants.SERVER_AUTHENTICATION_CODE%>"
-				                                   name="<%=XKMSMgtConstants.SERVER_AUTHENTICATION_CODE%>" type="text"
+				                                   name="<%=XKMSMgtConstants.SERVER_AUTHENTICATION_CODE%>"
+				                                   value="<%=Utils.getInputFieldValue(configData.getAuthenCode())%>"></td>
+				                    </tr>
+                                    <tr>
+				                        <td><fmt:message key='confirm.server.authentication.code'/><span class="required">*</span></td>
+				                        <td><input type="password" class="text-box-big" id="<%=XKMSMgtConstants.CONFIRM_SERVER_AUTHENTICATION_CODE%>"
+				                                   name="<%=XKMSMgtConstants.CONFIRM_SERVER_AUTHENTICATION_CODE%>"
 				                                   value="<%=Utils.getInputFieldValue(configData.getAuthenCode())%>"></td>
 				                    </tr>
 				                    <tr >
@@ -137,31 +173,49 @@
 				                    <tr>
 				                        <td><fmt:message key='keystore.password'/><span class="required">*</span></td>
 				                        <td><input type="password" class="text-box-big" id="<%=XKMSMgtConstants.KEY_STORE_PASSWORD%>"
-				                                   name="<%=XKMSMgtConstants.KEY_STORE_PASSWORD%>" type="text"
+				                                   name="<%=XKMSMgtConstants.KEY_STORE_PASSWORD%>"
+				                                   value="<%=Utils.getInputFieldValue(configData.getKeystorePassword())%>"></td>
+				                    </tr>
+                                    <tr>
+				                        <td><fmt:message key='confirm.keystore.password'/><span class="required">*</span></td>
+				                        <td><input type="password" class="text-box-big" id="<%=XKMSMgtConstants.CONFIRM_KEY_STORE_PASSWORD%>"
+				                                   name="<%=XKMSMgtConstants.CONFIRM_KEY_STORE_PASSWORD%>" class="text-box-big"
 				                                   value="<%=Utils.getInputFieldValue(configData.getKeystorePassword())%>"></td>
 				                    </tr>
 				                    <tr>
 				                        <td><fmt:message key='server.certificate.alias'/><span class="required">*</span></td>
-				                        <td><input class="text-box-big" id="<%=XKMSMgtConstants.SERVER_CERT_ALIACE%>"
-				                                   name="<%=XKMSMgtConstants.SERVER_CERT_ALIACE%>" type="text"
+				                        <td><input class="text-box-big" id="<%=XKMSMgtConstants.SERVER_CERT_ALIAS%>"
+				                                   name="<%=XKMSMgtConstants.SERVER_CERT_ALIAS%>" type="text"
 				                                   value="<%=Utils.getInputFieldValue(configData.getServerCertAlias())%>"></td>
 				                    </tr>
 				                    <tr>
 				                        <td><fmt:message key='server.key.password'/><span class="required">*</span></td>
 				                        <td><input type="password" class="text-box-big" id="<%=XKMSMgtConstants.SERVER_KEY_PASSWORD%>"
-				                                   name="<%=XKMSMgtConstants.SERVER_KEY_PASSWORD%>" type="text"
+				                                   name="<%=XKMSMgtConstants.SERVER_KEY_PASSWORD%>"
+				                                   value="<%=Utils.getInputFieldValue(configData.getServerKeyPassword())%>"></td>
+				                    </tr>
+                                    <tr>
+				                        <td><fmt:message key='confirm.server.key.password'/><span class="required">*</span></td>
+				                        <td><input type="password" class="text-box-big" id="<%=XKMSMgtConstants.CONFIRM_SERVER_KEY_PASSWORD%>"
+				                                   name="<%=XKMSMgtConstants.CONFIRM_SERVER_KEY_PASSWORD%>"
 				                                   value="<%=Utils.getInputFieldValue(configData.getServerKeyPassword())%>"></td>
 				                    </tr>
 				                    <tr>
 				                        <td><fmt:message key='issuer.certificate.alias'/><span class="required">*</span></td>
-				                        <td><input class="text-box-big" id="<%=XKMSMgtConstants.ISSUER_CERT_ALIACE%>"
-				                                   name="<%=XKMSMgtConstants.ISSUER_CERT_ALIACE%>" type="text"
+				                        <td><input class="text-box-big" id="<%=XKMSMgtConstants.ISSUER_CERT_ALIAS%>"
+				                                   name="<%=XKMSMgtConstants.ISSUER_CERT_ALIAS%>" type="text"
 				                                   value="<%=Utils.getInputFieldValue(configData.getIssuerCertAlias())%>"></td>
 				                    </tr>
 				                    <tr>
 				                        <td><fmt:message key='issuer.key.password'/><span class="required">*</span></td>
 				                        <td><input type="password" class="text-box-big" id="<%=XKMSMgtConstants.ISSUER_KEY_PASSWORD%>"
-				                                   name="<%=XKMSMgtConstants.ISSUER_KEY_PASSWORD%>" type="text"
+				                                   name="<%=XKMSMgtConstants.ISSUER_KEY_PASSWORD%>"
+				                                   value="<%=Utils.getInputFieldValue(configData.getIssuerKeyPassword())%>"></td>
+				                    </tr>
+                                    <tr>
+				                        <td><fmt:message key='confirm.issuer.key.password'/><span class="required">*</span></td>
+				                        <td><input type="password" class="text-box-big" id="<%=XKMSMgtConstants.CONFIRM_ISSUER_KEY_PASSWORD%>"
+				                                   name="<%=XKMSMgtConstants.CONFIRM_ISSUER_KEY_PASSWORD%>"
 				                                   value="<%=Utils.getInputFieldValue(configData.getIssuerKeyPassword())%>"></td>
 				                    </tr>
 				                    <tr>
@@ -173,7 +227,14 @@
 				                    <tr>
 				                        <td><fmt:message key='default.private.key.password'/></td>
 				                       <td><input type="password" class="text-box-big" id="<%=XKMSMgtConstants.DEFAULT_PRIVATE_KEY_PASSWORD%>"
-				                                   name="<%=XKMSMgtConstants.DEFAULT_PRIVATE_KEY_PASSWORD%>" type="text"
+				                                   name="<%=XKMSMgtConstants.DEFAULT_PRIVATE_KEY_PASSWORD%>"
+				                                   value="<%=Utils.getInputFieldValue(configData.getDefaultPrivateKeyPassword())%>">
+				                        </td>
+				                    </tr>
+                                    <tr>
+				                        <td><fmt:message key='confirm.default.private.key.password'/></td>
+				                       <td><input type="password" class="text-box-big" id="<%=XKMSMgtConstants.CONFIRM_DEFAULT_PRIVATE_KEY_PASSWORD%>"
+				                                   name="<%=XKMSMgtConstants.CONFIRM_DEFAULT_PRIVATE_KEY_PASSWORD%>"
 				                                   value="<%=Utils.getInputFieldValue(configData.getDefaultPrivateKeyPassword())%>">
 				                        </td>
 				                    </tr>

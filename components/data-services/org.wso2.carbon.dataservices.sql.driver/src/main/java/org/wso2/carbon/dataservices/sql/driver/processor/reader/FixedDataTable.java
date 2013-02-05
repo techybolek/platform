@@ -18,38 +18,22 @@
  */
 package org.wso2.carbon.dataservices.sql.driver.processor.reader;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import org.wso2.carbon.dataservices.sql.driver.parser.Constants;
+import org.wso2.carbon.dataservices.sql.driver.query.ColumnInfo;
+
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * Fixed data table implementation.
  */
-public class FixedDataTable implements DataTable {
+public class FixedDataTable extends DataTable {
 
     private Map<Integer, DataRow> rows;
 
-    private String tableName;
-
-    private Map<String, Integer> headers;
-
-    public FixedDataTable(String tableName, Map<String, Integer> headers) {
-        this.tableName = tableName;
-        this.headers = headers;
-        this.rows = new HashMap<Integer, DataRow>();
-    }
-
-    @Override
-    public String getTableName() {
-        return tableName;
-    }
-
-    @Override
-    public Map<String, Integer> getHeaders() {
-        return headers;
+    public FixedDataTable(String tableName, ColumnInfo[] headers) {
+        super(tableName, headers);
+        this.rows = Collections.synchronizedMap(new TreeMap<Integer, DataRow>());
     }
 
     @Override
@@ -149,9 +133,9 @@ public class FixedDataTable implements DataTable {
     
 	@Override
 	public Map<Integer, DataRow> applyCondition(String column,
-			String value, String operator) {
+			String value, String operator) throws SQLException {
 		Map<Integer, DataRow> dataRows = new HashMap<Integer, DataRow>(this.getRows());
-		int cellId = this.getHeaders().get(column);
+		int cellId = this.getHeader(column).getId();
 		if (Constants.EQUAL.equals(operator)) {
 			this.handleEqualCondition(dataRows, cellId, value, operator);
 		} else if (Constants.GREATER_THAN.equals(operator)) {
@@ -176,11 +160,6 @@ public class FixedDataTable implements DataTable {
 		for (int rowId : rowIds) {
 			this.getRows().remove(rowId);
 		}
-	}
-
-	@Override
-	public Map<String, Integer> getHeaderTypes() throws SQLException {
-		throw new SQLException("getHeaderTypes() not implemented in FixedDataTable");
 	}
 
 }

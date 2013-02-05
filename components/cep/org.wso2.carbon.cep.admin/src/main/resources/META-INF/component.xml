@@ -34,24 +34,8 @@
             <ResourceId>/permission/admin/manage/cep/addBucket</ResourceId>
         </ManagementPermission>
         <ManagementPermission>
-            <DisplayName>Add Input</DisplayName>
-            <ResourceId>/permission/admin/manage/cep/addInput</ResourceId>
-        </ManagementPermission>
-        <ManagementPermission>
-            <DisplayName>Add Query</DisplayName>
-            <ResourceId>/permission/admin/manage/cep/addQuery</ResourceId>
-        </ManagementPermission>
-        <ManagementPermission>
             <DisplayName>Delete Bucket</DisplayName>
             <ResourceId>/permission/admin/manage/cep/deleteBucket</ResourceId>
-        </ManagementPermission>
-        <ManagementPermission>
-            <DisplayName>Delete Input</DisplayName>
-            <ResourceId>/permission/admin/manage/cep/deleteInput</ResourceId>
-        </ManagementPermission>
-        <ManagementPermission>
-            <DisplayName>Delete Query</DisplayName>
-            <ResourceId>/permission/admin/manage/cep/deleteQuery</ResourceId>
         </ManagementPermission>
         <ManagementPermission>
             <DisplayName>Edit Bucket</DisplayName>

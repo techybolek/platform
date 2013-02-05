@@ -4,16 +4,16 @@ package org.wso2.carbon.cep.core;
 /**
  * This class contains the vary basic information of the bucket
  * */
-public class BucketBasicInfo {
-   /**
-    * Name of the bucket
-    * */
-   private String  name;
+public class BucketBasicInfo implements Comparable<BucketBasicInfo>{
+    /**
+     * Name of the bucket
+     * */
+    private String  name;
 
     /**
      * Description about the bucket
      * */
-   private String description;
+    private String description;
 
 
     public String getName() {
@@ -30,5 +30,10 @@ public class BucketBasicInfo {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public int compareTo(BucketBasicInfo o) {
+        return this.name.compareTo(o.getName()) ;
     }
 }

@@ -35,11 +35,17 @@
 
     String action = request.getParameter("action");
     String serverProfilePath = request.getParameter("serverProfilePath");
+    String serverIp = request.getParameter("ip");
+    String serverPort = request.getParameter("port");
     String responseText = "";
 
     if(ddlAjaxProcessorHelper.isNotNullOrEmpty(action)){
         if(action.equals("getServerProfiles") && ddlAjaxProcessorHelper.isNotNullOrEmpty(serverProfilePath)){
             responseText = ddlAjaxProcessorHelper.getServerProfileNames(serverProfilePath);
+            out.write(responseText);
+        } else if(action.equals("testServer") && ddlAjaxProcessorHelper.isNotNullOrEmpty(serverIp)
+                  && ddlAjaxProcessorHelper.isNotNullOrEmpty(serverPort)){
+            responseText = ddlAjaxProcessorHelper.backendServerExists(serverIp, serverPort);
             out.write(responseText);
         } else {
             out.write(0);

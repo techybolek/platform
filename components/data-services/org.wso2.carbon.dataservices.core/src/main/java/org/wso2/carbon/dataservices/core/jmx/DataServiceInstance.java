@@ -24,7 +24,7 @@ import java.util.Set;
 
 import org.wso2.carbon.dataservices.common.DBConstants;
 import org.wso2.carbon.dataservices.core.description.config.CSVConfig;
-import org.wso2.carbon.dataservices.core.description.config.CarbonDataSourceConfig;
+import org.wso2.carbon.dataservices.core.description.config.SQLCarbonDataSourceConfig;
 import org.wso2.carbon.dataservices.core.description.config.Config;
 import org.wso2.carbon.dataservices.core.description.config.ExcelConfig;
 import org.wso2.carbon.dataservices.core.description.config.GSpreadConfig;
@@ -125,7 +125,7 @@ public class DataServiceInstance implements DataServiceInstanceMBean {
 			return DBConstants.DataSourceTypes.RDBMS;
 		} else if (config instanceof JNDIConfig) {
 			return DBConstants.DataSourceTypes.JNDI;
-		} else if (config instanceof CarbonDataSourceConfig) {
+		} else if (config instanceof SQLCarbonDataSourceConfig) {
 			return DBConstants.DataSourceTypes.CARBON;
 		} else if (config instanceof ExcelConfig) {
 			return DBConstants.DataSourceTypes.EXCEL;

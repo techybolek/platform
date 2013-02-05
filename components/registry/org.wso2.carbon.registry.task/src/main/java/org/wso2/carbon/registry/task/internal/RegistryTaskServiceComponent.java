@@ -20,10 +20,9 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.CarbonException;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ntask.common.TaskException;
-import org.wso2.carbon.ntask.core.AbstractTask;
-import org.wso2.carbon.ntask.core.Task;
 import org.wso2.carbon.ntask.core.TaskInfo;
 import org.wso2.carbon.ntask.core.TaskManager;
 import org.wso2.carbon.ntask.core.service.TaskService;
@@ -36,7 +35,10 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @scr.component name="org.wso2.carbon.registry.task" immediate="true"
@@ -71,13 +73,13 @@ public class RegistryTaskServiceComponent {
         }
         try {
             TaskManager taskManager = null;
-            SuperTenantCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.startTenantFlow();
             try {
-                SuperTenantCarbonContext.getCurrentContext().setTenantId(
+                PrivilegedCarbonContext.getCurrentContext().setTenantId(
                         MultitenantConstants.SUPER_TENANT_ID);
                 taskManager = taskService.getTaskManager(REGISTRY_TASK_MANAGER);
             } finally {
-                SuperTenantCarbonContext.endTenantFlow();
+                PrivilegedCarbonContext.endTenantFlow();
             }
             if (taskManager != null) {
                 registerTasks(taskManager);
@@ -100,7 +102,8 @@ public class RegistryTaskServiceComponent {
             if (registryXML.exists()) {
                 try {
                     FileInputStream fileInputStream = new FileInputStream(registryXML);
-                    StAXOMBuilder builder = new StAXOMBuilder(fileInputStream);
+                    StAXOMBuilder builder = new StAXOMBuilder(
+                            CarbonUtils.replaceSystemVariablesInXml(fileInputStream));
                     OMElement configElement = builder.getDocumentElement();
                     OMElement taskElement = configElement.getFirstChildWithName(new QName("tasks"));
                     if (taskElement != null) {
@@ -135,6 +138,8 @@ public class RegistryTaskServiceComponent {
                     log.error("Unable to parse registry.xml", e);
                 } catch (IOException e) {
                     log.error("Unable to read registry.xml", e);
+                } catch (CarbonException e) {
+                    log.error("An error occurred during system variable replacement", e);
                 }
             }
         }
@@ -143,13 +148,13 @@ public class RegistryTaskServiceComponent {
     protected void unsetTaskService(TaskService taskService) {
         try {
             TaskManager taskManager = null;
-            SuperTenantCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.startTenantFlow();
             try {
-                SuperTenantCarbonContext.getCurrentContext().setTenantId(
+                PrivilegedCarbonContext.getCurrentContext().setTenantId(
                         MultitenantConstants.SUPER_TENANT_ID);
                 taskManager = taskService.getTaskManager(REGISTRY_TASK_MANAGER);
             } finally {
-                SuperTenantCarbonContext.endTenantFlow();
+                PrivilegedCarbonContext.endTenantFlow();
             }
             if (taskManager != null) {
                 for (TaskInfo taskInfo : taskManager.getAllTasks()) {

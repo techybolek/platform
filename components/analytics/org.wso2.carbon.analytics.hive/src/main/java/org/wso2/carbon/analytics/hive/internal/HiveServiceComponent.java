@@ -33,14 +33,14 @@ import org.wso2.carbon.analytics.hive.ServiceHolder;
 import org.wso2.carbon.analytics.hive.Utils;
 import org.wso2.carbon.analytics.hive.exception.HiveExecutionException;
 import org.wso2.carbon.analytics.hive.impl.HiveExecutorServiceImpl;
-import org.wso2.carbon.analytics.hive.multitenancy.HiveAxis2ConfigObserver;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
+import org.wso2.carbon.analytics.hive.web.HiveScriptStoreService;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.rssmanager.core.service.RSSManagerService;
-import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
@@ -61,6 +61,8 @@ import java.util.concurrent.Executors;
  * cardinality="1..1" policy="dynamic" bind="setTaskService" unbind="unsetTaskService"
  * @scr.reference name="rss.service" interface="org.wso2.carbon.rssmanager.core.service.RSSManagerService"
  * cardinality="1..1" policy="dynamic" bind="setRSSManagerService" unbind="unsetRSSManagerService"
+ * @scr.reference name="user.realmservice.default" interface="org.wso2.carbon.user.core.service.RealmService"
+ * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
  */
 
 public class HiveServiceComponent {
@@ -81,8 +83,13 @@ public class HiveServiceComponent {
     protected void activate(ComponentContext ctx) {
 
         BundleContext bundleContext = ctx.getBundleContext();
-        bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(),
-                                      new HiveAxis2ConfigObserver(), null);
+
+//        Axis2ConfigurationContextObserver tenantObserver = new HiveAxis2ConfigObserver();
+//        ((HiveAxis2ConfigObserver) tenantObserver).initializeTenant(
+//                PrivilegedCarbonContext.getCurrentContext().getTenantId());
+//
+//        bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(),
+//                                      tenantObserver, null);
 
         if (log.isDebugEnabled()) {
             log.debug("Starting 'HiveServiceComponent'");
@@ -106,12 +113,21 @@ public class HiveServiceComponent {
         // Set and register HiveExecutorService
         ServiceHolder.setHiveExecutorService(new HiveExecutorServiceImpl());
 
+        ServiceHolder.setHiveScriptStoreService(new HiveScriptStoreService());
+
         hiveServiceRegistration = ctx.getBundleContext().registerService(
                 HiveExecutorService.class.getName(),
                 ServiceHolder.getHiveExecutorService(),
                 null);
 
-        initializeMetaStore();
+        hiveServiceRegistration = ctx.getBundleContext().registerService(
+                HiveScriptStoreService.class.getName(),
+                ServiceHolder.getHiveScriptStoreService(),
+                null);
+
+        //initializeMetaStore();
+
+        Utils.setConnectRSS(true);
 
 /*        HiveConnectionManager connectionManager = HiveConnectionManager.getInstance();
         connectionManager.loadHiveConnectionConfiguration(ctx.getBundleContext());*/
@@ -215,11 +231,26 @@ DataSourceInformationRepository repository = dataSourceInfoService.
         ServiceHolder.setRSSManagerService(null);
     }
 
+    protected void setRealmService(RealmService realmService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting the Realm Service");
+        }
+
+        ServiceHolder.setRealmService(realmService);
+    }
+
+    protected void unsetRealmService(RealmService realmService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting the Realm Service");
+        }
+
+        ServiceHolder.setRealmService(null);
+    }
+
     private void initializeMetaStore() {
         log.info("Running Hive meta store validation query..");
 
-        String validationQuery = "CREATE TABLE IF NOT EXISTS tmp (key INT);\n" +
-                                 "DROP TABLE tmp;";
+        String validationQuery = "show tables;";
         try {
             ServiceHolder.getHiveExecutorService().execute(validationQuery);
         } catch (HiveExecutionException e) {

@@ -89,7 +89,7 @@ function addRowForSP(param1, param2, param3, tableName, delFunction) {
     inputElem.appendChild(option);
 
     var delCell = document.createElement('td');
-    delCell.innerHTML = '<a id="deleteLink" href="#" onClick="' + delFunction + '(this.parentNode.parentNode.rowIndex,\''+tableName+'\')" alt="Delete" class="icon-link" style="background-image:url(../admin/images/delete.gif);">Delete</a>';
+    delCell.innerHTML = '<a id="deleteLink" onClick="' + delFunction + '(this.parentNode.parentNode.rowIndex,\''+tableName+'\')" alt="Delete" class="icon-link" style="background-image:url(../admin/images/delete.gif);">Delete</a>';
 
     var rowtoAdd = document.createElement('tr');
     rowtoAdd.appendChild(param1Cell);

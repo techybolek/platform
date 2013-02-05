@@ -18,8 +18,16 @@ package org.wso2.carbon.throttling.agent.cache;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.registry.api.RegistryService;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.stratos.common.constants.StratosConstants;
+import org.wso2.carbon.stratos.common.util.MeteringAccessValidationUtils;
+import org.wso2.carbon.throttling.agent.internal.ThrottlingAgentServiceComponent;
 
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,7 +43,9 @@ public class ThrottlingInfoCache {
             new ConcurrentHashMap<Integer, TenantThrottlingInfo>();
 
     public void addTenant(int tenantId){
-        tenantThrottlingInfoMap.put(tenantId, new TenantThrottlingInfo());
+        if(!tenantThrottlingInfoMap.containsKey(tenantId)){
+            tenantThrottlingInfoMap.put(tenantId, getTenantThrottlingInfoFromRegistry(tenantId));
+        }
     }
 
     public void deleteTenant(int tenantId){
@@ -64,8 +74,45 @@ public class ThrottlingInfoCache {
 
     public TenantThrottlingInfo getTenantThrottlingInfo(int tenantId){
         if(!tenantThrottlingInfoMap.containsKey(tenantId)){
-            tenantThrottlingInfoMap.put(tenantId, new TenantThrottlingInfo());
+            tenantThrottlingInfoMap.put(tenantId, getTenantThrottlingInfoFromRegistry(tenantId));
         }
         return tenantThrottlingInfoMap.get(tenantId);
+    }
+
+    private TenantThrottlingInfo getTenantThrottlingInfoFromRegistry (int tenantId) {
+        log.info("Tenant throttling info is not in the cache. Hence, getting it from registry");
+        RegistryService registryService = ThrottlingAgentServiceComponent.getThrottlingAgent().
+                                            getRegistryService();
+        TenantThrottlingInfo tenantThrottlingInfo = new TenantThrottlingInfo();
+        try{
+            UserRegistry superTenantGovernanceRegistry = (UserRegistry)registryService.getGovernanceSystemRegistry();
+            String tenantValidationInfoResourcePath =
+                    StratosConstants.TENANT_USER_VALIDATION_STORE_PATH +
+                            RegistryConstants.PATH_SEPARATOR + tenantId;
+
+            if (superTenantGovernanceRegistry.resourceExists(tenantValidationInfoResourcePath)) {
+                Resource tenantValidationInfoResource =
+                        superTenantGovernanceRegistry.get(tenantValidationInfoResourcePath);
+                Properties properties = tenantValidationInfoResource.getProperties();
+                Set<String> actions = MeteringAccessValidationUtils.getAvailableActions(properties);
+                for (String action : actions) {
+                    String blocked =
+                            tenantValidationInfoResource.getProperty(MeteringAccessValidationUtils
+                                    .generateIsBlockedPropertyKey(action));
+
+                    String blockMessage =
+                            tenantValidationInfoResource.getProperty(MeteringAccessValidationUtils
+                                    .generateErrorMsgPropertyKey(action));
+
+                    tenantThrottlingInfo.updateThrottlingActionInfo(action,
+                            new ThrottlingActionInfo("true".equals(blocked), blockMessage));
+                }
+            }
+        } catch (Exception e){
+            log.error("Error occurred while obtaining governance system registry from registry service", e);
+        }
+
+        return tenantThrottlingInfo;
+
     }
 }

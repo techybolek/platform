@@ -80,7 +80,10 @@ public class HumanTaskServiceComponent {
 
                 registerAxis2ConfigurationContextObserver();
                 registerHumanTaskServerService();
-                registerHumanTaskUIResourceProvider(htServerHolder);
+
+                if(HumanTaskServerHolder.getInstance().getHtServer().getServerConfig().isUiRenderingEnabled()) {
+                    registerHumanTaskUIResourceProvider(htServerHolder);
+                }
 
             } else {
                 log.warn("Couldn't initialize Human Task Server, " +

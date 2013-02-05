@@ -22,15 +22,15 @@
 <%@ page import="org.wso2.carbon.CarbonConstants"%>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage"%>
 <%@ page import="org.wso2.carbon.utils.ServerConstants"%>
-<%@ page import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementPolicyAdminServiceClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="java.util.ResourceBundle" %>
-<%@page import="java.lang.Exception"%>
+<%@ page import="java.lang.Exception"%>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.EntitledResultSetDTO" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.EntitledAttributesDTO" %>
 <%@ page import="java.util.Set" %>
 <%@ page import="java.util.HashSet" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementServiceClient" %>
 <%
     String subjectType = "";
     String action = "";
@@ -75,10 +75,10 @@
 
     try {
         if (subjectName != null) {
-            EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
+            EntitlementServiceClient client = new EntitlementServiceClient(cookie,
                     serverURL, configContext);
             results = client.getEntitledAttributes(subjectName, resourceName, subjectId, action,
-                                                   enableChildSearch, true);
+                                                   enableChildSearch);
 
             if(EntitlementPolicyConstants.SEARCH_ERROR.equals(results.getMessageType())){
 %>
@@ -290,7 +290,11 @@
                     if(entitledAttributes != null && entitledAttributes.length > 0) {
                         Set<String> resourceSet = new HashSet <String>();
                         for(EntitledAttributesDTO result : entitledAttributes){
-                            resourceSet.add(result.getResourceName());
+                            if(result.getAllResources()){
+                                resourceSet.add("ANY");            
+                            } else {
+                                resourceSet.add(result.getResourceName());
+                            }
                         }
                         for(String resource : resourceSet){
                 %>
@@ -302,8 +306,18 @@
                                 Set<String> actionSet = new HashSet<String>();
                                 String actionNames = "";
                                 for(EntitledAttributesDTO result : entitledAttributes){
-                                    if(resource.equals(result.getResourceName())){
-                                        actionSet.add(result.getAction());
+                                    if(result.getAllResources()){
+                                        if(result.getAllActions()){
+                                            actionSet.add("ANY");
+                                        } else {
+                                            actionSet.add(result.getAction());
+                                        }
+                                    } else if(resource.equals(result.getResourceName())){
+                                        if(result.getAllActions()){
+                                            actionSet.add("ANY");
+                                        } else {
+                                            actionSet.add(result.getAction());
+                                        }       
                                     }
                                 }
 

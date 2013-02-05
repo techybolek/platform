@@ -26,7 +26,9 @@ import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.thrift.data.ThriftEventBundle;
 import org.wso2.carbon.databridge.commons.utils.EventDefinitionConverterUtils;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * Util class used to convert Events to thrift format
@@ -34,12 +36,13 @@ import java.util.LinkedList;
 public final class ThriftEventConverter {
     private static Log log = LogFactory.getLog(ThriftEventConverter.class);
 
-    private ThriftEventConverter(){ }
+    private ThriftEventConverter() {
+    }
 
     public static ThriftEventBundle toThriftEventBundle(Event event,
                                                         ThriftEventBundle eventBundle,
                                                         String sessionId) {
-        ThriftEventBundle thriftEventBundle =eventBundle;
+        ThriftEventBundle thriftEventBundle = eventBundle;
         if (thriftEventBundle == null) {
             thriftEventBundle = new ThriftEventBundle();
             thriftEventBundle.setStringAttributeList(new LinkedList<String>());//adding string list
@@ -47,13 +50,15 @@ public final class ThriftEventConverter {
             thriftEventBundle.setSessionId(sessionId);
             thriftEventBundle.setEventNum(0);
         }
-        thriftEventBundle.setEventNum(thriftEventBundle.getEventNum()+1);
         thriftEventBundle.addToStringAttributeList(event.getStreamId());
         thriftEventBundle.addToLongAttributeList(event.getTimeStamp());
 
         thriftEventBundle = assignAttributes(thriftEventBundle, event.getMetaData());
         thriftEventBundle = assignAttributes(thriftEventBundle, event.getCorrelationData());
         thriftEventBundle = assignAttributes(thriftEventBundle, event.getPayloadData());
+        thriftEventBundle = assignMap(thriftEventBundle, event.getArbitraryDataMap());
+        thriftEventBundle.setEventNum(thriftEventBundle.getEventNum() + 1);
+
         return thriftEventBundle;
     }
 
@@ -92,18 +97,28 @@ public final class ThriftEventConverter {
                         thriftEventBundle.setDoubleAttributeList(new LinkedList<Double>());
                     }
                     thriftEventBundle.addToDoubleAttributeList((Double) object);
-                } else if(object == null){
+                } else if (object == null) {
                     if (!thriftEventBundle.isSetStringAttributeList()) {
                         thriftEventBundle.setStringAttributeList(new LinkedList<String>());
                     }
                     thriftEventBundle.addToStringAttributeList(EventDefinitionConverterUtils.nullString);
                 } else {
-                    log.error("Undefined attribute type : " +object);
+                    log.error("Undefined attribute type : " + object);
                 }
             }
         }
         return thriftEventBundle;
-
     }
+
+    private static ThriftEventBundle assignMap(ThriftEventBundle thriftEventBundle, Map<String, String> arbitraryDataMap) {
+        if (null != arbitraryDataMap) {
+            if (!thriftEventBundle.isSetArbitraryDataMapMap()) {
+                thriftEventBundle.setArbitraryDataMapMap(new HashMap<Integer, Map<String, String>>());
+            }
+            thriftEventBundle.putToArbitraryDataMapMap(thriftEventBundle.getEventNum(), arbitraryDataMap);
+        }
+        return thriftEventBundle;
+    }
+
 
 }

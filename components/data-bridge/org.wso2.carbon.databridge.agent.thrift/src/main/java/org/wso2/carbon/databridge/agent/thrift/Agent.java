@@ -112,6 +112,7 @@ public class Agent {
         } catch (Exception e) {
             log.warn("Agent shutdown failed");
         }
+        AgentHolder.setAgent(null);
     }
 
     /**
@@ -134,6 +135,7 @@ public class Agent {
         } catch (Exception e) {
             log.warn("Agent forceful shutdown failed",e);
         }
+        AgentHolder.setAgent(null);
     }
 
 

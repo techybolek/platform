@@ -18,17 +18,17 @@
  */
 package org.wso2.carbon.dataservices.sql.driver.query.insert;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.wso2.carbon.dataservices.sql.driver.TCustomConnection;
 import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataCell;
 import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataRow;
 import org.wso2.carbon.dataservices.sql.driver.processor.reader.DataTable;
 import org.wso2.carbon.dataservices.sql.driver.query.ParamInfo;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class represents a select query for custom data sources.
@@ -57,9 +57,9 @@ public class CustomInsertQuery extends InsertQuery {
 					this.getTargetTableName() + "' does not exist");
 		}
 		DataRow row = new DataRow(0);
-		List<DataCell> cells = new ArrayList<DataCell>();
+		Map<Integer, DataCell> cells = new HashMap<Integer, DataCell>();
 		for (ParamInfo param : getParameters()) {
-			cells.add(new DataCell(param.getOrdinal(), param.getSqlType(), 
+			cells.put(param.getOrdinal(), new DataCell(param.getOrdinal(), param.getSqlType(),
 					param.getValue()));	
 		}
 		row.setCells(cells);

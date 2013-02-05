@@ -59,4 +59,12 @@ public class EventQueue<E> {
         }
         return isScheduledForEventDispatching;
     }
+
+    public synchronized LinkedBlockingQueue<Event> getAndResetQueue() {
+        LinkedBlockingQueue<Event> oldQueue = eventQueue;
+        eventQueue = new LinkedBlockingQueue<Event>();
+        isScheduledForEventDispatching = false;
+        return oldQueue;
+    }
+
 }

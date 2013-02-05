@@ -36,7 +36,7 @@ import org.apache.shindig.gadgets.oauth.BasicOAuthStoreConsumerKeyAndSecret;
 import org.apache.shindig.gadgets.oauth.OAuthFetcherConfig;
 import org.apache.shindig.gadgets.oauth.OAuthRequest;
 import org.apache.shindig.gadgets.oauth.OAuthStore;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.dashboard.common.DashboardConstants;
 import org.wso2.carbon.dashboard.common.OAuthUtils;
 import org.wso2.carbon.registry.core.Collection;
@@ -159,7 +159,7 @@ public class GSOAuthModule extends AbstractModule {
         private void loadConsumers() {
             try {
 //                String oauthConfigString = ResourceLoader.getContent(OAUTH_CONFIG);
-                Integer tId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
+                Integer tId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
                 Registry reg = OAuthUtils.getRegistry(tId);
                 store.initFromConfigString(reg, (Collection) reg.get(DashboardConstants.OAUTH_KEY_STORE));
             } catch (Throwable t) {
@@ -177,7 +177,7 @@ public class GSOAuthModule extends AbstractModule {
         public OAuthStore getStore() {
             Integer tId = null;
             try {
-                tId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
+                tId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
                 return mtStore.get(tId);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
@@ -198,7 +198,7 @@ public class GSOAuthModule extends AbstractModule {
             RegistryBasedOAuthStore newStore = new RegistryBasedOAuthStore();
             Integer tId = null;
             try {
-                tId = SuperTenantCarbonContext.getCurrentContext().getTenantId();
+                tId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
                 mtStore.put(tId, newStore);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);

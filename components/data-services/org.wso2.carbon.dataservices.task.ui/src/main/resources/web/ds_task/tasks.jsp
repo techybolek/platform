@@ -78,7 +78,7 @@
                     <td>
                         <a href="javascript:editRow('<%=taskName%>')" id="config_link"
                            class="edit-icon-link"><fmt:message key="dataservices.task.edit"/></a>
-                        <a href="javascript:deleteRow('<%=taskName%>')"
+                        <a href="javascript:deleteRow('<%=taskName%>', '<fmt:message key="dataservices.task.delete.waring"/>')"
                            id="delete_link" class="delete-icon-link"><fmt:message
                                 key="dataservices.task.property.delete"/></a>
                     </td>

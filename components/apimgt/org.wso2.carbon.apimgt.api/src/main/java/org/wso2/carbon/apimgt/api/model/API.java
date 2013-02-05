@@ -45,6 +45,10 @@ public class API {
     private AuthorizationPolicy authorizationPolicy;
     private Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
 
+    //dirty pattern to identify which parts to be updated
+    private boolean apiHeaderChanged;
+    private boolean apiResourcePatternsChanged;
+
     private APIStatus status;
 
     private String technicalOwner;
@@ -52,6 +56,13 @@ public class API {
     private String businessOwner;
     private String businessOwnerEmail;
 
+    private String visibility;
+    private String visibleRoles;
+
+    private boolean endpointSecured = false;
+	private String endpointUTUsername;
+    private String endpointUTPassword;
+    
     public String getTechnicalOwner() {
         return technicalOwner;
     }
@@ -251,4 +262,78 @@ public class API {
     public void setWadlUrl(String wadlUrl) {
         this.wadlUrl = wadlUrl;
     }
+
+    public String getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
+    }
+
+    public String getVisibleRoles() {
+        return visibleRoles;
+    }
+
+    public void setVisibleRoles(String visibleRoles) {
+        this.visibleRoles = visibleRoles;
+    }
+
+    public boolean isApiHeaderChanged() {
+        return apiHeaderChanged;
+    }
+
+    public void setApiHeaderChanged(boolean apiHeaderChanged) {
+        this.apiHeaderChanged = apiHeaderChanged;
+    }
+
+    public boolean isApiResourcePatternsChanged() {
+        return apiResourcePatternsChanged;
+    }
+
+    public void setApiResourcePatternsChanged(boolean apiResourcePatternsChanged) {
+        this.apiResourcePatternsChanged = apiResourcePatternsChanged;
+    }
+    
+    /**
+  	 * @return the endpointUTUsername
+  	 */
+  	public String getEndpointUTUsername() {
+  		return endpointUTUsername;
+  	}
+
+  	/**
+  	 * @param endpointUTUsername the endpointUTUsername to set
+  	 */
+  	public void setEndpointUTUsername(String endpointUTUsername) {
+  		this.endpointUTUsername = endpointUTUsername;
+  	}
+
+  	/**
+  	 * @return the endpointUTPassword
+  	 */
+  	public String getEndpointUTPassword() {
+  		return endpointUTPassword;
+  	}
+
+  	/**
+  	 * @param endpointUTPassword the endpointUTPassword to set
+  	 */
+  	public void setEndpointUTPassword(String endpointUTPassword) {
+  		this.endpointUTPassword = endpointUTPassword;
+  	}
+  	
+ 	/**
+ 	 * @return the endpointSecured
+ 	 */
+ 	public boolean isEndpointSecured() {
+ 		return endpointSecured;
+ 	}
+
+ 	/**
+ 	 * @param endpointSecured the endpointSecured to set
+ 	 */
+ 	public void setEndpointSecured(boolean endpointSecured) {
+ 		this.endpointSecured = endpointSecured;
+ 	}
 }

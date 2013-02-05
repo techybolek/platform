@@ -16,20 +16,25 @@
 
 package org.wso2.carbon.discovery.util;
 
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.WSDL2Constants;
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.TransportInDescription;
+import org.apache.axis2.description.WSDL2Constants;
 import org.apache.axis2.description.java2wsdl.Java2WSDLConstants;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisObserver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.discovery.TargetServiceObserver;
 import org.wso2.carbon.discovery.DiscoveryConstants;
 import org.wso2.carbon.discovery.DiscoveryException;
+import org.wso2.carbon.discovery.TargetServiceObserver;
 import org.wso2.carbon.discovery.workers.MessageSender;
+import org.wso2.carbon.utils.NetworkUtils;
 
 import javax.xml.namespace.QName;
+import java.net.SocketException;
 import java.net.URI;
 import java.util.List;
 
@@ -159,5 +164,32 @@ public class Util {
         if (serviceObserver != null) {            
             observers.remove(serviceObserver);
         }
+    }
+
+    public static String getWsdlInformation(String serviceName,
+                                              AxisConfiguration axisConfig) throws AxisFault {
+        String ip;
+        try {
+            ip = NetworkUtils.getLocalHostname();
+        } catch (SocketException e) {
+            throw new AxisFault("Cannot get local host name", e);
+        }
+
+        TransportInDescription transportInDescription = axisConfig.getTransportIn("http");
+
+        if (transportInDescription == null) {
+            transportInDescription = axisConfig.getTransportIn("https");
+        }
+
+        if (transportInDescription != null) {
+            EndpointReference[] epr =
+                    transportInDescription.getReceiver().getEPRsForService(serviceName, ip);
+            String wsdlUrlPrefix = epr[0].getAddress();
+            if (wsdlUrlPrefix.endsWith("/")) {
+                wsdlUrlPrefix = wsdlUrlPrefix.substring(0, wsdlUrlPrefix.length() - 1);
+            }
+            return wsdlUrlPrefix + "?wsdl";
+        }
+        return null;
     }
 }

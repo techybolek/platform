@@ -22,52 +22,27 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>governance.metadata-feature</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.governance.metadata.ui.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Governance Metadata UI Feature</name>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.8</version>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for Front-end Governance Metadata functionality</description>
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.governance.list.ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.governance.generic.ui</artifactId>
+            <version>4.0.8</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.governance.generic.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.governance.list.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.governance.policy.ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.governance.schema.ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.governance.wsdl.ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.governance.services.ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.governance.services.stub</artifactId>
+            <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -93,7 +68,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.governance.metadata.ui</id>
-                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:console</propertyDef>
@@ -101,13 +76,6 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.list.ui</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.list.stub</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.policy.ui</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.schema.ui</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.services.ui</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.services.stub</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.wsdl.ui</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.wsdltool.ui</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.wsdltool.stub</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.generic.ui</bundleDef>

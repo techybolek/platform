@@ -78,7 +78,7 @@ function validateTaskInputs() {
     if (scheduleType == "" || scheduleType == null) {
         CARBON.showWarningDialog("Select a schedule type");
         return false;
-    } else if (scheduleType == "DSS Operation") {
+    } else if (scheduleType == "DataService Operation") {
         if (serviceName == "" || serviceName == null) {
             CARBON.showWarningDialog("Select a valid data service name");
             return false;
@@ -87,7 +87,7 @@ function validateTaskInputs() {
             CARBON.showWarningDialog("Select a valid data service operation");
             return false;
         }
-    } else if (scheduleType == "DSS Task Class") {
+    } else if (scheduleType == "DataService Task Class") {
         if (taskClass == "" || taskClass == null) {
             CARBON.showWarningDialog("Task Class cannot be empty");
             return false;
@@ -185,8 +185,10 @@ function isContainRaw(tbody) {
     return false;
 }
 
-function deleteRow(name){
-    document.location.href = "saveTask.jsp?" + "taskName=" + name + "&saveMode=delete";
+function deleteRow(name, msg){
+	CARBON.showConfirmationDialog(msg + "' " + name + " ' ?", function() {
+        document.location.href = "saveTask.jsp?" + "taskName=" + name + "&saveMode=delete";
+    });
 }
 
 function editRow(name) {

@@ -92,3 +92,17 @@ BEGIN
 END;
 /
 
+------
+CREATE OR REPLACE
+PROCEDURE getCustomersByNumber(custNo IN INTEGER, my_ref_cursor OUT SYS_REFCURSOR, custName OUT STRING) AS
+   BEGIN
+   SELECT customerName INTO custName FROM Customers WHERE customerNumber=custNo;
+   OPEN my_ref_cursor FOR
+	    SELECT contactFirstName,phone
+            FROM   Customers
+            WHERE  customerNumber > custNo;
+   END getCustomersByNumber;
+/
+------
+
+

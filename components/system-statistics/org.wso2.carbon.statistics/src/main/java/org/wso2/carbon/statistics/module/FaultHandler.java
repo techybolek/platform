@@ -22,7 +22,6 @@ import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.WSDL2Constants;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -69,15 +68,6 @@ public class FaultHandler extends AbstractHandler {
                 Parameter parameter = axisOperation.getParameter(StatisticsConstants.OPERATION_FAULT_COUNTER);
                 if (parameter != null) {
                     ((AtomicInteger) parameter.getValue()).incrementAndGet();
-
-                    updateCurrentInvocationOperationStatistics(
-                            msgContext,
-                            StatisticsConstants.CURRENT_OPERATION_AND_SERVICE_FAULT_COUNTER,
-                            1);
-                    updateCurrentInvocationOperationStatistics(
-                            msgContext,
-                            StatisticsConstants.CURRENT_OUT_OPERATION_AND_SERVICE_COUNTER,
-                            0);
                 } else {
                     AtomicInteger counter = new AtomicInteger(0);
                     counter.incrementAndGet();
@@ -85,15 +75,6 @@ public class FaultHandler extends AbstractHandler {
                     parameter.setName(StatisticsConstants.OPERATION_FAULT_COUNTER);
                     parameter.setValue(counter);
                     axisOperation.addParameter(parameter);
-
-                    updateCurrentInvocationOperationStatistics(
-                            msgContext,
-                            StatisticsConstants.CURRENT_OPERATION_AND_SERVICE_FAULT_COUNTER,
-                            1);
-                    updateCurrentInvocationOperationStatistics(
-                            msgContext,
-                            StatisticsConstants.CURRENT_OUT_OPERATION_AND_SERVICE_COUNTER,
-                            0);
                 }
 
                 // Process operation request count
@@ -103,21 +84,12 @@ public class FaultHandler extends AbstractHandler {
                 if (operationParameter != null) {
                     ((AtomicInteger) operationParameter.getValue()).incrementAndGet();
 
-                    updateCurrentInvocationOperationStatistics(
-                            msgContext,
-                            StatisticsConstants.CURRENT_IN_OPERATION_AND_SERVICE_COUNTER,
-                            1);
                 } else {
                     AtomicInteger operationCounter = new AtomicInteger(1);
                     operationParameter = new Parameter();
                     operationParameter.setName(StatisticsConstants.IN_OPERATION_COUNTER);
                     operationParameter.setValue(operationCounter);
                     axisOperation.addParameter(operationParameter);
-
-                    updateCurrentInvocationOperationStatistics(
-                            msgContext,
-                            StatisticsConstants.CURRENT_IN_OPERATION_AND_SERVICE_COUNTER,
-                            1);
                 }
             }
             updateStatistics(msgContext);
@@ -125,17 +97,6 @@ public class FaultHandler extends AbstractHandler {
             log.error("Could not call FaultHandler.invoke", e);
          }
         return InvocationResponse.CONTINUE;
-    }
-
-    private void updateCurrentInvocationOperationStatistics(MessageContext msgContext,
-                                                            String operationAndServiceCounterName, int value)
-            throws AxisFault {
-        //Set count 1
-        Parameter currentCounterParam = new Parameter();
-        currentCounterParam.setName(operationAndServiceCounterName);
-        currentCounterParam.setValue(value);
-        msgContext.getAxisOperation().addParameter(currentCounterParam);
-        msgContext.getAxisService().addParameter(currentCounterParam);
     }
 
     private void updateStatistics(MessageContext msgContext) throws AxisFault {
@@ -167,23 +128,14 @@ public class FaultHandler extends AbstractHandler {
      */
     private void updateCurrentInvocationGlobalStatistics(MessageContext msgContext) throws AxisFault{
 
-        AxisConfiguration axisConfiguration = msgContext.getConfigurationContext().getAxisConfiguration();
         //Set request count 1
-        Parameter globalCurrentRequestCounterParam = new Parameter();
-        globalCurrentRequestCounterParam.setName(StatisticsConstants.GLOBAL_CURRENT_REQUEST_COUNTER);
-        globalCurrentRequestCounterParam.setValue(1);
-        axisConfiguration.addParameter(globalCurrentRequestCounterParam);
+        msgContext.setProperty(StatisticsConstants.GLOBAL_CURRENT_REQUEST_COUNTER,1);
 
         //Set response count 0
-        Parameter globalCurrentResponseCounterParam = new Parameter();
-        globalCurrentResponseCounterParam.setName(StatisticsConstants.GLOBAL_CURRENT_RESPONSE_COUNTER);
-        globalCurrentResponseCounterParam.setValue(0);
-        axisConfiguration.addParameter(globalCurrentResponseCounterParam);
+        msgContext.setProperty(StatisticsConstants.GLOBAL_CURRENT_RESPONSE_COUNTER,0);
 
         //Set fault count 1
-        Parameter globalCurrentFaultCounterParam = new Parameter();
-        globalCurrentFaultCounterParam.setName(StatisticsConstants.GLOBAL_CURRENT_FAULT_COUNTER);
-        globalCurrentFaultCounterParam.setValue(1);
-        axisConfiguration.addParameter(globalCurrentFaultCounterParam);
+        msgContext.setProperty(StatisticsConstants.GLOBAL_CURRENT_FAULT_COUNTER,1);
+
     }
 }

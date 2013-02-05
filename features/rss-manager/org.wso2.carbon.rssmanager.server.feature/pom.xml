@@ -5,12 +5,13 @@
     <parent>
         <artifactId>rss-manager-feature</artifactId>
         <groupId>org.wso2.carbon</groupId>
-        <version>4.0.0-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
+        <version>4.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.rssmanager.server.feature</artifactId>
+    <version>4.0.6</version>
     <name>RSS Manager Server Feature</name>
     <packaging>pom</packaging>
     <url>http://wso2.org</url>
@@ -21,24 +22,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rssmanager.core</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.platform.patch.version.406}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rssmanager.common</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.platform.patch.version.405}</version>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.service.mgt.server.feature</artifactId>
-            <version>${project.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.rssmanager.ui</artifactId>
-                <version>${wso2.carbon.version}</version>
-            </dependency>
     </dependencies>
 
     <build>
@@ -81,7 +71,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.rssmanager.server</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server
@@ -91,19 +81,13 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <!--bundleDef>
-                                    org.wso2.carbon:org.wso2.carbon.service.mgt:${carbon.platform.version}
-                                </bundleDef-->
                                 <bundleDef>
-                                    org.wso2.carbon:org.wso2.carbon.rssmanager.core:${carbon.platform.version}
+                                    org.wso2.carbon:org.wso2.carbon.rssmanager.core:${carbon.platform.patch.version.406}
                                 </bundleDef>
                                 <bundleDef>
-                                    org.wso2.carbon:org.wso2.carbon.rssmanager.common:${carbon.platform.version}
+                                    org.wso2.carbon:org.wso2.carbon.rssmanager.common:${carbon.platform.patch.version.405}
                                 </bundleDef>
                             </bundles>
-                            <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.service.mgt.server.feature</includedFeatureDef>
-                            </includedFeatures>
                         </configuration>
                     </execution>
                 </executions>
@@ -129,4 +113,10 @@
             </plugin>
         </plugins>
     </build>
+
+   <properties>
+       <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
+       <carbon.platform.patch.version.406>4.0.6</carbon.platform.patch.version.406>
+   </properties>
+
 </project>

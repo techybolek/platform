@@ -122,6 +122,8 @@ public class UserResource extends AbstractResource {
                 String error = SCIMConstants.CONTENT_TYPE_HEADER + " not present in the request header";
                 throw new FormatNotSupportedException(error);
             }
+            //identify input format
+            inputFormat = identifyInputFormat(inputFormat);
             //set the format in which the response should be encoded, if not specified in the request,
             // defaults to application/json.
             outputFormat = identifyOutputFormat(outputFormat);
@@ -270,6 +272,7 @@ public class UserResource extends AbstractResource {
             return new JAXRSResponseBuilder().buildResponse(scimResponse);
 
         } catch (CharonException e) {
+            e.printStackTrace();
             //create SCIM response with code as the same of exception and message as error message of the exception
             if (e.getCode() == -1) {
                 e.setCode(ResponseCodeConstants.CODE_INTERNAL_SERVER_ERROR);
@@ -277,12 +280,15 @@ public class UserResource extends AbstractResource {
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (UnauthorizedException e) {
+            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (FormatNotSupportedException e) {
+            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (BadRequestException e) {
+            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         }
@@ -305,6 +311,8 @@ public class UserResource extends AbstractResource {
                 String error = SCIMConstants.CONTENT_TYPE_HEADER + " not present in the request header";
                 throw new FormatNotSupportedException(error);
             }
+            //identify input format
+            inputFormat = identifyInputFormat(inputFormat);
             //set the format in which the response should be encoded, if not specified in the request,
             // defaults to application/json.
             outputFormat = identifyOutputFormat(outputFormat);
@@ -329,6 +337,7 @@ public class UserResource extends AbstractResource {
             return new JAXRSResponseBuilder().buildResponse(response);
 
         } catch (CharonException e) {
+            e.printStackTrace();
             //create SCIM response with code as the same of exception and message as error message of the exception
             if (e.getCode() == -1) {
                 e.setCode(ResponseCodeConstants.CODE_INTERNAL_SERVER_ERROR);
@@ -336,9 +345,11 @@ public class UserResource extends AbstractResource {
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (UnauthorizedException e) {
+            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (FormatNotSupportedException e) {
+            e.printStackTrace();
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         }

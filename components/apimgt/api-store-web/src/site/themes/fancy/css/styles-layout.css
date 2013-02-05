@@ -11,8 +11,9 @@ h3{
     padding:5px 0 10px;
 }
 h6{
-    color:#444;
-    text-decoration:underline;
+    color:#333;
+    font-weight:bold;
+    font-size:13px;
 }
 div.navbar-inner {
    height:45px;
@@ -135,6 +136,7 @@ div.navbar-inner {
     white-space: nowrap;
     color: #555;
     margin-bottom:5px;
+    cursor:default;
 }
 .row-fluid div.tabs-section{
     margin:10px 10px 30px 0;
@@ -176,6 +178,12 @@ div.navbar-inner {
 .searchAPIs-title{
     color:#317a91;
     font-size:25px;
+    padding:5px 0 10px 0;
+    font-weight:bold;
+}
+.signUp-title{
+    color:#000;
+    font-size:18px;
     padding:5px 0 10px 0;
     font-weight:bold;
 }
@@ -236,6 +244,7 @@ div.navbar-inner {
     cursor:pointer;
     font-size:11px;
 }
+
 .thumbnail-custom div.title{
     color:#66ccff;
     font-size:14px;
@@ -252,6 +261,7 @@ div.navbar-inner {
 }
 .thumbnail-custom div.thumbnail{
     width:150px;
+    height: 162px;
 }
 .clouds a {
     color: #777;
@@ -449,7 +459,7 @@ footer{
 }
 .cat_and_charts li.list-header, .more-from-provider li.list-header{
     background:none;
-    color:#919520;
+    color:#444;
     border-left:none;
     border-right:none;
     border-top:none;
@@ -565,4 +575,25 @@ tr.application-api td.api-key-cell{
 .settingsSection form {
     padding: 0;
     margin:0;
+}
+.requiredAstrix{
+    color:red;
+}
+.searchHelp {
+    background:transparent url(../images/help.png) no-repeat;
+    width:16px;
+    height:16px;
+    margin-top:-26px;
+    cursor:pointer
+
+}
+.searchHelp {
+    margin-top:2px;
+}
+.help-block {
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 0;
+    color:
+        #999;
 }

@@ -22,7 +22,11 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonException;
+import org.wso2.carbon.registry.common.utils.CommonUtil;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.securevault.SecretResolver;
+import org.wso2.securevault.SecretResolverFactory;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -49,13 +53,16 @@ public final class WorkListConfig {
             if (registryXML.exists()) {
                 try {
                     FileInputStream fileInputStream = new FileInputStream(registryXML);
-                    StAXOMBuilder builder = new StAXOMBuilder(fileInputStream);
+                    StAXOMBuilder builder = new StAXOMBuilder(
+                            CarbonUtils.replaceSystemVariablesInXml(fileInputStream));
                     OMElement configElement = builder.getDocumentElement();
+                    SecretResolver secretResolver = SecretResolverFactory.create(configElement, false);
                     OMElement workList =
                             configElement.getFirstChildWithName(new QName("workList"));
                     if (workList != null) {
-                        username = workList.getAttributeValue(new QName("username"));
-                        password = workList.getAttributeValue(new QName("password"));
+                        username = workList.getFirstChildWithName(new QName("username")).getText();
+                        password = CommonUtil.getResolvedPassword(secretResolver,"workList",
+                                workList.getFirstChildWithName(new QName("password")).getText());
                         serverURL = workList.getAttributeValue(new QName("serverURL"));
                         remote = workList.getAttributeValue(new QName("remote"));
                     }
@@ -63,6 +70,8 @@ public final class WorkListConfig {
                     log.error("Unable to parse registry.xml", e);
                 } catch (IOException e) {
                     log.error("Unable to read registry.xml", e);
+                } catch (CarbonException e) {
+                    log.error("An error occurred during system variable replacement", e);
                 }
             }
         }

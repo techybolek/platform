@@ -21,19 +21,19 @@ package org.wso2.carbon.rssmanager.core.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
 import org.wso2.carbon.ndatasource.common.DataSourceException;
 import org.wso2.carbon.ndatasource.core.DataSourceMetaInfo;
 import org.wso2.carbon.rssmanager.core.RSSManagerException;
-import org.wso2.carbon.rssmanager.core.internal.RSSManagerServiceComponent;
-import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAO;
-import org.wso2.carbon.rssmanager.core.internal.dao.RSSDAOFactory;
 import org.wso2.carbon.rssmanager.core.entity.*;
+import org.wso2.carbon.rssmanager.core.internal.RSSManagerServiceComponent;
 import org.wso2.carbon.rssmanager.core.internal.manager.RSSManager;
 import org.wso2.carbon.rssmanager.core.internal.util.RSSConfig;
 import org.wso2.carbon.rssmanager.core.internal.util.RSSManagerUtil;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.tenant.TenantManager;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -45,58 +45,31 @@ public class RSSAdmin extends AbstractAdmin {
     private static final Log log = LogFactory.getLog(RSSAdmin.class);
 
     public void createRSSInstance(RSSInstance rssInstance) throws RSSManagerException {
-        try {
-            this.getRSSManager().createRSSInstance(rssInstance);
-        } catch (RSSManagerException e) {
-            String msg =
-                    "Error occurred while creating RSS instance '" + rssInstance.getName() + "'";
-            handleException(msg, e);
-        }
+        this.getRSSManager().createRSSInstance(rssInstance);
     }
 
     public void dropRSSInstance(String rssInstanceName) throws RSSManagerException {
-        try {
-            this.getRSSManager().dropRSSInstance(rssInstanceName);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while dropping the RSS instance '" + rssInstanceName + "'";
-            handleException(msg, e);
-        }
+        this.getRSSManager().dropRSSInstance(rssInstanceName);
     }
 
     public void editRSSInstance(RSSInstance rssInstance) throws RSSManagerException {
-        try {
-            this.getRSSManager().editRSSInstanceConfiguration(rssInstance);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while editing the configuration of RSS instance '" +
-                    rssInstance.getName() + "'";
-            handleException(msg, e);
-        }
+        this.getRSSManager().editRSSInstanceConfiguration(rssInstance);
     }
 
     public RSSInstanceMetaData getRSSInstance(String rssInstanceName) throws RSSManagerException {
-        RSSInstanceMetaData metadata = null;
-        try {
-            RSSInstance rssInstance =
-                this.getRSSManager().getRSSInstance(rssInstanceName);
-            if (rssInstance == null) {
-                throw new RSSManagerException("Given name '" + rssInstance + "' does not " +
-                        "correspond to a valid RSS instance");
-            }
-            metadata = RSSManagerUtil.convertRSSInstanceToMetadata(rssInstance);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while retrieving the configuration of RSS instance '" +
-                    rssInstanceName + "'";
-            handleException(msg, e);
+        RSSInstance rssInstance = this.getRSSManager().getRSSInstance(rssInstanceName);
+        if (rssInstance == null) {
+            throw new RSSManagerException("Given name '" + rssInstance + "' does not " +
+                    "correspond to a valid RSS instance");
         }
-        return metadata;
+        return RSSManagerUtil.convertRSSInstanceToMetadata(rssInstance);
     }
 
     public RSSInstanceMetaData[] getRSSInstances() throws RSSManagerException {
-        int tid = CarbonContext.getCurrentContext().getTenantId();
+        int tid = this.getCurrentTenantId();
         RSSInstanceMetaData[] rssInstances = new RSSInstanceMetaData[0];
         try {
-            List<RSSInstanceMetaData> tmpList =
-                    this.getRSSManager().getRSSInstances(tid);
+            List<RSSInstanceMetaData> tmpList = this.getRSSManager().getRSSInstances(tid);
             rssInstances = tmpList.toArray(new RSSInstanceMetaData[tmpList.size()]);
         } catch (RSSManagerException e) {
             String tenantDomain = null;
@@ -113,30 +86,19 @@ public class RSSAdmin extends AbstractAdmin {
     }
 
     public void createDatabase(Database database) throws RSSManagerException {
-        try {
-            this.getRSSManager().createDatabase(database);
-        } catch (RSSManagerException e) {
-            String msg = "Error in creating the database '" + database.getName() + "'";
-            handleException(msg, e);
-        }
+        this.getRSSManager().createDatabase(database);
     }
 
     public void dropDatabase(String rssInstanceName, String databaseName) throws
             RSSManagerException {
-        try {
-            this.getRSSManager().dropDatabase(rssInstanceName, databaseName);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while dropping the database '" + databaseName + "'";
-            handleException(msg, e);
-        }
+        this.getRSSManager().dropDatabase(rssInstanceName, databaseName);
     }
 
     public DatabaseMetaData[] getDatabases() throws RSSManagerException {
-        int tid = CarbonContext.getCurrentContext().getTenantId();
+        int tid = this.getCurrentTenantId();
         DatabaseMetaData[] databases = new DatabaseMetaData[0];
         try {
-            List<DatabaseMetaData> tmpList =
-                    this.getRSSManager().getDatabases(tid);
+            List<DatabaseMetaData> tmpList = this.getRSSManager().getDatabases(tid);
             databases = tmpList.toArray(new DatabaseMetaData[tmpList.size()]);
         } catch (RSSManagerException e) {
             String tenantDomain = null;
@@ -154,41 +116,37 @@ public class RSSAdmin extends AbstractAdmin {
 
     public DatabaseMetaData getDatabase(String rssInstanceName, String databaseName) throws
             RSSManagerException {
-        DatabaseMetaData metadata = null;
-        try {
-            Database database = 
-                    this.getRSSManager().getDatabase(
-                            rssInstanceName, databaseName);
-            if (database == null) {
-                throw new RSSManagerException("Database '" + databaseName + "' does not exist");
-            }
-            metadata = RSSManagerUtil.convertDatabaseToMetadata(database);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while retrieving the configuration of the database '" +
-                    databaseName + "'";
-            handleException(msg, e);
+        Database database =
+                this.getRSSManager().getDatabase(rssInstanceName, databaseName);
+        if (database == null) {
+            throw new RSSManagerException("Database '" + databaseName + "' does not exist");
         }
-        return metadata;
+        return RSSManagerUtil.convertDatabaseToMetadata(database);
+    }
+
+    public boolean isDatabaseExist(String rssInstanceName,
+                                   String databaseName) throws RSSManagerException {
+        return this.getRSSManager().isDatabaseExist(rssInstanceName, databaseName);
+    }
+
+    public boolean isDatabaseUserExist(String rssInstanceName,
+                                   String databaseUsername) throws RSSManagerException {
+        return this.getRSSManager().isDatabaseUserExist(rssInstanceName, databaseUsername);
+    }
+
+    public boolean isDatabasePrivilegesTemplateExist(String templateName) throws
+            RSSManagerException {
+        return this.getRSSManager().isDatabasePrivilegeTemplateExist(templateName);
     }
 
     public void createDatabaseUser(DatabaseUser user) throws
             RSSManagerException {
-        try {
-            this.getRSSManager().createDatabaseUser(user);
-        } catch (RSSManagerException e) {
-            String msg =
-                    "Error occurred while creating the database user '" + user.getUsername() + "'";
-            handleException(msg, e);
-        }
+        this.getRSSManager().createDatabaseUser(user);
     }
 
-    public void dropDatabaseUser(String rssInstanceName, String username) throws RSSManagerException {
-        try {
-            this.getRSSManager().dropDatabaseUser(rssInstanceName, username);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while dropping the user '" + username + "'";
-            handleException(msg, e);
-        }
+    public void dropDatabaseUser(String rssInstanceName,
+                                 String username) throws RSSManagerException {
+        this.getRSSManager().dropDatabaseUser(rssInstanceName, username);
     }
 
     public void editDatabaseUserPrivileges(DatabasePrivilegeSet privileges,
@@ -197,71 +155,34 @@ public class RSSAdmin extends AbstractAdmin {
         this.getRSSManager().editDatabaseUserPrivileges(privileges, user, databaseName);
     }
 
-
     public DatabaseUserMetaData getDatabaseUser(String rssInstanceName, String username) throws
             RSSManagerException {
-        DatabaseUserMetaData metadata = null;
-        try {
-            DatabaseUser user = 
-                    this.getRSSManager().getDatabaseUser(rssInstanceName,
-                            username);
-            if (user == null) {
-                throw new RSSManagerException("Given username '" + username + "' does not " +
-                        "correspond to a valid database user");
-            }
-            metadata = RSSManagerUtil.convertToDatabaseUserMetadata(user);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while editing the database privileges of the user '" +
-                    username + "'";
-            handleException(msg, e);
+        DatabaseUser user = this.getRSSManager().getDatabaseUser(rssInstanceName, username);
+        if (user == null) {
+            throw new RSSManagerException("Given username '" + username + "' does not " +
+                    "correspond to a valid database user");
         }
-        return metadata;
+        return RSSManagerUtil.convertToDatabaseUserMetadata(user);
     }
 
     public DatabaseUserMetaData[] getDatabaseUsers() throws RSSManagerException {
-        DatabaseUserMetaData[] users = new DatabaseUserMetaData[0];
-        int tid = CarbonContext.getCurrentContext().getTenantId();
-        try {
-            List<DatabaseUserMetaData> tmpList =
-                    this.getRSSManager().getDatabaseUsers(tid);
-            users = tmpList.toArray(new DatabaseUserMetaData[tmpList.size()]);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while retrieving database user list";
-            handleException(msg, e);
-        }
-        return users;
+        List<DatabaseUserMetaData> tmpList =
+                this.getRSSManager().getDatabaseUsers(this.getCurrentTenantId());
+        return tmpList.toArray(new DatabaseUserMetaData[tmpList.size()]);
     }
 
-    public void createDatabasePrivilegesTemplate(DatabasePrivilegeTemplate template) throws
-            RSSManagerException {
-        try {
-            this.getRSSManager().createDatabasePrivilegesTemplate(template);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while creating the database privilege template '" +
-                    template.getName() + "'";
-            handleException(msg, e);
-        }
+    public void createDatabasePrivilegesTemplate(
+            DatabasePrivilegeTemplate template) throws RSSManagerException {
+        this.getRSSManager().createDatabasePrivilegesTemplate(template);
     }
 
     public void dropDatabasePrivilegesTemplate(String templateName) throws RSSManagerException {
-        try {
-            this.getRSSManager().dropDatabasePrivilegesTemplate(templateName);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while dropping the database privilege template '" +
-                    templateName + "'";
-            handleException(msg, e);
-        }
+        this.getRSSManager().dropDatabasePrivilegesTemplate(templateName);
     }
 
     public void editDatabasePrivilegesTemplate(DatabasePrivilegeTemplate template) throws
             RSSManagerException {
-        try {
-            this.getRSSManager().editDatabasePrivilegesTemplate(template);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while editing the database privilege template " +
-                    template.getName() + "'";
-            handleException(msg, e);
-        }
+        this.getRSSManager().editDatabasePrivilegesTemplate(template);
     }
 
     public DatabasePrivilegeTemplate[] getDatabasePrivilegesTemplates() throws RSSManagerException {
@@ -274,44 +195,6 @@ public class RSSAdmin extends AbstractAdmin {
             RSSManagerException {
         return this.getRSSManager().getDatabasePrivilegeTemplate(
                 templateName);
-    }
-
-    public void createCarbonDataSource(String databaseName, String username) throws
-            RSSManagerException {
-        RSSDAO dao = RSSDAOFactory.getRSSDAO();
-
-        int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        SuperTenantCarbonContext.startTenantFlow();
-        SuperTenantCarbonContext.getCurrentContext().setTenantId(tenantId);
-
-        Database database;
-        DatabaseUser user;
-        String dsName = null;
-        try {
-            database = dao.getDatabase(databaseName);
-            user = dao.getDatabaseUser(username);
-
-            DataSourceMetaInfo.DataSourceDefinition dsDef =
-                    new DataSourceMetaInfo.DataSourceDefinition();
-            dsDef.setDsXMLConfiguration(null);
-            dsDef.setType(null);
-
-            DataSourceMetaInfo metaInfo = new DataSourceMetaInfo();
-            dsName = database.getName() + "_" + user.getUsername();
-            metaInfo.setName(dsName);
-            metaInfo.setDefinition(dsDef);
-
-            RSSManagerServiceComponent.getDataSourceService().addDataSource(metaInfo);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while creating datasource'" +
-                    username + "'";
-            handleException(msg, e);
-        } catch (DataSourceException e) {
-            String msg = "Error occurred while creating the datasource '" + dsName + "'";
-            handleException(msg, e);
-        } finally {
-            SuperTenantCarbonContext.endTenantFlow();
-        }
     }
 
     /**
@@ -329,21 +212,23 @@ public class RSSAdmin extends AbstractAdmin {
                                String password) throws RSSManagerException {
         Connection conn = null;
         int tenantId =
-                SuperTenantCarbonContext.getCurrentContext(this.getConfigContext()).getTenantId();
+                PrivilegedCarbonContext.getCurrentContext(this.getConfigContext()).getTenantId();
 
         if (driverClass == null || driverClass.length() == 0) {
             String msg = "Driver class is missing";
-            log.error(msg);
             throw new RSSManagerException(msg);
         }
         if (jdbcURL == null || jdbcURL.length() == 0) {
             String msg = "Driver connection URL is missing";
-            log.error(msg);
             throw new RSSManagerException(msg);
         }
         try {
-            SuperTenantCarbonContext.startTenantFlow();
-            CarbonContextHolder.getCurrentCarbonContextHolder().setTenantId(tenantId);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+
+            Class<?> clz = (Class<?>) Class.forName(driverClass).newInstance();
+            
+
             conn = DriverManager.getConnection(jdbcURL, username, password);
             if (conn == null) {
                 String msg = "Unable to establish a JDBC connection with the database server";
@@ -352,6 +237,15 @@ public class RSSAdmin extends AbstractAdmin {
         } catch (SQLException e) {
             String msg = "Error occurred while testing the JDBC connection";
             handleException(msg, e);
+        } catch (ClassNotFoundException e) {
+            throw new RSSManagerException("Error occurred while testing database connectivity : " +
+                    e.getMessage());
+        } catch (InstantiationException e) {
+            throw new RSSManagerException("Error occurred while testing database connectivity : " +
+                    e.getMessage());
+        } catch (IllegalAccessException e) {
+            throw new RSSManagerException("Error occurred while testing database connectivity : " +
+                    e.getMessage());
         } finally {
             if (conn != null) {
                 try {
@@ -360,7 +254,7 @@ public class RSSAdmin extends AbstractAdmin {
                     log.error(e);
                 }
             }
-            SuperTenantCarbonContext.endTenantFlow();
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -370,76 +264,36 @@ public class RSSAdmin extends AbstractAdmin {
     }
 
     public int getSystemRSSInstanceCount() throws RSSManagerException {
-        int count = 0;
-        try {
-            count = this.getRSSManager().getSystemRSSInstanceCount();
-            return count;
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while retrieving the system RSS instance count";
-            handleException(msg, e);
-        }
-        return count;
+        return this.getRSSManager().getSystemRSSInstanceCount();
     }
 
     public void attachUserToDatabase(String rssInstanceName, String databaseName, String username,
                                      String templateName) throws RSSManagerException {
-        try {
-            this.getRSSManager().attachUserToDatabase(rssInstanceName, databaseName, username,
-                    templateName);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while attaching database user '" + username +
-                    "' to the database '" + databaseName + "' with the database user privileges " +
-                    "define in the database privilege template '" + templateName + "'";
-            handleException(msg, e);
-        }
+        this.getRSSManager().attachUserToDatabase(rssInstanceName, databaseName, username,
+                templateName);
     }
 
     public void detachUserFromDatabase(String rssInstanceName, String databaseName,
                                        String username) throws RSSManagerException {
-        try {
-            this.getRSSManager().detachUserFromDatabase(rssInstanceName, databaseName, username);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while detaching the database user '" + username +
-                    "' from the database '" + databaseName + "'";
-            handleException(msg, e);
-        }
+        this.getRSSManager().detachUserFromDatabase(rssInstanceName, databaseName, username);
     }
 
     public String[] getUsersAttachedToDatabase(String rssInstanceName,
-                                                             String databaseName) throws
+                                               String databaseName) throws
             RSSManagerException {
-        String[] users = new String[0];
-        List<String> tmpList;
-        try {
-            tmpList =
-                    this.getRSSManager().getUsersAttachedToDatabase(rssInstanceName, databaseName);
-            users = tmpList.toArray(new String[tmpList.size()]);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while retrieving database users attached to " +
-                    "the database '" + databaseName + "'";
-            handleException(msg, e);
-        }
-        return users;
+        List<String> tmpList =
+                this.getRSSManager().getUsersAttachedToDatabase(rssInstanceName, databaseName);
+        return tmpList.toArray(new String[tmpList.size()]);
     }
 
     public String[] getAvailableUsersToAttachToDatabase(String rssInstanceName,
-                                                                      String databaseName) throws
+                                                        String databaseName) throws
             RSSManagerException {
-        String[] users = new String[0];
-        List<String> tmpList;
-        try {
-            tmpList =
-                    this.getRSSManager().getAvailableUsersToAttachToDatabase(rssInstanceName,
-                            databaseName);
-            users = tmpList.toArray(new String[tmpList.size()]);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while retrieving database users available to be " +
-                    "attached to the database '" + databaseName + "'";
-            handleException(msg, e);
-        }
-        return users;
+        List<String> tmpList =
+                this.getRSSManager().getAvailableUsersToAttachToDatabase(rssInstanceName,
+                        databaseName);
+        return tmpList.toArray(new String[tmpList.size()]);
     }
-
     
     private RSSManager getRSSManager() throws RSSManagerException {
         RSSConfig config = RSSConfig.getInstance();
@@ -465,16 +319,121 @@ public class RSSAdmin extends AbstractAdmin {
 
     public DatabasePrivilegeSet getUserDatabasePermissions(
             String rssInstanceName, String databaseName, String username) throws RSSManagerException {
-        DatabasePrivilegeSet privileges = null;
-        try {
-            privileges = this.getRSSManager().getUserDatabasePrivileges(
-                    rssInstanceName, databaseName, username);
-        } catch (RSSManagerException e) {
-            String msg = "Error occurred while retrieving the permissions granted to the user '" +
-                    username + "' on database '" + databaseName + "'";
-            handleException(msg, e);
-        }
-        return privileges;
+        return this.getRSSManager().getUserDatabasePrivileges(rssInstanceName, databaseName,
+                username);
     }
-    
+
+    public boolean isInitializedTenant(String tenantDomainName) throws RSSManagerException {
+        if (!isSuperTenantUser()) {
+            String msg = "Unauthorized operation, only super tenant is authorized to perform " +
+                    "this operation permission denied";
+            throw new RSSManagerException(msg);
+        }
+        int tenantId = getTenantId(tenantDomainName);
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+        boolean initialized = false;
+        
+        return initialized;
+    }
+
+    public void initializeTenant(String tenantDomain) throws RSSManagerException {
+        if (!isSuperTenantUser()) {
+            String msg = "Unauthorized operation, only super tenant is authorized. " +
+                    "Tenant domain :" + CarbonContext.getThreadLocalCarbonContext().getTenantDomain() +
+                    " permission denied";
+            throw new RSSManagerException(msg);
+        }
+        int tenantId = getTenantId(tenantDomain);
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+    }
+
+    public DatabaseMetaData[] getDatabasesForTenant(String tenantDomain) throws RSSManagerException {
+        if (!isSuperTenantUser()) {
+            String msg = "Unauthorized operation, only super tenant is authorized. " +
+                    "Tenant domain :" + CarbonContext.getThreadLocalCarbonContext().getTenantDomain() +
+                    " permission denied";
+            throw new RSSManagerException(msg);
+        }
+        int tenantId = getTenantId(tenantDomain);
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+        DatabaseMetaData[] databases = null;
+        try {
+            databases = getDatabases();
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+        return databases;
+    }
+
+    public void createDatabaseForTenant(Database database,
+                                        String tenantDomain) throws RSSManagerException {
+        if (!isSuperTenantUser()) {
+            String msg = "Unauthorized operation, only super tenant is authorized to perform " +
+                    "this operation permission denied";
+            log.error(msg);
+            throw new RSSManagerException(msg);
+        }
+        try {
+            int tenantId = getTenantId(tenantDomain);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+            try {
+                database.setTenantId(tenantId);
+                createDatabase(database);
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        } catch (RSSManagerException e) {
+            log.error("Error occurred while creating database for tenant : " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    public DatabaseMetaData getDatabaseForTenant(String rssInstanceName,
+                                                 String databaseName, String tenantDomain) throws
+            RSSManagerException {
+        if (!isSuperTenantUser()) {
+            String msg = "Unauthorized operation, only super tenant is authorized to perform " +
+                    "this operation permission denied";
+            log.error(msg);
+            throw new RSSManagerException(msg);
+        }
+        int tenantId = getTenantId(tenantDomain);
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+        DatabaseMetaData metaData = null;
+        try {
+            metaData = getDatabase(rssInstanceName, databaseName);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+        return metaData;
+    }
+
+    private boolean isSuperTenantUser() {
+        return (CarbonContext.getThreadLocalCarbonContext().getTenantId() ==
+                MultitenantConstants.SUPER_TENANT_ID);
+    }
+
+    private int getTenantId(String tenantDomainName) {
+        int tenantId = MultitenantConstants.INVALID_TENANT_ID;
+        if (null != tenantDomainName) {
+            TenantManager tenantManager = RSSManagerServiceComponent.getTenantManager();
+            try {
+                tenantId = tenantManager.getTenantId(tenantDomainName);
+            } catch (UserStoreException e) {
+                log.error("Error while retrieving the tenant Id for tenant domain:" +
+                        tenantDomainName, e);
+            }
+        }
+        return tenantId;
+    }
+
+    private int getCurrentTenantId() {
+        return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+    }
+
 }

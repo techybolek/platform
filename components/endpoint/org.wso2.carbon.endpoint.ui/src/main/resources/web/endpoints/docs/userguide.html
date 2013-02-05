@@ -28,27 +28,28 @@
 <div id="middle">
 <h1>Endpoint Management</h1>
 
-<p>Use the Endpoint Management feature to add, remove and change endpoints.
-The endpoints defined here can be used when you are designing proxy services.
+<p>Use the Endpoint Management feature to add, remove and modify endpoints.
 </p>
 <ol>
-  <li>In the navigator, under Manage/Mediation, click
+  <li>In the navigator, under Manage > Service Bus, click
     <strong>Endpoints</strong>. The <em><strong>Manage
     Endpoints</strong></em> page appears.</li>
-  <li>In the <strong>Add Endpoint</strong> tab, select the endpoint you want
+  <li>In the <strong>Add Endpoint</strong> tab, select the endpoint type you want
     to add.
     The available options are: 
     <ul>
       <li>Address Endpoint - Defines the direct URL of the service</li>
        <li>Default Endpoint - Defines additional configuration for the default target</li>
       <li>WSDL Endpoint - Defines the WSDL, Service and Port</li>
-      <li>Fail-over Endpoint - Defines the endpoints that the service will
+      <li>Fail-over Endpoint - Defines a list of endpoints that the service will
         try to connect to in case of a failure. This will take place in a
         round robin manner.</li>
       <li>Load-Balance Group - Defines groups of endpoints for replicated
         services.The incoming requests will be directed to these endpoints in
         a round robin manner. These endpoints automatically handle the
         fail-over cases as well.</li>
+	<li>Recipient List Group - Defines the list of endpoints a message will be routed to</li>
+	<li>Template Endpoint -	Defines a template endpoint that can parameterfy endpoints</li> 
     </ul>
   </li>
 </ol>
@@ -80,8 +81,6 @@ The endpoints defined here can be used when you are designing proxy services.
     </div>
   <li>Enter the required details in the fields. 
     The following fields are specific to the Address Endpoint.
-    
-
     <ul>
       <li>Name: The unique name for the endpoint </li>
       <li>Address: The URL of the endpoint. You can test the availability of the given URL on the fly by just
@@ -103,8 +102,7 @@ The endpoints defined here can be used when you are designing proxy services.
       <li>Optimize: Optimization for the message which transfers binary
         data. The available values are: 
         <ul>
-          <li>Leave As-Is: No special Optimization. Keep the original message
-          </li>
+          <li>Leave As-Is: No special Optimization. Keep the original message</li>
           <li>SwA: Optimized as a SwA (SOAP with Attachment) message. </li>
           <li>MTOM: Optimized as a MTOM (message transmission optimization
             mechanism)
@@ -114,8 +112,8 @@ The endpoints defined here can be used when you are designing proxy services.
     </ul>
   </li>
   </ol>
-  <p>Note : The rest of the fields are general to all endpoints. Common
-    <a href="#Descriptio">Field  Descriptions</a>.</p>
+  <p>Note : The rest of the fields are general to Address, Default and WSDL endpoints. Common
+    <a href="#Description">Field  Descriptions</a>.</p>
 
 <h3>Adding a Default Endpoint</h3>
 <ol>
@@ -130,13 +128,10 @@ The endpoints defined here can be used when you are designing proxy services.
   </li>
     <li>Enter the required details in the fields.
         The Default Endpoint differ from the Addressing Endpoint only by the URL attribute. 
-    <p>Note : The rest of the fields are general to all endpoints. Common
-        <a href="#Descriptio">Field  Descriptions</a>.</p>
+    <p>Note : The rest of the fields are general to Address, Default and WSDL endpoints. Common
+    <a href="#Description">Field  Descriptions</a>.</p>
     </li>   
 </ol>
-
-
-
 
 <h3>Adding a WSDL Endpoint </h3>
 <ol>
@@ -154,14 +149,6 @@ The endpoints defined here can be used when you are designing proxy services.
 
     <ul>
       <li>Name: A unique name for the endpoint. </li>
-      <li>Specify As: The method to specify the WSDL. The available values
-        are: 
-        <ul>
-          <li>In-lined WSDL: Paste the WSDL in the text box that appears when
-            this option is selected. </li>
-          <li>URI: Activates the WSDL URI field. </li>
-        </ul>
-      </li>
       <li>WSDL URI: The URI of the WSDL. </li>
       <li>Service: The service selected from the available services for the
         WSDL. </li>
@@ -172,20 +159,20 @@ The endpoints defined here can be used when you are designing proxy services.
   </li>
 </ol>
 
-<p>Note: The rest of the fields are general to all endpoints. Common <a
-href="#Descriptio">Field Descriptions</a>. </p>
+<p>Note : The rest of the fields are general to Address, Default and WSDL endpoints. Common
+    <a href="#Description">Field  Descriptions</a>.</p>
 <ol>
 </ol>
 
 <h3>Adding a Fail-Over Endpoint</h3>
 <ol>
   <li>In the <strong>Add Endpoint</strong> list, click <strong>Fail-Over
-    Endpoint</strong>. The <em><strong>Failover Endpoint</strong></em> page
+    Endpoint</strong>. The <em><strong>Fail-over Endpoint</strong></em> page
     appears.</li>
   <li>In the <strong>Endpoint Name</strong> field, enter a name for the
     endpoint. </li>
-  <li>Click <strong>root</strong>. A shortcut menu with the available
-    endpoints appears. 
+  <li>Click on Add Child of <strong>root</strong>. A menu with the available
+    endpoints appears.
     <br/><br/>
     <div class="image">
     <img alt="Configuring Fail-over Endpoint" src="images/adding_failover_endpoint.png" />
@@ -194,12 +181,10 @@ href="#Descriptio">Field Descriptions</a>. </p>
     <p>
     </p>
   </li>
-  <li>Click on the endpoint you want to add as a failover endpoint.A tab with
+  <li>Click on the endpoint you want to add as a fail-over endpoint.A tab with
     the fields relevant to the selected endpoint appears.</li>
-  <li>Enter the details and click <strong>Save</strong>. 
-    
-    <a href="#Descriptio">Field Descriptions</a>
-    The following screenshot displays adding a Address endpoint to the fail-over
+  <li>Enter the details and click <strong>Save &amp; Close</strong>.
+    The following screen-shot displays adding a Address endpoint to the fail-over
     endpoint list.
 
     <br/><br/>
@@ -211,8 +196,6 @@ href="#Descriptio">Field Descriptions</a>. </p>
     You can add fail-over and load-balance endpoints interchangeably to as
     many levels as you want. 
     
-    The above screenshot is a possible arrangement of endpoints
-    prepared for demonstration purposes.
     </div>
   </li>
 </ol>
@@ -247,22 +230,18 @@ href="#Descriptio">Field Descriptions</a>. </p>
     <p>Figure 8: Configuring Load balance Group Endpoint </p>
     </div>
   </li>
-  <li>Click <strong>root</strong>. A shortcut menu with the available
-    endpoints appears</li>
+  <li>Click on Add Child of <strong>root</strong>. A menu with the available
+    endpoints appears.
+  </li>
   <li>Click on the endpoint you want to add as a load-balance group
     endpoint.A tab with the fields relevant to the selected endpoint
   appears.</li>
-  <li>Enter the details and click <strong>Save</strong>.
+  <li>Enter the details and click <strong>Save &amp; Close</strong>.
     You can add as many endpoints as you need to the load balancing group.
-
-    <p><a href="#Descriptio">Field Descriptions</a></p>
   </li>
-  <strong>Note</strong> : Please refer to the Fail-over endpoint section on
-  this guide for explanations and screen shots about how you can design the
-  load balancing and fail-over endpoints in multiple levels</ol>
+</ol>
 
-
-<h3>Adding Template endpoints</h3>
+<h3>Adding Template Endpoints</h3>
 <ol>
     <li>In the <strong>Add Endpoint</strong> tab, click <strong>Template
         Endpoint</strong>. The <em><strong>Template Endpoint</strong></em> page
@@ -273,10 +252,8 @@ href="#Descriptio">Field Descriptions</a>. </p>
         <p>Figure 9: Configuring Template Endpoint</p>
     </div>
 
-
   <li>Enter the required details in the fields.
     The following fields are specific to the Template Endpoint.
-
 
     <ul>
       <li>Name: The unique name for the template endpoint </li>
@@ -298,12 +275,35 @@ href="#Descriptio">Field Descriptions</a>. </p>
     </div>
   </ol>
 
+<h3>Adding a Recipient List Endpoint</h3>
+<ol>
+  <li>In the <strong>Add Endpoint</strong> list, click <strong>Recipient List
+    Endpoint</strong>. The <em><strong>Recipient List Endpoint</strong></em> page
+    appears.</li>
+  <li>In the <strong>Endpoint Name</strong> field, enter a name for the
+    endpoint. </li>
+  <li>Click on Add Child of <strong>root</strong>. A menu with the available
+    endpoints appears.
+  </li>
+  <li>Click on the endpoint you want to add as a Recipient List endpoint.A tab with
+    the fields relevant to the selected endpoint appears.</li>
+  <li>Enter the details and click <strong>Save &amp; Close</strong>.
+    The following screen-shot displays adding a Address endpoint to the Recipient List
+    endpoint list.
 
-<h3>Adding dynamic endpoints</h3>
+    <br/><br/>
+    <div class="image">
+    <img alt="Configuring Recipient List Endpoint" src="images/recipientlist_endpoint.png" />
+    <p>Figure 10: Configuring Recipient List Endpoint </p>
+    </div>
+  </li>
+</ol>
+
+<h3>Adding Dynamic Endpoints</h3>
 <ol>
     <li>
-        To add a dynamic endpoint click on <span style="font-weight: bold;">Save As</span> which will
-        display the dynamic endpoint save UI.
+        To save an endpoint as a dynamic endpoint, click on <span style="font-weight: bold;">Save In Registry</span> which will
+        display the dynamic endpoint Save As UI.
     </li>
     <li>
         Select either <span style="font-weight: bold;">Governance Registry</span> or <span
@@ -315,16 +315,15 @@ href="#Descriptio">Field Descriptions</a>. </p>
 
 <div>
     <img src="images/dynamic-endpoints.png" alt=""/>
-    <p>Figure 10: Adding a dynamic endpoint</p>
+    <p>Figure 11: Adding a dynamic endpoint</p>
 </div>
 <p>Saved dynamic endpoint will be displayed as follows</p>
 <div>
     <img src="images/saved-dynamic-endpoints.png" alt=""/>
-    <p>Figure 10.1: Saved dynamic endpoint</p>
+    <p>Figure 11.1: Saved dynamic endpoint</p>
 </div>
 
-
-<h2><a name="Descriptio" id="Descriptio">Description of Fields Common to All
+<h2><a name="Description" id="Description">Description of Fields Common to Address, Default and WSDL
 Endpoints</a></h2>
 
 <table style="border: 1px solid ;" border="1">
@@ -402,6 +401,10 @@ Endpoints</a></h2>
       <td>WS-Reliable Messaging </td>
       <td>Adds WS-Reliable Messaging features as described in a policy key
         (referring to a registry location). </td>
+    </tr>
+    <tr>
+      <td>Non Retry Error Codes</td>
+      <td>When a child endpoint of failover/loadbalance endpoint failed for a given error code, the request will not be send to the other child endpoints of failover/loadbalance endpoint. That means retry will not be happen with the rest of the child endpoints. This option is available only when endpoint is added as a child endpoint of failover/loadbalance endpoint</td>
     </tr>
   </tbody>
 </table>

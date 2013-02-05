@@ -1,0 +1,124 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements. See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership. The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License. You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied. See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<assembly>
+    <id>bin</id>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <formats>
+        <format>tar.gz</format>
+        <format>zip</format>
+    </formats>
+
+    <fileSets>
+        <fileSet>
+            <directory>../..</directory>
+            <outputDirectory>sandesha2-${version}-bin</outputDirectory>
+            <includes>
+                <include>LICENSE.txt</include>
+                <include>NOTICE.txt</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../..</directory>
+            <outputDirectory>sandesha2-${version}-bin</outputDirectory>
+            <includes>
+                <include>release-notes.html</include>
+                <include>README.txt</include>
+            </includes>
+            <filtered>true</filtered>
+        </fileSet>
+
+        <fileSet>
+            <directory>../../xdocs</directory>
+            <outputDirectory>sandesha2-${version}-bin/docs</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../../modules/samples/target/classes</directory>
+            <outputDirectory>sandesha2-${version}-bin/samples/classes</outputDirectory>
+            <includes>
+                <include>**/*.class</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../../modules/samples/src/main/resources/userguide</directory>
+            <outputDirectory>sandesha2-${version}-bin/samples/clients</outputDirectory>
+            <excludes>
+                <exclude>services.xml</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>../../modules/tests/test-resources</directory>
+            <outputDirectory>sandesha2-${version}-bin/samples/clients</outputDirectory>
+            <includes>
+                <include>client_axis2.xml</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../../modules/samples/target/aars</directory>
+            <outputDirectory>sandesha2-${version}-bin/samples/services</outputDirectory>
+            <includes>
+                <include>RMSampleService.aar</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../../modules/samples/target/jars</directory>
+            <outputDirectory>sandesha2-${version}-bin/samples/clients</outputDirectory>
+            <includes>
+                <include>UserguideSampleClients.jar</include>
+            </includes>
+        </fileSet>
+        <!-- Work-a-round to create empty folders -->
+        <fileSet>
+            <directory>../../modules/distribution/src/main/assembly</directory>
+            <outputDirectory>sandesha2-${version}-bin/samples/clients/lib</outputDirectory>
+            <includes>
+                <include>lib.txt</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../../modules/distribution/src/main/assembly</directory>
+            <outputDirectory>sandesha2-${version}-bin/samples/clients/modules</outputDirectory>
+            <includes>
+                <include>modules.txt</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../../modules/distribution/src/main/assembly</directory>
+            <outputDirectory>sandesha2-${version}-bin/samples/clients/services</outputDirectory>
+            <includes>
+                <include>services.txt</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>sandesha2-${version}-bin</outputDirectory>
+            <includes>
+                <include>org.apache.sandesha2:sandesha2-core</include>
+                <include>org.apache.sandesha2:sandesha2-client-constants</include>
+                <include>org.apache.sandesha2:sandesha2-policy</include>
+                <include>org.apache.sandesha2:sandesha2-rampart-integration</include>
+                <include>org.apache.sandesha2:sandesha2-persistence</include>
+                <include>org.apache.sandesha2:sandesha2</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+</assembly>
