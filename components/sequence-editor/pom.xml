@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -33,10 +33,10 @@
     <url>http://wso2.org</url>
     
     		<modules>
-       			<module>org.wso2.carbon.mediator.service/4.0.0</module>
-                <module>org.wso2.carbon.sequences.common/4.0.0</module>
-                <module>org.wso2.carbon.sequences/4.0.0</module>
-                <module>org.wso2.carbon.sequences.ui/4.0.0</module>
+       			<module>org.wso2.carbon.mediator.service</module>
+                <module>org.wso2.carbon.sequences.common</module>
+                <module>org.wso2.carbon.sequences</module>
+                <module>org.wso2.carbon.sequences.ui</module>
     		</modules>
 
     <dependencyManagement>

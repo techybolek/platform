@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -35,16 +35,16 @@
                 <!--module>org.wso2.carbon.bam.service.data.publisher</module>
                 <module>org.wso2.carbon.bam.service.data.publisher.ui</module-->
 		<!--module>org.wso2.carbon.bam.mediationstats.data.publisher</module-->
-		<module>org.wso2.carbon.bam.data.publisher.servicestats/4.0.0</module>
-		<module>org.wso2.carbon.bam.data.publisher.servicestats.ui/4.0.0</module>
-                <module>org.wso2.carbon.bam.data.publisher.mediationstats/4.0.0</module>
-                <module>org.wso2.carbon.bam.data.publisher.mediationstats.ui/4.0.0</module>
+		<module>org.wso2.carbon.bam.data.publisher.servicestats</module>
+		<module>org.wso2.carbon.bam.data.publisher.servicestats.ui</module>
+                <module>org.wso2.carbon.bam.data.publisher.mediationstats</module>
+                <module>org.wso2.carbon.bam.data.publisher.mediationstats.ui</module>
                 <!--module>org.wso2.carbon.bam.data.publisher.clientstats</module-->
-                <module>org.wso2.carbon.bam.data.publisher.activity.mediation/4.0.0</module>
-                <module>org.wso2.carbon.bam.data.publisher.activity.mediation.ui/4.0.0</module>
-                <module>org.wso2.carbon.bam.data.publisher.activity.service/4.0.0</module>
-                <module>org.wso2.carbon.bam.data.publisher.activity.service.ui/4.0.0</module>
-		<module>org.wso2.carbon.bam.lwevent.core/4.0.0</module>
+                <module>org.wso2.carbon.bam.data.publisher.activity.mediation</module>
+                <module>org.wso2.carbon.bam.data.publisher.activity.mediation.ui</module>
+                <module>org.wso2.carbon.bam.data.publisher.activity.service</module>
+                <module>org.wso2.carbon.bam.data.publisher.activity.service.ui</module>
+		<module>org.wso2.carbon.bam.lwevent.core</module>
                 <!--module>org.wso2.carbon.bam.data.publisher.activity.mediator</module-->
             </modules>
 

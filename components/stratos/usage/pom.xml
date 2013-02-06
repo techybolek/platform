@@ -33,10 +33,10 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.usage/2.0.0</module>
-        <module>org.wso2.carbon.usage.agent/2.0.0</module>
-        <module>org.wso2.carbon.usage.summary.generator/2.0.0</module>
-        <module>org.wso2.carbon.usage.ui/2.0.0</module>
+        <module>org.wso2.carbon.usage</module>
+        <module>org.wso2.carbon.usage.agent</module>
+        <module>org.wso2.carbon.usage.summary.generator</module>
+        <module>org.wso2.carbon.usage.ui</module>
     </modules>
 
 </project>

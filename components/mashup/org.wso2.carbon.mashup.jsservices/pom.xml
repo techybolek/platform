@@ -22,13 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>mashup</artifactId>
-        <version>4.0.0</version>
-<relativePath>../../pom.xml</relativePath>
+        <version>4.1.0-SNAPSHOT</version>
+<relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.mashup.jsservices</artifactId>
-	<version>4.0.2</version>
+	<version>4.1.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - JavaScript Services</name>
     <url>http://wso2.org</url>
@@ -38,7 +38,7 @@
 		<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
-            <version>4.0.2</version>
+            <version>4.1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mashup.utils</artifactId>
-            <version>4.0.1</version>
+            <version>4.1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -68,13 +68,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mashup.javascript.messagereceiver</artifactId>
-            <version>4.0.1</version>
+            <version>4.1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mashup.javascript.hostobjects.system</artifactId>
-            <version>4.0.1</version>
+            <version>4.1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>

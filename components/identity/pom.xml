@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -27,44 +27,44 @@
     <artifactId>identity</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Identity Aggregator Module</name>
-    <version>4.0.0</version>
+    <version>4.1.0-SNAPSHOT</version>
     <description>
         This is a Carbon bundle that represent the Identity module.
     </description>
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.identity.base/4.0.0</module>
-        <module>org.wso2.carbon.identity.core/4.0.0</module>
-        <module>org.wso2.carbon.identity.menu.ui/4.0.0</module>
-        <module>org.wso2.carbon.identity.provider/4.0.0</module>
-        <module>org.wso2.carbon.identity.provider.ui/4.0.0</module>
-        <module>org.wso2.carbon.identity.provider.openid.ui/4.0.0</module>
-        <module>org.wso2.carbon.identity.provider.openid/4.0.0</module>
-        <module>org.wso2.carbon.identity.user.registration/4.0.0</module>
-        <module>org.wso2.carbon.identity.user.registration.ui/4.0.0</module>
-        <module>org.wso2.carbon.identity.relyingparty/4.0.0</module>
-        <module>org.wso2.carbon.identity.relyingparty.ui/4.0.0</module>
-        <module>org.wso2.carbon.identity.user.profile/4.0.0</module>
-        <module>org.wso2.carbon.identity.user.profile.ui/4.0.0</module>
-        <module>org.wso2.carbon.identity.entitlement/4.0.0</module>
-        <module>org.wso2.carbon.identity.entitlement.ui/4.0.0</module>
-        <module>org.wso2.carbon.identity.entitlement.mediator/4.0.0</module>
-        <module>org.wso2.carbon.identity.sts.passive/4.0.0</module>
-        <module>org.wso2.carbon.identity.sts.passive.ui/4.0.0</module>
-        <module>org.wso2.carbon.identity.sso.saml/4.0.0</module>
-        <module>org.wso2.carbon.identity.sso.saml.ui/4.0.0</module>
-        <module>org.wso2.carbon.identity.provider.openid.admin/4.0.0</module>
-        <module>org.wso2.carbon.identity.provider.openid.admin.ui/4.0.0</module>
-        <module>org.wso2.carbon.identity.oauth.common/4.0.0</module>
-        <module>org.wso2.carbon.identity.oauth/4.0.0</module>
-        <module>org.wso2.carbon.identity.oauth.ui/4.0.0</module>
-        <module>org.wso2.carbon.identity.oauth.mediator/4.0.0</module>
-		<module>org.wso2.carbon.identity.scim.provider/4.0.0</module>
-        <module>org.wso2.carbon.identity.authentication/4.0.0</module>
-        <module>org.wso2.carbon.identity.thrift.authentication/4.0.0</module>
-        <module>org.wso2.carbon.identity.sts.mgt/4.0.0</module>
-        <module>org.wso2.carbon.identity.sts.mgt.ui/4.0.0</module>
+        <module>org.wso2.carbon.identity.base</module>
+        <module>org.wso2.carbon.identity.core</module>
+        <module>org.wso2.carbon.identity.menu.ui</module>
+        <module>org.wso2.carbon.identity.provider</module>
+        <module>org.wso2.carbon.identity.provider.ui</module>
+        <module>org.wso2.carbon.identity.provider.openid.ui</module>
+        <module>org.wso2.carbon.identity.provider.openid</module>
+        <module>org.wso2.carbon.identity.user.registration</module>
+        <module>org.wso2.carbon.identity.user.registration.ui</module>
+        <module>org.wso2.carbon.identity.relyingparty</module>
+        <module>org.wso2.carbon.identity.relyingparty.ui</module>
+        <module>org.wso2.carbon.identity.user.profile</module>
+        <module>org.wso2.carbon.identity.user.profile.ui</module>
+        <module>org.wso2.carbon.identity.entitlement</module>
+        <module>org.wso2.carbon.identity.entitlement.ui</module>
+        <module>org.wso2.carbon.identity.entitlement.mediator</module>
+        <module>org.wso2.carbon.identity.sts.passive</module>
+        <module>org.wso2.carbon.identity.sts.passive.ui</module>
+        <module>org.wso2.carbon.identity.sso.saml</module>
+        <module>org.wso2.carbon.identity.sso.saml.ui</module>
+        <module>org.wso2.carbon.identity.provider.openid.admin</module>
+        <module>org.wso2.carbon.identity.provider.openid.admin.ui</module>
+        <module>org.wso2.carbon.identity.oauth.common</module>
+        <module>org.wso2.carbon.identity.oauth</module>
+        <module>org.wso2.carbon.identity.oauth.ui</module>
+        <module>org.wso2.carbon.identity.oauth.mediator</module>
+		<module>org.wso2.carbon.identity.scim.provider</module>
+        <module>org.wso2.carbon.identity.authentication</module>
+        <module>org.wso2.carbon.identity.thrift.authentication</module>
+        <module>org.wso2.carbon.identity.sts.mgt</module>
+        <module>org.wso2.carbon.identity.sts.mgt.ui</module>
     </modules>
 
     <dependencyManagement>

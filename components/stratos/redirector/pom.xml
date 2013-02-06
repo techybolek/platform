@@ -33,9 +33,9 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.redirector.servlet/2.0.0</module>
-        <module>org.wso2.carbon.redirector.servlet.ui/2.0.0</module>
-        <module>org.wso2.carbon.sso.redirector.ui/2.0.0</module>
+        <module>org.wso2.carbon.redirector.servlet</module>
+        <module>org.wso2.carbon.redirector.servlet.ui</module>
+        <module>org.wso2.carbon.sso.redirector.ui</module>
     </modules>
 
 </project>

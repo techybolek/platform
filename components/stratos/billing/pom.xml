@@ -33,9 +33,9 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.billing.core/2.0.0</module>
-        <module>org.wso2.carbon.billing.mgt/2.0.0</module>
-        <module>org.wso2.carbon.billing.mgt.ui/2.0.0</module>
+        <module>org.wso2.carbon.billing.core</module>
+        <module>org.wso2.carbon.billing.mgt</module>
+        <module>org.wso2.carbon.billing.mgt.ui</module>
     </modules>
 
 </project>

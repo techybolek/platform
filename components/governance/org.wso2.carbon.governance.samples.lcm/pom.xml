@@ -23,7 +23,7 @@
         <groupId>org.wso2.governance</groupId>
     	<artifactId>governance-samples</artifactId>
         <version>4.5.0</version>
-	<relativePath>../../../pom.xml</relativePath>
+	<relativePath>../../pom.xml</relativePath>
     </parent>
 
 

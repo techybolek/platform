@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -126,16 +126,16 @@
     </dependencyManagement>
 
     <modules>
-       <module>org.wso2.carbon.cep.core/4.0.0</module>
-        <module>org.wso2.carbon.cep.admin/4.0.0</module>
-        <module>org.wso2.carbon.cep.ui/4.0.0</module>
-        <module>org.wso2.carbon.cep.fusion/4.0.0</module>
-        <module>org.wso2.carbon.cep.siddhi/4.0.0</module>
-	<!--<module>org.wso2.carbon.cep.core/4.0.2</module>-->
-        <!--<module>org.wso2.carbon.cep.admin/4.0.2</module>-->
-        <!--<module>org.wso2.carbon.cep.ui/4.0.2</module>-->
-        <!--<module>org.wso2.carbon.cep.fusion/4.0.2</module>-->
-        <!--<module>org.wso2.carbon.cep.siddhi/4.0.2</module>-->
+       <module>org.wso2.carbon.cep.core</module>
+        <module>org.wso2.carbon.cep.admin</module>
+        <module>org.wso2.carbon.cep.ui</module>
+        <module>org.wso2.carbon.cep.fusion</module>
+        <module>org.wso2.carbon.cep.siddhi</module>
+	<!--<module>org.wso2.carbon.cep.core</module>-->
+        <!--<module>org.wso2.carbon.cep.admin</module>-->
+        <!--<module>org.wso2.carbon.cep.ui</module>-->
+        <!--<module>org.wso2.carbon.cep.fusion</module>-->
+        <!--<module>org.wso2.carbon.cep.siddhi</module>-->
 
 
     </modules>

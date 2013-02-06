@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -35,11 +35,11 @@
     <url>http://wso2.org</url>
 
             <modules>
-                <module>org.wso2.carbon.qpid/4.0.0</module>
-                <module>org.wso2.carbon.qpid.commons/4.0.0</module>
-                <module>org.wso2.carbon.qpid.authentication/4.0.0</module>
-                <module>org.wso2.carbon.qpid.authorization/4.0.0</module>
-                <module>org.wso2.carbon.qpid.messagestore.jdbc/4.0.0</module>
+                <module>org.wso2.carbon.qpid</module>
+                <module>org.wso2.carbon.qpid.commons</module>
+                <module>org.wso2.carbon.qpid.authentication</module>
+                <module>org.wso2.carbon.qpid.authorization</module>
+                <module>org.wso2.carbon.qpid.messagestore.jdbc</module>
             </modules>
 
     <dependencyManagement>

@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -31,8 +31,8 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.rest.api/4.0.0</module>
-        <module>org.wso2.carbon.rest.api.ui/4.0.0</module>
+        <module>org.wso2.carbon.rest.api</module>
+        <module>org.wso2.carbon.rest.api.ui</module>
     </modules>
 
     <dependencyManagement>
@@ -101,7 +101,7 @@
 
     <properties>
         <wso2carbon.version.rest.api>4.0.0</wso2carbon.version.rest.api>
-        <synapse.version.rest.api>2.1.0-wso2v6</synapse.version.rest.api>
+        <synapse.version.rest.api>2.1.1-wso2v3</synapse.version.rest.api>
         <axis2.osgi.version.range.rest.api>${axis2.osgi.version.range}</axis2.osgi.version.range.rest.api>
         <axis2.wso2.version.rest.api>${axis2.wso2.version}</axis2.wso2.version.rest.api>
         <axiom.osgi.version.range.rest.api>${axiom.osgi.version.range}</axiom.osgi.version.range.rest.api>

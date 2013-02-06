@@ -5,14 +5,14 @@
     <parent>
         <artifactId>data-bridge</artifactId>
         <groupId>org.wso2.carbon</groupId>
-        <version>4.0.0</version>
-	<relativePath>../../pom.xml</relativePath>
+        <version>4.1.0-SNAPSHOT</version>
+	<relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>org.wso2.carbon.databridge.test.thrift</artifactId>
     <name>WSO2 Carbon - Data Bridge Thrift Test</name>
-    <version>4.0.7</version>
+    <version>4.1.0-SNAPSHOT</version>
     <description>
         org.wso2.carbon.databridge.test.thrift is used to test thrift
     </description>

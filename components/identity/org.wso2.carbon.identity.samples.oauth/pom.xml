@@ -15,7 +15,7 @@
 	<groupId>org.wso2.carbon</groupId>
 	<artifactId>org.wso2.carbon.identity.samples.oauth</artifactId>
 	<packaging>bundle</packaging>
-	<version>4.0.0</version>
+	<version>4.1.0-SNAPSHOT</version>
 	<name>WSO2 Carbon - OAuth Sample</name>
 	<description>A custom wso2 products or solution</description>
 	<url>http://wso2.org</url>
@@ -80,7 +80,7 @@
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
-			<version>4.0.1</version>
+			<version>4.1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.oauth.core</groupId>

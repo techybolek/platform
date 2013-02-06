@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>business-processes</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -34,12 +34,12 @@
     <description>BPEL Support for WSO2 Carbon</description>
 
     <modules>
-        <module>org.wso2.carbon.bpel/4.0.0</module>
-        <module>org.wso2.carbon.bpel.deployer/4.0.0</module>
-        <module>org.wso2.carbon.bpel.cluster.notifier/4.0.0</module>
-        <module>org.wso2.carbon.bpel.ui/4.0.0</module>
-        <module>org.wso2.carbon.bpel.b4p/4.0.0</module>
-        <module>org.wso2.carbon.bpel.bam.publisher/4.0.0</module>
+        <module>org.wso2.carbon.bpel</module>
+        <module>org.wso2.carbon.bpel.deployer</module>
+        <module>org.wso2.carbon.bpel.cluster.notifier</module>
+        <module>org.wso2.carbon.bpel.ui</module>
+        <module>org.wso2.carbon.bpel.b4p</module>
+        <module>org.wso2.carbon.bpel.bam.publisher</module>
     </modules>
 
     <dependencyManagement>

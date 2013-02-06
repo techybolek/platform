@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -131,13 +131,13 @@
     </dependencyManagement>
 
     <modules>
-        <module>org.wso2.carbon.event.ui/4.0.0</module>
-        <module>org.wso2.carbon.event.client/4.0.0</module>
-        <module>org.wso2.carbon.event.common/4.0.0</module>
-        <module>org.wso2.carbon.event.core/4.0.0</module>
-        <module>org.wso2.carbon.event.ws/4.0.0</module>
-        <module>org.wso2.carbon.event.admin/4.0.0</module>
-        <module>org.wso2.carbon.event.sink/4.0.0</module>
+        <module>org.wso2.carbon.event.ui</module>
+        <module>org.wso2.carbon.event.client</module>
+        <module>org.wso2.carbon.event.common</module>
+        <module>org.wso2.carbon.event.core</module>
+        <module>org.wso2.carbon.event.ws</module>
+        <module>org.wso2.carbon.event.admin</module>
+        <module>org.wso2.carbon.event.sink</module>
     </modules>
 
 

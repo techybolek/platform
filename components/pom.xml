@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>platform-parent</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -59,7 +59,7 @@
                  <module>data-sources</module>
                  <module>deployment-synchronizer</module>
                  <module>doc-request-processor</module>
-                 <module>ec2-client/4.0.0</module>
+                 <module>ec2-client</module>
                  <module>ejb-services</module>
                  <module>email-verification</module>
                 <module>endpoint</module>
@@ -123,7 +123,7 @@
                 <module>remote-usermgt</module>
                 <module>gadgets</module>
                 <module>webapp-mgt</module>
-				<module>jaggery/0.9.0-ALPHA1</module>
+				<!--module>jaggery/0.9.0-ALPHA1</module-->
 				<module>mashup</module>
                 <module>messagebox</module>
 		<module>qpid</module>
@@ -1505,7 +1505,7 @@
         <eclipse.osgi.version>3.5.0.v20090520</eclipse.osgi.version>
         <eclipse.osgi.services.version>3.2.0.v20090520-1800</eclipse.osgi.services.version>
         <equinox.commons.logging.version>1.0.4.v200706111724</equinox.commons.logging.version>
-        <synapse.version>2.1.0-wso2v6</synapse.version>
+        <synapse.version>2.1.1-wso2v3</synapse.version>
         <axiom.wso2.version>1.2.11.wso2v2</axiom.wso2.version>
         <wsdl4j.wso2.version>1.6.2.wso2v2</wsdl4j.wso2.version>
         <geronimo.stax.api.wso2.version>1.0.1.wso2v1</geronimo.stax.api.wso2.version>

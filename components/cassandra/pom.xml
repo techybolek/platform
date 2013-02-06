@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -156,12 +156,12 @@
     </repositories>
 
     <modules>
-        <module>org.wso2.carbon.cassandra.server/4.0.0</module>
-        <module>org.wso2.carbon.cassandra.dataaccess/4.0.0</module>
-        <module>org.wso2.carbon.cassandra.mgt/4.0.0</module>
-        <module>org.wso2.carbon.cassandra.mgt.ui/4.0.0</module>
-        <module>org.wso2.carbon.cassandra.examples/4.0.0</module>
-	<module>org.wso2.carbon.cassandra.sharedkey/4.0.0</module>
+        <module>org.wso2.carbon.cassandra.server</module>
+        <module>org.wso2.carbon.cassandra.dataaccess</module>
+        <module>org.wso2.carbon.cassandra.mgt</module>
+        <module>org.wso2.carbon.cassandra.mgt.ui</module>
+        <module>org.wso2.carbon.cassandra.examples</module>
+	<module>org.wso2.carbon.cassandra.sharedkey</module>
     </modules>
 
     <properties>

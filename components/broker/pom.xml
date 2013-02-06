@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -101,8 +101,8 @@
     </dependencyManagement>
 
     <modules>
-        <module>org.wso2.carbon.broker.core/4.0.0</module>
-        <module>org.wso2.carbon.broker.test/4.0.0</module>
+        <module>org.wso2.carbon.broker.core</module>
+        <module>org.wso2.carbon.broker.test</module>
     </modules>
 
 

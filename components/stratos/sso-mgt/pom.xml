@@ -31,7 +31,7 @@
     <name>WSO2 Stratos - SAML2 SSO Management Aggregator Component</name>
 
     <modules>
-        <module>org.wso2.stratos.identity.saml2.sso.mgt/2.0.0</module>
-        <module>org.wso2.stratos.identity.saml2.sso.mgt.ui/2.0.0</module>
+        <module>org.wso2.stratos.identity.saml2.sso.mgt</module>
+        <module>org.wso2.stratos.identity.saml2.sso.mgt.ui</module>
     </modules>
 </project>

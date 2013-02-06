@@ -16,15 +16,15 @@
 	<parent>
 		<groupId>org.wso2.carbon</groupId>
 		<artifactId>identity</artifactId>
-		<version>4.0.0</version>
-<relativePath>../../pom.xml</relativePath>
+		<version>4.1.0-SNAPSHOT</version>
+<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.wso2.carbon</groupId>
 	<artifactId>org.wso2.carbon.identity.provider.openid.ui</artifactId>
 	<packaging>bundle</packaging>
-	<version>4.0.6</version>
+	<version>4.1.0-SNAPSHOT</version>
 	<name>WSO2 Carbon - OpenID Provider UI</name>
 	<description>OpenID Provider UI component for WSO2 Carbon</description>
 	<url>http://www.wso2.com</url>
@@ -34,12 +34,12 @@
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.ui</artifactId>
-			<version>4.0.3</version>
+			<version>4.1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.identity.base</artifactId>
-            		<version>4.0.6</version>
+            		<version>4.1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openid4java.wso2</groupId>
@@ -56,7 +56,7 @@
          <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.provider.openid.stub</artifactId>
-	    <version>4.0.0</version>	
+	    <version>4.1.0-SNAPSHOT</version>	
         </dependency>
 	</dependencies>
 

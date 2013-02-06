@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.wso2.carbon</groupId>
@@ -30,12 +30,12 @@
     <packaging>pom</packaging>
     <name>API Management</name>
     <modules>
-        <module>org.wso2.carbon.apimgt.api/1.0.5</module>
-        <module>org.wso2.carbon.apimgt.impl/1.0.5</module>
-        <module>org.wso2.carbon.apimgt.hostobjects/1.0.5</module>
-        <module>org.wso2.carbon.apimgt.keymgt/1.0.6</module>
-	<module>org.wso2.carbon.apimgt.keymgt.client/1.0.5</module>
-        <module>org.wso2.carbon.apimgt.gateway/1.0.5</module>
+        <module>org.wso2.carbon.apimgt.api</module>
+        <module>org.wso2.carbon.apimgt.impl</module>
+        <module>org.wso2.carbon.apimgt.hostobjects</module>
+        <module>org.wso2.carbon.apimgt.keymgt</module>
+	<module>org.wso2.carbon.apimgt.keymgt.client</module>
+        <module>org.wso2.carbon.apimgt.gateway</module>
         <module>org.wso2.carbon.apimgt.usage</module>
     </modules>
     <build>

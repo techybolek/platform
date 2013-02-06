@@ -22,11 +22,11 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>andes</artifactId>
-        <version>4.0.0</version>
-<relativePath>../../pom.xml</relativePath>
+        <version>4.1.0-SNAPSHOT</version>
+<relativePath>../pom.xml</relativePath>
     </parent>
 
-    <version>4.0.7</version>
+    <version>4.1.0-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.andes.admin</artifactId>
     <packaging>bundle</packaging>
@@ -38,27 +38,27 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.andes.commons</artifactId>
-            <version>4.0.7</version>
+            <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.andes.core</artifactId>
-           <version>4.0.7</version>
+           <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
               <groupId>org.wso2.carbon</groupId>
               <artifactId>org.wso2.carbon.core</artifactId>
-              <version>4.0.6</version>
+              <version>4.1.0-SNAPSHOT</version>
           </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.andes.authentication</artifactId>
-            <version>4.0.7</version>
+            <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.event.core</artifactId>
-            <version>4.0.5</version>
+            <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.andes.wso2</groupId>
@@ -68,7 +68,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cassandra.server</artifactId>
-            <version>4.0.2</version>
+            <version>4.1.0-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

@@ -19,14 +19,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>iwa-authenticator</artifactId>
-        <version>4.0.1</version>
-<relativePath>../../pom.xml</relativePath>
+        <version>4.1.0-SNAPSHOT</version>
+<relativePath>../pom.xml</relativePath>
     </parent>
     
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.identity.authenticator.iwa</artifactId>
     <packaging>bundle</packaging>
-    <version>4.0.2</version>
+    <version>4.1.0-SNAPSHOT</version>
     <name>IWA Authenticator - BE bundle</name>
     <description>IWA Authenticator - BE bundle</description>
     <url>http://wso2.org</url>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>4.0.1</version>           
+            <version>4.1.0-SNAPSHOT</version>           
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -48,17 +48,17 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core.services</artifactId>
-            <version>4.0.2</version>           
+            <version>4.1.0-SNAPSHOT</version>           
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
-            <version>4.0.2</version>           
+            <version>4.1.0-SNAPSHOT</version>           
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.base</artifactId>
-            <version>4.0.2</version>
+            <version>4.1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

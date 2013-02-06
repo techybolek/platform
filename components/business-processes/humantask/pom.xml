@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>business-processes</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -34,10 +34,10 @@
     <description>WSO2 Human Task implementation</description>
 
     <modules>
-        <module>org.wso2.carbon.humantask/4.0.0</module>
-        <module>org.wso2.carbon.humantask.deployer/4.0.0</module>
-        <module>org.wso2.carbon.humantask.ui/4.0.0</module>
-        <module>org.wso2.carbon.humantask.cleanup.scheduler/4.0.0</module>
+        <module>org.wso2.carbon.humantask</module>
+        <module>org.wso2.carbon.humantask.deployer</module>
+        <module>org.wso2.carbon.humantask.ui</module>
+        <module>org.wso2.carbon.humantask.cleanup.scheduler</module>
     </modules>
 
     <dependencyManagement>

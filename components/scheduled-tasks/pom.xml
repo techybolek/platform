@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -33,9 +33,9 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.task/4.0.0</module>
-        <module>org.wso2.carbon.task.ui/4.0.0</module>
-        <module>org.wso2.carbon.task.services/4.0.0</module>
+        <module>org.wso2.carbon.task</module>
+        <module>org.wso2.carbon.task.ui</module>
+        <module>org.wso2.carbon.task.services</module>
     </modules>
 
     <dependencyManagement>
