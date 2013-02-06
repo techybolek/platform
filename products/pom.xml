@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>platform-parent</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
 	<relativePath>../parent/pom.xml</relativePath>
     </parent>
     
@@ -29,7 +29,7 @@
             </activation>
             <modules>
 		<module>integration/security-verifier</module>
-                <module>is/4.0.0</module>
+                <module>is</module>
            </modules>
         </profile>
         <!-- WSO2 Enterprise Service Bus profile  -->
@@ -43,7 +43,7 @@
             </activation>
             <modules>
 		<module>integration/security-verifier</module>
-                <module>esb/4.5.0</module>
+                <module>esb</module>
            </modules>
         </profile>
        <!-- WSO2 Application Server profile  -->
@@ -57,7 +57,7 @@
             </activation>
             <modules>
 		<module>integration/security-verifier</module>
-                <module>as/5.0.0</module>
+                <module>as</module>
            </modules>
         </profile>
         <!-- WSO2 Governence Registry profile  -->
@@ -71,7 +71,7 @@
             </activation>
             <modules>
 		<module>integration/security-verifier</module>
-                <module>greg/4.5.0</module>
+                <module>greg</module>
            </modules>
         </profile>
          <!-- WSO2 Data Services Server profile  -->
@@ -85,7 +85,7 @@
             </activation>
             <modules>
 		<module>integration/security-verifier</module>
-                <module>dss/3.0.0</module>
+                <module>dss</module>
            </modules>
         </profile>
          <!-- WSO2 Business Activity Monitoring Server profile  -->
@@ -99,7 +99,7 @@
             </activation>
             <modules>
 		<module>integration/security-verifier</module>
-                <module>bam2/2.0.0</module>
+                <module>bam2</module>
            </modules>
         </profile>
          <!-- WSO2 Complex Event Processing Server profile  -->
@@ -113,7 +113,7 @@
             </activation>
             <modules>
 		<module>integration/security-verifier</module>
-                <module>cep/2.0.0</module>
+                <module>cep</module>
            </modules>
         </profile>
         <!-- WSO2 Business Process Server profile  -->
@@ -127,7 +127,7 @@
             </activation>
             <modules>
 		<module>integration/security-verifier</module>
-                <module>bps/3.0.0</module>
+                <module>bps</module>
            </modules>
         </profile>
          <!-- WSO2 Business Rules Server profile  -->
@@ -141,7 +141,7 @@
             </activation>
             <modules>
 		<module>integration/security-verifier</module>
-                <module>brs/2.0.0</module>
+                <module>brs</module>
            </modules>
         </profile>
          <!-- WSO2 Message Broker profile  -->
@@ -155,7 +155,7 @@
             </activation>
             <modules>
 		<module>integration/security-verifier</module>
-                <module>mb/2.0.0</module>
+                <module>mb</module>
            </modules>
         </profile>
 	<!-- WSO2 Stratos Manager profile  -->
@@ -169,7 +169,7 @@
             </activation>
             <modules>
 		<module>integration/security-verifier</module>
-                <module>manager/2.0.0</module>
+                <module>manager</module>
            </modules>
         </profile>
         <!-- WSO2 Load Balancer profile  -->
@@ -183,7 +183,7 @@
             </activation>
             <modules>
 		<module>integration/security-verifier</module>
-                <module>lb/2.0.0</module>
+                <module>lb</module>
            </modules>
         </profile>
         <!-- WSO2 Cloud Services Gateway Server profile  -->
@@ -197,7 +197,7 @@
             </activation>
             <modules>
 		<module>integration/security-verifier</module>
-                <module>cg/1.0.0</module>
+                <module>cg</module>
            </modules>
 		</profile>-->
          <!-- WSO2 Gadget Server profile  -->
@@ -227,7 +227,7 @@
             </activation>
             <modules>
                 <module>integration/security-verifier</module>
-                <module>apimgt/1.0.0</module>
+                <module>apimgt</module>
            </modules>
         </profile>
 		
@@ -255,23 +255,23 @@
             </activation>
              <modules>
             <module>integration/security-verifier</module>
-            <module>as/5.0.0</module>
-            <module>is/4.0.0</module>
-            <module>esb/4.5.0</module>
-            <module>greg/4.5.0</module>
-            <module>manager/2.0.0</module>
-            <module>dss/3.0.0</module>
-            <module>bam2/2.0.0</module>
-            <module>cep/2.0.0</module>
-            <module>bps/3.0.0</module>
-            <module>brs/2.0.0</module>
-            <module>mb/2.0.0</module>	
-            <module>lb/2.0.0</module>	
+            <module>as</module>
+            <!--module>is</module>
+            <module>esb</module>
+            <module>greg</module>
+            <module>manager</module>
+            <module>dss</module>
+            <module>bam2</module>
+            <module>cep</module>
+            <module>bps</module>
+            <module>brs</module>
+            <module>mb</module>	
+            <module>lb</module>	
             <module>wsf</module>
-			<module>cg/1.0.0</module>
-            <module>apimgt/1.0.0</module>
+			<module>cg</module>
+            <module>apimgt</module>
             <module>gs</module>
-    	    <module>appfactory</module>
+    	    <module>appfactory</module-->
         </modules>
 	    <build>
 	        <plugins>
