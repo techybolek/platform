@@ -22,13 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-features</artifactId>
-        <version>4.0.0</version>
-        <relativePath>../../pom.xml</relativePath>
+        <version>4.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>wso2carbon-feature-repository</artifactId>
-    <version>4.0.7</version>
+    <version>4.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Feature Repository</name>
 
@@ -139,71 +139,71 @@
                                     <features>                                       
                                         <catFeature>
                                             <id>org.wso2.is.mandatory</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
                                         <catFeature>
                                             <id>org.wso2.is.identity.core</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
                                         <catFeature>
                                             <id>org.wso2.is.identity.mgt</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
                                         <catFeature>
                                             <id>org.wso2.is.identity.provider</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
 					<catFeature>
                                             <id>org.wso2.is.registry</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
 					<catFeature>
                                             <id>org.wso2.is.oauth</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
                                         <catFeature>
                                             <id>org.wso2.is.passive.sts</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
                                         <catFeature>
                                             <id>org.wso2.is.relying.party</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
 					<catFeature>
                                             <id>org.wso2.is.scim</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
                                         <catFeature>
                                             <id>org.wso2.is.sso.saml</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
                                         <catFeature>
                                             <id>org.wso2.is.user.profiles</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
 					<catFeature>
                                             <id>org.wso2.is.xacml</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
 					<catFeature>
                                             <id>org.wso2.is.directory.server</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
 					<catFeature>
                                             <id>org.wso2.is.cloud.identity</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
 					<catFeature>
                                             <id>org.wso2.is.self.registration</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
 					<catFeature>
                                             <id>org.wso2.is.authenticators</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
 					<catFeature>
                                             <id>org.wso2.is.claim.mgt</id>
-                                            <version>4.0.7</version>
+                                            <version>4.1.0-SNAPSHOT</version>
                                         </catFeature>
                                     </features>
                                 </category>

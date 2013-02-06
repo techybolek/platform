@@ -33,9 +33,9 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.stratos.common.feature/2.0.0</module>
-        <module>org.wso2.carbon.stratos.common.server.feature/2.0.0</module>
-        <module>org.wso2.carbon.stratos.common.ui.feature/2.0.0</module>
+        <module>org.wso2.carbon.stratos.common.feature</module>
+        <module>org.wso2.carbon.stratos.common.server.feature</module>
+        <module>org.wso2.carbon.stratos.common.ui.feature</module>
     </modules>
 
     

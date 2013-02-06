@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-features</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -32,8 +32,8 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.ntask.feature/4.0.0</module>
-	<module>org.wso2.carbon.ntask.core.feature/4.0.0</module>
+        <module>org.wso2.carbon.ntask.feature</module>
+	<module>org.wso2.carbon.ntask.core.feature</module>
     </modules>
 
     <dependencyManagement>

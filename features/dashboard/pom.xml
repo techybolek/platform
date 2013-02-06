@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-features</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -32,28 +32,28 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.dashboard.feature/4.0.0</module>
-        <module>org.wso2.carbon.dashboard.server.feature/4.0.0</module>
-        <module>org.wso2.carbon.dashboard.ui.feature/4.0.0</module>
-        <module>org.wso2.carbon.dashboard.mgt.gadgetrepo.feature/4.0.0</module>
-        <module>org.wso2.carbon.dashboard.mgt.gadgetrepo.server.feature/4.0.0</module>
-        <module>org.wso2.carbon.dashboard.mgt.gadgetrepo.ui.feature/4.0.0</module>
-        <module>org.wso2.carbon.dashboard.mgt.users.feature/4.0.0</module>
-        <module>org.wso2.carbon.dashboard.mgt.users.server.feature/4.0.0</module>
-        <module>org.wso2.carbon.dashboard.mgt.users.ui.feature/4.0.0</module>
-        <module>org.wso2.carbon.dashboard.gadgetrepopopulator.server.feature/4.0.0</module>
-        <module>org.wso2.carbon.dashboard.dashboardpopulator.server.feature/4.0.0</module>
-        <module>org.wso2.carbon.dashboard.gadgetframework.ui.feature/4.0.0</module>
-        <module>org.wso2.carbon.dashboard.mgt.theme.ui.feature/4.0.0</module>
-        <module>org.wso2.carbon.dashboard.mgt.theme.server.feature/4.0.0</module>
-        <module>org.wso2.carbon.dashboard.mgt.theme.feature/4.0.0</module>
-        <module>org.wso2.carbon.dashboard.themepopulator.server.feature/4.0.0</module>
-	<module>org.wso2.carbon.dashboard.social.ui.feature/4.0.0</module>
-	<module>org.wso2.carbon.dashboard.social.server.feature/4.0.0</module>
-	<module>org.wso2.carbon.dashboard.social.feature/4.0.0</module>
-	<module>org.wso2.carbon.dashboard.mgt.oauth.server.feature/4.0.0</module>
-	<module>org.wso2.carbon.dashboard.mgt.oauth.ui.feature/4.0.0</module>
-	<module>org.wso2.carbon.dashboard.mgt.oauth.feature/4.0.0</module>
+        <module>org.wso2.carbon.dashboard.feature</module>
+        <module>org.wso2.carbon.dashboard.server.feature</module>
+        <module>org.wso2.carbon.dashboard.ui.feature</module>
+        <module>org.wso2.carbon.dashboard.mgt.gadgetrepo.feature</module>
+        <module>org.wso2.carbon.dashboard.mgt.gadgetrepo.server.feature</module>
+        <module>org.wso2.carbon.dashboard.mgt.gadgetrepo.ui.feature</module>
+        <module>org.wso2.carbon.dashboard.mgt.users.feature</module>
+        <module>org.wso2.carbon.dashboard.mgt.users.server.feature</module>
+        <module>org.wso2.carbon.dashboard.mgt.users.ui.feature</module>
+        <module>org.wso2.carbon.dashboard.gadgetrepopopulator.server.feature</module>
+        <module>org.wso2.carbon.dashboard.dashboardpopulator.server.feature</module>
+        <module>org.wso2.carbon.dashboard.gadgetframework.ui.feature</module>
+        <module>org.wso2.carbon.dashboard.mgt.theme.ui.feature</module>
+        <module>org.wso2.carbon.dashboard.mgt.theme.server.feature</module>
+        <module>org.wso2.carbon.dashboard.mgt.theme.feature</module>
+        <module>org.wso2.carbon.dashboard.themepopulator.server.feature</module>
+	<module>org.wso2.carbon.dashboard.social.ui.feature</module>
+	<module>org.wso2.carbon.dashboard.social.server.feature</module>
+	<module>org.wso2.carbon.dashboard.social.feature</module>
+	<module>org.wso2.carbon.dashboard.mgt.oauth.server.feature</module>
+	<module>org.wso2.carbon.dashboard.mgt.oauth.ui.feature</module>
+	<module>org.wso2.carbon.dashboard.mgt.oauth.feature</module>
     </modules>
 
     <dependencyManagement>

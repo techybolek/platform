@@ -32,9 +32,9 @@
     <url>http://wso2.org</url>
 
     <modules>
-	<module>org.wso2.carbon.stratos.gapp.server.feature/2.0.0</module>
-	<module>org.wso2.carbon.stratos.gapp.ui.feature/2.0.0</module>
-        <module>org.wso2.carbon.stratos.gapp.feature/2.0.0</module>
+	<module>org.wso2.carbon.stratos.gapp.server.feature</module>
+	<module>org.wso2.carbon.stratos.gapp.ui.feature</module>
+        <module>org.wso2.carbon.stratos.gapp.feature</module>
     </modules>
 
 </project>

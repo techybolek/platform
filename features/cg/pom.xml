@@ -21,11 +21,11 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-features</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-	<version>4.0.1</version>
+	<version>4.1.0-SNAPSHOT</version>
 	<groupId>org.wso2.carbon</groupId>
     <artifactId>cg-features</artifactId>
     <packaging>pom</packaging>
@@ -33,13 +33,13 @@
     <url>http://wso2.org</url>
 
             <modules>
-                <module>org.wso2.carbon.cloud.gateway.agent.feature/4.0.1</module>
-                <module>org.wso2.carbon.cloud.gateway.agent.ui.feature/4.0.1</module>
-                <module>org.wso2.carbon.cloud.gateway.agent.server.feature/4.0.1</module>
-                <module>org.wso2.carbon.cloud.gateway.feature/4.0.1</module>
-                <module>org.wso2.carbon.cloud.gateway.server.feature/4.0.1</module>
-				<module>org.wso2.carbon.cloud.gateway.mediation.initializer.feature/4.0.1</module>
-    			<module>org.wso2.carbon.cloud.gateway.proxyadmin.ui.feature/4.0.1</module>
+                <module>org.wso2.carbon.cloud.gateway.agent.feature</module>
+                <module>org.wso2.carbon.cloud.gateway.agent.ui.feature</module>
+                <module>org.wso2.carbon.cloud.gateway.agent.server.feature</module>
+                <module>org.wso2.carbon.cloud.gateway.feature</module>
+                <module>org.wso2.carbon.cloud.gateway.server.feature</module>
+				<module>org.wso2.carbon.cloud.gateway.mediation.initializer.feature</module>
+    			<module>org.wso2.carbon.cloud.gateway.proxyadmin.ui.feature</module>
             </modules>
 
     <dependencyManagement>
@@ -47,17 +47,17 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.cloud.gateway.agent</artifactId>
-                <version>4.0.1</version>
+                <version>4.1.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.cloud.gateway.agent.ui</artifactId>
-                <version>4.0.1</version>
+                <version>4.1.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.cloud.gateway.common</artifactId>
-                <version>4.0.1</version>
+                <version>4.1.0-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -32,9 +32,9 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.load.balance.agent.feature/2.0.0</module>
-        <module>org.wso2.carbon.load.balance.agent.server.feature/2.0.0</module>
-        <module>org.wso2.carbon.load.balance.agent.ui.feature/2.0.0</module>
+        <module>org.wso2.carbon.load.balance.agent.feature</module>
+        <module>org.wso2.carbon.load.balance.agent.server.feature</module>
+        <module>org.wso2.carbon.load.balance.agent.ui.feature</module>
     </modules>
 
     <dependencyManagement>

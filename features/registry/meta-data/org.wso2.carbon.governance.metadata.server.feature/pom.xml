@@ -22,27 +22,27 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>governance.metadata-feature</artifactId>
-        <version>4.0.0</version>
-<relativePath>../../pom.xml</relativePath>
+        <version>4.1.0-SNAPSHOT</version>
+<relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.governance.metadata.server.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Governance Metadata Server Feature</name>
-    <version>4.0.8</version>
+    <version>4.1.0-SNAPSHOT</version>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for Back-end Governance Metadata functionality</description>
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.governance.list</artifactId>
-	    <version>4.0.5</version>
+	    <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.governance.generic</artifactId>
-	    <version>4.0.8</version>
+	    <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.governance.api</artifactId>
-            <version>4.0.8</version>
+            <version>4.1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>

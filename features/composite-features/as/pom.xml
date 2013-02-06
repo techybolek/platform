@@ -21,30 +21,30 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-features</artifactId>
-        <version>4.0.0</version>
-	<relativePath>../../pom.xml</relativePath>
+        <version>4.1.0-SNAPSHOT</version>
+	<relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.appserver</groupId>
     <artifactId>appserver-composite-feature-parent</artifactId>
-    <version>4.0.5</version>
+    <version>4.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - AS Composite Features Aggregator Module</name>
     <url>http://wso2.org</url>
 
     <modules>
-        <module>mashup/4.0.5</module>
-	<module>tools/4.0.5</module>
-	<module>monitoring/4.0.5</module>
-	<module>module-management/4.0.5</module>
-	<module>data-publishers/4.0.5</module>
-	<module>transports/4.0.5</module>
-	<module>registry/4.0.5</module>
-	<module>service-application-hosting/4.0.5</module>
-	<module>service-application-security/4.0.5</module>
-	<module>appserver-mandatory/4.0.5</module>
-	<module>miscellaneous/4.0.5</module>
+        <module>mashup</module>
+	<module>tools</module>
+	<module>monitoring</module>
+	<module>module-management</module>
+	<module>data-publishers</module>
+	<module>transports</module>
+	<module>registry</module>
+	<module>service-application-hosting</module>
+	<module>service-application-security</module>
+	<module>appserver-mandatory</module>
+	<module>miscellaneous</module>
     </modules>
 </project>
 

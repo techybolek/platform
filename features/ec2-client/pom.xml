@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-features</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -33,7 +33,7 @@
     <description>This feature is the parent ec2-client feature</description>
 
     <modules>
-        <module>org.wso2.carbon.ec2.client.feature/4.0.0</module>
+        <module>org.wso2.carbon.ec2.client.feature</module>
     </modules>
 
     <dependencyManagement>
