@@ -233,11 +233,6 @@
     </build>
 
     <properties>
-	<stratos.patch.version.201>2.0.1</stratos.patch.version.201>
-        <stratos.patch.version.202>2.0.2</stratos.patch.version.202>
-	<stratos.patch.version.203>2.0.3</stratos.patch.version.203>
-	<stratos.patch.version.205>2.0.5</stratos.patch.version.205>
-	<stratos.patch.version.206>2.0.6</stratos.patch.version.206>
 	<synapse.patch.version.211-wso2v2>2.1.1-wso2v2</synapse.patch.version.211-wso2v2>
 	<json.patch.version.200-wso2v1>2.0.0.wso2v1</json.patch.version.200-wso2v1>
 	<kaptcha.patch.version.230-wso2v1>2.3.0.wso2v1</kaptcha.patch.version.230-wso2v1>
