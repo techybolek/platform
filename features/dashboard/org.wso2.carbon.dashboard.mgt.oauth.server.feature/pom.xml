@@ -86,8 +86,6 @@
     </build>
 
  <properties>
- 	<carbon.platform.patch.version>3.2.1</carbon.platform.patch.version>
-	<carbon.platform.version>4.1.0-SNAPSHOT</carbon.platform.version>
  </properties>
 
 </project>
