@@ -21,7 +21,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cassandra.explorer.mgt</artifactId>
-            <version>${carbon.platform.patch.version.401}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
 
         <!--Cassandra -->

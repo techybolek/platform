@@ -24,12 +24,12 @@
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.databridge.persistence.cassandra</artifactId>
-            <version>${carbon.platform.patch.version.407}</version>
+            <version>${carbon.platform.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.databridge.streamdefn.cassandra</artifactId>
-            <version>${carbon.platform.patch.version.405}</version>
+            <version>${carbon.platform.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -71,9 +71,9 @@
 							</bundles>
 
 							<importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.platform.patch.version.405}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.platform.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.cassandra.dataaccess:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.databridge.core.server:${carbon.platform.patch.version.407}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.databridge.core.server:${carbon.platform.version}</importFeatureDef>
 							</importFeatures>
 						</configuration>
 					</execution>

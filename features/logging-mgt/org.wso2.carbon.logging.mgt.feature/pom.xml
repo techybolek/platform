@@ -38,13 +38,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging.mgt.server.feature</artifactId>
-            <version>${carbon.platform.patch.version.406}</version>
+            <version>${carbon.platform.version}</version>
             <type>zip</type>
 	    </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging.mgt.ui.feature</artifactId>
-            <version>${carbon.platform.patch.version.405}</version>
+            <version>${carbon.platform.version}</version>
             <type>zip</type>
 	</dependency>
         <dependency>
@@ -55,7 +55,7 @@
 	<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging.view.stub</artifactId>
-	    <version>${carbon.platform.patch.version.403}</version>
+	    <version>${carbon.platform.version}</version>
         </dependency>
 
     </dependencies>
@@ -80,8 +80,8 @@
                                 <importFeatureDef>org.wso2.carbon.core:${wso2carbon.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.logging.mgt.server.feature:${carbon.platform.patch.version.406}</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.logging.mgt.ui.feature:${carbon.platform.patch.version.405}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.logging.mgt.server.feature:${carbon.platform.version}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.logging.mgt.ui.feature:${carbon.platform.version}</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

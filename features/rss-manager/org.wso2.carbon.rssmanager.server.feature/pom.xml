@@ -22,12 +22,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rssmanager.core</artifactId>
-            <version>${carbon.platform.patch.version.406}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rssmanager.common</artifactId>
-            <version>${carbon.platform.patch.version.405}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
     </dependencies>
 
@@ -82,10 +82,10 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    org.wso2.carbon:org.wso2.carbon.rssmanager.core:${carbon.platform.patch.version.406}
+                                    org.wso2.carbon:org.wso2.carbon.rssmanager.core:${carbon.platform.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    org.wso2.carbon:org.wso2.carbon.rssmanager.common:${carbon.platform.patch.version.405}
+                                    org.wso2.carbon:org.wso2.carbon.rssmanager.common:${carbon.platform.version}
                                 </bundleDef>
                             </bundles>
                         </configuration>

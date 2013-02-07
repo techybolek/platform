@@ -38,25 +38,25 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediator.bam.server.feature</artifactId>
-            <version>${carbon.platform.patch.version.405}</version>
+            <version>${carbon.platform.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediator.bam.ui.feature</artifactId>
-            <version>${carbon.platform.patch.version.405}</version>
+            <version>${carbon.platform.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediator.bam.config.server.feature</artifactId>
-            <version>${carbon.platform.patch.version.405}</version>
+            <version>${carbon.platform.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediator.bam.config.ui.feature</artifactId>
-            <version>${carbon.platform.patch.version.405}</version>
+            <version>${carbon.platform.version}</version>
             <type>zip</type>
         </dependency>
     </dependencies>
@@ -79,24 +79,24 @@
                             <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
                                 <importFeatureDef>
-                                    org.wso2.carbon.core:${carbon.platform.patch.version.401}
+                                    org.wso2.carbon.core:${carbon.platform.version}
                                 </importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.databridge.datapublisher:${carbon.platform.patch.version.402}
+                                    org.wso2.carbon.databridge.datapublisher:${carbon.platform.version}
                                 </importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>
-                                    org.wso2.carbon:org.wso2.carbon.mediator.bam.server.feature:${carbon.platform.patch.version.405}
+                                    org.wso2.carbon:org.wso2.carbon.mediator.bam.server.feature:${carbon.platform.version}
                                 </includedFeatureDef>
                                 <includedFeatureDef>
-                                    org.wso2.carbon:org.wso2.carbon.mediator.bam.ui.feature:${carbon.platform.patch.version.405}
+                                    org.wso2.carbon:org.wso2.carbon.mediator.bam.ui.feature:${carbon.platform.version}
                                 </includedFeatureDef>
                                 <includedFeatureDef>
-                                    org.wso2.carbon:org.wso2.carbon.mediator.bam.config.server.feature:${carbon.platform.patch.version.405}
+                                    org.wso2.carbon:org.wso2.carbon.mediator.bam.config.server.feature:${carbon.platform.version}
                                 </includedFeatureDef>
                                 <includedFeatureDef>
-                                    org.wso2.carbon:org.wso2.carbon.mediator.bam.config.ui.feature:${carbon.platform.patch.version.405}
+                                    org.wso2.carbon:org.wso2.carbon.mediator.bam.config.ui.feature:${carbon.platform.version}
                                 </includedFeatureDef>
                             </includedFeatures>
                         </configuration>

@@ -22,13 +22,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cassandra.explorer.server.feature</artifactId>
-            <version>${carbon.platform.patch.version.405}</version>
+            <version>${carbon.platform.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cassandra.explorer.ui.feature</artifactId>
-            <version>${carbon.platform.patch.version.405}</version>
+            <version>${carbon.platform.version}</version>
             <type>zip</type>
         </dependency>
 
@@ -69,8 +69,8 @@
                                 <importFeatureDef>org.wso2.carbon.core:${project.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cassandra.explorer.server.feature:${carbon.platform.patch.version.405}</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cassandra.explorer.ui.feature:${carbon.platform.patch.version.405}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cassandra.explorer.server.feature:${carbon.platform.version}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cassandra.explorer.ui.feature:${carbon.platform.version}</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

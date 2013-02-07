@@ -65,7 +65,7 @@
 							</bundles>
 
 							<importFeatures>
-							    <importFeatureDef>org.wso2.carbon.core.server:${carbon.platform.patch.version.405}</importFeatureDef>
+							    <importFeatureDef>org.wso2.carbon.core.server:${carbon.platform.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.databridge.core.server:${project.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.databridge.commons.server:${project.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.databridge.commons.thrift.server:${project.version}</importFeatureDef>

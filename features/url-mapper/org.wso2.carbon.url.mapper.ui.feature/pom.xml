@@ -38,12 +38,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.url.mapper.ui</artifactId>
-	    <version>${carbon.platform.patch.version.402}</version>
+	    <version>${carbon.platform.version}</version>
         </dependency>
 	<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.url.mapper.stub</artifactId>
-	    <version>${carbon.platform.patch.version.401}</version>
+	    <version>${carbon.platform.version}</version>
         </dependency>
     </dependencies>
 

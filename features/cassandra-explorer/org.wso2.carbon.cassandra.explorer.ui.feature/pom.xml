@@ -20,12 +20,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cassandra.explorer.ui</artifactId>
-            <version>${carbon.platform.patch.version.405}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cassandra.explorer.stub</artifactId>
-            <version>${carbon.platform.patch.version.401}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
     </dependencies>
 
@@ -54,13 +54,13 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cassandra.explorer.ui:${carbon.platform.patch.version.405}
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cassandra.explorer.ui:${carbon.platform.version}
                                 </bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cassandra.explorer.stub:${carbon.platform.patch.version.401}
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cassandra.explorer.stub:${carbon.platform.version}
                                 </bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.ui:${carbon.platform.patch.version.402}
+                                <importFeatureDef>org.wso2.carbon.core.ui:${carbon.platform.version}
                                 </importFeatureDef>
                             </importFeatures>
                         </configuration>

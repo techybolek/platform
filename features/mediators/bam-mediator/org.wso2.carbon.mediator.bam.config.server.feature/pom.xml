@@ -38,7 +38,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediator.bam.config</artifactId>
-            <version>${carbon.platform.patch.version.405}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
     </dependencies>
 
@@ -65,7 +65,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.bam.config:${carbon.platform.patch.version.405}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.bam.config:${carbon.platform.version}</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.apache.synapse.wso2:${synapse.version}</importFeatureDef>

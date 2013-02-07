@@ -24,13 +24,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.databridge.datasink.cassandra.server.feature</artifactId>
-            <version>${carbon.platform.patch.version.407}</version>
+            <version>${carbon.platform.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.databridge.streamdefn.cassandra.server.feature</artifactId>
-            <version>${carbon.platform.patch.version.407}</version>
+            <version>${carbon.platform.version}</version>
             <type>zip</type>
         </dependency>
     </dependencies>
@@ -53,7 +53,7 @@
                             <id>org.wso2.carbon.databridge.cassandra</id>
 							<propertiesFile>../feature.properties</propertiesFile>
 							<importFeatures>
-								<importFeatureDef>org.wso2.carbon.core:${carbon.platform.patch.version.405}</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.core:${carbon.platform.version}</importFeatureDef>
 							</importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.databridge.streamdefn.cassandra.server.feature</includedFeatureDef>

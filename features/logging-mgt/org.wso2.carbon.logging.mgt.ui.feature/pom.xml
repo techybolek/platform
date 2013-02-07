@@ -42,7 +42,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging.view.ui</artifactId>
-	    <version>${carbon.platform.patch.version.405}</version>
+	    <version>${carbon.platform.version}</version>
         </dependency>
     </dependencies>
 
@@ -72,7 +72,7 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.logging.admin.ui</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.logging.view.ui</bundleDef>
                                <bundleDef>org.wso2.carbon:org.wso2.carbon.logging.admin.stub:${wso2carbon.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.logging.view.stub:${carbon.platform.patch.version.403}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.logging.view.stub:${carbon.platform.version}</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.ui:${wso2carbon.version}</importFeatureDef>

@@ -38,7 +38,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cassandra.server</artifactId>
-            <version>${carbon.platform.patch.version.405}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.cassandra.wso2</groupId>
@@ -123,7 +123,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.cassandra.sharedkey</artifactId>
-            <version>${carbon.platform.patch.version.403}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.github.wso2</groupId>
@@ -204,9 +204,9 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cassandra.server:${carbon.platform.patch.version.405}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cassandra.sharedkey:${carbon.platform.patch.version.403}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.authentication:${carbon.platform.patch.version.401}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cassandra.server:${carbon.platform.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cassandra.sharedkey:${carbon.platform.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.authentication:${carbon.platform.version}</bundleDef>
                                 <bundleDef>org.apache.cassandra.wso2:apache-cassandra</bundleDef>
                                 <bundleDef>libthrift.wso2:libthrift</bundleDef>
                                 <bundleDef>org.perf4j.wso2:perf4j</bundleDef>

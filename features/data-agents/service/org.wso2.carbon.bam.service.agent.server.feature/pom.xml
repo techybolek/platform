@@ -41,12 +41,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.bam.service.data.publisher</artifactId>
-            <version>${carbon.platform.patch.version.405}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.bam.data.publisher.util</artifactId>
-            <version>${carbon.platform.patch.version.405}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
     </dependencies>
 
@@ -99,19 +99,19 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    org.wso2.carbon:org.wso2.carbon.bam.service.data.publisher:${carbon.platform.patch.version.405}
+                                    org.wso2.carbon:org.wso2.carbon.bam.service.data.publisher:${carbon.platform.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    org.wso2.carbon:org.wso2.carbon.bam.data.publisher.util:${carbon.platform.patch.version.405}
+                                    org.wso2.carbon:org.wso2.carbon.bam.data.publisher.util:${carbon.platform.version}
                                 </bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.system.statistics.server:${carbon.platform.patch.version.401}
+                                    org.wso2.carbon.system.statistics.server:${carbon.platform.version}
                                 </importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.databridge.datapublisher:${carbon.platform.patch.version.402}
+                                    org.wso2.carbon.databridge.datapublisher:${carbon.platform.version}
                                 </importFeatureDef>
                             </importFeatures>
                         </configuration>

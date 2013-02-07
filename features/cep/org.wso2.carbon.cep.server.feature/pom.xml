@@ -159,9 +159,9 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cep.core:${carbon.platform.patch.version.405}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cep.admin:${carbon.platform.patch.version.405}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cep.siddhi:${carbon.platform.patch.version.402}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cep.core:${carbon.platform.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cep.admin:${carbon.platform.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cep.siddhi:${carbon.platform.version}</bundleDef>
                                 <bundleDef>org.wso2.siddhi:siddhi-api</bundleDef>
                                 <bundleDef>org.wso2.siddhi:siddhi-core</bundleDef>
                                 <bundleDef>org.wso2.siddhi:siddhi-query</bundleDef>
@@ -173,16 +173,16 @@
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>
-                                    org.wso2.carbon.core.server:${carbon.platform.patch.version.402}
+                                    org.wso2.carbon.core.server:${carbon.platform.version}
                                 </importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.brokermanager.server:${carbon.platform.patch.version.402}
+                                    org.wso2.carbon.brokermanager.server:${carbon.platform.version}
                                 </importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.broker.server:${carbon.platform.patch.version.402}
+                                    org.wso2.carbon.broker.server:${carbon.platform.version}
                                 </importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.cep.statistics.server:${carbon.platform.patch.version.402}
+                                    org.wso2.carbon.cep.statistics.server:${carbon.platform.version}
                                 </importFeatureDef>
                             </importFeatures>
                         </configuration>
