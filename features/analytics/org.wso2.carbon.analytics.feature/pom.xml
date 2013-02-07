@@ -38,13 +38,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.analytics.server.feature</artifactId>
-            <version>${carbon.patch.release.version407}</version>
+            <version>${carbon.platform.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.analytics.ui.feature</artifactId>
-            <version>${carbon.patch.release.version402}</version>
+            <version>${carbon.platform.version}</version>
             <type>zip</type>
         </dependency>
     </dependencies>
@@ -66,14 +66,14 @@
                             <id>org.wso2.carbon.analytics</id>
                             <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:${carbon.patch.release.version402}
+                                <importFeatureDef>org.wso2.carbon.core:${carbon.platform.version}
                                 </importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.analytics.server.feature:${carbon.patch.release.version407}
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.analytics.server.feature:${carbon.platform.version}
                                 </includedFeatureDef>
                                 <includedFeatureDef>
-                                    org.wso2.carbon:org.wso2.carbon.analytics.ui.feature:${carbon.patch.release.version402}
+                                    org.wso2.carbon:org.wso2.carbon.analytics.ui.feature:${carbon.platform.version}
                                 </includedFeatureDef>
                             </includedFeatures>
                         </configuration>
@@ -84,7 +84,7 @@
     </build>
 
     <properties>
-        <carbon.patch.release.version407></carbon.patch.release.version407>
-        <carbon.patch.release.version402></carbon.patch.release.version402>
+        <carbon.platform.version></carbon.platform.version>
+        <carbon.platform.version></carbon.platform.version>
     </properties>
 </project>

@@ -44,7 +44,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.bam.mediationstats.data.publisher</artifactId>
-	    <version>${carbon.patch.release.version405}</version>
+	    <version>${carbon.platform.version}</version>
         </dependency>
     </dependencies>
 
@@ -72,12 +72,12 @@
                             </adviceFile>
                             <bundles>
                                 <!--bundleDef>org.wso2.carbon:org.wso2.carbon.bam.activity.mediation.data.publisher</bundleDef-->
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.mediationstats.data.publisher:${carbon.patch.release.version405}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.data.publisher.util:${carbon.patch.release.version405}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.mediationstats.data.publisher:${carbon.platform.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.data.publisher.util:${carbon.platform.version}</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.databridge.datapublisher:${carbon.patch.release.version402}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.databridge.datapublisher:${carbon.platform.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>
@@ -86,9 +86,9 @@
         </plugins>
     </build>
     <properties>
-        <carbon.patch.release.version401></carbon.patch.release.version401>
-        <carbon.patch.release.version402></carbon.patch.release.version402>
-        <carbon.patch.release.version403></carbon.patch.release.version403>
-	<carbon.patch.release.version405></carbon.patch.release.version405>
+        <carbon.platform.version></carbon.platform.version>
+        <carbon.platform.version></carbon.platform.version>
+        <carbon.platform.version></carbon.platform.version>
+	<carbon.platform.version></carbon.platform.version>
     </properties>
 </project>

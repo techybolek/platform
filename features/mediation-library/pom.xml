@@ -43,7 +43,7 @@
             <!--dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
-                <version>${wso2carbon.patch.release.version}</version>
+                <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
@@ -58,7 +58,7 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.mediation.library</artifactId>
-                <version>${wso2carbon.patch.release.version}</version>
+                <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
@@ -74,7 +74,7 @@
     </dependencyManagement>
 
     <properties>
-	<wso2carbon.patch.release.version>${project.version}</wso2carbon.patch.release.version>
+	<carbon.platform.version>${project.version}</carbon.platform.version>
         <wso2carbon.version.mediation.library>${wso2carbon.version}</wso2carbon.version.mediation.library>
         <wso2carbon.version.mediation.registry>${wso2carbon.version}</wso2carbon.version.mediation.registry>
      	<synapse.patch.release.version>2.1.0-wso2v7</synapse.patch.release.version>

@@ -79,7 +79,7 @@
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.apache.synapse.wso2:${synapse.patch.release.version}</importFeatureDef>
-                                <!--importFeatureDef>org.wso2.carbon.mediation.initializer.server:${wso2carbon.patch.release.version}</importFeatureDef-->
+                                <!--importFeatureDef>org.wso2.carbon.mediation.initializer.server:${carbon.platform.version}</importFeatureDef-->
                             </importFeatures>
                         </configuration>
                     </execution>

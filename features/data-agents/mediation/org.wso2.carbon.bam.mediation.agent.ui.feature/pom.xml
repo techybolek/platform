@@ -47,12 +47,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.bam.mediationstats.data.publisher.ui</artifactId>
-            <version>${carbon.patch.release.version405}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.bam.mediationstats.data.publisher.stub</artifactId>
-	    <version>${carbon.patch.release.version405}</version>
+	    <version>${carbon.platform.version}</version>
         </dependency>
 
     </dependencies>
@@ -82,8 +82,8 @@
                             <bundles>
                                 <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.bam.activity.mediation.data.publisher.ui</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.activity.mediation.data.publisher.stub</bundleDef>-->
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.mediationstats.data.publisher.ui:${carbon.patch.release.version405}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.mediationstats.data.publisher.stub:${carbon.patch.release.version405}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.mediationstats.data.publisher.ui:${carbon.platform.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.mediationstats.data.publisher.stub:${carbon.platform.version}</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.ui:${wso2carbon.version}</importFeatureDef>
@@ -96,8 +96,8 @@
     </build>
 
     <properties>
-        <carbon.patch.release.version403></carbon.patch.release.version403>
-        <carbon.patch.release.version405></carbon.patch.release.version405>
+        <carbon.platform.version></carbon.platform.version>
+        <carbon.platform.version></carbon.platform.version>
     </properties>
 
 </project>

@@ -50,13 +50,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.reporting.ui.feature</artifactId>
-            <version>${carbon.patch.release.version401}</version>
+            <version>${carbon.platform.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.reporting.template.ui.feature</artifactId>
-            <version>${carbon.patch.release.version401}</version>
+            <version>${carbon.platform.version}</version>
             <type>zip</type>
         </dependency>
     </dependencies>
@@ -85,9 +85,9 @@
                                 </includedFeatureDef>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.reporting.template.server.feature:${project.version}
                                 </includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.reporting.ui.feature:${carbon.patch.release.version401}
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.reporting.ui.feature:${carbon.platform.version}
                                 </includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.reporting.template.ui.feature:${carbon.patch.release.version401}
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.reporting.template.ui.feature:${carbon.platform.version}
                                 </includedFeatureDef>
                             </includedFeatures>
                         </configuration>
@@ -98,7 +98,7 @@
     </build>
 
      <properties>
-        <carbon.patch.release.version401></carbon.patch.release.version401>
+        <carbon.platform.version></carbon.platform.version>
     </properties>
 
 </project>

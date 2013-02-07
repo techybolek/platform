@@ -38,12 +38,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.analytics.hive</artifactId>
-	        <version>${carbon.patch.release.version407}</version>
+	        <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rssmanager.stub</artifactId>
-            <version>${carbon.patch.release.version405}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
     </dependencies>
 
@@ -101,10 +101,10 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.rssmanager.stub</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.patch.release.version405}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.platform.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.analytics.hive.server.feature:${carbon.patch.release.version407}
+                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.analytics.hive.server.feature:${carbon.platform.version}
                                 </includedFeatureDef>
                             </includedFeatures>
                         </configuration>
@@ -115,9 +115,9 @@
     </build>
 
     <properties>
-       <carbon.patch.release.version405></carbon.patch.release.version405>
-       <carbon.patch.release.version407></carbon.patch.release.version407>
-       <carbon.patch.release.version402></carbon.patch.release.version402>
-       <carbon.patch.release.version401></carbon.patch.release.version401>
+       <carbon.platform.version></carbon.platform.version>
+       <carbon.platform.version></carbon.platform.version>
+       <carbon.platform.version></carbon.platform.version>
+       <carbon.platform.version></carbon.platform.version>
     </properties>
 </project>

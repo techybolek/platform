@@ -72,7 +72,7 @@
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.apache.synapse.wso2:${synapse.patch.release.version}</importFeatureDef>
-                                <!--importFeatureDef>org.wso2.carbon.mediation.initializer.server:${wso2carbon.patch.release.version}</importFeatureDef-->
+                                <!--importFeatureDef>org.wso2.carbon.mediation.initializer.server:${carbon.platform.version}</importFeatureDef-->
                             </importFeatures>
                         </configuration>
                     </execution>
@@ -94,7 +94,7 @@
                                <artifactItem>
                                    <groupId>org.wso2.carbon</groupId>
                                    <artifactId>org.wso2.carbon.mediation.library.connectors.linked-in</artifactId>
-                                   <version>${wso2carbon.patch.release.version}</version>
+                                   <version>${carbon.platform.version}</version>
                                    <type>zip</type>
                                    <overWrite>true</overWrite>
                                    <outputDirectory>src/main/resources/lib</outputDirectory>

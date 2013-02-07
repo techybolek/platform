@@ -86,7 +86,7 @@
 
     <properties>
         <slf4j.version>1.6.1</slf4j.version>
-        <carbon.patch.release.version405></carbon.patch.release.version405>
+        <carbon.platform.version></carbon.platform.version>
     </properties>
 
 </project>
