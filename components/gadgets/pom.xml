@@ -367,7 +367,7 @@
         </authenticator.version.governance>
         <javamail.version.governance>${javamail.version}</javamail.version.governance>
         <activation.version.governance>${activation.version}</activation.version.governance>
-        <servlet-api.version.governance>${version.equinox.javax.servlet}</servlet-api.version.governance>
+        <servlet-api.version.governance>${version.javax.servlet}</servlet-api.version.governance>
         <commons-fileupload.version.governance>${commons-fileupload.version}
         </commons-fileupload.version.governance>
         <abdera.wso2.version.governance>${abdera.wso2.version}</abdera.wso2.version.governance>
