@@ -72,7 +72,7 @@
                             org.apache.axis2.*; version="${axis2.osgi.version.range.endpoint}",
 			                org.apache.axiom.*; version="${axiom.osgi.version.range.endpoint}",
                             javax.xml.namespace;version="0.0.0",
-                            javax.servlet.http;version=${imp.pkg.version.javax.servlet},
+                            javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>

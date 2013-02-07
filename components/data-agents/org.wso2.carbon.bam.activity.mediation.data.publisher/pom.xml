@@ -36,8 +36,8 @@
                             org.wso2.carbon.bam.activity.mediation.data.publisher.*
                         </Export-Package>
                         <Import-Package>
-                            javax.servlet;version=${imp.pkg.version.javax.servlet},
-                            javax.servlet.http;version=${imp.pkg.version.javax.servlet},
+                            javax.servlet;version="${imp.pkg.version.javax.servlet}",
+                            javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
                             org.apache.axis2.*; version=${orbit.version.axis2},
                             org.apache.commons.pool.*; version=1.5.0,
                             org.wso2.carbon.bam.service.*,

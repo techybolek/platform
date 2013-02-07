@@ -79,7 +79,7 @@
                         </Export-Package>
                         <Import-Package>
                             org.wso2.carbon.dashboard.stub.*,
-                            javax.servlet;version=${imp.pkg.version.javax.servlet},
+                            javax.servlet;version="${imp.pkg.version.javax.servlet}",
                             javax.xml.namespace; version="0.0.0",
                             org.apache.shindig.*,
                             org.wso2.carbon.dashboard.common.*,

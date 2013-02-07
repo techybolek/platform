@@ -70,9 +70,9 @@
                             org.wso2.carbon.task.services.*
                         </Export-Package>
                         <Import-Package>
-                            javax.servlet;version=${imp.pkg.version.javax.servlet},
-                            javax.servlet.http;version=${imp.pkg.version.javax.servlet},
-                            javax.servlet.resources;version=${imp.pkg.version.javax.servlet},
+                            javax.servlet;version="${imp.pkg.version.javax.servlet}",
+                            javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
+                            javax.servlet.resources;version="${imp.pkg.version.javax.servlet}",
                             org.apache.commons.io.*,
                             org.quartz.*,
                             javax.transaction.*,
