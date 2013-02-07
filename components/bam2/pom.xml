@@ -49,7 +49,7 @@
     </modules>
 
     <properties>
-        <cxf.wso2.version.bam2>${cxf.orbit.version}</cxf.wso2.version.bam2>
+        <cxf.wso2.version.bam2>${orbit.version.cxf}</cxf.wso2.version.bam2>
         <wso2carbon.version.bam2>${wso2carbon.version}</wso2carbon.version.bam2>
         <axis2.wso2.version.bam>${axis2.wso2.version}</axis2.wso2.version.bam>
     </properties>
