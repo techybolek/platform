@@ -101,17 +101,17 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rssmanager.core</artifactId>
-            <version>${carbon.platform.patch.version.401}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>${carbon.platform.patch.version.406}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
          <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
-            <version>${carbon.platform.patch.version.406}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
          <dependency>
             <groupId>org.wso2.carbon</groupId>
