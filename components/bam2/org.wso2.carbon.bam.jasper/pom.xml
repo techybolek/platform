@@ -29,9 +29,9 @@
             &lt;!&ndash; <version>${jasperreports.wso2.bam.version}</version>&ndash;&gt;
         </dependency>-->
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.eclipse.equinox</groupId>
             <artifactId>javax.servlet</artifactId>
-            <version>${orbit.version.javax.servlet}</version>
+            <version>${equinox.javax.servlet.version}</version>
             <scope>provided</scope>
             <!-- <version>${jasperreports.wso2.bam.version}</version>-->
         </dependency>
