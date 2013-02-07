@@ -72,6 +72,11 @@
             <artifactId>axis2</artifactId>
         </dependency>
 
+	<dependency>
+             <groupId>org.eclipse.equinox</groupId>
+             <artifactId>javax.servlet.jsp</artifactId>
+             <version>${version.javax.servlet.jsp}</version>
+        </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.common</artifactId>
