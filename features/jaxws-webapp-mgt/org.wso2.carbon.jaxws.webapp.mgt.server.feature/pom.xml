@@ -48,7 +48,7 @@
         <dependency>
             <groupId>org.apache.cxf.wso2</groupId>
             <artifactId>cxf-bundle</artifactId>
-	    <version>${cxf.orbit.patch.version}</version>
+	    <version>${orbit.version.cxf}</version>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -100,7 +100,6 @@
         </plugins>
     </build>
     <properties>
-      <cxf.orbit.patch.version>2.6.1.wso2v2</cxf.orbit.patch.version>
     </properties>
 
 </project>
