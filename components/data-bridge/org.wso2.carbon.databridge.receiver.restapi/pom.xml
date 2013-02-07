@@ -151,7 +151,7 @@
     </build>
 
     <properties>
-        <cxf.wso2.version.databridge>${cxf.orbit.version}</cxf.wso2.version.databridge>
+        <cxf.wso2.version.databridge>${orbit.version.cxf}</cxf.wso2.version.databridge>
         <!--<cxf.test.version>2.6.0</cxf.test.version>-->
         <!--<httpclient.test.version>3.1</httpclient.test.version>-->
         <!--<jaxrs.test.version>1.1.1</jaxrs.test.version>-->
