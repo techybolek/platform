@@ -232,8 +232,6 @@
 	<libfb303.orbit.version>0.7.0.wso2v1</libfb303.orbit.version>
 	<libthrift.orbit.version>0.7.wso2v1</libthrift.orbit.version>
 	<slf4j.version>1.6.1</slf4j.version>
-        <carbon.platform.version></carbon.platform.version>
-        <carbon.platform.version></carbon.platform.version>
     </properties>
 
     <build>

@@ -129,6 +129,5 @@
     </build>
 
     <properties>
-        <carbon.platform.version></carbon.platform.version>
     </properties>
 </project>
