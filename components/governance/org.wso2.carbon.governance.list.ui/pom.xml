@@ -48,8 +48,8 @@
                             org.wso2.carbon.governance.list.ui.*,
                         </Export-Package>
                         <Import-Package>
-                            javax.servlet; version=2.4.0,
-                            javax.servlet.http; version=2.4.0,
+                            javax.servlet;version=${imp.pkg.version.javax.servlet},
+                            javax.servlet.http;version=${imp.pkg.version.javax.servlet},
                             org.apache.lucene.*,
                             org.wso2.carbon.governance.list.stub.*;version="${carbon.platform.package.import.version.range}",
                             *;resolution:=optional

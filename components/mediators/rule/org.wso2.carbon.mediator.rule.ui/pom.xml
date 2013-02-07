@@ -53,8 +53,8 @@
                         <Import-Package>
                             org.apache.axis2.*; version="[${axis2.osgi.version}, 1.5)",
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
-                            javax.servlet;version="2.4.0",
-                            javax.servlet.http;version="2.4.0",
+                            javax.servlet;version=${imp.pkg.version.javax.servlet},
+                            javax.servlet.http;version=${imp.pkg.version.javax.servlet},
                             !javax.xml.namespace,
                             javax.xml.namespace; version=0.0.0,
                             org.apache.commons.logging,

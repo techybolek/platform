@@ -60,8 +60,8 @@
 							!javax.xml.namespace,
 							javax.xml.namespace; version=0.0.0,
 							org.apache.commons.logging.*; version="1.0.4",
-							javax.servlet; version=2.4.0,
-							javax.servlet.http; version=2.4.0,
+							javax.servlet;version=${imp.pkg.version.javax.servlet},
+							javax.servlet.http;version=${imp.pkg.version.javax.servlet},
 							javax.xml.stream.*; version=1.0.1,
 							*;resolution:=optional
                         </Import-Package>

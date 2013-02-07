@@ -53,8 +53,8 @@
 							org.wso2.carbon.user.core;
 							org.wso2.carbon.event.core.*,
 							org.wso2.carbon.event.ws.*,
-							javax.servlet; version=2.4.0,
-							javax.servlet.http; version=2.4.0,
+							javax.servlet;version=${imp.pkg.version.javax.servlet},
+							javax.servlet.http;version=${imp.pkg.version.javax.servlet},
 							org.apache.commons.logging.*,
 							*;resolution:=optional
                         </Import-Package>

@@ -58,8 +58,8 @@
                         <Import-Package>
                             org.wso2.carbon.registry.resource.ui.*,
                             org.wso2.carbon.theme.mgt.ui.servlets.*,
-                            javax.servlet; version=2.4.0,
-                            javax.servlet.http; version=2.4.0,
+                            javax.servlet;version=${imp.pkg.version.javax.servlet},
+                            javax.servlet.http;version=${imp.pkg.version.javax.servlet},
                             org.apache.lucene.*,
                             org.apache.batik.*,
                             org.wso2.carbon.theme.mgt.stub.*; version="${carbon.platform.package.import.version.range}",

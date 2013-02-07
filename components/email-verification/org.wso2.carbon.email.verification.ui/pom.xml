@@ -43,8 +43,8 @@
                             org.wso2.carbon.email.verification.ui.*,
                         </Export-Package>
                         <Import-Package>
-                            javax.servlet; version=2.4.0,
-                            javax.servlet.http; version=2.4.0,
+                            javax.servlet;version=${imp.pkg.version.javax.servlet},
+                            javax.servlet.http;version=${imp.pkg.version.javax.servlet},
                             !javax.xml.namespace,
                             javax.xml.namespace; version=0.0.0,
                             org.wso2.carbon.email.verification.stub.*;version="${carbon.platform.package.import.version.range}",

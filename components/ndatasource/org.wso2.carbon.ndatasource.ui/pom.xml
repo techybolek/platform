@@ -43,8 +43,8 @@
                             org.apache.axis2.*; version="${axis2.osgi.version.range.ndatasource}",
                             org.apache.axiom.*; version="${axiom.osgi.version.range.ndatasource}",
                             org.apache.synapse.commons.*,
-                            javax.servlet;version="2.4.0",
-                            javax.servlet.http;version="2.4.0",
+                            javax.servlet;version=${imp.pkg.version.javax.servlet},
+                            javax.servlet.http;version=${imp.pkg.version.javax.servlet},
                             *;resolution:=optional,
                             org.wso2.carbon.ndatasource.stub.*;version="${carbon.platform.package.export.version}",
 						</Import-Package>

@@ -107,8 +107,8 @@
                             org.wso2.stratos.identity.saml2.sso.mgt.*
                         </Export-Package>
                         <Import-Package>
-                            javax.servlet; version=2.4.0,
-                            javax.servlet.http; version=2.4.0,
+                            javax.servlet;version=${imp.pkg.version.javax.servlet},
+                            javax.servlet.http;version=${imp.pkg.version.javax.servlet},
                             org.apache.lucene.*,
                             *;resolution:=optional
                         </Import-Package>
