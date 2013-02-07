@@ -239,7 +239,7 @@
 
     <properties>
         <carbon.version>4.0.0</carbon.version>
-	<carbon.platform.patch.version.401>4.0.1</carbon.platform.patch.version.401>
+	<carbon.platform.version>4.0.1</carbon.platform.version>
         <servlet-api.version>2.4</servlet-api.version>
         <apache.derby.version>10.3.2.1wso2v1</apache.derby.version>
         <hibernate.version>3.2.5.ga-wso2v1</hibernate.version>
