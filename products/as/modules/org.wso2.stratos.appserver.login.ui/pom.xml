@@ -72,8 +72,8 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Import-Package>
-                            javax.servlet; version=2.4.0,
-                            javax.servlet.http; version=2.4.0,
+                            javax.servlet; version="${exp.pkg.version.javax.servlet}",
+                            javax.servlet.http; version="${exp.pkg.version.javax.servlet}",
                             org.apache.lucene.*,
                             *;resolution:=optional
                         </Import-Package>
@@ -97,8 +97,8 @@
             <artifactId>commons-logging</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <groupId>org.eclipse.equinox</groupId>
+            <artifactId>javax.servlet</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
