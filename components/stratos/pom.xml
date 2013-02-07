@@ -104,7 +104,7 @@
 	    <dependency>
                 <groupId>commons-codec.wso2</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>${commons.codec.version}</version>
+                <version>${version.commons.codec}</version>
             </dependency>
 
             <dependency>
@@ -127,12 +127,12 @@
             <dependency>
                 <groupId>org.apache.axis2</groupId>
                 <artifactId>axis2-transport-base</artifactId>
-                <version>${axis2.transport.version}</version>
+                <version>${version.axis2.transport}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.axis2</groupId>
                 <artifactId>axis2-transport-jms</artifactId>
-                <version>${axis2.transport.version}</version>
+                <version>${version.axis2.transport}</version>
             </dependency>
              <dependency>
                 <groupId>org.wso2.carbon</groupId>
