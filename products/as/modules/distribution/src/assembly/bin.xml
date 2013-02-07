@@ -24,7 +24,7 @@
 
     <fileSets>
         <fileSet>
-            <directory>target/wso2carbon-core-${carbon.version}</directory>
+            <directory>target/wso2carbon-core-${carbon.kernel.version}</directory>
             <outputDirectory>${pom.artifactId}-${pom.version}</outputDirectory>
             <excludes>
                 <exclude>**/*.sh</exclude>
@@ -45,7 +45,7 @@
         </fileSet>
 		<!--  copying modules xml -->
         <fileSet>
-            <directory>../p2-profile-gen/target/wso2carbon-core-${carbon.platform.version}/modules</directory>
+            <directory>../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/modules</directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/modules/</outputDirectory>
 	    	<includes>
                 <include>*/**</include>
@@ -288,7 +288,7 @@
         <!--copying qpid config files -->
         <fileSet>
             <directory>
-                ../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/advanced/
+                ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/advanced/
             </directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/advanced
             </outputDirectory>
@@ -301,7 +301,7 @@
 
         <fileSet>
             <directory>
-                ../p2-profile-gen/target/wso2carbon-core-${wso2carbon.version}/repository/conf/
+                ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/
             </directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf</outputDirectory>
             <includes>
@@ -312,7 +312,7 @@
 	<!--Multitenancy related file -->
 	<fileSet>
             <directory>
-                ../p2-profile-gen/target/wso2carbon-core-${wso2carbon.version}/repository/conf/multitenancy/
+                ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/multitenancy/
             </directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/multitenancy</outputDirectory>
             <includes>
@@ -325,7 +325,7 @@
 
         <fileSet>
             <directory>
-                ../p2-profile-gen/target/wso2carbon-core-${wso2carbon.version}/repository/conf/etc/
+                ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/etc/
             </directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/etc</outputDirectory>
             <includes>
@@ -335,7 +335,7 @@
 	
  	<fileSet>
             <directory>
-                ../p2-profile-gen/target/wso2carbon-core-${wso2carbon.version}/repository/conf/data-bridge/
+                ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/data-bridge/
             </directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/data-bridge/</outputDirectory>
             <includes>
@@ -347,7 +347,7 @@
        <!--copying Kerberos conf files-->
         <fileSet>
             <directory>
-                ../p2-profile-gen/target/wso2carbon-core-${wso2carbon.version}/repository/conf/security
+                ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/security
             </directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/security</outputDirectory>
             <includes>
@@ -377,7 +377,7 @@
 			<outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/webapps/STRATOS_ROOT</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>../p2-profile-gen/target/wso2carbon-core-${wso2carbon.version}/dbscripts/identity/</directory>
+            <directory>../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/dbscripts/identity/</directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/dbscripts/identity</outputDirectory>
             <includes>
                 <include>**/**.sql</include>
@@ -429,14 +429,14 @@
         <!-- copying event broker config file -->
         <file>
             <source>
-                ../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/event-broker.xml
+                ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/event-broker.xml
             </source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/</outputDirectory>
         </file>
         <!-- Including logging-config.xml file -->
         <file>
             <source>
-                ../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/etc/logging-config.xml
+                ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/etc/logging-config.xml
             </source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/etc/
             </outputDirectory>
@@ -444,14 +444,14 @@
         <!-- Including log4j.properties file -->
         <file>
             <source>
-                ../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/log4j.properties
+                ../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/log4j.properties
             </source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/
             </outputDirectory>
         </file> 
 	<!-- Including coordination-client-config.xml file -->
 	<file>
-            <source>../p2-profile-gen/target/wso2carbon-core-${carbon.version}/repository/conf/etc/coordination-client-config.xml</source>
+            <source>../p2-profile-gen/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/etc/coordination-client-config.xml</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/etc</outputDirectory>
         </file>          
         <file>
@@ -479,30 +479,30 @@
             <fileMode>644</fileMode>
         </file>
         <file>
-            <source>target/wso2carbon-core-${carbon.version}/bin/README.txt</source>
+            <source>target/wso2carbon-core-${carbon.kernel.version}/bin/README.txt</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/bin/</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
         <file>
-            <source>target/wso2carbon-core-${carbon.version}/bin/version.txt</source>
+            <source>target/wso2carbon-core-${carbon.kernel.version}/bin/version.txt</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/bin/</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
         <file>
-            <source>target/wso2carbon-core-${carbon.version}/repository/conf/carbon.xml</source>
+            <source>target/wso2carbon-core-${carbon.kernel.version}/repository/conf/carbon.xml</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>target/wso2carbon-core-${carbon.version}/repository/conf/axis2/axis2.xml</source>
+            <source>target/wso2carbon-core-${carbon.kernel.version}/repository/conf/axis2/axis2.xml</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/axis2/</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
         <file>
-            <source>target/wso2carbon-core-${carbon.version}/repository/conf/README</source>
+            <source>target/wso2carbon-core-${carbon.kernel.version}/repository/conf/README</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
