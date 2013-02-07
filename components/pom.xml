@@ -777,6 +777,11 @@
             <version>${version.javax.servlet.jsp}</version>
         </dependency>
 	<dependency>
+            <groupId>org.eclipse.equinox</groupId>
+            <artifactId>org.apache.jasper.glassfish</artifactId>
+            <version>${version.jasper}</version>
+        </dependency>
+	<dependency>
             <groupId>commons-scxml.wso2</groupId>
             <artifactId>commons-scxml</artifactId>
             <version>${scxml.version}</version>
