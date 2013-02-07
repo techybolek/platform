@@ -84,7 +84,5 @@
         </plugins>
     </build>
     <properties>
-	<carbon.platform.patch.version.403>4.0.3</carbon.platform.patch.version.403>
-	<carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
     </properties>
 </project>

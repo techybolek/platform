@@ -109,6 +109,5 @@
     </build>
 
     <properties>
-        <carbon.platform.patch.version.403>4.0.3</carbon.platform.patch.version.403>
     </properties>
 </project>

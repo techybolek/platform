@@ -294,7 +294,6 @@
         <hostobjects.version>1.0.0</hostobjects.version>
         <appfactory.version>1.0.2</appfactory.version>
         <carbon.version>4.0.0</carbon.version>
-        <carbon.platform.patch.version.401>4.0.1</carbon.platform.patch.version.401>
         <email.sender.version>2.0.0</email.sender.version>
         <svnclient.version>1.6.18.wso2v1</svnclient.version>
     </properties>

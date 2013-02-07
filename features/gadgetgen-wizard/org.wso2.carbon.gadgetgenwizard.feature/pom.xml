@@ -79,6 +79,5 @@
         </plugins>
     </build>
      <properties>
-        <carbon.platform.patch.version.407>4.0.7</carbon.platform.patch.version.407>
     </properties>
 </project>

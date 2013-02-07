@@ -140,6 +140,5 @@
         </plugins>
     </build>
     <properties>
-	<carbon.platform.patch.version.401>4.0.1</carbon.platform.patch.version.401>
     </properties>
 </project>

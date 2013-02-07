@@ -156,9 +156,6 @@
     </build>
 
     <properties>
-        <carbon.platform.patch.version.401>4.0.1</carbon.platform.patch.version.401>
-        <carbon.platform.patch.version.402>4.0.2</carbon.platform.patch.version.402>
-        <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
     </properties>
 
 </project>

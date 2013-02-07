@@ -143,8 +143,6 @@
 
     <properties>
         <wso2carbon.version.rule>${wso2carbon.version}</wso2carbon.version.rule>
-	<carbon.platform.patch.version.401>4.0.1</carbon.platform.patch.version.401>
-	<carbon.platform.patch.version.402>4.0.2</carbon.platform.patch.version.402>
     </properties>
 
 </project>

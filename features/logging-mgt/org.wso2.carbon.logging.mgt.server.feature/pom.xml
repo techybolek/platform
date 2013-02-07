@@ -194,11 +194,6 @@
     </build>
     <properties>
         <libthrift.version>0.7.0.wso2v2</libthrift.version>
-	<carbon.platform.patch.version.401>4.0.1</carbon.platform.patch.version.401>
-        <carbon.platform.patch.version.402>4.0.2</carbon.platform.patch.version.402>
-	<carbon.platform.patch.version.403>4.0.3</carbon.platform.patch.version.403>
-	<carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
-	<carbon.platform.patch.version.406>4.0.6</carbon.platform.patch.version.406>
 	<cassandra.version>1.1.3.wso2v2</cassandra.version>
 	<hector-core.version.110>1.1.0.wso2v1</hector-core.version.110>
        <hadoop.orbit.version>0.20.203.1.wso2v2</hadoop.orbit.version>
