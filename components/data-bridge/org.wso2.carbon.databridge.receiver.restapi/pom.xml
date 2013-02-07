@@ -48,7 +48,7 @@
         <dependency>
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>javax.servlet</artifactId>
-            <version>${equinox.javax.servlet.version}</version>
+            <version>${version.javax.servlet}</version>
             <scope>provided</scope>
         </dependency>
 
