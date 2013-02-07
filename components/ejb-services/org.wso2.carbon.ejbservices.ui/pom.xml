@@ -102,10 +102,10 @@
             <!--<artifactId>org.eclipse.equinox.http.helper</artifactId>-->
         <!--</dependency>-->
 
-        <!--<dependency>-->
-            <!--<groupId>org.eclipse.equinox</groupId>-->
-            <!--<artifactId>org.eclipse.equinox.jsp.jasper</artifactId>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.eclipse.equinox</groupId>
+            <artifactId>org.apache.jasper.glassfish</artifactId>
+        </dependency>
 
         <!--<dependency>-->
             <!--<groupId>org.eclipse.equinox</groupId>-->
