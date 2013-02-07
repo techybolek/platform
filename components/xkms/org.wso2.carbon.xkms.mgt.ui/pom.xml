@@ -47,7 +47,7 @@
                             org.wso2.carbon.xkms.mgt.ui.*
                         </Export-Package>
                         <Import-Package>
-                            javax.servlet.*;version="2.4.0",
+                            javax.servlet.*;version="${imp.pkg.version.javax.servlet}",
                             org.wso2.carbon.xkms.mgt.stub.*;version="${carbon.platform.package.import.version.range}",
                             *;resolution:=optional
                         </Import-Package>

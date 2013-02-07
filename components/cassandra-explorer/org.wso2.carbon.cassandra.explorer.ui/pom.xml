@@ -28,7 +28,7 @@
                         <Carbon-Component>UIBundle</Carbon-Component>
                         <Import-Package>
                             org.wso2.carbon.cassandra.explorer.stub.*,
-                            javax.servlet.*;version="2.4.0",
+                            javax.servlet.*;version="${imp.pkg.version.javax.servlet}",
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>

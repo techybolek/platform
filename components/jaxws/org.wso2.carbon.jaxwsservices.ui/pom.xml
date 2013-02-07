@@ -47,7 +47,7 @@
                         <Import-Package>
                             org.wso2.carbon.jaxwsservices.stub.*;version="${carbon.platform.package.import.version.range}",
                             org.apache.axis2.*; version="${axis2.osgi.version.range}",
-                            javax.servlet.*;version="2.4.0",
+                            javax.servlet.*;version="${imp.pkg.version.javax.servlet}",
 			                *;resolution:=optional
                         </Import-Package>
                         <Carbon-Component>UIBundle</Carbon-Component>

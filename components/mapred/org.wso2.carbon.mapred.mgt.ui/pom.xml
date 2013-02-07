@@ -32,7 +32,7 @@
                         </Import-Package>-->
                         <Import-Package>
                             org.wso2.carbon.mapred.mgt.stub.*,
-                            javax.servlet.*;version="2.4.0",
+                            javax.servlet.*;version="${imp.pkg.version.javax.servlet}",
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>

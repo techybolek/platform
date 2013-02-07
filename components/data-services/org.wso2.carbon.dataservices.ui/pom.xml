@@ -47,7 +47,7 @@
                             org.wso2.carbon.dataservices.ui.*
                         </Export-Package>
                         <Import-Package>
-                            javax.servlet.*;version="2.4.0",
+                            javax.servlet.*;version="${imp.pkg.version.javax.servlet}",
                             javax.xml.namespace.*;version="0.0.0",
                             *;resolution:=optional,
                             org.wso2.carbon.dataservices.ui.stub.*;version="${carbon.platform.package.export.version}",

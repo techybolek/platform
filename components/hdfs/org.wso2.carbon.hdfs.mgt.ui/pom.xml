@@ -45,7 +45,7 @@
                         <Carbon-Component>UIBundle</Carbon-Component>
                         <Import-Package>
                             org.wso2.carbon.hdfs.mgt.stub.*;version="${carbon.platform.package.import.version.range}",
-                            javax.servlet.*;version="2.4.0",
+                            javax.servlet.*;version="${imp.pkg.version.javax.servlet}",
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>

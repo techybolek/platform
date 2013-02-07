@@ -45,7 +45,7 @@
                         </Export-Package>
                         <Import-Package>
                             org.wso2.carbon.throttle.stub.*;version="${carbon.platform.package.import.version.range}",
-                            javax.servlet.*;version="2.4.0",
+                            javax.servlet.*;version="${imp.pkg.version.javax.servlet}",
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
