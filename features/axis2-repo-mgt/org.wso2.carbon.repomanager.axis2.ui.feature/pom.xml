@@ -72,11 +72,11 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.repomanager.axis2.ui:4.0.5</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.repomanager.axis2.ui:</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.repomanager.axis2.stub</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.ui:4.0.5</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.ui:</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

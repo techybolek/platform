@@ -28,7 +28,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.feature</artifactId>
-    <version>1.0.7</version>
+    <version>1.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Api management Feature</name>
     <url>http://wso2.org</url>
@@ -38,13 +38,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.server.feature</artifactId>
-            <version>1.0.7</version>
+            <version>1.1.0-SNAPSHOT</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.ui.feature</artifactId>
-            <version>1.0.7</version>
+            <version>1.1.0-SNAPSHOT</version>
             <type>zip</type>
         </dependency>
     </dependencies>
@@ -66,7 +66,7 @@
                             <id>org.wso2.carbon.apimgt</id>
                             <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:4.0.6</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:</importFeatureDef>
 
 
                             </importFeatures>

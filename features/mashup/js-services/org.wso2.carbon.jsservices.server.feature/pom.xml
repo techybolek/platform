@@ -393,16 +393,16 @@
                             </importBundles>
                             <importFeatures>
                                 <importFeatureDef>
-                                    org.wso2.carbon.service.mgt.server:4.0.5
+                                    org.wso2.carbon.service.mgt.server
                                 </importFeatureDef>
                                 <importFeatureDef>
-									org.wso2.carbon.jsservices.common:4.0.2
+									org.wso2.carbon.jsservices.common
                                 </importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.core.common:4.0.5
+                                    org.wso2.carbon.core.common
                                 </importFeatureDef>
                                 <importFeatureDef>
-									org.wso2.carbon.ntask.core:4.0.5
+									org.wso2.carbon.ntask.core
 								</importFeatureDef>
                             </importFeatures>
                         </configuration>

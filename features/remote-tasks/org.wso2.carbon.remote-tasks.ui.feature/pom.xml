@@ -53,8 +53,8 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.remote-tasks.ui:4.0.5</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.remote-tasks.common:4.0.5</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.remote-tasks.ui:</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.remote-tasks.common:</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

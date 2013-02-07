@@ -72,8 +72,8 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.common:4.0.2</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.mgt.oauth:4.0.2</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.common:</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.mgt.oauth:</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.registry.core.server:${registry.core.feature.version}</importFeatureDef>

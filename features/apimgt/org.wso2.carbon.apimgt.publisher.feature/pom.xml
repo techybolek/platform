@@ -28,7 +28,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.publisher.feature</artifactId>
-    <version>1.0.2</version>
+    <version>1.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - API Publisher Feature</name>
     <url>http://wso2.org</url>
@@ -48,17 +48,17 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
-            <version>1.0.2</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-            <version>1.0.2</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.hostobjects</artifactId>
-            <version>1.0.2</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -92,8 +92,8 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.hostobjects</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:4.0.2</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.registry.core:4.0.1</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.registry.core:</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

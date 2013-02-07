@@ -99,7 +99,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.brokermanager.core:4.0.2
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.brokermanager.core
                                 </bundleDef>
                                 <bundleDef>
                                     org.wso2.carbon:org.wso2.carbon.brokermanager.admin:${project.version}

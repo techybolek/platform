@@ -232,8 +232,8 @@
 	<libfb303.orbit.version>0.7.0.wso2v1</libfb303.orbit.version>
 	<libthrift.orbit.version>0.7.wso2v1</libthrift.orbit.version>
 	<slf4j.version>1.6.1</slf4j.version>
-        <carbon.patch.release.version402>4.0.2</carbon.patch.release.version402>
-        <carbon.patch.release.version405>4.0.5</carbon.patch.release.version405>
+        <carbon.patch.release.version402></carbon.patch.release.version402>
+        <carbon.patch.release.version405></carbon.patch.release.version405>
     </properties>
 
     <build>

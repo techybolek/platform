@@ -69,7 +69,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.configadmin.ui:4.0.1</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.configadmin.ui:</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.configadmin.stub:4.0.0</bundleDef>
                             </bundles>
                             <importFeatures>

@@ -82,14 +82,14 @@
                             <bundles>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.initializer</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.registry</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.dependency.mgt:4.0.2</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.dependency.mgt:</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.startup</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.apache.synapse.wso2:${synapse.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.datasource.server:${datasources.feature.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.task.server:${scheduled.task.feature.version}</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.event.server:4.0.5</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.event.server:</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

@@ -124,8 +124,8 @@
                            				</adviceFile>
 							<bundles>
 								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.sts.mgt</bundleDef>
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.sts:4.0.5</bundleDef>
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.provider:4.0.6</bundleDef>
+								<bundleDef>org.wso2.carbon:org.wso2.carbon.sts:</bundleDef>
+								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.provider:</bundleDef>
 								<bundleDef>org.wso2.carbon:org.wso2.carbon.service.mgt</bundleDef>
 								<bundleDef>org.openid4java.wso2:openid4java-nodeps</bundleDef>
 								<bundleDef>org.igniterealtime.smack.wso2:smack</bundleDef>

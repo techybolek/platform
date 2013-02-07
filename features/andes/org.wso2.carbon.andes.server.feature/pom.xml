@@ -185,7 +185,7 @@
 				<bundleDef>org.apache.zookeeper.wso2:apache-zookeeper</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:4.0.5
+                                <importFeatureDef>org.wso2.carbon.core.server
                                 </importFeatureDef>
                             </importFeatures>
                         </configuration>

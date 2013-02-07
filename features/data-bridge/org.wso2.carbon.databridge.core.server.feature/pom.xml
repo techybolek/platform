@@ -101,7 +101,7 @@
                             <bundles>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.databridge.core:${project.version}</bundleDef>
                                 <bundleDef>com.google.guava.wso2:guava</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.authentication:4.0.1</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.authentication:</bundleDef>
                                 <bundleDef>com.google.guava.wso2:guava</bundleDef>
                             </bundles>
                             <importFeatures>

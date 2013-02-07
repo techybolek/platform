@@ -65,7 +65,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.caching:4.0.2</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.caching:</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>

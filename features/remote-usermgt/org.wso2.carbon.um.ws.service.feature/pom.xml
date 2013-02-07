@@ -66,8 +66,8 @@
 							<propertiesFile>../../../../etc/feature.properties</propertiesFile>
 							
 						<includedFeatures>
-                                			<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.um.ws.service.server.feature:4.0.2</includedFeatureDef>
-			                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.um.ws.service.client.feature:4.0.2</includedFeatureDef>
+                                			<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.um.ws.service.server.feature:</includedFeatureDef>
+			                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.um.ws.service.client.feature:</includedFeatureDef>
                           			</includedFeatures>
 						</configuration>
 					</execution>

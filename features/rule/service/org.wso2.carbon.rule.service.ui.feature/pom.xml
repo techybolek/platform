@@ -78,8 +78,8 @@
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.rule.ws.stub</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.service.mgt.ui:4.0.1</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.core.ui:4.0.2</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.service.mgt.ui:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.ui:</importFeatureDef>
                             </importFeatures>
 			    <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.rule.service.common.feature</includedFeatureDef>

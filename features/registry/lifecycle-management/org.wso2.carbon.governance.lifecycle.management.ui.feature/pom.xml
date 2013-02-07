@@ -87,8 +87,8 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.custom.lifecycles.checklist.ui:4.0.8</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.custom.lifecycles.history.ui:4.0.5</bundleDef>
-				<bundleDef>org.wso2.carbon:org.wso2.carbon.governance.custom.lifecycles.checklist.stub:4.0.5</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.custom.lifecycles.history.ui:</bundleDef>
+				<bundleDef>org.wso2.carbon:org.wso2.carbon.governance.custom.lifecycles.checklist.stub:</bundleDef>
                                 <!--bundleDef>org.wso2.carbon:org.wso2.carbon.registry.lifecycles.ui</bundleDef-->
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.lcm.ui</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.lcm.stub</bundleDef>

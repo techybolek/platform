@@ -69,7 +69,7 @@
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.claim.mgt.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.claim.mgt.ui.feature:4.0.1</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.claim.mgt.ui.feature:</includedFeatureDef>
                             </includedFeatures>
 						</configuration>
 					</execution>

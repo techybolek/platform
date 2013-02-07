@@ -90,7 +90,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.wso2.charon:org.wso2.charon.core</bundleDef>
-				<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.scim.common:4.0.7</bundleDef>
+				<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.scim.common:</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

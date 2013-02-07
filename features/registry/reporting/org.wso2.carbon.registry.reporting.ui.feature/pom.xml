@@ -72,7 +72,7 @@
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.registry.core.ui:${registry.core.feature.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.reporting.ui:4.0.1</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.reporting.ui:</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

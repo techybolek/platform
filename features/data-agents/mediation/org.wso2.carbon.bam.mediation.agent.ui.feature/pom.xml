@@ -96,8 +96,8 @@
     </build>
 
     <properties>
-        <carbon.patch.release.version403>4.0.3</carbon.patch.release.version403>
-        <carbon.patch.release.version405>4.0.5</carbon.patch.release.version405>
+        <carbon.patch.release.version403></carbon.patch.release.version403>
+        <carbon.patch.release.version405></carbon.patch.release.version405>
     </properties>
 
 </project>

@@ -68,7 +68,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.localentry.ui:4.0.1</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.localentry.ui:</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.localentry.stub</bundleDef>
                             </bundles>
                             <importFeatures>

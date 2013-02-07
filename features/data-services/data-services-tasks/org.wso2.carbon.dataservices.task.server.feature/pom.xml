@@ -80,7 +80,7 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.dataservices.task</bundleDef>
                             </bundles>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.ntask.core.feature:4.0.5</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.ntask.core.feature:</includedFeatureDef>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.dataservices.server.feature:${project.version}</includedFeatureDef>
                             </includedFeatures>
                         </configuration>

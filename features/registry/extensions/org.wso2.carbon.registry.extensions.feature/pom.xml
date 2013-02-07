@@ -29,7 +29,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.registry.extensions.feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - Registry Extensions Feature - 4.0.5</name>
+    <name>WSO2 Carbon - Registry Extensions Feature - </name>
     <version>4.1.0-SNAPSHOT</version>
     <url>http://wso2.org</url>
     <description>

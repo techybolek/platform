@@ -57,14 +57,14 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    org.wso2.carbon:org.wso2.carbon.remote-tasks.core:4.0.5
+                                    org.wso2.carbon:org.wso2.carbon.remote-tasks.core
                                 </bundleDef>
                                 <bundleDef>
-                                    org.wso2.carbon:org.wso2.carbon.remote-tasks.common:4.0.5
+                                    org.wso2.carbon:org.wso2.carbon.remote-tasks.common
                                 </bundleDef>
                             </bundles>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.ntask.core.feature:4.0.5</includedFeatureDef>                                
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.ntask.core.feature:</includedFeatureDef>                                
                             </includedFeatures>
                         </configuration>
                     </execution>

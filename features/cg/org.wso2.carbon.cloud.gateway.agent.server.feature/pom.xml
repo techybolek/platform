@@ -66,9 +66,9 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>libthrift.wso2:libthrift</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cloud.gateway.agent:4.0.2</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cloud.gateway.common:4.0.2</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cloud.gateway.stub:4.0.1</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cloud.gateway.agent:</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cloud.gateway.common:</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cloud.gateway.stub:</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>

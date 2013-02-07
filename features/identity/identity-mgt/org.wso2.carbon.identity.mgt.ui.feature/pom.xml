@@ -71,7 +71,7 @@
 								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.mgt.stub</bundleDef>
 							</bundles>
 							<importFeatures>
-								<importFeatureDef>org.wso2.carbon.core.ui:4.0.2</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.core.ui:</importFeatureDef>
 							</importFeatures>
 						</configuration>
 					</execution>

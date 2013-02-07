@@ -254,7 +254,7 @@
                                     org.wso2.carbon:org.wso2.carbon.appfactory.user.registration
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.email.sender</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.email.verification:4.0.2
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.email.verification
                                 </bundleDef>
                                 <bundleDef>org.tigris:svn-client-adapter</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.hostobjects.carbonutil</bundleDef>

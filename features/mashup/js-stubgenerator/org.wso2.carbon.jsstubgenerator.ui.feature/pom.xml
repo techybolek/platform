@@ -57,7 +57,7 @@
                                 </properties>
                             </adviceFile>
 							<bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mashup.javascript-stub-generator.ui:4.0.1</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mashup.javascript-stub-generator.ui:</bundleDef>
                             </bundles>
 							<importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.ui:${wso2carbon.core.version.mashup}</importFeatureDef>

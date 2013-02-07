@@ -57,8 +57,8 @@
                                 </properties>
                             </adviceFile> 
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.bam.mediation.agent:4.0.5</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.mediator.bam:4.0.5</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.bam.mediation.agent:</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.mediator.bam:</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

@@ -57,11 +57,11 @@
                                 </properties>
                             </adviceFile> 
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.mediation.initializer:4.0.5</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.mediation.initializer:</importFeatureDef>
 				<importFeatureDef>org.wso2.carbon.transports.passthru:1.0.2</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.service.mgt:4.0.5</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.service.mgt:</importFeatureDef>
 				<importFeatureDef>org.apache.synapse.wso2:2.1.1-wso2v2</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.transport.nhttp:4.0.5</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.transport.nhttp:</importFeatureDef>
 				<importFeatureDef>org.apache.synapse.transport.nhttp:2.1.1-wso2v2</importFeatureDef>
                             </importFeatures>
                         </configuration>

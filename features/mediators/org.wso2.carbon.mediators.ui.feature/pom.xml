@@ -284,7 +284,7 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.cache.ui
                                 </bundleDef>
                                 <bundleDef>
-                                    org.wso2.carbon:org.wso2.carbon.mediator.callout.ui:4.0.6
+                                    org.wso2.carbon:org.wso2.carbon.mediator.callout.ui
                                 </bundleDef>
                                 <bundleDef>
                                     org.wso2.carbon:org.wso2.carbon.mediator.calltemplate.ui
@@ -297,13 +297,13 @@
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.command.ui
                                 </bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.dblookup.ui:4.0.5
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.dblookup.ui
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.dbreport.ui
                                 </bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.entitlement.ui:4.0.2
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.entitlement.ui
                                 </bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.event.ui:4.0.1
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.event.ui
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.fault.ui
                                 </bundleDef>
@@ -315,7 +315,7 @@
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.iterate.ui
                                 </bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.log.ui:4.0.1
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.log.ui
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.oauth.ui
                                 </bundleDef>
@@ -382,7 +382,7 @@
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.bean.ui
                                 </bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.fastXSLT.ui:4.0.5</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.fastXSLT.ui:</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>

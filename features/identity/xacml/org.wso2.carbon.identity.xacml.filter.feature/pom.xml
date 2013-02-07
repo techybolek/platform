@@ -79,12 +79,12 @@
 							<bundles>
 								<bundleDef>libthrift.wso2:libthrift</bundleDef>
 								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.entitlement.proxy</bundleDef>
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.entitlement.filter:4.0.5</bundleDef>
+								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.entitlement.filter:</bundleDef>
 								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.entitlement.stub</bundleDef>
 								<bundleDef>org.wso2.carbon:org.wso2.carbon.authenticator.stub</bundleDef>
 							</bundles>
 							<importFeatures>
-								<importFeatureDef>org.wso2.carbon.core.server:4.0.5</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.core.server:</importFeatureDef>
 								<importFeatureDef>org.apache.synapse.wso2:2.1.1-wso2v1</importFeatureDef>
 							</importFeatures>
 						</configuration>

@@ -71,7 +71,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.application.mgt:${project.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.application.upload:4.0.1</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.application.upload:</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${project.parent.version}</importFeatureDef>

@@ -66,11 +66,11 @@
                             <id>org.wso2.carbon.service.mgt</id>
                             <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:4.0.1</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.service.mgt.server.feature:4.0.5</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.service.mgt.ui.feature:4.0.1</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.service.mgt.server.feature:</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.service.mgt.ui.feature:</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

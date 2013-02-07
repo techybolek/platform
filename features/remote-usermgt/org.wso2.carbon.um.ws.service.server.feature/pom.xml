@@ -63,7 +63,7 @@
 								</properties>
 							</adviceFile>
 							<bundles>
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.um.ws.service:4.0.2</bundleDef>
+								<bundleDef>org.wso2.carbon:org.wso2.carbon.um.ws.service:</bundleDef>
 							</bundles>
 							<importFeatures>
 								<importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>

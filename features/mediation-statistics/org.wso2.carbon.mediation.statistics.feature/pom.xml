@@ -71,7 +71,7 @@
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.mediation.statistics.server.feature:${project.version}</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.mediation.statistics.ui.feature:4.0.1</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.mediation.statistics.ui.feature:</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

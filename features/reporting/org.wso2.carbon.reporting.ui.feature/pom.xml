@@ -110,7 +110,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.reporting.ui:4.0.1
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.reporting.ui
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.reporting.util:${wso2carbon.version}
                                 </bundleDef>

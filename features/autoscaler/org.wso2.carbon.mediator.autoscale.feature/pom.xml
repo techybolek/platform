@@ -84,7 +84,7 @@
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.apache.synapse.wso2:${synapse.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.lb.common:4.0.6</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.lb.common:</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

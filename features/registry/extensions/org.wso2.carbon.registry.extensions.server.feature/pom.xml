@@ -87,7 +87,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.registry.extensions:4.0.5</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.registry.extensions:</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.registry.extensions:4.0.8</bundleDef>
                             </bundles>
                             <importBundles>

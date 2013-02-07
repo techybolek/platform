@@ -86,7 +86,7 @@
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.discovery.core.feature</includedFeatureDef>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.discovery.ui.feature:4.0.0</includedFeatureDef>
-				<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.discovery.proxy.feature:4.0.1</includedFeatureDef>
+				<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.discovery.proxy.feature:</includedFeatureDef>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.discovery.client.feature:${wso2carbon.version.discovery}</includedFeatureDef>
 				<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.discovery.mediation.ext.feature:${wso2carbon.version.discovery}</includedFeatureDef>
                             </includedFeatures>

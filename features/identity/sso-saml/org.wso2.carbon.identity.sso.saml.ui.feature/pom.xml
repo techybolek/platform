@@ -69,13 +69,13 @@
 								</properties>
 							</adviceFile>
 							<bundles>
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.sso.saml.ui:4.0.6</bundleDef>
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.sso.saml.stub:4.0.6</bundleDef>
+								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.sso.saml.ui:</bundleDef>
+								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.sso.saml.stub:</bundleDef>
                                 <bundleDef>org.apache.httpcomponents.wso2:httpclient</bundleDef>
                                 <bundleDef>org.apache.httpcomponents.wso2:httpcore</bundleDef>
 							</bundles>
 							<importFeatures>
-								<importFeatureDef>org.wso2.carbon.core.ui:4.0.5</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.core.ui:</importFeatureDef>
 							</importFeatures>
 						</configuration>
 					</execution>

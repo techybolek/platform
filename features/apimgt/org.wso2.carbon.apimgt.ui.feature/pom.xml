@@ -28,7 +28,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.ui.feature</artifactId>
-    <version>1.0.7</version>
+    <version>1.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Api management UI Feature</name>
     <url>http://wso2.org</url>
@@ -110,7 +110,7 @@
                                 <!--<importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.core</importBundleDef>-->
                             </importBundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.ui:4.0.6</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.ui:</importFeatureDef>
 				                <importFeatureDef>org.wso2.carbon.um.ws.service.client:${wso2carbon.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>

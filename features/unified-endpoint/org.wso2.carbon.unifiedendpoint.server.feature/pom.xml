@@ -70,7 +70,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.unifiedendpoint.core:4.0.5</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.unifiedendpoint.core:</bundleDef>
                                 <!--bundleDef>org.wso2.carbon:org.wso2.carbon.unifiedendpoint.service</bundleDef-->
                             </bundles>
                             <!--<importFeatures>

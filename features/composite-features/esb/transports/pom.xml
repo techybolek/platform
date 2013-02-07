@@ -63,10 +63,10 @@
                                 <importFeatureDef>org.wso2.carbon.transport.mail:4.0.0</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.transport.nhttp:4.0.0</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.transport.jms:4.0.0</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.transports.hl7.feature:4.0.2</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.transports.hl7.feature:</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.transports.passthru:1.0.2</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.transports.sap:4.0.0</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.relay.server:4.0.5</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.relay.server:</importFeatureDef>
                                 <importFeatureDef>org.apache.synapse.transport.nhttp:2.1.1-wso2v2</importFeatureDef>
                                 <importFeatureDef>org.apache.synapse.transport.vfs:2.1.1-wso2v2</importFeatureDef>
                                 <importFeatureDef>org.apache.synapse.transport.vfs.smb:2.1.1-wso2v2</importFeatureDef>

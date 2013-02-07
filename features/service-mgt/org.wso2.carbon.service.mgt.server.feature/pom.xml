@@ -100,28 +100,28 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.service.mgt:4.0.5</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.service.mgt:</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.operation.mgt</bundleDef>
                             </bundles>
                                <!--<importBundles>-->
                                 <!--<importBundleDef>org.wso2.carbon:org.wso2.carbon.reporting.common</importBundleDef>-->
                             <!--</importBundles>-->
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:4.0.1</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.security.mgt.server:4.0.5</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.module.mgt.server:4.0.2</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.throttle.server:4.0.2</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.caching.server:4.0.2</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.security.mgt.server:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.module.mgt.server:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.throttle.server:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.caching.server:</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.rm.server:${project.parent.version}</importFeatureDef>
                                 <!--<importFeatureDef>org.wso2.carbon.transport.mgt.server</importFeatureDef>-->
                                 <!--<importFeatureDef>org.wso2.carbon.tryit.server</importFeatureDef>-->
                             </importFeatures>
                             <!--includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.module.mgt.server.feature:4.0.2</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.throttle.server.feature:4.0.2</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.caching.server.feature:4.0.2</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.module.mgt.server.feature:</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.throttle.server.feature:</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.caching.server.feature:</includedFeatureDef>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.rm.server.feature:${project.parent.version}</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.security.mgt.server.feature:4.0.5</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.security.mgt.server.feature:</includedFeatureDef>
                             </includedFeatures-->
                         </configuration>
                     </execution>

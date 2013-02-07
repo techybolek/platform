@@ -92,7 +92,7 @@
                                     org.wso2.carbon.brokermanager.ui:${wso2carbon.version}
                                 </importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.cep.statistics.ui:4.0.2
+                                    org.wso2.carbon.cep.statistics.ui
                                 </importFeatureDef>
                             </importFeatures>
                         </configuration>

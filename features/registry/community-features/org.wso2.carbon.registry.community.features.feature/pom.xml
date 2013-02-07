@@ -74,8 +74,8 @@
                                 <importFeatureDef>org.wso2.carbon.registry.core:${registry.core.feature.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.community.features.server.feature:4.0.5</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.community.features.ui.feature:4.0.5</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.community.features.server.feature:</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.community.features.ui.feature:</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

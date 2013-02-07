@@ -81,7 +81,7 @@
                                 <!--includedFeatureDef>org.wso2.carbon:org.wso2.carbon.deployment.synchronizer.ui.feature
                                 </includedFeatureDef-->
                                 <includedFeatureDef>
-                                    org.wso2.carbon:org.wso2.carbon.deployment.synchronizer.subversion.feature:4.0.2
+                                    org.wso2.carbon:org.wso2.carbon.deployment.synchronizer.subversion.feature
                                 </includedFeatureDef>
                             </includedFeatures>
                         </configuration>

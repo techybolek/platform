@@ -107,9 +107,9 @@
                                                             </properties>
                                                         </adviceFile>
                                                         <bundles>
-                                                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.relyingparty.ui:4.0.5</bundleDef>
-                                                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.provider.openid.ui:4.0.6</bundleDef>
-                                                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.provider.openid:4.0.1</bundleDef>
+                                                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.relyingparty.ui:</bundleDef>
+                                                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.provider.openid.ui:</bundleDef>
+                                                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.provider.openid:</bundleDef>
                                                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.relyingparty.stub:4.0.0</bundleDef>
                                                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.provider.openid.stub:4.0.0</bundleDef>
                                                         </bundles>
@@ -121,7 +121,7 @@
                                                                 <importBundleDef>com.google.guava.wso2:guava</importBundleDef>
                                                         </importBundles>
 							<importFeatures>
-								<importFeatureDef>org.wso2.carbon.identity.core.ui:4.0.2</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.identity.core.ui:</importFeatureDef>
 							</importFeatures>
 						</configuration>
 					</execution>

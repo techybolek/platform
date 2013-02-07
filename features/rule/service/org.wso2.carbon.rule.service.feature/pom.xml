@@ -66,11 +66,11 @@
                             <id>org.wso2.carbon.rule.service</id>
                             <propertiesFile>../../../../etc/feature.properties</propertiesFile>                           
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:4.0.2</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.rule.service.server.feature:4.0.3</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.rule.service.ui.feature:4.0.3</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.rule.service.server.feature:</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.rule.service.ui.feature:</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

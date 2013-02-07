@@ -68,7 +68,7 @@
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.scim.consumer</bundleDef>
                             </bundles>
 			    <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.identity.scim.common:4.0.2</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.scim.common:</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

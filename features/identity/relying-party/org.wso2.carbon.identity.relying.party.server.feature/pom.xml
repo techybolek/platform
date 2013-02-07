@@ -105,13 +105,13 @@
                                 </properties>
                             </adviceFile>
 							<bundles>
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.relyingparty:4.0.6</bundleDef>
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.provider:4.0.6</bundleDef>
+								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.relyingparty:</bundleDef>
+								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.provider:</bundleDef>
 								<bundleDef>org.openid4java.wso2:openid4java-nodeps</bundleDef>
 								<bundleDef>org.igniterealtime.smack.wso2:smack</bundleDef>
 							</bundles>
 							<importFeatures>
-								<importFeatureDef>org.wso2.carbon.identity.core.server:4.0.6</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.identity.core.server:</importFeatureDef>
 							</importFeatures>
 						</configuration>
 					</execution>

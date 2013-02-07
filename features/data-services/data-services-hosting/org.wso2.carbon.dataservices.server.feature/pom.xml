@@ -166,10 +166,10 @@
                                 <bundleDef>commons-pool.wso2:commons-pool</bundleDef>                              
                             </bundles>
 				<importFeatures>
-                                <importFeatureDef>org.wso2.carbon.service.mgt.server:4.0.5
+                                <importFeatureDef>org.wso2.carbon.service.mgt.server
                                 </importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.event.server:4.0.5</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.transaction.manager:4.0.5</importFeatureDef>   
+                                <importFeatureDef>org.wso2.carbon.event.server:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.transaction.manager:</importFeatureDef>   
                        </importFeatures>
                         </configuration>
                     </execution>

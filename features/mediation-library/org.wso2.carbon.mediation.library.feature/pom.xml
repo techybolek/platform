@@ -91,7 +91,7 @@
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.mediation.library.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.mediation.library.ui.feature:4.0.1</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.mediation.library.ui.feature:</includedFeatureDef>
                                 <!--includedFeatureDef>org.wso2.carbon:org.wso2.carbon.mediation.library.connectors.twitter.feature</includedFeatureDef>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.mediation.library.connectors.linkedin.feature</includedFeatureDef-->
                             </includedFeatures>

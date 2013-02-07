@@ -69,7 +69,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.ui:4.0.1</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.ui:</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.stub</bundleDef>
                             </bundles>
                             <importFeatures>

@@ -56,7 +56,7 @@
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.bam.toolbox.deployer.server.feature:${project.version}
                                 </includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.bam.toolbox.deployer.ui.feature:4.0.5
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.bam.toolbox.deployer.ui.feature
                                 </includedFeatureDef>
                             </includedFeatures>
                         </configuration>

@@ -63,7 +63,7 @@
 							</bundles>
 
 							<importFeatures>
-								<importFeatureDef>org.wso2.carbon.core.server:4.0.2</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.core.server:</importFeatureDef>
 							</importFeatures>
 						</configuration>
 					</execution>
