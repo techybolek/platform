@@ -169,9 +169,9 @@
                 <version>20090211</version>
             </dependency>
             <dependency>
-                <groupId>javax.servlet</groupId>
+                <groupId>javax.servlet.jsp.jstl.wso2</groupId>
                 <artifactId>jstl</artifactId>
-                <version>1.2</version>
+                <version>${orbit.version.jstl}</version>
             </dependency>
             <!-- STAX implementation used in WSAS -->
             <dependency>
