@@ -8,8 +8,6 @@ import org.wso2.carbon.core.transports.TransportService;
 import org.wso2.carbon.transport.local.LocalTransportService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
-import java.util.Properties;
-
 /**
  * @scr.component name="local.transport.services" immediate="true"
  * @scr.reference name="config.context.service" interface="org.wso2.carbon.utils.ConfigurationContextService"
@@ -24,7 +22,7 @@ public class LocalTransportServiceComponent {
 
     protected void activate(ComponentContext ctxt) {
         log.debug("******* Local Transport bundle is activated ******* ");
-        Properties props = new Properties();
+        //Properties props = new Properties();
 		LocalTransportService localTransport;
 		ConfigurationContext configContext;
 
@@ -48,7 +46,7 @@ public class LocalTransportServiceComponent {
 
             // Register the LocalTransportService under TransportService interface.
             // This will make TransportManagement component to find this.
-            ctxt.getBundleContext().registerService(TransportService.class.getName(), localTransport, props);
+            ctxt.getBundleContext().registerService(TransportService.class.getName(), localTransport, null);
 
             if (log.isDebugEnabled()) {
                 log.debug("Successfully registered the local transport service");

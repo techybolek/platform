@@ -23,8 +23,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.mediator.service.MediatorService;
 
-import java.util.Properties;
-
 /**
  *
  */
@@ -38,13 +36,13 @@ public class SwitchMediatorActivator implements BundleActivator {
             log.debug("Starting the switch mediator component ...");
         }
 
-        Properties props = new Properties();
+        //Properties props = new Properties();
         bundleContext.registerService(MediatorService.class.getName(),
-                new SwitchMediatorService(), props);
+                new SwitchMediatorService(), null);
         bundleContext.registerService(MediatorService.class.getName(),
-                new SwitchCaseMediatorService(), props);
+                new SwitchCaseMediatorService(), null);
         bundleContext.registerService(MediatorService.class.getName(),
-                new SwitchDefaultMediatorService(), props);
+                new SwitchDefaultMediatorService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered the switch mediator service");

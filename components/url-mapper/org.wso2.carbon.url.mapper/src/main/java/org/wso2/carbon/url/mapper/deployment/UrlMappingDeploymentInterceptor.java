@@ -21,7 +21,8 @@ import org.wso2.carbon.utils.PreAxisConfigurationPopulationObserver;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
-import java.util.Properties;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 /**
  * The axis2 observer to observe the creating & terminating tenant configuration to delete service mapping of tenant
@@ -37,7 +38,7 @@ public class UrlMappingDeploymentInterceptor implements AxisObserver {
         BundleContext bundleCtx = ctxt.getBundleContext();
 
         // Publish the OSGi service
-        Properties props = new Properties();
+        Dictionary props = new Hashtable();
         props.put(CarbonConstants.AXIS2_CONFIG_SERVICE, AxisObserver.class.getName());
         bundleCtx.registerService(AxisObserver.class.getName(), this, props);
 
@@ -52,7 +53,7 @@ public class UrlMappingDeploymentInterceptor implements AxisObserver {
                 preAxisConfigObserver, null);
 
         // Publish an OSGi service to listen tenant configuration context creation events
-        Properties properties = new Properties();
+        Dictionary properties = new Hashtable();
         properties.put(CarbonConstants.AXIS2_CONFIG_SERVICE,
                 Axis2ConfigurationContextObserver.class.getName());
         bundleCtx.registerService(Axis2ConfigurationContextObserver.class.getName(),

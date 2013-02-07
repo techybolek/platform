@@ -35,9 +35,9 @@ public class TemplateMediatorActivator implements BundleActivator {
             log.debug("Starting the template mediator service component ...");
         }
 
-        Properties props = new Properties();
+        //Properties props = new Properties();
         bundleContext.registerService(
-                MediatorService.class.getName(), new TemplateMediatorService(), props);
+                MediatorService.class.getName(), new TemplateMediatorService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered template mediator service");

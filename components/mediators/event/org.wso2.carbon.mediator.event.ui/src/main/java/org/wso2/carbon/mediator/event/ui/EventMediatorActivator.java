@@ -15,13 +15,11 @@
  */
 package org.wso2.carbon.mediator.event.ui;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 import org.wso2.carbon.mediator.service.MediatorService;
-
-import java.util.Properties;
 
 public class EventMediatorActivator implements BundleActivator {
 
@@ -33,9 +31,9 @@ public class EventMediatorActivator implements BundleActivator {
             log.debug("Starting the event mediator component ...");
         }
         
-        Properties props = new Properties();
+        //Properties props = new Properties();
         bundleContext.registerService(
-                MediatorService.class.getName(), new EventMediatorService(), props);
+                MediatorService.class.getName(), new EventMediatorService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered the event mediator service");

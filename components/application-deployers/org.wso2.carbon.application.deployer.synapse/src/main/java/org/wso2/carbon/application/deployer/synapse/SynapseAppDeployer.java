@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.application.deployer.synapse;
 
+import org.apache.axis2.deployment.DeploymentException;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,7 +45,8 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
      * @param carbonApp  - CarbonApplication instance to check for artifacts
      * @param axisConfig - AxisConfiguration of the current tenant
      */
-    public void deployArtifacts(CarbonApplication carbonApp, AxisConfiguration axisConfig) {
+    public void deployArtifacts(CarbonApplication carbonApp, AxisConfiguration axisConfig)
+            throws DeploymentException {
         List<Artifact.Dependency> artifacts = carbonApp.getAppConfig().getApplicationArtifact()
                 .getDependencies();
 

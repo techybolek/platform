@@ -29,7 +29,8 @@ import org.wso2.carbon.sts.STSDeploymentListener;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
-import java.util.Properties;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 /**
  * @scr.component name="carbon.sts.component" immediate="true"
@@ -56,7 +57,7 @@ public class STSServiceComponent {
             BundleContext bundleCtx = ctxt.getBundleContext();
             STSServiceDataHolder.getInstance().setBundle(bundleCtx.getBundle());
             // Publish the OSGi service
-            Properties props = new Properties();
+            Dictionary props = new Hashtable();
             props.put(CarbonConstants.AXIS2_CONFIG_SERVICE, AxisObserver.class.getName());
             ctxt.getBundleContext().registerService(AxisObserver.class.getName(),
                                                     new STSDeploymentInterceptor(), props);

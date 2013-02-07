@@ -22,8 +22,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.mediator.service.MediatorService;
 
-import java.util.Properties;
-
 /**
  *
  */
@@ -37,9 +35,9 @@ public class FaultMediatorActivator implements BundleActivator {
             log.debug("Starting the fault mediator component ...");
         }
 
-        Properties props = new Properties();
+        //Properties props = new Properties();
         bundleContext.registerService(
-                MediatorService.class.getName(), new FaultMediatorService(), props);
+                MediatorService.class.getName(), new FaultMediatorService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered the fault mediator service");

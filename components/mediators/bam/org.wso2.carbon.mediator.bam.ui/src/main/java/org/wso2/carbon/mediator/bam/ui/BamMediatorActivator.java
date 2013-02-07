@@ -23,8 +23,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.mediator.service.MediatorService;
 
-import java.util.Properties;
-
 /**
  * Activator class for BAM Mediator
  */
@@ -38,9 +36,9 @@ public class BamMediatorActivator implements BundleActivator {
             log.debug("Starting the bam mediator component ...");
         }
 
-        Properties props = new Properties();
+        //Properties props = new Properties();
         bundleContext.registerService(
-                MediatorService.class.getName(), new BamMediatorService(), props);
+                MediatorService.class.getName(), new BamMediatorService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered the bam mediator service");

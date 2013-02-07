@@ -23,8 +23,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.mediator.service.MediatorService;
 
-import java.util.Properties;
-
 /**
  * 
  */
@@ -37,9 +35,9 @@ public class BeanMediatorActivator implements BundleActivator {
             log.debug("Starting the Bean mediator component ...");
         }
         
-        Properties props = new Properties();
+        //Properties props = new Properties();
         bundleContext.registerService(
-                MediatorService.class.getName(), new BeanMediatorService(), props);
+                MediatorService.class.getName(), new BeanMediatorService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully Bean the store mediator service");

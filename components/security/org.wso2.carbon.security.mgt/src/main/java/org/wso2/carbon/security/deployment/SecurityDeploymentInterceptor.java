@@ -35,7 +35,6 @@ import org.apache.neethi.PolicyReference;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.useradmin.Authorization;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -70,6 +69,8 @@ import org.wso2.carbon.utils.PreAxisConfigurationPopulationObserver;
 import javax.xml.namespace.QName;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -119,7 +120,7 @@ public class SecurityDeploymentInterceptor implements AxisObserver {
             throw new RuntimeException(msg, e);
         }
         // Publish the OSGi service
-        Properties props = new Properties();
+        Dictionary props = new Hashtable();
         props.put(CarbonConstants.AXIS2_CONFIG_SERVICE, AxisObserver.class.getName());
         bundleCtx.registerService(AxisObserver.class.getName(), this, props);
 
@@ -134,7 +135,7 @@ public class SecurityDeploymentInterceptor implements AxisObserver {
                                   preAxisConfigObserver, null);
 
         // Publish an OSGi service to listen tenant configuration context creation events
-        Properties properties = new Properties();
+        Dictionary properties = new Hashtable();
         properties.put(CarbonConstants.AXIS2_CONFIG_SERVICE,
                        Axis2ConfigurationContextObserver.class.getName());
         bundleCtx.registerService(Axis2ConfigurationContextObserver.class.getName(),

@@ -44,7 +44,7 @@ public class SynapseRegistryServiceComponent {
 
     protected void activate(ComponentContext ctxt) {
         ctxt.getBundleContext().registerService(SynapseRegistryService.class.getName(),
-                new SynapseRegistryServiceImpl(), new Properties());
+                new SynapseRegistryServiceImpl(), null);
     }
 
     protected void deactivate(ComponentContext ctxt) {

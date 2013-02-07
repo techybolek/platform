@@ -22,15 +22,14 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.core.transports.TransportAxis2ConfigurationContextObserver;
-import org.wso2.carbon.core.transports.TransportService;
 import org.wso2.carbon.core.transports.TransportPersistenceManager;
-import org.wso2.carbon.transport.jms.JMSTransportService;
+import org.wso2.carbon.core.transports.TransportService;
 import org.wso2.carbon.transport.jms.JMSServiceHolder;
+import org.wso2.carbon.transport.jms.JMSTransportService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.net.URL;
-import java.util.Properties;
 
 /**
  * @scr.component name="jms.transport.services" immediate="true"
@@ -50,7 +49,7 @@ public class JMSTransportServiceComponent {
     protected void activate(ComponentContext ctxt) {
         ConfigurationContext configContext;
         JMSTransportService jmsTransport;
-        Properties props;
+        //Properties props;
         
         log.debug("******* JMS Transport bundle is activated ******* ");
 
@@ -79,11 +78,11 @@ public class JMSTransportServiceComponent {
 
             // This should ideally contain properties of JMSTransportService as a collection of
             // key/value pair. Here we do not require to add any elements.
-            props = new Properties();
+            //props = new Properties();
 
             // Register the JMSTransportService under TransportService interface.
             // This will make TransportManagement component to find this.
-            bundleCtx.registerService(TransportService.class.getName(), jmsTransport, props);
+            bundleCtx.registerService(TransportService.class.getName(), jmsTransport, null);
 
             if (log.isDebugEnabled()) {
                 log.debug("Successfully registered the jms transport service");

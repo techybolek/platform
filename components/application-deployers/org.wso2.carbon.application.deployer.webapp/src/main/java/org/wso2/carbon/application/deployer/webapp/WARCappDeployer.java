@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.application.deployer.webapp;
 
+import org.apache.axis2.deployment.DeploymentException;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,7 +49,8 @@ public class WARCappDeployer implements AppDeploymentHandler {
      * @param carbonApp  - CarbonApplication instance to check for WAR artifacts
      * @param axisConfig - axisConfig of the current tenant
      */
-    public void deployArtifacts(CarbonApplication carbonApp, AxisConfiguration axisConfig) {
+    public void deployArtifacts(CarbonApplication carbonApp, AxisConfiguration axisConfig)
+            throws DeploymentException {
         List<Artifact.Dependency> artifacts = carbonApp.getAppConfig().getApplicationArtifact()
                 .getDependencies();
 

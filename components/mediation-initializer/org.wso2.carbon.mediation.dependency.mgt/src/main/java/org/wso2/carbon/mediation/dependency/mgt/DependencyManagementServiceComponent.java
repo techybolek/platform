@@ -44,8 +44,7 @@ public class DependencyManagementServiceComponent {
 
         bndCtx = cmpCtx.getBundleContext();
         bndCtx.registerService(ResolverRegistrationService.class.getName(),
-                new ResolverRegistrationServiceImpl(),
-                new Properties());
+                new ResolverRegistrationServiceImpl(), null);
 
         resolverListener = new CustomResolversListener(this, bndCtx);
 
@@ -92,7 +91,7 @@ public class DependencyManagementServiceComponent {
         timer.cancel();
         bndCtx.registerService(ConfigurationTrackingService.class.getName(),
                 new ConfigurationTrackingServiceImpl(bndCtx),
-                new Properties());
+                null);
 
         if (log.isDebugEnabled()) {
             log.debug("Configuration tracking service initialized");

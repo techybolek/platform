@@ -32,9 +32,8 @@
 	<url>http://wso2.org</url>
 
 			<modules>
-				<module>sso-authenticator</module>
-                                <module>token-authenticator</module>
 				<module>webseal-authenticator</module>
 				<module>saml2-sso-authenticator</module>
+				<module>iwa-authenticator</module>
 			</modules>
 </project>

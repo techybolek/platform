@@ -44,7 +44,7 @@ public class MLLPTransportServiceComponent {
     protected void activate(ComponentContext ctxt) {
         ConfigurationContext configContext;
         HL7TransportService HL7Transport;
-        Properties props;
+        //Properties props;
         if (log.isDebugEnabled()) {
             log.debug("MLLP Transport bundle is activated");
         }
@@ -67,12 +67,12 @@ public class MLLPTransportServiceComponent {
 
             // This should ideally contain properties of HL7TransportService as a collection of
             // key/value pair. Here we do not require to add any elements.
-            props = new Properties();
+            //props = new Properties();
 
             // Register the HL7TransportService under TransportService interface.
             // This will make TransportManagement component to find this.
             ctxt.getBundleContext()
-                    .registerService(TransportService.class.getName(), HL7Transport, props);
+                    .registerService(TransportService.class.getName(), HL7Transport, null);
 
             if (log.isDebugEnabled()) {
                 log.debug("Successfully registered the https transport service");

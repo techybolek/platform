@@ -22,8 +22,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.mediator.service.MediatorService;
 
-import java.util.Properties;
-
 /**
  *
  */
@@ -37,15 +35,15 @@ public class ThrottleMediatorActivator implements BundleActivator {
             log.debug("Starting the throttle mediator component ...");
         }
 
-        Properties props = new Properties();
+        //Properties props = new Properties();
         bundleContext.registerService(
-                MediatorService.class.getName(), new ThrottleMediatorService(), props);
+                MediatorService.class.getName(), new ThrottleMediatorService(), null);
 
         bundleContext.registerService(
-                MediatorService.class.getName(), new OnAcceptMediatorService(), props);
+                MediatorService.class.getName(), new OnAcceptMediatorService(), null);
 
         bundleContext.registerService(
-                MediatorService.class.getName(), new OnRejectMediatorService(), props);
+                MediatorService.class.getName(), new OnRejectMediatorService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered the throttle mediator service");

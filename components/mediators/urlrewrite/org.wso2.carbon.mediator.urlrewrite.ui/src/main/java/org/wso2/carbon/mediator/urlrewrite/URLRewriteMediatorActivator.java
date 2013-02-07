@@ -15,8 +15,6 @@
  */
 package org.wso2.carbon.mediator.urlrewrite;
 
-import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
@@ -36,11 +34,11 @@ public class URLRewriteMediatorActivator implements BundleActivator {
 						log.debug(" URLRewriteMediator component starts");
 				}
 
-				Properties props = new Properties();
+				//Properties props = new Properties();
 				bundleContext.registerService(MediatorService.class.getName(),
-				                              new URLRewriteMediatorService(), props);
+				                              new URLRewriteMediatorService(), null);
 				bundleContext.registerService(MediatorService.class.getName(),
-				                               new URLRulesMediatorService(), props);
+				                               new URLRulesMediatorService(), null);
 
 				if (log.isDebugEnabled()) {
 						log.debug("Successfully registered the property mediator service");

@@ -23,8 +23,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.mediator.service.MediatorService;
 
-import java.util.Properties;
-
 /**
  *
  */
@@ -38,9 +36,9 @@ public class PayloadFactoryMediatorActivator implements BundleActivator {
             log.debug("Starting the payloadFactory mediator component ...");
         }
 
-        Properties props = new Properties();
+        //Properties props = new Properties();
         bundleContext.registerService(
-                MediatorService.class.getName(), new PayloadFactoryMediatorService(), props);
+                MediatorService.class.getName(), new PayloadFactoryMediatorService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered the payloadFactory mediator service");

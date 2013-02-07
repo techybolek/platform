@@ -24,7 +24,7 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.caching.core.identity.IdentityCacheEntry;
 import org.wso2.carbon.caching.core.identity.IdentityCacheKey;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.utils.multitenancy.CarbonContextHolder;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.Calendar;
 import java.util.LinkedHashMap;
@@ -112,7 +112,7 @@ class PEPProxyCache {
     private Cache getCommonCache(String name) {
         // We create a single cache for all tenants. It is not a good choice to create per-tenant
         // caches in this case. We qualify tenants by adding the tenant identifier in the cache key.
-        CarbonContextHolder currentContext = CarbonContextHolder.getCurrentCarbonContextHolder();
+        PrivilegedCarbonContext currentContext = PrivilegedCarbonContext.getCurrentContext();
         currentContext.startTenantFlow();
         try {
             currentContext.setTenantId(MultitenantConstants.SUPER_TENANT_ID);

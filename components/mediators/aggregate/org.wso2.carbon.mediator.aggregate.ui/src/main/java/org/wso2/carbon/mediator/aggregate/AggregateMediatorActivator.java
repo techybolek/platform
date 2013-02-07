@@ -22,8 +22,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.mediator.service.MediatorService;
 
-import java.util.Properties;
-
 /**
  *
  */
@@ -37,9 +35,9 @@ public class AggregateMediatorActivator implements BundleActivator {
             log.debug("Starting the aggregate mediator component ...");
         }
 
-        Properties props = new Properties();
+        //Properties props = new Properties();
         bundleContext.registerService(
-                MediatorService.class.getName(), new AggregateMediatorService(), props);
+                MediatorService.class.getName(), new AggregateMediatorService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered the aggregate mediator service");

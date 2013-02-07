@@ -284,20 +284,20 @@ public class ConfigurationManager {
                 = new SynapseConfigurationServiceImpl(synConfig,
                 tenantId, configurationContext);
 
-        Properties props = new Properties();
+        //Properties props = new Properties();
         ServiceRegistration confRegistration =
                 ConfigurationHolder.getInstance().getBundleContext().registerService(
-                        SynapseConfigurationService.class.getName(), synCfgSvc, props);
+                        SynapseConfigurationService.class.getName(), synCfgSvc, null);
 
-        props = new Properties();
+        //props = new Properties();
         SynapseEnvironmentService synEnvSvc
                 = new SynapseEnvironmentServiceImpl(synEnv,
                 tenantId, configurationContext);
         ServiceRegistration envRegistration =
                 ConfigurationHolder.getInstance().getBundleContext().registerService(
-                        SynapseEnvironmentService.class.getName(), synEnvSvc, props);
+                        SynapseEnvironmentService.class.getName(), synEnvSvc, null);
 
-        props = new Properties();
+        //props = new Properties();
         SynapseRegistrationsService synRegistrationsSvc
                 = new SynapseRegistrationsServiceImpl(
                 confRegistration, envRegistration, tenantId, configurationContext);
@@ -305,7 +305,7 @@ public class ConfigurationManager {
         ServiceRegistration synapseRegistration =
                 ConfigurationHolder.getInstance().getBundleContext().registerService(
                         SynapseRegistrationsService.class.getName(),
-                        synRegistrationsSvc, props);
+                        synRegistrationsSvc, null);
 
     }
 

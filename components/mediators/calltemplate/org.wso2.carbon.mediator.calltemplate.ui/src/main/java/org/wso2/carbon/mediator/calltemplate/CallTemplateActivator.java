@@ -23,8 +23,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.mediator.service.MediatorService;
 
-import java.util.Properties;
-
 /**
  * 
  */
@@ -38,9 +36,9 @@ public class CallTemplateActivator implements BundleActivator {
             log.debug("Starting the call-template mediator component ...");
         }
         
-        Properties props = new Properties();
+        //Properties props = new Properties();
         bundleContext.registerService(
-                MediatorService.class.getName(), new CallTemplateService(), props);
+                MediatorService.class.getName(), new CallTemplateService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered the call-template mediator service");

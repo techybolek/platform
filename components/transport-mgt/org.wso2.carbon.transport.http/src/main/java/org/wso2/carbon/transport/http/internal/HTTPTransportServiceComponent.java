@@ -24,8 +24,6 @@ import org.wso2.carbon.core.transports.TransportService;
 import org.wso2.carbon.transport.http.HTTPTransportService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
-import java.util.Properties;
-
 /**
  * @scr.component name="http.transport.services" immediate="true"
  * @scr.reference name="config.context.service" interface="org.wso2.carbon.utils.ConfigurationContextService"
@@ -41,7 +39,7 @@ public class HTTPTransportServiceComponent {
 
     protected void activate(ComponentContext ctxt) {
         log.debug("******* HTTP Transport bundle is activated ******* ");
-        Properties props = new Properties();
+        //Properties props = new Properties();
 		HTTPTransportService httpTransport;
 		ConfigurationContext configContext;
 
@@ -65,7 +63,7 @@ public class HTTPTransportServiceComponent {
 
             // Register the HTTPTransportService under TransportService interface.
             // This will make TransportManagement component to find this.
-            ctxt.getBundleContext().registerService(TransportService.class.getName(), httpTransport, props);
+            ctxt.getBundleContext().registerService(TransportService.class.getName(), httpTransport, null);
 
             if (log.isDebugEnabled()) {
                 log.debug("Successfully registered the https transport service");

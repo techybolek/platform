@@ -43,6 +43,7 @@
         <module>org.wso2.carbon.identity.provider.openid</module>
         <module>org.wso2.carbon.identity.user.registration</module>
         <module>org.wso2.carbon.identity.user.registration.ui</module>
+        <module>org.wso2.carbon.identity.entitlement.proxy</module>
         <module>org.wso2.carbon.identity.relyingparty</module>
         <module>org.wso2.carbon.identity.relyingparty.ui</module>
         <module>org.wso2.carbon.identity.user.profile</module>
@@ -59,12 +60,13 @@
         <module>org.wso2.carbon.identity.oauth.common</module>
         <module>org.wso2.carbon.identity.oauth</module>
         <module>org.wso2.carbon.identity.oauth.ui</module>
-        <module>org.wso2.carbon.identity.oauth.mediator</module>
+        <!--module>org.wso2.carbon.identity.oauth.mediator</module-->
 		<module>org.wso2.carbon.identity.scim.provider</module>
         <module>org.wso2.carbon.identity.authentication</module>
         <module>org.wso2.carbon.identity.thrift.authentication</module>
         <module>org.wso2.carbon.identity.sts.mgt</module>
         <module>org.wso2.carbon.identity.sts.mgt.ui</module>
+        <module>org.wso2.carbon.identity.scim.common</module>
     </modules>
 
     <dependencyManagement>

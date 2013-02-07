@@ -38,9 +38,9 @@ public class LogMediatorActivator implements BundleActivator {
             log.debug("Starting the log mediator component ...");
         }
         
-        Properties props = new Properties();
+        //Properties props = new Properties();
         bundleContext.registerService(
-                MediatorService.class.getName(), new LogMediatorService(), props);
+                MediatorService.class.getName(), new LogMediatorService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered the log mediator service");

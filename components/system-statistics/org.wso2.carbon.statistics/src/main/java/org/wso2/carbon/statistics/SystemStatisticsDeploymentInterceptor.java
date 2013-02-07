@@ -19,7 +19,11 @@ package org.wso2.carbon.statistics;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.description.*;
+import org.apache.axis2.description.AxisModule;
+import org.apache.axis2.description.AxisOperation;
+import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.AxisServiceGroup;
+import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisEvent;
 import org.apache.axis2.engine.AxisObserver;
@@ -32,8 +36,9 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.PreAxisConfigurationPopulationObserver;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -50,7 +55,7 @@ public class SystemStatisticsDeploymentInterceptor implements AxisObserver {
         BundleContext bundleCtx = ctxt.getBundleContext();
 
         // Publish the OSGi service
-        Properties props = new Properties();
+        Dictionary props = new Hashtable();
         props.put(CarbonConstants.AXIS2_CONFIG_SERVICE, AxisObserver.class.getName());
         bundleCtx.registerService(AxisObserver.class.getName(), this, props);
 

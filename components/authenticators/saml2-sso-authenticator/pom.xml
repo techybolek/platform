@@ -33,6 +33,7 @@
 
     <modules>
         <module>org.wso2.carbon.identity.authenticator.saml2.sso</module>
+        <module>org.wso2.carbon.identity.authenticator.saml2.sso.common</module>
         <module>org.wso2.carbon.identity.authenticator.saml2.sso.ui</module>
     </modules>
     

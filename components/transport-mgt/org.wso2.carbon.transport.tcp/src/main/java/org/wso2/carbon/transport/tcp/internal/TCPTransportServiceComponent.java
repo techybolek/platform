@@ -22,14 +22,13 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.core.transports.TransportAxis2ConfigurationContextObserver;
-import org.wso2.carbon.core.transports.TransportService;
 import org.wso2.carbon.core.transports.TransportPersistenceManager;
+import org.wso2.carbon.core.transports.TransportService;
+import org.wso2.carbon.transport.tcp.TCPTransportService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.ConfigurationContextService;
-import org.wso2.carbon.transport.tcp.TCPTransportService;
 
 import java.net.URL;
-import java.util.Properties;
 
 /**
  * @scr.component name="tcp.transport.services" immediate="true"
@@ -47,7 +46,7 @@ public class TCPTransportServiceComponent {
     protected void activate(ComponentContext ctxt) {
         ConfigurationContext configContext;
         TCPTransportService tcpTransport;
-        Properties props;
+        //Properties props;
         log.debug("******* TCP Transport bundle is activated ******* ");
 
         try {
@@ -76,12 +75,12 @@ public class TCPTransportServiceComponent {
 
             // This should ideally contain properties of TCPTransportService as a collection of
             // key/value pair. Here we do not require to add any elements.
-            props = new Properties();
+            //props = new Properties();
 
             // Register the TCPTransportService under TransportService interface.
             // This will make TransportManagement component to find this.
             bundleCtx.registerService(TransportService.class.getName(), tcpTransport,
-                    props);
+                    null);
 
             if (log.isDebugEnabled()) {
                 log.debug("Successfully registered the TCP transport service");

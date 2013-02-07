@@ -37,9 +37,9 @@ public class TargetMediatorActivator implements BundleActivator {
             log.debug("Starting the target mediator component ...");
         }
 
-        Properties props = new Properties();
+        //Properties props = new Properties();
         bundleContext.registerService(
-                MediatorService.class.getName(), new TargetMediatorService(), props);
+                MediatorService.class.getName(), new TargetMediatorService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered the target mediator service");

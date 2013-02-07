@@ -22,8 +22,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.mediator.service.MediatorService;
 
-import java.util.Properties;
-
 /**
  *
  */
@@ -37,13 +35,13 @@ public class FilterMediatorActivator implements BundleActivator {
             log.debug("Starting the filter mediator component ...");
         }
 
-        Properties props = new Properties();
+        //Properties props = new Properties();
         bundleContext.registerService(
-                MediatorService.class.getName(), new FilterMediatorService(), props);
+                MediatorService.class.getName(), new FilterMediatorService(), null);
         bundleContext.registerService(
-                MediatorService.class.getName(), new ThenMediatorService(), props);
+                MediatorService.class.getName(), new ThenMediatorService(), null);
         bundleContext.registerService(
-                MediatorService.class.getName(), new ElseMediatorService(), props);
+                MediatorService.class.getName(), new ElseMediatorService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered the filter mediator service");

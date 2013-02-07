@@ -16,16 +16,15 @@
 
 package org.wso2.carbon.mediation.dependency.mgt.services;
 
-import org.apache.synapse.config.SynapseConfiguration;
-import org.apache.synapse.config.SynapseObserver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.config.SynapseConfiguration;
+import org.apache.synapse.config.SynapseObserver;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.dependency.mgt.DependencyTracker;
 
 import java.util.List;
-import java.util.Properties;
 
 public class ConfigurationTrackingServiceImpl implements ConfigurationTrackingService {
 
@@ -57,7 +56,7 @@ public class ConfigurationTrackingServiceImpl implements ConfigurationTrackingSe
 
                 if (!serviceRegistered) {
                     bndCtx.registerService(DependencyManagementService.class.getName(),
-                            mgtService, new Properties());
+                            mgtService, null);
                     if (log.isDebugEnabled()) {
                         log.debug("DependencyManagementService registered and ready to be used");
                     }

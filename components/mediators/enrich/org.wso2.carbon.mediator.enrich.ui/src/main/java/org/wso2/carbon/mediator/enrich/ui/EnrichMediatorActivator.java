@@ -23,8 +23,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.mediator.service.MediatorService;
 
-import java.util.Properties;
-
 
 public class EnrichMediatorActivator implements BundleActivator {
 
@@ -36,8 +34,8 @@ public class EnrichMediatorActivator implements BundleActivator {
             log.debug("Starting the Enrich mediator component ...");
         }
 
-        Properties props = new Properties();
-        bundleContext.registerService(MediatorService.class.getName(), new EnrichMediatorService(), props);
+        //Properties props = new Properties();
+        bundleContext.registerService(MediatorService.class.getName(), new EnrichMediatorService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered the Enrich Mediator Service");

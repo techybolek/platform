@@ -16,15 +16,13 @@
 
 package org.wso2.carbon.transport.https.internal;
 
-import org.wso2.carbon.utils.ConfigurationContextService;
-import org.wso2.carbon.transport.https.HTTPSTransportService;
-import org.wso2.carbon.core.transports.TransportService;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.axis2.context.ConfigurationContext;
 import org.osgi.service.component.ComponentContext;
-
-import java.util.Properties;
+import org.wso2.carbon.core.transports.TransportService;
+import org.wso2.carbon.transport.https.HTTPSTransportService;
+import org.wso2.carbon.utils.ConfigurationContextService;
 
 /**
  * @scr.component name="https.transport.services" immediate="true"
@@ -41,7 +39,7 @@ public class HTTPSTransportServiceComponent {
 
     protected void activate(ComponentContext ctxt) {
         log.debug("******* HTTPS Transport bundle is activated ******* ");
-        Properties props = new Properties();
+        //Properties props = new Properties();
 		HTTPSTransportService httpsTransport;
 		ConfigurationContext configContext;
 
@@ -64,7 +62,7 @@ public class HTTPSTransportServiceComponent {
 
             // Register the HTTPSTransportService under TransportService interface.
             // This will make TransportManagement component to find this.
-            ctxt.getBundleContext().registerService(TransportService.class.getName(), httpsTransport, props);
+            ctxt.getBundleContext().registerService(TransportService.class.getName(), httpsTransport, null);
 
             if (log.isDebugEnabled()) {
                 log.debug("Successfully registered the https transport service");

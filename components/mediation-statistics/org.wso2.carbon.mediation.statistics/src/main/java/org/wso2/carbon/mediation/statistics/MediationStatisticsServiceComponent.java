@@ -90,7 +90,7 @@ public class MediationStatisticsServiceComponent {
 
                 compCtx.getBundleContext().registerService(
                         MediationStatisticsService.class.getName(),
-                        service, new Properties());
+                        service, null);
                 initialized = true;
             } else {
                 log.error("Couldn't initialize Mediation Statistics");
@@ -276,7 +276,7 @@ public class MediationStatisticsServiceComponent {
 
                     compCtx.getBundleContext().registerService(
                         MediationStatisticsService.class.getName(),
-                        service, new Properties());
+                        service, null);
                 } else {
                     log.warn("Couldn't find the mediation statistics store for tenant id: "
                             + tenantId);

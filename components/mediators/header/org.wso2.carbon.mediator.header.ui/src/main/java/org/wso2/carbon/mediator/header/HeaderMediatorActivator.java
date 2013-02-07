@@ -22,8 +22,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.mediator.service.MediatorService;
 
-import java.util.Properties;
-
 /**
  *
  */
@@ -37,9 +35,9 @@ public class HeaderMediatorActivator implements BundleActivator {
             log.debug("Starting the header mediator component ...");
         }
 
-        Properties props = new Properties();
+        //Properties props = new Properties();
         bundleContext.registerService(
-                MediatorService.class.getName(), new HeaderMediatorService(), props);
+                MediatorService.class.getName(), new HeaderMediatorService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered the header mediator service");

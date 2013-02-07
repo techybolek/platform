@@ -100,7 +100,7 @@ public class DiscoveryComponent {
             CarbonDiscoveryService discoveryService = new CarbonDiscoveryService();
             discoveryServiceRegistration =
                     context.getBundleContext().registerService(DiscoveryService.class.getName(),
-                            discoveryService, new Properties());
+                            discoveryService, null);
             if (log.isDebugEnabled()) {
                 log.debug("Successfully registered the Carbon Discovery service");
             }

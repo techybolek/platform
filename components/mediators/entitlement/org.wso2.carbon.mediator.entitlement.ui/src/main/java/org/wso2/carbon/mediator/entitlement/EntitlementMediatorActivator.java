@@ -23,8 +23,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.mediator.service.MediatorService;
 
-import java.util.Properties;
-
 /**
  *
  */
@@ -38,21 +36,21 @@ public class EntitlementMediatorActivator implements BundleActivator {
             log.debug("Starting the entitlement mediator component ...");
         }
 
-        Properties props = new Properties();
+        //Properties props = new Properties();
         bundleContext.registerService(
-                MediatorService.class.getName(), new EntitlementMediatorService(), props);
+                MediatorService.class.getName(), new EntitlementMediatorService(), null);
 
         bundleContext.registerService(
-                MediatorService.class.getName(), new OnAcceptMediatorService(), props);
+                MediatorService.class.getName(), new OnAcceptMediatorService(), null);
 
         bundleContext.registerService(
-                MediatorService.class.getName(), new OnRejectMediatorService(), props);
+                MediatorService.class.getName(), new OnRejectMediatorService(), null);
 
         bundleContext.registerService(
-                MediatorService.class.getName(), new AdviceMediatorService(), props);
+                MediatorService.class.getName(), new AdviceMediatorService(), null);
 
         bundleContext.registerService(
-                MediatorService.class.getName(), new ObligationsMediatorService(), props);
+                MediatorService.class.getName(), new ObligationsMediatorService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered the property mediator service");

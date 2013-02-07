@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.application.deployer.humantask;
 
+import org.apache.axis2.deployment.DeploymentException;
 import org.wso2.carbon.application.deployer.handler.AppDeploymentHandler;
 import org.wso2.carbon.application.deployer.CarbonApplication;
 import org.wso2.carbon.application.deployer.AppDeployerUtils;
@@ -46,7 +47,8 @@ public class HumanTaskAppDeployer implements AppDeploymentHandler {
      * @param carbonApp - CarbonApplication instance to check for HumanTask artifacts
      * @param axisConfig - AxisConfiguration of the current tenant
      */
-    public void deployArtifacts(CarbonApplication carbonApp, AxisConfiguration axisConfig) {
+    public void deployArtifacts(CarbonApplication carbonApp, AxisConfiguration axisConfig)
+            throws DeploymentException {
         List<Artifact.Dependency> artifacts = carbonApp.getAppConfig().getApplicationArtifact()
                 .getDependencies();
 

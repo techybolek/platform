@@ -24,8 +24,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.mediator.service.MediatorService;
 
-import java.util.Properties;
-
 public class ConditionalRouterMediatorActivator implements BundleActivator {
 
     private static final Log log = LogFactory.getLog(ConditionalRouterMediatorActivator.class);
@@ -35,10 +33,10 @@ public class ConditionalRouterMediatorActivator implements BundleActivator {
             log.debug("Starting the Conditional Router Mediator component ...");
         }
 
-        Properties props = new Properties();
-        bundleContext.registerService(MediatorService.class.getName(), new ConditionalRouterMediatorService(), props);
+        //Properties props = new Properties();
+        bundleContext.registerService(MediatorService.class.getName(), new ConditionalRouterMediatorService(), null);
         bundleContext.registerService(
-                MediatorService.class.getName(), new ConditionalRouteMediatorService(), props);
+                MediatorService.class.getName(), new ConditionalRouteMediatorService(), null);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully registered the Conditional Router Mediator Service");

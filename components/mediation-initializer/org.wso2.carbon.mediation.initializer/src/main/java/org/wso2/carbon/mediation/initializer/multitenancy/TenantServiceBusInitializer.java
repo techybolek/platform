@@ -144,31 +144,31 @@ public class TenantServiceBusInitializer extends AbstractAxis2ConfigurationConte
             int tenantId = PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();
             // populate the SynapseEnv service and SynapseConfig OSGI Services so that other
             // components get to know about the availability of the new synapse configuration            
-            Properties props = new Properties();
+            //Properties props = new Properties();
             SynapseConfigurationService synCfgSvc
                         = new SynapseConfigurationServiceImpl(contextInfo.getSynapseConfiguration(),
                         tenantId, configurationContext);
 
             ServiceRegistration confRegistration =
                     ConfigurationHolder.getInstance().getBundleContext().registerService(
-                        SynapseConfigurationService.class.getName(), synCfgSvc, props);
+                        SynapseConfigurationService.class.getName(), synCfgSvc, null);
 
-            props = new Properties();
+            //props = new Properties();
             SynapseEnvironmentService synEnvSvc
                         = new SynapseEnvironmentServiceImpl(contextInfo.getSynapseEnvironment(),
                         tenantId, configurationContext);
             ServiceRegistration envRegistration =
                     ConfigurationHolder.getInstance().getBundleContext().registerService(
-                        SynapseEnvironmentService.class.getName(), synEnvSvc, props);
+                        SynapseEnvironmentService.class.getName(), synEnvSvc, null);
 
-            props = new Properties();
+            //props = new Properties();
             SynapseRegistrationsService synRegistrationsSvc
                     = new SynapseRegistrationsServiceImpl(
                     confRegistration, envRegistration, tenantId, configurationContext);
             ServiceRegistration synapseRegistration =
                     ConfigurationHolder.getInstance().getBundleContext().registerService(
                     SynapseRegistrationsService.class.getName(),
-                    synRegistrationsSvc, props);
+                    synRegistrationsSvc, null);
 
             ConfigurationTrackingService trackingService = ServiceBusInitializer.
                     getConfigurationTrackingService();

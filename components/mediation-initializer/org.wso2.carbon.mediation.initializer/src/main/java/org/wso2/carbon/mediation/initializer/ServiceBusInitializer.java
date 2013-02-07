@@ -177,12 +177,12 @@ public class ServiceBusInitializer {
 
             if (contextInfo.getSynapseConfiguration() != null) {
 
-                Properties props = new Properties();
+                //Properties props = new Properties();
                 SynapseConfigurationService synCfgSvc
                         = new SynapseConfigurationServiceImpl(contextInfo.getSynapseConfiguration(),
                         MultitenantConstants.SUPER_TENANT_ID, configCtxSvc.getServerConfigContext());
                 synCfgRegistration = bndCtx.registerService(
-                        SynapseConfigurationService.class.getName(), synCfgSvc, props);
+                        SynapseConfigurationService.class.getName(), synCfgSvc, null);
 
                 initPersistence(synCfgSvc,
                         configurationManager.getTracker().getCurrentConfigurationName());
@@ -190,7 +190,7 @@ public class ServiceBusInitializer {
                         ServerShutdownHandler.class.getName(),
                         new MPMShutdownHandler(
                                 synCfgSvc.getSynapseConfiguration().getAxisConfiguration()),
-                        props);
+                        null);
 
                 if (log.isDebugEnabled()) {
                     log.debug("SynapseConfigurationService Registered");
@@ -212,12 +212,12 @@ public class ServiceBusInitializer {
 
             if (contextInfo.getSynapseEnvironment() != null) {
 
-                Properties props = new Properties();
+                //Properties props = new Properties();
                 SynapseEnvironmentService synEnvSvc
                         = new SynapseEnvironmentServiceImpl(contextInfo.getSynapseEnvironment(),
                         MultitenantConstants.SUPER_TENANT_ID, configCtxSvc.getServerConfigContext());
                 synEnvRegistration = bndCtx.registerService(
-                        SynapseEnvironmentService.class.getName(), synEnvSvc, props);
+                        SynapseEnvironmentService.class.getName(), synEnvSvc, null);
 
                 if (log.isDebugEnabled()) {
                     log.debug("SynapseEnvironmentService Registered");
@@ -228,12 +228,12 @@ public class ServiceBusInitializer {
                         "SynapseEnvironment not found");
             }
 
-            Properties props = new Properties();
+            //Properties props = new Properties();
             SynapseRegistrationsService synRegistrationsSvc
                     = new SynapseRegistrationsServiceImpl(synCfgRegistration, synEnvRegistration,
                     MultitenantConstants.SUPER_TENANT_ID, configCtxSvc.getServerConfigContext());
             bndCtx.registerService(SynapseRegistrationsService.class.getName(),
-                    synRegistrationsSvc, props);
+                    synRegistrationsSvc, null);
 
             configCtxSvc.getServerConfigContext().setProperty(
                     ConfigurationManager.CONFIGURATION_MANAGER, configurationManager);
