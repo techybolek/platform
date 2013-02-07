@@ -36,13 +36,13 @@
     <description>WSO2 Autoscaler Service</description>
 
     <modules>
-        <module>service/autoscalerservice</module>
+        <!--module>service/autoscalerservice</module>
         <module>service/jvmagentmgtservice</module>
         <module>jvmagent</module>
         <module>jvmagentclient</module>
-        <!--module>initiator</module-->
+        <module>initiator</module>
         <module>org.wso2.carbon.autoscaler.agent.service.stub</module>
-        <module>org.wso2.carbon.autoscaler.agentmgt.service.stub</module>
+        <module>org.wso2.carbon.autoscaler.agentmgt.service.stub</module-->
     </modules>
 
     <dependencyManagement>

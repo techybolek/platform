@@ -36,8 +36,6 @@
                 <module>org.wso2.carbon.bam.service.data.publisher.ui</module>
 	        <module>org.wso2.carbon.bam.mediationstats.data.publisher</module>
 	        <module>org.wso2.carbon.bam.mediationstats.data.publisher.ui</module>
-	        <module>org.wso2.carbon.bam.activity.mediation.data.publisher</module>
-                <module>org.wso2.carbon.bam.activity.mediation.data.publisher.ui</module>
                 <module>org.wso2.carbon.bam.data.publisher.util</module>
             </modules>
 
