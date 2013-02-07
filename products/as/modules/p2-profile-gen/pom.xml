@@ -665,12 +665,8 @@
         </plugins>
     </build>
     <properties>
-	<carbon.platform.version>4.0.1</carbon.platform.version>
-        <carbon.platform.version>4.0.2</carbon.platform.version>
         <stratos.platform.patch.version.201>2.0.1</stratos.platform.patch.version.201>
         <stratos.platform.patch.version.202>2.0.2</stratos.platform.patch.version.202>
-        <carbon.platform.version>4.0.3</carbon.platform.version>
-        <carbon.platform.version>4.0.5</carbon.platform.version>
     </properties>
 
 </project>
