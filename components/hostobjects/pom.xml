@@ -146,7 +146,7 @@
             <dependency>
                 <groupId>org.eclipse.equinox</groupId>
                 <artifactId>javax.servlet.jsp</artifactId>
-                <version>${equinox.javax.servlet.jsp.version}</version>
+                <version>${version.javax.servlet.jsp}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>

@@ -139,11 +139,11 @@
                 <module>coordination</module>
                 <module>ntask</module>
                 <module>transaction-manager</module>
-                <module>rest-api</module>
+                <!--module>rest-api</module-->
 				<module>hostobjects</module>
                 <module>apimgt</module>
 		<module>andes</module>
-		<module>bam2</module>
+		<!--module>bam2</module-->
 		<module>analytics</module>
 		<module>data-agents</module>
 		<module>gadget-ide</module>
@@ -774,7 +774,7 @@
 	<dependency>
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>javax.servlet.jsp</artifactId>
-            <version>${equinox.javax.servlet.jsp.version}</version>
+            <version>${version.javax.servlet.jsp}</version>
         </dependency>
 	<dependency>
             <groupId>commons-scxml.wso2</groupId>

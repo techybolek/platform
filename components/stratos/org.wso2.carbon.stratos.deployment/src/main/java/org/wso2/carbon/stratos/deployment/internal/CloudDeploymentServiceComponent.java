@@ -15,8 +15,6 @@
  */
 package org.wso2.carbon.stratos.deployment.internal;
 
-import java.util.Properties;
-
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
@@ -28,6 +26,9 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.stratos.deployment.CloudDeploymentInterceptor;
 import org.wso2.carbon.stratos.deployment.SuperTenantRolePlayer;
 import org.wso2.carbon.utils.ConfigurationContextService;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 /**
  * @scr.component name="org.wso2.carbon.stratos.deployment.internal.CloudDeploymentServiceComponent" immediate="true"
@@ -43,7 +44,7 @@ public class CloudDeploymentServiceComponent {
         //TODO: Modify the permission in the UI
         try {
             ConfigurationContext configContext = DataHolder.getInstance().getServerConfigContext();
-            Properties props = new Properties();
+            Dictionary props = new Hashtable();
             props.put(CarbonConstants.AXIS2_CONFIG_SERVICE, AxisObserver.class.getName());
             ctxt.getBundleContext().registerService(AxisObserver.class.getName(), new CloudDeploymentInterceptor(),props);
             

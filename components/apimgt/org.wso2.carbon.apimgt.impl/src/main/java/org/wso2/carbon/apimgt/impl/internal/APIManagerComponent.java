@@ -111,7 +111,7 @@ public class APIManagerComponent {
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             registration = componentContext.getBundleContext().registerService(
                     APIManagerConfigurationService.class.getName(),
-                    configurationService, new Properties());
+                    configurationService, null);
             setupSelfRegistration(configuration);
             generateAPICreatorRole();
             APIStatusObserverList.getInstance().init(configuration);
