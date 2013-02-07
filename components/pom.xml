@@ -767,14 +767,14 @@
         </dependency>
 
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>servlet-api</artifactId>
-                <version>${servlet-api.version}</version>
+                <groupId>org.eclipse.equinox</groupId>
+                <artifactId>javax.servlet</artifactId>
+                <version>${equinox.javax.servlet.version}</version>
             </dependency>
 	<dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>javax.servlet</artifactId>
-            <version>${orbit.version.javax.servlet}</version>
+            <groupId>org.eclipse.equinox</groupId>
+            <artifactId>javax.servlet.jsp</artifactId>
+            <version>${equinox.javax.servlet.jsp.version}</version>
         </dependency>
 	<dependency>
             <groupId>commons-scxml.wso2</groupId>
@@ -1539,7 +1539,6 @@
         <authenticator.version>0.5</authenticator.version>
         <javamail.version>1.4</javamail.version>
         <activation.version>1.1</activation.version>
-        <servlet-api.version>2.4</servlet-api.version>
         <commons-fileupload.version>1.1.1</commons-fileupload.version>
         <commons-httpclient.version>3.0.1</commons-httpclient.version>
         <commons-httpclient.wso2.version>${orbit.version.commons.httpclient}</commons-httpclient.wso2.version>
@@ -1580,7 +1579,6 @@
 	<orbit.version.json-simple>1.1.wso2v1</orbit.version.json-simple>
 	<orbit.version.woden>1.0.0.M8-wso2v1</orbit.version.woden>
 	<orbit.version.commons-configuration>1.6.0.wso2v1</orbit.version.commons-configuration>
-	<orbit.version.javax.servlet>3.0.0.wso2v1</orbit.version.javax.servlet>
         <orbit.version.infinispan>5.1.2.wso2v1</orbit.version.infinispan>
         <zookeeper.orbit.version>3.3.5.wso2v1</zookeeper.orbit.version>
         <quartz2.orbit.version>2.1.1.wso2v1</quartz2.orbit.version>
