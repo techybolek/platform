@@ -35,9 +35,14 @@
     </build>
 
             <modules>
+		<module>rampart/1.6.1-wso2v9</module>
+		<module>commons/caching/4.0.2</module>
 		<module>synapse/2.1.1-wso2v3</module>
                 <module>commons/charon/1.0.1-wso2v1</module>
 		<!-- orbit/modules -->
+		<module>orbit/rampart-core</module>
+		<module>orbit/rampart-policy</module>
+		<module>orbit/rampart-trust</module>
 	     </modules>
    <dependencyManagement>
 	<dependencies>

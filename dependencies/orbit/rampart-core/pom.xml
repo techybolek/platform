@@ -22,8 +22,8 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-dependents</artifactId>
-        <version>4.0.0</version>
-        <relativePath>../../../pom.xml</relativePath>
+        <version>4.1.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
    </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -33,7 +33,7 @@
     <name>Rampart</name>
     <description>A custom wso2 products or solution</description>
     <url>http://www.wso2.com</url>
-    <version>1.6.1.wso2v8</version>
+    <version>1.6.1.wso2v9</version>
     <dependencies>
 
         <dependency>
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-core</artifactId>
-            <version>1.6.1-wso2v8</version>
+            <version>1.6.1-wso2v9</version>
             <optional>true</optional>
             <exclusions>
                 <exclusion>
@@ -165,7 +165,7 @@
 			            <Axis2Module>${project.artifactId}-${project.version}</Axis2Module>
                         <Bundle-Activator>org.wso2.carbon.rampart.internal.RampartActivator</Bundle-Activator>
                         <Private-Package>org.wso2.carbon.rampart.internal</Private-Package>
-                        <Export-Package>org.apache.rampart.*;version="1.6.1-wso2v8"</Export-Package>
+                        <Export-Package>org.apache.rampart.*;version="1.6.1-wso2v9"</Export-Package>
                         <Import-Package>
 	                    !org.apache.rampart.*,
                             org.apache.commons.logging.*; version="1.0.4",

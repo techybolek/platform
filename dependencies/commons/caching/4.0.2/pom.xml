@@ -180,7 +180,7 @@
     </modules>
 
     <properties>
-        <axis2.version>1.6.1-wso2v6</axis2.version>
+        <axis2.version>1.6.1-wso2v8</axis2.version>
         <wso2caching.version>4.0.2</wso2caching.version>
         <axiom.version>1.2.11</axiom.version>
         <neethi.version>2.0.4</neethi.version>

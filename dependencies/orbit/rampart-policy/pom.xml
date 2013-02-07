@@ -23,8 +23,8 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-dependents</artifactId>
-        <version>4.0.0</version>
-        <relativePath>../../../pom.xml</relativePath>
+        <version>4.1.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
    </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -34,7 +34,7 @@
     <name>Rampart Security Policy</name>
     <description>A custom wso2 products or solution</description>
     <url>http://www.wso2.com</url>
-    <version>1.6.1.wso2v8</version>
+    <version>1.6.1.wso2v9</version>
     <dependencies>
 
         <dependency>
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart-policy</artifactId>
-            <version>1.6.1-wso2v8</version>
+            <version>1.6.1-wso2v9</version>
             <optional>true</optional>
             <exclusions>
                 <exclusion>
