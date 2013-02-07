@@ -81,9 +81,9 @@
                 <version>3.2.0.v20090520-1800</version>
             </dependency>
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>servlet-api</artifactId>
-                <version>${servlet-api.version}</version>
+                <groupId>org.eclipse.equinox</groupId>
+                <artifactId>javax.servlet</artifactId>
+                <version>${javax.servlet.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.derby.wso2</groupId>
