@@ -231,9 +231,9 @@
                 <version>${wso2carbon.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.eclipse.equinox</groupId>
                 <artifactId>javax.servlet</artifactId>
-                <version>3.0.0.wso2v1</version>
+                <version>${equinox.javax.servlet.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.uri.template</groupId>
