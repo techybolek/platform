@@ -57,7 +57,7 @@
                                 </properties>
                             </adviceFile> 
                             <importFeatures>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.directory.service.mgr.feature:${patch.version.403}</featureArtifactDef>
+                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.directory.service.mgr.feature:${carbon.platform.version}</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.ldap.server:4.0.3</featureArtifactDef>
                             </importFeatures>
                         </configuration>
