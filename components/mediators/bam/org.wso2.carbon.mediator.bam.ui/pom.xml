@@ -104,7 +104,6 @@
     </dependencies>
 
     <properties>
-        <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
         <wso2carbon.bam-mediator-config-stub>${wso2carbon.version}</wso2carbon.bam-mediator-config-stub>
     </properties>
 

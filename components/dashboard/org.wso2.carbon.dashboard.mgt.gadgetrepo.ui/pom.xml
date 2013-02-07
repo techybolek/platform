@@ -104,7 +104,6 @@
     </build>
 
     <properties>
-        <carbon.platform.patch.version.322>4.0.1</carbon.platform.patch.version.322>
     </properties>
 
 </project>

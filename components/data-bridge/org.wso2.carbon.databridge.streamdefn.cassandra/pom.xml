@@ -168,8 +168,6 @@
 
     <properties>
         <wso2carbon.version.agent>${wso2carbon.version}</wso2carbon.version.agent>
-        <carbon.platform.patch.version.402>4.0.2</carbon.platform.patch.version.402>
-        <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
     </properties>
 
 </project>

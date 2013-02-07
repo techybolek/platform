@@ -152,7 +152,6 @@
 
     <properties>
         <cxf.wso2.version.databridge>${cxf.orbit.version}</cxf.wso2.version.databridge>
-        <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
         <!--<cxf.test.version>2.6.0</cxf.test.version>-->
         <!--<httpclient.test.version>3.1</httpclient.test.version>-->
         <!--<jaxrs.test.version>1.1.1</jaxrs.test.version>-->

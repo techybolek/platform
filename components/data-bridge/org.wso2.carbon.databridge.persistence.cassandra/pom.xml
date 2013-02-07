@@ -164,8 +164,6 @@
     </build>
 
     <properties>
-        <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
-        <carbon.platform.patch.version.407>4.0.7</carbon.platform.patch.version.407>
         <wso2carbon.version.agent>${wso2carbon.version}</wso2carbon.version.agent>
     </properties>
 

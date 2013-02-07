@@ -181,9 +181,6 @@
     </build>
 
     <properties>
-	<carbon.platform.patch.version.402>4.0.2</carbon.platform.patch.version.402>
-        <carbon.platform.patch.version.401>4.0.1</carbon.platform.patch.version.401>
-        <carbon.platform.patch.version.406>4.0.6</carbon.platform.patch.version.406>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hive.version>0.8.1.wso2v6</hive.version>
     </properties>

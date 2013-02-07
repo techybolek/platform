@@ -139,6 +139,5 @@
     </build>
 
     <properties>
-        <carbon.platform.patch.version.405>4.0.5</carbon.platform.patch.version.405>
     </properties>
 </project>

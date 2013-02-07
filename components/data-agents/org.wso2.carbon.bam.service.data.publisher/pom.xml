@@ -101,8 +101,5 @@
         </dependency>
     </dependencies>
     <properties>
-        <carbon.platform.patch.version.401>4.0.1</carbon.platform.patch.version.401>
-        <carbon.platform.patch.version.402>4.0.2</carbon.platform.patch.version.402>
-        <carbon.platform.patch.version.403>4.0.3</carbon.platform.patch.version.403>
     </properties>
 </project>
