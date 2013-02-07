@@ -39,6 +39,8 @@
 		<module>commons/caching/4.0.2</module>
 		<module>synapse/2.1.1-wso2v3</module>
                 <module>commons/charon/1.0.1-wso2v1</module>
+                <module>andes/0.13.0-wso2v6</module>
+                <module>orbit/andes</module>
 		<!-- orbit/modules -->
 		<module>orbit/rampart-core</module>
 		<module>orbit/rampart-policy</module>
