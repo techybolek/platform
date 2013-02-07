@@ -97,7 +97,7 @@
     </dependencyManagement>
 
     <properties>
-        <wso2carbon.version.caching>${wso2carbon.version}</wso2carbon.version.caching>
+        <wso2carbon.platform.version.caching>${wso2carbon.platform.version}</wso2carbon.platform.version.caching>
         <apache.derby.version>10.3.2.1wso2v1</apache.derby.version>
         <hibernate.version>3.2.5.ga-wso2v1</hibernate.version>
         <bcel.version>5.2.0.wso2v1</bcel.version>

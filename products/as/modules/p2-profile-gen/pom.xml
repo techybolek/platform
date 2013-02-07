@@ -254,7 +254,7 @@
                                     org.wso2.carbon:org.wso2.carbon.event.ui.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.application.deployer.webapp.feature:${carbon.version}
+                                    org.wso2.carbon:org.wso2.carbon.application.deployer.webapp.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.load.balance.agent.server.feature:${stratos.version}
@@ -275,13 +275,13 @@
                                     org.wso2.carbon:org.wso2.carbon.jsservices.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.docrequestprocessor.server.feature:${carbon.version}
+                                    org.wso2.carbon:org.wso2.carbon.docrequestprocessor.server.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.gadgetrequestprocessor.server.feature:${carbon.version}
+                                    org.wso2.carbon:org.wso2.carbon.gadgetrequestprocessor.server.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.sourcerequestprocessor.server.feature:${carbon.version}
+                                    org.wso2.carbon:org.wso2.carbon.sourcerequestprocessor.server.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.jsscraper.feature:${carbon.platform.version}
@@ -290,7 +290,7 @@
                                     org.wso2.carbon:org.wso2.carbon.jsstubgenerator.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.application.deployer.mashup.feature:${carbon.version}
+                                    org.wso2.carbon:org.wso2.carbon.application.deployer.mashup.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.apache.synapse.wso2.feature:${synapse.version}
@@ -562,7 +562,7 @@
                                 <feature>
                                     <id>org.wso2.carbon.application.deployer.webapp.feature.group
                                     </id>
-                                    <version>${carbon.version}</version>
+                                    <version>${carbon.platform.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.load.balance.agent.server.feature.group</id>
@@ -589,19 +589,19 @@
                                 <feature>
                                     <id>org.wso2.carbon.docrequestprocessor.server.feature.group
                                     </id>
-                                    <version>${carbon.version}</version>
+                                    <version>${carbon.platform.version}</version>
                                 </feature>
                                 <feature>
                                     <id>
                                         org.wso2.carbon.gadgetrequestprocessor.server.feature.group
                                     </id>
-                                    <version>${carbon.version}</version>
+                                    <version>${carbon.platform.version}</version>
                                 </feature>
                                 <feature>
                                     <id>
                                         org.wso2.carbon.sourcerequestprocessor.server.feature.group
                                     </id>
-                                    <version>${carbon.version}</version>
+                                    <version>${carbon.platform.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.jsscraper.feature.group</id>
@@ -614,7 +614,7 @@
                                 <feature>
                                     <id>org.wso2.carbon.application.deployer.mashup.feature.group
                                     </id>
-                                    <version>${carbon.version}</version>
+                                    <version>${carbon.platform.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.apache.synapse.wso2.feature.group</id>

@@ -296,7 +296,7 @@
     </build>
    
     <properties>
-       <carbon.version>4.0.5</carbon.version>
+       <carbon.kernel.version>${carbon.platform.version}</carbon.kernel.version>
     </properties>
 
     <!--<reporting>-->
