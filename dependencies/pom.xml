@@ -36,6 +36,7 @@
 
             <modules>
 		<module>synapse/2.1.1-wso2v3</module>
+                <module>commons/charon/1.0.1-wso2v1</module>
 		<!-- orbit/modules -->
 	     </modules>
    <dependencyManagement>
