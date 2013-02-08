@@ -85,7 +85,7 @@
          <module>registry</module>
          <module>ws-discovery</module>
          <module>mashup</module>
-         <module>bam-data-publishers</module>
+         <!--module>bam-data-publishers</module-->
          <module>reporting</module>
          <module>priority-mediation</module>
          <module>multiple-instance</module>
@@ -93,8 +93,8 @@
          <module>mediators</module>
          <module>profile-management</module>
          <module>claim-management</module>
-         <module>humantask</module>
-         <module>bpel</module>
+         <!--module>humantask</module-->
+         <!--module>bpel</module-->
         <module>authenticators</module>
         <module>gadgets</module>
         <module>tryit</module>
@@ -127,27 +127,27 @@
         <module>ec2-client</module>
         <module>esb-mediation</module>
         <module>rss-manager</module>
-        <module>coordination</module>
+        <!--module>coordination</module-->
         <module>ntask</module>
         <module>transaction-manager</module>
-        <module>rest-api</module>
-        <module>apimgt</module>
+        <!--module>rest-api</module-->
+        <!--module>apimgt</module-->
 	    <module>andes</module>
 	    <module>data-agents</module>
-	    <module>bam2</module>
+	    <!--module>bam2</module-->
 	    <module>analytics</module>
 	    <module>gadget-ide</module>
 	    <module>attachment-mgt</module>
-        <module>autoscaler</module>
+        <!--module>autoscaler</module-->
         <!--module>autoscaler-service</module-->
-        <module>tenantaware-load-balancer</module>
+        <!--module>tenantaware-load-balancer</module-->
         <module>gadgetgen-wizard</module>
         <module>cassandra-explorer</module>
         <module>data-bridge</module>
 	    <module>ndatasource</module>
 	    <!--module>jaggery/0.9.0-ALPHA1</module-->
-	    <module>bam</module>
-	    <module>appfactory</module>
+	    <!--module>bam</module-->
+	    <!--module>appfactory</module-->
         <!-- Add new features above. You should also include your newly-added-feature/s in features/repository/pom.xml  -->
     </modules>
     <build>

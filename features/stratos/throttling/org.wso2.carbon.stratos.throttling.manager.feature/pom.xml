@@ -38,7 +38,7 @@
  	<dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.registry.common</artifactId>
-                <version>${wso2carbon.version}</version>
+                <version>${carbon.platform.version}</version>
         </dependency>
 	<dependency>
                 <groupId>org.wso2.carbon</groupId>
@@ -76,7 +76,7 @@
                             <bundles>
 								<bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.manager</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.ui:${stratos.version}</bundleDef>
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.stub:${wso2carbon.version}</bundleDef>
+								<bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.stub:${carbon.platform.version}</bundleDef>
                             </bundles>
                             <!--importFeatures>
                                 <importFeatureDef>org.wso2.carbon.stratos.common:${wso2carbon.version}</importFeatureDef>

@@ -28,7 +28,7 @@
 	<url>http://wso2.org</url>
 
 			<modules>
-				<module>token-based</module>
+				<!--module>token-based</module-->
 				<module>saml2-sso</module>
 			</modules>
 

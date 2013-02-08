@@ -71,7 +71,7 @@
 
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.server.feature:1.0.7</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.server.feature</includedFeatureDef>
                                 <!--<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.apimgt.ui.feature</includedFeatureDef>-->
                             </includedFeatures>
                         </configuration>

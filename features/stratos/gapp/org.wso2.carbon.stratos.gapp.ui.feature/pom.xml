@@ -41,12 +41,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.stratos.common.stub</artifactId>
-	    <version>${carbon.version}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.tenant.register.gapp.stub</artifactId>
-	    <version>${carbon.version}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
     </dependencies>
 

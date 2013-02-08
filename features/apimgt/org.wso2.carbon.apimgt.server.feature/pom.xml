@@ -216,12 +216,12 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.usage.publisher</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.usage.client</bundleDef>
 				                <bundleDef>org.wso2.carbon:org.wso2.carbon.apimgt.handlers.security.stub</bundleDef>
-				<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.user.registration.stub</bundleDef>
+				<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.user.registration.stub:${carbon.platform.version}</bundleDef>
                             </bundles>
                             <importBundles>
-                                  <importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.authentication</importBundleDef>
-                                  <importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.thrift.authentication</importBundleDef>
-                                  <importBundleDef>org.wso2.carbon:org.wso2.carbon.hostobjects.sso:1.0.1</importBundleDef>
+                                  <importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.authentication:${carbon.platform.version}</importBundleDef>
+                                  <importBundleDef>org.wso2.carbon:org.wso2.carbon.identity.thrift.authentication:${carbon.platform.version}</importBundleDef>
+                                  <importBundleDef>org.wso2.carbon:org.wso2.carbon.hostobjects.sso:${carbon.platform.version}</importBundleDef>
                                   <importBundleDef>libthrift.wso2:libthrift:0.8.0.wso2v1</importBundleDef>
                             </importBundles>
                             <importFeatures>

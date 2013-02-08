@@ -78,8 +78,8 @@
                             <bundles>
 			        <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.common</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard</bundleDef>
-								<bundleDef>org.json.wso2:json.wso2v1</bundleDef>
-								<bundleDef>com.google.guice.wso2:guice2.wso2v2</bundleDef>
+								<bundleDef>org.json.wso2:json:${version.json.wso2}</bundleDef>
+								<bundleDef>com.google.guice.wso2:guice2</bundleDef>
                                 <bundleDef>com.google.common.wso2:google-collect:1.0.0.wso2v2</bundleDef>
                             </bundles>
                             <importFeatures>

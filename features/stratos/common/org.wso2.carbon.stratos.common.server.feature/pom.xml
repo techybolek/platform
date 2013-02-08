@@ -47,10 +47,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.activation</artifactId>
+	    <version>${stratos.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.sample.installer</artifactId>
+	    <version>${stratos.version}</version>
         </dependency>
         <!--<dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -59,10 +61,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.tenant.dispatcher</artifactId>
+			<version>${stratos.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.redirector.servlet</artifactId>
+			<version>${stratos.version}</version>
         </dependency>
         <!--<dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -71,6 +75,7 @@
 		<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.throttling.agent.stub</artifactId>
+			<version>${carbon.version}</version>
         </dependency>
         <!--<dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -84,10 +89,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.task</artifactId>
+            <version>${carbon.platform.version}</version> 
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.application.upload</artifactId>
+            <version>${carbon.platform.version}</version> 
         </dependency>
         <dependency>
             <groupId>org.apache.synapse</groupId>
@@ -236,6 +243,9 @@
 	<synapse.patch.version.211-wso2v2>2.1.1-wso2v3</synapse.patch.version.211-wso2v2>
 	<json.patch.version.200-wso2v1>2.0.0.wso2v1</json.patch.version.200-wso2v1>
 	<kaptcha.patch.version.230-wso2v1>2.3.0.wso2v1</kaptcha.patch.version.230-wso2v1>
+	<carbon.version>4.1.0-SNAPSHOT</carbon.version>
+	<carbon.platform.version>4.1.0-SNAPSHOT</carbon.platform.version>
+	<stratos.version>2.1.0-SNAPSHOT</stratos.version>
      </properties>
 
 </project>

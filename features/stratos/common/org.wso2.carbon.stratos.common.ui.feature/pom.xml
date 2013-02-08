@@ -51,7 +51,7 @@
             <dependency>
             	<groupId>org.wso2.carbon</groupId>
             	<artifactId>org.wso2.carbon.tenant.mgt.stub</artifactId>
-          	 <version>4.1.0-SNAPSHOT</version>
+            	<version>${carbon.platform.version}</version>
             </dependency>
             <!--  Tenant Mgmt  -->
             <dependency>
@@ -61,10 +61,8 @@
             </dependency>
             <dependency>
             	<groupId>org.wso2.carbon</groupId>
-            	<artifactId>
-            		org.wso2.carbon.stratos.common.stub
-            	</artifactId>
-            	<version>${carbon.version}</version>
+            	<artifactId>org.wso2.carbon.stratos.common.stub</artifactId>
+            	<version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
             	<groupId>org.wso2.carbon</groupId>
@@ -74,7 +72,7 @@
             <dependency>
             	<groupId>org.wso2.carbon</groupId>
             	<artifactId>org.wso2.carbon.theme.mgt.stub</artifactId>
-            	<version>${carbon.version}</version>
+            	<version>${carbon.platform.version}</version>
             </dependency>
              
         </dependencies>
