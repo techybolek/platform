@@ -18,7 +18,7 @@ package org.wso2.carbon.messagebox.internal.builder;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.messagebox.MessageBoxConstants;
 import org.wso2.carbon.messagebox.internal.ds.MessageBoxServiceValueHolder;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -33,7 +33,7 @@ public class Axis2ConfigurationContextObserverImpl extends
         try {
             UserRegistry userRegistry =
                     MessageBoxServiceValueHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(
-                            SuperTenantCarbonContext.getCurrentContext(configurationContext).getTenantId());
+                            PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId());
             if (!userRegistry.resourceExists(MessageBoxConstants.MB_MESSAGE_BOX_STORAGE_PATH)) {
                 userRegistry.put(MessageBoxConstants.MB_MESSAGE_BOX_STORAGE_PATH,
                                  userRegistry.newCollection());

@@ -22,7 +22,7 @@ import org.apache.axis2.databinding.utils.ConverterUtil;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.services.util.CarbonAuthenticationUtil;
 import org.wso2.carbon.messagebox.MessageBoxConstants;
 import org.wso2.carbon.messagebox.MessageBoxService;
@@ -133,7 +133,7 @@ public class Utils {
         try {
             org.wso2.carbon.registry.api.Registry registry =
                     MessageBoxHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(
-                            SuperTenantCarbonContext.getCurrentContext(messageContext).getTenantId());
+                            PrivilegedCarbonContext.getCurrentContext(messageContext).getTenantId());
 
             String userName = getUserName(accessKeyId, messageContext);
             if (registry.resourceExists(RegistryConstants.PROFILES_PATH + userName)) {
@@ -156,7 +156,7 @@ public class Utils {
         try {
             org.wso2.carbon.registry.api.Registry registry =
                     MessageBoxHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(
-                            SuperTenantCarbonContext.getCurrentContext(messageContext).getTenantId());
+                            PrivilegedCarbonContext.getCurrentContext(messageContext).getTenantId());
 
             if (registry.resourceExists(MessageBoxConstants.REGISTRY_ACCESS_KEY_INDEX_PATH)) {
                 org.wso2.carbon.registry.api.Collection userCollection =
@@ -180,8 +180,8 @@ public class Utils {
             HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
 
             try {
-                SuperTenantCarbonContext carbonContext =
-                        SuperTenantCarbonContext.getCurrentContext(messageContext);
+                PrivilegedCarbonContext carbonContext =
+                        PrivilegedCarbonContext.getCurrentContext(messageContext);
                 CarbonAuthenticationUtil.onSuccessAdminLogin(httpServletRequest.getSession(),
                                                              accessKeyId,
                                                              carbonContext.getTenantId(),

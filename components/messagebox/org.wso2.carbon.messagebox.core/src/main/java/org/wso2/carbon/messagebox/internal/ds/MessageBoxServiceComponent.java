@@ -21,7 +21,7 @@ package org.wso2.carbon.messagebox.internal.ds;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.core.multitenancy.SuperTenantCarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.messagebox.MessageBoxConfigurationException;
 import org.wso2.carbon.messagebox.MessageBoxService;
 import org.wso2.carbon.messagebox.internal.builder.Axis2ConfigurationContextObserverImpl;
@@ -55,8 +55,8 @@ public class MessageBoxServiceComponent {
 
     protected void activate(ComponentContext context) {
         try {
-            SuperTenantCarbonContext.startTenantFlow();
-            SuperTenantCarbonContext.getCurrentContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getCurrentContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
             MessageBoxService messageBoxService = MessageBoxServiceBuilder.createMessageBoxService();
             context.getBundleContext().registerService(
                     MessageBoxService.class.getName(), messageBoxService, null);
