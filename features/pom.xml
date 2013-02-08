@@ -117,7 +117,7 @@
         <module>ldap-server</module>
         <module>broker</module>
         <module>broker-manager</module>
-        <module>cep</module>
+        <!--module>cep</module-->
         <module>cassandra</module>
         <module>stratos</module>
         <module>unified-endpoint</module>

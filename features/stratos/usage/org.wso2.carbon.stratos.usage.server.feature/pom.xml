@@ -64,7 +64,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-				<bundleDef>org.wso2.carbon:org.wso2.carbon.usage:2.0.5</bundleDef>
+				<bundleDef>org.wso2.carbon:org.wso2.carbon.usage</bundleDef>
                                 <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.usage.meteringqueryds.stub:${carbon.version}</bundleDef>-->
                             </bundles>
                             <!--importFeatures>

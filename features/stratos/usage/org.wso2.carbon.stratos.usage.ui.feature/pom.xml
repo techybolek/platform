@@ -69,7 +69,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-				<bundleDef>org.wso2.carbon:org.wso2.carbon.usage.ui:2.0.5</bundleDef>
+				<bundleDef>org.wso2.carbon:org.wso2.carbon.usage.ui</bundleDef>
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.usage.stub</bundleDef>
                             </bundles>
                             <!--importFeatures>

@@ -74,7 +74,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.manager:2.0.5</bundleDef>
+								<bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.manager</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.ui:${stratos.version}</bundleDef>
 								<bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.stub:${wso2carbon.version}</bundleDef>
                             </bundles>

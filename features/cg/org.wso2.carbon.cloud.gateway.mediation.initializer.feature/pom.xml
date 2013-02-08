@@ -60,7 +60,7 @@
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>
-                                    org.wso2.carbon:org.wso2.carbon.mediation.initializer.server.feature:4.0.0
+                                    org.wso2.carbon:org.wso2.carbon.mediation.initializer.server.feature
                                 </includedFeatureDef>
                             </includedFeatures>
                         </configuration>

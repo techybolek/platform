@@ -69,7 +69,7 @@
                                 <importFeatureDef>org.wso2.carbon.core:${wso2carbon.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.xkms.mgt.server.feature:4.0.0</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.xkms.mgt.server.feature</includedFeatureDef>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.xkms.mgt.ui.feature</includedFeatureDef>
                             </includedFeatures>
                         </configuration>

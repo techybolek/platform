@@ -67,7 +67,7 @@
                             <propertiesFile>../../../../etc/feature.properties</propertiesFile>
                             <includedFeatures>
                                 <includedFeatureDef>
-                                    org.wso2.carbon:org.wso2.carbon.jsstubgenerator.server.feature:4.0.0
+                                    org.wso2.carbon:org.wso2.carbon.jsstubgenerator.server.feature
                                 </includedFeatureDef>
                                 <includedFeatureDef>
                                     org.wso2.carbon:org.wso2.carbon.jsstubgenerator.ui.feature

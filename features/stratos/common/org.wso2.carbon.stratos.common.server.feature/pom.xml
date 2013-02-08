@@ -197,9 +197,9 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.activation:${stratos.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.sample.installer:${stratos.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.dispatcher</bundleDef>
-                                <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.agent:2.0.1</bundleDef>-->
+                                <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.agent</bundleDef>-->
 				<!--<bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.agent.stub</bundleDef>-->
-                                <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.usage.agent:2.0.1</bundleDef>-->
+                                <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.usage.agent</bundleDef>-->
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.stratos.landing.page.deployer</bundleDef>
                                 <bundleDef>org.quartz-scheduler.wso2:quartz</bundleDef>                               
                                 <!--<bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.activity</bundleDef>-->
@@ -233,7 +233,7 @@
     </build>
 
     <properties>
-	<synapse.patch.version.211-wso2v2>2.1.1-wso2v2</synapse.patch.version.211-wso2v2>
+	<synapse.patch.version.211-wso2v2>2.1.1-wso2v3</synapse.patch.version.211-wso2v2>
 	<json.patch.version.200-wso2v1>2.0.0.wso2v1</json.patch.version.200-wso2v1>
 	<kaptcha.patch.version.230-wso2v1>2.3.0.wso2v1</kaptcha.patch.version.230-wso2v1>
      </properties>

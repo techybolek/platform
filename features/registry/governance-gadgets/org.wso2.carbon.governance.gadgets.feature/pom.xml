@@ -87,8 +87,8 @@
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.impactanalysis.feature</includedFeatureDef>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.lifecycle.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.resourceimpact.feature:4.0.0</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.ui.feature:4.0.0</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.resourceimpact.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.governance.gadgets.ui.feature</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

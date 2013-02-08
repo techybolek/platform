@@ -65,7 +65,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.agent:2.0.5</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.agent</bundleDef>
 								<bundleDef>org.wso2.carbon:org.wso2.carbon.throttling.agent.stub</bundleDef>
                             </bundles>             
                         </configuration>

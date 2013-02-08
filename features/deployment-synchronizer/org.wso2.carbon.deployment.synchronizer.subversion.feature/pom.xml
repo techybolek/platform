@@ -74,7 +74,7 @@
 				<bundleDef>org.tigris:svn-client-adapter</bundleDef>
                             </bundles>
 			    <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.deployment.synchronizer.server:4.0.0</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.deployment.synchronizer.server</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

@@ -195,7 +195,7 @@
                                 <importBundleDef>org.apache.geronimo.components.wso2:geronimo-transaction</importBundleDef>
                                 <importBundleDef>org.apache.ws.commons.axiom.wso2:axiom</importBundleDef>
                                 <importBundleDef>hsqldb.wso2:hsqldb</importBundleDef>
-                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.bpel.common:4.0.0</importBundleDef>
+                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.bpel.common</importBundleDef>
                                 <importBundleDef>org.wso2.carbon:org.wso2.carbon.unifiedendpoint.core</importBundleDef>
                                 <importBundleDef>org.apache.ode.wso2:ode:1.3.5.wso2v7</importBundleDef>
                                 <importBundleDef>net.sf.saxon.wso2:saxon.he</importBundleDef>

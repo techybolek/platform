@@ -58,9 +58,9 @@
                                 </properties>
                             </adviceFile> 
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.transport.mgt:4.0.0</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.transport.jms:4.0.0</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.transport.mail:4.0.0</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.transport.mgt</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.transport.jms</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.transport.mail</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

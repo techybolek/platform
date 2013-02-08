@@ -59,12 +59,12 @@
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.bam.mediation.agent</importFeatureDef>
 				<importFeatureDef>org.wso2.carbon.mediator.bam</importFeatureDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.common:2.0.6</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.common</featureArtifactDef>
 				<featureArtifactDef>org.wso2.identity:org.wso2.identity.ui</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.stratos.identity.saml2.sso.mgt:2.0.6</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.usage.agent:2.0.5</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.throttling.agent:2.0.5</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.deployment:2.0.0</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.stratos.identity.saml2.sso.mgt</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.usage.agent</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.throttling.agent</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.deployment</featureArtifactDef>
 				<!--featureArtifactDef>org.wso2.carbon:org.wso2.carbon.load.balance.agent.server:${stratos.version}</featureArtifactDef-->
                             </importFeatures>
                         </configuration>

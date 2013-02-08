@@ -58,7 +58,7 @@
                                 </properties>
                             </adviceFile> 
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.servicehosting:4.0.0</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.servicehosting</importFeatureDef>
 				<importFeatureDef>org.wso2.carbon.service.mgt</importFeatureDef>
 				<importFeatureDef>org.wso2.carbon.dataservices</importFeatureDef>
 				<importFeatureDef>org.wso2.carbon.webapp.mgt</importFeatureDef>

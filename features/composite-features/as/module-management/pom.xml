@@ -58,8 +58,8 @@
                                 </properties>
                             </adviceFile> 
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.xfer:4.0.0</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.mex:4.0.0</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.xfer</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.mex</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

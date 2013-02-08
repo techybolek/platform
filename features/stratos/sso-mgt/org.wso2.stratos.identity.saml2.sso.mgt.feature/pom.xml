@@ -65,8 +65,8 @@
 							<id>org.wso2.stratos.identity.saml2.sso.mgt</id>
 							<propertiesFile>../../../feature.properties</propertiesFile>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.stratos.identity.saml2.sso.mgt.server.feature:2.0.0</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.stratos.identity.saml2.sso.mgt.ui.feature:2.0.6</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.stratos.identity.saml2.sso.mgt.server.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.stratos.identity.saml2.sso.mgt.ui.feature</includedFeatureDef>
                             </includedFeatures>
 						</configuration>
 					</execution>

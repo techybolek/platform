@@ -77,9 +77,9 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.unifiedendpoint.ui:4.0.0</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.unifiedendpoint.ui</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.unifiedendpoint.core</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.unifiedendpoint.stub:4.0.0</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.unifiedendpoint.stub</bundleDef>
                             </bundles>
                             <!--<importFeatures>
                                 <importFeatureDef>org.wso2.carbon.mediation.initializer.ui:${mediation.initializer.feature.version}</importFeatureDef>

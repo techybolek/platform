@@ -75,7 +75,7 @@
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.caching.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.caching.ui.feature:4.0.0</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.caching.ui.feature</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

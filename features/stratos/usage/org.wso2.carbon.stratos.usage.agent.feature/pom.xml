@@ -65,7 +65,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.usage.agent:2.0.5</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.usage.agent</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

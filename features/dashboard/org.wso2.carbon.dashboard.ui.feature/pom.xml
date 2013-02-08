@@ -119,7 +119,7 @@
                                 <bundleDef>jdom.wso2:jdom</bundleDef>
                                 <bundleDef>rhino.wso2:js</bundleDef>
                                 <bundleDef>com.google.common.wso2:google-collect:1.0.0.wso2v2</bundleDef>
-                                <bundleDef>com.google.guice.wso2:guice2:2.0.0.wso2v2</bundleDef>
+                                <bundleDef>com.google.guice.wso2:guice2.wso2v2</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>

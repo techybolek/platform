@@ -73,8 +73,8 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.mgt.core:2.0.0</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.mgt:2.0.2</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.mgt.core</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.tenant.mgt</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.email.verification</bundleDef>
                             </bundles>
                             <importFeatures>

@@ -58,20 +58,20 @@
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.logging.mgt.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.databridge.datapublisher.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.system.statistics.feature</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.soaptracer.feature:4.0.0</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.soaptracer.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.security.mgt.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.xkms.mgt.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.sts.feature</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.xfer.feature:4.0.0</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.mex.feature:4.0.0</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.xfer.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.mex.feature</featureArtifactDef>
 
 				<!-- Registry related features -->
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.core.common.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.core.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.core.ui.feature</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.ui.menu.feature:4.0.0</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.resource.properties.feature:4.0.0</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.profiles.feature:4.0.0</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.ui.menu.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.resource.properties.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.profiles.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.contentsearch.feature</featureArtifactDef>
 
 				<!-- Directory server related features -->
@@ -89,8 +89,8 @@
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.sso.saml.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.um.ws.service.feature</featureArtifactDef>
-				<featureArtifactDef>org.wso2.identity:org.wso2.identity.styles.feature:4.0.0</featureArtifactDef>
-				<featureArtifactDef>org.wso2.identity:org.wso2.identity.utils.feature:4.0.0</featureArtifactDef>
+				<featureArtifactDef>org.wso2.identity:org.wso2.identity.styles.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.identity:org.wso2.identity.utils.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.oauth.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.iwa.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.sts.passive.feature</featureArtifactDef>
@@ -99,12 +99,12 @@
 				<!-- featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.mgt.feature</featureArtifactDef -->
 				
 				<!-- Features related to Cloud Identity -->
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.common.feature:2.0.6</featureArtifactDef>
-				<featureArtifactDef>org.wso2.identity:org.wso2.identity.ui.feature:4.0.0</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.stratos.identity.saml2.sso.mgt.feature:2.0.6</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.usage.agent.feature:2.0.5</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.throttling.agent.feature:2.0.5</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.deployment.feature:2.0.0</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.common.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.identity:org.wso2.identity.ui.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.stratos.identity.saml2.sso.mgt.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.usage.agent.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.throttling.agent.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.deployment.feature</featureArtifactDef>
 				<!--featureArtifactDef>org.wso2.carbon:org.wso2.carbon.load.balance.agent.server.feature:${stratos.version}</featureArtifactDef-->
                                 
 				<!-- IS specific composite features -->

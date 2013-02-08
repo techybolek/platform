@@ -88,7 +88,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.registry.extensions</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.registry.extensions:4.0.8</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.governance.registry.extensions</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>org.wso2.wsdl.validator.wso2:wsdl-validator</importBundleDef>

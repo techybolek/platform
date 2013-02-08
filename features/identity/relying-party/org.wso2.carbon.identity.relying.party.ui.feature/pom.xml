@@ -110,8 +110,8 @@
                                                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.relyingparty.ui</bundleDef>
                                                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.provider.openid.ui</bundleDef>
                                                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.provider.openid</bundleDef>
-                                                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.relyingparty.stub:4.0.0</bundleDef>
-                                                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.provider.openid.stub:4.0.0</bundleDef>
+                                                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.relyingparty.stub</bundleDef>
+                                                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.provider.openid.stub</bundleDef>
                                                         </bundles>
                                                         <importBundles>
                                                                 <importBundleDef>com.google.step2.wso2:step2</importBundleDef>

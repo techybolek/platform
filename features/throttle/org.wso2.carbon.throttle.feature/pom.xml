@@ -74,7 +74,7 @@
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.throttle.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.throttle.ui.feature:4.0.0</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.throttle.ui.feature</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

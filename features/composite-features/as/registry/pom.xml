@@ -59,8 +59,8 @@
                             </adviceFile> 
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.registry.core</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.registry.ui.menu:4.0.0</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.registry.resource.properties:4.0.0</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.registry.ui.menu</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.registry.resource.properties</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>
