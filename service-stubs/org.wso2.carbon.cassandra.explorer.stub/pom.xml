@@ -115,10 +115,9 @@
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2</artifactId>
+	    <version>${orbit.version.axis2}</version>
         </dependency>
     </dependencies>
 <properties>
-	<orbit.version.axiom>1.2.11.wso2v3</orbit.version.axiom>
-	<orbit.version.axis2>1.6.1.wso2v6</orbit.version.axis2>
 </properties>
 </project>

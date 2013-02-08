@@ -49,8 +49,8 @@
                             <tasks>
                                 <path id="wsdl2java.classpath">
 			 <pathelement location="${settings.localRepository}/org/apache/ws/commons/axiom/wso2/axiom/${orbit.version.axiom}/axiom-${orbit.version.axiom}.jar"/>
-                                    <pathelement location="${settings.localRepository}/org/apache/axis2/wso2/axis2-client/1.6.1.wso2v6/axis2-client-1.6.1.wso2v6.jar"/>
-                                    <pathelement location="${settings.localRepository}/org/apache/axis2/wso2/axis2/1.6.1.wso2v6/axis2-1.6.1.wso2v6.jar"/>
+                                    <pathelement location="${settings.localRepository}/org/apache/axis2/wso2/axis2-client/${orbit.version.axis2}/axis2-client-${orbit.version.axis2}.jar"/>
+                                    <pathelement location="${settings.localRepository}/org/apache/axis2/wso2/axis2/${orbit.version.axis2}/axis2-${orbit.version.axis2}.jar"/>
                                     <pathelement location="${settings.localRepository}/org/apache/ws/commons/axiom/wso2/axiom/${orbit.version.axiom}/axiom-${orbit.version.axiom}.jar"/>
                                 </path>
 				<java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
@@ -119,7 +119,7 @@ org.wso2.carbon.captcha.mgt.*;version="${carbon.platform.package.export.version}
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2-client</artifactId>
-            <version>1.6.1.wso2v6</version>
+            <version>${orbit.version.axis2}</version>
         </dependency>
     </dependencies>
 
