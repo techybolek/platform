@@ -48,7 +48,7 @@
                  <module>application-deployers</module>
                  <module>bam</module>
                  <!--module>bam-data-publishers</module-->
-                 <!--module>business-processes</module-->
+                 <module>business-processes</module>
                  <module>business-messaging</module>
                  <module>caching</module>
                  <module>captcha-mgt</module>

@@ -38,6 +38,7 @@
                 <module>org.wso2.carbon.governance.registry.extensions</module>
                 <module>org.wso2.carbon.governance.custom.lifecycles.checklist</module>
                 <module>org.wso2.carbon.governance.custom.lifecycles.checklist.ui</module>
+                <module>org.wso2.carbon.governance.custom.lifecycles.history.ui</module>
                 <module>org.wso2.carbon.governance.wsdltool</module>
                 <module>org.wso2.carbon.governance.wsdltool.ui</module>
                 <module>org.wso2.carbon.governance.services.ui</module>
@@ -52,7 +53,7 @@
                 <module>org.wso2.carbon.governance.lcm</module>
                 <module>org.wso2.carbon.governance.lcm.ui</module>
                 <module>org.wso2.carbon.governance.services</module>
-                <!--module>org.wso2.carbon.governance.dashboardpopulator</module-->
+                <module>org.wso2.carbon.governance.dashboardpopulator</module>
                 <module>org.wso2.carbon.governance.registry.eventing</module>
                 <module>org.wso2.carbon.governance.list</module>
                 <module>org.wso2.carbon.governance.list.ui</module>

@@ -597,6 +597,7 @@
 
     <properties>
         <stratos.version>2.1.0-SNAPSHOT</stratos.version>
+        <carbon.platform.version>4.1.0-SNAPSHOT</carbon.platform.version>
     </properties>
 
 </project>
