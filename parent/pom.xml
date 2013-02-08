@@ -294,7 +294,8 @@
         <version.apacheds.shared.ldap>0.9.18</version.apacheds.shared.ldap>
 
         <atomikos.version>3.7.0</atomikos.version>
-
+        <!--json wso2-->
+        <version.json.wso2>2.0.0.wso2v1</version.json.wso2>
         <!-- hibernate -->
         <hibernate.orbit.version>3.2.5.ga-wso2v1</hibernate.orbit.version>
 
@@ -365,7 +366,7 @@
 	
 	<!-- XML Schema -->
 	<orbit.version.xmlschema>1.4.7.wso2v2</orbit.version.xmlschema>
-
+        <version.commons.codec>1.4.0.wso2v1</version.commons.codec>
 	<!-- Batik -->
 	<batik.wso2.version>1.7.0.wso2v1</batik.wso2.version>
 
