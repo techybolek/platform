@@ -111,7 +111,7 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.qpid.stub</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:</importFeatureDef>			
+                                <importFeatureDef>org.wso2.carbon.core.server</importFeatureDef>			
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.event.common.feature:${wso2carbon.version}</includedFeatureDef>

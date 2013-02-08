@@ -80,8 +80,8 @@
                             </adviceFile>
                             <bundles>
 								<bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.mgt.gadgetrepo.common</bundleDef>
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.common:</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.mgt.gadgetrepo.ui:</bundleDef>
+								<bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.common</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.mgt.gadgetrepo.ui</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.mgt.gadgetrepo.stub</bundleDef>
                             </bundles>
                             <importFeatures>

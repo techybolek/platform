@@ -71,9 +71,9 @@
 							<id>org.wso2.carbon.identity.scim</id>
 							<propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <includedFeatures>
-				<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.scim.common.feature:</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.scim.provider.feature:</includedFeatureDef>
-				<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.scim.ui.feature:</includedFeatureDef>
+				<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.scim.common.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.scim.provider.feature</includedFeatureDef>
+				<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.scim.ui.feature</includedFeatureDef>
                             </includedFeatures>
 						</configuration>
 					</execution>

@@ -184,9 +184,9 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cassandra.explorer.mgt:</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.cassandra.explorer.mgt</bundleDef>
                                 <bundleDef>org.apache.cassandra.wso2:apache-cassandra</bundleDef>
-                                <bundleDef>libthrift.wso2:libthrift:</bundleDef>
+                                <bundleDef>libthrift.wso2:libthrift</bundleDef>
                                 <bundleDef>org.perf4j.wso2:perf4j</bundleDef>
                                 <bundleDef>org.cliffc.high_scale_lib.wso2:high-scale-lib</bundleDef>
                                 <bundleDef>org.slf4j:slf4j-api</bundleDef>

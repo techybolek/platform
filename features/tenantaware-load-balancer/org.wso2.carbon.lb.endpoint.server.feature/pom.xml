@@ -77,7 +77,7 @@
                                 <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
                                 <importFeatureDef>org.apache.synapse.wso2:${synapse.version}</importFeatureDef>
                                 <!--importFeatureDef>org.wso2.carbon.mediation.initializer.server:${mediation.initializer.feature.version}</importFeatureDef-->
-                                <importFeatureDef>org.wso2.carbon.lb.common:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.lb.common</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

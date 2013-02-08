@@ -70,7 +70,7 @@
                             </adviceFile>
                             <bundles>
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.usage.ui:2.0.5</bundleDef>
-				<bundleDef>org.wso2.carbon:org.wso2.carbon.usage.stub:</bundleDef>
+				<bundleDef>org.wso2.carbon:org.wso2.carbon.usage.stub</bundleDef>
                             </bundles>
                             <!--importFeatures>
                                 <importFeatureDef>org.wso2.carbon.stratos.common:${wso2carbon.version}</importFeatureDef>

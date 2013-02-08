@@ -57,13 +57,13 @@
                                 </properties>
                             </adviceFile> 
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.sequences:</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.proxyadmin:</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.mediators:</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.endpoint:</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.mediation.configadmin:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.sequences</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.proxyadmin</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.mediators</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.endpoint</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.mediation.configadmin</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.message.flows:4.0.0</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.mediation.templates:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.mediation.templates</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

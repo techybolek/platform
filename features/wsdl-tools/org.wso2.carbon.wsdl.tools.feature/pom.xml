@@ -70,7 +70,7 @@
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.wsdl.tools.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.wsdl.tools.ui.feature:</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.wsdl.tools.ui.feature</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

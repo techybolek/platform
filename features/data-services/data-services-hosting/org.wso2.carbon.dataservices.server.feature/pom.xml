@@ -168,8 +168,8 @@
 				<importFeatures>
                                 <importFeatureDef>org.wso2.carbon.service.mgt.server
                                 </importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.event.server:</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.transaction.manager:</importFeatureDef>   
+                                <importFeatureDef>org.wso2.carbon.event.server</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.transaction.manager</importFeatureDef>   
                        </importFeatures>
                         </configuration>
                     </execution>

@@ -66,11 +66,11 @@
                             <id>org.wso2.carbon.event</id>
                             <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.event.server.feature:</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.event.ui.feature:</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.event.server.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.event.ui.feature</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

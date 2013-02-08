@@ -68,7 +68,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.xkms.mgt.ui:</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.xkms.mgt.ui</bundleDef>
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.xkms.mgt.stub</bundleDef>
                             </bundles>
                             <importFeatures>

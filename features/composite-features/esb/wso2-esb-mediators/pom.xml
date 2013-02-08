@@ -58,10 +58,10 @@
                             </adviceFile> 
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.smooks:4.0.0</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.transaction.manager:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.transaction.manager</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.rule.mediation:4.0.0</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.oauth.mediator:</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.xacml.mediator:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.oauth.mediator</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.xacml.mediator</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

@@ -65,7 +65,7 @@
 							<id>org.wso2.carbon.identity.authenticator.token</id>
 							<propertiesFile>../../../../etc/feature.properties</propertiesFile>
 							 <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.token.server.feature:</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.token.server.feature</includedFeatureDef>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.token.ui.feature:4.0.0</includedFeatureDef>
                             </includedFeatures>
 						</configuration>

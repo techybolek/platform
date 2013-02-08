@@ -83,8 +83,8 @@
 								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.entitlement.stub</bundleDef>
 							</bundles>
 							<importFeatures>
-								<importFeatureDef>org.wso2.carbon.core.ui:</importFeatureDef>
-								<importFeatureDef>org.wso2.carbon.claim.mgt.ui:</importFeatureDef>	
+								<importFeatureDef>org.wso2.carbon.core.ui</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.claim.mgt.ui</importFeatureDef>	
 							</importFeatures>
 						</configuration>
 					</execution>

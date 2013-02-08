@@ -55,48 +55,48 @@
                             <publishArtifactRepository>true</publishArtifactRepository>
                             <featureArtifacts>
 
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.logging.mgt.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.databridge.datapublisher.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.system.statistics.feature:</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.logging.mgt.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.databridge.datapublisher.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.system.statistics.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.soaptracer.feature:4.0.0</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.security.mgt.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.xkms.mgt.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.sts.feature:</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.security.mgt.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.xkms.mgt.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.sts.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.xfer.feature:4.0.0</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.mex.feature:4.0.0</featureArtifactDef>
 
 				<!-- Registry related features -->
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.core.common.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.core.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.core.ui.feature:</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.core.common.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.core.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.core.ui.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.ui.menu.feature:4.0.0</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.resource.properties.feature:4.0.0</featureArtifactDef>
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.profiles.feature:4.0.0</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.contentsearch.feature:</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.registry.contentsearch.feature</featureArtifactDef>
 
 				<!-- Directory server related features -->
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.directory.service.mgr.feature:</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.directory.service.mgr.feature</featureArtifactDef>
 
 				<!-- Identity related features -->
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.core.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.provider.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.relying.party.feature:</featureArtifactDef>
-				<!--featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.mgt.feature:</featureArtifactDef-->
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.self.registration.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.user.profile.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.xacml.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.claim.mgt.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.sso.saml.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.um.ws.service.feature:</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.core.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.provider.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.relying.party.feature</featureArtifactDef>
+				<!--featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.mgt.feature</featureArtifactDef-->
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.self.registration.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.user.profile.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.xacml.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.claim.mgt.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.sso.saml.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.um.ws.service.feature</featureArtifactDef>
 				<featureArtifactDef>org.wso2.identity:org.wso2.identity.styles.feature:4.0.0</featureArtifactDef>
 				<featureArtifactDef>org.wso2.identity:org.wso2.identity.utils.feature:4.0.0</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.oauth.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.iwa.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.sts.passive.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.ldap.server.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.scim.feature:</featureArtifactDef>
-				<!-- featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.mgt.feature:</featureArtifactDef -->
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.oauth.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.iwa.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.sts.passive.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.ldap.server.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.scim.feature</featureArtifactDef>
+				<!-- featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.mgt.feature</featureArtifactDef -->
 				
 				<!-- Features related to Cloud Identity -->
 				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.common.feature:2.0.6</featureArtifactDef>
@@ -108,23 +108,23 @@
 				<!--featureArtifactDef>org.wso2.carbon:org.wso2.carbon.load.balance.agent.server.feature:${stratos.version}</featureArtifactDef-->
                                 
 				<!-- IS specific composite features -->
-				<featureArtifactDef>org.wso2.is:org.wso2.is.authenticators.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.claim.mgt.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.cloud.identity.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.directory.server.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.identity.core.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.identity.mgt.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.identity.provider.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.mandatory.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.oauth.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.passive.sts.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.registry.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.remote.usermgt.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.scim.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.self.registration.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.sso.saml.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.user.profiles.feature:</featureArtifactDef>
-				<featureArtifactDef>org.wso2.is:org.wso2.is.xacml.feature:</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.authenticators.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.claim.mgt.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.cloud.identity.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.directory.server.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.identity.core.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.identity.mgt.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.identity.provider.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.mandatory.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.oauth.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.passive.sts.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.registry.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.remote.usermgt.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.scim.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.self.registration.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.sso.saml.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.user.profiles.feature</featureArtifactDef>
+				<featureArtifactDef>org.wso2.is:org.wso2.is.xacml.feature</featureArtifactDef>
                             </featureArtifacts>
 
                             <categories>

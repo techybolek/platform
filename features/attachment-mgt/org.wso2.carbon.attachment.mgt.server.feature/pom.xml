@@ -158,7 +158,7 @@
 							</bundles>
 
 							<importFeatures>
-								<importFeatureDef>org.wso2.carbon.core.server:</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.core.server</importFeatureDef>
 							</importFeatures>
 						</configuration>
 					</execution>

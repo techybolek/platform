@@ -58,7 +58,7 @@
                             </adviceFile> 
                             <importFeatures>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.directory.service.mgr.feature:${carbon.platform.version}</featureArtifactDef>
-				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.ldap.server:</featureArtifactDef>
+				<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.ldap.server</featureArtifactDef>
                             </importFeatures>
                         </configuration>
                     </execution>

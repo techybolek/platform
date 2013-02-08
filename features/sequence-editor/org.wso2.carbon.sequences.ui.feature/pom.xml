@@ -77,7 +77,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.sequences.ui:</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.sequences.ui</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.sequences.common</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.service</bundleDef>
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.sequences.stub</bundleDef>

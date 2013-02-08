@@ -69,8 +69,8 @@
                                 <importFeatureDef>org.wso2.carbon.identity.core:${project.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.self.registration.server.feature:</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.self.registration.ui.feature:</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.self.registration.server.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.self.registration.ui.feature</includedFeatureDef>
                             </includedFeatures>
 						</configuration>
 					</execution>

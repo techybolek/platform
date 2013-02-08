@@ -57,13 +57,13 @@
                                 </properties>
                             </adviceFile> 
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.core.common:</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.core:</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.core.ui:</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.ui.menu:</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.resource.properties:</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.profiles:</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.contentsearch:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.core.common</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.core</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.core.ui</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.ui.menu</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.resource.properties</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.profiles</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.contentsearch</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

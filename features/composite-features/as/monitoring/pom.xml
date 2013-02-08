@@ -58,10 +58,10 @@
                                 </properties>
                             </adviceFile> 
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.logging.mgt:</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.system.statistics:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.logging.mgt</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.system.statistics</importFeatureDef>
 				<importFeatureDef>org.wso2.carbon.soaptracer:4.0.0</importFeatureDef>
-				<importFeatureDef>org.wso2.appserver.data.publisher:</importFeatureDef>
+				<importFeatureDef>org.wso2.appserver.data.publisher</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

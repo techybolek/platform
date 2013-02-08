@@ -64,8 +64,8 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-				<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.scim.ui:</bundleDef>
-				<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.scim.common.stub:</bundleDef>
+				<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.scim.ui</bundleDef>
+				<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.scim.common.stub</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

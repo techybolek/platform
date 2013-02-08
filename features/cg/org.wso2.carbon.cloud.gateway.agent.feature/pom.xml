@@ -71,8 +71,8 @@
                                 </importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cloud.gateway.agent.server.feature:</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cloud.gateway.agent.ui.feature:</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cloud.gateway.agent.server.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.cloud.gateway.agent.ui.feature</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

@@ -57,13 +57,13 @@
                                 </properties>
                             </adviceFile> 
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.mediation.library:</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.rest.api:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.mediation.library</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.rest.api</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.priority:4.0.0</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.localentry:</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.mediation.templates:</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.message.store:</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.message.processor:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.localentry</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.mediation.templates</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.message.store</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.message.processor</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.task:4.0.0</importFeatureDef>
                                 <importFeatureDef>org.wso2.esb.samples:4.6.0</importFeatureDef>
                             </importFeatures>

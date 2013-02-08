@@ -76,7 +76,7 @@
                             </adviceFile>
                             <bundles>
                             	<bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.mgt.oauth.stub</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.common:</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.common</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.mgt.oauth.ui</bundleDef>
                             </bundles>
                             <importFeatures>

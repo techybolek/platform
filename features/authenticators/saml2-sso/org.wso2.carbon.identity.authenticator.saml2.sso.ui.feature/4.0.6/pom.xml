@@ -86,11 +86,11 @@
 								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.ui</bundleDef>
 								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.stub</bundleDef>
 								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.common</bundleDef>	
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.sso.saml.stub:</bundleDef>
+								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.sso.saml.stub</bundleDef>
                                 				<bundleDef>opensaml.wso2:opensaml2</bundleDef>
 							</bundles>
 							<importFeatures>
-								<importFeatureDef>org.wso2.carbon.core.ui:</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.core.ui</importFeatureDef>
 							</importFeatures>
 						</configuration>
 					</execution>

@@ -57,7 +57,7 @@
                                 </properties>
                             </adviceFile> 
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.relying.party:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.relying.party</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

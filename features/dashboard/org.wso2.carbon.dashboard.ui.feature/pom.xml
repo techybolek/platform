@@ -113,7 +113,7 @@
                             	<bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.stub</bundleDef>
                             	<!--bundleDef>org.wso2.carbon:org.wso2.carbon.registry.core</bundleDef-->
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.common</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.ui:</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.dashboard.ui</bundleDef>
                                 <bundleDef>org.apache.shindig.wso2:shindig</bundleDef>
                                 <bundleDef>joda-time.wso2:joda-time</bundleDef>
                                 <bundleDef>jdom.wso2:jdom</bundleDef>

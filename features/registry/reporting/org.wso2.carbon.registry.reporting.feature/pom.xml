@@ -73,7 +73,7 @@
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.reporting.server.feature</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.reporting.ui.feature:</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.registry.reporting.ui.feature</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

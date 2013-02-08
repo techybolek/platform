@@ -57,8 +57,8 @@
                                 </properties>
                             </adviceFile> 
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso:</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.iwa:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.authenticator.iwa</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

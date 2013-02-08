@@ -96,11 +96,11 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.sso.saml:</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.identity.sso.saml</bundleDef>
                                 <bundleDef>opensaml.wso2:opensaml2</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.identity.core.server:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.core.server</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

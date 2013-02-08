@@ -62,12 +62,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
 							<id>org.wso2.carbon.identity.provider</id>
 							<propertiesFile>../../../etc/feature.properties</propertiesFile>
 							<importFeatures>
-								<importFeatureDef>org.wso2.carbon.identity.core:</importFeatureDef>
-								<importFeatureDef>org.wso2.carbon.identity.relying.party:</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.identity.core</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.identity.relying.party</importFeatureDef>
 							</importFeatures>
 							<includedFeatures>
-								<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.provider.server.feature:</includedFeatureDef>
-								<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.provider.ui.feature:</includedFeatureDef>
+								<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.provider.server.feature</includedFeatureDef>
+								<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.provider.ui.feature</includedFeatureDef>
 							</includedFeatures>
 						</configuration>
 					</execution>

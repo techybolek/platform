@@ -59,13 +59,13 @@
                             </adviceFile> 
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.servicehosting:4.0.0</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.service.mgt:</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.dataservices:</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.webapp.mgt:</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.jaxws.webapp.mgt:</importFeatureDef>
-				<importFeatureDef>org.wso2.appserver.mashup:</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.service.mgt</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.dataservices</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.webapp.mgt</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.jaxws.webapp.mgt</importFeatureDef>
+				<importFeatureDef>org.wso2.appserver.mashup</importFeatureDef>
 				<importFeatureDef>org.jaggeryjs:0.9.0.ALPHA2-wso2v2</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.identity.xacml.filter:</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.identity.xacml.filter</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

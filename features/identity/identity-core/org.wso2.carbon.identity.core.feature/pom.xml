@@ -70,11 +70,11 @@
                                 </properties>
                             </adviceFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.core.server.feature:</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.core.ui.feature:</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.core.server.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.identity.core.ui.feature</includedFeatureDef>
                             </includedFeatures>
 						</configuration>
 					</execution>

@@ -74,7 +74,7 @@
                             <bundles>
                                  <bundleDef>com.google.guava.wso2:guava</bundleDef>
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.registry.social.api</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.registry.social.impl:</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.registry.social.impl</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

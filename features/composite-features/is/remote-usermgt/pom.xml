@@ -57,7 +57,7 @@
                                 </properties>
                             </adviceFile> 
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon:org.wso2.carbon.um.ws.service:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon:org.wso2.carbon.um.ws.service</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

@@ -382,7 +382,7 @@
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.bean.ui
                                 </bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.fastXSLT.ui:</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.fastXSLT.ui</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>

@@ -75,7 +75,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.library</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.library.connectors.core:</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.library.connectors.core</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.apache.synapse.wso2:${synapse.patch.release.version}</importFeatureDef>

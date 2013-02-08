@@ -83,8 +83,8 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.jaxws.webapp.mgt:</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.jaxws.webapp.deployer:</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.jaxws.webapp.mgt</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.jaxws.webapp.deployer</bundleDef>
                                 <bundleDef>org.apache.cxf.wso2:cxf-bundle</bundleDef>
                                 <bundleDef>javax.ws.rs:jsr311-api</bundleDef>
                                 <bundleDef>org.springframework.ws.wso2:spring.framework</bundleDef>

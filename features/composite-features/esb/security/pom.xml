@@ -57,8 +57,8 @@
                                 </properties>
                             </adviceFile> 
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.security.mgt:</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.sts:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.security.mgt</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.sts</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

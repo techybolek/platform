@@ -100,7 +100,7 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.router.impl</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.fastXSLT</bundleDef>
                                 <!--bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.autoscale</bundleDef-->
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.event:</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mediator.event</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>org.wso2.carbon:org.wso2.carbon.ec2-client</importBundleDef>

@@ -57,7 +57,7 @@
                                 </properties>
                             </adviceFile>
 							<bundles>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mashup.javascript-scraper.ui:</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.carbon.mashup.javascript-scraper.ui</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

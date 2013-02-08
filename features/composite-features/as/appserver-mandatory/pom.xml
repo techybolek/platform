@@ -57,15 +57,15 @@
                                 </properties>
                             </adviceFile> 
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.application.mgt:</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.application.mgt.webapp:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.application.mgt</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.application.mgt.webapp</importFeatureDef>
 				<importFeatureDef>org.wso2.appserver.utils:5.0.1</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.repomanager.axis2:</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.coordination.core:</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.transaction.manager:</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.ndatasource:</importFeatureDef>
-				<importFeatureDef>org.wso2.appserver.module.mgt:</importFeatureDef>
-				<importFeatureDef>org.wso2.appserver.registry:</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.repomanager.axis2</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.coordination.core</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.transaction.manager</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.ndatasource</importFeatureDef>
+				<importFeatureDef>org.wso2.appserver.module.mgt</importFeatureDef>
+				<importFeatureDef>org.wso2.appserver.registry</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

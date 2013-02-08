@@ -72,7 +72,7 @@
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.discovery.module</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.discovery.core:</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.discovery.core</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

@@ -69,8 +69,8 @@
                                 <importFeatureDef>org.wso2.carbon.sequences:${sequence.feature.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.mediators.server.feature:</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.mediators.ui.feature:</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.mediators.server.feature</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.mediators.ui.feature</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

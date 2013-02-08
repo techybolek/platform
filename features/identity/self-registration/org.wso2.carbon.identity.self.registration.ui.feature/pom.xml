@@ -70,11 +70,11 @@
                                 </properties>
                             </adviceFile>
 							<bundles>
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.user.registration.ui:</bundleDef>
+								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.user.registration.ui</bundleDef>
 								<bundleDef>org.wso2.carbon:org.wso2.carbon.identity.user.registration.stub:4.0.0</bundleDef>
 							</bundles>
 							<importFeatures>
-								<importFeatureDef>org.wso2.carbon.identity.core.ui:</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.identity.core.ui</importFeatureDef>
 							</importFeatures>
 						</configuration>
 					</execution>

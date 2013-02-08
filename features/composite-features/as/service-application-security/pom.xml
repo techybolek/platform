@@ -58,7 +58,7 @@
                                 </properties>
                             </adviceFile> 
                             <importFeatures>
-				<importFeatureDef>org.wso2.carbon.identity.xacml.filter:</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.identity.xacml.filter</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>
