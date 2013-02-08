@@ -372,5 +372,6 @@
 
 	<!-- Kapcha -->
 	<kaptcha.wso2.version>2.3.0.wso2v1</kaptcha.wso2.version>
+	<commons.lang.version>2.6.0.wso2v1</commons.lang.version>
     </properties>
 </project>
