@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 
 public class QueryStringParser {
 
-    public static Map<String, String> parseQueryString(HttpServletRequest request) {
+    public static Map<String, String[]> parseQueryString(HttpServletRequest request) {
         return request.getParameterMap();
     }
 }
