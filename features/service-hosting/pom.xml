@@ -33,7 +33,7 @@
 
             <modules>
                 <module>aar-services</module>
-                <module>ejb-services</module>
+                <!--module>ejb-services</module-->
                 <module>jar-services</module>
                 <module>jaxws-services</module>
                 <module>spring-services</module>
