@@ -69,7 +69,7 @@ public class ThemeMgtService extends AbstractAdmin {
         if (registry == null) {
             registry = ThemeUtil.getThemeRegistryFromTenantPass(tenantPass);
         }
-        AddResourceUtil.addResource(path, mediaType, description, content, symlinkLocation, registry);
+        AddResourceUtil.addResource(path, mediaType, description, content, symlinkLocation, registry,new String[0][0]);
     }
 
     public void importResource(
@@ -86,7 +86,7 @@ public class ThemeMgtService extends AbstractAdmin {
             registry = ThemeUtil.getThemeRegistryFromTenantPass(tenantPass);
         }
         ImportResourceUtil.importResource(parentPath, resourceName, mediaType, description, fetchURL,
-                        symlinkLocation, registry);
+                        symlinkLocation, registry,new String[0][0]);
     }
 
     public void addTextResource(
