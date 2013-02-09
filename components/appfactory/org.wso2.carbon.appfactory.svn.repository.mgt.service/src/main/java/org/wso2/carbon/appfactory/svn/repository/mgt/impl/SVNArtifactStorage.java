@@ -17,8 +17,10 @@
 package org.wso2.carbon.appfactory.svn.repository.mgt.impl;
 
 
+import org.wso2.carbon.appfactory.common.AppFactoryException;
 import org.wso2.carbon.appfactory.core.ArtifactStorage;
 
+import javax.activation.DataHandler;
 import java.io.File;
 
 public class SVNArtifactStorage implements ArtifactStorage{
@@ -28,6 +30,12 @@ public class SVNArtifactStorage implements ArtifactStorage{
     }
 
     @Override
+    public void storeArtifact(String s, String s2, String s3, DataHandler dataHandler, String s4)
+            throws AppFactoryException {
+        //TODO
+    }
+
+
     public void storeArtifact(String applicationId, String version, String revision, File file) {
         //ToDO
     }

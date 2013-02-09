@@ -18,16 +18,17 @@
 package org.wso2.carbon.appfactory.svn.repository.mgt.impl;
 
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.appfactory.common.AppFactoryException;
 import org.wso2.carbon.appfactory.core.ArtifactStorage;
 import org.wso2.carbon.utils.CarbonUtils;
+
+import javax.activation.DataHandler;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 public class FileArtifactStorage implements ArtifactStorage {
     private static final Log log = LogFactory.getLog(FileArtifactStorage.class);
@@ -45,6 +46,11 @@ public class FileArtifactStorage implements ArtifactStorage {
     }
 
     @Override
+    public void storeArtifact(String s, String s2, String s3, DataHandler dataHandler, String s4)
+            throws AppFactoryException {
+        //TODO
+    }
+
     public void storeArtifact(String applicationId, String version, String revision, File file) throws AppFactoryException {
     	String path = getApplicationStorageDirectoryPath(applicationId, version, revision)  + File.separator + file.getName();
     	try {
