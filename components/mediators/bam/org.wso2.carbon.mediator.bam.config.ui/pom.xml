@@ -102,7 +102,7 @@
 
     <properties>
         <wso2carbon.version.bam-mediator-config-stub>${wso2carbon.version}</wso2carbon.version.bam-mediator-config-stub>
-        <wso2carbon.version.bam-mediator-config>4.0.5</wso2carbon.version.bam-mediator-config>
+        <wso2carbon.version.bam-mediator-config>${wso2carbon.version}</wso2carbon.version.bam-mediator-config>
     </properties>
 
 </project>
