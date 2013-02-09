@@ -40,13 +40,13 @@
         <dependency>
             <groupId>org.wso2.caching</groupId>
             <artifactId>wso2caching-core</artifactId>
-	    <version>4.0.2</version>
+	    <version>${carbon.platform.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.wso2.caching</groupId>
             <artifactId>wso2caching-mar</artifactId>
-	    <version>4.0.2</version>
+	    <version>${carbon.platform.version}</version>
         </dependency>
 
         <dependency>
