@@ -65,7 +65,7 @@
 				<module>org.wso2.carbon.dashboard.mgt.gadgetrepo.stub</module>
 				<module>org.wso2.carbon.dashboard.mgt.theme.stub</module>
 				<module>org.wso2.carbon.dashboard.mgt.users.stub</module>
-                               <module>org.wso2.carbon.dashboard.mgt.oauth.stub</module>
+                                <module>org.wso2.carbon.dashboard.mgt.oauth.stub</module>
 				<module>org.wso2.carbon.dashboard.social.stub</module>
 				<module>org.wso2.carbon.dashboard.stub</module>
 				<module>org.wso2.carbon.dataservices.stub</module>
@@ -109,7 +109,7 @@
 				<module>org.wso2.carbon.mediation.configadmin.stub</module>
 				<module>org.wso2.carbon.mediation.statistics.stub</module>
 				<module>org.wso2.carbon.mediation.templates.stub</module>
-                <module>org.wso2.carbon.mediator.bam.config.stub</module>
+                		<module>org.wso2.carbon.mediator.bam.config.stub</module>
 				<module>org.wso2.carbon.mediators.clazz.admin.stub</module>
 				<module>org.wso2.carbon.mediators.command.admin.stub</module>
 				<module>org.wso2.carbon.mediators.event.admin.stub</module>
@@ -217,12 +217,17 @@
                 		<module>org.wso2.carbon.cassandra.explorer.stub</module>
 				<module>org.wso2.carbon.bam.toolbox.deployer.stub</module>
 				<module>org.wso2.carbon.ndatasource.stub</module>
-                <module>org.wso2.carbon.hosting.mgt.stub</module>
-                <module>org.wso2.carbon.bpel.bam.publisher.stub</module>
+                		<module>org.wso2.carbon.hosting.mgt.stub</module>
+                		<module>org.wso2.carbon.bpel.bam.publisher.stub</module>
 				<module>org.wso2.carbon.bpel.bam.publisher.skeleton</module>
 			        <module>org.wso2.carbon.remote-tasks.stub</module>	
 			        <module>org.wso2.carbon.identity.authenticator.iwa.stub</module>	
 			        <module>org.wso2.carbon.cep.statistics.stub</module>	
+                                <module>org.wso2.carbon.appfactory.apiManager.dependency.management.stub</module>
+				<module>org.wso2.carbon.appfactory.application.deployer.stub</module>
+				<module>org.wso2.carbon.appfactory.artifact.storage.stub</module>
+				<module>org.wso2.carbon.appfactory.events.notification.stub</module>
+				<module>org.wso2.carbon.appfactory.jenkins.build.stub</module>
 			</modules>
 
     <build>
