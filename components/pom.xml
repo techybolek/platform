@@ -90,6 +90,7 @@
                 <module>registry</module>
                 <module>reliable-messaging</module>
                 <module>reporting</module>
+		<module>remote-usermgt</module>
                 <module>rule</module>
                 <module>scheduled-tasks</module>
                 <module>schema-generator</module>
