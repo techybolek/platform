@@ -28,18 +28,14 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.rssmanager.core</artifactId>
-                <version>${wso2.carbon.version}</version>
+                <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.rssmanager.ui</artifactId>
-                <version>${wso2.carbon.version}</version>
+                <version>${carbon.platform.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <properties>
-        <wso2.carbon.version>4.0.0</wso2.carbon.version>
-    </properties>
 
 </project>
