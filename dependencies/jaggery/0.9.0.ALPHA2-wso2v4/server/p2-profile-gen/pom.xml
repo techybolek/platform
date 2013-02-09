@@ -90,7 +90,7 @@
                                     org.jaggeryjs:org.jaggeryjs.admin.styles.feature:${jaggery.feature.version}
                                 </featureArtifactDef>
 								<featureArtifactDef>
-									org.wso2.carbon:org.wso2.carbon.ntask.feature:${ntask.feature.version}
+									org.wso2.carbon:org.wso2.carbon.ntask.feature:${carbon.platform.version}
 								</featureArtifactDef>
                             </featureArtifacts>
 
@@ -125,7 +125,7 @@
                                 </feature>
 								<feature>
                                     <id>org.wso2.carbon.ntask.feature.group</id>
-                                    <version>${ntask.feature.version}</version>
+                                    <version>${carbon.platform.version}</version>
                                 </feature>
                             </features>
 
