@@ -226,7 +226,7 @@
             <artifactId>wso2-uri-templates</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.eclipse.equinox</groupId>
             <artifactId>javax.servlet</artifactId>
         </dependency>
         <dependency>
@@ -343,7 +343,7 @@
                                 <importBundleDef>commons-fileupload.wso2:commons-fileupload</importBundleDef>
                                 <importBundleDef>rhino.wso2:js</importBundleDef>
                                 <importBundleDef>rome.wso2:rome</importBundleDef>
-                                <importBundleDef>org.wso2.carbon:javax.servlet</importBundleDef>
+                                <importBundleDef>org.eclipse.equinox:javax.servlet</importBundleDef>
                                 <importBundleDef>org.wso2.uri.template:wso2-uri-templates</importBundleDef>
                                 <importBundleDef>net.sf.saxon.wso2:saxon.bps</importBundleDef>
                                 <importBundleDef>jdom.wso2:jdom</importBundleDef>
