@@ -60,7 +60,7 @@
                  <module>deployment-synchronizer</module>
                  <module>doc-request-processor</module>
                  <module>ec2-client</module>
-                 <module>ejb-services</module>
+                 <!--module>ejb-services</module-->
                  <module>email-verification</module>
                 <module>endpoint</module>
                 <!--Removing eventing component since we are now using event component>
