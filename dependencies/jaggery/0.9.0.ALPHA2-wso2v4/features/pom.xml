@@ -347,11 +347,11 @@
                 <artifactId>rome</artifactId>
                 <version>${rome.osgi.version}</version>
             </dependency>
-            <dependency>
+            <!--dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.context</artifactId>
                 <version>${carbon.platform.version}</version>
-            </dependency>
+            </dependency-->
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.ndatasource.rdbms</artifactId>
