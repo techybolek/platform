@@ -45,10 +45,13 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.um.ws.api.stub.ClaimValue;
 import org.wso2.carbon.um.ws.api.stub.PermissionDTO;
 import org.wso2.carbon.um.ws.api.stub.RemoteUserStoreManagerServiceStub;
+import org.wso2.carbon.user.api.ClaimManager;
+import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.Permission;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.claim.Claim;
+import org.wso2.carbon.user.core.dto.RoleDTO;
 import org.wso2.carbon.user.core.tenant.Tenant;
 
 public class WSUserStoreManager implements UserStoreManager {
@@ -178,6 +181,10 @@ public class WSUserStoreManager implements UserStoreManager {
         return null;
     }
 
+    public String[] getAllSecondaryRoles() throws UserStoreException {
+        return new String[0];  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public Date getPasswordExpirationTime(String username) throws UserStoreException {
         try {
             long time = stub.getPasswordExpirationTime(username);
@@ -215,6 +222,10 @@ public class WSUserStoreManager implements UserStoreManager {
             handleException(e.getMessage(), e);
         }
         return null;
+    }
+
+    public String[] getRoleNames(boolean b) throws UserStoreException {
+        return new String[0];  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public int getTenantId() throws UserStoreException {
@@ -455,6 +466,14 @@ public class WSUserStoreManager implements UserStoreManager {
         return false;
     }
 
+    public ClaimManager getClaimManager() throws org.wso2.carbon.user.api.UserStoreException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public boolean isSCIMEnabled() throws org.wso2.carbon.user.api.UserStoreException {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public boolean isBulkImportSupported() throws UserStoreException {
         // TODO Auto-generated method stub
         return false;
@@ -470,6 +489,30 @@ public class WSUserStoreManager implements UserStoreManager {
         }
         
         return null;
+    }
+
+    public UserStoreManager getSecondaryUserStoreManager() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public UserStoreManager getSecondaryUserStoreManager(String s) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void addSecondaryUserStoreManager(String s, UserStoreManager userStoreManager) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void setSecondaryUserStoreManager(UserStoreManager userStoreManager) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public RoleDTO[] getRoleNamesWithDomain() throws UserStoreException {
+        return new RoleDTO[0];  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public RealmConfiguration getRealmConfiguration() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
 
