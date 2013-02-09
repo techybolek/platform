@@ -78,16 +78,18 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.core</artifactId>
+            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
+            <version>${carbon.platform.version}</version>
         </dependency>
     </dependencies>
     
     <properties>
-        <wso2carbon.version>4.0.0</wso2carbon.version>
-        <registry-component.version>4.0.0</registry-component.version>
-        <governance-component.version>4.0.0</governance-component.version>
+        <wso2carbon.version>${carbon.platform.version}</wso2carbon.version>
+        <registry-component.version>${carbon.platform.version}</registry-component.version>
+        <governance-component.version>${carbon.platform.version}</governance-component.version>
     </properties>
 </project>
