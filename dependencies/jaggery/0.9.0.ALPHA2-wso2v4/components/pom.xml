@@ -22,7 +22,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.jaggeryjs</groupId>
     <artifactId>components</artifactId>
-    <version>0.9.0.ALPHA2-wso2v3</version>
+    <version>0.9.0.ALPHA2-wso2v4</version>
     <packaging>pom</packaging>
     <name>Jaggery components parent</name>
     <url>http://jaggeryjs.org</url>
@@ -61,13 +61,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- jaggery versions -->
-        <jaggery.component.version>0.9.0.ALPHA2-wso2v3</jaggery.component.version>
-        <jaggery.feature.version>0.9.0.ALPHA2-wso2v3</jaggery.feature.version>
+        <jaggery.component.version>0.9.0.ALPHA2-wso2v4</jaggery.component.version>
+        <jaggery.feature.version>0.9.0.ALPHA2-wso2v4</jaggery.feature.version>
 
         <!-- carbon versions -->
-        <carbon.kernal.version>4.0.0</carbon.kernal.version>
-        <carbon.platform.version>4.0.0</carbon.platform.version>
-        <carbon.platform.patch.version>4.0.2</carbon.platform.patch.version>
+        <carbon.platform.version>4.1.0-SNAPSHOT</carbon.platform.version>
+
 
         <!-- osgi bundle versions -->
         <rhino.osgi.version>1.7.0.R1-wso2v3</rhino.osgi.version>
@@ -75,7 +74,7 @@
         <wss4j.osgi.version>1.5.11.wso2v3</wss4j.osgi.version>
         <axis2.osgi.version>1.6.1.wso2v8</axis2.osgi.version>
         <abdera.osgi.version>1.0.0.wso2v3</abdera.osgi.version>
-        <axiom.osgi.version>1.2.11.wso2v2</axiom.osgi.version>
+        <axiom.osgi.version>1.2.11.wso2v3</axiom.osgi.version>
         <tomcat.osgi.version>7.0.28.wso2v1</tomcat.osgi.version>
         <h2-engine.osgi.version>1.2.140.wso2v3</h2-engine.osgi.version>
         <wsdl4j.osgi.version>1.6.2.wso2v3</wsdl4j.osgi.version>
@@ -107,16 +106,6 @@
         <wso2-uri-templates.osgi.version>1.0.0</wso2-uri-templates.osgi.version>
         <javax.servlet.osgi.version>3.0.0.wso2v1</javax.servlet.osgi.version>
         <geronimo-servlet_3.0_spec.version>1.0</geronimo-servlet_3.0_spec.version>
-        <webapp.mgt.osgi.version>4.0.0</webapp.mgt.osgi.version>
-        <webapp.mgt.osgi.patch.version>4.0.5</webapp.mgt.osgi.patch.version>
-		<org.wso2.carbon.utils.version>4.0.2</org.wso2.carbon.utils.version>
-		<org.wso2.carbon.registry.core.version>4.0.2</org.wso2.carbon.registry.core.version>
-		<org.wso2.carbon.ui.version>4.0.2</org.wso2.carbon.ui.version>
-		<org.wso2.carbon.core.version>4.0.2</org.wso2.carbon.core.version>
-		<org.wso2.carbon.ndatasource.core.version>4.0.2</org.wso2.carbon.ndatasource.core.version>
-		<org.wso2.carbon.context.version>4.0.1</org.wso2.carbon.context.version>
-		<org.wso2.carbon.server.version>4.0.1</org.wso2.carbon.server.version>
-		<org.wso2.carbon.tomcat.version>4.0.1</org.wso2.carbon.tomcat.version>
 
         <!-- non-osgi bundle versions -->
         <json.version>20090211</json.version>
@@ -361,17 +350,17 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.context</artifactId>
-                <version>${org.wso2.carbon.context.version}</version>
+                <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.ndatasource.rdbms</artifactId>
-                <version>${carbon.kernal.version}</version>
+                <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.ndatasource.core</artifactId>
-                <version>${org.wso2.carbon.ndatasource.core.version}</version>
+                <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
@@ -401,12 +390,12 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.addressing</artifactId>
-                <version>${carbon.kernal.version}</version>
+                <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.utils</artifactId>
-                <version>${org.wso2.carbon.utils.version}</version>
+                <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
@@ -431,7 +420,7 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.registry.core</artifactId>
-                <version>${org.wso2.carbon.registry.core.version}</version>
+                <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.scribe</groupId>
@@ -442,34 +431,34 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.logging</artifactId>
-                <version>${carbon.kernal.version}</version>
+                <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.webapp.mgt</artifactId>
-                <version>${webapp.mgt.osgi.patch.version}</version>
+                <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.ui</artifactId>
-                <version>${org.wso2.carbon.ui.version}</version>
+                <version>${carbon.platform.version}</version>
             </dependency>
 
             <!-- jaggery-core dep -->
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.tomcat</artifactId>
-                <version>${org.wso2.carbon.tomcat.version}</version>
+                <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.core</artifactId>
-                <version>${org.wso2.carbon.core.version}</version>
+                <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.server</artifactId>
-                <version>${org.wso2.carbon.server.version}</version>
+                <version>${carbon.platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.googlecode.json-simple.wso2</groupId>

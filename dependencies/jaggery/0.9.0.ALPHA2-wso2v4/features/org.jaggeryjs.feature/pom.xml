@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.jaggeryjs</groupId>
         <artifactId>features</artifactId>
-        <version>0.9.0.ALPHA2-wso2v3</version>
+        <version>0.9.0.ALPHA2-wso2v4</version>
 <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -64,7 +64,7 @@
                             <id>org.jaggeryjs</id>
                             <propertiesFile>../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:${carbon.kernal.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:${carbon.platform.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
                                 <includedFeatureDef>org.jaggeryjs:org.jaggeryjs.server.feature</includedFeatureDef>
