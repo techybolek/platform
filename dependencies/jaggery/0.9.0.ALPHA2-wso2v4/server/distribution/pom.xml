@@ -109,7 +109,7 @@
                                         <include name="jaggery-${pom.version}.zip"/>
                                     </fileset>
                                 </unzip>
-                                <copy todir="target/wso2carbon-core-4.0.2/repository/components"
+                                <copy todir="target/wso2carbon-core-${carbon.platform.version}/repository/components"
                                       overwrite="true">
                                     <fileset
                                             dir="${tempdir}/jaggery-${pom.version}/carbon/repository/components">
