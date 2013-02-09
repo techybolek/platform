@@ -125,7 +125,7 @@
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>javax.servlet</artifactId>
             <scope>provided</scope>
-            <version>2.3</version>
+            <version>${version.javax.servlet}</version>
         </dependency>
         <dependency>
             <groupId>commons-fileupload</groupId>
