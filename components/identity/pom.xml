@@ -71,6 +71,7 @@
         <module>org.wso2.carbon.identity.scim.common</module>
         <module>org.wso2.carbon.identity.scim.ui</module>
         <module>org.wso2.carbon.identity.sts.store</module>
+	<module>org.wso2.carbon.identity.entitlement.filter</module>
     </modules>
 
     <dependencyManagement>
