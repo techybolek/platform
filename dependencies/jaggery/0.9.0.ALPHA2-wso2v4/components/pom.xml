@@ -84,7 +84,7 @@
         <axis2.osgi.version>1.6.1.wso2v8</axis2.osgi.version>
         <abdera.osgi.version>1.0.0.wso2v3</abdera.osgi.version>
         <axiom.osgi.version>1.2.11.wso2v3</axiom.osgi.version>
-        <tomcat.osgi.version>7.0.28.wso2v1</tomcat.osgi.version>
+        <tomcat.osgi.version>7.0.34.wso2v1</tomcat.osgi.version>
         <h2-engine.osgi.version>1.2.140.wso2v3</h2-engine.osgi.version>
         <wsdl4j.osgi.version>1.6.2.wso2v3</wsdl4j.osgi.version>
         <axis2-json.osgi.version>1.6.1.wso2v8</axis2-json.osgi.version>
