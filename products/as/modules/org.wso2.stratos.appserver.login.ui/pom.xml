@@ -72,8 +72,8 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Import-Package>
-                            javax.servlet; version="${exp.pkg.version.javax.servlet}",
-                            javax.servlet.http; version="${exp.pkg.version.javax.servlet}",
+                            javax.servlet; version="${imp.pkg.version.javax.servlet}",
+                            javax.servlet.http; version="${imp.pkg.version.javax.servlet}",
                             org.apache.lucene.*,
                             *;resolution:=optional
                         </Import-Package>

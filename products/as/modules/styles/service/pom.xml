@@ -58,7 +58,7 @@
                             org.osgi.framework,
                             org.osgi.service.http,
                             org.wso2.carbon.ui,
-                            javax.servlet.*;version="2.4.0",
+                            javax.servlet.*;version="${imp.pkg.version.javax.servlet}",
                             *;resolution:=optional
                         </Import-Package>
                         <Carbon-Component>UIBundle</Carbon-Component>
@@ -108,6 +108,7 @@
         <dependency>
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>javax.servlet.jsp</artifactId>
+            <version>${javax.servlet.jsp.version}</version>
         </dependency>
     </dependencies>
 </project>
