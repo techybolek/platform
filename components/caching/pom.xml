@@ -84,7 +84,6 @@
     </dependencyManagement>
 
     <properties>
-        <wso2caching.version>3.5.0</wso2caching.version>
         <geronimo.saaj.version.caching>1.0.0</geronimo.saaj.version.caching>
         <wso2carbon.version.caching>${carbon.platform.version}</wso2carbon.version.caching>
         <axis2.wso2.version.caching>${axis2.wso2.version}</axis2.wso2.version.caching>
