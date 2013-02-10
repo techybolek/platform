@@ -27,7 +27,7 @@
     </parent>
     <artifactId>wso2stratos-as-samples</artifactId>
     <packaging>pom</packaging>
-    <version>2.0.0</version>
+    <version>${stratos.version}</version>
     <name>WSO2 Stratos  AppServer - Samples</name>
     <url>http://wso2.org/projects/wsas/java</url>
     <description>WSO2 WSAS</description>
