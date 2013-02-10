@@ -98,7 +98,7 @@
         <module>authenticators</module>
         <module>gadgets</module>
         <module>tryit</module>
-        <!--module>xfer</module-->
+        <module>xfer</module>
         <module>mex</module>
         <module>webapp-mgt</module>
         <module>jaxws-webapp-mgt</module>
