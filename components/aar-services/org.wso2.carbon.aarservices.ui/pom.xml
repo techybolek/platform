@@ -51,7 +51,7 @@
                         <Import-Package>
                             !org.wso2.carbon.aarservices.ui.*,
                             org.wso2.carbon.aarservices.stub.*;version="${carbon.platform.package.import.version.range}",
-                            javax.servlet.http.*;version="3.0.0",
+                            javax.servlet.http.*;version="${imp.pkg.version.javax.servlet}",
                             *;resolution:=optional
                         </Import-Package>
                         <Carbon-Component>UIBundle</Carbon-Component>
