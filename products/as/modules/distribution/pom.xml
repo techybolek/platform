@@ -78,7 +78,7 @@
                                 <artifactItem>
                                     <groupId>org.wso2.carbon</groupId>
                                     <artifactId>wso2carbon-core</artifactId>
-                                    <version>${carbon.kernelersion}</version>
+                                    <version>${carbon.kernel.version}</version>
                                     <type>zip</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>target</outputDirectory>
@@ -122,7 +122,7 @@
                                         <include name="${project.artifactId}-${project.version}.zip"/>
                                     </fileset>
                                 </unzip>
-                                <copy todir="target/wso2carbon-core-${carbon.kernelersion}/repository/components"
+                                <copy todir="target/wso2carbon-core-${carbon.kernel.version}/repository/components"
                                       overwrite="true">
                                     <fileset
                                             dir="${tempdir}/${project.artifactId}-${project.version}/repository/components">
@@ -133,7 +133,7 @@
                                 <mkdir dir="${tempdir}"/>
                                 <unzip dest="${tempdir}">
                                     <fileset
-                                            dir="target/wso2carbon-core-${carbon.kernelersion}/repository/components/plugins/">
+                                            dir="target/wso2carbon-core-${carbon.kernel.version}/repository/components/plugins/">
                                         <include name="*.ui*.jar"/>
                                     </fileset>
                                 </unzip>
@@ -188,28 +188,28 @@
 				<equals arg1="${profile}" arg2="signJar"/>
 				<then>
                                 <signjar alias="wso2carbon"
-                                         keystore="target/wso2carbon-core-${carbon.kernelersion}/repository/resources/security/wso2carbon.jks"
+                                         keystore="target/wso2carbon-core-${carbon.kernel.version}/repository/resources/security/wso2carbon.jks"
                                          storepass="wso2carbon" lazy="true">
                                     <fileset
-                                            dir="target/wso2carbon-core-${carbon.kernelersion}/repository/components/plugins"
+                                            dir="target/wso2carbon-core-${carbon.kernel.version}/repository/components/plugins"
                                             includes="**/*.jar"/>
                                     <fileset
-                                            dir="target/wso2carbon-core-${carbon.kernelersion}/lib"
+                                            dir="target/wso2carbon-core-${carbon.kernel.version}/lib"
                                             includes="**/*.jar"/>
                                     <!--fileset
-                                            dir="target/wso2carbon-core-${carbon.kernelersion}/lib/api"
+                                            dir="target/wso2carbon-core-${carbon.kernel.version}/lib/api"
                                             includes="**/*.jar"/-->
                                     <fileset
-                                            dir="target/wso2carbon-core-${carbon.kernelersion}/bin"
+                                            dir="target/wso2carbon-core-${carbon.kernel.version}/bin"
                                             includes="**/*.jar"/>
                                     <!--fileset
-                                            dir="target/wso2carbon-core-${carbon.kernelersion}/lib/xboot"
+                                            dir="target/wso2carbon-core-${carbon.kernel.version}/lib/xboot"
                                             includes="**/*.jar"/-->
                                     <fileset
-                                            dir="target/wso2carbon-core-${carbon.kernelersion}/lib/endorsed"
+                                            dir="target/wso2carbon-core-${carbon.kernel.version}/lib/endorsed"
                                             includes="**/*.jar"/>
                                     <!--fileset
-                                            dir="target/wso2carbon-core-${carbon.kernelersion}/lib/core/WEB-INF/lib"
+                                            dir="target/wso2carbon-core-${carbon.kernel.version}/lib/core/WEB-INF/lib"
                                             includes="**/*.jar"/-->
                                 </signjar>
 				</then>
@@ -226,7 +226,7 @@
                                 <delete dir="target/archive-tmp"/>
                                 <delete dir="target/dependency-maven-plugin-markers"/>
                                 <delete dir="target/maven-archiver"/>
-                                <delete dir="target/wso2carbon-core-${carbon.kernelersion}"/>
+                                <delete dir="target/wso2carbon-core-${carbon.kernel.version}"/>
                                 <delete file="target/${project.artifactId}-${project.version}.jar"/>
                                 <delete dir="target/sources"/>
                                 <delete dir="target/site"/>
