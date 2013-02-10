@@ -145,7 +145,7 @@
         <module>cassandra-explorer</module>
         <module>data-bridge</module>
 	    <module>ndatasource</module>
-	    <!--module>jaggery/0.9.0-ALPHA1</module-->
+	    <module>jaggery/features</module>
 	    <!--module>bam</module-->
 	    <!--module>appfactory</module-->
         <!-- Add new features above. You should also include your newly-added-feature/s in features/repository/pom.xml  -->
