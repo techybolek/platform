@@ -373,5 +373,8 @@
 	<!-- Kapcha -->
 	<kaptcha.wso2.version>2.3.0.wso2v1</kaptcha.wso2.version>
 	<commons.lang.version>2.6.0.wso2v1</commons.lang.version>
+
+	<!-- Caching -->
+        <wso2caching.version>4.0.2</wso2caching.version>
     </properties>
 </project>
