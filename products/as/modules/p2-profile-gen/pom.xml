@@ -228,13 +228,13 @@
 
                                 <!--Stratos featurs-->
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.stratos.common.feature:${stratos.platform.patch.version.202}
+                                    org.wso2.carbon:org.wso2.carbon.stratos.common.feature:${stratos.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.stratos.usage.agent.feature:2.0.5
+                                    org.wso2.carbon:org.wso2.carbon.stratos.usage.agent.feature:${stratos.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.carbon:org.wso2.carbon.stratos.throttling.agent.feature:2.0.5
+                                    org.wso2.carbon:org.wso2.carbon.stratos.throttling.agent.feature:${stratos.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.stratos.deployment.feature:${stratos.version}
@@ -527,15 +527,15 @@
 
                                 <feature>
                                     <id>org.wso2.carbon.stratos.common.feature.group</id>
-                                    <version>${stratos.platform.patch.version.202}</version>
+                                    <version>${stratos.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.stratos.usage.agent.feature.group</id>
-                                    <version>2.0.5</version>
+                                    <version>${stratos.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.stratos.throttling.agent.feature.group</id>
-                                    <version>2.0.5</version>
+                                    <version>${stratos.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.stratos.deployment.feature.group</id>
@@ -665,8 +665,6 @@
         </plugins>
     </build>
     <properties>
-        <stratos.platform.patch.version.201>2.0.1</stratos.platform.patch.version.201>
-        <stratos.platform.patch.version.202>2.0.2</stratos.platform.patch.version.202>
     </properties>
 
 </project>
