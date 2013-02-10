@@ -169,6 +169,9 @@
         <version.equinox.core.expressions>3.4.401.v20120627-124442</version.equinox.core.expressions>
         <version.equinox.core.jobs>3.5.300.v20120622-204750</version.equinox.core.jobs>
 
+        <version.equinox.http.servlet>1.1.300.v20120522-1841</version.equinox.http.servlet>
+        <version.equinox.http.helper>1.1.0.wso2v1</version.equinox.http.helper>
+        <version.equinox.jsp.jasper>1.0.400.v20120522-2049</version.equinox.jsp.jasper>
         <version.javax.servlet>3.0.0.v201112011016</version.javax.servlet>
         <version.javax.el>2.2.0.v201108011116</version.javax.el>
         <version.javax.servlet.jsp>2.2.0.v201112011158</version.javax.servlet.jsp>
