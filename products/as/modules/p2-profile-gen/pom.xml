@@ -263,7 +263,7 @@
                                     org.wso2.carbon:org.wso2.carbon.identity.xacml.filter.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
-                                    org.wso2.carbon.identity.authenticator.saml2.sso.server.feature:${carbon.platform.version}
+                                    org.wso2.carbon:org.wso2.carbon.identity.authenticator.saml2.sso.server.feature:${carbon.platform.version}
                                 </featureArtifactDef>
                                 <!-- jaggery features -->
                                 <featureArtifactDef>
