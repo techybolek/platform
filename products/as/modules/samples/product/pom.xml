@@ -78,6 +78,7 @@
         <module>EJBLibrary</module>
         <module>TomcatWebApps/GenericJavaBeanResource</module>
         <module>TomcatWebApps/JDBCDataSource</module>
+        <module>TomcatWebApps/CarbonDataSourceAccessExample</module>
         <module>Axis2Module</module>
 	<module>EntitlementFilter</module>
     </modules>
