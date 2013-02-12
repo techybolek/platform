@@ -19,8 +19,8 @@ Deploying the Webapp
 ====================
 
 1. Use "ant" command in the CARBON_HOME/samples/TomcatWebApps/CarbonDataSource/ to build the webapp.
-2. This will deploy the GenericJavaBeanResource webapp to the <CARBON_HOME>/repository/deployment/server/webapps directory.
-If you start AppServer, GenericJavaBeanResource will be available as a deployed webapp.
+2. This will deploy the CarbonDataSourceAccess webapp to the <CARBON_HOME>/repository/deployment/server/webapps directory.
+If you start AppServer, CarbonDataSourceAccess will be available as a deployed webapp.
 
 
 
