@@ -83,6 +83,10 @@ the samples which are integrated,
        This is a webapp sample to demonstrate JDBC DataSource lookups for JDBC resources
        defined in contextXml descriptor.
 
+    c. CarbonDataSourceAccessExample
+       This is simple webapp sample to demonstrate the JNDI look-ups of Carbon DataSources
+       which are exposed as JNDI resources from carbon in WSO2 Application Server
+
 20. Jaxws-Jaxrs
     This contains series of samples to illustrate the use of Jaxws and Jaxrs in WSO2
     Application Server.
