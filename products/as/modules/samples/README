@@ -203,6 +203,7 @@ samples
   ├── TomcatWebApps
   │   ├── GenericJavaBeanResource
   │   └── JDBCDataSource
+  │   └── CarbonDataSourceAccessExample
   ├── VirtualDirectoryListing
   ├── Axis2Module
   ├── jaggerySamples
