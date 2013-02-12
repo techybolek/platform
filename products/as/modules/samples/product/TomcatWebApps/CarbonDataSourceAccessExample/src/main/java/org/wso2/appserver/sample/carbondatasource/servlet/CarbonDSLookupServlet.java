@@ -47,11 +47,23 @@ public class CarbonDSLookupServlet extends HttpServlet {
             PrintWriter writer = null;
 
             writer = response.getWriter();
-            writer.println("Data Source Info");
-            writer.println("Data Source Name : " +carbonDataSource.getName());
-            writer.println("Driver class Name : "+carbonDataSource.getDriverClassName());
-            writer.println("MaxActive value : " +carbonDataSource.getMaxActive());
-            writer.println("URL : "+carbonDataSource.getUrl());
+            writer.println("<TABLE BORDER=1>");
+            writer.println("<TR>");
+            writer.println("<TH COLSPAN=\"2\">Data Source Info</TH>");
+            writer.println("</TR>");
+            writer.println("<TR>");
+            writer.println("<TD>Data Source Name</TD><TD>" + carbonDataSource.getName() + "</TD>");
+            writer.println("</TR>");
+            writer.println("<TR>");
+            writer.println("<TD>Driver Class Name</TD><TD>" + carbonDataSource.getDriverClassName() + "</TD>");
+            writer.println("</TR>");
+            writer.println("<TR>");
+            writer.println("<TD>MaxActive value</TD><TD>" + carbonDataSource.getMaxActive() + "</TD>");
+            writer.println("</TR>");
+            writer.println("<TR>");
+            writer.println("<TD>URL</TD><TD>" + carbonDataSource.getUrl() + "</TD>");
+            writer.println("</TR>");
+            writer.println("</TABLE>");
 
         } catch (NamingException e) {
             e.printStackTrace();
