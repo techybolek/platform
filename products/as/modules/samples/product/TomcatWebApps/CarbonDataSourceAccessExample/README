@@ -1,4 +1,4 @@
-Sample : CarbonDataSourceAccess
+Sample : CarbonDataSourceAccessExample
 ===================
 
 Introduction
@@ -18,7 +18,7 @@ More info is available at : http://kishanthan.wordpress.com/2013/02/11/access-ca
 Deploying the Webapp
 ====================
 
-1. Use "ant" command in the CARBON_HOME/samples/TomcatWebApps/CarbonDataSource/ to build the webapp.
+1. Use "ant" command in the CARBON_HOME/samples/TomcatWebApps/CarbonDataSourceAccessExample/ to build the webapp.
 2. This will deploy the CarbonDataSourceAccess webapp to the <CARBON_HOME>/repository/deployment/server/webapps directory.
 If you start AppServer, CarbonDataSourceAccess will be available as a deployed webapp.
 
