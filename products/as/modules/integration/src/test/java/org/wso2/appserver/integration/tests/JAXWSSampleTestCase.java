@@ -46,8 +46,8 @@ public class JAXWSSampleTestCase {
         serviceClient.setOptions(options);
 
         // Call sayHi operation..
-        String request1 = "<ns2:sayHi xmlns:ns2=\"http://server.hw.demo/\">" +
-                "<arg0>World</arg0></ns2:sayHi>";
+        String request1 = "<ns1:sayHi xmlns:ns1=\"http://server.hw.demo/\">" +
+                "<arg0>World</arg0></ns1:sayHi>";
         OMElement result1 = serviceClient.sendReceive(createPayload(request1));
         assertNotNull(result1, "Result cannot be null");
         assertEquals(("<ns1:sayHiResponse xmlns:ns1=\"http://server.hw.demo/\">" +
@@ -55,8 +55,8 @@ public class JAXWSSampleTestCase {
                 result1.toString().trim());
 
         // Call sayHiToUser operation..
-        String request2 = "<ns2:sayHiToUser xmlns:ns2=\"http://server.hw.demo/\">" +
-                "<arg0><name>World</name></arg0></ns2:sayHiToUser>";
+        String request2 = "<ns1:sayHiToUser xmlns:ns1=\"http://server.hw.demo/\">" +
+                "<arg0><name>World</name></arg0></ns1:sayHiToUser>";
         OMElement result2 = serviceClient.sendReceive(createPayload(request2));
         assertNotNull(result2, "Result cannot be null");
         assertEquals(("<ns1:sayHiToUserResponse xmlns:ns1=\"http://server.hw.demo/\">" +
@@ -64,8 +64,8 @@ public class JAXWSSampleTestCase {
                 result2.toString().trim());
 
         // Call sayHiToUser operation again..
-        String request3 = "<ns2:sayHiToUser xmlns:ns2=\"http://server.hw.demo/\">" +
-                "<arg0><name>Galaxy</name></arg0></ns2:sayHiToUser>";
+        String request3 = "<ns1:sayHiToUser xmlns:ns1=\"http://server.hw.demo/\">" +
+                "<arg0><name>Galaxy</name></arg0></ns1:sayHiToUser>";
         OMElement result3 = serviceClient.sendReceive(createPayload(request3));
         assertNotNull(result3, "Result cannot be null");
         assertEquals(("<ns1:sayHiToUserResponse xmlns:ns1=\"http://server.hw.demo/\">" +
@@ -73,7 +73,7 @@ public class JAXWSSampleTestCase {
                 result3.toString().trim());
 
         // Call sayHi operation..
-        String request4 = "<ns2:getUsers xmlns:ns2=\"http://server.hw.demo/\"/>";
+        String request4 = "<ns1:getUsers xmlns:ns1=\"http://server.hw.demo/\"/>";
         OMElement result4 = serviceClient.sendReceive(createPayload(request4));
         assertNotNull(result4, "Result cannot be null");
         assertEquals(("<ns1:getUsersResponse xmlns:ns1=\"http://server.hw.demo/\">" +
