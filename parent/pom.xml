@@ -176,7 +176,7 @@
         <version.javax.el>2.2.0.v201108011116</version.javax.el>
         <version.javax.servlet.jsp>2.2.0.v201112011158</version.javax.servlet.jsp>
         <version.jasper>2.2.2.v201205150955</version.jasper>
-        <carbon.p2.plugin.version>1.5</carbon.p2.plugin.version>
+        <carbon.p2.plugin.version>1.5.2-SNAPSHOT</carbon.p2.plugin.version>
 
         <axis2.osgi.version>1.6.1.wso2v8</axis2.osgi.version>
         <axis2.osgi.version.range>[1.6.1.wso2v8, 1.7.0)</axis2.osgi.version.range>
