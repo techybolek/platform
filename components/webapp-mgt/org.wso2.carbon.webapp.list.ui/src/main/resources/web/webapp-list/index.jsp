@@ -27,6 +27,8 @@
 <%@page import="org.wso2.carbon.webapp.mgt.stub.types.carbon.WebappsWrapper" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.ResourceBundle" %>
+<%@ page import="java.util.TreeMap" %>
+<%@ page import="java.util.Map" %>
 <jsp:include page="../dialog/display_messages.jsp"/>
 
 <%
@@ -316,7 +318,7 @@
                                             if (webappState.equalsIgnoreCase(state)) {
                                     %>
                                     <option value="<%= state%>" selected="selected">
-                                        <%= state%>
+                                        <%= state %>
                                     </option>
                                     <%
                                     } else {
@@ -335,17 +337,26 @@
                                 <fmt:message key="webapp.type"/>
                                 <select name="webappType">
                                     <%
-                                        for (String type : new String[]{"WebApp", "JaxWebApp",
-                                                                        "JaggeryWebApp", "All"}) {
+                                 Map<String, String> map = new TreeMap<String, String>();
+                                 
+                                 if (map.isEmpty()) {
+                                     map.put("WebApp", "Webapp");
+                                     map.put("JaxWebApp", "Jax webapp");
+                                     map.put("JaggeryWebApp", "Jaggery webapp");
+                                     map.put("All", "All");
+                                 }
+                                    for (Object obj : map.keySet().toArray()) {
+                                    
+                                    String type = String.valueOf(obj);
                                             if (webappType.equalsIgnoreCase(type)) {
                                     %>
                                     <option value="<%= type%>" selected="selected">
-                                        <%= type%>
+                                        <%= map.get(type).toString() %>
                                     </option>
                                     <%
                                     } else {
                                     %>
-                                    <option value="<%= type%>"><%= type%>
+                                    <option value="<%= type %>"><%= map.get(type).toString()%>
                                     </option>
                                     <%
                                             }
