@@ -29,8 +29,8 @@
                         <phase>package</phase>
                         <configuration>
                             <tasks>
-                                <copy file="target/${pom.artifactId}-${wso2xfer.version}.jar"
-                                      tofile="target/${pom.artifactId}-${wso2xfer.version}.mar"/>
+                                <copy file="target/${project.artifactId}-${wso2xfer.version}.jar"
+                                      tofile="target/${project.artifactId}-${wso2xfer.version}.mar"/>
                             </tasks>
                         </configuration>
                         <goals>
@@ -53,7 +53,7 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>target/${pom.artifactId}-${wso2xfer.version}.mar</file>
+                                    <file>target/${project.artifactId}-${wso2xfer.version}.mar</file>
                                     <type>mar</type>
                                 </artifact>
                             </artifacts>

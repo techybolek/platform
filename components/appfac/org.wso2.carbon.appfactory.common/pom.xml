@@ -48,7 +48,7 @@
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.appfactory.events.notification.stub</artifactId>
             <scope>provided</scope>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jaggeryjs</groupId>

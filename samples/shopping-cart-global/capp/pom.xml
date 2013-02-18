@@ -66,7 +66,7 @@
                                       tofile="${tempdir}/ReOrderProcess_1.0.0/ReOrderProcessWF.zip" overwrite="false"/>
                                 <copy file="${basedir}/../data-service/dbs/ShoppingCartDS.dbs" 
                                       tofile="${tempdir}/ShoppingCartDS_1.0.0/ShoppingCartDS.dbs" overwrite="false"/-->
-                                <zip destfile="target/GlobalShoppingCartSample-${pom.version}.car"
+                                <zip destfile="target/GlobalShoppingCartSample-${project.version}.car"
                                      basedir="${tempdir}"/>
                                 <delete dir="${tempdir}"/>
                             </tasks>

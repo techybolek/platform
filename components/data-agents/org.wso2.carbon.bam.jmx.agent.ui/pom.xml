@@ -62,7 +62,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package>
                             org.wso2.carbon.bam.jmx.agent.ui.*,
                             org.wso2.carbon.bam.jmx.agent.profiles.*,

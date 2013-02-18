@@ -41,7 +41,7 @@
                                 <jar destfile="target/wso2caching-${wso2caching.version}.mar">
                                     <fileset dir="target/temp"/>
                                 </jar>
-                                <!--<copy file="target/${pom.artifactId}-${wso2caching.version}.jar"-->
+                                <!--<copy file="target/${project.artifactId}-${wso2caching.version}.jar"-->
                                 <!--tofile="target/wso2caching-${wso2caching.version}.mar"/>-->
                             </tasks>
                         </configuration>
@@ -67,11 +67,11 @@
                             <artifacts>
                                 <artifact>
                                     <file>target/wso2caching-${wso2caching.version}.mar</file>
-                                    <!--<file>target/${pom.artifactId}-${wso2caching.version}.mar</file>-->
+                                    <!--<file>target/${project.artifactId}-${wso2caching.version}.mar</file>-->
                                     <type>mar</type>
                                 </artifact>
                             </artifacts>
-                            <finalName>wso2caching-${pom.version}</finalName>
+                            <finalName>wso2caching-${project.version}</finalName>
                         </configuration>
                     </execution>
                 </executions>

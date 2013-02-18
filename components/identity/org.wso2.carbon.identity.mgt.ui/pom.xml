@@ -59,7 +59,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>
-                            ${pom.artifactId}
+                            ${project.artifactId}
                         </Bundle-SymbolicName>
                         <Export-Package>
                             org.wso2.carbon.identity.mgt.ui*,

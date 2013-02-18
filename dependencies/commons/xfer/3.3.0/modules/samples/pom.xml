@@ -20,7 +20,7 @@
         <dependency>
             <groupId>org.wso2.xfer</groupId>
             <artifactId>wso2xfer</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
     </dependencies>

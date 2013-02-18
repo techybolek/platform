@@ -106,13 +106,13 @@
                                 <mkdir dir="${tempdir}"/>
                                 <unzip dest="${tempdir}">
                                     <fileset dir="target">
-                                        <include name="jaggery-${pom.version}.zip"/>
+                                        <include name="jaggery-${project.version}.zip"/>
                                     </fileset>
                                 </unzip>
                                 <copy todir="target/wso2carbon-core-${carbon.platform.version}/repository/components"
                                       overwrite="true">
                                     <fileset
-                                            dir="${tempdir}/jaggery-${pom.version}/carbon/repository/components">
+                                            dir="${tempdir}/jaggery-${project.version}/carbon/repository/components">
                                     </fileset>
                                 </copy>
                                 <!--jar destfile="target/wso2carbon-core-${carbon.platform.version}/repository/components/plugins/org.wso2.carbon.jaggery.deployer_${jaggery.components.version}.jar" update="true">
@@ -132,7 +132,7 @@
                                      basedir="${jardir}/deployer"/>
 
 
-                                <delete file="target/jaggery-${pom.version}.zip"/>
+                                <delete file="target/jaggery-${project.version}.zip"/>
                                 <delete dir="${tempdir}"/>
                                 <mkdir dir="${tempdir}"/>
                                 <unzip dest="${tempdir}">
@@ -200,7 +200,7 @@
                                 <delete dir="target/dependency-maven-plugin-markers"/>
                                 <delete dir="target/maven-archiver"/>
                                 <delete dir="target/wso2carbon-core-${carbon.platform.version}"/>
-                                <delete file="target/jaggery-${pom.version}.jar"/>
+                                <delete file="target/jaggery-${project.version}.jar"/>
                                 <delete dir="target/sources"/>
                                 <delete dir="target/site"/>
                                 <delete dir="target/antrun"/>

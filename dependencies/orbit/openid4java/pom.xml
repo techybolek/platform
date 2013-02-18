@@ -161,8 +161,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Name>${pom.artifactId}</Bundle-Name>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Import-Package>!org.eclipse.higgins.*,</Import-Package>
                         <Export-Package>
 	                      org.openid4java.*;version=${orbit.version.openid4java},				    

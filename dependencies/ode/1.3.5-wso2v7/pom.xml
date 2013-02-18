@@ -52,7 +52,7 @@
 
     <properties>
         <!--
-        NOTE: Project version, to be used instead of ${pom.version} since that
+        NOTE: Project version, to be used instead of ${project.version} since that
               value magically changes when using SNAPSHOT versions.
 
               This value *must* be kept in sync with the value of the <version>
