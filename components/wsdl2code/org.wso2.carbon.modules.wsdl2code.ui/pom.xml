@@ -56,6 +56,8 @@
                 <includes>
                     <include>org/wso2/carbon/wsdl2code/ui/client/codegen-options.xml</include>
                     <include>org/wso2/carbon/wsdl2code/ui/client/generate-client-options.xml</include>
+                    <include>org/wso2/carbon/wsdl2code/ui/client/generate-client-cxf-jaxrs-options.xml</include>
+                    <include>org/wso2/carbon/wsdl2code/ui/client/generate-client-cxf-jaxws-options.xml</include>
                 </includes>
             </resource>
             <resource>

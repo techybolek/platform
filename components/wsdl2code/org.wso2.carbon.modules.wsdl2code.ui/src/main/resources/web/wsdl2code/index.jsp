@@ -29,11 +29,25 @@
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%
     String backendServerURL = CarbonUIUtil.getServerURL(this.getServletConfig().getServletContext(),
-                                                        session);
+            session);
     ConfigurationContext configContext =
             (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
 
     String generateClient = request.getParameter("generateClient");
+
+    //For CXF web applicationsc
+    String generateType= request.getParameter("resultType");
+    String wsdl =null;
+    String wadl =null;
+    String generateMethod=null;
+    if(generateType!=null && generateType.equalsIgnoreCase("cxf")){
+        generateMethod=request.getParameter("api");
+        if(generateMethod.equalsIgnoreCase("jaxws")){
+            wsdl =generateClient;
+        }else if(generateMethod.equalsIgnoreCase("jaxrs")){
+            wadl =generateClient;
+        }
+    }
 
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
     WSDL2CodeClient wsdl2CodeClient;
@@ -79,62 +93,122 @@
         request="<%=request%>"/>
 <script type="text/javascript">
 
-    var options = new Object();
+var options = new Object();
 
-    wso2.wsf.Util.initURLs();
+wso2.wsf.Util.initURLs();
 
-    var frondendURL = wso2.wsf.Util.getServerURL() + "/";
+var frondendURL = wso2.wsf.Util.getServerURL() + "/";
 
-    //TODO need to do validation here
-    function doValidation() {
+//TODO need to do validation here
+function doValidation() {
 
+}
+
+function startCodegen(optionsObj) {
+
+    <%if(generateClient!=null && generateType!=null && generateType.equalsIgnoreCase("cxf")){ %>
+    startCodegenForCXF(optionsObj);
+    return;
+    <%}%>
+
+    var genClientScenario = false;
+    <%if (generateClient != null) { %>
+    genClientScenario = true;
+    <%}%>
+
+    if (!genClientScenario && (document.getElementById("id_uri") == null ||
+            document.getElementById("id_uri").value == "")) {
+        CARBON.showWarningDialog('<fmt:message key="error.uri.field.empty"/>');
+        return false;
     }
 
-    function startCodegen(optionsObj) {
-        var genClientScenario = false;
-        <%if (generateClient != null) { %>
-            genClientScenario = true;
-        <%}%>
-
-        if (!genClientScenario && (document.getElementById("id_uri") == null ||
-                document.getElementById("id_uri").value == "")) {
-            CARBON.showWarningDialog('<fmt:message key="error.uri.field.empty"/>');
-            return false;
-        }
-
-        if (document.getElementById("id_uri") != null) {
-            var idUriElement = document.getElementById("id_uri").value;
-            if (idUriElement != null && idUriElement.length > 0) {
-                if (idUriElement.substring(0, 4) != "http" && idUriElement.substring(1, 6) != "extra") {
-                    CARBON.showWarningDialog('<fmt:message key="error.codegenFile.wrong"/>');
-                    return false;
-                }
+    if (document.getElementById("id_uri") != null) {
+        var idUriElement = document.getElementById("id_uri").value;
+        if (idUriElement != null && idUriElement.length > 0) {
+            if (idUriElement.substring(0, 4) != "http" && idUriElement.substring(1, 6) != "extra") {
+                CARBON.showWarningDialog('<fmt:message key="error.codegenFile.wrong"/>');
+                return false;
             }
         }
+    }
 
-        populateOptions();
-        var optionsString = "";
+    populateOptions();
+    var optionsString = "";
 
-        <%if (generateClient != null) { %>
-            optionsString += "-uri,<%= generateClient%>,";
-        <%}%>
+    <%if (generateClient != null) { %>
+    optionsString += "-uri,<%= generateClient%>,";
+    <%}%>
 
-        for (var o in optionsObj) {
-            optionsString += '-' + o.substring(3) + ',';
-            var oVal = optionsObj[o];
-            if (oVal != null && oVal.length != 0) {
-                optionsString += oVal + ',';
-            }
+    for (var o in optionsObj) {
+        optionsString += '-' + o.substring(3) + ',';
+        var oVal = optionsObj[o];
+        if (oVal != null && oVal.length != 0) {
+            optionsString += oVal + ',';
         }
-        var size = optionsString.length - 1;
-        optionsString = optionsString.substring(0, (optionsString.length - 1));
+    }
+    var size = optionsString.length - 1;
+    optionsString = optionsString.substring(0, (optionsString.length - 1));
 
 //        var generate_button = document.getElementById("generate_button");
 //        generate_button.disabled = true;
 //        wso2.wsf.Util.cursorWait();
 
-        location.href = '../wsdl2code/codegen_ajaxprocessor.jsp?optionsString='+optionsString;
+    location.href = '../wsdl2code/codegen_ajaxprocessor.jsp?optionsString='+optionsString;
+}
+
+function startCodegenForCXF(optionsObj) {
+
+    var genClientScenario = false;
+    <%if (generateClient != null) { %>
+    genClientScenario = true;
+    <%}%>
+
+    if (!genClientScenario && (document.getElementById("id_uri") == null ||
+            document.getElementById("id_uri").value == "")) {
+        CARBON.showWarningDialog('<fmt:message key="error.uri.field.empty"/>');
+        return false;
     }
+
+    if (document.getElementById("id_uri") != null) {
+        var idUriElement = document.getElementById("id_uri").value;
+        if (idUriElement != null && idUriElement.length > 0) {
+            if (idUriElement.substring(0, 4) != "http" && idUriElement.substring(1, 6) != "extra") {
+                CARBON.showWarningDialog('<fmt:message key="error.codegenFile.wrong"/>');
+                return false;
+            }
+        }
+    }
+
+    populateOptions();
+    var optionsString = "";
+
+    <%if (generateClient != null) { %>
+    optionsString += "-<%= generateMethod%>,";
+    <%}%>
+
+    <%if (wsdl != null) { %>
+    optionsString += "-Service,<%= wsdl%>,";
+    <%}else if(wadl!=null){%>
+    optionsString += "-Service,<%= wadl%>,";
+    <%}%>
+
+    for (var o in optionsObj) {
+        optionsString += '-' + o.substring(3) + ',';
+        var oVal = optionsObj[o];
+        if (oVal != null && oVal.length != 0) {
+            optionsString += oVal + ',';
+        }
+    }
+    var size = optionsString.length - 1;
+    optionsString = optionsString.substring(0, (optionsString.length - 1));
+
+
+//        var generate_button = document.getElementById("generate_button");
+//        generate_button.disabled = true;
+//        wso2.wsf.Util.cursorWait();
+
+    location.href = '../wsdl2code/codegen_ajaxprocessor.jsp?optionsString='+optionsString+'&type=cxf';
+}
 
 //    function wsdl2codeOnErrorCallback(data) {
 //        var generate_button = document.getElementById("generate_button");generate_button.disabled = false;
@@ -150,120 +224,132 @@
 //        window.location = downLocation.toString();
 //    }
 
-    var callback =
-    {
-        upload:handleUpload
-    };
+var callback =
+{
+    upload:handleUpload
+};
 
-    function getResponseValue(responseXML) {
-        var returnElementList = responseXML.getElementsByTagName("ns:return");
-        // Older browsers might not recognize namespaces (e.g. FF2)
-        if (returnElementList.length == 0)
-            returnElementList = responseXML.getElementsByTagName("return");
-        var returnElement = returnElementList[0];
+function getResponseValue(responseXML) {
+    var returnElementList = responseXML.getElementsByTagName("ns:return");
+    // Older browsers might not recognize namespaces (e.g. FF2)
+    if (returnElementList.length == 0)
+        returnElementList = responseXML.getElementsByTagName("return");
+    var returnElement = returnElementList[0];
 
-        return returnElement.firstChild.nodeValue;
-    }
+    return returnElement.firstChild.nodeValue;
+}
 
-    function handleUpload(o) {
-        var responseText = o.responseText;
-        if (responseText) {
-            var index = responseText.indexOf("<pre>");
+function handleUpload(o) {
+    var responseText = o.responseText;
+    if (responseText) {
+        var index = responseText.indexOf("<pre>");
 
-            responseText = responseText.replace( new RegExp("<pre[^>]*>"),"");
-            responseText = responseText.replace( new RegExp("</pre>"),"");
-            var uuid = responseText;
+        responseText = responseText.replace( new RegExp("<pre[^>]*>"),"");
+        responseText = responseText.replace( new RegExp("</pre>"),"");
+        var uuid = responseText;
 
-            var divObj = document.getElementById("divCodegenFileupload");
-            if (divObj) {
-                divObj.innerHTML = "";
-                divObj.style.display = "none";
-            }
-            divObj = document.getElementById(this.upload.codegenParentTextId);
-            divObj.value = uuid;
-        } else {
-            CARBON.showWarningDialog('<fmt:message key="error.fileUploadFailed"/>');
-        }
-    }
-
-    function submitFormAsync(codegenParentTextId) {
-        var codegenFile = document.getElementById('codegenFile');
-        var nodeValue = codegenFile.value;
-        if (nodeValue == undefined || nodeValue == "") {
-            CARBON.showWarningDialog('<fmt:message key="error.codegenFile.empty"/>');
-            return false;
-        }
-        handleUpload.codegenParentTextId = codegenParentTextId;
-        var form = document.getElementById("codegenFileUpload");
-        YAHOO.util.Connect.setForm(form, true, true);
-        YAHOO.util.Connect.asyncRequest("POST", form.getAttribute("action"), callback, null);
-        hideDiv();
-    }
-
-    function hideDiv() {
         var divObj = document.getElementById("divCodegenFileupload");
         if (divObj) {
             divObj.innerHTML = "";
             divObj.style.display = "none";
         }
+        divObj = document.getElementById(this.upload.codegenParentTextId);
+        divObj.value = uuid;
+    } else {
+        CARBON.showWarningDialog('<fmt:message key="error.fileUploadFailed"/>');
+    }
+}
+
+function submitFormAsync(codegenParentTextId) {
+    var codegenFile = document.getElementById('codegenFile');
+    var nodeValue = codegenFile.value;
+    if (nodeValue == undefined || nodeValue == "") {
+        CARBON.showWarningDialog('<fmt:message key="error.codegenFile.empty"/>');
+        return false;
+    }
+    handleUpload.codegenParentTextId = codegenParentTextId;
+    var form = document.getElementById("codegenFileUpload");
+    YAHOO.util.Connect.setForm(form, true, true);
+    YAHOO.util.Connect.asyncRequest("POST", form.getAttribute("action"), callback, null);
+    hideDiv();
+}
+
+function hideDiv() {
+    var divObj = document.getElementById("divCodegenFileupload");
+    if (divObj) {
+        divObj.innerHTML = "";
+        divObj.style.display = "none";
+    }
+}
+
+function showYUIPanel(hd, bd, width, innerPannelId, containerDivId) {
+    var container = document.getElementById(containerDivId);
+    container.innerHTML = "";
+    var yuiBody = '<div class="hd">' + hd + '</div>' +
+            '<div class="bd">' + bd + '</div>' +
+            '<div class="ft"></div>';
+    var yuiHolder = document.createElement("div");
+    yuiHolder.setAttribute("id", innerPannelId);
+    yuiHolder.innerHTML = yuiBody;
+    container.appendChild(yuiHolder);
+
+    var panel1 = new YAHOO.widget.Panel(innerPannelId, {
+        width:width,
+        zIndex:"500",
+        visible:false,
+        fixedcenter: true,
+        close:true,
+        draggable:true,
+        constraintoviewport:true });
+    panel1.render();
+
+    container.style.display = "inline";
+
+    panel1.show();
+}
+
+function codeGenFileUploadeHelper(codegenParentTextId, executor) {
+    var submit = '<fmt:message key="submit"/>';
+    var cancel = '<fmt:message key="cancel"/>';
+    var uploadFile = '<fmt:message key="uploadFile"/>';
+    var uploadFileHelp = ' ';
+    if(executor == "wsdl") {
+        uploadFileHelp = '<fmt:message key="uploadFileHelp"/>'
     }
 
-    function showYUIPanel(hd, bd, width, innerPannelId, containerDivId) {
-        var container = document.getElementById(containerDivId);
-        container.innerHTML = "";
-        var yuiBody = '<div class="hd">' + hd + '</div>' +
-                      '<div class="bd">' + bd + '</div>' +
-                      '<div class="ft"></div>';
-        var yuiHolder = document.createElement("div");
-        yuiHolder.setAttribute("id", innerPannelId);
-        yuiHolder.innerHTML = yuiBody;
-        container.appendChild(yuiHolder);
-
-        var panel1 = new YAHOO.widget.Panel(innerPannelId, {
-            width:width,
-            zIndex:"500",
-            visible:false,
-            fixedcenter: true,
-            close:true,
-            draggable:true,
-            constraintoviewport:true });
-        panel1.render();
-
-        container.style.display = "inline";
-
-        panel1.show();
-    }
-
-    function codeGenFileUploadeHelper(codegenParentTextId, executor) {
-        var submit = '<fmt:message key="submit"/>';
-        var cancel = '<fmt:message key="cancel"/>';
-        var uploadFile = '<fmt:message key="uploadFile"/>';
-        var uploadFileHelp = ' ';
-        if(executor == "wsdl") {
-            uploadFileHelp = '<fmt:message key="uploadFileHelp"/>'
-        }
-
-        var innerHTML = "<div id='formset'><form method='post' id='codegenFileUpload' name='codegenFileUpload' " +
-                "action='../../fileupload/"+executor+"' enctype='multipart/form-data' target='self'><fieldset>" +
-                "<legend>" + uploadFile + "</legend><div><input type='file' size='40' name='codegenFile'" +
-                " id='codegenFile'/></div><div><p>" + uploadFileHelp + "</p></div><div>"+
-                "<input type='button' value=" + submit + " onclick=\"submitFormAsync('" +
-                        codegenParentTextId +
-                        "')\"/><input type='button' value=" + cancel + " onclick='hideDiv()'/></div></fieldset></form></div>";
-        var header = '<fmt:message key="uploadFileTitle"/>';
-        showYUIPanel(header, innerHTML, "500px", "innerCodegenId", "divCodegenFileupload");
-    }
+    var innerHTML = "<div id='formset'><form method='post' id='codegenFileUpload' name='codegenFileUpload' " +
+            "action='../../fileupload/"+executor+"' enctype='multipart/form-data' target='self'><fieldset>" +
+            "<legend>" + uploadFile + "</legend><div><input type='file' size='40' name='codegenFile'" +
+            " id='codegenFile'/></div><div><p>" + uploadFileHelp + "</p></div><div>"+
+            "<input type='button' value=" + submit + " onclick=\"submitFormAsync('" +
+            codegenParentTextId +
+            "')\"/><input type='button' value=" + cancel + " onclick='hideDiv()'/></div></fieldset></form></div>";
+    var header = '<fmt:message key="uploadFileTitle"/>';
+    showYUIPanel(header, innerHTML, "500px", "innerCodegenId", "divCodegenFileupload");
+}
 </script>
 
 <div id="middle">
+    <% if(generateClient!=null && generateType!=null && generateType.equals("cxf")){ %>
+    <h2><fmt:message key="webapp.client"/></h2>
+    <% }else{ %>
     <h2><fmt:message key="wsdl2java"/></h2>
+    <% } %>
 
     <div id="divCodegenFileupload" style="display:none;" class="yui-skin-sam"></div>
     <%
-        OMElement omElement;
-        if (generateClient != null) {
+        OMElement omElement=null;
+        if (generateClient != null && (generateType==null || generateType.equals("axis2"))) {
             omElement = Util.getCodegenOptions(
                     "/org/wso2/carbon/wsdl2code/ui/client/generate-client-options.xml");
+        }else if(generateClient != null && generateType.equals("cxf")){
+            if(wadl !=null){
+                omElement = Util.getCodegenOptions(
+                        "/org/wso2/carbon/wsdl2code/ui/client/generate-client-cxf-jaxrs-options.xml");
+            }else if(wsdl !=null){
+                omElement = Util.getCodegenOptions(
+                        "/org/wso2/carbon/wsdl2code/ui/client/generate-client-cxf-jaxws-options.xml");
+            }
         } else {
             omElement =
                     Util.getCodegenOptions("/org/wso2/carbon/wsdl2code/ui/client/codegen-options.xml");
@@ -276,7 +362,11 @@
         <table width="100%">
             <thead>
             <tr>
+                <% if(generateClient!=null && generateType!=null && generateType.equals("cxf")){ %>
+                <th colspan="2"><fmt:message key="options"/></th>
+                <%}else{ %>
                 <th colspan="2"><fmt:message key="wsdl2codeOptions"/></th>
+                <%}%>
             </tr>
             </thead>
             <tr>
@@ -349,10 +439,10 @@
                                 <%
                                     }
                                     dynamicJS = dynamicJS + "var obj_" + name + "= document.getElementById('" +
-                                                name + "');\n" +
-                                                "if (obj_" + name + ".value != '') {\n" +
-                                                "    options['" + name + "'] = obj_" + name + ".value;\n" +
-                                                "}\n";
+                                            name + "');\n" +
+                                            "if (obj_" + name + ".value != '') {\n" +
+                                            "    options['" + name + "'] = obj_" + name + ".value;\n" +
+                                            "}\n";
                                 } else if ("text-area".equals(uiType)) {
 
                                 %>
@@ -360,20 +450,20 @@
                                           id="<%=name%>"></textarea>
                                 <%
                                     dynamicJS = dynamicJS + "var obj_" + name + " = document.getElementById('" +
-                                                name + "');\n" +
-                                                "if (obj_" + name + ".value != '') {\n" +
-                                                "    options['" + name + "'] = obj_" + name + ".value;\n" +
-                                                "}\n";
+                                            name + "');\n" +
+                                            "if (obj_" + name + ".value != '') {\n" +
+                                            "    options['" + name + "'] = obj_" + name + ".value;\n" +
+                                            "}\n";
                                 } else if ("check".equals(uiType)) {
 
                                 %>
                                 <input class="toolsClass" type="checkbox" id="<%=name%>"/>
                                 <%
                                     dynamicJS = dynamicJS + "var obj_" + name + " = document.getElementById('" +
-                                                name + "');\n" +
-                                                "if (obj_" + name + ".checked) {\n" +
-                                                "    options['" + name + "'] = \"\";\n" +
-                                                "}\n";
+                                            name + "');\n" +
+                                            "if (obj_" + name + ".checked) {\n" +
+                                            "    options['" + name + "'] = \"\";\n" +
+                                            "}\n";
                                 } else if ("option".equals(uiType)) {
 
                                 %>
@@ -384,7 +474,7 @@
                                         Iterator iterator =
                                                 values.getChildrenWithLocalName("value");
                                         while (iterator.hasNext()) {
-                                               OMElement value = (OMElement) iterator.next();
+                                            OMElement value = (OMElement) iterator.next();
                                             String valueText = value.getText();
                                     %>
                                     <option value="<%=valueText%>"><%=valueText%>
@@ -395,9 +485,9 @@
                                 </select>
                                 <%
                                         dynamicJS = dynamicJS + "var obj_" + name + " = document.getElementById('" +
-                                                    name + "');\n" +
-                                                    "options['" + name + "'] = obj_" + name + "[obj_" + name +
-                                                    ".selectedIndex].value;\n";
+                                                name + "');\n" +
+                                                "options['" + name + "'] = obj_" + name + "[obj_" + name +
+                                                ".selectedIndex].value;\n";
                                     }
                                 %>
                             </td>
@@ -412,7 +502,7 @@
                     <div class="buttonrow" style="padding-top:10px">
                         <script type="text/javascript">
                             function populateOptions() {
-                            <%=dynamicJS%>
+                                <%=dynamicJS%>
                             }
                         </script>
                         <input type="button" class="button"

@@ -67,4 +67,38 @@ public class WSDL2CodeClient {
             throw new AxisFault(e.getMessage(), e);
         }
     }
+
+    /**
+     * invoke the back-end CXF code generation methods and prompt to download the resulting zip file
+     * containing generated code
+     * @param options - code generation options
+     * @param response - http servlet response
+     * @throws AxisFault in case of error
+     */
+    public void codeGenForCXF(String[] options, HttpServletResponse response) throws AxisFault {
+        try {
+            ServletOutputStream out = response.getOutputStream();
+            CodegenDownloadData downloadData = stub.codegenForCXF(options);
+            if (downloadData != null) {
+                DataHandler handler = downloadData.getCodegenFileData();
+                response.setHeader("Content-Disposition", "fileName=" + downloadData.getFileName());
+                response.setContentType(handler.getContentType());
+                InputStream in = handler.getDataSource().getInputStream();
+                int nextChar;
+                while ((nextChar = in.read()) != -1) {
+                    out.write((char) nextChar);
+                }
+                out.flush();
+                in.close();
+            } else {
+                out.write("The requested service archive was not found on the server".getBytes());
+            }
+        } catch (RemoteException e) {
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage(), e);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new AxisFault(e.getMessage(), e);
+        }
+    }
 }

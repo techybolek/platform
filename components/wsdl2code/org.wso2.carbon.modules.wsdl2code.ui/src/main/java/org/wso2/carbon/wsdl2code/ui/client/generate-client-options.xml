@@ -54,10 +54,11 @@
             <value>jaxbri</value>
         </values>
     </argument>
-    <argument uiType="check">
-        <name>g</name>
-        <description>Generates all the classes. Valid only with -ss</description>
-    </argument>
+    <!--This is not required because this is works with serverside onlly-->
+    <!--<argument uiType="check">-->
+    <!--<name>g</name>-->
+    <!--<description>Generates all the classes. Valid only with -ss</description>-->
+    <!--</argument>-->
     <argument uiType="text">
         <name>pn</name>
         <description>Port name. Choose a specific port when there are multiple ports in the wsdl</description>
@@ -70,10 +71,11 @@
         <name>u</name>
         <description>Unpacks the databinding classes</description>
     </argument>
-    <argument uiType="text">
-        <name>r</name>
-        <description>Specify a repository against which code is generated</description>
-    </argument>
+    <!--Not supported in wsdl2java maven plugin-->
+    <!--<argument uiType="text">-->
+    <!--<name>r</name>-->
+    <!--<description>Specify a repository against which code is generated</description>-->
+    <!--</argument>-->
     <argument uiType="text-area">
         <name>ns2p</name>
         <description>ns1=pkg1,ns2=pkg2 .Specify a custom package name for each namespace specified in the wsdls schema</description>
@@ -98,18 +100,20 @@
         <name>uw</name>
         <description>Switch on un-wrapping</description>
     </argument>
-    <argument uiType="text" readOnly="true" name="xsdconfig" uploadFile="true">
-        <name>xsdconfig</name>
-        <description>Use XMLBeans .xsdconfig file. Valid only with -d xmlbeans</description>
-    </argument>
+    <!--Not supported in wsdl2java maven plugin-->
+    <!--<argument uiType="text" readOnly="true" name="xsdconfig" uploadFile="true">-->
+    <!--<name>xsdconfig</name>-->
+    <!--<description>Use XMLBeans .xsdconfig file. Valid only with -d xmlbeans</description>-->
+    <!--</argument>-->
     <argument uiType="check">
         <name>ap</name>
         <description>Generate code for all ports</description>
     </argument>
-    <argument uiType="check">
-        <name>or</name>
-        <description>Overwrite the existing classes</description>
-    </argument>
+    <!--Not supported in wsdl2java maven plugin-->
+    <!--<argument uiType="check">-->
+    <!--<name>or</name>-->
+    <!--<description>Overwrite the existing classes</description>-->
+    <!--</argument>-->
     <argument uiType="skip">
         <name>b</name>
         <description>Generate Axis 1.x backword compatible code</description>
@@ -118,16 +122,17 @@
         <name>sp</name>
         <description>Suppress namespace prefixes (Optimzation that reduces size of soap request/response)</description>
     </argument>
-    <argument uiType="text">
-        <name>Emp</name>
-        <description>Package name for ADB. Extension mapper package name</description>
-    </argument>
-    <argument uiType="check">
-        <name>Eosv</name>
-        <description>(for ADB) - off strict validation</description>
-    </argument>
-    <argument uiType="text" readOnly="true" name="Ebindingfile" uploadFile="true">
-        <name>Ebindingfile</name>
-        <description>File path to your JiBX binding definition</description>
-    </argument>
+    <!--Not supported in wsdl2java maven plugin-->
+    <!--<argument uiType="text">-->
+    <!--<name>Emp</name>-->
+    <!--<description>Package name for ADB. Extension mapper package name</description>-->
+    <!--</argument>-->
+    <!--<argument uiType="check">-->
+    <!--<name>Eosv</name>-->
+    <!--<description>(for ADB) - off strict validation</description>-->
+    <!--</argument>-->
+    <!--<argument uiType="text" readOnly="true" name="Ebindingfile" uploadFile="true">-->
+    <!--<name>Ebindingfile</name>-->
+    <!--<description>File path to your JiBX binding definition</description>-->
+    <!--</argument>-->
 </codegen>

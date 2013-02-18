@@ -26,6 +26,7 @@
 <%
     WSDL2CodeClient wsdl2CodeClient;
     String codegenOptions = CharacterEncoder.getSafeText(request.getParameter("optionsString"));
+    String type= CharacterEncoder.getSafeText(request.getParameter("type"));
 
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
     String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
@@ -49,6 +50,10 @@
         }
     }
 
-    wsdl2CodeClient.codeGen(options, response);
+    if(type!=null && type.equalsIgnoreCase("cxf")){
+        wsdl2CodeClient.codeGenForCXF(options,response);
+    }else{
+        wsdl2CodeClient.codeGen(options, response);
+    }
     out.close();
 %>
