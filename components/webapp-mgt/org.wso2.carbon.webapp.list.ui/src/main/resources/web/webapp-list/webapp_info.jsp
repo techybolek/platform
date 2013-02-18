@@ -27,6 +27,9 @@
 <%@ page import="org.wso2.carbon.webapp.mgt.stub.types.carbon.WebappStatistics" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.Date" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Iterator" %>
+<%@ page import="org.wso2.carbon.webapp.list.ui.WebAppDataExtractor" %>
 
 <fmt:bundle basename="org.wso2.carbon.webapp.list.ui.i18n.Resources">
 <carbon:breadcrumb
@@ -44,6 +47,11 @@
     String hostName = request.getParameter("hostName");
     String httpPort = request.getParameter("httpPort");
     String webappType = request.getParameter("webappType");
+
+    WebAppDataExtractor webAppDataExtractor =new WebAppDataExtractor();
+    List wsdlURLS=null;
+    List wadlURLS=null;
+
     String servletContext = "/";
 
     String urlPrefix = "http://" + hostName + ":" + httpPort;
@@ -65,6 +73,11 @@
                 webapp = client.getStartedWebapp(webappFileName);
                 if(webapp == null) {
                     webapp = client.getStoppedWebapp(webappFileName);
+                }
+                if(webappType.equalsIgnoreCase("JaxWebapp")) {
+                    webAppDataExtractor.getServletXML(client.getWarFileInputStream(webapp.getWebappFile(),webappType));
+                    wsdlURLS= webAppDataExtractor.getWSDLs(urlPrefix + webapp.getContext() + servletContext);
+                    wadlURLS= webAppDataExtractor.getWADLs(urlPrefix + webapp.getContext() + servletContext);
                 }
             }
             else if (webappState.equalsIgnoreCase("started")) {
@@ -151,6 +164,39 @@
         } else {
             return false;
         }
+    }
+
+    //    try it feature for jaxws webapps
+    function validateAndSubmitTryit(inputObj) {
+        if (inputObj == "") {
+            CARBON.showWarningDialog('<fmt:message key="tryit.error.msg"/>');
+            return;
+        }
+        var urlSegments = document.location.href.split("/");
+        var resourcePath = urlSegments[3];
+        var frontendURL = wso2.wsf.Util.getServerURL() + "/";
+        var proxyAddress = getProxyAddress();
+
+        var bodyXml = '<req:generateTryit xmlns:req="http://org.wso2.wsf/tools">\n' +
+                '<url><![CDATA[' + inputObj + ']]></url>\n' +
+                '<hostName><![CDATA[' + HOST + ']]></hostName>\n' +
+                '</req:generateTryit>\n';
+
+
+        var callURL = wso2.wsf.Util.getBackendServerURL(frontendURL, "<%=CarbonUIUtil.getAdminConsoleURL(request).split("/carbon/")[0]+"/services/"%>") + "ExternalTryitService" ;
+        wso2.wsf.Util.cursorWait();
+        new wso2.wsf.WSRequest(callURL, "urn:generateTryit", bodyXml, wcserviceClientCallback, [2], undefined, proxyAddress);
+    }
+
+    //    call back function for try it feature
+    function wcserviceClientCallback() {
+        var data = this.req.responseXML;
+        var returnElementList = data.getElementsByTagName("ns:return");
+        // Older browsers might not recognize namespaces (e.g. FF2)
+        if (returnElementList.length == 0)
+            returnElementList = data.getElementsByTagName("return");
+        var responseTextValue = returnElementList[0].firstChild.nodeValue;
+        window.open(responseTextValue);
     }
 </script>
 
@@ -415,6 +461,86 @@
                 <td width="10px">&nbsp;</td>
                 <td>&nbsp;</td>
             </tr>
+            <% if (webappType.equalsIgnoreCase("JaxWebapp") && wsdlURLS != null) { %>
+            <tr>
+                <td colspan="3">&nbsp;</td>
+            </tr>
+            <tr>
+                <td width="50%">
+                    <table class="styledLeft" id="wsTable"
+                           style="margin-left: 0px;" width="100%">
+                        <thead>
+                        <tr>
+                            <th colspan="3"><fmt:message key="availalebleWS"/></th>
+                        </tr>
+                        </thead>
+                        <%
+                            Iterator iterator = wsdlURLS.iterator();
+                            while (iterator.hasNext()) {
+                                String value = (String) iterator.next();
+                        %>
+                        <tr>
+                            <td>
+                                <%=value%>
+                            </td>
+                            <td>
+                                <a href="../wsdl2code/index.jsp?generateClient=<%=value%>&toppage=false&resultType=cxf&api=jaxws" class="icon-link"
+                                   style='background-image:url(images/genclient.gif)'>
+                                    <fmt:message key="generate.jaxws.client"/>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#" onclick="validateAndSubmitTryit('<%=value%>')" class="icon-link"
+                                   style='background-image:url(images/tryit.gif)'>
+                                    <fmt:message key="tryit"/>
+                                </a>
+                            </td>
+                        </tr>
+                        <%} %>
+                    </table>
+                </td>
+            </tr>
+            <%}%>
+            <% if (webappType.equalsIgnoreCase("JaxWebapp") && wadlURLS != null) { %>
+            <tr>
+                <td colspan="3">&nbsp;</td>
+            </tr>
+            <tr>
+                <td width="50%">
+                    <table class="styledLeft" id="rsTable"
+                           style="margin-left: 0px;" width="100%">
+                        <thead>
+                        <tr>
+                            <th colspan="3"><fmt:message key="availalebleRS"/></th>
+                        </tr>
+                        </thead>
+                        <%
+                            Iterator iterator = wadlURLS.iterator();
+                            while (iterator.hasNext()) {
+                                String value = (String)iterator.next();
+                        %>
+                        <tr>
+                            <td>
+                                <%=value%>
+                            </td>
+                            <td>
+                                <a href="../wsdl2code/index.jsp?generateClient=<%=value%>&toppage=false&resultType=cxf&api=jaxrs" class="icon-link"
+                                   style='background-image:url(images/genclient.gif)'>
+                                    <fmt:message key="generate.jaxrs.client"/>
+                                </a>
+                            </td>
+                            <%--<td>--%>
+                                <%--<a href="../tryit/rest.jsp?wadlURL=<%=value%>" class="icon-link"--%>
+                                   <%--style='background-image:url(images/tryit.gif)'>--%>
+                                    <%--<fmt:message key="tryit"/>--%>
+                                <%--</a>--%>
+                            <%--</td>--%>
+                        </tr>
+                        <%} %>
+                    </table>
+                </td>
+            </tr>
+            <%}%>
         </table>
 
 

@@ -313,4 +313,25 @@ public class WebappAdminClient {
             handleException("error.downloading.war", e);
         }
     }
+
+
+    public InputStream getWarFileInputStream(String fileName, String webappType) throws AxisFault{
+        InputStream inputStream=null;
+        try {
+
+            DataHandler handler = stub.downloadWarFileHandler(fileName, webappType);
+            if (handler != null) {
+
+                inputStream= handler.getDataSource().getInputStream();
+
+            } else {
+
+            }
+        } catch (RemoteException e) {
+            handleException("error.downloading.war", e);
+        } catch (IOException e) {
+            handleException("error.downloading.war", e);
+        }
+        return inputStream;
+    }
 }
