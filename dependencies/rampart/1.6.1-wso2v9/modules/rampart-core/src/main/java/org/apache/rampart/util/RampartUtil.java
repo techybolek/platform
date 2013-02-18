@@ -1334,8 +1334,11 @@ public class RampartUtil {
     			} else if (x509Token.isRequireThumbprintReference()) {
     				secBase.setKeyIdentifierType(WSConstants.THUMBPRINT_IDENTIFIER);
     				tokenTypeSet = true;
-    			}
-    		}
+                } else if (x509Token.isRequireEmbeddedTokenReference()) {
+                    secBase.setKeyIdentifierType(WSConstants.EMBED_SECURITY_TOKEN_REF);
+                    tokenTypeSet = true;
+                }
+            }
 
     		if (!tokenTypeSet) {
                 final RampartPolicyData rpd = rmd.getPolicyData();

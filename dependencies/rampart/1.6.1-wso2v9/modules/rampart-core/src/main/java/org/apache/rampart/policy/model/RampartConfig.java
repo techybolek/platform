@@ -80,6 +80,10 @@ public class RampartConfig implements Assertion {
 
     public final static String USER_LN = "user";
 
+    public final static String MUST_UNDERSTAND_LN = "mustUnderstand";
+
+    public final static String ACTOR_LN = "actor";
+
     public final static String USER_CERT_ALIAS_LN = "userCertAlias";
 
     public final static String ENCRYPTION_USER_LN = "encryptionUser";
@@ -161,6 +165,10 @@ public class RampartConfig implements Assertion {
 
     private SSLConfig sslConfig;
 
+    private int mustUnderstand = 1;
+
+    private String actor;
+
         /*To set timeStampStrict in WSSConfig through rampartConfig*/
     private String timeStampStrict = Boolean.toString(TIMESTAMP_STRICT);
 
@@ -169,6 +177,22 @@ public class RampartConfig implements Assertion {
     private boolean optimizeMessageProcessingForTransportBinding;
 
     private Map<String, String> propertyMap;
+
+    public int getMustUnderstand() {
+        return mustUnderstand;
+    }
+
+    public void setMustUnderstand(int mustUnderstand) {
+        this.mustUnderstand = mustUnderstand;
+    }
+
+    public String getActor() {
+        return actor;
+    }
+
+    public void setActor(String actor) {
+        this.actor = actor;
+    }
 
     public KerberosConfig getKerberosConfig() {
         return kerberosConfig;
@@ -324,6 +348,18 @@ public class RampartConfig implements Assertion {
         if (getUser() != null) {
             writer.writeStartElement(NS, USER_LN);
             writer.writeCharacters(getUser());
+            writer.writeEndElement();
+        }
+
+        if (getActor() != null) {
+            writer.writeStartElement(NS, ACTOR_LN);
+            writer.writeCharacters(getActor());
+            writer.writeEndElement();
+        }
+
+        if (getMustUnderstand() != 1) {
+            writer.writeStartElement(NS, MUST_UNDERSTAND_LN);
+            writer.writeCharacters(String.valueOf(getMustUnderstand()));
             writer.writeEndElement();
         }
 

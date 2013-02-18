@@ -389,10 +389,19 @@ public class RampartMessageData {
 
             if (axisService != null) { 
                 this.customClassLoader = axisService.getClassLoader(); 
-            } 
-            
-            if(this.sender && this.policyData != null) {
+            }
+
+            if (this.sender && this.policyData != null) {
                 this.secHeader = new WSSecHeader();
+                if (this.policyData.getRampartConfig() != null) {
+                    if (this.policyData.getRampartConfig().getMustUnderstand() == 0) {
+                        this.secHeader = new WSSecHeader(this.policyData.getRampartConfig().getActor(),
+                                                         false);
+                    } else {
+                        this.secHeader = new WSSecHeader(this.policyData.getRampartConfig().getActor(),
+                                                         true);
+                    }
+                }
                 secHeader.insertSecurityHeader(this.document);
             }
             

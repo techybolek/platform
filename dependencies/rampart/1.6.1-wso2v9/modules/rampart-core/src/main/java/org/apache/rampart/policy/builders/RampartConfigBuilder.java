@@ -44,6 +44,18 @@ public class RampartConfigBuilder implements AssertionBuilder {
             rampartConfig.setUserCertAlias(childElement.getText().trim());
         }
 
+        childElement = element.getFirstChildWithName(new QName(RampartConfig.NS,
+                                                               RampartConfig.ACTOR_LN));
+        if (childElement != null) {
+            rampartConfig.setActor(childElement.getText().trim());
+        }
+
+        childElement = element.getFirstChildWithName(new QName(RampartConfig.NS,
+                                                               RampartConfig.MUST_UNDERSTAND_LN));
+        if (childElement != null) {
+            rampartConfig.setMustUnderstand(Integer.parseInt(childElement.getText().trim()));
+        }
+
         childElement = element.getFirstChildWithName(new QName(
                 RampartConfig.NS, RampartConfig.ENCRYPTION_USER_LN));
         if (childElement != null) {

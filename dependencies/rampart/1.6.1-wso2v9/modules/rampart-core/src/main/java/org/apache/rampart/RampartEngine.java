@@ -151,6 +151,11 @@ public class RampartEngine {
         String actorValue = secHeader.getAttributeValue(new QName(rmd.getSoapConstants()
                 .getEnvelopeURI(), "actor"));
 
+        if (actorValue == null) {
+               actorValue = secHeader.getAttributeValue(new QName(rmd.getSoapConstants()
+                    .getEnvelopeURI(), "role"));
+        }
+
         Crypto signatureCrypto = RampartUtil.getSignatureCrypto(rpd.getRampartConfig(), msgCtx
                 .getAxisService().getClassLoader());
 
