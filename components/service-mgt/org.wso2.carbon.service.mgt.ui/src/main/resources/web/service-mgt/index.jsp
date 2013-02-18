@@ -20,6 +20,7 @@
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.service.mgt.ui.ServiceAdminClient" %>
+<%@ page import="org.wso2.carbon.service.mgt.ui.ServiceTypeNaming" %>
 <%@ page import="org.wso2.carbon.service.mgt.stub.types.carbon.ServiceMetaDataWrapper" %>
 <%@ page import="org.wso2.carbon.service.mgt.stub.types.carbon.ServiceMetaData" %>
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
@@ -66,6 +67,7 @@ padding:0 10px;
     } catch (NumberFormatException ignored) {
     }
     ServiceMetaDataWrapper servicesInfo;
+    ServiceTypeNaming stn = new ServiceTypeNaming();
 
     String serviceTypeFilter = request.getParameter("serviceTypeFilter");
     if (serviceTypeFilter == null) {
@@ -310,12 +312,12 @@ padding:0 10px;
                                     for (String serviceType : servicesInfo.getServiceTypes()) {
                                         if (serviceTypeFilter.equals(serviceType)) {
                                 %>
-                                <option value="<%= serviceType%>" selected="selected"><%= serviceType%>
+                                <option value="<%= serviceType%>" selected="selected"><%= stn.convertString(serviceType) %>
                                 </option>
                                 <%
                                 } else {
-                                %>
-                                <option value="<%= serviceType%>"><%= serviceType%>
+                                %>                           
+                                <option value="<%= serviceType%>"><%= stn.convertString(serviceType) %>
                                 </option>
                                 <%
                                         }
