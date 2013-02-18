@@ -18,10 +18,10 @@
  */
 package org.apache.synapse.mediators.elementary;
 
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.OMText;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -33,8 +33,6 @@ import org.apache.synapse.util.xpath.SynapseXPath;
 import org.jaxen.JaxenException;
 
 import java.util.ArrayList;
-
-import javax.xml.stream.XMLStreamException;
 
 /**
  * Inset an Axiom element to the current message. The target to insert the OMElement can be
@@ -103,6 +101,9 @@ public class Target {
                         ((OMElement)targetParent).addChild(sourceNodeList.get(0));
                     }
                 }
+            } else if (targetObj instanceof OMAttribute) {
+                OMAttribute attribute = (OMAttribute) targetObj;
+                attribute.setAttributeValue(((OMText) sourceNodeList.get(0)).getText());
             } else {
                 synLog.error("Invalid Target object to be enrich.");
                 throw new SynapseException("Invalid Target object to be enrich.");

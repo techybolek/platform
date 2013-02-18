@@ -87,8 +87,6 @@ public class CalloutMediatorFactory extends AbstractMediatorFactory {
             callout.setServiceURL(attServiceURL.getAttributeValue());
         } else if (attEndpoint != null) {
             callout.setEndpointKey(attEndpoint.getAttributeValue());
-        } else {
-            handleException("The 'serviceURL' attribute or 'endpointKey' attribute is required for the Callout mediator");
         }
 
         if (attAction != null) {

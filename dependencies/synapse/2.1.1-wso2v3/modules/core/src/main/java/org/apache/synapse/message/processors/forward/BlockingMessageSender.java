@@ -26,9 +26,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.addressing.EndpointReference;
-import org.apache.axis2.client.OperationClient;
 import org.apache.axis2.client.Options;
-import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.description.Parameter;
@@ -48,7 +46,7 @@ import java.util.Iterator;
 
 public class BlockingMessageSender {
 
-    private ServiceClient sc = null;
+    private MessageStoreServiceClient sc = null;
 
 
     public final static String DEFAULT_CLIENT_REPO = "./samples/axis2Client/client_repo";
@@ -68,7 +66,7 @@ public class BlockingMessageSender {
                     = ConfigurationContextFactory.createConfigurationContextFromFileSystem(
                     clientRepository != null ? clientRepository : DEFAULT_CLIENT_REPO,
                     axis2xml != null ? axis2xml : DEFAULT_AXIS2_XML);
-            sc = new ServiceClient(configurationContext, null);
+            sc = new MessageStoreServiceClient(configurationContext, null);
         } catch (AxisFault e) {
             String msg = "Error initializing BlockingMessageSender : " + e.getMessage();
             log.error(msg, e);
@@ -145,12 +143,17 @@ public class BlockingMessageSender {
                 options.setProperty(Constants.Configuration.ENABLE_SWA, Constants.VALUE_TRUE);
             }
 
+
+            if(endpoint.isForcePOX()){
+            	axis2Ctx.setDoingREST(true);
+            }
+
             sc.setOptions(options);
             OMElement result = null;
             try {
                 OMElement payload = axis2Ctx.getEnvelope().getBody().getFirstElement();
                 if(outOnlyMessage) {
-                    sc.sendRobust(payload);
+                	 sc.sendRobust(payload,axis2Ctx);
                 } else {
                     result = sc.sendReceive(payload);
                 }

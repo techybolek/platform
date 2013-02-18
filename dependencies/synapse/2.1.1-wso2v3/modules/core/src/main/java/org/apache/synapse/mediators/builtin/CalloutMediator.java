@@ -117,8 +117,10 @@ public class CalloutMediator extends AbstractMediator implements ManagedLifecycl
                         handleException("Endpoint Address is not specified", synCtx);
                     }
                 }
+            } else if (synCtx.getTo() != null && synCtx.getTo().getAddress() != null) {
+                endpointReferenceValue = synCtx.getTo().getAddress();
             } else {
-                handleException("Service url or Endpoint is required", synCtx);
+                handleException("Service url, Endpoint or 'To' header is required", synCtx);
             }
             options.setTo(new EndpointReference(endpointReferenceValue));
 
@@ -126,6 +128,8 @@ public class CalloutMediator extends AbstractMediator implements ManagedLifecycl
 
             if (action != null) {
                 options.setAction(action);
+            } else if (synCtx.getWSAAction() != null) {
+                options.setAction(synCtx.getWSAAction());
             } else {
 
                 //setting original SOAP action from message if action is not defined
@@ -202,10 +206,11 @@ public class CalloutMediator extends AbstractMediator implements ManagedLifecycl
 
             OMElement result = null;
             try {
-                options.setCallTransportCleanup(true);
                 if ("true".equals(synCtx.getProperty("OUT_ONLY"))) {
                     sc.sendRobust(request);
+                    sc.cleanupTransport();
                 } else {
+                    options.setCallTransportCleanup(true);
                     result = sc.sendReceive(request);
                 }
             } catch (AxisFault axisFault) {

@@ -1562,9 +1562,15 @@ public class SynapseConfiguration implements ManagedLifecycle, SynapseArtifact {
      * @param name Name of the message store
      * @param messageStore a MessageStore instance
      */
-    public void addMessageStore(String name,MessageStore messageStore) {
-        if (!messageStores.containsKey(name)){
-            messageStores.put(name,messageStore);
+    public void addMessageStore(String name, MessageStore messageStore) {
+        if (!messageStores.containsKey(name)) {
+            messageStores.put(name, messageStore);
+            Set<String> processors = messageProcessors.keySet();
+            for (String processorName : processors) {
+                if (messageProcessors.get(processorName).getMessageStoreName().equals(name)) {
+                    (messageProcessors.get(processorName)).start();
+                }
+            }
         } else {
             handleException("Duplicate message store : " + name);
         }

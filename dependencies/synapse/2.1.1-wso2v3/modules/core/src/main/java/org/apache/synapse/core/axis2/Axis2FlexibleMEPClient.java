@@ -422,9 +422,22 @@ public class Axis2FlexibleMEPClient {
             } else {
                 callback.setTimeOutOn(System.currentTimeMillis());
             }
-
+            mepClient.setCallback(callback);
+        } else {
+            //A call back should be registered only if the message is http
+            if (endpoint != null) {
+                String endpointAddress = endpoint.getAddress();
+                if (endpointAddress.startsWith("http")) {
+                    mepClient.setCallback(callback);
+                }
+            } else {
+                //Checking the addressing header
+                String endpointAddress = synapseOutMessageContext.getTo().getAddress();
+                if (endpointAddress.startsWith("http")) {
+                    mepClient.setCallback(callback);
+                }
+            }
         }
-        mepClient.setCallback(callback);
 
 //
 //        if (Utils.isClientThreadNonBlockingPropertySet(axisOutMsgCtx)) {

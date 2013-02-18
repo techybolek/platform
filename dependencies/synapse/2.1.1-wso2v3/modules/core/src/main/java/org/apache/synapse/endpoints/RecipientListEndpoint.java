@@ -31,10 +31,15 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.Value;
 import org.apache.synapse.mediators.eip.EIPConstants;
+import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.apache.synapse.util.MessageHelper;
+
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+
+import javax.xml.stream.XMLStreamException;
 
 /**
  * @author nuwan
@@ -80,6 +85,8 @@ public class RecipientListEndpoint extends AbstractEndpoint {
 			super.init(synapseEnvironment);
 		}
         this.env = synapseEnvironment;
+        
+        this.setContentAware(true);
 	}
 
 	@Override
@@ -123,6 +130,13 @@ public class RecipientListEndpoint extends AbstractEndpoint {
     private void sendToEndpointList(MessageContext synCtx, List<Endpoint> children) {
         int i = 0;
         boolean foundEndpoint = false;
+        
+        //we should build the message, its should have the same behavior as clone mediator
+        try {
+	        RelayUtils.buildMessage(((Axis2MessageContext) synCtx).getAxis2MessageContext(),false);
+        } catch (Exception e) {
+        	  handleException("Error while building message", e);
+        }
 
         for (Endpoint childEndpoint : children) {
 
