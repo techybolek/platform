@@ -244,8 +244,21 @@ public class WebappAdmin extends AbstractAdmin {
             }
             String appContext = "/";
             for (Container container : webapp.getContext().findChildren()) {
-                if(((StandardWrapper) container).getServletClass().equals("org.apache.cxf.transport.servlet.CXFServlet")) {
-                    appContext = (((StandardWrapper) container).findMappings())[0];
+                try {
+                    Class servletClass = Class.forName(((StandardWrapper) container).getServletClass(), false,
+                            container.getLoader().getClassLoader());
+                    Class cXFServletClass = Class.forName("org.apache.cxf.transport.servlet.CXFServlet", false,
+                            container.getLoader().getClassLoader());
+
+                    if (servletClass.isInstance(cXFServletClass.newInstance())) {
+                        appContext = (((StandardWrapper) container).findMappings())[0];
+                    }
+                } catch (ClassNotFoundException e) {
+                    log.warn(e);
+                } catch (InstantiationException e) {
+                    log.warn(e);
+                } catch (IllegalAccessException e) {
+                    log.warn(e);
                 }
             }
             if(appContext.endsWith("/*")) {
