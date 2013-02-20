@@ -244,15 +244,18 @@ public class WebappAdmin extends AbstractAdmin {
             }
             String appContext = "/";
             for (Container container : webapp.getContext().findChildren()) {
+/*
                 try {
                     Class servletClass = Class.forName(((StandardWrapper) container).getServletClass(), false,
                             container.getLoader().getClassLoader());
                     Class cXFServletClass = Class.forName("org.apache.cxf.transport.servlet.CXFServlet", false,
                             container.getLoader().getClassLoader());
+*/
 
-                    if (servletClass.isInstance(cXFServletClass.newInstance())) {
-                        appContext = (((StandardWrapper) container).findMappings())[0];
-                    }
+                if (((StandardWrapper) container).getServletName().toLowerCase().contains("cxf")) {
+                    appContext = (((StandardWrapper) container).findMappings())[0];
+                }
+/*
                 } catch (ClassNotFoundException e) {
                     log.warn(e);
                 } catch (InstantiationException e) {
@@ -260,6 +263,7 @@ public class WebappAdmin extends AbstractAdmin {
                 } catch (IllegalAccessException e) {
                     log.warn(e);
                 }
+*/
             }
             if(appContext.endsWith("/*")) {
                 appContext = appContext.substring(0, appContext.indexOf("/*"));
