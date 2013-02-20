@@ -45,19 +45,19 @@
             <artifactId>org.wso2.carbon.jaxws.webapp.deployer</artifactId>
 	    <version>${project.version}</version>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.apache.cxf.wso2</groupId>
             <artifactId>cxf-bundle</artifactId>
 	    <version>${orbit.version.cxf}</version>
-        </dependency>
-        <dependency>
+        </dependency-->
+        <!--dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>jsr311-api</artifactId>
-        </dependency>
- <dependency>
+        </dependency-->
+	 <!--dependency>
                 <groupId>org.springframework.ws.wso2</groupId>
                 <artifactId>spring.framework</artifactId>
-            </dependency>
+            </dependency-->
    </dependencies>
 
     <build>
@@ -85,9 +85,9 @@
                             <bundles>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.jaxws.webapp.mgt</bundleDef>
                                 <bundleDef>org.wso2.carbon:org.wso2.carbon.jaxws.webapp.deployer</bundleDef>
-                                <bundleDef>org.apache.cxf.wso2:cxf-bundle</bundleDef>
-                                <bundleDef>javax.ws.rs:jsr311-api</bundleDef>
-                                <bundleDef>org.springframework.ws.wso2:spring.framework</bundleDef>
+                                <!--bundleDef>org.apache.cxf.wso2:cxf-bundle</bundleDef-->
+                                <!--bundleDef>javax.ws.rs:jsr311-api</bundleDef-->
+                                <!--bundleDef>org.springframework.ws.wso2:spring.framework</bundleDef-->
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${project.version}</importFeatureDef>
