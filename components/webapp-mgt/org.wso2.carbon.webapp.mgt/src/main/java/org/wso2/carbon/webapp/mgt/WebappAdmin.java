@@ -251,8 +251,10 @@ public class WebappAdmin extends AbstractAdmin {
                     Class cXFServletClass = Class.forName("org.apache.cxf.transport.servlet.CXFServlet", false,
                             container.getLoader().getClassLoader());
 */
-
-                if (((StandardWrapper) container).getServletName().toLowerCase().contains("cxf")) {
+                if(((StandardWrapper) container).getServletClass().equals("org.apache.cxf.transport.servlet.CXFServlet")) {
+                    appContext = (((StandardWrapper) container).findMappings())[0];
+                }
+                else if (((StandardWrapper) container).getServletName().toLowerCase().contains("cxf")) {
                     appContext = (((StandardWrapper) container).findMappings())[0];
                 }
 /*
