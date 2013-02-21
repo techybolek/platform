@@ -76,7 +76,7 @@ public class WebappClassloadingContext {
         }
 
         for (String delegatedPkg : delegatedPackages) {
-            if (packageName.endsWith(delegatedPkg)) {
+            if (packageName.equals(delegatedPkg)) {
                 return true;
             }
         }
