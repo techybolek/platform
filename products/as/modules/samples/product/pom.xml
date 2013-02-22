@@ -175,12 +175,12 @@
     </dependencyManagement>
 
     <properties>
-        <appserver.axis2.version>1.6.1.wso2v7</appserver.axis2.version>
-        <appserver.axiom.version>1.2.11.wso2v2</appserver.axiom.version>
+        <appserver.axis2.version>1.6.1.wso2v8</appserver.axis2.version>
+        <appserver.axiom.version>1.2.11.wso2v4</appserver.axiom.version>
         <appserver.wss4j.version>1.5.11.wso2v1</appserver.wss4j.version>
-        <appserver.rampart.version>1.6.1.wso2v6</appserver.rampart.version>
+        <appserver.rampart.version>1.6.1.wso2v9</appserver.rampart.version>
         <appserver.hibernate.version>3.2.5.ga-wso2v1</appserver.hibernate.version>
-        <appserver.axis2.jibx.version>1.6.1.wso2v7</appserver.axis2.jibx.version>
+        <appserver.axis2.jibx.version>1.6.1.wso2v8</appserver.axis2.jibx.version>
         <orbit.version.wsdl4j>1.6.2.wso2v2</orbit.version.wsdl4j>
         <orbit.version.xmlschema>1.4.7.wso2v1</orbit.version.xmlschema>
         <orbit.version.woden>1.0.0.M8-wso2v1</orbit.version.woden>
