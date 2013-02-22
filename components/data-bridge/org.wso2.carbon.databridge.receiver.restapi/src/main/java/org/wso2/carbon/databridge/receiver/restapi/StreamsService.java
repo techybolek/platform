@@ -91,7 +91,7 @@ public class StreamsService {
     @Path("/{stream}/{version}")
     public Response publishEvent(
             @PathParam("stream") String streamName,
-            @PathParam("version") String version, String requestBody,
+            @PathParam("version") String version,
             @Context HttpServletRequest request) {
 
         try {
@@ -99,13 +99,7 @@ public class StreamsService {
                     (DataBridgeReceiverService) PrivilegedCarbonContext.getCurrentContext()
                             .getOSGiService(DataBridgeReceiverService.class);
 
-            final String streamId =
-                    dataBridgeReceiverService.findStreamId(RESTUtils.getSessionId(request), streamName
-                            , version);
-            if(streamId==null){
-                throw new WebApplicationException(new RuntimeException("No stream definitions exist for "+streamName+" "+version+", to process "+requestBody));
-            }
-            dataBridgeReceiverService.deleteStream(RESTUtils.getSessionId(request), streamId);
+            dataBridgeReceiverService.deleteStream(RESTUtils.getSessionId(request), streamName,version);
 
             return Response.status(Response.Status.ACCEPTED).build();
 
