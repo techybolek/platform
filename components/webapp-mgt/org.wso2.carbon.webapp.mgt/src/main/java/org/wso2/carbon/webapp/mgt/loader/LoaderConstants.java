@@ -19,8 +19,8 @@ package org.wso2.carbon.webapp.mgt.loader;
 
 public class LoaderConstants {
 
-    public final static String ENV_CONFIG_FILE = "as-classloading-environments.xml";
-    public final static String CL_CONFIG_FILE = "as-classloading.xml";
+    public final static String ENV_CONFIG_FILE = "webapp-classloading-environments.xml";
+    public final static String CL_CONFIG_FILE = "webapp-classloading.xml";
     public final static String APP_CL_CONFIG_FILE = "META-INF/" + CL_CONFIG_FILE;
 
     public final static String SYSTEM_ENV = "Tomcat";

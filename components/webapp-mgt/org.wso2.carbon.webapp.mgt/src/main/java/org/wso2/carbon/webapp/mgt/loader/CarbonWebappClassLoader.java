@@ -23,8 +23,8 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Customized WebappClassloader for Carbon. This class introduces a new classloading pattern which is based on the
- * as-classloading.xml file. The default behaviour is specified in the container level configuration file.
- * But webapps has the ability to override that behaviour by adding the customised  as-classloading.xml file into the
+ * webapp-classloading.xml file. The default behaviour is specified in the container level configuration file.
+ * But webapps has the ability to override that behaviour by adding the customised  webapp-classloading.xml file into the
  * webapp.
  */
 public class CarbonWebappClassLoader extends WebappClassLoader {

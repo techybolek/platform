@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Global ClassloadingConfiguration. Contains information specified in the as-classloading-environments.xml and
- * as-classloading.xml. Individual webapps build their own Contexts based on this global configuration.
+ * Global ClassloadingConfiguration. Contains information specified in the webapp-classloading-environments.xml and
+ * webapp-classloading.xml. Individual webapps build their own Contexts based on this global configuration.
  */
 public class ClassloadingConfiguration {
 

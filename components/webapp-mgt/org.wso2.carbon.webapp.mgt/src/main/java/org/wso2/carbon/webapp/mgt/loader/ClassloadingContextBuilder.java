@@ -38,7 +38,7 @@ import java.util.jar.JarFile;
 
 /**
  * Responsible for building the ClassloadingConfiguration and WebappClassloadingContext objects based on the
- * as-classloading-environments.xml and as-classloading.xml files.
+ * webapp-classloading-environments.xml and webapp-classloading.xml files.
  */
 public class ClassloadingContextBuilder {
     private static final Log log = LogFactory.getLog(ClassloadingContextBuilder.class);
@@ -61,7 +61,7 @@ public class ClassloadingContextBuilder {
         }
         populateEnvironments(classloadingConfig, envConfigFile);
 
-        //Loading classloading policy form the as-classloading.xml file.
+        //Loading classloading policy form the webapp-classloading.xml file.
         File clConfigFile = new File(clConfigPath);
         if (!clConfigFile.exists()) {
             throw new FileNotFoundException(clConfigPath);
