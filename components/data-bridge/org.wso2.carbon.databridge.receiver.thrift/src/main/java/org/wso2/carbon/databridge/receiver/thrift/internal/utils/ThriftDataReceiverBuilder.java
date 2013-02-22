@@ -62,6 +62,17 @@ public final class ThriftDataReceiverBuilder {
         }
     }
 
+    private static void populateHostName(OMElement config,
+                                         ThriftDataReceiverConfiguration thriftDataReceiverConfiguration){
+        OMElement receiverHostName = config.getFirstChildWithName(
+                new QName(DataBridgeConstants.DATA_BRIDGE_NAMESPACE,
+                          ThriftDataReceiverConstants.RECEIVER_HOST_NAME));
+        if (receiverHostName != null && receiverHostName.getText() != null
+                && !receiverHostName.getText().trim().equals("")) {
+                thriftDataReceiverConfiguration.setReceiverHostName(receiverHostName.getText());
+        }
+    }
+
 
     public static int readPortOffset(ServerConfigurationService serverConfiguration) {
 
@@ -84,6 +95,7 @@ public final class ThriftDataReceiverBuilder {
                               ThriftDataReceiverConstants.THRIFT_EVENT_RECEIVER_ELEMENT));
             if (thriftReceiverConfig != null) {
                 populatePorts(thriftReceiverConfig, portOffset, thriftDataReceiverConfiguration);
+                populateHostName(thriftReceiverConfig, thriftDataReceiverConfiguration);
             }
         }
     }

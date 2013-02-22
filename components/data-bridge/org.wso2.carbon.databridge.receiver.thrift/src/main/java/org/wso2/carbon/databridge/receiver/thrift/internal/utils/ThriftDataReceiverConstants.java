@@ -32,4 +32,5 @@ public final class ThriftDataReceiverConstants {
 
     public static final int CARBON_DEFAULT_PORT_OFFSET = 0;
     public static final String CARBON_CONFIG_PORT_OFFSET_NODE = "Ports.Offset";
+    public static final String RECEIVER_HOST_NAME="hostName";
 }

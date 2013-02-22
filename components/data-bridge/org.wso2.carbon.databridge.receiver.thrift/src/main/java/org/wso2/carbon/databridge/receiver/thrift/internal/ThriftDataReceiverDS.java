@@ -82,12 +82,14 @@ public class ThriftDataReceiverDS {
 
                 dataReceiver = new ThriftDataReceiverFactory().createAgentServer(thriftDataReceiverConfiguration, dataBridgeReceiverService);
                 String serverUrl = CarbonUtils.getServerURL(serverConfiguration, configurationContext.getServerConfigContext());
-                String hostName = null;
-                try {
-                    hostName = new URL(serverUrl).getHost();
-                } catch (MalformedURLException e) {
-                    hostName = HostAddressFinder.findAddress("localhost");
-                    log.warn("The server url :" + serverUrl + " is malformed URL hence hostname is assigned as '"+hostName+"'");
+                String hostName = thriftDataReceiverConfiguration.getReceiverHostName();
+                if (null == hostName) {
+                    try {
+                        hostName = new URL(serverUrl).getHost();
+                    } catch (MalformedURLException e) {
+                        hostName = HostAddressFinder.findAddress("localhost");
+                        log.warn("The server url :" + serverUrl + " is malformed URL hence hostname is assigned as '" + hostName + "'");
+                    }
                 }
                 dataReceiver.start(hostName);
 

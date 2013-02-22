@@ -27,11 +27,19 @@ import org.wso2.carbon.databridge.commons.thrift.utils.CommonThriftConstants;
 public class ThriftDataReceiverConfiguration {
     private int secureDataReceiverPort = CommonThriftConstants.DEFAULT_RECEIVER_PORT + CommonThriftConstants.SECURE_EVENT_RECEIVER_PORT_OFFSET;
     private int dataReceiverPort = CommonThriftConstants.DEFAULT_RECEIVER_PORT;
+    private String receiverHostName;
 
     public ThriftDataReceiverConfiguration(int defaultSslPort, int defaultPort) {
         secureDataReceiverPort = defaultSslPort;
         dataReceiverPort = defaultPort;
     }
+
+    public ThriftDataReceiverConfiguration(int defaultSslPort, int defaultPort,String confHostName) {
+        secureDataReceiverPort = defaultSslPort;
+        dataReceiverPort = defaultPort;
+        receiverHostName = confHostName;
+    }
+
 
     public int getDataReceiverPort() {
         return dataReceiverPort;
@@ -49,4 +57,11 @@ public class ThriftDataReceiverConfiguration {
         this.secureDataReceiverPort = secureDataReceiverPort;
     }
 
+    public String getReceiverHostName() {
+        return receiverHostName;
+    }
+
+    public void setReceiverHostName(String receiverHostName) {
+        this.receiverHostName = receiverHostName;
+    }
 }
