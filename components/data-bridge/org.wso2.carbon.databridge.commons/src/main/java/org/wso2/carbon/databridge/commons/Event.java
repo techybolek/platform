@@ -114,13 +114,13 @@ public class Event {
 
     @Override
     public String toString() {
-        return "Event{" +
-                EBCommonsConstants.STREAM_ID + "='" + streamId + '\'' +
-                ", " + EBCommonsConstants.TIME_STAMP + "=" + timeStamp +
-                ", " + EBCommonsConstants.META_DATA + "=" + (metaData == null ? null : Arrays.asList(metaData)) +
-                ", " + EBCommonsConstants.CORRELATION_DATA + "=" + (correlationData == null ? null : Arrays.asList(correlationData)) +
-                ", " + EBCommonsConstants.PAYLOAD_DATA + "=" + (payloadData == null ? null : Arrays.asList(payloadData)) +
-                ", " + EBCommonsConstants.ARBITRARY_DATA_MAP + "=" + arbitraryDataMap +
-                '}';
+        return "\nEvent{\n" +
+               "  " + EBCommonsConstants.STREAM_ID + "='" + streamId + "\',\n" +
+               "  " + EBCommonsConstants.TIME_STAMP + "=" + timeStamp + ",\n" +
+               "  " + EBCommonsConstants.META_DATA + "=" + (metaData == null ? null : Arrays.asList(metaData)) + ",\n" +
+               "  " + EBCommonsConstants.CORRELATION_DATA + "=" + (correlationData == null ? null : Arrays.asList(correlationData)) + ",\n" +
+               "  " + EBCommonsConstants.PAYLOAD_DATA + "=" + (payloadData == null ? null : Arrays.asList(payloadData)) + ",\n" +
+               "  " + EBCommonsConstants.ARBITRARY_DATA_MAP + "=" + arbitraryDataMap + ",\n" +
+               "}\n";
     }
 }

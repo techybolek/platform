@@ -34,7 +34,7 @@ import java.util.List;
  * the util class that converts Events and its definitions in to various forms
  */
 public final class EventDefinitionConverterUtils {
-    public final static String nullString="_null";
+    public final static String nullString = "_null";
     private static Gson gson = new Gson();
 
     private EventDefinitionConverterUtils() {
@@ -55,15 +55,13 @@ public final class EventDefinitionConverterUtils {
     }
 
 
-
-
     public static StreamDefinition convertFromJson(String streamDefinition)
             throws MalformedStreamDefinitionException {
         try {
             StreamDefinition tempStreamDefinition = gson.fromJson(streamDefinition.
-                    replaceAll("('|\")(?i)int('|\")", "'INT'").replaceAll("('|\")(?i)long('|\")", "'LONG'").
-                    replaceAll("('|\")(?i)float('|\")", "'FLOAT'").replaceAll("('|\")(?i)double('|\")", "'DOUBLE'").
-                    replaceAll("('|\")(?i)bool('|\")", "'BOOL'").replaceAll("('|\")(?i)string('|\")", "'STRING'"), StreamDefinition.class);
+                    replaceAll("('|\")type('|\")\\W*:\\W*('|\")(?i)int('|\")", "'type':'INT'").replaceAll("('|\")type('|\")\\W*:\\W*('|\")(?i)long('|\")", "'type':'LONG'").
+                    replaceAll("('|\")type('|\")\\W*:\\W*('|\")(?i)float('|\")", "'type':'FLOAT'").replaceAll("('|\")type('|\")\\W*:\\W*('|\")(?i)double('|\")", "'type':'DOUBLE'").
+                    replaceAll("('|\")type('|\")\\W*:\\W*('|\")(?i)bool('|\")", "'type':'BOOL'").replaceAll("('|\")type('|\")\\W*:\\W*('|\")(?i)string('|\")", "'type':'STRING'"), StreamDefinition.class);
 
             String name = tempStreamDefinition.getName();
             String version = tempStreamDefinition.getVersion();
@@ -76,25 +74,19 @@ public final class EventDefinitionConverterUtils {
                 throw new MalformedStreamDefinitionException("stream name is null");
             }
 
-            String streamId = tempStreamDefinition.getStreamId();
-            StreamDefinition newStreamDefinition;
-            if (streamId == null) {
-                newStreamDefinition = new StreamDefinition(name, version);
-            } else {
-                newStreamDefinition = new StreamDefinition(name, version, streamId);
-            }
+            StreamDefinition newStreamDefinition = new StreamDefinition(name, version);
 
             newStreamDefinition.setTags(tempStreamDefinition.getTags());
-            List<Attribute> metaList=tempStreamDefinition.getMetaData();
-            if(metaList!=null&&metaList.size()>0){
+            List<Attribute> metaList = tempStreamDefinition.getMetaData();
+            if (metaList != null && metaList.size() > 0) {
                 newStreamDefinition.setMetaData(metaList);
             }
-            List<Attribute> correlationList=tempStreamDefinition.getCorrelationData();
-            if(correlationList!=null&&correlationList.size()>0){
+            List<Attribute> correlationList = tempStreamDefinition.getCorrelationData();
+            if (correlationList != null && correlationList.size() > 0) {
                 newStreamDefinition.setCorrelationData(correlationList);
             }
-            List<Attribute> payloadList=tempStreamDefinition.getPayloadData();
-            if(payloadList!=null&&payloadList.size()>0){
+            List<Attribute> payloadList = tempStreamDefinition.getPayloadData();
+            if (payloadList != null && payloadList.size() > 0) {
                 newStreamDefinition.setPayloadData(payloadList);
             }
 
