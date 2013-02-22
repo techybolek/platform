@@ -19,6 +19,7 @@ package org.wso2.carbon.databridge.streamdefn.cassandra.datastore;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.databridge.commons.Credentials;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
+import org.wso2.carbon.databridge.commons.utils.DataBridgeCommonsUtils;
 import org.wso2.carbon.databridge.core.definitionstore.AbstractStreamDefinitionStore;
 import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
 import org.wso2.carbon.databridge.persistence.cassandra.datastore.ClusterFactory;
@@ -34,55 +35,46 @@ public class CassandraStreamDefinitionStore extends AbstractStreamDefinitionStor
     Logger log = Logger.getLogger(CassandraStreamDefinitionStore.class);
 
 
-    public CassandraStreamDefinitionStore(){
+    public CassandraStreamDefinitionStore() {
     }
 
-    @Override
-    protected boolean removeStreamId(Credentials credentials, String streamIdKey) {
-        return ServiceHolder.getCassandraConnector().deleteStreamIdFromStore(ClusterFactory.getCluster(credentials), streamIdKey);
-    }
 
     @Override
-    protected boolean removeStreamDefinition(Credentials credentials, String streamId) {
+    protected boolean removeStreamDefinition(Credentials credentials, String name, String version) {
         try {
             return ServiceHolder.getCassandraConnector()
                     .deleteStreamDefinitionFromStore(ClusterFactory.getCluster(credentials),
-                                                     streamId);
+                            DataBridgeCommonsUtils.generateStreamId(name, version));
         } catch (StreamDefinitionStoreException e) {
             return false;
         }
     }
 
     @Override
-    protected void saveStreamIdToStore(Credentials credentials, String streamIdKey, String streamId)
-            throws StreamDefinitionStoreException {
-
-
-        ServiceHolder.getCassandraConnector().saveStreamIdToStore(ClusterFactory.getCluster(credentials), streamIdKey, streamId);
+    protected void saveStreamDefinitionToStore(Credentials credentials, StreamDefinition streamDefinition) throws StreamDefinitionStoreException {
+        ServiceHolder.getCassandraConnector().saveStreamDefinitionToStore(ClusterFactory.getCluster(credentials), streamDefinition);
     }
 
     @Override
-    protected void saveStreamDefinitionToStore(Credentials credentials, String streamId, StreamDefinition streamDefinition) throws StreamDefinitionStoreException {
-        ServiceHolder.getCassandraConnector().saveStreamDefinitionToStore(ClusterFactory.getCluster(credentials), streamId, streamDefinition);
+    public StreamDefinition getStreamDefinitionFromStore(Credentials credentials, String name, String version) throws StreamDefinitionStoreException {
+        return ServiceHolder.getCassandraConnector().getStreamDefinitionFromCassandra(
+                ClusterFactory.getCluster(credentials),
+                DataBridgeCommonsUtils.generateStreamId(name, version));
+
     }
 
     @Override
-    protected String getStreamIdFromStore(Credentials credentials, String streamIdKey)
-            throws StreamDefinitionStoreException {
-        return ServiceHolder.getCassandraConnector().getStreamIdFromStore(ClusterFactory.getCluster(credentials), streamIdKey);
-    }
-
-
-    @Override
-    public StreamDefinition getStreamDefinitionFromStore(Credentials credentials, String streamId)
-            throws StreamDefinitionStoreException {
-        return ServiceHolder.getCassandraConnector().getStreamDefinitionFromStore(ClusterFactory.getCluster(credentials), streamId);
+    protected StreamDefinition getStreamDefinitionFromStore(
+            Credentials credentials, String streamId) throws StreamDefinitionStoreException {
+        return ServiceHolder.getCassandraConnector().getStreamDefinitionFromCassandra(
+                ClusterFactory.getCluster(credentials), streamId);
     }
 
     @Override
     protected Collection<StreamDefinition> getAllStreamDefinitionsFromStore(Credentials credentials) throws
             StreamDefinitionStoreException {
-        return ServiceHolder.getCassandraConnector().getAllStreamDefinitionFromStore(ClusterFactory.getCluster(credentials));
+        return ServiceHolder.getCassandraConnector().getAllStreamDefinitionFromStore(
+                ClusterFactory.getCluster(credentials));
     }
 
 
