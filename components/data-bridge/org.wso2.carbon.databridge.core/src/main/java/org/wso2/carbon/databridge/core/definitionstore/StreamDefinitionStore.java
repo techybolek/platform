@@ -35,10 +35,9 @@ public interface StreamDefinitionStore {
 
     public Collection<StreamDefinition> getAllStreamDefinitions(Credentials credentials);
 
-    public String getStreamId(Credentials credentials, String streamName, String streamVersion)
-            throws StreamDefinitionNotFoundException, StreamDefinitionStoreException;
-
     public void saveStreamDefinition(Credentials credentials,
                                      StreamDefinition streamDefinition)
             throws DifferentStreamDefinitionAlreadyDefinedException, StreamDefinitionStoreException;
+
+    public boolean deleteStreamDefinition(Credentials credentials, String streamName, String streamVersion);
 }

@@ -41,11 +41,17 @@ public interface AgentCallback {
 
 
     /**
+     * will get called  when types are removed
+     *
+     * @param streamDefinition TypeDefinition of event streams
+     * @param credentials      of the credential defining the event stream definition
+     */
+    void removeStream(StreamDefinition streamDefinition, Credentials credentials);
+
+    /**
      * will get called when Events arrive
      *
      * @param eventList Arrived event list
      */
     void receive(List<Event> eventList, Credentials credentials);
-
-
 }

@@ -29,17 +29,6 @@ public class DataBridgeUtils {
 
     private static Log log = LogFactory.getLog(DataBridgeUtils.class);
 
-    public static String constructStreamKey(String streamName, String version) {
-        return streamName + "::" + version;
-    }
-
-    public static String getStreamNameFromStreamKey(String streamKey) {
-        if (streamKey == null) {
-            return null;
-        }
-        return streamKey.split("::")[0];
-    }
-
     public static boolean equals(Event event1, Event event2, StreamDefinition streamDefinition) {
         if (event1 == event2) return true;
 
@@ -48,10 +37,13 @@ public class DataBridgeUtils {
         List<Attribute> metaDefinitions = streamDefinition.getMetaData();
 
 
-
         try {
-            if (!(event1.getStreamId().equals(event2.getStreamId()))) { return false; }
-            if (!(event1.getTimeStamp() == event2.getTimeStamp() )) { return false; }
+            if (!(event1.getStreamId().equals(event2.getStreamId()))) {
+                return false;
+            }
+            if (!(event1.getTimeStamp() == event2.getTimeStamp())) {
+                return false;
+            }
 
             if (payloadDefinitions != null) {
                 for (int i = 0; i < payloadDefinitions.size(); i++) {
@@ -62,7 +54,7 @@ public class DataBridgeUtils {
 
                 }
             } else {
-               if (!(event1.getPayloadData() == event2.getPayloadData())) return false;
+                if (!(event1.getPayloadData() == event2.getPayloadData())) return false;
             }
 
             if (metaDefinitions != null) {
@@ -96,7 +88,7 @@ public class DataBridgeUtils {
         return true;
     }
 
-    public static boolean compare(Object eventAttr1, Object eventAttr2,  AttributeType attributeType)
+    public static boolean compare(Object eventAttr1, Object eventAttr2, AttributeType attributeType)
             throws IOException {
         switch (attributeType) {
             case BOOL: {
@@ -108,7 +100,7 @@ public class DataBridgeUtils {
                 Integer tempVal1 =
                         (eventAttr1 instanceof Integer) ? (Integer) eventAttr1 : ((Double) eventAttr1).intValue();
                 Integer tempVal2 =
-                                        (eventAttr2 instanceof Integer) ? (Integer) eventAttr2 : ((Double) eventAttr2).intValue();
+                        (eventAttr2 instanceof Integer) ? (Integer) eventAttr2 : ((Double) eventAttr2).intValue();
 
                 if (!tempVal1.equals(tempVal2)) return false;
                 break;
@@ -118,7 +110,8 @@ public class DataBridgeUtils {
                 break;
             }
             case FLOAT: {
-                if (Float.compare(((Double) eventAttr1).floatValue(), ((Double) eventAttr2).floatValue()) != 0) return false;
+                if (Float.compare(((Double) eventAttr1).floatValue(), ((Double) eventAttr2).floatValue()) != 0)
+                    return false;
                 break;
             }
             case LONG: {

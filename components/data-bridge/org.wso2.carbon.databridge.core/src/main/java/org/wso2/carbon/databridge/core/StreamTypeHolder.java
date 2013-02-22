@@ -18,6 +18,7 @@
 package org.wso2.carbon.databridge.core;
 
 import org.wso2.carbon.databridge.commons.AttributeType;
+import org.wso2.carbon.databridge.commons.StreamDefinition;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class StreamTypeHolder {
     private String domainName;
-    private Map<String, AttributeComposite> attributeCompositeMap =  new ConcurrentHashMap<String, AttributeComposite>();
+    private Map<String, StreamAttributeComposite> attributeCompositeMap =  new ConcurrentHashMap<String, StreamAttributeComposite>();
 
     public StreamTypeHolder(String domainName) {
         this.domainName = domainName;
@@ -42,25 +43,23 @@ public class StreamTypeHolder {
     }
 
 
-    public Map<String, AttributeComposite> getAttributeCompositeMap() {
+    public Map<String, StreamAttributeComposite> getAttributeCompositeMap() {
         return attributeCompositeMap;
     }
 
-    public void putDataType(String streamId, AttributeType[] meta,
-                            AttributeType[] correlation, AttributeType[] payload) {
-        // todo log
-        this.attributeCompositeMap.put(streamId, new AttributeComposite(new AttributeType[][]{meta, correlation, payload}));
-    }
-
     public AttributeType[][] getDataType(String streamId) {
-        AttributeComposite type = attributeCompositeMap.get(streamId);
+        StreamAttributeComposite type = attributeCompositeMap.get(streamId);
         if(null != type){
             return type.getAttributeTypes();
         }
         return null;
     }
 
-    public AttributeComposite getAttributeComposite(String streamId){
+    public StreamAttributeComposite getAttributeComposite(String streamId){
        return attributeCompositeMap.get(streamId);
+    }
+
+    public void putStreamDefinition( StreamDefinition streamDefinition) {
+        this.attributeCompositeMap.put(streamDefinition.getStreamId(), new StreamAttributeComposite(streamDefinition));
     }
 }

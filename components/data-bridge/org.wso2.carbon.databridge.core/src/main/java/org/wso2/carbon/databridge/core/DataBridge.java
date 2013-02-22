@@ -21,8 +21,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.commons.Credentials;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
-import org.wso2.carbon.databridge.commons.exception.*;
-import org.wso2.carbon.databridge.commons.utils.EventDefinitionConverterUtils;
+import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
+import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
+import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
+import org.wso2.carbon.databridge.commons.exception.SessionTimeoutException;
+import org.wso2.carbon.databridge.commons.exception.UndefinedEventTypeException;
+import org.wso2.carbon.databridge.commons.utils.DataBridgeCommonsUtils;
+import org.wso2.carbon.databridge.core.Utils.AgentSession;
 import org.wso2.carbon.databridge.core.conf.DataBridgeConfiguration;
 import org.wso2.carbon.databridge.core.definitionstore.AbstractStreamDefinitionStore;
 import org.wso2.carbon.databridge.core.definitionstore.StreamDefinitionStore;
@@ -31,7 +36,6 @@ import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
 import org.wso2.carbon.databridge.core.internal.EventDispatcher;
 import org.wso2.carbon.databridge.core.internal.authentication.AuthenticationHandler;
 import org.wso2.carbon.databridge.core.internal.authentication.Authenticator;
-import org.wso2.carbon.databridge.core.Utils.AgentSession;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,7 +102,7 @@ public class DataBridge implements DataBridgeSubscriberService, DataBridgeReceiv
         }
         try {
             return eventDispatcher.findStreamId(agentSession.getCredentials(), streamName,
-                    streamVersion);
+                                                streamVersion);
         } catch (StreamDefinitionStoreException e) {
             log.warn("Cannot find streamId for " + streamName + " " + streamVersion, e);
             return null;
@@ -108,14 +112,8 @@ public class DataBridge implements DataBridgeSubscriberService, DataBridgeReceiv
 
     public boolean deleteStream(String sessionId, String streamId)
             throws SessionTimeoutException {
-        AgentSession agentSession = authenticator.getSession(sessionId);
-        if (agentSession.getCredentials() == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("session " + sessionId + " expired ");
-            }
-            throw new SessionTimeoutException(sessionId + " expired");
-        }
-        return eventDispatcher.deleteStream(agentSession.getCredentials(), streamId);
+        return deleteStream(sessionId, DataBridgeCommonsUtils.getStreamNameFromStreamId(streamId),
+                            DataBridgeCommonsUtils.getStreamVersionFromStreamId(streamId));
     }
 
     public boolean deleteStream(String sessionId, String streamName, String streamVersion)
@@ -181,8 +179,10 @@ public class DataBridge implements DataBridgeSubscriberService, DataBridgeReceiv
     }
 
     @Override
-    public StreamDefinition getStreamDefinition(String sessionId, String streamName, String streamVersion)
-            throws SessionTimeoutException, StreamDefinitionNotFoundException, StreamDefinitionStoreException {
+    public StreamDefinition getStreamDefinition(String sessionId, String streamName,
+                                                String streamVersion)
+            throws SessionTimeoutException, StreamDefinitionNotFoundException,
+                   StreamDefinitionStoreException {
         AgentSession agentSession = authenticator.getSession(sessionId);
         if (agentSession.getUsername() == null) {
             if (log.isDebugEnabled()) {
@@ -194,7 +194,8 @@ public class DataBridge implements DataBridgeSubscriberService, DataBridgeReceiv
     }
 
     @Override
-    public List<StreamDefinition> getAllStreamDefinitions(String sessionId) throws SessionTimeoutException {
+    public List<StreamDefinition> getAllStreamDefinitions(String sessionId)
+            throws SessionTimeoutException {
         AgentSession agentSession = authenticator.getSession(sessionId);
         if (agentSession.getUsername() == null) {
             if (log.isDebugEnabled()) {
@@ -208,7 +209,7 @@ public class DataBridge implements DataBridgeSubscriberService, DataBridgeReceiv
     @Override
     public void saveStreamDefinition(String sessionId, StreamDefinition streamDefinition)
             throws SessionTimeoutException, StreamDefinitionStoreException,
-            DifferentStreamDefinitionAlreadyDefinedException {
+                   DifferentStreamDefinitionAlreadyDefinedException {
         AgentSession agentSession = authenticator.getSession(sessionId);
         if (agentSession.getUsername() == null) {
             if (log.isDebugEnabled()) {
@@ -242,31 +243,24 @@ public class DataBridge implements DataBridgeSubscriberService, DataBridgeReceiv
     }
 
 
-    public void saveStreamDefinition(Credentials credentials, String streamDefinition)
-            throws MalformedStreamDefinitionException,
-            DifferentStreamDefinitionAlreadyDefinedException, StreamDefinitionStoreException {
-        saveStreamDefinition(credentials, EventDefinitionConverterUtils.convertFromJson(streamDefinition));
-    }
-
-
     @Override
     public void saveStreamDefinition(Credentials credentials, StreamDefinition streamDefinition)
-            throws DifferentStreamDefinitionAlreadyDefinedException, StreamDefinitionStoreException {
+            throws DifferentStreamDefinitionAlreadyDefinedException,
+                   StreamDefinitionStoreException {
         streamDefinitionStore.saveStreamDefinition(credentials, streamDefinition);
     }
 
     @Override
-    public String getStreamId(Credentials credentials, String streamName, String streamVersion)
-            throws StreamDefinitionNotFoundException, StreamDefinitionStoreException {
-        return streamDefinitionStore.getStreamId(credentials, streamName, streamVersion);
+    public boolean deleteStreamDefinition(Credentials credentials, String streamName,
+                                          String streamVersion) {
+        return streamDefinitionStore.deleteStreamDefinition(credentials, streamName, streamVersion);
     }
-
 
     public List<AgentCallback> getSubscribers() {
         return eventDispatcher.getSubscribers();
     }
 
-    public List<RawDataAgentCallback> getRawDataSubscribers(){
+    public List<RawDataAgentCallback> getRawDataSubscribers() {
         return eventDispatcher.getRawDataSubscribers();
     }
 
