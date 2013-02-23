@@ -341,8 +341,8 @@
                                  
                                  if (map.isEmpty()) {
                                      map.put("WebApp", "Webapp");
-                                     map.put("JaxWebApp", "Jax webapp");
-                                     map.put("JaggeryWebApp", "Jaggery webapp");
+                                     map.put("JaxWebApp", "JAX-WS/RS Webapp");
+                                     map.put("JaggeryWebApp", "Jaggery Webapp");
                                      map.put("All", "All");
                                  }
                                     for (Object obj : map.keySet().toArray()) {
