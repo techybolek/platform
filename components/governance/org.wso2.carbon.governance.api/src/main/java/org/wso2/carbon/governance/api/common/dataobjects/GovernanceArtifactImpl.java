@@ -557,8 +557,8 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
             throw new GovernanceException(msg);
         }
         try {
-            registry.addAssociation(path, attachedToArtifactPath, GovernanceConstants.DEPENDS);
             registry.addAssociation(attachedToArtifactPath, path, GovernanceConstants.USED_BY);
+            registry.addAssociation(path, attachedToArtifactPath, GovernanceConstants.DEPENDS);
         } catch (RegistryException e) {
             String msg = "Error in attaching the artifact. source id: " + id + ", path: " + path +
                     ", target id: " + attachedToArtifact.getId() + ", path:" +

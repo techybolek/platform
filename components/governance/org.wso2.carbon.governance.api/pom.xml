@@ -20,7 +20,7 @@
         <groupId>org.wso2.carbon</groupId>
         <artifactId>governance</artifactId>
         <version>4.1.0-SNAPSHOT</version>
-<relativePath>../pom.xml</relativePath>
+	<relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -45,7 +45,6 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.caching.core</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -56,27 +55,22 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.core</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
         </dependency>
  	<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.core</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
         </dependency>
        <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.api</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
                 <groupId>eclipse</groupId>
@@ -93,7 +87,6 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.extensions</artifactId>
-	    <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.juddi.wso2</groupId>
@@ -107,7 +100,6 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.common</artifactId>
-	    <version>4.1.0-SNAPSHOT</version>
 		<scope>test</scope>
         </dependency>
             <dependency>
@@ -157,10 +149,11 @@
                         </Export-Package>
                         <Import-Package>
                             org.wso2.carbon.registry.extensions.handlers.*,
+                            org.wso2.carbon.registry.extensions.utils.*,
                             org.apache.axis2.*; version="${axis2.osgi.version.range}",
-                            javax.servlet;version="${imp.pkg.version.javax.servlet}",
-                            javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
-                            javax.servlet.resources;version="${imp.pkg.version.javax.servlet}",
+                            javax.servlet;version="2.4.0",
+                            javax.servlet.http;version="2.4.0",
+                            javax.servlet.resources;version="2.4.0",
                             org.eclipse.equinox.http.helper,
                             *;resolution:=optional
                         </Import-Package>
