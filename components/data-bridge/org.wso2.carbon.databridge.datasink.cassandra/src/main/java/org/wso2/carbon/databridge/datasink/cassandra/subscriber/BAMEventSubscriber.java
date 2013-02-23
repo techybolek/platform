@@ -32,14 +32,23 @@ public class BAMEventSubscriber implements AgentCallback {
 
     @Override
     public void definedStream(StreamDefinition streamDefinition, Credentials credentials) {
-        // this is not needed for BAM
+        ServiceHolder.getCassandraConnector().definedStream(ClusterFactory.getCluster(credentials),
+                                                            streamDefinition);
+    }
+
+    @Override
+    public void removeStream(StreamDefinition streamDefinition, Credentials credentials) {
+        ServiceHolder.getCassandraConnector().removeStream(credentials,
+                                                           ClusterFactory.getCluster(credentials),
+                                                           streamDefinition);
     }
 
     @Override
     public void receive(List<Event> eventList, Credentials credentials) {
         if (System.getProperty("disable.bam.event.storage") == null) {
             try {
-                ServiceHolder.getCassandraConnector().insertEventList(ClusterFactory.getCluster(credentials), eventList);
+                ServiceHolder.getCassandraConnector().insertEventList(
+                        credentials, ClusterFactory.getCluster(credentials), eventList);
             } catch (Exception e) {
                 String errorMsg = "Error processing event. ";
                 log.error(errorMsg, e);
@@ -49,7 +58,7 @@ public class BAMEventSubscriber implements AgentCallback {
 //        for (Event event : eventList) {
 //            try {
 //                ServiceHolder.getCassandraConnector().insertEvent(ClusterFactory.getCluster(credentials), event);
-//            } catch (Exception e) {
+//            } catch (Exception e) {                           u
 //                String errorMsg = "Error processing event. " + event.toString();
 //                log.error(errorMsg, e);
 //            }
