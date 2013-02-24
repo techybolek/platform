@@ -20,7 +20,7 @@
         <groupId>org.wso2.carbon</groupId>
         <artifactId>registry</artifactId>
         <version>4.1.0-SNAPSHOT</version>
-<relativePath>../pom.xml</relativePath>
+	<relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -34,43 +34,35 @@
 	<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.caching.core</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.core</artifactId>
-            <version>${project.version}</version>
         </dependency>
 	<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.social.api</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>${project.version}</version>
         </dependency>
 	<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -111,7 +103,7 @@
                         </Export-Package>
                         <Import-Package>
                             org.apache.axis2.*; version="${axis2.osgi.version.range.socialimpl}",
-                            javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
+                            javax.servlet.http;version="2.4.0",
                             org.wso2.carbon.registry.social.impl.common.*,
                             *;resolution:=optional
                         </Import-Package>
