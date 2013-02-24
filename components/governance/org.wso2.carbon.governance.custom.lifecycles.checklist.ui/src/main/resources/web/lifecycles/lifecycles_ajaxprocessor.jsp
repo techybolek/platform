@@ -544,6 +544,9 @@
 		                if ((param.startsWith("current:"))) {
 		                	approveItem.setCurrentVote(Integer.parseInt(param.substring(8)));
 		                }
+		                if ((param.startsWith("order:"))) {
+		                	approveItem.setOrder(param.substring(6));
+                        }
 		            }
 		        }
 		        String key = propName.replace(prefix,"").replace(suffix,"");
@@ -554,7 +557,8 @@
 		    if (approveItem.matchLifeCycleStatus(lifeCycleState)) {
 		    	approveListItems.add(approveItem);
 		    }
-		}		
+		}	
+		Collections.sort(approveListItems);
 		%>
 		 <div>
 	            <table cellpadding="0" cellspacing="5" border="0">
