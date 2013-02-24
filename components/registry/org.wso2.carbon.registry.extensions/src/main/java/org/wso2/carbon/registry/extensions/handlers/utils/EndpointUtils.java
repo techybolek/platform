@@ -511,6 +511,11 @@ public class EndpointUtils {
         if (registry.resourceExists(endpointAbsolutePath)) {
             resource = registry.get(endpointAbsolutePath);
             endpointId = resource.getUUID();
+            String existingContent = new String((byte[])(resource.getContent()));
+            String newContent = getEndpointContent(url, endpointAbsolutePath);
+            if(!existingContent.equals(newContent)) {
+                resource.setContent(RegistryUtils.encodeString(newContent));
+            }
         } else {
             resource = registry.newResource();
             resource.setContent(RegistryUtils.encodeString(getEndpointContent(url, endpointAbsolutePath)));

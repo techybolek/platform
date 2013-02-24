@@ -25,10 +25,13 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 import org.wso2.carbon.registry.core.session.CurrentSession;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.extensions.beans.ServiceDocumentsBean;
 import org.wso2.carbon.registry.extensions.handlers.utils.EndpointUtils;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -284,7 +287,7 @@ public class CommonUtil {
         }
     }
 
-    public static void setWSDLURL(OMElement element, String namespace) {
+    public static void setDefinitionURL(OMElement element, String namespace) {
         // This is a path relative to the chroot
         OMElement overview = element.getFirstChildWithName(new QName(CommonConstants.SERVICE_ELEMENT_NAMESPACE, "interface"));
 
@@ -304,7 +307,7 @@ public class CommonUtil {
 
     }
 
-    public static String getWSDLURL(OMElement element) {
+    public static String getDefinitionURL(OMElement element) {
         // This will return a path relative to the chroot
         OMElement overview = element.getFirstChildWithName(new QName("Interface"));
         if (overview != null) {
@@ -395,6 +398,45 @@ public class CommonUtil {
         return null;
     }
 
+    public static void addService(OMElement service, RequestContext context)throws RegistryException{
+        Registry registry = context.getRegistry();
+        Resource resource = registry.newResource();
+        String tempNamespace = CommonUtil.derivePathFragmentFromNamespace(
+                CommonUtil.getServiceNamespace(service));
+        String path = getChrootedServiceLocation(registry, context.getRegistryContext()) + tempNamespace +
+                CommonUtil.getServiceName(service);
+        String content = service.toString();
+        resource.setContent(RegistryUtils.encodeString(content));
+        resource.setMediaType(RegistryConstants.SERVICE_MEDIA_TYPE);
+        // when saving the resource we are expecting to call the service media type handler, so
+        // we intentionally release the lock here.
+        boolean lockAlreadyAcquired = !CommonUtil.isUpdateLockAvailable();
+        CommonUtil.releaseUpdateLock();
+        try {
+//            We check for an existing resource and add its UUID here.
+            if(registry.resourceExists(path)){
+                Resource existingResource = registry.get(path);
+                resource.setUUID(existingResource.getUUID());
+            } else {
+                resource.setUUID(UUID.randomUUID().toString());
+            }
+            resource.setProperty("registry.DefinitionImport","true");
+            registry.put(path, resource);
+        } finally {
+            if (lockAlreadyAcquired) {
+                CommonUtil.acquireUpdateLock();
+            }
+        }
+        registry.addAssociation(path,RegistryUtils.getAbsolutePath(registry.getRegistryContext(),
+                CommonUtil.getDefinitionURL(service)), CommonConstants.DEPENDS);
+        registry.addAssociation(RegistryUtils.getAbsolutePath(registry.getRegistryContext(),
+                CommonUtil.getDefinitionURL(service)),path, CommonConstants.USED_BY);
+    }
+
+    private static String getChrootedServiceLocation(Registry registry, RegistryContext registryContext) {
+        return  RegistryUtils.getAbsolutePath(registryContext,
+                registry.getRegistryContext().getServicePath());  // service path contains the base
+    }
 
 /*
     public static void removeArtifactEntry(Registry registry, String artifactId) throws RegistryException {

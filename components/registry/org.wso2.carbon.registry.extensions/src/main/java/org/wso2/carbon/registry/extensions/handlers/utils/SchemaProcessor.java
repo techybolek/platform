@@ -25,7 +25,6 @@ import org.apache.ws.commons.schema.XmlSchemaCollection;
 import org.apache.ws.commons.schema.XmlSchemaExternal;
 import org.apache.ws.commons.schema.XmlSchemaObjectCollection;
 import org.wso2.carbon.CarbonException;
-import org.wso2.carbon.registry.common.utils.RegistryUtil;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
@@ -36,7 +35,6 @@ import org.wso2.carbon.registry.extensions.utils.WSDLUtil;
 import org.wso2.carbon.registry.extensions.utils.WSDLValidationInfo;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.xml.sax.InputSource;
-import java.io.File;
 
 import javax.wsdl.Types;
 import javax.wsdl.extensions.schema.Schema;
