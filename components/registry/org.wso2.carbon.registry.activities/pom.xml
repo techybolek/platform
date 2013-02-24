@@ -22,11 +22,12 @@
         <groupId>org.wso2.carbon</groupId>
         <artifactId>registry</artifactId>
         <version>4.1.0-SNAPSHOT</version>
-<relativePath>../pom.xml</relativePath>
+	<relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.registry.activities</artifactId>
+    <version>4.1.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Registry - Activities BE</name>
 
@@ -53,8 +54,8 @@
                             org.wso2.carbon.registry.core.*;version=1.0.1,
                             !javax.xml.namespace,
                             javax.xml.namespace; version=0.0.0,
-                            javax.servlet;version="${imp.pkg.version.javax.servlet}",
-                            javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
+                            javax.servlet; version=2.4.0,
+                            javax.servlet.http; version=2.4.0,
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",,
                             org.apache.lucene.*,
                             *;resolution:=optional
@@ -73,7 +74,6 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.common</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -86,7 +86,6 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.extensions</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
