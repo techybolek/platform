@@ -52,6 +52,14 @@
     if (rootPath == null) {
         rootPath = "/";
     }
+    String displayRootPath = request.getParameter("displayRootPath");
+    String displayPath;
+    if ("true".equals(displayRootPath)) {
+    	displayPath = "/_system/governance";
+    } else {
+    	displayPath = rootPath;
+    }
+    
     try {
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         ResourceServiceClient client = new ResourceServiceClient(cookie, config, session);
@@ -92,7 +100,7 @@
                                                 class="picked-path-textbox" <%= (expansionPath != null) ? "value=\"" + expansionPath + "\"" : ""%> style="width:500px;"
                                                 onfocus="setResolvedResourcePathOnConsumer('<%=resourceConsumer%>','<%=synapseRegistryRoot%>');" onchange="setResolvedResourcePathOnConsumer('<%=resourceConsumer%>','<%=synapseRegistryRoot%>')"/>
                                             <input type="button" class="button" value="<fmt:message key="ok"/>"
-                                                   onclick="if ((typeof(isMediationLocalEntrySelected) == undefined )|| !isMediationLocalEntrySelected) { if (validateResoucePath()) { handle<%= relativeRoot ? "Relative" : "" %>WindowOk(<%= relativeRoot ? "'" + rootPath + "', " : "" %>'<%=textBoxId%>'<%= onOKCallback != null ? ", " + onOKCallback : ""%>); CARBON.closeWindow(); return true; } return false; }; CARBON.closeWindow(); return true;" />
+                                                   onclick="if ((typeof(isMediationLocalEntrySelected) == undefined )|| !isMediationLocalEntrySelected) { if (validateResoucePath()) { handle<%= relativeRoot ? "Relative" : "" %>WindowOk(<%= relativeRoot ? "'" + displayPath + "', " : "" %>'<%=textBoxId%>'<%= onOKCallback != null ? ", " + onOKCallback : ""%>); CARBON.closeWindow(); return true; } return false; }; CARBON.closeWindow(); return true;" />
     </div>
     </fmt:bundle>    
     <%      } %>
