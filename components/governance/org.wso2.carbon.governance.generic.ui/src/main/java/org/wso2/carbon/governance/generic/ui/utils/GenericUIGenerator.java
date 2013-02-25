@@ -589,7 +589,7 @@ public class GenericUIGenerator {
                         } else {
                             table.append(printOptionText(label, name,
                                     optionValues.toArray(new String[optionValues.size()]),
-                                    widgetName, isPath, tooltip, request));
+                                    widgetName, isPath, tooltip,startsWith, request));
                         }
                     }
                 }
@@ -789,7 +789,7 @@ public class GenericUIGenerator {
     }
 
     public String printOptionText(String label, String name, String[] values, String widget,
-                                  boolean isPath, String tooltip, HttpServletRequest request) {
+                                  boolean isPath, String tooltip, String startsWith, HttpServletRequest request) {
         StringBuilder dropDown = new StringBuilder();
         dropDown.append("<tr><td class=\"leftCol-big\"><select name=\"" + widget.replaceAll(" ",
                 "_") + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\">");
@@ -803,8 +803,13 @@ public class GenericUIGenerator {
         String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
         String selectResource = "";
         if (isPath) {
-            selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                    "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
+        	if(startsWith != null ){
+        		selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
+                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTreeWithCustomPath('" + id + "','" + startsWith + "');\"/>";
+        	} else {
+        		selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
+                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
+        	}
         }
         dropDown.append("<td width=500px><input type=\"text\" name=\"" + widget.replaceAll(" ", "_") + UIGeneratorConstants.TEXT_FIELD
                 + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\" id=\"" + id +
@@ -822,16 +827,16 @@ public class GenericUIGenerator {
         String selectResourceButton = "$('" + id + "_button').style.display='';";
         value = StringEscapeUtils.escapeHtml(value);
         if (isPath) {
-            selectResource = " <input id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                    "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
+        	if (startsWith != null ) {
+        		selectResource = " <input id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
+                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTreeWithCustomPath('" + id + "','" + startsWith + "');\"/>";
+        	} else {
+        		selectResource = " <input id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
+                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
+        	}            
         }
 
-        String browsePath;
-        if (startsWith != null) {
-            browsePath = startsWith;
-        } else {
-            browsePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH;
-        }
+        String browsePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH;
 
         String div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + browsePath : "") + (urlTemplate != null ? urlTemplate.replace("@{value}", value) : value) + "\">" + value + "</a>" +
                 "&nbsp;" + (!isReadOnly ? "<a onclick=\"$('" + id + "_link').style.display='none';$('" + id +
@@ -1048,12 +1053,7 @@ public class GenericUIGenerator {
                         "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
             }
 
-            String browsePath;
-            if (startsWith != null) {
-                browsePath = startsWith;
-            } else {
-                browsePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH;
-            }
+            String browsePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH;
 
             String div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + browsePath : "") + (urlTemplate != null ? urlTemplate.replace("@{value}", value) : value) + "\">" + value + "</a>" +
                     "&nbsp;" + (!isReadOnly ? "<a onclick=\"$('" + id + "_link').style.display='none';$('" + id +
@@ -1138,12 +1138,7 @@ public class GenericUIGenerator {
                         "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
             }
 
-            String browsePath;
-            if (startsWith != null) {
-                browsePath = startsWith;
-            } else {
-                browsePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH;
-            }
+            String browsePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH;            
 
             String div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "" +
                     "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + browsePath : "") +
@@ -1205,16 +1200,16 @@ public class GenericUIGenerator {
             String selectResource = "";
             String selectResourceButton = "$('" + id + "_button').style.display='';";
             if (isPath) {
-                selectResource = " <input style=\"display:none\" id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
+            	if (startsWith != null) {
+            		selectResource = " <input style=\"display:none\" id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
+                            "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTreeWithCustomPath('" + id + "','" + startsWith + "');\"/>";
+            	} else {
+            		selectResource = " <input style=\"display:none\" id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
+                            "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
+            	}                
             }
 
-            String browsePath;
-            if (startsWith != null) {
-                browsePath = startsWith;
-            } else {
-                browsePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH;
-            }
+            String browsePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH;            
 
             String div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + browsePath : "") +
                     StringEscapeUtils.escapeHtml((urlTemplate != null ? urlTemplate.replace("@{value}", text) : text))
@@ -1251,7 +1246,11 @@ public class GenericUIGenerator {
         link.append("<tr><td colspan=\"3\"><a class=\"icon-link\" style=\"background-image: url(");
         link.append(addIconPath);
         link.append(");\" onclick=\"");
-        link.append("add" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(" + (isPath ? "'path'" : "") + "," + "'"+startsWith +"'"+  ")\">"); //creating a JavaScript onclick method name which should be identical ex: addEndpoint_Endpoint
+        if (startsWith != null) {
+        	link.append("add" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(" + (isPath ? "'path'" : "''") + "," + "'"+startsWith +"'"+  ")\">"); //creating a JavaScript onclick method name which should be identical ex: addEndpoint_Endpoint
+        } else {
+        	link.append("add" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(" + (isPath ? "'path'" : "''") + ")\">"); //creating a JavaScript onclick method name which should be identical ex: addEndpoint_Endpoint
+        }
         link.append("Add " + label.replaceAll(" ", "-")); //This is the display string for add item ex: Add EndPoint
         link.append("</a></td></tr>");
         link.append("<tr><td colspan=\"3\">");
@@ -1266,7 +1265,11 @@ public class GenericUIGenerator {
         link.append("<tr><td colspan=\"3\"><a class=\"icon-link\" style=\"background-image: url(");
         link.append(addIconPath);
         link.append(");\" onclick=\"");
-        link.append("add" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(" + (isPath ? "'path'" : "") + "," + "'"+startsWith +"'"+  ")\">"); //creating a JavaScript onclick method name which should be identical ex: addEndpoint_Endpoint
+        if (startsWith != null) {
+        	link.append("add" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(" + (isPath ? "'path'" : "''") + "," + "'"+startsWith +"'"+  ")\">"); //creating a JavaScript onclick method name which should be identical ex: addEndpoint_Endpoint
+        } else {
+        	link.append("add" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(" + (isPath ? "'path'" : "''") + ")\">"); //creating a JavaScript onclick method name which should be identical ex: addEndpoint_Endpoint
+        }
         link.append("Add " + label.replaceAll(" ", "-")); //This is the display string for add item ex: Add EndPoint
         link.append("</a></td></tr>");
         link.append("<tr><td colspan=\"3\">");
