@@ -58,6 +58,12 @@ public class CarbonWebappLoader extends WebappLoader {
         ((CarbonWebappClassLoader) getClassLoader()).setWebappCC(webappClassloadingContext);
     }
 
+    @Override
+    protected void stopInternal() throws LifecycleException {
+
+        super.stopInternal();
+    }
+
     //TODO Refactor
     private String getWebappFilePath() throws IOException {
         String webappFilePath = null;
