@@ -101,7 +101,7 @@ public class ThriftDataReceiverDS {
 
                 httpServiceInstance.registerServlet("/thriftReceiver",
                                                     new ThriftEventTransmissionServlet(processor, inProtFactory,
-                                                                        outProtFactory),
+                                                                                       outProtFactory),
                                                     new Hashtable(),
                                                     httpServiceInstance.createDefaultHttpContext());
 
@@ -109,7 +109,7 @@ public class ThriftDataReceiverDS {
                         new ThriftSecureEventTransmissionServiceImpl(dataBridgeReceiverService));
                 httpServiceInstance.registerServlet("/thriftAuthenticator",
                                                     new ThriftSecureEventTransmissionServlet(authProcessor, inProtFactory,
-                                                                             outProtFactory),
+                                                                                             outProtFactory),
                                                     new Hashtable(),
                                                     httpServiceInstance.createDefaultHttpContext());
 

@@ -68,8 +68,8 @@ public final class ThriftDataReceiverBuilder {
                 new QName(DataBridgeConstants.DATA_BRIDGE_NAMESPACE,
                           ThriftDataReceiverConstants.RECEIVER_HOST_NAME));
         if (receiverHostName != null && receiverHostName.getText() != null
-                && !receiverHostName.getText().trim().equals("")) {
-                thriftDataReceiverConfiguration.setReceiverHostName(receiverHostName.getText());
+            && !receiverHostName.getText().trim().equals("")) {
+            thriftDataReceiverConfiguration.setReceiverHostName(receiverHostName.getText());
         }
     }
 
