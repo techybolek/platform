@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.broker.core.BrokerService;
 import org.wso2.carbon.broker.core.exception.BrokerConfigException;
-import org.wso2.carbon.broker.core.internal.BrokerTypeFactory;
+import org.wso2.carbon.broker.core.BrokerTypeFactory;
 import org.wso2.carbon.broker.core.internal.CarbonBrokerService;
 import org.wso2.carbon.broker.core.internal.brokers.agent.AgentBrokerTypeFactory;
 import org.wso2.carbon.broker.core.internal.brokers.email.EmailBrokerTypeFactory;
@@ -124,11 +124,17 @@ public final class BrokerServiceBuilder {
                     (BrokerTypeFactory) brokerTypeFactoryClass.newInstance();
             brokerService.registerBrokerType(factory.getBrokerType());
         } catch (ClassNotFoundException e) {
+            log.error(e.getMessage(),e);
             throw new BrokerConfigException("Broker class " + className + " can not be found", e);
         } catch (IllegalAccessException e) {
+            log.error(e.getMessage(),e);
             throw new BrokerConfigException("Can not access the class " + className, e);
         } catch (InstantiationException e) {
+            log.error(e.getMessage(),e);
             throw new BrokerConfigException("Can not instantiate the class " + className, e);
+        } catch (Throwable e){
+            log.error(e.getMessage(),e);
+            throw new BrokerConfigException("Can not process class " + className, e);
         }
     }
 

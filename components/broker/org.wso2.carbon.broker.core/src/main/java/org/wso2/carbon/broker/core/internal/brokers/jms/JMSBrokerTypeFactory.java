@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.broker.core.internal.brokers.jms;
 
-import org.wso2.carbon.broker.core.internal.BrokerTypeFactory;
+import org.wso2.carbon.broker.core.BrokerTypeFactory;
 
 
 public interface JMSBrokerTypeFactory extends BrokerTypeFactory {

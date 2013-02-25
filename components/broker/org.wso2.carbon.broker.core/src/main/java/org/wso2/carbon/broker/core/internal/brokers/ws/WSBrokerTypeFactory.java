@@ -16,8 +16,8 @@
 
 package org.wso2.carbon.broker.core.internal.brokers.ws;
 
-import org.wso2.carbon.broker.core.internal.BrokerTypeFactory;
-import org.wso2.carbon.broker.core.internal.BrokerType;
+import org.wso2.carbon.broker.core.BrokerTypeFactory;
+import org.wso2.carbon.broker.core.BrokerType;
 
 public class WSBrokerTypeFactory implements BrokerTypeFactory {
 

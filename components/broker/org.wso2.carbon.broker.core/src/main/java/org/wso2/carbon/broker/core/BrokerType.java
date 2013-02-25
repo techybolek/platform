@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.broker.core.internal;
+package org.wso2.carbon.broker.core;
 
 import org.apache.axis2.engine.AxisConfiguration;
-import org.wso2.carbon.broker.core.BrokerConfiguration;
-import org.wso2.carbon.broker.core.BrokerListener;
-import org.wso2.carbon.broker.core.BrokerTypeDto;
 import org.wso2.carbon.broker.core.exception.BrokerEventProcessingException;
 
 /**

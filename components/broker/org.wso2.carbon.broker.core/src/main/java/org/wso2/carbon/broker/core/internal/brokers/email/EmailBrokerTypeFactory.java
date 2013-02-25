@@ -16,8 +16,8 @@
 
 package org.wso2.carbon.broker.core.internal.brokers.email;
 
-import org.wso2.carbon.broker.core.internal.BrokerType;
-import org.wso2.carbon.broker.core.internal.BrokerTypeFactory;
+import org.wso2.carbon.broker.core.BrokerType;
+import org.wso2.carbon.broker.core.BrokerTypeFactory;
 
 public class EmailBrokerTypeFactory implements BrokerTypeFactory {
 

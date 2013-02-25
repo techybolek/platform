@@ -25,7 +25,7 @@ import org.wso2.carbon.broker.core.BrokerListener;
 import org.wso2.carbon.broker.core.BrokerTypeDto;
 import org.wso2.carbon.broker.core.Property;
 import org.wso2.carbon.broker.core.exception.BrokerEventProcessingException;
-import org.wso2.carbon.broker.core.internal.BrokerType;
+import org.wso2.carbon.broker.core.BrokerType;
 import org.wso2.carbon.broker.core.internal.ds.BrokerServiceValueHolder;
 import org.wso2.carbon.broker.core.internal.util.BrokerConstants;
 import org.wso2.carbon.context.CarbonContext;

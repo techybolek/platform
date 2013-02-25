@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.broker.core.internal;
+package org.wso2.carbon.broker.core;
 
 public interface BrokerTypeFactory {
 

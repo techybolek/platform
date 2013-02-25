@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.broker.core.internal.brokers.jms.qpid;
 
-import org.wso2.carbon.broker.core.internal.BrokerType;
+import org.wso2.carbon.broker.core.BrokerType;
 import org.wso2.carbon.broker.core.internal.brokers.jms.JMSBrokerTypeFactory;
 
 /**
