@@ -54,8 +54,8 @@
                             org.wso2.carbon.registry.core.*,
                             org.wso2.carbon.user.core;
                             org.wso2.carbon.event.*,
-                            javax.servlet; version=2.4.0,
-                            javax.servlet.http; version=2.4.0,
+                            javax.servlet;version=${imp.pkg.version.javax.servlet},
+                            javax.servlet.http;version=${imp.pkg.version.javax.servlet},
                             org.apache.axis2.*; version="${axis2.osgi.version.range}",
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
                             org.apache.commons.logging.*,
@@ -73,8 +73,8 @@
             <artifactId>axis2-transport-mail</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <groupId>org.eclipse.equinox</groupId>
+            <artifactId>javax.servlet</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

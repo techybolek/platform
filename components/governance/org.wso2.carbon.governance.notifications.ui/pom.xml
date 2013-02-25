@@ -49,8 +49,8 @@
                             org.wso2.carbon.registry.resource.ui.*,
                             !javax.xml.namespace,
                             javax.xml.namespace; version=0.0.0,
-                            javax.servlet; version=2.4.0,
-                            javax.servlet.http; version=2.4.0,
+                            javax.servlet;version=${imp.pkg.version.javax.servlet},
+                            javax.servlet.http;version=${imp.pkg.version.javax.servlet},
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
                             org.apache.lucene.*,
                             org.wso2.carbon.governance.notifications.stub.*;version="${carbon.platform.package.import.version.range}",
@@ -97,8 +97,8 @@
             <artifactId>commons-digester</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <groupId>org.eclipse.equinox</groupId>
+            <artifactId>javax.servlet</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
