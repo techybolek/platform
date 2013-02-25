@@ -177,8 +177,8 @@ public abstract class JMSBrokerType implements BrokerType {
     @Override
     public void testConnection(BrokerConfiguration brokerConfiguration) throws BrokerEventProcessingException {
         String testMessage = " <brokerConfigurationTest>\n" +
-                "   <message>This is a test message.</message>\n" +
-                "   </brokerConfigurationTest>";
+                             "   <message>This is a test message.</message>\n" +
+                             "   </brokerConfigurationTest>";
         publish("test", testMessage, brokerConfiguration);
     }
 
@@ -190,7 +190,7 @@ public abstract class JMSBrokerType implements BrokerType {
                 this.brokerSubscriptionsMap.get(brokerConfiguration.getName());
         if (subscriptionIdSubscriptionsMap == null) {
             throw new BrokerEventProcessingException("There is no subscription for broker "
-                    + brokerConfiguration.getName());
+                                                     + brokerConfiguration.getName());
         }
 
         SubscriptionDetails subscriptionDetails = subscriptionIdSubscriptionsMap.remove(subscriptionId);
@@ -202,7 +202,7 @@ public abstract class JMSBrokerType implements BrokerType {
             subscriptionDetails.close();
         } catch (JMSException e) {
             throw new BrokerEventProcessingException("Can not unsubscribe from the broker with" +
-                    "configuration " + brokerConfiguration.getName(), e);
+                                                     "configuration " + brokerConfiguration.getName(), e);
         }
 
     }

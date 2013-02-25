@@ -107,6 +107,24 @@ public final class AgentBrokerType implements BrokerType {
 
 
         @Override
+        public void removeStream(StreamDefinition streamDefinition, Credentials credentials) {
+            topicStreamDefinitionMap.remove(createTopic(streamDefinition));
+            Map<String, BrokerListener> brokerListeners = topicBrokerListenerMap.get(createTopic(streamDefinition));
+            if (brokerListeners != null) {
+                for (BrokerListener brokerListener : brokerListeners.values()) {
+                    try {
+                        brokerListener.removeEventDefinition(streamDefinition);
+                    } catch (BrokerEventProcessingException e) {
+                        log.error("Cannot remove Stream Definition from a brokerListener subscribed to " +
+                                  streamDefinition.getStreamId(), e);
+                    }
+
+                }
+            }
+            streamIdBrokerListenerMap.remove(streamDefinition.getStreamId());
+        }
+
+        @Override
         public void definedStream(StreamDefinition streamDefinition, Credentials credentials) {
             topicStreamDefinitionMap.put(createTopic(streamDefinition), streamDefinition);
             Map<String, BrokerListener> brokerListeners = topicBrokerListenerMap.get(createTopic(streamDefinition));
@@ -117,7 +135,7 @@ public final class AgentBrokerType implements BrokerType {
 //            inputTypeDefMap.put(streamDefinition.getName(), streamDefinition);
             for (BrokerListener brokerListener : brokerListeners.values()) {
                 try {
-                       brokerListener.onEventDefinition(streamDefinition);
+                    brokerListener.addEventDefinition(streamDefinition);
                 } catch (BrokerEventProcessingException e) {
                     log.error("Cannot send Stream Definition to a brokerListener subscribed to " +
                               streamDefinition.getStreamId(), e);
@@ -169,8 +187,8 @@ public final class AgentBrokerType implements BrokerType {
     }
 
     public String subscribe(String topicName, BrokerListener brokerListener,
-                          BrokerConfiguration brokerConfiguration,
-                          AxisConfiguration axisConfiguration)
+                            BrokerConfiguration brokerConfiguration,
+                            AxisConfiguration axisConfiguration)
             throws BrokerEventProcessingException {
         String subscriptionId = UUID.randomUUID().toString();
         if (!topicBrokerListenerMap.containsKey(topicName)) {
@@ -181,7 +199,7 @@ public final class AgentBrokerType implements BrokerType {
             topicBrokerListenerMap.get(topicName).put(subscriptionId, brokerListener);
             StreamDefinition streamDefinition = topicStreamDefinitionMap.get(topicName);
             if (streamDefinition != null) {
-                brokerListener.onEventDefinition(streamDefinition);
+                brokerListener.addEventDefinition(streamDefinition);
             }
 
         }
@@ -280,8 +298,9 @@ public final class AgentBrokerType implements BrokerType {
     }
 
     @Override
-    public void testConnection(BrokerConfiguration brokerConfiguration) throws BrokerEventProcessingException {
-      // no test
+    public void testConnection(BrokerConfiguration brokerConfiguration)
+            throws BrokerEventProcessingException {
+        // no test
     }
 
     public BrokerTypeDto getBrokerTypeDto() {
@@ -290,7 +309,7 @@ public final class AgentBrokerType implements BrokerType {
 
     public void unsubscribe(String topicName,
                             BrokerConfiguration brokerConfiguration,
-                            AxisConfiguration axisConfiguration,String subscriptionId)
+                            AxisConfiguration axisConfiguration, String subscriptionId)
             throws BrokerEventProcessingException {
         Map<String, BrokerListener> map = topicBrokerListenerMap.get(topicName);
         if (map != null) {

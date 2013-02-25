@@ -65,12 +65,12 @@ public class CarbonBrokerService implements BrokerService {
     }
 
     public String subscribe(BrokerConfiguration brokerConfiguration,
-                          String topicName,
-                          BrokerListener brokerListener,
-                          AxisConfiguration axisConfiguration) throws BrokerEventProcessingException {
+                            String topicName,
+                            BrokerListener brokerListener,
+                            AxisConfiguration axisConfiguration) throws BrokerEventProcessingException {
         BrokerType brokerType = this.brokerTypeMap.get(brokerConfiguration.getType());
         try {
-           return brokerType.subscribe(topicName, brokerListener, brokerConfiguration, axisConfiguration);
+            return brokerType.subscribe(topicName, brokerListener, brokerConfiguration, axisConfiguration);
         } catch (BrokerEventProcessingException e) {
             log.error(e.getMessage(),e);
             throw new BrokerEventProcessingException(e.getMessage(),e);

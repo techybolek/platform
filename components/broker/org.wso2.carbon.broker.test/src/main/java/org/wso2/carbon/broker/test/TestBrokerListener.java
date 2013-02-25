@@ -34,8 +34,13 @@ public class TestBrokerListener implements BrokerListener {
     }
 
     @Override
-    public void onEventDefinition(Object object) throws BrokerEventProcessingException {
-        System.out.println("Definition ==> "+ object);
+    public void addEventDefinition(Object object) throws BrokerEventProcessingException {
+        System.out.println(" Add Definition ==> " + object);
+    }
+
+    @Override
+    public void removeEventDefinition(Object object) throws BrokerEventProcessingException {
+        System.out.println(" Remove Definition ==> " + object);
     }
 
     /**

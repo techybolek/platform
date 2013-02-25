@@ -63,10 +63,10 @@ public final class LocalBrokerType implements BrokerType {
         String subscriptionId = UUID.randomUUID().toString();
         try {
             Axis2Util.registerAxis2Service(topicName, brokerListener,
-                    brokerConfiguration, axisConfiguration, subscriptionId);
+                                           brokerConfiguration, axisConfiguration, subscriptionId);
         } catch (AxisFault axisFault) {
             throw new BrokerEventProcessingException("Can not create " +
-                    "the axis2 service to receive events", axisFault);
+                                                     "the axis2 service to receive events", axisFault);
         }
         return subscriptionId;
 
@@ -90,8 +90,8 @@ public final class LocalBrokerType implements BrokerType {
     @Override
     public void testConnection(BrokerConfiguration brokerConfiguration) throws BrokerEventProcessingException {
         String testMessage = " <brokerConfigurationTest>\n" +
-                "   <message>This is a test message.</message>\n" +
-                "   </brokerConfigurationTest>";
+                             "   <message>This is a test message.</message>\n" +
+                             "   </brokerConfigurationTest>";
         try {
             XMLStreamReader reader1 = StAXUtils.createXMLStreamReader(new ByteArrayInputStream(testMessage.getBytes()));
             StAXOMBuilder builder1 = new StAXOMBuilder(reader1);

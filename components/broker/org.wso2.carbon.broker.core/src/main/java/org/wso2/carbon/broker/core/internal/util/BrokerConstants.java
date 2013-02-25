@@ -55,6 +55,8 @@ public interface BrokerConstants {
     String BROKER_CONF_JMS_PROP_CONNECTION_FACTORY_LOOK_UP_NAME = "ConnectionFactory";
     String BROKER_CONF_JMS_PROP_JNDI_OBJECT_NAME_PREfIX = "connectionfactory.";
 
+    String BROKER_CONF_EMAIL_DEFAULT_SUBJECT = "defaultSubject";
+
     String BROKER_TYPE_LOCAL = "local";
     String BROKER_TYPE_WS_EVENT = "ws-event";
     String BROKER_TYPE_JMS_QPID = "jms-qpid";

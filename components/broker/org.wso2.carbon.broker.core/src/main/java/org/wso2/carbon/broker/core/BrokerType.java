@@ -41,9 +41,9 @@ public interface BrokerType {
      * @throws BrokerEventProcessingException - if can not subscribe to the broker
      */
     String subscribe(String topicName,
-                   BrokerListener brokerListener,
-                   BrokerConfiguration brokerConfiguration,
-                   AxisConfiguration axisConfiguration) throws BrokerEventProcessingException;
+                     BrokerListener brokerListener,
+                     BrokerConfiguration brokerConfiguration,
+                     AxisConfiguration axisConfiguration) throws BrokerEventProcessingException;
 
     /**
      * publish a message to a given connection with the broker configuration.

@@ -24,17 +24,23 @@ import org.wso2.carbon.broker.core.exception.BrokerEventProcessingException;
 public interface BrokerListener {
 
     /**
-     * when an event definition is defined broker proxy call this method with the recived event.
+     * when an event definition is defined broker calls this method with the definition.
      *
      * @param object - received event definition
      */
-    void onEventDefinition(Object object) throws BrokerEventProcessingException;
+    void addEventDefinition(Object object) throws BrokerEventProcessingException;
 
     /**
-     * when an event happens broker proxy call this method with the recived event.
+     * when an event definition is removed broker proxy call this method with the definition.
+     *
+     * @param object - received event definition
+     */
+    void removeEventDefinition(Object object) throws BrokerEventProcessingException;
+
+    /**
+     * when an event happens broker proxy call this method with the received event.
      *
      * @param object - received event
      */
     void onEvent(Object object) throws BrokerEventProcessingException;
-
 }

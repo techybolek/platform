@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.broker.core.BrokerConfiguration;
 import org.wso2.carbon.broker.core.BrokerListener;
 import org.wso2.carbon.broker.core.BrokerTypeDto;
+import org.wso2.carbon.broker.core.Property;
 import org.wso2.carbon.broker.core.exception.BrokerEventProcessingException;
 import org.wso2.carbon.broker.core.BrokerType;
 import org.wso2.carbon.broker.core.internal.ds.BrokerServiceValueHolder;
@@ -40,7 +41,9 @@ import org.wso2.carbon.broker.core.internal.util.BrokerConstants;
 import org.wso2.carbon.databridge.agent.thrift.internal.utils.AgentConstants;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -62,6 +65,16 @@ public final class EmailBrokerType implements BrokerType {
     private EmailBrokerType() {
         this.brokerTypeDto = new BrokerTypeDto();
         this.brokerTypeDto.setName(BrokerConstants.BROKER_TYPE_EMAIL);
+
+        ResourceBundle resourceBundle = ResourceBundle.getBundle(
+                "org.wso2.carbon.broker.core.i18n.Resources", Locale.getDefault());
+
+        // set default Subject as a property
+        Property factoryInitialProperty = new Property(BrokerConstants.BROKER_CONF_EMAIL_DEFAULT_SUBJECT);
+        factoryInitialProperty.setRequired(true);
+        factoryInitialProperty.setDisplayName(
+                resourceBundle.getString(BrokerConstants.BROKER_CONF_EMAIL_DEFAULT_SUBJECT));
+        getBrokerTypeDto().addProperty(factoryInitialProperty);
     }
 
     public static EmailBrokerType getInstance() {
@@ -83,7 +96,7 @@ public final class EmailBrokerType implements BrokerType {
         // note here the brokerConfiguration configuration for all the brokers are same hence ignored
         EmailSenderConfiguration emailSenderConfiguration = emailSenderConfigurationMap.get(topicName);
         if (emailSenderConfiguration == null) {
-            emailSenderConfiguration = new EmailSenderConfiguration(topicName);
+            emailSenderConfiguration = new EmailSenderConfiguration(topicName, brokerConfiguration.getProperties().get(BrokerConstants.BROKER_CONF_EMAIL_DEFAULT_SUBJECT));
             emailSenderConfigurationMap.putIfAbsent(topicName, emailSenderConfiguration);
         }
 
@@ -143,14 +156,14 @@ public final class EmailBrokerType implements BrokerType {
                 options.setProperty(Constants.Configuration.ENABLE_REST, Constants.VALUE_TRUE);
                 options.setProperty(MessageContext.TRANSPORT_HEADERS, headerMap);
                 options.setProperty(MailConstants.TRANSPORT_MAIL_FORMAT,
-                        MailConstants.TRANSPORT_FORMAT_TEXT);
+                                    MailConstants.TRANSPORT_FORMAT_TEXT);
                 options.setTo(new EndpointReference("mailto:" + to));
                 serviceClient.setOptions(options);
                 serviceClient.fireAndForget(payload);
                 log.debug("Sending confirmation mail to " + to);
             } catch (AxisFault e) {
                 String msg = "Error in delivering the message, " +
-                        "subject: " + subject + ", to: " + to + ".";
+                             "subject: " + subject + ", to: " + to + ".";
                 log.error(msg);
             }
         }
@@ -162,18 +175,22 @@ public final class EmailBrokerType implements BrokerType {
         private String subject;
         private String[] emailIds;
 
-        private EmailSenderConfiguration(String topic) {
+        private EmailSenderConfiguration(String topic, String defaultSubject) {
             String[] emailIdsAndSubject = topic.split("/");
-            subject = "";
+            if (defaultSubject != null) {
+                subject = defaultSubject;
+            } else {
+                subject = "";
+            }
             String emailIdString = null;
             if (emailIdsAndSubject.length == 2) {
                 subject = emailIdsAndSubject[1];
                 emailIdString = emailIdsAndSubject[0];
             } else if (emailIdsAndSubject.length == 1) {
                 emailIdString = emailIdsAndSubject[0];
-                log.info("Subject for the topic '"+topic+"' is empty");
-            }  else{
-                log.error(topic+ " doesn't constants E-mail ids hence no message will be sent via topic '"+topic+"'");
+                log.info("Subject for the topic '" + topic + "' is empty");
+            } else {
+                log.error(topic + " doesn't constants E-mail ids hence no message will be sent via topic '" + topic + "'");
             }
             emailIds = null;
             if (emailIdString != null) {

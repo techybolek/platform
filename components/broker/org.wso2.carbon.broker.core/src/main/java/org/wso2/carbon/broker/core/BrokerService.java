@@ -61,9 +61,9 @@ public interface BrokerService {
      *          - if problem happen when subscribing
      */
     String subscribe(BrokerConfiguration brokerConfiguration,
-                   String topicName,
-                   BrokerListener brokerListener,
-                   AxisConfiguration axisConfiguration) throws BrokerEventProcessingException;
+                     String topicName,
+                     BrokerListener brokerListener,
+                     AxisConfiguration axisConfiguration) throws BrokerEventProcessingException;
 
 
     /**
