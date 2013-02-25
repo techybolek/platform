@@ -19,6 +19,7 @@ package org.wso2.carbon.cep.core.mapping.output.mapping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.cep.core.exception.CEPEventProcessingException;
+import org.wso2.carbon.cep.core.internal.util.CEPRegistryUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,32 +38,30 @@ public class TextOutputMapping extends OutputMapping {
     public void setMappingText(String mappingText) {
         this.mappingText = mappingText;
         String text = mappingText;
+        if (CEPRegistryUtils.isRegistryPath(mappingText)) {
+            text = CEPRegistryUtils.getResource(mappingText);
+        }
         mappingTextList.clear();
         while (text.contains("{") && text.indexOf("}") > 0) {
             mappingTextList.add(text.substring(0, text.indexOf("{")));
             mappingTextList.add(text.substring(text.indexOf("{") + 1, text.indexOf("}")));
-            text = text.substring(text.indexOf("}")+1);
+            text = text.substring(text.indexOf("}") + 1);
         }
         mappingTextList.add(text);
 
     }
 
-    public Object convert(Object event) {
+    public Object convert(Object event) throws CEPEventProcessingException {
 
         String eventText = mappingTextList.get(0);
-        try {
-            for (int i = 1; i < mappingTextList.size(); i++) {
-                if (i % 2 == 0) {
-                    eventText += mappingTextList.get(i);
-                } else {
-                    eventText += getPropertyValue(event, mappingTextList.get(i)).toString();
-                }
+        for (int i = 1; i < mappingTextList.size(); i++) {
+            if (i % 2 == 0) {
+                eventText += mappingTextList.get(i);
+            } else {
+                eventText += getPropertyValue(event, mappingTextList.get(i)).toString();
             }
-            return eventText;
-        } catch (CEPEventProcessingException e) {
-            log.error("Error in accessing information from the output event to build the Output Text Message " + e);
         }
-        return null;
+        return eventText;
     }
 
 }

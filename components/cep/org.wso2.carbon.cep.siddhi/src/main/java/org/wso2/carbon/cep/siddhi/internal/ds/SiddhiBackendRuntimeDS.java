@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.cep.siddhi.internal.ds;
 
-import me.prettyprint.hector.api.Cluster;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
@@ -28,7 +27,6 @@ import org.wso2.carbon.cep.siddhi.backend.SiddhiBackEndRuntimeFactory;
 import org.wso2.carbon.cep.siddhi.persistence.CasandraPersistenceStore;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.siddhi.core.persistence.PersistenceStore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,10 +46,6 @@ public class SiddhiBackendRuntimeDS {
 
     private static final Log log = LogFactory.getLog(SiddhiBackendRuntimeDS.class);
 
-    private PersistenceStore casandraPersistenceStore = null;
-    private UserRealm userRealm;
-    private DataAccessService dataAccessService;
-    private String clusterName = null;
 
     protected void activate(ComponentContext context) {
         if (SiddhiBackendRuntimeValueHolder.getInstance().getCEPEngineProvider() == null) {
@@ -61,8 +55,10 @@ public class SiddhiBackendRuntimeDS {
                 cepEngineProvider.setName("SiddhiCEPRuntime");
                 cepEngineProvider.setProviderClass(SiddhiBackEndRuntimeFactory.class);
                 SiddhiBackendRuntimeValueHolder.getInstance().setCEPEngineProvider(cepEngineProvider);
-                String adminPassword = userRealm.getRealmConfiguration().getAdminPassword();
-                String adminUserName = userRealm.getRealmConfiguration().getAdminUserName();
+                String adminPassword = SiddhiBackendRuntimeValueHolder.getInstance().getUserRealm().
+                        getRealmConfiguration().getAdminPassword();
+                String adminUserName = SiddhiBackendRuntimeValueHolder.getInstance().getUserRealm().
+                        getRealmConfiguration().getAdminUserName();
 //           int tenantId =userRealm.getRealmConfiguration().getTenantId();
                 List<String> configPropertyNames = new ArrayList<String>();
                 configPropertyNames.add(SiddhiBackEndRuntimeFactory.PERSISTENCE_SNAPSHOT_TIME_INTERVAL_MINUTES);
@@ -72,12 +68,17 @@ public class SiddhiBackendRuntimeDS {
                 ClusterInformation clusterInformation = new ClusterInformation(adminUserName,
                                                                                adminPassword);
                 clusterInformation.setClusterName(CasandraPersistenceStore.CLUSTER_NAME);
-                Cluster cluster = dataAccessService.getCluster(clusterInformation);
-                clusterName = cluster.getName();
-                casandraPersistenceStore = new CasandraPersistenceStore(cluster);
-                SiddhiBackendRuntimeValueHolder.getInstance().setPersistenceStore(casandraPersistenceStore);
+//                Cluster cluster = dataAccessService.getCluster(clusterInformation);
+//                clusterName = cluster.getName();
+//                casandraPersistenceStore = new CasandraPersistenceStore(cluster);
+                SiddhiBackendRuntimeValueHolder.getInstance().setClusterInformation(clusterInformation);
+//                SiddhiBackendRuntimeValueHolder.getInstance().setPersistenceStore(casandraPersistenceStore);
                 SiddhiBackendRuntimeValueHolder.getInstance().getCEPService()
                         .registerCEPEngineProvider(cepEngineProvider);
+
+                if(null==SiddhiBackendRuntimeValueHolder.getInstance().getSiddhiExtentions()){
+                    SiddhiBackendRuntimeValueHolder.getInstance().setSiddhiExtentions(SiddhiConfigLoader.loadSiddhiExtensions());
+                }
             } catch (UserStoreException e) {
                 log.error("Error in accessing user store ", e);
             } catch (Throwable e) {
@@ -88,9 +89,11 @@ public class SiddhiBackendRuntimeDS {
     }
 
     protected void deactivate(ComponentContext context) {
-        if (dataAccessService != null && clusterName != null) {
-            dataAccessService.destroyCluster(clusterName);
-            clusterName = null;
+        if (SiddhiBackendRuntimeValueHolder.getInstance().getDataAccessService() != null &&
+            SiddhiBackendRuntimeValueHolder.getInstance().getClusterName() != null) {
+            SiddhiBackendRuntimeValueHolder.getInstance().getDataAccessService().
+                    destroyCluster(SiddhiBackendRuntimeValueHolder.getInstance().getClusterName());
+            SiddhiBackendRuntimeValueHolder.getInstance().setClusterName(null);
         }
     }
 
@@ -99,24 +102,24 @@ public class SiddhiBackendRuntimeDS {
     }
 
     protected void unSetCEPService(CEPServiceInterface cepService) {
-
+        SiddhiBackendRuntimeValueHolder.getInstance().registerCEPService(null);
     }
 
     protected void setUserRealm(UserRealm userRealm) {
-        this.userRealm = userRealm;
+        SiddhiBackendRuntimeValueHolder.getInstance().setUserRealm(userRealm);
     }
 
     protected void unsetUserRealm(UserRealm userRealm) {
-        this.userRealm = null;
+        SiddhiBackendRuntimeValueHolder.getInstance().setUserRealm(null);
 
     }
 
     protected void setDataAccessService(DataAccessService dataAccessService) {
-        this.dataAccessService = dataAccessService;
+        SiddhiBackendRuntimeValueHolder.getInstance().setDataAccessService(dataAccessService);
     }
 
     protected void unsetDataAccessService(DataAccessService dataAccessService) {
-        this.dataAccessService = null;
+        SiddhiBackendRuntimeValueHolder.getInstance().setDataAccessService(null);
     }
 
 

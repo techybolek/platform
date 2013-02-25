@@ -112,6 +112,16 @@ public class XMLInputMapping extends InputMapping {
         return (Event) tupleEvent;
     }
 
+    @Override
+    public void addEventDefinition(Object eventDef) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void removeEventDefinition(Object eventDef) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public static Object getValue(OMElement eventOMElement,
                                   String xpathString,
                                   String type,

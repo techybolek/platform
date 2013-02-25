@@ -18,7 +18,6 @@ package org.wso2.carbon.cep.core.mapping.input.mapping;
 
 import org.wso2.carbon.cep.core.exception.CEPEventProcessingException;
 import org.wso2.carbon.databridge.commons.Event;
-import org.wso2.carbon.databridge.commons.StreamDefinition;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -28,10 +27,10 @@ public abstract class InputMapping {
 
     protected String stream;
 
-    protected Class mappingClass ;
+    protected Class mappingClass;
 
     protected Map<String, Method> writeMethodMap;
-    protected StreamDefinition  eventStreamDefinition;
+//    protected StreamDefinition eventStreamDefinition;
 
     protected InputMapping() {
         this.writeMethodMap = new HashMap<String, Method>();
@@ -87,9 +86,9 @@ public abstract class InputMapping {
         this.writeMethodMap = writeMethodMap;
     }
 
-    public void setEventDefinition(Object eventDef) {
-        eventStreamDefinition =(StreamDefinition)eventDef;
-    }
+    public abstract void addEventDefinition(Object eventDef);
+
+    public abstract void removeEventDefinition(Object eventDef);
 
     @Override
     public boolean equals(Object o) {
@@ -102,9 +101,9 @@ public abstract class InputMapping {
 
         InputMapping that = (InputMapping) o;
 
-        if (eventStreamDefinition != null ? !eventStreamDefinition.equals(that.eventStreamDefinition) : that.eventStreamDefinition != null) {
-            return false;
-        }
+//        if (eventStreamDefinition != null ? !eventStreamDefinition.equals(that.eventStreamDefinition) : that.eventStreamDefinition != null) {
+//            return false;
+//        }
         if (mappingClass != null ? !mappingClass.equals(that.mappingClass) : that.mappingClass != null) {
             return false;
         }
@@ -123,7 +122,7 @@ public abstract class InputMapping {
         int result = stream != null ? stream.hashCode() : 0;
         result = 31 * result + (mappingClass != null ? mappingClass.hashCode() : 0);
         result = 31 * result + (writeMethodMap != null ? writeMethodMap.hashCode() : 0);
-        result = 31 * result + (eventStreamDefinition != null ? eventStreamDefinition.hashCode() : 0);
+//        result = 31 * result + (eventStreamDefinition != null ? eventStreamDefinition.hashCode() : 0);
         return result;
     }
 }

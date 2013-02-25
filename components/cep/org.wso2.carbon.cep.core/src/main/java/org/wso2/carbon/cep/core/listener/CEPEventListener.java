@@ -16,17 +16,16 @@
 
 package org.wso2.carbon.cep.core.listener;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.broker.core.BrokerConfiguration;
 import org.wso2.carbon.broker.core.BrokerService;
 import org.wso2.carbon.broker.core.exception.BrokerConfigException;
 import org.wso2.carbon.broker.core.exception.BrokerEventProcessingException;
+import org.wso2.carbon.cep.core.exception.CEPEventProcessingException;
 import org.wso2.carbon.cep.core.internal.config.BrokerConfigurationHelper;
 import org.wso2.carbon.cep.core.internal.ds.CEPServiceValueHolder;
+import org.wso2.carbon.cep.core.internal.util.CEPRegistryUtils;
 import org.wso2.carbon.cep.core.mapping.output.Output;
 import org.wso2.carbon.cep.core.mapping.output.mapping.OutputMapping;
 import org.wso2.carbon.cep.statistics.CEPStatisticsMonitor;
@@ -34,10 +33,6 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * this class used to receive the events from the cep engine. And then it passes those events
@@ -74,6 +69,9 @@ public class CEPEventListener {
             readyForProcessing = true;
             outputMapping = this.output.getOutputMapping();
             topic = output.getTopic();
+            if (CEPRegistryUtils.isRegistryPath(topic)) {
+                topic = CEPRegistryUtils.getResource(topic);
+            }
 
             BrokerConfigurationHelper brokerConfigurationHelper = new BrokerConfigurationHelper();
 
@@ -125,13 +123,17 @@ public class CEPEventListener {
 
                 try {
                     for (Object event : events) {
-                        Object eventToSend = outputMapping.convert(event);
-                        brokerService.publish(brokerConfiguration, topic, eventToSend);
-                        if (cepStatisticsMonitor != null) {
-                            cepStatisticsMonitor.incrementResponse();
+                        Object eventToSend;
+                        try {
+                            eventToSend = outputMapping.convert(event);
+                            brokerService.publish(brokerConfiguration, topic, eventToSend);
+                            if (cepStatisticsMonitor != null) {
+                                cepStatisticsMonitor.incrementResponse();
+                            }
+                        } catch (CEPEventProcessingException e) {
+                            log.error("Error converting event: " + event + " in output mapping ", e);
                         }
                     }
-
                 } catch (BrokerEventProcessingException e) {
                     log.error("Can not send the message using broker ", e);
                 }
@@ -175,12 +177,16 @@ public class CEPEventListener {
 //                }
 
                 try {
-                    Object eventToSend = outputMapping.convert(event);
-                    brokerService.publish(brokerConfiguration, topic, eventToSend);
-                    if (cepStatisticsMonitor != null) {
-                        cepStatisticsMonitor.incrementResponse();
+                    Object eventToSend = null;
+                    try {
+                        eventToSend = outputMapping.convert(event);
+                        brokerService.publish(brokerConfiguration, topic, eventToSend);
+                        if (cepStatisticsMonitor != null) {
+                            cepStatisticsMonitor.incrementResponse();
+                        }
+                    } catch (CEPEventProcessingException e) {
+                        log.error("Error converting event: " + event + " in output mapping ", e);
                     }
-
                 } catch (BrokerEventProcessingException e) {
                     log.error("Can not send the message using broker ", e);
                 }

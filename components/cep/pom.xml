@@ -131,13 +131,6 @@
         <module>org.wso2.carbon.cep.ui</module>
         <module>org.wso2.carbon.cep.fusion</module>
         <module>org.wso2.carbon.cep.siddhi</module>
-	<!--<module>org.wso2.carbon.cep.core</module>-->
-        <!--<module>org.wso2.carbon.cep.admin</module>-->
-        <!--<module>org.wso2.carbon.cep.ui</module>-->
-        <!--<module>org.wso2.carbon.cep.fusion</module>-->
-        <!--<module>org.wso2.carbon.cep.siddhi</module>-->
-
-
     </modules>
 
 

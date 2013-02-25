@@ -103,7 +103,7 @@ public class TestInputMapping extends TestCase {
         tupleInputMapping.setProperties(tupleProperties);
 
         //Set definition
-        tupleInputMapping.setEventDefinition(eventStreamDefinition);
+        tupleInputMapping.addEventDefinition(eventStreamDefinition);
 
         //Convert event
         Object convertedEvent=tupleInputMapping.convert(event);
@@ -147,7 +147,7 @@ public class TestInputMapping extends TestCase {
         tupleInputMapping.setMappingClass(Map.class);
 
         //Set definition
-        tupleInputMapping.setEventDefinition(eventStreamDefinition);
+        tupleInputMapping.addEventDefinition(eventStreamDefinition);
 
         //Convert event
         Object convertedEvent=tupleInputMapping.convert(event);

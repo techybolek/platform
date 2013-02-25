@@ -31,24 +31,19 @@ public class MapOutputMapping extends OutputMapping {
     private List<MapOutputProperty> propertyList;
 
     @Override
-    public Object convert(Object event) {
-       try {
+    public Object convert(Object event) throws CEPEventProcessingException {
         return buildMapEvent(event);
-    } catch (CEPEventProcessingException e) {
-        log.error("Error in accessing information from the output event to build the OM Element " + e);
     }
-    return null;
-}
 
     private Map buildMapEvent(Object event) throws CEPEventProcessingException {
-        Map<String,Object> map=new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<String, Object>();
         if (event instanceof Event) {
-           for(MapOutputProperty outputProperty : propertyList){
-               map.put(outputProperty.getName(),getPropertyValue(event, outputProperty.getValueOf()));
-           }
-        } else if(event instanceof Map){
-            for(MapOutputProperty outputProperty : propertyList){
-                map.put(outputProperty.getName(),((Map)event).get(outputProperty.getValueOf()));
+            for (MapOutputProperty outputProperty : propertyList) {
+                map.put(outputProperty.getName(), getPropertyValue(event, outputProperty.getValueOf()));
+            }
+        } else if (event instanceof Map) {
+            for (MapOutputProperty outputProperty : propertyList) {
+                map.put(outputProperty.getName(), ((Map) event).get(outputProperty.getValueOf()));
             }
         }
 

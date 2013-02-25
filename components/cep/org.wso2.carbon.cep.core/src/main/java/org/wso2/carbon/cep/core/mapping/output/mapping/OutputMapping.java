@@ -43,10 +43,11 @@ public abstract class OutputMapping {
         methodCache = new HashMap<Class, Map<String, Method>>();
     }
 
-    public abstract Object convert(Object event);
+    public abstract Object convert(Object event) throws CEPEventProcessingException;
 
     protected Object getPropertyValue(Object event, String property)
             throws CEPEventProcessingException {
+        try {
         if (event instanceof Map) {
             return ((Map) event).get(property);
         } else if (event instanceof Event) {
@@ -84,6 +85,9 @@ public abstract class OutputMapping {
                 throw new CEPEventProcessingException("Cannot invoke read method with description "
                                                       + property + " in class " + event.getClass());
             }
+        }
+        }catch (NullPointerException e){
+            throw  new CEPEventProcessingException("Cannot find property :"+property +" in event "+event,e);
         }
     }
 

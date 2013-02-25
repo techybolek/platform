@@ -34,19 +34,14 @@ public class TupleOutputMapping extends OutputMapping {
 
     private static final Log log = LogFactory.getLog(TupleOutputMapping.class);
 
-    private StreamDefinition streamDefinition ;
+    private StreamDefinition streamDefinition;
     private List<TupleOutputProperty> payloadDataProperties;
     private List<TupleOutputProperty> correlationDataProperties;
     private List<TupleOutputProperty> metaDataProperties;
     private String topic;
 
-    public Object convert(Object event) {
-        try {
-            return buildTupleEvent(event);
-        } catch (CEPEventProcessingException e) {
-            log.error("Error in accessing information from the output event to build the OM Element " + e);
-        }
-        return null;
+    public Object convert(Object event) throws CEPEventProcessingException {
+        return buildTupleEvent(event);
     }
 
     private Object buildTupleEvent(Object event) throws CEPEventProcessingException {
@@ -73,7 +68,7 @@ public class TupleOutputMapping extends OutputMapping {
             }
             (newEvent).setPayloadData(data);
         }
-        return new Object[]{newEvent,streamDefinition};
+        return new Object[]{newEvent, streamDefinition};
     }
 
     public List<TupleOutputProperty> getPayloadDataProperties() {
@@ -130,15 +125,15 @@ public class TupleOutputMapping extends OutputMapping {
 
     public void initStreamDefinition(String topic)
             throws CEPConfigurationException {
-        this.topic=topic;
+        this.topic = topic;
         String[] streamNameVersion = topic.split("/");
         try {
-            streamDefinition=new StreamDefinition(streamNameVersion[0],streamNameVersion[1]);
+            streamDefinition = new StreamDefinition(streamNameVersion[0], streamNameVersion[1]);
             streamDefinition.setMetaData(constructAttributeList(metaDataProperties));
             streamDefinition.setCorrelationData(constructAttributeList(correlationDataProperties));
             streamDefinition.setPayloadData(constructAttributeList(payloadDataProperties));
         } catch (MalformedStreamDefinitionException e) {
-            throw new CEPConfigurationException("Malformed topic : "+topic) ;
+            throw new CEPConfigurationException("Malformed topic : " + topic);
         }
     }
 }

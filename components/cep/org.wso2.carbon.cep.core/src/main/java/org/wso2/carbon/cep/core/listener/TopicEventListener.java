@@ -32,7 +32,8 @@ public class TopicEventListener {
     private CEPStatisticsMonitor cepStatisticsMonitor;
 
 
-    public TopicEventListener(CEPBucket cepBucket, Input input, CEPStatisticsMonitor cepStatisticsMonitor) {
+    public TopicEventListener(CEPBucket cepBucket, Input input,
+                              CEPStatisticsMonitor cepStatisticsMonitor) {
         this.cepBucket = cepBucket;
         this.input = input;
         this.cepStatisticsMonitor = cepStatisticsMonitor;
@@ -48,19 +49,30 @@ public class TopicEventListener {
         if (this.input.getInputMapping() != null) {
             event = this.input.getInputMapping().convert(event);
         }
-        this.cepBucket.insertEvent(event, this.input.getInputMapping());
-        if (cepStatisticsMonitor != null) {
-            cepStatisticsMonitor.incrementRequest();
+        if (event != null) {
+            this.cepBucket.insertEvent(event, this.input.getInputMapping());
+            if (cepStatisticsMonitor != null) {
+                cepStatisticsMonitor.incrementRequest();
+            }
         }
     }
 
     /**
-     * Defines the event definition to map the outputs accordingly
+     * Defines the event definition to map accordingly
      *
      * @param eventDef
      */
-    public void onEventDefinition(Object eventDef) {
-        input.getInputMapping().setEventDefinition(eventDef);
+    public void addEventDefinition(Object eventDef) {
+        input.getInputMapping().addEventDefinition(eventDef);
+    }
+
+    /**
+     * Removes the event definition from map accordingly
+     *
+     * @param eventDef
+     */
+    public void removeEventDefinition(Object eventDef) {
+        input.getInputMapping().removeEventDefinition(eventDef);
     }
 
     public CEPBucket getCepBucket() {

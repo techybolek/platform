@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.cep.siddhi.backend;
 
+import me.prettyprint.hector.api.Cluster;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.cep.core.backend.CEPBackEndRuntime;
@@ -29,6 +30,8 @@ import org.wso2.carbon.cep.core.mapping.input.property.MapInputProperty;
 import org.wso2.carbon.cep.core.mapping.input.property.TupleInputProperty;
 import org.wso2.carbon.cep.core.mapping.input.property.XMLInputProperty;
 import org.wso2.carbon.cep.siddhi.internal.ds.SiddhiBackendRuntimeValueHolder;
+import org.wso2.carbon.cep.siddhi.internal.ds.SiddhiConfigLoader;
+import org.wso2.carbon.cep.siddhi.persistence.CasandraPersistenceStore;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.config.SiddhiConfiguration;
 import org.wso2.siddhi.core.stream.input.InputHandler;
@@ -72,11 +75,23 @@ public class SiddhiBackEndRuntimeFactory implements CEPBackEndRuntimeFactory {
             SiddhiConfiguration siddhiConfig = new SiddhiConfiguration();
             siddhiConfig.setAsyncProcessing(false); //todo check which is good?
             siddhiConfig.setQueryPlanIdentifier(bucketName);
-            siddhiConfig.setInstanceIdentifier(UUID.randomUUID().toString());
-            siddhiConfig.setClusterIdentifier("WSO2CEP-Siddhi-Cluster");
+            siddhiConfig.setInstanceIdentifier("WSO2CEP-Siddhi-Instance-" + UUID.randomUUID().toString());
             siddhiConfig.setDistributedProcessing(isDistributedProcessingEnabled);
+            if(null==SiddhiBackendRuntimeValueHolder.getInstance().getSiddhiExtentions()){
+                SiddhiBackendRuntimeValueHolder.getInstance().setSiddhiExtentions(SiddhiConfigLoader.loadSiddhiExtensions());
+            }
+            siddhiConfig.setSiddhiExtensions(SiddhiBackendRuntimeValueHolder.getInstance().getSiddhiExtentions());
             SiddhiManager siddhiManager = new SiddhiManager(siddhiConfig);
-            siddhiManager.setPersistStore(SiddhiBackendRuntimeValueHolder.getInstance().getPersistenceStore());
+            if (persistenceTimeInterval > 0) {
+                if (null == SiddhiBackendRuntimeValueHolder.getInstance().getPersistenceStore()) {
+                    Cluster cluster = SiddhiBackendRuntimeValueHolder.getInstance().getDataAccessService().getCluster(SiddhiBackendRuntimeValueHolder.getInstance().getClusterInformation());
+                    SiddhiBackendRuntimeValueHolder.getInstance().setClusterName(cluster.getName());
+                    CasandraPersistenceStore casandraPersistenceStore = new CasandraPersistenceStore(cluster);
+                    SiddhiBackendRuntimeValueHolder.getInstance().setPersistenceStore(casandraPersistenceStore);
+                }
+                siddhiManager.setPersistStore(SiddhiBackendRuntimeValueHolder.getInstance().getPersistenceStore());
+
+            }
 
             Map<String, InputHandler> siddhiInputHandlerMap = new HashMap<String, InputHandler>();
 
@@ -116,7 +131,7 @@ public class SiddhiBackEndRuntimeFactory implements CEPBackEndRuntimeFactory {
 
             return new SiddhiBackEndRuntime(bucketName, siddhiManager, siddhiInputHandlerMap, tenantId, persistenceTimeInterval);
         } catch (Throwable e) {
-            throw new CEPConfigurationException("Error occurred in creating Siddhi Backend Runtime,"+e);
+            throw new CEPConfigurationException("Error occurred in creating Siddhi Backend Runtime," + e);
         }
     }
 }

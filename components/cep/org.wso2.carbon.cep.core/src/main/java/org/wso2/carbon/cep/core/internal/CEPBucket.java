@@ -30,6 +30,7 @@ import org.wso2.carbon.cep.core.exception.CEPConfigurationException;
 import org.wso2.carbon.cep.core.exception.CEPEventProcessingException;
 import org.wso2.carbon.cep.core.internal.config.BrokerConfigurationHelper;
 import org.wso2.carbon.cep.core.internal.ds.CEPServiceValueHolder;
+import org.wso2.carbon.cep.core.internal.util.CEPRegistryUtils;
 import org.wso2.carbon.cep.core.listener.BrokerEventListener;
 import org.wso2.carbon.cep.core.listener.CEPEventListener;
 import org.wso2.carbon.cep.core.listener.TopicEventListener;
@@ -114,11 +115,16 @@ public class CEPBucket {
 
         CEPEventListener cepEventListener = null;
         if (query.getOutput() != null) {
+            String topic=query.getOutput().getTopic();
+            if(CEPRegistryUtils.isRegistryPath(topic)){
+                topic =CEPRegistryUtils.getResource(topic);
+            }
             if (query.getOutput().getOutputMapping() != null && query.getOutput().getOutputMapping() instanceof TupleOutputMapping) {
-                ((TupleOutputMapping) (query.getOutput().getOutputMapping())).initStreamDefinition(query.getOutput().getTopic());
+
+                ((TupleOutputMapping) (query.getOutput().getOutputMapping())).initStreamDefinition(topic);
             }
             try {
-                cepEventListener = new CEPEventListener(query.getOutput(), tenantId, userName, CEPServiceValueHolder.getInstance().getCepStatisticsManager().createNewCEPStatisticMonitor(query.getOutput().getTopic(), query.getOutput().getBrokerName(), bucket.getName(), tenantId));
+                cepEventListener = new CEPEventListener(query.getOutput(), tenantId, userName, CEPServiceValueHolder.getInstance().getCepStatisticsManager().createNewCEPStatisticMonitor(topic, query.getOutput().getBrokerName(), bucket.getName(), tenantId));
             } catch (BrokerConfigException e) {
                 String errorMessage = "Can not subscribe to output the broker, No broker config found for " + query.getOutput().getBrokerName();
                 log.error(errorMessage);
@@ -146,7 +152,7 @@ public class CEPBucket {
                 brokerConfiguration = brokerConfigurationHelper.getBrokerConfiguration(input.getBrokerName(), tenantId);
 
                 input.setSubscriptionId(brokerService.subscribe(brokerConfiguration, input.getTopic(),
-                        brokerEventListener, axisConfiguration));
+                                                                brokerEventListener, axisConfiguration));
             } catch (BrokerEventProcessingException e) {
                 String errorMessage = "Can not subscribe to the broker " + input.getBrokerName();
                 log.error(errorMessage);

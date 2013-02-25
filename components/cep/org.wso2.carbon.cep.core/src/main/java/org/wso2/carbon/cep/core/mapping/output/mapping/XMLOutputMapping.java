@@ -22,6 +22,7 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.cep.core.exception.CEPEventProcessingException;
+import org.wso2.carbon.cep.core.internal.util.CEPRegistryUtils;
 
 import javax.xml.stream.XMLStreamException;
 import java.lang.reflect.Method;
@@ -33,6 +34,7 @@ public class XMLOutputMapping extends OutputMapping {
     private static final Log log = LogFactory.getLog(XMLOutputMapping.class);
 
     private String mappingXMLText;
+    private String xmlTemplate;
 
     public String getMappingXMLText() {
         return mappingXMLText;
@@ -40,22 +42,22 @@ public class XMLOutputMapping extends OutputMapping {
 
     public void setMappingXMLText(String mappingXMLText) {
         this.mappingXMLText = mappingXMLText;
+        xmlTemplate = mappingXMLText;
+        if (CEPRegistryUtils.isRegistryPath(mappingXMLText)) {
+            xmlTemplate = CEPRegistryUtils.getResource(mappingXMLText);
+        }
     }
 
-    public Object convert(Object event) {
+    public Object convert(Object event) throws CEPEventProcessingException {
 
         OMElement payload = null;
         try {
-            payload = AXIOMUtil.stringToOM(this.mappingXMLText);
+            payload = AXIOMUtil.stringToOM(this.xmlTemplate);
         } catch (XMLStreamException e) {
             log.error("Error in creating OM Element from given XML Mapping text " + e);
         }
         if (payload != null && payload.getChildElements() != null) {
-            try {
-                return buildOuputOMElement(event, payload, this.methodCache);
-            } catch (CEPEventProcessingException e) {
-                log.error("Error in accessing information from the output event to build the OM Element " + e);
-            }
+            return buildOuputOMElement(event, payload, this.methodCache);
         }
         return null;
     }

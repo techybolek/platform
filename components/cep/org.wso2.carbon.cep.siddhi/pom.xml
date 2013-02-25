@@ -23,17 +23,17 @@
         <dependency>
             <groupId>org.wso2.siddhi</groupId>
             <artifactId>siddhi-api</artifactId>
-            <version>1.0.0-wso2v3</version>
+            <version>2.0.0-wso2v1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.siddhi</groupId>
             <artifactId>siddhi-core</artifactId>
-            <version>1.0.0-wso2v3</version>
+            <version>2.0.0-wso2v1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.siddhi</groupId>
             <artifactId>siddhi-query</artifactId>
-            <version>1.0.0-wso2v3</version>
+            <version>2.0.0-wso2v1</version>
         </dependency>
         <dependency>
             <groupId>org.antlr.wso2</groupId>

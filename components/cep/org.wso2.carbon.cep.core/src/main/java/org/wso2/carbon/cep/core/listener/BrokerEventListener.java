@@ -35,11 +35,19 @@ public class BrokerEventListener implements BrokerListener {
     }
 
     @Override
-    public void onEventDefinition(Object eventDef) throws BrokerEventProcessingException {
+    public void addEventDefinition(Object eventDef) throws BrokerEventProcessingException {
         if (log.isDebugEnabled()) {
             log.debug("Received Event Def : " + eventDef.toString());
         }
-        this.topicEventListener.onEventDefinition(eventDef);
+        this.topicEventListener.addEventDefinition(eventDef);
+    }
+
+    @Override
+    public void removeEventDefinition(Object eventDef) throws BrokerEventProcessingException {
+        if (log.isDebugEnabled()) {
+            log.debug("Received Event Def : " + eventDef.toString());
+        }
+        this.topicEventListener.removeEventDefinition(eventDef);
     }
 
     public void onEvent(Object event) throws BrokerEventProcessingException {

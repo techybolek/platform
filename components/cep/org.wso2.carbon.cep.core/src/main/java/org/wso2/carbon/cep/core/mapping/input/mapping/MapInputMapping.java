@@ -88,6 +88,16 @@ public class MapInputMapping extends InputMapping {
         return tupleEvent;
     }
 
+    @Override
+    public void addEventDefinition(Object eventDef) {
+
+    }
+
+    @Override
+    public void removeEventDefinition(Object eventDef) {
+
+    }
+
 
     public List<MapInputProperty> getProperties() {
         return properties;
