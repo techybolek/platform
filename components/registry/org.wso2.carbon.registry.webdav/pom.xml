@@ -49,8 +49,8 @@
                         </Export-Package>
                         <Import-Package>
                         !org.slf4j.*,
-                        javax.servlet; version=2.4.0,
-                        javax.servlet.http; version=2.4.0,
+                        javax.servlet;version="${imp.pkg.version.javax.servlet}",
+                        javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
                         org.wso2.carbon.registry.core.*,
                         *;resolution:=optional
                         </Import-Package>
@@ -122,10 +122,10 @@
             <version>2.8.0</version>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <groupId>org.eclipse.equinox</groupId>
+            <artifactId>javax.servlet</artifactId>
             <scope>provided</scope>
-            <version>2.3</version>
+            <version>${version.javax.servlet}</version>
         </dependency>
         <dependency>
             <groupId>commons-fileupload</groupId>
