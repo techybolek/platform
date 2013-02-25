@@ -48,11 +48,15 @@
             <artifactId>org.wso2.carbon.governance.registry.extensions</artifactId>
             <version>4.1.0-SNAPSHOT</version>
         </dependency>
-
         <dependency>
             <groupId>org.wso2.wsdl.validator.wso2</groupId>
             <artifactId>wsdl-validator</artifactId>
         </dependency>            
+	<dependency>
+            <groupId>org.wso2.wadl.core.wso2</groupId>
+            <artifactId>wadl-core</artifactId>
+	    <version>1.1.3.wso2v1</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.maven.scm.wso2</groupId>
             <artifactId>maven-scm</artifactId>
@@ -92,6 +96,7 @@
                             </bundles>
                             <importBundles>
                                 <importBundleDef>org.wso2.wsdl.validator.wso2:wsdl-validator</importBundleDef>
+				<importBundleDef>org.wso2.wadl.core.wso2:wadl-core:1.1.3.wso2v1</importBundleDef>
                                 <importBundleDef>org.apache.maven.scm.wso2:maven-scm</importBundleDef>
                                 <importBundleDef>commons-scxml.wso2:commons-scxml</importBundleDef>
                             </importBundles>
