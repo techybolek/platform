@@ -144,11 +144,6 @@ public class ListMetadataService extends AbstractAdmin implements
 
     }
 
-    public String[] getAllLifeCycleState(String s) {
-        // TODO Implement this properly. This is added to fix the the compilation error when creating 4.1.0-SNAPSHOT trunk
-        return new String[0];
-    }
-
     public SchemaBean listSchemaByName(String schemaName)throws Exception{
         RegistryUtils.recordStatistics();
         UserRegistry registry = (UserRegistry)getGovernanceUserRegistry();
