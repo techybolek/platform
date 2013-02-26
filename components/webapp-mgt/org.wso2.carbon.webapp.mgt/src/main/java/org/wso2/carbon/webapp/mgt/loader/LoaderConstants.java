@@ -23,7 +23,7 @@ public class LoaderConstants {
     public final static String CL_CONFIG_FILE = "webapp-classloading.xml";
     public final static String APP_CL_CONFIG_FILE = "META-INF/" + CL_CONFIG_FILE;
 
-    public final static String SYSTEM_ENV = "Tomcat";
+    public final static String SYSTEM_ENV = "Carbon";
 
     //TODO add all the XML element names as constants.
 }

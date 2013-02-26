@@ -109,7 +109,9 @@ public class CarbonWebappClassLoader extends WebappClassLoader {
         // 1) Load from the parent if the parent-first is true and if package matches with the
         //    list of delegated packages
         boolean delegatedPkg = webappCC.isDelegatedPackage(name);
-        if (webappCC.isParentFirst() && delegatedPkg) {
+        boolean excludedPkg = webappCC.isExcludedPackage(name);
+
+        if (webappCC.isParentFirst() && delegatedPkg && !excludedPkg) {
             clazz = findClassFromParent(name, resolve);
             if (clazz != null) {
                 return clazz;
@@ -126,7 +128,7 @@ public class CarbonWebappClassLoader extends WebappClassLoader {
 
         // 4) Load from the parent if the parent-first is false and if the package matches with the
         //    list of delegated packages.
-        if (!webappCC.isParentFirst() && delegatedPkg) {
+        if (!webappCC.isParentFirst() && delegatedPkg && !excludedPkg) {
             clazz = findClassFromParent(name, resolve);
             if (clazz != null) {
                 return clazz;

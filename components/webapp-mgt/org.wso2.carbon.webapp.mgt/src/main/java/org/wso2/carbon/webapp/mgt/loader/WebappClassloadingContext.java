@@ -33,6 +33,9 @@ public class WebappClassloadingContext {
 
     private String[] delegatedPackages;
     private String[] delegatedPackageStems;
+    private String[] excludeedPackages;
+    private String[] excludeedPackageStems;
+    private boolean noExcludedPackages = true;
 
     private String[] repositories;
 
@@ -86,16 +89,42 @@ public class WebappClassloadingContext {
     public void setDelegatedPackages(String[] delegatedPkgList) {
         List<String> delegatedPackageList = new ArrayList<String>();
         List<String> delegatedPackageStemList = new ArrayList<String>();
+        List<String> excludedPackageList = new ArrayList<String>();
+        List<String> excludedPackageStemList = new ArrayList<String>();
 
         for (String packageName : delegatedPkgList) {
-            if (packageName.equals("*")) {
-                delegateAllPackages = true;
-                break;
-            } else if (packageName.endsWith(".*")) {
-                delegatedPackageStemList.add(packageName.substring(0, packageName.length() - 2));
+            // Detect excluded package or delegated package.
+            if (packageName.startsWith("!")) {
+                // Remove the "!" part.
+                packageName = packageName.substring(1);
+                if (packageName.endsWith(".*")) {
+                    excludedPackageStemList.add(packageName.substring(0, packageName.length() - 2));
+                } else {
+                    excludedPackageList.add(packageName);
+                }
+
             } else {
-                delegatedPackageList.add(packageName);
+
+                if (packageName.equals("*")) {
+                    delegateAllPackages = true;
+                    break;
+                } else if (packageName.endsWith(".*")) {
+                    delegatedPackageStemList.add(packageName.substring(0, packageName.length() - 2));
+                } else {
+                    delegatedPackageList.add(packageName);
+                }
+
             }
+        }
+
+        if(excludedPackageList.size() > 0 || excludedPackageStemList.size() > 0){
+            noExcludedPackages = false;
+        }
+
+        if(!noExcludedPackages){
+            excludeedPackages = excludedPackageList.toArray(new  String[excludedPackageList.size()]);
+            excludeedPackageStems = excludedPackageStemList.toArray(new String[excludedPackageStemList.size()]);
+
         }
 
         if (!delegateAllPackages) {
@@ -119,5 +148,36 @@ public class WebappClassloadingContext {
 
     public void setParentFirst(boolean parentFirst) {
         this.parentFirst = parentFirst;
+    }
+
+    public boolean isExcludedPackage(String name) {
+        if (noExcludedPackages) {
+            return false;
+        }
+
+        if (name == null)
+            return false;
+
+        // Looking up the package
+        String packageName;
+        int pos = name.lastIndexOf('.');
+        if (pos != -1) {
+            packageName = name.substring(0, pos);
+        } else {
+            return false;
+        }
+
+        for (String excludedPkg : excludeedPackageStems) {
+            if (packageName.startsWith(excludedPkg)) {
+                return true;
+            }
+        }
+
+        for (String excludedPkg : excludeedPackages) {
+            if (packageName.equals(excludedPkg)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
