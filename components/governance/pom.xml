@@ -41,18 +41,13 @@
                 <module>org.wso2.carbon.governance.custom.lifecycles.history.ui</module>
                 <module>org.wso2.carbon.governance.wsdltool</module>
                 <module>org.wso2.carbon.governance.wsdltool.ui</module>
-                <module>org.wso2.carbon.governance.services.ui</module>
                 <module>org.wso2.carbon.governance.generic.ui</module>
                 <module>org.wso2.carbon.governance.generic</module>
-                <module>org.wso2.carbon.governance.policy.ui</module>
-                <module>org.wso2.carbon.governance.wsdl.ui</module>
-                <module>org.wso2.carbon.governance.schema.ui</module>
                 <module>org.wso2.carbon.governance.gadgetsource</module>
                 <module>org.wso2.carbon.governance.gadgets.ui</module>
                 <module>org.wso2.carbon.governance.notifications.ui</module>
                 <module>org.wso2.carbon.governance.lcm</module>
                 <module>org.wso2.carbon.governance.lcm.ui</module>
-                <module>org.wso2.carbon.governance.services</module>
                 <module>org.wso2.carbon.governance.dashboardpopulator</module>
                 <module>org.wso2.carbon.governance.registry.eventing</module>
                 <module>org.wso2.carbon.governance.list</module>
