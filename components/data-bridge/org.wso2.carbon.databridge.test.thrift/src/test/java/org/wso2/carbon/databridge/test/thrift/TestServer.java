@@ -68,6 +68,11 @@ public class TestServer extends TestCase {
             }
 
             @Override
+            public void removeStream(StreamDefinition streamDefinition, Credentials credentials) {
+                log.info("StreamDefinition remove "+ streamDefinition);
+            }
+
+            @Override
             public void receive(List<Event> eventList, Credentials credentials) {
                 log.info("eventListSize=" + eventList.size() + " eventList " + eventList + " for username " + credentials.getUsername());
             }

@@ -101,6 +101,12 @@ public class AgentBackend {
             }
 
             @Override
+            public void removeStream(StreamDefinition streamDefinition, Credentials credentials) {
+                this.streamDefinition = null;
+            }
+
+
+            @Override
             public void receive(List<Event> eventList, Credentials credentials) {
                 addCount(eventList);
                 if (size <= STABLE && size > STABLE - 500) {
