@@ -49,7 +49,7 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
                             !org.wso2.carbon.governance.sramp.internal,
-                            org.wso2.carbon.governance.sramp.*,
+                            org.wso2.carbon.governance.sramp.*
                         </Export-Package>
                         <Private-Package>
                             org.wso2.carbon.governance.sramp.internal,
@@ -60,9 +60,9 @@
                             org.wso2.carbon.ui.*,
                             !javax.xml.namespace,
                             org.apache.abdera.*; version="${imp.pkg.version.abdera}",
-                            javax.xml.namespace; version=0.0.0,
-                            javax.servlet;version=${imp.pkg.version.javax.servlet},
-                            javax.servlet.http;version=${imp.pkg.version.javax.servlet},
+                            javax.xml.namespace,
+                            javax.servlet;version="${imp.pkg.version.javax.servlet}",
+                            javax.servlet.http;version="${imp.pkg.version.javax.servlet}",
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
                             org.apache.lucene.*,
                             org.apache.commons.logging,
