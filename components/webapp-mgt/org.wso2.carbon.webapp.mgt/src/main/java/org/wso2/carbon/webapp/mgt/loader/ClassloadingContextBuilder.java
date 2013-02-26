@@ -127,6 +127,11 @@ public class ClassloadingContextBuilder {
                 throw new Exception("Undefined environment.");
             }
         }
+
+        // Add default "ext" directory and always load Jars from here.
+        String[] defaultExtClasspath= generateClasspath(LoaderConstants.DEFAULT_EXT_DIR + "*.jar" );
+        Collections.addAll(providedResources, defaultExtClasspath);
+
         webappClassloadingContext.setDelegatedPackages(
                 delegatedPkgList.toArray(new String[delegatedPkgList.size()]));
         webappClassloadingContext.setProvidedRepositories(
@@ -298,16 +303,23 @@ public class ClassloadingContextBuilder {
         List<String> envList = new ArrayList<String>(environments.length);
         Collections.addAll(envList, environments);
 
+        /**
+         * Add 'Tomcat' also as an environments if
+         *
+         * 1. specified environments list does not contains 'Tomcat'
+         * 2. specified environments list does not contains 'Carbon', Carbon includes Tomcat
+         *
+         */
         boolean found = false;
         for (String env : envList) {
-            if (LoaderConstants.SYSTEM_ENV.equals(env)) {
+            if (LoaderConstants.TOMCAT_ENV.equals(env)  || LoaderConstants.SYSTEM_ENV.equals(env)) {
                 found = true;
                 break;
             }
         }
 
         if (!found) {
-            envList.add(LoaderConstants.SYSTEM_ENV);
+            envList.add(LoaderConstants.TOMCAT_ENV);
         }
 
         return envList.toArray(new String[envList.size()]);
