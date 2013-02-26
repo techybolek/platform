@@ -21,6 +21,7 @@ import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
+import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.query.Query;
 import org.wso2.siddhi.query.compiler.exception.SiddhiPraserException;
 
@@ -59,13 +60,12 @@ public class SiddhiCompiler {
             nodes.setTokenStream(tokens);
             SiddhiQLGrammarWalker walker = new SiddhiQLGrammarWalker(nodes);
             return walker.executionPlan();
-
         } catch (Throwable e) {
             throw new SiddhiPraserException(e.getMessage(), e);
         }
     }
 
- public static StreamDefinition parseStreamDefinition(String source) throws SiddhiPraserException {
+    public static StreamDefinition parseStreamDefinition(String source) throws SiddhiPraserException {
         try {
             SiddhiQLGrammarLexer lexer = new SiddhiQLGrammarLexer();
             lexer.setCharStream(new ANTLRStringStream(source));
@@ -79,13 +79,12 @@ public class SiddhiCompiler {
             nodes.setTokenStream(tokens);
             SiddhiQLGrammarWalker walker = new SiddhiQLGrammarWalker(nodes);
             return walker.definitionStream();
-
         } catch (Throwable e) {
             throw new SiddhiPraserException(e.getMessage(), e);
         }
     }
 
- public static Query parseQuery(String source) throws SiddhiPraserException {
+    public static Query parseQuery(String source) throws SiddhiPraserException {
         try {
             SiddhiQLGrammarLexer lexer = new SiddhiQLGrammarLexer();
             lexer.setCharStream(new ANTLRStringStream(source));
@@ -99,7 +98,26 @@ public class SiddhiCompiler {
             nodes.setTokenStream(tokens);
             SiddhiQLGrammarWalker walker = new SiddhiQLGrammarWalker(nodes);
             return walker.query();
+        } catch (Throwable e) {
+            throw new SiddhiPraserException(e.getMessage(), e);
+        }
+    }
 
+
+    public static TableDefinition parseTableDefinition(String source) throws SiddhiPraserException {
+        try {
+            SiddhiQLGrammarLexer lexer = new SiddhiQLGrammarLexer();
+            lexer.setCharStream(new ANTLRStringStream(source));
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            SiddhiQLGrammarParser parser = new SiddhiQLGrammarParser(tokens);
+
+            SiddhiQLGrammarParser.definitionTable_return r = parser.definitionTable();
+            CommonTree t = (CommonTree) r.getTree();
+
+            CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
+            nodes.setTokenStream(tokens);
+            SiddhiQLGrammarWalker walker = new SiddhiQLGrammarWalker(nodes);
+            return walker.definitionTable();
         } catch (Throwable e) {
             throw new SiddhiPraserException(e.getMessage(), e);
         }

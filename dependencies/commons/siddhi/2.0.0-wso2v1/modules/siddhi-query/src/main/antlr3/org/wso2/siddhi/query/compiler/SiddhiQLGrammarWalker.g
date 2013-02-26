@@ -15,6 +15,7 @@ options {
     import org.wso2.siddhi.query.api.condition.ConditionExtension;
     import org.wso2.siddhi.query.api.definition.Attribute;
     import org.wso2.siddhi.query.api.definition.StreamDefinition;
+    import org.wso2.siddhi.query.api.definition.TableDefinition;
     import org.wso2.siddhi.query.api.expression.Expression;
     import org.wso2.siddhi.query.api.expression.ExpressionExtension;
     import org.wso2.siddhi.query.api.expression.Time;
@@ -51,14 +52,23 @@ executionPlan returns [List<ExecutionPlan> executionPlanList]
     @init{
         $executionPlanList=new ArrayList<ExecutionPlan>();
     }
-	: (^(DEFINITION definitionStream {$executionPlanList.add($definitionStream.streamDefinition);}))*  (query)*
+	: (^(STREAM_DEFINITION definitionStream {$executionPlanList.add($definitionStream.streamDefinition);}))*
+	  (^(TABLE_DEFINITION definitionTable {$executionPlanList.add($definitionTable.tableDefinition);}))*
+	  (query)*
 	; 
-   
+
 definitionStream returns [StreamDefinition streamDefinition]
 	@init{
         $streamDefinition = QueryFactory.createStreamDefinition();
     }
-	:  ^(streamId {$streamDefinition.name($streamId.value);} (^(IN_ATTRIBUTE attributeName type  {$streamDefinition.attribute($attributeName.value, $type.type);}))+)
+	:  ^(streamId {$streamDefinition.name($streamId.value);} (^(IN_ATTRIBUTE attributeName type {$streamDefinition.attribute($attributeName.value, $type.type);}))+)
+	;
+
+definitionTable returns [TableDefinition tableDefinition]
+    @init{
+        $tableDefinition = QueryFactory.createTableDefinition();
+    }
+	:  ^(id {$tableDefinition.name($id.value);}  (^(IN_ATTRIBUTE attributeName type {$tableDefinition.attribute($attributeName.value, $type.type);}))+  (^(TABLE  tableType databaseName tableName {$tableDefinition.from($tableType.value, $databaseName.value, $tableName.value);}))? )
 	;
 
 query returns [Query query]
@@ -454,6 +464,18 @@ extensionId returns [String value]
     ;
 
 functionId returns [String value]
+    : id {$value=$id.value;}
+    ;
+
+tableType returns [String value]
+    : id {$value=$id.value;}
+    ;
+
+databaseName returns [String value]
+    : id {$value=$id.value;}
+    ;
+
+tableName returns [String value]
     : id {$value=$id.value;}
     ;
 

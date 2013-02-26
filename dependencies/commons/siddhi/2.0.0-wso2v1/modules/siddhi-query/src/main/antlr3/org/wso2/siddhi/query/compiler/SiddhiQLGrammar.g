@@ -22,7 +22,9 @@ tokens {
   PATTERN;
   JOIN; 
   STREAM;
-  DEFINITION;
+  STREAM_DEFINITION;
+  TABLE_DEFINITION;
+  TABLE;
   QUERY;
   FUNCTION;
   PARAMETERS;
@@ -72,11 +74,15 @@ tokens {
 
 
 executionPlan
-	:(definitionStream|query) (';' (definitionStream|query))* ';'?  ->  (^(DEFINITION definitionStream))*  ( query)*
+	:(definitionStream|definitionTable|query) (';' (definitionStream|definitionTable|query))* ';'?  ->  (^(STREAM_DEFINITION definitionStream))*  (^(TABLE_DEFINITION definitionTable))*  ( query)*
 	; 
    
 definitionStream 
 	:'define' 'stream' streamId '(' attributeName type (',' attributeName type )* ')'  ->  ^(streamId (^(IN_ATTRIBUTE attributeName type))+)
+	;
+
+definitionTable 
+	:'define' 'table' id '(' attributeName type (',' attributeName type )* ')' ('from' tableType ':' databaseName '.' tableName )?  ->  ^(id (^(IN_ATTRIBUTE attributeName type))+ ^(TABLE  tableType databaseName tableName)? )
 	;
 
 query
@@ -427,6 +433,12 @@ boolVal: BOOL_VAL;
 extensionId: id;
 
 functionId: id;
+
+tableType: id;
+
+databaseName: id;
+
+tableName: id;
 
 stringVal: STRING_VAL;
 
