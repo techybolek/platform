@@ -19,6 +19,7 @@ package org.wso2.siddhi.query.api;
 
 import org.wso2.siddhi.query.api.condition.Condition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
+import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.expression.constant.Constant;
 import org.wso2.siddhi.query.api.query.Query;
 import org.wso2.siddhi.query.api.query.input.BasicStream;
@@ -97,5 +98,9 @@ public abstract class QueryFactory {
 
     public static SequenceStream sequenceStream(SequenceElement sequenceElement, Constant within) {
         return new SequenceStream(sequenceElement,within);
+    }
+
+    public static TableDefinition createTableDefinition() {
+        return new TableDefinition();
     }
 }
