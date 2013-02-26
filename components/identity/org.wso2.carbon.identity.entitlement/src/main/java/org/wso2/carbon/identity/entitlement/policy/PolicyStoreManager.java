@@ -60,7 +60,7 @@ public class PolicyStoreManager {
         try {
             policy = reader.readPolicyDTO(policyId);
         } catch (IdentityException e) {
-            log.error("Error while reading policy " + policyId +" from PAP policy store");
+            log.error("Error while reading policy " + policyId +" from PAP policy store : " + e.getMessage());
         }
 
         if(policy != null){
@@ -70,7 +70,6 @@ public class PolicyStoreManager {
             dto.setPolicyOrder(policy.getPolicyOrder());
             dto.setAttributeDTOs(policy.getPolicyMetaData());
             if(policyStore.addPolicy(dto)){
-                log.info("Policy " + policyId + " is successfully stored in PDP policy store");
                 return true;
             } else {
                 log.error("Policy " + policyId  +" can not promote to policy store : " + policyStore.getClass());
@@ -84,7 +83,6 @@ public class PolicyStoreManager {
     public boolean removePolicy(String policyId) {
 
         if(policyStore.deletePolicy(policyId)){
-            log.info("Policy " + policyId + " is successfully removed from PDP policy store");
             return true;
         } else {
             log.error("Policy " + policyId  +" can not remove from policy store : " + policyStore.getClass());
@@ -92,7 +90,7 @@ public class PolicyStoreManager {
         return false;
     }
 
-    public boolean setPolicyCombiningAlgorithm(){
+    public void setPolicyCombiningAlgorithm(){
 
         PAPPolicyStoreReader reader = new PAPPolicyStoreReader(new PAPPolicyStore());
         String policyCombingAlgorithm = null;
@@ -106,9 +104,6 @@ public class PolicyStoreManager {
         if(policyCombingAlgorithm != null){
             policyStore.setPolicyCombiningAlgorithm(policyCombingAlgorithm);
             EntitlementEngine.getInstance().getCarbonPolicyFinder().init();
-            return true;
         }
-
-        return false;
     }
 }

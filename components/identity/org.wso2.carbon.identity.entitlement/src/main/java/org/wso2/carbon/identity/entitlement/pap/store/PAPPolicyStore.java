@@ -112,8 +112,8 @@ public class PAPPolicyStore {
             }
 
         } catch (RegistryException e) {
-            log.error("Error while retrieving active entitlement policies from PAP policy store", e);
-            throw new IdentityException("Error while retrieving active entitlement policies from PAP policy store");
+            log.error("Error while retrieving active entitlement policies", e);
+            throw new IdentityException("Error while retrieving active entitlement policies", e);
         }
 
         Resource[] resources = new Resource[resourceList.size()];
@@ -176,8 +176,8 @@ public class PAPPolicyStore {
             }
 
         } catch (RegistryException e) {
-            log.error("Error while retrieving  all entitlement policies from PAP policy store", e);
-            throw new IdentityException("Error while retrieving entitlement policies from PAP policy store");
+            log.error("Error while retrieving entitlement policy", e);
+            throw new IdentityException("Error while retrieving entitlement policies", e);
         }
 
         return resources.toArray(new Resource[resources.size()]);
@@ -218,9 +218,8 @@ public class PAPPolicyStore {
             }
 
         } catch (RegistryException e) {
-            log.error("Error while retrieving all entitlement policy identifiers from PAP policy store", e);
-            throw new IdentityException("Error while retrieving entitlement policy " +
-                                                            "identifiers from PAP policy store");
+            log.error("Error while retrieving entitlement policy resources", e);
+            throw new IdentityException("Error while retrieving entitlement policy resources", e);
         }
 
         return resources.toArray(new String[resources.size()]);
@@ -251,12 +250,45 @@ public class PAPPolicyStore {
             }
             return registry.get(path);
         } catch (RegistryException e) {
-            log.error("Error while retrieving entitlement policy " + policyId + " PAP policy store", e);
-            throw new IdentityException("Error while retrieving entitlement policy " + policyId
-                    + " PAP policy store");
+            log.error("Error while retrieving entitlement policy : " + policyId, e);
+            throw new IdentityException("Error while retrieving entitlement policy : " + policyId, e);
         }
     }
 
+
+    /**
+     * This returns given active policy as Registry resource
+     * 
+     * @param policyId policy id
+     * @return policy as Registry resource
+     * @throws IdentityException throws, if fails
+     */
+    public Resource getActivePolicy(String policyId) throws IdentityException {
+        String path = null;
+
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving entitlement policy");
+        }
+
+        try {
+            path = IdentityRegistryResources.ENTITLEMENT + policyId;
+
+            if (!registry.resourceExists(path)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Trying to access an entitlement policy which does not exist");
+                }
+                return null;
+            }
+            Resource resource = registry.get(path);
+            if ("true".equals(resource.getProperty(EntitlementConstants.ACTIVE_POLICY))) {
+                return resource;
+            }
+            return null;
+        } catch (RegistryException e) {
+            log.error("Error while retrieving entitlement policy : " + policyId, e);
+            throw new IdentityException("Error while retrieving entitlement policy : " + policyId, e);
+        }
+    }
 
     /**
      *
@@ -280,7 +312,8 @@ public class PAPPolicyStore {
         if(policy == null || policy.getPolicyId() == null){
             log.error("Error while creating or updating entitlement policy: " +
                       "Policy DTO or Policy Id can not be null");
-            throw new IdentityException("Invalid Entitlement Policy. Policy or policyId can not be Null");
+            throw new IdentityException("Error while creating or updating entitlement policy: " +
+                                        "Policy DTO or Policy Id can not be null");            
         }
 
         try {
@@ -392,9 +425,8 @@ public class PAPPolicyStore {
             }
 
             resource.setProperty(EntitlementConstants.ACTIVE_POLICY, Boolean.toString(policy.isActive()));
-            resource.setProperty(EntitlementConstants.PROMOTED_POLICY, Boolean.toString(policy.isPromote()));
-            resource.setProperty(EntitlementConstants.POLICY_LIFE_CYCLE,
-                                                        Integer.toString(policy.getPolicyLifeCycle()));
+            resource.setProperty(EntitlementConstants.PROMOTED_POLICY,
+                                                        Integer.toString(policy.getPromoteStatus()));                        
 
             if(policy.getPolicyType() != null && policy.getPolicyType().trim().length() > 0){
                 resource.setProperty(EntitlementConstants.POLICY_TYPE, policy.getPolicyType());
@@ -492,15 +524,11 @@ public class PAPPolicyStore {
                                                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
                                                path , "delete");
         } catch (RegistryException e) {
-            log.error("Error while adding or updating entitlement policy " + policy.getPolicyId() +
-                    " in PAP policy store", e);
-            throw new IdentityException("Error while adding or updating entitlement policy " +
-                    policy.getPolicyId() + " in PAP policy store");
+            log.error("Error while adding or updating entitlement policy", e);
+            throw new IdentityException("Error while adding or updating entitlement policy", e);
         } catch (UserStoreException e) {
-            log.error("Error while adding or updating entitlement policy " + policy.getPolicyId()
-                    + " in PAP policy store ", e);
-            throw new IdentityException("Error while adding or updating entitlement policy " +
-                    policy.getPolicyId()+ " in PAP policy store");
+            log.error("Error while adding or updating entitlement policy", e);
+            throw new IdentityException("Error while adding or updating entitlement policy", e);
         }
     }
 
@@ -536,8 +564,8 @@ public class PAPPolicyStore {
                 }
             }
         } catch (RegistryException e) {
-            log.error("Error while re-ordering entitlement policy in PAP policy store", e);
-            throw new IdentityException("Error while re-ordering entitlement policy in PAP policy store", e);
+            log.error("Error while re-ordering entitlement policy", e);
+            throw new IdentityException("Error while re-ordering entitlement policy", e);
         }
 
     }
@@ -564,8 +592,40 @@ public class PAPPolicyStore {
             }
             registry.delete(path);
         } catch (RegistryException e) {
-            log.error("Error while removing entitlement policy " + policyId + " from PAP policy store" , e);
-            throw new IdentityException("Error while removing policy " + policyId + " from PAP policy store");
+            log.error("Error while removing entitlement policy", e);
+            throw new IdentityException("Error while removing policy", e);
+        }
+    }
+
+    /**
+     * This method is used get resources which contains bags of pre-defined data related to XACML
+     * Policy from registry
+     *
+     * @param resourceName
+     *            registry resource name
+     * @return registry resource
+     * @throws org.wso2.carbon.identity.base.IdentityException
+     */
+    public Resource getEntitlementPolicyResources(String resourceName) throws IdentityException {
+        String path = null;
+
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving entitlement policy resources");
+        }
+
+        try {
+            path = IdentityRegistryResources.ENTITLEMENT_POLICY_RESOURCES + resourceName;
+
+            if (!registry.resourceExists(path)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Trying to access an entitlement policy resource which does not exist");
+                }
+                return null;
+            }
+            return registry.get(path);
+        } catch (RegistryException e) {
+            log.error("Error while retrieving entitlement policy resources", e);
+            throw new IdentityException("Error while retrieving entitlement policy resources", e);
         }
     }
 
@@ -585,22 +645,26 @@ public class PAPPolicyStore {
             policyCollection.setProperty("globalPolicyCombiningAlgorithm", policyCombiningAlgorithm);
             registry.put(IdentityRegistryResources.ENTITLEMENT, policyCollection);
         } catch (RegistryException e) {
-            log.error("Error while updating combing algorithm in PAP policy store ", e);
-            throw new IdentityException("Error while updating combing algorithm in PAP policy store");
+            log.error("Error while writing entitlement policy resources", e);
+            throw new IdentityException("Error while writing entitlement policy resources", e);
         }
     }
 
     /**
      * This gets the policy collection
      * @return policy collection as Registry collection
-     * @throws RegistryException throws, if fails
+     * @throws IdentityException throws, if fails
      */
-    public Collection getPolicyCollection() throws RegistryException {
-
-        if(registry.resourceExists(IdentityRegistryResources.ENTITLEMENT)){
-            return  (Collection) registry.get(IdentityRegistryResources.ENTITLEMENT);
+    public Collection getPolicyCollection() throws IdentityException {
+        try {
+            if(registry.resourceExists(IdentityRegistryResources.ENTITLEMENT)){
+                return  (Collection) registry.get(IdentityRegistryResources.ENTITLEMENT);
+            }
+            return null;
+        } catch (RegistryException e) {
+            log.error("Error while reading policy collection", e);
+            throw new IdentityException("Error while reading policy collection", e);
         }
-        return null;
     }
 
     /**

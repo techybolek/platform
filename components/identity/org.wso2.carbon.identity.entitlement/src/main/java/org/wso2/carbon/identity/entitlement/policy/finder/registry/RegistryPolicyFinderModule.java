@@ -25,8 +25,6 @@ import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.entitlement.dto.AttributeDTO;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
-import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStore;
-import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreReader;
 import org.wso2.carbon.identity.entitlement.policy.finder.AbstractPolicyFinderModule;
 import org.wso2.carbon.identity.entitlement.policy.finder.CarbonPolicyFinderModule;
 import org.wso2.carbon.registry.core.Registry;
@@ -111,26 +109,6 @@ public class RegistryPolicyFinderModule extends AbstractPolicyFinderModule {
     }
 
     @Override
-    public String getReferencedPolicy(String policyId) {
-
-        // retrieve for policies that are not promoted policies but active
-
-        PAPPolicyStoreReader papPolicyStoreReader = new PAPPolicyStoreReader(new PAPPolicyStore());
-
-        try{
-            PolicyDTO dto = papPolicyStoreReader.readPolicyDTO(policyId);
-            if(dto != null && dto.getPolicy() != null && dto.isActive()){
-                return dto.getPolicy();
-            }
-        } catch (IdentityException e) {
-            log.error("Error while retrieving reference policy " + policyId);
-            // ignore
-        }
-
-        return null;
-    }
-
-    @Override
     public Map<String, Set<AttributeDTO>> getSearchAttributes(String identifier, Set<AttributeDTO> givenAttribute) {
 
         PolicyDTO[] policyDTOs = null;
@@ -203,7 +181,7 @@ public class RegistryPolicyFinderModule extends AbstractPolicyFinderModule {
     /**
      *
      */
-    public static void clearCache(){
+    public void clearCache(){
         invalidateCache();    
     }
 

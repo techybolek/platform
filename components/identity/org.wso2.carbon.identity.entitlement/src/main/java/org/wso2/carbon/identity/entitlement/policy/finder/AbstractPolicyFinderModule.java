@@ -18,15 +18,18 @@
 
 package org.wso2.carbon.identity.entitlement.policy.finder;
 
-import org.wso2.carbon.identity.entitlement.cache.DecisionClearingCache;
-import org.wso2.carbon.identity.entitlement.cache.EntitlementPolicyClearingCache;
-import org.wso2.carbon.identity.entitlement.dto.AttributeDTO;
+import org.wso2.balana.ParsingException;
+import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.entitlement.EntitlementUtil;
+import org.wso2.carbon.identity.entitlement.cache.DecisionCache;
+import org.wso2.carbon.identity.entitlement.cache.EntitlementPolicyCache;
+import org.wso2.carbon.identity.entitlement.pdp.EntitlementEngine;
 
 import java.util.*;
 
 /**
- * Abstract implementation of a policy finder module. This can be easily extended by any module
- * that support dynamic policy changes. 
+ * Abstract implementation of a policy finder module. This can be easily extended by any module that does not
+ * support policy ordering and that support dynamic policy changes
  */
 public abstract class AbstractPolicyFinderModule implements CarbonPolicyFinderModule {
 
@@ -34,9 +37,9 @@ public abstract class AbstractPolicyFinderModule implements CarbonPolicyFinderMo
     /**
      * This method must be called by the module when its policies are updated
      */
-    public static void invalidateCache() {
-        DecisionClearingCache.getInstance().invalidateCache();
-        EntitlementPolicyClearingCache.getInstance().invalidateCache();
+    public final void invalidateCache() {
+        DecisionCache.getInstance().invalidateCache();
+        EntitlementPolicyCache.getInstance().invalidateCache();
     }
 
     @Override
@@ -46,6 +49,8 @@ public abstract class AbstractPolicyFinderModule implements CarbonPolicyFinderMo
 
         String[] policyIdentifiers = getPolicyIdentifiers();
         if(policyIdentifiers != null){
+            //sort identifiers according to natural order
+            Arrays.sort(policyIdentifiers);
             for(String identifier : policyIdentifiers){
                 String policy = getPolicy(identifier);
                 policies.add(policy);
@@ -69,16 +74,5 @@ public abstract class AbstractPolicyFinderModule implements CarbonPolicyFinderMo
     @Override
     public boolean isPolicyOrderingSupport() {
         return false;
-    }
-
-    @Override
-    public Map<String, Set<AttributeDTO>> getSearchAttributes(String identifier,
-                                                              Set<AttributeDTO> givenAttribute) {
-        return null;
-    }
-
-    @Override
-    public int getSupportedSearchAttributesScheme() {
-        return 0;
     }
 }

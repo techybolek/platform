@@ -30,14 +30,14 @@ public class RegistryPolicyHandler extends Handler {
     @Override
     public void put(RequestContext requestContext) throws RegistryException {
        
-        RegistryPolicyFinderModule.clearCache();
+        new RegistryPolicyFinderModule().clearCache();
         super.put(requestContext);     
     }
 
     @Override
     public void delete(RequestContext requestContext) throws RegistryException {
 
-        RegistryPolicyFinderModule.clearCache();
+        new RegistryPolicyFinderModule().clearCache();
         super.delete(requestContext);
     }
 }

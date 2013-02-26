@@ -35,8 +35,6 @@ public class EntitlementConstants {
 
 	public static final String PROMOTED_POLICY = "promoted";
 
-	public static final String POLICY_LIFE_CYCLE = "policyLifeStatus";
-
 	public static final String POLICY_ORDER = "policyOrder";
 
 	public static final String MAX_POLICY_ORDER = "maxPolicyOrder";
@@ -131,15 +129,25 @@ public class EntitlementConstants {
 
 	public static final int POLICY_META_DATA_ARRAY_LENGTH = 4;
 
+	public static final String ON_DEMAND_POLICY_LOADING = "OnDemandPolicyLoading.Enable";
+
+	public static final String MAX_POLICY_ENTRIES = "OnDemandPolicyLoading.MaxPolicyEntries";
+
+	public static final int MAX_NO_OF_IN_MEMORY_POLICIES = 10;
+
+	public static final String DECISION_CACHING = "PDP.DecisionCaching.Enable";
+
+	public static final String DECISION_CACHING_INTERVAL = "PDP.DecisionCaching.CachingInterval";
+
+	public static final String ATTRIBUTE_CACHING = "AttributeCaching.Enable";
+
+	public static final String RESOURCE_CACHING = "ResourceCaching.Enable";
+    
 	public static final String AUTHORIZATION_PERMISSION = "/permission/admin/configure";
 
 	public static final String PIP_RESOURCE_CACHE = "PIP_RESOURCE_CACHE";
 
 	public static final String PDP_DECISION_CACHE = "PDP_DECISION_CACHE";
-
-	public static final String PDP_SIMPLE_DECISION_CACHE = "PDP_SIMPLE_DECISION_CACHE";
-
-	public static final String PDP_DECISION_CLEARING_CACHE = "PDP_DECISION_CACHE";
 
 	public static final String POLICY_SEARCH_CACHE = "POLICY_SEARCH_CACHE";
 
@@ -152,6 +160,8 @@ public class EntitlementConstants {
 	public static final String XACML_DECISION_CACHE = "XACML_DECISION_CACHE";
 
 	public static final String ENTITLEMENT_POLICY_CACHE = "ENTITLEMENT_POLICY_CACHE";
+
+	public final static String TEMPLATE_POLICY = "WSO2_TEMPLATE_POLICY";
 
 	public static final int DEFAULT_ITEMS_PER_PAGE = 50;
 
@@ -208,39 +218,10 @@ public class EntitlementConstants {
 
     public static final String ENTITLEMENT_POLICY_PUBLISHER = "/repository/identity/Entitlement/publisher/";
 
-
-    // entitlement.properties file configurations
-
-    public static final String ON_DEMAND_POLICY_LOADING = "PDP.OnDemangPolicyLoading.Enable";
-
-    public static final String ON_DEMAND_POLICY_MAX_POLICY_ENTRIES =
-                                                "PDP.OnDemangPolicyLoading.MaxInMemoryPolicies";
-
-    public static final String MAX_POLICY_REFERENCE_ENTRIES = "PDP.References.MaxPolicyEntries";
-
-    public static final int MAX_NO_OF_IN_MEMORY_POLICIES = 10;
-
-    public static final String DECISION_CACHING = "PDP.DecisionCaching.Enable";
-
-    public static final String DECISION_CACHING_INTERVAL = "PDP.DecisionCaching.CachingInterval";
-
-    public static final String ATTRIBUTE_CACHING = "PDP.AttributeCaching.Enable";
-
-    public static final String ATTRIBUTE_CACHING_INTERVAL = "PDP.DecisionCaching.CachingInterval";
-
-    public static final String RESOURCE_CACHING = "PDP.ResourceCaching.Enable";
-
-    public static final String RESOURCE_CACHING_INTERVAL = "PDP.DecisionCaching.CachingInterval";
-
     public static final String PDP_ENABLE = "PDP.Enable";
 
     public static final String PAP_ENABLE = "PAP.Enable";
 
     public static final String BALANA_CONFIG_ENABLE = "PDP.Balana.Config.Enable";
 
-    public static final String MULTIPLE_DECISION_PROFILE_ENABLE = "PDP.Multiple.Decision.Profile.Enable";
-    
-    public static final String FILESYSTEM_POLICY_PATH = "PAP.Policy.Add.Start.Policy.File.Path";
-
-    public static final String START_UP_POLICY_ADDING = "PAP.Policy.Add.Start.Enable";
 }

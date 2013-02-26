@@ -34,9 +34,7 @@ public class PolicySearchCache {
 
     private Cache cache = null;
 
-    private static PolicySearchCache policySearchCache = null;
-
-    private static final Object lock = new Object();  
+    private static PolicySearchCache policySearchCache = new PolicySearchCache();
 
     private PolicySearchCache() {
         this.cache =  CarbonUtils.getLocalCache(EntitlementConstants.POLICY_SEARCH_CACHE);
@@ -48,18 +46,11 @@ public class PolicySearchCache {
     private static Log log = LogFactory.getLog(PolicySearchCache.class);
 
     /**
-     * Gets a new instance of EntitlementPolicyClearingCache.
+     * Gets a new instance of EntitlementPolicyCache.
      *
-     * @return A new instance of EntitlementPolicyClearingCache.
+     * @return A new instance of EntitlementPolicyCache.
      */
     public static PolicySearchCache getInstance() {
-        if(policySearchCache == null){
-            synchronized (lock){
-                if(policySearchCache == null){
-                    policySearchCache = new PolicySearchCache();
-                }
-            }
-        }
         return policySearchCache;
     }
 

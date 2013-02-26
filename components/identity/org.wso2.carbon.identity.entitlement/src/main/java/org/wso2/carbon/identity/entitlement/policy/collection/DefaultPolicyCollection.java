@@ -292,7 +292,7 @@ public class DefaultPolicyCollection implements PolicyCollection{
      */
     public AbstractPolicy getPolicy(URI identifier, int type, VersionConstraints constraints) {
         
-        TreeSet<AbstractPolicy> set = policies.get(identifier.toString());
+        TreeSet<AbstractPolicy> set = policies.get(identifier);
 
         // if we don't know about this identifier then there's nothing to do
         if (set == null)

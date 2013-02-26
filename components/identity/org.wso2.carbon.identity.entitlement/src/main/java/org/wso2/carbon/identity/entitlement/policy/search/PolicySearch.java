@@ -48,7 +48,7 @@ public class PolicySearch {
 
     private int pdpDecisionCachingInterval;
 
-    private PolicySearchCache policySearchCache = null;
+    private PolicySearchCache policySearchCache = PolicySearchCache.getInstance();
 
     public PolicySearch(EntitlementEngine engine) {
 
@@ -62,7 +62,6 @@ public class PolicySearch {
 
         this.engine = engine;
         this.pdpDecisionCachingInterval = engine.getPdpDecisionCachingInterval();
-        this.policySearchCache = PolicySearchCache.getInstance();
     }
 
     /**

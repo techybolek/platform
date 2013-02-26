@@ -38,10 +38,8 @@ public class PIPAttributeCache {
 
     private Cache cache = null;
 
-    private static PIPAttributeCache pipAttributeCache = null;
+    private static PIPAttributeCache pipAttributeCache = new PIPAttributeCache();
 
-    private static final Object lock = new Object();
-    
     private PIPAttributeCache() {
         this.cache =  CarbonUtils.getLocalCache(EntitlementConstants.PIP_ATTRIBUTE_CACHE);
     }
@@ -49,22 +47,14 @@ public class PIPAttributeCache {
     /**
      * the logger we'll use for all messages
      */
-    private static Log log = LogFactory.getLog(EntitlementPolicyClearingCache.class);
+    private static Log log = LogFactory.getLog(EntitlementPolicyCache.class);
 
     /**
-     * Gets a new instance of EntitlementPolicyClearingCache.
+     * Gets a new instance of EntitlementPolicyCache.
      *
-     * @return A new instance of EntitlementPolicyClearingCache.
+     * @return A new instance of EntitlementPolicyCache.
      */
     public static PIPAttributeCache getInstance() {
-
-        if(pipAttributeCache == null){
-            synchronized (lock){
-                if(pipAttributeCache == null){
-                    pipAttributeCache = new PIPAttributeCache();
-                }
-            }
-        }
         return pipAttributeCache;
     }
 

@@ -31,42 +31,34 @@ import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent
 import org.wso2.carbon.utils.CarbonUtils;
 
 /**
- *
+ * 
  */
-public class DecisionClearingCache {
+public class EntitlementPolicyCache {
 
-    private Cache cache = null;
+	private Cache cache = null;
 
-    private static DecisionClearingCache decisionClearingCache = null;
+    private static EntitlementPolicyCache entitlementPolicyCache = new EntitlementPolicyCache();
 
-    private static final Object lock = new Object(); 
-
-    private DecisionClearingCache() {
-        this.cache =  CarbonUtils.getLocalCache(EntitlementConstants.PDP_DECISION_CLEARING_CACHE);
+    private EntitlementPolicyCache() {
+        this.cache =  CarbonUtils.getLocalCache(EntitlementConstants.ENTITLEMENT_POLICY_CACHE); 
     }
 
     /**
      * the logger we'll use for all messages
      */
-    private static Log log = LogFactory.getLog(DecisionClearingCache.class);
+	private static Log log = LogFactory.getLog(EntitlementPolicyCache.class);
 
-    /**
-     * Gets a new instance of EntitlementPolicyClearingCache.
-     *
-     * @return A new instance of EntitlementPolicyClearingCache.
-     */
-    public static DecisionClearingCache getInstance() {
-        if(decisionClearingCache == null){
-            synchronized (lock){
-                if(decisionClearingCache == null){
-                    decisionClearingCache = new DecisionClearingCache();
-                }
-            }
-        }
-        return decisionClearingCache;
-    }
+	/**
+	 * Gets a new instance of EntitlementPolicyCache.
+	 *
+	 * @return A new instance of EntitlementPolicyCache.
+	 */
+	public static EntitlementPolicyCache getInstance() {
+		return entitlementPolicyCache;
+	}
 
     public void addToCache(int hashCode){
+
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, "");
         IdentityCacheEntry cacheEntry = new IdentityCacheEntry(hashCode);
@@ -103,7 +95,7 @@ public class DecisionClearingCache {
         IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, "");
 
         if(this.cache.containsKey(cacheKey)){
-
+            
             this.cache.remove(cacheKey);
 
             if (log.isDebugEnabled()) {
@@ -113,7 +105,7 @@ public class DecisionClearingCache {
             CacheInvalidator invalidator = EntitlementServiceComponent.getCacheInvalidator();
             try {
                 if (invalidator != null) {
-                    invalidator.invalidateCache(EntitlementConstants.PDP_DECISION_CLEARING_CACHE, cacheKey);
+                    invalidator.invalidateCache(EntitlementConstants.ENTITLEMENT_POLICY_CACHE, cacheKey);
                     if (log.isDebugEnabled()) {
                         log.debug("Calling invalidation cache");
                     }

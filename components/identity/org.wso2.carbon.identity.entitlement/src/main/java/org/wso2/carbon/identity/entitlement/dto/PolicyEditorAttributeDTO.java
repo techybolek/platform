@@ -47,11 +47,6 @@ public class PolicyEditorAttributeDTO {
      */
     private String[] supportedCategories = new String[]{};
 
-    /**
-     * attributeId with data types. This helps to build basic policy editor
-     */
-    private String[] attributeIdDataTypes = new String[]{};
-
     public AttributeTreeNodeDTO[] getNodeDTOs() {
         return Arrays.copyOf(nodeDTOs, nodeDTOs.length);
     }
@@ -66,17 +61,9 @@ public class PolicyEditorAttributeDTO {
     public String[] getSupportedRuleFunctions() {
         return Arrays.copyOf(supportedRuleFunctions, supportedRuleFunctions.length);
     }
-
+    
     public void addSupportedRuleFunctions(List<String> ruleFunctions) {
         this.supportedRuleFunctions = ruleFunctions.toArray(new String[ruleFunctions.size()]);
-    }
-
-    public void addAttributeIdDataTypes(List<String> attributeIdDataTypes) {
-        this.attributeIdDataTypes = attributeIdDataTypes.toArray(new String[attributeIdDataTypes.size()]);
-    }
-
-    public String[] getAttributeIdDataTypes() {
-        return Arrays.copyOf(attributeIdDataTypes, attributeIdDataTypes.length);
     }
 
     public String[] getSupportedTargetFunctions() {

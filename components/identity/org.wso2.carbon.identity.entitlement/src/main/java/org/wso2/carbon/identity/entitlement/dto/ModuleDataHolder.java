@@ -35,15 +35,12 @@ public class ModuleDataHolder {
 
     private ModuleStatusHolder[] statusHolders;
 
-    private ModuleStatusHolder latestStatus;
-
     public ModuleDataHolder() {
     }
 
     public ModuleDataHolder(Resource resource) {
 
         List<ModulePropertyDTO> propertyDTOs = new ArrayList<ModulePropertyDTO>();
-        List<ModuleStatusHolder> statusHolders = new ArrayList<ModuleStatusHolder>();
         if(resource != null && resource.getProperties() != null){
             Properties properties = resource.getProperties();
             for(Map.Entry<Object, Object> entry : properties.entrySet()){
@@ -53,26 +50,7 @@ public class ModuleDataHolder {
                 if(value instanceof ArrayList){
                     List list = (ArrayList) entry.getValue();
                     if(list != null && list.size() > 0 && list.get(0) != null){
-                        if(((String)entry.getKey()).startsWith(ModuleStatusHolder.STATUS_HOLDER_NAME)){
-                            ModuleStatusHolder statusHolder = new ModuleStatusHolder();
-                            if(list.size() > 0  && list.get(0) != null){
-                                statusHolder.setTimeInstance((String)list.get(0));
-                            }
-                            if(list.size() > 1  && list.get(1) != null){
-                                statusHolder.setKey((String)list.get(1));
-                            }
-                            if(list.size() > 2  && list.get(2) != null){
-                                statusHolder.setMessage((String)list.get(2));
-                                statusHolder.setSuccess(false);
-                            } else {
-                                statusHolder.setSuccess(true);
-                            }
-                            statusHolders.add(statusHolder);
-                            continue;
-                        }
-
                         dto.setValue((String)list.get(0));
-
                         if(list.size() > 1  && list.get(1) != null){
                             dto.setDisplayName((String)list.get(1));
                         }
@@ -82,16 +60,11 @@ public class ModuleDataHolder {
                         if(list.size() > 3  && list.get(3) != null){
                             dto.setRequired(Boolean.parseBoolean((String)list.get(3)));
                         }
-                        if(list.size() > 4  && list.get(4) != null){
-                            dto.setSecret(Boolean.parseBoolean((String)list.get(4)));
-                        }
-
-                        //password must be decrypted TODO
-                        if(dto.isSecret()){
-
-                        }
                     }
+                } else {
+                    dto.setValue((String)value);    
                 }
+
                 if(MODULE_NAME.equals(dto.getId())){
                     moduleName = dto.getValue();
                     continue;
@@ -102,7 +75,6 @@ public class ModuleDataHolder {
         }
 
         this.propertyDTOs = propertyDTOs.toArray(new ModulePropertyDTO[propertyDTOs.size()]);
-        this.statusHolders = statusHolders.toArray(new ModuleStatusHolder[statusHolders.size()]);
     }
 
     public String getModuleName() {
@@ -121,22 +93,12 @@ public class ModuleDataHolder {
         this.propertyDTOs = propertyDTOs;
     }
 
-    public ModuleStatusHolder getLatestStatus() {
-        return latestStatus;
-    }
-
-    public void setLatestStatus(ModuleStatusHolder latestStatus) {
-        this.latestStatus = latestStatus;
-    }
-
     public ModuleStatusHolder[] getStatusHolders() {
         return statusHolders;
     }
 
-    public void addStatusHolders(List<ModuleStatusHolder> statusHolders) {
-        List<ModuleStatusHolder> arrayList =
-                                new ArrayList<ModuleStatusHolder>(Arrays.asList(this.statusHolders));
-        arrayList.addAll(statusHolders);
-        this.statusHolders = arrayList.toArray(new ModuleStatusHolder[arrayList.size()]);
+    public void setStatusHolders(ModuleStatusHolder[] statusHolders) {
+        this.statusHolders = statusHolders;
     }
+
 }

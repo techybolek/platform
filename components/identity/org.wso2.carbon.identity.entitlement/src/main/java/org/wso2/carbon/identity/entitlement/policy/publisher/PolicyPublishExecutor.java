@@ -124,16 +124,7 @@ public class PolicyPublishExecutor implements Runnable {
                     }
                     statusHolders.add(new ModuleStatusHolder(policyId));
                 }
-                holder.addStatusHolders(statusHolders);
-                if(statusHolders.size() > 0){
-                    holder.setLatestStatus(statusHolders.get(0));
-                }
-                try {
-                    publisher.persistSubscriber(holder, true);
-                } catch (IdentityException e) {
-                    // ignore
-                    log.error("Error while persisting subscriber status" , e);
-                }
+                holder.setStatusHolders(statusHolders.toArray(new ModuleStatusHolder[statusHolders.size()]));
             }
         }
     }

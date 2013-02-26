@@ -97,7 +97,6 @@ public class CarbonBasicPolicyPublisherModule extends AbstractPolicyPublisherMod
         dataMap3.put(AbstractPolicyPublisherModule.REQUIRED, "true");
         dataMap3.put(AbstractPolicyPublisherModule.DISPLAY_NAME, "Subscriber Password");
         dataMap3.put(AbstractPolicyPublisherModule.ORDER, "3");
-        dataMap3.put(AbstractPolicyPublisherModule.SECRET, "true");
 
         properties.put("subscriberURL", dataMap1);
         properties.put("subscriberUserName", dataMap2);

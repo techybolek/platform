@@ -125,13 +125,9 @@ public class WSXACMLMessageReceiver extends RPCMessageReceiver {
             String samlResponse = secureXACMLResponse(xacmlResponse);
             OMElement samlResponseElement = AXIOMUtil.stringToOM(samlResponse);
             SOAPEnvelope outSOAPEnvelope = createDefaultSOAPEnvelope(inMessageContext);
-            if(outSOAPEnvelope != null){
-                outSOAPEnvelope.getBody().addChild(samlResponseElement);
-                outMessageContext.setEnvelope(outSOAPEnvelope);
-            } else {
-                throw new Exception("SOAP envelope can not be null");    
-            }
-        } catch (Exception e){
+            outSOAPEnvelope.getBody().addChild(samlResponseElement);
+            outMessageContext.setEnvelope(outSOAPEnvelope);
+        }catch (Exception e){
             log.error("Error occurred while evaluating XACML request.", e);
             throw new AxisFault("Error occurred while evaluating XACML request.", e);
         }
@@ -151,11 +147,7 @@ public class WSXACMLMessageReceiver extends RPCMessageReceiver {
 		} else {
 			log.error("Unknown SOAP Envelope");
 		}
-        if(soapFactory != null){
-            return soapFactory.getDefaultEnvelope();
-        }
-
-        return null;
+		return soapFactory.getDefaultEnvelope();
 	}
 
   /**

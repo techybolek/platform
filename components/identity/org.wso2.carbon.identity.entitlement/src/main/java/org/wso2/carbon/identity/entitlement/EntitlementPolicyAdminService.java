@@ -27,13 +27,12 @@ import org.wso2.carbon.identity.core.IdentityRegistryResources;
 import org.wso2.carbon.identity.entitlement.dto.*;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 import org.wso2.carbon.identity.entitlement.pap.PolicyEditorDataFinder;
+import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyFinder;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStore;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreManager;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreReader;
 import org.wso2.carbon.identity.entitlement.pdp.EntitlementEngine;
 import org.wso2.carbon.identity.entitlement.policy.*;
-import org.wso2.carbon.identity.entitlement.policy.publisher.PolicyPublisher;
-import org.wso2.carbon.identity.entitlement.policy.publisher.PolicyPublisherModule;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -57,10 +56,11 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 	 * This method persists a new XACML policy
 	 * 
 	 * @param policy PolicyDTO object
-	 * @throws IdentityException throws if invalid policy or if policy
+     * @return returns whether True/False
+	 * @throws org.wso2.carbon.identity.base.IdentityException throws if invalid policy or if policy
 	 *             with same id is exist
 	 */
-	public void addPolicy(PolicyDTO policy) throws IdentityException {
+	public boolean addPolicy(PolicyDTO policy) throws IdentityException {
 
 		PAPPolicyStoreManager policyAdmin;
 		AbstractPolicy policyObj;
@@ -70,8 +70,7 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
             policy.setPolicy(policy.getPolicy().replaceAll(">\\s+<", "><"));
         }
         if(!EntitlementUtil.validatePolicy(policy)){
-            throw new IdentityException("Invalid Entitlement Policy. " +
-                    "Policy is not valid according to XACML schema");
+            throw new IdentityException("Invalid Entitlement Policy");
         }
 		policyObj = PolicyReader.getInstance(null).getPolicy(policy.getPolicy());
 		if (policyObj != null) {
@@ -81,16 +80,17 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 			policy.setActive(policy.isActive());
 			if (getPolicy(policy.getPolicyId()) != null) {
 				throw new IdentityException(
-						"An Entitlement Policy with the given Id already exists");
+						"An Entitlement Policy with the given ID already exists");
 			}
 
 			policyAdmin.addOrUpdatePolicy(policy);
-            if(policy.isPromote()){
-                syncPDPPolicy(policy, policyAdmin);
+            if(policy.getPromoteStatus() == PolicyDTO.PROMOTED){
+                syncPDPPolicy(policy, PolicyDTO.PROMOTED, policyAdmin);
             }
 			entitlementEngine.getPapPolicyFinder().init();
+            return true;
 		} else {
-			throw new IdentityException("Unsupported Entitlement Policy. Policy can not be parsed");
+			throw new IdentityException("Invalid Entitlement Policy");
 		}
 	}
 
@@ -111,8 +111,7 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 				AbstractPolicy policyObj;
 				PolicyDTO policy = policies[i];
                 if(!EntitlementUtil.validatePolicy(policy)){
-                    throw new IdentityException("Invalid Entitlement Policy. " +
-                            "Policy is not valid according to XACML schema");
+                    throw new IdentityException("Invalid Entitlement Policy");
                 }
 				policyObj = PolicyReader.getInstance(null).getPolicy(policy.getPolicy());
 				if (policyObj != null) {
@@ -125,82 +124,14 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 					policyAdmin.addOrUpdatePolicy(policy);
 					entitlementEngine.getPapPolicyFinder().init();
 				} else {
-                    throw new IdentityException("Unsupported Entitlement Policy. Policy can not be parsed");
+					throw new IdentityException("Invalid Entitlement Policy");
 				}
 			}
 		} else {
-			throw new IdentityException("No Entitlement policies are provided.");
+			throw new IdentityException("No valid Entitlement policies provided.");
 		}
 	}
 
-	/**
-	 * Updates given policy
-	 *
-	 * @param policy policy object
-	 * @throws org.wso2.carbon.identity.base.IdentityException throws if invalid policy
-	 */
-	public void updatePolicy(PolicyDTO policy) throws IdentityException {
-
-        PAPPolicyStoreManager policyAdmin;
-		AbstractPolicy policyObj;
-        String policyId;
-        boolean changeActive = false;
-        boolean changePolicyStatus = false;
-
-		EntitlementEngine entitlementEngine = EntitlementEngine.getInstance();
-        if(policy.getPolicy() != null){
-            policy.setPolicy(policy.getPolicy().replaceAll(">\\s+<", "><"));
-        }
-        if(!EntitlementUtil.validatePolicy(policy)){
-            throw new IdentityException("Invalid Entitlement Policy. " +
-                    "Policy is not valid according to XACML schema");
-        }
-
-        policyId = policy.getPolicyId();
-
-        if(policyId == null && policy.getPolicy() != null){
-            policyObj = PolicyReader.getInstance(null).getPolicy(policy.getPolicy());
-            if (policyObj != null) {
-                policy.setPolicyId(policyObj.getId().toASCIIString());
-            } else {
-                throw new IdentityException("Unsupported Entitlement Policy. Policy can not be parsed");
-            }
-        }
-
-        PolicyDTO oldPolicy = getLightPolicy(policyId);
-        // treat this as a new policy
-        if(oldPolicy == null){
-            addPolicy(policy);
-            return;
-        }
-
-        if(oldPolicy.isActive() != policy.isActive()){
-            changeActive = true;
-        }
-
-        if(oldPolicy.isPromote() != policy.isPromote() ||
-            (PolicyDTO.PAP_UN_SYNC_POLICY == policy.getPolicyLifeCycle() && policy.isPromote())){
-            changePolicyStatus = true;
-        }
-
-        policyAdmin = new PAPPolicyStoreManager(new PAPPolicyStore());
-        policyAdmin.addOrUpdatePolicy(policy);
-
-
-        if(!changeActive && changePolicyStatus){
-            syncPDPPolicy(policy, policyAdmin);
-        } else if(!(changeActive && policy.getPolicy() == null)){
-            if(policy.isPromote()){
-                policy.setPolicyLifeCycle(PolicyDTO.PAP_UN_SYNC_POLICY);
-            }
-            policy.setActive(false);
-            policyAdmin.addOrUpdatePolicy(policy);
-        }
-
-        // Reload the policies to the memory.
-        entitlementEngine.getPapPolicyFinder().init();
-	}
-    
 	/**
 	 * This method finds the policy file from given registry path and adds the policy
 	 * 
@@ -239,11 +170,9 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 			policyDTO.setPolicy(policy.replaceAll(">\\s+<", "><"));
 			addPolicy(policyDTO);
 		} catch (RegistryException e) {
-            log.error("Registry Error occurs while reading policy from registry", e);
-			throw new IdentityException("Error loading policy from carbon registry");
+			throw new IdentityException("Registry Error occurs while reading policy from registry");
 		} catch (IOException e) {
-            log.error("I/O Error occurs while reading policy from registry", e);
-			throw new IdentityException("Error loading policy from carbon registry");
+			throw new IdentityException("I/O Error occurs while reading policy from registry");
 		} finally {
 			if (bufferedReader != null) {
 				try {
@@ -286,7 +215,7 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 					&& (!policyTypeFilter.equals(policyDTO.getPolicyType()) &&
                     !("Active".equals(policyTypeFilter) && policyDTO.isActive()) &&
                     !("Promoted".equals(policyTypeFilter) && 
-                            policyDTO.isPromote()))) {
+                            policyDTO.getPromoteStatus() == PolicyDTO.PROMOTED))) {
 				continue;
 			}
 
@@ -370,18 +299,58 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 	 */
 	public void removePolicy(PolicyDTO policy) throws IdentityException {
 		PAPPolicyStoreManager policyAdmin;
+        PAPPolicyStoreReader reader;
 		EntitlementEngine entitlementEngine = EntitlementEngine.getInstance();
 		policyAdmin = new PAPPolicyStoreManager(new PAPPolicyStore());
-
-        PolicyDTO oldPolicy = getLightPolicy(policy.getPolicyId());
-        if(oldPolicy != null && oldPolicy.isPromote()){
-            policy.setPromote(false);
-            syncPDPPolicy(policy, null);
+        reader = new PAPPolicyStoreReader(new PAPPolicyStore());
+        int status = reader.readLightPolicyDTO(policy.getPolicyId()).getPromoteStatus();
+		policyAdmin.removePolicy(policy);
+        if(status == PolicyDTO.PROMOTED || status == PolicyDTO.SYNC){
+            syncPDPPolicy(policy,PolicyDTO.DEPROMOTED, null);
         }
-
-        policyAdmin.removePolicy(policy);
 		// Reload the policies to the memory.
 		entitlementEngine.getPapPolicyFinder().init();
+	}
+
+	/**
+	 * Updates given policy
+	 * 
+	 * @param policy policy object
+	 * @throws org.wso2.carbon.identity.base.IdentityException throws if invalid policy
+	 */
+	public void updatePolicy(PolicyDTO policy) throws IdentityException {
+		PAPPolicyStoreManager policyAdmin;
+		AbstractPolicy policyObj;
+		EntitlementEngine entitlementEngine = EntitlementEngine.getInstance();
+        if(policy.getPolicy() != null){
+            policy.setPolicy(policy.getPolicy().replaceAll(">\\s+<", "><"));
+        }        
+        if(!EntitlementUtil.validatePolicy(policy)){
+            throw new IdentityException("Invalid Entitlement Policy");
+        }
+        policyAdmin = new PAPPolicyStoreManager(new PAPPolicyStore());
+        if(policy.getPolicyId() != null && policy.getPolicy() == null){
+            policyAdmin.addOrUpdatePolicy(policy);
+        } else {
+            policyObj = PolicyReader.getInstance(null).getPolicy(policy.getPolicy());
+            if (policyObj != null) {
+                policy.setPolicyId(policyObj.getId().toASCIIString());    
+            } else {
+                throw new IdentityException("Invalid Entitlement Policy");
+            }
+            policyAdmin.addOrUpdatePolicy(policy);
+        }
+        
+        if(policy.getPromoteStatus() == PolicyDTO.PROMOTED){
+            syncPDPPolicy(policy, PolicyDTO.PROMOTED, policyAdmin);
+        } else if (policy.getPromoteStatus() == PolicyDTO.DEPROMOTED){
+            syncPDPPolicy(policy, PolicyDTO.DEPROMOTED, policyAdmin);
+        } else if(policy.getPolicy() != null){
+            syncPDPPolicy(policy, PolicyDTO.SYNC, policyAdmin);    
+        }
+
+        // Reload the policies to the memory.
+        entitlementEngine.getPapPolicyFinder().init();
 	}
 
     /**
@@ -400,6 +369,61 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
 
         return null;
     }
+
+
+	/**
+	 * This method is used get pre-defined data-types, functions, identifiers and algorithms related
+	 * to XACML Policy
+	 * 
+	 * @param resourceName Registry resource Name related to one bag of data
+	 * @return data as String array
+	 * @throws org.wso2.carbon.identity.base.IdentityException throws when registry error occurs
+	 */
+
+	public String[] getEntitlementPolicyDataFromRegistry(String resourceName)
+			throws IdentityException {
+		PAPPolicyStore policyStoreAdmin;
+		List<String> entitlementPolicyResources = new ArrayList<String>();
+        EntitlementEngine.getInstance();
+		Resource resource;
+		InputStream inputStream = null;
+		BufferedReader bufferedReader = null;
+		try {
+			policyStoreAdmin = new PAPPolicyStore(EntitlementServiceComponent.getRegistryService()
+					.getGovernanceSystemRegistry());
+			resource = policyStoreAdmin.getEntitlementPolicyResources(resourceName);
+			inputStream = resource.getContentStream();
+			bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+			String stringLine;
+			while ((stringLine = bufferedReader.readLine()) != null) {
+				entitlementPolicyResources.add(stringLine.trim());
+			}
+		} catch (IOException e) {
+			throw new IdentityException("Error occurs while reading resource content", e);
+		} catch (RegistryException e) {
+			throw new IdentityException("Error occurs while creating inputStream from registry "
+					+ "resource", e);
+		} catch (IdentityException e) {
+			throw new IdentityException("Error occurs while initializing PAPPolicyStore", e);
+		} finally {
+			if (bufferedReader != null) {
+				try {
+					bufferedReader.close();
+				} catch (IOException e) {
+					log.error("Error occurs while closing inputStream", e);
+				}
+			}
+			if (inputStream != null) {
+				try {
+					inputStream.close();
+				} catch (IOException e) {
+					log.error("Error occurs while closing inputStream", e);
+				}
+			}
+		}
+
+		return entitlementPolicyResources.toArray(new String[entitlementPolicyResources.size()]);
+	}
 
 	/**
 	 * This method returns the list of policy id available in PDP
@@ -476,136 +500,23 @@ public class EntitlementPolicyAdminService extends AbstractAdmin {
     }
 
 
-    /**
-     * Gets subscriber details
-     *
-     * @param id  subscriber id
-     * @return subscriber details as SubscriberDTO
-     * @throws IdentityException throws, if any error
-     */
-    public ModuleDataHolder getSubscriber(String id) throws IdentityException {
-
-        PolicyPublisher publisher = EntitlementEngine.getInstance().getPolicyPublisher();
-        return publisher.retrieveSubscriber(id);
-    }
-
-    /**
-     * Gets all subscribers ids that is registered,
-     *
-     * @return subscriber's ids as String array
-     * @throws IdentityException throws, if fails
-     */
-    public String[] getSubscriberIds() throws IdentityException {
-
-        PolicyPublisher publisher = EntitlementEngine.getInstance().getPolicyPublisher();
-        String[] ids = publisher.retrieveSubscriberIds();
-        if(ids != null){
-            return ids;
-        } else {
-            return new String[0];
-        }
-    }
-
-
-    /**
-     * Set or update subscriber details in to registry
-     *
-     * @param holder subscriber data as ModuleDataHolder object
-     * @param update boolean indicating if this is an update or add
-     * @throws IdentityException throws, if fails
-     */
-    public void updateSubscriber(ModuleDataHolder holder,boolean update) throws IdentityException {
-
-        PolicyPublisher publisher = EntitlementEngine.getInstance().getPolicyPublisher();
-        publisher.persistSubscriber(holder,update);
-
-    }
-
-    /**
-     * delete subscriber details from registry
-     *
-     * @param subscriberId subscriber id
-     * @throws IdentityException throws, if fails
-     */
-    public void deleteSubscriber(String subscriberId) throws IdentityException {
-
-        PolicyPublisher publisher = EntitlementEngine.getInstance().getPolicyPublisher();
-        publisher.deleteSubscriber(subscriberId);
-
-    }
-
-    /**
-     * Publishes given set of policies to all subscribers
-     *
-     * @param policyIds policy ids to publish,  if null or empty, all policies are published
-     * @param subscriberIds subscriber ids to publish,  if null or empty, all policies are published
-     * @throws IdentityException throws, if fails
-     */
-    public void publishPolicies(String[] policyIds, String[] subscriberIds)  throws IdentityException {
-
-        EntitlementEngine engine = EntitlementEngine.getInstance();
-        PolicyPublisher publisher = engine.getPolicyPublisher();
-        PAPPolicyStore policyStore = new PAPPolicyStore();
-        if(policyIds == null || policyIds.length < 1){
-            policyIds = policyStore.getAllPolicyIds();
-        }
-        if(subscriberIds == null || subscriberIds.length < 1){
-            subscriberIds = publisher.retrieveSubscriberIds();
-        }
-
-        if(policyIds == null || policyIds.length  < 1){
-            throw new IdentityException("There are no policies to publish");
-        }
-
-        if(subscriberIds == null || subscriberIds.length < 1){
-            throw new IdentityException("There are no subscribers to publish");
-        }
-
-        publisher.publishPolicy(policyIds, subscriberIds);
-    }
-
-
-    /**
-     * Gets policy publisher module data to populate in the UI
-     *
-     * @return
-     */
-    public ModuleDataHolder[]  getPublisherModuleProperties(){
-
-        List<ModuleDataHolder> holders = EntitlementServiceComponent.
-            getEntitlementConfig().getModulePropertyHolders(PolicyPublisherModule.class.getName());
-        if(holders != null){
-            return holders.toArray(new ModuleDataHolder[holders.size()]);
-        }
-
-        return null;
-    }
-
-    /**
-     * Helper method
-     *
-     * @param policyDTO
-     * @param papManager
-     * @throws IdentityException
-     */
-    private void syncPDPPolicy(PolicyDTO policyDTO, PAPPolicyStoreManager papManager)
+    private void syncPDPPolicy(PolicyDTO policyDTO, int promoteStatus, PAPPolicyStoreManager papManager)
                                                                         throws IdentityException {
 
         PolicyStoreManager manager = EntitlementEngine.getInstance().getPolicyStoreManager();
 
-        if(policyDTO.isPromote()){
+        if(PolicyDTO.PROMOTED == promoteStatus){
             if(manager.promotePolicy(policyDTO.getPolicyId())){
-                policyDTO.setPromote(true);
-                policyDTO.setPolicyLifeCycle(PolicyDTO.PDP_PROMOTED_POLICY);
-            } else {
-                throw new IdentityException("Policy can not be promoted to PDP policy store");
+                policyDTO.setPromoteStatus(PolicyDTO.PROMOTED);
             }
-        } else {
+        } else if(PolicyDTO.DEPROMOTED == promoteStatus){
             if(manager.removePolicy(policyDTO.getPolicyId())){
-                policyDTO.setPolicyLifeCycle(PolicyDTO.PAP_POLICY);
-            } else {
-                throw new IdentityException("Policy can not be removed from PDP policy store");
+                policyDTO.setPromoteStatus(PolicyDTO.PROMOTE);
             }
+        } else if(PolicyDTO.SYNC == promoteStatus){
+            policyDTO.setPromoteStatus(PolicyDTO.SYNC);
+        } else {
+            policyDTO.setPromoteStatus(PolicyDTO.PROMOTE);    
         }
 
         if(papManager != null){

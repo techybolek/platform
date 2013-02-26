@@ -52,7 +52,10 @@ public class PolicyTarget {
     @Override
     public int hashCode() {
         if(this.target != null){
-            return target.encode().hashCode();
+            OutputStream stream = new ByteArrayOutputStream();
+            ((Target)this.target).encode(stream);
+            stream.toString();
+            return stream.toString().hashCode();
         } else {
             return 0;
         }

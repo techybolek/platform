@@ -30,9 +30,7 @@ public class PolicyDTO {
     
     private boolean active;
 
-    private boolean promote;
-
-    private int policyLifeCycle;
+    private int promoteStatus;
 
     private String policyType;
 
@@ -54,11 +52,13 @@ public class PolicyDTO {
 
     private String[] policyIdReferences = new String[0];
 
-    public final static int PAP_POLICY = 0;
+    public final static int PROMOTE = 0;
 
-    public final static int PDP_PROMOTED_POLICY = 1;
+    public final static int SYNC = 1;
 
-    public final static int PAP_UN_SYNC_POLICY = 2;
+    public final static int PROMOTED = 2;
+
+    public final static int DEPROMOTED = 3;
 
     public String getPolicyId() {
         return policyId;
@@ -84,6 +84,13 @@ public class PolicyDTO {
         return active;
     }
 
+    public int getPromoteStatus() {
+        return promoteStatus;
+    }
+
+    public void setPromoteStatus(int promoteStatus) {
+        this.promoteStatus = promoteStatus;
+    }
 
     public String getPolicyType() {
         return policyType;
@@ -164,21 +171,5 @@ public class PolicyDTO {
 
     public void setPolicyIdReferences(String[] policyIdReferences) {
         this.policyIdReferences = Arrays.copyOf(policyIdReferences, policyIdReferences.length);
-    }
-
-    public boolean isPromote() {
-        return promote;
-    }
-
-    public void setPromote(boolean promote) {
-        this.promote = promote;
-    }
-
-    public int getPolicyLifeCycle() {
-        return policyLifeCycle;
-    }
-
-    public void setPolicyLifeCycle(int policyLifeCycle) {
-        this.policyLifeCycle = policyLifeCycle;
     }
 }

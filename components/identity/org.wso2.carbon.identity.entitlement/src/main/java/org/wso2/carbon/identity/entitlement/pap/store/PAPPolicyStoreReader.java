@@ -62,7 +62,7 @@ public class PAPPolicyStoreReader {
     }
 
     /**
-     *
+     * 
      * @param policyId
      * @return
      * @throws IdentityException
@@ -76,18 +76,15 @@ public class PAPPolicyStoreReader {
     /**
      *
      * @param policyId
-     * @param finder
      * @return
      * @throws IdentityException
      */
     public synchronized AbstractPolicy readActivePolicy(String policyId, PolicyFinder finder)
                                                                         throws IdentityException {
         Resource resource = null;
-        resource = store.getPolicy(policyId);
+        resource = store.getActivePolicy(policyId);
         if(resource != null){
-            if ("true".equals(resource.getProperty(EntitlementConstants.ACTIVE_POLICY))) {
-                return readPolicy(resource, finder);
-            }                       
+            return readPolicy(resource, finder);
         }
 
         return null;
@@ -151,10 +148,10 @@ public class PAPPolicyStoreReader {
         String policy = null;
         try {
             policy = new String((byte[]) resource.getContent());
-            return PolicyReader.getInstance(null).getPolicy(policy);
+            return PolicyReader.getInstance(finder).getPolicy(policy);
         } catch (RegistryException e) {
-            log.error("Error while parsing entitlement policy", e);
-            throw new IdentityException("Error while loading entitlement policy");
+            log.error("Error while loading entitlement policy", e);
+            throw new IdentityException("Error while loading entitlement policy", e);
         }
     }
 
@@ -170,8 +167,8 @@ public class PAPPolicyStoreReader {
             policy = new String((byte[]) resource.getContent());
             return PolicyReader.getInstance(null).getTarget(policy);
         } catch (RegistryException e) {
-            log.error("Error while parsing entitlement policy", e);
-            throw new IdentityException("Error while parsing entitlement policy");
+            log.error("Error while loading entitlement policy", e);
+            throw new IdentityException("Error while loading entitlement policy", e);
         }
     }
 
@@ -326,17 +323,12 @@ public class PAPPolicyStoreReader {
                 dto.setActive(true);
             }
 
-            if ("true".equals(resource.getProperty(EntitlementConstants.PROMOTED_POLICY))) {
-                dto.setPromote(true);
-            }
-
-            String status = resource.getProperty(EntitlementConstants.POLICY_LIFE_CYCLE);
+            String status = resource.getProperty(EntitlementConstants.PROMOTED_POLICY);
             if (status != null) {
-                dto.setPolicyLifeCycle(Integer.parseInt(status));
+                dto.setPromoteStatus(Integer.parseInt(status));
             } else {
-                dto.setPolicyLifeCycle(PolicyDTO.PAP_POLICY);
+                dto.setPromoteStatus(PolicyDTO.PROMOTE);
             }
-
             String policyOrder = resource.getProperty(EntitlementConstants.POLICY_ORDER);
             if(policyOrder != null){
                 dto.setPolicyOrder(Integer.parseInt(policyOrder));
@@ -372,13 +364,11 @@ public class PAPPolicyStoreReader {
                     getPolicyMetaDataFromRegistryProperties(resource.getProperties()));
             return dto;
         } catch (RegistryException e) {
-            log.error("Error while loading entitlement policy " + policyId + " from PAP policy store", e);
-            throw new IdentityException("Error while loading entitlement policy " + policyId +
-                    " from PAP policy store");
+            log.error("Error while loading entitlement policy", e);
+            throw new IdentityException("Error while loading entitlement policy", e);
         } catch (UserStoreException e) {
-            log.error("Error while loading entitlement policy " + policyId + " from PAP policy store", e);
-            throw new IdentityException("Error while loading entitlement policy " + policyId +
-                    " from PAP policy store");
+            log.error("Error while loading entitlement policy", e);
+            throw new IdentityException("Error while loading entitlement policy", e);
         }
     }
 
@@ -419,15 +409,11 @@ public class PAPPolicyStoreReader {
             if ("true".equals(resource.getProperty(EntitlementConstants.ACTIVE_POLICY))) {
                 dto.setActive(true);
             }
-            if ("true".equals(resource.getProperty(EntitlementConstants.PROMOTED_POLICY))) {
-                dto.setPromote(true);
-            }
-
-            String status = resource.getProperty(EntitlementConstants.POLICY_LIFE_CYCLE);
+            String status = resource.getProperty(EntitlementConstants.PROMOTED_POLICY);
             if (status != null) {
-                dto.setPolicyLifeCycle(Integer.parseInt(status));
+                dto.setPromoteStatus(Integer.parseInt(status));
             } else {
-                dto.setPolicyLifeCycle(PolicyDTO.PAP_POLICY);
+                dto.setPromoteStatus(PolicyDTO.PROMOTE);
             }
             String policyOrder = resource.getProperty(EntitlementConstants.POLICY_ORDER);
             if(policyOrder != null){
@@ -451,9 +437,8 @@ public class PAPPolicyStoreReader {
 
             return dto;
         } catch (UserStoreException e) {
-            log.error("Error while loading entitlement policy " + policyId + " from PAP policy store", e);
-            throw new IdentityException("Error while loading entitlement policy " + policyId +
-                    " from PAP policy store");
+            log.error("Error while loading entitlement policy", e);
+            throw new IdentityException("Error while loading entitlement policy", e);
         }
     }
 
@@ -493,15 +478,11 @@ public class PAPPolicyStoreReader {
             if ("true".equals(resource.getProperty(EntitlementConstants.ACTIVE_POLICY))) {
                 dto.setActive(true);
             }
-            if ("true".equals(resource.getProperty(EntitlementConstants.PROMOTED_POLICY))) {
-                dto.setPromote(true);
-            }
-
-            String status = resource.getProperty(EntitlementConstants.POLICY_LIFE_CYCLE);
+            String status = resource.getProperty(EntitlementConstants.PROMOTED_POLICY);
             if (status != null) {
-                dto.setPolicyLifeCycle(Integer.parseInt(status));
+                dto.setPromoteStatus(Integer.parseInt(status));
             } else {
-                dto.setPolicyLifeCycle(PolicyDTO.PAP_POLICY);
+                dto.setPromoteStatus(PolicyDTO.PROMOTE);
             }
             String policyOrder = resource.getProperty(EntitlementConstants.POLICY_ORDER);
             if(policyOrder != null){
@@ -539,9 +520,8 @@ public class PAPPolicyStoreReader {
                                 getPolicyMetaDataFromRegistryProperties(resource.getProperties()));
             return dto;
         } catch (UserStoreException e) {
-            log.error("Error while loading entitlement policy " + policyId + " from PAP policy store", e);
-            throw new IdentityException("Error while loading entitlement policy " + policyId +
-                    " from PAP policy store");
+            log.error("Error while loading entitlement policy", e);
+            throw new IdentityException("Error while loading entitlement policy", e);
         }
     }
 
@@ -553,7 +533,6 @@ public class PAPPolicyStoreReader {
      */
     private PolicyDTO readPolicyDTO(Resource resource) throws IdentityException {
         String policy = null;
-        String policyId = null;
         AbstractPolicy absPolicy = null;
         PolicyDTO dto = null;
         boolean policyEditable = false;
@@ -575,23 +554,18 @@ public class PAPPolicyStoreReader {
 
             policy = new String((byte[]) resource.getContent());
             absPolicy = PolicyReader.getInstance(null).getPolicy(policy);
-            policyId = absPolicy.getId().toASCIIString();
             dto = new PolicyDTO();
-            dto.setPolicyId(policyId);
+            dto.setPolicyId(absPolicy.getId().toASCIIString());
             dto.setPolicyEditable(policyEditable);
             dto.setPolicyCanDelete(policyCanDelete);
             if ("true".equals(resource.getProperty(EntitlementConstants.ACTIVE_POLICY))) {
                 dto.setActive(true);
             }
-            if ("true".equals(resource.getProperty(EntitlementConstants.PROMOTED_POLICY))) {
-                dto.setPromote(true);
-            }
-
-            String status = resource.getProperty(EntitlementConstants.POLICY_LIFE_CYCLE);
+            String status = resource.getProperty(EntitlementConstants.PROMOTED_POLICY);
             if (status != null) {
-                dto.setPolicyLifeCycle(Integer.parseInt(status));
+                dto.setPromoteStatus(Integer.parseInt(status));
             } else {
-                dto.setPolicyLifeCycle(PolicyDTO.PAP_POLICY);
+                dto.setPromoteStatus(PolicyDTO.PROMOTE);
             }
             String policyOrder = resource.getProperty(EntitlementConstants.POLICY_ORDER);
             if(policyOrder != null){
@@ -630,13 +604,11 @@ public class PAPPolicyStoreReader {
                     getPolicyMetaDataFromRegistryProperties(resource.getProperties()));
             return dto;
         } catch (RegistryException e) {
-            log.error("Error while loading entitlement policy " + policyId + " from PAP policy store", e);
-            throw new IdentityException("Error while loading entitlement policy " + policyId +
-                    " from PAP policy store");
+            log.error("Error while loading entitlement policy", e);
+            throw new IdentityException("Error while loading entitlement policy", e);
         } catch (UserStoreException e) {
-            log.error("Error while loading entitlement policy " + policyId + " from PAP policy store", e);
-            throw new IdentityException("Error while loading entitlement policy " + policyId +
-                    " from PAP policy store");
+            log.error("Error while loading entitlement policy", e);
+            throw new IdentityException("Error while loading entitlement policy", e);
         }
     }
 
@@ -653,10 +625,9 @@ public class PAPPolicyStoreReader {
                 return policyCollection.getProperty("globalPolicyCombiningAlgorithm");
             }            
             return null;
-        } catch (RegistryException e) {
-            log.error("Error while reading policy combining algorithm from PAP policy store", e);
-            throw new IdentityException("Error while reading policy combining algorithm from " +
-                    "PAP policy store");
+        } catch (IdentityException e) {
+            log.error("Error while reading policy combining algorithm", e);
+            throw new IdentityException("Error while reading policy combining algorithm", e);
         }
     }    
 }

@@ -24,8 +24,9 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.*;
 
-import org.apache.commons.io.FileUtils;
-import org.wso2.balana.*;
+import org.wso2.balana.Balana;
+import org.wso2.balana.ParsingException;
+import org.wso2.balana.XACMLConstants;
 import org.wso2.balana.attr.BooleanAttribute;
 import org.wso2.balana.attr.DateAttribute;
 import org.wso2.balana.attr.DateTimeAttribute;
@@ -51,26 +52,12 @@ import org.wso2.balana.ctx.Attribute;
 import org.wso2.balana.ctx.xacml2.RequestCtx;
 import org.wso2.balana.ctx.xacml2.Subject;
 import org.wso2.balana.xacml3.Attributes;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.entitlement.dto.AttributeDTO;
 import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
-import org.wso2.carbon.identity.entitlement.dto.PolicyStoreDTO;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementExtensionBuilder;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
-import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStore;
-import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreManager;
-import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStoreReader;
-import org.wso2.carbon.identity.entitlement.pdp.EntitlementEngine;
-import org.wso2.carbon.identity.entitlement.policy.PolicyReader;
-import org.wso2.carbon.identity.entitlement.policy.PolicyStoreManager;
-import org.wso2.carbon.identity.entitlement.policy.store.CarbonPolicyStore;
-import org.wso2.carbon.registry.core.Collection;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -601,219 +588,4 @@ public class EntitlementUtil {
         "</Attribute></Attributes></Request>";
 	}
 
-    public static void addSamplePolicies(Registry registry) {
-
-        File policyFolder = new File(CarbonUtils.getCarbonHome() + File.separator
-                + "repository" + File.separator + "resources" + File.separator
-                + "security" + File.separator + "policies" + File.separator + "xacml"
-                + File.separator + "default");
-
-        if (policyFolder.exists()) {
-            for (File policyFile : policyFolder.listFiles()) {
-                if (policyFile.isFile()) {
-                    PolicyDTO policyDTO = new PolicyDTO();
-                    try{
-                        policyDTO.setPolicy(FileUtils.readFileToString(policyFile));
-                        EntitlementUtil.addFilesystemPolicy(policyDTO, registry, false);
-                    } catch (Exception e){
-                        // log and ignore
-                        log.error("Error while adding sample XACML policies" ,e);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * This method persists a new XACML policy, which was read from filesystem,
-     * in the registry
-     * 
-     * @param policyDTO PolicyDTO object
-     * @param registry Registry
-     * @param promote where policy must be promote PDP or not
-     * @return returns whether True/False
-     * @throws org.wso2.carbon.identity.base.IdentityException
-     *             throws if policy with same id is exist
-     */
-    public static boolean addFilesystemPolicy(PolicyDTO policyDTO,
-                                              Registry registry, boolean promote)
-            throws IdentityException {
-
-        PAPPolicyStoreManager policyAdmin;
-        AbstractPolicy policyObj;
-
-        if (policyDTO.getPolicy() != null) {
-            policyDTO.setPolicy(policyDTO.getPolicy().replaceAll(">\\s+<", "><"));
-        }
-
-        policyObj = getPolicy(policyDTO.getPolicy());
-
-        if (policyObj != null) {
-            PAPPolicyStore policyStore = new PAPPolicyStore(registry);
-            policyAdmin = new PAPPolicyStoreManager(policyStore);
-            policyDTO.setPolicyId(policyObj.getId().toASCIIString());
-            policyDTO.setActive(true);
-
-            if (getPolicy(policyDTO.getPolicyId(), registry) != null) {
-                throw new IdentityException(
-                        "An Entitlement Policy with the given ID already exists");
-            }
-
-            policyDTO.setPromote(promote);
-            policyAdmin.addOrUpdatePolicy(policyDTO);
-
-            PAPPolicyStoreReader reader = new PAPPolicyStoreReader(policyStore);
-            policyDTO = reader.readPolicyDTO(policyDTO.getPolicyId());
-
-            PolicyStoreDTO policyStoreDTO = new PolicyStoreDTO();
-            policyStoreDTO.setPolicyId(policyDTO.getPolicyId());
-            policyStoreDTO.setPolicy(policyDTO.getPolicy());
-            policyStoreDTO.setPolicyOrder(policyDTO.getPolicyOrder());
-            policyStoreDTO.setAttributeDTOs(policyDTO.getPolicyMetaData());
-
-            if(promote){
-                if (addPolicyToPDP(policyStoreDTO)) {
-                    policyDTO.setPolicyLifeCycle(PolicyDTO.PDP_PROMOTED_POLICY);
-                }
-            }
-            
-            policyAdmin.addOrUpdatePolicy(policyDTO);
-            
-            return true;
-        } else {
-            throw new IdentityException("Invalid Entitlement Policy");
-        }
-    }
-
-
-    public static AbstractPolicy getPolicy(String policy) {
-
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setIgnoringComments(true);
-        factory.setNamespaceAware(true);
-        DocumentBuilder builder;
-        InputStream stream = null;
-        // now use the factory to create the document builder
-        try {
-            builder = factory.newDocumentBuilder();
-            stream = new ByteArrayInputStream(policy.getBytes("UTF-8"));
-            Document doc = builder.parse(stream);
-            Element root = doc.getDocumentElement();
-            String name = root.getTagName();
-            // see what type of policy this is
-            if (name.equals("Policy")) {
-                return Policy.getInstance(root);
-            } else if (name.equals("PolicySet")) {
-                return PolicySet.getInstance(root, null);
-            } else {
-                // this isn't a root type that we know how to handle
-                throw new ParsingException("Unknown root document type: " + name);
-            }
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Error while parsing start up policy" , e);
-        } finally {
-            if(stream != null){
-                try {
-                    stream.close();
-                } catch (IOException e) {
-                    log.error("Error while closing input stream");
-                }
-            }
-        }
-    }
-	
-	/**
-	 * Gets policy dto for a given policy id
-	 * 
-	 * @param policyId policy id
-	 * @param registry Registry
-	 * @return returns policy
-	 * @throws org.wso2.carbon.identity.base.IdentityException
-	 */
-    public static PolicyDTO getPolicy(String policyId, Registry registry) throws IdentityException {
-        PAPPolicyStoreReader policyReader = null;
-        policyReader = new PAPPolicyStoreReader(new PAPPolicyStore(registry));
-        return policyReader.readPolicyDTO(policyId);
-    }
-	
-    /**
-     * @param policyStoreDTO
-     * @return
-     */
-    public static boolean addPolicyToPDP(PolicyStoreDTO policyStoreDTO) {
-
-        Registry registry;
-        String policyPath;
-        Collection policyCollection;
-        Resource resource;
-
-        Map.Entry<CarbonPolicyStore, Properties> entry = EntitlementServiceComponent
-                .getEntitlementConfig().getPolicyStore().entrySet().iterator().next();
-        String policyStorePath = entry.getValue().getProperty("policyStorePath");
-
-        if (policyStorePath == null) {
-            policyStorePath = "/repository/identity/Entitlement/actualStore/";
-        }
-
-        if (policyStoreDTO == null || policyStoreDTO.getPolicy() == null
-                || policyStoreDTO.getPolicy().trim().length() == 0
-                || policyStoreDTO.getPolicyId() == null
-                || policyStoreDTO.getPolicyId().trim().length() == 0) {
-            return false;
-        }
-
-        try {
-            registry = EntitlementServiceComponent.getRegistryService()
-                    .getGovernanceSystemRegistry();
-
-            if (registry.resourceExists(policyStorePath)) {
-                policyCollection = (Collection) registry.get(policyStorePath);
-            } else {
-                policyCollection = registry.newCollection();
-            }
-
-            registry.put(policyStorePath, policyCollection);
-            policyPath = policyStorePath + policyStoreDTO.getPolicyId();
-
-            if (registry.resourceExists(policyPath)) {
-                resource = registry.get(policyPath);
-            } else {
-                resource = registry.newResource();
-            }
-
-            resource.setProperty("policyOrder", Integer.toString(policyStoreDTO.getPolicyOrder()));
-            resource.setContent(policyStoreDTO.getPolicy());
-            resource.setMediaType("application/xacml-policy+xml");
-            AttributeDTO[] attributeDTOs = policyStoreDTO.getAttributeDTOs();
-            if (attributeDTOs != null) {
-                setAttributesAsProperties(attributeDTOs, resource);
-            }
-            registry.put(policyPath, resource);
-            return true;
-        } catch (RegistryException e) {
-            log.error(e);
-            return false;
-        }
-    }
-    
-    /**
-     * This helper method creates properties object which contains the policy meta data.
-     *
-     * @param attributeDTOs List of AttributeDTO
-     * @param resource registry resource
-     */
-    public static void setAttributesAsProperties(AttributeDTO[] attributeDTOs, Resource resource) {
-        
-        int attributeElementNo = 0;
-        if(attributeDTOs != null){
-            for(AttributeDTO attributeDTO : attributeDTOs){
-                resource.setProperty("policyMetaData" + attributeElementNo,
-                       attributeDTO.getAttributeType() + "," +
-                       attributeDTO.getAttributeValue() + "," +
-                       attributeDTO.getAttributeId() + "," +
-                       attributeDTO.getAttributeDataType());
-                attributeElementNo ++;
-            }
-        }
-    }
 }

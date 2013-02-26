@@ -20,17 +20,19 @@ package org.wso2.carbon.identity.entitlement.policy.finder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.balana.*;
+import org.wso2.balana.AbstractPolicy;
+import org.wso2.balana.PolicyMetaData;
+import org.wso2.balana.VersionConstraints;
 import org.wso2.balana.combine.PolicyCombiningAlgorithm;
 import org.wso2.balana.combine.xacml3.DenyOverridesPolicyAlg;
+import org.wso2.balana.combine.xacml3.DenyOverridesRuleAlg;
 import org.wso2.balana.ctx.EvaluationCtx;
 import org.wso2.balana.finder.*;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.entitlement.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.EntitlementException;
 import org.wso2.carbon.identity.entitlement.EntitlementUtil;
-import org.wso2.carbon.identity.entitlement.cache.EntitlementPolicyClearingCache;
+import org.wso2.carbon.identity.entitlement.cache.EntitlementPolicyCache;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 import org.wso2.carbon.identity.entitlement.pdp.EntitlementEngine;
 import org.wso2.carbon.identity.entitlement.policy.collection.PolicyCollection;
@@ -57,13 +59,7 @@ public class CarbonPolicyFinder extends PolicyFinderModule {
      */
     private static volatile boolean initFinish;
 
-	private EntitlementPolicyClearingCache policyClearingCache = EntitlementPolicyClearingCache.getInstance();
-
-    private LinkedHashMap<URI, AbstractPolicy> policyReferenceCache = null;
-
-    private int maxReferenceCacheEntries = EntitlementConstants.MAX_NO_OF_IN_MEMORY_POLICIES;    
-
-    public PolicyReader policyReader;
+	private EntitlementPolicyCache policyClearingCache = EntitlementPolicyCache.getInstance();
 
     private static Log log = LogFactory.getLog(CarbonPolicyFinder.class);
 
@@ -81,27 +77,6 @@ public class CarbonPolicyFinder extends PolicyFinderModule {
         }
         
         log.info("Initializing of policy store is started at :  " + new Date());
-
-        String maxEntries = EntitlementServiceComponent.getEntitlementConfig().getEngineProperties().
-                getProperty(EntitlementConstants.MAX_POLICY_REFERENCE_ENTRIES);
-
-        if(maxEntries != null){
-            try{
-                maxReferenceCacheEntries = Integer.parseInt(maxEntries.trim());
-            } catch (Exception e){
-                //ignore
-            }
-        }
-
-        policyReferenceCache = new LinkedHashMap<URI, AbstractPolicy>(){
-
-            @Override
-            protected boolean removeEldestEntry(Map.Entry eldest) {
-                // oldest entry of the cache would be removed when max cache size become, i.e 50
-                return size() > maxReferenceCacheEntries;
-            }
-
-        };
 
         PolicyCombiningAlgorithm policyCombiningAlgorithm = null;        
         // get registered finder modules
@@ -122,15 +97,14 @@ public class CarbonPolicyFinder extends PolicyFinderModule {
         }
 
         // get policy reader
-        policyReader = PolicyReader.getInstance(finder);
+        PolicyReader policyReader = PolicyReader.getInstance(finder);
 
         // get order of the policy finder modules
         int[] moduleOrders = getPolicyModuleOrder();
 
         if(this.finderModules != null && this.finderModules.size() > 0){
             // find policy combining algorithm.
-            // only check in highest order module and it would be the
-            // PDP policy combining algorithm
+            // only check in highest order module
             for(CarbonPolicyFinderModule finderModule : this.finderModules){
                 if(finderModule.getModulePriority() == moduleOrders[0]){
                     String algorithm = finderModule.getPolicyCombiningAlgorithm();
@@ -143,7 +117,7 @@ public class CarbonPolicyFinder extends PolicyFinderModule {
                 }
             }
 
-            // if policy combining algorithm is null, set default one
+            // if null, set default one
             if(policyCombiningAlgorithm == null){
                 policyCombiningAlgorithm  = new DenyOverridesPolicyAlg();
             }
@@ -152,22 +126,15 @@ public class CarbonPolicyFinder extends PolicyFinderModule {
 
             for (int moduleOrder : moduleOrders) {
                 for(CarbonPolicyFinderModule finderModule : this.finderModules){
-                    // policy collection is created by using all policies in
-                    // the modules.  highest ordered module's policies would
-                    // be picked 1st
                     if(finderModule.getModulePriority() == moduleOrder){
                         String[] policies = finderModule.getPolicies();
-                        // check whether module itself support for policy ordering
-                        // if not, sort them according to natural order
-                        if(!finderModule.isPolicyOrderingSupport()){
-                            Arrays.sort(policies);
-                        }
                         for(String policy : policies){
                             AbstractPolicy abstractPolicy = policyReader.getPolicy(policy);
                             if(abstractPolicy != null){
                                 policyCollection.addPolicy(abstractPolicy);
                             }
                         }
+                        //finderModule.invalidateCache(false);
                     }
                 }
             }
@@ -201,7 +168,6 @@ public class CarbonPolicyFinder extends PolicyFinderModule {
         if(policyClearingCache.getFromCache() == 0){
             init(this.finder);
             policyClearingCache.addToCache(1);
-            policyReferenceCache.clear();
             EntitlementEngine.getInstance().clearDecisionCache(false);
             if(log.isDebugEnabled()){
                 int tenantId = CarbonContext.getCurrentContext().getTenantId();
@@ -227,43 +193,32 @@ public class CarbonPolicyFinder extends PolicyFinderModule {
     public PolicyFinderResult findPolicy(URI idReference, int type, VersionConstraints constraints,
                                                             PolicyMetaData parentMetaData) {
 
-        AbstractPolicy policy = policyReferenceCache.get(idReference);
+        if(policyClearingCache.getFromCache() == 0){
+            init(this.finder);
+            policyClearingCache.addToCache(1);
+            EntitlementEngine.getInstance().clearDecisionCache(false);
+            if(log.isDebugEnabled()){
+                int tenantId = CarbonContext.getCurrentContext().getTenantId();
+                log.debug("Invalidation cache message is received. " +
+                "Re-initialized policy finder module of current node and invalidate decision " +
+                        "caching for tenantId : " + tenantId);
+            }
+        }
         
-        if(policy == null){
-            if(this.finderModules != null){
-                for(CarbonPolicyFinderModule finderModule : this.finderModules){
-                    String policyString = finderModule.getReferencedPolicy(idReference.toString());
-                    if(policyString != null){
-                        policy = policyReader.getPolicy(policyString);
-                        if(policy != null){
-                            policyReferenceCache.put(idReference, policy);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+		AbstractPolicy policy = policyCollection.getPolicy(idReference, type, constraints);
 
-        if(policy != null){
-            // we found a valid version, so see if it's the right kind,
-            // and if it is then we return it
-            if (type == PolicyReference.POLICY_REFERENCE) {
-                if (policy instanceof Policy)
-                    return new PolicyFinderResult(policy);
-            } else {
-                if (policy instanceof PolicySet)
-                   return new PolicyFinderResult(policy);
-            }
-        }
-
-        return new PolicyFinderResult();
+		if (policy == null) {
+			return new PolicyFinderResult();
+		} else {
+			return new PolicyFinderResult(policy);
+		}
     }
+
 
 
     /**
      * Helper method to order the module according to module number  //TODO : with Comparator class
-     * Highest module number would be the 1st ordered value
-     * 
+     *
      * @return int array with ordered values
      */
     private int[] getPolicyModuleOrder(){

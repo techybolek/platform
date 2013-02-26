@@ -82,7 +82,6 @@ public class PolicyReader implements ErrorHandler {
 
     /**
      *
-     * @param policyFinder
      * @return
      */
     public static PolicyReader getInstance(PolicyFinder policyFinder) {
@@ -157,7 +156,7 @@ public class PolicyReader implements ErrorHandler {
     private AbstractPolicy handleDocument(Document doc) throws ParsingException {
         // handle the policy, if it's a known type
         Element root = doc.getDocumentElement();
-        String name = root.getLocalName();
+        String name = root.getTagName();
         // see what type of policy this is
         if (name.equals("Policy")) {
             return Policy.getInstance(root);
@@ -203,9 +202,5 @@ public class PolicyReader implements ErrorHandler {
         }
 
         throw new SAXException("fatal error parsing policy");
-    }
-
-    public PolicyFinder getPolicyFinder() {
-        return policyFinder;
     }
 }

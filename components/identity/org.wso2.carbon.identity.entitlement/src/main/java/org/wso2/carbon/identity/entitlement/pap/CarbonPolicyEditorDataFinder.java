@@ -142,7 +142,7 @@ public class CarbonPolicyEditorDataFinder extends AbstractPolicyEditorDataFinder
     }
 
     @Override
-    public Set<String> getAttributeDataTypes(String category) throws Exception {        
+    public Set<String> getAttributeDataTypes(String attributeType) throws Exception {        
         Set<String> values = new HashSet<String>();
         values.add("http://www.w3.org/2001/XMLSchema#string");
         values.add("http://www.w3.org/2001/XMLSchema#boolean");

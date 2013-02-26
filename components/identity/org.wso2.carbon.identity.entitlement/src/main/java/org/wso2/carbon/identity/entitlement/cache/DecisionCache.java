@@ -16,7 +16,6 @@
 * under the License.
 */
 
-
 package org.wso2.carbon.identity.entitlement.cache;
 
 import net.sf.jsr107cache.Cache;
@@ -29,20 +28,16 @@ import org.wso2.carbon.caching.core.identity.IdentityCacheKey;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
-import org.wso2.carbon.identity.entitlement.pdp.PolicyDecision;
 import org.wso2.carbon.utils.CarbonUtils;
 
-
 /**
- * Decision cache
+ *
  */
 public class DecisionCache {
 
     private Cache cache = null;
 
-    private static DecisionCache decisionCache = null;
-
-    private static final Object lock = new Object();
+    private static DecisionCache decisionCache = new DecisionCache();
 
     private DecisionCache() {
         this.cache =  CarbonUtils.getLocalCache(EntitlementConstants.PDP_DECISION_CACHE);
@@ -54,62 +49,73 @@ public class DecisionCache {
     private static Log log = LogFactory.getLog(DecisionCache.class);
 
     /**
-     * Gets a new instance of EntitlementPolicyClearingCache.
+     * Gets a new instance of EntitlementPolicyCache.
      *
-     * @return A new instance of EntitlementPolicyClearingCache.
+     * @return A new instance of EntitlementPolicyCache.
      */
     public static DecisionCache getInstance() {
-        if(decisionCache == null){
-            synchronized (lock){
-                if(decisionCache == null){
-                    decisionCache = new DecisionCache();
-                }
-            }
-        }
         return decisionCache;
     }
 
-    public void addToCache(String key, PolicyDecision decision){
-
+    public void addToCache(int hashCode){
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, key);
-        this.cache.put(cacheKey, decision);
+        IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, "");
+        IdentityCacheEntry cacheEntry = new IdentityCacheEntry(hashCode);
+        this.cache.put(cacheKey, cacheEntry);
         if (log.isDebugEnabled()) {
             log.debug("Cache entry is added");
         }
     }
 
-    public PolicyDecision getFromCache(String key){
+    public int getFromCache(){
 
+        int hashCode = 0;
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, key);
+        IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, "");
         Object entry = this.cache.get(cacheKey);
         if(entry != null){
+            IdentityCacheEntry cacheEntry = (IdentityCacheEntry) entry;
+            hashCode =  cacheEntry.getHashEntry();
             if (log.isDebugEnabled()) {
                 log.debug("Cache entry is found");
             }
-            return (PolicyDecision) entry;
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Cache entry is not found");
             }
         }
 
-        return null;
+        return hashCode;
     }
 
-    public void removeFromCache(String key){
+    public void invalidateCache(){
 
         int tenantId = CarbonContext.getCurrentContext().getTenantId();
-        IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, key);
-        this.cache.remove(cacheKey);
-        if (log.isDebugEnabled()) {
-            log.debug("Cache entry is removed");
+        IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, "");
+
+        if(this.cache.containsKey(cacheKey)){
+
+            this.cache.remove(cacheKey);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Local cache is invalidated");
+            }
+            //sending cluster message
+            CacheInvalidator invalidator = EntitlementServiceComponent.getCacheInvalidator();
+            try {
+                if (invalidator != null) {
+                    invalidator.invalidateCache(EntitlementConstants.PDP_DECISION_CACHE, cacheKey);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Calling invalidation cache");
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Not calling invalidation cache");
+                    }
+                }
+            } catch (CacheException e) {
+                log.error("Error while invalidating cache", e);
+            }
         }
     }
-
-    public void clearCache(){
-        this.cache.clear();
-    }
-
 }

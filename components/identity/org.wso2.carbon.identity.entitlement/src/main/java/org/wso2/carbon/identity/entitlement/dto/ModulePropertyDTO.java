@@ -33,8 +33,6 @@ public class ModulePropertyDTO {
 
     private int displayOrder;
 
-    private boolean secret;
-
     private String module;
 
     public String getDisplayName() {
@@ -83,13 +81,5 @@ public class ModulePropertyDTO {
 
     public void setRequired(boolean required) {
         this.required = required;
-    }
-
-    public boolean isSecret() {
-        return secret;
-    }
-
-    public void setSecret(boolean secret) {
-        this.secret = secret;
     }
 }
