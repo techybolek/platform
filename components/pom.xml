@@ -325,6 +325,16 @@
             <artifactId>org.wso2.carbon.server.admin.ui</artifactId>
             <version>${carbon.platform.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.base</artifactId>
+            <version>${carbon.platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.authenticator.proxy</artifactId>
+            <version>${carbon.platform.version}</version>
+        </dependency>
 
 	    <!-- Event dependencies -->
             <dependency>
