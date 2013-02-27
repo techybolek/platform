@@ -107,7 +107,6 @@ public class WebappClassloadingContext {
 
                 if (packageName.equals("*")) {
                     delegateAllPackages = true;
-                    break;
                 } else if (packageName.endsWith(".*")) {
                     delegatedPackageStemList.add(packageName.substring(0, packageName.length() - 2));
                 } else {
