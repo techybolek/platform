@@ -262,6 +262,11 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.user.api</artifactId>
+                <version>${carbon.platform.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.utils</artifactId>
                 <version>${carbon.platform.version}</version>
             </dependency>
@@ -309,6 +314,16 @@
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.server</artifactId>
        	    <version>${carbon.platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.server.admin.common</artifactId>
+            <version>${carbon.platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.server.admin.ui</artifactId>
+            <version>${carbon.platform.version}</version>
         </dependency>
 
 	    <!-- Event dependencies -->
@@ -423,6 +438,31 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.ws.client</artifactId>
+            <version>${carbon.platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.registry.uddi</artifactId>
+            <version>${carbon.platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.registry.server</artifactId>
+            <version>${carbon.platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.registry.admin.api</artifactId>
+            <version>${carbon.platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.registry.indexing</artifactId>
+            <version>${carbon.platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.registry.social.api</artifactId>
             <version>${carbon.platform.version}</version>
         </dependency>
 
@@ -1517,7 +1557,7 @@
         <geronimo.stax.api.wso2.version>1.0.1.wso2v1</geronimo.stax.api.wso2.version>
         <xmlschema.version>1.4.3</xmlschema.version>
         <addressing.version>1.6.1-wso2v1</addressing.version>
-        <rampart.version>1.6.1-wso2v4</rampart.version>
+        <rampart.version>1.6.1-wso2v9</rampart.version>
         <wss4j.version>1.5.11.wso2v1</wss4j.version>
         <gdata-core.wso2.version>1.47.0.wso2v1</gdata-core.wso2.version>
         <gdata-spreadsheet.wso2.version>3.0.0.wso2v1</gdata-spreadsheet.wso2.version>
@@ -1557,7 +1597,7 @@
         <neethi.wso2.version>${neethi.osgi.version}</neethi.wso2.version>
         <commons-lang.wso2.version>2.6.0.wso2v1</commons-lang.wso2.version>
         <wso2mex.version>2.2</wso2mex.version>
-        <rampart.wso2.version>1.6.1.wso2v4</rampart.wso2.version>
+        <rampart.wso2.version>1.6.1.wso2v9</rampart.wso2.version>
         <sandesha2.version>1.6.1-wso2v1</sandesha2.version>
         <jasperreports.wso2.version>3.7.1.wso2v1</jasperreports.wso2.version>
         <wso2throttle.version>3.3.0</wso2throttle.version>
