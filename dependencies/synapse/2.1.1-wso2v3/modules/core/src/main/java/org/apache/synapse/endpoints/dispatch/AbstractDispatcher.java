@@ -102,7 +102,7 @@ public abstract class AbstractDispatcher implements Dispatcher {
 
                     for(String sessionId : sessionIds){
                         if(sessionId != null && (sessionId.indexOf("JSESSIONID") != -1 || sessionId
-								.indexOf("PHPSESSID") != -1)){
+								.indexOf("PHPSESSID") != -1 || sessionId.indexOf("phpMyAdmin") != -1)){
                             if (log.isDebugEnabled()) {
                                 log.debug("Extracted SessionID : " + sessionId);
                             }
