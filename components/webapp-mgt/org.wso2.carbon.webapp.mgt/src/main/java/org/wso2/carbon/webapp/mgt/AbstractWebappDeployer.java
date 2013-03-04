@@ -213,7 +213,9 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
             }
             Host host = DataHolder.getCarbonTomcatService().getTomcat().getHost();
             String webappContext = "/" + webappFile.getName();
-            if (host.findChild(webappContext) == null && webappFile.isDirectory()) {
+            //Make sure we are not re-deploying faulty apps on faulty list again.
+            boolean  isExistingFaultyApp = isExistingFaultyApp(webappFile.getName());
+            if (host.findChild(webappContext) == null && webappFile.isDirectory() && !isExistingFaultyApp) {
                 isSkipped = false;
             }
         }
@@ -251,6 +253,18 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
             throw new DeploymentException(msg, e);
         }
         super.undeploy(fileName);
+    }
+
+
+    public boolean isExistingFaultyApp(String fileName) {
+        if (webappsHolder.getFaultyWebapps() != null) {
+            if (webappsHolder.getFaultyWebapps().get(fileName) != null) {
+                return true;
+            } else if (webappsHolder.getFaultyWebapps().get(fileName + ".war") != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
