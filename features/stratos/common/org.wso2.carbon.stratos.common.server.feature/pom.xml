@@ -231,6 +231,7 @@
                             </importBundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
+				<importFeatureDef>org.wso2.carbon.identity.authenticator.saml2.sso.server:${carbon.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

@@ -40,11 +40,6 @@
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.load.balance.agent</artifactId>
         </dependency>
-	<dependency>              
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.server</artifactId>
-	    <version>${wso2carbon.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
