@@ -72,7 +72,7 @@
     <properties>
         <stratos.version>2.1.0-SNAPSHOT</stratos.version>
 	<synapse.version>2.1.0-wso2v6</synapse.version>
-        <carbon.version>4.0.0</carbon.version>
+        <carbon.version>4.1.0-SNAPSHOT</carbon.version>
         <quartz.wso2.version>2.1.1.wso2v1</quartz.wso2.version>
 	<carbon.p2.plugin.version>1.5</carbon.p2.plugin.version>
     </properties>

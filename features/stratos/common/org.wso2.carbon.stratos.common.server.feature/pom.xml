@@ -49,6 +49,7 @@
             <artifactId>org.wso2.carbon.activation</artifactId>
 	    <version>${stratos.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.sample.installer</artifactId>
@@ -230,7 +231,6 @@
                             </importBundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
-				<importFeatureDef>org.wso2.carbon.identity.authenticator.saml2.sso.server:${carbon.platform.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

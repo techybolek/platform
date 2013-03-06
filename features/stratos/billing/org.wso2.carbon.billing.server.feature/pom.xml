@@ -60,6 +60,11 @@
                 <artifactId>org.wso2.carbon.rule.backend</artifactId>
                 <version>4.1.0-SNAPSHOT</version>
         </dependency>
+	<dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.email.sender</artifactId>
+	    <version>2.1.0-SNAPSHOT</version>
+	</dependency>
         </dependencies>
     <build>
         <plugins>
@@ -89,6 +94,7 @@
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.rule.kernel</bundleDef>
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.rule.common</bundleDef>
 				<bundleDef>org.wso2.carbon:org.wso2.carbon.rule.backend</bundleDef>
+				<bundleDef>org.wso2.carbon:org.wso2.carbon.email.sender</bundleDef>
                            </bundles>
                             <!--importFeatures>
                                 <importFeatureDef>org.wso2.carbon.stratos.common:${wso2carbon.version}</importFeatureDef>
