@@ -30,7 +30,9 @@
     <url>http://wso2.org</url>
     <modules>
         <module>org.wso2.carbon.stratos.usage.server.feature</module>
+        <module>org.wso2.carbon.stratos.usage.ui.feature</module>
         <module>org.wso2.carbon.stratos.usage.agent.feature</module>
+        <module>org.wso2.carbon.stratos.usage.feature</module>
     </modules>
 </project>
 
