@@ -33,9 +33,8 @@ public class GroupMgtAgentBuilder {
         // checks the existence. 
         if (clusteringAgent.getGroupManagementAgent(domain, subDomain) == null) {
             
-            clusteringAgent.addGroupManagementAgent(new SubDomainAwareGroupManagementAgent(
-                subDomain),
-                domain, subDomain);
+            clusteringAgent.addGroupManagementAgent(new SubDomainAwareGroupManagementAgent(subDomain),
+                domain, subDomain,-1);
             
             log.info("Group management agent added to cluster domain: " +
                 domain + " and sub domain: " + subDomain);

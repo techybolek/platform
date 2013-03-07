@@ -174,9 +174,8 @@ public class ClusterDomainManagerImpl implements ClusterDomainManager {
          */
 
         if (clusteringAgent.getGroupManagementAgent(domain, subDomain) == null) {
-            clusteringAgent.addGroupManagementAgent(new SubDomainAwareGroupManagementAgent(
-                                                                                           subDomain),
-                                                    domain, subDomain);
+            clusteringAgent.addGroupManagementAgent(new SubDomainAwareGroupManagementAgent(subDomain),
+                                                    domain, subDomain,-1);
 
             if (log.isDebugEnabled()) {
                 log.debug("Group management agent added to cluster domain: " + domain +
