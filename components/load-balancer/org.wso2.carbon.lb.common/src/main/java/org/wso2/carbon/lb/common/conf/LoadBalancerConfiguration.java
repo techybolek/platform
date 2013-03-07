@@ -852,6 +852,7 @@ public class LoadBalancerConfiguration implements Serializable {
         private String groupManagementAgentClass;
         private String autoscalerTaskClass;
         private String mbServerUrl = "localhost:5672";
+        private boolean useEmbeddedAutoscaler = true;
 
         public String getElasticIP() {
             return elasticIP;
@@ -863,6 +864,10 @@ public class LoadBalancerConfiguration implements Serializable {
 
         public boolean isAutoscaleEnabled() {
             return isAutoscaleEnabled;
+        }
+
+        public boolean useEmbeddedAutoscaler() {
+            return useEmbeddedAutoscaler;
         }
         
         public boolean getFailOver() {
@@ -895,6 +900,10 @@ public class LoadBalancerConfiguration implements Serializable {
 
         public void setEnable_autoscaler(String isEnabled) {
             this.isAutoscaleEnabled = Boolean.parseBoolean(isEnabled);
+        }
+
+        public void setUse_embedded_autoscaler(String use) {
+            this.useEmbeddedAutoscaler = Boolean.parseBoolean(use);
         }
         
         public void setFail_over(String isEnabled) {
