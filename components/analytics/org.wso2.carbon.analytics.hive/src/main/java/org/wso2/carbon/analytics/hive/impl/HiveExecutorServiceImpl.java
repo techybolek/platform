@@ -331,24 +331,34 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
                             List<String> columnValues = new ArrayList<String>();
 
-                            Object resObject = rs.getObject(1);
+                            int noOfColumns = rs.getMetaData().getColumnCount();
 
-                            if (resObject.toString().contains("\t")) {
-                                columnValues = Arrays.asList(resObject.toString().split("\t"));
-                            } else {
-                                for (int i = 1; i <= columnCount; i++) {
-                                    Object resObj = rs.getObject(i);
-                                    if (null != resObj) {
-                                        columnValues.add(rs.getObject(i).toString());
-                                    } else {
-                                        columnValues.add("");
-                                    }
+                            boolean isTombstone=true;
+                            for(int k=1;k<=noOfColumns;k++){
+                                 Object obj= rs.getObject(k);
+                                if(obj != null){
+                                    isTombstone =false;
+                                    break;
                                 }
                             }
+                            if(!isTombstone){
+                                Object resObject = rs.getObject(1);
+                                if (resObject.toString().contains("\t")) {
+                                    columnValues = Arrays.asList(resObject.toString().split("\t"));
+                                } else {
+                                    for (int i = 1; i <= columnCount; i++) {
+                                        Object resObj = rs.getObject(i);
+                                        if (null != resObj) {
+                                            columnValues.add(rs.getObject(i).toString());
+                                        } else {
+                                            columnValues.add("");
+                                        }
+                                    }
+                                }
+                                resultRow.setColumnValues(columnValues.toArray(new String[]{}));
 
-                            resultRow.setColumnValues(columnValues.toArray(new String[]{}));
-
-                            results.add(resultRow);
+                                results.add(resultRow);
+                            }
                         }
 
                         queryResult.setResultRows(results.toArray(new QueryResultRow[]{}));
