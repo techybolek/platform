@@ -75,7 +75,7 @@
                 JSONArray columnValueArray = new JSONArray();
                 columnValueArray.add( columns[i].getName());
                 columnValueArray.add(columns[i].getValue());
-                columnValueArray.add((new Date(columns[i].getTimeStamp())).toString());
+                columnValueArray.add((new Date(columns[i].getTimeStamp()/1000)).toString());
                 valuesArray.add(columnValueArray);
                 }
             }
