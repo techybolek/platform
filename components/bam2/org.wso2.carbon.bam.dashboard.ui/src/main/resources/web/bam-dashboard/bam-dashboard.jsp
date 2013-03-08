@@ -39,7 +39,7 @@
                 dashboardUrl = "../../bamdashboards/index.jag";
             }
             else{
-                dashboardUrl = "../jaggeryapps/bamdashboards/index.jag";
+                dashboardUrl = "../../jaggeryapps/bamdashboards/index.jag";
             }
             location.href = dashboardUrl;
     });
