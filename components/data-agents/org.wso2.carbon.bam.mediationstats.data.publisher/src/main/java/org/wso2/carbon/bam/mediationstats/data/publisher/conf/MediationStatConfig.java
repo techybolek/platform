@@ -18,6 +18,7 @@ package org.wso2.carbon.bam.mediationstats.data.publisher.conf;
 
 public class MediationStatConfig {
 
+    private boolean isPublishingEnable;
     private boolean enableMediationStats;
     private String url = "";
     private String userName = "";
@@ -106,6 +107,14 @@ public class MediationStatConfig {
 
     public boolean isLoadBalancingEnabled(){
         return isLoadBalancingEnabled;
+    }
+
+    public void setStatisticsReporterDisable(boolean isPublishingEnabled) {
+        isPublishingEnable = isPublishingEnabled;
+    }
+
+    public boolean getStatisticsReporterDisable() {
+        return isPublishingEnable;
     }
 
 }

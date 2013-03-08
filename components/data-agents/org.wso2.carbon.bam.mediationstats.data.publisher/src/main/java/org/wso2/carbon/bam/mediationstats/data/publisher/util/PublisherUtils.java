@@ -43,6 +43,15 @@ public class PublisherUtils {
 
     private static final String TRANSPORT = "https"; // TODO: it is not ideal to assume https is always available
 
+    private static boolean isStatisticsReporterDisable = false;
+
+    public static void setStatisticsReporterDisable(boolean isStatisticsReporterDisabled) {
+        PublisherUtils.isStatisticsReporterDisable = isStatisticsReporterDisabled;
+    }
+
+    public static boolean getStatisticsReporterDisable() {
+        return isStatisticsReporterDisable;
+    }
 
     private static Map<String,EventPublisherConfig> eventPublisherConfigMap =
             new HashMap<String, EventPublisherConfig>();

@@ -19,8 +19,10 @@ package org.wso2.carbon.bam.mediationstats.data.publisher.conf;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.bam.data.publisher.util.BAMDataPublisherConstants;
+import org.wso2.carbon.bam.data.publisher.util.PublisherUtil;
 import org.wso2.carbon.bam.mediationstats.data.publisher.util.MediationDataPublisherConstants;
 import org.wso2.carbon.bam.mediationstats.data.publisher.util.MediationPublisherException;
+import org.wso2.carbon.bam.mediationstats.data.publisher.util.PublisherUtils;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -49,6 +51,7 @@ public class RegistryPersistenceManager {
 
         MediationStatConfig mediationStatConfig = new MediationStatConfig();
         // First set it to defaults, but do not persist
+        mediationStatConfig.setStatisticsReporterDisable(PublisherUtils.getStatisticsReporterDisable());
         mediationStatConfig.setEnableMediationStats(false);
         mediationStatConfig.setUrl(EMPTY_STRING);
         mediationStatConfig.setUserName(EMPTY_STRING);

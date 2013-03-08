@@ -15,6 +15,8 @@
  */
 package org.wso2.carbon.bam.mediationstats.data.publisher.internal;
 
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,13 +25,24 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.bam.mediationstats.data.publisher.conf.RegistryPersistenceManager;
 import org.wso2.carbon.bam.mediationstats.data.publisher.observer.BAMMediationStatisticsObserver;
 import org.wso2.carbon.bam.mediationstats.data.publisher.services.BAMMediationStatsPublisherAdmin;
+import org.wso2.carbon.bam.mediationstats.data.publisher.util.CommonConstants;
 import org.wso2.carbon.bam.mediationstats.data.publisher.util.PublisherUtils;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.mediation.initializer.services.SynapseEnvironmentService;
 import org.wso2.carbon.mediation.statistics.MediationStatisticsStore;
 import org.wso2.carbon.mediation.statistics.services.MediationStatisticsService;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 /**
  * @scr.component name="org.wso2.carbon.bam.mediationstats.data.publisher" immediate="true"
@@ -55,6 +68,8 @@ public class MediationStatisticsComponent {
 
     private static final Log log = LogFactory.getLog(MediationStatisticsComponent.class);
 
+    private static boolean StatisticReporterDisabled;
+
     private boolean activated = false;
     private ServiceRegistration statAdminServiceRegistration;
     private MediationStatisticsService mediationStatisticsService;
@@ -63,34 +78,43 @@ public class MediationStatisticsComponent {
 
     protected void activate(ComponentContext ctxt) {
 
-        BAMMediationStatsPublisherAdmin bamMediationStatsPublisherAdmin = new BAMMediationStatsPublisherAdmin();
+        checkPublishingEnabled();
 
-        PublisherUtils.setMediationStatPublisherAdmin(bamMediationStatsPublisherAdmin);
+        PublisherUtils.setStatisticsReporterDisable(StatisticReporterDisabled);
 
-        MediationStatisticsStore mediationStatisticsStore = mediationStatisticsService.getStatisticsStore();
-        int tenantId = mediationStatisticsService.getTenantId();
+        if(!StatisticReporterDisabled){
+            BAMMediationStatsPublisherAdmin bamMediationStatsPublisherAdmin = new BAMMediationStatsPublisherAdmin();
 
-        if(mediationStatisticsStore!= null){
-            BAMMediationStatisticsObserver observer = new BAMMediationStatisticsObserver();
-            mediationStatisticsStore.registerObserver(observer);
-            observer.setTenantId(tenantId);
-            // 'MediationStat service' will be deployed per tenant (cardinality="1..n")
-            observer.setTenantAxisConfiguration(mediationStatisticsService.getConfigurationContext().
-                    getAxisConfiguration());
-            log.debug("Registering  Observer for tenant: " + mediationStatisticsService.getTenantId());
-        } else {
+            PublisherUtils.setMediationStatPublisherAdmin(bamMediationStatsPublisherAdmin);
+
+            MediationStatisticsStore mediationStatisticsStore = mediationStatisticsService.getStatisticsStore();
+            int tenantId = mediationStatisticsService.getTenantId();
+
+            if(mediationStatisticsStore!= null){
+                BAMMediationStatisticsObserver observer = new BAMMediationStatisticsObserver();
+                mediationStatisticsStore.registerObserver(observer);
+                observer.setTenantId(tenantId);
+                // 'MediationStat service' will be deployed per tenant (cardinality="1..n")
+                observer.setTenantAxisConfiguration(mediationStatisticsService.getConfigurationContext().
+                        getAxisConfiguration());
+                log.debug("Registering  Observer for tenant: " + mediationStatisticsService.getTenantId());
+            } else {
+                log.error("Can't register an observer for mediationStatisticsStore. " +
+                                    "If you have disabled StatisticsReporter, please enable it in the Carbon.xml");
+            }
+
+            //Load previously saved configurations
+            new RegistryPersistenceManager().load(tenantId);
+
+
+            activated = true;
+            log.debug("BAM MediationStatisticsComponent activate");
+            if (log.isDebugEnabled()) {
+                log.debug("BAM Mediation statistics data publisher bundle is activated");
+            }
+        }else{
             log.warn("Can't register an observer for mediationStatisticsStore. " +
-                    "If you have disabled StatisticsReporter, please enable it in the Carbon.xml");
-        }
-
-        //Load previously saved configurations
-        new RegistryPersistenceManager().load(tenantId);
-
-
-        activated = true;
-        log.debug("BAM MediationStatisticsComponent activate");
-        if (log.isDebugEnabled()) {
-            log.debug("BAM Mediation statistics data publisher bundle is activated");
+                                    "If you have disabled StatisticsReporter, please enable it in the Carbon.xml");
         }
     }
 
@@ -170,4 +194,22 @@ public class MediationStatisticsComponent {
         }
         // mediationStatisticsService = null;
     }
+
+    private void checkPublishingEnabled() {
+
+                String carbonStatisticsReporter =
+                        /*bamConfig.getFirstChildWithName(new QName());*/
+                        CarbonUtils.getServerConfiguration().getFirstProperty(CommonConstants.CARBON_STATISTICS_REPORTER);
+                if (null != carbonStatisticsReporter) {
+                    if (carbonStatisticsReporter.trim()
+                            .equalsIgnoreCase(CommonConstants.CARBON_STATISTIC_REPORTER_DISABLED)) {
+                        StatisticReporterDisabled = false;
+                    } else {
+                        log.info("Statistic Reporter is Disabled");
+                        StatisticReporterDisabled = true;
+                    }
+                } else {
+                    StatisticReporterDisabled = true;
+                }
+        }
 }
