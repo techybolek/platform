@@ -44,6 +44,7 @@ import org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner;
 import org.apache.hadoop.security.Credentials;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.Tool;
+import org.eclipse.core.runtime.internal.adaptor.URLConverterImpl;
 
 /** 
  * A map/reduce job configuration.
@@ -1801,6 +1802,14 @@ public class JobConf extends Configuration {
           }
           toReturn = URLDecoder.decode(toReturn, "UTF-8");
           return toReturn.replaceAll("!.*$", "");
+        }else if ("bundleresource".equals(url.getProtocol())){
+            URL bundleSourceUrl = new URLConverterImpl().resolve((loader.getResource(class_file)));
+            String toReturn = bundleSourceUrl.getPath();
+            if (toReturn.startsWith("file:")) {
+                toReturn = toReturn.substring("file:".length());
+            }
+            toReturn = URLDecoder.decode(toReturn, "UTF-8");
+            return toReturn.replaceAll("!.*$", "");
         }
       }
     } catch (IOException e) {
