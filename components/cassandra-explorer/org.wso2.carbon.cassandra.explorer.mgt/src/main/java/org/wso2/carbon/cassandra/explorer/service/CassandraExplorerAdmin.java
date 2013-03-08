@@ -18,25 +18,33 @@
 */
 package org.wso2.carbon.cassandra.explorer.service;
 
+import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.beans.Row;
+import me.prettyprint.hector.api.ddl.ColumnDefinition;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.ComparatorType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
 import me.prettyprint.hector.api.query.SliceQuery;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.wso2.carbon.cassandra.explorer.connection.ConnectionManager;
 import org.wso2.carbon.cassandra.explorer.data.Column;
 import org.wso2.carbon.cassandra.explorer.exception.CassandraExplorerException;
+import org.wso2.carbon.cassandra.explorer.utils.CFInfo;
+import org.wso2.carbon.cassandra.explorer.utils.CassandraUtils;
 import org.wso2.carbon.core.AbstractAdmin;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,6 +57,8 @@ import java.util.Map;
 public class CassandraExplorerAdmin extends AbstractAdmin {
 
     private static final StringSerializer stringSerializer = new StringSerializer();
+    private static final ByteBufferSerializer byteBufferSerializer = new ByteBufferSerializer();
+    private ByteBuffer emptyByteBuffer = ByteBufferUtil.bytes("");
 
     /**
      * @param keyspaceName Selected KeySpace by tenant
@@ -58,89 +68,101 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
     public int getNoOfRows(String keyspaceName, String columnFamily)
             throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
-        if(cluster == null){
+        if (cluster == null) {
             throw new CassandraExplorerException("No connection to Cluster available");
         }
         Keyspace keyspace = ConnectionManager.getKeyspace(cluster, keyspaceName);
 
-        RangeSlicesQuery<String, String, String> rangeSlicesQuery =
-                HFactory.createRangeSlicesQuery(keyspace, stringSerializer, stringSerializer,
-                                                stringSerializer);
+        RangeSlicesQuery<ByteBuffer, ByteBuffer, ByteBuffer> rangeSlicesQuery =
+                HFactory.createRangeSlicesQuery(keyspace, byteBufferSerializer, byteBufferSerializer,
+                                                byteBufferSerializer);
         rangeSlicesQuery.setColumnFamily(columnFamily);
-        rangeSlicesQuery.setKeys("", "");
+        rangeSlicesQuery.setKeys(emptyByteBuffer, emptyByteBuffer);
         rangeSlicesQuery.setRowCount(ConnectionManager.getMaxResultCount());
         rangeSlicesQuery.setReturnKeysOnly();
-        QueryResult<OrderedRows<String, String, String>> result;
-        try{
+        QueryResult<OrderedRows<ByteBuffer, ByteBuffer, ByteBuffer>> result;
+        try {
             result = rangeSlicesQuery.execute();
-        }catch (HectorException exception){
-            throw new CassandraExplorerException(exception.getMessage(),exception);
+        } catch (HectorException exception) {
+            throw new CassandraExplorerException(exception.getMessage(), exception);
         }
         return result.get().getCount();
     }
 
-    /**   Method to get Paginate Slice for Rows
+    /**
+     * Method to get Paginate Slice for Rows
      *
-     * @param keyspaceName   Name of the keyspace
-     * @param columnFamily   Column Family Name
-     * @param startingNo     Starting Number
-     * @param limit          Display Limit
+     * @param keyspaceName Name of the keyspace
+     * @param columnFamily Column Family Name
+     * @param startingNo   Starting Number
+     * @param limit        Display Limit
      * @return
      * @throws CassandraExplorerException
      */
     public org.wso2.carbon.cassandra.explorer.data.Row[] getRowPaginateSlice
-    (String keyspaceName, String columnFamily, int startingNo, int limit)
+            (String keyspaceName, String columnFamily, int startingNo, int limit)
             throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
-        if(cluster == null){
+        if (cluster == null) {
             throw new CassandraExplorerException("No connection to Cluster available");
         }
         Keyspace keyspace = ConnectionManager.getKeyspace(cluster, keyspaceName);
+        CFInfo columnFamilyInfo = CassandraUtils.getColumnFamilyInfo(cluster, keyspace,
+                                                                     columnFamily);
 
-        RangeSlicesQuery<String, String, String> rangeSlicesQuery =
-                HFactory.createRangeSlicesQuery(keyspace, stringSerializer, stringSerializer,
-                                                stringSerializer);
+        RangeSlicesQuery<ByteBuffer, ByteBuffer, ByteBuffer> rangeSlicesQuery =
+                HFactory.createRangeSlicesQuery(keyspace, byteBufferSerializer, byteBufferSerializer,
+                                                byteBufferSerializer);
         rangeSlicesQuery.setColumnFamily(columnFamily);
-        rangeSlicesQuery.setKeys("", "");
-        rangeSlicesQuery.setRange("", "", false, 3);
+        rangeSlicesQuery.setKeys(emptyByteBuffer, emptyByteBuffer);
+        rangeSlicesQuery.setRange(emptyByteBuffer, emptyByteBuffer, false, 3);
         rangeSlicesQuery.setRowCount(startingNo + 1);
 
         ArrayList<org.wso2.carbon.cassandra.explorer.data.Row> rowlist =
                 new ArrayList<org.wso2.carbon.cassandra.explorer.data.Row>();
 
-        QueryResult<OrderedRows<String, String, String>> result;
-        try{
+        QueryResult<OrderedRows<ByteBuffer, ByteBuffer, ByteBuffer>> result;
+        try {
             result = rangeSlicesQuery.execute();
-        }catch (HectorException exception){
-            throw new CassandraExplorerException(exception.getMessage(),exception);
+        } catch (HectorException exception) {
+            throw new CassandraExplorerException(exception.getMessage(), exception);
         }
-        String endKey = "";
+        ByteBuffer endKey = emptyByteBuffer;
         if (result.get().peekLast() != null) {
             endKey = result.get().peekLast().getKey();
         }
         rangeSlicesQuery.setRowCount(limit);
-        rangeSlicesQuery.setKeys(endKey, "");
+        rangeSlicesQuery.setKeys(endKey, emptyByteBuffer);
 
-        try{
+        try {
             result = rangeSlicesQuery.execute();
-        }catch (HectorException exception){
-            throw new CassandraExplorerException(exception.getMessage(),exception);
+        } catch (HectorException exception) {
+            throw new CassandraExplorerException(exception.getMessage(), exception);
         }
 
-        for (Row cassandraRow : result.get().getList()) {
+        for (Row<ByteBuffer, ByteBuffer, ByteBuffer> cassandraRow : result.get().getList()) {
             org.wso2.carbon.cassandra.explorer.data.Row row =
                     new org.wso2.carbon.cassandra.explorer.data.Row();
-            row.setRowId(cleanNonXmlChars(cassandraRow.getKey().toString()));
-            List<HColumn<String, String>> hColumnsList = cassandraRow.getColumnSlice().getColumns();
+            row.setRowId(CassandraUtils.getStringDeserialization(
+                    columnFamilyInfo.getKeySerializer(), cassandraRow.getKey()));
+            List<HColumn<ByteBuffer, ByteBuffer>> hColumnsList = cassandraRow.
+                    getColumnSlice().getColumns();
             Column[] columns = new Column[hColumnsList.size()];
             for (int i = 0; i < hColumnsList.size(); i++) {
                 // we are sending only 3 columns max
                 if (i == 3) {
                     break;
                 }
+                HColumn hColumn = hColumnsList.get(i);
                 Column column = new Column();
-                column.setName(cleanNonXmlChars(hColumnsList.get(i).getName()));
-                column.setValue(cleanNonXmlChars(hColumnsList.get(i).getValue()));
+                column.setName(CassandraUtils.getStringDeserialization(
+                        columnFamilyInfo.getColumnSerializer(), hColumn.getNameBytes()));
+
+                String value = CassandraUtils.getStringDeserialization(columnFamilyInfo.
+                        getColumnValueSerializer(hColumn.getNameBytes()),
+                                                                       hColumn.getValueBytes());
+                column.setValue(value);
+                column.setTimeStamp(hColumn.getClock());
                 columns[i] = column;
             }
             row.setColumns(columns);
@@ -158,44 +180,57 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
                                                                     int startingNo, int limit)
             throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
-        if(cluster == null){
+        if (cluster == null) {
             throw new CassandraExplorerException("No connection to Cluster available");
         }
         Keyspace keyspace = ConnectionManager.getKeyspace(cluster, keyspaceName);
+        CFInfo columnFamilyInfo = CassandraUtils.getColumnFamilyInfo(cluster, keyspace,
+                                                                     columnFamily);
 
-        RangeSlicesQuery<String, String, String> rangeSlicesQuery =
-                HFactory.createRangeSlicesQuery(keyspace, stringSerializer, stringSerializer,
-                                                stringSerializer);
+        RangeSlicesQuery<ByteBuffer, ByteBuffer, ByteBuffer> rangeSlicesQuery =
+                HFactory.createRangeSlicesQuery(keyspace, byteBufferSerializer, byteBufferSerializer,
+                                                byteBufferSerializer);
         rangeSlicesQuery.setColumnFamily(columnFamily);
-        rangeSlicesQuery.setKeys("", "");
-        rangeSlicesQuery.setRange("", "", false, 3);
+        rangeSlicesQuery.setKeys(emptyByteBuffer, emptyByteBuffer);
+        rangeSlicesQuery.setRange(emptyByteBuffer, emptyByteBuffer, false, 3);
         rangeSlicesQuery.setRowCount(ConnectionManager.getMaxResultCount());
 
-        ArrayList<org.wso2.carbon.cassandra.explorer.data.Row> rowlist =
-                new ArrayList<org.wso2.carbon.cassandra.explorer.data.Row>();
+        ArrayList<org.wso2.carbon.cassandra.explorer.data.Row> rowlist = new ArrayList<org.wso2.carbon.cassandra.explorer.data.Row>();
 
-        QueryResult<OrderedRows<String, String, String>> result;
-        try{
+        QueryResult<OrderedRows<ByteBuffer, ByteBuffer, ByteBuffer>> result;
+        try {
             result = rangeSlicesQuery.execute();
-        }catch (HectorException exception){
-            throw new CassandraExplorerException(exception.getMessage(),exception);
+        } catch (HectorException exception) {
+            throw new CassandraExplorerException(exception.getMessage(), exception);
         }
-        for (Row cassandraRow : result.get().getList()) {
+        for (Row<ByteBuffer, ByteBuffer, ByteBuffer> cassandraRow : result.get().getList()) {
             org.wso2.carbon.cassandra.explorer.data.Row row =
                     new org.wso2.carbon.cassandra.explorer.data.Row();
+
+            String rowKey = CassandraUtils.getStringDeserialization(
+                    columnFamilyInfo.getKeySerializer(), cassandraRow.getKey());
             //check if search key present in the row keys.
-            if ((cassandraRow.getKey().toString().contains(searchKey))) {
-                row.setRowId(cassandraRow.getKey().toString());
-                List<HColumn<String, String>> hColumnsList = cassandraRow.getColumnSlice().getColumns();
+            if (rowKey.contains(searchKey)) {
+                row.setRowId(cleanNonXmlChars(rowKey));
+                List<HColumn<ByteBuffer, ByteBuffer>> hColumnsList = cassandraRow.
+                        getColumnSlice().getColumns();
                 Column[] columns = new Column[hColumnsList.size()];
                 for (int i = 0; i < hColumnsList.size(); i++) {
                     // we are sending only 3 columns max
                     if (i == 3) {
                         break;
                     }
+
+                    HColumn hColumn = hColumnsList.get(i);
                     Column column = new Column();
-                    column.setName(cleanNonXmlChars(hColumnsList.get(i).getName()));
-                    column.setValue(cleanNonXmlChars(hColumnsList.get(i).getValue()));
+                    column.setName(CassandraUtils.getStringDeserialization(
+                            columnFamilyInfo.getColumnSerializer(), hColumn.getNameBytes()));
+
+                    String value = CassandraUtils.getStringDeserialization(columnFamilyInfo.
+                            getColumnValueSerializer(hColumn.getNameBytes()),
+                                                                           hColumn.getValueBytes());
+                    column.setValue(value);
+                    column.setTimeStamp(hColumn.getClock());
                     columns[i] = column;
                 }
                 row.setColumns(columns);
@@ -223,33 +258,38 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
             , String searchKey)
             throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
-        if(cluster == null){
+        if (cluster == null) {
             throw new CassandraExplorerException("No connection to Cluster available");
         }
         Keyspace keyspace = ConnectionManager.getKeyspace(cluster, keyspaceName);
+        CFInfo columnFamilyInfo = CassandraUtils.getColumnFamilyInfo(cluster, keyspace,
+                                                                     columnFamily);
 
-        RangeSlicesQuery<String, String, String> rangeSlicesQuery =
-                HFactory.createRangeSlicesQuery(keyspace, stringSerializer, stringSerializer,
-                                                stringSerializer);
+        RangeSlicesQuery<ByteBuffer, ByteBuffer, ByteBuffer> rangeSlicesQuery =
+                HFactory.createRangeSlicesQuery(keyspace, byteBufferSerializer, byteBufferSerializer,
+                                                byteBufferSerializer);
         rangeSlicesQuery.setColumnFamily(columnFamily);
-        rangeSlicesQuery.setKeys("", "");
+        rangeSlicesQuery.setKeys(emptyByteBuffer, emptyByteBuffer);
         rangeSlicesQuery.setReturnKeysOnly();
         rangeSlicesQuery.setRowCount(ConnectionManager.getMaxResultCount());
 
         ArrayList<org.wso2.carbon.cassandra.explorer.data.Row> rowlist =
                 new ArrayList<org.wso2.carbon.cassandra.explorer.data.Row>();
-        QueryResult<OrderedRows<String, String, String>> result;
-        try{
+        QueryResult<OrderedRows<ByteBuffer, ByteBuffer, ByteBuffer>> result;
+        try {
             result = rangeSlicesQuery.execute();
-        }catch (HectorException exception){
-            throw new CassandraExplorerException(exception.getMessage(),exception);
+        } catch (HectorException exception) {
+            throw new CassandraExplorerException(exception.getMessage(), exception);
         }
 
-        for (Row cassandraRow : result.get().getList()) {
+        for (Row<ByteBuffer, ByteBuffer, ByteBuffer> cassandraRow : result.get().getList()) {
             org.wso2.carbon.cassandra.explorer.data.Row row =
                     new org.wso2.carbon.cassandra.explorer.data.Row();
+
+            String rowKey = CassandraUtils.getStringDeserialization(
+                    columnFamilyInfo.getKeySerializer(), cassandraRow.getKey());
             //check if search key present in the row keys.
-            if ((cassandraRow.getKey().toString().contains(searchKey))) {
+            if (rowKey.contains(searchKey)) {
                 rowlist.add(row);
             }
         }
@@ -260,35 +300,51 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
                                   String rowName, String searchKey, int startingNo, int limit)
             throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
-        if(cluster == null){
+        if (cluster == null) {
             throw new CassandraExplorerException("No connection to Cluster available");
         }
         Keyspace keyspace = ConnectionManager.getKeyspace(cluster, keyspaceName);
+        CFInfo columnFamilyInfo = CassandraUtils.getColumnFamilyInfo(cluster, keyspace,
+                                                                     columnFamily);
 
-        SliceQuery<String, String, String> sliceQuery =
-                HFactory.createSliceQuery(keyspace, stringSerializer, stringSerializer,
-                                          stringSerializer);
+        SliceQuery<ByteBuffer, ByteBuffer, ByteBuffer> sliceQuery =
+                HFactory.createSliceQuery(keyspace, byteBufferSerializer, byteBufferSerializer,
+                                          byteBufferSerializer);
         sliceQuery.setColumnFamily(columnFamily);
-        sliceQuery.setKey(rowName);
-        sliceQuery.setRange("", "", false, ConnectionManager.getMaxResultCount());
-        QueryResult<ColumnSlice<String, String>> result ;
-        try{
+        if (rowName instanceof String) {
+            sliceQuery.setKey(ByteBuffer.wrap(rowName.getBytes()));
+        } else {
+            sliceQuery.setKey(columnFamilyInfo.getKeySerializer().toByteBuffer(rowName));
+        }
+        sliceQuery.setRange(emptyByteBuffer, emptyByteBuffer, false,
+                            ConnectionManager.getMaxResultCount());
+        QueryResult<ColumnSlice<ByteBuffer, ByteBuffer>> result;
+        try {
             result = sliceQuery.execute();
-        }catch (HectorException exception){
-            throw new CassandraExplorerException(exception.getMessage(),exception);
+        } catch (HectorException exception) {
+            throw new CassandraExplorerException(exception.getMessage(), exception);
         }
 
-        List<HColumn<String, String>> hColumnsList;
+        List<HColumn<ByteBuffer, ByteBuffer>> hColumnsList;
         ArrayList<Column> columnsList = new ArrayList<Column>();
         hColumnsList = result.get().getColumns();
 
         for (HColumn hColumn : hColumnsList) {
-            Column column = new Column();
-            column.setName(cleanNonXmlChars(hColumn.getName().toString()));
-            column.setValue(cleanNonXmlChars(hColumn.getValue().toString()));
-            column.setTimeStamp(hColumn.getClock());
+            String columnKey = CassandraUtils.getStringDeserialization(
+                    columnFamilyInfo.getColumnSerializer(), hColumn.getNameBytes());
+            String columnValue = CassandraUtils.getStringDeserialization(columnFamilyInfo.
+                    getColumnValueSerializer(hColumn.getNameBytes()), hColumn.getValueBytes());
 
-            if ((column.getName().contains(searchKey) || column.getValue().contains(searchKey))) {
+            if ((columnKey.contains(searchKey) || columnValue.contains(searchKey))) {
+                Column column = new Column();
+
+                columnKey = cleanNonXmlChars(columnKey);
+                columnValue = cleanNonXmlChars(columnValue);
+
+                column.setName(columnKey);
+                column.setValue(columnValue);
+                column.setTimeStamp(hColumn.getClock());
+
                 columnsList.add(column);
             }
         }
@@ -308,84 +364,114 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
                                           String rowName, String searchKey)
             throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
-        if(cluster == null){
+        if (cluster == null) {
             throw new CassandraExplorerException("No connection to Cluster available");
         }
         Keyspace keyspace = ConnectionManager.getKeyspace(cluster, keyspaceName);
+        CFInfo columnFamilyInfo = CassandraUtils.getColumnFamilyInfo(cluster, keyspace,
+                                                                     columnFamily);
 
-        SliceQuery<String, String, String> sliceQuery =
-                HFactory.createSliceQuery(keyspace, stringSerializer, stringSerializer,
-                                          stringSerializer);
+        SliceQuery<ByteBuffer, ByteBuffer, ByteBuffer> sliceQuery =
+                HFactory.createSliceQuery(keyspace, byteBufferSerializer, byteBufferSerializer,
+                                          byteBufferSerializer);
         sliceQuery.setColumnFamily(columnFamily);
-        sliceQuery.setKey(rowName);
-        sliceQuery.setRange("", "", false, ConnectionManager.getMaxResultCount());
-        QueryResult<ColumnSlice<String, String>> result ;
-        try{
-            result = sliceQuery.execute();
-        }catch (HectorException exception){
-            throw new CassandraExplorerException(exception.getMessage(),exception);
+        if (rowName instanceof String) {
+            sliceQuery.setKey(ByteBuffer.wrap(rowName.getBytes()));
+        } else {
+            sliceQuery.setKey(columnFamilyInfo.getKeySerializer().toByteBuffer(rowName));
         }
-        List<HColumn<String, String>> hColumnsList;
-        ArrayList<Column> columnsList = new ArrayList<Column>();
+        sliceQuery.setRange(emptyByteBuffer, emptyByteBuffer, false,
+                            ConnectionManager.getMaxResultCount());
+        QueryResult<ColumnSlice<ByteBuffer, ByteBuffer>> result;
+        try {
+            result = sliceQuery.execute();
+        } catch (HectorException exception) {
+            throw new CassandraExplorerException(exception.getMessage(), exception);
+        }
+        List<HColumn<ByteBuffer, ByteBuffer>> hColumnsList;
         hColumnsList = result.get().getColumns();
 
+        int columnCount = 0;
         for (HColumn hColumn : hColumnsList) {
-            Column column = new Column();
-            if ((column.getName().contains(searchKey) || column.getValue().contains(searchKey))) {
-                columnsList.add(column);
+
+            String columnKey = CassandraUtils.getStringDeserialization(
+                    columnFamilyInfo.getColumnSerializer(), hColumn.getNameBytes());
+            String columnValue = CassandraUtils.getStringDeserialization(columnFamilyInfo.
+                    getColumnValueSerializer(hColumn.getNameBytes()), hColumn.getValueBytes());
+
+            if ((columnKey.contains(searchKey) || columnValue.contains(searchKey))) {
+                columnCount++;
             }
         }
-        return columnsList.size();
+        return columnCount;
     }
 
     public Column[] getColumnPaginateSlice(String keyspaceName, String columnFamily, String rowName,
                                            int startingNo, int limit)
             throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
-        if(cluster == null){
+        if (cluster == null) {
             throw new CassandraExplorerException("No connection to Cluster available");
         }
         Keyspace keyspace = ConnectionManager.getKeyspace(cluster, keyspaceName);
-        //get the results up to the startingNo
-        SliceQuery<String, String, String> sliceQuery =
-                HFactory.createSliceQuery(keyspace, stringSerializer, stringSerializer,
-                                          stringSerializer);
-        sliceQuery.setColumnFamily(columnFamily);
-        sliceQuery.setKey(rowName);
+        CFInfo columnFamilyInfo = CassandraUtils.getColumnFamilyInfo(cluster, keyspace,
+                                                                     columnFamily);
 
-        QueryResult<ColumnSlice<String, String>> result;
+        //get the results up to the startingNo
+        SliceQuery<ByteBuffer, ByteBuffer, ByteBuffer> sliceQuery =
+                HFactory.createSliceQuery(keyspace, byteBufferSerializer, byteBufferSerializer,
+                                          byteBufferSerializer);
+        sliceQuery.setColumnFamily(columnFamily);
+        if (rowName instanceof String) {
+            sliceQuery.setKey(ByteBuffer.wrap(rowName.getBytes()));
+        } else {
+            sliceQuery.setKey(columnFamilyInfo.getKeySerializer().toByteBuffer(rowName));
+        }
+
+        QueryResult<ColumnSlice<ByteBuffer, ByteBuffer>> result;
         if (startingNo != 0) {
-            sliceQuery.setRange("", "", false, startingNo + 1);
-            try{
+            sliceQuery.setRange(emptyByteBuffer, emptyByteBuffer, false,
+                                startingNo + 1);
+            try {
                 result = sliceQuery.execute();
-            }catch (HectorException exception){
-                throw new CassandraExplorerException(exception.getMessage(),exception);
+            } catch (HectorException exception) {
+                throw new CassandraExplorerException(exception.getMessage(), exception);
             }
-            List<HColumn<String, String>> tmpHColumnsList = result.get().getColumns();
+            List<HColumn<ByteBuffer, ByteBuffer>> tmpHColumnsList = result.get().getColumns();
 
             //TODO handle if results are empty
             HColumn startingColumn = tmpHColumnsList.get(tmpHColumnsList.size() - 1);
-            String startingColumnName = (String) startingColumn.getName();
+            ByteBuffer startingColumnName = (ByteBuffer) startingColumn.getName();
 
-            sliceQuery.setRange(startingColumnName, "", false, limit);
+            sliceQuery.setRange(startingColumnName, emptyByteBuffer, false, limit);
         } else {
-            sliceQuery.setRange("", "", false, limit);
+            sliceQuery.setRange(emptyByteBuffer, emptyByteBuffer, false, limit);
         }
-        try{
+        try {
             result = sliceQuery.execute();
-        }catch (HectorException exception){
-            throw new CassandraExplorerException(exception.getMessage(),exception);
+        } catch (HectorException exception) {
+            throw new CassandraExplorerException(exception.getMessage(), exception);
         }
 
-        List<HColumn<String, String>> hColumnsList;
+        List<HColumn<ByteBuffer, ByteBuffer>> hColumnsList;
         ArrayList<Column> columnsList = new ArrayList<Column>();
         hColumnsList = result.get().getColumns();
 
         for (HColumn hColumn : hColumnsList) {
             Column column = new Column();
-            column.setName(cleanNonXmlChars(hColumn.getName().toString()));
-            column.setValue(cleanNonXmlChars(hColumn.getValue().toString()));
+
+            String key = CassandraUtils.getStringDeserialization(
+                    columnFamilyInfo.getColumnSerializer(), hColumn.getNameBytes());
+            String value = CassandraUtils.getStringDeserialization(columnFamilyInfo.
+                    getColumnValueSerializer(hColumn.getNameBytes()), hColumn.getValueBytes());
+
+            key = cleanNonXmlChars(key);
+            value = cleanNonXmlChars(value);
+
+            column.setName(key);
+            column.setValue(value);
             column.setTimeStamp(hColumn.getClock());
+
             columnsList.add(column);
         }
         Column[] columnArray = new Column[columnsList.size()];
@@ -395,25 +481,32 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
     public int getNoOfColumns(String keyspaceName, String columnFamily, String rowName)
             throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
-        if(cluster == null){
+        if (cluster == null) {
             throw new CassandraExplorerException("No connection to Cluster available");
         }
         Keyspace keyspace = ConnectionManager.getKeyspace(cluster, keyspaceName);
-
-        SliceQuery<String, String, String> sliceQuery =
-                HFactory.createSliceQuery(keyspace, stringSerializer, stringSerializer,
-                                          stringSerializer);
+        CFInfo columnFamilyInfo = CassandraUtils.getColumnFamilyInfo(cluster, keyspace,
+                                                                     columnFamily);
+        
+        SliceQuery<ByteBuffer, ByteBuffer, ByteBuffer> sliceQuery =
+                HFactory.createSliceQuery(keyspace, byteBufferSerializer, byteBufferSerializer,
+                                          byteBufferSerializer);
         sliceQuery.setColumnFamily(columnFamily);
-        sliceQuery.setKey(rowName);
-        sliceQuery.setRange("", "", false, ConnectionManager.getMaxResultCount());
-        QueryResult<ColumnSlice<String, String>> result ;
-        try{
+        if (rowName instanceof String) {
+            sliceQuery.setKey(ByteBuffer.wrap(rowName.getBytes()));
+        } else {
+            sliceQuery.setKey(columnFamilyInfo.getKeySerializer().toByteBuffer(rowName));
+        }
+        sliceQuery.setRange(emptyByteBuffer, emptyByteBuffer, false,
+                            ConnectionManager.getMaxResultCount());
+        QueryResult<ColumnSlice<ByteBuffer, ByteBuffer>> result;
+        try {
             result = sliceQuery.execute();
-        }catch (HectorException exception){
-            throw new CassandraExplorerException(exception.getMessage(),exception);
+        } catch (HectorException exception) {
+            throw new CassandraExplorerException(exception.getMessage(), exception);
         }
 
-        List<HColumn<String, String>> hColumnsList;
+        List<HColumn<ByteBuffer, ByteBuffer>> hColumnsList;
         hColumnsList = result.get().getColumns();
         return hColumnsList.size();
     }
@@ -441,7 +534,7 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
 
     public String[] getKeyspaces() throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
-        if(cluster == null){
+        if (cluster == null) {
             throw new CassandraExplorerException("No connection to Cluster available");
         }
         Iterator<KeyspaceDefinition> keyspaceItr = null;
@@ -461,7 +554,7 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
 
     public String[] getColumnFamilies(String keySpace) throws CassandraExplorerException {
         Cluster cluster = ConnectionManager.getCluster();
-        if(cluster == null){
+        if (cluster == null) {
             throw new CassandraExplorerException("No connection to Cluster available");
         }
         Iterator<ColumnFamilyDefinition> keyspaceItr = cluster.describeKeyspace(keySpace).getCfDefs()
@@ -475,7 +568,8 @@ public class CassandraExplorerAdmin extends AbstractAdmin {
     }
 
     //Setting Maximum row result count
-    public void setMaxRowCount(int maxRowCount){
+
+    public void setMaxRowCount(int maxRowCount) {
         ConnectionManager.setMaxResultCount(maxRowCount);
     }
 

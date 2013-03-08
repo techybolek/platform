@@ -19,16 +19,27 @@
 
 package org.wso2.carbon.cassandra.explorer.connection;
 
+import me.prettyprint.cassandra.serializers.AsciiSerializer;
+import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
+import me.prettyprint.cassandra.serializers.IntegerSerializer;
+import me.prettyprint.cassandra.serializers.LongSerializer;
+import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.cassandra.serializers.TimeUUIDSerializer;
+import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.ThriftCluster;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.ComparatorType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
 import org.wso2.carbon.cassandra.explorer.exception.CassandraExplorerException;
 import org.wso2.carbon.cassandra.explorer.session.ExplorerSessionManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +50,20 @@ public class ConnectionManager {
     private static int maxResultCount = 10000;
 
     private static final String EXPLORER_MAX_RESULT_COUNT="maxResultCount";
+
+    private static final Map<String, Serializer> serializerMap =
+            new HashMap<String, Serializer>();
+
+    static {
+
+        serializerMap.put(ComparatorType.UTF8TYPE.getClassName(), new StringSerializer());
+        serializerMap.put(ComparatorType.ASCIITYPE.getClassName(), new AsciiSerializer());
+        serializerMap.put(ComparatorType.LONGTYPE.getClassName(), new LongSerializer());
+        serializerMap.put(ComparatorType.BYTESTYPE.getClassName(), new ByteBufferSerializer());
+        serializerMap.put(ComparatorType.INTEGERTYPE.getClassName(), new IntegerSerializer());
+        serializerMap.put(ComparatorType.UUIDTYPE.getClassName(), new UUIDSerializer());
+        serializerMap.put(ComparatorType.TIMEUUIDTYPE.getClassName(), new TimeUUIDSerializer());
+    }
 
     public ConnectionManager(String clusterName, String connectionUrl,
                              Map<String, String> credentials) throws CassandraExplorerException {
@@ -59,6 +84,20 @@ public class ConnectionManager {
         }
     }
 
+    public static ColumnFamilyDefinition getColumnFamilyDefinition(Cluster cluster, Keyspace keyspace,
+                                                            String columnFamilyName) {
+        KeyspaceDefinition keyspaceDef =
+                cluster.describeKeyspace(keyspace.getKeyspaceName());
+        List<ColumnFamilyDefinition> cfDef = keyspaceDef.getCfDefs();
+        for (ColumnFamilyDefinition cfdef : cfDef) {
+            if (cfdef.getName().equals(columnFamilyName)) {
+                return cfdef;
+            }
+        }
+
+        return null;
+    }
+
     public List<Keyspace> getCassandraKeySpacesList(Cluster cluster) {
         List<KeyspaceDefinition> KeyspaceDefsList = cluster.describeKeyspaces();
         List<Keyspace> keyspaceList = new ArrayList<Keyspace>();
@@ -70,6 +109,10 @@ public class ConnectionManager {
 
     public static Keyspace getKeyspace(Cluster cluster, String keyspaceName) {
         return HFactory.createKeyspace(keyspaceName, cluster);
+    }
+
+    public static Serializer getSerializer(String comparatorClass) {
+        return serializerMap.get(comparatorClass);
     }
 
     public static Cluster getCluster() throws CassandraExplorerException {
