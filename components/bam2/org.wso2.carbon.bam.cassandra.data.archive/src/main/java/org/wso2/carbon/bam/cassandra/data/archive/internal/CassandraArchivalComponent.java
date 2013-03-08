@@ -23,19 +23,19 @@ import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
 import org.wso2.carbon.analytics.hive.web.HiveScriptStoreService;
 import org.wso2.carbon.bam.cassandra.data.archive.util.CassandraArchiveUtil;
 import org.wso2.carbon.cassandra.dataaccess.DataAccessService;
-import org.wso2.carbon.databridge.persistence.cassandra.datastore.CassandraConnector;
+import org.wso2.carbon.databridge.core.DataBridgeReceiverService;
 
 
 /**
  * @scr.component name="databridge.cassandra.archive.comp" immediate="true"
  * @scr.reference name="dataaccess.service" interface="org.wso2.carbon.cassandra.dataaccess.DataAccessService"
  * cardinality="1..1" policy="dynamic" bind="setDataAccessService" unbind="unsetDataAccessService"
- * @scr.reference name="databridge.cassandra.service" interface="org.wso2.carbon.databridge.persistence.cassandra.datastore.CassandraConnector"
- * cardinality="1..1" policy="dynamic" bind="setCassandraConnectorService" unbind="unsetCassandraConnectorService"
  * @scr.reference name="bam.hive.service" interface="org.wso2.carbon.analytics.hive.service.HiveExecutorService"
  * cardinality="1..1" policy="dynamic" bind="setHiveExecutorService" unbind="unsetHiveExecutorService"
  * @scr.reference name="bam.hive.store.service" interface="org.wso2.carbon.analytics.hive.web.HiveScriptStoreService"
  * cardinality="1..1" policy="dynamic" bind="setHiveScriptStoreService" unbind="unsetHiveScriptStoreService"
+ * @scr.reference name="bam.data.bridge.core" interface="org.wso2.carbon.databridge.core.DataBridgeReceiverService"
+ * cardinality="1..1" policy="dynamic" bind="setDataBridgeReceiverService"  unbind="unsetDataBridgeReceiverService
  * */
 public class CassandraArchivalComponent {
 
@@ -62,14 +62,6 @@ public class CassandraArchivalComponent {
         CassandraArchiveUtil.setDataAccessService(null);
     }
 
-    protected  void setCassandraConnectorService(CassandraConnector cassandraConnector){
-        CassandraArchiveUtil.setCassandraConnectorService(cassandraConnector);
-    }
-
-    protected void unsetCassandraConnectorService(CassandraConnector cassandraConnector){
-        CassandraArchiveUtil.setCassandraConnectorService(null);
-    }
-
     protected void setHiveExecutorService(HiveExecutorService hiveExecutorService){
         CassandraArchiveUtil.setHiveExecutorService(hiveExecutorService);
     }
@@ -84,5 +76,13 @@ public class CassandraArchivalComponent {
 
     protected void unsetHiveScriptStoreService(HiveScriptStoreService scriptStoreService){
         CassandraArchiveUtil.setHiveScriptStoreService(null);
+    }
+
+    protected void setDataBridgeReceiverService(DataBridgeReceiverService dataBridgeReceiverService) {
+        CassandraArchiveUtil.setDataBridgeReceiverService(dataBridgeReceiverService);
+    }
+
+    protected void unsetDataBridgeReceiverService(DataBridgeReceiverService dataBridgeReceiverService) {
+        CassandraArchiveUtil.setDataBridgeReceiverService(null);
     }
 }

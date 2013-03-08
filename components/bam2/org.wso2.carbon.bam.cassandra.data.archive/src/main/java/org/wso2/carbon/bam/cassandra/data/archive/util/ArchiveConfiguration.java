@@ -26,7 +26,52 @@ public class ArchiveConfiguration {
     private Date startDate;
     private Date endDate;
     private int noOfDays;
+    private String cronExpression;
+    private String userName;
+    private String password;
+    private boolean isSchedulingOn;
+    private String connectionURL;
 
+
+    public String getConnectionURL() {
+        return connectionURL;
+    }
+
+    public void setConnectionURL(String connectionURL) {
+        this.connectionURL = connectionURL;
+    }
+
+    public boolean isSchedulingOn() {
+        return isSchedulingOn;
+    }
+
+    public void setSchedulingOn(boolean schedulingOn) {
+        isSchedulingOn = schedulingOn;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getCronExpression() {
+        return cronExpression;
+    }
+
+    public void setCronExpression(String cronExpression) {
+        this.cronExpression = cronExpression;
+    }
 
     public Date getEndDate() {
         return endDate;

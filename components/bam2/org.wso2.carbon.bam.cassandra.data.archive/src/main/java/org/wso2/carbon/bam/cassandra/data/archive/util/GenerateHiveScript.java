@@ -22,6 +22,7 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.Cluster;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.bam.cassandra.data.archive.udf.GetPastDate;
 import org.wso2.carbon.databridge.commons.Attribute;
 import org.wso2.carbon.databridge.commons.AttributeType;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
@@ -36,7 +37,7 @@ import java.util.List;
 public class GenerateHiveScript {
     private static final Log log = LogFactory.getLog(GenerateHiveScript.class);
 
-    private String cassandraHostIp;
+    private String cassandraHostIp="";
     private int cassandraPortValue;
 
     private static final String createTableIfNotExist = "CREATE EXTERNAL TABLE IF NOT EXISTS ";
@@ -59,34 +60,37 @@ public class GenerateHiveScript {
 
     private static final String basicColumnMapping = ":key,Name,Version,Timestamp,Nick_Name,Description";
 
+    private String username;
+    private String password;
 
-    public GenerateHiveScript(Cluster cluster) {
+
+    public GenerateHiveScript(Cluster cluster, ArchiveConfiguration archiveConfiguration) {
         Iterator iterator = cluster.getConnectionManager().getHosts().iterator();
-        //Currently only take one cassandra host value. Need to check whether we can provide all ip addresses for cassandra cluster
-        while (iterator.hasNext()) {
-            CassandraHost cassandraHost = (CassandraHost) iterator.next();
-            cassandraHostIp = cassandraHost.getIp();
-            cassandraPortValue = cassandraHost.getPort();
+
+        String connectionURL = archiveConfiguration.getConnectionURL();
+        if (connectionURL != null) {
+            String[] connectionArray = connectionURL.split(",");
+            for (int i = 1; i <= connectionArray.length; i++) {
+                String[] ips = connectionArray[i-1].split(":");
+                if (i < connectionArray.length) {
+                    cassandraHostIp = cassandraHostIp + ips[0] + ",";
+                } else {
+                    cassandraHostIp = cassandraHostIp + ips[0];
+                }
+                cassandraPortValue = Integer.parseInt(ips[1]);
+            }
+        } else {
+            while (iterator.hasNext()) {
+                CassandraHost cassandraHost = (CassandraHost) iterator.next();
+                cassandraHostIp = cassandraHost.getIp();
+                cassandraPortValue = cassandraHost.getPort();
+            }
         }
+        username = archiveConfiguration.getUserName();
+        password = archiveConfiguration.getPassword();
     }
 
-    /**
-     * CREATE EXTERNAL TABLE IF NOT EXISTS org_wso2_bam_phone_retail_store_kpi
-     * (rowKey STRING, Name STRING, Version STRING,p_Timestamp BIGINT, Nick_Name STRING, Description STRING,
-     * meta_clientType STRING,payload_brand STRING,payload_quantity INT,payload_total INT,payload_user STRING ) STORED BY
-     * 'org.apache.hadoop.hive.cassandra.CassandraStorageHandler'
-     * WITH SERDEPROPERTIES (
-     * "cassandra.host" = "127.0.0.1" ,
-     * "cassandra.port" = "9160" ,
-     * "cassandra.ks.name" = "EVENT_KS" ,
-     * "cassandra.ks.username" = "admin" ,
-     * "cassandra.ks.password" = "admin" ,
-     * "cassandra.cf.name" = "org_wso2_bam_phone_retail_store_kpi",
-     * "cassandra.columns.mapping" =
-     * ":key,Name,Version,Timestamp,Nick_Name,Description,meta_clientType,payload_brand,payload_quantity,payload_total,payload_user");
-     * <p/>
-     * insert overwrite table org_wso2_bam_phone_retail_store_kpi_arch select * from org_wso2_bam_phone_retail_store_kpi;
-     */
+
 
     public String generateMappingForReadingCassandraOriginalCF(StreamDefinition streamDefinition) {
         String tableName = removeUnnecessaryCharsFromTableName(streamDefinition.getName());
@@ -95,6 +99,8 @@ public class GenerateHiveScript {
         String hiveQuery = "drop table " + tableName + ";\n";
         hiveQuery = hiveQuery + generateHiveCassandraMapping(streamDefinition, tableName, cfName) +"\n";
         hiveQuery = hiveQuery + setHiveConf(CassandraArchiveUtil.CASSANDRA_ORIGINAL_CF,cfName);
+        hiveQuery = hiveQuery + setHiveConf(CassandraArchiveUtil.CASSANDRA_USERNAME,username);
+        hiveQuery = hiveQuery + setHiveConf(CassandraArchiveUtil.CASSANDRA_PASSWORD,password);
         return hiveQuery;
     }
 
@@ -106,10 +112,21 @@ public class GenerateHiveScript {
         return hiveQuery;
     }
 
-    public String hiveQueryForWritingDataToArchivalCF(StreamDefinition streamDefinition) {
+    public String hiveQueryForWritingDataToArchivalCF(StreamDefinition streamDefinition, ArchiveConfiguration archiveConfiguration) {
         String originalTableName = removeUnnecessaryCharsFromTableName(streamDefinition.getName());
         String archivalTableName = originalTableName + "_arch";
-        String hiveQuery = "insert overwrite table " + archivalTableName + " select * from " + originalTableName + ";";
+        int noOfDays = archiveConfiguration.getNoOfDays();
+        String hiveQuery = "insert overwrite table " + archivalTableName + " select * from " + originalTableName;
+        if(!archiveConfiguration.isSchedulingOn()){
+            long startDateTimestamp = archiveConfiguration.getStartDate().getTime();
+            long endDateTimestamp = archiveConfiguration.getEndDate().getTime();
+              hiveQuery = hiveQuery + " where Data_Timestamp > " + startDateTimestamp + " AND Data_Timestamp < " +
+                      endDateTimestamp;
+        }
+        else {
+            hiveQuery = hiveQuery + " where Data_Timestamp < get_past_date('" + noOfDays +"')";
+        }
+        hiveQuery = hiveQuery + " AND Version='" + streamDefinition.getVersion() + "';";
         return hiveQuery;
     }
 
@@ -141,8 +158,8 @@ public class GenerateHiveScript {
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraHost, cassandraHostIp);
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraPort, Integer.toString(cassandraPortValue));
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKs, CassandraConnector.BAM_EVENT_DATA_KEYSPACE);
-        hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKsUsername, "admin");
-        hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKsPassword, "admin");
+        hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKsUsername, username);
+        hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKsPassword, password);
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraCFName, cfName);
         hiveQuery = hiveQuery + cassandraColumnMapping + "=\"" + ":key,Name" + "\"";
         hiveQuery = hiveQuery + ");";
@@ -153,11 +170,22 @@ public class GenerateHiveScript {
         return hiveQuery;
     }
 
-    public String hiveQueryForWritingDataToTmpCF(StreamDefinition streamDefinition) {
+    public String hiveQueryForWritingDataToTmpCF(StreamDefinition streamDefinition, ArchiveConfiguration archiveConfiguration) {
         String originalTableName = removeUnnecessaryCharsFromTableName(streamDefinition.getName());
         String streamNameAndVersion = streamDefinition.getName() + streamDefinition.getVersion();
         String tmpTableName = removeUnnecessaryCharsFromTableName(streamNameAndVersion);
-        String hiveQuery = "insert overwrite table " + tmpTableName + " select rowKey,Name from " + originalTableName + ";";
+        int noOfDays = archiveConfiguration.getNoOfDays();
+        String hiveQuery = "insert overwrite table " + tmpTableName + " select rowKey,Name from " + originalTableName;
+        if(!archiveConfiguration.isSchedulingOn()){
+            long startDateTimestamp = archiveConfiguration.getStartDate().getTime();
+            long endDateTimestamp = archiveConfiguration.getEndDate().getTime();
+            hiveQuery = hiveQuery + " where Data_Timestamp > " + startDateTimestamp + " AND Data_Timestamp < " +
+                    endDateTimestamp;
+        }
+        else {
+            hiveQuery = hiveQuery + " where Data_Timestamp < get_past_date('" + noOfDays +"')";
+        }
+        hiveQuery = hiveQuery + " AND Version='" + streamDefinition.getVersion() + "';";
         return hiveQuery;
     }
 
@@ -184,8 +212,8 @@ public class GenerateHiveScript {
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraHost, cassandraHostIp);
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraPort, Integer.toString(cassandraPortValue));
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKs, CassandraConnector.BAM_EVENT_DATA_KEYSPACE);
-        hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKsUsername, "admin");
-        hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKsPassword, "admin");
+        hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKsUsername, username);
+        hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraKsPassword, password);
         hiveQuery = hiveQuery + addCassandraDetailsAsKeyValue(cassandraCFName, cfName);
 
         String columnMappingValue = basicColumnMapping + columnMappingForAttributes(streamMetaList, DataType.meta) +
@@ -264,4 +292,10 @@ public class GenerateHiveScript {
         }
         return streamName;
     }
+
+    public String createUDF() {
+        String hiveQuery = "create temporary function get_past_date as '" + GetPastDate.class.getName() +"';\n";
+        return hiveQuery;
+    }
+
 }

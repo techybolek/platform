@@ -86,6 +86,11 @@
             <artifactId>hadoop-core</artifactId>
             <version>0.20.203.1.wso2v2</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.hive.wso2</groupId>
+            <artifactId>hive</artifactId>
+            <version>0.8.1.wso2v6</version>
+        </dependency>
     </dependencies>
 
 </project>

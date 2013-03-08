@@ -20,7 +20,7 @@ import me.prettyprint.hector.api.Cluster;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
 import org.wso2.carbon.analytics.hive.web.HiveScriptStoreService;
 import org.wso2.carbon.cassandra.dataaccess.DataAccessService;
-import org.wso2.carbon.databridge.persistence.cassandra.datastore.CassandraConnector;
+import org.wso2.carbon.databridge.core.DataBridgeReceiverService;
 
 
 public class CassandraArchiveUtil {
@@ -28,13 +28,16 @@ public class CassandraArchiveUtil {
     public static final String COLUMN_FAMILY_NAME = "column_family_name";
     public static final String CASSANDRA_PORT = "cassandra_port";
     public static final String CASSANDRA_HOST_IP = "cassandra_host_ip";
+    public static final String CASSANDRA_USERNAME = "cassandra_username";
+    public static final String CASSANDRA_PASSWORD = "cassandra_password";
 
     private static DataAccessService dataAccessService;
-    private static CassandraConnector cassandraConnector;
     private static HiveExecutorService hiveExecutor;
     private static HiveScriptStoreService hiveScriptStoreService;
+    private static DataBridgeReceiverService dataBridgeService;
     private static Cluster cassandraCluster;
     public static final String CASSANDRA_ORIGINAL_CF = "cassandra_original_column_family";
+    public static final String DEFAULT_CASSANDRA_CLUSTER = "Test Cluster";
 
 
     public static void setDataAccessService(DataAccessService dataAccessSrv) {
@@ -43,14 +46,6 @@ public class CassandraArchiveUtil {
 
     public static DataAccessService getDataAccessService() {
         return dataAccessService;
-    }
-
-    public static void setCassandraConnectorService(CassandraConnector cassandraConnectorService) {
-        cassandraConnector = cassandraConnectorService;
-    }
-
-    public static CassandraConnector getCassandraConnectorService() {
-        return cassandraConnector;
     }
 
     public static void setHiveExecutorService(HiveExecutorService hiveExecutorService) {
@@ -75,5 +70,14 @@ public class CassandraArchiveUtil {
 
     public static Cluster getCassandraCluster() {
         return cassandraCluster;
+    }
+
+    public static void setDataBridgeReceiverService(
+            DataBridgeReceiverService dataBridgeReceiverService) {
+        dataBridgeService = dataBridgeReceiverService;
+    }
+
+    public static DataBridgeReceiverService getDataBridgeReceiverService (){
+        return dataBridgeService;
     }
 }
