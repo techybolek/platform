@@ -126,8 +126,8 @@ public class CarbonCassandraAuthenticator implements IAuthenticator {
         if(cacheEntry != null){
            value = ((StringCacheEntry)cacheEntry).getStringValue();
         }else {
-            log.info("The key is not present in the cache...");
             if (log.isDebugEnabled()) {
+            	log.debug("The key is not present in the cache...");
                 log.debug("Credentials for Username : " + username + " retrieved from cache");
             }
         }
