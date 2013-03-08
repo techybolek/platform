@@ -21,6 +21,7 @@ package org.wso2.carbon.bam.jmx.agent.tasks;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.bam.data.publisher.util.PublisherUtil;
 import org.wso2.carbon.bam.jmx.agent.JmxAgent;
 import org.wso2.carbon.bam.jmx.agent.exceptions.ProfileDoesNotExistException;
 import org.wso2.carbon.bam.jmx.agent.profiles.Profile;
@@ -265,8 +266,8 @@ public class JmxTask extends AbstractTask {
                 //if this is a composite data type
                 if (attribute[k].length == 3) {
                     if (log.isDebugEnabled()) {
-                        System.out.print(attribute[0][0] + "__" +
-                                         attribute[k][0] + "__" + attribute[k][1] + "  == ");
+                        log.debug(attribute[0][0] + "__" +
+                                attribute[k][0] + "__" + attribute[k][1] + "  == ");
 
                     }
                     //Get the composite object
@@ -276,7 +277,7 @@ public class JmxTask extends AbstractTask {
                 } else {
                     if (log.isDebugEnabled()) {
 
-                        System.out.print(attribute[0][0] + "__" + attribute[k][0] + "  == ");
+                        log.debug(attribute[0][0] + "__" + attribute[k][0] + "  == ");
                     }
                     //Get the attribute
                     attrValue = jmxAgent.getAttribute(attribute[0][0], attribute[k][0]);
@@ -284,7 +285,7 @@ public class JmxTask extends AbstractTask {
 
                 if (log.isDebugEnabled()) {
 
-                    System.out.println(attrValue);
+                    log.debug(attrValue);
                 }
 
                 //TODO-just a temporary fix. Fix this properly!
@@ -306,7 +307,7 @@ public class JmxTask extends AbstractTask {
             }
         }
         Event jmxEvent = new Event(streamId, System.currentTimeMillis(),
-                                   new Object[]{"externalEvent"}, null,
+                                   new Object[]{"externalEvent", PublisherUtil.getHostAddress()}, null,
                                    arrayList.toArray());
         dataPublisher.publish(jmxEvent);
         if (log.isDebugEnabled()) {
@@ -330,7 +331,8 @@ public class JmxTask extends AbstractTask {
                 append("  'nickName': 'JMX Dump',").
                 append("  'description': 'JMX monitoring data',").
                 append("  'metaData':[").
-                append("          {'name':'clientType','type':'STRING'}").
+                append("          {'name':'clientType','type':'STRING'},").
+                append("          {'name':'host','type':'STRING'}").
                 append("  ],").
                 append("  'payloadData':[");
 

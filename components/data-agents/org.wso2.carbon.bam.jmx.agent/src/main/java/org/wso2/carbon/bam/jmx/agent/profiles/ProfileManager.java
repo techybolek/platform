@@ -379,43 +379,41 @@ public class ProfileManager extends RegistryAbstractAdmin {
      * @return an array of all the profiles regardless of their state
      */
     public Profile[] getAllProfiles() {
-        Profile[] profiles;
+        Profile[] profiles = null;
 
         //iterate through the profiles
         try {
-            Resource folder = registry.get(REG_LOCATION);
-            String[] content = (String[]) folder.getContent();
+            if (registry.resourceExists(REG_LOCATION)) {
+                Resource folder = registry.get(REG_LOCATION);
+                String[] content = (String[]) folder.getContent();
 
-            //initiate the profiles array
-            profiles = new Profile[content.length];
+                //initiate the profiles array
+                profiles = new Profile[content.length];
 
 
-            int counter = 0;
+                int counter = 0;
 
-            for (String path : content) {
-                Resource res = registry.get(path);
-                String xmlProfile = new String((byte[]) res.getContent());
-                //set the class loader
-                //to escape from a XStream bug
-                xstream.setClassLoader(Profile.class.getClassLoader());
+                for (String path : content) {
+                    Resource res = registry.get(path);
+                    String xmlProfile = new String((byte[]) res.getContent());
+                    //set the class loader
+                    //to escape from a XStream bug
+                    xstream.setClassLoader(Profile.class.getClassLoader());
 
-                Profile profile = (Profile) xstream.fromXML(xmlProfile);
+                    Profile profile = (Profile) xstream.fromXML(xmlProfile);
 
-                //decrypt data
-                //TODO: What is the best approach to handle this exception?
-                profile = decryptData(profile);
-                profiles[counter++] = profile;
+                    //decrypt data
+                    //TODO: What is the best approach to handle this exception?
+                    profile = decryptData(profile);
+                    profiles[counter++] = profile;
 
+                }
             }
 
             return profiles;
         } catch (ResourceNotFoundException e) {
             //handle the case when no profiles are in the registry
-
-            System.out.println();
-            log.error("Resource does not exist");
-            System.out.println();
-
+            log.error("Resource does not exist", e);
             return null;
         } catch (RegistryException e) {
             //handle the case when no profiles are in the registry
@@ -462,7 +460,7 @@ public class ProfileManager extends RegistryAbstractAdmin {
         tbProfile.setPass("admin");
 
         //set the attributes to be monitored
-        String[][][] attributes = new String[2][][];
+        String[][][] attributes = new String[7][][];
 
         //add the attributes of the first mbean
 
@@ -540,6 +538,191 @@ public class ProfileManager extends RegistryAbstractAdmin {
         attributes[1][1][1] = "processCpuTime";
 
 
+        /*
+            PS Eden space
+        */
+        attributes[2] = new String[5][3];
+
+        //Mbean name
+        attributes[2][0][0] = "java.lang:name=PS Eden Space,type=MemoryPool";
+
+        //Usage - used
+        //set attribute
+        attributes[2][1][0] = "Usage";
+        attributes[2][1][1] = "used";
+        // set alias
+        attributes[2][1][2] = "ps_eden_space_used";
+
+        //Usage - committed
+        //set attribute
+        attributes[2][2][0] = "Usage";
+        attributes[2][2][1] = "committed";
+        // set alias
+        attributes[2][2][2] = "ps_eden_space_committed";
+
+        //Usage - init
+        //set attribute
+        attributes[2][3][0] = "Usage";
+        attributes[2][3][1] = "init";
+        // set alias
+        attributes[2][3][2] = "ps_eden_space_init";
+
+        //Usage - max
+        //set attribute
+        attributes[2][4][0] = "Usage";
+        attributes[2][4][1] = "max";
+        // set alias
+        attributes[2][4][2] = "ps_eden_space_max";
+
+
+        /*
+            PS Old Gen
+        */
+        attributes[3] = new String[5][3];
+
+        //Mbean name
+        attributes[3][0][0] = "java.lang:name=PS Old Gen,type=MemoryPool";
+
+        //Usage - used
+        //set attribute
+        attributes[3][1][0] = "Usage";
+        attributes[3][1][1] = "used";
+        // set alias
+        attributes[3][1][2] = "ps_old_gen_used";
+
+        //Usage - committed
+        //set attribute
+        attributes[3][2][0] = "Usage";
+        attributes[3][2][1] = "committed";
+        // set alias
+        attributes[3][2][2] = "ps_old_gen_committed";
+
+        //Usage - init
+        //set attribute
+        attributes[3][3][0] = "Usage";
+        attributes[3][3][1] = "init";
+        // set alias
+        attributes[3][3][2] = "ps_old_gen_init";
+
+        //Usage - max
+        //set attribute
+        attributes[3][4][0] = "Usage";
+        attributes[3][4][1] = "max";
+        // set alias
+        attributes[3][4][2] = "ps_old_gen_max";
+
+
+        /*
+            PS Survivor Space
+        */
+        attributes[4] = new String[5][3];
+
+        //Mbean name
+        attributes[4][0][0] = "java.lang:name=PS Survivor Space,type=MemoryPool";
+
+        //Usage - used
+        //set attribute
+        attributes[4][1][0] = "Usage";
+        attributes[4][1][1] = "used";
+        // set alias
+        attributes[4][1][2] = "ps_survivor_space_used";
+
+        //Usage - committed
+        //set attribute
+        attributes[4][2][0] = "Usage";
+        attributes[4][2][1] = "committed";
+        // set alias
+        attributes[4][2][2] = "ps_survivor_space_committed";
+
+        //Usage - init
+        //set attribute
+        attributes[4][3][0] = "Usage";
+        attributes[4][3][1] = "init";
+        // set alias
+        attributes[4][3][2] = "ps_survivor_space_init";
+
+        //Usage - max
+        //set attribute
+        attributes[4][4][0] = "Usage";
+        attributes[4][4][1] = "max";
+        // set alias
+        attributes[4][4][2] = "ps_survivor_space_max";
+
+
+
+        /*
+            PS Perm Gen
+        */
+        attributes[5] = new String[5][3];
+
+        //Mbean name
+        attributes[5][0][0] = "java.lang:name=PS Perm Gen,type=MemoryPool";
+
+        //Usage - used
+        //set attribute
+        attributes[5][1][0] = "Usage";
+        attributes[5][1][1] = "used";
+        // set alias
+        attributes[5][1][2] = "ps_perm_gen_used";
+
+        //Usage - committed
+        //set attribute
+        attributes[5][2][0] = "Usage";
+        attributes[5][2][1] = "committed";
+        // set alias
+        attributes[5][2][2] = "ps_perm_gen_committed";
+
+        //Usage - init
+        //set attribute
+        attributes[5][3][0] = "Usage";
+        attributes[5][3][1] = "init";
+        // set alias
+        attributes[5][3][2] = "ps_perm_gen_init";
+
+        //Usage - max
+        //set attribute
+        attributes[5][4][0] = "Usage";
+        attributes[5][4][1] = "max";
+        // set alias
+        attributes[5][4][2] = "ps_perm_gen_max";
+
+        /*
+            Code Cache
+        */
+        attributes[6] = new String[5][3];
+
+        //Mbean name
+        attributes[6][0][0] = "java.lang:name=Code Cache,type=MemoryPool";
+
+        //Usage - used
+        //set attribute
+        attributes[6][1][0] = "Usage";
+        attributes[6][1][1] = "used";
+        // set alias
+        attributes[6][1][2] = "ps_code_cache_used";
+
+        //Usage - committed
+        //set attribute
+        attributes[6][2][0] = "Usage";
+        attributes[6][2][1] = "committed";
+        // set alias
+        attributes[6][2][2] = "ps_code_cache_committed";
+
+        //Usage - init
+        //set attribute
+        attributes[6][3][0] = "Usage";
+        attributes[6][3][1] = "init";
+        // set alias
+        attributes[6][3][2] = "ps_code_cache_init";
+
+        //Usage - max
+        //set attribute
+        attributes[6][4][0] = "Usage";
+        attributes[6][4][1] = "max";
+        // set alias
+        attributes[6][4][2] = "ps_code_cache_max";
+
+
         tbProfile.setAttributes(attributes);
 
 
@@ -553,5 +736,4 @@ public class ProfileManager extends RegistryAbstractAdmin {
         return tbProfile;
 
     }
-
 }
