@@ -37,5 +37,4 @@ public class CassandraDataArchiveAdminClient {
     public void archiveCassandraData(ArchiveConfiguration archiveConfig) throws RemoteException, CassandraArchivalServiceException {
         stub.archiveCassandraData(archiveConfig);
     }
-
 }
