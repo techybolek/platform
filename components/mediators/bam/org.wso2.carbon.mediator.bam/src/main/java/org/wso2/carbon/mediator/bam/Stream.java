@@ -97,27 +97,17 @@ public class Stream {
 
     private void createDataPublisher() throws BamMediatorException {
         if(this.isCloudDeployment()){ // In Stratos environment
-            asyncDataPublisher = new AsyncDataPublisher(this.getServerConfigBAMServerURL(),
+            this.createLoadBalancingDataPublisher(this.getServerConfigBAMServerURL(),
+                                                  this.bamServerConfig.getUsername(),
+                                                  this.bamServerConfig.getPassword());
+            /*asyncDataPublisher = new AsyncDataPublisher(this.getServerConfigBAMServerURL(),
                                                         this.bamServerConfig.getUsername(),
-                                                        this.bamServerConfig.getPassword());
+                                                        this.bamServerConfig.getPassword());*/
         } else { // In normal Carbon environment
             if(this.bamServerConfig.isLoadbalanced()){
-                ArrayList<ReceiverGroup> allReceiverGroups = new ArrayList<ReceiverGroup>();
-                ArrayList<String> receiverGroupUrls = DataPublisherUtil.getReceiverGroups(this.bamServerConfig.getUrlSet());
-
-                for (String aReceiverGroupURL : receiverGroupUrls) {
-                    ArrayList<DataPublisherHolder> dataPublisherHolders = new ArrayList<DataPublisherHolder>();
-                    String[] urls = aReceiverGroupURL.split(",");
-                    for (String aUrl : urls) {
-                        DataPublisherHolder aNode = new DataPublisherHolder(null, aUrl.trim(), this.bamServerConfig.getUsername(),
-                                                                            this.bamServerConfig.getPassword());
-                        dataPublisherHolders.add(aNode);
-                    }
-                    ReceiverGroup group = new ReceiverGroup(dataPublisherHolders);
-                    allReceiverGroups.add(group);
-                }
-                this.loadBalancingDataPublisher = new LoadBalancingDataPublisher(allReceiverGroups);
-
+                this.createLoadBalancingDataPublisher(this.bamServerConfig.getUrlSet(),
+                                                      this.bamServerConfig.getUsername(),
+                                                      this.bamServerConfig.getPassword());
             } else {
                 if(this.bamServerConfig.isSecure()){
                     asyncDataPublisher = new AsyncDataPublisher("ssl://" + this.bamServerConfig.getIp() + ":" + this.bamServerConfig.getAuthenticationPort(),
@@ -132,6 +122,23 @@ public class Stream {
         }
 
         log.info("Data Publisher Created.");
+    }
+    
+    private void createLoadBalancingDataPublisher(String urlSet, String username, String password) throws BamMediatorException {
+        ArrayList<ReceiverGroup> allReceiverGroups = new ArrayList<ReceiverGroup>();
+        ArrayList<String> receiverGroupUrls = DataPublisherUtil.getReceiverGroups(urlSet);
+
+        for (String aReceiverGroupURL : receiverGroupUrls) {
+            ArrayList<DataPublisherHolder> dataPublisherHolders = new ArrayList<DataPublisherHolder>();
+            String[] urls = aReceiverGroupURL.split(",");
+            for (String aUrl : urls) {
+                DataPublisherHolder aNode = new DataPublisherHolder(null, aUrl.trim(), username, password);
+                dataPublisherHolders.add(aNode);
+            }
+            ReceiverGroup group = new ReceiverGroup(dataPublisherHolders);
+            allReceiverGroups.add(group);
+        }
+        this.loadBalancingDataPublisher = new LoadBalancingDataPublisher(allReceiverGroups);
     }
 
     private String getServerConfigBAMServerURL(){
