@@ -34,6 +34,7 @@
     <modules>
         <module>mediation</module>
         <module>service</module>
+	<module>jmx</module>
     </modules>
 
     <dependencyManagement>
