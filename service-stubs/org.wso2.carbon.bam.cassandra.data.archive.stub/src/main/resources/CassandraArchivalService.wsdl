@@ -30,8 +30,11 @@
                     <xs:element minOccurs="0" name="cronExpression" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="endDate" nillable="true" type="xs:date"/>
                     <xs:element minOccurs="0" name="noOfDays" type="xs:int"/>
+                    <xs:element minOccurs="0" name="password" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="schedulingOn" type="xs:boolean"/>
                     <xs:element minOccurs="0" name="startDate" nillable="true" type="xs:date"/>
                     <xs:element minOccurs="0" name="streamName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="userName" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
