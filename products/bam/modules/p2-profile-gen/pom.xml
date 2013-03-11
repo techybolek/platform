@@ -297,14 +297,17 @@
                                 </featureArtifactDef>
                                 <!--ADDED END-->
 
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.throttle.server.feature:${carbon.version}
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.throttle.server.feature:${carbon.version}
                                 </featureArtifactDef>
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.caching.server.feature:${carbon.version}
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.caching.server.feature:${carbon.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.rm.server.feature:${carbon.version}
                                 </featureArtifactDef>
                                 <!-- stratos features -->
-                                <featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.common.feature:${stratos.version}
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.stratos.common.feature:${stratos.version}
                                 </featureArtifactDef>
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.captcha.mgt.server.feature:${carbon.version}
@@ -312,6 +315,11 @@
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.load.balance.agent.server.feature:${stratos.version}
                                 </featureArtifactDef>
+
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.servicehosting.server.feature:${carbon.version}
+                                </featureArtifactDef>
+
                             </featureArtifacts>
                         </configuration>
                     </execution>
@@ -339,6 +347,10 @@
                                 </feature>
 
                                 <!-- Gadget Gen -->
+                                <feature>
+                                    <id>org.wso2.carbon.servicehosting.server.feature.group</id>
+                                    <version>${carbon.version}</version>
+                                </feature>
 
                                 <feature>
                                     <id>org.wso2.carbon.gadgetgenwizard.feature.group</id>

@@ -274,7 +274,7 @@
             </includes>
             <fileMode>755</fileMode>
         </fileSet>
-	
+
       <fileSet>
 	<directory>lib/home</directory>
 	<outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/webapps/STRATOS_ROOT</outputDirectory>
@@ -284,7 +284,7 @@
          <fileMode>755</fileMode>
       </fileSet>
     </fileSets>
-   
+
 
     <dependencySets>
 	<dependencySet>
@@ -293,6 +293,42 @@
 			<include>org.apache.rampart:rampart:mar</include>
 		</includes>
 	</dependencySet>
+     <dependencySet>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/lib</outputDirectory>
+            <includes>
+                <include>bouncycastle:bcprov-jdk15:jar</include>
+                <include>org.hibernate.wso2:hibernate:jar</include>
+            </includes>
+      </dependencySet>
+      <dependencySet>
+            <outputDirectory>${pom.artifactId}-${pom.version}/lib/runtimes/cxf
+            </outputDirectory>
+            <includes>
+               <include>org.apache.cxf:cxf-bundle:jar</include>
+                <include>net.sf.ehcache:ehcache-core:jar</include>
+                <include>org.apache.httpcomponents:httpasyncclient:jar</include>
+                <include>org.apache.httpcomponents:httpclient:jar</include>
+                <include>org.apache.httpcomponents:httpcore:jar</include>
+                <include>org.apache.httpcomponents:httpcore-nio:jar</include>
+                <include>javax.ws.rs:javax.ws.rs-api:jar</include>
+                <include>com.sun.xml.bind:jaxb-impl:jar</include>
+                <include>com.sun.xml.bind:jaxb-xjc:jar</include>
+                <include>org.apache.neethi:neethi:jar</include>
+                <include>org.apache.ws.security:wss4j:jar</include>
+                <include>xml-resolver:xml-resolver:jar</include>
+                <include>org.apache.ws.xmlschema:xmlschema-core:jar</include>
+                <include>wsdl4j:wsdl4j:jar</include>
+                <include>commons-logging:commons-logging:jar</include>
+                <include>org.apache.santuario:xmlsec:jar</include>
+                <include>org.springframework:spring-aop:jar</include>
+                <include>org.springframework:spring-asm:jar</include>
+                <include>org.springframework:spring-beans:jar</include>
+                <include>org.springframework:spring-context:jar</include>
+                <include>org.springframework:spring-core:jar</include>
+                <include>org.springframework:spring-expression:jar</include>
+                <include>org.springframework:spring-web:jar</include>
+            </includes>
+        </dependencySet>
 	</dependencySets>
 
     <files>
@@ -314,6 +350,25 @@
         <file>
             <source>../../README.txt</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/</outputDirectory>
+            <filtered>true</filtered>
+            <fileMode>644</fileMode>
+        </file>
+
+         <file>
+            <source>bam-resources/conf/tomcat/webapp-classloading.xml</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/tomcat</outputDirectory>
+            <filtered>true</filtered>
+            <fileMode>644</fileMode>
+        </file>
+        <file>
+            <source>bam-resources/conf/tomcat/webapp-classloading-environments.xml</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/tomcat</outputDirectory>
+            <filtered>true</filtered>
+            <fileMode>644</fileMode>
+        </file>
+        <file>
+            <source>bam-resources/conf/tomcat/context.xml</source>
+            <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/tomcat</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
