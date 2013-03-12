@@ -1,0 +1,5 @@
+<service domain="AS_SERVICE_DOMAIN" subDomain="AS_SERVICE_SUBDOMAIN" tenantRange="TENANT_RANGE">
+        <cartridge type="AS_CARTRIDGE_TYPE"/>
+        <host>AS_SERVICE_HOST</host>
+        <payload>AS_PAYLOAD_PATH</payload>
+</service>

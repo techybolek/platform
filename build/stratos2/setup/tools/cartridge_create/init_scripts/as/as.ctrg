@@ -1,0 +1,30 @@
+#!/bin/bash
+    mv ./wso2-cartridge-init.sh /opt/
+    mv ./get-launch-params.rb /opt/
+    mv ./*.tar.gz /opt/
+    mv ./*.zip /opt/
+    
+
+	apt-get update
+	# Next, all the packages.
+	
+	apt-get install -y nano zip unzip curl wget openssl ssl-cert ldap-utils git ruby
+
+    # Install java
+    tar -zxf /opt/jdk1.6.0_33.tar.gz -C/opt
+    # Install WSO2 Application Server
+    tar -zxf /opt/wso2as-5.0.1.tar.gz -C/opt
+
+    pushd /etc/init.d
+    echo "#!/bin/bash -e
+chmod 755 /opt/wso2-cartridge-init.sh
+/opt/wso2-cartridge-init.sh > /var/log/wso2-cartridge-init.log
+exit 0
+    " > ./s2.sh
+    chmod u+x ./s2.sh
+    cd ../rc2.d
+    ln -s /etc/init.d/s2.sh /etc/rc2.d/s2.sh
+    mv ./s2.sh ./S70s2.sh
+    popd
+
+
