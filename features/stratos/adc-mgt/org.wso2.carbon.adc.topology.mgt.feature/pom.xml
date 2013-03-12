@@ -56,7 +56,7 @@
                             <goal>p2-feature-gen</goal>
                         </goals>
                         <configuration>
-                            <id>org.wso2.carbon.adc.mgt</id>
+                            <id>org.wso2.carbon.adc.topology.mgt</id>
                             <propertiesFile>../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
