@@ -37,6 +37,11 @@
 				<module>org.wso2.carbon.rssmanager.stub</module>
 				<module>org.wso2.carbon.aarservices.stub</module>
 				<module>org.wso2.carbon.account.mgt.stub</module>
+                                <module>org.wso2.carbon.adc.instanceinfo.mgt.stub</module>
+                                <module>org.wso2.carbon.adc.mgt.stub</module>
+                                <module>org.wso2.carbon.adc.reponotification.service.stub</module>
+                                <module>org.wso2.carbon.adc.repositoryinformation.service.stub</module>
+                                <module>org.wso2.carbon.adc.topologymgt.service.stub</module>
 				<module>org.wso2.carbon.admin.mgt.stub</module>
 				<module>org.wso2.carbon.application.mgt.bpel.stub</module>
 				<module>org.wso2.carbon.application.mgt.humantask.stub</module>
@@ -56,6 +61,7 @@
 				<module>org.wso2.carbon.brokermanager.stub</module>
 				<module>org.wso2.carbon.business.messaging.salesforce.stub</module>
 				<module>org.wso2.carbon.caching.stub</module>
+                                <module>org.wso2.carbon.cartridge.agent.stub</module>
 				<module>org.wso2.carbon.cassandra.mgt.stub</module>
 				<module>org.wso2.carbon.cep.stub</module>
 				<module>org.wso2.carbon.claim.mgt.stub</module>
@@ -213,6 +219,7 @@
 				<module>org.wso2.carbon.hosting.wnagent.stub</module>
 				<module>org.wso2.carbon.hosting.wnregistration.stub</module>
 				<module>org.wso2.carbon.load.balance.autoscaler.service.stub</module>
+                                <module>org.wso2.carbon.load.balance.cartridge.autoscaler.service.stub</module>
 				<module>org.wso2.carbon.bam.gadgetgenwizard.stub</module>
                 		<module>org.wso2.carbon.cassandra.explorer.stub</module>
 				<module>org.wso2.carbon.bam.toolbox.deployer.stub</module>

@@ -71,7 +71,10 @@
 	<module>status-monitor</module>
 	<module>org.wso2.carbon.stratos.deployment</module>
 	<module>org.wso2.carbon.stratos.landing.page.deployer</module>
-        <module>sso-mgt</module>
+        <module>cartridge-agent</module>
+        <module>org.wso2.carbon.stratos.cloud.controller</module>
+        <module>artifact-deployment-coordinator</module>
+        <module>org.wso2.carbon.cartridge.mgt.ui</module>
     </modules>
 
     <repositories>
