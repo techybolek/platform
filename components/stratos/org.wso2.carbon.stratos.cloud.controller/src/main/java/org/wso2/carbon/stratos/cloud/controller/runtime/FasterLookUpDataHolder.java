@@ -35,7 +35,7 @@ import org.wso2.carbon.stratos.cloud.controller.util.IaasProvider;
 import org.wso2.carbon.stratos.cloud.controller.util.ServiceContext;
 
 /**
- * This object holds all runtime data. This is a Singleton class.
+ * This object holds all runtime data and provides faster access. This is a Singleton class.
  */
 public class FasterLookUpDataHolder implements Serializable{
 

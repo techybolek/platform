@@ -9,7 +9,7 @@ import org.wso2.carbon.stratos.cloud.controller.exception.CloudControllerExcepti
 import org.wso2.carbon.stratos.cloud.controller.persist.Serializer;
 import org.wso2.carbon.stratos.cloud.controller.runtime.FasterLookUpDataHolder;
 import org.wso2.carbon.stratos.cloud.controller.util.CloudControllerConstants;
-import org.wso2.carbon.stratos.cloud.controller.util.CloudControllerServiceReferenceHolder;
+import org.wso2.carbon.stratos.cloud.controller.util.DeclarativeServiceReferenceHolder;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 
 /**
@@ -22,7 +22,7 @@ public class RegistryManager {
 	
 	public static RegistryManager getInstance() {
 
-		registryService = CloudControllerServiceReferenceHolder.getInstance().getRegistry();
+		registryService = DeclarativeServiceReferenceHolder.getInstance().getRegistry();
 				
 		if (registryManager == null) {
 			synchronized(RegistryManager.class){

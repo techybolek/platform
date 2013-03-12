@@ -104,6 +104,11 @@
             <artifactId>aws-common</artifactId>
               <version>${jclouds.version}</version>
          </dependency>
+        <dependency>
+            <groupId>org.jclouds.api</groupId>
+            <artifactId>vcloud</artifactId>
+            <version>${jclouds.version}</version>
+        </dependency>
          <dependency>
            <groupId>com.google.code.gson</groupId>
            <artifactId>gson</artifactId>
@@ -205,6 +210,7 @@
                                 <bundleDef>org.jclouds:jclouds-compute:${jclouds.version}</bundleDef>
                                 <bundleDef>org.jclouds.api:ec2:${jclouds.version}</bundleDef>
                                 <bundleDef>org.jclouds.api:openstack-nova:${jclouds.version}</bundleDef>
+                                <bundleDef>org.jclouds.api:vcloud:${jclouds.version}</bundleDef>
                                 <bundleDef>org.jclouds.common:openstack-common:${jclouds.version}</bundleDef>
                                 <bundleDef>org.jclouds.api:openstack-keystone:${jclouds.version}</bundleDef>
                                 <bundleDef>org.jclouds.provider:aws-ec2:${jclouds.version}</bundleDef>

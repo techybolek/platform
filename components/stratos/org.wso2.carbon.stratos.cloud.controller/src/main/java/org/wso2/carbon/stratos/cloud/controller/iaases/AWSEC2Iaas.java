@@ -94,6 +94,10 @@ public class AWSEC2Iaas extends Iaas{
         template.getOptions().as(TemplateOptions.class).inboundPorts(new int[]{});
 
         // set EC2 specific options
+		if (iaas.getProperty("subnetId") != null) {
+			template.getOptions().as(AWSEC2TemplateOptions.class).subnetId(iaas.getProperty("subnetId"));
+		}
+
         if (iaas.getProperty("availabilityZone") != null) {
             template.getOptions().as(AWSEC2TemplateOptions.class)
                     .placementGroup(iaas.getProperty("availabilityZone"));

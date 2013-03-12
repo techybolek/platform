@@ -11,7 +11,7 @@ import org.wso2.carbon.stratos.cloud.controller.exception.CloudControllerExcepti
 import org.wso2.carbon.stratos.cloud.controller.impl.CloudControllerServiceImpl;
 import org.wso2.carbon.stratos.cloud.controller.interfaces.CloudControllerService;
 import org.wso2.carbon.stratos.cloud.controller.topic.ConfigurationPublisher;
-import org.wso2.carbon.stratos.cloud.controller.util.CloudControllerServiceReferenceHolder;
+import org.wso2.carbon.stratos.cloud.controller.util.DeclarativeServiceReferenceHolder;
 
 /**
  * Registering Cloud Controller Service.
@@ -32,8 +32,8 @@ public class CloudControllerDSComponent {
 
     protected void activate(ComponentContext context) {
         try {
-        	if (CloudControllerServiceReferenceHolder.getInstance().getConfigPub() == null) {
-        		CloudControllerServiceReferenceHolder.getInstance()
+        	if (DeclarativeServiceReferenceHolder.getInstance().getConfigPub() == null) {
+        		DeclarativeServiceReferenceHolder.getInstance()
         		.setConfigPub(new ConfigurationPublisher());
         	}
             
@@ -52,14 +52,14 @@ public class CloudControllerDSComponent {
         if (log.isDebugEnabled()) {
             log.debug("Setting the Task Service");
         }
-        CloudControllerServiceReferenceHolder.getInstance().setTaskService(taskService);
+        DeclarativeServiceReferenceHolder.getInstance().setTaskService(taskService);
     }
 
     protected void unsetTaskService(TaskService taskService) {
         if (log.isDebugEnabled()) {
             log.debug("Unsetting the Task Service");
         }
-        CloudControllerServiceReferenceHolder.getInstance().setTaskService(null);
+        DeclarativeServiceReferenceHolder.getInstance().setTaskService(null);
     }
     
 	protected void setRegistryService(RegistryService registryService) {
@@ -67,7 +67,7 @@ public class CloudControllerDSComponent {
 			log.debug("Setting the Registry Service");
 		}
 		try {
-	        CloudControllerServiceReferenceHolder.getInstance()
+	        DeclarativeServiceReferenceHolder.getInstance()
 	                                             .setRegistry(registryService.getGovernanceSystemRegistry());
         } catch (RegistryException e) {
         	String msg = "Failed when retrieving Governance System Registry.";
@@ -80,6 +80,6 @@ public class CloudControllerDSComponent {
 		if (log.isDebugEnabled()) {
             log.debug("Unsetting the Registry Service");
         }
-        CloudControllerServiceReferenceHolder.getInstance().setRegistry(null);
+        DeclarativeServiceReferenceHolder.getInstance().setRegistry(null);
 	}
 }

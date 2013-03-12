@@ -7,8 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.axiom.om.OMElement;
@@ -29,16 +27,6 @@ public class CloudControllerUtil {
 		return AXIOMUtil.stringToOM(xml);
 	}
 
-//	public static void persist(ServiceContext ctxt) {
-//
-//		try {
-//	        OMElement elt = serviceCtxtToOMElement(ctxt);
-//	        
-//        } catch (XMLStreamException e) {
-//        	handleException("Failed to convert the newly added service context to an OMElement", e);
-//        }
-//    }
-	
 	public static byte[] getBytesFromFile(String path) {
 
 		try {

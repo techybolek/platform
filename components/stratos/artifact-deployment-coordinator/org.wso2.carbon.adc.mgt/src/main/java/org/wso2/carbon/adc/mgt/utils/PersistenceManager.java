@@ -187,9 +187,12 @@ public class PersistenceManager {
 			con = DriverManager.getConnection(url + db, dbUsername, dbPassword);
 			Class.forName(driver);
 			statement = con.createStatement();
-			String sql =
-			             "SELECT C.CARTRIDGE, C.ALIAS, C.CLUSTER_DOMAIN, C.CLUSTER_SUBDOMAIN, C.STATE, C.PROVIDER, C.HOSTNAME, R.REPO_NAME FROM CARTRIDGE_SUBSCRIPTION C " +
-			             "LEFT JOIN REPOSITORY R ON C.REPO_ID=R.REPO_ID WHERE TENANT_ID='" +tenantId + "' AND C.STATE != 'UNSUBSCRIBED' ";
+            String sql =
+                    "SELECT C.CARTRIDGE, C.ALIAS, C.CLUSTER_DOMAIN, C.CLUSTER_SUBDOMAIN, C.MIN_INSTANCES, C.MAX_INSTANCES," +
+                            " C.STATE, C.PROVIDER, C.HOSTNAME, R.REPO_NAME FROM CARTRIDGE_SUBSCRIPTION C " +
+                            "LEFT JOIN REPOSITORY R ON C.REPO_ID=R.REPO_ID WHERE TENANT_ID='" + tenantId +
+                            "' AND C.STATE != 'UNSUBSCRIBED' ";
+
 			resultSet = statement.executeQuery(sql);
 			while (resultSet.next()) {
 				CartridgeSubscription cartridge = new CartridgeSubscription();
@@ -199,6 +202,8 @@ public class PersistenceManager {
 				cartridge.setClusterDomain(resultSet.getString("CLUSTER_DOMAIN"));
 				cartridge.setClusterSubdomain(resultSet.getString("CLUSTER_SUBDOMAIN"));
 				cartridge.setProvider(resultSet.getString("PROVIDER"));
+                cartridge.setMaxInstances(resultSet.getInt("MAX_INSTANCES"));
+                cartridge.setMinInstances(resultSet.getInt("MIN_INSTANCES"));
 				Repository repo = new Repository();
 				repo.setRepoName(resultSet.getString("REPO_NAME"));
 				cartridge.setRepository(repo);

@@ -13,15 +13,19 @@ import org.wso2.carbon.lb.common.conf.structure.NodeBuilder;
 import org.wso2.carbon.lb.common.conf.util.Constants;
 import org.wso2.carbon.stratos.cloud.controller.exception.CloudControllerException;
 import org.wso2.carbon.stratos.cloud.controller.util.CloudControllerConstants;
-import org.wso2.carbon.stratos.cloud.controller.util.CloudControllerServiceReferenceHolder;
+import org.wso2.carbon.stratos.cloud.controller.util.DeclarativeServiceReferenceHolder;
 import org.wso2.carbon.stratos.cloud.controller.util.ServiceContext;
 
+/**
+ * This class is responsible for generating the service topology and
+ * publishing it to a topic.
+ */
 public class TopologyBuilder implements Runnable {
 
     private BlockingQueue<List<ServiceContext>> sharedQueue;
 	private File topologyFile, backup;
 	private static final Log log = LogFactory.getLog(TopologyBuilder.class);
-	private CloudControllerServiceReferenceHolder data = CloudControllerServiceReferenceHolder.getInstance();
+	private DeclarativeServiceReferenceHolder data = DeclarativeServiceReferenceHolder.getInstance();
 	
 	public TopologyBuilder(BlockingQueue<List<ServiceContext>> queue){
 		

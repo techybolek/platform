@@ -28,6 +28,7 @@ import org.wso2.carbon.stratos.cloud.controller.interfaces.Iaas;
 
 /**
  * This is the basic data structure which holds an IaaS specific details.
+ * NOTE: If you add a new attribute, please assign it in the constructor too.
  */
 public class IaasProvider implements Serializable{
    
@@ -98,6 +99,7 @@ public class IaasProvider implements Serializable{
     	this.template = anIaasProvider.getTemplate();
     	this.payload = anIaasProvider.getPayload();
     	this.iaas = anIaasProvider.getIaas();
+    	this.maxInstanceLimit = anIaasProvider.getMaxInstanceLimit();
     }
     
     public String getType() {
@@ -250,7 +252,7 @@ public class IaasProvider implements Serializable{
     }
 
 	public int getMaxInstanceLimit() {
-	    return maxInstanceLimit;
+	    return this.maxInstanceLimit;
     }
 
 	public void setMaxInstanceLimit(int maxInstanceLimit) {

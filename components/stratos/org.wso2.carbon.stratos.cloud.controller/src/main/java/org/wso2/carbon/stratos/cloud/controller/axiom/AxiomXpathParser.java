@@ -59,7 +59,6 @@ import org.wso2.securevault.SecretResolverFactory;
 
 /**
  * This class is parsing configuration files using Axiom Xpath.
- * 
  */
 public class AxiomXpathParser {
 
@@ -72,21 +71,76 @@ public class AxiomXpathParser {
 	}
 
 	/**
+     * @param cartridgeElement Cartridges section as a {@link String}
+     * @param aCartridge {@link Cartridge} instance.
+     * @param appTypesNodes nodes of App types.
+     */
+    private void getAppTypes(String cartridgeElementString, Cartridge aCartridge,
+                             List<?> appTypesNodes) {
+	    Object nodeObj;
+	    if (!appTypesNodes.isEmpty()) {
+	    	if ((nodeObj = appTypesNodes.get(0)) instanceof OMNode) {
+	    		OMNode appTypeNode = (OMNode) nodeObj;
+
+	    		if (appTypeNode.getType() == OMNode.ELEMENT_NODE) {
+
+	    			OMElement appTypesElt = (OMElement) appTypeNode;
+
+	    			for (Iterator<?> iterator =
+	    			                            appTypesElt.getChildrenWithName(new QName(
+	    			                                                                      CloudControllerConstants.APP_TYPE_ELEMENT)); iterator.hasNext();) {
+	    				OMElement appElt = (OMElement) iterator.next();
+
+	    				String name =
+	    				              appElt.getAttributeValue(new QName(
+	    				                                                 CloudControllerConstants.NAME_ATTR));
+	    				String appSpecificMapping =
+	    				                            appElt.getAttributeValue(new QName(
+	    				                                                               CloudControllerConstants.APP_SPECIFIC_MAPPING_ATTR));
+
+	    				AppType appType;
+
+	    				if (appSpecificMapping == null) {
+	    					appType = new AppType(name);
+	    				} else {
+	    					appType =
+	    					          new AppType(name,
+	    					                      Boolean.valueOf(appSpecificMapping));
+	    				}
+
+	    				aCartridge.addAppType(appType);
+	    			}
+
+	    		} else {
+	    			String msg =
+	    			             "Essential '" + CloudControllerConstants.APP_TYPE_ELEMENT +
+	    			                     "' element cannot" + " be found in " +
+	    			                     cartridgeElementString + " of " +
+	    			                     xmlSource;
+	    			handleException(msg);
+	    		}
+
+	    	}
+	    }
+    }
+
+	/**
 	 * @return a List of {@link Cartridge}s.
 	 */
 	public List<Cartridge> getCartridgesList() {
 
-		FasterLookUpDataHolder data = FasterLookUpDataHolder.getInstance();
+		FasterLookUpDataHolder dataHolder = FasterLookUpDataHolder.getInstance();
 
-		List<IaasProvider> iaasProviders = data.getIaasProviders();
+		List<IaasProvider> iaasProviders = dataHolder.getIaasProviders();
 
 		if (iaasProviders == null) {
-			data.setIaasProviders((iaasProviders = new ArrayList<IaasProvider>()));
+			dataHolder.setIaasProviders((iaasProviders = new ArrayList<IaasProvider>()));
 		}
 
 		List<Cartridge> cartridges = new ArrayList<Cartridge>();
 
 		String xpath = CloudControllerConstants.CARTRIDGES_ELEMENT_XPATH;
+		
 		// cartridges can be found from this XPATH
 		List<?> cartridgeNodes = getMatchingNodes(xpath, documentElement);
 
@@ -110,19 +164,17 @@ public class AxiomXpathParser {
 
 					OMElement cartridgeElement = (OMElement) cartridgeNode;
 
-					String type =
-					              cartridgeElement.getAttributeValue(new QName(
+					// retrieve Attributes of a Cartridge definition
+					String type = cartridgeElement.getAttributeValue(new QName(
 					                                                           CloudControllerConstants.TYPE_ATTR));
-					String host =
-					              cartridgeElement.getAttributeValue(new QName(
+					String host = cartridgeElement.getAttributeValue(new QName(
 					                                                           CloudControllerConstants.HOST_ATTR));
-					String provider =
-					                  cartridgeElement.getAttributeValue(new QName(
+					String provider = cartridgeElement.getAttributeValue(new QName(
 					                                                               CloudControllerConstants.PROVIDER_ATTR));
 
 					Cartridge aCartridge;
 
-					if ((aCartridge = data.getCartridge(type)) == null) {
+					if ((aCartridge = dataHolder.getCartridge(type)) == null) {
 
 						aCartridge = new Cartridge(type, host, provider);
 					}
@@ -141,192 +193,35 @@ public class AxiomXpathParser {
 					// load properties of this cartridge
 					loadProperties(cartridgeElement, aCartridge.getProperties());
 
-					List<?> iaasProviderNodes =
-					                            getMatchingNodes(xpath +
-					                                                     CloudControllerConstants.IAAS_PROVIDER_ELEMENT_XPATH,
+					// retrieve the list of IaaS providers
+					List<?> iaasProviderNodes = getMatchingNodes(xpath + CloudControllerConstants.IAAS_PROVIDER_ELEMENT_XPATH,
 					                                             cartridgeElement);
 
-					for (Object nodeObj : iaasProviderNodes) {
-						if (nodeObj instanceof OMNode) {
-							OMNode iaasProviderNode = (OMNode) nodeObj;
-
-							if (iaasProviderNode.getType() == OMNode.ELEMENT_NODE) {
-
-								OMElement iaasElt = (OMElement) iaasProviderNode;
-
-								// add the IaasProvider to this cartridge
-								aCartridge.addIaasProvider(getIaasProvider(iaasElt, iaasProviders));
-
-							} else {
-								String msg =
-								             "Essential '" +
-								                     CloudControllerConstants.IAAS_PROVIDER_ELEMENT +
-								                     "' element cannot" + " be found in " +
-								                     cartridgeElement.toString() + " of " +
-								                     xmlSource;
-								handleException(msg);
-							}
-
-						}
-					}
+					getIaasProviders(iaasProviders, cartridgeElement.toString(), aCartridge, iaasProviderNodes);
 
 					// load dirs
-					List<?> deploymentNodes =
-					                          getMatchingNodes(xpath +
-					                                                   CloudControllerConstants.DEPLOYMENT_ELEMENT_XPATH,
+					List<?> deploymentNodes = getMatchingNodes(xpath + CloudControllerConstants.DEPLOYMENT_ELEMENT_XPATH,
 					                                           cartridgeElement);
-					Object nodeObj;
-					if ((nodeObj = deploymentNodes.get(0)) instanceof OMNode) {
-						OMNode deploymentNode = (OMNode) nodeObj;
-
-						if (deploymentNode.getType() == OMNode.ELEMENT_NODE) {
-
-							OMElement deployElt = (OMElement) deploymentNode;
-
-							if (deployElt.getAttributeValue(new QName(
-							                                          CloudControllerConstants.BASE_DIR_ATTR)) != null) {
-
-								aCartridge.setBaseDir(deployElt.getAttributeValue(new QName(
-								                                                            CloudControllerConstants.BASE_DIR_ATTR)));
-							}
-
-							for (Iterator<?> iterator =
-							                            deployElt.getChildrenWithName(new QName(
-							                                                                    CloudControllerConstants.DIRECTORY_ELEMENT)); iterator.hasNext();) {
-								OMElement dir = (OMElement) iterator.next();
-								aCartridge.addDeploymentDir(dir.getText());
-							}
-
-						} else {
-							String msg =
-							             "Essential '" + CloudControllerConstants.DEPLOYMENT_ELEMENT +
-							                     "' element cannot" + " be found in " +
-							                     cartridgeElement.toString() + " of " + xmlSource;
-							handleException(msg);
-						}
-
-					}
+                    setDeploymentDirs(cartridgeElement.toString(), aCartridge, deploymentNodes);
 
 					// load port mappings
 					List<?> portMappingNodes =
 					                           getMatchingNodes(xpath +
 					                                                    CloudControllerConstants.PORT_MAPPING_ELEMENT_XPATH,
 					                                            cartridgeElement);
-					if (!portMappingNodes.isEmpty()) {
-						if ((nodeObj = portMappingNodes.get(0)) instanceof OMNode) {
-							OMNode portMappingNode = (OMNode) nodeObj;
-
-							if (portMappingNode.getType() == OMNode.ELEMENT_NODE) {
-
-								OMElement portMappingElt = (OMElement) portMappingNode;
-
-								for (Iterator<?> iterator =
-								                            portMappingElt.getChildrenWithName(new QName(
-								                                                                         CloudControllerConstants.HTTP_ELEMENT)); iterator.hasNext();) {
-									OMElement httpElt = (OMElement) iterator.next();
-
-									String port =
-									              httpElt.getAttributeValue(new QName(
-									                                                  CloudControllerConstants.PORT_ATTR));
-									String proxyPort =
-									                   httpElt.getAttributeValue(new QName(
-									                                                       CloudControllerConstants.PROXY_PORT_ATTR));
-
-									PortMapping mapping =
-									                      new PortMapping(
-									                                      CloudControllerConstants.HTTP_ELEMENT,
-									                                      port, proxyPort);
-
-									aCartridge.addPortMapping(mapping);
-								}
-
-								for (Iterator<?> iterator =
-								                            portMappingElt.getChildrenWithName(new QName(
-								                                                                         CloudControllerConstants.HTTPS_ELEMENT)); iterator.hasNext();) {
-									OMElement httpsElt = (OMElement) iterator.next();
-
-									String port =
-									              httpsElt.getAttributeValue(new QName(
-									                                                   CloudControllerConstants.PORT_ATTR));
-									String proxyPort =
-									                   httpsElt.getAttributeValue(new QName(
-									                                                        CloudControllerConstants.PROXY_PORT_ATTR));
-
-									PortMapping mapping =
-									                      new PortMapping(
-									                                      CloudControllerConstants.HTTPS_ELEMENT,
-									                                      port, proxyPort);
-
-									aCartridge.addPortMapping(mapping);
-								}
-
-							} else {
-								String msg =
-								             "Essential '" +
-								                     CloudControllerConstants.PORT_MAPPING_ELEMENT +
-								                     "' element cannot" + " be found in " +
-								                     cartridgeElement.toString() + " of " +
-								                     xmlSource;
-								handleException(msg);
-							}
-
-						}
-					}
+					getPortMappings(cartridgeElement.toString(), aCartridge, portMappingNodes);
 
 					// load appTypes
 					List<?> appTypesNodes =
 					                        getMatchingNodes(xpath +
 					                                                 CloudControllerConstants.APP_TYPES_ELEMENT_XPATH,
 					                                         cartridgeElement);
-					if (!appTypesNodes.isEmpty()) {
-						if ((nodeObj = appTypesNodes.get(0)) instanceof OMNode) {
-							OMNode appTypeNode = (OMNode) nodeObj;
-
-							if (appTypeNode.getType() == OMNode.ELEMENT_NODE) {
-
-								OMElement appTypesElt = (OMElement) appTypeNode;
-
-								for (Iterator<?> iterator =
-								                            appTypesElt.getChildrenWithName(new QName(
-								                                                                      CloudControllerConstants.APP_TYPE_ELEMENT)); iterator.hasNext();) {
-									OMElement appElt = (OMElement) iterator.next();
-
-									String name =
-									              appElt.getAttributeValue(new QName(
-									                                                 CloudControllerConstants.NAME_ATTR));
-									String appSpecificMapping =
-									                            appElt.getAttributeValue(new QName(
-									                                                               CloudControllerConstants.APP_SPECIFIC_MAPPING_ATTR));
-
-									AppType appType;
-
-									if (appSpecificMapping == null) {
-										appType = new AppType(name);
-									} else {
-										appType =
-										          new AppType(name,
-										                      Boolean.valueOf(appSpecificMapping));
-									}
-
-									aCartridge.addAppType(appType);
-								}
-
-							} else {
-								String msg =
-								             "Essential '" + CloudControllerConstants.APP_TYPE_ELEMENT +
-								                     "' element cannot" + " be found in " +
-								                     cartridgeElement.toString() + " of " +
-								                     xmlSource;
-								handleException(msg);
-							}
-
-						}
-					}
+					getAppTypes(cartridgeElement.toString(), aCartridge, appTypesNodes);
 
 					cartridges.add(aCartridge);
 
-					if (data.getCartridge(type) == null) {
-						data.addCartridge(aCartridge);
+					if (dataHolder.getCartridge(type) == null) {
+						dataHolder.addCartridge(aCartridge);
 					}
 				}
 			}
@@ -335,6 +230,40 @@ public class AxiomXpathParser {
 		return cartridges;
 
 	}
+
+	/**
+     * @param iaasProviders
+     * @param cartridgeElementString
+     * @param aCartridge
+     * @param iaasProviderNodes
+     */
+    private void getIaasProviders(List<IaasProvider> iaasProviders,
+                                  String cartridgeElementString, Cartridge aCartridge,
+                                  List<?> iaasProviderNodes) {
+	    for (Object nodeObj : iaasProviderNodes) {
+	    	if (nodeObj instanceof OMNode) {
+	    		OMNode iaasProviderNode = (OMNode) nodeObj;
+
+	    		if (iaasProviderNode.getType() == OMNode.ELEMENT_NODE) {
+
+	    			OMElement iaasElt = (OMElement) iaasProviderNode;
+
+	    			// add the IaasProvider to this cartridge
+	    			aCartridge.addIaasProvider(getIaasProvider(iaasElt, iaasProviders));
+
+	    		} else {
+	    			String msg =
+	    			             "Essential '" +
+	    			                     CloudControllerConstants.IAAS_PROVIDER_ELEMENT +
+	    			                     "' element cannot" + " be found in " +
+	    			                     cartridgeElementString + " of " +
+	    			                     xmlSource;
+	    			handleException(msg);
+	    		}
+
+	    	}
+	    }
+    }
 
 	private Element getDOMElement(final OMElement omElement) {
 
@@ -407,7 +336,7 @@ public class AxiomXpathParser {
 		return nodeList != null ? nodeList.get(0) : null;
 	}
 
-	private IaasProvider getIaasProvider(final OMNode item, final List<IaasProvider> iaases) {
+	private IaasProvider getIaasProvider(final OMNode item, List<IaasProvider> iaases) {
 
 		IaasProvider iaas = null;
 
@@ -520,6 +449,76 @@ public class AxiomXpathParser {
 		return nodeList;
 	}
 
+	/**
+     * @param cartridgeElement Cartridges section as a {@link String}
+     * @param aCartridge {@link Cartridge} instance.
+     * @param portMappingNodes nodes of port mapping elements
+     */
+    private void getPortMappings(String cartridgeElementString, Cartridge aCartridge,
+                                 List<?> portMappingNodes) {
+	    Object nodeObj;
+	    if (!portMappingNodes.isEmpty()) {
+	    	if ((nodeObj = portMappingNodes.get(0)) instanceof OMNode) {
+	    		OMNode portMappingNode = (OMNode) nodeObj;
+
+	    		if (portMappingNode.getType() == OMNode.ELEMENT_NODE) {
+
+	    			OMElement portMappingElt = (OMElement) portMappingNode;
+
+	    			for (Iterator<?> iterator =
+	    			                            portMappingElt.getChildrenWithName(new QName(
+	    			                                                                         CloudControllerConstants.HTTP_ELEMENT)); iterator.hasNext();) {
+	    				OMElement httpElt = (OMElement) iterator.next();
+
+	    				String port =
+	    				              httpElt.getAttributeValue(new QName(
+	    				                                                  CloudControllerConstants.PORT_ATTR));
+	    				String proxyPort =
+	    				                   httpElt.getAttributeValue(new QName(
+	    				                                                       CloudControllerConstants.PROXY_PORT_ATTR));
+
+	    				PortMapping mapping =
+	    				                      new PortMapping(
+	    				                                      CloudControllerConstants.HTTP_ELEMENT,
+	    				                                      port, proxyPort);
+
+	    				aCartridge.addPortMapping(mapping);
+	    			}
+
+	    			for (Iterator<?> iterator =
+	    			                            portMappingElt.getChildrenWithName(new QName(
+	    			                                                                         CloudControllerConstants.HTTPS_ELEMENT)); iterator.hasNext();) {
+	    				OMElement httpsElt = (OMElement) iterator.next();
+
+	    				String port =
+	    				              httpsElt.getAttributeValue(new QName(
+	    				                                                   CloudControllerConstants.PORT_ATTR));
+	    				String proxyPort =
+	    				                   httpsElt.getAttributeValue(new QName(
+	    				                                                        CloudControllerConstants.PROXY_PORT_ATTR));
+
+	    				PortMapping mapping =
+	    				                      new PortMapping(
+	    				                                      CloudControllerConstants.HTTPS_ELEMENT,
+	    				                                      port, proxyPort);
+
+	    				aCartridge.addPortMapping(mapping);
+	    			}
+
+	    		} else {
+	    			String msg =
+	    			             "Essential '" +
+	    			                     CloudControllerConstants.PORT_MAPPING_ELEMENT +
+	    			                     "' element cannot" + " be found in " +
+	    			                     cartridgeElementString + " of " +
+	    			                     xmlSource;
+	    			handleException(msg);
+	    		}
+
+	    	}
+	    }
+    }
+
 	public List<ServiceContext> getServiceContexts() {
 
 		List<ServiceContext> serviceContextList = new ArrayList<ServiceContext>();
@@ -599,20 +598,8 @@ public class AxiomXpathParser {
 
 							handleException(msg);
 						}
-
-						// Cartridge matchingCartridge =
-						// findCartridge(cartridges, type);
-						//
-						// if(matchingCartridge == null){
-						// matchingCartridge = new Cartridge(type, null, null);
-						// }
-						//
-						// // for(IaasProvider iaas :
-						// matchingCartridge.getIaases()){
-						// // iaas.reset();
-						// // }
-						//
-						// serviceCtxt.setCartridge(matchingCartridge);
+						
+						// set Cartridge type
 						serviceCtxt.setCartridgeType(type);
 
 					}
@@ -655,20 +642,6 @@ public class AxiomXpathParser {
 		throw new MalformedConfigurationFileException(msg);
 	}
 
-	// private Cartridge findCartridge(List<Cartridge> cartridges, String type)
-	// {
-	//
-	// if (cartridges != null) {
-	// for (Cartridge cartridge : cartridges) {
-	// if (type.equals(cartridge.getType())) {
-	// return cartridge;
-	// }
-	// }
-	// }
-	//
-	// return null;
-	// }
-
 	private void handleException(final String msg, final Exception e) {
 		log.error(msg, e);
 		throw new MalformedConfigurationFileException(msg, e);
@@ -696,35 +669,6 @@ public class AxiomXpathParser {
 			             "Essential '" + CloudControllerConstants.CLASS_NAME_ELEMENT + "' element " +
 			                     "has not specified in " + xmlSource;
 			handleException(msg);
-		}
-
-	}
-	
-	private void loadMaxInstanceLimit(final IaasProvider iaas, final OMElement iaasElt) {
-
-		Iterator<?> it =
-		                 iaasElt.getChildrenWithName(new QName(
-		                                                       CloudControllerConstants.MAX_INSTANCE_LIMIT_ELEMENT));
-
-		if (it.hasNext()) {
-			OMElement maxInstanceLimitElt = (OMElement) it.next();
-
-			try {
-				iaas.setMaxInstanceLimit(Integer.parseInt(maxInstanceLimitElt.getText()));
-			} catch (NumberFormatException e) {
-				String msg =
-				             CloudControllerConstants.SCALE_UP_ORDER_ELEMENT +
-				                     " element contained" + " in " + xmlSource + "" +
-				                     " has a value which is not an Integer value.";
-				handleException(msg, e);
-			}
-
-		}
-
-		if (it.hasNext()) {
-			log.warn(xmlSource + " contains more than one " +
-			         CloudControllerConstants.MAX_INSTANCE_LIMIT_ELEMENT + " elements!" +
-			         " Elements other than the first will be neglected.");
 		}
 
 	}
@@ -778,7 +722,7 @@ public class AxiomXpathParser {
 		}
 
 	}
-
+	
 	private void loadHostName(final List<OMNode> nodes, final ServiceContext serviceCtxt) {
 
 		if (nodes == null || nodes.isEmpty()) {
@@ -810,13 +754,6 @@ public class AxiomXpathParser {
 			String alias =
 			               identityElt.getAttributeValue(new QName(
 			                                                       CloudControllerConstants.ALIAS_ATTRIBUTE));
-
-			// // FIXME following is a hack to find the correct alias.
-			// if (iaas.getProvider().contains("ec2")) {
-			// alias = AutoscalerConstant.EC2_IDENTITY_ALIAS;
-			// } else {
-			// alias = AutoscalerConstant.OPENSTACK_IDENTITY_ALIAS;
-			// }
 
 			// retrieve the secured password
 			if (secretResolver != null && secretResolver.isInitialized() &&
@@ -851,6 +788,35 @@ public class AxiomXpathParser {
 
 	}
 
+	private void loadMaxInstanceLimit(IaasProvider iaas, final OMElement iaasElt) {
+
+		Iterator<?> it =
+		                 iaasElt.getChildrenWithName(new QName(
+		                                                       CloudControllerConstants.MAX_INSTANCE_LIMIT_ELEMENT));
+
+		if (it.hasNext()) {
+			OMElement maxInstanceLimitElt = (OMElement) it.next();
+
+			try {
+				iaas.setMaxInstanceLimit(Integer.parseInt(maxInstanceLimitElt.getText()));
+			} catch (NumberFormatException e) {
+				String msg =
+				             CloudControllerConstants.MAX_INSTANCE_LIMIT_ELEMENT +
+				                     " element contained" + " in " + xmlSource + "" +
+				                     " has a value which is not an Integer value.";
+				handleException(msg, e);
+			}
+
+		}
+
+		if (it.hasNext()) {
+			log.warn(xmlSource + " contains more than one " +
+			         CloudControllerConstants.MAX_INSTANCE_LIMIT_ELEMENT + " elements!" +
+			         " Elements other than the first will be neglected.");
+		}
+
+	}
+
 	private void loadPayload(final List<OMNode> nodes, final ServiceContext serviceCtxt) {
 
 		if (nodes == null || nodes.isEmpty()) {
@@ -866,10 +832,6 @@ public class AxiomXpathParser {
 				byte[] payload = CloudControllerUtil.getBytesFromFile(node.getText());
 				serviceCtxt.setPayload(payload);
 
-				// for (IaasProvider iaas :
-				// serviceCtxt.getCartridge().getIaases()) {
-				// iaas.setPayload(payload);
-				// }
 			}
 
 		}
@@ -991,19 +953,8 @@ public class AxiomXpathParser {
 
 	}
 
-	// private String getText(Object obj) {
-	// if (getElement(obj) != null) {
-	// return getElement(obj).getText();
-	// }
-	//
-	// return null;
-	// }
-
 	private void loadTemplate(final IaasProvider iaas, final OMElement iaasElt) {
 
-		// @SuppressWarnings("rawtypes")
-		// List properties = getMatchingNodes(xpath +
-		// AutoscalerConstant.IMAGE_ID_ELEMENT_XPATH, iaasElt);
 		Iterator<?> it =
 		                 iaasElt.getChildrenWithName(new QName(CloudControllerConstants.IMAGE_ID_ELEMENT));
 
@@ -1016,14 +967,6 @@ public class AxiomXpathParser {
 			log.warn(xmlSource + " contains more than one " + CloudControllerConstants.IMAGE_ID_ELEMENT +
 			         " elements!" + " Elements other than the first will be neglected.");
 		}
-
-//		if (iaas.getImage() == null) {
-//
-//			String msg =
-//			             "Essential '" + CloudControllerConstants.IMAGE_ID_ELEMENT + "' element" +
-//			                     " has not specified in " + xmlSource;
-//			handleException(msg);
-//		}
 
 	}
 
@@ -1163,6 +1106,46 @@ public class AxiomXpathParser {
 
 	}
 
+	/**
+     * @param cartridgeElement Cartridges section as a {@link String}
+     * @param aCartridge {@link Cartridge} instance.
+     * @param deploymentNodes list of deployment directory nodes
+     */
+    private void setDeploymentDirs(String cartridgeElementString, Cartridge aCartridge,
+                                   List<?> deploymentNodes) {
+	    Object nodeObj;
+	    if ((nodeObj = deploymentNodes.get(0)) instanceof OMNode) {
+	    	OMNode deploymentNode = (OMNode) nodeObj;
+
+	    	if (deploymentNode.getType() == OMNode.ELEMENT_NODE) {
+
+	    		OMElement deployElt = (OMElement) deploymentNode;
+
+	    		if (deployElt.getAttributeValue(new QName(
+	    		                                          CloudControllerConstants.BASE_DIR_ATTR)) != null) {
+
+	    			aCartridge.setBaseDir(deployElt.getAttributeValue(new QName(
+	    			                                                            CloudControllerConstants.BASE_DIR_ATTR)));
+	    		}
+
+	    		for (Iterator<?> iterator =
+	    		                            deployElt.getChildrenWithName(new QName(
+	    		                                                                    CloudControllerConstants.DIRECTORY_ELEMENT)); iterator.hasNext();) {
+	    			OMElement dir = (OMElement) iterator.next();
+	    			aCartridge.addDeploymentDir(dir.getText());
+	    		}
+
+	    	} else {
+	    		String msg =
+	    		             "Essential '" + CloudControllerConstants.DEPLOYMENT_ELEMENT +
+	    		                     "' element cannot" + " be found in " +
+	    		                     cartridgeElementString + " of " + xmlSource;
+	    		handleException(msg);
+	    	}
+
+	    }
+    }
+
 	public void setIaasProvidersList() {
 
 		List<IaasProvider> iaasProviders = FasterLookUpDataHolder.getInstance().getIaasProviders();
@@ -1178,10 +1161,6 @@ public class AxiomXpathParser {
 		// in cloud-controller xml.
 		if (nodeList == null || nodeList.isEmpty()) {
 			return;
-			// String msg =
-			// "Essential '" + AutoscalerConstant.IAAS_PROVIDER_ELEMENT +
-			// "' element cannot" + " be found in " + xmlSource;
-			// handleException(msg);
 		}
 
 		for (OMNode node : nodeList) {
@@ -1190,179 +1169,6 @@ public class AxiomXpathParser {
 
 	}
 
-	// public void setBAMServerInfo() {
-	//
-	// List<?> properties =
-	// getMatchingNodes(AutoscalerConstant.ENABLE_BAM_DATA_PUBLISHER_XPATH,
-	// documentElement);
-	//
-	// if (properties.size() > 1) {
-	// log.warn(xmlSource + " contains more than one " +
-	// AutoscalerConstant.ENABLE_BAM_DATA_PUBLISHER + " elements!" +
-	// " Elements other than the first will be neglected.");
-	// }
-	//
-	// Object obj = properties.get(0);
-	// OMNode enableDataPublisherObj;
-	//
-	// if ((obj instanceof OMNode) && (enableDataPublisherObj =
-	// (OMNode)obj).getType() == OMNode.ELEMENT_NODE) {
-	//
-	// OMElement enableDataPubElt = (OMElement) enableDataPublisherObj;
-	//
-	// FasterLookUpDataHolder.getInstance().setEnableBAMDataPublisher(Boolean.parseBoolean(enableDataPubElt.getText()));
-	//
-	// }
-	//
-	// if (FasterLookUpDataHolder.getInstance().getEnableBAMDataPublisher()) {
-	//
-	// // read data publisher cron
-	// properties =
-	// getMatchingNodes(AutoscalerConstant.DATA_PUBLISHER_CRON_XPATH,
-	// documentElement);
-	//
-	// if (properties.size() > 1) {
-	// log.warn(xmlSource + " contains more than one " +
-	// AutoscalerConstant.DATA_PUBLISHER_CRON_ELEMENT + " elements!" +
-	// " Elements other than the first will be neglected.");
-	// }
-	//
-	// obj = properties.get(0);
-	// OMNode dataPubCronObj;
-	//
-	// if ((obj instanceof OMNode) &&
-	// (dataPubCronObj = (OMNode) obj).getType() == OMNode.ELEMENT_NODE) {
-	//
-	// OMElement dataPubCronElt = (OMElement) dataPubCronObj;
-	//
-	// FasterLookUpDataHolder.getInstance().setDataPublisherCron(dataPubCronElt.getText());
-	//
-	// }
-	//
-	// // read bam server user name
-	// properties =
-	// getMatchingNodes(AutoscalerConstant.BAM_SERVER_ADMIN_USERNAME_XPATH,
-	// documentElement);
-	//
-	// if (properties.size() > 1) {
-	// log.warn(xmlSource + " contains more than one " +
-	// AutoscalerConstant.BAM_SERVER_ADMIN_USERNAME_ELEMENT + " elements!" +
-	// " Elements other than the first will be neglected.");
-	// }
-	//
-	// obj = properties.get(0);
-	// OMNode bamServerUserNameObj;
-	//
-	// if ((obj instanceof OMNode) &&
-	// (bamServerUserNameObj = (OMNode) obj).getType() == OMNode.ELEMENT_NODE) {
-	//
-	// OMElement bamServerUserNameElt = (OMElement) bamServerUserNameObj;
-	//
-	// FasterLookUpDataHolder.getInstance().setBamUsername(bamServerUserNameElt.getText());
-	//
-	// }
-	//
-	// // read bam server password
-	//
-	// properties =
-	// getMatchingNodes(AutoscalerConstant.BAM_SERVER_ADMIN_PASSWORD_XPATH,
-	// documentElement);
-	//
-	// if (properties.size() > 1) {
-	// log.warn(xmlSource + " contains more than one " +
-	// AutoscalerConstant.BAM_SERVER_ADMIN_PASSWORD_ELEMENT + " elements!" +
-	// " Elements other than the first will be neglected.");
-	// }
-	//
-	// obj = properties.get(0);
-	// OMNode bamServerPasswordObj;
-	//
-	// if ((obj instanceof OMNode) &&
-	// (bamServerPasswordObj = (OMNode) obj).getType() == OMNode.ELEMENT_NODE) {
-	//
-	// OMElement bamServerPasswordElt = (OMElement) bamServerPasswordObj;
-	//
-	// // retrieve the value using secure vault
-	// SecretResolver secretResolver =
-	// SecretResolverFactory.create(documentElement, false);
-	//
-	// String alias =
-	// bamServerPasswordElt.getAttributeValue(new QName(
-	// AutoscalerConstant.ALIAS_ATTRIBUTE));
-	//
-	// // retrieve the secured password
-	// if (secretResolver != null && secretResolver.isInitialized() &&
-	// secretResolver.isTokenProtected(alias)) {
-	//
-	// FasterLookUpDataHolder.getInstance()
-	// .setBamPassword(secretResolver.resolve(alias));
-	//
-	// }
-	//
-	// // if we still cannot find a value, we try to assign the value which is
-	// specified
-	// // in the element, if any
-	// if (FasterLookUpDataHolder.getInstance().getBamPassword() == null) {
-	// log.warn("Unable to fine a value for " +
-	// AutoscalerConstant.BAM_SERVER_ADMIN_PASSWORD_ELEMENT +
-	// " element from Secure Vault." +
-	// "Hence we will try to assign the plain text value (if specified).");
-	// FasterLookUpDataHolder.getInstance()
-	// .setBamPassword(bamServerPasswordElt.getText());
-	// }
-	//
-	// }
-	//
-	// // read Cassandra host address
-	// properties =
-	// getMatchingNodes(AutoscalerConstant.CASSANDRA_HOST_ADDRESS_XPATH,
-	// documentElement);
-	//
-	// if (properties.size() > 1) {
-	// log.warn(xmlSource + " contains more than one " +
-	// AutoscalerConstant.CASSANDRA_HOST_ADDRESS + " elements!" +
-	// " Elements other than the first will be neglected.");
-	// }
-	//
-	// obj = properties.get(0);
-	// OMNode cassandraHostAddressObj;
-	//
-	// if ((obj instanceof OMNode) &&
-	// (cassandraHostAddressObj = (OMNode) obj).getType() ==
-	// OMNode.ELEMENT_NODE) {
-	//
-	// OMElement cassandraHostAddressElt = (OMElement) cassandraHostAddressObj;
-	//
-	// FasterLookUpDataHolder.getInstance()
-	// .setCassandraHostAddr(cassandraHostAddressElt.getText());
-	//
-	// }
-	//
-	// // read Cassandra host port
-	// properties =
-	// getMatchingNodes(AutoscalerConstant.CASSANDRA_HOST_PORT_XPATH,
-	// documentElement);
-	//
-	// if (properties.size() > 1) {
-	// log.warn(xmlSource + " contains more than one " +
-	// AutoscalerConstant.CASSANDRA_HOST_PORT + " elements!" +
-	// " Elements other than the first will be neglected.");
-	// }
-	//
-	// obj = properties.get(0);
-	// OMNode cassandraHostPortObj;
-	//
-	// if ((obj instanceof OMNode) &&
-	// (cassandraHostPortObj = (OMNode) obj).getType() == OMNode.ELEMENT_NODE) {
-	//
-	// OMElement cassandraHostPortElt = (OMElement) cassandraHostPortObj;
-	//
-	// FasterLookUpDataHolder.getInstance()
-	// .setCassandraHostPort(cassandraHostPortElt.getText());
-	//
-	// }
-	// }
-	// }
 
 	public void setTopologySyncRelatedData() {
 

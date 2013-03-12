@@ -74,36 +74,36 @@ public class CartridgeDeployer extends AbstractDeployer{
         AxiomXpathParser parser = new AxiomXpathParser(deploymentFileData.getFile());
         parser.parse();
 
-        // validate
         try {
+        	// validate
             validateCartridge(parser);
             
-        } catch (Exception e) {
-            String msg = "Invalid deployment artefact at "+deploymentFileData.getAbsolutePath();
+			// deploy - grab cartridges
+			List<Cartridge> cartridges = parser.getCartridgesList();
+
+			ThreadExecutor exec = new ThreadExecutor(3);
+			// create Jclouds objects, for each IaaS
+			for (Cartridge cartridge : cartridges) {
+				// jclouds object building is time consuming, hence I use Java executor framework
+				exec.execute(new JcloudsObjectBuilder(cartridge, deploymentFileData));
+			}
+			exec.shutdown();
+			// update map
+			fileToCartridgeListMap.put(deploymentFileData.getAbsolutePath(),
+			                           new ArrayList<Cartridge>(cartridges));
+
+			log.info("Successfully deployed the Cartridge definition specified at "+deploymentFileData.getAbsolutePath());
+			
+		} catch (Exception e) {
+			String msg = "Invalid deployment artefact at "+deploymentFileData.getAbsolutePath();
             // back up the file
             File f = deploymentFileData.getFile();
             f.renameTo(new File(deploymentFileData.getAbsolutePath()+".back"));
             log.error(msg, e);
             throw new DeploymentException(msg, e);
-        }
-        // deploy - grab cartridges
-        List<Cartridge> cartridges = parser.getCartridgesList();
+		} 
         
-        ThreadExecutor exec = new ThreadExecutor(3);
-        // create Jclouds objects, for each IaaS
-        for (Cartridge cartridge : cartridges) {
-        	// jclouds object building is time consuming, hence I use Java executor framework
-        	exec.execute(new JcloudsObjectBuilder(cartridge, deploymentFileData));
-        }
-        exec.shutdown();
         
-        // add cartridges
-//        FasterLookUpDataHolder.getInstance().addCartridges(cartridges);
-        
-        // update map
-        fileToCartridgeListMap.put(deploymentFileData.getAbsolutePath(), new ArrayList<Cartridge>(cartridges));
-        
-        log.info("Successfully deployed the Cartridge definition specified at "+deploymentFileData.getAbsolutePath());
     }
     
     private void validateCartridge(AxiomXpathParser parser) throws Exception {

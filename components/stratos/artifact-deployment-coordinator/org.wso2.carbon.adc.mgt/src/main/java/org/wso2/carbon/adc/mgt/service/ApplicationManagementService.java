@@ -125,7 +125,7 @@ public class ApplicationManagementService extends AbstractAdmin {
         } catch (Exception e) {
             String msg = " Exception is occurred, Reason: " + e.getMessage();
             log.error(msg, e);
-            throw new ADCException("Sorry, An error occurred while getting cartridge information ", e);
+            throw new ADCException("An error occurred while getting cartridge information ", e);
         }
         if(sub.getCartridge() == null) {
             String msg = "Info request for not subscribed cartridge";
@@ -621,12 +621,15 @@ public class ApplicationManagementService extends AbstractAdmin {
 	
 	private void validate(String cartridgeType, String cartName) throws AxisFault, ADCException {
 	    if (!isValidCartridge(cartridgeType)) {
-	    	throw new ADCException("Sorry. " + cartridgeType +
-	    	                    " is not a valid cartridge type! ");
+            String msg = cartridgeType + " is not a valid cartridge type. Please try again with a valid cartridge type. ";
+            log.error(msg);
+            throw new ADCException(msg);
 	    }			
 
 	    if (isAliasAlreadyTaken(cartName, cartridgeType)) {
-	    	throw new ADCException("Sorry. alias you provided, " + cartName + "is already taken.");
+            String msg = "The alias you have provided, " + cartName + " is already taken. Please try again with a different alias. ";
+            log.error(msg);
+            throw new ADCException(msg);
 	    }
     }
 
@@ -765,7 +768,7 @@ public class ApplicationManagementService extends AbstractAdmin {
         } catch (Exception e) {
             String msg = "Exception : " + e.getMessage();
             log.error(msg, e);
-            throw new AxisFault("Sorry, subscribe failed!", e);
+            throw new AxisFault("Failure in Subscribing to the cartridge", e);
         }
     }
 
@@ -838,7 +841,7 @@ public class ApplicationManagementService extends AbstractAdmin {
 		}
 
 		if (subcription == null) {
-			throw new AxisFault("Sorry. you have not subscribed to " + name);
+			throw new AxisFault("No subscriptions to " + name);
 		}
 
 		if (subcription.getState().equals("ACTIVE") || subcription.getState().equals("PENDING")) {
@@ -915,7 +918,7 @@ public class ApplicationManagementService extends AbstractAdmin {
         } catch (Exception e) {
             String msg = "Exception : " + e.getMessage();
             log.error(msg, e);
-            throw new AxisFault("Sorry, subscribe failed!", e);
+            throw new AxisFault("Subscribe failed ", e);
         }
     }
 
@@ -957,7 +960,7 @@ public class ApplicationManagementService extends AbstractAdmin {
         } catch (Exception e) {
             String msg = "Exception : " + e.getMessage();
             log.error(msg, e);
-            throw new AxisFault("Sorry, subscribe failed!", e);
+            throw new AxisFault("Subscribe failed ", e);
         }
         DataHandler payloadDataHandler = new DataHandler(dataSource);
 		return payloadDataHandler;

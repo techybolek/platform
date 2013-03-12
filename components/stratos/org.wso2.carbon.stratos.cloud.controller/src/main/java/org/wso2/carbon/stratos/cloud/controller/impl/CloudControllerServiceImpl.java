@@ -34,7 +34,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jclouds.compute.ComputeService;
-import org.jclouds.compute.RunNodesException;
 import org.jclouds.compute.domain.ComputeMetadata;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.NodeMetadata.Status;
@@ -61,7 +60,7 @@ import org.wso2.carbon.stratos.cloud.controller.topic.TopologySynchronizerTask;
 import org.wso2.carbon.stratos.cloud.controller.util.CloudControllerConstants;
 import org.wso2.carbon.stratos.cloud.controller.util.Cartridge;
 import org.wso2.carbon.stratos.cloud.controller.util.CartridgeInfo;
-import org.wso2.carbon.stratos.cloud.controller.util.CloudControllerServiceReferenceHolder;
+import org.wso2.carbon.stratos.cloud.controller.util.DeclarativeServiceReferenceHolder;
 import org.wso2.carbon.stratos.cloud.controller.util.CloudControllerUtil;
 import org.wso2.carbon.stratos.cloud.controller.util.IaasContext;
 import org.wso2.carbon.stratos.cloud.controller.util.IaasProvider;
@@ -69,13 +68,11 @@ import org.wso2.carbon.stratos.cloud.controller.util.Properties;
 import org.wso2.carbon.stratos.cloud.controller.util.Property;
 import org.wso2.carbon.stratos.cloud.controller.util.ServiceContext;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 /**
  * Cloud Controller Service is responsible for starting up new server instances,
- * terminating already
- * started instances, providing pending instance count etc.
+ * terminating already started instances, providing pending instance count etc.
  * 
  */
 public class CloudControllerServiceImpl implements CloudControllerService {
@@ -85,105 +82,126 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 
 	public CloudControllerServiceImpl() {
 
+		// acquire serialized data from registry
 		acquireData();
 
-		TaskManager tm = null;
-		TaskInfo taskInfo = null;
+		// gets the task service
 		TaskService taskService =
-		                          CloudControllerServiceReferenceHolder.getInstance()
+		                          DeclarativeServiceReferenceHolder.getInstance()
 		                                                               .getTaskService();
 
 		if (dataHolder.getEnableBAMDataPublisher()) {
 
-			// initialize and schedule the data publisher task
-			try {
-
-				if (!taskService.getRegisteredTaskTypes()
-				                .contains(CloudControllerConstants.DATA_PUB_TASK_TYPE)) {
-
-					taskService.registerTaskType(CloudControllerConstants.DATA_PUB_TASK_TYPE);
-
-					tm = taskService.getTaskManager(CloudControllerConstants.DATA_PUB_TASK_TYPE);
-
-					if (!tm.isTaskScheduled(CloudControllerConstants.DATA_PUB_TASK_NAME)) {
-
-						TriggerInfo triggerInfo =
-						                          new TriggerInfo(
-						                                          FasterLookUpDataHolder.getInstance()
-						                                                                .getDataPublisherCron());
-						taskInfo =
-						           new TaskInfo(CloudControllerConstants.DATA_PUB_TASK_NAME,
-						                        CartridgeInstanceDataPublisherTask.class.getName(),
-						                        new HashMap<String, String>(), triggerInfo);
-						tm.registerTask(taskInfo);
-						// tm.rescheduleTask(AutoscalerConstant.DATA_PUB_TASK_NAME);
-						// tm.scheduleTask(taskInfo.getName());
-					}
-				}
-
-			} catch (Exception e) {
-				String msg =
-				             "Error scheduling task: " +
-				                     CloudControllerConstants.DATA_PUB_TASK_NAME;
-				log.error(msg, e);
-				if (tm != null) {
-					try {
-						tm.deleteTask(CloudControllerConstants.DATA_PUB_TASK_NAME);
-					} catch (TaskException e1) {
-						log.error(e1);
-					}
-				}
-				throw new CloudControllerException(msg, e);
-			}
+			// register and schedule, BAM data publisher task 
+			registerAndScheduleDataPublisherTask(taskService);
 		}
 
 		if (dataHolder.getEnableTopologySync()) {
 
-			// initialize TopologyBuilder Consumer
-			Thread topologyConsumer =
-			                          new Thread(
-			                                     new TopologyBuilder(
-			                                                         dataHolder.getSharedTopologyDiffQueue()));
-			// start consumer
-			topologyConsumer.start();
+			// start the topology builder thread
+			startTopologyBuilder();
 
-			try {
-
-				if (!taskService.getRegisteredTaskTypes()
-				                .contains(CloudControllerConstants.TOPOLOGY_SYNC_TASK_TYPE)) {
-
-					// topology sync
-					taskService.registerTaskType(CloudControllerConstants.TOPOLOGY_SYNC_TASK_TYPE);
-
-					tm =
-					     taskService.getTaskManager(CloudControllerConstants.TOPOLOGY_SYNC_TASK_TYPE);
-
-					TriggerInfo triggerInfo =
-					                          new TriggerInfo(
-					                                          dataHolder.getTopologySynchronizerCron());
-					taskInfo =
-					           new TaskInfo(CloudControllerConstants.TOPOLOGY_SYNC_TASK_NAME,
-					                        TopologySynchronizerTask.class.getName(),
-					                        new HashMap<String, String>(), triggerInfo);
-					tm.registerTask(taskInfo);
-				}
-
-			} catch (Exception e) {
-				String msg =
-				             "Error scheduling task: " +
-				                     CloudControllerConstants.TOPOLOGY_SYNC_TASK_NAME;
-				log.error(msg, e);
-				if (tm != null) {
-					try {
-						tm.deleteTask(CloudControllerConstants.TOPOLOGY_SYNC_TASK_NAME);
-					} catch (TaskException e1) {
-						log.error(e1);
-					}
-				}
-				throw new CloudControllerException(msg, e);
-			}
+			// register and schedule, topology synchronizer task
+			registerAndScheduleTopologySyncerTask(taskService);
 		}
 	}
+
+    private void registerAndScheduleTopologySyncerTask(TaskService taskService) {
+	    TaskInfo taskInfo;
+	    TaskManager tm = null;
+	    try {
+
+	    	if (!taskService.getRegisteredTaskTypes()
+	    	                .contains(CloudControllerConstants.TOPOLOGY_SYNC_TASK_TYPE)) {
+
+	    		// topology sync
+	    		taskService.registerTaskType(CloudControllerConstants.TOPOLOGY_SYNC_TASK_TYPE);
+
+	    		tm =
+	    		     taskService.getTaskManager(CloudControllerConstants.TOPOLOGY_SYNC_TASK_TYPE);
+
+	    		TriggerInfo triggerInfo =
+	    		                          new TriggerInfo(
+	    		                                          dataHolder.getTopologySynchronizerCron());
+	    		taskInfo =
+	    		           new TaskInfo(CloudControllerConstants.TOPOLOGY_SYNC_TASK_NAME,
+	    		                        TopologySynchronizerTask.class.getName(),
+	    		                        new HashMap<String, String>(), triggerInfo);
+	    		tm.registerTask(taskInfo);
+	    	}
+
+	    } catch (Exception e) {
+	    	String msg =
+	    	             "Error scheduling task: " +
+	    	                     CloudControllerConstants.TOPOLOGY_SYNC_TASK_NAME;
+	    	log.error(msg, e);
+	    	if (tm != null) {
+	    		try {
+	    			tm.deleteTask(CloudControllerConstants.TOPOLOGY_SYNC_TASK_NAME);
+	    		} catch (TaskException e1) {
+	    			log.error(e1);
+	    		}
+	    	}
+	    	throw new CloudControllerException(msg, e);
+	    }
+    }
+
+    private void startTopologyBuilder() {
+	    // initialize TopologyBuilder Consumer
+	    Thread topologyBuilder =
+	                              new Thread(
+	                                         new TopologyBuilder(
+	                                                             dataHolder.getSharedTopologyDiffQueue()));
+	    // start consumer
+	    topologyBuilder.start();
+    }
+
+    private TaskManager registerAndScheduleDataPublisherTask(TaskService taskService) {
+	    TaskInfo taskInfo;
+	    TaskManager tm = null;
+	    // initialize and schedule the data publisher task
+	    try {
+
+	    	if (!taskService.getRegisteredTaskTypes()
+	    	                .contains(CloudControllerConstants.DATA_PUB_TASK_TYPE)) {
+
+	    		taskService.registerTaskType(CloudControllerConstants.DATA_PUB_TASK_TYPE);
+
+	    		tm = taskService.getTaskManager(CloudControllerConstants.DATA_PUB_TASK_TYPE);
+
+	    		if (!tm.isTaskScheduled(CloudControllerConstants.DATA_PUB_TASK_NAME)) {
+
+	    			TriggerInfo triggerInfo =
+	    			                          new TriggerInfo(
+	    			                                          FasterLookUpDataHolder.getInstance()
+	    			                                                                .getDataPublisherCron());
+	    			taskInfo =
+	    			           new TaskInfo(CloudControllerConstants.DATA_PUB_TASK_NAME,
+	    			                        CartridgeInstanceDataPublisherTask.class.getName(),
+	    			                        new HashMap<String, String>(), triggerInfo);
+	    			tm.registerTask(taskInfo);
+
+	    			// Following code is currently not required, due to an issue in TS API.
+	    			// tm.scheduleTask(taskInfo.getName());
+	    		}
+	    	}
+
+	    } catch (Exception e) {
+	    	String msg =
+	    	             "Error scheduling task: " +
+	    	                     CloudControllerConstants.DATA_PUB_TASK_NAME;
+	    	log.error(msg, e);
+	    	if (tm != null) {
+	    		try {
+	    			tm.deleteTask(CloudControllerConstants.DATA_PUB_TASK_NAME);
+	    		} catch (TaskException e1) {
+	    			log.error(e1);
+	    		}
+	    	}
+	    	throw new CloudControllerException(msg, e);
+	    }
+	    return tm;
+    }
 
 	private void acquireData() {
 
@@ -255,11 +273,13 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 		String ip = "";
 		final Lock lock = new ReentrantLock();
 
+		// check for sub domain
 		subDomainName = checkSubDomain(subDomainName);
 
 		log.info("Starting new instance of domain : " + domainName + " and sub domain : " +
 		         subDomainName);
 
+		// get the subjected ServiceContext
 		ServiceContext serviceCtxt =
 		                             FasterLookUpDataHolder.getInstance()
 		                                                   .getServiceContext(domainName,
@@ -930,14 +950,6 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 		}
 
 		if (payload != null && payload.length != 0) {
-			// // replace User Data
-			// for (IaasProvider iaas :
-			// newServiceCtxt.getCartridge().getIaases()) {
-			//
-			// iaas.setPayload(payload);
-			//
-			// iaas.getIaas().setDynamicPayload(iaas);
-			// }
 
 			// write payload file
 			try {
@@ -959,8 +971,6 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 			log.debug("Payload is null or empty for :\n "+newServiceCtxt.toNode().toString());
 		}
 
-		// FasterLookUpDataHolder.getInstance().addServiceContext(newServiceCtxt);
-
 		// persist
 		try {
 			String uniqueName = domain + "-" + subDomain + "-" + UUID.randomUUID() + ".xml";
@@ -974,11 +984,6 @@ public class CloudControllerServiceImpl implements CloudControllerService {
 			log.error(msg, e);
 			throw new CloudControllerException(msg, e);
 		}
-		// CloudControllerUtil.persist(newServiceCtxt);
-
-		// publish to the topic
-		// ConfigurationPublisher.publish("cloud-controller-topology",
-		// "Cloud Controller sends config details ....");
 
 		log.info("Service successfully registered! Domain - " + domain + ", Sub domain - " +
 		         newServiceCtxt.getSubDomainName() + ", Cartridge type - " + cartridgeType);

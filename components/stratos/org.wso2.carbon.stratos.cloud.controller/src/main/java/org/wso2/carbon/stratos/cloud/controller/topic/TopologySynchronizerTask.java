@@ -27,12 +27,12 @@ import org.wso2.carbon.ntask.core.Task;
 import org.wso2.carbon.stratos.cloud.controller.exception.CloudControllerException;
 import org.wso2.carbon.stratos.cloud.controller.runtime.FasterLookUpDataHolder;
 import org.wso2.carbon.stratos.cloud.controller.util.CloudControllerConstants;
-import org.wso2.carbon.stratos.cloud.controller.util.CloudControllerServiceReferenceHolder;
+import org.wso2.carbon.stratos.cloud.controller.util.DeclarativeServiceReferenceHolder;
 
 public class TopologySynchronizerTask implements Task{
     
     private static final Log log = LogFactory.getLog(TopologySynchronizerTask.class);
-    private CloudControllerServiceReferenceHolder data = CloudControllerServiceReferenceHolder.getInstance();
+    private DeclarativeServiceReferenceHolder data = DeclarativeServiceReferenceHolder.getInstance();
     private File topologyFile;
     
     @Override
