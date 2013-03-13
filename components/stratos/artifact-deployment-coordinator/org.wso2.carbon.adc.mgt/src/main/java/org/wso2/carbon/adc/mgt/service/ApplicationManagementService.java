@@ -153,7 +153,7 @@ public class ApplicationManagementService extends AbstractAdmin {
 	    	if (CartridgeConstants.MYSQL_CARTRIDGE_NAME.equals(sub.getCartridge())) {
 	    		cartridge.setIp(ips[0]);
 				if (sub.getDataCartridge() != null) {
-					cartridge.setPassword(sub.getDataCartridge().getPassword());
+                    cartridge.setDbUserName(sub.getDataCartridge().getUserName());
 				}
 	    		cartridge.setVersion("5.5");
 	    		
@@ -437,6 +437,7 @@ public class ApplicationManagementService extends AbstractAdmin {
 		Repository repository = null;
 		DataCartridge dataCartridge = null;
 		String cartName = (alias != null) ? alias : cartridgeType;
+        String payloadZipFileName = "/tmp/" + UUID.randomUUID().toString() + ".zip";
 
 			log.info("Subscribing tenant [" + getTenantId() + "] with username [" + getUsername()+"]");
 			
@@ -456,11 +457,12 @@ public class ApplicationManagementService extends AbstractAdmin {
 				                clusterDomain,
 				                clusterSubDomain,
 				                createPayload(cartridgeInfo, cartName, 1,
-				                              1, repoURL, mysqlPassword, "localhost"),
+				                              1, repoURL, mysqlPassword, "localhost",payloadZipFileName),
 				                "*",
 				                cartName + "." + cartridgeInfo.getHostName(), 
 				                setRegisterServiceProperties());
-				sleepUntilRegistered();
+                deletePayloadFile(payloadZipFileName);
+				//sleepUntilRegistered();
 				//activateInstance(clusterDomain, clusterSubDomain);				
 				new Thread(new MySQLPasswordConfigurer(cartridgeType, clusterDomain,
 					                                       clusterSubDomain, mysqlPassword)).start();
@@ -498,9 +500,10 @@ public class ApplicationManagementService extends AbstractAdmin {
 					                clusterDomain,
 					                clusterSubDomain,
 					                createPayload(cartridgeInfo, cartName, minInstances,
-					                              maxInstances, repoURL, mySQLPassword, mySQLHostName), "*",
+					                              maxInstances, repoURL, mySQLPassword, mySQLHostName,payloadZipFileName), "*",
 					                cartName + "." + cartridgeInfo.getHostName(),
 					                properties);
+                    deletePayloadFile(payloadZipFileName);
 				} else {
 
 					TopologyManagementService topologyService = DataHolder.getTopologyMgtService();
@@ -535,6 +538,12 @@ public class ApplicationManagementService extends AbstractAdmin {
 			addDNSEntry(alias, cartridgeType);			
 			return createSubscriptionMessage(cartridgeType, repository);
 
+    }
+
+    private void deletePayloadFile(String payloadZipFileName) {
+        File payloadFile = new File(payloadZipFileName);
+        payloadFile.delete();
+        log.info(" Payload file is deleted. ");
     }
 
 	private Properties setRegisterServiceProperties() {
@@ -950,13 +959,15 @@ public class ApplicationManagementService extends AbstractAdmin {
 	}
 
 	private DataHandler createPayload(CartridgeInfo cartridgeInfo, String cartridgeName, int min,
-	                                  int max, String repoURL, String mySQLPwd, String mySQLHost) throws AxisFault {
-        FileDataSource dataSource =
-                null;
+	            int max, String repoURL, String mySQLPwd, String mySQLHost,String payloadZipFileName)throws AxisFault {
+
+        FileDataSource dataSource =null;
+        File payloadFile = null;
         try {
-            dataSource = new FileDataSource(getPayload(cartridgeInfo, cartridgeName,
-                                          min, max, repoURL,
-                                          mySQLPwd, mySQLHost));
+            payloadFile = getPayload(cartridgeInfo, cartridgeName,
+                    min, max, repoURL,
+                    mySQLPwd, mySQLHost, payloadZipFileName);
+            dataSource = new FileDataSource(payloadFile);
         } catch (Exception e) {
             String msg = "Exception : " + e.getMessage();
             log.error(msg, e);
@@ -982,7 +993,7 @@ public class ApplicationManagementService extends AbstractAdmin {
 	
 	private File getPayload(CartridgeInfo cartridgeInfo, String cartridgeName, int minInstances,
 	                        int maxInstances, String repoURL, 
-	                        String mySQLPassword, String mySQLHost) throws Exception {
+	                        String mySQLPassword, String mySQLHost,String payloadZipFileName) throws Exception {
 		String payloadString = "";
 
 		payloadString += "TENANT_RANGE=" + "*";
@@ -1040,9 +1051,7 @@ public class ApplicationManagementService extends AbstractAdmin {
 		// read private key ( for now from file system )
 		String privateKeyFile = "id_rsa";
 
-		// write both to a zip file
-		String payloadZipFileTemp = "/tmp/" + UUID.randomUUID().toString() + ".zip";
-		FileOutputStream fos = new FileOutputStream(payloadZipFileTemp);
+        FileOutputStream fos = new FileOutputStream(payloadZipFileName);
 		ZipOutputStream zos = new ZipOutputStream(fos);
 
 		addToZipFile(payloadStringTempFile, zos);
@@ -1051,7 +1060,7 @@ public class ApplicationManagementService extends AbstractAdmin {
 		zos.close();
 		fos.close();
 
-		return new File(payloadZipFileTemp);
+        return new File(payloadZipFileName);
 	}
 
 	private String createPortMappingPayloadString(CartridgeInfo cartridgeInfo) {

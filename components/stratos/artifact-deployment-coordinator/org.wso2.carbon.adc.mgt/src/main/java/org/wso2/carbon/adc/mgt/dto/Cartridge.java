@@ -30,6 +30,7 @@ public class Cartridge {
 	private int minInstanceCount;
 	private int maxInstanceCount;
 	private String repoURL;
+    private String dbUserName;
 
 	public String getCartridgeName() {
 		return cartridgeName;
@@ -126,6 +127,13 @@ public class Cartridge {
 	public void setRepoURL(String repoURL) {
     	this.repoURL = repoURL;
     }
-	
 
+
+    public String getDbUserName() {
+        return dbUserName;
+    }
+
+    public void setDbUserName(String dbUserName) {
+        this.dbUserName = dbUserName;
+    }
 }
