@@ -44,7 +44,7 @@
                 <module>andes/0.13.0-wso2v6</module>
                 <module>hive/0.8.1-wso2v6</module>
                 <module>hadoop/0.20.203.1-wso2v4</module>
-                <module>jclouds/1.6.0-wso2v1/vcloud</module>
+                <module>jclouds/vcloud/1.6.0-wso2v1</module>
                 <module>orbit/andes</module>
 		<!-- orbit/modules -->
 		<module>orbit/rampart-core</module>
