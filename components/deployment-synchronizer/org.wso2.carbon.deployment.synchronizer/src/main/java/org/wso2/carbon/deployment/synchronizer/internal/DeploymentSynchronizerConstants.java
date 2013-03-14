@@ -48,6 +48,7 @@ public class DeploymentSynchronizerConstants {
 
     public static final String REPOSITORY_TYPE_REGISTRY = "registry";
     public static final String REPOSITORY_TYPE_SVN = "svn";
+    public static final String REPOSITORY_TYPE_GIT = "git";
 
     // Defaults
     public static final int DEFAULT_POOL_SIZE = 20;
