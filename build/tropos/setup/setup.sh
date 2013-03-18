@@ -187,10 +187,6 @@ if [[ $adc = "true" ]]; then
         unzip ./axis2c-1.6.0.zip -d /opt
         mv /opt/axis2c-1.6.0 /opt/axis2c
     fi
-    if [[ ! -d /home/wso2/axis2c ]]; then
-        mkdir -p /home/wso2/axis2c
-        cp -a /opt/axis2c /home/wso2/axis2c/deploy
-    fi
 fi
 if [[ $elb = "true" ]]; then
     if [[ ! -d $elb_path ]]; then
@@ -349,13 +345,6 @@ if [[ $adc = "true" ]]; then
     #End set repo setup related stuff
     ###############################################################################################
 
-
-
-
-
-
-    # You must have LD_LIBRARY_PATH set for the mod_appfactory_svnauth.so module to access Axis2/C libraries.
-    export LD_LIBRARY_PATH=$axis2c_path/lib/:$LD_LIBRARY_PATH #Here /opt/axis2c is the Axis2/C client repository.
 
     mkdir -p /var/www/notify
     cp -f ./resources/notify.php /var/www/notify/index.php
