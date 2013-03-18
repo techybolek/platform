@@ -12,7 +12,7 @@ fi
 function help {
     echo ""
     echo "Give one or more of the servers to be setup in this machine. The available servers are"
-    echo "cc, elb, agent, adc, all. 'all' means you need to setup all servers in this machine."
+    echo "cc, elb, agent, sc, all. 'all' means you need to setup all servers in this machine."
     echo "usage:"
     echo "setup.sh -p\"<product list>\""
     echo "eg."
@@ -46,21 +46,21 @@ do
     if [[ $x = "agent" ]]; then
         agent="true"
     fi
-    if [[ $x = "adc" ]]; then
-        adc="true"
+    if [[ $x = "sc" ]]; then
+        sc="true"
     fi
     if [[ $x = "all" ]]; then
         cc="true"
         elb="true"
         agent="true"
-        adc="true"
+        sc="true"
     fi
     if [[ $x = "demo" ]]; then
         demo="true"
         cc="true"
         elb="true"
         agent="true"
-        adc="true"
+        sc="true"
     fi
 done
 product_list=`echo $product_list | sed 's/^ *//g' | sed 's/ *$//g'`
@@ -69,26 +69,15 @@ if [[ -z $product_list || $product_list = "" ]]; then
     exit 1
 fi
 
-if [[ $adc = "true" ]]; then
-    echo ${mb_path}
-
-    echo "Starting MB server ..." >> $LOG
-    nohup ${mb_path}/bin/wso2server.sh -DportOffset=$mb_port_offset &
-    echo "MB server started" >> $LOG
-    sleep $SLEEP
+if [[ $sc = "true" ]]; then
     
-    echo ${adc_path}
+    echo ${sc_path}
 
-    echo "Starting ADC server ..." >> $LOG
-    nohup ${adc_path}/bin/wso2server.sh -DportOffset=$adc_port_offset &
-    echo "ADC server started" >> $LOG
+    echo "Starting SC server ..." >> $LOG
+    nohup ${sc_path}/bin/wso2server.sh -DportOffset=$sc_port_offset &
+    echo "SC server started" >> $LOG
     sleep $SLEEP
 
-    echo ${is_path}
-
-    echo "Starting IS server ..." >> $LOG
-    nohup ${is_path}/bin/wso2server.sh -DportOffset=$is_port_offset &
-    echo "IS server started" >> $LOG
 fi
 
 if [[ $cc = "true" ]]; then

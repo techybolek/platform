@@ -377,7 +377,7 @@ if [[ $sc = "true" ]]; then
 
     echo "Set mb hostname and mb port in bin/wso2server.sh." >> $LOG
     cp -f ./bin/wso2server.sh bin/wso2server.sh.orig
-    cat bin/wso2server.sh.orig | sed -e "s@MB_HOSTNAME:MB_PORT@$mb_hostname:$mb_listen_port@g" > bin/wso2server.sh
+    cat bin/wso2server.sh.orig | sed -e "s@CC_HOSTNAME:CC_PORT@$cc_hostname:$mb_listen_port@g" > bin/wso2server.sh
 
     echo "Change CC hostname in repository/conf/cartridge-config.properties" >> $LOG
 
@@ -412,7 +412,7 @@ if [[ $sc = "true" ]]; then
     cat repository/conf/cartridge-config.properties.orig | sed -e "s@S2_DB_SCHEMA@$s2_db_schema@g" > repository/conf/cartridge-config.properties
 
     cp -f repository/conf/cartridge-config.properties repository/conf/cartridge-config.properties.orig
-    cat repository/conf/cartridge-config.properties.orig | sed -e "s@MB_HOSTNAME:MB_PORT@$mb_hostname:$mb_listen_port@g" > repository/conf/cartridge-config.properties
+    cat repository/conf/cartridge-config.properties.orig | sed -e "s@CC_HOSTNAME:CC_PORT@$cc_hostname:$mb_listen_port@g" > repository/conf/cartridge-config.properties
 
     cp -f repository/conf/cartridge-config.properties repository/conf/cartridge-config.properties.orig
     cat repository/conf/cartridge-config.properties.orig | sed -e "s@ELB_IP@$elb_ip@g" > repository/conf/cartridge-config.properties
@@ -682,7 +682,7 @@ fi # End Demo specific stuff
     cat repository/conf/cloud-controller.xml.orig | sed -e "s@<property name=\"jclouds.endpoint\" value=\"*.*\" />@<property name=\"jclouds.endpoint\" value=\"http://$nova_controller_hostname:5000/\" />@g" > repository/conf/cloud-controller.xml
 
     cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
-    cat repository/conf/cloud-controller.xml.orig | sed -e "s@MB_HOSTNAME:MB_PORT@$mb_hostname:$mb_listen_port@g" > repository/conf/cloud-controller.xml
+    cat repository/conf/cloud-controller.xml.orig | sed -e "s@CC_HOSTNAME:CC_PORT@$cc_hostname:$mb_listen_port@g" > repository/conf/cloud-controller.xml
 
     echo "In repository/conf/carbon.xml"
     cp -f repository/conf/carbon.xml repository/conf/carbon.xml.orig
@@ -713,11 +713,6 @@ fi
 
 
 
-
-
-
-
-
 if [[ $elb = "true" ]]; then
     #Setup ELB
     ##########
@@ -740,7 +735,7 @@ if [[ $elb = "true" ]]; then
     cat repository/conf/loadbalancer.conf.orig | sed -e "s@ENABLE_AUTOSCALER@$enable_autoscaler@g" > repository/conf/loadbalancer.conf
 
     cp -f repository/conf/loadbalancer.conf repository/conf/loadbalancer.conf.orig
-    cat repository/conf/loadbalancer.conf.orig | sed -e "s@MB_HOSTNAME:MB_PORT@$mb_hostname:$mb_listen_port@g" > repository/conf/loadbalancer.conf
+    cat repository/conf/loadbalancer.conf.orig | sed -e "s@CC_HOSTNAME:CC_PORT@$cc_hostname:$mb_listen_port@g" > repository/conf/loadbalancer.conf
 
     echo "Set hostname of the machine where elb run, in repository/conf/axis2/axis2.xml" >> $LOG
     #<!--parameter name="localMemberHost">ELB_HOSTNAME</parameter-->
