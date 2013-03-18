@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Die on any error:
 set -e
@@ -135,6 +135,7 @@ if [[ ! -d $JAVA_HOME ]]; then
     echo "Please set the JAVA_HOME environment variable for the running user"
     exit 1
 fi
+export JAVA_HOME=$JAVA_HOME
 
 if [[ ! -d $setup_dir ]]; then
     echo "Please set the parameter setup_dir to your Stratos2 download directory path in conf/setup.conf"
