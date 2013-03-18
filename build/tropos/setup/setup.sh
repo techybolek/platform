@@ -176,29 +176,25 @@ if [[ $sc = "true" ]]; then
         cp -rf ./lib /opt/
     fi
     if [[ ! -d $sc_path ]]; then
-        unzip ./wso2sc-1.0.0.zip -d /opt
-    fi
-    if [[ ! -d $is_path ]]; then
-        unzip ./wso2is-4.0.0.zip -d /opt
+        unzip ./$sc_pack -d /opt
     fi
     if [[ ! -d $axis2c_path ]]; then
-        unzip ./axis2c-1.6.0.zip -d /opt
-        mv /opt/axis2c-1.6.0 /opt/axis2c
+        unzip ./$axis2c_pack -d /opt
     fi
 fi
 if [[ $elb = "true" ]]; then
     if [[ ! -d $elb_path ]]; then
-        unzip ./wso2elb-2.0.3.zip -d /opt
+        unzip ./$elb_pack -d /opt
     fi
 fi
 if [[ $cc = "true" ]]; then
     if [[ ! -d $cc_path ]]; then
-        unzip ./wso2cc-1.0.0.zip -d /opt
+        unzip ./$cc_pack -d /opt
     fi
 fi
 if [[ $agent = "true" ]]; then
     if [[ ! -d $agent_path ]]; then
-        unzip ./wso2s2agent-1.0.0.zip -d /opt
+        unzip ./$agent_pack -d /opt
     fi
 fi
 
