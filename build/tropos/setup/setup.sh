@@ -13,14 +13,14 @@ source "./conf/setup.conf"
 cc="false"
 elb="false"
 agent="false"
-adc="false"
+sc="false"
 demo="false"
 product_list=""
 
 function help {
     echo ""
     echo "Give one or more of the servers to be setup in this machine. The available servers are"
-    echo "cc, elb, agent, adc, all or demo. 'all' means you need to setup all servers in this machine."
+    echo "cc, elb, agent, sc, all or demo. 'all' means you need to setup all servers in this machine."
     echo "demo means you will setup a demo server of S2 in a single physical machine which has Openstack installed."
     echo "This demo server include all S2 related packs."
     echo "usage:"
@@ -61,21 +61,21 @@ do
     if [[ $x = "agent" ]]; then
         agent="true"
     fi
-    if [[ $x = "adc" ]]; then
-        adc="true"
+    if [[ $x = "sc" ]]; then
+        sc="true"
     fi
     if [[ $x = "all" ]]; then
         cc="true"
         elb="true"
         agent="true"
-        adc="true"
+        sc="true"
     fi
     if [[ $x = "demo" ]]; then
         demo="true"
         cc="true"
         elb="true"
         agent="true"
-        adc="true"
+        sc="true"
     fi
 done
 product_list=`echo $product_list | sed 's/^ *//g' | sed 's/ *$//g'`
@@ -97,9 +97,9 @@ if [[ ( -z $hostname || -z $hostip ) ]]; then
     exit 1
 fi
 
-if [[ $adc = "true" ]]; then
+if [[ $sc = "true" ]]; then
     if [[ ( -z $git_user || -z $email|| -z $s2_db_user || -z $s2_db_pass || -z $hostname
-        || -z $adc_path || -z $is_path || -z $mb_path || -z $axis2c_path ) ]]; then
+        || -z $sc_path || -z $is_path || -z $axis2c_path ) ]]; then
         helpsetup
         exit 1
     fi
@@ -162,7 +162,7 @@ echo ""
 
 echo "$hostip    git.$stratos_domain" >> /etc/hosts
 
-if [[ $adc = "true" ]]; then
+if [[ $sc = "true" ]]; then
     if [[ ! -d $resource_path ]]; then
         cp -rf ./resources /opt/
     fi
@@ -174,14 +174,11 @@ if [[ $adc = "true" ]]; then
     if [[ ! -d $lib_path ]]; then
         cp -rf ./lib /opt/
     fi
-    if [[ ! -d $adc_path ]]; then
-        unzip ./wso2adc-1.0.0.zip -d /opt
+    if [[ ! -d $sc_path ]]; then
+        unzip ./wso2sc-1.0.0.zip -d /opt
     fi
     if [[ ! -d $is_path ]]; then
         unzip ./wso2is-4.0.0.zip -d /opt
-    fi
-    if [[ ! -d $mb_path ]]; then
-        unzip ./wso2mb-2.0.1.zip -d /opt
     fi
     if [[ ! -d $axis2c_path ]]; then
         unzip ./axis2c-1.6.0.zip -d /opt
@@ -204,7 +201,7 @@ if [[ $agent = "true" ]]; then
     fi
 fi
 
-if [[ $adc = "true" ]]; then
+if [[ $sc = "true" ]]; then
     ##
     mysql -u${userstore_db_user} -p${userstore_db_pass} -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%'   IDENTIFIED BY '${userstore_db_pass}' WITH GRANT OPTION;flush privileges;"
 
@@ -252,7 +249,7 @@ if [[ $adc = "true" ]]; then
         su - $s2_user -c "ssh-keygen -t rsa"
         su - $s2_user -c "cp -a /home/$s2_user/.ssh/id_rsa.pub /home/$s2_user/$s2_user.pub"
 
-        cp -f /home/$s2_user/.ssh/id_rsa $adc_path/
+        cp -f /home/$s2_user/.ssh/id_rsa $sc_path/
 
         # Add $s2_user.pub key to /home/git/gitolite-admin/keydir/
         cp -f /home/$s2_user/$s2_user.pub /home/git/gitolite-admin/keydir/
@@ -309,7 +306,7 @@ if [[ $adc = "true" ]]; then
         #CacheMaxEntries 100
 
         cp -f ./resources/git /etc/apache2/sites-available/git.orig
-        cat /etc/apache2/sites-available/git.orig | sed -e "s@IS_HOSTNAME:IS_PORT@$adc_hostname:$adc_port@g" | sed -e "s@STRATOS_DOMAIN@$stratos_domain@g" > /etc/apache2/sites-available/git
+        cat /etc/apache2/sites-available/git.orig | sed -e "s@IS_HOSTNAME:IS_PORT@$sc_hostname:$sc_port@g" | sed -e "s@STRATOS_DOMAIN@$stratos_domain@g" > /etc/apache2/sites-available/git
 
 
         echo "Now to check whether paths set to /var/www execute" >> $LOG
@@ -359,7 +356,7 @@ if [[ $adc = "true" ]]; then
     echo "You need to import the $s2_user.pub into openstack(With the same name mentioned in /opt/wso2cc-1.0.0/repository/deployment/server/cartridges/<cartridge name.xml>)"
     echo "Click the 'project' tab and then 'Access & Security' menu. Under 'Keypairs' section click 'Import Keypairs'. If there is a key already with the"
     echo "same name, first delete it before importing your key"
-    echo "Open another command line interface into ADC node and"
+    echo "Open another command line interface into SC node and"
     echo "cat /home/$s2_user/$s2_user.pub" 
     echo "Cut and paste the output into the box that you get when execute import keys of the openstack dashboard."
     echo "When you are ready press any key to continue"
@@ -367,16 +364,16 @@ if [[ $adc = "true" ]]; then
     read
 
 
-    #Setup ADC
+    #Setup SC
     ##########
-    echo "Setup ADC" >> $LOG
-    echo "Configuring the ADC"
+    echo "Setup SC" >> $LOG
+    echo "Configuring the SC"
 
-    cp -f ./config/adc/repository/conf/cartridge-config.properties $adc_path/repository/conf/
-    cp -f ./config/adc/bin/wso2server.sh $adc_path/bin/
-    cp -f ./config/adc/repository/conf/datasources/master-datasources.xml $adc_path/repository/conf/datasources/
-    cp -f ./$mysql_connector_jar $adc_path/repository/components/lib/
-    pushd $adc_path
+    cp -f ./config/sc/repository/conf/cartridge-config.properties $sc_path/repository/conf/
+    cp -f ./config/sc/bin/wso2server.sh $sc_path/bin/
+    cp -f ./config/sc/repository/conf/datasources/master-datasources.xml $sc_path/repository/conf/datasources/
+    cp -f ./$mysql_connector_jar $sc_path/repository/components/lib/
+    pushd $sc_path
 
     echo "Set mb hostname and mb port in bin/wso2server.sh." >> $LOG
     cp -f ./bin/wso2server.sh bin/wso2server.sh.orig
@@ -397,7 +394,7 @@ if [[ $adc = "true" ]]; then
     cat repository/conf/cartridge-config.properties.orig | sed -e "s@GIT_IP@$git_ip@g" > repository/conf/cartridge-config.properties
 
     cp -f repository/conf/cartridge-config.properties repository/conf/cartridge-config.properties.orig
-    cat repository/conf/cartridge-config.properties.orig | sed -e "s@ADC_HOSTNAME:ADC_PORT@$adc_hostname:$adc_port@g" > repository/conf/cartridge-config.properties
+    cat repository/conf/cartridge-config.properties.orig | sed -e "s@SC_HOSTNAME:SC_PORT@$sc_hostname:$sc_port@g" > repository/conf/cartridge-config.properties
 
     cp -f repository/conf/cartridge-config.properties repository/conf/cartridge-config.properties.orig
     cat repository/conf/cartridge-config.properties.orig | sed -e "s@IS_HOSTNAME:IS_PORT@$is_hostname:$is_port@g" > repository/conf/cartridge-config.properties
@@ -445,55 +442,9 @@ if [[ $adc = "true" ]]; then
     cp -f repository/conf/datasources/master-datasources.xml repository/conf/datasources/master-datasources.xml.orig
     cat repository/conf/datasources/master-datasources.xml.orig | sed -e "s@USERSTORE_DB_PASS@$userstore_db_pass@g" > repository/conf/datasources/master-datasources.xml
 
-    sed -i "s/ADC_LOCAL_MEMBER_HOST/${adc_ip}/g" repository/conf/axis2/axis2.xml
+    sed -i "s/SC_LOCAL_MEMBER_HOST/${sc_ip}/g" repository/conf/axis2/axis2.xml
 
-    popd # adc_path
-
-    #Setup MB
-    #########
-    echo "Setup MB" >> $LOG
-    cp -f ./config/mb/repository/conf/advanced/qpid-virtualhosts.xml $mb_path/repository/conf/advanced/
-    cp -f ./config/mb/repository/conf/carbon.xml $mb_path/repository/conf/
-    pushd $mb_path
-    echo "Set settings in mb/repository/conf/advanced/qpid-virtualhosts.xml" >> $LOG
-    cp -f repository/conf/advanced/qpid-virtualhosts.xml repository/conf/advanced/qpid-virtualhosts.xml.orig
-    cat repository/conf/advanced/qpid-virtualhosts.xml.orig | sed -e "s@MB_CASSANDRA_PORT@$mb_cassandra_port@g" > repository/conf/advanced/qpid-virtualhosts.xml
-
-    echo "Set settings in mb/repository/conf/carbon.xml" >> $LOG
-    cp -f repository/conf/carbon.xml repository/conf/carbon.xml.orig
-    cat repository/conf/carbon.xml.orig | sed -e "s@OFFSET@$mb_port_offset@g" > repository/conf/carbon.xml
-    #Before starting mb delete rm -rf tmp/ at mb root folder
-    rm -rf ./tmp
-    popd #mb_path
-
-
-
-    #Setup IS
-    #########
-
-    echo "Setup IS" >> $LOG
-    cp -f ./config/is/repository/conf/datasources/master-datasources.xml $is_path/repository/conf/datasources/
-    cp -f ./$mysql_connector_jar $is_path/repository/components/lib/
-    pushd $is_path
-
-    echo "Set Following in repository/conf/datasources/master-datasources.xml" >> $LOG
-    cp -f repository/conf/datasources/master-datasources.xml repository/conf/datasources/master-datasources.xml.orig
-    cat repository/conf/datasources/master-datasources.xml.orig | sed -e "s@USERSTORE_DB_HOSTNAME@$userstore_db_hostname@g" > repository/conf/datasources/master-datasources.xml
-
-    cp -f repository/conf/datasources/master-datasources.xml repository/conf/datasources/master-datasources.xml.orig
-    cat repository/conf/datasources/master-datasources.xml.orig | sed -e "s@USERSTORE_DB_PORT@$userstore_db_port@g" > repository/conf/datasources/master-datasources.xml
-
-    cp -f repository/conf/datasources/master-datasources.xml repository/conf/datasources/master-datasources.xml.orig
-    cat repository/conf/datasources/master-datasources.xml.orig | sed -e "s@USERSTORE_DB_SCHEMA@$userstore_db_schema@g" > repository/conf/datasources/master-datasources.xml
-
-    cp -f repository/conf/datasources/master-datasources.xml repository/conf/datasources/master-datasources.xml.orig
-    cat repository/conf/datasources/master-datasources.xml.orig | sed -e "s@USERSTORE_DB_USER@$userstore_db_user@g" > repository/conf/datasources/master-datasources.xml
-
-    cp -f repository/conf/datasources/master-datasources.xml repository/conf/datasources/master-datasources.xml.orig
-    cat repository/conf/datasources/master-datasources.xml.orig | sed -e "s@USERSTORE_DB_PASS@$userstore_db_pass@g" > repository/conf/datasources/master-datasources.xml
-
-    popd #is_path
-
+    popd # sc_path
 
 
 
@@ -514,7 +465,7 @@ if [[ $adc = "true" ]]; then
     #Copy the https://svn.wso2.org/repos/wso2/scratch/hosting/build/tropos/resources/db.stratos.com file into /etc/bind. Edit it as necessary
     cp -f ./resources/db.stratos.com $resource_path/db.$stratos_domain
     echo "Set ELb Hostname in /etc/bind/db.stratos.com" >> $LOG
-    cat $resource_path/db.$stratos_domain | sed -e "s@ADC_IP@$adc_ip@g" | sed -e "s@ELB_IP@$elb_ip@g" | sed -e "s@STRATOS_DOMAIN@$stratos_domain@g" > /etc/bind/db.$stratos_domain
+    cat $resource_path/db.$stratos_domain | sed -e "s@SC_IP@$sc_ip@g" | sed -e "s@ELB_IP@$elb_ip@g" | sed -e "s@STRATOS_DOMAIN@$stratos_domain@g" > /etc/bind/db.$stratos_domain
 
     echo "Add the following content to /etc/bind/named.conf.local" >> $LOG
     echo "zone \"$stratos_domain\" {" >> /etc/bind/named.conf.local
@@ -527,10 +478,10 @@ if [[ $adc = "true" ]]; then
     cp -f ./scripts/remove_entry_zone_file.sh $script_path/
 
 
-    chmod 600 $adc_path/id_rsa
-    chown $s2_user.$s2_user $adc_path/id_rsa
-    echo "End configuring the ADC"
-fi #End ADC server installation
+    chmod 600 $sc_path/id_rsa
+    chown $s2_user.$s2_user $sc_path/id_rsa
+    echo "End configuring the SC"
+fi #End SC server installation
 
 
 
@@ -544,7 +495,7 @@ if [[ $cc = "true" ]]; then
     if [[ $demo = "true" ]]; then
         cp -f /home/$s2_user/.ssh/id_rsa $cc_path/
     else
-        echo "Copy the /home/$s2_user/.ssh/id_rsa in ADC host machine into $cc_path"
+        echo "Copy the /home/$s2_user/.ssh/id_rsa in SC host machine into $cc_path"
         echo "When you are ready press any key to continue"
         read
     fi
@@ -564,6 +515,11 @@ if [[ $cc = "true" ]]; then
 
     cp -f ./config/cc/repository/conf/cloud-controller.xml $cc_path/repository/conf/
     cp -f ./config/cc/repository/conf/carbon.xml $cc_path/repository/conf/
+
+    #MB specific file copying
+    cp -f ./config/cc/repository/conf/advanced/qpid-virtualhosts.xml $cc_path/repository/conf/advanced/
+    cp -f ./config/cc/repository/conf/carbon.xml $cc_path/repository/conf/
+    #End MB specific file copying
 
     pushd $cc_path
 
@@ -689,9 +645,9 @@ sed -i "s/AS_SERVICE_HOST/${appserver_service_host}/g" repository/resources/payl
 sed -i "s/AS_SERVICE_DOMAIN/${appserver_service_domain}/g" repository/resources/payload/appserver_as_001.txt
 sed -i "s/PAYLOAD_ELBHOST/${elb_ip}/g" repository/resources/payload/appserver_as_001.txt
 sed -i "s/PAYLOAD_ELBPORT/${elb_cluster_port}/g" repository/resources/payload/appserver_as_001.txt
-sed -i "s/PAYLOAD_ADCHOST/${adc_ip}/g" repository/resources/payload/appserver_as_001.txt
-sed -i "s/PAYLOAD_ADC_CLUSTER_PORT/${adc_cluster_port}/g" repository/resources/payload/appserver_as_001.txt
-sed -i "s/PAYLOAD_ADCPORT/${adc_port}/g" repository/resources/payload/appserver_as_001.txt
+sed -i "s/PAYLOAD_SCHOST/${sc_ip}/g" repository/resources/payload/appserver_as_001.txt
+sed -i "s/PAYLOAD_SC_CLUSTER_PORT/${sc_cluster_port}/g" repository/resources/payload/appserver_as_001.txt
+sed -i "s/PAYLOAD_SCPORT/${sc_port}/g" repository/resources/payload/appserver_as_001.txt
 sed -i "s/PAYLOAD_GITHOSTNAME/git.${stratos_domain}/g" repository/resources/payload/appserver_as_001.txt
 sed -i "s/PAYLOAD_GITIP/${git_ip}/g" repository/resources/payload/appserver_as_001.txt
 sed -i "s/PAYLOAD_USERSTORE_DBHOST/${hostip}/g" repository/resources/payload/appserver_as_001.txt
@@ -735,6 +691,21 @@ fi # End Demo specific stuff
     #Before starting CC we need to delete
     #rm ./repository/conf/service-topology.conf
     #rm ./repository/conf/service-topology.conf.back
+
+
+    #Setup MB
+    #########
+    echo "Setup MB" >> $LOG
+    echo "Set settings in cc/repository/conf/advanced/qpid-virtualhosts.xml" >> $LOG
+    cp -f repository/conf/advanced/qpid-virtualhosts.xml repository/conf/advanced/qpid-virtualhosts.xml.orig
+    cat repository/conf/advanced/qpid-virtualhosts.xml.orig | sed -e "s@MB_CASSANDRA_PORT@$mb_cassandra_port@g" > repository/conf/advanced/qpid-virtualhosts.xml
+
+    echo "Set settings in mb/repository/conf/carbon.xml" >> $LOG
+    cp -f repository/conf/carbon.xml repository/conf/carbon.xml.orig
+    cat repository/conf/carbon.xml.orig | sed -e "s@OFFSET@$cc_port_offset@g" > repository/conf/carbon.xml
+    #Before starting sc delete rm -rf tmp/ at mb root folder
+    rm -rf ./tmp
+
 
     popd #cc_path
     echo "End configuring the Cloud Controller"
@@ -816,17 +787,17 @@ if [[ $agent = "true" ]]; then
     cp -f ./conf/agent.properties conf/agent.properties.orig
     cat conf/agent.properties.orig | sed -e "s@ELB_HOSTNAME@$elb_hostname@g" > conf/agent.properties
 
-    echo "Set ADC_PATH in conf/agent.properties." >> $LOG
+    echo "Set SC_PATH in conf/agent.properties." >> $LOG
     cp -f ./conf/agent.properties conf/agent.properties.orig
-    cat conf/agent.properties.orig | sed -e "s@ADC_PATH@$adc_path@g" > conf/agent.properties
+    cat conf/agent.properties.orig | sed -e "s@SC_PATH@$sc_path@g" > conf/agent.properties
 
-    echo "Set ADC_HOST in conf/agent.properties." >> $LOG
+    echo "Set SC_HOST in conf/agent.properties." >> $LOG
     cp -f ./conf/agent.properties conf/agent.properties.orig
-    cat conf/agent.properties.orig | sed -e "s@ADC_HOSTNAME@$adc_hostname@g" > conf/agent.properties
+    cat conf/agent.properties.orig | sed -e "s@SC_HOSTNAME@$sc_hostname@g" > conf/agent.properties
 
-    echo "Set ADC_PORT in conf/agent.properties." >> $LOG
+    echo "Set SC_PORT in conf/agent.properties." >> $LOG
     cp -f ./conf/agent.properties conf/agent.properties.orig
-    cat conf/agent.properties.orig | sed -e "s@ADC_PORT@$adc_port@g" > conf/agent.properties
+    cat conf/agent.properties.orig | sed -e "s@SC_PORT@$sc_port@g" > conf/agent.properties
 
 
     popd #agent_path
@@ -845,7 +816,7 @@ fi
 #####################
 echo "Starting the servers" >> $LOG
 #Starting the servers in the following order is recommended
-#mb, cc, elb, is, agent, adc
+#mb, cc, elb, is, agent, sc
 
 chown $s2_user:$s2_user -R /opt
 
@@ -857,9 +828,9 @@ chmod -R 777 /var/log/s2
 su - $s2_user -c "source $setup_dir/conf/setup.conf;$setup_dir/start_server.sh -p$product_list >> $LOG"
 
 echo "Servers started. Please look at $LOG file for server startup details"
-if [[ $adc == "true" ]]; then
+if [[ $sc == "true" ]]; then
     echo "**************************************************************"
-    echo "Management Console : https://$HOSTNAME:$adc_port/"
+    echo "Management Console : https://$HOSTNAME:$sc_port/"
     echo "**************************************************************"
 fi
 
