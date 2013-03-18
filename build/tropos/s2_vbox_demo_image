@@ -1,0 +1,102 @@
+Install Openstack
+----------------
+- Launch Ubuntu 12.04 precise LTS 64bit m1.large instance with 40GB HD. 4G memory.
+- apt-get update
+- adduser wso2(password g)
+- add wso2 to sudoers list
+wso2    ALL=(ALL:ALL) ALL
+
+- add <ip> s2demo.wso2.com into /etc/hosts
+- copy OpenstackInstaller, client wso2 user home
+- Log in as wso2 user
+
+Add virtual interfaces
+
+auto eth1
+iface eth1 inet static
+address 192.168.92.10
+network 192.168.92.0
+netmask 255.255.255.0
+broadcast 192.168.92.255
+
+auto eth2
+iface eth2 inet manual
+up ifconfig eth2 up
+
+reboot
+
+- Edit oscontrollerinsaller.sh and install
+
+    #./OSinstall.sh -T all -C s2demo.wso2.com -f 14.1.0.0/16 -s 512 -P eth1 -A admin -t wso2 -v lxc
+    ./OSinstall.sh -T all -C s2demo.wso2.com -F 192.168.92.64/26 -f 192.168.93.64/26 -s 62 -P eth1 -p eth2 -A admin -t wso2 -v lxc
+
+
+Ports open should be 22, 80, 53, 443, 3306, 8280, 9445, 9443, 9763, 4103,4025 and 8080
+cd client; init.sh
+$ source adminrc
+$ nova secgroup-add-rule default tcp 8280 8280  0.0.0.0/0
+$ nova secgroup-add-rule default tcp 9443 9443  0.0.0.0/0
+$ nova secgroup-add-rule default tcp 9445 9445  0.0.0.0/0
+$ nova secgroup-add-rule default tcp 9763 9763  0.0.0.0/0
+$ nova secgroup-add-rule default tcp 4025 4025  0.0.0.0/0
+
+
+- create upload folder and first copy php os image
+- upload php
+    ./imageupload.sh -a admin -p openstack -t wso2 -C s2demo.wso2.com -x amd64 -y ubuntu -w 12.04 -z /home/wso2/upload/ubuntu-12.04-server-php-cloudimg-amd64.tar.gz -n ubuntu-12.04-server-php-cloudimg-amd64
+
+- then delete upload/php image
+- Do the same for mysql image
+
+    #./imageupload.sh -a admin -p openstack -t wso2 -C s2demo.wso2.com -x amd64 -y ubuntu -w 12.04 -z /home/wso2/upload/ubuntu-12.04-server-mysql-cloudimg-amd64.tar.gz -n ubuntu-12.04-server-mysql-cloudimg-amd64
+
+Copy the demo_setup.tar.gz into /home/wso2
+
+Now take snapshot
+
+- create instances of php and mysql and test
+- delete the instances and make sure /var/lib/nova/instances/instances-* does not exist
+
+- Clone the snapshot you taken as s2demo
+
+
+Install S2
+----------
+
+
+
+
+- Copy demo_setup.zip folder into /home/wso2 and unzip
+- copy mysql jar, is, mb, jdk into /home/wso2/demo_setup/
+- Move /home/wso2/demo_setup/software/cli tool to /home/wso2/
+
+- In demo_setup/conf/setup.conf file
+
+  Change setup directory to
+  export setup_dir="/home/wso2/demo_setup"
+  Make root mysql password wso2123
+
+  Change host name to s2demo.wso2.com
+  export hostname="s2demo.wso2.com"
+ 
+- In demo_setup/clean.sh
+  Make root mysql password wso2123
+
+- update /home/wso2/demo_setup/conf/setup.conf php and mysql and as image id's
+- update HOSTIP and GIT_IP with the eth1 ip address
+
+- Check /home/wso2/demo_setup folder content. It should contain 
+  jdk1.6.0_24.zip mysql-connector-java-5.1.17-bin.jar  wso2is-4.0.0.zip  wso2mb-2.0.1.zip wso2cc-1.0.0.zip wso2elb-2.0.3.zip wso2s2agent-1.0.0.zip wso2adc-1.0.0.zip wso2s2cli-1.0.1.zip
+
+Export to  s2demo.ova
+
+Testing
+=======
+- Reboot
+- create an openstack mysql instances and test
+- cd demo_setup
+- run setup.sh -pdemo and check whether 6 java processes are up
+- Do any other test
+
+- If any test fail import s2demo.ova as a new VM  and remove demo_setup.zip and copy the new demo_setup.zip and 
+  do the testing again. Do this until all tests are successful. Final s2demo.ova is the one released.

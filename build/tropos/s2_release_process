@@ -1,0 +1,29 @@
+S2 packs release
+================
+Checkout https://svn.wso2.org/repos/wso2/scratch/hosting/build/tropos
+cd tropos
+Copy all release binaries to binaries folder
+run s2_release.sh
+This will create wso2s2-1.0.0.zip which is ready for upload
+
+S2 vbox demo vm release
+====================
+Copy mb and is into extra folder
+run s2_demo.sh
+This will create ./demo_setup.zip which is ready for testing
+For informatin on creating the image from ground up see
+s2_vbox_demo_image
+
+Uploading the release
+=====================
+Copy s2 release pack, demo pack and any cartridges into release folder
+cd release
+Update the sign_packs.sh script
+
+Sign packs using sign_packs.sh script
+scp s2 release files
+scp demo ova files
+scp cartridges files
+scp KEYS file
+
+

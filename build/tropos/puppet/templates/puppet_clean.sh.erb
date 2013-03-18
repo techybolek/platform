@@ -1,0 +1,83 @@
+#!/bin/bash
+#
+# This will clean the entire Stratos system from the server.
+# Once run, you need to re-run the puppet_init.sh to recover
+# the setup.
+#
+
+PACKS_DIR=/mnt/packs
+STRATOS_DIR=/mnt/<%= server_ip %>
+ARCHIVE_DIR=/mnt/archive
+
+RM=`which rm`
+KILL=`which kill`
+PKILL=`which pkill`
+CAT=`which cat`
+FIND=`which find`
+ECHO=`which echo`
+MKDIR=`which mkdir`
+RSYNC=`which rsync`
+DATE=`which date`
+
+DATE=`${DATE} +%Y%m%d%H%M`
+
+function _archive_logs {
+	OP=${1}
+	
+	if [ -d ${ARCHIVE_DIR}/${OP} ]; then
+		${RM} -rf ${ARCHIVE_DIR}/${OP}
+	fi
+
+	if [ ${OP} == "all" ]; then
+		for S in `find ${STRATOS_DIR} -type d -iname "wso2*-*.*" -exec basename {} \;`
+		do
+			${MKDIR} -p ${ARCHIVE_DIR}/${OP}/${DATE}/
+			${ECHO} -e "\nDumping ${S} to ${ARCHIVE_DIR}/${OP}/${DATE}/"
+			${RSYNC} -arz ${STRATOS_DIR}/${S} ${ARCHIVE_DIR}/${OP}/${DATE}/
+		done
+	else
+		SERVICE=`${FIND} ${STRATOS_DIR} -type d -iname "wso2*${OP}*" -exec basename {} \;`
+		
+		${MKDIR} -p ${ARCHIVE_DIR}/${DATE}/
+		${ECHO} -e "\nDumping ${SERVICE} to ${ARCHIVE_DIR}/${DATE}/${SERVICE}/"
+		${RSYNC} -arz ${STRATOS_DIR}/${SERVICE} ${ARCHIVE_DIR}/${DATE}/
+	fi
+}
+
+if [ $# -eq 0 ]; then
+
+	${ECHO} -e "\nCleaning ${STRATOS_DIR}"
+	${ECHO} -e "\nCleaning ${PACKS_DIR}"
+
+	_archive_logs all
+
+	for PID in `find ${STRATOS_DIR} -type f -name "wso2carbon.pid" -exec ${CAT} {} \;`
+	do
+		${KILL} -9 ${PID}
+		${RM} -rf ${STRATOS_DIR}/*
+		${RM} -rf ${PACKS_DIR}/*
+	done
+else
+	for SERVICE in $@
+	do
+		if [ ! -f ${PACKS_DIR}/wso2${SERVICE}*.zip ]; then
+			${ECHO} -e "\nwso2${SERVICE}*.zip not found in ${PACKS_DIR}"
+		else
+			${ECHO} -e "\nRemoving wso2${SERVICE}*.zip"
+			${RM} ${PACKS_DIR}/wso2${SERVICE}*.zip
+		fi
+	
+		SERVICE_DIR=`${FIND} ${STRATOS_DIR} -type d -iname "wso2${SERVICE}*"`
+	
+		if [ ! -d ${SERVICE_DIR} ]; then
+			${ECHO} -e "\nNo deployment found for ${SERVICE}"
+		else
+			PID=`${CAT} ${SERVICE_DIR}/wso2carbon.pid`
+			_archive_logs ${SERVICE}
+			${ECHO} -e "\nRemoving ${SERVICE} with the pid ${PID}"
+			${KILL} -9 ${PID}
+			${RM} -rf ${SERVICE_DIR}
+		fi
+	done
+fi
+

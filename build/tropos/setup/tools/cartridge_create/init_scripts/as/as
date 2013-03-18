@@ -1,0 +1,24 @@
+#!/bin/bash
+INSTANCE=$1
+INSTANCE_USER=$2
+KEY=$3
+SOFTWARE=$4
+
+SCP="scp -i ./$KEY"
+SSH="ssh -i ./$KEY"
+
+$SCP ./wso2-cartridge-init.sh $INSTANCE_USER@$INSTANCE:
+$SCP ./as.ctrg $INSTANCE_USER@$INSTANCE:
+$SCP ./get-launch-params.rb $INSTANCE_USER@$INSTANCE:
+$SCP ./wso2as-5.0.1.tar.gz $INSTANCE_USER@$INSTANCE:
+$SCP ./jdk1.6.0_33.tar.gz $INSTANCE_USER@$INSTANCE:
+
+# Copy additional software
+arr=$(echo $SOFTWARE | tr ":" "\n")
+for x in $arr
+do
+   $SCP $x $INSTANCE_USER@$INSTANCE:
+done
+
+# Execute the cartridge creation process in the remoter server
+$SSH $INSTANCE_USER@$INSTANCE "sudo chmod 755 ./as.ctrg;sudo ./as.ctrg"

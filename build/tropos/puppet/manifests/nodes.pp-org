@@ -1,0 +1,703 @@
+stage { 'configure': require => Stage['main'] }
+stage { 'deploy': require => Stage['configure'] }
+
+node basenode {
+        $package_repo 		= "http://puppet-stratos-packs.s3-website-us-east-1.amazonaws.com/stratos-1.6"
+        $depsync_svn_repo 	= "https://svn.stratoslive.wso2.com/wso2/repo/slive/"
+	$local_package_dir	= "/mnt/packs/"
+	$deploy_new_packs	= "true"
+}
+
+node confignode inherits basenode  {
+	## Service subdomains
+	$stratos_domain 	= "stratoslive.wso2.com"
+	$as_subdomain 		= "appserver"
+	$bam_subdomain 		= "monitor"
+	$bps_subdomain 		= "process"
+	$brs_subdomain 		= "rule"
+	$cep_subdomain 		= "cep"
+	$dss_subdomain 		= "data"
+	$esb_subdomain 		= "esb"
+	$gs_subdomain 		= "gadget"
+	$cg_subdomain 		= "cloudgateway"
+	$ts_subdomain 		= "task"
+	$governance_subdomain 	= "governance"
+	$is_subdomain 		= "identity"
+	$mb_subdomain 		= "messaging"
+	$ms_subdomain 		= "mashup"
+	$ss_subdomain 		= "storage"
+	$am_subdomain 		= "api"
+	$management_subdomain 	= "management"
+
+	## MySQL server configuration details
+	$mysql_server_1 	= "mysql1.stratoslive.wso2.com"	
+	$mysql_server_2 	= "mysql2.stratoslive.wso2.com"	
+	$mysql_port 		= "3306"
+	$max_connections 	= "100000"
+	$max_active 		= "150"
+	$max_wait 		= "360000"
+	
+	## Deployment Synchronizer
+	$repository_type 	= "svn"
+	$svn_user 		= "wso2"
+	$svn_password 		= "aXNxwpr3HnvAH07"	
+
+	## Auto-scaler
+	$keystore_password 	= "wso2carbon"
+	$auto_scaler_epr 	= "http://10.96.158.31:9863/services/AutoscalerService/"	
+	$auto_scaler_task_interval = "60000"
+	$server_startup_delay 	= "60000"
+
+	## Database detilas
+	$registry_user 		= "registry"
+	$registry_password 	= "3HLw31L9KtdtaUQqdBbE3ujm8CL5uogMis1zBg2z"
+	$registry_database 	= "governance"
+
+	$hive_database 		= "metastore_db"
+	$rss_database 		= "rss_db"
+	$rss_user 		= "rss_db"
+	$rss_password 		= "MigufcXoyiaQx6uyuBPLUAIjmXmeefIy0guAaqX9"	
+	$rss_instance_user 	= "wso2admin"	
+	$rss_instance_password 	= "6b8KwXFg83CRCNB"	
+
+	$rss_instance0		= "rss0"
+	$rss_instance1		= "rss1"
+	$rss_instance2 		= "rss2"
+
+	$billing_user 		= "billing"
+	$billing_password 	= "WLHXSKoXXtGAxVstg565JVHKyvAqAGGSvHMzAzob"
+	$billing_database 	= "billing"
+	$billing_datasource 	= "WSO2BillingDS"
+
+	$userstore_user 	= "userstore"
+	$userstore_password 	= "8snAiMxI5PJ5y0LAxzWg341J91rL6chuJ83Ij8uX"
+	$userstore_database 	= "userstore"
+
+	## BPS database for both BPS and GReg
+	$bps_user 		= "bps"
+	$bps_password 		= "LnhwV0poXT49BxDAe3fh3bWoFtDqHRtGxy918XXE"
+	$bps_database 		= "bps"
+
+	## Cassandra details
+	$css0_subdomain 	= "node0.cassandra"
+	$css1_subdomain 	= "node1.cassandra"
+	$css2_subdomain 	= "node2.cassandra"
+	$css_cluster_name 	= "Stratos Dev Setup"
+	$css_port		= "9160"
+	$cassandra_username	= "cassandra"
+	$cassandra_password	= "qnzyEX7s5AdvApIJxR8yYFuV5Rhqa0JaCliaSFoX"
+	#$cassandra_password	= "1YDqjRaLNGN/DiirHAeD3T7U0m24oz6/U/0po53T"
+	$css_replication_factor = "3"
+	$hdfs_url               = "hadoop0"
+        $hdfs_port              = "9000"
+        $hdfs_job_tracker_port  = "9001"
+
+	## Hadoop details
+        $hadoop1_subdomain      = "hadoop1"
+        $hadoop2_subdomain      = "hadoop2"
+        $dfs_replication        = "1"
+        $hadoop_heapsize        = "1024"
+
+	## LOGEVENT configurations
+	$receiver_url		= "receiver.stratoslive.wso2.com"
+	$receiver_port		= "7617"
+	$receiver_secure_port	= "7717"
+	$receiver_username 	= "cassandra"
+	$receiver_password 	= "1YDqjRaLNGN/DiirHAeD3T7U0m24oz6/U/0po53T"
+
+	## BAM Analyzer details
+	$analyzer_subdomain     = "analyzer"
+
+	## Management Details
+	$paypal_url		= "https://www.sandbox.paypal.com/webscr?cmd=_express-checkout&amp;token="
+	$paypal_api_username	= "amila._1298269926_biz_api1.gmail.com"
+	$paypal_api_password	= "1298269936"
+	$paypal_api_signature	= "A-o7r-w63QP-eYC0F5GtdYr9iHR6AXTodDTbyn7ZBcsjlCb2Zxvzcmmj"
+	$paypal_env		= "sandbox"
+	$notification_email	= "damitha@wso2.com"
+	$finance_email		= "amilam@wso2.com"
+	$super_admin_email	= "sanjaya@wso2.com"
+	$stratos_admin_user	= "stratos"
+	$stratos_admin_password = "aw9O8xu7pqPdMXV7+DVoPIx/I80WDfEJLSA/hAKW"
+
+	## Google Analytics URLS
+	$google_manager		= "http://c.content.wso2.com/stratoslive-scripts/stratoslive.js"
+	$google_greg		= "http://c.content.wso2.com/stratoslive-scripts/governance-stratoslive.js"
+	$google_as		= "http://c.content.wso2.com/stratoslive-scripts/appserver-stratoslive.js"
+	$google_ts		= "http://c.content.wso2.com/stratoslive-scripts/appserver-stratoslive.js"
+	$google_is		= "http://c.content.wso2.com/stratoslive-scripts/identity-stratoslive.js"
+	$google_esb		= "http://c.content.wso2.com/stratoslive-scripts/esb-stratoslive.js"
+	$google_dss		= "http://c.content.wso2.com/stratoslive-scripts/dss-stratoslive.js"
+	$google_bps		= "http://c.content.wso2.com/stratoslive-scripts/process-stratoslive.js"
+	$google_bam		= "http://c.content.wso2.com/stratoslive-scripts/monitor-stratoslive.js"
+	$google_brs		= "http://c.content.wso2.com/stratoslive-scripts/rule-stratoslive.js"
+	$google_cg		= "http://c.content.wso2.com/stratoslive-scripts/cg-stratoslive.js"
+	$google_ss		= "http://c.content.wso2.com/stratoslive-scripts/ss-stratoslive.js"
+	$google_cep		= "http://c.content.wso2.com/stratoslive-scripts/cep-stratoslive.js"
+	$google_mb		= "http://c.content.wso2.com/stratoslive-scripts/cep-stratoslive.js"
+
+
+
+
+	## Server details for billing
+	$time_zone		= "GMT-8:00"
+}
+
+### PUPPET-DEV STRATOS NODES IN LK VMs ####
+
+node 'puppet.novalocal' inherits confignode {
+	$server_ip 	= $ipaddress
+	
+	## Automatic failover
+        $virtual_ip     = "192.168.4.250"
+        $interface      = "eth0"
+        $check_interval = "2"
+        $priority       = "100"
+        $state          = "MASTER"
+	
+	include system_config
+        
+
+	class {"stratos::elb":
+                services           =>  ["identity,*,mgt",
+                                        "governance,*,mgt"],
+                version            => "2.0.3",
+                maintenance_mode   => "true",
+                auto_scaler        => "false",
+                auto_failover      => "false",
+		owner		   => "root",
+		group		   => "root",
+		target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+
+#	class {"stratos::esb":
+#                version            => "4.6.0",
+#                offset             => 2,
+#                tribes_port        => 4200,
+#                config_db          => "esb_config",
+#                maintenance_mode   => "true",
+#                depsync            => "true",
+#                sub_cluster_domain => "worker",
+#		owner		   => "kurumba",
+#		group		   => "kurumba",
+#                target             => "/mnt/${server_ip}",
+#                stage              => "deploy",
+#        }
+#
+#	class {"stratos::dss":
+#                version            => "3.0.1",
+#                offset             => 3,
+#                tribes_port        => 4300,
+#                config_db          => "dss_config",
+#                maintenance_mode   => "true",
+#                depsync            => "true",
+#                sub_cluster_domain => "worker",
+#                owner              => "kurumba",
+#                group              => "kurumba",
+#                target             => "/mnt/${server_ip}",
+#                stage              => "deploy",
+#        }
+#	
+#	class {"stratos::identity":
+#		version            => "4.0.1",
+#                offset             => 7,
+#                tribes_port        => 4700,
+#                config_db          => "identity_config",
+#                maintenance_mode   => "true",
+#		owner		   => "kurumba",
+#		group		   => "kurumba",
+#                target             => "/mnt/${server_ip}",
+#                sub_cluster_domain => "mgt",
+#                stage              => "deploy",
+#        }
+}
+
+node 'stratos02.wso2.com' inherits confignode {
+	$server_ip      = $ec2_local_ipv4 
+
+        ## Automatic failover
+        $virtual_ip     = "192.168.4.250"
+        $interface      = "eth0"
+        $check_interval = "2"
+        $priority       = "100"
+        $state          = "MASTER"
+
+        include system_config
+
+        class {"stratos::elb":
+                services           =>  ["esb,*,*",
+                                        "rule,*,*"],
+                version            => "2.0.2",
+                maintenance_mode   => "true",
+                auto_scaler        => "false",
+                auto_failover      => "false",
+		owner		   => "root",
+		group		   => "root",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+	
+	class {"stratos::appserver":
+                version            => "5.0.2",
+                offset             => 1,
+                tribes_port        => 4100,
+                config_db          => "appserver_config",
+                maintenance_mode   => "false",
+                depsync            => "true",
+                sub_cluster_domain => "worker",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+	
+	class {"stratos::esb":
+                version            => "4.6.0",
+                offset             => 2,
+                tribes_port        => 4200,
+                config_db          => "esb_config",
+                maintenance_mode   => "true",
+                depsync            => "true",
+                sub_cluster_domain => "mgt",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+	
+	class {"stratos::brs":
+		version            => "2.0.0",
+                offset             => 5,
+                tribes_port        => 4500,
+                config_db          => "brs_config",
+                maintenance_mode   => "true",
+                depsync            => "true",
+                sub_cluster_domain => "mgt",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+		
+	class {"stratos::greg":
+		version            => "4.5.3",
+                offset             => 7,
+                tribes_port        => 4700,
+                config_db          => "governance",
+                maintenance_mode   => "true",
+                sub_cluster_domain => "mgt",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+}
+
+node 'stratos03.wso2.com' inherits confignode {
+	$server_ip      = $ec2_local_ipv4
+
+        include system_config
+        
+	class {"stratos::elb":
+                services           =>  ["storage,*,*",
+                                        "manager,*,mgt"],
+                version            => "2.0.2",
+                maintenance_mode   => "true",
+                auto_scaler        => "false",
+                auto_failover      => "false",
+		owner		   => "root",
+		group		   => "root",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+
+	class {"stratos::dss":
+		version            => "3.0.1",
+                offset             => 3,
+                tribes_port        => 4300,
+                config_db          => "dss_config",
+                maintenance_mode   => "true",
+                depsync            => "true",
+                sub_cluster_domain => "worker",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+		
+	class {"stratos::bam":
+                version            => "2.1.0",
+                offset             => 6,
+                tribes_port        => 4900,
+                config_db          => "bam_config",
+                maintenance_mode   => "true",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                sub_cluster_domain => "mgt",
+                instance_type      => "receiver",
+                stage              => "deploy",
+        }
+        
+	class {"stratos::manager":
+                version            => "2.0.2",
+                offset             => 7,
+                tribes_port        => 4700,
+                config_db          => "manager_config",
+                maintenance_mode   => "true",
+                sub_cluster_domain => "mgt",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+}
+
+node 'stratos04.wso2.com' inherits confignode {
+	$server_ip      = $ec2_local_ipv4
+
+        include system_config
+
+	class {"stratos::elb":
+                services           =>  ["appserver,*,*",
+                                        "task,*,mgt"],
+                version            => "2.0.2",
+                maintenance_mode   => "true",
+                auto_scaler        => "false",
+                auto_failover      => "false",
+		owner		   => "root",
+		group		   => "root",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+
+	class {"stratos::appserver":
+                version            => "5.0.2",
+                offset             => 1,
+                tribes_port        => 4100,
+                config_db          => "appserver_config",
+                maintenance_mode   => "false",
+                depsync            => "true",
+                sub_cluster_domain => "mgt",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+
+	class {"stratos::bps":
+		version            => "3.0.1",
+                offset             => 4,
+                tribes_port        => 4400,
+                config_db          => "bps_config",
+                maintenance_mode   => "true",
+                depsync            => "true",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                sub_cluster_domain => "worker",
+                stage              => "deploy",
+        }
+	
+	class {"stratos::brs":
+		version            => "2.0.0",
+                offset             => 5,
+                tribes_port        => 4500,
+                config_db          => "brs_config",
+                maintenance_mode   => "true",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                sub_cluster_domain => "worker",
+                stage              => "deploy",
+                depsync            => "true",
+        }
+	
+	class {"stratos::storage":
+                version            => "1.0.2",
+                offset             => 7,
+                tribes_port        => 4700,
+                config_db          => "ss_config",
+                maintenance_mode   => "true",
+                sub_cluster_domain => "mgt",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }	
+}
+
+
+node 'stratos05.wso2.com' inherits confignode {
+	$server_ip      = $ec2_local_ipv4
+
+        include system_config
+	
+	class {"stratos::elb":
+                services           =>  ["data,*,*",
+                                        "cep,*,mgt"],
+                version            => "2.0.2",
+                maintenance_mode   => "true",
+                auto_scaler        => "false",
+                auto_failover      => "false",
+		owner		   => "root",
+		group		   => "root",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+
+	class {"stratos::appserver":
+                version            => "5.0.2",
+                offset             => 1,
+                tribes_port        => 4100,
+                config_db          => "appserver_config",
+                maintenance_mode   => "false",
+                depsync            => "true",
+                sub_cluster_domain => "worker",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+	
+	class {"stratos::dss":
+		version            => "3.0.1",
+                offset             => 3,
+                tribes_port        => 4300,
+                config_db          => "dss_config",
+                maintenance_mode   => "true",
+                depsync            => "true",
+                sub_cluster_domain => "mgt",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+	
+	class {"stratos::bps":
+		version            => "3.0.1",
+                offset             => 4,
+                tribes_port        => 4400,
+                config_db          => "bps_config",
+                maintenance_mode   => "true",
+                depsync            => "true",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                sub_cluster_domain => "worker",
+                stage              => "deploy",
+        }
+
+}
+
+node 'stratos06.wso2.com' inherits confignode {
+        $server_ip      = $ec2_local_ipv4
+
+        include system_config
+
+        class {"stratos::elb":
+                services           =>  ["process,*,*",
+                                        "monitor,*,mgt"],
+                version            => "2.0.2",
+                maintenance_mode   => "true",
+                auto_scaler        => "false",
+                auto_failover      => "false",
+                owner              => "root",
+                group              => "root",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+	
+	class {"stratos::esb":
+                version            => "4.6.0",
+                offset             => 2,
+                tribes_port        => 4200,
+                config_db          => "esb_config",
+                maintenance_mode   => "true",
+                depsync            => "true",
+                sub_cluster_domain => "worker",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+	
+	class {"stratos::bps":
+		version            => "3.0.1",
+                offset             => 4,
+                tribes_port        => 4400,
+                config_db          => "bps_config",
+                maintenance_mode   => "true",
+                depsync            => "true",
+                sub_cluster_domain => "mgt",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+        
+	class {"stratos::bam":
+                version            => "2.1.0",
+                offset             => 6,
+                tribes_port        => 4900,
+                config_db          => "bam_config",
+                maintenance_mode   => "true",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                sub_cluster_domain => "mgt",
+                instance_type      => "analyzer",
+                stage              => "deploy",
+        }
+	
+	class {"stratos::ts":
+		version            => "1.0.1",
+                offset             => 8,
+                tribes_port        => 4800,
+                config_db          => "ts_config",
+                maintenance_mode   => "true",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                sub_cluster_domain => "mgt",
+                stage              => "deploy",
+        }
+}
+
+node 'stratos07.wso2.com' inherits confignode {
+        $server_ip      = $ec2_local_ipv4
+
+        include system_config
+
+	class {"stratos::appserver":
+                version            => "5.0.2",
+                offset             => 1,
+                tribes_port        => 4100,
+                config_db          => "appserver_config",
+                maintenance_mode   => "false",
+                depsync            => "true",
+                sub_cluster_domain => "worker",
+                owner              => "kurumba",
+                group              => "kurumba",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+
+	class {"stratos::css":
+		version            => "1.0.2",
+                offset             => 8,
+                tribes_port        => 4700,
+                config_db          => "ss_config",
+                maintenance_mode   => "true",
+                sub_cluster_domain => "worker",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+		css_id		   => "node0",
+                target             => "/mnt/data",
+                stage              => "deploy",
+        }
+	
+	class {"stratos::cg":
+		version            => "1.0.0",
+                offset             => 10,
+                tribes_port        => 4800,
+                config_db          => "cg_config",
+                maintenance_mode   => "true",
+		owner		   => "root",
+		group		   => "root",
+                target             => "/mnt/${server_ip}",
+                sub_cluster_domain => "mgt",
+                stage              => "deploy",
+        }
+
+	class {"hadoop":
+                namenode        => "1",
+                first_run       => "1",
+	}
+
+
+}
+
+node 'stratos08.wso2.com' inherits confignode {
+        $server_ip      = $ec2_local_ipv4
+
+        include system_config
+
+	class {"stratos::cep":
+		version            => "2.0.1",
+                offset             => 7,
+                tribes_port        => 4700,
+                config_db          => "cep_config",
+                maintenance_mode   => "true",
+                depsync            => "true",
+		owner		   => "root",
+		group		   => "root",
+                target             => "/mnt/${server_ip}",
+                sub_cluster_domain => "mgt",
+                stage              => "deploy",
+        }
+
+
+	class {"stratos::css":
+		version            => "1.0.2",
+                offset             => 8,
+                tribes_port        => 4700,
+                config_db          => "ss_config",
+                maintenance_mode   => "true",
+                sub_cluster_domain => "worker",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+		css_id		   => "node1",
+                target             => "/mnt/data",
+                stage              => "deploy",
+        }
+
+
+	class {"hadoop":
+                namenode        => "0",
+                first_run       => "1",
+	}
+
+
+
+}
+
+node 'stratos09.wso2.com' inherits confignode {
+        $server_ip      = $ec2_local_ipv4
+
+        include system_config
+
+	class {"stratos::css":
+		version            => "1.0.2",
+                offset             => 8,
+                tribes_port        => 4700,
+                config_db          => "ss_config",
+                maintenance_mode   => "true",
+                sub_cluster_domain => "worker",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+		css_id		   => "node2",
+                target             => "/mnt/data",
+                stage              => "deploy",
+        }
+
+	class {"stratos::mb":
+                version            => "2.1.0",
+                offset             => 10,
+                tribes_port        => 4800,
+                config_db          => "mb_config",
+                maintenance_mode   => "true",
+                sub_cluster_domain => "mgt",
+		owner		   => "kurumba",
+		group		   => "kurumba",
+                target             => "/mnt/${server_ip}",
+                stage              => "deploy",
+        }
+
+	class {"hadoop":
+                namenode        => "0",
+                first_run       => "1",
+	}
+}
+

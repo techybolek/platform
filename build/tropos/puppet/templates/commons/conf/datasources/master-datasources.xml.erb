@@ -1,0 +1,507 @@
+<datasources-configuration xmlns:svns="http://org.wso2.securevault/configuration">
+  
+    <providers>
+        <provider>org.wso2.carbon.ndatasource.rdbms.RDBMSDataSourceReader</provider>
+    </providers>
+  
+    <datasources>
+      
+        <datasource>
+            <name>WSO2_CARBON_DB</name>
+            <description>The datasource used for registry and user manager</description>
+            <jndiConfig>
+                <name>jdbc/WSO2CarbonDB</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:h2:<%= carbon_home %>/repository/database/WSO2CARBON_DB;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=60000</url>
+                    <username>wso2carbon</username>
+                    <password>wso2carbon</password>
+                    <driverClassName>org.h2.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+		    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+
+	<datasource>
+            <name>WSO2_GOVERNANCE_DB</name>
+            <description>The datasource used for governance MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/<%= registry_database %></name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_1 %>:<%= mysql_port %>/<%= registry_database %>?autoReconnect=true</url>
+                    <username><%= registry_user %></username>
+                    <password><%= registry_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+
+	<datasource>
+            <name>WSO2_USERSTORE_DB</name>
+            <description>The datasource used for userstore MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/<%= userstore_database %></name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_2 %>:<%= mysql_port %>/<%= userstore_database %>?autoReconnect=true</url>
+                    <username><%= userstore_user %></username>
+                    <password><%= userstore_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+	
+<!-- CONFIG DBS -->
+
+	<datasource>
+            <name>WSO2_APPSERVER_CONFIG_DB</name>
+            <description>The datasource used for APPSERVER_CONFIG MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/appserver_config</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_1 %>:<%= mysql_port %>/appserver_config?autoReconnect=true</url>
+                    <username><%= registry_user %></username>
+                    <password><%= registry_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+	
+	<datasource>
+            <name>WSO2_BAM_CONFIG_DB</name>
+            <description>The datasource used for BAM_CONFIG MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/bam_config</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_1 %>:<%= mysql_port %>/bam_config?autoReconnect=true</url>
+                    <username><%= registry_user %></username>
+                    <password><%= registry_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+
+	<datasource>
+            <name>WSO2_BPS_CONFIG_DB</name>
+            <description>The datasource used for BPS_CONFIG MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/bps_config</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_1 %>:<%= mysql_port %>/bps_config?autoReconnect=true</url>
+                    <username><%= registry_user %></username>
+                    <password><%= registry_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+
+	<datasource>
+            <name>WSO2_BRS_CONFIG_DB</name>
+            <description>The datasource used for BRS_CONFIG MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/brs_config</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_1 %>:<%= mysql_port %>/brs_config?autoReconnect=true</url>
+                    <username><%= registry_user %></username>
+                    <password><%= registry_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+
+	<datasource>
+            <name>WSO2_CEP_CONFIG_DB</name>
+            <description>The datasource used for CEP_CONFIG MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/cep_config</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_1 %>:<%= mysql_port %>/cep_config?autoReconnect=true</url>
+                    <username><%= registry_user %></username>
+                    <password><%= registry_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+
+	<datasource>
+            <name>WSO2_DSS_CONFIG_DB</name>
+            <description>The datasource used for DSS_CONFIG MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/dss_config</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_1 %>:<%= mysql_port %>/dss_config?autoReconnect=true</url>
+                    <username><%= registry_user %></username>
+                    <password><%= registry_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+
+	<datasource>
+            <name>WSO2_ESB_CONFIG_DB</name>
+            <description>The datasource used for ESB_CONFIG MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/esb_config</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_1 %>:<%= mysql_port %>/esb_config?autoReconnect=true</url>
+                    <username><%= registry_user %></username>
+                    <password><%= registry_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+
+	<datasource>
+            <name>WSO2_GADGET_DB</name>
+            <description>The datasource used for GADGET_CONFIG MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/gadget_config</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_1 %>:<%= mysql_port %>/gadget_config?autoReconnect=true</url>
+                    <username><%= registry_user %></username>
+                    <password><%= registry_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+
+	<datasource>
+            <name>WSO2_MB_CONFIG_DB</name>
+            <description>The datasource used for MB_CONFIG MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/mb_config</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_1 %>:<%= mysql_port %>/mb_config?autoReconnect=true</url>
+                    <username><%= registry_user %></username>
+                    <password><%= registry_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+
+	<datasource>
+            <name>WSO2_MASHUP_CONFIG_DB</name>
+            <description>The datasource used for MASHUP_CONFIG MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/mashup_config</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_1 %>:<%= mysql_port %>/mashup_config?autoReconnect=true</url>
+                    <username><%= registry_user %></username>
+                    <password><%= registry_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+
+	<datasource>
+            <name>WSO2_MANAGER_CONFIG_DB</name>
+            <description>The datasource used for MANAGER_CONFIG MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/manager_config</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_1 %>:<%= mysql_port %>/manager_config?autoReconnect=true</url>
+                    <username><%= registry_user %></username>
+                    <password><%= registry_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+
+	<datasource>
+            <name><%= billing_datasource %></name>
+            <description>The datasource used for BILLING MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/<%= billing_datasource %></name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_2 %>:<%= mysql_port %>/<%= billing_database %>?autoReconnect=true</url>
+                    <username><%= billing_user %></username>
+                    <password><%= billing_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+
+ 	<datasource>
+             <name>WSO2_IS_CONFIG_DB</name>
+             <description>The datasource used for IS_CONFIG MySQL database</description>
+             <jndiConfig>
+                 <name>jdbc/identity_config</name>
+             </jndiConfig>
+             <definition type="RDBMS">
+                 <configuration>
+                     <url>jdbc:mysql://<%= mysql_server_1 %>:<%= mysql_port %>/identity_config?autoReconnect=true</url>
+                     <username><%= registry_user %></username>
+                     <password><%= registry_password %></password>
+                     <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                     <maxActive><%= max_active %></maxActive>
+                     <maxWait><%= max_wait %></maxWait>
+                     <minIdle>5</minIdle>
+                     <testOnBorrow>true</testOnBorrow>
+                     <validationQuery>SELECT 1</validationQuery>
+                     <validationInterval>30000</validationInterval>
+                 </configuration>
+             </definition>
+         </datasource>
+
+	<datasource>
+            <name>WSO2_RSS_DB</name>
+            <description>The datasource used for RSS_DB MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/<%= rss_database %></name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_2 %>:<%= mysql_port %>/<%= rss_database %>?autoReconnect=true</url>
+                    <username><%= rss_user %></username>
+                    <password><%= rss_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+
+	<datasource>
+            <name>WSO2_STORAGE_CONFIG_DB</name>
+            <description>The datasource used for STORAGE_CONFIG MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/ss_config</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_1 %>:<%= mysql_port %>/ss_config?autoReconnect=true</url>
+                    <username><%= registry_user %></username>
+                    <password><%= registry_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+	<datasource>
+            <name>WSO2_CG_CONFIG_DB</name>
+            <description>The datasource used for CG_CONFIG MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/cg_config</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_1 %>:<%= mysql_port %>/cg_config?autoReconnect=true</url>
+                    <username><%= registry_user %></username>
+                    <password><%= registry_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+	<datasource>
+            <name>WSO2_TS_CONFIG_DB</name>
+            <description>The datasource used for TS_CONFIG MySQL database</description>
+            <jndiConfig>
+                <name>jdbc/ts_config</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:mysql://<%= mysql_server_1 %>:<%= mysql_port %>/ts_config?autoReconnect=true</url>
+                    <username><%= registry_user %></username>
+                    <password><%= registry_password %></password>
+                    <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+                    <maxActive><%= max_active %></maxActive>
+                    <maxWait><%= max_wait %></maxWait>
+                    <minIdle>5</minIdle>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+
+	<datasource>
+            <name>WSO2AM_DB</name>
+            <description>The datasource used for API Manager database</description>
+            <jndiConfig>
+                <name>jdbc/WSO2AM_DB</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                    <url>jdbc:h2:<%= carbon_home %>/repository/database/WSO2AM_DB;DB_CLOSE_ON_EXIT=FALSE</url>
+                    <username>wso2carbon</username>
+                    <password>wso2carbon</password>
+                    <driverClassName>org.h2.Driver</driverClassName>
+                    <maxActive>50</maxActive>
+                    <maxWait>60000</maxWait>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                </configuration>
+            </definition>
+        </datasource>
+
+        <!-- For an explanation of the properties, see: http://people.apache.org/~fhanik/jdbc-pool/jdbc-pool.html -->
+        <!--datasource>
+            <name>SAMPLE_DATA_SOURCE</name>
+            <jndiConfig>
+                <name></name>
+                <properties>
+                    <property name="java.naming.factory.initial"></property>
+                    <property name="java.naming.provider.url"></property>
+                </properties>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+
+                    <defaultAutoCommit></defaultAutoCommit>
+                    <defaultReadOnly></defaultReadOnly>
+                    <defaultTransactionIsolation>NONE|READ_COMMITTED|READ_UNCOMMITTED|REPEATABLE_READ|SERIALIZABLE</defaultTransactionIsolation>
+                    <defaultCatalog></defaultCatalog>
+                    <username></username>
+                    <password svns:secretAlias="WSO2.DB.Password"></password>
+                    <maxActive></maxActive>
+                    <maxIdle></maxIdle>
+                    <initialSize></initialSize>
+                    <maxWait></maxWait>
+
+                    <dataSourceClassName>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</dataSourceClassName>
+                    <dataSourceProps>
+                        <property name="url">jdbc:mysql://localhost:3306/Test1</property>
+                        <property name="user">root</property>
+                        <property name="password">123</property>
+                    </dataSourceProps>
+
+                </configuration>
+            </definition>
+        </datasource-->
+
+    </datasources>
+
+</datasources-configuration>
