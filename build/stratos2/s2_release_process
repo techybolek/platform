@@ -1,7 +1,7 @@
 S2 packs release
 ================
-Checkout https://svn.wso2.org/repos/wso2/scratch/hosting/build/tropos
-cd tropos
+Checkout https://svn.wso2.org/repos/wso2/scratch/hosting/build/stratos2
+cd stratos2
 Copy all release binaries to binaries folder
 run s2_release.sh
 This will create wso2s2-1.0.0.zip which is ready for upload
