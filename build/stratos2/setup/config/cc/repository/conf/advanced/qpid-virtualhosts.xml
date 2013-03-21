@@ -30,7 +30,7 @@
                 <password>admin</password>
                 <cluster>ClusterOne</cluster>
                 <idGenerator>org.wso2.andes.server.cluster.coordination.TimeStampBasedMessageIdGenerator</idGenerator>
-                <connectionString>localhost:MB_CASSANDRA_PORT</connectionString>
+                <connectionString>MB_CASSANDRA_HOST:MB_CASSANDRA_PORT</connectionString>
             </store>
 
             <housekeeping>

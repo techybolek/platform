@@ -699,6 +699,8 @@ fi # End Demo specific stuff
     echo "Setup MB" >> $LOG
     echo "Set settings in cc/repository/conf/advanced/qpid-virtualhosts.xml" >> $LOG
     cp -f repository/conf/advanced/qpid-virtualhosts.xml repository/conf/advanced/qpid-virtualhosts.xml.orig
+    cat repository/conf/advanced/qpid-virtualhosts.xml.orig | sed -e "s@MB_CASSANDRA_HOST@$mb_cassandra_host@g" > repository/conf/advanced/qpid-virtualhosts.xml
+    cp -f repository/conf/advanced/qpid-virtualhosts.xml repository/conf/advanced/qpid-virtualhosts.xml.orig
     cat repository/conf/advanced/qpid-virtualhosts.xml.orig | sed -e "s@MB_CASSANDRA_PORT@$mb_cassandra_port@g" > repository/conf/advanced/qpid-virtualhosts.xml
 
     echo "Set settings in cc/repository/conf/carbon.xml" >> $LOG
