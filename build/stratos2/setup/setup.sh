@@ -436,8 +436,15 @@ if [[ $sc = "true" ]]; then
     cp -f repository/conf/datasources/master-datasources.xml repository/conf/datasources/master-datasources.xml.orig
     cat repository/conf/datasources/master-datasources.xml.orig | sed -e "s@USERSTORE_DB_PASS@$userstore_db_pass@g" > repository/conf/datasources/master-datasources.xml
 
-    sed -i "s/SC_LOCAL_MEMBER_HOST/${sc_ip}/g" repository/conf/axis2/axis2.xml
-
+    cp -f repository/conf/axis2/axis2.xml repository/conf/axis2/axis2.xml.orig
+    cat repository/conf/axis2/axis2.xml.orig | sed -i "s@SC_HOSTNAME@${sc_hostname}@g" > repository/conf/axis2/axis2.xml
+    
+    cp -f repository/conf/axis2/axis2.xml repository/conf/axis2/axis2.xml.orig
+    cat repository/conf/axis2/axis2.xml.orig | sed -i "s@SC_CLUSTER_PORT@${sc_cluster_port}@g" > repository/conf/axis2/axis2.xml
+    
+    cp -f repository/conf/carbon.xml repository/conf/carbon.xml.orig
+    cat repository/conf/carbon.xml.orig | sed -i "s@SC_PORT_OFFSET@${sc_port_offset}@g" > repository/conf/carbon.xml
+    
     popd # sc_path
 
 
@@ -459,7 +466,7 @@ if [[ $sc = "true" ]]; then
     #Copy the https://svn.wso2.org/repos/wso2/scratch/hosting/build/tropos/resources/db.stratos.com file into /etc/bind. Edit it as necessary
     cp -f ./resources/db.stratos.com $resource_path/db.$stratos_domain
     echo "Set ELb Hostname in /etc/bind/db.stratos.com" >> $LOG
-    cat $resource_path/db.$stratos_domain | sed -e "s@SC_IP@$sc_ip@g" | sed -e "s@ELB_IP@$elb_ip@g" | sed -e "s@STRATOS_DOMAIN@$stratos_domain@g" > /etc/bind/db.$stratos_domain
+    cat $resource_path/db.$stratos_domain | sed -e "s@SC_HOSTNAME@$sc_hostname@g" | sed -e "s@ELB_IP@$elb_ip@g" | sed -e "s@STRATOS_DOMAIN@$stratos_domain@g" > /etc/bind/db.$stratos_domain
 
     echo "Add the following content to /etc/bind/named.conf.local" >> $LOG
     echo "zone \"$stratos_domain\" {" >> /etc/bind/named.conf.local
