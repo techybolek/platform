@@ -734,6 +734,9 @@ if [[ $elb = "true" ]]; then
 
     cp -f repository/conf/loadbalancer.conf repository/conf/loadbalancer.conf.orig
     cat repository/conf/loadbalancer.conf.orig | sed -e "s@ENABLE_AUTOSCALER@$enable_autoscaler@g" > repository/conf/loadbalancer.conf
+    
+    cp -f repository/conf/loadbalancer.conf repository/conf/loadbalancer.conf.orig
+    cat repository/conf/loadbalancer.conf.orig | sed -e "s@ENABLE_EMBEDDED_AUTOSCALER@$enable_embedded_autoscaler@g" > repository/conf/loadbalancer.conf
 
     cp -f repository/conf/loadbalancer.conf repository/conf/loadbalancer.conf.orig
     cat repository/conf/loadbalancer.conf.orig | sed -e "s@CC_HOSTNAME:MB_LISTEN_PORT@$cc_hostname:$mb_listen_port@g" > repository/conf/loadbalancer.conf
