@@ -465,6 +465,14 @@ public class GadgetGenService extends RegistryAbstractAdmin {
         }
         try {
             URL url = new URL(stringUrl);
+             if (url.getPort() == -1) {
+                //ie.port is not set in the url
+                if (url.getProtocol().equalsIgnoreCase("https")) {
+                    return "http://" + url.getHost() + url.getPath();
+                } else {
+                    return stringUrl;
+                }
+            } else {
             String portOffset = CarbonUtils.getServerConfiguration().
                         getFirstProperty("Ports.Offset");
               int  port =  CarbonUtils.
@@ -472,8 +480,10 @@ public class GadgetGenService extends RegistryAbstractAdmin {
                               getServerConfigContext(), "http")+
                         Integer.parseInt(portOffset);
             return "http://"+url.getHost()+":"+port+url.getPath();
+             }
         } catch (MalformedURLException e) {
             return "";
         }
     }
 }
+
