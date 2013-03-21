@@ -279,7 +279,7 @@ do
     -Dcom.sun.jndi.ldap.connect.pool.timeout=3000  \
     -Dorg.terracotta.quartz.skipUpdateCheck=true \
     -Djava.security.egd=file:/dev/./urandom \
-    -Dmb.server.ip=MB_HOSTNAME:MB_PORT \
+    -Dmb.server.ip=CC_HOSTNAME:MB_LISTEN_PORT \
     org.wso2.carbon.bootstrap.Bootstrap $*
     status=$?
 done
