@@ -46,43 +46,38 @@
 		<cron>1 * * * * ? *</cron>
 	</topologySync>	
 
-	<!-- Specify the properties that are common to an IaaS here. This element 
-		is not necessary [0..1]. But you can use this section to avoid specifying 
-		same property over and over again. -->
-	<iaasProviders>
-		<!--<iaasProvider type="ec2" name="EC2 specific details"> <provider>aws-ec2</provider> 
-			<identity svns:secretAlias="elastic.scaler.ec2.identity">cdcd</identity> 
-			<credential svns:secretAlias="elastic.scaler.ec2.credential">cdccdc</credential> 
-			<scaleUpOrder>2</scaleUpOrder> <scaleDownOrder>1</scaleDownOrder> <property 
-			name="A.x" value="a"/> <property name="B" value="b"/> <imageId>tempEC2</imageId> 
-			</iaasProvider> -->
-        <!--iaasProvider type="ec2" name="ec2 specific details">
+        <!-- Specify the properties that are common to an IaaS here. This element 
+                is not necessary [0..1]. But you can use this section to avoid specifying 
+                same property over and over again. -->
+        <iaasProviders>
+            <EC2_PROVIDER_STARTiaasProvider type="ec2" name="ec2 specific details">
             <className>org.wso2.carbon.stratos.cloud.controller.iaases.AWSEC2Iaas</className>
-			<provider>aws-ec2</provider>
-			<identity svns:secretAlias="elastic.scaler.openstack.identity">0Y6WGHTP8VJXXPDPHER2</identity>
-			<credential svns:secretAlias="elastic.scaler.openstack.credential">qwhl1DrEmgVddWphpLkHZC3qfCR9rth4EWOpY83L</credential>
-			<scaleUpOrder>1</scaleUpOrder>
-			<scaleDownOrder>2</scaleDownOrder>
-			<property name="jclouds.ec2.ami-query" value="owner-id=6109-6823-6798;state=available;image-type=machine"/>
-            <property name="availabilityZone" value="us-east-1b"/>
-			<property name="securityGroups" value="S2SLive-ALL"/>
-            <property name="instanceType" value="m1.large"/>
-            <property name="keyPair" value="S2SLive-keypair"/>
-			<imageId>us-east-1/ami-52409a3b</imageId>
-		</iaasProvider-->
-		<iaasProvider type="openstack" name="openstack specific details">
-            		<className>org.wso2.carbon.stratos.cloud.controller.iaases.OpenstackNovaIaas</className>
-			<provider>openstack-nova</provider>
-			<identity svns:secretAlias="elastic.scaler.openstack.identity">demo:demo</identity>
-			<credential svns:secretAlias="elastic.scaler.openstack.credential">openstack</credential>
-			<property name="jclouds.endpoint" value="http://192.168.16.20:5000/" />
-            		<property name="jclouds.openstack-nova.auto-create-floating-ips" value="false"/>
-			<property name="jclouds.api-version" value="2.0/" />
-			<scaleUpOrder>2</scaleUpOrder>
-			<scaleDownOrder>3</scaleDownOrder>
-			<property name="X" value="x" />
-			<property name="Y" value="y" />
-			<imageId>nova/dab37f0e-cf6f-4812-86fc-733acf22d5e6</imageId>
-		</iaasProvider>
-	</iaasProviders>
+                        <provider>aws-ec2</provider>
+                        <identity svns:secretAlias="elastic.scaler.openstack.identity">EC2_IDENTITY</identity>
+                        <credential svns:secretAlias="elastic.scaler.openstack.credential">EC2_CREDENTIAL</credential>
+                        <scaleUpOrder>EC2_SCALEUP_ORDER</scaleUpOrder>
+                        <scaleDownOrder>EC2_SCALEDOWN_ORDER</scaleDownOrder>
+                        <property name="jclouds.ec2.ami-query" value="owner-id=XX-XX-XX;state=available;image-type=machine"/>
+            <property name="availabilityZone" value="EC2_AVAILABILITY_ZONE"/>
+                        <property name="securityGroups" value="EC2_SECURITY_GROUPS"/>
+            <property name="instanceType" value="EC2_INSTANCE_TYPE"/>
+            <property name="keyPair" value="EC2_KEYPAIR"/>
+                        <imageId>EC2_IMAGE_ID</imageId>
+                    </iaasProviderEC2_PROVIDER_END>
+                <iaasProvider type="openstack" name="openstack specific details">
+            <OPENSTACK_PROVIDER_STARTclassName>org.wso2.carbon.stratos.cloud.controller.iaases.OpenstackNovaIaas</className>
+                        <provider>openstack-nova</provider>
+                        <identity svns:secretAlias="cloud.controller.openstack.identity">OPENSTACK_IDENTITY</identity>
+                        <credential svns:secretAlias="cloud.controller.openstack.credential">OPENSTACK_CREDENTIAL</credential>
+                        <property name="jclouds.endpoint" value="OPENSTACK_ENDPOINT" />
+            <property name="jclouds.openstack-nova.auto-create-floating-ips" value="false"/>
+                        <property name="jclouds.api-version" value="2.0/" />
+                        <scaleUpOrder>OPENSTACK_SCALEUP_ORDER</scaleUpOrder>
+                        <scaleDownOrder>OPENSTACK_SCALEDOWN_ORDER</scaleDownOrder>
+                        <property name="X" value="x" />
+                        <property name="Y" value="y" />
+                        <imageId>OPENSTACK_IMAGE_ID</imageId>
+                    </iaasProviderOPENSTACK_PROVIDER_END>
+        </iaasProviders>
+
 </cloudController>

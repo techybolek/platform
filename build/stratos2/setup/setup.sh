@@ -143,6 +143,21 @@ if [[ ! -d $setup_dir ]]; then
     exit 1
 fi
 
+if [[ $openstack_provider_enable = "true" ]]; then
+    if [[ ( -z $openstack_identity || -z $openstack_credential || -z $openstack_jclouds_endpoint ) ]]; then
+        helpsetup
+        exit 1
+    fi
+
+fi
+
+if [[ $ec2_provider_enable = "true" ]]; then
+    if [[ ( -z $ec2_identity || -z $ec2_credential || -z $ec2_keypair ) ]]; then
+        helpsetup
+        exit 1
+    fi
+fi
+
 }
 
 setup_validate
@@ -524,36 +539,120 @@ if [[ $cc = "true" ]]; then
 
     pushd $cc_path
 
+# Set up providers
+##########################################################################################################
+#        <iaasProviders>
+#        <!--iaasProvider type="ec2" name="ec2 specific details">
+#            <className>org.wso2.carbon.stratos.cloud.controller.iaases.AWSEC2Iaas</className>
+#                        <provider>aws-ec2</provider>
+#                        <identity svns:secretAlias="elastic.scaler.openstack.identity">dhsaghfdal</identity>
+#                        <credential svns:secretAlias="elastic.scaler.openstack.credential">jdkjaskd</credential>
+#                        <scaleUpOrder>1</scaleUpOrder>
+#                        <scaleDownOrder>2</scaleDownOrder>
+#                        <property name="jclouds.ec2.ami-query" value="owner-id=XX-XX-XX;state=available;image-type=machine"/>
+#            <property name="availabilityZone" value="us-east-1c"/>
+#                        <property name="securityGroups" value="manager,cep,mb,default"/>
+#            <property name="instanceType" value="m1.large"/>
+#            <property name="keyPair" value="nirmal-key"/>
+#                        <imageId>us-east-1/ami-52409a3b</imageId>
+#                </iaasProvider-->
+#                <iaasProvider type="openstack" name="openstack specific details">
+#            <className>org.wso2.carbon.stratos.cloud.controller.iaases.OpenstackNovaIaas</className>
+#                        <provider>openstack-nova</provider>
+#                        <identity svns:secretAlias="cloud.controller.openstack.identity">demo:demo</identity>
+#                        <credential svns:secretAlias="cloud.controller.openstack.credential">openstack</credential>
+#                        <property name="jclouds.endpoint" value="http://192.168.16.20:5000/" />
+#            <property name="jclouds.openstack-nova.auto-create-floating-ips" value="false"/>
+#                        <property name="jclouds.api-version" value="2.0/" />
+#                        <scaleUpOrder>2</scaleUpOrder>
+#                        <scaleDownOrder>3</scaleDownOrder>
+#                        <property name="X" value="x" />
+#                        <property name="Y" value="y" />
+#                        <imageId>nova/dab37f0e-cf6f-4812-86fc-733acf22d5e6</imageId>
+#                </iaasProvider>
+#        </iaasProviders>
 
+   echo "Set openstack provider specific info on repository/conf/cloud-controller.xml" >> $LOG
 
-    echo "Set openstack controller ip in repository/conf/cloud-controller.xml" >> $LOG
+   if [[ $openstack_provider_enable = "true" ]]; then
 
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@EC2_PROVIDER_START@@g" > repository/conf/cloud-controller.xml
 
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@EC2_IDENTITY@$ec2_identity@g" > repository/conf/cloud-controller.xml
+       
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@EC2_CREDENTIAL@$ec2_credential@g" > repository/conf/cloud-controller.xml
+       
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@EC2_SCALEUP_ORDER@$ec2_scaleup_order@g" > repository/conf/cloud-controller.xml
+       
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@EC2_SCALEDOWN_ORDER@$ec2_scaledown_order@g" > repository/conf/cloud-controller.xml
+       
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@EC2_AVAILABILITY@$ec2_availability_zone@g" > repository/conf/cloud-controller.xml
+       
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@EC2_SECURITY_GROUPS@$ec2_security_groups@g" > repository/conf/cloud-controller.xml
+       
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@EC2_INSTANCE_TYPE@$ec2_instance_type@g" > repository/conf/cloud-controller.xml
+       
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@EC2_KEYPAIR@$ec2_keypair@g" > repository/conf/cloud-controller.xml
+       
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@EC2_IMAGE_ID@$ec2_image_id@g" > repository/conf/cloud-controller.xml
 
-    #   <topologySync enable="true">
-    #       <!-- MB server info -->
-    #       <mbServerUrl>{IP}:5672</mbServerUrl>
-    #       <cron>1 * * * * ? *</cron>
-    #   </topologySync>
-    #
-    #<iaasProvider type="openstack" name="openstack specific details">
-    #          <className>org.wso2.carbon.stratos.cloud.controller.iaases.OpenstackNovaIaas</className>
-    #                      <provider>openstack-nova</provider>
-    #                      <identity svns:secretAlias="elastic.scaler.openstack.identity">demo:demo</identity>
-    #                      <credential svns:secretAlias="elastic.scaler.openstack.credential">openstack</credential>
-    #                      <property name="jclouds.endpoint" value="http://192.168.16.20:5000/" />
-    #          <property name="jclouds.openstack-nova.auto-create-floating-ips" value="false"/>
-    #                      <property name="jclouds.api-version" value="2.0/" />
-    #                      <scaleUpOrder>2</scaleUpOrder>
-    #                      <scaleDownOrder>3</scaleDownOrder>
-    #                      <property name="X" value="x" />
-    #                      <property name="Y" value="y" />
-    #                      <imageId>nova/dab37f0e-cf6f-4812-86fc-733acf22d5e6</imageId>
-    #              </iaasProvider>
-    #      </iaasProviders>
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@EC2_PROVIDER_END@@g" > repository/conf/cloud-controller.xml
+   else
 
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@EC2_PROVIDER_START@!--@g" > repository/conf/cloud-controller.xml
+
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@EC2_PROVIDER_END@--@g" > repository/conf/cloud-controller.xml
+   fi
 
     
+   echo "Set EC2 provider specific info on repository/conf/cloud-controller.xml" >> $LOG
+
+   if [[ $ec2_provider_enable = "true" ]]; then
+
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@OPENSTACK_PROVIDER_START@@g" > repository/conf/cloud-controller.xml
+       
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@OPENSTACK_IDENTITY@$openstack_identity@g" > repository/conf/cloud-controller.xml
+       
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@OPENSTACK_CREDENTIAL@$openstack_credential@g" > repository/conf/cloud-controller.xml
+       
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@OPENSTACK_JCLOUDS_ENDPOINT@$openstack_jclouds_endpoint@g" > repository/conf/cloud-controller.xml
+       
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@OPENSTACK_SCALEUP_ORDER@$openstack_scaleup_order@g" > repository/conf/cloud-controller.xml
+       
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@OPENSTACK_SCALEDOWN_ORDER@$openstack_scaledown_order@g" > repository/conf/cloud-controller.xml
+       
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@OPENSTACK_IMAGE_ID@$openstack_image_id@g" > repository/conf/cloud-controller.xml
+
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@OPENSTACK_PROVIDER_END@@g" > repository/conf/cloud-controller.xml
+   else
+
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@OPENSTACK_PROVIDER_START@!--@g" > repository/conf/cloud-controller.xml
+
+       cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
+       cat repository/conf/cloud-controller.xml.orig | sed -e "s@OPENSTACK_PROVIDER_END@--@g" > repository/conf/cloud-controller.xml
+   fi
 
     
     
