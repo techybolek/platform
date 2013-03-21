@@ -1,0 +1,36 @@
+#!/bin/bash
+
+
+user="stratos"
+remote_ip=""
+remote_path=""
+xml=""
+
+function help {
+    echo "Usage: copy-xml <mandatory arguments>"
+    echo "    Usage:"
+    echo "    	  copy-xml <remote ip> <remote path> <xml>"
+    echo "    eg:"
+    echo "    	  copy-xml 172.17.1.2 /opt/carban/config/ /tmp/xml"
+    echo ""
+}
+
+function main {
+
+if [[ (-z $remote_ip || -z $remote_path || -z $xml) ]]; then
+    help
+    exit 1
+fi
+
+}
+
+remote_ip=$1
+remote_path=$2
+xml=$3
+
+if [[ (-n $remote_ip && -n $remote_path && -n $xml) ]]; then
+    scp ${xml} ${user}@${remote_ip}:${remote_path}
+    rm ${xml}
+fi
+
+main
