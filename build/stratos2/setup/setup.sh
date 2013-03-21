@@ -99,7 +99,7 @@ fi
 
 if [[ $sc = "true" ]]; then
     if [[ ( -z $git_user || -z $email|| -z $s2_db_user || -z $s2_db_pass || -z $hostname
-        || -z $sc_path || -z $is_path || -z $axis2c_path ) ]]; then
+        || -z $sc_path || -z $axis2c_path ) ]]; then
         helpsetup
         exit 1
     fi
