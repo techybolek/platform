@@ -303,7 +303,7 @@ if [[ $sc = "true" ]]; then
         #CacheMaxEntries 100
 
         cp -f ./resources/git /etc/apache2/sites-available/git.orig
-        cat /etc/apache2/sites-available/git.orig | sed -e "s@IS_HOSTNAME:IS_PORT@$sc_hostname:$sc_port@g" | sed -e "s@STRATOS_DOMAIN@$stratos_domain@g" > /etc/apache2/sites-available/git
+        cat /etc/apache2/sites-available/git.orig | sed -e "s@IS_HOSTNAME:IS_PORT@$sc_hostname:$sc_https_port@g" | sed -e "s@STRATOS_DOMAIN@$stratos_domain@g" > /etc/apache2/sites-available/git
 
 
         echo "Now to check whether paths set to /var/www execute" >> $LOG
@@ -374,15 +374,15 @@ if [[ $sc = "true" ]]; then
 
     echo "Set mb hostname and mb port in bin/wso2server.sh." >> $LOG
     cp -f ./bin/wso2server.sh bin/wso2server.sh.orig
-    cat bin/wso2server.sh.orig | sed -e "s@CC_HOSTNAME:CC_PORT@$cc_hostname:$mb_listen_port@g" > bin/wso2server.sh
+    cat bin/wso2server.sh.orig | sed -e "s@CC_HOSTNAME:MB_LISTEN_PORT@$cc_hostname:$mb_listen_port@g" > bin/wso2server.sh
 
     echo "Change CC hostname in repository/conf/cartridge-config.properties" >> $LOG
 
     cp -f repository/conf/cartridge-config.properties repository/conf/cartridge-config.properties.orig
-    cat repository/conf/cartridge-config.properties.orig | sed -e "s@CC_HOSTNAME:CC_PORT@$cc_hostname:$cc_port@g" > repository/conf/cartridge-config.properties
+    cat repository/conf/cartridge-config.properties.orig | sed -e "s@CC_HOSTNAME:CC_PORT@$cc_hostname:$cc_https_port@g" > repository/conf/cartridge-config.properties
 
     cp -f repository/conf/cartridge-config.properties repository/conf/cartridge-config.properties.orig
-    cat repository/conf/cartridge-config.properties.orig | sed -e "s@AGENT_HOSTNAME:AGENT_PORT@$agent_hostname:$agent_port@g" > repository/conf/cartridge-config.properties
+    cat repository/conf/cartridge-config.properties.orig | sed -e "s@AGENT_HOSTNAME:AGENT_PORT@$agent_hostname:$agent_http_port@g" > repository/conf/cartridge-config.properties
 
     cp -f repository/conf/cartridge-config.properties repository/conf/cartridge-config.properties.orig
     cat repository/conf/cartridge-config.properties.orig | sed -e "s@STRATOS_DOMAIN@$stratos_domain@g" > repository/conf/cartridge-config.properties
@@ -391,10 +391,7 @@ if [[ $sc = "true" ]]; then
     cat repository/conf/cartridge-config.properties.orig | sed -e "s@GIT_IP@$git_ip@g" > repository/conf/cartridge-config.properties
 
     cp -f repository/conf/cartridge-config.properties repository/conf/cartridge-config.properties.orig
-    cat repository/conf/cartridge-config.properties.orig | sed -e "s@SC_HOSTNAME:SC_PORT@$sc_hostname:$sc_port@g" > repository/conf/cartridge-config.properties
-
-    cp -f repository/conf/cartridge-config.properties repository/conf/cartridge-config.properties.orig
-    cat repository/conf/cartridge-config.properties.orig | sed -e "s@IS_HOSTNAME:IS_PORT@$is_hostname:$is_port@g" > repository/conf/cartridge-config.properties
+    cat repository/conf/cartridge-config.properties.orig | sed -e "s@SC_HOSTNAME:SC_HTTPS_PORT@$sc_hostname:$sc_https_port@g" > repository/conf/cartridge-config.properties
 
     cp -f repository/conf/cartridge-config.properties repository/conf/cartridge-config.properties.orig
     cat repository/conf/cartridge-config.properties.orig | sed -e "s@S2_DB_HOSTNAME:S2_DB_PORT@$s2_db_hostname:$s2_db_port@g" > repository/conf/cartridge-config.properties
@@ -409,7 +406,7 @@ if [[ $sc = "true" ]]; then
     cat repository/conf/cartridge-config.properties.orig | sed -e "s@S2_DB_SCHEMA@$s2_db_schema@g" > repository/conf/cartridge-config.properties
 
     cp -f repository/conf/cartridge-config.properties repository/conf/cartridge-config.properties.orig
-    cat repository/conf/cartridge-config.properties.orig | sed -e "s@CC_HOSTNAME:CC_PORT@$cc_hostname:$mb_listen_port@g" > repository/conf/cartridge-config.properties
+    cat repository/conf/cartridge-config.properties.orig | sed -e "s@CC_HOSTNAME:MB_LISTEN_PORT@$cc_hostname:$mb_listen_port@g" > repository/conf/cartridge-config.properties
 
     cp -f repository/conf/cartridge-config.properties repository/conf/cartridge-config.properties.orig
     cat repository/conf/cartridge-config.properties.orig | sed -e "s@ELB_IP@$elb_ip@g" > repository/conf/cartridge-config.properties
@@ -644,7 +641,7 @@ sed -i "s/PAYLOAD_ELBHOST/${elb_ip}/g" repository/resources/payload/appserver_as
 sed -i "s/PAYLOAD_ELBPORT/${elb_cluster_port}/g" repository/resources/payload/appserver_as_001.txt
 sed -i "s/PAYLOAD_SCHOST/${sc_ip}/g" repository/resources/payload/appserver_as_001.txt
 sed -i "s/PAYLOAD_SC_CLUSTER_PORT/${sc_cluster_port}/g" repository/resources/payload/appserver_as_001.txt
-sed -i "s/PAYLOAD_SCPORT/${sc_port}/g" repository/resources/payload/appserver_as_001.txt
+sed -i "s/PAYLOAD_SCPORT/${sc_https_port}/g" repository/resources/payload/appserver_as_001.txt
 sed -i "s/PAYLOAD_GITHOSTNAME/git.${stratos_domain}/g" repository/resources/payload/appserver_as_001.txt
 sed -i "s/PAYLOAD_GITIP/${git_ip}/g" repository/resources/payload/appserver_as_001.txt
 sed -i "s/PAYLOAD_USERSTORE_DBHOST/${hostip}/g" repository/resources/payload/appserver_as_001.txt
@@ -679,7 +676,7 @@ fi # End Demo specific stuff
     cat repository/conf/cloud-controller.xml.orig | sed -e "s@<property name=\"jclouds.endpoint\" value=\"*.*\" />@<property name=\"jclouds.endpoint\" value=\"http://$nova_controller_hostname:5000/\" />@g" > repository/conf/cloud-controller.xml
 
     cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
-    cat repository/conf/cloud-controller.xml.orig | sed -e "s@CC_HOSTNAME:CC_PORT@$cc_hostname:$mb_listen_port@g" > repository/conf/cloud-controller.xml
+    cat repository/conf/cloud-controller.xml.orig | sed -e "s@CC_HOSTNAME:MB_LISTEN_PORT@$cc_hostname:$mb_listen_port@g" > repository/conf/cloud-controller.xml
 
     echo "In repository/conf/carbon.xml"
     cp -f repository/conf/carbon.xml repository/conf/carbon.xml.orig
@@ -726,13 +723,13 @@ if [[ $elb = "true" ]]; then
     echo "Set CC host and port in repository/conf/loadbalancer.conf" >> $LOG
     # autoscaler_service_epr  https://CC_HOSTNAME:CC_PORT/services/CloudControllerService;
     cp -f repository/conf/loadbalancer.conf repository/conf/loadbalancer.conf.orig
-    cat repository/conf/loadbalancer.conf.orig | sed -e "s@CC_HOSTNAME:CC_PORT@$cc_hostname:$cc_port@g" > repository/conf/loadbalancer.conf
+    cat repository/conf/loadbalancer.conf.orig | sed -e "s@CC_HOSTNAME:CC_PORT@$cc_hostname:$cc_https_port@g" > repository/conf/loadbalancer.conf
 
     cp -f repository/conf/loadbalancer.conf repository/conf/loadbalancer.conf.orig
     cat repository/conf/loadbalancer.conf.orig | sed -e "s@ENABLE_AUTOSCALER@$enable_autoscaler@g" > repository/conf/loadbalancer.conf
 
     cp -f repository/conf/loadbalancer.conf repository/conf/loadbalancer.conf.orig
-    cat repository/conf/loadbalancer.conf.orig | sed -e "s@CC_HOSTNAME:CC_PORT@$cc_hostname:$mb_listen_port@g" > repository/conf/loadbalancer.conf
+    cat repository/conf/loadbalancer.conf.orig | sed -e "s@CC_HOSTNAME:MB_LISTEN_PORT@$cc_hostname:$mb_listen_port@g" > repository/conf/loadbalancer.conf
 
     echo "Set hostname of the machine where elb run, in repository/conf/axis2/axis2.xml" >> $LOG
     #<!--parameter name="localMemberHost">ELB_HOSTNAME</parameter-->
@@ -773,7 +770,7 @@ if [[ $agent = "true" ]]; then
     cat conf/agent.properties.orig | sed -e "s@AGENT_HOSTNAME@$agent_hostname@g" > conf/agent.properties
 
     cp -f ./conf/agent.properties conf/agent.properties.orig
-    cat conf/agent.properties.orig | sed -e "s@AGENT_PORT@$agent_clustering_port@g" > conf/agent.properties
+    cat conf/agent.properties.orig | sed -e "s@AGENT_CLUSTERING_PORT@$agent_clustering_port@g" > conf/agent.properties
 
     echo "Set ELB hostname in conf/agent.properties." >> $LOG
     cp -f ./conf/agent.properties conf/agent.properties.orig
@@ -787,9 +784,9 @@ if [[ $agent = "true" ]]; then
     cp -f ./conf/agent.properties conf/agent.properties.orig
     cat conf/agent.properties.orig | sed -e "s@SC_HOSTNAME@$sc_hostname@g" > conf/agent.properties
 
-    echo "Set SC_PORT in conf/agent.properties." >> $LOG
+    echo "Set SC_HTTPS_PORT in conf/agent.properties." >> $LOG
     cp -f ./conf/agent.properties conf/agent.properties.orig
-    cat conf/agent.properties.orig | sed -e "s@SC_PORT@$sc_port@g" > conf/agent.properties
+    cat conf/agent.properties.orig | sed -e "s@SC_HTTPS_PORT@$sc_https_port@g" > conf/agent.properties
 
 
     popd #agent_path
@@ -822,7 +819,7 @@ su - $s2_user -c "source $setup_dir/conf/setup.conf;$setup_dir/start_server.sh -
 echo "Servers started. Please look at $LOG file for server startup details"
 if [[ $sc == "true" ]]; then
     echo "**************************************************************"
-    echo "Management Console : https://$HOSTNAME:$sc_port/"
+    echo "Management Console : https://$HOSTNAME:$sc_https_port/"
     echo "**************************************************************"
 fi
 
