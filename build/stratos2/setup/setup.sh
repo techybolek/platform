@@ -303,7 +303,7 @@ if [[ $sc = "true" ]]; then
         #CacheMaxEntries 100
 
         cp -f ./resources/git /etc/apache2/sites-available/git.orig
-        cat /etc/apache2/sites-available/git.orig | sed -e "s@IS_HOSTNAME:IS_PORT@$sc_hostname:$sc_https_port@g" | sed -e "s@STRATOS_DOMAIN@$stratos_domain@g" > /etc/apache2/sites-available/git
+        cat /etc/apache2/sites-available/git.orig | sed -e "s@SC_HOSTNAME:SC_HTTPS_PORT@$sc_hostname:$sc_https_port@g" | sed -e "s@STRATOS_DOMAIN@$stratos_domain@g" > /etc/apache2/sites-available/git
 
 
         echo "Now to check whether paths set to /var/www execute" >> $LOG
@@ -785,6 +785,9 @@ if [[ $agent = "true" ]]; then
     echo "Set ELB hostname in conf/agent.properties." >> $LOG
     cp -f ./conf/agent.properties conf/agent.properties.orig
     cat conf/agent.properties.orig | sed -e "s@ELB_HOSTNAME@$elb_hostname@g" > conf/agent.properties
+    
+    cp -f ./conf/agent.properties conf/agent.properties.orig
+    cat conf/agent.properties.orig | sed -e "s@ELB_CLUSTER_PORT@$elb_cluster_port@g" > conf/agent.properties
 
     echo "Set SC_PATH in conf/agent.properties." >> $LOG
     cp -f ./conf/agent.properties conf/agent.properties.orig
