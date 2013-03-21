@@ -33,16 +33,16 @@
 			 Optional element. -->
 		<cron>1 * * * * ? *</cron>
 		<!-- Cassandra cluster related info -->
-		<cassandraInfo>
+		<!--cassandraInfo>
 			<connectionUrl>localhost:9160</connectionUrl>
 			<userName>admin</userName>
 			<password svns:secretAlias="cloud.controller.cassandra.server.password">admin</password>
-		</cassandraInfo>
+		</cassandraInfo-->
 	</dataPublisher>
 
     	<topologySync enable="true">
 		<!-- MB server info -->
-		<mbServerUrl>MB_HOSTNAME:MB_PORT</mbServerUrl>
+		<mbServerUrl>MB_HOSTNAME:MB_LISTEN_PORT</mbServerUrl>
 		<cron>1 * * * * ? *</cron>
 	</topologySync>	
 
@@ -64,10 +64,10 @@
 			<scaleUpOrder>1</scaleUpOrder>
 			<scaleDownOrder>2</scaleDownOrder>
 			<property name="jclouds.ec2.ami-query" value="owner-id=6109-6823-6798;state=available;image-type=machine"/>
-            <property name="availabilityZone" value="us-east-1c"/>
-			<property name="securityGroups" value="manager,cep,mb,default"/>
+            <property name="availabilityZone" value="us-east-1b"/>
+			<property name="securityGroups" value="S2SLive-ALL"/>
             <property name="instanceType" value="m1.large"/>
-            <property name="keyPair" value="nirmal-key"/>
+            <property name="keyPair" value="S2SLive-keypair"/>
 			<imageId>us-east-1/ami-52409a3b</imageId>
 		</iaasProvider-->
 		<iaasProvider type="openstack" name="openstack specific details">

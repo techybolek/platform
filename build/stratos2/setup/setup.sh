@@ -701,9 +701,9 @@ fi # End Demo specific stuff
     cp -f repository/conf/advanced/qpid-virtualhosts.xml repository/conf/advanced/qpid-virtualhosts.xml.orig
     cat repository/conf/advanced/qpid-virtualhosts.xml.orig | sed -e "s@MB_CASSANDRA_PORT@$mb_cassandra_port@g" > repository/conf/advanced/qpid-virtualhosts.xml
 
-    echo "Set settings in mb/repository/conf/carbon.xml" >> $LOG
+    echo "Set settings in cc/repository/conf/carbon.xml" >> $LOG
     cp -f repository/conf/carbon.xml repository/conf/carbon.xml.orig
-    cat repository/conf/carbon.xml.orig | sed -e "s@OFFSET@$cc_port_offset@g" > repository/conf/carbon.xml
+    cat repository/conf/carbon.xml.orig | sed -e "s@CC_PORT_OFFSET@$cc_port_offset@g" > repository/conf/carbon.xml
     #Before starting sc delete rm -rf tmp/ at mb root folder
     rm -rf ./tmp
 
