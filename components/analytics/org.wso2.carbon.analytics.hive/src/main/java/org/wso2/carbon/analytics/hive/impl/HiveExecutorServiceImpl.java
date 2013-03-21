@@ -18,6 +18,7 @@ package org.wso2.carbon.analytics.hive.impl;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveContext;
 import org.wso2.carbon.analytics.hive.HiveConstants;
 import org.wso2.carbon.analytics.hive.Utils;
@@ -50,13 +51,16 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
     private static boolean IS_PROFILING_ENABLED = false;
 
     private static DateFormat dateFormat = new SimpleDateFormat("yy/MM/dd HH:mm:ss");
+    private static int uriCounter = 0;
+    //Used for round robin fetching of meta store uris in multiple remote meta store server scenario
+
 
     static {
         try {
             Class.forName("org.apache.hadoop.hive.jdbc.HiveDriver");
         } catch (ClassNotFoundException e) {
             log.fatal("Hive JDBC Driver not found in the class path. Hive query execution will" +
-                    " fail..", e);
+                      " fail..", e);
         }
 
         try {
@@ -73,9 +77,9 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
      * @throws HiveExecutionException
      */
     public QueryResult[] execute(String script) throws HiveExecutionException {
-        String tenantDomain =  PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
+        String tenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
         int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
-        if (Utils.canConnectToRSS()  && null != HiveRSSMetastoreManager.getInstance()) {
+        if (Utils.canConnectToRSS() && null != HiveRSSMetastoreManager.getInstance()) {
             HiveRSSMetastoreManager.getInstance().prepareRSSMetaStore(tenantDomain, tenantId);
         }
         if (script != null) {
@@ -216,6 +220,10 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
     private class ScriptCallable implements Callable<ScriptResult> {
 
+        private final String HIVE_META_STORE_LOCAL = "hive.metastore.local";
+        private final String HIVE_META_STORE_URIS = "hive.metastore.uris";
+        private final String LOCAL_META_STORE_URI = "jdbc:hive://";
+
         private String script;
 
         private int tenantId;
@@ -231,12 +239,13 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
             Connection con;
             try {
-                con = DriverManager.getConnection("jdbc:hive://", null, null);
+                con = getConnection();
             } catch (SQLException e) {
-                log.error("Error getting connection..", e);
+                log.error("Error getting connection to any listed remote Hive meta stores..", e);
 
                 ScriptResult result = new ScriptResult();
-                result.setErrorMessage("Error getting connection." + e.getMessage());
+                result.setErrorMessage("Error getting connection to any" +
+                                       " listed remote Hive meta stores..." + e);
                 return result;
             }
 
@@ -306,7 +315,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                     }
 
                     if (!(trimmedCmdLine.startsWith("class") ||
-                            trimmedCmdLine.startsWith("CLASS"))) { // Normal hive query
+                        trimmedCmdLine.startsWith("CLASS"))) { // Normal hive query
                         QueryResult queryResult = new QueryResult();
 
                         queryResult.setQuery(trimmedCmdLine);
@@ -331,7 +340,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
                             List<String> columnValues = new ArrayList<String>();
 
-                            int noOfColumns = rs.getMetaData().getColumnCount();
+							int noOfColumns = rs.getMetaData().getColumnCount();
 
                             boolean isTombstone=true;
                             for(int k=1;k<=noOfColumns;k++){
@@ -341,24 +350,26 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                                     break;
                                 }
                             }
+
                             if(!isTombstone){
                                 Object resObject = rs.getObject(1);
-                                if (resObject.toString().contains("\t")) {
-                                    columnValues = Arrays.asList(resObject.toString().split("\t"));
-                                } else {
-                                    for (int i = 1; i <= columnCount; i++) {
-                                        Object resObj = rs.getObject(i);
-                                        if (null != resObj) {
-                                            columnValues.add(rs.getObject(i).toString());
-                                        } else {
-                                            columnValues.add("");
-                                        }
-                                    }
-                                }
-                                resultRow.setColumnValues(columnValues.toArray(new String[]{}));
+		                        if (resObject.toString().contains("\t")) {
+		                            columnValues = Arrays.asList(resObject.toString().split("\t"));
+		                        } else {
+		                            for (int i = 1; i <= columnCount; i++) {
+		                                Object resObj = rs.getObject(i);
+		                                if (null != resObj) {
+		                                    columnValues.add(rs.getObject(i).toString());
+		                                } else {
+		                                    columnValues.add("");
+		                                }
+		                            }
+		                        }
+		                        resultRow.setColumnValues(columnValues.toArray(new String[]{}));
 
-                                results.add(resultRow);
-                            }
+		                        results.add(resultRow);
+							}
+
                         }
 
                         queryResult.setResultRows(results.toArray(new QueryResultRow[]{}));
@@ -457,6 +468,81 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                     }
                 }
             }
+
+        }
+
+        private Connection getConnection() throws SQLException {
+            HiveConf conf = HiveContext.getCurrentContext().getConf();
+            boolean isLocalMetaStore = Boolean.parseBoolean(
+                    conf.get(HIVE_META_STORE_LOCAL, "true"));
+
+            String uri = LOCAL_META_STORE_URI;
+            Connection con = null;
+            if (!isLocalMetaStore) {
+                String uriString = conf.get(HIVE_META_STORE_URIS);
+                if (uriString != null) {
+                    String[] uris = uriString.split(",");
+
+                    if (uris.length == 0) {
+                        log.warn("No remote URI's specified though remote Meta store is enabled." +
+                                 " Defaulting to local meta store..");
+                        uris = new String[1];
+                        uris[0] = LOCAL_META_STORE_URI;
+                    }
+
+                    int noOfUris = uris.length;
+
+                    uri = uris[(uriCounter++) % noOfUris];
+
+                    boolean connectionSuccessful = false;
+                    int tryCount = 0; // Number of uris already tried to connect
+                    while (!connectionSuccessful) {
+                        try {
+                            con = DriverManager.getConnection(uri, null, null);
+                        } catch (SQLException e) {
+                            log.error("Error getting connection for meta store URI " + uri +
+                                      " ..", e);
+
+                            tryCount++;
+                            if (uriCounter >= noOfUris && tryCount == noOfUris) {
+                                uriCounter = 0; // Reset uri count if unsuccessful to prevent unbounded increment in the variable
+                                throw e;
+                            } else {
+                                uri = uris[(uriCounter++) % noOfUris];
+                                continue;
+
+                            }
+                        }
+
+                        if (uriCounter >= noOfUris) {
+                            uriCounter = 0; // Reset uri count if successful to prevent unbounded increment in the variable
+                        }
+                        connectionSuccessful = true;
+                    }
+
+                } else {
+                    log.warn("No remote URI's specified though remote Meta store is enabled." +
+                             " Defaulting to local meta store..");
+                    try {
+                        con = DriverManager.getConnection(LOCAL_META_STORE_URI, null, null);
+                    } catch (SQLException e) {
+                        log.error("Error getting connection..", e);
+
+                        throw e;
+                    }
+                }
+            } else {
+                try {
+                    con = DriverManager.getConnection(uri, null, null);
+                } catch (SQLException e) {
+                    log.error("Error getting connection..", e);
+
+                    throw e;
+                }
+
+            }
+
+            return con;
 
         }
 
