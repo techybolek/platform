@@ -542,7 +542,7 @@
      corresponding to the "class" attribute of the "clustering" element. It is also responsible for
      getting this node to join the cluster.
      -->
-    <clustering class="org.apache.axis2.clustering.tribes.TribesClusteringAgent" enable="false">
+    <clustering class="org.apache.axis2.clustering.tribes.TribesClusteringAgent" enable="true">
 
         <!--
            This parameter indicates whether the cluster has to be automatically initalized
@@ -564,7 +564,7 @@
                     is deemed to have left the cluster, it will be detected by the Group Membership
                     Service (GMS) using a TCP ping mechanism.
         -->
-        <parameter name="membershipScheme">multicast</parameter>
+        <parameter name="membershipScheme">wka</parameter>
 
         <!--
          The clustering domain/group. Nodes in the same group will belong to the same multicast
@@ -610,9 +610,9 @@
             <parameter name="mcastBindAddress">127.0.0.1</parameter>
         -->
             <!-- The host name or IP address of this member -->
-        <!--
-        <parameter name="localMemberHost">127.0.0.1</parameter>
-        -->
+        
+        <parameter name="localMemberHost">SC_HOSTNAME</parameter>
+        
 
         <!--
             The bind adress of this member. The difference between localMemberHost & localMemberBindAddress
@@ -627,7 +627,7 @@
         The TCP port used by this member. This is the port through which other nodes will
         contact this member
          -->
-        <parameter name="localMemberPort">4000</parameter>
+        <parameter name="localMemberPort">SC_CLUSTER_PORT</parameter>
 
         <!--
             The bind port of this member. The difference between localMemberPort & localMemberBindPort
