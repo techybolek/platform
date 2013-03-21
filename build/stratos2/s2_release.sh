@@ -16,6 +16,7 @@ cp -rf ../binaries/wso2cc-1.0.0.zip ./
 cp -rf ../binaries/wso2elb-2.0.4.zip ./
 cp -rf ../binaries/wso2s2agent-1.0.0.zip ./
 cp -rf ../binaries/wso2s2cli-1.0.0.zip ./
+cp -rf ../binaries/axis2c-1.6.0.zip ./
 
 # Copy release docs
 cp -f ~/Downloads/Stratos2UserGuide.pdf ./docs
