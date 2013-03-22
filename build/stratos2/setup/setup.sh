@@ -661,12 +661,6 @@ if [[ $cc = "true" ]]; then
 
 if [[ $demo = "true" ]]; then
   
-    cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
-    cat repository/conf/cloud-controller.xml.orig | sed -e "s@<identity svns:secretAlias=\"elastic.scaler.openstack.identity\">*.*</identity>@<identity svns:secretAlias=\"elastic.scaler.openstack.identity\">$nova_projectid:$nova_user</identity>@g" > repository/conf/cloud-controller.xml
-
-    cp -f repository/conf/cloud-controller.xml repository/conf/cloud-controller.xml.orig
-    cat repository/conf/cloud-controller.xml.orig | sed -e "s@<credential svns:secretAlias=\"elastic.scaler.openstack.credential\">*.*</credential>@<credential svns:secretAlias=\"elastic.scaler.openstack.credential\">$nova_pass</credential>@g" > repository/conf/cloud-controller.xml
-
 
 echo "Change mysql image id in repository/deployment/server/cartridges/mysql.xml" >> $LOG
 #<iaasProvider type="openstack" >
