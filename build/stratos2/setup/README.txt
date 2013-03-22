@@ -13,7 +13,9 @@ connector jar to this folder.
 Edit conf/setup.conf according to your environment. There you need to give
 information about your IaaS environment.
 
-run setup.sh to install.
+run setup.sh as root to install.
+eg.
+sudo JAVA_HOME=/opt/jdk1.6.0_24 ./setup.sh -uwso2 -p"all"
 
 Please refer to the Documentation shipped along with this release packs.
 
