@@ -355,26 +355,6 @@ if [[ $sc = "true" ]]; then
     ###############################################################################################
 
 
-    mkdir -p /var/www/notify
-    cp -f ./resources/notify.php /var/www/notify/index.php
-    echo "Now restart apache2 and if start successfull you configuration upto this point is OK." >> $LOG
-    echo "Now restart apache2 and if start successfull you configuration upto this point is OK."
-    apachectl stop
-    sleep 5
-    apachectl start
-
-    echo ""
-    echo "Now open a browser with your Openstack setup public dns and log into the Openstack dashboard with following credentials."
-    echo "You need to import the $s2_user.pub into openstack(With the same name mentioned in /opt/wso2cc-1.0.0/repository/deployment/server/cartridges/<cartridge name.xml>)"
-    echo "Click the 'project' tab and then 'Access & Security' menu. Under 'Keypairs' section click 'Import Keypairs'. If there is a key already with the"
-    echo "same name, first delete it before importing your key"
-    echo "Open another command line interface into SC node and"
-    echo "cat /home/$s2_user/$s2_user.pub" 
-    echo "Cut and paste the output into the box that you get when execute import keys of the openstack dashboard."
-    echo "When you are ready press any key to continue"
-    echo ""
-    read
-
 
     #Setup SC
     ##########
