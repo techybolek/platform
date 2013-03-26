@@ -2,7 +2,9 @@ S2 packs release
 ================
 Checkout https://svn.wso2.org/repos/wso2/scratch/hosting/build/stratos2
 cd stratos2
-Copy all release binaries to binaries folder
+Copy all release binaries to binaries folder. They are
+axis2c-1.6.0.zip  mod_appfactory_svnauth.so  wso2cc-1.0.0.zip  wso2elb-2.0.4.zip  wso2s2agent-1.0.0.zip  wso2s2cli-1.0.0.zip  wso2sc-1.0.0.zip
+
 run s2_release.sh
 This will create wso2s2-1.0.0.zip which is ready for upload
 
