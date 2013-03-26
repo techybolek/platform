@@ -1,0 +1,3 @@
+This is an Apache module created for authenticating git users against Stratos2 Controller.
+To build the module execute
+make
