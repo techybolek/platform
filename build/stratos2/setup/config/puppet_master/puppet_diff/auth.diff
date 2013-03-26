@@ -1,0 +1,47 @@
+path ~ ^/catalog/([^/]+)$					path ~ ^/catalog/([^/]+)$
+method find							method find
+allow $1							allow $1
+							      >	allow star.s2.wso2.com
+
+path ~ ^/node/([^/]+)$						path ~ ^/node/([^/]+)$
+method find							method find
+allow $1							allow $1
+
+path /certificate_revocation_list/ca				path /certificate_revocation_list/ca
+method find							method find
+allow *								allow *
+
+path ~ ^/report/([^/]+)$				      |	path /report
+method save							method save
+allow $1						      |	allow *
+
+path /file							path /file
+allow *								allow *
+
+path /certificate/ca					      |	path /file_metadata
+auth any							auth any
+method find							method find
+allow *								allow *
+
+							      >	path /certificate/ca
+							      >	auth no
+							      >	method find
+							      >	allow *
+							      >
+path /certificate/						path /certificate/
+auth any						      |	auth no
+method find							method find
+allow *								allow *
+
+path /certificate_request					path /certificate_request
+auth any						      |	auth no
+method find, save						method find, save
+allow *								allow *
+
+path /								path /
+							      >	environment stratos2
+							      >	allow *
+							      >
+							      >	path /
+auth any							auth any
+							      >

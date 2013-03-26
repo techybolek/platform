@@ -1,0 +1,13 @@
+[files]								[files]
+  path /etc/puppet/files				      |	   path /etc/puppet/
+#  allow *.example.com					      |	   allow *
+#  deny *.evil.example.com				      <
+#  allow 192.168.0.0/24					      <
+
+[plugins]							[plugins]
+#  allow *.example.com					      |	   allow *
+#  deny *.evil.example.com				      |
+#  allow 192.168.0.0/24					      |	[stratos2]
+							      >	  path /mnt/puppet/stratos2/
+							      >	  allow *
+							      >

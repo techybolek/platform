@@ -176,7 +176,7 @@ echo ""
 echo "For all the questions asked while during executing the script please just press the enter button"
 echo ""
 
-echo "$hostip    git.$stratos_domain" >> /etc/hosts
+echo "$hostip    git.$stratos2_domain" >> /etc/hosts
 
 if [[ $sc = "true" ]]; then
     if [[ ! -d $resource_path ]]; then
@@ -318,7 +318,7 @@ if [[ $sc = "true" ]]; then
         #CacheMaxEntries 100
 
         cp -f ./resources/git /etc/apache2/sites-available/git.orig
-        cat /etc/apache2/sites-available/git.orig | sed -e "s@SC_HOSTNAME:SC_HTTPS_PORT@$sc_hostname:$sc_https_port@g" | sed -e "s@STRATOS_DOMAIN@$stratos_domain@g" > /etc/apache2/sites-available/git
+        cat /etc/apache2/sites-available/git.orig | sed -e "s@SC_HOSTNAME:SC_HTTPS_PORT@$sc_hostname:$sc_https_port@g" | sed -e "s@STRATOS_DOMAIN@$stratos2_domain@g" > /etc/apache2/sites-available/git
 
 
         echo "Now to check whether paths set to /var/www execute" >> $LOG
@@ -380,7 +380,7 @@ if [[ $sc = "true" ]]; then
     cat repository/conf/cartridge-config.properties.orig | sed -e "s@AGENT_HOSTNAME:AGENT_PORT@$agent_hostname:$agent_http_port@g" > repository/conf/cartridge-config.properties
 
     cp -f repository/conf/cartridge-config.properties repository/conf/cartridge-config.properties.orig
-    cat repository/conf/cartridge-config.properties.orig | sed -e "s@STRATOS_DOMAIN@$stratos_domain@g" > repository/conf/cartridge-config.properties
+    cat repository/conf/cartridge-config.properties.orig | sed -e "s@STRATOS_DOMAIN@$stratos2_domain@g" > repository/conf/cartridge-config.properties
 
     cp -f repository/conf/cartridge-config.properties repository/conf/cartridge-config.properties.orig
     cat repository/conf/cartridge-config.properties.orig | sed -e "s@GIT_IP@$git_ip@g" > repository/conf/cartridge-config.properties
@@ -432,13 +432,13 @@ if [[ $sc = "true" ]]; then
     cat repository/conf/datasources/master-datasources.xml.orig | sed -e "s@USERSTORE_DB_PASS@$userstore_db_pass@g" > repository/conf/datasources/master-datasources.xml
 
     cp -f repository/conf/axis2/axis2.xml repository/conf/axis2/axis2.xml.orig
-    cat repository/conf/axis2/axis2.xml.orig | sed -i "s@SC_HOSTNAME@${sc_hostname}@g" > repository/conf/axis2/axis2.xml
+    cat repository/conf/axis2/axis2.xml.orig | sed -e "s@SC_HOSTNAME@${sc_hostname}@g" > repository/conf/axis2/axis2.xml
     
     cp -f repository/conf/axis2/axis2.xml repository/conf/axis2/axis2.xml.orig
-    cat repository/conf/axis2/axis2.xml.orig | sed -i "s@SC_CLUSTER_PORT@${sc_cluster_port}@g" > repository/conf/axis2/axis2.xml
+    cat repository/conf/axis2/axis2.xml.orig | sed -e "s@SC_CLUSTER_PORT@${sc_cluster_port}@g" > repository/conf/axis2/axis2.xml
     
     cp -f repository/conf/carbon.xml repository/conf/carbon.xml.orig
-    cat repository/conf/carbon.xml.orig | sed -i "s@SC_PORT_OFFSET@${sc_port_offset}@g" > repository/conf/carbon.xml
+    cat repository/conf/carbon.xml.orig | sed -e "s@SC_PORT_OFFSET@${sc_port_offset}@g" > repository/conf/carbon.xml
     
     popd # sc_path
 
@@ -459,14 +459,14 @@ if [[ $sc = "true" ]]; then
     echo "bind Namespaces" >> $LOG
 
     #Copy the https://svn.wso2.org/repos/wso2/scratch/hosting/build/tropos/resources/db.stratos.com file into /etc/bind. Edit it as necessary
-    cp -f ./resources/db.stratos.com $resource_path/db.$stratos_domain
+    cp -f ./resources/db.stratos.com $resource_path/db.$stratos2_domain
     echo "Set ELb Hostname in /etc/bind/db.stratos.com" >> $LOG
-    cat $resource_path/db.$stratos_domain | sed -e "s@SC_HOSTNAME@$sc_hostname@g" | sed -e "s@ELB_IP@$elb_ip@g" | sed -e "s@STRATOS_DOMAIN@$stratos_domain@g" > /etc/bind/db.$stratos_domain
+    cat $resource_path/db.$stratos2_domain | sed -e "s@SC_HOSTNAME@$sc_hostname@g" | sed -e "s@ELB_IP@$elb_ip@g" | sed -e "s@STRATOS_DOMAIN@$stratos2_domain@g" > /etc/bind/db.$stratos2_domain
 
     echo "Add the following content to /etc/bind/named.conf.local" >> $LOG
-    echo "zone \"$stratos_domain\" {" >> /etc/bind/named.conf.local
+    echo "zone \"$stratos2_domain\" {" >> /etc/bind/named.conf.local
     echo "      type master;" >> /etc/bind/named.conf.local
-    echo "      file \"/etc/bind/db.$stratos_domain\";" >> /etc/bind/named.conf.local
+    echo "      file \"/etc/bind/db.$stratos2_domain\";" >> /etc/bind/named.conf.local
     echo "};" >> /etc/bind/named.conf.local
 
     #Copy https://svn.wso2.org/repos/wso2/scratch/hosting/build/tropos/resources/append_zone_file.sh into /opt/scripts folder
@@ -665,7 +665,7 @@ cp -f repository/deployment/server/cartridges/mysql.xml repository/deployment/se
 cat repository/deployment/server/cartridges/mysql.xml.orig | sed -e "s@<imageId>*.*</imageId>@<imageId>nova/$mysql_image_id</imageId>@g" > repository/deployment/server/cartridges/mysql.xml
 
 cp -f repository/deployment/server/cartridges/mysql.xml repository/deployment/server/cartridges/mysql.xml.orig
-cat repository/deployment/server/cartridges/mysql.xml.orig | sed -e "s@STRATOS_DOMAIN@$stratos_domain@g" > repository/deployment/server/cartridges/mysql.xml
+cat repository/deployment/server/cartridges/mysql.xml.orig | sed -e "s@STRATOS_DOMAIN@$stratos2_domain@g" > repository/deployment/server/cartridges/mysql.xml
 
 
 
@@ -691,7 +691,7 @@ cp -f repository/deployment/server/cartridges/php.xml repository/deployment/serv
 cat repository/deployment/server/cartridges/php.xml.orig | sed -e "s@<imageId>*.*</imageId>@<imageId>nova/$php_image_id</imageId>@g" > repository/deployment/server/cartridges/php.xml
 
 cp -f repository/deployment/server/cartridges/php.xml repository/deployment/server/cartridges/php.xml.orig
-cat repository/deployment/server/cartridges/php.xml.orig | sed -e "s@STRATOS_DOMAIN@$stratos_domain@g" > repository/deployment/server/cartridges/php.xml
+cat repository/deployment/server/cartridges/php.xml.orig | sed -e "s@STRATOS_DOMAIN@$stratos2_domain@g" > repository/deployment/server/cartridges/php.xml
 
 echo "Change image id in repository/deployment/server/cartridges/as1.xml" >> $LOG
 
@@ -722,7 +722,7 @@ sed -i "s/PAYLOAD_ELBPORT/${elb_cluster_port}/g" repository/resources/payload/ap
 sed -i "s/PAYLOAD_SCHOST/${sc_ip}/g" repository/resources/payload/appserver_as_001.txt
 sed -i "s/PAYLOAD_SC_CLUSTER_PORT/${sc_cluster_port}/g" repository/resources/payload/appserver_as_001.txt
 sed -i "s/PAYLOAD_SCPORT/${sc_https_port}/g" repository/resources/payload/appserver_as_001.txt
-sed -i "s/PAYLOAD_GITHOSTNAME/git.${stratos_domain}/g" repository/resources/payload/appserver_as_001.txt
+sed -i "s/PAYLOAD_GITHOSTNAME/git.${stratos2_domain}/g" repository/resources/payload/appserver_as_001.txt
 sed -i "s/PAYLOAD_GITIP/${git_ip}/g" repository/resources/payload/appserver_as_001.txt
 sed -i "s/PAYLOAD_USERSTORE_DBHOST/${hostip}/g" repository/resources/payload/appserver_as_001.txt
 sed -i "s/PAYLOAD_USERSTORE_DB_PORT/${userstore_db_port}/g" repository/resources/payload/appserver_as_001.txt

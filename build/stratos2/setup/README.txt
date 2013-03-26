@@ -17,6 +17,15 @@ run setup.sh as root to install.
 eg.
 sudo JAVA_HOME=/opt/jdk1.6.0_24 ./setup.sh -uwso2 -p"all"
 
+You need to configure IaaS as well. To do that fill the IaaS specific settings
+in conf/setup.conf file and execute IaaS specific configure script.
+
+eg. Openstack
+configure_openstack.sh
+
+eg. EC2
+configure_ec2.sh
+
 Please refer to the Documentation shipped along with this release packs.
 
 ---------------------------------------------------------------------------

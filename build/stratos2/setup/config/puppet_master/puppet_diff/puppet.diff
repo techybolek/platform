@@ -1,0 +1,23 @@
+[main]								[main]
+logdir=/var/log/puppet						logdir=/var/log/puppet
+vardir=/var/lib/puppet						vardir=/var/lib/puppet
+ssldir=/var/lib/puppet/ssl					ssldir=/var/lib/puppet/ssl
+rundir=/var/run/puppet						rundir=/var/run/puppet
+factpath=$vardir/lib/facter					factpath=$vardir/lib/facter
+templatedir=$confdir/templates				      |	templatedir=/etc/puppet/templates/
+prerun_command=/etc/puppet/etckeeper-commit-pre		      |	modulepath=/etc/puppet/modules/
+postrun_command=/etc/puppet/etckeeper-commit-post	      |	report=false
+							      >
+							      >	[stratos2]
+							      >	modulepath=/mnt/puppet/stratos2/modules/
+							      >	templatedir=/mnt/puppet/stratos2/templates/
+							      >	manifest=/mnt/puppet/stratos2/manifests/site.pp
+							      >	manifestdir=/mnt/puppet/stratos2/manifests/
+							      >	report=false
+
+[master]							[master]
+# These are needed when the puppetmaster is run by passenger  |	node_name = facter
+# and can safely be removed if webrick is used.		      <
+ssl_client_header = SSL_CLIENT_S_DN 			      <
+ssl_client_verify_header = SSL_CLIENT_VERIFY		      <
+
