@@ -35,6 +35,7 @@ import org.wso2.carbon.mediator.bam.config.stream.StreamConfiguration;
 import org.wso2.carbon.mediator.bam.builders.CorrelationDataBuilder;
 import org.wso2.carbon.mediator.bam.builders.MetaDataBuilder;
 import org.wso2.carbon.mediator.bam.builders.PayloadDataBuilder;
+
 import java.util.ArrayList;
 
 /**
@@ -56,7 +57,7 @@ public class Stream {
     private MetaDataBuilder metaDataBuilder;
     private CorrelationDataBuilder correlationDataBuilder;
 
-    public Stream () {
+    public Stream() {
         streamDefinitionBuilder = new StreamDefinitionBuilder();
         loadBalancingDataPublisher = null;
         isPublisherCreated = false;
@@ -83,7 +84,7 @@ public class Stream {
 
     private synchronized static void initializeDataPublisher(Stream stream) throws BamMediatorException {
         try {
-            if(!stream.isPublisherCreated){
+            if (!stream.isPublisherCreated) {
                 stream.createDataPublisher();
                 stream.setStreamDefinitionToDataPublisher();
                 stream.isPublisherCreated = true;
@@ -96,61 +97,74 @@ public class Stream {
     }
 
     private void createDataPublisher() throws BamMediatorException {
-        if(this.isCloudDeployment()){ // In Stratos environment
+        if (this.isCloudDeployment()) { // In Stratos environment
             this.createLoadBalancingDataPublisher(this.getServerConfigBAMServerURL(),
-                                                  this.bamServerConfig.getUsername(),
-                                                  this.bamServerConfig.getPassword());
+                    this.bamServerConfig.getUsername(),
+                    this.bamServerConfig.getPassword());
             /*asyncDataPublisher = new AsyncDataPublisher(this.getServerConfigBAMServerURL(),
                                                         this.bamServerConfig.getUsername(),
                                                         this.bamServerConfig.getPassword());*/
         } else { // In normal Carbon environment
-            if(this.bamServerConfig.isLoadbalanced()){
+            if (this.bamServerConfig.isLoadbalanced()) {
                 this.createLoadBalancingDataPublisher(this.bamServerConfig.getUrlSet(),
-                                                      this.bamServerConfig.getUsername(),
-                                                      this.bamServerConfig.getPassword());
+                        this.bamServerConfig.getUsername(),
+                        this.bamServerConfig.getPassword());
             } else {
-                if(this.bamServerConfig.isSecure()){
+                if (this.bamServerConfig.isSecure()) {
                     asyncDataPublisher = new AsyncDataPublisher("ssl://" + this.bamServerConfig.getIp() + ":" + this.bamServerConfig.getAuthenticationPort(),
-                                                                "ssl://" + this.bamServerConfig.getIp() + ":" + this.bamServerConfig.getAuthenticationPort(),
-                                                                this.bamServerConfig.getUsername(), this.bamServerConfig.getPassword());
+                            "ssl://" + this.bamServerConfig.getIp() + ":" + this.bamServerConfig.getAuthenticationPort(),
+                            this.bamServerConfig.getUsername(), this.bamServerConfig.getPassword());
                 } else {
                     asyncDataPublisher = new AsyncDataPublisher("ssl://" + this.bamServerConfig.getIp() + ":" + this.bamServerConfig.getAuthenticationPort(),
-                                                                "tcp://" + this.bamServerConfig.getIp() + ":" + this.bamServerConfig.getReceiverPort(),
-                                                                this.bamServerConfig.getUsername(), this.bamServerConfig.getPassword());
+                            "tcp://" + this.bamServerConfig.getIp() + ":" + this.bamServerConfig.getReceiverPort(),
+                            this.bamServerConfig.getUsername(), this.bamServerConfig.getPassword());
                 }
             }
         }
 
         log.info("Data Publisher Created.");
     }
-    
+
     private void createLoadBalancingDataPublisher(String urlSet, String username, String password) throws BamMediatorException {
         ArrayList<ReceiverGroup> allReceiverGroups = new ArrayList<ReceiverGroup>();
         ArrayList<String> receiverGroupUrls = DataPublisherUtil.getReceiverGroups(urlSet);
 
         for (String aReceiverGroupURL : receiverGroupUrls) {
             ArrayList<DataPublisherHolder> dataPublisherHolders = new ArrayList<DataPublisherHolder>();
-            String[] urls = aReceiverGroupURL.split(",");
-            for (String aUrl : urls) {
-                DataPublisherHolder aNode = new DataPublisherHolder(null, aUrl.trim(), username, password);
-                dataPublisherHolders.add(aNode);
+            String[] failOverUrls = aReceiverGroupURL.split("\\|");
+            String[] lbURLs = aReceiverGroupURL.split(",");
+            if (failOverUrls == null || failOverUrls.length == 1) {
+                for (String aUrl : lbURLs) {
+                    DataPublisherHolder aNode = new DataPublisherHolder(null, aUrl.trim(), username, password);
+                    dataPublisherHolders.add(aNode);
+                }
+                ReceiverGroup group = new ReceiverGroup(dataPublisherHolders);
+                allReceiverGroups.add(group);
+            } else if (lbURLs != null && lbURLs.length != 1) {
+                throw new BamMediatorException("You can either have fali over URLs or load balancing URLS in one receiver group",
+                        new Exception("You can either have fali over URLs or load balancing URLS in one receiver group"));
+            } else {
+                for (String aUrl : failOverUrls) {
+                    DataPublisherHolder aNode = new DataPublisherHolder(null, aUrl.trim(), username, password);
+                    dataPublisherHolders.add(aNode);
+                }
+                ReceiverGroup group = new ReceiverGroup(dataPublisherHolders, true);
+                allReceiverGroups.add(group);
             }
-            ReceiverGroup group = new ReceiverGroup(dataPublisherHolders);
-            allReceiverGroups.add(group);
         }
         this.loadBalancingDataPublisher = new LoadBalancingDataPublisher(allReceiverGroups);
     }
 
-    private String getServerConfigBAMServerURL(){
+    private String getServerConfigBAMServerURL() {
         String[] bamServerUrl = ServerConfiguration.getInstance().getProperties(SERVER_CONFIG_BAM_URL);
-        if(null != bamServerUrl){
-            return bamServerUrl[bamServerUrl.length-1];
-        }else {
+        if (null != bamServerUrl) {
+            return bamServerUrl[bamServerUrl.length - 1];
+        } else {
             return DEFAULT_BAM_SERVER_URL;
         }
     }
 
-    private boolean isCloudDeployment(){
+    private boolean isCloudDeployment() {
         String[] cloudDeploy = ServerConfiguration.getInstance().getProperties(CLOUD_DEPLOYMENT_PROP);
         return null != cloudDeploy && Boolean.parseBoolean(cloudDeploy[cloudDeploy.length - 1]);
     }
@@ -158,46 +172,46 @@ public class Stream {
     private void setStreamDefinitionToDataPublisher() throws BamMediatorException {
         try {
             StreamDefinition streamDef = this.streamDefinitionBuilder.buildStreamDefinition(this.streamConfiguration);
-            if(this.bamServerConfig.isLoadbalanced()){
+            if (this.bamServerConfig.isLoadbalanced()) {
                 loadBalancingDataPublisher.addStreamDefinition(streamDef);
             } else {
                 asyncDataPublisher.addStreamDefinition(streamDef);
             }
         } catch (BamMediatorException e) {
             String errorMsg = "Error while creating the Asynchronous/LoadBalancing Data Publisher" +
-                              "or while creating the Stream Definition. " + e.getMessage();
+                    "or while creating the Stream Definition. " + e.getMessage();
             log.error(errorMsg, e);
             throw new BamMediatorException(errorMsg, e);
         }
     }
-    
+
     private void publishEvent(MessageContext messageContext) throws BamMediatorException {
         org.apache.axis2.context.MessageContext msgCtx = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         AxisConfiguration axisConfiguration = msgCtx.getConfigurationContext().getAxisConfiguration();
-        try{
+        try {
             Object[] metaData = this.metaDataBuilder.createMetadata(messageContext, axisConfiguration);
             Object[] correlationData = this.correlationDataBuilder.createCorrelationData(messageContext);
             Object[] payloadData = this.payloadDataBuilder.createPayloadData(messageContext, msgCtx,
-                                                                             this.streamConfiguration);
+                    this.streamConfiguration);
 
-            if(this.bamServerConfig.isLoadbalanced()){
+            if (this.bamServerConfig.isLoadbalanced()) {
                 loadBalancingDataPublisher.publish(this.streamConfiguration.getName(),
-                                                   this.streamConfiguration.getVersion(), metaData,
-                                                   correlationData, payloadData);
+                        this.streamConfiguration.getVersion(), metaData,
+                        correlationData, payloadData);
             } else {
                 if (!asyncDataPublisher.canPublish()) {
                     asyncDataPublisher.reconnect();
                 }
                 asyncDataPublisher.publish(this.streamConfiguration.getName(),
-                                           this.streamConfiguration.getVersion(),
-                                           metaData, correlationData, payloadData);
+                        this.streamConfiguration.getVersion(),
+                        metaData, correlationData, payloadData);
             }
 
-        } catch (AgentException e){
+        } catch (AgentException e) {
             String errorMsg = "Agent error occurred while sending the event. " + e.getMessage();
             log.error(errorMsg, e);
             throw new BamMediatorException(errorMsg, e);
-        } catch (Exception e){
+        } catch (Exception e) {
             String errorMsg = "Error occurred while sending the event. " + e.getMessage();
             log.error(errorMsg, e);
             throw new BamMediatorException(errorMsg, e);
