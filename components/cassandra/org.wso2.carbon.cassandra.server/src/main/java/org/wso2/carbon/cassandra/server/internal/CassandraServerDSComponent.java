@@ -21,20 +21,17 @@ package org.wso2.carbon.cassandra.server.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.cassandra.server.CassandraServerComponentManager;
 import org.wso2.carbon.cassandra.server.CassandraServerController;
 import org.wso2.carbon.cassandra.server.service.CassandraServerService;
 import org.wso2.carbon.cassandra.server.service.CassandraServerServiceImpl;
 import org.wso2.carbon.identity.authentication.AuthenticationService;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ServerConstants;
-import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.base.api.ServerConfigurationService;
 
 import java.io.File;
-import java.lang.Integer;
-import java.lang.String;
-import java.lang.System;
 
 /**
  * @scr.component name="org.wso2.carbon.cassandra.server.component" immediate="true"
@@ -175,14 +172,7 @@ public class CassandraServerDSComponent {
      * @return offset number
      */
     private int readPortOffset() {
-        ServerConfiguration carbonConfig = ServerConfiguration.getInstance();
-        String portOffset = carbonConfig.getFirstProperty(CARBON_CONFIG_PORT_OFFSET);
-
-        try {
-            return ((portOffset != null) ? Integer.parseInt(portOffset.trim()) : CARBON_DEFAULT_PORT_OFFSET);
-        } catch (NumberFormatException e) {
-            return CARBON_DEFAULT_PORT_OFFSET;
-        }
+      return CarbonUtils.getPortFromServerConfig(CARBON_CONFIG_PORT_OFFSET)+1;
     }
 
     /**
