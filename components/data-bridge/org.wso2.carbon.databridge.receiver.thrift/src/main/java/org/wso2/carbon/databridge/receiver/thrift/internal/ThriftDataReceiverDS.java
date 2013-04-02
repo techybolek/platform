@@ -74,7 +74,7 @@ public class ThriftDataReceiverDS {
     protected void activate(ComponentContext context) {
 
         try {
-            int portOffset = ThriftDataReceiverBuilder.readPortOffset(serverConfiguration);
+            int portOffset = ThriftDataReceiverBuilder.readPortOffset();
             ThriftDataReceiverConfiguration thriftDataReceiverConfiguration = new ThriftDataReceiverConfiguration(CommonThriftConstants.DEFAULT_RECEIVER_PORT + CommonThriftConstants.SECURE_EVENT_RECEIVER_PORT_OFFSET + portOffset, CommonThriftConstants.DEFAULT_RECEIVER_PORT + portOffset);
             ThriftDataReceiverBuilder.populateConfigurations(portOffset, thriftDataReceiverConfiguration, dataBridgeReceiverService.getInitialConfig());
 

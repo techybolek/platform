@@ -21,8 +21,8 @@ import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.core.internal.utils.DataBridgeConstants;
-import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.databridge.receiver.thrift.conf.ThriftDataReceiverConfiguration;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.xml.namespace.QName;
 
@@ -74,15 +74,8 @@ public final class ThriftDataReceiverBuilder {
     }
 
 
-    public static int readPortOffset(ServerConfigurationService serverConfiguration) {
-
-        String portOffset = serverConfiguration.getFirstProperty(ThriftDataReceiverConstants.CARBON_CONFIG_PORT_OFFSET_NODE);
-
-        try {
-            return ((portOffset != null) ? Integer.parseInt(portOffset.trim()) : ThriftDataReceiverConstants.CARBON_DEFAULT_PORT_OFFSET);
-        } catch (NumberFormatException e) {
-            return ThriftDataReceiverConstants.CARBON_DEFAULT_PORT_OFFSET;
-        }
+    public static int readPortOffset() {
+       return CarbonUtils.getPortFromServerConfig(ThriftDataReceiverConstants.CARBON_CONFIG_PORT_OFFSET_NODE)+1;
     }
 
 
