@@ -1,13 +1,21 @@
 package org.wso2.carbon.databridge.agent.thrift;
 
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
 import org.wso2.carbon.databridge.agent.thrift.internal.utils.AgentConstants;
 import org.wso2.carbon.databridge.agent.thrift.lb.ReceiverStateObserver;
+import org.wso2.carbon.databridge.agent.thrift.util.DataPublisherUtil;
+import org.wso2.carbon.databridge.agent.thrift.util.PublishData;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
-import org.wso2.carbon.databridge.commons.exception.*;
+import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
+import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
+import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
+import org.wso2.carbon.databridge.commons.exception.NoStreamDefinitionExistException;
+import org.wso2.carbon.databridge.commons.exception.StreamDefinitionException;
+import org.wso2.carbon.databridge.commons.exception.TransportException;
 
 import java.net.MalformedURLException;
 import java.util.Map;
@@ -42,9 +50,9 @@ public class AsyncDataPublisher {
 
     private DataPublisher dataPublisher;
 
-    private Map<String, String> streamIdCache = new ConcurrentHashMap<String, String>();
+    private ConcurrentHashMap<String, String> streamIdCache = new ConcurrentHashMap<String, String>();
 
-    private Map<String, Object> streamDefnCache = new ConcurrentHashMap<String, Object>();
+    private ConcurrentHashMap<String, String> streamDefnCache = new ConcurrentHashMap<String, String>();
 
     private LinkedBlockingQueue<PublishData> publishDataQueue;
 
@@ -60,6 +68,9 @@ public class AsyncDataPublisher {
 
     private ReceiverStateObserver receiverStateObserver;
 
+    private Gson gson = new Gson();
+
+
     /**
      * To create the Data Publisher and creates the connection asynchronously
      *
@@ -74,9 +85,9 @@ public class AsyncDataPublisher {
                               String username, String password) {
         isConnectorAlive = new AtomicBoolean(true);
         this.publishDataQueue = new LinkedBlockingQueue<PublishData>(AgentConstants
-                .DEFAULT_ASYNC_CLIENT_BUFFERED_EVENTS_SIZE);
+                                                                             .DEFAULT_ASYNC_CLIENT_BUFFERED_EVENTS_SIZE);
         receiverConnectionWorker = new ReceiverConnectionWorker(authenticationURL,
-                receiverURL, username, password, null);
+                                                                receiverURL, username, password, null);
         connectorService.submit(receiverConnectionWorker);
     }
 
@@ -93,9 +104,9 @@ public class AsyncDataPublisher {
                               String password) {
         isConnectorAlive = new AtomicBoolean(true);
         this.publishDataQueue = new LinkedBlockingQueue<PublishData>(AgentConstants
-                .DEFAULT_ASYNC_CLIENT_BUFFERED_EVENTS_SIZE);
+                                                                             .DEFAULT_ASYNC_CLIENT_BUFFERED_EVENTS_SIZE);
         receiverConnectionWorker = new ReceiverConnectionWorker(receiverURL,
-                username, password);
+                                                                username, password);
         connectorService.submit(receiverConnectionWorker);
     }
 
@@ -115,7 +126,7 @@ public class AsyncDataPublisher {
         this.publishDataQueue = new LinkedBlockingQueue<PublishData>
                 (agent.getAgentConfiguration().getAsyncDataPublisherBufferedEventSize());
         receiverConnectionWorker = new ReceiverConnectionWorker(receiverURL,
-                username, password, agent);
+                                                                username, password, agent);
         connectorService.submit(receiverConnectionWorker);
     }
 
@@ -136,7 +147,40 @@ public class AsyncDataPublisher {
         this.publishDataQueue = new LinkedBlockingQueue<PublishData>
                 (agent.getAgentConfiguration().getAsyncDataPublisherBufferedEventSize());
         receiverConnectionWorker = new ReceiverConnectionWorker(authenticationUrl, receiverUrl,
-                userName, password, agent);
+                                                                userName, password, agent);
+        connectorService.submit(receiverConnectionWorker);
+    }
+
+    /**
+     * To create the Data Publisher and creates the connection asynchronously
+     *
+     * @param authenticationUrl the secure authentication url, use <ssl/https>://<HOST>:<PORT>
+     * @param receiverUrl       the event receiver url
+     *                          use <tcp/http></tcp/http>://<HOST>:<PORT> for normal data transfer and
+     *                          use <ssl/https></ssl/https>://<HOST>:<PORT> for secure data transfer
+     * @param userName          user name
+     * @param password          password
+     * @param agent             the underlining agent
+     * @param streamDefnCache   the common Stream Definition cache used by AsyncDataPublishers
+     */
+    public AsyncDataPublisher(String authenticationUrl, String receiverUrl, String userName,
+                              String password, Agent agent,
+                              ConcurrentHashMap<String, String> streamDefnCache) {
+        if (streamDefnCache != null) {
+            this.streamDefnCache = streamDefnCache;
+        }
+        isConnectorAlive = new AtomicBoolean(true);
+        if (agent != null) {
+            this.publishDataQueue = new LinkedBlockingQueue<PublishData>
+                    (agent.getAgentConfiguration().getAsyncDataPublisherBufferedEventSize());
+            receiverConnectionWorker = new ReceiverConnectionWorker(authenticationUrl, receiverUrl,
+                                                                    userName, password, agent);
+        } else {
+            this.publishDataQueue = new LinkedBlockingQueue<PublishData>(AgentConstants
+                                                                                 .DEFAULT_ASYNC_CLIENT_BUFFERED_EVENTS_SIZE);
+            receiverConnectionWorker = new ReceiverConnectionWorker(authenticationUrl, receiverUrl,
+                                                                    userName, password, null);
+        }
         connectorService.submit(receiverConnectionWorker);
     }
 
@@ -204,15 +248,19 @@ public class AsyncDataPublisher {
      * @return agent
      */
     public Agent getAgent() {
-        if (null != dataPublisher)
+        if (null != dataPublisher) {
             return dataPublisher.getAgent();
-        else return null;
+        } else {
+            return null;
+        }
     }
 
 
     public void registerReceiverObserver(ReceiverStateObserver observer) {
         receiverStateObserver = observer;
-        if (null != dataPublisher) dataPublisher.registerReceiverStateObserver(receiverStateObserver);
+        if (null != dataPublisher) {
+            dataPublisher.registerReceiverStateObserver(receiverStateObserver);
+        }
     }
 
     /**
@@ -259,19 +307,19 @@ public class AsyncDataPublisher {
                         Object[] payloadDataArray, Map<String, String> arbitraryDataMap) throws AgentException {
         if (canPublish()) {
             if (null != dataPublisher) {
-                String streamKey = getStreamCacheKey(streamName, streamVersion);
+                String streamKey = DataPublisherUtil.getStreamCacheKey(streamName, streamVersion);
                 String streamId = streamIdCache.get(streamKey);
                 if (null != streamId) {
                     dataPublisher.publish(streamId, timeStamp, metaDataArray,
-                            correlationDataArray, payloadDataArray, arbitraryDataMap);
+                                          correlationDataArray, payloadDataArray, arbitraryDataMap);
                 } else {
                     boolean isAdded = publishDataQueue.offer(new PublishData(streamName,
-                            streamVersion,
-                            timeStamp,
-                            metaDataArray,
-                            correlationDataArray,
-                            payloadDataArray,
-                            arbitraryDataMap));
+                                                                             streamVersion,
+                                                                             timeStamp,
+                                                                             metaDataArray,
+                                                                             correlationDataArray,
+                                                                             payloadDataArray,
+                                                                             arbitraryDataMap));
 
                     if (isPublisherAlive.compareAndSet(false, true)) {
                         publisherService.submit(new DataPublishWorker());
@@ -284,12 +332,12 @@ public class AsyncDataPublisher {
             } else {
                 //receiverConnector worker is started to connect, but not yet dataPublisher is setted
                 boolean isAdded = publishDataQueue.offer(new PublishData(streamName,
-                        streamVersion,
-                        timeStamp,
-                        metaDataArray,
-                        correlationDataArray,
-                        payloadDataArray,
-                        arbitraryDataMap));
+                                                                         streamVersion,
+                                                                         timeStamp,
+                                                                         metaDataArray,
+                                                                         correlationDataArray,
+                                                                         payloadDataArray,
+                                                                         arbitraryDataMap));
                 if (!isAdded && log.isDebugEnabled()) {
                     log.debug("Event queue is full, and Event is not added to the queue to publish");
                 }
@@ -297,12 +345,12 @@ public class AsyncDataPublisher {
 
         } else {
             boolean isAdded = publishDataQueue.offer(new PublishData(streamName,
-                    streamVersion,
-                    timeStamp,
-                    metaDataArray,
-                    correlationDataArray,
-                    payloadDataArray,
-                    arbitraryDataMap));
+                                                                     streamVersion,
+                                                                     timeStamp,
+                                                                     metaDataArray,
+                                                                     correlationDataArray,
+                                                                     payloadDataArray,
+                                                                     arbitraryDataMap));
             reconnect();
             if (!isAdded && log.isDebugEnabled()) {
                 log.debug("Event queue is full, and Event is not added to the queue to publish");
@@ -350,18 +398,18 @@ public class AsyncDataPublisher {
                         Object[] payloadDataArray, Map<String, String> arbitraryDataMap) throws AgentException {
         if (canPublish()) {
             if (null != dataPublisher) {
-                String streamKey = getStreamCacheKey(streamName, streamVersion);
+                String streamKey = DataPublisherUtil.getStreamCacheKey(streamName, streamVersion);
                 String streamId = streamIdCache.get(streamKey);
                 if (null != streamId) {
                     dataPublisher.publish(streamId, metaDataArray,
-                            correlationDataArray, payloadDataArray);
+                                          correlationDataArray, payloadDataArray);
                 } else {
                     boolean isAdded = publishDataQueue.offer(new PublishData(streamName,
-                            streamVersion,
-                            metaDataArray,
-                            correlationDataArray,
-                            payloadDataArray,
-                            arbitraryDataMap));
+                                                                             streamVersion,
+                                                                             metaDataArray,
+                                                                             correlationDataArray,
+                                                                             payloadDataArray,
+                                                                             arbitraryDataMap));
 
                     if (isPublisherAlive.compareAndSet(false, true)) {
                         publisherService.submit(new DataPublishWorker());
@@ -374,22 +422,22 @@ public class AsyncDataPublisher {
             } else {
                 //receiverConnector worker is started to connect, but not yet dataPublisher is setted
                 boolean isAdded = publishDataQueue.offer(new PublishData(streamName,
-                        streamVersion,
-                        metaDataArray,
-                        correlationDataArray,
-                        payloadDataArray,
-                        arbitraryDataMap));
+                                                                         streamVersion,
+                                                                         metaDataArray,
+                                                                         correlationDataArray,
+                                                                         payloadDataArray,
+                                                                         arbitraryDataMap));
                 if (!isAdded && log.isDebugEnabled()) {
                     log.debug("Event queue is full, and Event is not added to the queue to publish");
                 }
             }
         } else {
             boolean isAdded = publishDataQueue.offer(new PublishData(streamName,
-                    streamVersion,
-                    metaDataArray,
-                    correlationDataArray,
-                    payloadDataArray,
-                    arbitraryDataMap));
+                                                                     streamVersion,
+                                                                     metaDataArray,
+                                                                     correlationDataArray,
+                                                                     payloadDataArray,
+                                                                     arbitraryDataMap));
             reconnect();
             if (!isAdded && log.isDebugEnabled()) {
                 log.debug("Event queue is full, and Event is not added to the queue to publish");
@@ -414,15 +462,15 @@ public class AsyncDataPublisher {
             throws AgentException {
         if (canPublish()) {
             if (null != dataPublisher) {
-                String streamKey = getStreamCacheKey(streamName, streamVersion);
+                String streamKey = DataPublisherUtil.getStreamCacheKey(streamName, streamVersion);
                 String streamId = streamIdCache.get(streamKey);
                 if (null != streamId) {
                     event.setStreamId(streamId);
                     dataPublisher.publish(event);
                 } else {
                     boolean isAdded = publishDataQueue.offer(new PublishData(streamName,
-                            streamVersion,
-                            event));
+                                                                             streamVersion,
+                                                                             event));
 
                     if (isPublisherAlive.compareAndSet(false, true)) {
                         publisherService.submit(new DataPublishWorker());
@@ -435,16 +483,16 @@ public class AsyncDataPublisher {
             } else {
                 //receiverConnector worker is started to connect, but not yet dataPublisher is setted
                 boolean isAdded = publishDataQueue.offer(new PublishData(streamName,
-                        streamVersion,
-                        event));
+                                                                         streamVersion,
+                                                                         event));
                 if (!isAdded && log.isDebugEnabled()) {
                     log.debug("Event queue is full, and Event is not added to the queue to publish");
                 }
             }
         } else {
             boolean isAdded = publishDataQueue.offer(new PublishData(streamName,
-                    streamVersion,
-                    event));
+                                                                     streamVersion,
+                                                                     event));
             reconnect();
             if (!isAdded && log.isDebugEnabled()) {
                 log.debug("Event queue is full, and Event is not added to the queue to publish");
@@ -469,8 +517,8 @@ public class AsyncDataPublisher {
             } else {
                 //receiverConnector worker is started to connect, but not yet dataPublisher is setted
                 boolean isAdded = publishDataQueue.offer(new PublishData(null,
-                        null,
-                        event));
+                                                                         null,
+                                                                         event));
 
                 if (!isAdded && log.isDebugEnabled()) {
                     log.debug("Event queue is full, and Event is not added to the queue to publish");
@@ -478,8 +526,8 @@ public class AsyncDataPublisher {
             }
         } else {
             boolean isAdded = publishDataQueue.offer(new PublishData(null,
-                    null,
-                    event));
+                                                                     null,
+                                                                     event));
             reconnect();
 
             if (!isAdded && log.isDebugEnabled()) {
@@ -508,7 +556,7 @@ public class AsyncDataPublisher {
      * @param version    Version of stream which should be added
      */
     public void addStreamDefinition(String streamDefn, String streamName, String version) {
-        String key = getStreamCacheKey(streamName, version);
+        String key = DataPublisherUtil.getStreamCacheKey(streamName, version);
         streamDefnCache.put(key, streamDefn);
     }
 
@@ -520,8 +568,8 @@ public class AsyncDataPublisher {
      */
 
     public void addStreamDefinition(StreamDefinition definition) {
-        String key = getStreamCacheKey(definition.getName(), definition.getVersion());
-        streamDefnCache.put(key, definition);
+        String key = DataPublisherUtil.getStreamCacheKey(definition.getName(), definition.getVersion());
+        streamDefnCache.put(key, gson.toJson(definition));
     }
 
     /**
@@ -533,7 +581,7 @@ public class AsyncDataPublisher {
      * @return whether the stream definition is exists or not
      */
     public boolean isStreamDefinitionAdded(String streamName, String version) {
-        String key = getStreamCacheKey(streamName, version);
+        String key = DataPublisherUtil.getStreamCacheKey(streamName, version);
         return null != streamDefnCache.get(key);
     }
 
@@ -546,18 +594,11 @@ public class AsyncDataPublisher {
      * @return whether the stream definition is exists or not
      */
     public boolean isStreamDefinitionAdded(StreamDefinition streamDefinition) {
-        String key = getStreamCacheKey(streamDefinition.getName(),
-                streamDefinition.getVersion());
+        String key = DataPublisherUtil.getStreamCacheKey(streamDefinition.getName(),
+                                                         streamDefinition.getVersion());
         return null != streamDefnCache.get(key);
     }
 
-    private String getStreamCacheKey(String streamName, String version) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(streamName);
-        sb.append("_");
-        sb.append(version);
-        return sb.toString();
-    }
 
     /**
      * Returns the streamId if the already stream name and version is defined in the receiver
@@ -574,7 +615,7 @@ public class AsyncDataPublisher {
     public String findStream(String name, String version)
             throws AgentException, StreamDefinitionException, NoStreamDefinitionExistException {
         if (null != dataPublisher) {
-            String key = getStreamCacheKey(name, version);
+            String key = DataPublisherUtil.getStreamCacheKey(name, version);
             String streamId = streamIdCache.get(key);
             if (null == streamId) {
                 streamId = dataPublisher.findStream(name, version);
@@ -596,7 +637,7 @@ public class AsyncDataPublisher {
     public String findStreamId(String name, String version)
             throws AgentException {
         if (null != dataPublisher) {
-            String key = getStreamCacheKey(name, version);
+            String key = DataPublisherUtil.getStreamCacheKey(name, version);
             String streamId = streamIdCache.get(key);
             if (null == streamId) {
                 streamId = dataPublisher.findStreamId(name, version);
@@ -621,61 +662,6 @@ public class AsyncDataPublisher {
 
 
     /**
-     * Inner class which wrapps the published event's data
-     * to push in the queue
-     */
-    public class PublishData {
-
-        private Event event;
-        private String streamName;
-        private String streamVersion;
-
-        private PublishData(String streamName,
-                            String streamVersion,
-                            long timeStamp,
-                            Object[] metaDataArray,
-                            Object[] correlationDataArray,
-                            Object[] payloadDataArray, Map<String, String> arbitraryDataMap) {
-            this.streamName = streamName;
-            this.streamVersion = streamVersion;
-            this.event = new Event(null, timeStamp, metaDataArray,
-                    correlationDataArray, payloadDataArray, arbitraryDataMap);
-        }
-
-        private PublishData(String streamName,
-                            String streamVersion,
-                            Object[] metaDataArray,
-                            Object[] correlationDataArray,
-                            Object[] payloadDataArray, Map<String, String> arbitraryDataMap) {
-            this.streamName = streamName;
-            this.streamVersion = streamVersion;
-            this.event = new Event(null, System.currentTimeMillis(),
-                    metaDataArray, correlationDataArray, payloadDataArray, arbitraryDataMap);
-        }
-
-        private PublishData(String streamName,
-                            String streamVersion,
-                            Event event) {
-            this.streamName = streamName;
-            this.streamVersion = streamVersion;
-            this.event = event;
-        }
-
-        public Event getEvent() {
-            return event;
-        }
-
-        public String getStreamName() {
-            return streamName;
-        }
-
-        public String getStreamVersion() {
-            return streamVersion;
-        }
-    }
-
-
-    /**
      * Worker thread which is responsible to get the events from the queue
      * and publish
      */
@@ -687,13 +673,14 @@ public class AsyncDataPublisher {
                 PublishData data = publishDataQueue.poll();
                 while (null != data) {
                     String streamIdKey = null;
-                    String streamId = data.event.getStreamId();
-                    if (null == streamId || streamId.isEmpty()) {
-                        streamIdKey = getStreamCacheKey(data.streamName,
-                                data.streamVersion);
+                    String streamId = null;
+                    if (data.getStreamName() != null && data.getStreamVersion() != null) {
+                        streamIdKey = DataPublisherUtil.getStreamCacheKey(data.getStreamName(),
+                                                                          data.getStreamVersion());
                         streamId = streamIdCache.get(streamIdKey);
+                    } else {
+                        streamId = data.getEvent().getStreamId();
                     }
-
                     if (null == streamId) {
                         try {
                             Object defn = streamDefnCache.get(streamIdKey);
@@ -707,8 +694,8 @@ public class AsyncDataPublisher {
 
                             if (null != streamId) {
                                 streamIdCache.put(streamIdKey, streamId);
-                                data.event.setStreamId(streamId);
-                                dataPublisher.publish(data.event);
+                                data.getEvent().setStreamId(streamId);
+                                dataPublisher.publish(data.getEvent());
                             } else {
                                 log.error("Stream Id is null for stream definition :" + defn.toString());
                             }
@@ -723,9 +710,9 @@ public class AsyncDataPublisher {
                             log.error("Malformed stream definition", e);
                         }
                     } else {
-                        data.event.setStreamId(streamId);
+                        data.getEvent().setStreamId(streamId);
                         try {
-                            dataPublisher.publish(data.event);
+                            dataPublisher.publish(data.getEvent());
                         } catch (AgentException e) {
                             log.error("Error occurred while publishing the event", e);
                         }
@@ -813,8 +800,11 @@ public class AsyncDataPublisher {
 
                 } catch (MalformedURLException e) {
                     dataPublisher = null;
-                    if (!isReconnecting) log.error("Malformed url error when connecting to receiver", e);
-                    else log.error("Reconnection failed for " + receiverUrl);
+                    if (!isReconnecting) {
+                        log.error("Malformed url error when connecting to receiver", e);
+                    } else {
+                        log.error("Reconnection failed for " + receiverUrl);
+                    }
                     if (null != receiverStateObserver) {
                         receiverStateObserver.notifyConnectionFailure(receiverUrl, username, password);
                         receiverStateObserver.
@@ -822,8 +812,11 @@ public class AsyncDataPublisher {
                     }
                 } catch (AgentException e) {
                     dataPublisher = null;
-                    if (!isReconnecting) log.error("Error while connection to event receiver", e);
-                    else log.error("Reconnection failed for for " + receiverUrl);
+                    if (!isReconnecting) {
+                        log.error("Error while connection to event receiver", e);
+                    } else {
+                        log.error("Reconnection failed for for " + receiverUrl);
+                    }
                     if (null != receiverStateObserver) {
                         receiverStateObserver.notifyConnectionFailure(receiverUrl, username, password);
                         receiverStateObserver.
@@ -831,8 +824,11 @@ public class AsyncDataPublisher {
                     }
                 } catch (AuthenticationException e) {
                     dataPublisher = null;
-                    if (!isReconnecting) log.error("Error while connection to event receiver", e);
-                    else log.error("Reconnection failed for" + receiverUrl);
+                    if (!isReconnecting) {
+                        log.error("Error while connection to event receiver", e);
+                    } else {
+                        log.error("Reconnection failed for" + receiverUrl);
+                    }
                     if (null != receiverStateObserver) {
                         receiverStateObserver.notifyConnectionFailure(receiverUrl, username, password);
                         receiverStateObserver.
@@ -840,8 +836,11 @@ public class AsyncDataPublisher {
                     }
                 } catch (TransportException e) {
                     dataPublisher = null;
-                    if (!isReconnecting) log.error("Error while connection to event receiver", e);
-                    else log.error("Reconnection failed for " + receiverUrl);
+                    if (!isReconnecting) {
+                        log.error("Error while connection to event receiver", e);
+                    } else {
+                        log.error("Reconnection failed for " + receiverUrl);
+                    }
                     if (null != receiverStateObserver) {
                         receiverStateObserver.notifyConnectionFailure(receiverUrl, username, password);
                         receiverStateObserver.

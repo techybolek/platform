@@ -27,6 +27,7 @@ package org.wso2.carbon.databridge.agent.thrift.internal.utils;
 public final class AgentConstants {
 
 
+
     private AgentConstants() {
     }
 
@@ -51,6 +52,7 @@ public final class AgentConstants {
     public static final String SECURE_EVICTION_TIME_PERIOD = "secureEvictionTimePeriod";
     public static final String SECURE_MIN_IDLE_TIME_IN_POOL = "secureMinIdleTimeInPool";
     public static final String ASYNC_BUFFER_SIZE = "asyncDataPublisherBufferedEventSize";
+    public static final String LB_BUFFER_SIZE = "lbDataPublisherBufferedEventSize";
     public static final String RECONNECTION_INTERVAL = "loadBalancingReconnectionInterval";
 
     public static final String MAX_MESSAGE_BUNDLE_SIZE = "maxMessageBundleSize";
@@ -65,6 +67,7 @@ public final class AgentConstants {
     //AgentConfiguration
     public static final int DEFAULT_BUFFERED_EVENTS_SIZE = 200;
     public static final int DEFAULT_ASYNC_CLIENT_BUFFERED_EVENTS_SIZE = 10000;
+    public static final int DEFAULT_LB_CLIENT_BUFFERED_EVENTS_SIZE = 10000;
     public static final long DEFAULT_RECONNECTION_INTERVAL = 30;
 
     public static final int DEFAULT_POOL_SIZE = 30;

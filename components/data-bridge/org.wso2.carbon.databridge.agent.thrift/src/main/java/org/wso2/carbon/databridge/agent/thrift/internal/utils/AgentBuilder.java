@@ -203,6 +203,12 @@ public final class AgentBuilder {
         if (asyncBuffer != null) {
             agentConfiguration.setAsyncDataPublisherBufferedEventSize(Integer.parseInt(asyncBuffer.getText()));
         }
+        OMElement lbBuffer = agentServerConfig.getFirstChildWithName(
+                new QName(AgentConstants.AGENT_CONF_NAMESPACE,
+                          AgentConstants.LB_BUFFER_SIZE));
+        if (lbBuffer != null) {
+            agentConfiguration.setLoadBalancingDataPublisherBufferedEventSize(Integer.parseInt(lbBuffer.getText()));
+        }
         OMElement reconnectionInterval = agentServerConfig.getFirstChildWithName(
                 new QName(AgentConstants.AGENT_CONF_NAMESPACE,
                         AgentConstants.RECONNECTION_INTERVAL));

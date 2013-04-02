@@ -1,6 +1,6 @@
 package org.wso2.carbon.databridge.agent.thrift.lb;
 
-import org.wso2.carbon.databridge.agent.thrift.AsyncDataPublisher;
+import org.wso2.carbon.databridge.agent.thrift.util.PublishData;
 import org.wso2.carbon.databridge.commons.Event;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -27,7 +27,7 @@ public interface ReceiverStateObserver {
 
     public void resendEvents(LinkedBlockingQueue<Event> events);
 
-    public void resendPublishedData(LinkedBlockingQueue<AsyncDataPublisher.PublishData> publishDatas);
+    public void resendPublishedData(LinkedBlockingQueue<PublishData> publishDataQueue);
 
     public void notifyConnectionSuccess(String receiverUrl, String username, String password);
 }

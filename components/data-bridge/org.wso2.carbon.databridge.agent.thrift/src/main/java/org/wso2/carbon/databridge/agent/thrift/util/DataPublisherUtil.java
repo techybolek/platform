@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  */
 public class DataPublisherUtil {
 
-      public static ArrayList<String> getReceiverGroups(String urls) {
+    public static ArrayList<String> getReceiverGroups(String urls) {
         ArrayList<String> matchList = new ArrayList<String>();
         Pattern regex = Pattern.compile("\\{.*?\\}");
         Matcher regexMatcher = regex.matcher(urls);
@@ -32,6 +32,14 @@ public class DataPublisherUtil {
             matchList.add(urls.replace("{", "").replace("}", ""));
         }
         return matchList;
+    }
+
+    public static String getStreamCacheKey(String streamName, String version) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(streamName);
+        sb.append("_");
+        sb.append(version);
+        return sb.toString();
     }
 
 }

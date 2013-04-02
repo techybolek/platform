@@ -6,11 +6,13 @@ import org.wso2.carbon.databridge.agent.thrift.Agent;
 import org.wso2.carbon.databridge.agent.thrift.AgentHolder;
 import org.wso2.carbon.databridge.agent.thrift.AsyncDataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
+import org.wso2.carbon.databridge.agent.thrift.util.DataPublisherUtil;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Copyright (c) 2009, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
@@ -32,10 +34,12 @@ public class LoadBalancingDataPublisher {
 
     private ArrayList<ReceiverGroup> receiverGroups;
 
+    private ConcurrentHashMap<String, String> streamDefnCache = new ConcurrentHashMap<String, String>();
+
     public LoadBalancingDataPublisher(ArrayList<ReceiverGroup> receiverGroups) {
         this.receiverGroups = receiverGroups;
         for (ReceiverGroup group : receiverGroups) {
-            group.createDataPublishers(AgentHolder.getOrCreateAgent());
+            group.createDataPublishers(AgentHolder.getOrCreateAgent(), streamDefnCache);
         }
     }
 
@@ -43,12 +47,27 @@ public class LoadBalancingDataPublisher {
         this.receiverGroups = receiverGroups;
         AgentHolder.setAgent(agent);
         for (ReceiverGroup group : receiverGroups) {
-            group.createDataPublishers(agent);
+            group.createDataPublishers(agent, streamDefnCache);
+        }
+    }
+
+    public LoadBalancingDataPublisher(ArrayList<ReceiverGroup> receiverGroups, Agent agent, boolean shareStreamDefinitionCache) {
+
+        this.receiverGroups = receiverGroups;
+        AgentHolder.setAgent(agent);
+        if (shareStreamDefinitionCache) {
+            for (ReceiverGroup group : receiverGroups) {
+                group.createDataPublishers(agent, streamDefnCache);
+            }
+        } else {
+            for (ReceiverGroup group : receiverGroups) {
+                group.createDataPublishers(agent, null);
+            }
         }
     }
 
     public void addReceiverGroup(ReceiverGroup aReceiverGroup) {
-        aReceiverGroup.createDataPublishers(AgentHolder.getOrCreateAgent());
+        aReceiverGroup.createDataPublishers(AgentHolder.getOrCreateAgent(), streamDefnCache);
         this.receiverGroups.add(aReceiverGroup);
     }
 
@@ -76,7 +95,7 @@ public class LoadBalancingDataPublisher {
                         Object[] payloadDataArray, Map<String, String> arbitraryDataMap) throws AgentException {
         for (ReceiverGroup aGroup : receiverGroups) {
             aGroup.publish(streamName, streamVersion, timeStamp,
-                    metaDataArray, correlationDataArray, payloadDataArray, arbitraryDataMap);
+                           metaDataArray, correlationDataArray, payloadDataArray, arbitraryDataMap);
         }
     }
 
@@ -103,7 +122,7 @@ public class LoadBalancingDataPublisher {
                         Object[] payloadDataArray) throws AgentException {
         for (ReceiverGroup aGroup : receiverGroups) {
             aGroup.publish(streamName, streamVersion, timeStamp,
-                    metaDataArray, correlationDataArray, payloadDataArray, null);
+                           metaDataArray, correlationDataArray, payloadDataArray, null);
         }
     }
 
@@ -129,7 +148,7 @@ public class LoadBalancingDataPublisher {
                         Object[] payloadDataArray, Map<String, String> arbitraryDataMap) throws AgentException {
         for (ReceiverGroup aGroup : receiverGroups) {
             aGroup.publish(streamName, streamVersion,
-                    metaDataArray, correlationDataArray, payloadDataArray, arbitraryDataMap);
+                           metaDataArray, correlationDataArray, payloadDataArray, arbitraryDataMap);
         }
     }
 
@@ -154,7 +173,7 @@ public class LoadBalancingDataPublisher {
                         Object[] payloadDataArray) throws AgentException {
         for (ReceiverGroup aGroup : receiverGroups) {
             aGroup.publish(streamName, streamVersion,
-                    metaDataArray, correlationDataArray, payloadDataArray, null);
+                           metaDataArray, correlationDataArray, payloadDataArray, null);
         }
     }
 
@@ -176,7 +195,7 @@ public class LoadBalancingDataPublisher {
             throws AgentException {
         for (ReceiverGroup aGroup : receiverGroups) {
             aGroup.publish(streamName, streamVersion,
-                    event);
+                           event);
         }
     }
 
@@ -209,10 +228,39 @@ public class LoadBalancingDataPublisher {
         }
     }
 
+
+    /**
+     * Returns a boolean whether the stream definition is already
+     * added to cache in async data publisher
+     *
+     * @param streamName Name of the stream needed to check
+     * @param version    version of the stream needed to check
+     * @return whether the stream definition is exists or not
+     */
+    public boolean isStreamDefinitionAdded(String streamName, String version) {
+        String key = DataPublisherUtil.getStreamCacheKey(streamName, version);
+        return null != streamDefnCache.get(key);
+    }
+
+
+    /**
+     * Returns a boolean whether the stream definition is already
+     * added to cache in async data publisher
+     *
+     * @param streamDefinition Object of the stream definition needed to check in the cache
+     * @return whether the stream definition is exists or not
+     */
+    public boolean isStreamDefinitionAdded(StreamDefinition streamDefinition) {
+        String key = DataPublisherUtil.getStreamCacheKey(streamDefinition.getName(),
+                                                         streamDefinition.getVersion());
+        return null != streamDefnCache.get(key);
+    }
+
     public void stop() {
         for (ReceiverGroup group : receiverGroups) {
             group.stop();
         }
     }
+
 
 }

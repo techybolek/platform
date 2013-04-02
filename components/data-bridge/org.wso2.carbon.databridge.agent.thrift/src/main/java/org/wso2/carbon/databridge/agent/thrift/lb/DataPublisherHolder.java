@@ -3,6 +3,7 @@ package org.wso2.carbon.databridge.agent.thrift.lb;
 import org.wso2.carbon.databridge.agent.thrift.Agent;
 import org.wso2.carbon.databridge.agent.thrift.AsyncDataPublisher;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -21,12 +22,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * limitations under the License.
  */
 public class DataPublisherHolder {
-    private String authenticationUrl;
-    private String receiverUrl;
-    private String username;
-    private String password;
-    private Agent agent;
-    private AtomicBoolean connected = new AtomicBoolean(true);
+    private String authenticationUrl = null;
+    private String receiverUrl = null;
+    private String username = null;
+    private String password = null;
+    private Agent agent = null;
+    private AtomicBoolean connected = new AtomicBoolean(false);
 
     private AsyncDataPublisher dataPublisher;
 
@@ -38,23 +39,13 @@ public class DataPublisherHolder {
         this.agent = null;
     }
 
-    protected void setAgent(Agent agent){
+    protected void setAgent(Agent agent) {
         this.agent = agent;
     }
 
 
-    public void generateDataPublisher() {
-        if (null != authenticationUrl) {
-            if (null != agent) {
-                dataPublisher = new AsyncDataPublisher(authenticationUrl, receiverUrl, username, password, agent);
-            } else {
-                dataPublisher = new AsyncDataPublisher(authenticationUrl, receiverUrl, username, password);
-            }
-        } else if (null != agent) {
-            dataPublisher = new AsyncDataPublisher(receiverUrl, username, password, agent);
-        } else {
-            dataPublisher = new AsyncDataPublisher(receiverUrl, username, password);
-        }
+    public void generateDataPublisher(ConcurrentHashMap<String, String> streamDefnCache) {
+            dataPublisher = new AsyncDataPublisher(authenticationUrl, receiverUrl, username, password, agent,streamDefnCache);
     }
 
     public String getAuthenticationUrl() {

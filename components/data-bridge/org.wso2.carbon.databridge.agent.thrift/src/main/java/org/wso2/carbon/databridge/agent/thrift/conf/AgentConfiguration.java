@@ -31,6 +31,7 @@ public class AgentConfiguration {
     private int bufferedEventsSize = AgentConstants.DEFAULT_BUFFERED_EVENTS_SIZE;
     private int poolSize = AgentConstants.DEFAULT_POOL_SIZE;
     private int asyncDataPublisherBufferedEventSize = AgentConstants.DEFAULT_ASYNC_CLIENT_BUFFERED_EVENTS_SIZE;
+    private int loadBalancingDataPublisherBufferedEventSize = AgentConstants.DEFAULT_LB_CLIENT_BUFFERED_EVENTS_SIZE;
 
     private int maxTransportPoolSize = AgentConstants.DEFAULT_MAX_TRANSPORT_POOL_SIZE;
     private int maxIdleConnections = AgentConstants.DEFAULT_MAX_IDLE_CONNECTIONS;
@@ -166,5 +167,13 @@ public class AgentConfiguration {
 
     public void setReconnectionInterval(long reconnectionInterval) {
         this.reconnectionInterval = reconnectionInterval;
+    }
+
+    public int getLoadBalancingDataPublisherBufferedEventSize() {
+        return loadBalancingDataPublisherBufferedEventSize;
+    }
+
+    public void setLoadBalancingDataPublisherBufferedEventSize(int loadBalancingDataPublisherBufferedEventSize) {
+        this.loadBalancingDataPublisherBufferedEventSize = loadBalancingDataPublisherBufferedEventSize;
     }
 }
