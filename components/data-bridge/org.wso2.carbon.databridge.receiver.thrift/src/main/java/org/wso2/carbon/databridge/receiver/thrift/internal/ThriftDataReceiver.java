@@ -39,6 +39,8 @@ import org.wso2.carbon.databridge.receiver.thrift.service.ThriftEventTransmissio
 import org.wso2.carbon.databridge.receiver.thrift.service.ThriftSecureEventTransmissionServiceImpl;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.UnknownHostException;
 
 /**
@@ -97,7 +99,7 @@ public class ThriftDataReceiver {
     public void start(String hostName)
             throws DataBridgeException {
         startSecureEventTransmission(hostName, thriftDataReceiverConfiguration.getSecureDataReceiverPort(), dataBridgeReceiverService);
-        startEventTransmission(thriftDataReceiverConfiguration.getDataReceiverPort(), dataBridgeReceiverService);
+        startEventTransmission(hostName,thriftDataReceiverConfiguration.getDataReceiverPort(), dataBridgeReceiverService);
     }
 
 
@@ -158,10 +160,12 @@ public class ThriftDataReceiver {
         thread.start();
     }
 
-    protected void startEventTransmission(int port, DataBridgeReceiverService dataBridgeReceiverService)
+    protected void startEventTransmission(String hostName, int port,
+                                          DataBridgeReceiverService dataBridgeReceiverService)
             throws DataBridgeException {
         try {
-            TServerSocket serverTransport = new TServerSocket(port);
+            TServerSocket serverTransport = new TServerSocket(
+                    new InetSocketAddress(hostName, port));
             ThriftEventTransmissionService.Processor<ThriftEventTransmissionServiceImpl> processor =
                     new ThriftEventTransmissionService.Processor<ThriftEventTransmissionServiceImpl>(
                             new ThriftEventTransmissionServiceImpl(dataBridgeReceiverService));
@@ -171,7 +175,8 @@ public class ThriftDataReceiver {
             log.info("Thrift port : " + port);
             thread.start();
         } catch (TTransportException e) {
-            throw new DataBridgeException("Cannot start Thrift server on port " + port, e);
+            throw new DataBridgeException("Cannot start Thrift server on port " + port +
+                                          " on host " + hostName, e);
         }
     }
 
