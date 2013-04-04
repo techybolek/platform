@@ -26,9 +26,11 @@ import org.wso2.carbon.analytics.hive.dto.QueryResult;
 import org.wso2.carbon.analytics.hive.dto.QueryResultRow;
 import org.wso2.carbon.analytics.hive.dto.ScriptResult;
 import org.wso2.carbon.analytics.hive.exception.HiveExecutionException;
+import org.wso2.carbon.analytics.hive.exception.RegistryAccessException;
 import org.wso2.carbon.analytics.hive.extension.AbstractHiveAnalyzer;
 import org.wso2.carbon.analytics.hive.multitenancy.HiveRSSMetastoreManager;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
+import org.wso2.carbon.analytics.hive.util.RegistryAccessUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -85,6 +87,14 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
         if (script != null) {
 
             ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
+
+            // Parse script to bind registry value
+            try {
+                script = RegistryAccessUtil.parseScriptForRegistryValues(script);
+            } catch (RegistryAccessException e) {
+                log.error("Error during parsing registry values ...", e);
+                throw new HiveExecutionException(e.getExceptionMessage(), e);
+            }
 
             ScriptCallable callable = new ScriptCallable(tenantId, script);
 
