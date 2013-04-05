@@ -33,16 +33,16 @@ public class SynapseAppDeployerConstants {
     public static final String TEMPLATE_TYPE = "synapse/template";
 
     // Deployment folders for synapse artifacts
-    public static final String SEQUENCES_FOLDER = "/sequences/";
-    public static final String ENDPOINTS_FOLDER = "/endpoints/";
-    public static final String PROXY_SERVICES_FOLDER = "/proxy-services/";
-    public static final String LOCAL_ENTRIES_FOLDER = "/local-entries/";
-    public static final String EVENTS_FOLDER = "/event-sources/";
-    public static final String TASKS_FOLDER = "/tasks/";
-    public static final String MESSAGE_STORE_FOLDER="/message-store/";
-    public static final String MESSAGE_PROCESSOR_FOLDER="/message-processors/";
-    public static final String APIS_FOLDER = "/api/";
-    public static final String TEMPLATES_FOLDER = "/templates/";
+    public static final String SEQUENCES_FOLDER = "sequences";
+    public static final String ENDPOINTS_FOLDER = "endpoints";
+    public static final String PROXY_SERVICES_FOLDER = "proxy-services";
+    public static final String LOCAL_ENTRIES_FOLDER = "local-entries";
+    public static final String EVENTS_FOLDER = "event-sources";
+    public static final String TASKS_FOLDER = "tasks";
+    public static final String MESSAGE_STORE_FOLDER="message-store";
+    public static final String MESSAGE_PROCESSOR_FOLDER="message-processors";
+    public static final String APIS_FOLDER = "api";
+    public static final String TEMPLATES_FOLDER = "templates";
 
     // Synapse config path
     public static final String SYNAPSE_CONFIGS = "synapse-configs";
