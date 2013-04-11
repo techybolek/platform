@@ -198,13 +198,13 @@ public class Result extends AbstractResult {
     public void encode(StringBuilder builder) {
 
         if (resourceId == null){
-            builder.append("<Result>\n");
+            builder.append("<Result>");
         } else {
-            builder.append("<Result ResourceId=\"").append(resourceId).append("\">\n");
+            builder.append("<Result ResourceId=\"").append(resourceId).append("\">");
         }
 
         // encode the decision
-        builder.append("<Decision>").append(DECISIONS[decision]).append("</Decision>\n");
+        builder.append("<Decision>").append(DECISIONS[decision]).append("</Decision>");
 
         // encode the status
         if (status != null){
@@ -213,7 +213,7 @@ public class Result extends AbstractResult {
 
         // encode the obligations
         if (obligations != null && obligations.size() != 0) {
-            builder.append("<Obligations>\n");
+            builder.append("<Obligations>");
 
             Iterator it = obligations.iterator();
 
@@ -221,9 +221,9 @@ public class Result extends AbstractResult {
                 ObligationResult obligation = (ObligationResult) (it.next());
                 obligation.encode(builder);
             }
-            builder.append("</Obligations>\n");
+            builder.append("</Obligations>");
         }
         // finish it off
-        builder.append("</Result>\n");
+        builder.append("</Result>");
     }
 }

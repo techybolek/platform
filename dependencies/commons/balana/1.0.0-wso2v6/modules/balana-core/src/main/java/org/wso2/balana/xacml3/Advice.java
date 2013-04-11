@@ -127,13 +127,13 @@ public class Advice {
      */
     public void encode(StringBuilder builder){
 
-        builder.append("<Advice AdviceId=\"").append(adviceId).append("\" >\n");
+        builder.append("<Advice AdviceId=\"").append(adviceId).append("\" >");
 
         if(assignments != null && assignments.size() > 0){
             for(AttributeAssignment assignment : assignments){
                 assignment.encode(builder);
             }
         }
-        builder.append("</Advice>\n");
+        builder.append("</Advice>");
     }
 }

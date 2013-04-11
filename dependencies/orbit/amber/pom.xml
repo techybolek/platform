@@ -22,8 +22,8 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-dependents</artifactId>
-        <version>4.0.0</version>
-        <relativePath>../../../pom.xml</relativePath>
+        <version>4.2.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
    </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -31,7 +31,7 @@
     <artifactId>amber</artifactId>
     <packaging>bundle</packaging>
     <name>Orbit - Apache Amber</name>
-    <version>0.22.1358727.wso2v2</version>
+    <version>0.22.1358727.wso2v3</version>
     <description>
         This orbit bundle wraps the Apache Amber modules required for OAuth support.
     </description>
@@ -41,18 +41,33 @@
         <dependency>
             <groupId>org.apache.amber</groupId>
             <artifactId>oauth2-common</artifactId>
-            <version>0.22.1358727-wso2v2</version>
+            <version>0.22.1358727-wso2v3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.amber</groupId>
             <artifactId>oauth2-authzserver</artifactId>
-            <version>0.22.1358727-wso2v2</version>
+            <version>0.22.1358727-wso2v3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.amber</groupId>
             <artifactId>oauth2-dynamicreg-server</artifactId>
-            <version>0.22.1358727-wso2v2</version>
+            <version>0.22.1358727-wso2v3</version>
         </dependency>
+	<dependency>
+            <groupId>org.apache.amber</groupId>
+            <artifactId>oltu-oauth2-jwt</artifactId>
+            <version>0.22.1358727-wso2v3</version>
+        </dependency>
+	<dependency>
+            <groupId>org.apache.amber</groupId>
+            <artifactId>openidconnect-authzserver</artifactId>
+            <version>0.22.1358727-wso2v3</version>
+        </dependency>
+	 <!--dependency>
+            <groupId>org.apache.amber</groupId>
+            <artifactId>openidconnect-common</artifactId>
+            <version>0.22.1358727-wso2v3</version>
+        </dependency-->
     </dependencies>
 
     <build>
@@ -66,12 +81,14 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.apache.amber.*;version=0.22.1358727.wso2v2,-split-package:=merge-first
+                            org.apache.amber.*;version=0.22.1358727.wso2v3,
+			    org.apache.oltu.*;version=0.22.1358727.wso2v3,
+				-split-package:=merge-first
                         </Export-Package>
                         <Import-Package>
-                            !org.apache.amber.*;
+                            !org.apache.amber.*;!org.apache.oltu.*;
 							org.codehaus.jettison.json;version="0.0.0",
-							org.slf4j;version="[1.5.10.wso2v1,2)",
+							org.slf4j;version="[1.5.10.wso2v1,3)",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>

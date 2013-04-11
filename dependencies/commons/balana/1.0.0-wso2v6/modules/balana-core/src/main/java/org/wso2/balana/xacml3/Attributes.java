@@ -190,7 +190,7 @@ public class Attributes {
      */
     public void encode(StringBuilder builder) {
 
-        builder.append("<Attributes Category=\"").append(category.toString()).append("\">\n");
+        builder.append("<Attributes Category=\"").append(category.toString()).append("\">");
 
         for(Attribute attribute : attributes){
             if(attribute.isIncludeInResult()){

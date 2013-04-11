@@ -107,7 +107,7 @@ public class Obligation implements ObligationResult{
      */
     public void encode(StringBuilder builder){
 
-        builder.append("<Obligation ObligationId=\"").append(obligationId).append("\">\n");
+        builder.append("<Obligation ObligationId=\"").append(obligationId).append("\">");
 
         if(assignments != null && assignments.size() > 0){
             for(AttributeAssignment assignment : assignments){

@@ -282,14 +282,14 @@ public class Result extends AbstractResult{
      */
     public void encode(StringBuilder builder) {
 
-        builder.append("<Result>\n");
+        builder.append("<Result>");
         // encode the decision
         //check whether decision is extended indeterminate values
         if(decision == 4 || decision == 5 || decision == 6){
             // if this is extended indeterminate values, we just return the "Indeterminate"
-            builder.append("<Decision>").append(DECISIONS[2]).append("</Decision>\n");
+            builder.append("<Decision>").append(DECISIONS[2]).append("</Decision>");
         } else {
-            builder.append("<Decision>").append(DECISIONS[decision]).append("</Decision>\n");
+            builder.append("<Decision>").append(DECISIONS[decision]).append("</Decision>");
         }
         // encode the status
         if (status != null){
@@ -298,20 +298,20 @@ public class Result extends AbstractResult{
         // encode the obligations
         if (obligations != null  && obligations.size() != 0) {
 
-            builder.append("<Obligations>\n");
+            builder.append("<Obligations>");
 
             Iterator it = obligations.iterator();
             while (it.hasNext()) {
                 Obligation obligation = (Obligation) (it.next());
                 obligation.encode(builder);
             }
-            builder.append("</Obligations>\n");
+            builder.append("</Obligations>");
         }
 
         // encode the advices
         if (advices != null  && advices.size() != 0) {
 
-            builder.append("<AssociatedAdvice>\n");
+            builder.append("<AssociatedAdvice>");
 
             Iterator it = advices.iterator();
 
@@ -319,18 +319,18 @@ public class Result extends AbstractResult{
                 Advice advice = (Advice) (it.next());
                 advice.encode(builder);
             }
-            builder.append("</AssociatedAdvice>\n");
+            builder.append("</AssociatedAdvice>");
         }
 
         // encode the policy, policySet references
         if (policyReferences != null  && policyReferences.size() != 0) {
-            builder.append("<PolicyIdentifierList>\n");
+            builder.append("<PolicyIdentifierList>");
 
             for(PolicyReference reference : policyReferences){
                 reference.encode(builder);
             }
 
-            builder.append("</PolicyIdentifierList>\n");
+            builder.append("</PolicyIdentifierList>");
         }
 
         // encode the attributes
@@ -341,7 +341,7 @@ public class Result extends AbstractResult{
         }
 
         // finish it off
-        builder.append("</Result>\n");
+        builder.append("</Result>");
     }
 
 }

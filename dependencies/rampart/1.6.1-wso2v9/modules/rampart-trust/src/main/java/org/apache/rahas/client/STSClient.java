@@ -38,6 +38,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Assertion;
 import org.apache.neethi.Policy;
+import org.apache.rahas.Rahas;
 import org.apache.rahas.RahasConstants;
 import org.apache.rahas.Token;
 import org.apache.rahas.TokenStorage;
@@ -231,9 +232,13 @@ public class STSClient {
             OMElement response = client.sendReceive(rstQn,
                                                     createValidateRequest(requestType,tokenId));
             
-            return true;
-            
-            
+            if ((TrustUtil.getWSTNamespace(version) + RahasConstants.STATUS_CODE_VALID)
+                    .equals(response.getFirstChildWithName(new QName(RahasConstants.WST_NS_05_02,
+                                            RahasConstants.LocalNames.STATUS)).getFirstElement().getText())) {
+                return true;
+            } else {
+                return false;
+            }
         } catch (AxisFault e) {
             log.error("errorInValidatingToken", e);
             throw new TrustException("errorInValidatingToken", new String[]{issuerAddress},e);

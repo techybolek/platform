@@ -273,13 +273,13 @@ public class Status {
         encodeStatusCode(code.iterator(), builder);
 
         if (message != null){
-            builder.append("<StatusMessage>").append(message).append("</StatusMessage>\n");
+            builder.append("<StatusMessage>").append(message).append("</StatusMessage>");
         }
 
         if (detail != null) {
             builder.append(detail.getEncoded());
         }
-        builder.append("</Status>\n");
+        builder.append("</Status>");
     }
 
     /**
@@ -293,11 +293,11 @@ public class Status {
         String code = (String) (iterator.next());
 
         if (iterator.hasNext()) {
-            builder.append("<StatusCode Value=\"").append(code).append("\">\n");
+            builder.append("<StatusCode Value=\"").append(code).append("\">");
             encodeStatusCode(iterator, builder);
-            builder.append("</StatusCode>\n");
+            builder.append("</StatusCode>");
         } else {
-            builder.append("<StatusCode Value=\"").append(code).append("\"/>\n");
+            builder.append("<StatusCode Value=\"").append(code).append("\"/>");
         }
     }
 

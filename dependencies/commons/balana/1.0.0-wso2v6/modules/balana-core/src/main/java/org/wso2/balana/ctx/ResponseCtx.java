@@ -177,11 +177,11 @@ public class ResponseCtx {
 
         builder.append("<Response");
 
-        if(version == XACMLConstants.XACML_VERSION_3_0){
+       /* if(version == XACMLConstants.XACML_VERSION_3_0){
             builder.append(" xmlns=\"urn:oasis:names:tc:xacml:3.0:core:schema:wd-17\"");
-        }
+        }*/
 
-        builder.append(">\n");
+        builder.append(">");
 
         // Go through all results
         Iterator it = results.iterator();
@@ -190,7 +190,7 @@ public class ResponseCtx {
             result.encode(builder);
         }
         // Finish the XML for a response
-        builder.append("</Response>\n");
+        builder.append("</Response>");
 
     }
 
