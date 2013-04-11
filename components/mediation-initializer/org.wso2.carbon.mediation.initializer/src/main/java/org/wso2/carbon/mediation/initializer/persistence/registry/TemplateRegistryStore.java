@@ -20,7 +20,6 @@ package org.wso2.carbon.mediation.initializer.persistence.registry;
 import org.apache.axiom.om.OMElement;
 import org.apache.synapse.config.xml.XMLConfigConstants;
 import org.wso2.carbon.application.deployer.AppDeployerUtils;
-import org.wso2.carbon.application.deployer.synapse.SynapseAppDeployerConstants;
 import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -63,7 +62,7 @@ public class TemplateRegistryStore extends AbstractRegistryStore {
             String templatePath = getConfigurationPath()
                     + RegistryConstants.PATH_SEPARATOR + name;
 
-            AppDeployerUtils.attachArtifactToOwnerApp(fileName, SynapseAppDeployerConstants
+            AppDeployerUtils.attachArtifactToOwnerApp(fileName, ServiceBusConstants
                     .SEQUENCE_TYPE, name, registry.getTenantId());
 
             try {

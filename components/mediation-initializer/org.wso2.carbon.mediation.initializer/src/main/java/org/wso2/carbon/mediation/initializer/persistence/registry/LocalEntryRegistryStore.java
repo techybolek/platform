@@ -16,18 +16,16 @@
 
 package org.wso2.carbon.mediation.initializer.persistence.registry;
 
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
-import org.wso2.carbon.mediation.initializer.ServiceBusInitializer;
-import org.wso2.carbon.application.deployer.AppDeployerUtils;
-import org.wso2.carbon.application.deployer.synapse.SynapseAppDeployerConstants;
 import org.apache.axiom.om.OMElement;
 import org.apache.synapse.config.xml.XMLConfigConstants;
+import org.wso2.carbon.application.deployer.AppDeployerUtils;
+import org.wso2.carbon.mediation.initializer.ServiceBusConstants;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 
-import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  *
@@ -68,7 +66,7 @@ public class LocalEntryRegistryStore extends AbstractRegistryStore {
             String localEntryPath = getConfigurationPath()
                     + RegistryConstants.PATH_SEPARATOR + name;
 
-            AppDeployerUtils.attachArtifactToOwnerApp(fileName, SynapseAppDeployerConstants
+            AppDeployerUtils.attachArtifactToOwnerApp(fileName, ServiceBusConstants
                     .LOCAL_ENTRY_TYPE, name, registry.getTenantId());
 
             try {
