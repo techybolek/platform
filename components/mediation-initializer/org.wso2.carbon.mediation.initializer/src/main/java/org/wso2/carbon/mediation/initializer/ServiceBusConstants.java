@@ -77,14 +77,14 @@ public final class ServiceBusConstants {
     public static final String SYNAPSE_CONFIGS = "synapse-configs";
     public static final String SYNAPSE_CONFIG_LOCK = "synapse.config.lock";
 
-    public static final java.lang.String SEQUENCE_TYPE = "synapse/sequence";
-    public static final java.lang.String ENDPOINT_TYPE = "synapse/endpoint";
-    public static final java.lang.String PROXY_SERVICE_TYPE = "synapse/proxy-service";
-    public static final java.lang.String LOCAL_ENTRY_TYPE = "synapse/local-entry";
-    public static final java.lang.String EVENT_SOURCE_TYPE = "synapse/event-source";
-    public static final java.lang.String TASK_TYPE = "synapse/task";
-    public static final java.lang.String MESSAGE_STORE_TYPE = "synapse/message-store";
-    public static final java.lang.String MESSAGE_PROCESSOR_TYPE = "synapse/message-processors";
+    public static final String SEQUENCE_TYPE = "synapse/sequence";
+    public static final String ENDPOINT_TYPE = "synapse/endpoint";
+    public static final String PROXY_SERVICE_TYPE = "synapse/proxy-service";
+    public static final String LOCAL_ENTRY_TYPE = "synapse/local-entry";
+    public static final String EVENT_SOURCE_TYPE = "synapse/event-source";
+    public static final String TASK_TYPE = "synapse/task";
+    public static final String MESSAGE_STORE_TYPE = "synapse/message-store";
+    public static final String MESSAGE_PROCESSOR_TYPE = "synapse/message-processors";
 
     public static final class RegistryStore {
         public static final String SEQUENCE_REGISTRY = "sequences";
