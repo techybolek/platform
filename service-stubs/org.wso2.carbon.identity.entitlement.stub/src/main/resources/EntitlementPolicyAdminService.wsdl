@@ -1,5 +1,5 @@
 
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:tns="http://entitlement.identity.carbon.wso2.org" xmlns:ax2256="http://dto.entitlement.identity.carbon.wso2.org/xsd" xmlns:ax2254="http://base.identity.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://entitlement.identity.carbon.wso2.org"> 
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:tns="http://entitlement.identity.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:ax2256="http://dto.entitlement.identity.carbon.wso2.org/xsd" xmlns:ax2254="http://base.identity.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://entitlement.identity.carbon.wso2.org"> 
     <wsdl:documentation>EntitlementPolicyAdminService</wsdl:documentation> 
     <wsdl:types> 
         <xs:schema xmlns:ax2255="http://base.identity.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" xmlns:ax2257="http://dto.entitlement.identity.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd"> 
@@ -9,6 +9,14 @@
                 <xs:complexType> 
                     <xs:sequence> 
                         <xs:element minOccurs="0" name="IdentityException" nillable="true" type="ax2254:IdentityException"/> 
+                    </xs:sequence> 
+                </xs:complexType> 
+            </xs:element> 
+            <xs:element name="updateSubscriber"> 
+                <xs:complexType> 
+                    <xs:sequence> 
+                        <xs:element minOccurs="0" name="holder" nillable="true" type="ax2256:ModuleDataHolder"/> 
+                        <xs:element minOccurs="0" name="update" type="xs:boolean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
@@ -40,10 +48,56 @@
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
+            <xs:element name="publishPolicies"> 
+                <xs:complexType> 
+                    <xs:sequence> 
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="policyIds" nillable="true" type="xs:string"/> 
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="subscriberIds" nillable="true" type="xs:string"/> 
+                    </xs:sequence> 
+                </xs:complexType> 
+            </xs:element> 
             <xs:element name="importPolicyFromRegistry"> 
                 <xs:complexType> 
                     <xs:sequence> 
                         <xs:element minOccurs="0" name="policyRegistryPath" nillable="true" type="xs:string"/> 
+                    </xs:sequence> 
+                </xs:complexType> 
+            </xs:element> 
+            <xs:element name="getSubscriberIds"> 
+                <xs:complexType> 
+                    <xs:sequence/> 
+                </xs:complexType> 
+            </xs:element> 
+            <xs:element name="getSubscriberIdsResponse"> 
+                <xs:complexType> 
+                    <xs:sequence> 
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string"/> 
+                    </xs:sequence> 
+                </xs:complexType> 
+            </xs:element> 
+            <xs:element name="getSubscriber"> 
+                <xs:complexType> 
+                    <xs:sequence> 
+                        <xs:element minOccurs="0" name="id" nillable="true" type="xs:string"/> 
+                    </xs:sequence> 
+                </xs:complexType> 
+            </xs:element> 
+            <xs:element name="getSubscriberResponse"> 
+                <xs:complexType> 
+                    <xs:sequence> 
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2256:ModuleDataHolder"/> 
+                    </xs:sequence> 
+                </xs:complexType> 
+            </xs:element> 
+            <xs:element name="getPublisherModuleProperties"> 
+                <xs:complexType> 
+                    <xs:sequence/> 
+                </xs:complexType> 
+            </xs:element> 
+            <xs:element name="getPublisherModulePropertiesResponse"> 
+                <xs:complexType> 
+                    <xs:sequence> 
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2256:ModuleDataHolder"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
@@ -113,20 +167,6 @@
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
-            <xs:element name="getEntitlementPolicyDataFromRegistry"> 
-                <xs:complexType> 
-                    <xs:sequence> 
-                        <xs:element minOccurs="0" name="resourceName" nillable="true" type="xs:string"/> 
-                    </xs:sequence> 
-                </xs:complexType> 
-            </xs:element> 
-            <xs:element name="getEntitlementPolicyDataFromRegistryResponse"> 
-                <xs:complexType> 
-                    <xs:sequence> 
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string"/> 
-                    </xs:sequence> 
-                </xs:complexType> 
-            </xs:element> 
             <xs:element name="getAllPolicyIds"> 
                 <xs:complexType> 
                     <xs:sequence/> 
@@ -155,17 +195,17 @@
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
+            <xs:element name="deleteSubscriber"> 
+                <xs:complexType> 
+                    <xs:sequence> 
+                        <xs:element minOccurs="0" name="subscriberId" nillable="true" type="xs:string"/> 
+                    </xs:sequence> 
+                </xs:complexType> 
+            </xs:element> 
             <xs:element name="addPolicy"> 
                 <xs:complexType> 
                     <xs:sequence> 
                         <xs:element minOccurs="0" name="policy" nillable="true" type="ax2256:PolicyDTO"/> 
-                    </xs:sequence> 
-                </xs:complexType> 
-            </xs:element> 
-            <xs:element name="addPolicyResponse"> 
-                <xs:complexType> 
-                    <xs:sequence> 
-                        <xs:element minOccurs="0" name="return" type="xs:boolean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
@@ -178,6 +218,33 @@
             </xs:element> 
         </xs:schema> 
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.entitlement.identity.carbon.wso2.org/xsd"> 
+            <xs:complexType name="ModuleDataHolder"> 
+                <xs:sequence> 
+                    <xs:element minOccurs="0" name="latestStatus" nillable="true" type="ax2256:ModuleStatusHolder"/> 
+                    <xs:element minOccurs="0" name="moduleName" nillable="true" type="xs:string"/> 
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="propertyDTOs" nillable="true" type="ax2256:ModulePropertyDTO"/> 
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="statusHolders" nillable="true" type="ax2256:ModuleStatusHolder"/> 
+                </xs:sequence> 
+            </xs:complexType> 
+            <xs:complexType name="ModuleStatusHolder"> 
+                <xs:sequence> 
+                    <xs:element minOccurs="0" name="key" nillable="true" type="xs:string"/> 
+                    <xs:element minOccurs="0" name="message" nillable="true" type="xs:string"/> 
+                    <xs:element minOccurs="0" name="success" type="xs:boolean"/> 
+                    <xs:element minOccurs="0" name="timeInstance" nillable="true" type="xs:string"/> 
+                </xs:sequence> 
+            </xs:complexType> 
+            <xs:complexType name="ModulePropertyDTO"> 
+                <xs:sequence> 
+                    <xs:element minOccurs="0" name="displayName" nillable="true" type="xs:string"/> 
+                    <xs:element minOccurs="0" name="displayOrder" type="xs:int"/> 
+                    <xs:element minOccurs="0" name="id" nillable="true" type="xs:string"/> 
+                    <xs:element minOccurs="0" name="module" nillable="true" type="xs:string"/> 
+                    <xs:element minOccurs="0" name="required" type="xs:boolean"/> 
+                    <xs:element minOccurs="0" name="secret" type="xs:boolean"/> 
+                    <xs:element minOccurs="0" name="value" nillable="true" type="xs:string"/> 
+                </xs:sequence> 
+            </xs:complexType> 
             <xs:complexType name="PolicyDTO"> 
                 <xs:sequence> 
                     <xs:element minOccurs="0" name="active" type="xs:boolean"/> 
@@ -189,11 +256,12 @@
                     <xs:element minOccurs="0" name="policyEditor" nillable="true" type="xs:string"/> 
                     <xs:element minOccurs="0" name="policyId" nillable="true" type="xs:string"/> 
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="policyIdReferences" nillable="true" type="xs:string"/> 
+                    <xs:element minOccurs="0" name="policyLifeCycle" type="xs:int"/> 
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="policyMetaData" nillable="true" type="ax2256:AttributeDTO"/> 
                     <xs:element minOccurs="0" name="policyOrder" type="xs:int"/> 
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="policySetIdReferences" nillable="true" type="xs:string"/> 
                     <xs:element minOccurs="0" name="policyType" nillable="true" type="xs:string"/> 
-                    <xs:element minOccurs="0" name="promoteStatus" type="xs:int"/> 
+                    <xs:element minOccurs="0" name="promote" type="xs:boolean"/> 
                 </xs:sequence> 
             </xs:complexType> 
             <xs:complexType name="AttributeDTO"> 
@@ -208,6 +276,7 @@
             </xs:complexType> 
             <xs:complexType name="PolicyEditorAttributeDTO"> 
                 <xs:sequence> 
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="attributeIdDataTypes" nillable="true" type="xs:string"/> 
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="nodeDTOs" nillable="true" type="ax2256:AttributeTreeNodeDTO"/> 
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="supportedCategories" nillable="true" type="xs:string"/> 
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="supportedRuleFunctions" nillable="true" type="xs:string"/> 
@@ -248,11 +317,11 @@
     <wsdl:message name="EntitlementPolicyAdminServiceIdentityException"> 
         <wsdl:part name="parameters" element="ns1:EntitlementPolicyAdminServiceIdentityException"/> 
     </wsdl:message> 
-    <wsdl:message name="getEntitlementPolicyDataFromRegistryRequest"> 
-        <wsdl:part name="parameters" element="ns1:getEntitlementPolicyDataFromRegistry"/> 
+    <wsdl:message name="getPublisherModulePropertiesRequest"> 
+        <wsdl:part name="parameters" element="ns1:getPublisherModuleProperties"/> 
     </wsdl:message> 
-    <wsdl:message name="getEntitlementPolicyDataFromRegistryResponse"> 
-        <wsdl:part name="parameters" element="ns1:getEntitlementPolicyDataFromRegistryResponse"/> 
+    <wsdl:message name="getPublisherModulePropertiesResponse"> 
+        <wsdl:part name="parameters" element="ns1:getPublisherModulePropertiesResponse"/> 
     </wsdl:message> 
     <wsdl:message name="setGlobalPolicyAlgorithmRequest"> 
         <wsdl:part name="parameters" element="ns1:setGlobalPolicyAlgorithm"/> 
@@ -263,20 +332,32 @@
     <wsdl:message name="getPolicyAttributeValuesResponse"> 
         <wsdl:part name="parameters" element="ns1:getPolicyAttributeValuesResponse"/> 
     </wsdl:message> 
+    <wsdl:message name="updateSubscriberRequest"> 
+        <wsdl:part name="parameters" element="ns1:updateSubscriber"/> 
+    </wsdl:message> 
     <wsdl:message name="updatePolicyRequest"> 
         <wsdl:part name="parameters" element="ns1:updatePolicy"/> 
     </wsdl:message> 
+    <wsdl:message name="getSubscriberIdsRequest"> 
+        <wsdl:part name="parameters" element="ns1:getSubscriberIds"/> 
+    </wsdl:message> 
+    <wsdl:message name="getSubscriberIdsResponse"> 
+        <wsdl:part name="parameters" element="ns1:getSubscriberIdsResponse"/> 
+    </wsdl:message> 
     <wsdl:message name="addPolicyRequest"> 
         <wsdl:part name="parameters" element="ns1:addPolicy"/> 
-    </wsdl:message> 
-    <wsdl:message name="addPolicyResponse"> 
-        <wsdl:part name="parameters" element="ns1:addPolicyResponse"/> 
     </wsdl:message> 
     <wsdl:message name="getAllPolicyIdsRequest"> 
         <wsdl:part name="parameters" element="ns1:getAllPolicyIds"/> 
     </wsdl:message> 
     <wsdl:message name="getAllPolicyIdsResponse"> 
         <wsdl:part name="parameters" element="ns1:getAllPolicyIdsResponse"/> 
+    </wsdl:message> 
+    <wsdl:message name="getSubscriberRequest"> 
+        <wsdl:part name="parameters" element="ns1:getSubscriber"/> 
+    </wsdl:message> 
+    <wsdl:message name="getSubscriberResponse"> 
+        <wsdl:part name="parameters" element="ns1:getSubscriberResponse"/> 
     </wsdl:message> 
     <wsdl:message name="reOderPoliciesRequest"> 
         <wsdl:part name="parameters" element="ns1:reOderPolicies"/> 
@@ -302,6 +383,9 @@
     <wsdl:message name="getAllPoliciesResponse"> 
         <wsdl:part name="parameters" element="ns1:getAllPoliciesResponse"/> 
     </wsdl:message> 
+    <wsdl:message name="deleteSubscriberRequest"> 
+        <wsdl:part name="parameters" element="ns1:deleteSubscriber"/> 
+    </wsdl:message> 
     <wsdl:message name="removePolicyRequest"> 
         <wsdl:part name="parameters" element="ns1:removePolicy"/> 
     </wsdl:message> 
@@ -310,6 +394,9 @@
     </wsdl:message> 
     <wsdl:message name="getLightPolicyResponse"> 
         <wsdl:part name="parameters" element="ns1:getLightPolicyResponse"/> 
+    </wsdl:message> 
+    <wsdl:message name="publishPoliciesRequest"> 
+        <wsdl:part name="parameters" element="ns1:publishPolicies"/> 
     </wsdl:message> 
     <wsdl:message name="getPolicyRequest"> 
         <wsdl:part name="parameters" element="ns1:getPolicy"/> 
@@ -322,10 +409,9 @@
             <wsdl:input message="tns:importPolicyFromRegistryRequest" wsaw:Action="urn:importPolicyFromRegistry"/> 
             <wsdl:fault message="tns:EntitlementPolicyAdminServiceIdentityException" name="EntitlementPolicyAdminServiceIdentityException" wsaw:Action="urn:importPolicyFromRegistryEntitlementPolicyAdminServiceIdentityException"/> 
         </wsdl:operation> 
-        <wsdl:operation name="getEntitlementPolicyDataFromRegistry"> 
-            <wsdl:input message="tns:getEntitlementPolicyDataFromRegistryRequest" wsaw:Action="urn:getEntitlementPolicyDataFromRegistry"/> 
-            <wsdl:output message="tns:getEntitlementPolicyDataFromRegistryResponse" wsaw:Action="urn:getEntitlementPolicyDataFromRegistryResponse"/> 
-            <wsdl:fault message="tns:EntitlementPolicyAdminServiceIdentityException" name="EntitlementPolicyAdminServiceIdentityException" wsaw:Action="urn:getEntitlementPolicyDataFromRegistryEntitlementPolicyAdminServiceIdentityException"/> 
+        <wsdl:operation name="getPublisherModuleProperties"> 
+            <wsdl:input message="tns:getPublisherModulePropertiesRequest" wsaw:Action="urn:getPublisherModuleProperties"/> 
+            <wsdl:output message="tns:getPublisherModulePropertiesResponse" wsaw:Action="urn:getPublisherModulePropertiesResponse"/> 
         </wsdl:operation> 
         <wsdl:operation name="setGlobalPolicyAlgorithm"> 
             <wsdl:input message="tns:setGlobalPolicyAlgorithmRequest" wsaw:Action="urn:setGlobalPolicyAlgorithm"/> 
@@ -336,19 +422,32 @@
             <wsdl:output message="tns:getPolicyAttributeValuesResponse" wsaw:Action="urn:getPolicyAttributeValuesResponse"/> 
             <wsdl:fault message="tns:EntitlementPolicyAdminServiceIdentityException" name="EntitlementPolicyAdminServiceIdentityException" wsaw:Action="urn:getPolicyAttributeValuesEntitlementPolicyAdminServiceIdentityException"/> 
         </wsdl:operation> 
+        <wsdl:operation name="updateSubscriber"> 
+            <wsdl:input message="tns:updateSubscriberRequest" wsaw:Action="urn:updateSubscriber"/> 
+            <wsdl:fault message="tns:EntitlementPolicyAdminServiceIdentityException" name="EntitlementPolicyAdminServiceIdentityException" wsaw:Action="urn:updateSubscriberEntitlementPolicyAdminServiceIdentityException"/> 
+        </wsdl:operation> 
         <wsdl:operation name="updatePolicy"> 
             <wsdl:input message="tns:updatePolicyRequest" wsaw:Action="urn:updatePolicy"/> 
             <wsdl:fault message="tns:EntitlementPolicyAdminServiceIdentityException" name="EntitlementPolicyAdminServiceIdentityException" wsaw:Action="urn:updatePolicyEntitlementPolicyAdminServiceIdentityException"/> 
         </wsdl:operation> 
+        <wsdl:operation name="getSubscriberIds"> 
+            <wsdl:input message="tns:getSubscriberIdsRequest" wsaw:Action="urn:getSubscriberIds"/> 
+            <wsdl:output message="tns:getSubscriberIdsResponse" wsaw:Action="urn:getSubscriberIdsResponse"/> 
+            <wsdl:fault message="tns:EntitlementPolicyAdminServiceIdentityException" name="EntitlementPolicyAdminServiceIdentityException" wsaw:Action="urn:getSubscriberIdsEntitlementPolicyAdminServiceIdentityException"/> 
+        </wsdl:operation> 
         <wsdl:operation name="addPolicy"> 
             <wsdl:input message="tns:addPolicyRequest" wsaw:Action="urn:addPolicy"/> 
-            <wsdl:output message="tns:addPolicyResponse" wsaw:Action="urn:addPolicyResponse"/> 
             <wsdl:fault message="tns:EntitlementPolicyAdminServiceIdentityException" name="EntitlementPolicyAdminServiceIdentityException" wsaw:Action="urn:addPolicyEntitlementPolicyAdminServiceIdentityException"/> 
         </wsdl:operation> 
         <wsdl:operation name="getAllPolicyIds"> 
             <wsdl:input message="tns:getAllPolicyIdsRequest" wsaw:Action="urn:getAllPolicyIds"/> 
             <wsdl:output message="tns:getAllPolicyIdsResponse" wsaw:Action="urn:getAllPolicyIdsResponse"/> 
             <wsdl:fault message="tns:EntitlementPolicyAdminServiceIdentityException" name="EntitlementPolicyAdminServiceIdentityException" wsaw:Action="urn:getAllPolicyIdsEntitlementPolicyAdminServiceIdentityException"/> 
+        </wsdl:operation> 
+        <wsdl:operation name="getSubscriber"> 
+            <wsdl:input message="tns:getSubscriberRequest" wsaw:Action="urn:getSubscriber"/> 
+            <wsdl:output message="tns:getSubscriberResponse" wsaw:Action="urn:getSubscriberResponse"/> 
+            <wsdl:fault message="tns:EntitlementPolicyAdminServiceIdentityException" name="EntitlementPolicyAdminServiceIdentityException" wsaw:Action="urn:getSubscriberEntitlementPolicyAdminServiceIdentityException"/> 
         </wsdl:operation> 
         <wsdl:operation name="reOderPolicies"> 
             <wsdl:input message="tns:reOderPoliciesRequest" wsaw:Action="urn:reOderPolicies"/> 
@@ -373,6 +472,10 @@
             <wsdl:output message="tns:getAllPoliciesResponse" wsaw:Action="urn:getAllPoliciesResponse"/> 
             <wsdl:fault message="tns:EntitlementPolicyAdminServiceIdentityException" name="EntitlementPolicyAdminServiceIdentityException" wsaw:Action="urn:getAllPoliciesEntitlementPolicyAdminServiceIdentityException"/> 
         </wsdl:operation> 
+        <wsdl:operation name="deleteSubscriber"> 
+            <wsdl:input message="tns:deleteSubscriberRequest" wsaw:Action="urn:deleteSubscriber"/> 
+            <wsdl:fault message="tns:EntitlementPolicyAdminServiceIdentityException" name="EntitlementPolicyAdminServiceIdentityException" wsaw:Action="urn:deleteSubscriberEntitlementPolicyAdminServiceIdentityException"/> 
+        </wsdl:operation> 
         <wsdl:operation name="removePolicy"> 
             <wsdl:input message="tns:removePolicyRequest" wsaw:Action="urn:removePolicy"/> 
             <wsdl:fault message="tns:EntitlementPolicyAdminServiceIdentityException" name="EntitlementPolicyAdminServiceIdentityException" wsaw:Action="urn:removePolicyEntitlementPolicyAdminServiceIdentityException"/> 
@@ -381,6 +484,10 @@
             <wsdl:input message="tns:getLightPolicyRequest" wsaw:Action="urn:getLightPolicy"/> 
             <wsdl:output message="tns:getLightPolicyResponse" wsaw:Action="urn:getLightPolicyResponse"/> 
             <wsdl:fault message="tns:EntitlementPolicyAdminServiceIdentityException" name="EntitlementPolicyAdminServiceIdentityException" wsaw:Action="urn:getLightPolicyEntitlementPolicyAdminServiceIdentityException"/> 
+        </wsdl:operation> 
+        <wsdl:operation name="publishPolicies"> 
+            <wsdl:input message="tns:publishPoliciesRequest" wsaw:Action="urn:publishPolicies"/> 
+            <wsdl:fault message="tns:EntitlementPolicyAdminServiceIdentityException" name="EntitlementPolicyAdminServiceIdentityException" wsaw:Action="urn:publishPoliciesEntitlementPolicyAdminServiceIdentityException"/> 
         </wsdl:operation> 
         <wsdl:operation name="getPolicy"> 
             <wsdl:input message="tns:getPolicyRequest" wsaw:Action="urn:getPolicy"/> 
@@ -399,18 +506,6 @@
                 <soap:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
             </wsdl:fault> 
         </wsdl:operation> 
-        <wsdl:operation name="getEntitlementPolicyDataFromRegistry"> 
-            <soap:operation soapAction="urn:getEntitlementPolicyDataFromRegistry" style="document"/> 
-            <wsdl:input> 
-                <soap:body use="literal"/> 
-            </wsdl:input> 
-            <wsdl:output> 
-                <soap:body use="literal"/> 
-            </wsdl:output> 
-            <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
-                <soap:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
-            </wsdl:fault> 
-        </wsdl:operation> 
         <wsdl:operation name="setGlobalPolicyAlgorithm"> 
             <soap:operation soapAction="urn:setGlobalPolicyAlgorithm" style="document"/> 
             <wsdl:input> 
@@ -419,6 +514,15 @@
             <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
                 <soap:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
             </wsdl:fault> 
+        </wsdl:operation> 
+        <wsdl:operation name="getPublisherModuleProperties"> 
+            <soap:operation soapAction="urn:getPublisherModuleProperties" style="document"/> 
+            <wsdl:input> 
+                <soap:body use="literal"/> 
+            </wsdl:input> 
+            <wsdl:output> 
+                <soap:body use="literal"/> 
+            </wsdl:output> 
         </wsdl:operation> 
         <wsdl:operation name="getPolicyAttributeValues"> 
             <soap:operation soapAction="urn:getPolicyAttributeValues" style="document"/> 
@@ -432,11 +536,32 @@
                 <soap:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
             </wsdl:fault> 
         </wsdl:operation> 
+        <wsdl:operation name="updateSubscriber"> 
+            <soap:operation soapAction="urn:updateSubscriber" style="document"/> 
+            <wsdl:input> 
+                <soap:body use="literal"/> 
+            </wsdl:input> 
+            <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
+                <soap:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
+            </wsdl:fault> 
+        </wsdl:operation> 
         <wsdl:operation name="updatePolicy"> 
             <soap:operation soapAction="urn:updatePolicy" style="document"/> 
             <wsdl:input> 
                 <soap:body use="literal"/> 
             </wsdl:input> 
+            <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
+                <soap:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
+            </wsdl:fault> 
+        </wsdl:operation> 
+        <wsdl:operation name="getSubscriberIds"> 
+            <soap:operation soapAction="urn:getSubscriberIds" style="document"/> 
+            <wsdl:input> 
+                <soap:body use="literal"/> 
+            </wsdl:input> 
+            <wsdl:output> 
+                <soap:body use="literal"/> 
+            </wsdl:output> 
             <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
                 <soap:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
             </wsdl:fault> 
@@ -455,6 +580,15 @@
         </wsdl:operation> 
         <wsdl:operation name="addPolicy"> 
             <soap:operation soapAction="urn:addPolicy" style="document"/> 
+            <wsdl:input> 
+                <soap:body use="literal"/> 
+            </wsdl:input> 
+            <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
+                <soap:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
+            </wsdl:fault> 
+        </wsdl:operation> 
+        <wsdl:operation name="getSubscriber"> 
+            <soap:operation soapAction="urn:getSubscriber" style="document"/> 
             <wsdl:input> 
                 <soap:body use="literal"/> 
             </wsdl:input> 
@@ -507,15 +641,6 @@
                 <soap:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
             </wsdl:fault> 
         </wsdl:operation> 
-        <wsdl:operation name="removePolicy"> 
-            <soap:operation soapAction="urn:removePolicy" style="document"/> 
-            <wsdl:input> 
-                <soap:body use="literal"/> 
-            </wsdl:input> 
-            <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
-                <soap:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
-            </wsdl:fault> 
-        </wsdl:operation> 
         <wsdl:operation name="getAllPolicies"> 
             <soap:operation soapAction="urn:getAllPolicies" style="document"/> 
             <wsdl:input> 
@@ -528,6 +653,24 @@
                 <soap:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
             </wsdl:fault> 
         </wsdl:operation> 
+        <wsdl:operation name="deleteSubscriber"> 
+            <soap:operation soapAction="urn:deleteSubscriber" style="document"/> 
+            <wsdl:input> 
+                <soap:body use="literal"/> 
+            </wsdl:input> 
+            <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
+                <soap:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
+            </wsdl:fault> 
+        </wsdl:operation> 
+        <wsdl:operation name="removePolicy"> 
+            <soap:operation soapAction="urn:removePolicy" style="document"/> 
+            <wsdl:input> 
+                <soap:body use="literal"/> 
+            </wsdl:input> 
+            <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
+                <soap:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
+            </wsdl:fault> 
+        </wsdl:operation> 
         <wsdl:operation name="getLightPolicy"> 
             <soap:operation soapAction="urn:getLightPolicy" style="document"/> 
             <wsdl:input> 
@@ -536,6 +679,15 @@
             <wsdl:output> 
                 <soap:body use="literal"/> 
             </wsdl:output> 
+            <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
+                <soap:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
+            </wsdl:fault> 
+        </wsdl:operation> 
+        <wsdl:operation name="publishPolicies"> 
+            <soap:operation soapAction="urn:publishPolicies" style="document"/> 
+            <wsdl:input> 
+                <soap:body use="literal"/> 
+            </wsdl:input> 
             <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
                 <soap:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
             </wsdl:fault> 
@@ -564,18 +716,6 @@
                 <soap12:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
             </wsdl:fault> 
         </wsdl:operation> 
-        <wsdl:operation name="getEntitlementPolicyDataFromRegistry"> 
-            <soap12:operation soapAction="urn:getEntitlementPolicyDataFromRegistry" style="document"/> 
-            <wsdl:input> 
-                <soap12:body use="literal"/> 
-            </wsdl:input> 
-            <wsdl:output> 
-                <soap12:body use="literal"/> 
-            </wsdl:output> 
-            <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
-                <soap12:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
-            </wsdl:fault> 
-        </wsdl:operation> 
         <wsdl:operation name="setGlobalPolicyAlgorithm"> 
             <soap12:operation soapAction="urn:setGlobalPolicyAlgorithm" style="document"/> 
             <wsdl:input> 
@@ -584,6 +724,15 @@
             <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
                 <soap12:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
             </wsdl:fault> 
+        </wsdl:operation> 
+        <wsdl:operation name="getPublisherModuleProperties"> 
+            <soap12:operation soapAction="urn:getPublisherModuleProperties" style="document"/> 
+            <wsdl:input> 
+                <soap12:body use="literal"/> 
+            </wsdl:input> 
+            <wsdl:output> 
+                <soap12:body use="literal"/> 
+            </wsdl:output> 
         </wsdl:operation> 
         <wsdl:operation name="getPolicyAttributeValues"> 
             <soap12:operation soapAction="urn:getPolicyAttributeValues" style="document"/> 
@@ -597,11 +746,32 @@
                 <soap12:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
             </wsdl:fault> 
         </wsdl:operation> 
+        <wsdl:operation name="updateSubscriber"> 
+            <soap12:operation soapAction="urn:updateSubscriber" style="document"/> 
+            <wsdl:input> 
+                <soap12:body use="literal"/> 
+            </wsdl:input> 
+            <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
+                <soap12:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
+            </wsdl:fault> 
+        </wsdl:operation> 
         <wsdl:operation name="updatePolicy"> 
             <soap12:operation soapAction="urn:updatePolicy" style="document"/> 
             <wsdl:input> 
                 <soap12:body use="literal"/> 
             </wsdl:input> 
+            <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
+                <soap12:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
+            </wsdl:fault> 
+        </wsdl:operation> 
+        <wsdl:operation name="getSubscriberIds"> 
+            <soap12:operation soapAction="urn:getSubscriberIds" style="document"/> 
+            <wsdl:input> 
+                <soap12:body use="literal"/> 
+            </wsdl:input> 
+            <wsdl:output> 
+                <soap12:body use="literal"/> 
+            </wsdl:output> 
             <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
                 <soap12:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
             </wsdl:fault> 
@@ -620,6 +790,15 @@
         </wsdl:operation> 
         <wsdl:operation name="addPolicy"> 
             <soap12:operation soapAction="urn:addPolicy" style="document"/> 
+            <wsdl:input> 
+                <soap12:body use="literal"/> 
+            </wsdl:input> 
+            <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
+                <soap12:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
+            </wsdl:fault> 
+        </wsdl:operation> 
+        <wsdl:operation name="getSubscriber"> 
+            <soap12:operation soapAction="urn:getSubscriber" style="document"/> 
             <wsdl:input> 
                 <soap12:body use="literal"/> 
             </wsdl:input> 
@@ -672,15 +851,6 @@
                 <soap12:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
             </wsdl:fault> 
         </wsdl:operation> 
-        <wsdl:operation name="removePolicy"> 
-            <soap12:operation soapAction="urn:removePolicy" style="document"/> 
-            <wsdl:input> 
-                <soap12:body use="literal"/> 
-            </wsdl:input> 
-            <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
-                <soap12:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
-            </wsdl:fault> 
-        </wsdl:operation> 
         <wsdl:operation name="getAllPolicies"> 
             <soap12:operation soapAction="urn:getAllPolicies" style="document"/> 
             <wsdl:input> 
@@ -693,6 +863,24 @@
                 <soap12:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
             </wsdl:fault> 
         </wsdl:operation> 
+        <wsdl:operation name="deleteSubscriber"> 
+            <soap12:operation soapAction="urn:deleteSubscriber" style="document"/> 
+            <wsdl:input> 
+                <soap12:body use="literal"/> 
+            </wsdl:input> 
+            <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
+                <soap12:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
+            </wsdl:fault> 
+        </wsdl:operation> 
+        <wsdl:operation name="removePolicy"> 
+            <soap12:operation soapAction="urn:removePolicy" style="document"/> 
+            <wsdl:input> 
+                <soap12:body use="literal"/> 
+            </wsdl:input> 
+            <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
+                <soap12:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
+            </wsdl:fault> 
+        </wsdl:operation> 
         <wsdl:operation name="getLightPolicy"> 
             <soap12:operation soapAction="urn:getLightPolicy" style="document"/> 
             <wsdl:input> 
@@ -701,6 +889,15 @@
             <wsdl:output> 
                 <soap12:body use="literal"/> 
             </wsdl:output> 
+            <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
+                <soap12:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
+            </wsdl:fault> 
+        </wsdl:operation> 
+        <wsdl:operation name="publishPolicies"> 
+            <soap12:operation soapAction="urn:publishPolicies" style="document"/> 
+            <wsdl:input> 
+                <soap12:body use="literal"/> 
+            </wsdl:input> 
             <wsdl:fault name="EntitlementPolicyAdminServiceIdentityException"> 
                 <soap12:fault use="literal" name="EntitlementPolicyAdminServiceIdentityException"/> 
             </wsdl:fault> 
@@ -726,20 +923,20 @@
                 <mime:content type="text/xml" part="parameters"/> 
             </wsdl:input> 
         </wsdl:operation> 
-        <wsdl:operation name="getEntitlementPolicyDataFromRegistry"> 
-            <http:operation location="getEntitlementPolicyDataFromRegistry"/> 
+        <wsdl:operation name="setGlobalPolicyAlgorithm"> 
+            <http:operation location="setGlobalPolicyAlgorithm"/> 
+            <wsdl:input> 
+                <mime:content type="text/xml" part="parameters"/> 
+            </wsdl:input> 
+        </wsdl:operation> 
+        <wsdl:operation name="getPublisherModuleProperties"> 
+            <http:operation location="getPublisherModuleProperties"/> 
             <wsdl:input> 
                 <mime:content type="text/xml" part="parameters"/> 
             </wsdl:input> 
             <wsdl:output> 
                 <mime:content type="text/xml" part="parameters"/> 
             </wsdl:output> 
-        </wsdl:operation> 
-        <wsdl:operation name="setGlobalPolicyAlgorithm"> 
-            <http:operation location="setGlobalPolicyAlgorithm"/> 
-            <wsdl:input> 
-                <mime:content type="text/xml" part="parameters"/> 
-            </wsdl:input> 
         </wsdl:operation> 
         <wsdl:operation name="getPolicyAttributeValues"> 
             <http:operation location="getPolicyAttributeValues"/> 
@@ -750,11 +947,26 @@
                 <mime:content type="text/xml" part="parameters"/> 
             </wsdl:output> 
         </wsdl:operation> 
+        <wsdl:operation name="updateSubscriber"> 
+            <http:operation location="updateSubscriber"/> 
+            <wsdl:input> 
+                <mime:content type="text/xml" part="parameters"/> 
+            </wsdl:input> 
+        </wsdl:operation> 
         <wsdl:operation name="updatePolicy"> 
             <http:operation location="updatePolicy"/> 
             <wsdl:input> 
                 <mime:content type="text/xml" part="parameters"/> 
             </wsdl:input> 
+        </wsdl:operation> 
+        <wsdl:operation name="getSubscriberIds"> 
+            <http:operation location="getSubscriberIds"/> 
+            <wsdl:input> 
+                <mime:content type="text/xml" part="parameters"/> 
+            </wsdl:input> 
+            <wsdl:output> 
+                <mime:content type="text/xml" part="parameters"/> 
+            </wsdl:output> 
         </wsdl:operation> 
         <wsdl:operation name="getAllPolicyIds"> 
             <http:operation location="getAllPolicyIds"/> 
@@ -767,6 +979,12 @@
         </wsdl:operation> 
         <wsdl:operation name="addPolicy"> 
             <http:operation location="addPolicy"/> 
+            <wsdl:input> 
+                <mime:content type="text/xml" part="parameters"/> 
+            </wsdl:input> 
+        </wsdl:operation> 
+        <wsdl:operation name="getSubscriber"> 
+            <http:operation location="getSubscriber"/> 
             <wsdl:input> 
                 <mime:content type="text/xml" part="parameters"/> 
             </wsdl:input> 
@@ -804,12 +1022,6 @@
                 <mime:content type="text/xml" part="parameters"/> 
             </wsdl:output> 
         </wsdl:operation> 
-        <wsdl:operation name="removePolicy"> 
-            <http:operation location="removePolicy"/> 
-            <wsdl:input> 
-                <mime:content type="text/xml" part="parameters"/> 
-            </wsdl:input> 
-        </wsdl:operation> 
         <wsdl:operation name="getAllPolicies"> 
             <http:operation location="getAllPolicies"/> 
             <wsdl:input> 
@@ -819,6 +1031,18 @@
                 <mime:content type="text/xml" part="parameters"/> 
             </wsdl:output> 
         </wsdl:operation> 
+        <wsdl:operation name="deleteSubscriber"> 
+            <http:operation location="deleteSubscriber"/> 
+            <wsdl:input> 
+                <mime:content type="text/xml" part="parameters"/> 
+            </wsdl:input> 
+        </wsdl:operation> 
+        <wsdl:operation name="removePolicy"> 
+            <http:operation location="removePolicy"/> 
+            <wsdl:input> 
+                <mime:content type="text/xml" part="parameters"/> 
+            </wsdl:input> 
+        </wsdl:operation> 
         <wsdl:operation name="getLightPolicy"> 
             <http:operation location="getLightPolicy"/> 
             <wsdl:input> 
@@ -827,6 +1051,12 @@
             <wsdl:output> 
                 <mime:content type="text/xml" part="parameters"/> 
             </wsdl:output> 
+        </wsdl:operation> 
+        <wsdl:operation name="publishPolicies"> 
+            <http:operation location="publishPolicies"/> 
+            <wsdl:input> 
+                <mime:content type="text/xml" part="parameters"/> 
+            </wsdl:input> 
         </wsdl:operation> 
         <wsdl:operation name="getPolicy"> 
             <http:operation location="getPolicy"/> 

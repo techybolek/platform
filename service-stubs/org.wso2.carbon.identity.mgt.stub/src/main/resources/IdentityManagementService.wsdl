@@ -18,7 +18,7 @@
  -->
 
 
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://services.mgt.identity.carbon.wso2.org" xmlns:ax2267="http://dto.mgt.identity.carbon.wso2.org/xsd" xmlns:ax2272="http://mgt.identity.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax2270="http://beans.mgt.captcha.carbon.wso2.org/xsd" xmlns:ax2266="http://beans.mgt.identity.carbon.wso2.org/xsd" xmlns:ax2274="http://mail.mgt.identity.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://services.mgt.identity.carbon.wso2.org"> 
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://services.mgt.identity.carbon.wso2.org" xmlns:ax2268="http://beans.mgt.captcha.carbon.wso2.org/xsd" xmlns:ax2272="http://mail.mgt.identity.carbon.wso2.org/xsd" xmlns:ax2264="http://beans.mgt.identity.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax2270="http://mgt.identity.carbon.wso2.org/xsd" xmlns:ax2265="http://dto.mgt.identity.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://services.mgt.identity.carbon.wso2.org"> 
     <wsdl:documentation>IdentityManagementService</wsdl:documentation> 
     <wsdl:types> 
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://beans.mgt.captcha.carbon.wso2.org/xsd"> 
@@ -30,7 +30,7 @@
                 </xs:sequence> 
             </xs:complexType> 
         </xs:schema> 
-        <xs:schema xmlns:ax2273="http://mgt.identity.carbon.wso2.org/xsd" xmlns:ax2271="http://beans.mgt.captcha.carbon.wso2.org/xsd" xmlns:ax2276="http://dto.mgt.identity.carbon.wso2.org/xsd" xmlns:ax2269="http://beans.mgt.identity.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://services.mgt.identity.carbon.wso2.org"> 
+        <xs:schema xmlns:ax2271="http://mgt.identity.carbon.wso2.org/xsd" xmlns:ax2267="http://beans.mgt.identity.carbon.wso2.org/xsd" xmlns:ax2274="http://dto.mgt.identity.carbon.wso2.org/xsd" xmlns:ax2269="http://beans.mgt.captcha.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://services.mgt.identity.carbon.wso2.org"> 
             <xs:import namespace="http://beans.mgt.identity.carbon.wso2.org/xsd"/> 
             <xs:import namespace="http://beans.mgt.captcha.carbon.wso2.org/xsd"/> 
             <xs:import namespace="http://mgt.identity.carbon.wso2.org/xsd"/> 
@@ -38,29 +38,29 @@
             <xs:element name="verifyUser"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2269:UserMgtBean"/> 
-                        <xs:element minOccurs="0" name="captchaInfoBean" nillable="true" type="ax2270:CaptchaInfoBean"/> 
+                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2267:UserMgtBean"/> 
+                        <xs:element minOccurs="0" name="captchaInfoBean" nillable="true" type="ax2268:CaptchaInfoBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="verifyUserResponse"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2269:VerificationBean"/> 
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2267:VerificationBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="IdentityManagementServiceIdentityMgtException"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="IdentityMgtException" nillable="true" type="ax2272:IdentityMgtException"/> 
+                        <xs:element minOccurs="0" name="IdentityMgtException" nillable="true" type="ax2270:IdentityMgtException"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="verifyPrimaryChallengeQuestion"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2269:UserMgtBean"/> 
+                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2267:UserMgtBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
@@ -71,25 +71,35 @@
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
+            <xs:element name="verifyEmail"> 
+                <xs:complexType> 
+                    <xs:sequence/> 
+                </xs:complexType> 
+            </xs:element> 
             <xs:element name="verifyChallengeQuestion"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2269:UserMgtBean"/> 
+                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2267:UserMgtBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="verifyChallengeQuestionResponse"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2269:VerificationBean"/> 
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2267:VerificationBean"/> 
                     </xs:sequence> 
+                </xs:complexType> 
+            </xs:element> 
+            <xs:element name="updateEmail"> 
+                <xs:complexType> 
+                    <xs:sequence/> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="updateCredential"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2269:UserMgtBean"/> 
-                        <xs:element minOccurs="0" name="captchaInfoBean" nillable="true" type="ax2270:CaptchaInfoBean"/> 
+                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2267:UserMgtBean"/> 
+                        <xs:element minOccurs="0" name="captchaInfoBean" nillable="true" type="ax2268:CaptchaInfoBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
@@ -103,7 +113,7 @@
             <xs:element name="unlockUserAccount"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2269:UserMgtBean"/> 
+                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2267:UserMgtBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
@@ -117,14 +127,14 @@
             <xs:element name="setChallengeQuestionsOfUser"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2269:UserMgtBean"/> 
+                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2267:UserMgtBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="processTemporaryPassword"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2269:UserMgtBean"/> 
+                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2267:UserMgtBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
@@ -138,7 +148,7 @@
             <xs:element name="processPasswordRecovery"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2269:UserMgtBean"/> 
+                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2267:UserMgtBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
@@ -152,7 +162,7 @@
             <xs:element name="processAccountRecovery"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2269:UserMgtBean"/> 
+                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2267:UserMgtBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
@@ -166,7 +176,7 @@
             <xs:element name="processAccountConfirmation"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2269:UserMgtBean"/> 
+                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2267:UserMgtBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
@@ -180,84 +190,84 @@
             <xs:element name="getTemporaryPasswordData"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2269:UserMgtBean"/> 
+                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2267:UserMgtBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="getTemporaryPasswordDataResponse"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2267:RecoveryDataDTO"/> 
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2265:RecoveryDataDTO"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="getPrimaryQuestionsOfUser"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2269:UserMgtBean"/> 
+                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2267:UserMgtBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="getPrimaryQuestionsOfUserResponse"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2267:UserChallengesDTO"/> 
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2265:UserChallengesDTO"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="getPasswordRecoveryData"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2269:UserMgtBean"/> 
+                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2267:UserMgtBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="getPasswordRecoveryDataResponse"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2267:RecoveryDataDTO"/> 
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2265:RecoveryDataDTO"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="getChallengeQuestionsOfUser"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2269:UserMgtBean"/> 
+                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2267:UserMgtBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="getChallengeQuestionsOfUserResponse"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2267:UserChallengesDTO"/> 
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2265:UserChallengesDTO"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="getAccountRecoveryData"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2269:UserMgtBean"/> 
+                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2267:UserMgtBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="getAccountRecoveryDataResponse"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2267:RecoveryDataDTO"/> 
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2265:RecoveryDataDTO"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="getAccountConfirmationData"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2269:UserMgtBean"/> 
+                        <xs:element minOccurs="0" name="userMgtBean" nillable="true" type="ax2267:UserMgtBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
             <xs:element name="getAccountConfirmationDataResponse"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2267:RecoveryDataDTO"/> 
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2265:RecoveryDataDTO"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
@@ -269,7 +279,7 @@
             <xs:element name="generateRandomCaptchaResponse"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2270:CaptchaInfoBean"/> 
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2268:CaptchaInfoBean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
@@ -283,12 +293,27 @@
             <xs:element name="confirmUserAccountResponse"> 
                 <xs:complexType> 
                     <xs:sequence> 
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2269:VerificationBean"/> 
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2267:VerificationBean"/> 
+                    </xs:sequence> 
+                </xs:complexType> 
+            </xs:element> 
+            <xs:element name="authenticate"> 
+                <xs:complexType> 
+                    <xs:sequence> 
+                        <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string"/> 
+                        <xs:element minOccurs="0" name="password" nillable="true" type="xs:string"/> 
+                    </xs:sequence> 
+                </xs:complexType> 
+            </xs:element> 
+            <xs:element name="authenticateResponse"> 
+                <xs:complexType> 
+                    <xs:sequence> 
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/> 
                     </xs:sequence> 
                 </xs:complexType> 
             </xs:element> 
         </xs:schema> 
-        <xs:schema xmlns:ax2275="http://mail.mgt.identity.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.mgt.identity.carbon.wso2.org/xsd"> 
+        <xs:schema xmlns:ax2273="http://mail.mgt.identity.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.mgt.identity.carbon.wso2.org/xsd"> 
             <xs:import namespace="http://mail.mgt.identity.carbon.wso2.org/xsd"/> 
             <xs:complexType name="UserChallengesDTO"> 
                 <xs:sequence> 
@@ -310,7 +335,7 @@
                     <xs:element minOccurs="0" name="confirmation" nillable="true" type="xs:string"/> 
                     <xs:element minOccurs="0" name="domainName" nillable="true" type="xs:string"/> 
                     <xs:element minOccurs="0" name="email" nillable="true" type="xs:string"/> 
-                    <xs:element minOccurs="0" name="emailConfig" nillable="true" type="ax2274:EmailConfig"/> 
+                    <xs:element minOccurs="0" name="emailConfig" nillable="true" type="ax2272:EmailConfig"/> 
                     <xs:element minOccurs="0" name="emailSent" type="xs:boolean"/> 
                     <xs:element minOccurs="0" name="firstName" nillable="true" type="xs:string"/> 
                     <xs:element minOccurs="0" name="temporaryPassword" nillable="true" type="xs:string"/> 
@@ -318,7 +343,7 @@
                 </xs:sequence> 
             </xs:complexType> 
         </xs:schema> 
-        <xs:schema xmlns:ax2268="http://dto.mgt.identity.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://beans.mgt.identity.carbon.wso2.org/xsd"> 
+        <xs:schema xmlns:ax2266="http://dto.mgt.identity.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://beans.mgt.identity.carbon.wso2.org/xsd"> 
             <xs:import namespace="http://dto.mgt.identity.carbon.wso2.org/xsd"/> 
             <xs:complexType name="UserMgtBean"> 
                 <xs:sequence> 
@@ -326,8 +351,8 @@
                     <xs:element minOccurs="0" name="recoveryType" nillable="true" type="xs:string"/> 
                     <xs:element minOccurs="0" name="secretKey" nillable="true" type="xs:string"/> 
                     <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/> 
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="userChallenges" nillable="true" type="ax2267:UserChallengesDTO"/> 
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="userEvidenceDTOs" nillable="true" type="ax2267:UserEvidenceDTO"/> 
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="userChallenges" nillable="true" type="ax2265:UserChallengesDTO"/> 
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="userEvidenceDTOs" nillable="true" type="ax2265:UserEvidenceDTO"/> 
                     <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string"/> 
                     <xs:element minOccurs="0" name="userKey" nillable="true" type="xs:string"/> 
                     <xs:element minOccurs="0" name="userPassword" nillable="true" type="xs:string"/> 
@@ -361,6 +386,12 @@
             </xs:complexType> 
         </xs:schema> 
     </wsdl:types> 
+    <wsdl:message name="authenticateRequest"> 
+        <wsdl:part name="parameters" element="ns:authenticate"/> 
+    </wsdl:message> 
+    <wsdl:message name="authenticateResponse"> 
+        <wsdl:part name="parameters" element="ns:authenticateResponse"/> 
+    </wsdl:message> 
     <wsdl:message name="getChallengeQuestionsOfUserRequest"> 
         <wsdl:part name="parameters" element="ns:getChallengeQuestionsOfUser"/> 
     </wsdl:message> 
@@ -433,6 +464,9 @@
     <wsdl:message name="setChallengeQuestionsOfUserRequest"> 
         <wsdl:part name="parameters" element="ns:setChallengeQuestionsOfUser"/> 
     </wsdl:message> 
+    <wsdl:message name="verifyEmailRequest"> 
+        <wsdl:part name="parameters" element="ns:verifyEmail"/> 
+    </wsdl:message> 
     <wsdl:message name="getAccountRecoveryDataRequest"> 
         <wsdl:part name="parameters" element="ns:getAccountRecoveryData"/> 
     </wsdl:message> 
@@ -444,6 +478,9 @@
     </wsdl:message> 
     <wsdl:message name="confirmUserAccountResponse"> 
         <wsdl:part name="parameters" element="ns:confirmUserAccountResponse"/> 
+    </wsdl:message> 
+    <wsdl:message name="updateEmailRequest"> 
+        <wsdl:part name="parameters" element="ns:updateEmail"/> 
     </wsdl:message> 
     <wsdl:message name="unlockUserAccountRequest"> 
         <wsdl:part name="parameters" element="ns:unlockUserAccount"/> 
@@ -470,6 +507,10 @@
         <wsdl:part name="parameters" element="ns:verifyUserResponse"/> 
     </wsdl:message> 
     <wsdl:portType name="IdentityManagementServicePortType"> 
+        <wsdl:operation name="authenticate"> 
+            <wsdl:input message="ns:authenticateRequest" wsaw:Action="urn:authenticate"/> 
+            <wsdl:output message="ns:authenticateResponse" wsaw:Action="urn:authenticateResponse"/> 
+        </wsdl:operation> 
         <wsdl:operation name="getChallengeQuestionsOfUser"> 
             <wsdl:input message="ns:getChallengeQuestionsOfUserRequest" wsaw:Action="urn:getChallengeQuestionsOfUser"/> 
             <wsdl:output message="ns:getChallengeQuestionsOfUserResponse" wsaw:Action="urn:getChallengeQuestionsOfUserResponse"/> 
@@ -528,6 +569,9 @@
             <wsdl:input message="ns:setChallengeQuestionsOfUserRequest" wsaw:Action="urn:setChallengeQuestionsOfUser"/> 
             <wsdl:fault message="ns:IdentityManagementServiceIdentityMgtException" name="IdentityManagementServiceIdentityMgtException" wsaw:Action="urn:setChallengeQuestionsOfUserIdentityManagementServiceIdentityMgtException"/> 
         </wsdl:operation> 
+        <wsdl:operation name="verifyEmail"> 
+            <wsdl:input message="ns:verifyEmailRequest" wsaw:Action="urn:verifyEmail"/> 
+        </wsdl:operation> 
         <wsdl:operation name="getAccountRecoveryData"> 
             <wsdl:input message="ns:getAccountRecoveryDataRequest" wsaw:Action="urn:getAccountRecoveryData"/> 
             <wsdl:output message="ns:getAccountRecoveryDataResponse" wsaw:Action="urn:getAccountRecoveryDataResponse"/> 
@@ -536,6 +580,9 @@
         <wsdl:operation name="confirmUserAccount"> 
             <wsdl:input message="ns:confirmUserAccountRequest" wsaw:Action="urn:confirmUserAccount"/> 
             <wsdl:output message="ns:confirmUserAccountResponse" wsaw:Action="urn:confirmUserAccountResponse"/> 
+        </wsdl:operation> 
+        <wsdl:operation name="updateEmail"> 
+            <wsdl:input message="ns:updateEmailRequest" wsaw:Action="urn:updateEmail"/> 
         </wsdl:operation> 
         <wsdl:operation name="unlockUserAccount"> 
             <wsdl:input message="ns:unlockUserAccountRequest" wsaw:Action="urn:unlockUserAccount"/> 
@@ -569,6 +616,15 @@
             <wsdl:fault name="IdentityManagementServiceIdentityMgtException"> 
                 <soap:fault use="literal" name="IdentityManagementServiceIdentityMgtException"/> 
             </wsdl:fault> 
+        </wsdl:operation> 
+        <wsdl:operation name="authenticate"> 
+            <soap:operation soapAction="urn:authenticate" style="document"/> 
+            <wsdl:input> 
+                <soap:body use="literal"/> 
+            </wsdl:input> 
+            <wsdl:output> 
+                <soap:body use="literal"/> 
+            </wsdl:output> 
         </wsdl:operation> 
         <wsdl:operation name="getTemporaryPasswordData"> 
             <soap:operation soapAction="urn:getTemporaryPasswordData" style="document"/> 
@@ -687,6 +743,12 @@
                 <soap:fault use="literal" name="IdentityManagementServiceIdentityMgtException"/> 
             </wsdl:fault> 
         </wsdl:operation> 
+        <wsdl:operation name="verifyEmail"> 
+            <soap:operation soapAction="urn:verifyEmail" style="document"/> 
+            <wsdl:input> 
+                <soap:body use="literal"/> 
+            </wsdl:input> 
+        </wsdl:operation> 
         <wsdl:operation name="setChallengeQuestionsOfUser"> 
             <soap:operation soapAction="urn:setChallengeQuestionsOfUser" style="document"/> 
             <wsdl:input> 
@@ -716,6 +778,12 @@
             <wsdl:output> 
                 <soap:body use="literal"/> 
             </wsdl:output> 
+        </wsdl:operation> 
+        <wsdl:operation name="updateEmail"> 
+            <soap:operation soapAction="urn:updateEmail" style="document"/> 
+            <wsdl:input> 
+                <soap:body use="literal"/> 
+            </wsdl:input> 
         </wsdl:operation> 
         <wsdl:operation name="unlockUserAccount"> 
             <soap:operation soapAction="urn:unlockUserAccount" style="document"/> 
@@ -773,6 +841,15 @@
             <wsdl:fault name="IdentityManagementServiceIdentityMgtException"> 
                 <soap12:fault use="literal" name="IdentityManagementServiceIdentityMgtException"/> 
             </wsdl:fault> 
+        </wsdl:operation> 
+        <wsdl:operation name="authenticate"> 
+            <soap12:operation soapAction="urn:authenticate" style="document"/> 
+            <wsdl:input> 
+                <soap12:body use="literal"/> 
+            </wsdl:input> 
+            <wsdl:output> 
+                <soap12:body use="literal"/> 
+            </wsdl:output> 
         </wsdl:operation> 
         <wsdl:operation name="getTemporaryPasswordData"> 
             <soap12:operation soapAction="urn:getTemporaryPasswordData" style="document"/> 
@@ -891,6 +968,12 @@
                 <soap12:fault use="literal" name="IdentityManagementServiceIdentityMgtException"/> 
             </wsdl:fault> 
         </wsdl:operation> 
+        <wsdl:operation name="verifyEmail"> 
+            <soap12:operation soapAction="urn:verifyEmail" style="document"/> 
+            <wsdl:input> 
+                <soap12:body use="literal"/> 
+            </wsdl:input> 
+        </wsdl:operation> 
         <wsdl:operation name="setChallengeQuestionsOfUser"> 
             <soap12:operation soapAction="urn:setChallengeQuestionsOfUser" style="document"/> 
             <wsdl:input> 
@@ -920,6 +1003,12 @@
             <wsdl:output> 
                 <soap12:body use="literal"/> 
             </wsdl:output> 
+        </wsdl:operation> 
+        <wsdl:operation name="updateEmail"> 
+            <soap12:operation soapAction="urn:updateEmail" style="document"/> 
+            <wsdl:input> 
+                <soap12:body use="literal"/> 
+            </wsdl:input> 
         </wsdl:operation> 
         <wsdl:operation name="unlockUserAccount"> 
             <soap12:operation soapAction="urn:unlockUserAccount" style="document"/> 
@@ -968,6 +1057,15 @@
         <http:binding verb="POST"/> 
         <wsdl:operation name="getChallengeQuestionsOfUser"> 
             <http:operation location="getChallengeQuestionsOfUser"/> 
+            <wsdl:input> 
+                <mime:content type="text/xml" part="parameters"/> 
+            </wsdl:input> 
+            <wsdl:output> 
+                <mime:content type="text/xml" part="parameters"/> 
+            </wsdl:output> 
+        </wsdl:operation> 
+        <wsdl:operation name="authenticate"> 
+            <http:operation location="authenticate"/> 
             <wsdl:input> 
                 <mime:content type="text/xml" part="parameters"/> 
             </wsdl:input> 
@@ -1065,6 +1163,12 @@
                 <mime:content type="text/xml" part="parameters"/> 
             </wsdl:output> 
         </wsdl:operation> 
+        <wsdl:operation name="verifyEmail"> 
+            <http:operation location="verifyEmail"/> 
+            <wsdl:input> 
+                <mime:content type="text/xml" part="parameters"/> 
+            </wsdl:input> 
+        </wsdl:operation> 
         <wsdl:operation name="setChallengeQuestionsOfUser"> 
             <http:operation location="setChallengeQuestionsOfUser"/> 
             <wsdl:input> 
@@ -1088,6 +1192,12 @@
             <wsdl:output> 
                 <mime:content type="text/xml" part="parameters"/> 
             </wsdl:output> 
+        </wsdl:operation> 
+        <wsdl:operation name="updateEmail"> 
+            <http:operation location="updateEmail"/> 
+            <wsdl:input> 
+                <mime:content type="text/xml" part="parameters"/> 
+            </wsdl:input> 
         </wsdl:operation> 
         <wsdl:operation name="unlockUserAccount"> 
             <http:operation location="unlockUserAccount"/> 
