@@ -24,14 +24,17 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.base.IdentityConstants;
+import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceIdentityException;
 import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceStub;
-import org.wso2.carbon.identity.user.registration.stub.dto.InfoCarDTO;
-import org.wso2.carbon.identity.user.registration.stub.dto.OpenIDDTO;
+import org.wso2.carbon.identity.user.registration.stub.dto.PasswordRegExDTO;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserDTO;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
 
+import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UserRegistrationClient {
 
@@ -127,34 +130,23 @@ public class UserRegistrationClient {
         }
 
     }
-
+    
     /**
-     * @param infoCard Inforcard
+     * 
+     * @return
      * @throws AxisFault
      */
-    public void addUserWithInfoCard(InfoCarDTO infoCard) throws AxisFault {
-        try {
-            stub.addUserWithInfoCard(infoCard);
-        } catch (Exception e) {
-            handleException(
-                    "Error ouccured while adding users with an information card at the backend service",
-                    e);
-        }
+	public PasswordRegExDTO[] getPasswordRegularExpressions() throws AxisFault {
+		try {
+			return stub.getPasswordRegularExpressions();
+		} catch (Exception e) {
+			handleException(
+					"Error ouccured while adding a user at the backend service",
+					e);
+		}
+		return null;
+	}
 
-    }
-
-    /**
-     * @param openID
-     * @throws AxisFault
-     */
-    public void addUserWithOpenID(OpenIDDTO openID) throws AxisFault {
-        try {
-            stub.addUserWithOpenID(openID);
-        } catch (Exception e) {
-            handleException(
-                    "Error ouccured while adding users with an OpenID at the backend service", e);
-        }
-    }
 
     /**
      * @return

@@ -18,6 +18,13 @@
 package org.wso2.carbon.identity.sso.saml.ui;
 
 public class SAMLSSOProviderConstants {
+
+    public static final String ISSUER_LIST_FILTER = "org.wso2.carbon.issuer.filter";
+    public static final int DEFAULT_ITEMS_PER_PAGE = 5;
+    public static final String CONFIG_CLIENT = "SAMLSSOConfigServiceClient";
+    public static final String STARTING_SERVICE_PROVIDERS_DATA_PAGE = "starting_page";
+    public static final String SERVICE_PROVIDERS_DATA_PAGE_COUNT = "page_count";
+
 	public static final String USERNAME = "username";
 	public static final String PASSWORD = "password";
 	public static final String FEDERATED_IDP = "federated-idp-domain";

@@ -26,15 +26,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openid4java.message.DirectError;
-import org.openid4java.message.Message;
-import org.openid4java.message.Parameter;
 import org.openid4java.message.ParameterList;
-import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.base.IdentityConstants.OpenId;
 import org.wso2.carbon.identity.base.IdentityException;
@@ -44,8 +39,6 @@ import org.wso2.carbon.identity.provider.openid.stub.dto.OpenIDParameterDTO;
 import org.wso2.carbon.identity.provider.openid.ui.OpenIDConstants;
 import org.wso2.carbon.identity.provider.openid.ui.client.OpenIDAdminClient;
 import org.wso2.carbon.identity.provider.openid.ui.util.OpenIDUtil;
-import org.wso2.carbon.ui.CarbonUIUtil;
-import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 

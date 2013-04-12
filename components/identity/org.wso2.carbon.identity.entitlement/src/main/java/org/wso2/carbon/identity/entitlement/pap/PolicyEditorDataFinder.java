@@ -58,6 +58,7 @@ public class PolicyEditorDataFinder {
     public void init(){
 		Map<PolicyEditorDataFinderModule, Properties> metaDataFinderConfigs = EntitlementServiceComponent.
                 getEntitlementConfig().getPolicyMetaDataFinderModules();
+        // only one module can be there.
         if(metaDataFinderConfigs != null && !metaDataFinderConfigs.isEmpty()){
             metaDataFinderModules = metaDataFinderConfigs.keySet();
         }
@@ -145,6 +146,16 @@ public class PolicyEditorDataFinder {
                     targetFunctionList.add(entry.getValue());
                 }
                 policyAttributeDTO.addSupportedTargetFunctions(targetFunctionList);
+            }
+
+            Map<String, String> attributeIdDataTypeMap = module.getAttributeIdDataTypes();          
+            if(attributeIdDataTypeMap != null){
+                ArrayList<String> attributeIdDataTypeList = new ArrayList<String>();
+                for(Map.Entry<String, String> entry : attributeIdDataTypeMap.entrySet()){
+                    attributeIdDataTypeList.add(entry.getKey());
+                    attributeIdDataTypeList.add(entry.getValue());
+                }
+                policyAttributeDTO.addAttributeIdDataTypes(attributeIdDataTypeList);
             }
 
             Map<String, String> ruleFunctionMap = module.getSupportedRuleFunctions();

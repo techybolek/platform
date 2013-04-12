@@ -18,11 +18,11 @@
 
 package org.wso2.carbon.identity.oauth.ui.endpoints.token;
 
-import org.apache.amber.oauth2.as.request.OAuthTokenRequest;
 import org.apache.amber.oauth2.common.message.types.GrantType;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.oauth.common.CarbonOAuthTokenRequest;
 import org.wso2.carbon.identity.oauth.ui.OAuthClientException;
 import org.wso2.carbon.identity.oauth.ui.client.OAuth2ServiceClient;
 import org.wso2.carbon.identity.oauth.ui.internal.OAuthUIServiceComponentHolder;
@@ -49,7 +49,7 @@ public class OAuth2TokenClient {
                 getConfigurationContextService().getServerConfigContext();
     }
 
-    public OAuth2AccessTokenRespDTO getAccessToken(OAuthTokenRequest oauthRequest)
+    public OAuth2AccessTokenRespDTO getAccessToken(CarbonOAuthTokenRequest oauthRequest)
                                                                     throws OAuthClientException {
         OAuth2AccessTokenReqDTO tokenReqDTO = new OAuth2AccessTokenReqDTO();
         String grantType = oauthRequest.getGrantType();
@@ -66,7 +66,7 @@ public class OAuth2TokenClient {
             tokenReqDTO.setResourceOwnerPassword(oauthRequest.getPassword());
         } else if (GrantType.REFRESH_TOKEN.toString().equals(grantType)){
             tokenReqDTO.setRefreshToken(oauthRequest.getRefreshToken());
-        } else if (GrantType.SAML20_BEARER_ASSERTION.toString().equals(grantType)) {
+        } else if (org.wso2.carbon.identity.oauth.common.GrantType.SAML20_BEARER.toString().equals(grantType)) {
             tokenReqDTO.setAssertion(oauthRequest.getAssertion());
         }
 

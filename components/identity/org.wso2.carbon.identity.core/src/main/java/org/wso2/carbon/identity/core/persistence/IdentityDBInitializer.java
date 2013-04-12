@@ -202,6 +202,8 @@ public class IdentityDBInitializer {
                     type = "postgresql";
                 } else if (databaseProductName.matches("(?i).*openedge.*")) {
                     type = "openedge";
+                } else if (databaseProductName.matches("(?i).*informix.*")) {
+                    type = "informix";
                 } else {
                     String msg = "Unsupported database: " + databaseProductName +
                             ". Database will not be created automatically by the WSO2 Identity Server. " +
@@ -308,7 +310,7 @@ public class IdentityDBInitializer {
             Connection conn = dataSource.getConnection();
             SQLWarning warning = conn.getWarnings();
             while (warning != null) {
-                log.info(warning + " sql warning");
+                log.debug(warning + " sql warning");
                 warning = warning.getNextWarning();
             }
             conn.clearWarnings();

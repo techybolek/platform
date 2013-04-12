@@ -52,7 +52,7 @@
     String policy = "";
     PolicyElementDTO policyElement = new PolicyElementDTO();
     EntitlementPolicyCreator policyCreator = new EntitlementPolicyCreator();
-    PolicyDTO policyDTO = new PolicyDTO();
+    PolicyDTO policyDTO = null;
 
     List<SubElementDTO> subElementDTOs = entitlementPolicyBean.getTargetElementDTOs();
     List<RuleElementDTO> ruleElementDTOs = entitlementPolicyBean.getRuleElements();
@@ -79,6 +79,19 @@
     }
 
     try {
+
+        EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
+                serverURL, configContext);
+        try{
+            policyDTO = client.getPolicy(policyName);
+        } catch (Exception e){
+            //ignore
+        }
+
+        if(policyDTO == null){
+            policyDTO = new PolicyDTO();
+        }
+
         if (ruleDTOs != null && ruleDTOs.size() > 0 || targetDTO != null){
             policyMetaData = PolicyEditorUtil.processPolicyData(targetDTO, ruleDTOs, obligationDTOs,
                                                             ruleElementOrder, entitlementPolicyBean);
@@ -102,8 +115,6 @@
         policyDTO.setPolicyId(policyName);
         policyDTO.setPolicy(policy);
 
-        EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
-                serverURL, configContext);
         if(entitlementPolicyBean.isEditPolicy()){
             client.updatePolicy(policyDTO);    
         } else {
@@ -118,7 +129,7 @@
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
         forwardTo = "index.jsp?";
     } catch (Exception e) {
-        String message = resourceBundle.getString("error.while.loading.policy");
+        String message = resourceBundle.getString("error.while.adding.policy") + " " + e.getMessage();
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
         forwardTo = "index.jsp?";
     }

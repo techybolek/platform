@@ -4,15 +4,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
-import org.wso2.carbon.caching.core.identity.IdentityCacheEntry;
-import org.wso2.carbon.caching.core.identity.IdentityCacheKey;
+import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.IdentityMgtException;
 import org.wso2.carbon.identity.mgt.beans.UserMgtBean;
 import org.wso2.carbon.identity.mgt.beans.VerificationBean;
-import org.wso2.carbon.identity.mgt.cache.LoginAttemptCache;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.dto.UserEvidenceDTO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
+import org.wso2.carbon.identity.mgt.store.UserIdentityDataStore;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -22,7 +21,6 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.tenant.TenantManager;
-import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -257,15 +255,13 @@ public class Utils {
 
         if(UserCoreConstants.USER_LOCKED.equals(status)){
             accountStatus = UserCoreConstants.USER_LOCKED;
-            lockUserAccount(userId, tenantId);
         } else {
             accountStatus = UserCoreConstants.USER_UNLOCKED;
-            unlockUserAccount(userId, tenantId);
         }
 
         try {
             ClaimsMgtUtil.setClaimInUserStoreManager(userId, tenantId,
-                                UserCoreConstants.ClaimTypeURIs.ACCOUNT_STATUS, accountStatus);
+                    UserIdentityDataStore.ACCOUNT_LOCK, accountStatus);
         } catch (IdentityMgtException e) {
             String mgs = "Error while persisting account status for user : " + userId;
             log.error(mgs, e);
@@ -273,36 +269,6 @@ public class Utils {
         }
     }
 
-    /**
-     * persist user account status
-     *
-     * @param userId user id
-     * @param status whether account is lock or unlock
-     * @throws IdentityMgtException if fails
-     */
-    public static void persistAccountStatus(String userId, String status) throws IdentityMgtException {
-
-        int tenantId = 0;
-        String accountStatus;
-        String domainName = MultitenantUtils.getTenantDomain(userId);
-        tenantId = getTenantId(domainName);
-        userId = MultitenantUtils.getTenantAwareUsername(userId);
-
-        if(UserCoreConstants.USER_LOCKED.equals(status)){
-            accountStatus = UserCoreConstants.USER_LOCKED;
-        } else {
-            accountStatus = UserCoreConstants.USER_UNLOCKED;
-        }
-
-        try {
-            ClaimsMgtUtil.setClaimInUserStoreManager(userId, tenantId,
-                                UserCoreConstants.ClaimTypeURIs.ACCOUNT_STATUS, accountStatus);
-        } catch (IdentityMgtException e) {
-            String mgs = "Error while persisting account status for user : " + userId;
-            log.error(mgs, e);
-            throw new IdentityMgtException(mgs, e);
-        }
-    }
 
     /**
      * Confirm that confirmation key has been sent to the same user.
@@ -315,6 +281,7 @@ public class Utils {
         VerificationBean verificationBean = new VerificationBean();
 
         boolean success = false;
+        boolean isExpire = false;
         Registry registry = null;
         try {
 
@@ -336,11 +303,21 @@ public class Utils {
                         verificationBean.setUserId(resource.getProperty(key));
                     } else if (key.equals(IdentityMgtConstants.SECRET_KEY)) {
                         verificationBean.setKey(resource.getProperty(key));
+                    } else if (key.equals(IdentityMgtConstants.EXPIRE_TIME)){
+                        String time = resource.getProperty(key);
+                        if(System.currentTimeMillis() > Long.parseLong(time)){
+                            log.warn("Expired confirmation key : " + confirmationKey);
+                            verificationBean.setError("Expired confirmation key");
+                            isExpire = true;
+                            break;
+                        }
                     }
                 }
                 registry.delete(resource.getPath());
-                success = true;
-                log.info("confirmation is success for key : " + confirmationKey);
+                if(!isExpire){
+                    success = true;
+                    log.info("confirmation is success for key : " + confirmationKey);
+                }
             } else {
                 log.warn("invalid confirmation key : " + confirmationKey);
                 verificationBean.setError("Invalid confirmation key");
@@ -351,7 +328,7 @@ public class Utils {
         } finally {
             if(registry != null){
                 try{
-                    if (success) {
+                    if (success || isExpire) {
                         registry.commitTransaction();
                     } else {
                         registry.rollbackTransaction();
@@ -361,7 +338,11 @@ public class Utils {
                 }
             }
         }
-        verificationBean.setVerified(success);
+        if(isExpire){
+            verificationBean.setVerified(false);
+        } else {
+            verificationBean.setVerified(success);
+        }
         return verificationBean;
     }
 
@@ -386,9 +367,18 @@ public class Utils {
 
             if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
                 if(userStoreManager.isExistingUser(userId)){
-                    String accountStatus = userStoreManager.
-                        getUserClaimValue(userId, UserCoreConstants.ClaimTypeURIs.ACCOUNT_STATUS, null);
-                    if(!UserCoreConstants.USER_LOCKED.equals(accountStatus)){
+                    if(IdentityMgtConfig.getInstance().isAuthPolicyAccountLockCheck()){
+                        String accountLock = null;
+                        try{
+                            accountLock = userStoreManager.
+                                getUserClaimValue(userId, UserIdentityDataStore.ACCOUNT_LOCK, null);
+                            if(!Boolean.parseBoolean(accountLock)){
+                                return true;
+                            }
+                        } catch (Exception e){
+                            // ignore this is not an admin method call
+                        }
+                    } else {
                         return true;
                     }
                 }
@@ -469,30 +459,7 @@ public class Utils {
         return new String[] {IdentityMgtConstants.DEFAULT_CHALLENGE_QUESTION_URI01,
                                             IdentityMgtConstants.DEFAULT_CHALLENGE_QUESTION_URI02};
     }
-
-    public static void lockUserAccount(String userName, int tenantId){
-
-        IdentityCacheKey cacheKey = new IdentityCacheKey(tenantId, userName);
-        IdentityCacheEntry cacheEntry = new IdentityCacheEntry(-10);
-        LoginAttemptCache.getInstance().getCache().put(cacheKey, cacheEntry);
-    }
     
-    public static void unlockUserAccount(String userName, int tenantId){
-
-        LoginAttemptCache.getInstance().clearCacheEntry(userName);
-    }
-
-    public static String getChallengeSeparator(){
-        
-        String value = IdentityMgtServiceComponent.getRealmService().
-                            getBootstrapRealmConfiguration().getUserStoreProperty("challengeQuestionSeparator");
-        if(value != null && value.trim().length() == 1){
-            return value;
-        } else {
-            return IdentityMgtConstants.CHALLENGES_SEPARATOR;
-        }
-    }
-
     public static Policy getSecurityPolicy(){
 
         String policyString = "        <wsp:Policy wsu:Id=\"UTOverTransport\" xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2004/09/policy\"\n" +

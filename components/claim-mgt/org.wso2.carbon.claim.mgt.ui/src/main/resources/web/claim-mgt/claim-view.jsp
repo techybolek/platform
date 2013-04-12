@@ -15,6 +15,8 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
+<%@page import="org.wso2.carbon.claim.mgt.stub.dto.ClaimAttributeDTO"%>
+<%@page import="java.util.Map"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
 	prefix="carbon"%>
@@ -28,6 +30,7 @@
 <%@page import="java.lang.Exception"%>
 <%@page import="org.wso2.carbon.claim.mgt.ui.client.ClaimAdminClient"%>
 <%@page import="org.wso2.carbon.claim.mgt.stub.dto.ClaimDialectDTO"%>
+<%@ page import="org.wso2.carbon.user.core.UserCoreConstants" %>
 
 <%
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
@@ -79,30 +82,117 @@
 
                     jQuery(".toggle_container").hide();
                     /*Hide (Collapse) the toggle containers on load use show() insted of hide() 	in the above code if you want to keep the content section expanded. */
-
-                    jQuery("a.trigger-title").click(function() {
+                    var triggerHandler = function() {
                         if (jQuery(this.parentNode).next().is(":visible")) {
-                            this.parentNode.className = "active trigger";
+                            $('i',this).get(0).className = "claim-arrow-down";
+                            jQuery(this).parent().removeClass('trigger-title-container-light');
                         } else {
-                            this.parentNode.className = "trigger";
+                            $('i',this).get(0).className = "claim-arrow-up";
+                            jQuery(this).parent().addClass('trigger-title-container-light');
                         }
 
                         jQuery(this.parentNode).next().slideToggle("fast");
                         return false; //Prevent the browser jump to the link anchor
-                    });
+                    };
+                    jQuery("a.trigger-title").click(triggerHandler);
                 });
+                function removeItem(dialect,claim,length) {
+                        var defaultDialect = "<%=UserCoreConstants.DEFAULT_CARBON_DIALECT%>";
+                        if((dialect == defaultDialect) && (length < 2 )){
+                            CARBON.showWarningDialog('<fmt:message key="cannot.remove.default.carbon.dialect.all.claims"/>');
+                            return false;
+                        } else {
+                            CARBON.showConfirmationDialog('<fmt:message key="remove.message1"/>'+ claim +'<fmt:message key="remove.message2"/>',
+                            function() {
+                                location.href ="remove-claim.jsp?dialect="+dialect+"&claimUri="+claim;
+                            }, null);
+                        }
+                }
         </script>
     <style type="text/css">
         .editLink {
             background: transparent url(../admin/images/edit.gif) no-repeat 0px 0px !important;
-            float: right !important;
+            float: left !important;
             padding: 0px 0px 0px 20px !important;
             color: inherit !important;
             font-size: 12px !important;
             line-height: 20px !important;
             margin-right: 10px !important;
             margin-bottom: 5px !important;
+            margin-left: 5px !important;
+            height:30px;
         }
+
+        .deleteLink {
+            background: transparent url(../admin/images/delete.gif) no-repeat 0px 0px !important;
+            float: left !important;
+            padding: 0px 0px 0px 20px !important;
+            color: inherit !important;
+            font-size: 12px !important;
+            line-height: 20px !important;
+            margin-right: 10px !important;
+            margin-bottom: 5px !important;
+            margin-left: 5px !important;
+            height:30px;
+        }
+        .trigger-title{
+            float:left;
+            display:block;
+            min-width:300px;
+            vertical-align:bottom;
+        }
+        .claim-arrow-up{
+            background: url('../admin/images/up-arrow.png') left bottom;
+            width:16px;
+            height:16px;
+            display:inline-block;
+            margin-top:3px;
+        }
+        .claim-arrow-down{
+            background: url('../admin/images/down-arrow.png') left bottom;
+            width:16px;
+            height:16px;
+            display:inline-block;
+            margin-top:3px;
+        }
+
+        div.trigger-title-container {
+            border: solid 1px #c2c4c6;
+
+            -moz-box-shadow: 3px 3px 3px #888;
+            -webkit-box-shadow: 3px 3px 3px #888;
+            box-shadow: 3px 3px 3px #888;
+
+            padding: 0;
+            background-color: #e9e9e9;
+            background-repeat: no-repeat;
+            background-position: 5px center;
+            padding-left: 5px;
+            padding-bottom: 0px !important;
+            margin-bottom: 0px !important;
+            margin: 0;
+            z-index: 1;
+            cursor: pointer;
+            min-height: 30px;
+
+            font-weight: normal;
+            outline-color: -moz-use-text-color;
+            outline-style: none;
+            outline-width: 0;
+            font-size: 13px;
+
+        }
+        div.trigger-title-container-light{
+            background-color: #fefefe;
+            -moz-box-shadow: 0 0 0 transparent;
+            -webkit-box-shadow: 0 0 0 transparent;
+            box-shadow: 0 0 0 transparent;
+            font-weight:bold;
+        }
+        div.trigger-title-container span {
+            line-height:16px;
+        }
+
     </style>
     <div id="middle">
 	<h2><fmt:message key='available.claims.for'/><%=dialectUri%></h2>
@@ -122,35 +212,54 @@
 
 		<% for (int j=0; j<claims.length;j++ ) {             
               if (claims[j].getClaim().getDisplayTag()!=null) {%>
-        <h2 class="trigger active">
-            <a href="#" class="trigger-title"><%=claims[j].getClaim().getDisplayTag()%></a>
+        <div class="trigger-title-container">
+            <a href="#" class="trigger-title"><i class="claim-arrow-down"></i> <span><%=claims[j].getClaim().getDisplayTag()%></span></a>
             <a href="update-claim.jsp?dialect=<%=dialectUri%>&claimUri=<%=claims[j].getClaim().getClaimUri()%>" class="editLink icon-link">Edit</a>
-        </h2>
+            <a href="#" class="icon-link deleteLink"  style="background-image:url(../claim-mgt/images/delete.gif);"
+                               onclick="removeItem('<%=dialectUri%>','<%=claims[j].getClaim().getClaimUri()%>','<%=claims.length%>'  );return false;"><fmt:message key='remove.claim.mapping'/></a>
+            <div style="clear:both"></div>
+        </div>
         <div class="toggle_container">
         <table style="width: 100%" class="styledLeft">
 		<tbody>
 			<tr>
 				<td class="leftCol-small"><fmt:message key='description'/></td>
-				<td><%=claims[j].getClaim().getDescription()%></td>
+				<td class="leftCol-big"><%=claims[j].getClaim().getDescription()%></td>
 			</tr>
 
 			<tr>
 				<td class="leftCol-small"><fmt:message key='claim.uri'/></td>
-				<td><%=claims[j].getClaim().getClaimUri()%></td>
+				<td class="leftCol-big"><%=claims[j].getClaim().getClaimUri()%></td>
 			</tr>
+			<%
+			
+			if (claims[j].getMappedAttribute() != null && claims[j].getMappedAttribute().indexOf(";") <= 0) {
+			
+            	ClaimAttributeDTO[] attrMap = claims[j].getMappedAttributes();
+            
+					if (attrMap != null) {
+						for (int x =0; x < attrMap.length; x++) {
+							String val = attrMap[x].getDomainName() + "/" + attrMap[x].getAttributeName();
+							claims[j].setMappedAttribute(claims[j].getMappedAttribute() + ";"
+							+ val);
+						}
+					}
+			}
+			
+			%>
 
 			<tr>
 				<td class="leftCol-small"><fmt:message key='mapped.attribute'/></td>
-				<td><%=claims[j].getMappedAttribute()%></td>
+				<td class="leftCol-big"><%=claims[j].getMappedAttribute()%></td>
 			</tr>
 
 			<tr>
 				<td class="leftCol-small"><fmt:message key='regular.expression'/></td>
-				<td><%=claims[j].getClaim().getRegEx()%></td>
+				<td class="leftCol-big"><%=claims[j].getClaim().getRegEx()%></td>
 			</tr>
             <tr>
 				<td class="leftCol-small"><fmt:message key='display.order'/></td>
-				<td><%=claims[j].getClaim().getDisplayOrder()%></td>
+				<td class="leftCol-big"><%=claims[j].getClaim().getDisplayOrder()%></td>
 			</tr>
 			<tr>
 				<td class="leftCol-small"><fmt:message key='supported.by.default'/></td>
@@ -169,7 +278,16 @@
 				<td>false</td>
 				<%} %>
 			</tr>
-
+			
+			<tr>
+				<td class="leftCol-small"><fmt:message key='readonly'/></td>
+				<%if (claims[j].getClaim().getReadOnly()) { %>
+				<td>true</td>
+				<% } else { %>
+				<td>false</td>
+				<%} %>
+			</tr>
+		
 		</tbody>
             </table>
         </div>

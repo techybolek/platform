@@ -21,12 +21,14 @@
 <%@page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@page import="org.wso2.carbon.CarbonConstants" %>
 <%@page import="org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO" %>
+<%@page import="org.wso2.carbon.identity.oauth.ui.OAuthConstants" %>
 <%@page import="org.wso2.carbon.identity.oauth.ui.client.OAuthAdminClient" %>
 <%@page import="org.wso2.carbon.ui.CarbonUIMessage" %>
-<%@page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 
+<%@page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@page import="java.util.ResourceBundle" %>
+<%@ page import="java.util.ResourceBundle" %>
+<%@ page import="org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil" %>
 <script type="text/javascript" src="extensions/js/vui.js"></script>
 <script type="text/javascript" src="../extensions/core/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
@@ -39,14 +41,44 @@
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
     String forwardTo = null;
     String addAction = "add.jsp";
+    OAuthAdminClient client = null;
+
+    int numberOfPages = 0;
+    String isPaginatedString = request.getParameter("isPaginated");
+    if (isPaginatedString != null && isPaginatedString.equals("true")) {
+        client = (OAuthAdminClient) session.getAttribute(OAuthConstants.OAUTH_ADMIN_CLIENT);
+        numberOfPages = (Integer) session.getAttribute(OAuthConstants.OAUTH_DATA_PAGE_COUNT);
+    }
+    String paginationValue = "isPaginated=true";
+
+
+    String pageNumber = request.getParameter("pageNumber");
+    if (pageNumber == null) {
+        pageNumber = "0";
+    }
+    int pageNumberInt = 0;
+    try {
+        pageNumberInt = Integer.parseInt(pageNumber);
+    } catch (NumberFormatException ignored) {
+    }
 
     try {
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
         ConfigurationContext configContext =
                 (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
-        OAuthAdminClient client = new OAuthAdminClient(cookie, backendServerURL, configContext);
-        apps = client.getAllOAuthApplicationData();
+        if (client == null) {
+            int itemsPerPageInt = OAuthConstants.DEFAULT_ITEMS_PER_PAGE;
+            client = new OAuthAdminClient(cookie, backendServerURL, configContext);
+            if (client.getAllOAuthApplicationData() != null) {
+                numberOfPages = (int) Math.ceil((double) client.getAllOAuthApplicationData().length / itemsPerPageInt);
+                session.setAttribute(OAuthConstants.OAUTH_ADMIN_CLIENT, client);
+                session.setAttribute(OAuthConstants.OAUTH_DATA_PAGE_COUNT, numberOfPages);
+            }
+        }
+        if (client != null && client.getAllOAuthApplicationData() != null) {
+            apps = OAuthUIUtil.doPaging(pageNumberInt, client.getAllOAuthApplicationData());
+        }
 
     } catch (Exception e) {
         String message = resourceBundle.getString("error.while.loading.user.application.data");
@@ -84,9 +116,9 @@
 
         <div id="workArea">
             <script type="text/javascript">
-                function remove(consumerkey, appname) {
+                function itemRemove(consumerkey, appname) {
                     CARBON.showConfirmationDialog("<fmt:message key='remove.message1'/>" + appname + "<fmt:message key='remove.message2'/>",
-                                                  function() {
+                                                  function () {
                                                       location.href = "remove-app.jsp?consumerkey=" + consumerkey;
                                                   }, null);
                 }
@@ -108,19 +140,21 @@
                 <%
                     if (apps != null && apps.length > 0) {
                         for (int i = 0; i < apps.length; i++) {
+                            if (apps[i] != null) {
                 %>
                 <tr>
                     <td width="50%"><a
                             href="edit.jsp?consumerkey=<%=apps[i].getOauthConsumerKey()%>"><%=apps[i].getApplicationName()%>
                     </a></td>
                     <td width="50%"><a title="<fmt:message key='remove.app'/>"
-                                       onclick="remove('<%=apps[i].getOauthConsumerKey()%>','<%=apps[i].getApplicationName()%>');return false;"
+                                       onclick="itemRemove('<%=apps[i].getOauthConsumerKey()%>','<%=apps[i].getApplicationName()%>');return false;"
                                        href="#"
                                        style="background-image: url(../oauth/images/delete.gif);"
                                        class="icon-link">
                         <fmt:message key='delete'/></a></td>
                 </tr>
                 <%
+                        }
                     }
                 } else {
                 %>
@@ -131,6 +165,15 @@
                     }
                 %>
                 </tbody>
+                <tr>
+                    <carbon:paginator pageNumber="<%=pageNumberInt%>"
+                                      numberOfPages="<%=numberOfPages%>"
+                                      page="index.jsp"
+                                      pageNumberParameterName="pageNumber"
+                                      parameters="<%=paginationValue%>"
+                                      resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
+                                      prevKey="prev" nextKey="next"/>
+                </tr>
             </table>
         </div>
     </div>

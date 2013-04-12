@@ -205,7 +205,8 @@
             %>
         </div>
         <div class="buttonRow">
-            <a onclick="doCancel()" class="icon-link" style="background-image:none;"><< Back to PDP Configurations</a><div style="clear:both"></div>
+            <a onclick="doCancel()" class="icon-link" style="background-image:none;">
+                <fmt:message key="back.to.pdp.config"/></a><div style="clear:both"></div>
         </div>
     </div>
 </div>

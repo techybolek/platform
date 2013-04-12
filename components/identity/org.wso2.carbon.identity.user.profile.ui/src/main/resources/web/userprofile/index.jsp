@@ -31,27 +31,33 @@
 <script type="text/javascript" src="../extensions/core/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
 
-<jsp:include page="../dialog/display_messages.jsp" />
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage"%>
 <%@page import="org.wso2.carbon.user.core.UserCoreConstants"%>
 <%@ page import="org.wso2.carbon.identity.user.profile.stub.types.UserProfileDTO" %>
+<%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.UserRealmInfo" %>
+<%@ page import="org.wso2.carbon.user.mgt.ui.UserAdminUIConstants" %>
+<%@ page import="org.wso2.carbon.user.mgt.ui.UserAdminClient" %>
+<%@ page import="org.wso2.carbon.user.mgt.stub.types.carbon.UserStoreInfo" %>
 
 <%
     boolean readOnlyUserStore = false;
     String username = CharacterEncoder.getSafeText(request.getParameter("username"));
     String forwardTo = null;
-    String fromUserMgt = "true";
+    String fromUserMgt = null;
     UserProfileCient client = null;
+    String editCancel = request.getParameter("editCancel");
+    UserRealmInfo userRealmInfo = null;
+    boolean multipleProfilesEnabled = false;
 
     if (username == null) {
         username = (String) request.getSession().getAttribute("logged-user");
     }
 
-    String addAction = "add.jsp?username="+username+"&fromUserMgt=false";
-
-    if ("true".equals(fromUserMgt)) {
-        addAction = "add.jsp?username=" + username+"&fromUserMgt=true";
-    }
+    fromUserMgt = request.getParameter("fromUserMgt");
+    
+    if (fromUserMgt==null) fromUserMgt = "false";
+    
+    String addAction = "add.jsp?username="+username+"&fromUserMgt="+ fromUserMgt;
 
     UserProfileDTO[] profiles = new UserProfileDTO[0];
     String BUNDLE = "org.wso2.carbon.identity.user.profile.ui.i18n.Resources";
@@ -69,6 +75,51 @@
                 backendServerURL, configContext);
         readOnlyUserStore = client.isReadOnlyUserStore();
      	profiles = client.getUserProfiles(username);
+
+
+        //read the domain of the user
+        String userDomain = UserProfileCient.extractDomainFromName(username);
+        if (userDomain != null) {
+            //i.e primary
+            multipleProfilesEnabled = client.isAddProfileEnabledForDomain(userDomain);
+        }
+
+        //get user store manager config
+        userRealmInfo = (UserRealmInfo)session.getAttribute(UserAdminUIConstants.USER_STORE_INFO);
+        if (userRealmInfo == null) {
+            UserAdminClient userAdminClient = new UserAdminClient(cookie, backendServerURL, configContext);
+            userRealmInfo = userAdminClient.getUserRealmInfo();
+            session.setAttribute(UserAdminUIConstants.USER_STORE_INFO, userRealmInfo);
+        }
+
+        //select the user storemanager of user and check readonly.
+        UserStoreInfo[] allUserStoreInfo = userRealmInfo.getUserStoresInfo();
+        if (allUserStoreInfo != null && allUserStoreInfo.length > 0) {
+            for (int i = 0; i < allUserStoreInfo.length; i++) {
+                if (allUserStoreInfo[i] != null) {
+                    if (allUserStoreInfo[i].getDomainName() != null &&
+                        allUserStoreInfo[i].getDomainName().equalsIgnoreCase(userDomain)) {
+                        readOnlyUserStore = allUserStoreInfo[i].getReadOnly();
+                    }
+                }
+            }
+        }
+
+        //if only one profile exist, take directly to edit.jsp
+        if ((!multipleProfilesEnabled && profiles != null && profiles.length == 1) || readOnlyUserStore ) {
+
+            if("true".equals(editCancel) && "true".equals(fromUserMgt)){
+                forwardTo = "../user/user-mgt.jsp?ordinal=1";
+            } else {
+                forwardTo = "edit.jsp?username=" + username + "&profile=" + profiles[0].getProfileName()
+                            + "&fromUserMgt="+fromUserMgt+"&noOfProfiles=1";
+            }
+        } else {
+            
+        	 %>
+        	 <jsp:include page="../dialog/display_messages.jsp" />
+        	 <% 
+        }
 	} catch (Exception e) {
 		String message = resourceBundle.getString("error.while.loading.user.profile.data");
 		CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.ERROR, request);
@@ -131,7 +182,7 @@
             </script>
             <% if(!readOnlyUserStore) {%>
             <div style="height:30px;">
-                <%if (client.isAddProfileEnabled()) {%>
+                <%if (multipleProfilesEnabled) {%>
                 <a href="javascript:document.location.href='<%=addAction%>'" class="icon-link"
                    style="background-image:url(../admin/images/add.gif);"><fmt:message
                         key='add.new.profiles'/></a>
@@ -151,13 +202,7 @@
            				String profileName = CharacterEncoder.getSafeText(profiles[i].getProfileName());
            %>		
 			<tr>
-			    <%
-        	    if ("true".equals(fromUserMgt)) {
-                %>
-				<td width="50%"><a href="edit.jsp?username=<%=username%>&profile=<%=profileName%>&fromUserMgt=true"><%=profileName%></a></td>
-				<%}else{ %>
-				<td width="50%"><a href="edit.jsp?username=<%=username%>&profile=<%=profileName%>&fromUserMgt=false"><%=profileName%></a></td>
-				<%} %>
+				<td width="50%"><a href="edit.jsp?username=<%=username%>&profile=<%=profileName%>&fromUserMgt=<%=fromUserMgt%>"><%=profileName%></a></td>
 				<td width="50%">
 				<%
                     if (readOnlyUserStore == false && !"default".equals(profileName)) {

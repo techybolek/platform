@@ -43,6 +43,8 @@ public abstract class AbstractPolicyPublisherModule implements PolicyPublisherMo
 
     protected static final String ORDER = "order";
 
+    protected static final String SECRET = "password";
+
     public void init(Properties properties) throws Exception {
 
         List<ModulePropertyDTO>  propertyDTOs = new ArrayList<ModulePropertyDTO>();
@@ -76,6 +78,9 @@ public abstract class AbstractPolicyPublisherModule implements PolicyPublisherMo
                 }
                 if(attributeMap.get(REQUIRED) != null){
                     dto.setRequired(Boolean.parseBoolean((String)attributeMap.get(REQUIRED)));
+                }
+                if(attributeMap.get(SECRET) != null){
+                    dto.setSecret(Boolean.parseBoolean((String)attributeMap.get(SECRET)));
                 }
                 propertyDTOs.add(dto);
             }

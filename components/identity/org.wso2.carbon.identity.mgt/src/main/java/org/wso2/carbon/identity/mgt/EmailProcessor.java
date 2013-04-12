@@ -51,8 +51,6 @@ public class EmailProcessor {
 
     private Map<String, EmailConfig> emailConfigs = new HashMap<String, EmailConfig>();
 
-    private boolean emailSendingInternallyManaged;
-
     private EmailSender emailSender;
 
     public EmailProcessor() {
@@ -117,7 +115,7 @@ public class EmailProcessor {
             emailDataDTO.setTemporaryPassword(data.get(IdentityMgtConstants.TEMPORARY_PASSWORD));
             emailDataDTO.setEmailConfig(emailConfig);
 
-            if(emailSendingInternallyManaged){
+            if(IdentityMgtConfig.getInstance().isEmailSendingInternallyManaged()){
                 
                 EmailSendingModule module = emailSender.getModule();
                 module.setEmailDataDTO(emailDataDTO);
@@ -129,7 +127,7 @@ public class EmailProcessor {
             }
 
         } catch (Exception e) {
-            String msg = "Error in processing email sending.";
+            String msg = "Error in processing email sending";
             log.error(msg, e);
             throw new IdentityMgtException(msg, e);
         }
@@ -221,11 +219,4 @@ public class EmailProcessor {
         return config;
     }
 
-    public boolean isEmailSendingInternallyManaged() {
-        return emailSendingInternallyManaged;
-    }
-
-    public void setEmailSendingInternallyManaged(boolean emailSendingInternallyManaged) {
-        this.emailSendingInternallyManaged = emailSendingInternallyManaged;
-    }
 }

@@ -30,6 +30,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
 import org.wso2.carbon.identity.oauth.ui.OAuth2Parameters;
 import org.wso2.carbon.identity.oauth.ui.OAuthConstants;
+import org.wso2.carbon.identity.oauth.ui.internal.OAuthUIServiceComponentHolder;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AuthorizeReqDTO;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AuthorizeRespDTO;
 import org.wso2.carbon.ui.CarbonUIUtil;
@@ -92,7 +93,7 @@ public class OAuth2AuthzClient {
             }
             response.setStatus(HttpServletResponse.SC_FOUND);
             request.getSession().removeAttribute(OAuthConstants.OAUTH2_PARAMS);
-            return oauthResponse.getLocationUri();
+            return handleOpenIDConnectParams(request, oauthResponse.getLocationUri(), oauth2Params);
 
         } catch (OAuthProblemException e) {
             log.error(e.getError(), e.getCause());
@@ -102,7 +103,42 @@ public class OAuth2AuthzClient {
         }
     }
 
-    private OAuth2AuthorizeRespDTO authorize(HttpServletRequest req, OAuth2Parameters oauth2Params)
+	private String handleOpenIDConnectParams(HttpServletRequest request, String redirectUrl,
+	                                         OAuth2Parameters oauth2Params) {
+
+		if ("true".equals(request.getSession()
+		                         .getAttribute(OAuthConstants.OIDCSessionConstant.OIDC_REQUEST))) {
+			// store the logged in user in session to support prompt = none
+			String loggedInUser = request.getParameter(OAuthConstants.REQ_PARAM_OAUTH_USER_NAME);
+			if (loggedInUser != null) {
+				request.getSession()
+				       .setAttribute(OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER,
+				                     loggedInUser);
+			} else {
+				loggedInUser =
+				               (String) request.getSession()
+				                               .getAttribute(OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER);
+			}
+			// load the users approved applications
+			String appName = oauth2Params.getApplicationName();
+			boolean isRpInStore =
+			                      OAuthUIServiceComponentHolder.getInstance()
+			                                                   .getOauth2UserAppsStore()
+			                                                   .isUserRPInStore(loggedInUser,
+			                                                                    appName);
+			
+			if(isRpInStore && oauth2Params.getPrompt() != null && oauth2Params.getPrompt().contains("none")) {
+				return redirectUrl; // should not prompt for consent
+			}
+			// store the response and forward for user consent
+			request.getSession().setAttribute(OAuthConstants.OIDCSessionConstant.OIDC_RESPONSE,
+			                                  redirectUrl);
+			redirectUrl = "../../carbon/oauth/oauth2_consent_ajaxprocessor.jsp";
+		}
+		return redirectUrl;
+	}
+
+	private OAuth2AuthorizeRespDTO authorize(HttpServletRequest req, OAuth2Parameters oauth2Params)
             throws OAuthProblemException {
         try {
             // authenticate and issue the authorization code
@@ -119,7 +155,11 @@ public class OAuth2AuthzClient {
             authzReqDTO.setResponseType(oauth2Params.getResponseType());
             authzReqDTO.setScopes(oauth2Params.getScopes().toArray(
                     new String[oauth2Params.getScopes().size()]));
-            authzReqDTO.setUsername(req.getParameter(OAuthConstants.REQ_PARAM_OAUTH_USER_NAME));
+            String username = req.getParameter(OAuthConstants.REQ_PARAM_OAUTH_USER_NAME);
+            if(username == null) {
+            	username = (String) req.getSession().getAttribute(OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER);
+            }
+            authzReqDTO.setUsername(username);
             authzReqDTO.setPassword(req.getParameter(OAuthConstants.REQ_PARAM_OAUTH_USER_PASSWORD));
 
             return oauth2ServiceClient.authorize(authzReqDTO);

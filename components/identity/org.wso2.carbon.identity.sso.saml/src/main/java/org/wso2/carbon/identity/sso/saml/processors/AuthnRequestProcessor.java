@@ -40,6 +40,8 @@ import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class AuthnRequestProcessor {
@@ -89,6 +91,7 @@ public class AuthnRequestProcessor {
 			SSOSessionPersistenceManager sessionPersistenceManager =
 			                                                         SSOSessionPersistenceManager.getPersistenceManager();
 
+		
 			// authenticate the user, if required
 			if (!isAuthencated && authMode.equals(SAMLSSOConstants.AuthnModes.USERNAME_PASSWORD)) {
 				RealmService realmService = SAMLSSOUtil.getRealmService();
@@ -110,13 +113,18 @@ public class AuthnRequestProcessor {
 					}
 				}
 
-				if (!authenticate(authnReqDTO.getUsername(), authnReqDTO.getPassword())) {
+				if (CarbonUtils.isRunningOnLocalTransportMode()
+						&& authnReqDTO.getPassword().equals(
+								"federated_idp_login")) {
+					isAuthencated = true;
+				} else if (!authenticate(authnReqDTO.getUsername(),
+						authnReqDTO.getPassword())) {
 					log.warn("Authentication Failure, invalid username or password.");
 					String errorMsg = "login.fail.message";
-					SAMLSSORespDTO errorResp =
-					                           buildErrorResponse(authnReqDTO.getId(),
-					                                              SAMLSSOConstants.StatusCodes.AUTHN_FAILURE,
-					                                              errorMsg);
+					SAMLSSORespDTO errorResp = buildErrorResponse(
+							authnReqDTO.getId(),
+							SAMLSSOConstants.StatusCodes.AUTHN_FAILURE,
+							errorMsg);
 					errorResp.setErrorMsg(errorMsg);
 					errorResp.setLoginPageURL(authnReqDTO.getLoginPageURL());
 					return errorResp;
@@ -228,15 +236,16 @@ public class AuthnRequestProcessor {
 			throw new IdentityException("Invalid Assertion Consumer URL value '" + acsUrl +
 			                            "' in the " + "AuthnRequest");
 		}
-
 		authnReqDTO.setAssertionConsumerURL(ssoIdpConfigs.getAssertionConsumerUrl());
 		authnReqDTO.setLoginPageURL(ssoIdpConfigs.getLoginPageURL());
 		authnReqDTO.setCertAlias(ssoIdpConfigs.getCertAlias());
 		authnReqDTO.setUseFullyQualifiedUsernameAsSubject(ssoIdpConfigs.isUseFullyQualifiedUsername());
 		authnReqDTO.setDoSingleLogout(ssoIdpConfigs.isDoSingleLogout());
 		authnReqDTO.setLogoutURL(ssoIdpConfigs.getLogoutURL());
+		authnReqDTO.setDoSignResponse(ssoIdpConfigs.isDoSignResponse());
 		authnReqDTO.setDoSignAssertions(ssoIdpConfigs.isDoSignAssertions());
 		authnReqDTO.setRequestedClaims((ssoIdpConfigs.getRequestedClaims()));
+        authnReqDTO.setRequestedAudiences((ssoIdpConfigs.getRequestedAudiences()));
 	}
 	
 	/**
@@ -329,6 +338,14 @@ public class AuthnRequestProcessor {
                     log.debug("user authentication failed due to invalid credentials.");
                 }
                 return false;
+            }
+            
+            int index = username.indexOf("/");
+            if (index < 0) {
+                String domain = UserCoreUtil.getDomainFromThreadLocal();
+                if (domain != null) {
+                    username = domain + "/" + username;
+                }
             }
 
             // Check the authorization

@@ -46,6 +46,13 @@
 	String BUNDLE = "org.wso2.carbon.identity.user.profile.ui.i18n.Resources";
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 	String fromUserMgt = (String) request.getParameter("fromUserMgt");
+    String noOfProfiles = request.getParameter("noOfProfiles");
+    if (noOfProfiles == null) {
+        noOfProfiles = "0";
+    }
+    
+    if (fromUserMgt==null) fromUserMgt = "false";
+
     
     try {
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
@@ -75,7 +82,12 @@
         String message = resourceBundle.getString("user.profile.updated.successfully");
         CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.INFO, request);
         if ("true".equals(fromUserMgt)) {
-        	forwardTo ="index.jsp?username="+username+"&fromUserMgt=true";
+            //if there is only one profile, send directly to user-mgt.jsp
+            if ((!client.isAddProfileEnabled()) && ((Integer.parseInt(noOfProfiles)) == 1)) {
+                forwardTo = "../user/user-mgt.jsp?ordinal=1";
+            } else {
+                forwardTo ="index.jsp?username="+username+"&fromUserMgt="+fromUserMgt;
+            }
         }else{
         	forwardTo ="index.jsp?region=region5&item=userprofiles_menu&ordinal=0";        	
         }
@@ -84,7 +96,7 @@
         String message = MessageFormat.format(resourceBundle.getString(
                 "error.while.updating.user.profile"), username, e.getMessage());
     	CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
-        forwardTo = "edit.jsp?username=" + username + "&profile=" + profile + "&fromUserMgt=true";
+        forwardTo = "edit.jsp?username=" + username + "&profile=" + profile + "&fromUserMgt=true&noOfProfiles=" + noOfProfiles;
     }
 %>
 

@@ -1,4 +1,6 @@
-package org.wso2.carbon.user.cassandra.credentialtypes;/*
+package org.wso2.carbon.user.cassandra.credentialtypes;
+
+/*
  *   Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
@@ -16,19 +18,26 @@ package org.wso2.carbon.user.cassandra.credentialtypes;/*
  *  under the License.
  */
 
-import me.prettyprint.cassandra.serializers.BooleanSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.QueryResult;
-import org.wso2.carbon.user.cassandra.Util;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.user.cassandra.CFConstants;
+import org.wso2.carbon.user.cassandra.Util;
 import org.wso2.carbon.user.core.multiplecredentials.Credential;
+import org.wso2.carbon.user.core.multiplecredentials.CredentialDoesNotExistException;
+import org.wso2.carbon.user.core.multiplecredentials.CredentialProperty;
 import org.wso2.carbon.user.core.multiplecredentials.CredentialType;
+import org.wso2.carbon.user.core.multiplecredentials.CredentialsAlreadyExistsException;
+import org.wso2.carbon.user.core.multiplecredentials.MultipleCredentialsException;
 import org.wso2.carbon.user.core.multiplecredentials.UserDoesNotExistException;
 
 public abstract class AbstractCassandraCredential implements CredentialType {
@@ -52,6 +61,10 @@ public abstract class AbstractCassandraCredential implements CredentialType {
             throw new UserDoesNotExistException("User not found for identifier : " + identifier);
         }
         return existingUserId;
+    }
+
+    protected ColumnSlice<String, String> getCredentialRow(String identifier) {
+       return Util.getExistingCredentialsRow(identifier, credentialTypeName, keyspace);
     }
 
     @Override
@@ -93,7 +106,7 @@ public abstract class AbstractCassandraCredential implements CredentialType {
         // set is active to true
         mutator.addInsertion(createRowKeyForReverseLookup(identifier),
                              CFConstants.USERNAME_INDEX,
-                             HFactory.createColumn(CFConstants.IS_ACTIVE, true));
+                             HFactory.createColumn(CFConstants.IS_ACTIVE, "TRUE"));
         mutator.execute();
     }
 
@@ -105,28 +118,98 @@ public abstract class AbstractCassandraCredential implements CredentialType {
         // set is active to false
         mutator.addInsertion(createRowKeyForReverseLookup(identifier),
                              CFConstants.USERNAME_INDEX,
-                             HFactory.createColumn(CFConstants.IS_ACTIVE, false));
+                             HFactory.createColumn(CFConstants.IS_ACTIVE, "FALSE"));
         mutator.execute();
     }
 
     @Override
     public boolean isActive(String identifier) throws UserDoesNotExistException {
-        BooleanSerializer booleanSerializer = BooleanSerializer.get();
-        ColumnQuery<String, String, Boolean> isActiveQuery = HFactory
-                .createColumnQuery(keyspace, stringSerializer, stringSerializer, booleanSerializer);
+        ColumnQuery<String, String, String> isActiveQuery = HFactory
+                .createColumnQuery(keyspace, stringSerializer, stringSerializer, stringSerializer);
 
         isActiveQuery.setColumnFamily(CFConstants.USERNAME_INDEX).setKey(createRowKeyForReverseLookup(identifier))
                 .setName(CFConstants.IS_ACTIVE);
 
-        QueryResult<HColumn<String, Boolean>> result = isActiveQuery.execute();
+        QueryResult<HColumn<String, String>> result = isActiveQuery.execute();
 
-        HColumn<String, Boolean> isActiveResult = result.get();
+        HColumn<String, String> isActiveResult = result.get();
 
         if (isActiveResult != null) {
-            return isActiveResult.getValue();
+            return "TRUE".equals(isActiveResult.getValue());
         }
 
         return false;
 
+    }
+
+    private static Log log = LogFactory.getLog(AbstractCassandraCredential.class);
+
+    @Override
+    public void add(String userId, Credential credential) throws MultipleCredentialsException {
+
+        if (getExistingCredentialId(userId) != null) {
+
+            String message = "Credential of type: " + credentialTypeName +
+                             " already exists for user id : " + userId;
+
+            CredentialsAlreadyExistsException credentialsAlreadyExistsException = new CredentialsAlreadyExistsException(message);
+            log.error(message, credentialsAlreadyExistsException);
+            throw credentialsAlreadyExistsException;
+        }
+        Mutator<String> mutator = HFactory.createMutator(keyspace, stringSerializer);
+
+        String identifier = credential.getIdentifier();
+        // add identifer
+        mutator.addInsertion(userId, CFConstants.USERS, HFactory.createColumn(credentialTypeName, identifier));
+
+        // add identifier - also functions as reverse look up
+        mutator.addInsertion(createRowKeyForReverseLookup(identifier),
+                             CFConstants.USERNAME_INDEX,
+                             HFactory.createColumn(CFConstants.USER_ID, userId));
+
+
+        // add identifier
+        mutator.addInsertion(createRowKeyForReverseLookup(identifier),
+                             CFConstants.USERNAME_INDEX,
+                             HFactory.createColumn(CFConstants.SECRET, credential.getSecret()));
+
+
+        // add cred properties
+        if (credential.getCredentialProperties() != null) {
+            for (CredentialProperty credentialProperty : credential.getCredentialProperties()) {
+                if (CFConstants.USER_ID.equals(credentialProperty.getKey()) ||
+                    CFConstants.SECRET.equals(credentialProperty.getKey())) {
+                    throw new ReservedPropertiesUsedException("The reserved property "
+                                                              + credentialProperty.getKey()
+                                                              + " is used.");
+                }
+                mutator.addInsertion(createRowKeyForReverseLookup(identifier),
+                                     CFConstants.USERNAME_INDEX,
+                                     HFactory.createColumn(credentialProperty.getKey(),
+                                                           credentialProperty.getValue()));
+            }
+        }
+
+
+        mutator.execute();
+
+        // activate by default
+        activate(credential.getIdentifier());
+
+    }
+
+    protected String getExistingCredentialId(String userId) throws CredentialDoesNotExistException {
+        ColumnQuery<String, String, String> getCredentialQuery = HFactory
+                .createColumnQuery(keyspace, stringSerializer, stringSerializer, stringSerializer);
+
+        getCredentialQuery.setColumnFamily(CFConstants.USERS).setKey(userId)
+                .setName(credentialTypeName);
+
+        HColumn<String, String> deviceIdResult = getCredentialQuery.execute().get();
+
+        if (deviceIdResult == null) {
+            return null;
+        }
+        return deviceIdResult.getValue();
     }
 }

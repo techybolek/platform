@@ -17,11 +17,11 @@
  -->
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
+<%@ page import="org.wso2.carbon.identity.sso.saml.ui.SAMLSSOProviderConstants" %>
 <%@ page import="org.wso2.carbon.identity.sso.saml.ui.client.SAMLSSOConfigServiceClient" %>
-<%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@page import="java.util.ArrayList" %>
 <%@ page import="java.util.ResourceBundle" %>
 
 <script type="text/javascript" src="global-params.js"></script>
@@ -31,6 +31,7 @@
 
 
 <%
+    session.setAttribute(SAMLSSOProviderConstants.CONFIG_CLIENT, null);
     String backendServerURL;
     ConfigurationContext configContext;
     String cookie;

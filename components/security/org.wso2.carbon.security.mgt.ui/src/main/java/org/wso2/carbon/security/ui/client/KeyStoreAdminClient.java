@@ -17,13 +17,6 @@
 */
 package org.wso2.carbon.security.ui.client;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.util.Enumeration;
 import org.apache.axiom.om.util.Base64;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -35,12 +28,23 @@ import org.wso2.carbon.security.mgt.stub.keystore.DeleteStore;
 import org.wso2.carbon.security.mgt.stub.keystore.GetKeyStoresResponse;
 import org.wso2.carbon.security.mgt.stub.keystore.GetKeystoreInfo;
 import org.wso2.carbon.security.mgt.stub.keystore.GetKeystoreInfoResponse;
+import org.wso2.carbon.security.mgt.stub.keystore.GetPaginatedKeystoreInfo;
+import org.wso2.carbon.security.mgt.stub.keystore.GetPaginatedKeystoreInfoResponse;
 import org.wso2.carbon.security.mgt.stub.keystore.GetStoreEntries;
 import org.wso2.carbon.security.mgt.stub.keystore.GetStoreEntriesResponse;
 import org.wso2.carbon.security.mgt.stub.keystore.ImportCertToStore;
 import org.wso2.carbon.security.mgt.stub.keystore.KeyStoreAdminServiceStub;
 import org.wso2.carbon.security.mgt.stub.keystore.RemoveCertFromStore;
 import org.wso2.carbon.security.mgt.stub.keystore.xsd.KeyStoreData;
+import org.wso2.carbon.security.mgt.stub.keystore.xsd.PaginatedKeyStoreData;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.util.Enumeration;
 
 public class KeyStoreAdminClient {
 
@@ -209,5 +213,18 @@ public class KeyStoreAdminClient {
 	       throw e;
         }
     }
+     public PaginatedKeyStoreData getPaginatedKeystoreInfo(String keyStoreName, int pageNumber) throws java.lang.Exception {
+            try {
+                GetPaginatedKeystoreInfo request = new GetPaginatedKeystoreInfo();
+                request.setKeyStoreName(keyStoreName);
+                request.setPageNumber(pageNumber);
+
+                GetPaginatedKeystoreInfoResponse response = stub.getPaginatedKeystoreInfo(request);
+                return response.get_return();
+            } catch (java.lang.Exception e) {
+                log.error(e);
+                throw e;
+            }
+        }
 
 }

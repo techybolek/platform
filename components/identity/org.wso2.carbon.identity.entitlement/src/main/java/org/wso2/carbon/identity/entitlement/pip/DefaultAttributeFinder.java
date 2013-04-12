@@ -28,9 +28,9 @@ import org.wso2.carbon.core.util.AdminServicesUtil;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 import org.wso2.carbon.user.api.ClaimManager;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.claim.Claim;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 /**
@@ -51,10 +51,10 @@ public class DefaultAttributeFinder extends AbstractPIPAttributeFinder {
 	public void init(Properties properties) throws Exception {
 		realm = EntitlementServiceComponent.getRealmservice().getBootstrapRealm();
 		ClaimManager claimAdmin = realm.getClaimManager();
-		Claim[] claims = (Claim[]) claimAdmin
-				.getAllClaims(UserCoreConstants.DEFAULT_CARBON_DIALECT);
+		ClaimMapping[] claims = (ClaimMapping[]) claimAdmin
+				.getAllClaimMappings(UserCoreConstants.DEFAULT_CARBON_DIALECT);
 		for (int i = 0; i < claims.length; i++) {
-			supportedAttrs.add(claims[i].getClaimUri());
+			supportedAttrs.add(claims[i].getClaim().getClaimUri());
 		}
 		if (log.isDebugEnabled()) {
 			log.debug("DefaultAttributeFinder executed successfully");

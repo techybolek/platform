@@ -58,10 +58,14 @@ public class SAMLSSOConfigAdmin {
         serviceProviderDO.setUseFullyQualifiedUsername(serviceProviderDTO.isUseFullyQualifiedUsername());
         serviceProviderDO.setDoSingleLogout(serviceProviderDTO.isDoSingleLogout());
         serviceProviderDO.setLogoutURL(serviceProviderDTO.getLogoutURL());
+        serviceProviderDO.setDoSignResponse(serviceProviderDTO.isDoSignResponse());
         serviceProviderDO.setDoSignAssertions(serviceProviderDTO.isDoSignAssertions());
         if(serviceProviderDTO.getRequestedClaims() != null && serviceProviderDTO.getRequestedClaims().length != 0){
         	serviceProviderDO.setAttributeConsumingServiceIndex(Integer.toString(IdentityUtil.getRandomInteger()));
         	serviceProviderDO.setRequestedClaims(serviceProviderDTO.getRequestedClaims());
+        }
+        if(serviceProviderDTO.getRequestedAudiences() != null && serviceProviderDTO.getRequestedAudiences().length != 0){
+            serviceProviderDO.setRequestedAudiences(serviceProviderDTO.getRequestedAudiences());
         }
         IdentityPersistenceManager persistenceManager = IdentityPersistenceManager
                 .getPersistanceManager();
@@ -88,23 +92,19 @@ public class SAMLSSOConfigAdmin {
             serviceProviders = new SAMLSSOServiceProviderDTO[providersSet.length];
 
             for (int i = 0; i < providersSet.length; i++) {
-
                 SAMLSSOServiceProviderDO providerDO = providersSet[i];
-
                 SAMLSSOServiceProviderDTO providerDTO = new SAMLSSOServiceProviderDTO();
-
                 providerDTO.setIssuer(providerDO.getIssuer());
                 providerDTO.setAssertionConsumerUrl(providerDO.getAssertionConsumerUrl());
                 providerDTO.setCertAlias(providerDO.getCertAlias());
                 providerDTO.setAttributeConsumingServiceIndex(providerDO.getAttributeConsumingServiceIndex());
-
                 providerDTO.setUseFullyQualifiedUsername(providerDO.isUseFullyQualifiedUsername());
+                providerDTO.setDoSignResponse(providerDO.isDoSignResponse());
                 providerDTO.setDoSignAssertions(providerDO.isDoSignAssertions());
-
                 providerDTO.setDoSingleLogout(providerDO.isDoSingleLogout());
                 providerDTO.setLogoutURL(providerDO.getLogoutURL());
-
                 providerDTO.setRequestedClaims(providerDO.getRequestedClaims());
+                providerDTO.setRequestedAudiences(providerDO.getRequestedAudiences());
                 serviceProviders[i] = providerDTO;
             }
         } catch (IdentityException e) {

@@ -15,6 +15,7 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
+<%@page import="org.wso2.carbon.ui.util.CharacterEncoder"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
@@ -33,6 +34,7 @@
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.PolicyEditorAttributeDTO" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.AttributeTreeNodeDTO" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.ui.PolicyEditorConstants" %>
 <jsp:useBean id="entitlementPolicyBean" type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
              class="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean" scope="session"/>
 <jsp:setProperty name="entitlementPolicyBean" property="*" />
@@ -46,7 +48,15 @@
     String forwardTo = null;
     PaginatedPolicySetDTO paginatedPolicySetDTO = null;
     String globalPolicyCombiningAlgorithm = null;
-    String [] policyCombiningAlgorithms = null;
+    String [] policyCombiningAlgorithms = new String[]{PolicyEditorConstants.CombiningAlog.DENY_OVERRIDE_ID,
+                            PolicyEditorConstants.CombiningAlog.PERMIT_OVERRIDE_ID,
+                            PolicyEditorConstants.CombiningAlog.FIRST_APPLICABLE_ID,
+                            PolicyEditorConstants.CombiningAlog.PERMIT_UNLESS_DENY_ID,
+                            PolicyEditorConstants.CombiningAlog.DENY_UNLESS_PERMIT_ID,
+                            PolicyEditorConstants.CombiningAlog.ORDER_PERMIT_OVERRIDE_ID,
+                            PolicyEditorConstants.CombiningAlog.ORDER_DENY_OVERRIDE_ID,
+                            PolicyEditorConstants.CombiningAlog.ONLY_ONE_APPLICABLE_ID};
+
     PolicyDTO[] policies = null;
     String[] policyTypes = new String[] {"Policy", "PolicySet", "Active" , "Promoted"};
     String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
@@ -84,7 +94,6 @@
     try {
         EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);
         paginatedPolicySetDTO = client.getAllPolicies(policyTypeFilter, policySearchString, pageNumberInt);
-        policyCombiningAlgorithms = client.getEntitlementPolicyDataFromRegistry("policyCombiningAlgorithms");
         if(globalPolicyCombiningAlgorithm != null && globalPolicyCombiningAlgorithm.trim().length() > 0){
             client.setGlobalPolicyAlgorithm(globalPolicyCombiningAlgorithm);
         } else {
@@ -161,7 +170,7 @@
         numberOfPages = paginatedPolicySetDTO.getNumberOfPages();
 
     } catch (Exception e) {
-    	String message = resourceBundle.getString("error.while.loading.policy");
+    	String message = resourceBundle.getString("error.while.loading.policy")+ " " + e.getMessage();
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request, e);
         forwardTo = "../admin/error.jsp";
 %>
@@ -492,7 +501,7 @@
         </tr>
     </table>
 
-    <form action="index.jsp" name="searchForm">
+    <form action="index.jsp" name="searchForm" method="post">
         <table id="searchTable" name="searchTable" class="styledLeft" style="border:0;
                                                 !important margin-top:10px;margin-bottom:10px;">
             <tr>
@@ -596,7 +605,7 @@
                 <td style="width:100px;">
                     <a class="icon-link" onclick="updownthis(this,'up',<%=request.getParameter("pageNumber")%>,<%=numberOfPages%>)" style="background-image:url(../admin/images/up-arrow.gif)"></a>
                     <a class="icon-link" onclick="updownthis(this,'down',<%=request.getParameter("pageNumber")%>,<%=numberOfPages%>)" style="background-image:url(../admin/images/down-arrow.gif)"></a>
-                    <input type="hidden" value="<%=policies[i].getPolicyId()%>"/>                    
+                    <input type="hidden" value="<%=CharacterEncoder.getSafeText(policies[i].getPolicyId())%>"/>                    
                 </td>
 
                 <td width="10px" style="text-align:center; !important">
@@ -639,12 +648,12 @@
                     href="#" style="background-image: url(images/enable.gif);" class="icon-link">
                     <fmt:message key='enable.policy'/></a>
                     <%} %>
-                    <% if (policies[i].getPromoteStatus() == 2) { %>
+                    <% if (policies[i].getPolicyLifeCycle() == 1) { %>
                     <a title="<fmt:message key='not.promote.policy'/>"
                     <% if(edit){%> onclick="dePromote('<%=policies[i].getPolicyId()%>');return false;" <%}%>
                     href="#" style="background-image: url(images/delete.gif);" class="icon-link">
                     <fmt:message key='not.promote.policy'/></a>
-                    <% } else if(policies[i].getPromoteStatus() == 1) { %>
+                    <% } else if(policies[i].getPolicyLifeCycle() == 2) { %>
                     <a title="<fmt:message key='sync.policy'/>"
                     <% if(edit){%> onclick="promote('<%=policies[i].getPolicyId()%>');return false;"  <%}%>
                     href="#" style="background-image: url(images/sync.png);" class="icon-link">

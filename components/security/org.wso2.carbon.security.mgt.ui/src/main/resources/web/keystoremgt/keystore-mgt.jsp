@@ -24,6 +24,8 @@
 <%@page import="org.wso2.carbon.CarbonConstants" %>
 <%@page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@page import="org.wso2.carbon.CarbonError"%>
+<%@ page import="org.wso2.carbon.security.ui.SecurityUIConstants" %>
+<%@page import="org.wso2.carbon.security.ui.Util" %>
 <script type="text/javascript" src="../extensions/core/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
 
@@ -31,13 +33,41 @@
 
     <%
         KeyStoreData[] datas = null;
+        String paginationValue = "region=region1&item=keystores_menu";
+	    int numberOfPages = 0;
+	    
+	    String pageNumber = request.getParameter("pageNumber");
+	    
+	    if (pageNumber == null) {
+	        pageNumber = "0";
+	    }
+	    
+	    int pageNumberInt = 0;
+	    
+	    try {
+	        pageNumberInt = Integer.parseInt(pageNumber);
+	    } catch (NumberFormatException ignored) {
+	    }
+    
+        KeyStoreData[] keyStores = (KeyStoreData[])session.getAttribute(SecurityUIConstants.SESSION_ATTR_KEYSTORES);
+        
         try {
             String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
             String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
             ConfigurationContext configContext =
                     (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
             KeyStoreAdminClient client = new KeyStoreAdminClient(cookie, backendServerURL, configContext);
-            datas = client.getKeyStores();
+            
+            if (keyStores == null || (Boolean)session.getAttribute(SecurityUIConstants.RE_FETCH_KEYSTORES)){
+                keyStores = client.getKeyStores();
+                session.setAttribute(SecurityUIConstants.SESSION_ATTR_KEYSTORES, keyStores);
+                session.setAttribute(SecurityUIConstants.RE_FETCH_KEYSTORES, Boolean.FALSE);
+            }
+            
+            if (keyStores != null && keyStores.length > 0) {
+                numberOfPages = (int) Math.ceil((double) keyStores.length / SecurityUIConstants.KEYSTORE_DEFAULT_ITEMS_PER_PAGE);
+                datas = Util.doKeyStoresPaging(pageNumberInt, keyStores);
+            }
         } catch (Exception e) {
             CarbonError error = new CarbonError();
             error.addError(e.getMessage());
@@ -105,6 +135,13 @@
                 %>
                 </tbody>
             </table>
+            <carbon:paginator pageNumber="<%=pageNumberInt%>"
+                              numberOfPages="<%=numberOfPages%>"
+                              page="keystore-mgt.jsp"
+                              pageNumberParameterName="pageNumber"
+                              parameters="<%=paginationValue%>"
+                              resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
+                              prevKey="prev" nextKey="next"/>
             <%
                 }
             %>

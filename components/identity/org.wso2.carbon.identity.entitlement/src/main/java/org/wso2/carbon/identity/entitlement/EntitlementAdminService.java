@@ -22,25 +22,21 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.entitlement.cache.DecisionCache;
-import org.wso2.carbon.identity.entitlement.cache.EntitlementPolicyCache;
-import org.wso2.carbon.identity.entitlement.dto.ModuleDataHolder;
+import org.wso2.carbon.identity.entitlement.cache.DecisionClearingCache;
+import org.wso2.carbon.identity.entitlement.cache.EntitlementPolicyClearingCache;
 import org.wso2.carbon.identity.entitlement.dto.PDPDataHolder;
 import org.wso2.carbon.identity.entitlement.dto.PIPFinderDataHolder;
 import org.wso2.carbon.identity.entitlement.dto.PolicyFinderDataHolder;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyFinder;
-import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStore;
 import org.wso2.carbon.identity.entitlement.pdp.EntitlementEngine;
 import org.wso2.carbon.identity.entitlement.pip.*;
 import org.wso2.carbon.identity.entitlement.policy.finder.CarbonPolicyFinderModule;
-import org.wso2.carbon.identity.entitlement.policy.publisher.PolicyPublisher;
-import org.wso2.carbon.identity.entitlement.policy.publisher.PolicyPublisherModule;
 
 import java.util.*;
 
 /**
- * Entitlement PDP, PIP, Publisher related admin services are exposed 
+ * Entitlement PDP related admin services are exposed
  */
 public class EntitlementAdminService extends AbstractAdmin {
 
@@ -304,9 +300,9 @@ public class EntitlementAdminService extends AbstractAdmin {
                         EntitlementEngine.getInstance().getCarbonPolicyFinder().init();
                         // need to re init all policy finder modules in the cluster.
                         // therefore calling invalidation cache
-                        DecisionCache.getInstance().invalidateCache();
-                        EntitlementPolicyCache.getInstance().invalidateCache();
-                        EntitlementPolicyCache.getInstance().addToCache(1);
+                        DecisionClearingCache.getInstance().invalidateCache();
+                        EntitlementPolicyClearingCache.getInstance().invalidateCache();
+                        EntitlementPolicyClearingCache.getInstance().addToCache(1);
                     } catch (Exception e) {
                         throw new IdentityException("Error while refreshing attribute finder - " +
                                                     policyFinder);
@@ -317,110 +313,6 @@ public class EntitlementAdminService extends AbstractAdmin {
         }
     }
       
-    /**
-     * Gets subscriber details
-     *
-     * @param id  subscriber id
-     * @return subscriber details as SubscriberDTO
-     * @throws IdentityException throws, if any error
-     */
-    public ModuleDataHolder getSubscriber(String id) throws IdentityException {
-
-        PolicyPublisher publisher = EntitlementEngine.getInstance().getPolicyPublisher();
-        return publisher.retrieveSubscriber(id);
-    }
-
-    /**
-     * Gets all subscribers ids that is registered,
-     *
-     * @return subscriber's ids as String array
-     * @throws IdentityException throws, if fails
-     */
-    public String[] getSubscriberIds() throws IdentityException {
-
-        PolicyPublisher publisher = EntitlementEngine.getInstance().getPolicyPublisher();
-        String[] ids = publisher.retrieveSubscriberIds();
-        if(ids != null){
-            return ids;
-        } else {
-            return new String[0];
-        }
-    }
-
-
-    /**
-     * Set or update subscriber details in to registry
-     *
-     * @param holder subscriber data as ModuleDataHolder object
-     * @param update boolean indicating if this is an update or add
-     * @throws IdentityException throws, if fails
-     */
-    public void updateSubscriber(ModuleDataHolder holder,boolean update) throws IdentityException {
-
-        PolicyPublisher publisher = EntitlementEngine.getInstance().getPolicyPublisher();
-        publisher.persistSubscriber(holder,update);
-
-    }
-
-    /**
-     * delete subscriber details from registry
-     *
-     * @param subscriberId subscriber id
-     * @throws IdentityException throws, if fails
-     */
-    public void deleteSubscriber(String subscriberId) throws IdentityException {
-
-        PolicyPublisher publisher = EntitlementEngine.getInstance().getPolicyPublisher();
-        publisher.deleteSubscriber(subscriberId);
-
-    }
-
-    /**
-     * Publishes given set of policies to all subscribers
-     *
-     * @param policyIds policy ids to publish,  if null or empty, all policies are published
-     * @param subscriberIds subscriber ids to publish,  if null or empty, all policies are published
-     * @throws IdentityException throws, if fails
-     */
-    public void publishPolicies(String[] policyIds, String[] subscriberIds)  throws IdentityException {
-
-        EntitlementEngine engine = EntitlementEngine.getInstance();
-        PolicyPublisher publisher = engine.getPolicyPublisher();
-        PAPPolicyStore policyStore = new PAPPolicyStore();
-        if(policyIds == null || policyIds.length < 1){
-            policyIds = policyStore.getAllPolicyIds();
-        }
-        if(subscriberIds == null || subscriberIds.length < 1){
-            subscriberIds = publisher.retrieveSubscriberIds();
-        }
-
-        if(policyIds == null || policyIds.length  < 1){
-            throw new IdentityException("There are no policies to publish");
-        }
-
-        if(subscriberIds == null || subscriberIds.length < 1){
-            throw new IdentityException("There are no subscribers to publish");
-        }
-
-        publisher.publishPolicy(policyIds, subscriberIds);
-    }
-
-
-    /**
-     * Gets policy publisher module data to populate in the UI
-     *
-     * @return
-     */
-    public ModuleDataHolder[]  getPublisherModuleProperties(){
-
-        List<ModuleDataHolder> holders = EntitlementServiceComponent.
-            getEntitlementConfig().getModulePropertyHolders(PolicyPublisherModule.class.getName());
-        if(holders != null){
-            return holders.toArray(new ModuleDataHolder[holders.size()]);
-        }
-
-        return null;
-    }
 
     /**
      * Tests engine of PAP policy store 

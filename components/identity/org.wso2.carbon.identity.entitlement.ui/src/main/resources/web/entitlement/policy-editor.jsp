@@ -87,13 +87,13 @@
     String[] combineFunctions = new String[] {PolicyEditorConstants.COMBINE_FUNCTION_END,
             PolicyEditorConstants.COMBINE_FUNCTION_AND, PolicyEditorConstants.COMBINE_FUNCTION_OR};
 
-    String[] ruleCombingAlgorithm = new String[]{PolicyEditorConstants.CombiningAlog.RULE_COMBINING_DENY_OVERRIDE,
-                            PolicyEditorConstants.CombiningAlog.RULE_COMBINING_PERMIT_OVERRIDE, 
-                            PolicyEditorConstants.CombiningAlog.RULE_COMBINING_FIRST_APPLICABLE,
-                            PolicyEditorConstants.CombiningAlog.RULE_COMBINING_PERMIT_UNLESS_DENY,
-                            PolicyEditorConstants.CombiningAlog.RULE_COMBINING_DENY_UNLESS_PERMIT,
-                            PolicyEditorConstants.CombiningAlog.RULE_COMBINING_ORDER_PERMIT_OVERRIDE,
-                            PolicyEditorConstants.CombiningAlog.RULE_COMBINING_ORDER_DENY_OVERRIDE };
+    String[] ruleCombingAlgorithm = new String[]{PolicyEditorConstants.CombiningAlog.DENY_OVERRIDE_ID,
+                            PolicyEditorConstants.CombiningAlog.PERMIT_OVERRIDE_ID,
+                            PolicyEditorConstants.CombiningAlog.FIRST_APPLICABLE_ID,
+                            PolicyEditorConstants.CombiningAlog.PERMIT_UNLESS_DENY_ID,
+                            PolicyEditorConstants.CombiningAlog.DENY_UNLESS_PERMIT_ID,
+                            PolicyEditorConstants.CombiningAlog.ORDER_PERMIT_OVERRIDE_ID,
+                            PolicyEditorConstants.CombiningAlog.ORDER_DENY_OVERRIDE_ID};
 
     String[] obligationTypes = new String[]{"Obligation", "Advice"};
 

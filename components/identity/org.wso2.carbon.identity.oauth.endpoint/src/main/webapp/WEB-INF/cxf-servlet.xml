@@ -27,9 +27,11 @@
         <jaxrs:serviceBeans>
             <ref bean="tokenEndpointBean"/>
             <ref bean="revokeEndpointBean"/>
+            <ref bean="userinfoEndpointBean"/>
         </jaxrs:serviceBeans>
     </jaxrs:server>
 
     <bean id="tokenEndpointBean" class="org.wso2.carbon.identity.oauth.endpoint.token.OAuth2TokenEndpoint"/>
     <bean id="revokeEndpointBean" class="org.wso2.carbon.identity.oauth.endpoint.revoke.OAuthRevocationEndpoint"/>
+    <bean id="userinfoEndpointBean" class="org.wso2.carbon.identity.oauth.endpoint.user.OpenIDConnectUserEndpoint"/>
 </beans>

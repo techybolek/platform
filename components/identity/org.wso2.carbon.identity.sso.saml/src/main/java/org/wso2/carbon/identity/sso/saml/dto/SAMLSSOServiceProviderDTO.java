@@ -30,6 +30,7 @@ public class SAMLSSOServiceProviderDTO {
     private boolean doSignAssertions;
     private boolean doSignResponse;
     private String[] requestedClaims;
+    private String[] requestedAudiences;
 
     public String getIssuer() {
         return issuer;
@@ -115,6 +116,20 @@ public class SAMLSSOServiceProviderDTO {
      */
     public void setRequestedClaims(String[] requestedClaims) {
 	    this.requestedClaims = requestedClaims;
+    }
+
+    /**
+     * @return the requestedAudiences
+     */
+    public String[] getRequestedAudiences() {
+        return requestedAudiences;
+    }
+
+    /**
+     * @param requestedAudiences the requestedAudiences to set
+     */
+    public void setRequestedAudiences(String[] requestedAudiences) {
+        this.requestedAudiences = requestedAudiences;
     }
 
 	/**

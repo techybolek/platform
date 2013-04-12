@@ -31,7 +31,9 @@ public class SAMLSSOProviderConfigBean {
 	private String enableSingleLogout = "false";
 	private String singleLogoutUrl = "";
 	private String enableClaims = "false";
+    private String enableAudiences = "false";
 	private List<String> selectedClaims = new ArrayList<String>();
+    private List<String> selectedAudiences = new ArrayList<String>();
 
 	/**
 	 * clears the values in bean
@@ -46,6 +48,7 @@ public class SAMLSSOProviderConfigBean {
 		enableSingleLogout = "false";
 		singleLogoutUrl = "";
 		enableClaims = "false";
+        enableAudiences = "false";
 		selectedClaims.clear();
 	}
 
@@ -196,8 +199,8 @@ public class SAMLSSOProviderConfigBean {
 	}
 
 	/**
-	 * @param selectedAttributes
-	 *            the selectedAttributes to set
+	 * @param selectedClaims
+	 *            the selected claims to set
 	 */
 	public void setSelectedAttributes(List<String> selectedClaims) {
 		this.selectedClaims = selectedClaims;
@@ -225,4 +228,53 @@ public class SAMLSSOProviderConfigBean {
 	public void removeClaimFromList(String claim) {
 		selectedClaims.remove(claim);
 	}
+
+    /**
+     * @return the enableAudiences
+     */
+    public String getEnableAudiences() {
+        return enableAudiences;
+    }
+
+    /**
+     * @param enableAudiences
+     *            the enableAudiences to set
+     */
+    public void setEnableAudiences(String enableAudiences) {
+        this.enableAudiences = enableAudiences;
+    }
+
+    /**
+     * @return the selectedAudiences
+     */
+    public List<String> getSelectedAudiences() {
+        return selectedAudiences;
+    }
+
+    public String[] getSelectedAudiencesArray() {
+        return selectedAudiences.toArray(new String[selectedAudiences.size()]);
+    }
+
+    /**
+     * add an audience to the required audiences list
+     *
+     * @param audience
+     * @return
+     */
+    public boolean addAudienceToList(String audience) {
+        if(selectedAudiences.contains(audience)){
+            return false;
+        }
+        selectedAudiences.add(audience);
+        return true;
+    }
+
+    /**
+     * remove a audience from the required audiences list
+     *
+     * @param audience
+     */
+    public void removeAudienceFromList(String audience) {
+        selectedAudiences.remove(audience);
+    }
 }

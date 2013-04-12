@@ -40,10 +40,10 @@
 			<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
 		</operation>
 		<operation name="getAllPromotedUserChallenge">
-			<parameter name="AuthorizationAction" locked="true">/permission/admin/security</parameter>
+			<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
 		</operation>
 		<operation name="getAllChallengeQuestions">
-			<parameter name="AuthorizationAction" locked="true">/permission/admin/security</parameter>
+			<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
 		</operation>
         <parameter name="adminService" locked="false">true</parameter>
         <parameter name="hiddenService" locked="false">true</parameter>

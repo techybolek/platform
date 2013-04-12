@@ -41,6 +41,10 @@
         session.removeAttribute("actionNames");
     }
 
+    // remove request and response from session
+    session.removeAttribute("txtRequest");
+    session.removeAttribute("txtResponse");    
+
     resourceNames = (String)session.getAttribute("resourceNames");
     subjectNames = (String)session.getAttribute("subjectNames");
     actionNames = (String)session.getAttribute("actionNames");
@@ -112,6 +116,9 @@
         <form id="requestForm" name="requestForm" method="post" action="">
         <table class="styledLeft noBorders">
         <tr>
+            
+        </tr>
+        <tr>
             <td><fmt:message key='resource.names.are'/></td>
             <td colspan="2">
             <%
@@ -146,6 +153,10 @@
                 }
             %>
             </td>
+            <%--<td>--%>
+                <%--<input id="subjectIncludeResult" name="subjectIncludeResult"--%>
+                       <%--class="text-box-big" type="checkbox" value="true" checked="checked"/>--%>
+            <%--</td>--%>
         </tr>
 
         <tr>

@@ -42,13 +42,26 @@ public class CarbonRegistryPolicyStore implements CarbonPolicyStore {
 
     private String policyStorePath;
 
+    private static final String PROPERTY_POLICY_STORE_PATH = "policyStorePath";
+
+    private static final String PROPERTY_ATTRIBUTE_SEPARATOR = "attributeValueSeparator";
+
+    private static final String DEFAULT_POLICY_STORE_PATH = "/repository/identity/Entitlement" +
+            "/actualStore/";
+
+    private static final String KEY_VALUE_POLICY_ODER = "policyOrder";
+
+    private static final String KEY_VALUE_POLICY_META_DATA = "policyMetaData";
+
+    private static final String POLICY_MEDIA_TYPE = "application/xacml-policy+xml";
+
 	private static Log log = LogFactory.getLog(CarbonRegistryPolicyStore.class);
 
     @Override
     public void init(Properties properties) {
-        policyStorePath = properties.getProperty("policyStorePath");
+        policyStorePath = properties.getProperty(PROPERTY_POLICY_STORE_PATH);
         if(policyStorePath == null){
-            policyStorePath = "/repository/identity/Entitlement/actualStore/";
+            policyStorePath = DEFAULT_POLICY_STORE_PATH;
         }
     }
 
@@ -86,9 +99,9 @@ public class CarbonRegistryPolicyStore implements CarbonPolicyStore {
                 resource = registry.newResource();
             }
 
-            resource.setProperty("policyOrder", Integer.toString(policy.getPolicyOrder()));
+            resource.setProperty(KEY_VALUE_POLICY_ODER, Integer.toString(policy.getPolicyOrder()));
             resource.setContent(policy.getPolicy());
-            resource.setMediaType("application/xacml-policy+xml");
+            resource.setMediaType(POLICY_MEDIA_TYPE);
             AttributeDTO[] attributeDTOs = policy.getAttributeDTOs();
             if(attributeDTOs != null){
                 setAttributesAsProperties(attributeDTOs, resource);
@@ -165,7 +178,7 @@ public class CarbonRegistryPolicyStore implements CarbonPolicyStore {
         int attributeElementNo = 0;
         if(attributeDTOs != null){
             for(AttributeDTO attributeDTO : attributeDTOs){
-                resource.setProperty("policyMetaData" + attributeElementNo,
+                resource.setProperty(KEY_VALUE_POLICY_META_DATA + attributeElementNo,
                        attributeDTO.getAttributeType() + "," +
                        attributeDTO.getAttributeValue() + "," +
                        attributeDTO.getAttributeId() + "," +

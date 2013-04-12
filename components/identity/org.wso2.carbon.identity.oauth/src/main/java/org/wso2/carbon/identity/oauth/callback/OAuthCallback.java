@@ -59,6 +59,10 @@ public class OAuthCallback implements Callback {
      */
     private GrantType grantType;
     /**
+     * OAuth2 grant type
+     */
+    private org.wso2.carbon.identity.oauth.common.GrantType carbonGrantType;
+    /**
      * Client who will be accessing the resource
      */
     private String client;
@@ -228,6 +232,10 @@ public class OAuthCallback implements Callback {
         return grantType;
     }
 
+    public org.wso2.carbon.identity.oauth.common.GrantType getCarbonGrantType() {
+        return carbonGrantType;
+    }
+
     /**
      * Set the Grant Type
      *
@@ -235,6 +243,10 @@ public class OAuthCallback implements Callback {
      */
     public void setGrantType(GrantType grantType) {
         this.grantType = grantType;
+    }
+
+    public void setCarbonGrantType(org.wso2.carbon.identity.oauth.common.GrantType carbonGrantType) {
+        this.carbonGrantType = carbonGrantType;
     }
 
     /**

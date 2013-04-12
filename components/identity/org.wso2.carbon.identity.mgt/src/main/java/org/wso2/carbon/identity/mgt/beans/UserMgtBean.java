@@ -65,12 +65,12 @@ public class UserMgtBean {
     /**
      * user challenges that must be answered by user
      */
-    private UserChallengesDTO[] userChallenges;
+    private UserChallengesDTO[] userChallenges = new UserChallengesDTO[0];
 
     /**
      * evidences about user to identify him uniquely
      */
-    private UserEvidenceDTO[] userEvidenceDTOs;
+    private UserEvidenceDTO[] userEvidenceDTOs = new UserEvidenceDTO[0];
 
     public String getUserId() {
         return userId;

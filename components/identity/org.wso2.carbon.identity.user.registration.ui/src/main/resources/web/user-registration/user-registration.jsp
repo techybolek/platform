@@ -15,6 +15,8 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
+<%@page import="org.wso2.carbon.identity.user.registration.stub.dto.PasswordRegExDTO"%>
+<%@page import="org.wso2.carbon.ui.util.CharacterEncoder"%>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -31,11 +33,15 @@
 
 <%@page import="java.util.ResourceBundle" %>
 <%@ page import="java.net.URLDecoder" %>
+<jsp:include page="../dialog/display_messages.jsp"/>
+
 <%@ page import="org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO" %>
 <link media="all" type="text/css" rel="stylesheet" href="css/registration.css"/>
 
 <%
     String cssLocation = request.getParameter("css");
+    PasswordRegExDTO[] regExes = null;
+
     if ("null".equals(cssLocation)) {
         cssLocation = null;
     }
@@ -85,6 +91,7 @@
                     client.readUserFieldsForUserRegistration(IdentityConstants.OPENID_SREG_DIALECT);
         }
         userFields = client.getOrderedUserFields(userFields);
+        regExes = client.getPasswordRegularExpressions();
     } catch (Exception e) {
         String message = resourceBundle.getString("error.while.loading.user.registration.fields");
         session.removeAttribute("openId");
@@ -183,6 +190,16 @@
         if (value == '') {
             CARBON.showWarningDialog('<fmt:message key="user.name.is.required"/>');
             return false;
+        } else if (value.length > 20) {
+    		CARBON.showWarningDialog('<fmt:message key="user.name.is.too.long"/>');
+        	return false;
+    	}
+        
+        var domain = null;
+        
+        if (value.indexOf("/") > 0) {
+        	domain = value.substring(0, value.indexOf("/"));
+        	domain = domain.toUpperCase();
         }
 
         value =
@@ -191,7 +208,10 @@
         if (value == '') {
             CARBON.showWarningDialog('<fmt:message key="password.is.required"/>');
             return false;
-        }
+        } else if (value.length > 30) {
+    		CARBON.showWarningDialog('<fmt:message key="password.is.too.long"/>');
+        	return false;
+    	}
 
         value =
         document.getElementsByName("<%=UserRegistrationConstants.PARAM_RETYPED_PASSWORD%>")[0].value;
@@ -206,10 +226,27 @@
             return false;
         }
 
-        if (password.length < 6) {
-            CARBON.showWarningDialog('<fmt:message key="password.short"/>');
-            return false;
-        }
+    	var selectedDomainValue = domain;
+		var pwd = "pwd_";
+
+		var passwordRegExElm = document.getElementById(pwd +selectedDomainValue);
+
+		if (passwordRegExElm!=null) {
+	   		passwordRegEx = document.getElementById(pwd +selectedDomainValue).value;
+		} else {
+			passwordRegEx = document.getElementById("pwd_primary_null").value;
+		}
+		
+		if (passwordRegEx!=null) {
+		
+		 	var passReg = new RegExp(passwordRegEx);
+	     	var valid = passReg.test(value);
+	     	if (value != '' && !valid) {
+	            CARBON.showWarningDialog("Password strength does not meet with the required criteria.");
+	            return false;
+	     	}
+       }
+	
 
     <%if (userFields!=null) {
 for (int i=0; i< userFields.length;i++) { %>
@@ -220,8 +257,15 @@ for (int i=0; i< userFields.length;i++) { %>
                                      " <fmt:message key="is.required"/>");
             return false;
         }
+        
+        if (value != null && value.length > 30) {
+    		CARBON.showWarningDialog(' <fmt:message key="value.is.too.long"/>');
+        	return false;
+    	}
 
     <%}
+    
+    
     if(userFields[i].getRegEx() != null){
     %>
         var reg = new RegExp("<%=userFields[i].getRegEx() %>");
@@ -231,7 +275,19 @@ for (int i=0; i< userFields.length;i++) { %>
                                      " <fmt:message key="is.not.valid"/>");
             return false;
         }
-    <%}} }%>
+    <%}%>
+
+    var unsafeCharPattern = /[<>`\"]/;
+    var elements = document.getElementsByTagName("input");
+    for(i = 0; i < elements.length; i++){
+        if((elements[i].type === 'text' || elements[i].type === 'password') && 
+           elements[i].value != null && elements[i].value.match(unsafeCharPattern) != null){
+            CARBON.showWarningDialog("<fmt:message key="unsafe.char.validation.msg"/>");
+            return false;
+        }
+    }
+
+    <%} }%>
 
         document.registrationform.submit();
     }
@@ -251,6 +307,29 @@ for (int i=0; i< userFields.length;i++) { %>
 </div>
 <%} else { %>
 <form method="post" name="registrationform" action="add_user.jsp" target="_self">
+
+<%
+
+if (regExes!=null) {
+	
+	for (int i=0; i < regExes.length;i++) {
+		if (i==0) {
+%>
+<input type="hidden"  id="pwd_primary_null" name="pwd_primary_null" value=<%=regExes[i].getRegEx()%>>   
+
+<% 
+		}
+%>
+ <input type="hidden"  id="pwd_<%=regExes[i].getDomainName().toUpperCase()%>" name="pwd_<%=regExes[i].getDomainName().toUpperCase()%>" value=<%=regExes[i].getRegEx()%>>    
+
+<% 
+		
+	}
+}
+
+%>
+
+
 <%
 if(forwardPage!=null){
     %>
@@ -296,7 +375,7 @@ if(forwardPage!=null){
                     }
             %>
             <tr>
-                <td class="leftCol-small"><%=userFields[i].getFieldName()%>
+                <td class="leftCol-small"><%=CharacterEncoder.getSafeText(userFields[i].getFieldName())%>
                     <% if (userFields[i].getRequired()) {%>
                     <span class="required">*</span>
                     <%}%></td>

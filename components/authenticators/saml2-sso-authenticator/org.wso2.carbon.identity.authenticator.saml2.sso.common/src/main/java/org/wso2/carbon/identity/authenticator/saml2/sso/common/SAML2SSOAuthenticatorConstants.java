@@ -39,6 +39,11 @@ public final class SAML2SSOAuthenticatorConstants {
     public static final String IDENTITY_PROVIDER_SSO_SERVICE_URL = "IdentityProviderSSOServiceURL";
     public static final String LOGIN_PAGE = "LoginPage";
     public static final String LANDING_PAGE = "LandingPage";
+    public static final String FEDERATION_CONFIG = "FederationConfig";
+    public static final String FEDERATION_CONFIG_USER = "FederationConfigUser";
+    public static final String FEDERATION_CONFIG_PASSWORD = "FederationConfigPassword";
+
+
 
     public static final class ErrorMessageConstants{
         public static final String RESPONSE_NOT_PRESENT = "response.not.present";

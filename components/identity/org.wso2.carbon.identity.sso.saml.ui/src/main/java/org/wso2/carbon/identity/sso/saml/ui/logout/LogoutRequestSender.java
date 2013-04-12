@@ -29,7 +29,7 @@ import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.wso2.carbon.identity.sso.saml.stub.types.SingleLogoutRequestDTO;
+import org.wso2.carbon.identity.sso.saml.dto.SingleLogoutRequestDTO;
 import org.wso2.carbon.identity.sso.saml.ui.util.SAMLSSOUIUtil;
 
 import javax.net.ssl.SSLContext;
@@ -183,14 +183,14 @@ public class LogoutRequestSender {
      * takes an array of SingleLogoutRequestDTO objects, creates and submits each of them as a task
      * to the thread pool
      *
-     * @param logoutReqs Array of SingleLogoutRequestDTO representing all the session participants
+     * @param singleLogoutRequestDTOs Array of SingleLogoutRequestDTO representing all the session participants
      */
-    public void sendLogoutRequests(SingleLogoutRequestDTO[] logoutReqs) {
-        if (logoutReqs == null) {
+    public void sendLogoutRequests(org.wso2.carbon.identity.sso.saml.dto.SingleLogoutRequestDTO[] singleLogoutRequestDTOs) {
+        if (singleLogoutRequestDTOs == null) {
             return;
         }
         // For each logoutReq, create a new task and submit it to the thread pool.
-        for (SingleLogoutRequestDTO reqDTO : logoutReqs) {
+        for (SingleLogoutRequestDTO reqDTO : singleLogoutRequestDTOs) {
             threadPool.submit(new LogoutReqSenderTask(reqDTO));
             if (log.isDebugEnabled()) {
                 log.debug("A logoutReqSenderTask is assigned to the thread pool");

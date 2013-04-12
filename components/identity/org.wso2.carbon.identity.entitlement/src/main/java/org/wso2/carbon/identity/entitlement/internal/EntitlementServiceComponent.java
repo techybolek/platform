@@ -16,7 +16,13 @@
 
 package org.wso2.carbon.identity.entitlement.internal;
 
-import org.apache.axis2.databinding.types.UnsignedByte;
+import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.server.TServer;
@@ -24,11 +30,16 @@ import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.transport.TSSLTransportFactory;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TTransportException;
-import org.jboss.marshalling.util.ByteReadField;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.base.ServerConfigurationException;
 import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.entitlement.EntitlementConstants;
+import org.wso2.carbon.identity.entitlement.EntitlementUtil;
+import org.wso2.carbon.identity.entitlement.cache.*;
+import org.wso2.carbon.identity.entitlement.cache.EntitlementPolicyClearingCache;
+import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
+import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStore;
 import org.wso2.carbon.identity.entitlement.thrift.EntitlementService;
 import org.wso2.carbon.identity.entitlement.thrift.ThriftConfigConstants;
 import org.wso2.carbon.identity.entitlement.thrift.ThriftEntitlementServiceImpl;
@@ -39,15 +50,6 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.NetworkUtils;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * @scr.component name="identity.entitlement.component" immediate="true"
@@ -99,13 +101,83 @@ public class EntitlementServiceComponent {
             EntitlementServiceInitializer entitlementServiceInitializer = new EntitlementServiceInitializer(
                     registryService);
             entitlementServiceInitializer.putEntitlementPolicyResourcesToRegistry();
+
+            // build configuration file
             entitlementConfig = new EntitlementConfigHolder();
             EntitlementExtensionBuilder builder = new EntitlementExtensionBuilder();
             builder.setBundleContext(ctxt.getBundleContext());
             builder.buildEntitlementConfig(entitlementConfig);
+
+            //init caches as we are using one cache for all tenant
+
+            DecisionCache.getInstance();
+            SimpleDecisionCache.getInstance();
+            DecisionClearingCache.getInstance();
+            PolicySearchCache.getInstance();
+            PIPAttributeCache.getInstance();
+            PIPAbstractAttributeCache.getInstance();
+            EntitlementPolicyClearingCache.getInstance();
             
             // Start loading schema.
             new Thread(new SchemaBuilder(entitlementConfig)).start();
+
+            // Read XACML policy files from a pre-defined location in the
+            // filesystem and load to registry at the server startup
+            PAPPolicyStore papPolicyStore = new PAPPolicyStore(
+                    registryService.getGovernanceSystemRegistry());
+
+            String startUpPolicyAdding = entitlementConfig.getEngineProperties().getProperty(
+                                                        EntitlementConstants.START_UP_POLICY_ADDING);
+
+            if(startUpPolicyAdding != null && Boolean.parseBoolean(startUpPolicyAdding)){                
+                if (papPolicyStore.getAllPolicyIds() == null
+                        || papPolicyStore.getAllPolicyIds().length == 0) {
+                    File policyFolder = null;
+                    String policyPathFromConfig = entitlementConfig.getEngineProperties().getProperty(
+                            EntitlementConstants.FILESYSTEM_POLICY_PATH);
+
+                    if (policyPathFromConfig != null && policyPathFromConfig.trim().length() > 0) {
+                        policyFolder = new File(policyPathFromConfig);
+                    }
+
+                    if(policyFolder != null && !policyFolder.exists()){
+                        log.warn("Defined policy directory location is not exit. " +
+                                "Therefore using default policy location");
+                    }
+
+                    if(policyPathFromConfig == null || !policyFolder.exists()){
+                        policyFolder = new File(CarbonUtils.getCarbonHome() + File.separator
+                                + "repository" + File.separator + "resources" + File.separator
+                                + "security" + File.separator + "policies" + File.separator + "xacml");
+
+                    }
+
+                    boolean customPolicies = false;
+
+                    if (policyFolder != null && policyFolder.exists()) {
+                        for (File policyFile : policyFolder.listFiles()) {
+                            if (policyFile.isFile()) {
+                                PolicyDTO policyDTO = new PolicyDTO();
+                                policyDTO.setPolicy(FileUtils.readFileToString(policyFile));
+                                try {
+                                    EntitlementUtil.addFilesystemPolicy(policyDTO,
+                                            registryService.getGovernanceSystemRegistry(), true);
+                                } catch (Exception e){
+                                    // log and ignore
+                                    log.error("Error while adding XACML policies" ,e);
+                                }
+                                customPolicies = true;
+
+                            }
+                        }
+                    }
+
+                    if(!customPolicies){
+                        // load default policies
+                        EntitlementUtil.addSamplePolicies(registryService.getGovernanceSystemRegistry());
+                    }
+                }
+            }
             
             //TODO: Read from identit.xml, the configurations to be used in thrift based entitlement service.
             //initialize thrift authenticator

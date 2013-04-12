@@ -22,6 +22,7 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.core.util.KeyStoreUtil;
+import org.wso2.carbon.identity.authenticator.saml2.sso.common.Util;
 import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
@@ -34,10 +35,11 @@ import org.wso2.carbon.security.SecurityConfigException;
 import org.wso2.carbon.security.keystore.KeyStoreAdmin;
 import org.wso2.carbon.security.keystore.service.KeyStoreData;
 import org.wso2.carbon.user.api.Claim;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-public class SAMLSSOConfigService extends AbstractAdmin{
+public class SAMLSSOConfigService extends AbstractAdmin {
 
 	private static Log log = LogFactory.getLog(SAMLSSOConfigService.class);
 
@@ -50,6 +52,15 @@ public class SAMLSSOConfigService extends AbstractAdmin{
 	public boolean addRPServiceProvider(SAMLSSOServiceProviderDTO spDto) throws IdentityException {
 		SAMLSSOConfigAdmin configAdmin = new SAMLSSOConfigAdmin(getConfigSystemRegistry());
 		return configAdmin.addRelyingPartyServiceProvider(spDto);
+	}
+
+	/**
+	 * 
+	 * @param reload
+	 * @return
+	 */
+	public String reloadSAML2FedaretedIdpConfig(boolean reload) {
+		return Util.reloadFederateIdPConfig(reload);
 	}
 
 	/**
@@ -69,15 +80,10 @@ public class SAMLSSOConfigService extends AbstractAdmin{
 	 */
 	private KeyStoreData[] getKeyStores() throws IdentityException {
 		try {
-			KeyStoreAdmin admin =
-			                      new KeyStoreAdmin(CarbonContext.getThreadLocalCarbonContext()
-			                                                     .getTenantId(),
-			                                        getGovernanceRegistry());
-			boolean isSuperAdmin =
-			                       MultitenantConstants.SUPER_TENANT_ID == CarbonContext.getThreadLocalCarbonContext()
-			                                                                            .getTenantId()
-			                                                                                          ? true
-			                                                                                          : false;
+			KeyStoreAdmin admin = new KeyStoreAdmin(CarbonContext.getThreadLocalCarbonContext()
+					.getTenantId(), getGovernanceRegistry());
+			boolean isSuperAdmin = MultitenantConstants.SUPER_TENANT_ID == CarbonContext
+					.getThreadLocalCarbonContext().getTenantId() ? true : false;
 			return admin.getKeyStores(isSuperAdmin);
 		} catch (SecurityConfigException e) {
 			log.error("Error when loading the key stores from registry", e);
@@ -94,17 +100,14 @@ public class SAMLSSOConfigService extends AbstractAdmin{
 		KeyStoreData[] keyStores = getKeyStores();
 		KeyStoreData primaryKeyStore = null;
 		for (int i = 0; i < keyStores.length; i++) {
-			boolean superTenant =
-			                      MultitenantConstants.SUPER_TENANT_ID == CarbonContext.getThreadLocalCarbonContext()
-			                                                                           .getTenantId()
-			                                                                                         ? true
-			                                                                                         : false;
+			boolean superTenant = MultitenantConstants.SUPER_TENANT_ID == CarbonContext
+					.getThreadLocalCarbonContext().getTenantId() ? true : false;
 			if (superTenant && KeyStoreUtil.isPrimaryStore(keyStores[i].getKeyStoreName())) {
 				primaryKeyStore = keyStores[i];
 				break;
-			} else if (!superTenant &&
-			           SAMLSSOUtil.generateKSNameFromDomainName(getTenantDomain())
-			                      .equals(keyStores[i].getKeyStoreName())) {
+			} else if (!superTenant
+					&& SAMLSSOUtil.generateKSNameFromDomainName(getTenantDomain()).equals(
+							keyStores[i].getKeyStoreName())) {
 				primaryKeyStore = keyStores[i];
 				break;
 			}
@@ -125,33 +128,33 @@ public class SAMLSSOConfigService extends AbstractAdmin{
 		SAMLSSOConfigAdmin ssoConfigAdmin = new SAMLSSOConfigAdmin(getConfigSystemRegistry());
 		return ssoConfigAdmin.removeServiceProvider(issuer);
 	}
-    
+
 	/**
 	 * 
 	 * @return
 	 * @throws IdentityException
 	 */
 	public String[] getClaimURIs() throws IdentityException {
-		String tenatUser =
-		                   MultitenantUtils.getTenantAwareUsername(CarbonContext.getCurrentContext()
-		                                                                        .getUsername());
+		String tenatUser = MultitenantUtils.getTenantAwareUsername(CarbonContext
+				.getCurrentContext().getUsername());
 		String domainName = MultitenantUtils.getTenantDomain(tenatUser);
 		String[] claimUris = null;
 		try {
 			UserRealm realm = IdentityTenantUtil.getRealm(domainName, tenatUser);
-			String claimDialect =
-			                      IdentityUtil.getProperty(IdentityConstants.ServerConfig.SSO_ATTRIB_CLAIM_DIALECT);
+			String claimDialect = IdentityUtil
+					.getProperty(IdentityConstants.ServerConfig.SSO_ATTRIB_CLAIM_DIALECT);
 
 			if (claimDialect == null || claimDialect.equals("")) {
 				// set default
 				claimDialect = "http://wso2.org/claims";
 			}
 
-			Claim[] claims = realm.getClaimManager().getAllClaims(claimDialect);
+			ClaimMapping[] claims = realm.getClaimManager().getAllClaimMappings(claimDialect);
 			claimUris = new String[claims.length];
 
 			for (int i = 0; i < claims.length; i++) {
-				claimUris[i] = claims[i].getClaimUri();
+				Claim claim = claims[i].getClaim();
+				claimUris[i] = claim.getClaimUri();
 			}
 
 		} catch (IdentityException e) {
@@ -173,9 +176,8 @@ public class SAMLSSOConfigService extends AbstractAdmin{
 	private String[] getStoreEntries(String keyStoreName) throws IdentityException {
 		KeyStoreAdmin admin;
 		try {
-			admin =
-			        new KeyStoreAdmin(CarbonContext.getCurrentContext().getTenantId(),
-			                          getGovernanceRegistry());
+			admin = new KeyStoreAdmin(CarbonContext.getCurrentContext().getTenantId(),
+					getGovernanceRegistry());
 			return admin.getStoreEntries(keyStoreName);
 		} catch (SecurityConfigException e) {
 			log.error("Error reading entries from the key store : " + keyStoreName);

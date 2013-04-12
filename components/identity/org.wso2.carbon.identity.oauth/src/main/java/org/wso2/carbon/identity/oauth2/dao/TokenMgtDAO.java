@@ -307,6 +307,9 @@ public class TokenMgtDAO {
         ResultSet resultSet;
         String userStoreDomain = null;
         String sql = null;
+        String mySqlQuery;
+        String oracleQuery;
+        String msSqlQuery;
 
         try {
             connection = JDBCPersistenceManager.getInstance().getDBConnection();
@@ -318,9 +321,29 @@ public class TokenMgtDAO {
             if (userStoreDomain != null) {
                 accessTokenStoreTable = accessTokenStoreTable + "_" + userStoreDomain;
             }
-            sql = "SELECT ACCESS_TOKEN, AUTHZ_USER, " +
+            mySqlQuery = "SELECT ACCESS_TOKEN, AUTHZ_USER, " +
                     "TOKEN_SCOPE, TOKEN_STATE FROM " + accessTokenStoreTable +
-                    " WHERE CONSUMER_KEY = ? AND REFRESH_TOKEN = ? ORDER BY TIME_CREATED DESC LIMIT 1;";
+                    " WHERE CONSUMER_KEY = ? AND REFRESH_TOKEN = ? ORDER BY TIME_CREATED DESC LIMIT 1";
+
+            oracleQuery = "SELECT * FROM (SELECT ACCESS_TOKEN, AUTHZ_USER, " +
+                    "TOKEN_SCOPE, TOKEN_STATE FROM " + accessTokenStoreTable +
+                    " WHERE CONSUMER_KEY = ? AND REFRESH_TOKEN = ? ORDER BY TIME_CREATED DESC) WHERE ROWNUM < 2 ";
+
+            msSqlQuery = "SELECT TOP 1 ACCESS_TOKEN, AUTHZ_USER, " +
+                    "TOKEN_SCOPE, TOKEN_STATE FROM " + accessTokenStoreTable +
+                    " WHERE CONSUMER_KEY = ? AND REFRESH_TOKEN = ? ORDER BY TIME_CREATED DESC";
+
+            if (connection.getMetaData().getDriverName().contains("MySQL")
+                    || connection.getMetaData().getDriverName().contains("H2")) {
+                sql = mySqlQuery;
+            }
+            else if(connection.getMetaData().getDriverName().contains("MS SQL")){
+                sql = msSqlQuery;
+            }
+            else {
+                sql = oracleQuery;
+            }
+
             prepStmt = connection.prepareStatement(sql);
 
             prepStmt.setString(1, consumerKey);

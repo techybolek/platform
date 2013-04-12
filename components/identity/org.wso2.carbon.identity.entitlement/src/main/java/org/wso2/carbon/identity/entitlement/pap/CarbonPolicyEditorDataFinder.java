@@ -18,6 +18,12 @@
 
 package org.wso2.carbon.identity.entitlement.pap;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
@@ -29,10 +35,9 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.ClaimManager;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
-
-import java.util.*;
 
 /**
  * this is default implementation of the policy meta data finder module which finds the resource in the
@@ -131,8 +136,9 @@ public class CarbonPolicyEditorDataFinder extends AbstractPolicyEditorDataFinder
             int tenantId =  CarbonContext.getCurrentContext().getTenantId();
             ClaimManager claimManager = EntitlementServiceComponent.getRealmservice().
                     getTenantUserRealm(tenantId).getClaimManager();
-            Claim[] claims = claimManager.getAllClaims(UserCoreConstants.DEFAULT_CARBON_DIALECT);
-            for(Claim claim : claims){
+            ClaimMapping[] claims = claimManager.getAllClaimMappings(UserCoreConstants.DEFAULT_CARBON_DIALECT);
+            for(ClaimMapping mapping : claims){
+            	Claim claim = mapping.getClaim();
                 if(claim.isSupportedByDefault()){
                     values.put(claim.getDisplayTag(), claim.getClaimUri());
                 }
@@ -142,7 +148,7 @@ public class CarbonPolicyEditorDataFinder extends AbstractPolicyEditorDataFinder
     }
 
     @Override
-    public Set<String> getAttributeDataTypes(String attributeType) throws Exception {        
+    public Set<String> getAttributeDataTypes(String category) throws Exception {        
         Set<String> values = new HashSet<String>();
         values.add("http://www.w3.org/2001/XMLSchema#string");
         values.add("http://www.w3.org/2001/XMLSchema#boolean");

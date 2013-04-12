@@ -107,6 +107,7 @@ public class AuthnRequestValidator {
                 validationResponse.setLoginPageURL(spDO.getLoginPageURL());
                 spAcsUrl = spDO.getAssertionConsumerUrl();
             }
+            // Check for a Spoofing attack
             String acsUrl = authnReq.getAssertionConsumerServiceURL();
 			if (spAcsUrl != null && acsUrl != null && !acsUrl.equals(spAcsUrl)) {
 				log.error("Invalid ACS URL value " + acsUrl + " in the AuthnRequest message from " +

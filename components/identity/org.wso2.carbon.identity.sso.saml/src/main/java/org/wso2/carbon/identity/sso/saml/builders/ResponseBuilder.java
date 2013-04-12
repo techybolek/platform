@@ -92,7 +92,7 @@ public class ResponseBuilder {
         DateTime notOnOrAfter = new DateTime(issueInstant.getMillis() + 5 * 60 * 1000);
         response.setIssueInstant(issueInstant);
         response.getAssertions().add(buildSAMLAssertion(authReqDTO, notOnOrAfter, sessionId));
-        if (authReqDTO.getDoSignAssertions()) {
+        if (authReqDTO.isDoSignResponse()) {
             SAMLSSOUtil.setSignature(response, XMLSignature.ALGO_ID_SIGNATURE_RSA,
                     new SignKeyDataHolder(authReqDTO.getUsername()));
         }
@@ -158,16 +158,28 @@ public class ResponseBuilder {
                 samlAssertion.getAttributeStatements().add(buildAttributeStatement(claims));
             }
 
-            Audience audience = new AudienceBuilder().buildObject();
-            audience.setAudienceURI(authReqDTO.getIssuer());
             AudienceRestriction audienceRestriction =
                     new AudienceRestrictionBuilder().buildObject();
-            audienceRestriction.getAudiences().add(audience);
+            Audience issuerAudience = new AudienceBuilder().buildObject();
+            issuerAudience.setAudienceURI(authReqDTO.getIssuer());
+            audienceRestriction.getAudiences().add(issuerAudience);
+            if(authReqDTO.getRequestedAudiences() != null){
+                for(String requestedAudience:authReqDTO.getRequestedAudiences()){
+                    Audience audience = new AudienceBuilder().buildObject();
+                    audience.setAudienceURI(requestedAudience);
+                    audienceRestriction.getAudiences().add(audience);
+                }
+            }
             Conditions conditions = new ConditionsBuilder().buildObject();
             conditions.setNotBefore(currentTime);
             conditions.setNotOnOrAfter(notOnOrAfter);
             conditions.getAudienceRestrictions().add(audienceRestriction);
             samlAssertion.setConditions(conditions);
+
+            if(authReqDTO.getDoSignAssertions()){
+                SAMLSSOUtil.setSignature(samlAssertion, XMLSignature.ALGO_ID_SIGNATURE_RSA,
+                        new SignKeyDataHolder(authReqDTO.getUsername()));
+            }
 
             return samlAssertion;
         } catch (Exception e) {

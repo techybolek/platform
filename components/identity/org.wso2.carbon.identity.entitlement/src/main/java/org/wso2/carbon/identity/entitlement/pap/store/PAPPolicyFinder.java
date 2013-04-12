@@ -122,7 +122,7 @@ public class PAPPolicyFinder extends PolicyFinderModule {
             // this is only supporting for on demand loading
             maxInMemoryPolicies = EntitlementConstants.MAX_NO_OF_IN_MEMORY_POLICIES;
             String maxInMemoryPoliciesValue = EntitlementServiceComponent.getEntitlementConfig().
-                    getEngineProperties().getProperty(EntitlementConstants.MAX_POLICY_ENTRIES);
+                    getEngineProperties().getProperty(EntitlementConstants.ON_DEMAND_POLICY_MAX_POLICY_ENTRIES);
             if (maxInMemoryPoliciesValue != null && !"".equals(maxInMemoryPoliciesValue)) {
                 maxInMemoryPolicies = Integer.parseInt(maxInMemoryPoliciesValue);
             }

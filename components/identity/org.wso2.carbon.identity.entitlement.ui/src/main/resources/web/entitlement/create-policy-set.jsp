@@ -33,15 +33,24 @@
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.BasicTargetElementDTO" %>
 <%@ page import="org.wso2.carbon.ui.util.CharacterEncoder" %>
 <%@ page import="org.wso2.carbon.claim.mgt.stub.dto.ClaimMappingDTO" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.ui.PolicyEditorConstants" %>
 
 <jsp:useBean id="entitlementPolicyBean" type="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean"
              class="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyBean" scope="session"/>
 <jsp:setProperty name="entitlementPolicyBean" property="*" />
 <%
     String forwardTo = null;
-    String[] algorithmNames = null;
     String[] policyIds = null;
 
+    String[] algorithmNames = new String[]{PolicyEditorConstants.CombiningAlog.DENY_OVERRIDE_ID,
+                            PolicyEditorConstants.CombiningAlog.PERMIT_OVERRIDE_ID,
+                            PolicyEditorConstants.CombiningAlog.FIRST_APPLICABLE_ID,
+                            PolicyEditorConstants.CombiningAlog.PERMIT_UNLESS_DENY_ID,
+                            PolicyEditorConstants.CombiningAlog.DENY_UNLESS_PERMIT_ID,
+                            PolicyEditorConstants.CombiningAlog.ORDER_PERMIT_OVERRIDE_ID,
+                            PolicyEditorConstants.CombiningAlog.ORDER_DENY_OVERRIDE_ID,
+                            PolicyEditorConstants.CombiningAlog.ONLY_ONE_APPLICABLE_ID};
+    
     PolicySetDTO policySetDTO = entitlementPolicyBean.getPolicySetDTO();
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     ConfigurationContext configContext =
@@ -156,14 +165,8 @@
 
         EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
                 serverURL, configContext);
-        algorithmNames = client.getEntitlementPolicyDataFromRegistry("policyCombiningAlgorithms");
         entitlementPolicyBean.setPolicyCombiningAlgorithms(algorithmNames);
         policyIds = client.getAllPolicyIds();
-        algorithmNames = client.getEntitlementPolicyDataFromRegistry("ruleCombiningAlgorithms");
-        ClaimAdminClient claimAdminClient = new ClaimAdminClient(cookie, backEndServerURL,
-                configContext);
-        claimDialectDTO =claimAdminClient.getAllClaimMappingsByDialectWithRole(EntitlementPolicyConstants.DEFAULT_CARBON_DIALECT);
-
 
     } catch (Exception e) {
     	String message = resourceBundle.getString("error.while.loading.policy.resource");

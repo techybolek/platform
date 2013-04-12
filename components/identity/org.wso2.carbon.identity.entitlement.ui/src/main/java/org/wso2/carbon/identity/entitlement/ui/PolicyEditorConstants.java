@@ -147,29 +147,34 @@ public class PolicyEditorConstants {
 
         public static final String DATE_TIME = "http://www.w3.org/2001/XMLSchema#dateTime";
 
-        public static final String DATE = "http://www.w3.org/2001/XMLSchema#date";        
-    }
+        public static final String DATE = "http://www.w3.org/2001/XMLSchema#date";
 
+        public static final String DOUBLE = "http://www.w3.org/2001/XMLSchema#double";  
+
+        public static final String INT = "http://www.w3.org/2001/XMLSchema#integer";
+
+    }
 
 
     public static final class CombiningAlog {
 
-        public static final String RULE_COMBINING_DENY_OVERRIDE = "deny-overrides";
+        public static final String DENY_OVERRIDE_ID = "deny-overrides";
 
-        public static final String RULE_COMBINING_PERMIT_OVERRIDE = "permit-overrides";
+        public static final String PERMIT_OVERRIDE_ID = "permit-overrides";
 
-        public static final String RULE_COMBINING_FIRST_APPLICABLE = "first-applicable";
+        public static final String FIRST_APPLICABLE_ID = "first-applicable";
 
-        public static final String RULE_COMBINING_ORDER_PERMIT_OVERRIDE = "ordered-permit-overrides";
+        public static final String ORDER_PERMIT_OVERRIDE_ID = "ordered-permit-overrides";
 
-        public static final String RULE_COMBINING_ORDER_DENY_OVERRIDE = "ordered-deny-overrides";
+        public static final String ORDER_DENY_OVERRIDE_ID = "ordered-deny-overrides";
 
-        public static final String RULE_COMBINING_DENY_UNLESS_PERMIT = "deny-unless-permit";
+        public static final String DENY_UNLESS_PERMIT_ID = "deny-unless-permit";
 
-        public static final String RULE_COMBINING_PERMIT_UNLESS_DENY = "permit-unless-deny";
-        
+        public static final String PERMIT_UNLESS_DENY_ID = "permit-unless-deny";
+
+        public static final String ONLY_ONE_APPLICABLE_ID = "only-one-applicable";
+
     }
-
 
 
     public static final String RULE_ALGORITHM_IDENTIFIER_1 = "urn:oasis:names:tc:xacml:1.0:" +
@@ -177,6 +182,12 @@ public class PolicyEditorConstants {
 
     public static final String RULE_ALGORITHM_IDENTIFIER_3 = "urn:oasis:names:tc:xacml:3.0:" +
                                                                         "rule-combining-algorithm:";
+
+    public static final String POLICY_ALGORITHM_IDENTIFIER_1 = "urn:oasis:names:tc:xacml:1.0:" +
+                                                                    "policy-combining-algorithm:";
+
+    public static final String POLICY_ALGORITHM_IDENTIFIER_3 = "urn:oasis:names:tc:xacml:3.0:" +
+                                                                    "policy-combining-algorithm:";
 
     public static final String POLICY_EDITOR_SEPARATOR = "|";
 
@@ -216,21 +227,34 @@ public class PolicyEditorConstants {
     
     public static final String SOA_POLICY_EDITOR = "SOA";
 
-    public static final String ANY = "*";
 
-    public static final String EQUAL_RANGE = "[";
+    public static class FunctionIdentifier {
 
-    public static final String RANGE = "(";
+        public static final String ANY = "*";
 
-    public static final String GREATER = ">";
+        public static final String EQUAL_RANGE = "[";
 
-    public static final String GREATER_EQUAL = ">=";
+        public static final String EQUAL_RANGE_CLOSE = "]";
 
-    public static final String LESS = "<";
+        public static final String RANGE = "(";
 
-    public static final String LESS_EQUAL = "<=";
+        public static final String RANGE_CLOSE = ")";
 
-    public static final String REGEX = "{";
+        public static final String GREATER = ">";
+
+        public static final String GREATER_EQUAL = ">=";
+
+        public static final String LESS = "<";
+
+        public static final String LESS_EQUAL = "<=";
+
+        public static final String REGEX = "{";
+
+        public static final String AND = "&";
+
+        public static final String OR = "|";
+
+    }
 
     public static final class AttributeId {
 

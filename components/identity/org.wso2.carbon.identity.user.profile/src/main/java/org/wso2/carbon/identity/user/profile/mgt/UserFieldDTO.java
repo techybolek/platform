@@ -24,9 +24,24 @@ public class UserFieldDTO {
     private String displayName;
     private boolean isRequired;
     private String regEx;
-    private int displayOrder;    
+    private int displayOrder; 
+    private boolean readOnly;
+    private boolean checkedAttribute;
+        
     
-    public int getDisplayOrder() {
+    public boolean isReadOnly() {
+		return readOnly;
+	}
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
+	}
+	public boolean isCheckedAttribute() {
+		return checkedAttribute;
+	}
+	public void setCheckedAttribute(boolean checkedAttribute) {
+		this.checkedAttribute = checkedAttribute;
+	}
+	public int getDisplayOrder() {
         return displayOrder;
     }
     public void setDisplayOrder(int displayOrder) {

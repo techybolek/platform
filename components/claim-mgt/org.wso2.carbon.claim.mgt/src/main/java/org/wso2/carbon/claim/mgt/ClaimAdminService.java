@@ -17,15 +17,22 @@
 */
 package org.wso2.carbon.claim.mgt;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.wso2.carbon.claim.mgt.dto.ClaimAttributeDTO;
 import org.wso2.carbon.claim.mgt.dto.ClaimDTO;
 import org.wso2.carbon.claim.mgt.dto.ClaimDialectDTO;
 import org.wso2.carbon.claim.mgt.dto.ClaimMappingDTO;
+import org.wso2.carbon.user.api.Claim;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.claim.Claim;
-import org.wso2.carbon.user.core.claim.ClaimMapping;
-
-import java.util.*;
-import java.util.Map.Entry;
 
 public class ClaimAdminService {
 
@@ -50,7 +57,8 @@ public class ClaimAdminService {
         claims = new ArrayList<ClaimDialect>();
 
         for (int i = 0; i < claimMappings.length; i++) {
-            String dialectUri = claimMappings[i].getClaim().getDialectURI();
+            String dialectUri = claimMappings[i].getClaim().getDialectURI();           
+            
             if (!claimMap.containsKey(dialectUri)) {
                 mappingList = new ArrayList<ClaimMapping>();
                 mappingList.add(claimMappings[i]);
@@ -85,6 +93,7 @@ public class ClaimAdminService {
          That will make it easy for POJO to generate client side code and wsdl with out complexity*/
         ClaimDialectDTO[] claimDialectDTOs= convertClaimDialectArrayToClaimDialectDTOArray(
                 claims.toArray(new ClaimDialect[claims.size()]));
+                
         return claimDialectDTOs;
         //return claims.toArray(new ClaimDialect[claims.size()]);
     }
@@ -222,20 +231,48 @@ public class ClaimAdminService {
         return claimMappings.toArray(new ClaimMapping[claimMappings.size()]);
 
     }
-    private ClaimMappingDTO convertClaimMappingToClaimMappingDTO(ClaimMapping claimMapping){
-        ClaimMappingDTO claimMappingDTO=new ClaimMappingDTO();
-        claimMappingDTO.setClaim(convertClaimToClaimDTO(claimMapping.getClaim()));
-        claimMappingDTO.setMappedAttribute(claimMapping.getMappedAttribute());
-        return claimMappingDTO;
-    }
+    
+	private ClaimMappingDTO convertClaimMappingToClaimMappingDTO(ClaimMapping claimMapping) {
+		ClaimMappingDTO claimMappingDTO = new ClaimMappingDTO();
+		claimMappingDTO.setClaim(convertClaimToClaimDTO(claimMapping.getClaim()));
+		claimMappingDTO.setMappedAttribute(claimMapping.getMappedAttribute());
+	
+		Map<String, String> attributes = claimMapping.getMappedAttributes();
 
-    private ClaimMapping convertClaimMappingDTOToClaimMapping(ClaimMappingDTO claimMappingDTO){
-        ClaimMapping claimMapping=new ClaimMapping();
-        claimMapping.setClaim(convertClaimDTOToClaim(claimMappingDTO.getClaim()));
-        claimMapping.setMappedAttribute(claimMappingDTO.getMappedAttribute());
-        return claimMapping;
+		if (attributes != null) {
+			ClaimAttributeDTO[] attrDto = new ClaimAttributeDTO[attributes.size()];
+			int i = 0;
+			for (Map.Entry<String, String> entry : attributes.entrySet()) {
+				ClaimAttributeDTO dto = new ClaimAttributeDTO();
+				dto.setAttributeName(entry.getValue());
+				dto.setDomainName(entry.getKey());
+				attrDto[i++] = dto;
+			}
+			claimMappingDTO.setMappedAttributes(attrDto);
+		}
 
-    }
+		return claimMappingDTO;
+	}
+
+	private ClaimMapping convertClaimMappingDTOToClaimMapping(ClaimMappingDTO claimMappingDTO) {
+		ClaimMapping claimMapping = new ClaimMapping();
+		claimMapping.setClaim(convertClaimDTOToClaim(claimMappingDTO.getClaim()));
+		claimMapping.setMappedAttribute(claimMappingDTO.getMappedAttribute());
+
+		ClaimAttributeDTO[] attributes = claimMappingDTO.getMappedAttributes();
+
+		if (attributes != null) {
+			for (int i = 0; i < attributes.length; i++) {
+				if (attributes[i].getDomainName()==null){
+					claimMapping.setMappedAttribute(attributes[i].getAttributeName());
+				}else {
+				claimMapping.setMappedAttribute(attributes[i].getDomainName(),
+						attributes[i].getAttributeName());
+				}
+			}
+		}
+		return claimMapping;
+	}
 
     private ClaimDTO convertClaimToClaimDTO(Claim claim) {
         ClaimDTO claimDTO = new ClaimDTO();
@@ -248,6 +285,8 @@ public class ClaimAdminService {
         claimDTO.setRequired(claim.isRequired());
         claimDTO.setSupportedByDefault(claim.isSupportedByDefault());
         claimDTO.setValue(claim.getValue());
+        claimDTO.setCheckedAttribute(claim.isCheckedAttribute());
+        claimDTO.setReadOnly(claim.isReadOnly());
         return claimDTO;
     }
 
@@ -262,9 +301,11 @@ public class ClaimAdminService {
         claim.setDisplayTag(claimDTO.getDisplayTag());
         claim.setRegEx(claimDTO.getRegEx());
         claim.setRequired(claimDTO.isRequired());
-                
+        claim.setCheckedAttribute(claimDTO.isCheckedAttribute());
+        claim.setReadOnly(claimDTO.isReadOnly());
         return claim;
     }
+    
     private ClaimDialect convertClaimDialectDTOToClaimDialect(ClaimDialectDTO claimDialectDTO){
         ClaimDialect claimDialect=new ClaimDialect();
         claimDialect.setClaimMapping(convertClaimMappingDTOArrayToClaimMappingArray(

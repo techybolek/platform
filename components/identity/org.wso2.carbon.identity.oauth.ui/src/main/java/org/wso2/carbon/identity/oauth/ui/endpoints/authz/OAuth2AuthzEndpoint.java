@@ -18,6 +18,15 @@
 
 package org.wso2.carbon.identity.oauth.ui.endpoints.authz;
 
+import java.io.IOException;
+import java.rmi.RemoteException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.apache.amber.oauth2.as.request.OAuthAuthzRequest;
 import org.apache.amber.oauth2.as.response.OAuthASResponse;
 import org.apache.amber.oauth2.common.exception.OAuthProblemException;
@@ -25,6 +34,8 @@ import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.oltu.openidconnect.as.util.OIDCAuthzServerUtil;
+import org.apache.oltu.openidconnect.as.OIDC;
 import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
 import org.wso2.carbon.identity.oauth.ui.OAuth2Parameters;
 import org.wso2.carbon.identity.oauth.ui.OAuthConstants;
@@ -34,20 +45,16 @@ import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientValidationResponseDT
 import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.ui.util.CharacterEncoder;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.rmi.RemoteException;
-
 /**
  * This servlet handles the authorization endpoint and token endpoint.
  */
 public class OAuth2AuthzEndpoint extends HttpServlet {
 
-    private static final Log log = LogFactory.getLog(OAuth2AuthzEndpoint.class);
+    /**
+	 * 
+	 */
+    private static final long serialVersionUID = 2962823648421720546L;
+	private static final Log log = LogFactory.getLog(OAuth2AuthzEndpoint.class);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -135,11 +142,54 @@ public class OAuth2AuthzEndpoint extends HttpServlet {
             params.setScopes(oauthRequest.getScopes());
             params.setState(oauthRequest.getState());
             params.setClientId(clientId);
+            
+			// OpenID Connect request parameters
+			if (OIDCAuthzServerUtil.isOIDCAuthzRequest(oauthRequest.getScopes())) {
+				// these parameters must be processed in the complete implementation
+				params.setNonce(oauthRequest.getParam(OIDC.AuthZRequest.NONCE));
+				params.setDisplay(oauthRequest.getParam(OIDC.AuthZRequest.DISPLAY));
+				params.setRequest(oauthRequest.getParam(OIDC.AuthZRequest.REQUEST));
+				params.setRequestURI(oauthRequest.getParam(OIDC.AuthZRequest.REQUEST_URI));
+				params.setIDTokenHint(oauthRequest.getParam(OIDC.AuthZRequest.ID_TOKEN_HINT));
+				params.setLoginHint(oauthRequest.getParam(OIDC.AuthZRequest.LOGIN_HINT));
+				String prompt = oauthRequest.getParam(OIDC.AuthZRequest.PROMPT);
+				params.setPrompt(prompt);
+				req.getSession().setAttribute(OAuthConstants.OIDCSessionConstant.OIDC_REQUEST, "true");
+				req.getSession().setAttribute(OAuthConstants.OIDCSessionConstant.OIDC_RP, params.getApplicationName());
+				if(prompt != null) { // processing prompt
+					// prompt can be four values {none, login, consent, select_profile}
+					String[] prompts = prompt.trim().split(" ");
+					boolean contains_none = prompt.contains("none");
+					if(prompts.length > 1 && contains_none) { // invalid combination
+						log.error("Invalid prompt variable combination. " + prompt);
+						HttpSession session = req.getSession();
+						session.setAttribute(OAuthConstants.OAUTH_ERROR_CODE, OAuth2ErrorCodes.INVALID_REQUEST);
+						session.setAttribute(OAuthConstants.OAUTH_ERROR_MESSAGE, "Invalid prompt combination. The valune none cannot be used with others");
+						String errorPageURL = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth-error.jsp";
+						errorPageURL = errorPageURL.replace("/oauth2/authorize", "");
+						return errorPageURL;
+					}
+					Object logedInUser = req.getSession().getAttribute(OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER);
+					if(contains_none && logedInUser == null) {
+						log.error("User not authenticated. " + prompt);
+						HttpSession session = req.getSession();
+						session.setAttribute(OAuthConstants.OAUTH_ERROR_CODE, OAuth2ErrorCodes.INVALID_REQUEST);
+						session.setAttribute(OAuthConstants.OAUTH_ERROR_MESSAGE, "Received prompt none but no authenticated user found");
+						String errorPageURL = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth-error.jsp";
+						errorPageURL = errorPageURL.replace("/oauth2/authorize", "");
+						return errorPageURL;
+					}
+					if(!prompt.contains("login")) { // we should not log the user
+						req.getSession().setAttribute(OAuthConstants.OAUTH2_PARAMS, params);
+			            String loginPage = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth2-authn-finish.jsp";
+			            loginPage = loginPage.replace("/oauth2/authorize", "");
+			            return loginPage;
+					}
+				}
+			}
 
-            HttpSession session = req.getSession();
-            session.setAttribute(OAuthConstants.OAUTH2_PARAMS, params);
-            String loginPage = CarbonUIUtil.getAdminConsoleURL(req) +
-                    "oauth/oauth2_authn_ajaxprocessor.jsp";
+            req.getSession().setAttribute(OAuthConstants.OAUTH2_PARAMS, params);
+            String loginPage = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth2_authn_ajaxprocessor.jsp";
             loginPage = loginPage.replace("/oauth2/authorize", "");
             return loginPage;
 

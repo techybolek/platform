@@ -22,10 +22,10 @@ import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.user.api.ClaimMapping;
+import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.claim.Claim;
 import org.wso2.carbon.user.core.claim.ClaimManager;
-import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.UserStoreException;
 
 public class IdentityClaimManager {
 
@@ -41,21 +41,21 @@ public class IdentityClaimManager {
     private IdentityClaimManager() throws IdentityException {
     }
 
-    public static IdentityClaimManager getInstance() throws IdentityException {
+	public static IdentityClaimManager getInstance() throws IdentityException {
 
-        // Enables attempted thread-safety using double-check locking
-        if (claimManager == null) {
-            synchronized (lock) {
-                if (claimManager == null) {
-                    claimManager = new IdentityClaimManager();
-                    if (log.isDebugEnabled()) {
-                        log.debug("IdentityClaimManager singleton instance created successfully");
-                    }
-                }
-            }
-        }
-        return claimManager;
-    }
+		// Enables attempted thread-safety using double-check locking
+		if (claimManager == null) {
+			synchronized (lock) {
+				if (claimManager == null) {
+					claimManager = new IdentityClaimManager();
+					if (log.isDebugEnabled()) {
+						log.debug("IdentityClaimManager singleton instance created successfully");
+					}
+				}
+			}
+		}
+		return claimManager;
+	}
 
         /**
      * Returns all supported claims.
@@ -66,7 +66,15 @@ public class IdentityClaimManager {
     public Claim[] getAllSupportedClaims(UserRealm realm) throws IdentityException {
         try {
             ClaimManager claimAdmin = realm.getClaimManager();
-            return (Claim[]) claimAdmin.getAllSupportClaimsByDefault();
+            ClaimMapping[] mappings = claimAdmin.getAllSupportClaimMappingsByDefault();
+            Claim[] claims = new Claim[0];
+            if (mappings != null ){ 
+				claims = new Claim[mappings.length];
+				for (int i = 0; i < mappings.length; i++) {
+					claims[i]= (Claim)mappings[i].getClaim();
+				}
+			}
+            return claims;
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             log.error("Error occurred while loading supported claims", e);
             getException("Error occurred while loading supported claima", e);
@@ -90,13 +98,19 @@ public class IdentityClaimManager {
         try {
 
             claimAdmin = realm.getClaimManager();
-            claims = (Claim[]) claimAdmin.getAllClaims(dialectUri);
             requiredClaims = new ArrayList<Claim>();
-            for (int i = 0; i < claims.length; i++) {
-                if (claims[i].isSupportedByDefault()) {
-                    requiredClaims.add(claims[i]);
-                }
-            }
+            
+            ClaimMapping[] mappings = claimAdmin.getAllClaimMappings(dialectUri);;
+
+            if (mappings != null ){ 
+				claims = new Claim[mappings.length];
+				for (int i = 0; i < mappings.length; i++) {
+	                if (mappings[i].getClaim().isSupportedByDefault()) {
+	                    requiredClaims.add((Claim)mappings[i].getClaim());
+	                }
+				}
+			}
+
             return requiredClaims.toArray(new Claim[requiredClaims.size()]);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             log.error("Error occurred while loading supported claims from the dialect "

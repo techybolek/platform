@@ -51,6 +51,7 @@
                 <link>../oauth/oauth-login.jsp</link>
                 <link>../oauth/oauth-login-finish.jsp</link>
                 <link>../oauth/oauth2-authn-finish.jsp</link>
+                <link>../oauth/oauth2_consent_ajaxprocessor.jsp</link>
             </authentication>
         </bypass>
     </framework-configuration>

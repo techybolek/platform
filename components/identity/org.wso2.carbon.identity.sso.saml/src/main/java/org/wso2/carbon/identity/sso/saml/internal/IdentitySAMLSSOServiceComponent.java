@@ -19,6 +19,7 @@ package org.wso2.carbon.identity.sso.saml.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.identity.authenticator.saml2.sso.common.Util;
 import org.wso2.carbon.identity.sso.saml.SSOServiceProviderConfigManager;
 import org.wso2.carbon.identity.sso.saml.util.SAMLSSOUtil;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -48,6 +49,7 @@ public class IdentitySAMLSSOServiceComponent{
         // Register a SSOServiceProviderConfigManager object as an OSGi Service
         ctxt.getBundleContext().registerService(SSOServiceProviderConfigManager.class.getName(),
                                                 SSOServiceProviderConfigManager.getInstance(), null);
+        Util.initSSOConfigParams();
         if (log.isDebugEnabled()) {
             log.info("Identity SAML SSO bundle is activated");
         }

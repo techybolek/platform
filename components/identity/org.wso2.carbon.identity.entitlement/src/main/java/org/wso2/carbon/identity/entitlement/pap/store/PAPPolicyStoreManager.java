@@ -25,6 +25,7 @@ import org.wso2.carbon.identity.entitlement.dto.PolicyDTO;
 public class PAPPolicyStoreManager {
 
     private PAPPolicyStore store;
+    
     private static Log log = LogFactory.getLog(PAPPolicyStoreManager.class);
 
     public PAPPolicyStoreManager(PAPPolicyStore store) {

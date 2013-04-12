@@ -87,103 +87,6 @@ public class EntitlementAdminServiceClient {
         }
     }
 
-    /**
-     * Gets all subscriber ids
-     *
-     * @return subscriber ids as String array
-     * @throws AxisFault throws
-     */
-    public String[] getSubscriberIds() throws AxisFault {
-
-        try {
-            return stub.getSubscriberIds();
-        } catch (Exception e) {
-            handleException(e.getMessage(), e);
-        }
-
-        return null;
-    }
-
-    /**
-     * Gets subscriber data
-     *
-     * @param id subscriber id
-     * @return subscriber data as SubscriberDTO object
-     * @throws AxisFault throws
-     */
-    public ModuleDataHolder getSubscriber(String id) throws AxisFault {
-
-        try {
-            return stub.getSubscriber(id);
-        } catch (Exception e) {
-            handleException(e.getMessage(), e);
-        }
-
-        return null;
-    }
-
-    /**
-     * Updates or creates subscriber data
-     *
-     * @param holder subscriber data as ModuleDataHolder object
-     * @throws AxisFault throws
-     */
-    public void updateSubscriber(ModuleDataHolder holder,boolean update) throws AxisFault {
-
-        try {
-            stub.updateSubscriber(holder,update);
-        } catch (Exception e) {
-            handleException(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Removes publisher data
-     *
-     * @param id subscriber id
-     * @throws AxisFault throws
-     */
-    public void deleteSubscriber(String id) throws AxisFault {
-
-        try {
-            stub.deleteSubscriber(id);
-        } catch (Exception e) {
-            handleException(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Publishes given set of policies to given set of subscribers
-     *
-     * @param policies policy ids as String array, if null or empty, all policies are published
-     * @param subscriberId subscriber ids as String array, if null or empty, publish to all subscribers
-     * @throws AxisFault throws
-     */
-    public void publishAll(String[] policies, String[] subscriberId) throws AxisFault {
-
-        try {
-            stub.publishPolicies(policies, subscriberId);
-        } catch (Exception e) {
-            handleException(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Get all publisher modules properties that is needed to configure
-     *
-     * @return publisher modules properties as ModuleDataHolder
-     * @throws AxisFault throws
-     */
-    public ModuleDataHolder[] getPublisherModuleProperties() throws AxisFault {
-
-        try {
-            return stub.getPublisherModuleProperties();
-        } catch (Exception e) {
-            handleException(e.getMessage(), e);
-        }
-
-        return null;
-    }
 
     /**
      * Evaluate XACML request with PDP
@@ -198,13 +101,14 @@ public class EntitlementAdminServiceClient {
                 request = request.trim().replaceAll("&lt;", "<"); //TODO should be properly fixed
                 request = request.trim().replaceAll("&gt;", ">");
             }
-            return ClientUtil.getStatus(stub.doTestRequest(request));
+            return stub.doTestRequest(request);
         } catch (Exception e) {
-            handleException("Error occurred while policy evaluation", e);
+            handleException("Error occurred while test policy evaluation", e);
         }
         return null;
     }
 
+    
     public PDPDataHolder getPDPData() throws AxisFault {
 
         try {

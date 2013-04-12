@@ -103,10 +103,10 @@ public class WSRealmTenantManager implements TenantManager {
         return new Tenant[0];
     }
 
+    //TODO:implement methods
     public org.wso2.carbon.user.api.Tenant[] getAllTenantsForTenantDomainStr(String s)
             throws org.wso2.carbon.user.api.UserStoreException {
         return new org.wso2.carbon.user.api.Tenant[0];
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public String getDomain(int tenantId) throws UserStoreException {
@@ -127,7 +127,9 @@ public class WSRealmTenantManager implements TenantManager {
         return null;
     }
 
-    public String[] getAllTenantDomainStrOfUser(String s) throws org.wso2.carbon.user.api.UserStoreException {
+    //TODO:implement methods
+    public String[] getAllTenantDomainStrOfUser(String s)
+            throws org.wso2.carbon.user.api.UserStoreException {
         return new String[0];  //To change body of implemented methods use File | Settings | File Templates.
     }
 

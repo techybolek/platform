@@ -18,6 +18,8 @@
 package org.wso2.carbon.identity.scim.ui.utils;
 
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.scim.common.stub.config.SCIMProviderDTO;
+import org.wso2.carbon.identity.scim.ui.SCIMConstants;
 
 public class SCIMUIUtils {
     public static String getGlobalConsumerId() {
@@ -29,5 +31,24 @@ public class SCIMUIUtils {
         String currentTenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain();
         String consumerId = loggedInUser + "@" + currentTenantDomain;
         return consumerId;
+    }
+
+    public static SCIMProviderDTO[] doPaging(int pageNumber, SCIMProviderDTO[] scimProviderDTOSet) {
+
+        int itemsPerPageInt = SCIMConstants.DEFAULT_ITEMS_PER_PAGE;
+        SCIMProviderDTO[] returnedSCIMProviderDTOSet;
+
+        int startIndex = pageNumber * itemsPerPageInt;
+        int endIndex = (pageNumber + 1) * itemsPerPageInt;
+        if (itemsPerPageInt < scimProviderDTOSet.length) {
+            returnedSCIMProviderDTOSet = new SCIMProviderDTO[itemsPerPageInt];
+        } else {
+            returnedSCIMProviderDTOSet = new SCIMProviderDTO[scimProviderDTOSet.length];
+        }
+        for (int i = startIndex, j = 0; i < endIndex && i < scimProviderDTOSet.length; i++, j++) {
+            returnedSCIMProviderDTOSet[j] = scimProviderDTOSet[i];
+        }
+
+        return returnedSCIMProviderDTOSet;
     }
 }

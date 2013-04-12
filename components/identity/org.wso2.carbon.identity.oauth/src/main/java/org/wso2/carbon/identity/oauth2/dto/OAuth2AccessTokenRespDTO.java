@@ -24,6 +24,7 @@ public class OAuth2AccessTokenRespDTO {
     String tokenType;
     String accessToken;
     String refreshToken;
+    private String idToken;
     String callbackURI;
     boolean error;
     String errorCode;
@@ -114,5 +115,19 @@ public class OAuth2AccessTokenRespDTO {
 
     public void setExpiresInMillis(long expiresInMillis) {
         this.expiresInMillis = expiresInMillis;
+    }
+
+	/**
+	 * @return the idToken
+	 */
+    public String getIDToken() {
+	    return idToken;
+    }
+
+	/**
+	 * @param idToken the idToken to set
+	 */
+    public void setIDToken(String idToken) {
+	    this.idToken = idToken;
     }
 }

@@ -147,14 +147,9 @@
     %>
 
     <div id="workArea">
-        <table style="width:100%">
-            <tr>
-                <td style="width:50%">
-                    <div id="loginbox" class="identity-box">
+
+        <div id="loginbox" style="width:400px;">
                         <strong><fmt:message key='signin.with.openid'/></strong>
-
-                        <h2></h2>
-
                         <form action="openid.jsp">
                             <%
                                 if (cssLocation != null) {
@@ -187,10 +182,16 @@
                                 </tr>
                             </table>
                         </form>
+                        <br>
+			           
+
                     </div>
-                </td>
-            </tr>
-        </table>
+
+
+
+
+
+
 
     </div>
     <% } %>
@@ -202,7 +203,7 @@
         // Closing HTML page tags.
 %>
 <div class="footer-content">
-    <div class="copyright">&copy; 2008 - 2009 WSO2 Inc. All Rights Reserved.</div>
+    <div class="copyright">&copy; 2008 - 2013 WSO2 Inc. All Rights Reserved.</div>
 </div>
 </body>
 </html>

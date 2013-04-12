@@ -24,6 +24,7 @@ import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.entitlement.EntitlementConstants;
 import org.wso2.carbon.identity.entitlement.dto.ModuleDataHolder;
 import org.wso2.carbon.identity.entitlement.dto.ModulePropertyDTO;
+import org.wso2.carbon.identity.entitlement.dto.ModuleStatusHolder;
 import org.wso2.carbon.identity.entitlement.internal.EntitlementServiceComponent;
 import org.wso2.carbon.identity.entitlement.pap.store.PAPPolicyStore;
 import org.wso2.carbon.registry.core.Collection;
@@ -124,7 +125,7 @@ public class PolicyPublisher{
             Resource resource;
 
             if(registry.resourceExists(subscriberPath)){
-                if(update == true){
+                if(update){
                     resource = registry.get(subscriberPath);
                 } else {
                     throw new IdentityException("Subscriber ID already exists!");
@@ -216,15 +217,35 @@ public class PolicyPublisher{
         for(ModulePropertyDTO dto : propertyDTOs){
             if(dto.getId() != null && dto.getValue() != null) {
                 ArrayList<String> list = new ArrayList<String>();
+                //password must be encrypted TODO
+                if(dto.isSecret()){
+
+                }
                 list.add(dto.getValue());
                 list.add(dto.getDisplayName());
                 list.add(Integer.toString(dto.getDisplayOrder()));
                 list.add(Boolean.toString(dto.isRequired()));
+                list.add(Boolean.toString(dto.isSecret()));
                 resource.setProperty(dto.getId(), list);
             }
         }
-        resource.setProperty(ModuleDataHolder.MODULE_NAME, holder.getModuleName());
 
+        ModuleStatusHolder[] statusHolders = holder.getStatusHolders();
+        int num = 0;
+        if(statusHolders != null){
+            for(ModuleStatusHolder statusHolder : statusHolders){
+                List<String>  list = new ArrayList<String>();
+                list.add(statusHolder.getTimeInstance());
+                list.add(statusHolder.getKey());
+                if(statusHolder.getMessage() != null){
+                    list.add(statusHolder.getMessage());
+                }
+                resource.setProperty(ModuleStatusHolder.STATUS_HOLDER_NAME + num, list);
+                num ++;
+            }
+        }
+
+        resource.setProperty(ModuleDataHolder.MODULE_NAME, holder.getModuleName());
     }
 
     public Set<PolicyPublisherModule> getPublisherModules() {

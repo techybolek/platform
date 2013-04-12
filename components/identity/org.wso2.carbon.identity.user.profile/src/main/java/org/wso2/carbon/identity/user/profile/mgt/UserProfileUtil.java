@@ -34,7 +34,7 @@ public class UserProfileUtil {
         } else {
             AuthorizationManager authorizer = realm.getAuthorizationManager();
             isAuthrized = authorizer.isUserAuthorized(currentUserName,
-                    CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION + "/manage/modify/user-profile",
+                    CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION + "/configure/security/usermgt/profiles",
                     "ui.execute");
         }
         return isAuthrized;

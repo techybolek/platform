@@ -18,7 +18,8 @@
 
 package org.wso2.carbon.identity.oauth.ui.client;
 
-import org.apache.axiom.om.OMElement;
+import java.rmi.RemoteException;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
@@ -26,9 +27,14 @@ import org.wso2.carbon.identity.oauth.ui.internal.OAuthUIServiceComponentHolder;
 import org.wso2.carbon.identity.oauth2.OAuth2Service;
 import org.wso2.carbon.identity.oauth2.ResponseHeader;
 import org.wso2.carbon.identity.oauth2.stub.OAuth2ServiceStub;
-import org.wso2.carbon.identity.oauth2.stub.dto.*;
-
-import java.rmi.RemoteException;
+import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AccessTokenReqDTO;
+import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AccessTokenRespDTO;
+import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AuthorizeReqDTO;
+import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AuthorizeRespDTO;
+import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientValidationResponseDTO;
+import org.wso2.carbon.identity.oauth2.stub.dto.OAuthRevocationRequestDTO;
+import org.wso2.carbon.identity.oauth2.stub.dto.OAuthRevocationResponseDTO;
+import org.wso2.carbon.user.api.Claim;
 
 public class OAuth2ServiceClient {
 
@@ -40,7 +46,6 @@ public class OAuth2ServiceClient {
     public OAuth2ServiceClient(String backendServerURL, ConfigurationContext configCtx)
             throws AxisFault {
 
-        OMElement wsModeOM;
         try {
             wsMode = Boolean.parseBoolean(IdentityUtil.getProperty("SeparateBackEnd"));
         } catch (Exception e) {
@@ -142,6 +147,7 @@ public class OAuth2ServiceClient {
         areqDTO.setAuthorizationCode(tokenReqDTO.getAuthorizationCode());
         areqDTO.setScope(tokenReqDTO.getScope());
         areqDTO.setAssertion(tokenReqDTO.getAssertion());
+        areqDTO.setCredentialType(tokenReqDTO.getCredentialType());
 
         org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenRespDTO resp = oauth2Service.issueAccessToken(areqDTO);
 
@@ -155,6 +161,7 @@ public class OAuth2ServiceClient {
         respDTO.setRefreshToken(resp.getRefreshToken());
         respDTO.setError(resp.isError());
         respDTO.setTokenType(resp.getTokenType());
+        respDTO.setIDToken(resp.getIDToken());
 
         org.wso2.carbon.identity.oauth2.stub.types.ResponseHeader[] headers = new org.wso2.carbon.identity.oauth2.stub.types.ResponseHeader[resp.getRespHeaders().length];
         respDTO.setRespHeaders(headers);
@@ -196,6 +203,23 @@ public class OAuth2ServiceClient {
         respDTO.setErrorMsg(resp.getErrorMsg());
 
         return respDTO;
+    }
+    
+    /**
+     * 
+     * @param accessToken
+     * @return
+     * @throws RemoteException
+     */
+    public Claim[] getUserClaims(String accessToken) throws RemoteException {
+    	if(wsMode) {
+    	return null;
+    	}
+    	return _getUserClaims(accessToken);
+    }
+
+	private Claim[] _getUserClaims(String accessToken) {
+	    return oauth2Service.getUserClaims(accessToken);
     }
 
 }

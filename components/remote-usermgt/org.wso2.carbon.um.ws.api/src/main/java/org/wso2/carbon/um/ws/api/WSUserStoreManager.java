@@ -51,7 +51,6 @@ import org.wso2.carbon.user.core.Permission;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.claim.Claim;
-import org.wso2.carbon.user.core.dto.RoleDTO;
 import org.wso2.carbon.user.core.tenant.Tenant;
 
 public class WSUserStoreManager implements UserStoreManager {
@@ -507,12 +506,8 @@ public class WSUserStoreManager implements UserStoreManager {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public RoleDTO[] getRoleNamesWithDomain() throws UserStoreException {
-        return new RoleDTO[0];  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
     public RealmConfiguration getRealmConfiguration() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
 

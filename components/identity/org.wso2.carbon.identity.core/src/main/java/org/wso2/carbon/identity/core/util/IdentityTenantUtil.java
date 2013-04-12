@@ -17,12 +17,14 @@
 */
 package org.wso2.carbon.identity.core.util;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonException;
-import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.AdminServicesUtil;
 import org.wso2.carbon.core.util.AnonymousSessionUtil;
@@ -30,14 +32,10 @@ import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 public class IdentityTenantUtil {
 
@@ -67,6 +65,7 @@ public class IdentityTenantUtil {
         return getRegistryForAnonymousSession(domainName, username);
     }
 
+    @SuppressWarnings("deprecation")
     public static Registry getRegistry() throws IdentityException {
         try {
             return AdminServicesUtil.getSystemRegistry();
@@ -80,11 +79,11 @@ public class IdentityTenantUtil {
         return getRealmForAnonymousSession(domainName, username);
     }
 
+    @SuppressWarnings("deprecation")
     private static Registry getRegistryForAnonymousSession(String domainName, String username)
             throws IdentityException {
         try {
             if (domainName == null && username == null) {
-                ServerConfiguration serverConfig = ServerConfiguration.getInstance();
                 domainName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
             }
             if (username == null) {
@@ -118,17 +117,7 @@ public class IdentityTenantUtil {
             log.error("Error obtaining the realm", e);
             throw new IdentityException("Error Obtaining a realm", e);
         }
-        return null;
-    }
-
-    private static UserRegistry getUserRegistryByUsername(String username) throws IdentityException {
-        try {
-            return AnonymousSessionUtil.getUserRegistryByUserName(registryService, realmService,
-                    username);
-        } catch (CarbonException e) {
-            log.error("Error obtaining UserRegistry", e);
-            throw new IdentityException("Error obtaining UserRegistry", e);
-        }
+		return null;
     }
 
     public static void setRealmService(RealmService realmService) {

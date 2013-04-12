@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -21,16 +21,11 @@ package org.wso2.carbon.identity.mgt.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.mgt.IdentityMgtException;
-import org.wso2.carbon.identity.mgt.dto.UserChallengesDTO;
-import org.wso2.carbon.identity.mgt.dto.UserEvidenceDTO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.user.core.UserCoreConstants;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
-import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.api.Tenant;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
  * user claim related functions are done by this
@@ -133,8 +128,8 @@ public class ClaimsMgtUtil {
             if (userStoreManager != null) {
                 String oldValue = userStoreManager.getUserClaimValue(userName, claim, null);
                 if(oldValue == null || !oldValue.equals(value)){                
-                    ((AbstractUserStoreManager)userStoreManager).doSetUserClaimValue(userName, claim, value,
-                                                                    UserCoreConstants.DEFAULT_PROFILE);
+                    userStoreManager.setUserClaimValue(userName, claim, value,
+                                                                UserCoreConstants.DEFAULT_PROFILE);
                 }
             }
         } catch (Exception e) {

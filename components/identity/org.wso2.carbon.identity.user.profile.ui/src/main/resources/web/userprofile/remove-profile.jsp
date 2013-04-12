@@ -41,6 +41,9 @@
     String BUNDLE = "org.wso2.carbon.identity.user.profile.ui.i18n.Resources";
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 	String fromUserMgt = (String) request.getParameter("fromUserMgt");
+	
+    if (fromUserMgt==null) fromUserMgt = "false";
+
     
     try {
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);

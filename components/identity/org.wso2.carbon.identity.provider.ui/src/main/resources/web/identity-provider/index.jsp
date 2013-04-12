@@ -87,7 +87,7 @@
 
         <div id="workArea">
             <script type="text/javascript">
-                function remove(openID, index) {
+                function itemRemove(openID, index) {
                     if (index == '0') {
                         CARBON.showWarningDialog("<fmt:message key='cannot.remove.openid'/>", null, null);
                         return;
@@ -117,7 +117,7 @@
                     <td width="50%">
                     <% if(!openIDs[i].equals(primaryOpenID)) {%>
                         <a title="<fmt:message key='remove.openid'/>"
-                           onclick="remove('<%=openIDs[i]%>','<%=i%>');return false;"
+                           onclick="itemRemove('<%=openIDs[i]%>','<%=i%>');return false;"
                            href="#" style="background-image: url(images/delete.gif);" class="icon-link"><fmt:message key='delete'/></a>
                     <% } else {%>      
                         <fmt:message key='openid.primary'/>

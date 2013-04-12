@@ -44,16 +44,6 @@
 
 <script type="text/javascript">
 
-    function doValidationOnClaims() {
-        var fld = document.getElementById("realmName");
-        var value = fld.value;
-        value = value.replace(/^\s+/, "");
-        if (value.length == 0) {
-            CARBON.showWarningDialog("<fmt:message key='enter.valid.realm.name'/>", null, null);
-            return false;
-        }
-        return true;
-    }
     function removePassiveSTSTrustService(realm) {
         CARBON.showConfirmationDialog("<fmt:message key='remove.message1'/>" + realm + "<fmt:message key='remove.message2'/>",
                                       function() {
@@ -77,24 +67,13 @@
         }
     }
 
-    function loadClaims() {
-        var selectedDialect = document.getElementById('claimDialects').options[document.getElementById('claimDialects').selectedIndex].value;
-        var enteredRealmName = document.getElementById('realmName').value;
-        document.getElementById('claimDialects').value = selectedDialect;
-        location.href = 'passive-sts.jsp?claimDialect=' + selectedDialect + '&enteredRealmName=' + enteredRealmName;
-    }
-
 </script>
 
 <%
+    String addAction = "add-passive-sts-trusted-service.jsp";
     String cookie = null;
     IdentityPassiveSTSClient passiveSTSClient = null;
     ClaimDTO[] trustedServices = null;
-    ClaimDialectDTO claimMapping = null;
-    String[] dialects;
-    String dialect;
-    ClaimAdminClient claimAdminClient;
-    String enteredRealmName = request.getParameter("enteredRealmName");
     try {
         cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         ConfigurationContext configContext = (ConfigurationContext) session.getServletContext()
@@ -102,13 +81,6 @@
         String backendURL = CarbonUIUtil.getServerURL(session.getServletContext(), session);
         passiveSTSClient = new IdentityPassiveSTSClient(backendURL, configContext);
         trustedServices = passiveSTSClient.getAllTrustedServices();
-
-        claimAdminClient = new ClaimAdminClient(cookie, backendURL, configContext);
-        dialect = request.getParameter("claimDialect");
-        if (dialect == null) {
-            dialect = "http://wso2.org/claims";
-        }
-        claimMapping = claimAdminClient.getAllClaimMappingsByDialect(dialect);
 
     } catch (Exception e) {
 %>
@@ -123,100 +95,13 @@
 <div id="middle">
     <h2><fmt:message key="passive.sts.configuration"/></h2>
 
+    <div style="height:30px;">
+        <a href="javascript:document.location.href='<%=addAction%>'" class="icon-link"
+           style="background-image:url(../admin/images/add.gif);"><fmt:message
+                key='sts.trusted.services.new'/></a>
+    </div>
+
     <div id="workArea">
-        <form method="get" action="add-passive-sts-trusted-service.jsp"
-              name="passiveSTSTrustedService"
-              onsubmit="return doValidationOnClaims();">
-            <table class="styledLeft" width="100%">
-                <thead>
-                <tr>
-                    <th><fmt:message key="sts.trusted.services.new"/></th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td class="formRow">
-                        <table class="normal" cellspacing="0" style="margin-left:-10px;">
-                            <tr>
-                                <td><fmt:message key="passive.sts.service.realms"/><font
-                                        color="red">*</font></td>
-                                <td>
-                                    <%
-                                        if (enteredRealmName != null) {
-                                    %>
-                                    <input type="text" id="realmName" name="realmName"
-                                           class="text-box-big" value="<%=enteredRealmName%>"/>
-                                    <%
-                                    } else {
-                                    %>
-                                    <input type="text" id="realmName" name="realmName"
-                                           class="text-box-big"/>
-                                    <%
-                                        }
-                                    %>
-
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><fmt:message key="passive.sts.claim.dialect"/></td>
-                                <td><select onchange="loadClaims()" id="claimDialects"
-                                            name="dialect">
-                                    <%
-                                        if (claimMapping != null) {
-                                            for (ClaimDialectDTO claimDialectDTO : claimAdminClient.getAllClaimMappings()) {
-                                                if (claimDialectDTO.getDialectURI().trim().equals(dialect.trim())) {
-                                    %>
-                                    <option name="dialect" selected="true"
-                                            value="<%=claimDialectDTO.getDialectURI()%>"><%=claimDialectDTO.getDialectURI()%>
-                                    </option>
-                                    <%
-
-                                    } else {
-                                    %>
-                                    <option name="dialect"
-                                            value="<%=claimDialectDTO.getDialectURI()%>"><%=claimDialectDTO.getDialectURI()%>
-                                    </option>
-                                    <%
-                                                }
-                                            }
-                                        }
-                                    %>
-                                </select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><fmt:message key="passive.sts.default.claims"/></td>
-                                <td>
-                                    <table style="margin-left:-10px;">
-                                        <%
-                                            if (claimMapping != null && claimMapping.getClaimMappings() != null && claimMapping.getClaimMappings().length > 0) {
-                                                for (ClaimMappingDTO dto : claimMapping.getClaimMappings()) {
-                                        %>
-                                        <tr>
-                                            <td>
-                                                <input type="checkbox" name="claims"
-                                                       value="<%=dto.getClaim().getClaimUri()%>"/><%=dto.getClaim().getClaimUri()%>
-                                            </td>
-                                        </tr>
-                                        <%
-                                                }
-                                            }
-                                        %>
-                                    </table>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="buttonRow">
-                        <input class="button" type="submit"
-                               value="<fmt:message key="sts.apply.caption"/>"/>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </form>
         <br/>
 
         <form>

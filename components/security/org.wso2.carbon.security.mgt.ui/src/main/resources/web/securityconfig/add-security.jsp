@@ -27,6 +27,9 @@
     String forwardTo = null;
     String serviceName = (String) session.getAttribute("serviceName");
     String specificPath = (String) session.getAttribute("returToPath");
+    if (specificPath==null) {
+    	specificPath = (String) session.getAttribute("returnToPath");
+    }
     String BUNDLE = "org.wso2.carbon.security.ui.i18n.Resources";
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
     try {

@@ -26,6 +26,7 @@ import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.apache.amber.oauth2.common.message.OAuthResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.oauth.common.CarbonOAuthTokenRequest;
 import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
 import org.wso2.carbon.identity.oauth.ui.OAuthClientException;
 import org.wso2.carbon.identity.oauth.ui.OAuthConstants;
@@ -96,7 +97,7 @@ public class OAuth2TokenEndpoint {
         }
 
         try {
-            OAuthTokenRequest oauthRequest = new OAuthTokenRequest(httpRequest);
+            CarbonOAuthTokenRequest oauthRequest = new CarbonOAuthTokenRequest(httpRequest);
             OAuth2TokenClient tokenClient = new OAuth2TokenClient();
             // exchange the access token for the authorization grant.
             OAuth2AccessTokenRespDTO oauth2AccessTokenResp = tokenClient.getAccessToken(oauthRequest);

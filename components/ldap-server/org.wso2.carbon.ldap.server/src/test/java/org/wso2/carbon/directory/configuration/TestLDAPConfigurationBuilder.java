@@ -86,7 +86,10 @@ public class TestLDAPConfigurationBuilder extends TestCase {
         assertEquals(info.getPreferredDomainComponent(), "wso2");
         assertEquals(info.getRootDN(), "dc=wso2,dc=org");
 
-        AdminInfo admin = info.getPartitionAdministrator();
+        /*Commenting out the following part because we moved creating user admin entry and group
+         *entry to user core and not reading following config in ldap component anymore.*/
+
+        /*AdminInfo admin = info.getPartitionAdministrator();
         assertNotNull(admin);
 
         //assertEquals(admin.getAdminUID(), "myadmin");
@@ -100,7 +103,7 @@ public class TestLDAPConfigurationBuilder extends TestCase {
 
         //assertEquals(groupInfo.getAdminRoleName(), "super");
         assertEquals(groupInfo.getGroupNameAttribute(), "cn");
-        assertEquals(groupInfo.getMemberNameAttribute(), "member");
+        assertEquals(groupInfo.getMemberNameAttribute(), "member");*/
 
 
     }

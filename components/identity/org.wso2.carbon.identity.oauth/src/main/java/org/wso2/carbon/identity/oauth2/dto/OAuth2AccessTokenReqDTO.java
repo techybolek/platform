@@ -29,6 +29,9 @@ public class OAuth2AccessTokenReqDTO {
     private String resourceOwnerPassword;
     private String refreshToken;
     private String assertion;
+    private String clientAssertionType;
+    private String clientAssertion;
+    private String credentialType;
 
     public String getClientId() {
         return clientId;
@@ -108,5 +111,29 @@ public class OAuth2AccessTokenReqDTO {
 
     public void setAssertion(String assertion) {
         this.assertion = assertion;
+    }
+
+    public String getClientAssertionType() {
+        return clientAssertionType;
+    }
+
+    public void setClientAssertionType(String clientAssertionType) {
+        this.clientAssertionType = clientAssertionType;
+    }
+
+    public String getClientAssertion() {
+        return clientAssertion;
+    }
+
+    public void setClientAssertion(String clientAssertion) {
+        this.clientAssertion = clientAssertion;
+    }
+
+	public String getCredentialType() {
+	    return credentialType;
+    }
+
+	public void setCredentialType(String credentialType) {
+	    this.credentialType = credentialType;
     }
 }

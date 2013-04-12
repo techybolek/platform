@@ -22,6 +22,9 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Audience;
+import org.opensaml.saml2.core.AudienceRestriction;
+import org.opensaml.saml2.core.Conditions;
 import org.opensaml.saml2.core.Response;
 import org.opensaml.xml.signature.SignatureValidator;
 import org.opensaml.xml.validation.ValidationException;
@@ -61,7 +64,7 @@ public class SAML2SSOAuthenticator implements CarbonServerAuthenticator {
     public boolean login(AuthnReqDTO authDto) {
         HttpSession httpSession = getHttpSession();
         try {
-            Response response = (Response) Util.unmarshall(authDto.getResponse());
+            Response response = (Response) Util.unmarshall(org.wso2.carbon.identity.authenticator.saml2.sso.common.Util.decode(authDto.getResponse()));
             String username = getUsernameFromResponse(response);
 
             if ((username == null) || username.trim().equals("")) {
@@ -72,6 +75,14 @@ public class SAML2SSOAuthenticator implements CarbonServerAuthenticator {
                 // Unable to call #handleAuthenticationCompleted since there is no way to determine
                 // tenantId without knowing the username.
                 return false;
+            }
+            
+            if (!validateAudienceRestriction(response)) {
+            	log.error("Authentication Request is rejected. " +
+                        "SAMLResponse AudienceRestriction validation failed.");
+            	CarbonAuthenticationUtil.onFailedAdminLogin(httpSession, username, -1,
+                                                           "SAML2 SSO Authentication", "Data");
+            	return false;
             }
 
             RegistryService registryService = SAML2SSOAuthBEDataHolder.getInstance().getRegistryService();
@@ -254,6 +265,68 @@ public class SAML2SSOAuthenticator implements CarbonServerAuthenticator {
         }
         return null;
     }
+    
+    /**
+     * Get the Assertion from the SAML2 Response
+     * 
+     * @param response SAML2 Response
+     * @return assertion
+     */
+    private Assertion getAssertionFromResponse(Response response) {
+    	Assertion assertion = null;
+    	if (response != null){
+    		List<Assertion> assertions = response.getAssertions();
+            if (assertions != null && assertions.size() > 0) {
+                assertion = assertions.get(0);
+            } else {
+            	log.error("SAML2 Response doesn't contain Assertions");
+            }
+    	}
+        return assertion;
+    }
+    
+	/**
+	 * Validate the AudienceRestriction of SAML2 Response 
+	 * 
+	 * @param assertion SAML2 Assertion
+	 * @return validity
+	 */
+	public boolean validateAudienceRestriction(Response response) {
+		Assertion assertion = getAssertionFromResponse(response);
+		if (assertion != null) {
+			Conditions conditions = assertion.getConditions();
+    		if (conditions != null) {
+    			List<AudienceRestriction> audienceRestrictions = conditions.getAudienceRestrictions();
+    			if (audienceRestrictions != null && !audienceRestrictions.isEmpty()) {
+    				for (AudienceRestriction audienceRestriction : audienceRestrictions) {
+    					if (audienceRestriction.getAudiences() != null && audienceRestriction.getAudiences().size() > 0) {
+    						for (Audience audience : audienceRestriction.getAudiences()) {
+    							String spId = org.wso2.carbon.identity.authenticator.saml2.sso.common.Util.getServiceProviderId();
+    							if (spId==null){
+    								org.wso2.carbon.identity.authenticator.saml2.sso.common.Util.initSSOConfigParams();
+    								spId = org.wso2.carbon.identity.authenticator.saml2.sso.common.Util.getServiceProviderId();
+    							}
+								if (spId != null) {
+									if (spId.equals(audience.getAudienceURI())) {
+										return true;
+									}
+								} else {
+		    						log.warn("No SAML2 service provider ID defined.");
+								}
+							}
+    					} else {
+    						log.warn("SAML2 Response's AudienceRestriction doesn't contain Audiences");
+    					}
+    				}
+    			} else {
+    				log.error("SAML2 Response doesn't contain AudienceRestrictions");
+    			}
+        	} else {
+        		log.error("SAML2 Response doesn't contain Conditions");
+        	}
+		} 
+		return false;
+	}
 
     private HttpSession getHttpSession() {
         MessageContext msgCtx = MessageContext.getCurrentMessageContext();

@@ -15,6 +15,7 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
+<%@page import="org.wso2.carbon.ui.util.CharacterEncoder"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
 	prefix="carbon"%>
@@ -28,8 +29,10 @@
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.ModulePropertyDTO" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.stub.dto.ModuleStatusHolder" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.PropertyDTOComparator" %>
-<%@ page import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementAdminServiceClient" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants" %>
+<%@ page
+        import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementPolicyAdminServiceClient" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.ui.util.ClientUtil" %>
 
 <%
     String subscriberId;
@@ -40,6 +43,28 @@
     String forwardTo = null;
     boolean fromIndexPage = false;
     boolean view = false;
+    String paginationValue = "" ;
+
+    EntitlementPolicyAdminServiceClient client = null;
+
+
+          int numberOfPages = 0;
+          String isPaginatedString = request.getParameter("isPaginated");
+          if (isPaginatedString != null && isPaginatedString.equals("true")) {
+              client = (EntitlementPolicyAdminServiceClient) session.getAttribute(EntitlementPolicyConstants.ENTITLEMENT_SUBSCRIBER_CLIENT);
+          }
+
+
+
+          String pageNumber = request.getParameter("pageNumber");
+          if (pageNumber == null) {
+              pageNumber = "0";
+          }
+          int pageNumberInt = 0;
+          try {
+              pageNumberInt = Integer.parseInt(pageNumber);
+          } catch (NumberFormatException ignored) {
+          }
 
 
     selectedModule = request.getParameter("selectedModule");
@@ -64,9 +89,16 @@
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
     String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
+
     try {
-        EntitlementAdminServiceClient client = new EntitlementAdminServiceClient(cookie,
-                serverURL, configContext);
+
+        if (client == null) {
+
+            client = new EntitlementPolicyAdminServiceClient(cookie,
+                            serverURL, configContext);
+            session.setAttribute(EntitlementPolicyConstants.ENTITLEMENT_SUBSCRIBER_CLIENT, client);
+        }
+
         if(subscriberId != null){
             subscriber = client.getSubscriber(subscriberId);
             if(subscriber != null){
@@ -94,6 +126,8 @@
             session.setAttribute(EntitlementPolicyConstants.ENTITLEMENT_PUBLISHER_PROPERTY, propertyDTOs);
             java.util.Arrays.sort(propertyDTOs , new PropertyDTOComparator());
         }
+
+        paginationValue = "isPaginated=true&view="+viewString+"&subscriberId="+subscriberId+"&fromIndexPage="+fromIndex;
     } catch (Exception e) {
     	String message = resourceBundle.getString("error.while.performing.advance.search");
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
@@ -117,7 +151,7 @@
 <carbon:breadcrumb
 		label="add.new.subscriber"
 		resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
-		topPage="false"
+		topPage="true"
 		request="<%=request%>" />
 
     <script type="text/javascript" src="../carbon/admin/js/breadcrumbs.js"></script>
@@ -131,23 +165,27 @@
 <script type="text/javascript">
 
     function doAdd(){
-        document.requestForm.action = "policy-publish.jsp";
-        var update = document.createElement("input");
-        update.setAttribute("type", "hidden");
-        update.setAttribute("name", "update");
-        update.setAttribute("value", "false");
-        document.requestForm.appendChild(update);
-        document.requestForm.submit();
+        if(validateUnsafeChars()){
+			document.requestForm.action = "policy-publish.jsp";
+			var update = document.createElement("input");
+			update.setAttribute("type", "hidden");
+			update.setAttribute("name", "update");
+			update.setAttribute("value", "false");
+			document.requestForm.appendChild(update);
+			document.requestForm.submit();
+        }
     }
 
     function doUpdate(){
-        document.requestForm.action = "policy-publish.jsp";
-        var update = document.createElement("input");
-        update.setAttribute("type", "hidden");
-        update.setAttribute("name", "update");
-        update.setAttribute("value", "true");
-        document.requestForm.appendChild(update);
-        document.requestForm.submit();
+        if(validateUnsafeChars()){
+			document.requestForm.action = "policy-publish.jsp";
+			var update = document.createElement("input");
+			update.setAttribute("type", "hidden");
+			update.setAttribute("name", "update");
+			update.setAttribute("value", "true");
+			document.requestForm.appendChild(update);
+			document.requestForm.submit();
+        }
     }
 
     function doCancel(){
@@ -158,73 +196,135 @@
         document.requestForm.submit();
     }
 
+    function validateUnsafeChars(){
+		var unsafeCharPattern = /[<>`\"]/;
+		var elements = document.getElementsByTagName("input");
+		for(i = 0; i < elements.length; i++){
+			if((elements[i].type === 'text' || elements[i].type === 'password') && 
+			   elements[i].value != null && elements[i].value.match(unsafeCharPattern) != null){
+				CARBON.showWarningDialog("<fmt:message key="unsafe.char.validation.msg"/>");
+				return false;
+			}
+		}
+		return true;
+    }
+
 </script>
 
 <div id="middle">
+    <%
+        if(view){
+    %>
+    <h2><fmt:message key="show.subscriber"/></h2>
+    <%
+        } else {
+    %>
     <h2><fmt:message key="add.subscriber"/></h2>
+    <%
+        }
+    %>
     <div id="workArea">
-        <form id="requestForm" name="requestForm" method="post" action="add-subscriber.jsp">
-        <table class="styledLeft noBorders">
         <%
             if(view){
         %>
+        <div class="sectionSeperator">
+            <fmt:message key="subscriber.configurations"/>
+        </div>
+        <%
+            }
+        %>
+        <form id="requestForm" name="requestForm" method="post" action="add-subscriber.jsp">
+        <%
+            if(view){
+        %>
+            <div class="sectionSub">
+            <table  class="styledLeft"  style="width: 100%;margin-top:10px;">
+            <%
+                if(propertyDTOs != null){
+                    for(ModulePropertyDTO dto : propertyDTOs){
+                        if(dto.getSecret()){
+                            continue;
+                        }
+                        if(dto.getDisplayName() != null && dto.getValue() != null){
+            %>
                 <tr>
-                    <td>
-                        <table  class="styledLeft"  style="width: 100%;margin-top:10px;">
-                        <%
-                            if(propertyDTOs != null){
-                                for(ModulePropertyDTO dto : propertyDTOs){
-                                    if("subscriberPassword".equals(dto.getId())){
-                                        continue;
-                                    }
-                                    if(dto.getDisplayName() != null && dto.getValue() != null){
-                        %>
-                            <tr>
-                                <td><%=dto.getDisplayName()%></td>
-                                <td><%=dto.getValue()%></td>
-                            </tr>
-                        <%
-                                    }
-                                }
-                            }
-                        %>
-                        </table>
-                    </td>
+                    <td><%=CharacterEncoder.getSafeText(dto.getDisplayName())%></td>
+                    <td><%=CharacterEncoder.getSafeText(dto.getValue())%></td>
                 </tr>
+            <%
+                        }
+                    }
+                }
+            %>
+            </table>
+            </div>
+            <div class="sectionSeperator">
+                <fmt:message key="subscriber.status"/>
+            </div>
+
+            <div class="sectionSub">
+            <table  class="styledLeft"  style="width: 100%;margin-top:10px;">
+            <thead>
                 <tr>
-                    <td>
-                        <table  class="styledLeft"  style="width: 100%;margin-top:10px;">
-                        <%
-                            if(subscriber != null && subscriber.getStatusHolders() != null){
-                                for(ModuleStatusHolder dto : subscriber.getStatusHolders()){
-                                    if(dto != null && dto.getTimeInstance() != null &&
-                                                                            dto.getKey() != null){
-                        %>
-                                <tr>
-                                    <td><%=dto.getTimeInstance()%></td>
-                                    <td><%=dto.getKey()%></td>
-                                    <td><%=dto.getSuccess()%></td>
-                                    <td>
-                                        <%
-                                          if(dto.getMessage() != null){
-                                        %>
-                                        <%=dto.getMessage()%>
-                                        <%
-                                            }
-                                        %>
-                                    </td>
+                    <th><fmt:message key="time.stamp"/></th>
+                    <th><fmt:message key="policy.id"/></th>
+                    <th><fmt:message key="status"/></th>
+                    <th><fmt:message key="details"/></th>
+                </tr>
+            </thead>
+            <%
+                if(subscriber != null && subscriber.getStatusHolders() != null){
+
+                    ModuleStatusHolder[] dtos = subscriber.getStatusHolders();
+                    int itemsPerPageInt = EntitlementPolicyConstants.DEFAULT_ITEMS_PER_PAGE;
+                           numberOfPages = (int) Math.ceil((double) dtos.length / itemsPerPageInt);
+                    ModuleStatusHolder[] paginatedDTOs = ClientUtil.doModuleStatusHoldersPaging(pageNumberInt, dtos);
+
+                    for(ModuleStatusHolder dto : paginatedDTOs){
+                        if(dto != null && dto.getTimeInstance() != null &&
+                                                                dto.getKey() != null){
+            %>
+                    <tr>
+                        <td><%=dto.getTimeInstance()%></td>
+                        <td><%=dto.getKey()%></td>
+                        <td><%if(dto.getSuccess()){%>Succeed<%} else {%> Failed <%} %></td>
+                        <td>
+                            <%
+                              if(dto.getMessage() != null){
+                            %>
+                            <%=dto.getMessage()%>
+                            <%
+                                }
+                            %>
+                        </td>
+                    </tr>
+            <%
+                        }
+                    }
+
+                    %>
+                <tr>
+                                    <carbon:paginator pageNumber="<%=pageNumberInt%>"
+                                                      numberOfPages="<%=numberOfPages%>"
+                                                      page="add-subscriber.jsp"
+                                                      pageNumberParameterName="pageNumber"
+                                                      parameters="<%=paginationValue%>"
+                                                      resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
+                                                      prevKey="prev" nextKey="next"/>
                                 </tr>
-                        <%
-                                    }
-                                }
-                            }
-                        %>
-                        </table>
-                    </td>
-                </tr>
+                <%
+
+                }
+            %>
+            </table>
+            </div>
+            <div class="buttonRow">
+                <a onclick="doCancel()" class="icon-link" style="background-image:none;"><fmt:message key="back.to.subscribers"/></a><div style="clear:both"></div>
+            </div>
         <%
             } else {
         %>
+            <table class="styledLeft noBorders">
                 <tr>
                     <td class="leftCol-small"><fmt:message key='select.module'/><span class="required">*</span></td>
                     <td colspan="2">
@@ -235,11 +335,11 @@
                                     for (ModuleDataHolder module : dataHolders) {
                                         if(module.getModuleName().equals(selectedModule)) {
                             %>
-                                <option value="<%=selectedModule%>" selected="selected"><%=selectedModule%></option>
+                                <option value="<%=selectedModule%>" selected="selected"><%=CharacterEncoder.getSafeText(selectedModule)%></option>
                             <%
                                         } else {
                             %>
-                                <option value="<%=module.getModuleName()%>"><%=module.getModuleName()%></option>
+                                <option value="<%=module.getModuleName()%>"><%=CharacterEncoder.getSafeText(module.getModuleName())%></option>
                             <%
                                         }
                                     }
@@ -256,12 +356,12 @@
                                 continue;
                             }
                             String inputType = "text";
-                            if ("subscriberPassword".equals(dto.getId())) {
+                            if (dto.getSecret()) {
                                 inputType = "password";
                             }
                 %>
                 <tr>
-                    <td class="leftCol-small"><%=dto.getDisplayName()%>
+                    <td class="leftCol-small"><%=CharacterEncoder.getSafeText(dto.getDisplayName())%>
                     <%
                         if(dto.getRequired()){
                     %>
@@ -286,23 +386,19 @@
             <%
                     }
                 }
-            }
             %>
-                <tr>
-                    <td colspan="2" class="buttonRow">
-                        <%
-                            if(!view){   
-                        %>
-                        <input class="button" type="button"
-                            <%if(subscriber != null){%> value="<fmt:message key='update'/>" onclick="doUpdate();" <%} else { %>
-                            value="<fmt:message key='add'/>" onclick="doAdd();" <% } %> />
-                        <%
-                            }
-                        %>
-                        <input class="button" type="button" value="<fmt:message key='cancel'/>"  onclick="doCancel();"/>
-                    </td>
-                </tr>
+            <tr>
+                <td colspan="2" class="buttonRow">
+                    <input class="button" type="button"
+                        <%if(subscriber != null){%> value="<fmt:message key='update'/>" onclick="doUpdate();" <%} else { %>
+                        value="<fmt:message key='add'/>" onclick="doAdd();" <% } %> />
+                    <input class="button" type="button" value="<fmt:message key='cancel'/>"  onclick="doCancel();"/>
+                </td>
+            </tr>
         </table>
+        <%
+            }
+        %>
         </form>
     </div>
 </div>

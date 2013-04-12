@@ -44,6 +44,9 @@
 		<parameter name="ServiceClass">org.wso2.carbon.identity.oauth.OAuthAdminService</parameter>
 		<parameter name="AuthorizationAction" locked="false">/permission/admin/manage</parameter>
         <parameter name="adminService" locked="true">true</parameter>
+        <operation name="getAppsAuthorizedByUser" mep="http://www.w3.org/2006/01/wsdl/in-out">
+            <parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
+        </operation>
         <operation name="revokeAuthzForAppsByResoureOwner" mep="http://www.w3.org/2006/01/wsdl/in-out">
             <parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
         </operation>

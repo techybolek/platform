@@ -40,7 +40,17 @@ public class RecoveryDataDTO {
 
     private boolean emailSent;
 
+    private String errorMessage;
+
     private EmailConfig emailConfig;
+
+    public RecoveryDataDTO() {
+    }
+
+    public RecoveryDataDTO(String errorMessage) {
+        this.errorMessage = errorMessage;
+        emailSent = false;        
+    }
 
     public String getUserId() {
         return userId;
@@ -104,5 +114,13 @@ public class RecoveryDataDTO {
 
     public void setEmailConfig(EmailConfig emailConfig) {
         this.emailConfig = emailConfig;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

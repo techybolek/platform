@@ -78,60 +78,92 @@ public interface CarbonPolicyFinderModule {
     public String getModuleName();
 
     /**
-     * gets priority of the module, if integer value is high, then priority is also high 
+     * gets priority of the module, if integer value is high, then priority is also high
+     *
+     * when selecting policy combining algorithm by the PDP, it will select algorithm
+     * this is defined by highest priority module
+     *
+     * when all policies are ordered by the PDP,  it would order based on the priority of the
+     * module
+     *
      *
      * @return  integer value
      */
     public int getModulePriority();
 
     /**
-     * 
-     * @return
+     * gets all supported policies. policies are fetched as Strings.
+     * if policy ordering is supported by module itself, these policies must be ordered.
+     *
+     *
+     * @return array of policies as Strings
      */
     public String[] getPolicies();
 
     /**
+     * gets all supported policy ids by this module
+     * if policy ordering is supported by module itself, these policy ids must be ordered
      *
-     * @return
+     * @return array of policy ids as Strings
      */
     public String[] getPolicyIdentifiers();
 
     /**
+     * gets policy for given policy Id
      *
-     * @param policyId
-     * @return
+     * @param policyId  policy id as String value
+     * @return policy as String
      */
     public String getPolicy(String policyId);
 
-    /**
-     *
-     * @param identifier
-     * @param givenAttribute
-     * @return
-     */
-    public Map<String, Set<AttributeDTO>> getSearchAttributes(String identifier, Set<AttributeDTO> givenAttribute);
 
     /**
+     * gets reference policy for given policy Id
      *
-     * @return
+     * reference policy can not be with PDP policy store,  may be in some external policy store
+     * Therefore new method has been add for retrieve reference policies
+     *
+     * @param policyId  policy id as String value
+     * @return reference policy as String
+     */
+    public String getReferencedPolicy(String policyId);    
+
+    /**
+     * gets attributes that are used for policy searching
+     *
+     * @param identifier unique identifier to separate out search attributes
+     * @param givenAttribute pre-given attributes to retrieve other attributes
+     * @return return search attributes based on a given policy.  Map of policy id with search attributes.
+     */
+    public Map<String, Set<AttributeDTO>> getSearchAttributes(String identifier,
+                                                              Set<AttributeDTO> givenAttribute);
+
+    /**
+     * gets support attribute searching scheme of this module
+     *
+     * @return return scheme identifier value
      */
     public int getSupportedSearchAttributesScheme();
 
     /**
+     * returns whether this module supports for default category of policies
+     * if means policies has been written based subject or users, resource, actions and environment
      *
-     * @return
+     * @return whether supported or not
      */
     public boolean isDefaultCategoriesSupported();
 
     /**
+     * returns whether this module supports for policy ordering.
      *
-     * @return
+     * @return whether supported or not
      */
     public boolean isPolicyOrderingSupport();
 
     /**
-     * 
-     * @return
+     * gets policy combining algorithm
+     *
+     * @return valid policy combining algorithm uri
      */
     public String getPolicyCombiningAlgorithm();
 

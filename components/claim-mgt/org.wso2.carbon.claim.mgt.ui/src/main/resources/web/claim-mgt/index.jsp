@@ -82,7 +82,7 @@
 
         <div id="workArea">
             <script type="text/javascript">
-                function remove(store, dialect, defaultDialect) {
+                function removeItem(store, dialect, defaultDialect) {
                     if (dialect == defaultDialect) {
                         CARBON.showWarningDialog('<fmt:message key="cannot.remove.default.carbon.dialect"/>', null, null);
                         return;
@@ -116,7 +116,7 @@
                             href="claim-view.jsp?store=<%=UserCoreConstants.INTERNAL_USERSTORE%>&dialect=<%=claimDialectDTO[i].getDialectURI()%>"><%=claimDialectDTO[i].getDialectURI()%>
                     </a></td>
                     <td width="50%"><a title="<fmt:message key='remove.claim.dialect'/>"
-                                       onclick="remove('<%=UserCoreConstants.INTERNAL_USERSTORE%>','<%=claimDialectDTO[i].getDialectURI()%>','<%=UserCoreConstants.DEFAULT_CARBON_DIALECT%>');return false;"
+                                       onclick="removeItem('<%=UserCoreConstants.INTERNAL_USERSTORE%>','<%=claimDialectDTO[i].getDialectURI()%>','<%=UserCoreConstants.DEFAULT_CARBON_DIALECT%>');return false;"
                                        href="#" style="background-image: url(images/delete.gif);"
                                        class="icon-link"><fmt:message key='delete'/></a></td>
                 </tr>

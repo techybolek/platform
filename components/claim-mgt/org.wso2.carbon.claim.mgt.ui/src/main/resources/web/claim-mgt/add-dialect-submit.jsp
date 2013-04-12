@@ -15,6 +15,10 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
+<%@page import="java.text.MessageFormat"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="org.wso2.carbon.claim.mgt.stub.dto.ClaimAttributeDTO"%>
+<%@page import="java.util.List"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
 	prefix="carbon"%>
@@ -47,6 +51,7 @@
 	String regex = request.getParameter("regex");
 	String supported = request.getParameter("supportedhidden");
 	String required = request.getParameter("requiredhidden");
+	String readonly = request.getParameter("readonlyhidden");
 	String store = request.getParameter("store");
 	String displayOrder = request.getParameter("displayOrder");
 	ClaimDialectDTO dto = null;
@@ -76,8 +81,39 @@
 			claim.setSupportedByDefault(true);
 		}
 		
+		if ("true".equals(readonly)) {
+			claim.setReadOnly(true);
+		}
+		
 		mapping.setClaim(claim);
-		mapping.setMappedAttribute(attribute);
+		
+		if (attribute!=null){
+			String[] attributes = attribute.split(";");
+			List<ClaimAttributeDTO> attrList = new ArrayList<ClaimAttributeDTO>();
+			
+			for (int i=0;i<attributes.length;i++){
+				int index = 0;
+				if ((index = attributes[i].indexOf("/"))>1){
+					String domain = attributes[i].substring(0, index);
+					String attrName = attributes[i].substring(index + 1);
+					if (domain!=null){
+						ClaimAttributeDTO attr = new ClaimAttributeDTO();
+						attr.setAttributeName(attrName);
+						attr.setDomainName(domain);
+						attrList.add(attr);
+					}
+				} else {
+					ClaimAttributeDTO attr = new ClaimAttributeDTO();
+					attr.setAttributeName(attributes[i]);
+					attr.setDomainName(null);
+					attrList.add(attr);				}
+				}
+			
+			if (attrList.size()>0){
+				mapping.setMappedAttributes(attrList.toArray(new ClaimAttributeDTO[attrList.size()]));
+			}
+	
+		}
 		
 		dto = new ClaimDialectDTO();
 		dto.addClaimMappings(mapping);
@@ -87,9 +123,10 @@
 		client.addNewClaimDialect(dto);
 		forwardTo = "index.jsp?region=region1&item=claim_mgt_menu&ordinal=0";
 	} catch (Exception e) {
-		String message = resourceBundle.getString("error.adding.dialect");
-		CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.ERROR, request);
-		forwardTo = "../admin/error.jsp";
+		String unformatted = resourceBundle.getString("error.adding.claim.mapping");
+		String message = MessageFormat.format(unformatted, new Object[]{e.getMessage()});
+		CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
+		forwardTo = "index.jsp?region=region1&item=claim_mgt_menu&ordinal=0";
 	}
 %>
 

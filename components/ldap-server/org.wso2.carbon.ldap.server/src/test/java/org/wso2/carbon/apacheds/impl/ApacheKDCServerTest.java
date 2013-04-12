@@ -63,7 +63,9 @@ public class ApacheKDCServerTest extends AbstractDirectoryTestCase {
             DirectoryServiceFactory.createKDCServer(DirectoryServiceFactory.LDAPServerType.APACHE_DIRECTORY_SERVICE);
         server.init(config, this.embeddedLdap);
 
-        server.kerberizePartition(partitionInfo, this.embeddedLdap);
+        /*Commenting this out because we moved adding admin user, group entries to embedded-ldap,
+        * into user-core. So there is no principal to add kerberos properties*/
+        //server.kerberizePartition(partitionInfo, this.embeddedLdap);
 
         server.start();
 

@@ -32,7 +32,7 @@
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
     try {
-    	EntitlementAdminServiceClient client = new EntitlementAdminServiceClient(cookie,
+    	EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
                                                 serverURL, configContext);
         String[] selectedSubscribers = request.getParameterValues("subscribers");
         for(String subscriber :selectedSubscribers){
@@ -48,7 +48,6 @@
 
 <%@page import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementPolicyAdminServiceClient"%>
 <%@page import="java.util.ResourceBundle"%>
-<%@ page import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementAdminServiceClient" %>
 <script
 	type="text/javascript">
     function forward() {

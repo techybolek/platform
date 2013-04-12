@@ -21,17 +21,18 @@
 <%@page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@page import="org.wso2.carbon.CarbonConstants" %>
 <%@page import="org.wso2.carbon.identity.scim.common.stub.config.SCIMProviderDTO" %>
+<%@page import="org.wso2.carbon.identity.scim.ui.SCIMConstants" %>
 <%@page import="org.wso2.carbon.identity.scim.ui.client.SCIMConfigAdminClient" %>
 <%@page import="org.wso2.carbon.identity.scim.ui.utils.SCIMUIUtils" %>
-<%@page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 
+<%@page import="org.wso2.carbon.ui.CarbonUIMessage" %>
 <%@page import="org.wso2.carbon.ui.CarbonUIUtil" %>
-<%@page import="org.wso2.carbon.utils.ServerConstants" %>
 <script type="text/javascript" src="extensions/js/vui.js"></script>
 <script type="text/javascript" src="../extensions/core/js/vui.js"></script>
 <script type="text/javascript" src="../admin/js/main.js"></script>
 
 <jsp:include page="../dialog/display_messages.jsp"/>
+<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="java.util.ResourceBundle" %>
 
 <%
@@ -41,14 +42,45 @@
     String forwardTo = null;
     String addAction = "add.jsp";
 
+    SCIMConfigAdminClient client = null;
+
+    int numberOfPages = 0;
+    String isPaginatedString = request.getParameter("isPaginated");
+    if (isPaginatedString != null && isPaginatedString.equals("true")) {
+        client = (SCIMConfigAdminClient) session.getAttribute(SCIMConstants.SCIM_CONFIG_ADMIN_CLIENT);
+        numberOfPages = (Integer) session.getAttribute(SCIMConstants.SCIM_DATA_PAGE_COUNT);
+    }
+    String paginationValue = "isPaginated=true";
+
+
+    String pageNumber = request.getParameter("pageNumber");
+    if (pageNumber == null) {
+        pageNumber = "0";
+    }
+    int pageNumberInt = 0;
+    try {
+        pageNumberInt = Integer.parseInt(pageNumber);
+    } catch (NumberFormatException ignored) {
+    }
+
     try {
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
         ConfigurationContext configContext =
                 (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
-        SCIMConfigAdminClient client = new SCIMConfigAdminClient(cookie, backendServerURL, configContext);
+        if (client == null) {
+            int itemsPerPageInt = SCIMConstants.DEFAULT_ITEMS_PER_PAGE;
+            client = new SCIMConfigAdminClient(cookie, backendServerURL, configContext);
+            if(client.getAllGlobalProviders(SCIMUIUtils.getGlobalConsumerId()) != null){
+            numberOfPages = (int) Math.ceil((double) client.getAllGlobalProviders(SCIMUIUtils.getGlobalConsumerId()).length / itemsPerPageInt);
+            session.setAttribute(SCIMConstants.SCIM_CONFIG_ADMIN_CLIENT, client);
+            session.setAttribute(SCIMConstants.SCIM_DATA_PAGE_COUNT, numberOfPages);
 
-        scimProviders = client.getAllGlobalProviders(SCIMUIUtils.getGlobalConsumerId());
+            }
+        }
+        if (client != null && client.getAllGlobalProviders(SCIMUIUtils.getGlobalConsumerId()) != null) {
+        scimProviders = SCIMUIUtils.doPaging(pageNumberInt, client.getAllGlobalProviders(SCIMUIUtils.getGlobalConsumerId()));
+        }
 
     } catch (Exception e) {
         String message = resourceBundle.getString("error.while.loading.scim.provider.data");
@@ -86,9 +118,9 @@
 
         <div id="workArea">
             <script type="text/javascript">
-                function remove(providerId) {
+                function itemRemove(providerId) {
                     CARBON.showConfirmationDialog("<fmt:message key='remove.message1'/>" + providerId + "<fmt:message key='remove.message2'/>",
-                                                  function() {
+                                                  function () {
                                                       location.href = "remove-provider.jsp?providerId=" + providerId;
                                                   }, null);
                 }
@@ -109,19 +141,21 @@
                 <%
                     if (scimProviders != null && scimProviders.length > 0) {
                         for (int i = 0; i < scimProviders.length; i++) {
+                            if (scimProviders[i] != null) {
                 %>
                 <tr>
                     <td width="50%"><a
                             href="edit.jsp?providerId=<%=scimProviders[i].getProviderId()%>"><%=scimProviders[i].getProviderId()%>
                     </a></td>
                     <td width="50%"><a title="<fmt:message key='remove.provider'/>"
-                                       onclick="remove('<%=scimProviders[i].getProviderId()%>');return false;"
+                                       onclick="itemRemove('<%=scimProviders[i].getProviderId()%>');return false;"
                                        href="#"
                                        style="background-image: url(../scim/images/delete.gif);"
                                        class="icon-link">
                         <fmt:message key='delete'/></a></td>
                 </tr>
                 <%
+                        }
                     }
                 } else {
                 %>
@@ -132,6 +166,15 @@
                     }
                 %>
                 </tbody>
+                <tr>
+                    <carbon:paginator pageNumber="<%=pageNumberInt%>"
+                                      numberOfPages="<%=numberOfPages%>"
+                                      page="index.jsp"
+                                      pageNumberParameterName="pageNumber"
+                                      parameters="<%=paginationValue%>"
+                                      resourceBundle="org.wso2.carbon.identity.entitlement.ui.i18n.Resources"
+                                      prevKey="prev" nextKey="next"/>
+                </tr>
             </table>
         </div>
     </div>

@@ -16,17 +16,31 @@ package org.wso2.carbon.user.cassandra;/*
  *  under the License.
  */
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Random;
+
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.QueryResult;
-import org.wso2.carbon.user.cassandra.CFConstants;
+import me.prettyprint.hector.api.query.SliceQuery;
+
+import org.apache.axiom.om.util.Base64;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.user.api.RealmConfiguration;
+import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.jdbc.JDBCRealmConstants;
 import org.wso2.carbon.user.core.multiplecredentials.Credential;
+import org.wso2.carbon.user.core.multiplecredentials.MultipleCredentialsException;
 
 public class Util {
+
 
     public static String createRowKeyForReverseLookup(String identifier, String credentialTypeName) {
         return credentialTypeName + "::" + identifier;
@@ -36,11 +50,12 @@ public class Util {
         return createRowKeyForReverseLookup(credential.getIdentifier(), credential.getCredentialsType());
     }
 
+    private static Serializer<String> stringSerializer = StringSerializer.get();
+
     public static String getExistingUserId(String credentialTypeName, String identifier,
                                            Keyspace keyspace) {
 
         identifier = createRowKeyForReverseLookup(identifier, credentialTypeName);
-        Serializer<String> stringSerializer = StringSerializer.get();
         ColumnQuery<String, String, String> usernameIndexQuery = HFactory
                 .createColumnQuery(keyspace, stringSerializer, stringSerializer, stringSerializer);
 
@@ -56,5 +71,92 @@ public class Util {
         }
 
         return userIdCol.getValue();
+    }
+
+    public static ColumnSlice<String, String> getExistingCredentialsRow(String identifier,
+                                                                        String credentialTypeName,
+                                                                        Keyspace keyspace) {
+
+        identifier = createRowKeyForReverseLookup(identifier, credentialTypeName);
+        SliceQuery<String, String, String> credentialRowQuery = HFactory
+                .createSliceQuery(keyspace, stringSerializer, stringSerializer, stringSerializer);
+
+        credentialRowQuery.setColumnFamily(CFConstants.USERNAME_INDEX).setKey(identifier)
+                .setRange("", "", true, 100);
+
+
+        return credentialRowQuery.execute().get();
+    }
+
+    public static String getSaltValue(String identifier,
+                               String credentialTypeName,
+                               Keyspace keyspace) {
+
+        identifier = createRowKeyForReverseLookup(identifier, credentialTypeName);
+
+        ColumnQuery<String, String, String> saltValQuery = HFactory
+                .createColumnQuery(keyspace, stringSerializer, stringSerializer, stringSerializer);
+
+        saltValQuery.setColumnFamily(CFConstants.USERNAME_INDEX).setKey(identifier)
+                .setName(CFConstants.SALT_VALUE);
+        HColumn<String, String> saltValResult = saltValQuery.execute().get();
+
+        if (saltValResult == null) {
+            return null;
+        }
+
+        return saltValResult.getValue();
+    }
+
+
+    private static Log log = LogFactory.getLog(Util.class);
+
+    private static RealmConfiguration realmConfig;
+
+    public static RealmConfiguration getRealmConfig() {
+        return realmConfig;
+    }
+
+    public static void setRealmConfig(RealmConfiguration realmConfig) {
+        Util.realmConfig = realmConfig;
+    }
+
+    public static String preparePassword(String password, String saltValue) throws MultipleCredentialsException {
+        try {
+            String digestInput = password;
+            if (saltValue != null) {
+                digestInput = password + saltValue;
+            }
+            String digsestFunction = Util.getRealmConfig().getUserStoreProperties().get(
+                    JDBCRealmConstants.DIGEST_FUNCTION);
+            if (digsestFunction != null) {
+
+                if (digsestFunction.
+                        equals(UserCoreConstants.RealmConfig.PASSWORD_HASH_METHOD_PLAIN_TEXT)) {
+                    return password;
+                }
+
+                MessageDigest dgst = MessageDigest.getInstance(digsestFunction);
+                byte[] byteValue = dgst.digest(digestInput.getBytes());
+                password = Base64.encode(byteValue);
+            }
+            return password;
+        } catch (NoSuchAlgorithmException e) {
+            log.error(e.getMessage(), e);
+            throw new MultipleCredentialsException(e.getMessage(), e);
+        }
+    }
+
+    protected static Random random = new Random();
+
+    public static String getSaltValue() {
+        String saltValue = null;
+        if ("true".equals(realmConfig.getUserStoreProperties().get(
+                JDBCRealmConstants.STORE_SALTED_PASSWORDS))) {
+            byte[] bytes = new byte[16];
+            random.nextBytes(bytes);
+            saltValue = Base64.encode(bytes);
+        }
+        return saltValue;
     }
 }

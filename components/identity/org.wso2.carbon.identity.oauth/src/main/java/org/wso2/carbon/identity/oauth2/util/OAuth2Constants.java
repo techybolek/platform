@@ -27,6 +27,19 @@ public class OAuth2Constants {
     public static long UNASSIGNED_VALIDITY_PERIOD = -1l;
 
     public static String OAUTH_SAML2_BEARER_METHOD = "urn:oasis:names:tc:SAML:2.0:cm:bearer";
+    public static String OAUTH_SAML2_BEARER_GRANT_ENUM = "SAML20_BEARER";
 
     public static String ACCESS_TOKEN_STORE_TABLE = "IDN_OAUTH2_ACCESS_TOKEN";
+
+    public static class ClientAuthMethods {
+        public static final String BASIC = "basic";
+        public static final String SAML_20_BEARER = "saml-2.0-bearer";
+    }
+
+    public static class OAuthError{
+        public static class TokenResponse{
+            public static final String UNSUPPRTED_CLIENT_AUTHENTICATION_METHOD = "unsupported_client_authentication_method";
+        }
+    }
+
 }

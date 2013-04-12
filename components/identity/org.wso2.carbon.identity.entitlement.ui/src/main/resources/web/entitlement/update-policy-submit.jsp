@@ -32,7 +32,7 @@
 	String forwardTo = null;
 	String action = request.getParameter("action");
 	String policyid = request.getParameter("policyid");
-	PolicyDTO dto = new PolicyDTO();
+	PolicyDTO dto = null;
 	String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
     ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
@@ -40,7 +40,8 @@
 
 		try {
 			EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie, serverURL, configContext);
-			dto.setPolicy(request.getParameter("policy"));
+			dto = client.getLightPolicy(policyid);
+            dto.setPolicy(request.getParameter("policy"));
 			dto.setPolicyId(policyid);
 			client.updatePolicy(dto);
 			//session.setAttribute("entitlementpolicy", dto.getPolicy());

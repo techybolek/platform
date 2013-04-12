@@ -51,6 +51,7 @@
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
     String[] options = new String[]{"Yes", "No"};
     String[] optionsValues = new String[]{resourceBundle.getString("yes"), resourceBundle.getString("no")};
+    String backLink = (String)session.getAttribute("backLink");
 %>
 <%!
     String info = null;
@@ -96,6 +97,12 @@
 	<%
 		return;
     }
+    
+    if (backLink==null){
+    	backLink = "../service-mgt/service_info.jsp?serviceName="+ serviceName;
+    }
+    
+    
     
 	try {
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
@@ -231,7 +238,7 @@
            <table class="styledLeft">
                <tr>
                    <td class="buttonRow">
-                               <input type="button" class="button" value="< <fmt:message key="back"/>" onclick="location.href = '../service-mgt/service_info.jsp?serviceName=<%=serviceName%>'">
+                               <input type="button" class="button" value="< <fmt:message key="back"/>" onclick="location.href = '<%=backLink%>'">
                    </td>
                </tr>
            </table>
@@ -390,7 +397,7 @@
 
                     <tr>
                         <td class="buttonRow" colspan="5">
-                            <input type="button" class="button" value="< <fmt:message key="back"/>" onclick="location.href = '../service-mgt/service_info.jsp?serviceName=<%=serviceName%>'">
+                            <input type="button" class="button" value="< <fmt:message key="back"/>" onclick="location.href = '<%=backLink%>'">
                             <input class="button" type="submit"
                                    value="<fmt:message key="next"/> >"/>
                         </td>

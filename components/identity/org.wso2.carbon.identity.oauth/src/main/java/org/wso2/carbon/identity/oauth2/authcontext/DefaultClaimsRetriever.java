@@ -25,10 +25,7 @@ import org.wso2.carbon.identity.oauth.util.ClaimCache;
 import org.wso2.carbon.identity.oauth.util.ClaimCacheKey;
 import org.wso2.carbon.identity.oauth.util.UserClaims;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
-import org.wso2.carbon.user.api.Claim;
-import org.wso2.carbon.user.api.ClaimManager;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.api.*;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -75,7 +72,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
             } else {
                 ClaimManager claimManager = OAuthComponentServiceHolder.getRealmService().
                         getTenantUserRealm(tenantId).getClaimManager();
-                Claim[] claims = claimManager.getAllClaims(dialectURI);
+                ClaimMapping[] claims = claimManager.getAllClaimMappings(dialectURI);
                 String[] claimURIs = claim_to_string(claims);
                 UserStoreManager userStoreManager = OAuthComponentServiceHolder.getRealmService().
                         getTenantUserRealm(tenantId).getUserStoreManager();
@@ -95,10 +92,10 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
      * Helper method to convert array of <code>Claim</code> object to
      * array of <code>String</code> objects corresponding to the ClaimURI values.
      */
-    private String[] claim_to_string(Claim[] claims) {
+    private String[] claim_to_string(ClaimMapping[] claims) {
         String[] temp = new String[claims.length];
         for (int i = 0; i < claims.length; i++) {
-            temp[i] = claims[i].getClaimUri();
+            temp[i] = claims[i].getClaim().getClaimUri();
         }
         return temp;
     }

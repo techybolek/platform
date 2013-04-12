@@ -27,7 +27,7 @@ public class UserChallengesSetDTO {
 
     private String id;
 
-    private UserChallengesDTO[] challengesDTOs;
+    private UserChallengesDTO[] challengesDTOs = new UserChallengesDTO[0];
 
     public String getId() {
         return id;

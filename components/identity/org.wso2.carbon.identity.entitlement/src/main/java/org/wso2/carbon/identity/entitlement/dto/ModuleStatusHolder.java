@@ -26,7 +26,7 @@ import java.util.Date;
 public class ModuleStatusHolder {
 
     /**
-     * unique key to identify status
+     * key to identify status. basically policy Id
      */
     private String key;
 
@@ -45,6 +45,10 @@ public class ModuleStatusHolder {
      */
     private String message;
 
+    public static final String SEPARATOR = ",";
+
+    public static final String STATUS_HOLDER_NAME = "status_holder";
+
     public ModuleStatusHolder(String key, String message) {
         this.key = key;
         this.message = message;
@@ -56,6 +60,9 @@ public class ModuleStatusHolder {
         this.key = key;
         this.success = true;
         this.timeInstance = (new Date()).toString();
+    }
+
+    public ModuleStatusHolder() {
     }
 
     public String getKey() {

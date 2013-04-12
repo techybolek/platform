@@ -49,6 +49,8 @@
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 	String fromUserMgt = (String) request.getParameter("fromUserMgt");
 	
+    if (fromUserMgt==null) fromUserMgt = "false";
+	
     try {
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
@@ -98,7 +100,7 @@
         String message = MessageFormat.format(resourceBundle.getString(
             "error.while.updating.user.profile"), username, e.getMessage());
     	CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
-        forwardTo = "edit.jsp?username=" + username + "&profile=" + profile + "&fromUserMgt=true";
+        forwardTo = "edit.jsp?username=" + username + "&profile=" + profile + "&fromUserMgt="+fromUserMgt;
     }
 %>
 

@@ -78,7 +78,7 @@ public abstract class AbstractPIPResourceFinder implements PIPResourceFinder{
         for(int i = 0; i < children.getLength(); i++){
             Node child = children.item(i);
             if(child != null){
-                if(EntitlementConstants.ENVIRONMENT_ELEMENT.equals(child.getNodeName())){
+                if(EntitlementConstants.ENVIRONMENT_ELEMENT.equals(child.getLocalName())){
                     if(child.getChildNodes() != null && child.getChildNodes().getLength() > 0){
                         environment = context.getAttribute(new URI(StringAttribute.identifier),
                                     new URI(EntitlementConstants.ENVIRONMENT_ID_DEFAULT), null, 

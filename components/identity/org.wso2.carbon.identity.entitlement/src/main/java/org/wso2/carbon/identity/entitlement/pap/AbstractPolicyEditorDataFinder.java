@@ -31,7 +31,7 @@ import java.util.Set;
 public abstract class AbstractPolicyEditorDataFinder implements PolicyEditorDataFinderModule {
 
     @Override
-    public Map<String, String> getSupportedAttributeIds(String attributeType) throws Exception {
+    public Map<String, String> getSupportedAttributeIds(String category) throws Exception {
         return null;
     }
 
@@ -46,7 +46,7 @@ public abstract class AbstractPolicyEditorDataFinder implements PolicyEditorData
     }
 
     @Override
-    public Set<String> getAttributeDataTypes(String attributeType) throws Exception {
+    public Set<String> getAttributeDataTypes(String category) throws Exception {
         return null;
     }
 
@@ -110,5 +110,11 @@ public abstract class AbstractPolicyEditorDataFinder implements PolicyEditorData
         newMap.put("regexp matching to" , "regexp-match");
         return newMap;
     }
-       
+
+    @Override
+    public final Map<String, String> getAttributeIdDataTypes() {
+        Map<String, String> values = new HashMap<String, String>();
+        values.put("http://wso2.org/claims/age", "http://www.w3.org/2001/XMLSchema#integer");
+        return values; 
+    }
 }

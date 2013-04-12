@@ -18,7 +18,10 @@
 package org.wso2.carbon.identity.entitlement.ui.util;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.impl.llom.util.AXIOMUtil;
+import org.wso2.carbon.identity.entitlement.stub.dto.ModuleStatusHolder;
+import org.wso2.carbon.identity.entitlement.ui.EntitlementPolicyConstants;
 
 import javax.xml.namespace.QName;
 
@@ -26,22 +29,34 @@ import javax.xml.namespace.QName;
  *
  */
 public class ClientUtil {
+
     /**
-     * Helper method to extact the boolean response
+     * Helper method to extract the boolean response
      *
      * @param xmlstring XACML resource as String
      * @return  Decision
      * @throws Exception if fails
      */
     public static String getStatus(String xmlstring) throws Exception {
+        
         OMElement response = null;
         OMElement result = null;
         OMElement decision = null;
         response = AXIOMUtil.stringToOM(xmlstring);
 
-        result = response.getFirstChildWithName(new QName("Result"));
+        OMNamespace nameSpace = response.getNamespace();
+
+        if(nameSpace != null){
+            result = response.getFirstChildWithName(new QName(nameSpace.getNamespaceURI(), "Result"));
+        } else {
+            result = response.getFirstElement();
+        }
         if (result != null) {
-            decision = result.getFirstChildWithName(new QName("Decision"));
+            if(nameSpace != null){
+                decision = result.getFirstChildWithName(new QName(nameSpace.getNamespaceURI(), "Decision"));
+            } else {
+                decision = result.getFirstChildWithName(new QName("Decision"));
+            }
             if (decision != null) {
                 return decision.getText();
             }
@@ -49,4 +64,45 @@ public class ClientUtil {
 
         return "Invalid Status";
     }
+
+    public static String[] doPaging(int pageNumber, String[] subscriberNameSet) {
+
+              int itemsPerPageInt = EntitlementPolicyConstants.DEFAULT_ITEMS_PER_PAGE;
+           String[] returnedSubscriberNameSet;
+
+           int startIndex = pageNumber * itemsPerPageInt;
+           int endIndex = (pageNumber + 1) * itemsPerPageInt;
+           if (itemsPerPageInt < subscriberNameSet.length) {
+               returnedSubscriberNameSet = new String[itemsPerPageInt];
+           } else {
+               returnedSubscriberNameSet = new String[subscriberNameSet.length];
+           }
+           for (int i = startIndex, j = 0; i < endIndex && i < subscriberNameSet.length; i++, j++) {
+               returnedSubscriberNameSet[j] = subscriberNameSet[i];
+           }
+
+           return returnedSubscriberNameSet;
+       }
+
+    public static ModuleStatusHolder[] doModuleStatusHoldersPaging(int pageNumber, ModuleStatusHolder[] moduleStatusHolderSet) {
+
+              int itemsPerPageInt = EntitlementPolicyConstants.DEFAULT_ITEMS_PER_PAGE;
+        ModuleStatusHolder[] returnedModuleStatusHolderSet;
+
+           int startIndex = pageNumber * itemsPerPageInt;
+           int endIndex = (pageNumber + 1) * itemsPerPageInt;
+           if (itemsPerPageInt < moduleStatusHolderSet.length) {
+               returnedModuleStatusHolderSet = new ModuleStatusHolder[itemsPerPageInt];
+           } else {
+               returnedModuleStatusHolderSet = new ModuleStatusHolder[moduleStatusHolderSet.length];
+           }
+           for (int i = startIndex, j = 0; i < endIndex && i < moduleStatusHolderSet.length; i++, j++) {
+               returnedModuleStatusHolderSet[j] = moduleStatusHolderSet[i];
+           }
+
+           return returnedModuleStatusHolderSet;
+       }
+
+
+
 }

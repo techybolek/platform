@@ -57,24 +57,28 @@
             return;
         }
     %>
-    <div id="middle">
-        <h2><fmt:message key="email.sent"/></h2>
+
     <%
         if(emailSent){
     %>
-
-        <p><fmt:message key="email.sent.message"/></p>
+        <div id="middle">
+            <h2><fmt:message key="email.sent"/></h2>
+            <p><fmt:message key="email.sent.message"/></p>
+        </div>
     <%
         } else {
     %>
-         <p><fmt:message key="email.not.sent"/> </p>
-        <p>
-            <fmt:message key="try.again"/><a href="forgot_root.jsp"><fmt:message key="try.again.here"/></a> .
-        </p>
+        <div id="middle">
+            <h2><fmt:message key="email.not.sent"/></h2>
+            <p><fmt:message key="email.not.sent.message"/> </p>
+            <p>
+                <fmt:message key="try.again"/><a href="forgot_root.jsp"><fmt:message key="try.again.here"/></a> .
+            </p>
+        </div>
     <%
         }
     %>
-    </div>
+
 
 </fmt:bundle>
 

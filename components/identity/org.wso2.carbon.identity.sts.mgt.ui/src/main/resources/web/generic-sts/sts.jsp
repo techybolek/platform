@@ -70,7 +70,7 @@
         return true;
     }
 
-    function remove(hostName) {
+    function itemRemove(hostName) {
         CARBON.showConfirmationDialog("<fmt:message key='remove.message1'/>" + hostName + "<fmt:message key='remove.message2'/>",
                                       function() {
                                           location.href = "remove-trusted-service.jsp?endpointaddrs=" + hostName;
@@ -108,7 +108,10 @@
 
         address = (String) request.getParameter("endpointaddrs");
         keyAlias = (String) request.getParameter("alias");
-        session.setAttribute("returToPath", "../generic-sts/sts.jsp");
+        session.setAttribute("returnToPath", "../generic-sts/sts.jsp");
+        session.setAttribute("cancelLink", "../generic-sts/sts.jsp");
+        session.setAttribute("backLink", "../generic-sts/sts.jsp");
+
         try {
             sts.addTrustedService(address, keyAlias);
         } catch (Exception e) {
@@ -177,7 +180,7 @@
                     </td>
                     <td width="20%">
                         <a title="Remove Trusted RP"
-                           onclick="remove('<%=service.getServiceAddress()%>');return false;"
+                           onclick="itemRemove('<%=service.getServiceAddress()%>');return false;"
                            href="#" class="icon-link"
                            style="background-image:url(../admin/images/delete.gif)">Delete
                         </a>

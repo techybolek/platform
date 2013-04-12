@@ -55,10 +55,11 @@ public interface PIPAttributeFinder {
      * within PIP attribute finder. Here PIP attribute finder have been given access for <code>EvaluationCtx</code>
      * which encapsulates the XACML request.
      *
+     * @param attributeType
      * @param attributeId The unique id of the required attribute.
+     * @param category Category of the subject
      * @param issuer The attribute issuer.
      * @param context  EvaluationCtx which encapsulates the XACML request.
-     * @param category Category of the subject
      * @return Returns a <code>Set</code> of <code>String</code>s that represent the attribute
 	 *         values.
      * @throws Exception throws, if fails

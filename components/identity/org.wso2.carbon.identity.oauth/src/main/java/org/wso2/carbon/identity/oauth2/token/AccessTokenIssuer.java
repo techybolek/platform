@@ -18,11 +18,19 @@
 
 package org.wso2.carbon.identity.oauth2.token;
 
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import net.sf.jsr107cache.Cache;
+
 import org.apache.amber.oauth2.common.error.OAuthError;
 import org.apache.amber.oauth2.common.message.types.GrantType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.oltu.openidconnect.as.util.OIDCAuthzServerUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.model.OAuthAppDO;
@@ -36,22 +44,35 @@ import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.ResponseHeader;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenReqDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenRespDTO;
-import org.wso2.carbon.identity.oauth2.token.handlers.*;
+import org.wso2.carbon.identity.oauth2.token.handlers.clientauth.BasicAuthClientAuthentcationHandler;
+import org.wso2.carbon.identity.oauth2.token.handlers.clientauth.ClientAuthenticationHandler;
+import org.wso2.carbon.identity.oauth2.token.handlers.clientauth.SAM2BearerClientAuthenticationHandler;
+import org.wso2.carbon.identity.oauth2.token.handlers.grant.AuthorizationCodeHandler;
+import org.wso2.carbon.identity.oauth2.token.handlers.grant.AuthorizationGrantHandler;
+import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGrantHandler;
+import org.wso2.carbon.identity.oauth2.token.handlers.grant.PasswordGrantHandler;
+import org.wso2.carbon.identity.oauth2.token.handlers.grant.RefreshGrantTypeHandler;
+import org.wso2.carbon.identity.oauth2.token.handlers.grant.SAML2BearerGrantTypeHandler;
+import org.wso2.carbon.identity.oauth2.util.OAuth2Constants;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
+import org.wso2.carbon.identity.openidconnect.IDTokenGenerator;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.config.RealmConfiguration;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
-
-import java.util.*;
 
 public class AccessTokenIssuer {
 
     private Map<String, AuthorizationGrantHandler> authzGrantHandlers =
             new Hashtable<String, AuthorizationGrantHandler>();
+    private Map<String, ClientAuthenticationHandler> clientAuthenticationHandlers =
+            new Hashtable<String, ClientAuthenticationHandler>();
 
     private List<String> supportedGrantTypes;
+    private List<String> supportedClientAuthenticationMethods;
 
     private static AccessTokenIssuer instance;
 
@@ -85,8 +106,13 @@ public class AccessTokenIssuer {
                 new ClientCredentialsGrantHandler());
         authzGrantHandlers.put(GrantType.REFRESH_TOKEN.toString(),
                 new RefreshGrantTypeHandler());
-        authzGrantHandlers.put(GrantType.SAML20_BEARER_ASSERTION.toString(),
+        authzGrantHandlers.put(org.wso2.carbon.identity.oauth.common.GrantType.SAML20_BEARER.toString(),
                 new SAML2BearerGrantTypeHandler());
+
+        supportedClientAuthenticationMethods = OAuthServerConfiguration.getInstance().getSupportedClientAuthMethods();
+
+        clientAuthenticationHandlers.put(OAuth2Constants.ClientAuthMethods.BASIC, new BasicAuthClientAuthentcationHandler());
+        clientAuthenticationHandlers.put(OAuth2Constants.ClientAuthMethods.SAML_20_BEARER, new SAM2BearerClientAuthenticationHandler());
 
         //TODO: check userClaimsCache = PrivilegedCarbonContext.getCurrentContext().getCache("UserClaimsCache");
         //in org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever
@@ -97,8 +123,19 @@ public class AccessTokenIssuer {
     public OAuth2AccessTokenRespDTO issue(OAuth2AccessTokenReqDTO tokenReqDTO)
             throws IdentityException, InvalidOAuthClientException {
 
-        String grantType = tokenReqDTO.getGrantType();
+    	 if (tokenReqDTO.getResourceOwnerUsername() !=null) {
+	        //identify,whether the ResourceOwner used ordinal username/email
+	        String resourceOwner = getResourceOwnerName(tokenReqDTO.getResourceOwnerUsername());
+	        tokenReqDTO.setResourceOwnerUsername(resourceOwner);
+        }
+		String grantType = tokenReqDTO.getGrantType();
+        String clientAssertionType = tokenReqDTO.getClientAssertionType();
+        String clientAssertion = tokenReqDTO.getClientAssertion();
+        String consumerKey = tokenReqDTO.getClientId();
+        String consumerSecret = tokenReqDTO.getClientSecret();
+        String clientAuthMethod = null;
         OAuth2AccessTokenRespDTO tokenRespDTO;
+
 
         if (!supportedGrantTypes.contains(grantType)) {
             //Do not change this log format as these logs use by external applications
@@ -109,17 +146,38 @@ public class AccessTokenIssuer {
             return tokenRespDTO;
         }
 
-        AuthorizationGrantHandler authzGrantHandler = authzGrantHandlers.get(
-                grantType);
-        OAuthAppDO oAuthAppDO = getAppInformation(tokenReqDTO);
+        if(clientAssertionType != null && clientAssertion != null){
+            clientAuthMethod = OAuth2Constants.ClientAuthMethods.SAML_20_BEARER;
+        }else if(consumerKey != null && consumerSecret != null){
+            clientAuthMethod = OAuth2Constants.ClientAuthMethods.BASIC;
+        }
+
+        if(clientAuthMethod == null || !supportedClientAuthenticationMethods.contains(clientAuthMethod)){
+            log.debug("Unsupported Client Authentication Method : " + clientAuthMethod +
+                    " for client id : " + tokenReqDTO.getClientId());
+            tokenRespDTO = handleError(OAuth2Constants.OAuthError.TokenResponse.UNSUPPRTED_CLIENT_AUTHENTICATION_METHOD,
+                    "Unsupported Client Authentication Method!", tokenReqDTO);
+            return tokenRespDTO;
+        }
+
+        AuthorizationGrantHandler authzGrantHandler = authzGrantHandlers.get(grantType);
+        ClientAuthenticationHandler clientAuthHandler = clientAuthenticationHandlers.get(clientAuthMethod);
+
         OAuthTokenReqMessageContext tokReqMsgCtx = new OAuthTokenReqMessageContext(tokenReqDTO);
+        boolean isAuthenticated = clientAuthHandler.authenticateClient(tokReqMsgCtx);
+        boolean isValidGrant = authzGrantHandler.validateGrant(tokReqMsgCtx);
+        boolean isAuthorized = authzGrantHandler.authorizeAccessDelegation(tokReqMsgCtx);
+        boolean isValidScope = authzGrantHandler.validateScope(tokReqMsgCtx);
+
+        OAuthAppDO oAuthAppDO = getAppInformation(tokenReqDTO);
         String applicationName = oAuthAppDO.getApplicationName();
-        boolean isAuthenticated = authzGrantHandler.authenticateClient(tokReqMsgCtx);
-        /**
-         * In the SAML2 bearer OAuth handling scenario, we're setting the resource owner username in the
-         * authenticateClient() method. So, we need to call it before getting the username.
-         */
-        String userName = tokenReqDTO.getResourceOwnerUsername();
+        String userName = tokReqMsgCtx.getAuthorizedUser();
+	    if(grantType.equals(GrantType.CLIENT_CREDENTIALS.toString()))
+        {
+            tokReqMsgCtx.setAuthorizedUser(oAuthAppDO.getUserName());
+            tokReqMsgCtx.setTenantID(oAuthAppDO.getTenantId());
+        }
+
         //boolean isAuthenticated = true;
         if (!isAuthenticated) {
             //Do not change this log format as these logs use by external applications
@@ -130,7 +188,6 @@ public class AccessTokenIssuer {
             return tokenRespDTO;
         }
 
-        boolean isValidGrant = authzGrantHandler.validateGrant(tokReqMsgCtx);
         //boolean isValidGrant = true;
         if (!isValidGrant) {
             //Do not change this log format as these logs use by external applications
@@ -141,7 +198,6 @@ public class AccessTokenIssuer {
             return tokenRespDTO;
         }
 
-        boolean isAuthorized = authzGrantHandler.authorizeAccessDelegation(tokReqMsgCtx);
         //boolean isAuthorized = true;
         if (!isAuthorized) {
             //Do not change this log format as these logs use by external applications
@@ -152,7 +208,6 @@ public class AccessTokenIssuer {
             return tokenRespDTO;
         }
 
-        boolean isValidScope = authzGrantHandler.validateScope(tokReqMsgCtx);
         //boolean isValidScope = true;
         if (!isValidScope) {
             //Do not change this log format as these logs use by external applications
@@ -180,7 +235,6 @@ public class AccessTokenIssuer {
                     // Get user's claim values from the default profile.
                     Claim[] mapClaimValues = getUserClaimValues(tokenReqDTO, userStoreManager);
                     ResponseHeader header;
-                    int i = 0;
                     for (Iterator<String> iterator = reqRespHeaderClaims.iterator(); iterator.hasNext(); ) {
 
                         String claimUri = iterator.next();
@@ -206,12 +260,19 @@ public class AccessTokenIssuer {
         tokenRespDTO.setCallbackURI(oAuthAppDO.getCallbackUrl());
 
         ResponseHeader[] respHeadersArr = new ResponseHeader[respHeaders.size()];
+
         tokenRespDTO.setRespHeaders(respHeaders.toArray(respHeadersArr));
 
         //Do not change this log format as these logs use by external applications
         if (log.isDebugEnabled()) {
             log.debug("Access Token issued to client. client-id=" + tokenReqDTO.getClientId() + " " +
                     "" + "user-name=" + userName + " to application=" + applicationName);
+        }
+        
+        if(tokReqMsgCtx.getScope() != null && OIDCAuthzServerUtil.isOIDCAuthzRequest(tokReqMsgCtx.getScope())) {
+        	// TODO : We should allow to plug-in many generators 
+        	IDTokenGenerator generator = new IDTokenGenerator(tokReqMsgCtx, tokenRespDTO);
+			tokenRespDTO.setIDToken(generator.generateToken());
         }
         return tokenRespDTO;
     }
@@ -265,5 +326,59 @@ public class AccessTokenIssuer {
         tokenRespDTO.setErrorMsg(errorMsg);
         return tokenRespDTO;
     }
+  	/**
+	 * Identify whether the ResourceOwner used his ordinal username or email
+	 * 
+	 * @param userId
+	 * @return
+	 */
+	private boolean isResourceOwnerUsedEmail(String userId) {
 
+		if (userId.contains("@")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Get the username using email address of the user. Email is a claim
+	 * attribute of an user. So, in the userstore it is users responsibility TO
+	 * MAINTAIN THE EMAIL AS UNIQUE for each and every users. If it is not
+	 * unique we pick the very first entry from the userlist.
+	 * 
+	 * @param email
+	 * @return
+	 */
+	private String getUserfromEmail(String email) {
+		String claim= "http://wso2.org/claims/emailaddress";
+		String username = null;
+		  try {
+			    RealmService realmSvc = OAuthComponentServiceHolder.getRealmService();
+				RealmConfiguration config = new  RealmConfiguration();
+				UserRealm realm = realmSvc.getUserRealm(config);
+				org.wso2.carbon.user.core.UserStoreManager storeManager = realm.getUserStoreManager();
+				String user[] = storeManager.getUserList(claim, email, null);
+				if(user.length>0){
+					username = user[0].toString();
+				}
+			} catch (UserStoreException e) {
+				log.error("Error while retrieving the username using the email : "+email, e);
+			}
+		return username;
+	}
+	
+	/**
+	 * identify the resource owner
+	 * @param userID
+	 * @return
+	 */
+	private String getResourceOwnerName(String userID){
+		String resourceOwner = userID;
+		if (isResourceOwnerUsedEmail(userID)) {
+			resourceOwner = getUserfromEmail(userID);
+		}
+		return resourceOwner;
+	}
+	
 }

@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
 import org.wso2.carbon.identity.oauth.ui.OAuthClientException;
 import org.wso2.carbon.identity.oauth.ui.OAuthConstants;
 import org.wso2.carbon.ui.CarbonUIUtil;
@@ -84,5 +85,38 @@ public class OAuthUIUtil {
         ServerConfiguration serverConfig = ServerConfiguration.getInstance();
         String hostname = serverConfig.getFirstProperty("HostName");
         return "Basic realm=" + hostname;
+    }
+    
+    /**
+     * Returns the schema and the credential of authorization header
+     * @param authorizationHeader
+     * @return
+     */
+    public static String[] extractAuthorizationHeaderInfo(String authorizationHeader) {
+    	  String[] splitValues = authorizationHeader.trim().split(" ");
+    	  byte[] decodedBytes = Base64Utils.decode(splitValues[1].trim());
+    	  if (decodedBytes != null) {
+              splitValues[1] = new String(decodedBytes);
+          }
+    	  return splitValues;
+    }
+
+    public static OAuthConsumerAppDTO[] doPaging(int pageNumber, OAuthConsumerAppDTO[] oAuthConsumerAppDTOSet) {
+
+           int itemsPerPageInt = OAuthConstants.DEFAULT_ITEMS_PER_PAGE;
+        OAuthConsumerAppDTO[] returnedOAuthConsumerSet;
+
+        int startIndex = pageNumber * itemsPerPageInt;
+        int endIndex = (pageNumber + 1) * itemsPerPageInt;
+        if (itemsPerPageInt < oAuthConsumerAppDTOSet.length) {
+            returnedOAuthConsumerSet = new OAuthConsumerAppDTO[itemsPerPageInt];
+        } else {
+            returnedOAuthConsumerSet = new OAuthConsumerAppDTO[oAuthConsumerAppDTOSet.length];
+        }
+        for (int i = startIndex, j = 0; i < endIndex && i < oAuthConsumerAppDTOSet.length; i++, j++) {
+            returnedOAuthConsumerSet[j] = oAuthConsumerAppDTOSet[i];
+        }
+
+        return returnedOAuthConsumerSet;
     }
 }

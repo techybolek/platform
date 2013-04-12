@@ -75,4 +75,11 @@ public class KeyStoreAdminServiceImpl extends AbstractAdmin implements KeyStoreA
     	admin.removeCertFromStore(alias, keyStoreName);
     }
 
+    public PaginatedKeyStoreData getPaginatedKeystoreInfo(String keyStoreName, int pageNumber) throws SecurityConfigException {
+        KeyStoreAdmin admin = new KeyStoreAdmin(CarbonContext.getCurrentContext().getTenantId(),
+                       getGovernanceSystemRegistry());
+        return admin.getPaginatedKeystoreInfo(keyStoreName, pageNumber);
+
+    }
+
 }

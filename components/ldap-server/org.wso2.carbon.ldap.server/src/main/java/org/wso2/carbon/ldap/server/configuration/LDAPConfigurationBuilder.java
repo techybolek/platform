@@ -31,6 +31,7 @@ import org.wso2.carbon.ldap.server.exception.DirectoryServerException;
 import org.wso2.carbon.ldap.server.util.EmbeddingLDAPException;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.ldap.LDAPConstants;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -365,7 +366,7 @@ public class LDAPConfigurationBuilder {
     private void buildPartitionConfigurations(OMElement documentElement) {
 
         //read user-mgt.xml
-        RealmConfiguration realmConfig = getUserManagementXMLElement();
+        //RealmConfiguration realmConfig = getUserManagementXMLElement();
         
         this.partitionConfigurations = new PartitionInfo();
 
@@ -384,14 +385,17 @@ public class LDAPConfigurationBuilder {
         OMElement partitionAdmin = documentElement.getFirstChildWithName(new QName(
                 "PartitionAdmin"));
         propertyMap = getChildPropertyElements(partitionAdmin);
-        
-        AdminInfo defaultPartitionAdmin = buildPartitionAdminConfigurations(realmConfig, propertyMap);
 
-        AdminGroupInfo adminGroupInfo = buildPartitionAdminGroupConfigurations(realmConfig);
+        /*do not create admin user and admin group because it is anyway checked and created
+         *in user core.*/
 
-        defaultPartitionAdmin.setGroupInformation(adminGroupInfo);
+        //AdminInfo defaultPartitionAdmin = buildPartitionAdminConfigurations(realmConfig, propertyMap);
 
-        this.partitionConfigurations.setPartitionAdministrator(defaultPartitionAdmin);
+        //AdminGroupInfo adminGroupInfo = buildPartitionAdminGroupConfigurations(realmConfig);
+
+        //defaultPartitionAdmin.setGroupInformation(adminGroupInfo);
+
+        //this.partitionConfigurations.setPartitionAdministrator(defaultPartitionAdmin);
 
     }
 
@@ -570,6 +574,8 @@ public class LDAPConfigurationBuilder {
             if (logger.isDebugEnabled()) {
                 logger.debug(errorMsg);
             }
+        } catch (UserStoreException e) {
+            logger.error("Error occured while reading user-mgt.xml",e);
         }
 
         return config;

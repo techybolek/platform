@@ -44,6 +44,13 @@
             IdentityManagementClient client =
                     new IdentityManagementClient(backendServerURL, configContext) ;
             UserChallengesDTO[] questionDTOs = client.getChallengeQuestionsOfUser(userName, userKey);
+            if(questionDTOs == null || questionDTOs.length == 0){
+%>
+           <script type="text/javascript">
+                location.href = "fail _password_reset.jsp";
+            </script>
+<%            
+            }
             if(questionDTOs != null && questionDTOs.length > 0) {
                 currentChallenge = questionDTOs[0];
             }

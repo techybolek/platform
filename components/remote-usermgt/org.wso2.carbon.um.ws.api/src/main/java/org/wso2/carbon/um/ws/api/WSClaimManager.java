@@ -24,10 +24,13 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.um.ws.api.stub.RemoteClaimManagerServiceStub;
+import org.wso2.carbon.um.ws.api.stub.RemoteClaimManagerServiceUserStoreExceptionException;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.claim.Claim;
 import org.wso2.carbon.user.core.claim.ClaimManager;
-import org.wso2.carbon.user.core.claim.ClaimMapping;
+import org.wso2.carbon.user.api.ClaimMapping;
+
+import java.rmi.RemoteException;
 
 public class WSClaimManager implements ClaimManager {
 
@@ -73,24 +76,6 @@ public class WSClaimManager implements ClaimManager {
 
     }
 
-    public Claim[] getAllClaims() throws UserStoreException {
-        try {
-            return WSRealmUtil.convertToClaims(stub.getAllClaims(null));
-        } catch (Exception e) {
-            this.handleException(e.getMessage(), e);
-        }
-        return new Claim[0];
-    }
-
-    public Claim[] getAllClaims(String dialectUri) throws UserStoreException {
-        try {
-            return WSRealmUtil.convertToClaims(stub.getAllClaims(dialectUri));
-        } catch (Exception e) {
-            this.handleException(e.getMessage(), e);
-        }
-        return new Claim[0];
-    }
-
     public String[] getAllClaimUris() throws UserStoreException {
         try {
             return stub.getAllClaimUris();
@@ -100,27 +85,9 @@ public class WSClaimManager implements ClaimManager {
         return new String[0];
     }
 
-    public Claim[] getAllRequiredClaims() throws UserStoreException {
-        try {
-            return WSRealmUtil.convertToClaims(stub.getAllRequiredClaims());
-        } catch (Exception e) {
-            this.handleException(e.getMessage(), e);
-        }
-        return new Claim[0];
-    }
-
-    public Claim[] getAllSupportClaimsByDefault() throws UserStoreException {
-        try {
-            return WSRealmUtil.convertToClaims(stub.getAllSupportClaimsByDefault());
-        } catch (Exception e) {
-            this.handleException(e.getMessage(), e);
-        }
-        return new Claim[0];
-    }
-
     public String getAttributeName(String claimURI) throws UserStoreException {
         try {
-            return stub.getAttributeName(claimURI);
+            return stub.getAttributeName(null, claimURI);
         } catch (Exception e) {
             this.handleException(e.getMessage(), e);
         }
@@ -159,20 +126,63 @@ public class WSClaimManager implements ClaimManager {
         throw new UserStoreException(msg, e);
     }
 
-    public void addNewClaimMapping(org.wso2.carbon.user.api.ClaimMapping mapping)
-            throws org.wso2.carbon.user.core.UserStoreException {
-        addNewClaimMapping(ClaimMapping.class.cast(mapping));
-
+    public String getAttributeName(String domainName, String claimURI)
+            throws org.wso2.carbon.user.api.UserStoreException {
+        try {
+            return stub.getAttributeName(domainName, claimURI);
+        } catch (RemoteException e) {
+            this.handleException(e.getMessage(), e);
+        } catch (RemoteClaimManagerServiceUserStoreExceptionException e) {
+            this.handleException(e.getMessage(), e);
+        }
+        return null;
     }
 
-    public void deleteClaimMapping(org.wso2.carbon.user.api.ClaimMapping mapping)
-            throws org.wso2.carbon.user.core.UserStoreException {
-        deleteClaimMapping(ClaimMapping.class.cast(mapping));
-
+    public org.wso2.carbon.user.api.ClaimMapping[] getAllSupportClaimMappingsByDefault()
+            throws org.wso2.carbon.user.api.UserStoreException {
+        try {
+            return WSRealmUtil.convertToClaimMappings(stub.getAllSupportClaimMappingsByDefault());
+        } catch (RemoteException e) {
+            this.handleException(e.getMessage(), e);
+        } catch (RemoteClaimManagerServiceUserStoreExceptionException e) {
+            this.handleException(e.getMessage(), e);
+        }
+        return new ClaimMapping[0];
     }
 
-    public void updateClaimMapping(org.wso2.carbon.user.api.ClaimMapping mapping)
-            throws org.wso2.carbon.user.core.UserStoreException {
-        updateClaimMapping(ClaimMapping.class.cast(mapping));
+    public org.wso2.carbon.user.api.ClaimMapping[] getAllClaimMappings()
+            throws org.wso2.carbon.user.api.UserStoreException {
+        try {
+            return WSRealmUtil.convertToClaimMappings(stub.getAllClaimMappings(null));
+        } catch (RemoteException e) {
+            this.handleException(e.getMessage(), e);
+        } catch (RemoteClaimManagerServiceUserStoreExceptionException e) {
+            this.handleException(e.getMessage(), e);
+        }
+        return new ClaimMapping[0];
+    }
+
+    public org.wso2.carbon.user.api.ClaimMapping[] getAllClaimMappings(String dialectURI)
+            throws org.wso2.carbon.user.api.UserStoreException {
+        try {
+            return WSRealmUtil.convertToClaimMappings(stub.getAllClaimMappings(null));
+        } catch (RemoteException e) {
+            this.handleException(e.getMessage(), e);
+        } catch (RemoteClaimManagerServiceUserStoreExceptionException e) {
+            this.handleException(e.getMessage(), e);
+        }
+        return new ClaimMapping[0];
+    }
+
+    public org.wso2.carbon.user.api.ClaimMapping[] getAllRequiredClaimMappings()
+            throws org.wso2.carbon.user.api.UserStoreException {
+        try {
+            return WSRealmUtil.convertToClaimMappings(stub.getAllRequiredClaimMappings());
+        } catch (RemoteException e) {
+            this.handleException(e.getMessage(), e);
+        } catch (RemoteClaimManagerServiceUserStoreExceptionException e) {
+            this.handleException(e.getMessage(), e);
+        }
+        return new ClaimMapping[0];
     }
 }

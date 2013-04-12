@@ -115,25 +115,26 @@ public class OpenIDUserDAO extends AbstractDAO<OpenIDUserDO> {
         return true;
     }
 
-    public String getUserIdForAssociation(String openId) {
-        OpenIDUserDO userDO = null;
+	public String getUserIdForAssociation(String openId) {
 
-        try {
-            if (registry.resourceExists(IdentityRegistryResources.OPENID_SIGN_UP
-                    + getOpenIdModified(openId))) {
-                userDO = resourceToObject(registry.get(IdentityRegistryResources.OPENID_SIGN_UP
-                        + getOpenIdModified(openId)));
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Unable to find an Sign-Up for " + openId);
-                }
-            }
-        } catch (RegistryException e) {
-            log.error("Error retrieving a resource from Registry", e);
-        }
+		try {
+			if (registry
+					.resourceExists(IdentityRegistryResources.OPENID_SIGN_UP
+							+ getOpenIdModified(openId))) {
+				return resourceToObject(
+						registry.get(IdentityRegistryResources.OPENID_SIGN_UP
+								+ getOpenIdModified(openId))).getUserName();
+			} else {
+				if (log.isDebugEnabled()) {
+					log.debug("Unable to find an Sign-Up for " + openId);
+				}
+			}
+		} catch (RegistryException e) {
+			log.error("Error retrieving a resource from Registry", e);
+		}
 
-        return userDO.getUserName();
-    }
+		return null;
+	}
 
     public boolean hasAssociation(String openId) {
         try {

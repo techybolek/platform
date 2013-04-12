@@ -65,22 +65,29 @@
 
     <link href="css/forgot-password.css" rel="stylesheet" type="text/css" media="all"/>
 
-    <div id="middle">
-        <h2><fmt:message key="account.id.recovery.lookup"/></h2>
-    </div>
+
 <%
     if(success){
 %>
+
+    <div id="middle">
+        <h2><fmt:message key="account.id.found"/></h2>
+    </div>
     <div>
-        <h3><fmt:message key="account.id.found"/></h3>
-        <p><fmt:message key="account.id.found"/></p>
+        <p><fmt:message key="account.id.found.message"/></p>
     </div>
 <%
     } else {
 %>
+
+    <div id="middle">
+        <h2><fmt:message key="account.id.found"/></h2>
+    </div>
     <div>
-        <h3><fmt:message key="account.id.not.found"/></h3>
         <p><fmt:message key="account.id.not.found.message"/></p>
+        <p>
+        <fmt:message key="try.again"/><a href="forgot_root.jsp"><fmt:message key="try.again.here"/></a> .
+        </p>
     </div>
 <%
     }

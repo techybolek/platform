@@ -51,9 +51,9 @@
 			} else if("disable".equals(action)) {
 				dto.setActive(false);
 			} else if("promote".equals(action)){
-                dto.setPromoteStatus(2);
+                dto.setPromote(true);
             } else if("depromote".equals(action)){
-                dto.setPromoteStatus(3);
+                dto.setPromote(false);
             }
 			client.updatePolicy(dto);
 			//session.setAttribute("entitlementpolicy", dto.getPolicy());

@@ -30,7 +30,7 @@ public class EmailSender  {
         module = new DefaultEmailSendingModule();
     }
 
-    private static ExecutorService threadPool = Executors.newFixedThreadPool(2);
+    private static ExecutorService threadPool = Executors.newFixedThreadPool(5);
 
     /**
      *  creates and submits a task to the thread pool

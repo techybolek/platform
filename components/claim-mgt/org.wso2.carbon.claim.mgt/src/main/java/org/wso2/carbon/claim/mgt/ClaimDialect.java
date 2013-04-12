@@ -17,7 +17,7 @@
 */
 package org.wso2.carbon.claim.mgt;
 
-import org.wso2.carbon.user.core.claim.ClaimMapping;
+import org.wso2.carbon.user.api.ClaimMapping;
 
 public class ClaimDialect {
 

@@ -65,7 +65,7 @@ public class PolicyCreatorUtil {
 
         if(policyElementDTO.getRuleCombiningAlgorithms() != null && policyElementDTO.
                 getRuleCombiningAlgorithms().trim().length() > 0) {
-            if(PolicyEditorConstants.CombiningAlog.RULE_COMBINING_FIRST_APPLICABLE.equals(policyElementDTO.
+            if(PolicyEditorConstants.CombiningAlog.FIRST_APPLICABLE_ID.equals(policyElementDTO.
                     getRuleCombiningAlgorithms().trim())){
                 policyElement.setAttribute(EntitlementPolicyConstants.RULE_ALGORITHM,
                         PolicyEditorConstants.RULE_ALGORITHM_IDENTIFIER_1 + policyElementDTO.
@@ -695,6 +695,7 @@ public class PolicyCreatorUtil {
 
             ApplyElementDTO applyElementDTOBag = new ApplyElementDTO();
             for(String attributeValue :attributeValues){
+                attributeValue = attributeValue.trim();
                 AttributeValueElementDTO attributeValueElementDTO = new AttributeValueElementDTO();
                 if(dataType != null && dataType.trim().length() > 0){
                     attributeValueElementDTO.setAttributeDataType(dataType);
@@ -879,7 +880,7 @@ public class PolicyCreatorUtil {
                 Element resourceElement = doc.createElement(PolicyEditorConstants.ALL_OF_ELEMENT);
                 MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                         getFunctionId(functionOnResources),
-                        resources[0], PolicyEditorConstants.RESOURCE_CATEGORY_URI, resourceId, resourceDataType);
+                        resources[0].trim(), PolicyEditorConstants.RESOURCE_CATEGORY_URI, resourceId, resourceDataType);
                 Element matchElement= createMatchElement(matchElementDTO, doc);
                 if(matchElement != null){
                     resourceElement.appendChild(matchElement);                    
@@ -904,7 +905,7 @@ public class PolicyCreatorUtil {
             } else if(functionOnResources.equals(EntitlementPolicyConstants.IS_IN)) {
                 ApplyElementDTO elementDTO = createApplyElementForNonBagFunctions(
                         getFunctionId(functionOnResources),
-                        PolicyEditorConstants.RESOURCE_CATEGORY_URI, resourceId, resources[0], resourceDataType);
+                        PolicyEditorConstants.RESOURCE_CATEGORY_URI, resourceId, resources[0].trim(), resourceDataType);
                 applyElementDTO.setApplyElement(elementDTO);
             } else {
                 ApplyElementDTO elementDTO = createApplyElementForBagFunctions(
@@ -925,7 +926,7 @@ public class PolicyCreatorUtil {
                 Element actionElement = doc.createElement(PolicyEditorConstants.ALL_OF_ELEMENT);
                 MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                         getFunctionId(functionOnActions),
-                        actions[0], PolicyEditorConstants.ACTION_CATEGORY_URI, actionId, actionDataType);
+                        actions[0].trim(), PolicyEditorConstants.ACTION_CATEGORY_URI, actionId, actionDataType);
                 Element matchElement= createMatchElement(matchElementDTO, doc);
                 if(matchElement != null){
                     actionElement.appendChild(matchElement);
@@ -949,7 +950,7 @@ public class PolicyCreatorUtil {
             } else if(functionOnActions.equals(EntitlementPolicyConstants.IS_IN)) {
                 ApplyElementDTO elementDTO = createApplyElementForNonBagFunctions(
                         getFunctionId(functionOnActions),
-                        PolicyEditorConstants.ACTION_CATEGORY_URI, actionId, actions[0], actionDataType);
+                        PolicyEditorConstants.ACTION_CATEGORY_URI, actionId, actions[0].trim(), actionDataType);
                 applyElementDTO.setApplyElement(elementDTO);
             } else {
                 ApplyElementDTO elementDTO = createApplyElementForBagFunctions(
@@ -960,7 +961,7 @@ public class PolicyCreatorUtil {
         }
 
         if(environmentNames != null  && environmentNames.trim().length() > 0) {
-            String[] environments = environmentNames.split(",");
+            String[] environments = environmentNames.split(EntitlementPolicyConstants.ATTRIBUTE_SEPARATOR);
             if(environmentId == null || environmentId.trim().length() < 1){
                 environmentId = EntitlementPolicyConstants.ENVIRONMENT_ID;
             }
@@ -970,7 +971,7 @@ public class PolicyCreatorUtil {
                 Element environmentElement = doc.createElement(PolicyEditorConstants.ALL_OF_ELEMENT);
                 MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                         getFunctionId(functionOnEnvironment),
-                        environments[0], PolicyEditorConstants.ENVIRONMENT_CATEGORY_URI, environmentId, environmentDataType);
+                        environments[0].trim(), PolicyEditorConstants.ENVIRONMENT_CATEGORY_URI, environmentId, environmentDataType);
                 Element matchElement= createMatchElement(matchElementDTO, doc);
                 if(matchElement != null){
                     environmentElement.appendChild(matchElement);
@@ -994,7 +995,7 @@ public class PolicyCreatorUtil {
             } else if(functionOnEnvironment.equals(EntitlementPolicyConstants.IS_IN)) {
                 ApplyElementDTO elementDTO = createApplyElementForNonBagFunctions(
                         getFunctionId(functionOnEnvironment),
-                        PolicyEditorConstants.ENVIRONMENT_CATEGORY_URI, environmentId, environments[0], environmentDataType);
+                        PolicyEditorConstants.ENVIRONMENT_CATEGORY_URI, environmentId, environments[0].trim(), environmentDataType);
                 applyElementDTO.setApplyElement(elementDTO);
             } else {
                 ApplyElementDTO elementDTO = createApplyElementForBagFunctions(
@@ -1005,7 +1006,7 @@ public class PolicyCreatorUtil {
         }
 
         if(subjectNames != null  && subjectNames.trim().length() > 0) {
-            String[] subjects = subjectNames.split(",");
+            String[] subjects = subjectNames.split(EntitlementPolicyConstants.ATTRIBUTE_SEPARATOR);
             if(subjectId == null || subjectId.trim().length() < 1){
                 if(EntitlementPolicyConstants.SUBJECT_TYPE_ROLES.equals(subjectType)){
                     subjectId = EntitlementPolicyConstants.SUBJECT_ID_ROLE;
@@ -1019,7 +1020,7 @@ public class PolicyCreatorUtil {
                     functionOnSubjects.equals(EntitlementPolicyConstants.REGEXP_MATCH)) {
                 elementDTO = createApplyElementForNonBagFunctionsWithAnyOf(
                         getFunctionId(functionOnSubjects),
-                        PolicyEditorConstants.SUBJECT_CATEGORY_URI,subjectId, subjects[0]);
+                        PolicyEditorConstants.SUBJECT_CATEGORY_URI,subjectId, subjects[0].trim());
 
             } else if(functionOnSubjects.contains("less") || functionOnSubjects.contains("greater")){
 
@@ -1039,7 +1040,7 @@ public class PolicyCreatorUtil {
             } else if(functionOnSubjects.equals(EntitlementPolicyConstants.IS_IN)) {
                 elementDTO = createApplyElementForNonBagFunctions(
                         getFunctionId(functionOnSubjects),
-                        PolicyEditorConstants.SUBJECT_CATEGORY_URI, subjectId, subjects[0], subjectDataType);
+                        PolicyEditorConstants.SUBJECT_CATEGORY_URI, subjectId, subjects[0].trim(), subjectDataType);
             } else {
                 elementDTO = createApplyElementForBagFunctions(
                         getFunctionId(functionOnSubjects),
@@ -1180,7 +1181,7 @@ public class PolicyCreatorUtil {
         if(resourceNames != null  && resourceNames.trim().length() > 0) {
             resourcesElement = doc.createElement(PolicyEditorConstants.ANY_OF_ELEMENT);
             Element resourceElement = doc.createElement(PolicyEditorConstants.ALL_OF_ELEMENT);
-            String[] resources = resourceNames.split(",");
+            String[] resources = resourceNames.split(EntitlementPolicyConstants.ATTRIBUTE_SEPARATOR);
             if(resourceId == null || resourceId.trim().length() < 1) {
                 resourceId = EntitlementPolicyConstants.RESOURCE_ID;
             }
@@ -1188,7 +1189,7 @@ public class PolicyCreatorUtil {
                     functionOnResources.equals(EntitlementPolicyConstants.REGEXP_MATCH) ) {
                 MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                         getFunctionId(functionOnResources),
-                        resources[0], PolicyEditorConstants.RESOURCE_CATEGORY_URI, resourceId, resourceDataType);
+                        resources[0].trim(), PolicyEditorConstants.RESOURCE_CATEGORY_URI, resourceId, resourceDataType);
                 Element matchElement= createMatchElement(matchElementDTO, doc);
                 if(matchElement != null){
                     resourceElement.appendChild(matchElement);
@@ -1196,6 +1197,7 @@ public class PolicyCreatorUtil {
                 resourcesElement.appendChild(resourceElement);
             } else if(functionOnResources.equals(EntitlementPolicyConstants.AT_LEAST_ONE_MATCH)) {
                 for(String resource : resources){
+                    resource = resource.trim();
                     Element resourceEle = doc.createElement(PolicyEditorConstants.ALL_OF_ELEMENT);
                     MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                             getFunctionId(EntitlementPolicyConstants.EQUAL_TO),
@@ -1208,6 +1210,7 @@ public class PolicyCreatorUtil {
                 }
             } else if(functionOnResources.equals(EntitlementPolicyConstants.AT_LEAST_ONE_MATCH_REGEXP)) {
                 for(String resource : resources){
+                    resource = resource.trim();
                     Element resourceEle = doc.createElement(PolicyEditorConstants.ALL_OF_ELEMENT);
                     MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                             getFunctionId(EntitlementPolicyConstants.REGEXP_MATCH),
@@ -1220,6 +1223,7 @@ public class PolicyCreatorUtil {
                 }
             } else if(functionOnResources.equals(EntitlementPolicyConstants.MATCH_REGEXP_SET_OF)) {
                 for(String resource : resources){
+                    resource = resource.trim();
                     MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                             getFunctionId(EntitlementPolicyConstants.REGEXP_MATCH),
                             resource, PolicyEditorConstants.RESOURCE_CATEGORY_URI, resourceId, resourceDataType);
@@ -1231,6 +1235,7 @@ public class PolicyCreatorUtil {
                 resourcesElement.appendChild(resourceElement);
             }else if(functionOnResources.equals(EntitlementPolicyConstants.SET_OF)) {
                 for(String resource : resources){
+                    resource = resource.trim();
                     MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                             getFunctionId(EntitlementPolicyConstants.EQUAL_TO),
                             resource, PolicyEditorConstants.RESOURCE_CATEGORY_URI, resourceId, resourceDataType);
@@ -1254,7 +1259,7 @@ public class PolicyCreatorUtil {
                     functionOnActions.equals(EntitlementPolicyConstants. REGEXP_MATCH)) {
                 MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                         getFunctionId(functionOnActions),
-                        actions[0], PolicyEditorConstants.ACTION_CATEGORY_URI, actionId, actionDataType);
+                        actions[0].trim(), PolicyEditorConstants.ACTION_CATEGORY_URI, actionId, actionDataType);
                 Element matchElement= createMatchElement(matchElementDTO, doc);
                 if(matchElement != null){
                     actionElement.appendChild(matchElement);
@@ -1262,7 +1267,8 @@ public class PolicyCreatorUtil {
                 actionsElement.appendChild(actionElement);
             } else if(functionOnActions.equals(EntitlementPolicyConstants.AT_LEAST_ONE_MATCH)) {
                 for(String action : actions){
-                Element actionEle = doc.createElement(PolicyEditorConstants.ALL_OF_ELEMENT);
+                    action = action.trim();
+                    Element actionEle = doc.createElement(PolicyEditorConstants.ALL_OF_ELEMENT);
                     MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                             getFunctionId(EntitlementPolicyConstants.EQUAL_TO),
                             action, PolicyEditorConstants.ACTION_CATEGORY_URI, actionId, actionDataType);
@@ -1274,7 +1280,8 @@ public class PolicyCreatorUtil {
                 }
             } else if(functionOnActions.equals(EntitlementPolicyConstants.AT_LEAST_ONE_MATCH_REGEXP)) {
                 for(String action : actions){
-                Element actionEle = doc.createElement(PolicyEditorConstants.ALL_OF_ELEMENT);
+                    action = action.trim();
+                    Element actionEle = doc.createElement(PolicyEditorConstants.ALL_OF_ELEMENT);
                     MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                             getFunctionId(EntitlementPolicyConstants.REGEXP_MATCH),
                             action, PolicyEditorConstants.ACTION_CATEGORY_URI, actionId, actionDataType);
@@ -1286,6 +1293,7 @@ public class PolicyCreatorUtil {
                 }
             } else if(functionOnActions.equals(EntitlementPolicyConstants.MATCH_REGEXP_SET_OF)) {
                 for(String action : actions){
+                    action = action.trim();
                     MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                             getFunctionId(EntitlementPolicyConstants.REGEXP_MATCH),
                             action, PolicyEditorConstants.ACTION_CATEGORY_URI, actionId, actionDataType);
@@ -1297,6 +1305,7 @@ public class PolicyCreatorUtil {
                 actionsElement.appendChild(actionElement);
             } else if(functionOnActions.equals(EntitlementPolicyConstants.SET_OF)) {
                 for(String action : actions){
+                    action = action.trim();
                     MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                             getFunctionId(EntitlementPolicyConstants.EQUAL_TO),
                             action, PolicyEditorConstants.ACTION_CATEGORY_URI, actionId, actionDataType);
@@ -1321,7 +1330,7 @@ public class PolicyCreatorUtil {
                     functionOnEnvironment.equals(EntitlementPolicyConstants.REGEXP_MATCH)) {
                 MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                         getFunctionId(functionOnEnvironment),
-                        environments[0], PolicyEditorConstants.ENVIRONMENT_CATEGORY_URI, environmentId, environmentDataType);
+                        environments[0].trim(), PolicyEditorConstants.ENVIRONMENT_CATEGORY_URI, environmentId, environmentDataType);
                 Element matchElement= createMatchElement(matchElementDTO, doc);
                 if(matchElement != null){
                     environmentElement.appendChild(matchElement);
@@ -1329,7 +1338,8 @@ public class PolicyCreatorUtil {
                 environmentsElement.appendChild(environmentElement);
             } else if(functionOnEnvironment.equals(EntitlementPolicyConstants.AT_LEAST_ONE_MATCH)) {
                 for(String environment : environments){
-                Element environmentEle = doc.createElement(PolicyEditorConstants.ALL_OF_ELEMENT);
+                    environment = environment.trim();
+                    Element environmentEle = doc.createElement(PolicyEditorConstants.ALL_OF_ELEMENT);
                     MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                             getFunctionId(EntitlementPolicyConstants.EQUAL_TO),
                             environment, PolicyEditorConstants.ENVIRONMENT_CATEGORY_URI, environmentId, environmentDataType);
@@ -1341,7 +1351,8 @@ public class PolicyCreatorUtil {
                 }
             } else if(functionOnEnvironment.equals(EntitlementPolicyConstants.AT_LEAST_ONE_MATCH_REGEXP)) {
                 for(String environment : environments){
-                Element environmentEle = doc.createElement(PolicyEditorConstants.ALL_OF_ELEMENT);
+                    environment = environment.trim();
+                    Element environmentEle = doc.createElement(PolicyEditorConstants.ALL_OF_ELEMENT);
                     MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                             getFunctionId(EntitlementPolicyConstants.REGEXP_MATCH),
                             environment, PolicyEditorConstants.ENVIRONMENT_CATEGORY_URI, environmentId, environmentDataType);
@@ -1353,6 +1364,7 @@ public class PolicyCreatorUtil {
                 }
             }else if(functionOnEnvironment.equals(EntitlementPolicyConstants.MATCH_REGEXP_SET_OF)) {
                 for(String environment : environments){
+                    environment = environment.trim();
                     MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                             getFunctionId(EntitlementPolicyConstants.REGEXP_MATCH),
                             environment, PolicyEditorConstants.ENVIRONMENT_CATEGORY_URI, environmentId, environmentDataType);
@@ -1364,6 +1376,7 @@ public class PolicyCreatorUtil {
                 environmentsElement.appendChild(environmentElement);                
             }else if(functionOnEnvironment.equals(EntitlementPolicyConstants.SET_OF)) {
                 for(String environment : environments){
+                    environment = environment.trim();
                     MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                             getFunctionId(EntitlementPolicyConstants.EQUAL_TO),
                             environment, PolicyEditorConstants.ENVIRONMENT_CATEGORY_URI, environmentId, environmentDataType);
@@ -1392,7 +1405,7 @@ public class PolicyCreatorUtil {
                     EntitlementPolicyConstants.REGEXP_MATCH.equals(functionOnSubjects)) {
                 MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                         getFunctionId(functionOnSubjects),
-                        subjects[0], PolicyEditorConstants.SUBJECT_CATEGORY_URI, subjectId, subjectDataType);
+                        subjects[0].trim(), PolicyEditorConstants.SUBJECT_CATEGORY_URI, subjectId, subjectDataType);
                 Element matchElement= createMatchElement(matchElementDTO, doc);
                 if(matchElement != null){
                     subjectElement.appendChild(matchElement);
@@ -1400,6 +1413,7 @@ public class PolicyCreatorUtil {
                 subjectsElement.appendChild(subjectElement);
             } else if(EntitlementPolicyConstants.AT_LEAST_ONE_MATCH.equals(functionOnSubjects)){
                 for(String subject : subjects){
+                    subject = subject.trim();
                     Element subjectEle = doc.createElement(PolicyEditorConstants.ALL_OF_ELEMENT);
                     MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                             getFunctionId(EntitlementPolicyConstants.EQUAL_TO),
@@ -1412,6 +1426,7 @@ public class PolicyCreatorUtil {
                 }
             } else if(EntitlementPolicyConstants.AT_LEAST_ONE_MATCH_REGEXP.equals(functionOnSubjects)){
                 for(String subject : subjects){
+                    subject = subject.trim();
                     Element subjectEle = doc.createElement(PolicyEditorConstants.ALL_OF_ELEMENT);
                     MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                             getFunctionId(EntitlementPolicyConstants.REGEXP_MATCH),
@@ -1424,6 +1439,7 @@ public class PolicyCreatorUtil {
                 }
             } else if(EntitlementPolicyConstants.SET_OF.equals(functionOnSubjects)){
                 for(String subject : subjects){
+                    subject = subject.trim();
                     MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                             getFunctionId(EntitlementPolicyConstants.EQUAL_TO),
                             subject, PolicyEditorConstants.SUBJECT_CATEGORY_URI, subjectId, subjectDataType);
@@ -1435,6 +1451,7 @@ public class PolicyCreatorUtil {
                 subjectsElement.appendChild(subjectElement);
             } else if(EntitlementPolicyConstants.MATCH_REGEXP_SET_OF.equals(functionOnSubjects)){
                 for(String subject : subjects){
+                    subject = subject.trim();
                     MatchElementDTO matchElementDTO = createMatchElementForNonBagFunctions(
                             getFunctionId(EntitlementPolicyConstants.REGEXP_MATCH),
                             subject, PolicyEditorConstants.SUBJECT_CATEGORY_URI, subjectId, subjectDataType);
@@ -2018,8 +2035,14 @@ public class PolicyCreatorUtil {
             String policyCombiningAlgorithm = omElement.
                     getAttributeValue(new QName(EntitlementPolicyConstants.POLICY_ALGORITHM));
             //TODO
-            policySetDTO.setPolicyCombiningAlgId(policyCombiningAlgorithm.
-                    split(EntitlementPolicyConstants.POLICY_ALGORITHM_IDENTIFIER)[1]);
+
+            if(policyCombiningAlgorithm.contains(PolicyEditorConstants.POLICY_ALGORITHM_IDENTIFIER_1)){
+                policySetDTO.setPolicyCombiningAlgId(policyCombiningAlgorithm.
+                        split(PolicyEditorConstants.POLICY_ALGORITHM_IDENTIFIER_1)[1]);
+            } else {
+                policySetDTO.setPolicyCombiningAlgId(policyCombiningAlgorithm.
+                        split(PolicyEditorConstants.POLICY_ALGORITHM_IDENTIFIER_3)[1]);             
+            }
 
             Iterator iterator1 = omElement.getChildrenWithLocalName(EntitlementPolicyConstants.
                     DESCRIPTION_ELEMENT);
@@ -2488,11 +2511,17 @@ public class PolicyCreatorUtil {
                     getPolicySetId());
         }
 
-        if(policySetDTO.getPolicyCombiningAlgId() != null && policySetDTO.getPolicyCombiningAlgId().
-                trim().length() > 0) {
-            policySetElement.setAttribute(EntitlementPolicyConstants.POLICY_ALGORITHM,
-                    EntitlementPolicyConstants.POLICY_ALGORITHM_IDENTIFIER + policySetDTO.
-                            getPolicyCombiningAlgId());
+        String combiningAlgId = policySetDTO.getPolicyCombiningAlgId();
+        if(combiningAlgId != null && combiningAlgId.trim().length() > 0) {
+
+            if(PolicyEditorConstants.CombiningAlog.ONLY_ONE_APPLICABLE_ID.equals(combiningAlgId) ||
+                    PolicyEditorConstants.CombiningAlog.FIRST_APPLICABLE_ID.equals(combiningAlgId)){
+                policySetElement.setAttribute(EntitlementPolicyConstants.POLICY_ALGORITHM,
+                        PolicyEditorConstants.POLICY_ALGORITHM_IDENTIFIER_1 + combiningAlgId);
+            } else {
+                policySetElement.setAttribute(EntitlementPolicyConstants.POLICY_ALGORITHM,
+                        PolicyEditorConstants.POLICY_ALGORITHM_IDENTIFIER_3 + combiningAlgId);                
+            }
         }
 
         if(policySetDTO.getVersion() != null && policySetDTO.getVersion().trim().length() > 0){

@@ -25,7 +25,8 @@
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="java.util.ResourceBundle" %>
 <%@page import="java.lang.Exception"%>
-<%@ page import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementAdminServiceClient" %>
+<%@ page
+        import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementPolicyAdminServiceClient" %>
 <%
 
     boolean publishToAllSubscribers = false;
@@ -53,7 +54,7 @@
     String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
     try {
-        EntitlementAdminServiceClient client = new EntitlementAdminServiceClient(cookie,
+        EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
                 serverURL, configContext); 
         if(publishAllPolicies && publishToAllSubscribers){
             client.publishAll(null, null);

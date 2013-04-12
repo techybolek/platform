@@ -211,6 +211,8 @@
 
     try {
         EntitlementPolicyCreator creator = new EntitlementPolicyCreator();
+        EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
+                serverURL, configContext);
         PolicyDTO policyDTO = null;
         if(editorDTO != null){
             String[] policyData = PolicyEditorUtil.createBasicPolicyData(editorDTO,
@@ -218,20 +220,24 @@
             editorDTO.setAttributeIdDataTypeMap(entitlementPolicyBean.getAttributeIdDataTypeMap());
             editorDTO.setAttributeIdMap(entitlementPolicyBean.getDefaultAttributeIdMap());
             editorDTO.setDataTypeMap(entitlementPolicyBean.getDefaultDataTypeMap());
-
             String policy = creator.createBasicPolicy(editorDTO);
-            if(policy != null){
+            try{
+                policyDTO = client.getPolicy(policyId);
+            } catch (Exception e){
+                //ignore
+            }
+
+            if(policyDTO == null){
                 policyDTO = new PolicyDTO();
+            }
+
+            if(policy != null){                                                 
                 policyDTO.setPolicyId(policyId);
                 policyDTO.setPolicy(policy);
                 policyDTO.setBasicPolicyEditorMetaData(policyData);
                 policyDTO.setPolicyEditor(PolicyEditorConstants.SOA_POLICY_EDITOR);
             }
         }
-
-
-        EntitlementPolicyAdminServiceClient client = new EntitlementPolicyAdminServiceClient(cookie,
-                serverURL, configContext);
 
         if(entitlementPolicyBean.isEditPolicy()){
             client.updatePolicy(policyDTO);
@@ -247,7 +253,7 @@
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
         forwardTo = "index.jsp?";
     } catch (Exception e) {
-        String message = resourceBundle.getString("error.while.loading.policy");
+        String message = resourceBundle.getString("error.while.adding.policy") + " " + e.getMessage();
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
         forwardTo = "index.jsp?";
     }

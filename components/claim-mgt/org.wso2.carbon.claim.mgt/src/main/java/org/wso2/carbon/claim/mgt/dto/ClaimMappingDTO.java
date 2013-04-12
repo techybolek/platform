@@ -21,6 +21,8 @@ public class ClaimMappingDTO {
     private ClaimDTO claim;
 
     private String mappedAttribute;
+    
+    private ClaimAttributeDTO[] mappedAttributes;
 
     public ClaimDTO getClaim() {
         return claim;
@@ -37,5 +39,13 @@ public class ClaimMappingDTO {
     public void setMappedAttribute(String mappedAttribute) {
         this.mappedAttribute = mappedAttribute;
     }
+
+	public ClaimAttributeDTO[] getMappedAttributes() {
+		return mappedAttributes;
+	}
+
+	public void setMappedAttributes(ClaimAttributeDTO[] mappedAttributes) {
+		this.mappedAttributes = mappedAttributes;
+	}
 
 }

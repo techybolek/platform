@@ -42,6 +42,16 @@ public class AccessTokenDO extends CacheEntry {
 
     private long validityPeriodInMillis;
 
+    private int tenantID;
+
+    public int getTenantID() {
+	    return tenantID;
+    }
+
+    public void setTenantID(int tenantID) {
+	    this.tenantID = tenantID;
+    }
+
     public String getConsumerKey() {
         return consumerKey;
     }
@@ -61,7 +71,7 @@ public class AccessTokenDO extends CacheEntry {
     private long validityPeriod;
 
     public AccessTokenDO(String consumerKey, String authzUser, String[] scope, Timestamp issuedTime, long validityPeriod) {
-        this.setConsumerKey(consumerKey);
+        this.consumerKey = consumerKey;
         this.authzUser = authzUser;
         this.scope = scope;
         this.issuedTime = issuedTime;

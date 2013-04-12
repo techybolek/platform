@@ -16,7 +16,6 @@
 package org.wso2.carbon.identity.core.model;
 
 import java.util.Date;
-import java.util.Set;
 
 import org.apache.axiom.om.OMElement;
 

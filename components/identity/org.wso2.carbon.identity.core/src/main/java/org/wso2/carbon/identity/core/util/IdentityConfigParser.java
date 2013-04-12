@@ -17,23 +17,29 @@
 */
 package org.wso2.carbon.identity.core.util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Stack;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
 import org.wso2.carbon.base.ServerConfigurationException;
-import org.wso2.carbon.identity.core.internal.IdentityCoreServiceComponent;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import java.io.*;
-import java.net.URL;
-import java.util.*;
 
 public class IdentityConfigParser {
 
@@ -60,16 +66,16 @@ public class IdentityConfigParser {
         }
     }
 
-    public static IdentityConfigParser getInstance() throws ServerConfigurationException {
-        if (parser == null) {
-            synchronized (lock) {
-                if (parser == null) {
-                    parser = new IdentityConfigParser();
-                }
-            }
-        }
-        return parser;
-    }
+	public static IdentityConfigParser getInstance() throws ServerConfigurationException {
+		if (parser == null) {
+			synchronized (lock) {
+				if (parser == null) {
+					parser = new IdentityConfigParser();
+				}
+			}
+		}
+		return parser;
+	}
 
     public static IdentityConfigParser getInstance(String filePath)
             throws ServerConfigurationException {

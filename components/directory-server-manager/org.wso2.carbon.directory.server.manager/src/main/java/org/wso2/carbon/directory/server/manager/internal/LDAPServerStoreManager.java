@@ -57,7 +57,11 @@ public class LDAPServerStoreManager {
     public LDAPServerStoreManager(RealmConfiguration realmConfig) {
 
         this.realmConfiguration = realmConfig;
-        this.connectionSource = new LDAPConnectionContext(realmConfig);
+        try {
+            this.connectionSource = new LDAPConnectionContext(realmConfig);
+        } catch (UserStoreException e) {
+            log.error("Error occurred while instantiating LDAPConnectionContext",e);
+        }
     }
 
     protected boolean isServerNameValid(String serverName) {

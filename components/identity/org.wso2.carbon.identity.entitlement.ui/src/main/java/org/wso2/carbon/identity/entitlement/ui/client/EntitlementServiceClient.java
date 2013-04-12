@@ -67,7 +67,7 @@ public class EntitlementServiceClient {
                 request = request.trim().replaceAll("&lt;", "<"); //TODO should be properly fixed
                 request = request.trim().replaceAll("&gt;", ">");                 
             }
-            return ClientUtil.getStatus(stub.getDecision(request));
+            return stub.getDecision(request);
         } catch (Exception e) {
             handleException("Error occurred while policy evaluation", e);
         }

@@ -94,23 +94,26 @@ public class JDBCPersistenceManager {
         }
     }
 
-    /**
-     * Get an instance of the JDBCPersistenceManager. It implements a lazy initialization with double
-     * checked locking, because it is initialized first by identity.core module during the start up.
-     *
-     * @return JDBCPersistenceManager instance
-     * @throws IdentityException Error when reading the data source configurations
-     */
-    public static JDBCPersistenceManager getInstance() throws IdentityException {
-        if (instance == null) {
-            synchronized (JDBCPersistenceManager.class) {
-                if (instance == null) {
-                    instance = new JDBCPersistenceManager();
-                }
-            }
-        }
-        return instance;
-    }
+	/**
+	 * Get an instance of the JDBCPersistenceManager. It implements a lazy
+	 * initialization with double
+	 * checked locking, because it is initialized first by identity.core module
+	 * during the start up.
+	 * 
+	 * @return JDBCPersistenceManager instance
+	 * @throws IdentityException
+	 *             Error when reading the data source configurations
+	 */
+	public static JDBCPersistenceManager getInstance() throws IdentityException {
+		if (instance == null) {
+			synchronized (JDBCPersistenceManager.class) {
+				if (instance == null) {
+					instance = new JDBCPersistenceManager();
+				}
+			}
+		}
+		return instance;
+	}
 
     public void initializeDatabase() throws Exception {
         IdentityDBInitializer dbInitializer = new IdentityDBInitializer(dataSource);

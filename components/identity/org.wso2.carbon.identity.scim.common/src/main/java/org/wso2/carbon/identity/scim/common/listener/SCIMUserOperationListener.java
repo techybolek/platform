@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.scim.common.listener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.scim.common.config.SCIMProvisioningConfigManager;
 import org.wso2.carbon.identity.scim.common.group.SCIMGroupHandler;
 import org.wso2.carbon.identity.scim.common.impl.DefaultSCIMProvisioningHandler;
@@ -28,12 +29,12 @@ import org.wso2.carbon.identity.scim.common.utils.IdentitySCIMException;
 import org.wso2.carbon.identity.scim.common.utils.SCIMCommonConstants;
 import org.wso2.carbon.identity.scim.common.utils.SCIMCommonUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
-import org.wso2.carbon.user.api.Claim;
+import org.wso2.carbon.user.api.ClaimManager;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.core.Permission;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
-import org.wso2.carbon.user.api.ClaimManager;
 import org.wso2.carbon.user.core.listener.UserOperationEventListener;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.charon.core.exceptions.CharonException;
@@ -41,7 +42,6 @@ import org.wso2.charon.core.exceptions.NotFoundException;
 import org.wso2.charon.core.objects.Group;
 import org.wso2.charon.core.objects.User;
 import org.wso2.charon.core.schema.SCIMConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.charon.core.util.AttributeUtil;
 
 import java.util.ArrayList;
@@ -77,7 +77,7 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
     public boolean doPostAuthenticate(String userName, boolean authenticated,
                                       UserStoreManager userStoreManager)
             throws UserStoreException {
-        return authenticated;
+        return true;
     }
 
     public boolean doPreAddUser(String s, Object o, String[] strings,
@@ -99,10 +99,10 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
                 ClaimManager claimManager = userStoreManager.getClaimManager();
 
                 //get existingClaims related to SCIM claim dialect
-                Claim[] existingClaims = claimManager.getAllClaims(SCIMCommonUtils.SCIM_CLAIM_DIALECT);
+                ClaimMapping[] existingClaims = claimManager.getAllClaimMappings(SCIMCommonUtils.SCIM_CLAIM_DIALECT);
                 List<String> claimURIList = new ArrayList<String>();
-                for (Claim claim : existingClaims) {
-                    claimURIList.add(claim.getClaimUri());
+                for (ClaimMapping claim : existingClaims) {
+                    claimURIList.add(claim.getClaim().getClaimUri());
                 }
                 //obtain user claim values (since user is already added at this point by CARBON UM)
                 attributes = userStoreManager.getUserClaimValues(
@@ -276,11 +276,11 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
                             ClaimManager claimManager = userStoreManager.getClaimManager();
                             if (claimManager != null) {
                                 //get existingClaims related to SCIM claim dialect
-                                Claim[] existingClaims = claimManager.getAllClaims(
+                                ClaimMapping[] existingClaims = claimManager.getAllClaimMappings(
                                         SCIMCommonUtils.SCIM_CLAIM_DIALECT);
                                 List<String> claimURIList = new ArrayList<String>();
-                                for (Claim claim : existingClaims) {
-                                    claimURIList.add(claim.getClaimUri());
+                                for (ClaimMapping claim : existingClaims) {
+                                    claimURIList.add(claim.getClaim().getClaimUri());
                                 }
                                 //obtain user claim values (since claims already updated at is point by CARBON UM)
                                 Map<String, String> attributes = userStoreManager.getUserClaimValues(
@@ -329,12 +329,12 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
         return true;
     }
 
-    public boolean doPreAddRole(String s, String[] strings, Permission[] permissions,
+    public boolean doPreAddRole(String s, String[] strings, org.wso2.carbon.user.api.Permission[] permissions,
                                 UserStoreManager userStoreManager) throws UserStoreException {
         return true;
     }
 
-    public boolean doPostAddRole(String roleName, String[] userList, Permission[] permissions,
+    public boolean doPostAddRole(String roleName, String[] userList, org.wso2.carbon.user.api.Permission[] permissions,
                                  UserStoreManager userStoreManager) throws UserStoreException {
         SCIMGroupHandler scimGroupHandler = new SCIMGroupHandler(userStoreManager.getTenantId());
         //query role name from identity table

@@ -181,14 +181,15 @@ public class OAuthAppDAO {
             while (rSet.next()) {
                 // There is at least one application associated with a given key
                 rSetHasRows = true;
-                if (rSet.getString(3) != null && rSet.getString(3).length() > 0) {
+                if (rSet.getString(4) != null && rSet.getString(4).length() > 0) {
                     oauthApp = new OAuthAppDO();
                     oauthApp.setOauthConsumerKey(consumerKey);
                     oauthApp.setOauthConsumerSecret(rSet.getString(1));
-                    oauthApp.setApplicationName(rSet.getString(2));
-                    oauthApp.setOauthVersion(rSet.getString(3));
-                    oauthApp.setCallbackUrl(rSet.getString(4));
-                    oauthApp.setUserName(rSet.getString(5));
+                    oauthApp.setUserName(rSet.getString(2)); 
+                    oauthApp.setApplicationName(rSet.getString(3));
+                    oauthApp.setOauthVersion(rSet.getString(4));
+                    oauthApp.setCallbackUrl(rSet.getString(5));
+                    oauthApp.setTenantId(rSet.getInt(6));
                     oauthApps.add(oauthApp);
                 }
             }

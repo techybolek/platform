@@ -35,7 +35,6 @@
         if (scopeString.endsWith(": ")) {
             scopeString = scopeString.substring(0, scopeString.lastIndexOf(": "));
         }
-
     } else {
         request.getSession().setAttribute(OAuthConstants.OAUTH_ERROR_CODE, "invalid_request");
         request.getSession().setAttribute(OAuthConstants.OAUTH_ERROR_MESSAGE,
@@ -84,9 +83,21 @@
         </div>
     </div>
 </div>
+<%
+if(!"true".equals(request.getSession().getAttribute(OAuthConstants.OIDCSessionConstant.OIDC_REQUEST))) {
+%>
 <div class="header-text">
     <strong><%=(String) oauth2Params.getApplicationName()%></strong> requests access to <strong><%=scopeString%></strong>
 </div>
+<%
+} else {
+%>
+<div class="header-text">
+    <strong>Please login to continue</strong>
+</div>
+<%
+}
+%>
 
 <div class="container">
     <div class="row">

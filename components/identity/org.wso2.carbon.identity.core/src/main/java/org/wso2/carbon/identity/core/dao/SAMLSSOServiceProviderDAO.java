@@ -61,6 +61,10 @@ public class SAMLSSOServiceProviderDAO extends AbstractDAO<SAMLSSOServiceProvide
         serviceProviderDO.setLogoutURL(resource
                 .getProperty(IdentityRegistryResources.PROP_SAML_SSO_LOGOUT_URL));
 
+        if (resource.getProperty(IdentityRegistryResources.PROP_SAML_SSO_DO_SIGN_RESPONSE) != null) {
+            serviceProviderDO.setDoSignResponse(new Boolean(resource.getProperty(
+                    IdentityRegistryResources.PROP_SAML_SSO_DO_SIGN_RESPONSE).trim()));
+        }
         if (resource.getProperty(IdentityRegistryResources.PROP_SAML_SSO_DO_SIGN_ASSERTIONS) != null) {
             serviceProviderDO.setDoSignAssertions(new Boolean(resource.getProperty(
                     IdentityRegistryResources.PROP_SAML_SSO_DO_SIGN_ASSERTIONS).trim()));
@@ -76,6 +80,11 @@ public class SAMLSSOServiceProviderDAO extends AbstractDAO<SAMLSSOServiceProvide
         if (resource.getProperty(IdentityRegistryResources.PROP_SAML_SSO_REQUESTED_CLAIMS) != null) {
             serviceProviderDO.setRequestedClaims(resource
                     .getPropertyValues(IdentityRegistryResources.PROP_SAML_SSO_REQUESTED_CLAIMS));
+        }
+
+        if (resource.getProperty(IdentityRegistryResources.PROP_SAML_SSO_REQUESTED_AUDIENCES) != null) {
+            serviceProviderDO.setRequestedAudiences(resource
+                    .getPropertyValues(IdentityRegistryResources.PROP_SAML_SSO_REQUESTED_AUDIENCES));
         }
 
         return serviceProviderDO;
@@ -120,7 +129,9 @@ public class SAMLSSOServiceProviderDAO extends AbstractDAO<SAMLSSOServiceProvide
             String doSingleLogout = serviceProviderDO.isDoSingleLogout() ? "true" : "false";
             resource.addProperty(IdentityRegistryResources.PROP_SAML_SSO_DO_SINGLE_LOGOUT,
                     doSingleLogout);
-
+            String doSignResponse = serviceProviderDO.isDoSignResponse() ? "true" : "false";
+            resource.addProperty(IdentityRegistryResources.PROP_SAML_SSO_DO_SIGN_RESPONSE,
+                                 doSignResponse);
             String doSignAssertions = serviceProviderDO.isDoSignAssertions() ? "true" : "false";
             resource.addProperty(IdentityRegistryResources.PROP_SAML_SSO_DO_SIGN_ASSERTIONS,
                     doSignAssertions);
@@ -131,6 +142,11 @@ public class SAMLSSOServiceProviderDAO extends AbstractDAO<SAMLSSOServiceProvide
                 resource.addProperty(
                         IdentityRegistryResources.PROP_SAML_SSO_ATTRIB_CONSUMING_SERVICE_INDEX,
                         serviceProviderDO.getAttributeConsumingServiceIndex());
+            }
+            if (serviceProviderDO.getRequestedAudiencesList() != null
+                    && serviceProviderDO.getRequestedAudiencesList().size() > 0) {
+                resource.setProperty(IdentityRegistryResources.PROP_SAML_SSO_REQUESTED_AUDIENCES,
+                        serviceProviderDO.getRequestedAudiencesList());
             }
 
             try {

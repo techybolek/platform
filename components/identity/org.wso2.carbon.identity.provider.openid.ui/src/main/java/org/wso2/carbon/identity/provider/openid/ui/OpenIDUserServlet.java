@@ -58,6 +58,12 @@ public class OpenIDUserServlet extends HttpServlet {
 		ConfigurationContext configContext = null;
         String tenantDomain = null;
         String mainCSS = "";
+        String placeHolder = "";
+        
+        if (req.getRequestURL().indexOf("/images")>0 || req.getRequestURL().indexOf("/styles/css")>0){
+        	return;
+        }
+        
         if (req.getSession()
                 .getAttribute(MultitenantConstants.TENANT_DOMAIN) != null) {
             tenantDomain = (String) req.getSession().getAttribute(
@@ -68,7 +74,7 @@ public class OpenIDUserServlet extends HttpServlet {
                     .getAttribute(MultitenantConstants.TENANT_DOMAIN);
         }
         if (tenantDomain != null) {
-        String themeRoot = "../../../../t/" + tenantDomain
+        String themeRoot = placeHolder+ "../../../../t/" + tenantDomain
                     + "/registry/resource"
                     + RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH
                     + "/repository";
@@ -83,7 +89,18 @@ public class OpenIDUserServlet extends HttpServlet {
         } else {
             mainCSS = "../carbon/styles/css/main.css";
         }
-		String errorBack= "<html><head><link media=\"all\" type=\"text/css\" rel=\"stylesheet\" href=\"../carbon/openid-provider/css/openid-provider.css\" /><link media=\"all\" type=\"text/css\" rel=\"stylesheet\" href=\"../carbon/admin/css/global.css\" />"
+        String errorBack = "";
+        try {
+			user = OpenIDUtil.getUserName(req.getRequestURL().toString());
+			if (log.isDebugEnabled()) {
+				log.debug("OpenID url hit for the user " + user);
+			}
+			
+			if (user.indexOf("/")>0) {
+				placeHolder = "../";
+			}
+			
+		   errorBack= "<html><head><link media=\"all\" type=\"text/css\" rel=\"stylesheet\" href=\""+placeHolder+"../carbon/openid-provider/css/openid-provider.css\" /><link media=\"all\" type=\"text/css\" rel=\"stylesheet\" href=\""+placeHolder+"../carbon/admin/css/global.css\" />"
                     +"<link media=\"all\" type=\"text/css\" rel=\"stylesheet\" href=\""+mainCSS+"\">\n"
 					+ "</head>" 
 					+"<body>"
@@ -93,7 +110,7 @@ public class OpenIDUserServlet extends HttpServlet {
                             +"<td colspan=\"2\" id=\"header\">"
                                 +"<div id=\"header-div\">"
                                     +"<div class=\"right-logo\">Management Console</div>"
-                                    +"<div class=\"left-logo\"><a class=\"header-home\" href=\"../carbon/admin/index.jsp\"><img height=\"32\" width=\"300\" src=\"../admin/images/1px.gif\"/></a>"
+                                    +"<div class=\"left-logo\"><a class=\"header-home\" href=\""+placeHolder+"../carbon/admin/index.jsp\"><img height=\"32\" width=\"300\" src=\""+placeHolder+"../admin/images/1px.gif\"/></a>"
                                     +"</div>"
                                 +"</div>"
                             +"</td>"
@@ -109,7 +126,7 @@ public class OpenIDUserServlet extends HttpServlet {
                             +"<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"openid-box\">"
                                         +"<tr><td class=\"openid-box-08\"></td>"
                                         +"<td class=\"openid-box-back\" style=\"color:#c55825;\">"
-                                            +"<img src=\"../carbon/openid-provider/images/openid-biguser-fishy.gif\" align=\"middle\" hspace=\"50\" />You are trying to do something fishy !!! "
+                                            +"<img src=\""+placeHolder+"../carbon/openid-provider/images/openid-biguser-fishy.gif\" align=\"middle\" hspace=\"50\" />You are trying to do something fishy !!! "
                                         +"</td>"
                                         +"<td class=\"openid-box-04\"></td>"
                             +"</tr>"
@@ -130,11 +147,7 @@ public class OpenIDUserServlet extends HttpServlet {
                         +"</tbody>"
                     +"</table>"
                     +"</body></html>";
-		try {
-			user = OpenIDUtil.getUserName(req.getRequestURL().toString());
-			if (log.isDebugEnabled()) {
-				log.debug("OpenID url hit for the user " + user);
-			}
+		
 		} catch (IdentityException e) {
 			log.error("Failed to retreive the user name corresponding to the provided OpenID", e);
 			resp.setContentType("text/html");
@@ -169,7 +182,7 @@ public class OpenIDUserServlet extends HttpServlet {
 			back = errorBack;
 		} else {*/
 			resp.setContentType("text/html");
-			back = "<html><head><link media=\"all\" type=\"text/css\" rel=\"stylesheet\" href=\"../carbon/openid-provider/css/openid-provider.css\" /><link media=\"all\" type=\"text/css\" rel=\"stylesheet\" href=\"../carbon/admin/css/global.css\" />"
+			back = "<html><head><link media=\"all\" type=\"text/css\" rel=\"stylesheet\" href=\""+placeHolder+"../carbon/openid-provider/css/openid-provider.css\" /><link media=\"all\" type=\"text/css\" rel=\"stylesheet\" href=\""+placeHolder+"../carbon/admin/css/global.css\" />"
                     +"<link media=\"all\" type=\"text/css\" rel=\"stylesheet\" href=\""+mainCSS+"\">\n"
                     + "<link rel='openid2.provider' href='" + serverUrl + "'/>\n"
 					+ "<link rel='openid.server' href='" + serverUrl + "'/>\n" + "</head>" 
@@ -180,7 +193,7 @@ public class OpenIDUserServlet extends HttpServlet {
                             +"<td colspan=\"2\" id=\"header\">"
                                 +"<div id=\"header-div\">"
                                     +"<div class=\"right-logo\">Management Console</div>"
-                                    +"<div class=\"left-logo\"><a class=\"header-home\" href=\"../carbon/admin/index.jsp\"><img height=\"32\" width=\"300\" src=\"../carbon/admin/images/1px.gif\"/></a>"
+                                    +"<div class=\"left-logo\"><a class=\"header-home\" href=\""+placeHolder+"../carbon/admin/index.jsp\"><img height=\"32\" width=\"300\" src=\""+placeHolder+"../carbon/admin/images/1px.gif\"/></a>"
                                     +"</div>"
                                 +"</div>"
                             +"</td>"
@@ -196,7 +209,7 @@ public class OpenIDUserServlet extends HttpServlet {
                             +"<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"openid-box\">"
                                         +"<tr><td class=\"openid-box-08\"></td>"
                                         +"<td class=\"openid-box-back\">"
-                                            +"<img src=\"../carbon/openid-provider/images/openid-biguser.gif\" align=\"middle\" hspace=\"50\" />This is the OpenID Url of user, <span class=\"openid-box-username\">"+user+"</span>"
+                                            +"<img src=\""+placeHolder+"../carbon/openid-provider/images/openid-biguser.gif\" align=\"middle\" hspace=\"50\" />This is the OpenID Url of user, <span class=\"openid-box-username\">"+user+"</span>"
                                         +"</td>"
                                         +"<td class=\"openid-box-04\"></td>"
                             +"</tr>"

@@ -39,6 +39,7 @@ import org.wso2.carbon.security.SecurityConstants;
 import org.wso2.carbon.security.SecurityServiceHolder;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.TenantUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -205,19 +206,30 @@ public class ServicePasswordCallbackHandler implements CallbackHandler {
         String tenantAwareUserName = TenantUtils.getTenantAwareUsername(user);
         try {
 
-            UserRealm realm = AnonymousSessionUtil.getRealmByUserName(
-                    SecurityServiceHolder.getRegistryService(),
-                    SecurityServiceHolder.getRealmService(),user);
-            isAuthorized = realm.getAuthorizationManager().isUserAuthorized(
-                    tenantAwareUserName,
-                    serviceGroupId+"/"+serviceId,
-                    UserCoreConstants.INVOKE_SERVICE_PERMISSION);
+			UserRealm realm = AnonymousSessionUtil.getRealmByUserName(
+					SecurityServiceHolder.getRegistryService(),
+					SecurityServiceHolder.getRealmService(), user);
 
-            if (isAuthorized == true) {
-                isAuthenticated = realm.getUserStoreManager().authenticate(tenantAwareUserName, password);
-            }
+			isAuthenticated = realm.getUserStoreManager().authenticate(
+					tenantAwareUserName, password);
 
-            return isAuthenticated;
+			if (isAuthenticated) {
+
+				int index = tenantAwareUserName.indexOf("/");
+				if (index < 0) {
+					String domain = UserCoreUtil.getDomainFromThreadLocal();
+					if (domain != null) {
+						tenantAwareUserName = domain + "/" + tenantAwareUserName;
+					}
+				}
+
+				isAuthorized = realm.getAuthorizationManager()
+						.isUserAuthorized(tenantAwareUserName,
+								serviceGroupId + "/" + serviceId,
+								UserCoreConstants.INVOKE_SERVICE_PERMISSION);
+			}
+
+            return isAuthorized;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw e;

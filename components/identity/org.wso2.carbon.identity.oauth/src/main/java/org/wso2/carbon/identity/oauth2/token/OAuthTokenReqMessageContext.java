@@ -30,6 +30,8 @@ public class OAuthTokenReqMessageContext {
 
     private String[] scope;
 
+    private int tenantID;
+
     private long validityPeriod;
     
     private Properties properties = new Properties();
@@ -52,6 +54,14 @@ public class OAuthTokenReqMessageContext {
 
     public String[] getScope() {
         return scope;
+    }
+    
+    public int getTenantID() {
+	return tenantID;
+    }
+
+    public void setTenantID(int tenantID) {
+	this.tenantID = tenantID;
     }
 
     public void setScope(String[] scope) {

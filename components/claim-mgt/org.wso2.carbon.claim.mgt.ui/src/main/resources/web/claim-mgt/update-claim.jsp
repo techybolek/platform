@@ -65,7 +65,7 @@
     			hiddenElement.value="false";
     		}
    		}
-        function remove(dialect,claim,length) {
+        function removeItem(dialect,claim,length) {
             var defaultDialect = "<%=UserCoreConstants.DEFAULT_CARBON_DIALECT%>";
             if((dialect == defaultDialect) && (length < 2 )){
                 CARBON.showWarningDialog('<fmt:message key="cannot.remove.default.carbon.dialect.all.claims"/>');
@@ -83,19 +83,28 @@
         	if (value == '') {
             	CARBON.showWarningDialog('<fmt:message key="attribute.is.required"/>');
             	return false;
-        	}      
+        	} else if (value.length > 30) {
+        		CARBON.showWarningDialog('<fmt:message key="attr.id.is.too.long"/>');
+            	return false;
+        	}     
 
         	var value = document.getElementsByName("description")[0].value;
         	if (value == '') {
             	CARBON.showWarningDialog('<fmt:message key="description.is.required"/>');
             	return false;
-        	}         
+        	} else if (value.length > 150) {
+        		CARBON.showWarningDialog('<fmt:message key="description.is.too.long"/>');
+            	return false;
+        	}        
 
         	var value = document.getElementsByName("displayName")[0].value;
         	if (value == '') {
             	CARBON.showWarningDialog('<fmt:message key="displayname.is.required"/>');
             	return false;
-        	} 
+        	} else if (value.length > 30) {
+        		CARBON.showWarningDialog('<fmt:message key="displayname.is.too.long"/>');
+            	return false;
+        	}
 
         	var value = document.getElementsByName("displayOrder")[0].value;
         	if (value != '') {
@@ -104,6 +113,12 @@
                   CARBON.showWarningDialog('<fmt:message key="display.order.has.to.be.integer"/>');
             	  return false;
             	}
+        	}
+        	
+        	var value = document.getElementsByName("regex")[0].value;
+        	if (value != '' && value.length > 100) {
+            	CARBON.showWarningDialog('<fmt:message key="regex.is.too.long"/>');
+            	return false;
         	}
         	
         	document.updateclaim.submit();
@@ -116,7 +131,7 @@
         	 ClaimMappingDTO[] claims =  claimMappping[i].getClaimMappings();
            %>
                 <a href="#" class="icon-link"  style="background-image:url(../claim-mgt/images/delete.gif);"
-                   onclick="remove('<%=dialectUri%>','<%=claimUri%>','<%=claims.length%>'  );return false;"><fmt:message key='remove.claim.mapping'/></a>
+                   onclick="removeItem('<%=dialectUri%>','<%=claimUri%>','<%=claims.length%>'  );return false;"><fmt:message key='remove.claim.mapping'/></a>
     </div>
 
     <form name="updateclaim" action="update-claim-submit.jsp?claimUri=<%=claimUri%>&dialect=<%=dialectUri%>" method="post">
@@ -134,30 +149,30 @@
 					<table class="normal" cellspacing="0" style="width: 100%" >
 					    	<tr>
 							<td class="leftCol-small"><fmt:message key='display.name'/><font class="required">*</font></td>
-							<td><input type="text" name="displayName" id="displayName" value="<%=claims[j].getClaim().getDisplayTag()%>"/></td>
+							<td class="leftCol-big"><input type="text" name="displayName" id="displayName" value="<%=claims[j].getClaim().getDisplayTag()%>"/></td>
 						</tr>
 						
 						<tr>
 							<td class="leftCol-small"><fmt:message key='description'/><font class="required">*</font></td>
-							<td><input type="text" name="description" id="description" value="<%=claims[j].getClaim().getDescription()%>"/></td>
+							<td class="leftCol-big"><input type="text" name="description" id="description" value="<%=claims[j].getClaim().getDescription()%>"/></td>
 						</tr>
 			
 						<tr>
 							<td class="leftCol-small"><fmt:message key='claim.uri'/><font class="required">*</font></td>
-							<td><%=claims[j].getClaim().getClaimUri()%></td>
+							<td class="leftCol-big"><%=claims[j].getClaim().getClaimUri()%></td>
 						</tr>
 			
 						<tr>
 							<td class="leftCol-small"><fmt:message key='mapped.attribute'/><font class="required">*</font></td>
-							<td><input type="text" name="attribute" id="attribute" value="<%=claims[j].getMappedAttribute()%>"/></td>
+							<td class="leftCol-big"><input type="text" name="attribute" id="attribute" value="<%=claims[j].getMappedAttribute()%>"/></td>
 						</tr>
 			
 						<tr>
 							<td class="leftCol-small"><fmt:message key='regular.expression'/></td>
 							<% if(claims[j].getClaim().getRegEx()!=null) {%>
-							<td><input type="text" name="regex" id="regex" value="<%=claims[j].getClaim().getRegEx()%>"/></td>
+							<td class="leftCol-big"><input type="text" name="regex" id="regex" value="<%=claims[j].getClaim().getRegEx()%>"/></td>
 							<%} else { %>
-							<td><input type="text" name="regex" id="regex"/></td>
+							<td class="leftCol-big"><input type="text" name="regex" id="regex"/></td>
 							<%} %>
 						</tr>
 			            		<tr>
@@ -167,12 +182,12 @@
 						<tr>
 							<td class="leftCol-small"><fmt:message key='supported.by.default'/></td>
 							<%if (claims[j].getClaim().getSupportedByDefault()) { %>
-							<td>
+							<td class="leftCol-big">
 							    <input type='checkbox' name='supported' id='supported' checked='checked' onclick="setType('supported','supportedhidden')" />
 							    <input type='hidden' name='supportedhidden' id='supportedhidden' value='true' />
 							</td>
 							<% } else { %>
-							<td>
+							<td class="leftCol-big">
 							    <input type='checkbox' name='supported' id='supported' onclick="setType('supported','supportedhidden')" />
 							    <input type='hidden' name='supportedhidden' id='supportedhidden' value='false' />
 							</td>
@@ -182,17 +197,33 @@
 						<tr>
 							<td class="leftCol-small"><fmt:message key='required'/></td>
 							<%if (claims[j].getClaim().getRequired()) { %>
-							<td>
+							<td class="leftCol-big">
 							     <input type='checkbox' name='required' id='required' checked='checked' onclick="setType('required','requiredhidden')" />
 							     <input type='hidden' name='requiredhidden' id='requiredhidden' value='true' />
 							</td>
 							<% } else { %>
-							<td>
+							<td class="leftCol-big">
 							     <input type='checkbox' name='required' id='required' onclick="setType('required','requiredhidden')" />
 							     <input type='hidden' name='requiredhidden' id='requiredhidden' value='false' />
 							</td>
 							<%} %>
 						</tr>
+						
+						<tr>
+							<td class="leftCol-small"><fmt:message key='readonly'/></td>
+							<%if (claims[j].getClaim().getReadOnly()) { %>
+							<td>
+							     <input type='checkbox' name='readonly' id='readonly' checked='checked' onclick="setType('readonly','readonlyhidden')" />
+							     <input type='hidden' name='requiredhidden' id='requiredhidden' value='true' />
+							</td>
+							<% } else { %>
+							<td>
+							     <input type='checkbox' name='readonly' id='readonly' onclick="setType('readonly','readonlyhidden')" />
+							     <input type='hidden' name='readonlyhidden' id='readonlyhidden' value='false' />
+							</td>
+							<%} %>
+						</tr>
+						
 					</table>
 				</td>
 			</tr>

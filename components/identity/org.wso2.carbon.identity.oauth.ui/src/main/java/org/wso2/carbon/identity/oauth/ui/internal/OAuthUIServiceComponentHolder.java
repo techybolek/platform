@@ -20,8 +20,10 @@ package org.wso2.carbon.identity.oauth.ui.internal;
 
 import org.osgi.service.http.HttpService;
 import org.wso2.carbon.base.api.ServerConfigurationService;
+import org.wso2.carbon.identity.oauth.ui.util.OpenIDConnectUserRPStore;
 import org.wso2.carbon.identity.oauth2.OAuth2Service;
 import org.wso2.carbon.utils.ConfigurationContextService;
+import org.apache.commons.collections.map.MultiValueMap;
 
 /**
  * A singleton to hold the OSGi services received during the component activation.
@@ -34,6 +36,7 @@ public class OAuthUIServiceComponentHolder {
     private ServerConfigurationService serverConfigurationService;
     private HttpService httpService;
     private OAuth2Service oauth2Service;
+    private OpenIDConnectUserRPStore oauth2UserAppsStore = new OpenIDConnectUserRPStore();
 
     private OAuthUIServiceComponentHolder(){
     }
@@ -73,4 +76,12 @@ public class OAuthUIServiceComponentHolder {
     public void setHttpService(HttpService httpService) {
         this.httpService = httpService;
     }
+
+	/**
+	 * @return the oauthUserAppsStore
+	 */
+    public OpenIDConnectUserRPStore getOauth2UserAppsStore() {
+	    return oauth2UserAppsStore;
+    }
+	
 }

@@ -36,8 +36,7 @@ import java.util.Random;
 public class PasswordUtil {
     
     private static final Log log = LogFactory.getLog(PasswordUtil.class);
-    private static final int PASSWORD_LENGTH = 8;
-    private static final Random RANDOM = new SecureRandom();
+
 
     /**
      * Update Password with the user input
@@ -80,24 +79,6 @@ public class PasswordUtil {
             throw new IdentityMgtException(msg, e);
         }
     }
-
-    /**
-     * TODO  password must be valid
-     * @return
-     */
-    public static String generateTemporaryPassword() {
-        // Pick from some letters that won't be easily mistaken for each
-        // other. So, for example, omit o O and 0, 1 l and L.
-        String letters = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789+@";
-
-        StringBuffer pw = new StringBuffer();
-        for (int i = 0; i<PASSWORD_LENGTH; i++){
-          int index = (int)(RANDOM.nextDouble()*letters.length());
-          pw.append(letters.substring(index, index+1));
-        }
-        return pw.toString();
-    }
-
 
     /**
      *

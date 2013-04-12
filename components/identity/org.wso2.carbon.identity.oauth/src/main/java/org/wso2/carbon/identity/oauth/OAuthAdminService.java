@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.identity.oauth;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
@@ -40,9 +43,6 @@ import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.dao.TokenMgtDAO;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 public class OAuthAdminService extends AbstractAdmin {
 
@@ -296,5 +296,4 @@ public class OAuthAdminService extends AbstractAdmin {
             return revokeRespDTO;
         }
     }
-
 }

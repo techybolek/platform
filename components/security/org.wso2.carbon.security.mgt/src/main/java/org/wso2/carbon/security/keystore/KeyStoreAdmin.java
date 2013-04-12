@@ -36,6 +36,8 @@ import org.wso2.carbon.security.SecurityConstants;
 import org.wso2.carbon.security.keystore.service.CertData;
 import org.wso2.carbon.security.keystore.service.CertDataDetail;
 import org.wso2.carbon.security.keystore.service.KeyStoreData;
+import org.wso2.carbon.security.keystore.service.PaginatedCertData;
+import org.wso2.carbon.security.keystore.service.PaginatedKeyStoreData;
 import org.wso2.carbon.security.util.KeyStoreMgtUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -607,5 +609,138 @@ public class KeyStoreAdmin {
         }
         return tenantName + "-" + uuid + ".cert";
     }
+
+    /**
+       * This method is used internally to do the pagination purposes.
+       *
+       * @param pageNumber  page Number
+       * @param certDataSet set of keyStoreData
+       * @return PaginatedPolicySetDTO object containing the number of pages and the set of policies
+       *         that reside in the given page.
+       */
+      private PaginatedCertData doPaging(int pageNumber, CertData[] certDataSet) {
+
+          PaginatedCertData paginatedCertData = new PaginatedCertData();
+          if (certDataSet.length == 0) {
+              paginatedCertData.setCertDataSet(new CertData[0]);
+              return paginatedCertData;
+          }
+          String itemsPerPage = ServerConfiguration.getInstance().getFirstProperty("ItemsPerPage");
+          int itemsPerPageInt = SecurityConstants.ITEMS_PER_PAGE;
+//          if (itemsPerPage != null) {
+//              itemsPerPageInt = Integer.parseInt(itemsPerPage);
+//          }
+          int numberOfPages = (int) Math.ceil((double) certDataSet.length / itemsPerPageInt);
+          if (pageNumber > numberOfPages - 1) {
+              pageNumber = numberOfPages - 1;
+          }
+          int startIndex = pageNumber * itemsPerPageInt;
+          int endIndex = (pageNumber + SecurityConstants.CACHING_PAGE_SIZE) * itemsPerPageInt;
+          CertData[] returnedCertDataSet = new CertData[itemsPerPageInt * SecurityConstants.CACHING_PAGE_SIZE];
+
+          for (int i = startIndex, j = 0; i < endIndex && i < certDataSet.length; i++, j++) {
+              returnedCertDataSet[j] = certDataSet[i];
+          }
+
+          paginatedCertData.setCertDataSet(returnedCertDataSet);
+          paginatedCertData.setNumberOfPages(numberOfPages);
+
+          return paginatedCertData;
+      }
+
+      /**
+       * This method will list 1. Certificate aliases 2. Private key alise 3. Private key value to a
+       * given keystore.
+       *
+       * @param keyStoreName The name of the keystore
+       * @param pageNumber   page number
+       * @return Instance of KeyStoreData
+       * @throws SecurityConfigException will be thrown
+       */
+      public PaginatedKeyStoreData getPaginatedKeystoreInfo(String keyStoreName, int pageNumber)
+              throws SecurityConfigException {
+          try {
+
+              if (keyStoreName == null) {
+                  throw new Exception("keystore name cannot be null");
+              }
+
+              KeyStore keyStore;
+              String keyStoreType;
+              String privateKeyPassowrd;
+              if (KeyStoreUtil.isPrimaryStore(keyStoreName)) {
+                  KeyStoreManager keyMan = KeyStoreManager.getInstance(tenantId);
+                  keyStore = keyMan.getPrimaryKeyStore();
+                  ServerConfiguration serverConfig = ServerConfiguration.getInstance();
+                  keyStoreType = serverConfig
+                          .getFirstProperty(RegistryResources.SecurityManagement.SERVER_PRIMARY_KEYSTORE_TYPE);
+                  privateKeyPassowrd = serverConfig
+                          .getFirstProperty(RegistryResources.SecurityManagement.SERVER_PRIVATE_KEY_PASSWORD);
+              } else {
+                  String path = SecurityConstants.KEY_STORES + "/" + keyStoreName;
+                  if (!registry.resourceExists(path)) {
+                      throw new SecurityConfigException("Key Store not found");
+                  }
+                  Resource resource = registry.get(path);
+                  KeyStoreManager manager = KeyStoreManager.getInstance(tenantId);
+                  keyStore = manager.getKeyStore(keyStoreName);
+                  keyStoreType = resource.getProperty(SecurityConstants.PROP_TYPE);
+
+                  String encpass = resource.getProperty(SecurityConstants.PROP_PRIVATE_KEY_PASS);
+
+                  CryptoUtil util = CryptoUtil.getDefaultCryptoUtil();
+                  privateKeyPassowrd = new String(util.base64DecodeAndDecrypt(encpass));
+
+              }
+              // Fill the information about the certificates
+              Enumeration<String> aliases = keyStore.aliases();
+              List<org.wso2.carbon.security.keystore.service.CertData> certDataList = new ArrayList<CertData>();
+              Format formatter = new SimpleDateFormat("dd/MM/yyyy");
+
+              while (aliases.hasMoreElements()) {
+                  String alias = aliases.nextElement();
+                  if (keyStore.isCertificateEntry(alias)) {
+                      X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
+                      certDataList.add(fillCertData(cert, alias, formatter));
+                  }
+              }
+
+              // Create a cert array
+              CertData[] certs = certDataList.toArray(new CertData[certDataList.size()]);
+
+              // Create a KeyStoreData bean, set the name and fill in the cert information
+              PaginatedKeyStoreData keyStoreData = new PaginatedKeyStoreData();
+              keyStoreData.setKeyStoreName(keyStoreName);
+              keyStoreData.setPaginatedCertData(doPaging(pageNumber, certs));
+              keyStoreData.setKeyStoreType(keyStoreType);
+
+              aliases = keyStore.aliases();
+              while (aliases.hasMoreElements()) {
+                  String alias = aliases.nextElement();
+                  // There be only one entry in WSAS related keystores
+                  if (keyStore.isKeyEntry(alias)) {
+                      X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
+                      keyStoreData.setKey(fillCertData(cert, alias, formatter));
+
+                      PrivateKey key = (PrivateKey) keyStore.getKey(alias, privateKeyPassowrd
+                              .toCharArray());
+                      String pemKey;
+                      pemKey = "-----BEGIN PRIVATE KEY-----\n";
+                      pemKey += Base64.encode(key.getEncoded());
+                      pemKey += "\n-----END PRIVATE KEY-----";
+                      keyStoreData.setKeyValue(pemKey);
+                      break;
+
+                  }
+              }
+              return keyStoreData;
+          } catch (Exception e) {
+              String msg = "Error has encounted while loading the keystore to the given keystore name "
+                           + keyStoreName;
+              log.error(msg, e);
+              throw new SecurityConfigException(msg);
+          }
+
+      }
 
 }

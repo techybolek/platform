@@ -40,6 +40,13 @@
         forwardPage = URLDecoder.decode(forwardPage, "UTF-8");
         session.setAttribute("forwardPage", forwardPage);
     }
+    
+    String forwardTo = null;
+
+    String BUNDLE = "org.wso2.carbon.identity.relyingparty.ui.i18n.Resources";
+    ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
+    
+    try {
 
     String serverURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
     ConfigurationContext configContext =
@@ -49,7 +56,6 @@
     cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
 
     OpenIDDTO openID = (OpenIDDTO) session.getAttribute("openId");
-    String forwardTo = null;
     RelyingPartyServiceClient client =
             new RelyingPartyServiceClient(cookie, serverURL, configContext);
     OpenIDDTO dto = new OpenIDDTO();
@@ -57,8 +63,6 @@
     dto.setUserName(request.getParameter("username"));
     dto.setPassword(request.getParameter("password"));
     boolean status = client.addOpenIDToProfile(dto);
-    String BUNDLE = "org.wso2.carbon.identity.relyingparty.ui.i18n.Resources";
-    ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 
     if (status) {
         String message = resourceBundle.getString("openid.added.to.profile");
@@ -81,6 +85,12 @@
                             "&css=" + URLEncoder.encode(cssLocation, "UTF-8") + "&title=" +
                             URLEncoder.encode(pageTitle, "UTF-8");
         }
+    }
+    } catch (Exception e){
+    	String message = resourceBundle.getString("unable.to.signin.please.try.again");
+        CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
+        forwardTo = "openid_sign_in.jsp";
+
     }
 %>
 

@@ -17,38 +17,76 @@
  */
 package org.wso2.carbon.identity.user.registration;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.IdentityClaimManager;
 import org.wso2.carbon.identity.core.persistence.IdentityPersistenceManager;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
-import org.wso2.carbon.identity.relyingparty.RelyingPartyData;
-import org.wso2.carbon.identity.relyingparty.RelyingPartyException;
-import org.wso2.carbon.identity.relyingparty.TokenVerifierConstants;
-import org.wso2.carbon.identity.relyingparty.saml.SAMLTokenVerifier;
-import org.wso2.carbon.identity.user.registration.dto.InfoCarDTO;
-import org.wso2.carbon.identity.user.registration.dto.OpenIDDTO;
+import org.wso2.carbon.identity.user.registration.dto.PasswordRegExDTO;
 import org.wso2.carbon.identity.user.registration.dto.UserDTO;
 import org.wso2.carbon.identity.user.registration.dto.UserFieldDTO;
 import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.user.core.*;
+import org.wso2.carbon.user.core.Permission;
+import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.UserStoreException;
+import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.claim.Claim;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 public class UserRegistrationService {
+	
+    private static Log log = LogFactory.getLog(UserRegistrationService.class);
+
+	/**
+	 * This service method will return back all available password validation regular expressions
+	 * against the corresponding domain names.
+	 * 
+	 * @return
+	 * @throws IdentityException
+	 */
+	public PasswordRegExDTO[] getPasswordRegularExpressions() throws IdentityException {
+		UserRealm realm = null;
+		realm = IdentityTenantUtil.getRealm(null, null);
+		List<PasswordRegExDTO> passwordRegExList = new ArrayList<PasswordRegExDTO>();
+		PasswordRegExDTO passwordRegEx;
+
+		try {
+
+			UserStoreManager manager = realm.getUserStoreManager();
+			String domainName;
+			String regEx;
+
+			while (manager != null) {
+				domainName = manager.getRealmConfiguration().getUserStoreProperty(
+						UserCoreConstants.RealmConfig.PROPERTY_DOMAIN_NAME);
+				regEx = manager.getRealmConfiguration().getUserStoreProperty(
+						UserCoreConstants.RealmConfig.PROPERTY_JS_REG_EX);
+				if (regEx != null && regEx.length() > 0) {
+					passwordRegEx = new PasswordRegExDTO();
+					passwordRegEx.setDomainName(domainName);
+					passwordRegEx.setRegEx(regEx);
+					passwordRegExList.add(passwordRegEx);
+				}
+				manager = manager.getSecondaryUserStoreManager();
+			}
+
+		} catch (UserStoreException e) {
+			log.error(e);
+			throw new IdentityException(
+					"Error occured while loading password validation regular expressions.");
+		}
+
+		return passwordRegExList.toArray(new PasswordRegExDTO[passwordRegExList.size()]);
+	}
 
     public UserFieldDTO[] readUserFieldsForUserRegistration(String dialect)
             throws IdentityException {
@@ -73,8 +111,11 @@ public class UserRegistrationService {
                 if(UserCoreConstants.ClaimTypeURIs.ACCOUNT_STATUS.equals(claim.getClaimUri())){
                     continue;
                 }
-                claimList.add(getUserFieldDTO(claim.getClaimUri(), claim.getDisplayTag(),
-                        claim.isRequired(), claim.getDisplayOrder(), claim.getRegEx()));
+				if (!claim.isReadOnly()) {
+					claimList.add(getUserFieldDTO(claim.getClaimUri(),
+							claim.getDisplayTag(), claim.isRequired(),
+							claim.getDisplayOrder(), claim.getRegEx()));
+				}
             }
         }
 
@@ -148,22 +189,56 @@ public class UserRegistrationService {
         Permission permission = null;
         try {
             admin = realm.getUserStoreManager();
+            
+            if (!isUserNameWithAllowedDomainName(userName,realm)){
+                throw new IdentityException("Domain does not permit self registration");
+            }
+            
             // add user
             admin.addUser(userName, password, null, claimList, profileName);
+            
+            String identityRoleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR +
+                    IdentityConstants.IDENTITY_DEFAULT_ROLE;
+            
             // if this is the first time a user signs up, needs to create role
-            if (!admin.isExistingRole(IdentityConstants.IDENTITY_DEFAULT_ROLE)) {
-                permission = new Permission("/permission/admin/login",
-                        UserMgtConstants.EXECUTE_ACTION);
-                admin.addRole(IdentityConstants.IDENTITY_DEFAULT_ROLE, new String[] { userName },
-                        new Permission[] { permission });
-            } else {
-                // if role already exists, just add user to role
-                admin.updateUserListOfRole(IdentityConstants.IDENTITY_DEFAULT_ROLE,
-                        new String[] {}, new String[] { userName });
-            }
+            try {
+				if (!admin.isExistingRole(identityRoleName)) {
+				    permission = new Permission("/permission/admin/login",
+				            UserMgtConstants.EXECUTE_ACTION);     
+				    admin.addRole(identityRoleName, new String[] { userName },
+				            new Permission[] { permission });
+				} else {
+				    // if role already exists, just add user to role
+				    admin.updateUserListOfRole(identityRoleName,
+				            new String[] {}, new String[] { userName });
+				}
+			} catch (org.wso2.carbon.user.api.UserStoreException e) {
+				// If something goes wrong here - them remove the already added user.
+				admin.deleteUser(userName);
+	            throw new IdentityException("Error occurred while adding user : " + userName, e);
+			}
         } catch (UserStoreException e) {
             throw new IdentityException("Error occurred while adding user : " + userName, e);
         }
     }
+    
+	private boolean isUserNameWithAllowedDomainName(String userName, UserRealm realm)
+			throws IdentityException {
+		int index;
+		index = userName.indexOf("/");
+
+		// Check whether we have a secondary UserStoreManager setup.
+		if (index > 0) {
+			// Using the short-circuit. User name comes with the domain name.
+			try {
+				return !realm.getRealmConfiguration().isRestrictedDomainForSlefSignUp(
+						userName.substring(0, index));
+			} catch (UserStoreException e) {
+				throw new IdentityException(e.getMessage(), e);
+			}
+		}
+
+		return true;
+	}
 
 }

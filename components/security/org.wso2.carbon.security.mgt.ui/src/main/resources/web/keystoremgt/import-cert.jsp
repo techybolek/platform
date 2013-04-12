@@ -106,38 +106,7 @@
                     </tbody>
                 </table>
             </form>
-            <p>&nbsp;</p>
-            
-                <h3><fmt:message key="available.certificates"/></h3>
-                <table class="styledLeft">
-                    <thead>
-                    <tr>
-                         <th><fmt:message key="alias"/></th>
-                   		 <th><fmt:message key="issuerdn"/></th>
-	                    <th><fmt:message key="subjectdn"/></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                     <%
-                    if (certData != null && certData.length > 0) {
-                        for (CertData cert : certData) {
-                            if (cert != null) {
-                	%>
-                		<tr>
-                    		<td><%=cert.getAlias()%>
-                    		</td>
-                    		<td><%=cert.getIssuerDN()%>
-                   			</td>
-		                    <td><%=cert.getSubjectDN()%>
-        		            </td>
-        		        </tr>
-       		        <%
-            	             }
-        	             }
-	                }
-    	            %>
-                    </tbody>
-                </table>
+
             
         </div>
     </div>

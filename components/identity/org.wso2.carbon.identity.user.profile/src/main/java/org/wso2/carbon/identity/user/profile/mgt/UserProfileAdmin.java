@@ -24,12 +24,14 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.base.IdentityConstants;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.claim.Claim;
+import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.core.claim.ClaimManager;
+import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.profile.ProfileConfiguration;
 import org.wso2.carbon.user.core.profile.ProfileConfigurationManager;
 import org.wso2.carbon.utils.ServerConstants;
@@ -61,8 +63,25 @@ public class UserProfileAdmin extends AbstractAdmin {
     public void setUserProfile(String username, UserProfileDTO profile) throws UserProfileException {
         UserRealm realm = null;
         try {
+           
             if (!this.isAuthorized(username)) {
                 throw new UserProfileException("You are not authorized to perform this action.");
+            }
+
+            int indexOne;
+            indexOne = username.indexOf("/");
+
+            if (indexOne < 0) {
+                /*if domain is not provided, this can be the scenario where user from a secondary user store
+                logs in without domain name and tries to view his own profile*/
+                MessageContext messageContext = MessageContext.getCurrentMessageContext();
+                HttpServletRequest request = (HttpServletRequest) messageContext
+                        .getProperty("transport.http.servletRequest");
+                String domainName = (String) request.getSession().getAttribute("logged_in_domain");
+
+                if (domainName != null) {
+                    username = domainName + "/" + username;
+                }
             }
 
             realm = getUserRealm();
@@ -71,9 +90,11 @@ public class UserProfileAdmin extends AbstractAdmin {
             Map<String, String> map = new HashMap<String, String>();
             for (UserFieldDTO data : udatas) {
                 String claimURI = data.getClaimUri();
-                String value = data.getFieldValue();
-                map.put(claimURI, value);
-            }
+				String value = data.getFieldValue();
+				if (!data.isReadOnly()) {
+					map.put(claimURI, value);
+				}
+			}
 
             if (profile.getProfileConifuration() != null) {
                 map.put(UserCoreConstants.PROFILE_CONFIGURATION, profile.getProfileConifuration());
@@ -133,15 +154,43 @@ public class UserProfileAdmin extends AbstractAdmin {
 
             UserRealm realm = getUserRealm();
 
-            UserStoreManager ur = realm.getUserStoreManager();
+            UserStoreManager ur = realm.getUserStoreManager(); 
+            
+            boolean isReadOnly = ur.isReadOnly();
+            
+			int index;
+			index = username.indexOf("/");
+
+			UserStoreManager secUserStoreManager = null;
+			
+			// Check whether we have a secondary UserStoreManager setup.
+			if (index > 0) {
+				// Using the short-circuit. User name comes with the domain name.
+				String domain = username.substring(0, index);
+
+				if (ur instanceof AbstractUserStoreManager) {
+					secUserStoreManager = ((AbstractUserStoreManager) ur)
+							.getSecondaryUserStoreManager(domain);
+					if (secUserStoreManager != null) {
+						isReadOnly = secUserStoreManager.isReadOnly();
+					}
+				}
+			}
 
             ProfileConfigurationManager profileAdmin = realm
                     .getProfileConfigurationManager();
             if (profileAdmin != null) {
                 availableProfileConfigurations = getAvailableProfileConfiguration(profileAdmin);
             }
+            
+            String[] profileNames = null;
 
-            String[] profileNames = ur.getProfileNames(username);
+            if(secUserStoreManager != null){
+                profileNames = secUserStoreManager.getProfileNames(username);
+            } else {
+                profileNames = ur.getProfileNames(username);
+            }
+            
             profiles = new UserProfileDTO[profileNames.length];
             Claim[] claims = getAllSupportedClaims(realm, UserCoreConstants.DEFAULT_CARBON_DIALECT);
             String[] claimUris = new String[claims.length + 1];
@@ -166,6 +215,8 @@ public class UserProfileAdmin extends AbstractAdmin {
                         data.setRegEx(claim.getRegEx());
                         data.setRequired(claim.isRequired());
                         data.setDisplayOrder(claim.getDisplayOrder());
+                        data.setCheckedAttribute(claim.isCheckedAttribute());
+                        data.setReadOnly(claim.isReadOnly());
                         userFields.add(data);
                     }
                 }
@@ -178,6 +229,10 @@ public class UserProfileAdmin extends AbstractAdmin {
                 profileConfig = valueMap.get(UserCoreConstants.PROFILE_CONFIGURATION);
                 if (profileConfig == null) {
                     profileConfig = UserCoreConstants.DEFAULT_PROFILE_CONFIGURATION;
+                }
+                
+                if (isReadOnly){
+                	profileConfig = "readonly";
                 }
 
                 temp.setProfileConifuration(profileConfig);
@@ -222,6 +277,8 @@ public class UserProfileAdmin extends AbstractAdmin {
                 data.setRequired(claim.isRequired());
                 data.setDisplayOrder(claim.getDisplayOrder());
                 data.setRegEx(claim.getRegEx());
+                data.setCheckedAttribute(claim.isCheckedAttribute());
+                data.setReadOnly(claim.isReadOnly());
                 datas[j] = data;
             }
 
@@ -255,10 +312,54 @@ public class UserProfileAdmin extends AbstractAdmin {
             UserRealm realm = getUserRealm();
 
             UserStoreManager ur = realm.getUserStoreManager();
+            
+            boolean isReadOnly = ur.isReadOnly();
+
+            int indexOne;
+			indexOne = username.indexOf("/");
+
+            if (indexOne < 0) {
+                /*if domain is not provided, this can be the scenario where user from a secondary user store
+                logs in without domain name and tries to view his own profile*/
+                MessageContext messageContext = MessageContext.getCurrentMessageContext();
+                HttpServletRequest request = (HttpServletRequest) messageContext
+                        .getProperty("transport.http.servletRequest");
+                String domainName = (String) request.getSession().getAttribute("logged_in_domain");
+
+                if (domainName != null) {
+                    username = domainName + "/" + username;
+                }
+            }
+			int index;
+			index = username.indexOf("/");
+
+			UserStoreManager secUserStoreManager = null;
+			
+			// Check whether we have a secondary UserStoreManager setup.
+			if (index > 0) {
+				// Using the short-circuit. User name comes with the domain name.
+				String domain = username.substring(0, index);
+
+				if (ur instanceof AbstractUserStoreManager) {
+					secUserStoreManager = ((AbstractUserStoreManager) ur)
+							.getSecondaryUserStoreManager(domain);
+					if (secUserStoreManager != null) {
+						isReadOnly = secUserStoreManager.isReadOnly();
+					}
+				}
+			}
+            
             ProfileConfigurationManager profileAdmin = realm
                     .getProfileConfigurationManager();
 
-            String[] profileNames = ur.getProfileNames(username);
+            String[] profileNames = null;
+            
+            if(secUserStoreManager != null){
+                profileNames = secUserStoreManager.getProfileNames(username);
+            } else {
+                profileNames = ur.getProfileNames(username);
+            }
+            
             boolean found = false;
 
             if (profileNames != null && profileNames.length > 0) {
@@ -300,6 +401,8 @@ public class UserProfileAdmin extends AbstractAdmin {
                     data.setRegEx(claim.getRegEx());
                     data.setRequired(claim.isRequired());
                     data.setDisplayOrder(claim.getDisplayOrder());
+                    data.setReadOnly(claim.isReadOnly());
+                    data.setCheckedAttribute(claim.isCheckedAttribute());
                     userFields.add(data);
                 }
             }
@@ -310,6 +413,10 @@ public class UserProfileAdmin extends AbstractAdmin {
             profileConfig = valueMap.get(UserCoreConstants.PROFILE_CONFIGURATION);
             if (profileConfig == null) {
                 profileConfig = UserCoreConstants.DEFAULT_PROFILE_CONFIGURATION;
+            }
+            
+            if (isReadOnly){
+            	profileConfig = "readonly";
             }
 
             profile.setProfileConifuration(profileConfig);
@@ -335,6 +442,32 @@ public class UserProfileAdmin extends AbstractAdmin {
         return userStoreManager.isMultipleProfilesAllowed();
     }
 
+
+    public boolean isAddProfileEnabledForDomain(String domain) throws UserProfileException {
+
+        org.wso2.carbon.user.core.UserStoreManager userStoreManager = null;
+        org.wso2.carbon.user.core.UserRealm realm = getUserRealm();
+        boolean isAddProfileEnabled = false;
+
+        try {
+            userStoreManager = realm.getUserStoreManager().getSecondaryUserStoreManager(domain);
+
+        } catch (UserStoreException e) {
+            String errorMessage = "Error in obtaining SecondaryUserStoreManager.";
+            log.error(errorMessage, e);
+            throw new UserProfileException(errorMessage, e);
+        }
+
+        if(userStoreManager != null){
+            isAddProfileEnabled = userStoreManager.isMultipleProfilesAllowed();
+        }
+
+        return isAddProfileEnabled;
+    }
+
+
+
+
     private Claim[] getClaimsToEnterData(UserRealm realm)
             throws UserStoreException {
         try {
@@ -343,6 +476,8 @@ public class UserProfileAdmin extends AbstractAdmin {
             throw new UserStoreException(e);
         }
     }
+
+
     
     private boolean isAuthorized(String targetUser) throws UserStoreException, CarbonException {
         boolean isAuthrized = false;
@@ -364,16 +499,16 @@ public class UserProfileAdmin extends AbstractAdmin {
      */
     private Claim[] getAllSupportedClaims(UserRealm realm, String dialectUri)
             throws org.wso2.carbon.user.api.UserStoreException {
-        Claim[] claims = null;
+        ClaimMapping[] claims = null;
         ArrayList<Claim> reqClaims = null;
 
-        claims = (Claim[]) realm.getClaimManager().getAllSupportClaimsByDefault();
+        claims = realm.getClaimManager().getAllSupportClaimMappingsByDefault();
         reqClaims = new ArrayList<Claim>();
         for (int i = 0; i < claims.length; i++) {
-            if (dialectUri.equals(claims[i].getDialectURI())) {
-                if (claims[i] != null && claims[i].getDisplayTag() != null
-                        && !claims[i].getClaimUri().equals(IdentityConstants.CLAIM_PPID))
-                    reqClaims.add(claims[i]);
+            if (dialectUri.equals(claims[i].getClaim().getDialectURI())) {
+                if (claims[i] != null && claims[i].getClaim().getDisplayTag() != null
+                        && !claims[i].getClaim().getClaimUri().equals(IdentityConstants.CLAIM_PPID))
+                    reqClaims.add((Claim)claims[i].getClaim());
             }
         }
 

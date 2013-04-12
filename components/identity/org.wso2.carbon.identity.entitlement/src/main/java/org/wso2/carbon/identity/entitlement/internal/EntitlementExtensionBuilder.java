@@ -182,6 +182,12 @@ public class EntitlementExtensionBuilder {
 
         properties.load(inStream);
 
+        try{
+            inStream.close();
+        } catch (Exception e){
+            log.error("Error while closing input stream ", e);
+        }
+
         return properties;
     }
 
@@ -194,17 +200,22 @@ public class EntitlementExtensionBuilder {
 
         Properties pdpProperties = new Properties();
         
-        setProperty(properties,pdpProperties,"PDP.OnDemangPolicyLoading.Enable");
-        setProperty(properties,pdpProperties,"PDP.OnDemangPolicyLoading.MaxInMemoryPolicies");
-        setProperty(properties,pdpProperties,"PDP.DecisionCaching.Enable");
-        setProperty(properties,pdpProperties,"PDP.DecisionCaching.CachingInterval");
-        setProperty(properties,pdpProperties,"PDP.AttributeCaching.Enable");
-        setProperty(properties,pdpProperties,"PDP.DecisionCaching.CachingInterval");
-        setProperty(properties,pdpProperties,"PDP.ResourceCaching.Enable");
-        setProperty(properties,pdpProperties,"PDP.ResourceCaching.CachingInterval");
+        setProperty(properties,pdpProperties, EntitlementConstants.ON_DEMAND_POLICY_LOADING);
+        setProperty(properties,pdpProperties, EntitlementConstants.ON_DEMAND_POLICY_MAX_POLICY_ENTRIES);
+        setProperty(properties,pdpProperties, EntitlementConstants.DECISION_CACHING);
+        setProperty(properties,pdpProperties, EntitlementConstants.DECISION_CACHING_INTERVAL);
+        setProperty(properties,pdpProperties, EntitlementConstants.ATTRIBUTE_CACHING);
+        setProperty(properties,pdpProperties, EntitlementConstants.ATTRIBUTE_CACHING_INTERVAL);
+        setProperty(properties,pdpProperties, EntitlementConstants.RESOURCE_CACHING);
+        setProperty(properties,pdpProperties, EntitlementConstants.RESOURCE_CACHING_INTERVAL);
         setProperty(properties,pdpProperties, EntitlementConstants.PDP_ENABLE);
         setProperty(properties,pdpProperties, EntitlementConstants.PAP_ENABLE);
-        setProperty(properties,pdpProperties,PDP_SCHEMA_VALIDATION);
+        setProperty(properties,pdpProperties, EntitlementConstants.BALANA_CONFIG_ENABLE);
+        setProperty(properties,pdpProperties, EntitlementConstants.MULTIPLE_DECISION_PROFILE_ENABLE);
+        setProperty(properties,pdpProperties, EntitlementConstants.MAX_POLICY_REFERENCE_ENTRIES);
+        setProperty(properties,pdpProperties, EntitlementConstants.FILESYSTEM_POLICY_PATH);
+        setProperty(properties,pdpProperties, EntitlementConstants.START_UP_POLICY_ADDING);
+        setProperty(properties,pdpProperties, PDP_SCHEMA_VALIDATION);
 
         holder.setEngineProperties(pdpProperties);
     }
@@ -212,7 +223,7 @@ public class EntitlementExtensionBuilder {
     private void setProperty(Properties inProp, Properties outProp, String name) {
         String value;
         if ((value = inProp.getProperty(name)) != null) {
-            outProp.setProperty(name, value);
+            outProp.setProperty(name, value.trim());
         }
     }
 
@@ -321,8 +332,9 @@ public class EntitlementExtensionBuilder {
             int j = 1;
             Properties metadataProps = new Properties();
             while (properties.getProperty(className + "." + j) != null) {
-                String[] props = properties.getProperty(className + "." + j++).split(",");
-                metadataProps.put(props[0], props[1]);
+                String value = properties.getProperty(className + "." + j++);
+                metadataProps.put(value.substring(0,value.indexOf(",")),
+                        value.substring(value.indexOf(",") + 1));
             }
 
             metadata.init(metadataProps);

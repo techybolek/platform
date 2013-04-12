@@ -43,6 +43,17 @@ public class ClaimDTO {
      * This are claims required at the time user registration.
      */
     private boolean required;
+    
+    /**
+     * This is to indicate the claim is read-only.
+     */
+    private boolean readOnly;
+    
+    
+    /**
+     * This is to indicate that this is a checked attribute with a boolean value.
+     */
+    private boolean checkedAttribute;
 
     /**
      * Regular expression to validate the claim value - if none is provide, no
@@ -137,4 +148,21 @@ public class ClaimDTO {
     public void setDisplayOrder(int displayOrder) {
         this.displayOrder = displayOrder;
     }
+
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
+	}
+
+	public boolean isCheckedAttribute() {
+		return checkedAttribute;
+	}
+
+	public void setCheckedAttribute(boolean checkedAttribute) {
+		this.checkedAttribute = checkedAttribute;
+	}
+    
 }

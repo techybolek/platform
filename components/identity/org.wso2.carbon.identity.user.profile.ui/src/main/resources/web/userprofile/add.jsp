@@ -219,9 +219,21 @@ function validateTextForIllegal(fld,fldName) {
 		                                        <font class="required">*</font> 
 		                               <%}%>
 		                        </td>
+                                <%
+                                    if(!userFields[i].getReadOnly()) {
+                                %>
 		                        <td><input class="text-box-big"
 		                                   id="<%=userFields[i].getClaimUri()%>"
 		                                   name="<%=userFields[i].getClaimUri()%>" type="text"></td>
+                                <%
+                                    } else {
+                                %>
+                                <td><input class="text-box-big"
+		                                   id="<%=userFields[i].getClaimUri()%>"
+		                                   name="<%=userFields[i].getClaimUri()%>" type="text" readonly="true"></td>
+                                <%
+                                    }
+                                %>
 		                    </tr>
 		                    <%
 		                                }

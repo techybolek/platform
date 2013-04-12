@@ -33,82 +33,84 @@
 <jsp:include page="../highlighter/header.jsp"/>
 
 <%
-
-    String policyRequest = (String)session.getAttribute("txtRequest");
-    session.removeAttribute("policyreq");
     String forwardTo = null;
-    String BUNDLE = "org.wso2.carbon.identity.entitlement.ui.i18n.Resources";
-	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
-
-    List<RowDTO> rowDTOs = new ArrayList<RowDTO>();
-    String resourceNames = CharacterEncoder.getSafeText(request.getParameter("resourceNames"));
-    String subjectNames = CharacterEncoder.getSafeText(request.getParameter("subjectNames"));
-    String actionNames = CharacterEncoder.getSafeText(request.getParameter("actionNames"));
-    String environmentNames = CharacterEncoder.getSafeText(request.getParameter("environmentNames"));
-
-    if (resourceNames != null  && !resourceNames.trim().equals("")){
-        RowDTO rowDTO = new RowDTO();
-        rowDTO.setAttributeValue(resourceNames);
-        rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
-        rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:resource:resource-id");
-        rowDTO.setCategory("urn:oasis:names:tc:xacml:3.0:attribute-category:resource");
-        rowDTOs.add(rowDTO);
-        session.setAttribute("resourceNames",resourceNames);
-    }
-    if (subjectNames != null  && !subjectNames.trim().equals("")){
-        RowDTO rowDTO = new RowDTO();
-        rowDTO.setAttributeValue(subjectNames);
-        rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
-        rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:subject:subject-id");
-        rowDTO.setCategory("urn:oasis:names:tc:xacml:1.0:subject-category:access-subject");
-        rowDTOs.add(rowDTO);
-        session.setAttribute("subjectNames",subjectNames);
-    }
-    if (actionNames != null  && !actionNames.trim().equals("")){
-        RowDTO rowDTO = new RowDTO();
-        rowDTO.setAttributeValue(actionNames);
-        rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
-        rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:action:action-id");
-        rowDTO.setCategory("urn:oasis:names:tc:xacml:3.0:attribute-category:action");
-        rowDTOs.add(rowDTO);
-        session.setAttribute("actionNames",actionNames);
-    }
-    if (environmentNames != null  && !environmentNames.trim().equals("")){
-        RowDTO rowDTO = new RowDTO();
-        rowDTO.setAttributeValue(environmentNames);
-        rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
-        rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:environment:environment-id");
-        rowDTO.setCategory("urn:oasis:names:tc:xacml:3.0:attribute-category:environment");
-        rowDTOs.add(rowDTO);
-        session.setAttribute("environmentNames",environmentNames);
+    boolean showResponse = false;
+    String requestString = (String)session.getAttribute("txtRequest");
+    String responseString = (String)session.getAttribute("txtResponse");
+    String isResponse = request.getParameter("isResponse");
+    if(isResponse != null && isResponse.trim().length() > 0){
+        showResponse = true;
     }
 
-    RequestElementDTO requestElementDTO = new RequestElementDTO();
-    requestElementDTO.setRowDTOs(rowDTOs);
+    if(!showResponse){
+        List<RowDTO> rowDTOs = new ArrayList<RowDTO>();
+        String resourceNames = CharacterEncoder.getSafeText(request.getParameter("resourceNames"));
+        String subjectNames = CharacterEncoder.getSafeText(request.getParameter("subjectNames"));
+        String actionNames = CharacterEncoder.getSafeText(request.getParameter("actionNames"));
+        String environmentNames = CharacterEncoder.getSafeText(request.getParameter("environmentNames"));
 
-    EntitlementPolicyCreator entitlementPolicyCreator = new EntitlementPolicyCreator();
-
-    try {
-        if(policyRequest != null && policyRequest.trim().length() > 0){
-            policyRequest = policyRequest.trim().replaceAll("><", ">\n<");
-        } else if(!requestElementDTO.getRowDTOs().isEmpty()){
-            String createdRequest = entitlementPolicyCreator.createBasicRequest(requestElementDTO);
-            if(createdRequest != null && createdRequest.trim().length() > 0){
-                policyRequest = createdRequest.trim().replaceAll("><", ">\n<");
-            }
-        }else {
-            policyRequest = "";
+        if (resourceNames != null  && !resourceNames.trim().equals("")){
+            RowDTO rowDTO = new RowDTO();
+            rowDTO.setAttributeValue(resourceNames);
+            rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
+            rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:resource:resource-id");
+            rowDTO.setCategory("urn:oasis:names:tc:xacml:3.0:attribute-category:resource");
+            rowDTOs.add(rowDTO);
+            session.setAttribute("resourceNames",resourceNames);
         }
-    } catch (Exception e) {
-        CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request);
-        forwardTo = "../admin/error.jsp";
+        if (subjectNames != null  && !subjectNames.trim().equals("")){
+            RowDTO rowDTO = new RowDTO();
+            rowDTO.setAttributeValue(subjectNames);
+            rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
+            rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:subject:subject-id");
+            rowDTO.setCategory("urn:oasis:names:tc:xacml:1.0:subject-category:access-subject");
+            rowDTOs.add(rowDTO);
+            session.setAttribute("subjectNames",subjectNames);
+        }
+        if (actionNames != null  && !actionNames.trim().equals("")){
+            RowDTO rowDTO = new RowDTO();
+            rowDTO.setAttributeValue(actionNames);
+            rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
+            rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:action:action-id");
+            rowDTO.setCategory("urn:oasis:names:tc:xacml:3.0:attribute-category:action");
+            rowDTOs.add(rowDTO);
+            session.setAttribute("actionNames",actionNames);
+        }
+        if (environmentNames != null  && !environmentNames.trim().equals("")){
+            RowDTO rowDTO = new RowDTO();
+            rowDTO.setAttributeValue(environmentNames);
+            rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
+            rowDTO.setAttributeId("urn:oasis:names:tc:xacml:1.0:environment:environment-id");
+            rowDTO.setCategory("urn:oasis:names:tc:xacml:3.0:attribute-category:environment");
+            rowDTOs.add(rowDTO);
+            session.setAttribute("environmentNames",environmentNames);
+        }
 
-%>
+        RequestElementDTO requestElementDTO = new RequestElementDTO();
+        requestElementDTO.setRowDTOs(rowDTOs);
 
-<script type="text/javascript">
-    forward();
-</script>
-<%
+        EntitlementPolicyCreator entitlementPolicyCreator = new EntitlementPolicyCreator();
+
+        try {
+            if(requestString != null && requestString.trim().length() > 0){
+                requestString = requestString.trim().replaceAll("><", ">\n<");
+            } else if(!requestElementDTO.getRowDTOs().isEmpty()){
+                String createdRequest = entitlementPolicyCreator.createBasicRequest(requestElementDTO);
+                if(createdRequest != null && createdRequest.trim().length() > 0){
+                    requestString = createdRequest.trim().replaceAll("><", ">\n<");
+                }
+            } else {
+                requestString = "";
+            }
+        } catch (Exception e) {
+            CarbonUIMessage.sendCarbonUIMessage(e.getMessage(), CarbonUIMessage.ERROR, request);
+            forwardTo = "../admin/error.jsp";
+    %>
+    <script type="text/javascript">
+        forward();
+    </script>
+    <%
+        }
     }
 %>
 <fmt:bundle basename="org.wso2.carbon.identity.entitlement.ui.i18n.Resources">
@@ -133,6 +135,7 @@
 
     
     <script type="text/javascript">
+
         function validateRequest() {
            var value = document.getElementById("txtRequestTemp").value;
            if (value == '') {
@@ -157,6 +160,10 @@
                 document.evaluateRequest.submit();
             }
         }
+
+        function backToEvaluation(){
+            location.href = "eval-policy.jsp";
+        }
     </script>
 
 
@@ -168,25 +175,52 @@
 	
 		<thead>
 			<tr>
-				<th><fmt:message key='ent.eval.policy.request'/></th>
+				<th>
+                    <%
+                        if(showResponse){
+                    %>
+                        <fmt:message key='ent.eval.policy.response'/>
+                    <%
+                        } else {
+                    %>
+                        <fmt:message key='ent.eval.policy.request'/>
+                    <%
+                        }
+                    %>
+                </th>
 			</tr>
 		</thead>
 		<tbody>
         <tr>
             <td>
                 <div>
-                <textarea id="txtRequestTemp" name="txtRequestTemp" rows="30" cols="120"><%=policyRequest%>
+                <textarea id="txtRequestTemp" name="txtRequestTemp" rows="30" cols="120">
+                    <%if(showResponse){%> <%=responseString%> <% } else {%> <%=requestString%> <%}%>
                 </textarea>
-                <textarea name="txtRequest" id="txtRequest" style="display:none"><%=policyRequest%></textarea>
+                <textarea name="txtRequest" id="txtRequest" style="display:none">
+                    <%if(showResponse){%> <%=responseString%> <% } else {%> <%=requestString%> <%}%>
+                </textarea>
                 <input type="hidden" id="forwardTo" name="forwardTo" value="eval-policy.jsp" />
                 </div>
             </td>
         </tr>
         <tr>
             <td class="buttonRow">
+                <%
+                    if(showResponse){
+                %>
+                <input type="button" value="<fmt:message key='back.evaluate'/>" class="button" onclick="backToEvaluation();"/>
+                <%
+                    } else {
+                %>
                 <input type="button" value="<fmt:message key='test.evaluate'/>" class="button" onclick="evaluateXACMLRequest(false);"/>
                 <input type="button" value="<fmt:message key='pdp.evaluate'/>" class="button" onclick="evaluateXACMLRequest(true);"/>
-                <input class="button" type="reset" value="<fmt:message key='cancel'/>"  onclick="javascript:document.location.href='create-evaluation-request.jsp?region=region1&item=policy_tryit_menu'"/>
+                <input class="button" type="reset" value="<fmt:message key='cancel'/>"
+                       onclick="javascript:document.location.href='create-evaluation-request.jsp'"/>
+
+                <%
+                    }
+                %>
             </td>
         </tr>
 		</tbody>	

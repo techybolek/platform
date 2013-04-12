@@ -17,17 +17,18 @@
 */
 package org.wso2.carbon.claim.mgt;
 
-import java.util.ArrayList;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.core.util.AdminServicesUtil;
+import org.wso2.carbon.user.api.Claim;
+import org.wso2.carbon.user.api.ClaimMapping;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.claim.Claim;
 import org.wso2.carbon.user.core.claim.ClaimManager;
-import org.wso2.carbon.user.core.claim.ClaimMapping;
+
+import java.util.ArrayList;
 
 public class ClaimManagerHandler {
 
@@ -66,24 +67,31 @@ public class ClaimManagerHandler {
      * @return
      * @throws Exception
      */
-    public Claim[] getAllSupportedClaims() throws Exception {
-        ClaimManager claimManager = null;
+	public Claim[] getAllSupportedClaims() throws Exception {
+		ClaimManager claimManager = null;
 
-        try {
-            UserRealm realm = getRealm();
-            claimManager = realm.getClaimManager();
-            if (claimManager != null) {
-                // There can be cases - we get a request for an external user store - where we don'
-                // have a claims administrator.
-                return (Claim[]) realm.getClaimManager().getAllSupportClaimsByDefault();
-            }
-        } catch (UserStoreException e) {
-            log.error("Error occurred while loading supported claims", e);
-            getException("Error occurred while loading supported claima", e);
-        }
+		try {
+			UserRealm realm = getRealm();
+			claimManager = realm.getClaimManager();
+			if (claimManager != null) {
+				// There can be cases - we get a request for an external user
+				// store - where we don'
+				// have a claims administrator.
+				ClaimMapping[] mappings = realm.getClaimManager()
+						.getAllSupportClaimMappingsByDefault();
+				Claim[] claims = new Claim[mappings.length];
+				for (int i = 0; i < mappings.length; i++) {
+					claims[1] = mappings[i].getClaim();
+				}
+				return claims;
+			}
+		} catch (UserStoreException e) {
+			log.error("Error occurred while loading supported claims", e);
+			getException("Error occurred while loading supported claima", e);
+		}
 
-        return new Claim[0];
-    }
+		return new Claim[0];
+	}
 
     /**
      * 
@@ -92,8 +100,6 @@ public class ClaimManagerHandler {
      */
     public ClaimMapping[] getAllSupportedClaimMappings() throws Exception {
         ClaimMapping[] claimMappings = new ClaimMapping[0];
-        ClaimMapping claimMapping = null;
-        Claim[] claims = null;
         ClaimManager claimManager = null;
 
         try {
@@ -105,17 +111,7 @@ public class ClaimManagerHandler {
                 return new ClaimMapping[0];
             }
 
-            claims = (Claim[]) claimManager.getAllSupportClaimsByDefault();
-            if (claims != null) {
-                claimMappings = new ClaimMapping[claims.length];
-                for (int i = 0; i < claims.length; i++) {
-                    claimMapping = new ClaimMapping(null, null);
-                    claimMapping.setClaim(claims[i]);
-                    claimMapping.setMappedAttribute(realm.getClaimManager().getAttributeName(
-                            claims[i].getClaimUri()));
-                    claimMappings[i] = claimMapping;
-                }
-            }
+            return claimManager.getAllSupportClaimMappingsByDefault();
 
         } catch (UserStoreException e) {
             log.error("Error occurred while loading supported claims", e);
@@ -132,8 +128,6 @@ public class ClaimManagerHandler {
      */
     public ClaimMapping[] getAllClaimMappings() throws Exception {
         ClaimMapping[] claimMappings = new ClaimMapping[0];
-        ClaimMapping claimMapping = null;
-        Claim[] claims = null;
         ClaimManager claimManager = null;
 
         try {
@@ -145,17 +139,7 @@ public class ClaimManagerHandler {
                 return new ClaimMapping[0];
             }
 
-            claims = (Claim[]) claimManager.getAllClaims();
-            if (claims != null) {
-                claimMappings = new ClaimMapping[claims.length];
-                for (int i = 0; i < claims.length; i++) {
-                    claimMapping = new ClaimMapping(null, null);
-                    claimMapping.setClaim(claims[i]);
-                    claimMapping.setMappedAttribute(claimManager.getAttributeName(claims[i]
-                            .getClaimUri()));
-                    claimMappings[i] = claimMapping;
-                }
-            }
+            claimMappings =  claimManager.getAllClaimMappings();
 
         } catch (UserStoreException e) {
             log.error("Error occurred while loading supported claims", e);
@@ -189,10 +173,7 @@ public class ClaimManagerHandler {
     public ClaimMapping[] getAllSupportedClaimMappings(String dialectUri)
             throws Exception {
         ClaimMapping[] claimMappings = new ClaimMapping[0];
-        ClaimMapping claimMapping = null;
-        Claim[] claims = null;
         ClaimManager claimManager = null;
-
         try {
             UserRealm realm = getRealm();
             claimManager = realm.getClaimManager();
@@ -201,17 +182,8 @@ public class ClaimManagerHandler {
                 // have a claims administrator.
                 return new ClaimMapping[0];
             }
-            claims = getAllSupportedClaims(dialectUri);
-            if (claims != null && claims.length > 0) {
-                claimMappings = new ClaimMapping[claims.length];
-                for (int i = 0; i < claims.length; i++) {
-                    claimMapping = new ClaimMapping(null, null);
-                    claimMapping.setClaim(claims[i]);
-                    claimMapping.setMappedAttribute(claimManager.getAttributeName(claims[i]
-                            .getClaimUri()));
-                    claimMappings[i] = claimMapping;
-                }
-            }
+           // return claimManager.getAllSupportClaimMappingsByDefault();
+            return claimManager.getAllClaimMappings(dialectUri);
 
         } catch (UserStoreException e) {
             log.error("Error occurred while loading supported claims", e);
@@ -231,6 +203,7 @@ public class ClaimManagerHandler {
         Claim[] claims = new Claim[0];
         ArrayList<Claim> reqClaims = null;
         ClaimManager claimManager = null;
+        ClaimMapping[] mappings = null;
 
         try {
             UserRealm realm = getRealm();
@@ -240,11 +213,12 @@ public class ClaimManagerHandler {
                 // have a claims administrator.
                 return claims;
             }
-            claims = (Claim[]) claimManager.getAllSupportClaimsByDefault();
+            mappings = claimManager.getAllSupportClaimMappingsByDefault();
             reqClaims = new ArrayList<Claim>();
-            for (int i = 0; i < claims.length; i++) {
-                if (dialectUri.equals(claims[i].getDialectURI())) {
-                    reqClaims.add(claims[i]);
+            for (int i = 0; i < mappings.length; i++) {
+            	Claim claim = mappings[i].getClaim();
+                if (dialectUri.equals(claim.getDialectURI())) {
+                    reqClaims.add(claim);
                 }
             }
 
@@ -263,21 +237,37 @@ public class ClaimManagerHandler {
      * @param mapping
      * @throws Exception
      */
-    public void upateClaimMapping(ClaimMapping mapping) throws Exception {
-        ClaimManager claimManager = null;
-        try {
-            UserRealm realm = getRealm();
-            claimManager = realm.getClaimManager();
-            if (claimManager != null) {
-                // There can be cases - we get a request for an external user store - where we don'
-                // have a claims administrator.
-                claimManager.updateClaimMapping(mapping);
-            }
-        } catch (UserStoreException e) {
-            log.error("Error occurred while updating claim mapping", e);
-            getException("Error occurred while updating claim mapping", e);
-        }
-    }
+	public void upateClaimMapping(ClaimMapping mapping) throws Exception {
+		ClaimManager claimManager = null;
+		try {
+			UserRealm realm = getRealm();
+
+			String primaryDomainName = realm.getRealmConfiguration().getUserStoreProperty(
+					UserCoreConstants.RealmConfig.PROPERTY_DOMAIN_NAME);
+
+			if (primaryDomainName == null) {
+				if (mapping.getMappedAttribute() == null) {
+					throw new Exception("Attribute name cannot be null for the primary domain");
+				}
+			} else if (mapping.getMappedAttribute() == null) {
+				String attr = mapping.getMappedAttribute(primaryDomainName);
+				if (attr == null) {
+					throw new Exception("Attribute name cannot be null for the primary domain");
+				}
+				mapping.setMappedAttribute(attr);
+			}
+
+			claimManager = realm.getClaimManager();
+			if (claimManager != null) {
+				// There can be cases - we get a request for an external user store - where we don'
+				// have a claims administrator.
+				claimManager.updateClaimMapping(mapping);
+			}
+		} catch (UserStoreException e) {
+			log.error("Error occurred while updating claim mapping", e);
+			getException("Error occurred while updating claim mapping", e);
+		}
+	}
 
     /**
      * 
@@ -357,18 +347,18 @@ public class ClaimManagerHandler {
      * @throws Exception
      */
     public void removeClaimDialect(String dialectUri) throws Exception {
-        Claim[] claims = null;
-        ClaimMapping mapping = null;
+        ClaimMapping[] mapping = null;
         ClaimManager claimManager = null;
         try {
             UserRealm realm = getRealm();
             claimManager = realm.getClaimManager();
             if (claimManager != null) {
-                claims = (Claim[]) claimManager.getAllClaims(dialectUri);
-                for (int i = 0; i < claims.length; i++) {
-                    mapping = new ClaimMapping(claims[i], null);
-                    claimManager.deleteClaimMapping(mapping);
-                }
+            	mapping = claimManager.getAllClaimMappings(dialectUri);
+				if (mapping != null) {
+					for (int i = 0; i < mapping.length; i++) {
+						claimManager.deleteClaimMapping(mapping[i]);
+					}
+				}
             }
         } catch (UserStoreException e) {
             log.error("Error occurred while removing new claim dialect", e);

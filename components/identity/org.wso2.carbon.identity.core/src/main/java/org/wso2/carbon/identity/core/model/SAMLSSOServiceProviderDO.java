@@ -29,10 +29,13 @@ public class SAMLSSOServiceProviderDO {
 	private boolean useFullyQualifiedUsername;
 	private boolean doSingleLogout;
 	private String loginPageURL;
+	private boolean doSignResponse;
 	private boolean doSignAssertions;
 	private String attributeConsumingServiceIndex;
 	private String[] requestedClaims;
 	private List<String> requestedClaimsList;
+    private String[] requestedAudiences;
+    private List<String> requestedAudiencesList;
 
 	public String getIssuer() {
 		return issuer;
@@ -144,5 +147,51 @@ public class SAMLSSOServiceProviderDO {
 	public void setRequestedClaims(List<String> requestedClaims) {
 		this.requestedClaimsList = requestedClaims;
 		this.requestedClaims = requestedClaims.toArray(new String[requestedClaimsList.size()]);
+	}
+
+    /**
+     * @return the requestedAudiences
+     */
+    public String[] getRequestedAudiences() {
+        return requestedAudiences;
+    }
+
+    /**
+     * @return the requestedAudiences
+     */
+    public List<String> getRequestedAudiencesList() {
+        return requestedAudiencesList;
+    }
+
+    /**
+     * @param requestedAudiences
+     *            the requestedAudiences to set
+     */
+    public void setRequestedAudiences(String[] requestedAudiences) {
+        this.requestedAudiences = requestedAudiences;
+        this.requestedAudiencesList = ConverterUtil.toList(requestedAudiences);
+    }
+
+    /**
+     * @param requestedAudiences
+     *            the requestedAudiences to set
+     */
+    public void setRequestedAudiences(List<String> requestedAudiences) {
+        this.requestedAudiencesList = requestedAudiences;
+        this.requestedAudiences = requestedAudiences.toArray(new String[requestedAudiencesList.size()]);
+    }
+
+	/**
+	 * @return the doSignResponse
+	 */
+	public boolean isDoSignResponse() {
+		return doSignResponse;
+	}
+
+	/**
+	 * @param doSignResponse the doSignResponse to set
+	 */
+	public void setDoSignResponse(boolean doSignResponse) {
+		this.doSignResponse = doSignResponse;
 	}
 }

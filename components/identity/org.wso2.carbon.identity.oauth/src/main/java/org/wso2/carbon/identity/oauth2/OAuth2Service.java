@@ -18,24 +18,44 @@
 
 package org.wso2.carbon.identity.oauth2;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.poi.util.ArrayUtil;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.model.OAuthAppDO;
+import org.wso2.carbon.identity.core.util.IdentityConfigParser;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
 import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
 import org.wso2.carbon.identity.oauth.common.exception.UnauthorizedRevocationException;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDAO;
 import org.wso2.carbon.identity.oauth2.authz.AuthorizationHandlerManager;
 import org.wso2.carbon.identity.oauth2.dao.TokenMgtDAO;
-import org.wso2.carbon.identity.oauth2.dto.*;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenReqDTO;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenRespDTO;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeReqDTO;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2AuthorizeRespDTO;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientValidationResponseDTO;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
+import org.wso2.carbon.identity.oauth2.dto.OAuthRevocationRequestDTO;
+import org.wso2.carbon.identity.oauth2.dto.OAuthRevocationResponseDTO;
 import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
 import org.wso2.carbon.identity.oauth2.model.RefreshTokenValidationDataDO;
 import org.wso2.carbon.identity.oauth2.token.AccessTokenIssuer;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Constants;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
+import org.wso2.carbon.user.api.Claim;
+import org.wso2.carbon.user.core.UserStoreManager;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 /**
  * OAuth2 Service which is used to issue authorization codes or access tokens upon authorizing by the
@@ -236,4 +256,129 @@ public class OAuth2Service extends AbstractAdmin {
             return revokeRespDTO;
         }
     }
+    
+	/**
+	 * Returns an array of claims of the authorized user. This is for the
+	 * OpenIDConnect user-end-point implementation.
+	 * 
+	 * TODO : 1. Should return the userinfo response instead.
+	 * TODO : 2. Should create another service API for userinfo endpoint
+	 * 
+	 * @param accessToken
+	 * @return
+	 * @throws IdentityException
+	 */
+	public Claim[] getUserClaims(String accessToken) {
+
+		OAuth2TokenValidationRequestDTO reqDTO = new OAuth2TokenValidationRequestDTO();
+		reqDTO.setAccessToken(accessToken);
+		reqDTO.setTokenType("bearer");
+		OAuth2TokenValidationResponseDTO respDTO =
+		                                           new OAuth2TokenValidationService().validate(reqDTO);
+
+		String username = respDTO.getAuthorizedUser();
+		if (username == null) { // invalid token
+			log.debug(respDTO.getErrorMsg());
+			return null;
+		}
+		String[] scope = respDTO.getScope();
+		boolean isOICScope = false;
+		for (String curScope : scope) {
+			if ("openid".equals(curScope)) {
+				isOICScope = true;
+			}
+		}
+		if (!isOICScope) {
+			log.error("AccessToken does not have the openid scope");
+			return null;
+		}
+
+		// TODO : this code is ugly
+		String profileName = "default"; // TODO : configurable
+		String tenantDomain = MultitenantUtils.getTenantDomain(username);
+		String tenatUser = MultitenantUtils.getTenantAwareUsername(username);
+
+		List<Claim> claimsList = new ArrayList<Claim>();
+
+		// MUST claim
+		// http://openid.net/specs/openid-connect-basic-1_0-22.html#id_res
+		Claim subClaim = new Claim();
+		subClaim.setClaimUri("sub");
+		subClaim.setValue(username);
+		claimsList.add(subClaim);
+
+		try {
+			UserStoreManager userStore =
+			                             IdentityTenantUtil.getRealm(tenantDomain, tenatUser)
+			                                               .getUserStoreManager();
+			// externel configured claims
+			String[] claims = OAuthServerConfiguration.getInstance().getSupportedClaims();
+			if (claims != null) {
+				Map<String, String> extClaimsMap =
+				                                   userStore.getUserClaimValues(username, claims,
+				                                                                profileName);
+				Iterator ite = extClaimsMap.keySet().iterator();
+				int i = 0;
+				while (ite.hasNext()) {
+					String claimUri = (String) ite.next();
+					Claim curClaim = new Claim();
+					curClaim.setClaimUri(claimUri);
+					curClaim.setValue(extClaimsMap.get(curClaim));
+					claimsList.add(curClaim);
+				}
+			}
+			// default claims
+			String[] defaultClaims = new String[3];
+			defaultClaims[0] = "http://wso2.org/claims/emailaddress";
+			defaultClaims[1] = "http://wso2.org/claims/givenname";
+			defaultClaims[2] = "http://wso2.org/claims/lastname";
+			String emailAddress = null;
+			String firstName = null;
+			String lastName = null;
+			Map<String, String> defClaimsMap =
+			                                   userStore.getUserClaimValues(username,
+			                                                                defaultClaims,
+			                                                                profileName);
+			if (defClaimsMap.get(defaultClaims[0]) != null) {
+				emailAddress = defClaimsMap.get(defaultClaims[0]);
+				Claim email = new Claim();
+				email.setClaimUri("email");
+				email.setValue(emailAddress);
+				claimsList.add(email);
+				Claim prefName = new Claim();
+				prefName.setClaimUri("preferred_username");
+				prefName.setValue(emailAddress.split("@")[0]);
+				claimsList.add(prefName);
+			}
+			if (defClaimsMap.get(defaultClaims[1]) != null) {
+				firstName = defClaimsMap.get(defaultClaims[1]);
+				Claim givenName = new Claim();
+				givenName.setClaimUri("given_name");
+				givenName.setValue(firstName);
+				claimsList.add(givenName);
+			}
+			if (defClaimsMap.get(defaultClaims[2]) != null) {
+				lastName = defClaimsMap.get(defaultClaims[2]);
+				Claim familyName = new Claim();
+				familyName.setClaimUri("family_name");
+				familyName.setValue(lastName);
+				claimsList.add(familyName);
+			}
+			if (firstName != null && lastName != null) {
+				Claim name = new Claim();
+				name.setClaimUri("name");
+				name.setValue(firstName + " " + lastName);
+				claimsList.add(name);
+			}
+
+		} catch (Exception e) {
+			log.error("Error while reading user claims ", e);
+		}
+
+		Claim[] allClaims = new Claim[claimsList.size()];
+		for(int i = 0; i < claimsList.size(); i++) {
+			allClaims[i] = claimsList.get(i);
+		}
+		return allClaims;
+	}
 }

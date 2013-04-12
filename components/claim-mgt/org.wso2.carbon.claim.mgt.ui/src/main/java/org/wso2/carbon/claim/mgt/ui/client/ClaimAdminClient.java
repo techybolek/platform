@@ -17,10 +17,6 @@
  */
 package org.wso2.carbon.claim.mgt.ui.client;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;

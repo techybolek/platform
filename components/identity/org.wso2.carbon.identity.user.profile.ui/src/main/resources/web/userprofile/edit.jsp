@@ -38,6 +38,13 @@
     String username = CharacterEncoder.getSafeText((String) request.getParameter("username"));
     String profile = CharacterEncoder.getSafeText((String) request.getParameter("profile"));
     String fromUserMgt = (String) request.getParameter("fromUserMgt");
+    String noOfProfiles = request.getParameter("noOfProfiles");
+    if (noOfProfiles == null) {
+        noOfProfiles = "0";
+    }
+    
+    if (fromUserMgt==null) fromUserMgt = "false";
+
 
     UserProfileDTO userProfile = null;
     UserFieldDTO[] userFields = null;
@@ -54,8 +61,12 @@
                 .getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
         UserProfileCient client = new UserProfileCient(cookie, backendServerURL,
                 configContext);
-        readOnlyUserStore = client.isReadOnlyUserStore();
         userProfile = client.getUserProfile(username, profile);
+        
+        if ("readonly".equals(userProfile.getProfileConifuration())){
+        	readOnlyUserStore = true;
+        }
+        
         if (userProfile != null) {
             userFields = client.getOrderedUserFields(userProfile.getFieldValues());
             profileConfigs = userProfile.getProfileConfigurations();
@@ -133,7 +144,8 @@
                 function validate() {
 
                 <% if (userFields != null) {
-                    for (int i = 0; i < userFields.length; i++) { %>
+                    for (int i = 0; i < userFields.length; i++) {
+                        if(!userFields[i].getReadOnly()) {%>
                         var value = document.getElementsByName("<%=userFields[i].getClaimUri()%>")[0].value;
                         <%if (userFields[i].getRequired() && userFields[i].getDisplayName()!=null) {%>
                             if (validateEmpty("<%=userFields[i].getClaimUri()%>").length > 0) {
@@ -149,15 +161,27 @@
                                 return false;
                             }
                         <%}
-                   }
-              }%>
+                        }
+                    }
+                }
+                %>
+                
+	                var unsafeCharPattern = /[<>`\"]/;
+	                var elements = document.getElementsByTagName("input");
+	                for(i = 0; i < elements.length; i++){
+	                    if((elements[i].type === 'text' || elements[i].type === 'password') && 
+	                       elements[i].value != null && elements[i].value.match(unsafeCharPattern) != null){
+	                        CARBON.showWarningDialog("<fmt:message key="unsafe.char.validation.msg"/>");
+	                        return false;
+	                    }
+	                }
 
                     document.updateProfileform.submit();
                 }
             </script>
 
             <form method="post" name="updateProfileform"
-                  action="edit-finish.jsp?profile=<%=CharacterEncoder.getSafeText(userProfile.getProfileName())%>&fromUserMgt=<%=true%>"
+                  action="edit-finish.jsp?profile=<%=CharacterEncoder.getSafeText(userProfile.getProfileName())%>&fromUserMgt=<%=fromUserMgt%>&noOfProfiles=<%=noOfProfiles%>"
                   target="_self">
                 <input type="hidden" name="username" value="<%=username%>"/>
                 <table style="width: 100%" class="styledLeft">
@@ -223,43 +247,44 @@
 		                            %>
 		                        </td>
 		                        <%
-		                            if (userFields[i].getFieldValue() != null) {
-                                    if (!readOnlyUserStore) {
-
-                                        if(!"http://wso2.org/claims/accountStatus".equals(userFields[i].getClaimUri())){
+		                            String value = userFields[i].getFieldValue();
+                                    if (value != null) {
+                                    if (!readOnlyUserStore && !userFields[i].getReadOnly()) {
+                                        if(value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")){
+                                            // assume as boolean value. But actually this must be sent from backend.
+                                            // will fix for next release.
 		                         %>
-		                                <td><input id="<%=userFields[i].getClaimUri()%>" name="<%=userFields[i].getClaimUri()%>"
-		                                   class="text-box-big" type="text" value="<%=userFields[i].getFieldValue()%>"  ></td>
+                                            <td><input id="<%=userFields[i].getClaimUri()%>" name="<%=userFields[i].getClaimUri()%>"
+                                             class="text-box-big" type="checkbox" value="true" <%if(Boolean.parseBoolean(value)){%> checked="checked" <%}%> ></td>
+
 		                         <%
                                         } else {
                                  %>
-		                                <td><input id="<%=userFields[i].getClaimUri()%>" name="<%=userFields[i].getClaimUri()%>"
-		                                   class="text-box-big" type="checkbox" value="locked" <%if("locked".equals(userFields[i].getFieldValue())){%> checked="checked" <%}%> ></td>
-                                 <%
+                                            <td><input id="<%=userFields[i].getClaimUri()%>" name="<%=userFields[i].getClaimUri()%>"
+                                             class="text-box-big" type="text" value="<%=userFields[i].getFieldValue()%>"  ></td>
+		                         <%
                                         }
                                     } else {
 		                         %>
 		                              <td><%=CharacterEncoder.getSafeText(userFields[i].getFieldValue())%></td>
 		                          <%
 		                              }
-		                                              } else {
+                                  } else {
 		                          %>
 		                            <%
-		                                if (!readOnlyUserStore) {
-                                            if(!"http://wso2.org/claims/accountStatus".equals(userFields[i].getClaimUri())){
+		                                if (!readOnlyUserStore && !userFields[i].getReadOnly()) {
 		                            %>
-		                                 <td><input id="<%=userFields[i].getClaimUri()%>" name="<%=userFields[i].getClaimUri()%>"
-		                                   class="text-box-big" type="text" ></td>
-		                            <%
-                                                } else {
-                                    %>
- 		                                 <td><input id="<%=userFields[i].getClaimUri()%>" name="<%=userFields[i].getClaimUri()%>"
-		                                   class="text-box-big" type="checkbox" value="locked" ></td>
 
+		                                 <td><input id="<%=userFields[i].getClaimUri()%>" name="<%=userFields[i].getClaimUri()%>"
+		                                   class="text-box-big" type="text"></td>
                                     <%
-                                                }
+                                            } else {
+                                    %>
+                                         <td><input id="<%=userFields[i].getClaimUri()%>" name="<%=userFields[i].getClaimUri()%>"
+		                                   class="text-box-big" type="text" readonly="true"></td>
+                                    <%
                                             }
-		                                                }
+                                        }
 		                            %>
 		                    </tr>
 		                    <%
@@ -281,11 +306,7 @@
                                 }
                             %>
                             <input type="button" class="button"
-                                       <%if ("true".equals(fromUserMgt)) {%>
-                                              onclick="javascript:location.href='index.jsp?username=<%=username%>&fromUserMgt=true'"
-                                       <%} else {%>
-                                              onclick="javascript:location.href='index.jsp?region=region5&item=userprofiles_menu&ordinal=0'"
-                                        <%}%>
+                                              onclick="javascript:location.href='index.jsp?username=<%=username%>&fromUserMgt=<%=fromUserMgt%>&editCancel=true'"  
                                           value="<fmt:message key='cancel'/>"/></td>
                     </tr>
                     </tbody>

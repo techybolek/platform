@@ -16,6 +16,13 @@
 
 package org.wso2.carbon.identity.sso.saml.ui.util;
 
+import org.wso2.carbon.identity.sso.saml.ui.SAMLSSOProviderConstants;
+import org.wso2.carbon.ui.util.CharacterEncoder;
+import org.wso2.carbon.identity.sso.saml.stub.types.SAMLSSOServiceProviderDTO;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+
 public class SAMLSSOUIUtil {
 
     private static int singleLogoutRetryCount = 5;
@@ -39,10 +46,64 @@ public class SAMLSSOUIUtil {
 
     /**
      * This check if the status code is 2XX, check value between 200 and 300
+     *
      * @param status
      * @return
      */
     public static boolean isHttpSuccessStatusCode(int status) {
         return status >= 200 && status < 300;
     }
+
+    /**
+     * Return
+     *
+     * @param request
+     * @param parameter
+     * @return
+     */
+    public static String getSafeInput(HttpServletRequest request, String parameter) {
+        return CharacterEncoder.getSafeText(request.getParameter(parameter));
+    }
+
+    public static SAMLSSOServiceProviderDTO[] doPaging(int pageNumber,
+                                                       SAMLSSOServiceProviderDTO[] serviceProviderSet) {
+
+        int itemsPerPageInt = SAMLSSOProviderConstants.DEFAULT_ITEMS_PER_PAGE;
+        SAMLSSOServiceProviderDTO[] returnedServiceProviderSet;
+
+        int startIndex = pageNumber * itemsPerPageInt;
+        int endIndex = (pageNumber + 1) * itemsPerPageInt;
+        if (serviceProviderSet.length > itemsPerPageInt) {
+
+            returnedServiceProviderSet = new SAMLSSOServiceProviderDTO[itemsPerPageInt];
+        } else {
+            returnedServiceProviderSet = new SAMLSSOServiceProviderDTO[serviceProviderSet.length];
+        }
+
+        for (int i = startIndex, j = 0; i < endIndex && i < serviceProviderSet.length; i++, j++) {
+            returnedServiceProviderSet[j] = serviceProviderSet[i];
+        }
+
+        return returnedServiceProviderSet;
+    }
+
+    public static SAMLSSOServiceProviderDTO[] doFilter(String filter,
+                                                           SAMLSSOServiceProviderDTO[] serviceProviderSet) {
+        String regPattern = filter.replace("*", ".*");
+        ArrayList<SAMLSSOServiceProviderDTO> list = new ArrayList<SAMLSSOServiceProviderDTO>();
+        for(SAMLSSOServiceProviderDTO serviceProvider : serviceProviderSet){
+            if(serviceProvider.getIssuer().toLowerCase().matches(regPattern.toLowerCase())){
+                list.add(serviceProvider);
+                      }
+        }
+        SAMLSSOServiceProviderDTO[] filteredProviders = new SAMLSSOServiceProviderDTO[list.size()];
+        for(int i = 0; i < list.size(); i++){
+            filteredProviders[i] = list.get(i);
+
+        }
+
+        return filteredProviders;
+    }
+
+
 }

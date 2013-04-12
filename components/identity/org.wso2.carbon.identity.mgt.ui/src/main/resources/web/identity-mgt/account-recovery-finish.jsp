@@ -41,14 +41,18 @@
     int challengeNumber = 1;
 
     while(true){
-        UserChallengesDTO dto = new UserChallengesDTO();
+
         String question = CharacterEncoder.getSafeText(request.getParameter("challengeQuestion_" + challengeNumber));
-        if(question == null || question.trim().length() < 1){
-            break;
-        }
         String answer = CharacterEncoder.getSafeText(request.getParameter("challengeAnswer_" + challengeNumber));
         String id = CharacterEncoder.getSafeText(request.getParameter("challengeId_" + challengeNumber));
-        if(answer !=  null && answer.trim().length() > 0 && id != null && id.trim().length() > 0){
+
+        if(question == null || question.trim().length() < 1 ||
+                        answer ==  null || answer.trim().length() < 1 ){
+            break;
+        }
+        
+        UserChallengesDTO dto = new UserChallengesDTO();
+        if(id != null && id.trim().length() > 0){
             dto.setQuestion(question);
             dto.setAnswer(answer);
             dto.setPrimary(false);
@@ -76,13 +80,15 @@
 						CarbonConstants.CONFIGURATION_CONTEXT);
         client = new IdentityManagementAdminClient(cookie,
                 backendServerURL, configContext);
-        client.setChallengeQuestionsOfUser(userName,
-                userChallengesDTOs.toArray(new UserChallengesDTO[userChallengesDTOs.size()]));
+        if(userChallengesDTOs.size() > 0){
+            client.setChallengeQuestionsOfUser(userName,
+                    userChallengesDTOs.toArray(new UserChallengesDTO[userChallengesDTOs.size()]));
+        }
         forwardTo = "account-recovery.jsp?username=" + userName;
 	} catch (Exception e) {
 		String message = resourceBundle.getString("error.while.persisting.account.recovery.data");
 		CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.ERROR, request);
-		forwardTo = "../admin/error.jsp";
+		forwardTo = "account-recovery.jsp?username=" + userName;
 	}
 %>
 

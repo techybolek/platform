@@ -85,6 +85,18 @@ public class OAuthServerConfiguration {
         //Supported Response Types
         public static final String SUPPORTED_RESP_TYPES = "SupportedResponseTypes";
         
+        // OpenID Connect Configuration
+        public static final String SUPPORTED_CLAIMS = "OpenIDConnectClaims";
+
+        //Supported Client Authentication Methods
+        public static final String SUPPORTED_CLIENT_AUTH_METHODS = "SupportedClientAuthMethods";
+
+        public static final String SAML2_GRANT = "SAML2Grant";
+        public static final String ISSUERS = "Issuers";
+        public static final String AUDIENCE = "Audience";
+        public static final String TOKEN_END_POINT = "TokenEndPoint";
+        public static final String TOKEN_END_POINT_ALIASES = "TokenEndPointAliases";
+
         //JWT Generator 
         public static final String AUTHORIZATION_CONTEXT_TOKEN_GENERATION = "AuthorizationContextTokenGeneration";
         public static final String ENABLED = "Enabled";
@@ -98,6 +110,12 @@ public class OAuthServerConfiguration {
         public static final String ENABLE_ASSERTIONS_USERNAME = "UserName";
         public static final String ENABLE_ACCESS_TOKEN_PARTITIONING = "EnableAccessTokenPartitioning";
         public static final String ACCESS_TOKEN_PARTITIONING_DOMAINS = "AccessTokenPartitioningDomains";
+        
+        // OpenIDConnect confiurations
+        public static final String OPENID_CONNECT = "OpenIDConnect";
+        public static final String OPENID_CONNECT_IDTOKEN_ISSUER = "IDTokenIssuer";
+        public static final String OPENID_CONNECT_IDTOKEN_EXPIRATION = "IDTokenExpiration";
+
     }
 
 
@@ -129,6 +147,18 @@ public class OAuthServerConfiguration {
 
     private List<String> supportedResponseTypes = new ArrayList<String>();
     
+    private String[] supportedClaims = null;
+
+    private List<String> supportedClientAuthMethods = new ArrayList<String>();
+
+    private List<String> saml2Issuers = new ArrayList<String>();
+
+    private List<String> saml2Audience = new ArrayList<String>();
+
+    private String tokenEP = null;
+
+    private List<String> tokenEPAliases = new ArrayList<String>();
+    
     private List<String> requiredHeaderClaimUris = new ArrayList<String>();
     
     private boolean isAuthContextTokGenEnabled = false;
@@ -142,6 +172,10 @@ public class OAuthServerConfiguration {
     private String signatureAlgorithm = "SHA256withRSA";
 
     private String authContextTTL = "15L";
+    
+    private String openIDConnectIDTokenIssuer = "OIDCAuthzServer";
+    
+    private String openIDConnectIDTokenExpiration =  "300";
 
     private OAuthServerConfiguration() {
         buildOAuthServerConfiguration();
@@ -197,6 +231,15 @@ public class OAuthServerConfiguration {
             // read supported response types
             parseSupportedResponseTypesConfig(oauthElem);
             
+            //read supported claims
+            parseSupportedClaimsConfig(oauthElem);
+
+            // read supported response types
+            parseSupportedClientAuthMethodsConfig(oauthElem);
+
+            // read SAML2 grant config
+            parseSAML2GrantConfig(oauthElem);
+            
             // read JWT generator config
             parseAuthorizationContextTokenGeneratorConfig(oauthElem);
 
@@ -208,6 +251,9 @@ public class OAuthServerConfiguration {
 
             // read access token partitioning domains config
             parseAccessTokenPartitioningDomainsConfig(oauthElem);
+            
+            // read openid connect configurations
+            parseOpenIDConnectConfig(oauthElem);
 
         } catch (ServerConfigurationException e) {
             log.error("Error when reading the OAuth Configurations. " +
@@ -243,6 +289,29 @@ public class OAuthServerConfiguration {
         return supportedResponseTypes;
     }
     
+    public String[] getSupportedClaims() {
+    	return supportedClaims;
+    }
+
+    public List<String> getSupportedClientAuthMethods() {
+        return supportedClientAuthMethods;
+    }
+
+    public List<String> getSAML2Issuers() {
+        return saml2Issuers;
+    }
+
+    public List<String> getSAML2Audience() {
+        return saml2Audience;
+    }
+
+    public String getTokenEndPoint() {
+        return tokenEP;
+    }
+
+    public List<String> getTokenEndPointAliases() {
+        return tokenEPAliases;
+    }
     public List<String> getRequiredHeaderClaimUris() {
         return requiredHeaderClaimUris;
    
@@ -314,7 +383,21 @@ public class OAuthServerConfiguration {
         return tokenPersistencePreprocessor;
     }
 
-    private void parseOAuthCallbackHandlers(OMElement callbackHandlersElem) {
+    /**
+	 * @return the openIDConnectIDTokenIssuer
+	 */
+    public String getOpenIDConnectIDTokenIssuer() {
+	    return openIDConnectIDTokenIssuer;
+    }
+
+	/**
+	 * @return the openIDConnectIDTokenExpiration
+	 */
+    public String getOpenIDConnectIDTokenExpiration() {
+	    return openIDConnectIDTokenExpiration;
+    }
+
+	private void parseOAuthCallbackHandlers(OMElement callbackHandlersElem) {
         if (callbackHandlersElem == null) {
             warnOnFaultyConfiguration("AuthorizationCallbackHandlers element is not available.");
             return;
@@ -572,7 +655,7 @@ public class OAuthServerConfiguration {
         validGrantTypes.add(GrantType.CLIENT_CREDENTIALS.toString());
         validGrantTypes.add(GrantType.PASSWORD.toString());
         validGrantTypes.add(GrantType.REFRESH_TOKEN.toString());
-        validGrantTypes.add(GrantType.SAML20_BEARER_ASSERTION.toString());
+        validGrantTypes.add(org.wso2.carbon.identity.oauth.common.GrantType.SAML20_BEARER.toString());
 
         if (supportedGrantTypesElem != null) {
             String grantTypeStr = supportedGrantTypesElem.getText();
@@ -643,6 +726,119 @@ public class OAuthServerConfiguration {
         }
     }
     
+    private void parseSupportedClaimsConfig(OMElement oauthConfigElem) {
+        OMElement supportedClaimsElem = oauthConfigElem.getFirstChildWithName(
+                getQNameWithIdentityNS(ConfigElements.SUPPORTED_CLAIMS));
+        String claimsStr = null;
+        if (supportedClaimsElem != null) {
+            claimsStr = supportedClaimsElem.getText();
+            if (claimsStr != null) {
+                supportedClaims = claimsStr.split(",");
+            }
+        } 
+        if (log.isDebugEnabled()) {
+            log.debug("Supported Claims : " + claimsStr);
+        }
+    }
+
+    private void parseSupportedClientAuthMethodsConfig(OMElement oauthConfigElem) {
+        OMElement supportedClientAuthMethodsElem = oauthConfigElem.getFirstChildWithName(
+                getQNameWithIdentityNS(ConfigElements.SUPPORTED_CLIENT_AUTH_METHODS));
+
+        // These are the default client authentication methods supported.
+        List<String> validClientAuthMethods = new ArrayList<String>(4);
+        validClientAuthMethods.add(org.wso2.carbon.identity.oauth2.util.OAuth2Constants.ClientAuthMethods.BASIC.toString());
+        validClientAuthMethods.add(org.wso2.carbon.identity.oauth2.util.OAuth2Constants.ClientAuthMethods.SAML_20_BEARER.toString());
+
+        if (supportedClientAuthMethodsElem != null) {
+            String supportedClientAuthMethodsElemStr = supportedClientAuthMethodsElem.getText();
+            if (supportedClientAuthMethodsElemStr != null) {
+                String[] clientAuthMethods = supportedClientAuthMethodsElemStr.split(",");
+                // Check whether user provided grant types are valid
+                if (supportedClientAuthMethodsElem != null) {
+                    for (String providedClientAuthMethod : clientAuthMethods) {
+                        providedClientAuthMethod = providedClientAuthMethod.trim();
+                        if (validClientAuthMethods.contains(providedClientAuthMethod)) {
+                            supportedClientAuthMethods.add(providedClientAuthMethod);
+                        } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Invalid Client Authentication Method provided : " + providedClientAuthMethod +
+                                        ". This will be ignored.");
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            // if this element is not present, assume the default case.
+            supportedClientAuthMethods.addAll(validClientAuthMethods);
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Supported Client Authentication Methods : " + supportedClientAuthMethods);
+        }
+    }
+
+    private void parseSAML2GrantConfig(OMElement oauthConfigElem) {
+        OMElement validSAML2IssuersElem = oauthConfigElem.getFirstChildWithName(
+                getQNameWithIdentityNS(ConfigElements.SAML2_GRANT)).
+                getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.ISSUERS));
+
+        if (validSAML2IssuersElem != null) {
+            String[] issuers = validSAML2IssuersElem.getText().split(",");
+            for(String issuer:issuers){
+                saml2Issuers.add(issuer);
+            }
+        }
+        if (log.isDebugEnabled()) {
+            for(int i=0 ; i<saml2Issuers.size() ; i++){
+                log.debug("Valid SAML2Grant Issuer " + i +" : " + saml2Issuers.get(i));
+            }
+        }
+
+        OMElement validSAML2AudienceElem = oauthConfigElem.getFirstChildWithName(
+                getQNameWithIdentityNS(ConfigElements.SAML2_GRANT)).
+                getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.AUDIENCE));
+        if (validSAML2AudienceElem != null) {
+            String[] audiences = validSAML2AudienceElem.getText().split(",");
+            for(String audience:audiences){
+                saml2Audience.add(audience);
+            }
+        }
+        if (log.isDebugEnabled()) {
+            for(int i=0 ; i<saml2Audience.size() ; i++){
+                log.debug("Valid SAML2Grant Audience " + i +" : " + saml2Audience.get(i));
+            }
+        }
+
+        OMElement validTokenEPElem = oauthConfigElem.getFirstChildWithName(
+                getQNameWithIdentityNS(ConfigElements.SAML2_GRANT)).
+                getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.TOKEN_END_POINT));
+        if (validTokenEPElem != null) {
+            tokenEP = validSAML2AudienceElem.getText();
+        }
+        if (log.isDebugEnabled()) {
+            for(int i=0 ; i<saml2Audience.size() ; i++){
+                log.debug("Token EndPoint : " + tokenEP);
+            }
+        }
+
+        OMElement tokenEPAliasesElem = oauthConfigElem.getFirstChildWithName(
+                getQNameWithIdentityNS(ConfigElements.SAML2_GRANT)).
+                getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.TOKEN_END_POINT_ALIASES));
+        if (tokenEPAliasesElem != null) {
+            String[] aliases = tokenEPAliasesElem.getText().split(",");
+            for(String alias:aliases){
+                tokenEPAliases.add(alias);
+            }
+        }
+        if (log.isDebugEnabled()) {
+            for(int i=0 ; i<tokenEPAliases.size() ; i++){
+                log.debug("Token EndPoint Alias" + i +" : " + tokenEPAliases.get(i));
+            }
+        }
+    }
+
 	private void parseAuthorizationContextTokenGeneratorConfig(OMElement oauthConfigElem) {
 		OMElement authContextTokGenConfigElem =
                 oauthConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.AUTHORIZATION_CONTEXT_TOKEN_GENERATION));
@@ -676,6 +872,21 @@ public class OAuthServerConfiguration {
                 log.debug("JWT Generation is enabled");
             }else{
 			    log.debug("JWT Generation is disabled");
+            }
+		}
+	}
+	
+	private void parseOpenIDConnectConfig(OMElement oauthConfigElem) {
+		
+		OMElement validSAML2IssuersElem =
+		                                  oauthConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT));
+		
+		if(validSAML2IssuersElem != null) {
+			if(validSAML2IssuersElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_ISSUER)) != null){
+                openIDConnectIDTokenIssuer =  validSAML2IssuersElem	.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_ISSUER)).getText().trim();
+            }
+			if(validSAML2IssuersElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_EXPIRATION)) != null){
+                openIDConnectIDTokenExpiration =  validSAML2IssuersElem	.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_EXPIRATION)).getText().trim();
             }
 		}
 	}

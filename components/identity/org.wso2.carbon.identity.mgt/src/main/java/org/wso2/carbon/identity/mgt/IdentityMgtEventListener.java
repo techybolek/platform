@@ -23,23 +23,20 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.mgt.beans.UserMgtBean;
-import org.wso2.carbon.identity.mgt.cache.LoginAttemptCache;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
+import org.wso2.carbon.identity.mgt.dto.UserIdentityDTO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
+import org.wso2.carbon.identity.mgt.store.UserIdentityDataStore;
 import org.wso2.carbon.identity.mgt.util.Utils;
 import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.common.AbstractUserOperationEventListener;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
-import org.wso2.carbon.user.core.jdbc.JDBCRealmConstants;
 import org.wso2.carbon.utils.ServerConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -54,91 +51,68 @@ import java.util.*;
  */
 public class IdentityMgtEventListener extends AbstractUserOperationEventListener {
 
-    private LoginAttemptCache cache = LoginAttemptCache.getInstance();
-
     private static final Log log = LogFactory.getLog(IdentityMgtEventListener.class);
-    
-    private int maxLoginAttempts;
 
-    private String defaultPassword;
+    private IdentityMgtProcessor processor;
 
-    private boolean allowTemporaryPassword;
-
-    private RealmConfiguration realmConfig;
-
-    private AccountRecoveryProcessor processor;
+    private UserIdentityDataStore module;
 
     public IdentityMgtEventListener() {
 
+        processor = IdentityMgtServiceComponent.getRecoveryProcessor();
+        module = IdentityMgtConfig.getInstance().getIdentityDataStore();
+        String adminUserName = IdentityMgtServiceComponent.getRealmService().
+                                            getBootstrapRealmConfiguration().getAdminUserName();
+
         try {
-            realmConfig = IdentityMgtServiceComponent.getRealmService().
-                                                                getBootstrapRealmConfiguration();
-            String  maxLoginAttemptProperty = realmConfig.
-                                    getUserStoreProperty(IdentityMgtConstants.MAX_FAILED_ATTEMPT);
-            if(maxLoginAttemptProperty != null){
-                maxLoginAttempts = Integer.valueOf(maxLoginAttemptProperty);
-            } else {
-                maxLoginAttempts = IdentityMgtConstants.DEFAULT_MAX_FAILED_LOGIN_ATTEMPT;
-            }
+            IdentityMgtConfig config = IdentityMgtConfig.getInstance();
 
-            String defaultPasswordProperty = realmConfig.
-                                    getUserStoreProperty(IdentityMgtConstants.DEFAULT_PASSWORD);
-            if(defaultPasswordProperty != null){
-                defaultPassword = defaultPasswordProperty.trim();
-            }
-
-            String  allowTemporaryPasswordProperty = realmConfig.
-                                    getUserStoreProperty(IdentityMgtConstants.TEMPORARY_PASSWORD_ARE_ALLOWED);
-            if(allowTemporaryPasswordProperty != null){
-                allowTemporaryPassword = Boolean.parseBoolean(allowTemporaryPasswordProperty);
-            }
-            processor = IdentityMgtServiceComponent.getRecoveryProcessor();
-            
-        } catch (Exception e) {
-            maxLoginAttempts = IdentityMgtConstants.DEFAULT_MAX_FAILED_LOGIN_ATTEMPT;
-        }     
+            if(config.isListenerEnable()){
+                IdentityMgtServiceComponent.getRealmService().getBootstrapRealm().
+                getUserStoreManager().setUserClaimValue(adminUserName, 
+                UserIdentityDataStore.ACCOUNT_LOCK, Boolean.toString(false), null);
+            }       	
+        } catch (UserStoreException e) {
+            log.error("Error while init identity listener" , e);
+        }
     }
 
     @Override
     public int getExecutionOrderId() {
-        return 1000;   
+        return 1357;   
     }
 
     @Override
     public boolean doPreAuthenticate(String userName, Object credential,
                                     UserStoreManager userStoreManager) throws UserStoreException {
 
+
         if(log.isDebugEnabled()){
             log.debug("Pre authenticator is called in IdentityMgtEventListener");
         }
 
-        int tenantId = userStoreManager.getTenantId();
+        IdentityMgtConfig config = IdentityMgtConfig.getInstance();
 
-        if(maxLoginAttempts == 0){
-            if(log.isDebugEnabled()){
-                log.debug("Max failed login attempts are not defined.");
-            }
+        if(!config.isListenerEnable()){
             return true;
         }
 
-        int failedAttempts =  cache.getValueFromCache(userName);
+        if(!config.isEnableAuthPolicy()){
+            return true;    
+        }
 
-        if(failedAttempts < 0){
-            log.warn("User account is locked for user : " + userName);
+        UserIdentityDTO userIdentityDTO = module.load(userName, userStoreManager);
+
+        if(userIdentityDTO == null){
+            log.warn("Invalid user name " + userName);
             return false;
         }
 
-        if(failedAttempts == (maxLoginAttempts - 1)){
-            if(log.isDebugEnabled()){
-                log.debug("User, " + userName +  " has exceed the max failed login attempts. " +
-                        "User account would be locked");
+        if(config.isAuthPolicyAccountLockCheck()){
+            if(userIdentityDTO.getAccountLock()){
+                log.warn("User account is locked for user : " + userName);
+                return false;
             }
-            try {
-                Utils.persistAccountStatus(userName, tenantId, UserCoreConstants.USER_LOCKED);
-            } catch (IdentityMgtException e) {
-                log.error("Error while persisting user account status : LOCKED");
-            }
-            return true;
         }
 
         return true;
@@ -152,13 +126,43 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
             log.debug("Post authenticator is called in IdentityMgtEventListener");
         }
 
-        if(authenticated){
-            cache.clearCacheEntry(userName);
-        } else {
-            cache.addToCache(userName);
+        IdentityMgtConfig config = IdentityMgtConfig.getInstance();
+
+        if(!config.isListenerEnable()){
+            return true;
         }
 
-        return authenticated;
+        if(!config.isEnableAuthPolicy()){
+            return authenticated;
+        }
+
+        UserIdentityDTO userIdentityDTO = module.load(userName, userStoreManager);
+
+        if(!authenticated && config.isAuthPolicyAccountLockOnFailure()){
+            userIdentityDTO.setFailAttempts();
+            if(userIdentityDTO.getFailAttempts() >= config.getAuthPolicyMaxLoginAttempts()){
+                if(log.isDebugEnabled()){
+                    log.debug("User, " + userName +  " has exceed the max failed login attempts. " +
+                            "User account would be locked");
+                }
+                userIdentityDTO.setAccountLock(true);
+                userIdentityDTO.setTemporaryLock(true);
+                int lockTime = IdentityMgtConfig.getInstance().getAuthPolicyLockingTime();
+                if(lockTime != 0){
+                    userIdentityDTO.setUnlockTime(System.currentTimeMillis() + (lockTime*60*1000));
+                }                                
+            }
+            module.store(userIdentityDTO, userStoreManager);
+        } else {
+            if(userIdentityDTO.getAccountLock() || userIdentityDTO.getFailAttempts() > 0){
+                userIdentityDTO.setAccountLock(false);
+                userIdentityDTO.setFailAttempts(0);
+                userIdentityDTO.setUnlockTime(0);
+                module.store(userIdentityDTO, userStoreManager);
+            }
+        }
+
+        return true;
     }
 
 
@@ -171,40 +175,114 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
             log.debug("Pre add user is called in IdentityMgtEventListener");
         }
 
+        IdentityMgtConfig config = IdentityMgtConfig.getInstance();
+
+        if(!config.isListenerEnable()){
+            return true;
+        }
+
         processUserChallenges(userName, claims, true, userStoreManager);
 
-        if(credential == null || (credential instanceof String &&
-                                                    ((String)credential).trim().length() < 1)){
-            if(log.isDebugEnabled()){
-                log.debug("Credentials are null. Using default user password as credentials");
-            }
+        Map<String, String> userData = new HashMap<String, String>();
 
-            if(defaultPassword == null || defaultPassword.trim().length() < 1){
-                throw new UserStoreException("Default user password has not been properly configured");             
+        for(Map.Entry<String, String> entry : claims.entrySet()){
+            if(Arrays.asList(config.getIdentityDataStore().getSupportedTypes()).contains(entry.getKey())){
+                String value = entry.getValue();
+                if(value != null){
+                    if(UserIdentityDataStore.ACCOUNT_LOCK.equals(entry.getKey())){
+                        if(UserCoreConstants.USER_LOCKED.equals(value)){
+                            value = Integer.toString(UserIdentityDTO.TRUE);
+                        } else {
+                            value = Integer.toString(UserIdentityDTO.FALSE);
+                        }
+                    }
+                    userData.put(entry.getKey(), value);
+                }
             }
-
-            ((AbstractUserStoreManager)userStoreManager).doAddUser(userName, defaultPassword,
-                                                                        roleList, claims, profile);
-
-            UserMgtBean bean = new UserMgtBean();
-            bean.setUserId(userName);
-            if(allowTemporaryPassword){
-                bean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_TEMPORARY_PASSWORD);
-            } else {
-                bean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_PASSWORD_RESET);                 
-            }
-            try {
-                processor.processRecoveryUsingEmail(bean, userStoreManager.getTenantId());
-            } catch (IdentityMgtException e) {
-                log.error("Error while sending temporary password to user's email account");
-            }
-
-            return false;
-        } else {
-            //lock account and persist
-            Utils.lockUserAccount(userName, userStoreManager.getTenantId());
-            claims.put(UserCoreConstants.ClaimTypeURIs.ACCOUNT_STATUS, UserCoreConstants.USER_LOCKED);
         }
+
+        if(userData.size() > 0){
+            for(String key : userData.keySet()){
+                claims.remove(key);
+            }
+        }
+
+        if(config.isEnableUserAccountVerification()){
+
+            if(credential == null || (credential instanceof String &&
+                                                        ((String)credential).trim().length() < 1)){
+                if(log.isDebugEnabled()){
+                    log.debug("Credentials are null. Using default user password as credentials");
+                }
+
+                String defaultPassword = config.getTemporaryDefaultPassword();
+
+                if(defaultPassword == null || defaultPassword.trim().length() < 1){
+                    throw new UserStoreException("Default user password has not been properly configured");
+                }
+
+                ((AbstractUserStoreManager)userStoreManager).addUser(userName, defaultPassword,
+                                                                        roleList, claims, profile, false);                
+
+                UserMgtBean bean = new UserMgtBean();
+                bean.setUserId(userName);
+                if(config.isEnableTemporaryPassword()){
+                    bean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_TEMPORARY_PASSWORD);
+                    // You can not lock account if temporary password is used.
+                    UserIdentityDTO userIdentityDTO = new UserIdentityDTO(userName, userData);
+                    userIdentityDTO.setAccountLock(false);
+                    config.getIdentityDataStore().store(userIdentityDTO, userStoreManager);
+                } else {
+                    bean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_ACCOUNT_CONFORM);
+                    UserIdentityDTO userIdentityDTO = new UserIdentityDTO(userName, userData);
+                    userIdentityDTO.setAccountLock(true);
+                    userIdentityDTO.setTemporaryLock(false);
+                    config.getIdentityDataStore().store(userIdentityDTO, userStoreManager);
+                }
+                try {
+                    processor.processRecoveryUsingEmail(bean, userStoreManager.getTenantId());
+                    if(!config.isEnableTemporaryPassword()){
+                        bean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_PASSWORD_RESET);
+                        processor.processRecoveryUsingEmail(bean, userStoreManager.getTenantId());
+                    }
+                } catch (IdentityMgtException e) {
+                    log.error("Error while sending temporary password to user's email account");
+                }
+
+                return false;
+            } else {
+
+                
+                ((AbstractUserStoreManager)userStoreManager).addUser(userName, credential, roleList, claims, profile, false);
+
+                //lock account and persist
+                UserIdentityDTO userIdentityDTO = new UserIdentityDTO(userName, userData);
+                userIdentityDTO.setAccountLock(true);
+                userIdentityDTO.setTemporaryLock(false);
+                config.getIdentityDataStore().store(userIdentityDTO, userStoreManager);
+
+                UserMgtBean bean = new UserMgtBean();
+                bean.setUserId(userName);
+                bean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_ACCOUNT_CONFORM);
+                try {
+                    processor.processRecoveryUsingEmail(bean, userStoreManager.getTenantId());
+                } catch (IdentityMgtException e) {
+                    log.error("Error while sending confirmation link to user's email account for user " + userName);
+                }
+
+                return false;
+            }
+        }
+
+        // adding claim value based on property
+        if(config.isAuthPolicyAccountLockOnCreation()){
+            claims.put(UserIdentityDataStore.ACCOUNT_LOCK, "true");
+        } else {
+            claims.put(UserIdentityDataStore.ACCOUNT_LOCK, "false");
+        }
+        claims.put(UserIdentityDataStore.PASSWORD_TIME_STAMP,
+                    Long.toString(System.currentTimeMillis()));
+        
         return true;
     }
 
@@ -213,13 +291,10 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
     public boolean doPostAddUser(String userName, Object credential, String[] roleList,
                 Map<String, String> claims, String profile, UserStoreManager userStoreManager)
                                                                     throws UserStoreException {
-        UserMgtBean bean = new UserMgtBean();
-        bean.setUserId(userName);
-        bean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_ACCOUNT_CONFORM);
-        try {
-            processor.processRecoveryUsingEmail(bean, userStoreManager.getTenantId());
-        } catch (IdentityMgtException e) {
-            log.error("Error while sending confirmation link to user's email account");
+
+        IdentityMgtConfig config = IdentityMgtConfig.getInstance();
+        if(!config.isListenerEnable()){
+            return true;
         }
 
         return true;
@@ -230,21 +305,29 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
     public boolean doPreUpdateCredentialByAdmin(String userName, Object newCredential,
                                     UserStoreManager userStoreManager) throws UserStoreException {
 
+        IdentityMgtConfig config = IdentityMgtConfig.getInstance();
+        if(!config.isListenerEnable()){
+            return true;
+        }
+
         if(newCredential == null || (newCredential instanceof String &&
                                                     ((String)newCredential).trim().length() < 1)){
             if(log.isDebugEnabled()){
                 log.debug("Credentials are null. Using default user password as credentials");
             }
 
+            String defaultPassword = config.getTemporaryDefaultPassword();
+
             if(defaultPassword == null || defaultPassword.trim().length() < 1){
                 throw new UserStoreException("Default user password has not been properly configured");
             }
 
-            ((AbstractUserStoreManager)userStoreManager).doUpdateCredentialByAdmin(userName, defaultPassword);
+            ((AbstractUserStoreManager)userStoreManager).updateCredentialByAdmin(userName, defaultPassword);
 
             UserMgtBean bean = new UserMgtBean();
             bean.setUserId(userName);
-            if(allowTemporaryPassword){
+            
+            if(config.isEnableTemporaryPassword()){
                 bean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_TEMPORARY_PASSWORD);
             } else {
                 bean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_PASSWORD_RESET);
@@ -265,43 +348,60 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
     public boolean doPreSetUserClaimValue(String userName, String claimURI, String claimValue,
                 String profileName, UserStoreManager userStoreManager) throws UserStoreException {
 
+        IdentityMgtConfig config = IdentityMgtConfig.getInstance();
+
+        if(!config.isListenerEnable()){
+            return true;
+        }
+
+        UserIdentityDTO identityDTO = null;
+        UserIdentityDataStore identityDataStore = IdentityMgtConfig.getInstance().getIdentityDataStore();
+
+        if(Arrays.asList(identityDataStore.getSupportedTypes()).contains(claimURI)){
+            identityDTO = identityDataStore.load(userName, userStoreManager);
+        }
+
         if(UserCoreConstants.ClaimTypeURIs.PRIMARY_CHALLENGES.equals(claimURI)){
 
             throw new UserStoreException("Primary challenges can not be modified");
 
-        } else if(UserCoreConstants.ClaimTypeURIs.ACCOUNT_STATUS.equals(claimURI)){
+        } else if(UserIdentityDataStore.ACCOUNT_LOCK.equals(claimURI)){
 
             if(isLoggedInUser(userName)){
                 throw new UserStoreException("You can not change your own account status");
             }
 
-            if(UserCoreConstants.USER_LOCKED.equals(claimValue)){
-                Utils.lockUserAccount(userName, userStoreManager.getTenantId());
-            } else {
-                Utils.unlockUserAccount(userName, userStoreManager.getTenantId());
+            if(identityDTO != null){
+                identityDTO.setAccountLock(Boolean.parseBoolean(claimValue));
+                identityDataStore.store(identityDTO, userStoreManager);
             }
-            return true;
+            return false;
 
         } else {
 
             List<String> challengesUri = processor.getQuestionProcessor().
                             getChallengeQuestionUris(userName, userStoreManager.getTenantId());
+            String separator = IdentityMgtConfig.getInstance().getChallengeQuestionSeparator();
             if(challengesUri.contains(claimURI)){
                 if(isNewAnswer(userName, claimURI, claimValue, userStoreManager)){
                     if(claimValue != null){
                         claimValue = claimValue.trim();
-                        String question = claimValue.substring(0,claimValue.indexOf(Utils.getChallengeSeparator()));
-                        String answer = claimValue.substring(claimValue.indexOf(Utils.getChallengeSeparator())+ 1);
+                        String question = claimValue.substring(0,
+                                claimValue.indexOf(separator));
+                        String answer = claimValue.
+                                substring(claimValue.indexOf(separator)+ 1);
                         if(question != null && answer != null){
                             question = question.trim();
                             answer = answer.trim();
-                            claimValue =question + Utils.getChallengeSeparator() + doHash(answer.toLowerCase());
-                            ((AbstractUserStoreManager) userStoreManager).
-                                    doSetUserClaimValue(userName, claimURI, claimValue, profileName);
+                            claimValue = question + separator + doHash(answer.toLowerCase());
+                            if(identityDTO != null){
+                                identityDTO.getUserDataMap().put(claimURI, claimValue);
+                                identityDataStore.store(identityDTO, userStoreManager);
+                                return false;
+                            }
                         }
                     }
                 }
-                return false;
             }
         }
 
@@ -312,6 +412,13 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
     public boolean doPreSetUserClaimValues(String userName, Map<String, String> claims,
                 String profileName, UserStoreManager userStoreManager) throws UserStoreException {
 
+        IdentityMgtConfig config = IdentityMgtConfig.getInstance();
+
+        if(!config.isListenerEnable()){
+            return true;
+        }
+
+        UserIdentityDataStore identityDataStore = IdentityMgtConfig.getInstance().getIdentityDataStore();
 
         if(claims.containsKey(UserCoreConstants.ClaimTypeURIs.PRIMARY_CHALLENGES)){
 
@@ -319,24 +426,53 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 
         }
 
-        if(claims.containsKey(UserCoreConstants.ClaimTypeURIs.ACCOUNT_STATUS)){
+        // check whether there are already created challenge questions for user
 
-            if(UserCoreConstants.USER_LOCKED.
-                        equals(claims.get(UserCoreConstants.ClaimTypeURIs.ACCOUNT_STATUS))){
-                Utils.lockUserAccount(userName, userStoreManager.getTenantId());
-            } else {
-                Utils.unlockUserAccount(userName, userStoreManager.getTenantId());
+        boolean primaryChallenge = true;
+        try{
+            String value =userStoreManager.getUserClaimValue(userName,
+                                UserCoreConstants.ClaimTypeURIs.PRIMARY_CHALLENGES, null);
+            if(value != null && value.trim().length() > 0){
+                primaryChallenge = false;
+            }
+        } catch (Exception e){
+            //
+        }
+
+        processUserChallenges(userName, claims, primaryChallenge, userStoreManager);
+
+        Map<String, String> userData = new HashMap<String, String>();
+
+        for(Map.Entry<String, String> entry : claims.entrySet()){
+            if(Arrays.asList(identityDataStore.getSupportedTypes()).contains(entry.getKey())){
+                String value = entry.getValue();
+                if(value != null){
+                    userData.put(entry.getKey(), value);
+                }
             }
         }
-        
-        processUserChallenges(userName, claims, false, userStoreManager);
-        return true;
 
+        if(userData.size() > 0){
+            UserIdentityDTO identityDTO = new UserIdentityDTO(userName, userData);
+            identityDataStore.store(identityDTO, userStoreManager);
+            for(String key : userData.keySet()){
+                claims.remove(key);
+            }
+        }
+
+        return true;
     }
 
     @Override
     public boolean doPostDeleteUser(String userName, UserStoreManager userStoreManager)
                                                                         throws UserStoreException {
+
+        IdentityMgtConfig config = IdentityMgtConfig.getInstance();
+        if(!config.isListenerEnable()){
+            return true;
+        }
+
+        IdentityMgtConfig.getInstance().getIdentityDataStore().remove(userName, userStoreManager);
 
         UserRegistry registry = null;
         try{
@@ -374,11 +510,54 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
     }
 
 
+    @Override
+    public boolean doPostGetUserClaimValues(String userName, String[] claims, String profileName,
+                                    Map<String, String> claimMap, UserStoreManager storeManager) {
+
+        IdentityMgtConfig config = IdentityMgtConfig.getInstance();
+        if(!config.isListenerEnable()){
+            return true;
+        }
+
+        if(claimMap == null){
+            claimMap = new HashMap<String, String>();
+        }
+
+        UserIdentityDataStore identityDataStore = IdentityMgtConfig.getInstance().getIdentityDataStore();
+        UserIdentityDTO identityDTO = identityDataStore.load(userName, storeManager);
+        for(String  claim : claims){
+            if(identityDTO.getUserDataMap().containsKey(claim)){
+                claimMap.put(claim, identityDTO.getUserDataMap().get(claim));
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean doPostGetUserClaimValue(String userName, String claim, List<String> claimValue,
+                                           String profileName, UserStoreManager storeManager) {
+        
+        IdentityMgtConfig config = IdentityMgtConfig.getInstance();
+        if(!config.isListenerEnable()){
+            return true;
+        }
+
+        UserIdentityDataStore identityDataStore = IdentityMgtConfig.getInstance().getIdentityDataStore();
+        UserIdentityDTO identityDTO = identityDataStore.load(userName, storeManager);
+        if(identityDTO.getUserDataMap().containsKey(claim)){
+            claimValue.add(identityDTO.getUserDataMap().get(claim));
+        }
+
+        return false;
+    }
+
     private void processUserChallenges(String userName, Map<String, String> claims,
                            boolean primary, UserStoreManager manager) throws UserStoreException {
 
         String[] challengeUris = Utils.getChallengeUris();
         List<String> selectedUris = new ArrayList<String>();
+        String separator = IdentityMgtConfig.getInstance().getChallengeQuestionSeparator();
         if(challengeUris != null){
             Map<String, String> challengeMap = new HashMap<String, String>();
             for(String challenge : challengeUris){
@@ -391,14 +570,15 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
                     }
                     challengeValue = challengeValue.trim();
                     String question = challengeValue.
-                        substring(0,challengeValue.indexOf(Utils.getChallengeSeparator()));
+                        substring(0,challengeValue.indexOf(separator));
                     String answer = challengeValue.
-                        substring(challengeValue.indexOf(Utils.getChallengeSeparator())+ 1);
+                        substring(challengeValue.indexOf(separator)+ 1);
                     if(question != null && answer != null){
                         question = question.trim();
                         answer = answer.trim();
                         challengeMap.put(question, answer);
-                        claims.put(challenge, question + Utils.getChallengeSeparator() + doHash(answer.toLowerCase()));
+                        claims.put(challenge, question + separator +
+                                doHash(answer.toLowerCase()));
                     } else {
                         claims.remove(challenge);
                     }
@@ -409,9 +589,11 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
                 String value = "";
                 for(Map.Entry<String, String> entry : challengeMap.entrySet()){
                     if("".equals(value)){
-                        value = entry.getKey() + "=" + doHash(entry.getValue().toLowerCase());
+                        value = entry.getKey() + separator +
+                                doHash(entry.getValue().toLowerCase());
                     } else {
-                        value = value + Utils.getChallengeSeparator() + entry.getKey() + "=" + doHash(entry.getValue().toLowerCase());
+                        value = value + separator + entry.getKey() + separator +
+                                                            doHash(entry.getValue().toLowerCase());
                     }
                 }
     
@@ -429,7 +611,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
                     if("".equals(selectedUriString)){
                         selectedUriString = uri;
                     } else {
-                        selectedUriString = selectedUriString + Utils.getChallengeSeparator() + uri;
+                        selectedUriString = selectedUriString + separator + uri;
                     }
                 }
 
@@ -443,8 +625,9 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
     private String doHash(String input) throws UserStoreException {
         try {
             MessageDigest dgst;
-            String digsestFunction = realmConfig.getUserStoreProperties().get(
-                                                                JDBCRealmConstants.DIGEST_FUNCTION);
+
+            String digsestFunction = IdentityMgtConfig.getInstance().getDigsestFunction();
+
             if (digsestFunction != null) {
                 dgst = MessageDigest.getInstance(digsestFunction);
             } else {

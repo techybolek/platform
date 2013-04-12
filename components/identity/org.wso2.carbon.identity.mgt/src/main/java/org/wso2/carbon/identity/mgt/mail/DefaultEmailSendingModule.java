@@ -17,25 +17,18 @@ package org.wso2.carbon.identity.mgt.mail;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.mail.MailConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.CarbonConfigurationContextFactory;
-import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
-import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
 import java.util.Map;

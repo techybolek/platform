@@ -22,12 +22,12 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.caching.core.CacheInvalidator;
-import org.wso2.carbon.identity.mgt.AccountRecoveryProcessor;
+import org.wso2.carbon.identity.mgt.IdentityMgtProcessor;
+import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.IdentityMgtEventListener;
 import org.wso2.carbon.identity.mgt.IdentityMgtException;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.dto.ChallengeQuestionDTO;
-import org.wso2.carbon.identity.mgt.util.Utils;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -35,11 +35,9 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.ClaimManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.api.ClaimMapping;
-import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.listener.UserOperationEventListener;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +68,7 @@ public class IdentityMgtServiceComponent {
 
     private static RegistryService registryService;
 
-    private static AccountRecoveryProcessor recoveryProcessor;
+    private static IdentityMgtProcessor recoveryProcessor;
 
     private static ConfigurationContextService configurationContextService;
 
@@ -92,6 +90,7 @@ public class IdentityMgtServiceComponent {
         serviceRegistration =
                 context.getBundleContext().registerService(UserOperationEventListener.class.getName(),
                         listener, null);
+
         log.debug("Identity Management bundle is activated");
     }
 
@@ -139,7 +138,7 @@ public class IdentityMgtServiceComponent {
         return registryService;
     }
 
-    public static AccountRecoveryProcessor getRecoveryProcessor() {
+    public static IdentityMgtProcessor getRecoveryProcessor() {
         return recoveryProcessor;
     }
 
@@ -162,47 +161,18 @@ public class IdentityMgtServiceComponent {
     private static void init(){
 
         Registry registry;
-        recoveryProcessor = new AccountRecoveryProcessor();
+        recoveryProcessor = new IdentityMgtProcessor();
+        IdentityMgtConfig.getInstance(realmService.getBootstrapRealmConfiguration());
         try {
             registry = IdentityMgtServiceComponent.getRegistryService().getConfigSystemRegistry();
             if(!registry.resourceExists(IdentityMgtConstants.IDENTITY_MANAGEMENT_PATH)){
                 Collection questionCollection = registry.newCollection();
                 registry.put(IdentityMgtConstants.IDENTITY_MANAGEMENT_PATH, questionCollection);
-                modifyClaims();
                 loadDefaultChallenges();
             }
         } catch (RegistryException e) {
             log.error("Error while creating registry collection for org.wso2.carbon.identity.mgt component");
-        }
-        processLockUsers();
-    }
-
-    private static void modifyClaims(){
-
-        try{
-            ClaimManager manger =  realmService.getBootstrapRealm().getClaimManager();
-            
-            ClaimMapping mapping1 = manger.getClaimMapping(UserCoreConstants.
-                                                                    ClaimTypeURIs.ACCOUNT_STATUS);
-            mapping1.getClaim().setDisplayOrder(1);
-            mapping1.getClaim().setSupportedByDefault(true);
-            manger.updateClaimMapping(mapping1);
-
-            ClaimMapping mapping2 = manger.
-                            getClaimMapping(IdentityMgtConstants.DEFAULT_CHALLENGE_QUESTION_URI01);
-            mapping2.getClaim().setSupportedByDefault(false);
-            mapping2.getClaim().setRequired(false);
-            manger.updateClaimMapping(mapping2);
-
-            ClaimMapping mapping3 = manger.
-                            getClaimMapping(IdentityMgtConstants.DEFAULT_CHALLENGE_QUESTION_URI02);
-            mapping3.getClaim().setSupportedByDefault(false);
-            mapping3.getClaim().setRequired(false);
-            manger.updateClaimMapping(mapping3);
-
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            log.error("Error while modifying claims" , e);    
-        }
+        }                  
     }
 
 
@@ -233,21 +203,21 @@ public class IdentityMgtServiceComponent {
             log.error("Error while promoting default challenge questions", e);
         }
     }
-
-    private static void processLockUsers() {
-
-        try{
-            UserStoreManager manager = realmService.getBootstrapRealm().getUserStoreManager();
-            String[] users = manager.getUserList(UserCoreConstants.ClaimTypeURIs.ACCOUNT_STATUS,
-                                                            UserCoreConstants.USER_LOCKED, null);
-
-            for(String user : users){
-                String userName = MultitenantUtils.getTenantAwareUsername(user);
-                String tenantDomain = MultitenantUtils.getTenantDomain(user);
-                Utils.lockUserAccount(userName, Utils.getTenantId(tenantDomain));
-            }
-        } catch (Exception e) {
-            log.error("Error while locking user account of locked users", e);
-        }
-    }
+//
+//    private static void processLockUsers() {
+//
+//        try{
+//            UserStoreManager manager = realmService.getBootstrapRealm().getUserStoreManager();
+//            String[] users = manager.getUserList(UserCoreConstants.ClaimTypeURIs.ACCOUNT_STATUS,
+//                                                            UserCoreConstants.USER_LOCKED, null);
+//
+//            for(String user : users){
+//                String userName = MultitenantUtils.getTenantAwareUsername(user);
+//                String tenantDomain = MultitenantUtils.getTenantDomain(user);
+//                Utils.lockUserAccount(userName, Utils.getTenantId(tenantDomain));
+//            }
+//        } catch (Exception e) {
+//            log.error("Error while locking user account of locked users", e);
+//        }
+//    }
 }

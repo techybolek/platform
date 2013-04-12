@@ -90,13 +90,14 @@ public class CarbonBasicPolicyPublisherModule extends AbstractPolicyPublisherMod
 
         Map<String, String> dataMap2 = new HashMap<String, String>();
         dataMap2.put(AbstractPolicyPublisherModule.REQUIRED, "true");
-        dataMap2.put(AbstractPolicyPublisherModule.DISPLAY_NAME, "Subscriber UserName");
+        dataMap2.put(AbstractPolicyPublisherModule.DISPLAY_NAME, "Subscriber User Name");
         dataMap2.put(AbstractPolicyPublisherModule.ORDER, "2");
 
         Map<String, String> dataMap3 = new HashMap<String, String>();
         dataMap3.put(AbstractPolicyPublisherModule.REQUIRED, "true");
         dataMap3.put(AbstractPolicyPublisherModule.DISPLAY_NAME, "Subscriber Password");
         dataMap3.put(AbstractPolicyPublisherModule.ORDER, "3");
+        dataMap3.put(AbstractPolicyPublisherModule.SECRET, "true");
 
         properties.put("subscriberURL", dataMap1);
         properties.put("subscriberUserName", dataMap2);

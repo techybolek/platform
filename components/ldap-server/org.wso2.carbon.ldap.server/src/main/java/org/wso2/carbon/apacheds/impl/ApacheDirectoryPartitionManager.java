@@ -95,15 +95,19 @@ class ApacheDirectoryPartitionManager implements PartitionManager {
 
                 // Create group ou
                 addGroupStoreToPartition(partition.getSuffix());
+
+                /*do not create admin user and admin group because it is anyway checked and created
+                 *in user core.*/
+                
                 // create tenant administrator entry at the time of tenant-partition created.
-                addAdmin(partitionInformation.getPartitionAdministrator(), partition.
+                /*addAdmin(partitionInformation.getPartitionAdministrator(), partition.
                         getSuffix(), partitionInformation.getRealm(), partitionInformation.
                         isKdcEnabled());
                 addAdminGroup(partitionInformation.getPartitionAdministrator(), partition.
                         getSuffix());
 
                 addAdminACLEntry(partitionInformation.getPartitionAdministrator().getAdminUserName(),
-                                 partition.getSuffix());
+                                 partition.getSuffix());*/
 
                 this.directoryService.sync();
             }
@@ -559,7 +563,15 @@ class ApacheDirectoryPartitionManager implements PartitionManager {
 
     private void addAdminGroup(AdminInfo adminInfo, String partitionSuffix)
             throws DirectoryServerException {
+
         AdminGroupInfo groupInfo = adminInfo.getGroupInformation();
+
+        if(groupInfo.getAdminRoleName().contains("/")){
+            String adminRole = groupInfo.getAdminRoleName();
+            adminRole = adminRole.substring(adminRole.indexOf("/") + 1);
+            groupInfo.setAdminRoleName(adminRole);
+        }
+        
         String domainName = "";
         try {
 
@@ -596,6 +608,12 @@ class ApacheDirectoryPartitionManager implements PartitionManager {
     private void addAdmin(AdminInfo adminInfo, String partitionSuffix, final String realm,
                           final boolean kdcEnabled) throws DirectoryServerException {
 
+        if(adminInfo.getAdminUserName().contains("/")){
+            String admin = adminInfo.getAdminUserName();
+            admin = admin.substring(admin.indexOf("/") + 1);
+            adminInfo.setAdminUserName(admin);
+        }
+        
         String domainName =  adminInfo.getUsernameAttribute() + "=" + adminInfo.getAdminUserName() + "," + "ou=Users," + partitionSuffix;
 
         try {

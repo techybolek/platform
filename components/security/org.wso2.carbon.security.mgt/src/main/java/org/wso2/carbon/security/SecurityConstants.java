@@ -108,4 +108,8 @@ public class SecurityConstants {
             "200401-wss-wssecurity-utility-1.0.xsd";
     public static final String POLICY_ID = "Id";
     public static final QName POLICY_ID_QNAME = new QName(WS_SEC_UTILITY_NS, POLICY_ID);
+
+    public static final int DEFAULT_ITEMS_PER_PAGE = 50;
+    public static final int ITEMS_PER_PAGE = 10;
+    public static final int CACHING_PAGE_SIZE = 5;
 }

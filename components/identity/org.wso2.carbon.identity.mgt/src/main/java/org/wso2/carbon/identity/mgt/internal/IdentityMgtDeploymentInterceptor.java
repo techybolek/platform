@@ -41,6 +41,7 @@ import java.util.ArrayList;
 public class IdentityMgtDeploymentInterceptor implements AxisObserver {
 
     private static final Log log = LogFactory.getLog(IdentityMgtDeploymentInterceptor.class);    
+
     @Override
     public void init(AxisConfiguration axisConfiguration) {
 
@@ -48,20 +49,20 @@ public class IdentityMgtDeploymentInterceptor implements AxisObserver {
 
     @Override
     public void serviceUpdate(AxisEvent axisEvent, AxisService axisService) {
-        
-        int eventType = axisEvent.getEventType();
-        if (eventType == AxisEvent.SERVICE_DEPLOY &&
-                                    "IdentityManagementService".equals(axisService.getName())) {
-            try {
-                String serverURL = CarbonUtils.getServerConfiguration().getFirstProperty("ServerURL");
-                if(!serverURL.startsWith("local")) {
-                    axisService.applyPolicy(Utils.getSecurityPolicy());
-                    axisService.addModuleref("rampart");
-                }
-            } catch (AxisFault axisFault) {
-                log.error("Security can not be applied for IdentityManagementService", axisFault);
-            }
-        }
+          // TODO
+//        int eventType = axisEvent.getEventType();
+//        if (eventType == AxisEvent.SERVICE_DEPLOY &&
+//                                    "IdentityManagementService".equals(axisService.getName())) {
+//            try {
+//                String serverURL = CarbonUtils.getServerConfiguration().getFirstProperty("ServerURL");
+//                if(!serverURL.startsWith("local")) {
+//                    axisService.applyPolicy(Utils.getSecurityPolicy());
+//                    axisService.addModuleref("rampart");
+//                }
+//            } catch (AxisFault axisFault) {
+//                log.error("Security can not be applied for IdentityManagementService", axisFault);
+//            }
+//        }
     }
 
     @Override

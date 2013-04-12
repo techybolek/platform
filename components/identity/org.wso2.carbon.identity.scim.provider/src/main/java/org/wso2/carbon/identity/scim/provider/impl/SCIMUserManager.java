@@ -29,11 +29,13 @@ import org.wso2.carbon.identity.scim.common.utils.AttributeMapper;
 import org.wso2.carbon.identity.scim.common.utils.IdentitySCIMException;
 import org.wso2.carbon.identity.scim.common.utils.SCIMCommonUtils;
 import org.wso2.carbon.user.api.Claim;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.claim.ClaimManager;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.charon.core.attributes.Attribute;
 import org.wso2.charon.core.exceptions.CharonException;
 import org.wso2.charon.core.exceptions.NotFoundException;
@@ -64,8 +66,6 @@ public class SCIMUserManager implements UserManager {
     //to make provisioning to other providers asynchronously happen.
     private ExecutorService provisioningThreadPool = Executors.newCachedThreadPool();
 
-    SCIMProvisioningConfigManager provisioningConfigManager = SCIMProvisioningConfigManager.getInstance();
-
     public SCIMUserManager(UserStoreManager carbonUserStoreManager, String userName,
                            ClaimManager claimManager) {
         carbonUM = carbonUserStoreManager;
@@ -74,6 +74,8 @@ public class SCIMUserManager implements UserManager {
     }
 
     public User createUser(User user) throws CharonException {
+        SCIMProvisioningConfigManager provisioningConfigManager =
+                SCIMProvisioningConfigManager.getInstance();
         //if operating in dumb mode, do not persist the operation, only provision to providers
         if (provisioningConfigManager.isDumbMode()) {
 
@@ -232,6 +234,8 @@ public class SCIMUserManager implements UserManager {
     }
 
     public User updateUser(User user) throws CharonException {
+        SCIMProvisioningConfigManager provisioningConfigManager =
+                SCIMProvisioningConfigManager.getInstance();
         //if operating in dumb mode, do not persist the operation, only provision to providers
         if (provisioningConfigManager.isDumbMode()) {
 
@@ -288,6 +292,9 @@ public class SCIMUserManager implements UserManager {
     }
 
     public void deleteUser(String userId) throws NotFoundException, CharonException {
+        SCIMProvisioningConfigManager provisioningConfigManager =
+                SCIMProvisioningConfigManager.getInstance();
+        
         //if operating in dumb mode, do not persist the operation, only provision to providers
         if (provisioningConfigManager.isDumbMode()) {
             if (log.isDebugEnabled()) {
@@ -336,6 +343,9 @@ public class SCIMUserManager implements UserManager {
     }
 
     public Group createGroup(Group group) throws CharonException {
+        SCIMProvisioningConfigManager provisioningConfigManager =
+                SCIMProvisioningConfigManager.getInstance();
+        
         //if operating in dumb mode, do not persist the operation, only provision to providers
         if (provisioningConfigManager.isDumbMode()) {
             if (log.isDebugEnabled()) {
@@ -429,8 +439,8 @@ public class SCIMUserManager implements UserManager {
                 for (String roleName : roleNames) {
                     //skip internal roles
                     if ((CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equals(roleName)) ||
-                        (((AbstractUserStoreManager) carbonUM).getEveryOneRoleName().equals(roleName)) ||
-                        (((AbstractUserStoreManager) carbonUM).getAdminRoleName().equals(roleName))) {
+                    		UserCoreUtil.isEveryoneRole(roleName, carbonUM.getRealmConfiguration()) ||
+                    		UserCoreUtil.isPrimaryAdminRole(roleName,carbonUM.getRealmConfiguration())) {	 
                         continue;
                     }
                     groupList.add(this.getGroupWithName(roleName));
@@ -463,8 +473,8 @@ public class SCIMUserManager implements UserManager {
             if (attributeValue != null && carbonUM.isExistingRole(attributeValue)) {
                 //skip internal roles
                 if ((CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equals(attributeValue)) ||
-                    (((AbstractUserStoreManager) carbonUM).getEveryOneRoleName().equals(attributeValue)) ||
-                    (((AbstractUserStoreManager) carbonUM).getAdminRoleName().equals(attributeValue))) {
+                		UserCoreUtil.isEveryoneRole(attributeValue, carbonUM.getRealmConfiguration()) ||
+                		UserCoreUtil.isPrimaryAdminRole(attributeValue,carbonUM.getRealmConfiguration())) {
                     throw new IdentitySCIMException("Internal roles do not support SCIM.");
                 }
                 //we expect only one result
@@ -492,6 +502,9 @@ public class SCIMUserManager implements UserManager {
     }
 
     public Group updateGroup(Group oldGroup, Group newGroup) throws CharonException {
+        SCIMProvisioningConfigManager provisioningConfigManager =
+                SCIMProvisioningConfigManager.getInstance();
+        
         //if operating in dumb mode, do not persist the operation, only provision to providers
         if (provisioningConfigManager.isDumbMode()) {
             if (log.isDebugEnabled()) {
@@ -608,6 +621,8 @@ public class SCIMUserManager implements UserManager {
     }
 
     public void deleteGroup(String groupId) throws NotFoundException, CharonException {
+        SCIMProvisioningConfigManager provisioningConfigManager =
+                SCIMProvisioningConfigManager.getInstance();
         //if operating in dumb mode, do not persist the operation, only provision to providers
         if (provisioningConfigManager.isDumbMode()) {
             if (log.isDebugEnabled()) {
@@ -657,11 +672,11 @@ public class SCIMUserManager implements UserManager {
         User scimUser = null;
         try {
             //get claims related to SCIM claim dialect
-            Claim[] claims = carbonClaimManager.getAllClaims(SCIMCommonUtils.SCIM_CLAIM_DIALECT);
+            ClaimMapping[] claims = carbonClaimManager.getAllClaimMappings(SCIMCommonUtils.SCIM_CLAIM_DIALECT);
 
             List<String> claimURIList = new ArrayList<String>();
-            for (Claim claim : claims) {
-                claimURIList.add(claim.getClaimUri());
+            for (ClaimMapping claim : claims) {
+                claimURIList.add(claim.getClaim().getClaimUri());
             }
             //obtain user claim values
             Map<String, String> attributes = carbonUM.getUserClaimValues(
@@ -677,15 +692,13 @@ public class SCIMUserManager implements UserManager {
                     attributes, SCIMConstants.USER_INT);
             //add groups of user:
             for (String role : roles) {
-                String everyOneRoleName =
-                        ((AbstractUserStoreManager) carbonUM).getEveryOneRoleName();
-                String adminRoleName =
-                        ((AbstractUserStoreManager) carbonUM).getAdminRoleName();
-                if (everyOneRoleName.equals(role) || adminRoleName.equals(role) ||
-                    CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equals(role)) {
-                    //carbon specific roles do not possess SCIM info, hence skipping them.
-                    continue;
-                }
+				if (UserCoreUtil.isEveryoneRole(role, carbonUM.getRealmConfiguration())
+						|| UserCoreUtil.isPrimaryAdminRole(role, carbonUM.getRealmConfiguration())
+						|| CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equalsIgnoreCase(role)) {
+					// carbon specific roles do not possess SCIM info, hence
+					// skipping them.
+					continue;
+				}
                 Group group = getGroupOnlyWithMetaAttributes(role);
                 scimUser.setGroup(null, group.getId(), role);
             }
@@ -776,6 +789,8 @@ public class SCIMUserManager implements UserManager {
                 log.debug("Server is operating in dumb mode. " +
                           "Hence, operation is not persisted, it will only be provisioned.");
             }
+            SCIMProvisioningConfigManager provisioningConfigManager =
+                    SCIMProvisioningConfigManager.getInstance();
             //read the connectors
             String[] provisioningHandlers = provisioningConfigManager.getProvisioningHandlers();
             if (provisioningHandlers != null && provisioningHandlers.length != 0) {

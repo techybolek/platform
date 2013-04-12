@@ -166,7 +166,7 @@
                             %>
 
                             <a href="javascript:document.location.href='<%=signInLink%>'">
-                                <fmt:message key='association.message2'/></a><fmt:message
+                                <fmt:message key='association.message11'/></a><fmt:message
                                 key='association.message3'/>
                             <%
                                 String signUpLink = "../user-registration/user-registration.jsp";

@@ -23,6 +23,7 @@
 <%@page import="java.util.ResourceBundle" %>
 <%@page import="java.text.MessageFormat" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.security.ui.SecurityUIConstants" %>
 
 <jsp:include page="../dialog/display_messages.jsp"/>
 
@@ -41,6 +42,7 @@
         String message = resourceBundle.getString("keystore.delete");
         forwardTo = "keystore-mgt.jsp";
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
+        session.setAttribute(SecurityUIConstants.RE_FETCH_KEYSTORES, Boolean.TRUE);
     } catch (Exception e) {
         String message = MessageFormat.format(resourceBundle.getString("keystore.cannot.delete"),
                 new Object[]{e.getMessage()});

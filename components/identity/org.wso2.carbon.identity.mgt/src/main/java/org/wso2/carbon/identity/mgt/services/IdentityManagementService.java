@@ -20,7 +20,7 @@ package org.wso2.carbon.identity.mgt.services;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.mgt.AccountRecoveryConfig;
+import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.ChallengeQuestionProcessor;
 import org.wso2.carbon.identity.mgt.IdentityMgtException;
 import org.wso2.carbon.identity.mgt.beans.UserMgtBean;
@@ -36,7 +36,6 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -65,10 +64,7 @@ public class IdentityManagementService {
         int tenantId;
         VerificationBean bean = new VerificationBean();
 
-        AccountRecoveryConfig config = IdentityMgtServiceComponent.
-                                                getRecoveryProcessor().getRecoveryConfig();
-
-        if(config.isCaptchaVerificationInternallyManaged()){
+        if(IdentityMgtConfig.getInstance().isCaptchaVerificationInternallyManaged()){
             try {
                 CaptchaUtil.processCaptchaInfoBean(captchaInfoBean);
             } catch (Exception e) {
@@ -245,11 +241,9 @@ public class IdentityManagementService {
         boolean success = false;
         UserRegistry registry = null;
         Resource resource;
-        
-        AccountRecoveryConfig config = IdentityMgtServiceComponent.
-                                                getRecoveryProcessor().getRecoveryConfig();
+
         try{
-            if(config.isCaptchaVerificationInternallyManaged()){
+            if(IdentityMgtConfig.getInstance().isCaptchaVerificationInternallyManaged()){
                 CaptchaUtil.processCaptchaInfoBean(captchaInfoBean);
             }
 

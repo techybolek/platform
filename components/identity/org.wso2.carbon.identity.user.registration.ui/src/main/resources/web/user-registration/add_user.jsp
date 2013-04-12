@@ -36,7 +36,7 @@
             (ConfigurationContext) config.getServletContext()
                     .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
     String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
-    String forwardTo = "index.jsp?region=region1&item=user_registration_menu&ordinal=0";
+    String forwardTo = "user-registration.jsp?region=region1&item=user_registration_menu&ordinal=0";
 
     if (forwardPage != null) {
         forwardTo = forwardPage;

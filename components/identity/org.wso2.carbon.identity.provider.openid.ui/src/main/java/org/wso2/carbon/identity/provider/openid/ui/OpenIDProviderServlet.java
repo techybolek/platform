@@ -24,6 +24,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.provider.openid.ui.handlers.OpenIDHandler;
 import org.wso2.carbon.identity.provider.openid.ui.util.OpenIDUtil;
 
@@ -34,6 +37,7 @@ import org.wso2.carbon.identity.provider.openid.ui.util.OpenIDUtil;
 public class OpenIDProviderServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 58052109007507494L;
+	private static final Log log = LogFactory.getLog(OpenIDProviderServlet.class);
 
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp)
@@ -46,10 +50,16 @@ public class OpenIDProviderServlet extends HttpServlet {
 
 		try {
 			response = provider.processRequest(req, resp);
+		} catch (IdentityException e) {
+			throw new ServletException(e);
+		}
+		// at this time the response may be already committed
+		try {
 			resp.sendRedirect(response);
 		} catch (Exception e) {
-			throw new ServletException(e);
-		} 
+			log.debug(e);
+			// do nothing
+		}
 	}
 
 }

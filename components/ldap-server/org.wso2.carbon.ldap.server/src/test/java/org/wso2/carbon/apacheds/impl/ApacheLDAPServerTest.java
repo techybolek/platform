@@ -132,7 +132,10 @@ public class ApacheLDAPServerTest extends AbstractDirectoryTestCase {
         // Get password attribute and check whether it is plain text.
         String[] attrIDs = {"userPassword"};
 
-        Attributes answer = ctx.getAttributes("uid=amilaj,ou=Users,dc=example,dc=com", attrIDs);
+        /*Commenting out the following part because we moved creating user admin entry and group
+         *entry to user core*/
+
+        /*Attributes answer = ctx.getAttributes("uid=amilaj,ou=Users,dc=example,dc=com", attrIDs);
 
         for (NamingEnumeration ae = answer.getAll(); ae.hasMore();) {
             Attribute attr = (Attribute)ae.next();
@@ -143,7 +146,7 @@ public class ApacheLDAPServerTest extends AbstractDirectoryTestCase {
                 assertEquals("iceage", passwd);
             }
 
-        }
+        }*/
 
     }
 

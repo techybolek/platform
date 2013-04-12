@@ -1,4 +1,31 @@
+/*
+ * Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * 
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.user.cassandra;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
+
+import javax.sql.DataSource;
 
 import me.prettyprint.cassandra.model.BasicColumnFamilyDefinition;
 import me.prettyprint.cassandra.serializers.StringSerializer;
@@ -10,7 +37,9 @@ import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
+import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.SliceQuery;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
@@ -36,24 +65,16 @@ import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.util.DatabaseUtil;
 import org.wso2.carbon.user.core.util.JDBCRealmUtil;
 
-import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
-
 public class CassandraUserStoreManager extends AbstractUserStoreManager implements
                                                                         MultipleCredentialUserStoreManager{
 
     private static final int MAX_CREDENTIALS_NO = 100;
+    private static final int MAX_CLAIMS_PER_USER = 100000;
     private Cluster cluster;
     private Keyspace keyspace;
 
     private static Log log = LogFactory.getLog(CassandraUserStoreManager.class);
+    private static boolean DEBUG = log.isDebugEnabled();
     private StringSerializer stringSerializer = StringSerializer.get();
 
     private static final int MAX_PASSWORDS_VALUE = 100;
@@ -72,6 +93,8 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
     public CassandraUserStoreManager(RealmConfiguration realmConfig, int tenantId)
             throws UserStoreException {
         this.realmConfig = realmConfig;
+        Util.setRealmConfig(realmConfig);
+
         this.tenantId = tenantId;
         realmConfig.setUserStoreProperties(JDBCRealmUtil.getSQL(realmConfig
                                                                         .getUserStoreProperties()));
@@ -162,7 +185,7 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
 
         if (log.isDebugEnabled()) {
             log.debug("The jdbcDataSource being used by JDBCUserStoreManager :: "
-                      + jdbcDataSource.hashCode());
+                      + dataSource.hashCode());
         }
         realmConfig.setUserStoreProperties(JDBCRealmUtil.getSQL(realmConfig
                                                                         .getUserStoreProperties()));
@@ -294,14 +317,12 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
             passwordIndexCF.setKeyspaceName(keyspaceName);
             cluster.addColumnFamily(passwordIndexCF, true);
 
+            // add claims CF
+            ColumnFamilyDefinition claimsCF = new BasicColumnFamilyDefinition();
+            claimsCF.setName(CFConstants.CLAIMS);
+            claimsCF.setKeyspaceName(keyspaceName);
+            cluster.addColumnFamily(claimsCF, true);
 
-
-            // add admin user and role
-            Mutator<String> mutator = HFactory.createMutator(keyspace, stringSerializer);
-
-
-            // random uuid for the user is created
-            String userId = UUID.randomUUID().toString();
 
 
 
@@ -329,63 +350,80 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
 //            jdbcUserRealm.getAuthorizationManager().authorizeRole("admin");
 
         }
-    }
-
-    /**
-     * Creates a credential object using passed claims for adduser
-     *
-     * @param claims
-     * @return
-     * @throws UserStoreException
-     */
-    private TNCredential buildTNCredential(Map<String, String> claims) throws UserStoreException {
-
-        log.info("Reading credentials");
-
-        TNCredential cred = new TNCredential();
-
-        String property;
-        String propValue;
-
-        if (claims != null) {
-            Iterator<Map.Entry<String, String>> ite = claims.entrySet().iterator();
-            while (ite.hasNext()) {
-                Map.Entry<String, String> entry = ite.next();
-
-                property = entry.getKey();
-                propValue = entry.getValue();
-
-                if (TNConstants.CREDENTIAL_TYPE.equals(property)) {
-                    cred.setCredentialType(propValue);
-                } else if (TNConstants.CRED_DEVICE_ID.equals(property)) {
-                    cred.setDeviceID(propValue);
-                } else if (TNConstants.CRED_EXT_USERNAME.equals(property)) {
-                    cred.setExtUsername(propValue);
-                } else if (TNConstants.CRED_EXT_PROVIDER.equals(property)) {
-                    cred.setExtProvider(propValue);
-                } else if (TNConstants.CRED_EXT_ACCESS_TOKEN.equals(property)) {
-                    cred.setExtAccessToken(propValue);
-                } else if (TNConstants.CRED_EXT_EMAIL_ADDRESS.equals(property)) {
-                    cred.setExtEmailAddress(propValue);
-                } else if (TNConstants.CRED_PHONE_NUMBER.equals(property)) {
-                    cred.setPhoneNumber(propValue);
-                } else if (TNConstants.CRED_EMAIL_ADDRESS.equals(property)) {
-                    cred.setEmail(propValue);
-                } else if (TNConstants.CRED_PASSWORD.equals(property)) {
-                    cred.setPassword(propValue);
-                }
-            }
+        String msg = "Connected to Cassandra keyspace : " + keyspace.getKeyspaceName() + ". ";
+        if (foundKS) {
+            msg += " Keyspace already found. Not creating any column families or intialization data.";
         } else {
-            throw new UserStoreException("No credentials found. Unable to add user");
+            msg += " Keyspace not found. Creating all column families and adding initialization data.";
         }
-
-        return cred;
+        log.info(msg);
     }
+
+//    /**
+//     * Creates a credential object using passed claims for adduser
+//     *
+//     * @param claims
+//     * @return
+//     * @throws UserStoreException
+//     */
+//    private TNCredential buildTNCredential(Map<String, String> claims) throws UserStoreException {
+//
+//        log.info("Reading credentials");
+//
+//        TNCredential cred = new TNCredential();
+//
+//        String property;
+//        String propValue;
+//
+//        if (claims != null) {
+//            Iterator<Map.Entry<String, String>> ite = claims.entrySet().iterator();
+//            while (ite.hasNext()) {
+//                Map.Entry<String, String> entry = ite.next();
+//
+//                property = entry.getKey();
+//                propValue = entry.getValue();
+//
+//                if (TNConstants.CREDENTIAL_TYPE.equals(property)) {
+//                    cred.setCredentialType(propValue);
+//                } else if (TNConstants.CRED_DEVICE_ID.equals(property)) {
+//                    cred.setDeviceID(propValue);
+//                } else if (TNConstants.CRED_EXT_USERNAME.equals(property)) {
+//                    cred.setExtUsername(propValue);
+//                } else if (TNConstants.CRED_EXT_PROVIDER.equals(property)) {
+//                    cred.setExtProvider(propValue);
+//                } else if (TNConstants.CRED_EXT_ACCESS_TOKEN.equals(property)) {
+//                    cred.setExtAccessToken(propValue);
+//                } else if (TNConstants.CRED_EXT_EMAIL_ADDRESS.equals(property)) {
+//                    cred.setExtEmailAddress(propValue);
+//                } else if (TNConstants.CRED_PHONE_NUMBER.equals(property)) {
+//                    cred.setPhoneNumber(propValue);
+//                } else if (TNConstants.CRED_EMAIL_ADDRESS.equals(property)) {
+//                    cred.setEmail(propValue);
+//                } else if (TNConstants.CRED_PASSWORD.equals(property)) {
+//                    cred.setPassword(propValue);
+//                }
+//            }
+//        } else {
+//            throw new UserStoreException("No credentials found. Unable to add user");
+//        }
+//
+//        return cred;
+//    }
 
     @Override
     public Map<String, String> getUserPropertyValues(String userName, String[] propertyNames,
                                                      String profileName) throws UserStoreException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    protected boolean doCheckExistingRole(String s) throws UserStoreException {
+        throw new UserStoreException("doCheckExistingRole(String) not implemented for CassandraUserStoreManager");
+    }
+
+    @Override
+    protected boolean doCheckExistingUser(String s) throws UserStoreException {
+        throw new UserStoreException("doCheckExistingUser(String) not implemented for CassandraUserStoreManager");
     }
 
     @Override
@@ -396,13 +434,30 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
 
     @Override
     public boolean doAuthenticate(String userName, Object credential) throws UserStoreException {
-
-        Credential credentialObj = new Credential();
-        credentialObj.setCredentialsType(CFConstants.DEFAULT_TYPE);
+    	String credentialType = CFConstants.DEFAULT_TYPE;
+    	if(userName.contains(":")) {
+    		String[] cred = userName.split(":");
+    		credentialType = cred[0];
+    		userName = cred[1];
+    	}
+    	if(DEBUG) {
+    		log.debug("Authenticating " + userName);
+    	}
+    	Credential credentialObj = new Credential();
+        credentialObj.setCredentialsType(credentialType);
         credentialObj.setIdentifier(userName);
         // this is a bad cast, but this has to be done to be compatible with this legacy interface
         credentialObj.setSecret((String) credential);
-        return getCredentialType(credentialObj).authenticate(credentialObj);
+        
+		if (credentialObj.getSecret() == null
+				|| credentialObj.getSecret().trim().length() == 0 ||
+                                    getCredentialType(credentialObj).isNullSecretAllowed()) {
+			return getCredentialType(credentialObj).authenticate(credentialObj);
+		} else {
+			return authenticate(credentialObj);
+		}
+        
+        //return getCredentialType(credentialObj).authenticate(credentialObj);
 //
 //        String userId = getExistingUserId(userName, CFConstants.DEFAULT_TYPE);
 //
@@ -442,12 +497,15 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
     public void doAddUser(String userName, Object credential, String[] roleList,
                           Map<String, String> claims, String profileName)
             throws UserStoreException {
+    	if(DEBUG) {
+    		log.debug("Adding  " + userName);
+    	}
+        Credential newCredential = new Credential();
+        newCredential.setIdentifier(userName);
+        newCredential.setSecret((String) credential);
+        newCredential.setCredentialsType(CFConstants.DEFAULT_TYPE);
+        this.addUser(newCredential, roleList, claims, profileName);
 
-        TNCredential cred = buildTNCredential(claims);
-        // creating new userId
-        String userId = UUID.randomUUID().toString();
-        overwriteCredential(userId, cred);
-        addUserToRole(userName, roleList);
     }
 
     private void addUserToRole(String userName, String[] roleList) {
@@ -475,101 +533,106 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
         mutator.execute();
     }
 
-    private void overwriteCredential(String userId, TNCredential cred) {
+//    private void overwriteCredential(String userId, TNCredential cred) {
 
-        Mutator<String> mutator = HFactory.createMutator(keyspace, stringSerializer);
+//        Mutator<String> mutator = HFactory.createMutator(keyspace, stringSerializer);
+//
+//
+//
+//        if (cred.getCredentialType().equals(TNConstants.TYPE_DEVICE_ID)) {
+//
+//            // add user
+//            mutator.addInsertion(userId, CFConstants.USERS, HFactory.createColumn("deviceId", cred.getDeviceID()))
+//                    .addInsertion(userId, CFConstants.USERS, HFactory.createColumn("isActive", "TRUE"));
+//
+//            // add reverse look up
+//            mutator.addInsertion(cred.getDeviceID(), CFConstants.USERNAME_INDEX, HFactory.createColumn(CFConstants.USER_ID, userId));
+//
+//        } else if (cred.getCredentialType().equals(TNConstants.TYPE_EXT_LOGIN)) {
+//
+//            log.info("Registering external user " + cred.getExtUsername() + " of " +
+//                     cred.getExtProvider());
+//
+//            // add external user
+//            mutator.addInsertion(userId, CFConstants.USERS, HFactory.createColumn("extUsername", cred.getDeviceID()))
+//                    .addInsertion(userId, CFConstants.USERS, HFactory.createColumn("extProvider", cred.getExtProvider()))
+//                    .addInsertion(userId, CFConstants.USERS, HFactory.createColumn("extAccessToken", cred.getExtAccessToken()))
+//                    .addInsertion(userId, CFConstants.USERS, HFactory.createColumn("extEmailAddress", cred.getExtEmailAddress()))
+//                    .addInsertion(userId, CFConstants.USERS, HFactory.createColumn("isActive", "TRUE"));
+//
+//
+//            // add reverse look up - external username
+//            mutator.addInsertion(cred.getExtProvider() + ":" +
+//                                 cred.getExtUsername(), CFConstants.USERNAME_INDEX,
+//                                 HFactory.createColumn(CFConstants.USER_ID, userId));
+//
+//            // add reverse look up - external email
+//            mutator.addInsertion(cred.getExtProvider() + ":" + cred.getExtEmailAddress(),
+//                                 CFConstants.USERNAME_INDEX,
+//                                 HFactory.createColumn(CFConstants.USER_ID, userId));
+//
+//            // add reverse look up - password
+//            mutator.addInsertion(userId, CFConstants.PASSWORD_INDEX,
+//                                 HFactory.createColumn(
+//                                         cred.getExtEmailAddress() + "password",
+//                                         Integer.toString(new Random().nextInt())));
+//
+//
+//        } else if (cred.getCredentialType().equals(TNConstants.TYPE_PHONE_NUMBER)) {
+//
+//            log.info("Registering phone number " + cred.getPhoneNumber());
+//
+//            // add phone user
+//            mutator.addInsertion(userId, CFConstants.USERS, HFactory.createColumn("phoneNo", cred.getPhoneNumber()))
+//                    .addInsertion(userId, CFConstants.USERS, HFactory.createColumn("isActive", "TRUE"));
+//
+//            // add reverse lookup - phone user
+//
+//            mutator.addInsertion(cred.getPhoneNumber(), CFConstants.USERNAME_INDEX, HFactory.createColumn(CFConstants.USER_ID, userId));
+//
+//            // add reverse lookup -  password
+//
+//            mutator.addInsertion(userId, CFConstants.PASSWORD_INDEX,
+//                                 HFactory.createColumn(cred.getPhoneNumber() + "password", cred.getPassword()));
+//
+//
+//        } else if (cred.getCredentialType().equals(TNConstants.TYPE_EMAIL)) {
+//
+//            log.info("Registering email " + cred.getEmail());
+//
+//            // add email user
+//            mutator.addInsertion(userId, CFConstants.USERS, HFactory.createColumn("emailAddress", cred.getEmail()))
+//                    .addInsertion(userId, CFConstants.USERS, HFactory.createColumn("isActive", "TRUE"));
+//
+//            // add reverse lookup - email user w/ password
+//
+//            mutator.addInsertion(cred.getEmail(), CFConstants.USERNAME_INDEX, HFactory.createColumn(CFConstants.USER_ID, userId));
+//
+//            // add reverse lookup -  password
+//
+//            mutator.addInsertion(userId, CFConstants.PASSWORD_INDEX,
+//                                 HFactory.createColumn(cred.getEmail() + "password", cred.getPassword()));
+//
+//        }
+//        mutator.execute();
 
-
-
-        if (cred.getCredentialType().equals(TNConstants.TYPE_DEVICE_ID)) {
-
-            // add user
-            mutator.addInsertion(userId, CFConstants.USERS, HFactory.createColumn("deviceId", cred.getDeviceID()))
-                    .addInsertion(userId, CFConstants.USERS, HFactory.createColumn("isActive", "TRUE"));
-
-            // add reverse look up
-            mutator.addInsertion(cred.getDeviceID(), CFConstants.USERNAME_INDEX, HFactory.createColumn(CFConstants.USER_ID, userId));
-
-        } else if (cred.getCredentialType().equals(TNConstants.TYPE_EXT_LOGIN)) {
-
-            log.info("Registering external user " + cred.getExtUsername() + " of " +
-                     cred.getExtProvider());
-
-            // add external user
-            mutator.addInsertion(userId, CFConstants.USERS, HFactory.createColumn("extUsername", cred.getDeviceID()))
-                    .addInsertion(userId, CFConstants.USERS, HFactory.createColumn("extProvider", cred.getExtProvider()))
-                    .addInsertion(userId, CFConstants.USERS, HFactory.createColumn("extAccessToken", cred.getExtAccessToken()))
-                    .addInsertion(userId, CFConstants.USERS, HFactory.createColumn("extEmailAddress", cred.getExtEmailAddress()))
-                    .addInsertion(userId, CFConstants.USERS, HFactory.createColumn("isActive", "TRUE"));
-
-
-            // add reverse look up - external username
-            mutator.addInsertion(cred.getExtProvider() + ":" +
-                                 cred.getExtUsername(), CFConstants.USERNAME_INDEX,
-                                 HFactory.createColumn(CFConstants.USER_ID, userId));
-
-            // add reverse look up - external email
-            mutator.addInsertion(cred.getExtProvider() + ":" + cred.getExtEmailAddress(),
-                                 CFConstants.USERNAME_INDEX,
-                                 HFactory.createColumn(CFConstants.USER_ID, userId));
-
-            // add reverse look up - password
-            mutator.addInsertion(userId, CFConstants.PASSWORD_INDEX,
-                                 HFactory.createColumn(
-                                         cred.getExtEmailAddress() + "password",
-                                         Integer.toString(new Random().nextInt())));
-
-
-        } else if (cred.getCredentialType().equals(TNConstants.TYPE_PHONE_NUMBER)) {
-
-            log.info("Registering phone number " + cred.getPhoneNumber());
-
-            // add phone user
-            mutator.addInsertion(userId, CFConstants.USERS, HFactory.createColumn("phoneNo", cred.getPhoneNumber()))
-                    .addInsertion(userId, CFConstants.USERS, HFactory.createColumn("isActive", "TRUE"));
-
-            // add reverse lookup - phone user
-
-            mutator.addInsertion(cred.getPhoneNumber(), CFConstants.USERNAME_INDEX, HFactory.createColumn(CFConstants.USER_ID, userId));
-
-            // add reverse lookup -  password
-
-            mutator.addInsertion(userId, CFConstants.PASSWORD_INDEX,
-                                 HFactory.createColumn(cred.getPhoneNumber() + "password", cred.getPassword()));
-
-
-        } else if (cred.getCredentialType().equals(TNConstants.TYPE_EMAIL)) {
-
-            log.info("Registering email " + cred.getEmail());
-
-            // add email user
-            mutator.addInsertion(userId, CFConstants.USERS, HFactory.createColumn("emailAddress", cred.getEmail()))
-                    .addInsertion(userId, CFConstants.USERS, HFactory.createColumn("isActive", "TRUE"));
-
-            // add reverse lookup - email user w/ password
-
-            mutator.addInsertion(cred.getEmail(), CFConstants.USERNAME_INDEX, HFactory.createColumn(CFConstants.USER_ID, userId));
-
-            // add reverse lookup -  password
-
-            mutator.addInsertion(userId, CFConstants.PASSWORD_INDEX,
-                                 HFactory.createColumn(cred.getEmail() + "password", cred.getPassword()));
-
-        }
-        mutator.execute();
-
-    }
+//    }
 
     @Override
     public Claim[] getUserClaimValues(String userName, String profileName)
             throws UserStoreException {
-        log.info("Generating permission token for " + userName);
-        // TODO : we should be calling another serive to get the permissions
-        Claim claim = new Claim();
-        claim.setClaimUri("permission_token");
-        claim.setValue("TR1,NV2,HB3");
-        claim.setDisplayTag("permission_token");
-        return new Claim[] { claim };
+    	if(DEBUG) {
+    		log.debug("Getting claims for " + userName);
+    	}
+        String credentialType = CFConstants.DEFAULT_TYPE;
+        if(userName.contains(":")) {
+            String[] cred = userName.split(":");
+            credentialType = cred[0];
+            userName = cred[1];
+        }
+
+        return getUserClaimValues(userName, credentialType, profileName);
+
     }
 
     @Override
@@ -678,31 +741,67 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
 
     @Override
     public void doDeleteUser(String userName) throws UserStoreException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        String credentialType = CFConstants.DEFAULT_TYPE;
+        if(userName.contains(":")) {
+            String[] cred = userName.split(":");
+            credentialType = cred[0];
+            userName = cred[1];
+        }
+
+        this.deleteUser(userName, credentialType);
     }
 
     @Override
     public void doSetUserClaimValue(String userName, String claimURI, String claimValue,
                                     String profileName) throws UserStoreException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        String credentialType = CFConstants.DEFAULT_TYPE;
+        if(userName.contains(":")) {
+            String[] cred = userName.split(":");
+            credentialType = cred[0];
+            userName = cred[1];
+        }
+
+        setUserClaimValue(userName, credentialType, claimURI, claimValue, profileName);
     }
 
     @Override
     public void doSetUserClaimValues(String userName, Map<String, String> claims,
                                      String profileName) throws UserStoreException {
-        //To change body of implemented methods use File | Settings | File Templates.
+
+        String credentialType = CFConstants.DEFAULT_TYPE;
+        if(userName.contains(":")) {
+            String[] cred = userName.split(":");
+            credentialType = cred[0];
+            userName = cred[1];
+        }
+
+        setUserClaimValues(userName, credentialType, claims, profileName);
+
     }
 
     @Override
     public void doDeleteUserClaimValue(String userName, String claimURI, String profileName)
             throws UserStoreException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        String credentialType = CFConstants.DEFAULT_TYPE;
+        if(userName.contains(":")) {
+            String[] cred = userName.split(":");
+            credentialType = cred[0];
+            userName = cred[1];
+        }
+        deleteUserClaimValue(userName, credentialType, claimURI, profileName);
     }
 
     @Override
     public void doDeleteUserClaimValues(String userName, String[] claims, String profileName)
             throws UserStoreException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        String credentialType = CFConstants.DEFAULT_TYPE;
+        if(userName.contains(":")) {
+            String[] cred = userName.split(":");
+            credentialType = cred[0];
+            userName = cred[1];
+        }
+
+        deleteUserClaimValues(userName, credentialType, claims, profileName);
     }
 
     @Override
@@ -725,6 +824,11 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
     @Override
     public List<String> getExternalRoleListOfUser(String s) throws UserStoreException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    protected void doAddRole(String s, String[] strings, org.wso2.carbon.user.api.Permission[] permissions) throws UserStoreException {
+        throw new UserStoreException("doAddRole(String,String[],Permission[]) not implemented for CassandraUserStoreManager");
     }
 
     @Override
@@ -776,6 +880,21 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
     }
 
     @Override
+    protected String[] doGetRoleNames(String s, int i) throws UserStoreException {
+        throw new UserStoreException("doGetRoleNames(String,int) not implemented for CassandraUserStoreManager");
+    }
+
+    @Override
+    protected String[] doListUsers(String s, int i) throws UserStoreException {
+        throw new UserStoreException("doListUsers(String,int) not implemented for CassandraUserStoreManager");
+    }
+
+    @Override
+    protected String[] doGetDisplayNamesForInternalRole(String[] strings) throws UserStoreException {
+        throw new UserStoreException("doGetDisplayNamesForInternalRole(String[]) not implemented for CassandraUserStoreManager");
+    }
+
+    @Override
     public String[] listUsers(String filter, int maxItemLimit) throws UserStoreException {
         return new String[0];  //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -786,7 +905,7 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
             return true;
         }
 
-        if (getExistingUserId(userName, "Default") == null) {
+        if (getExistingUserId(userName, CFConstants.DEFAULT_TYPE) == null) {
             return false;
         } else {
             return true;
@@ -809,6 +928,11 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
     }
 
     @Override
+    protected String[] doGetUserListOfRole(String s, String s2) throws UserStoreException {
+        throw new UserStoreException("doGetUserListOfRole(String,String) not implemented for CassandraUserStoreManager");
+    }
+
+    @Override
     public String[] getProfileNames(String userName) throws UserStoreException {
         return new String[0];  //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -825,6 +949,192 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
     public String[] getRoleListOfUser(String userName) throws UserStoreException {
 
         return getRoleListOfUserForUserId(getExistingUserId(userName, CFConstants.DEFAULT_TYPE));
+    }
+
+    @Override
+    public String[] getRoleListOfUser(String identifer, String credentialType)
+            throws UserStoreException {
+        return getRoleListOfUserForUserId(getExistingUserId(identifer, credentialType));
+    }
+
+    @Override
+    public void addUserWithUserId(String userId, Credential credential, String[] roleList,
+                                  Map<String, String> claimMap, String profileName) throws UserStoreException {
+        if (getExistingUserId(credential) != null) {
+            String msg = "User already exists for identifer : " + credential.getIdentifier() +
+                         " for credential type : " + credential.getCredentialsType();
+            UserAlreadyExistsException userAlreadyExistsException = new UserAlreadyExistsException(msg);
+            log.error(msg, userAlreadyExistsException);
+            throw userAlreadyExistsException;
+        }
+        if(DEBUG) {
+        	log.debug("Adding user " + credential.getIdentifier());
+        }
+        CredentialType credentialType = getCredentialType(credential);
+        credentialType.add(userId, credential);
+        addUserToRole(userId, roleList);
+
+        if (claimMap != null) {
+            addClaimsForUser(userId, claimMap);
+        }
+        // TODO add profile support
+
+    }
+
+    @Override
+    public String getUserId(Credential credential) {
+    	if(DEBUG) {
+    		log.debug("Getting user ID for " + credential.getIdentifier());
+    	}
+        return getExistingUserId(credential);
+    }
+
+    @Override
+    public void setUserClaimValues(String identifer, String credentialType,
+                                   Map<String, String> claims, String profileName)
+            throws UserStoreException {
+        String existingUserId = getExistingUserId(identifer, credentialType);
+        Mutator<String> mutator = HFactory.createMutator(keyspace, stringSerializer);
+        if(DEBUG) {
+        	log.debug("Adding claims for " + identifer);
+        }
+        // add claims
+        for (Map.Entry<String, String> claimEntry : claims.entrySet()) {
+
+            mutator.addInsertion(existingUserId, CFConstants.CLAIMS,
+                                 HFactory.createColumn(claimEntry.getKey(), claimEntry.getValue()));
+        }
+        mutator.execute();
+    }
+
+    @Override
+    public void setUserClaimValue(String identifer, String credentialType, String claimURI,
+                                  String claimValue, String profileName) throws UserStoreException {
+		if (DEBUG) {
+			log.debug("Setting " + claimURI + " for " + identifer);
+		}
+        String existingUserId = getExistingUserId(identifer, credentialType);
+        Mutator<String> mutator = HFactory.createMutator(keyspace, stringSerializer);
+        // add claims
+        mutator.addInsertion(existingUserId, CFConstants.CLAIMS, HFactory.createColumn(claimURI, claimValue));
+        mutator.execute();
+    }
+
+    @Override
+    public void deleteUserClaimValue(String identifer, String credentialType, String claimURI,
+                                     String profileName) throws UserStoreException {
+    	if(DEBUG) {
+    		log.debug("Deleting claims for " + identifer);
+    	}
+        String existingUserId = getExistingUserId(identifer, credentialType);
+
+        Mutator<String> mutator = HFactory.createMutator(keyspace, stringSerializer);
+
+        // delete claim value
+        mutator.addDeletion(existingUserId , CFConstants.CLAIMS, claimURI, stringSerializer);
+        mutator.execute();
+    }
+
+    @Override
+    public void deleteUserClaimValues(String identifer, String credentialType, String[] claims,
+                                      String profileName) throws UserStoreException {
+        String existingUserId = getExistingUserId(identifer, credentialType);
+
+        Mutator<String> mutator = HFactory.createMutator(keyspace, stringSerializer);
+
+        // delete claim value
+        for (String claim : claims) {
+            mutator.addDeletion(existingUserId , CFConstants.CLAIMS, claim, stringSerializer);
+        }
+        mutator.execute();
+    }
+
+    @Override
+    public String getUserClaimValue(String identifer, String credentialType, String claimUri,
+                                    String profileName) throws UserStoreException {
+    	if(DEBUG) {
+    		log.debug("Getting claims for " + identifer);
+    	}
+        String existingUserId = getExistingUserId(identifer, credentialType);
+        ColumnQuery<String, String, String> claimValQuery = HFactory
+                .createColumnQuery(keyspace, stringSerializer, stringSerializer, stringSerializer);
+
+        claimValQuery.setColumnFamily(CFConstants.CLAIMS).setKey(existingUserId)
+                .setName(claimUri);
+        HColumn<String, String> claimValResult = claimValQuery.execute().get();
+
+        if (claimValResult == null) {
+            return null;
+        }
+
+        return claimValResult.getValue();
+    }
+
+    @Override
+    public Claim[] getUserClaimValues(String identifer, String credentialType, String[] claims,
+                                      String profileName) throws UserStoreException {
+        String existingUserId = getExistingUserId(identifer, credentialType);
+        SliceQuery<String,String,String> claimsQuery = HFactory
+                .createSliceQuery(keyspace, stringSerializer, stringSerializer,
+                                  stringSerializer);
+        claimsQuery.setColumnNames(claims)
+                .setColumnFamily(CFConstants.CLAIMS)
+                .setKey(existingUserId);
+
+        List<Claim> claimsList = new ArrayList<Claim>();
+        ColumnSlice<String, String> claimsColSlice = claimsQuery.execute().get();
+        if (claimsColSlice == null) {
+            return new Claim[0];
+        }
+        for (HColumn<String, String> entry : claimsColSlice.getColumns()) {
+            Claim claim = new Claim();
+            claim.setValue(entry.getValue());
+            claim.setClaimUri(entry.getName());
+//            String displayTag;
+//            try {
+//                displayTag = claimManager.getClaim(entry.getName()).getDisplayTag();
+//            } catch (org.wso2.carbon.user.api.UserStoreException e) {
+//                throw new UserStoreException(e);
+//            }
+//            claim.setDisplayTag(displayTag);
+            claimsList.add(claim);
+        }
+
+        return claimsList.toArray(new Claim[claimsList.size()]);
+    }
+
+    @Override
+    public Claim[] getUserClaimValues(String identifer, String credentialType, String profileName)
+            throws UserStoreException {
+        String existingUserId = getExistingUserId(identifer, credentialType);
+        SliceQuery<String,String,String> claimsQuery = HFactory
+                .createSliceQuery(keyspace, stringSerializer, stringSerializer,
+                                  stringSerializer);
+        claimsQuery.setRange("", "", false, MAX_CLAIMS_PER_USER)
+                .setColumnFamily(CFConstants.CLAIMS)
+                .setKey(existingUserId);
+
+
+        List<Claim> claimsList = new ArrayList<Claim>();
+        ColumnSlice<String, String> claimsColSlice = claimsQuery.execute().get();
+        if (claimsColSlice == null) {
+            return new Claim[0];
+        }
+        for (HColumn<String, String> entry : claimsColSlice.getColumns()) {
+            Claim claim = new Claim();
+            claim.setValue(entry.getValue());
+            claim.setClaimUri(entry.getName());
+//            String displayTag;
+//            try {
+//                displayTag = claimManager.getClaim(entry.getName()).getDisplayTag();
+//            } catch (org.wso2.carbon.user.api.UserStoreException e) {
+//                throw new UserStoreException(e);
+//            }
+//            claim.setDisplayTag(displayTag);
+            claimsList.add(claim);
+        }
+
+        return claimsList.toArray(new Claim[claimsList.size()]);
     }
 
     public String[] getRoleListOfUserForUserId(String userId) throws UserStoreException {
@@ -874,24 +1184,24 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
     @Override
     public void addUser(Credential credential, String[] roleList, Map<String, String> claims,
                         String profileName) throws UserStoreException {
-
-        if (getExistingUserId(credential) != null) {
-            String msg = "User already exists for identifer : " + credential.getIdentifier() +
-                         " for credential type : " + credential.getCredentialsType();
-            UserAlreadyExistsException userAlreadyExistsException = new UserAlreadyExistsException(msg);
-            log.error(msg, userAlreadyExistsException);
-            throw userAlreadyExistsException;
-        }
-
-        CredentialType credentialType = getCredentialType(credential);
-
+    	if(DEBUG) {
+    		log.debug("Adding user " + credential.getIdentifier());
+    	}
         // create new userId
         String userId = UUID.randomUUID().toString();
+        addUserWithUserId(userId, credential, roleList, claims, profileName);
+    }
 
-        credentialType.add(userId, credential);
-        addUserToRole(userId, roleList);
+    private void addClaimsForUser(String userId, Map<String, String> claims) {
 
-        // TODO add claims and profile support
+        Mutator<String> mutator = HFactory.createMutator(keyspace, stringSerializer);
+
+        // add claims
+        for (Map.Entry<String, String> claimsVals : claims.entrySet()) {
+            mutator.addInsertion(userId, CFConstants.CLAIMS, HFactory.createColumn(claimsVals.getKey(), claimsVals.getValue()));
+        }
+
+        mutator.execute();
     }
 
     private CredentialType getCredentialType(Credential credential)
@@ -914,7 +1224,7 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
     }
 
     @Override
-    public void addUser(Credential[] credentials, String[] roleList, Map<String, String> claims,
+    public void addUsers(Credential[] credentials, String[] roleList, Map<String, String> claims,
                         String profileName) throws UserStoreException {
         for (int i = 0; i < credentials.length; i++) {
             Credential credential = credentials[i];
@@ -924,6 +1234,9 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
 
     @Override
     public void deleteUser(String identifier, String credentialType) throws UserStoreException {
+    	if(DEBUG) {
+    		log.debug("Deleting user " + identifier);
+    	}
         Credential credential = new Credential();
         credential.setIdentifier(identifier);
         credential.setCredentialsType(credentialType);
@@ -933,17 +1246,33 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
     @Override
     public void addCredential(String identifier, String credentialType, Credential credential)
             throws UserStoreException {
-        getCredentialType(credential).add(getExistingUserId(identifier, credentialType), credential);
+    	if(DEBUG) {
+    		log.debug("Adding credential " + credential.getIdentifier() + " to " + identifier);
+    	}
+        String existingUserId = getExistingUserId(identifier, credentialType);
+        if (existingUserId == null) {
+            String message = "User does not exist for credential : " + credential.getIdentifier();
+            UserDoesNotExistException userDoesNotExistException = new UserDoesNotExistException(message);
+            log.error(message, userDoesNotExistException);
+            throw userDoesNotExistException;
+        }
+        getCredentialType(credential).add(existingUserId, credential);
     }
 
     @Override
     public void updateCredential(String identifier, String credentialType, Credential newCredential)
             throws UserStoreException {
+    	if(DEBUG) {
+    		log.debug("Updating credential " + identifier);
+    	}
         getCredentialType(newCredential).update(getExistingUserId(identifier, credentialType), newCredential);
     }
 
     @Override
     public void deleteCredential(String identifier, String credentialType) throws UserStoreException {
+    	if(DEBUG) {
+    		log.debug("Deleting credential " + identifier);
+    	}
         Credential credential = new Credential();
         credential.setIdentifier(identifier);
         credential.setCredentialsType(credentialType);
@@ -953,15 +1282,18 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
     @Override
     public void deleteUser(Credential credential) throws UserStoreException {
 
-        String existingUserId = getExistingUserId(credential);
+        String userId = getExistingUserId(credential);
 
-        if (existingUserId == null) {
-            throw new UserDoesNotExistException("User does not exist for credential : " + credential.getIdentifier());
+        if (userId == null) {
+            String message = "User does not exist for credential : " + credential.getIdentifier();
+            UserDoesNotExistException userDoesNotExistException = new UserDoesNotExistException(message);
+            log.error(message, userDoesNotExistException);
+            throw userDoesNotExistException;
         }
 
         Mutator<String> mutator = HFactory.createMutator(keyspace, stringSerializer);
 
-        String userId = getExistingUserId(credential);
+//        String userId = getExistingUserId(credential);
 
         // delete user row
         mutator.addDeletion(userId, CFConstants.USERS, null, stringSerializer);
@@ -985,13 +1317,35 @@ public class CassandraUserStoreManager extends AbstractUserStoreManager implemen
     }
 
     @Override
-    public boolean authenticate(Credential credential) throws UserStoreException{
+    public boolean authenticate(Credential credential) throws UserStoreException {
+    	if(DEBUG) {
+    		log.debug("Authenticating " + credential.getIdentifier());
+    	}
+        if ("true".equals(realmConfig.getUserStoreProperty(CFConstants.AUTH_WITH_ANY_CREDENTIAL))) {
+            boolean isAuthenticated = false;
+
+            for (Credential retrievedCredential : getCredentials(credential)) {
+                if (retrievedCredential.getSecret() == null) {
+                    continue;
+                }
+                String preparedPasswordHash = Util
+                        .preparePassword(credential.getSecret(), Util.getSaltValue(
+                                retrievedCredential.getIdentifier(), retrievedCredential.getCredentialsType(),
+                                keyspace));
+                if (retrievedCredential.getSecret().equals(preparedPasswordHash)) {
+                    isAuthenticated = true;
+                }
+            }
+            return isAuthenticated;
+        }
         return getCredentialType(credential.getCredentialsType()).authenticate(credential);
     }
 
     @Override
     public Credential[] getCredentials(String anIdentifier, String credentialType) throws UserStoreException {
-
+    	if(DEBUG) {
+    		log.debug("Getting credentials for " + anIdentifier);
+    	}
         String existingUserId = getExistingUserId(anIdentifier, credentialType);
 
         if (existingUserId == null) {

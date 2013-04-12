@@ -23,7 +23,7 @@
 
 <%
     boolean evaluatedWithPDP = false;
-    String policyRequest = CharacterEncoder.getSafeText(request.getParameter("txtRequest"));
+    String requestString = CharacterEncoder.getSafeText(request.getParameter("txtRequest"));
     String withPDP = CharacterEncoder.getSafeText(request.getParameter("withPDP"));
     if("true".equals(withPDP)){
         evaluatedWithPDP = true; 
@@ -44,7 +44,7 @@
     String actionNames = CharacterEncoder.getSafeText(request.getParameter("actionNames"));
     String environmentNames = CharacterEncoder.getSafeText(request.getParameter("environmentNames"));
 
-    if (resourceNames != null  && !resourceNames.trim().equals("")){
+    if (resourceNames != null  && resourceNames.trim().length() > 0){
         RowDTO rowDTO = new RowDTO();
         rowDTO.setAttributeValue(resourceNames);
         rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
@@ -53,7 +53,7 @@
         rowDTOs.add(rowDTO);
         session.setAttribute("resourceNames",resourceNames);
     }
-    if (subjectNames != null  && !subjectNames.trim().equals("")){
+    if (subjectNames != null  && subjectNames.trim().length() > 0){
         RowDTO rowDTO = new RowDTO();
         rowDTO.setAttributeValue(subjectNames);
         rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
@@ -62,7 +62,7 @@
         rowDTOs.add(rowDTO);
         session.setAttribute("subjectNames",subjectNames);
     }
-    if (actionNames != null  && !actionNames.trim().equals("")){
+    if (actionNames != null  && actionNames.trim().length() > 0){
         RowDTO rowDTO = new RowDTO();
         rowDTO.setAttributeValue(actionNames);
         rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
@@ -71,7 +71,7 @@
         rowDTOs.add(rowDTO);
         session.setAttribute("actionNames",actionNames);
     }
-    if (environmentNames != null  && !environmentNames.trim().equals("")){
+    if (environmentNames != null  && environmentNames.trim().length() > 0){
         RowDTO rowDTO = new RowDTO();
         rowDTO.setAttributeValue(environmentNames);
         rowDTO.setAttributeDataType(EntitlementPolicyConstants.STRING_DATA_TYPE);
@@ -90,22 +90,28 @@
     	EntitlementAdminServiceClient adminClient =
                                 new EntitlementAdminServiceClient(cookie, serverURL, configContext);
     	EntitlementServiceClient client = new EntitlementServiceClient(cookie, serverURL, configContext);
-        if(policyRequest == null || policyRequest.trim().length() < 1){
+        if(requestString == null || requestString.trim().length() < 1){
             String createdRequest = entitlementPolicyCreator.createBasicRequest(requestElementDTO);
             if(createdRequest != null && createdRequest.trim().length() > 0){
-                policyRequest = createdRequest.trim().replaceAll("><", ">\n<");
+                requestString = createdRequest.trim().replaceAll("><", ">\n<");
             }
         }
         if(evaluatedWithPDP){
-            resp = client.getDecision(policyRequest);
+            resp = client.getDecision(requestString);
         } else {
-            resp = adminClient.getDecision(policyRequest);            
+            resp = adminClient.getDecision(requestString);
         }
-        session.setAttribute("txtRequest", policyRequest);
-    	CarbonUIMessage.sendCarbonUIMessage(resp, CarbonUIMessage.INFO, request);
+
+        String responseValue = ClientUtil.getStatus(resp);
+
+        session.setAttribute("txtRequest", requestString);
+        session.setAttribute("txtResponse", resp);
     	if (forwardTo == null) {
+            CarbonUIMessage.sendCarbonUIMessage(responseValue, CarbonUIMessage.INFO, request);
             forwardTo = "create-evaluation-request.jsp";
-    	}
+    	} else {
+            forwardTo = "eval-policy.jsp?isResponse=true";
+        }
     } catch (Exception e) {
     	String message = resourceBundle.getString("invalid.request");
         CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
@@ -125,6 +131,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.dto.RequestElementDTO" %>
 <%@ page import="org.wso2.carbon.identity.entitlement.ui.client.EntitlementAdminServiceClient" %>
+<%@ page import="org.wso2.carbon.identity.entitlement.ui.util.ClientUtil" %>
 <script
 	type="text/javascript">
     function forward() {

@@ -19,31 +19,18 @@
 package org.wso2.carbon.identity.entitlement.ui;
 
 /**
- *  Constants related with XACML policy such as per-defined Element Names and NameSpaces
+ * Constants related with XACML policy such as per-defined Element Names and NameSpaces
  */
 public class EntitlementPolicyConstants {
 
-    public static final String POLICY_NAMESPACE = "urn:oasis:names:tc:xacml:2.0:policy:schema:os";
+    public static final int DEFAULT_ITEMS_PER_PAGE = 10;
+    public static final String ENTITLEMENT_ADMIN_CLIENT = "EntitlementAdminClient";
+    public static final String ENTITLEMENT_SUBSCRIBER_CLIENT = "EntitlementSubscriberClient";
 
     public static final String XACML3_POLICY_NAMESPACE = "urn:oasis:names:tc:xacml:3.0:core:schema:wd-17";
 
-
     public static final String ATTRIBUTE_NAMESPACE = "urn:oasis:names:tc:xacml:2.0:example:attribute:";
 
-    public static final String DATA_TYPE_NAMESPACE1 = "http://www.w3.org/2001/XMLSchema#";
-
-    public static final String DATA_TYPE_NAMESPACE2 = "urn:oasis:names:tc:xacml:1.0:data-type:";
-
-    public static final String SUBJECT_CATEGORY = "urn:oasis:names:tc:xacml:1.0:subject-category";
-
-    public static final String FUNCTION_NAMESPACE = "urn:oasis:names:tc:xacml:1.0:function:";
-
-    public static final String FUNCTION_NAMESPACE_STRING = "urn:oasis:names:tc:xacml:1.0:function:string-";
-
-    public static final String RULE_ALGORITHM_IDENTIFIER = "urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:";
-
-    public static final String POLICY_ALGORITHM_IDENTIFIER = "urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:";
-    
     public static final String POLICY_ELEMENT = "Policy";
 
     public static final String APPLY_ELEMENT = "Apply";
@@ -84,63 +71,61 @@ public class EntitlementPolicyConstants {
 
     public static final String ATTRIBUTE_DESIGNATOR = "AttributeDesignator";
 
-    public static final String  ATTRIBUTE_ID = "AttributeId";
+    public static final String ATTRIBUTE_ID = "AttributeId";
 
-    public static final String  CATEGORY = "Category";
+    public static final String CATEGORY = "Category";
 
-    public static final String  ATTRIBUTE = "Attribute";
+    public static final String ATTRIBUTE = "Attribute";
 
-    public static final String  ATTRIBUTES = "Attributes";
+    public static final String ATTRIBUTES = "Attributes";
 
-    public static final String  INCLUDE_RESULT = "IncludeInResult";
+    public static final String INCLUDE_RESULT = "IncludeInResult";
 
-    public static final String  DATA_TYPE = "DataType";
+    public static final String DATA_TYPE = "DataType";
 
-    public static final String  ISSUER = "Issuer";
+    public static final String ISSUER = "Issuer";
 
-    public static final String  MUST_BE_PRESENT = "MustBePresent";
-    
-    public static final String  REQUEST_CONTEXT_PATH = "RequestContextPath";
+    public static final String MUST_BE_PRESENT = "MustBePresent";
 
-    public static final String  MATCH_ID = "MatchId";
+    public static final String REQUEST_CONTEXT_PATH = "RequestContextPath";
 
-    public static final String  RULE_ID = "RuleId";
+    public static final String MATCH_ID = "MatchId";
 
-    public static final String  RULE_EFFECT = "Effect";
-    
-    public static final String  RULE_DESCRIPTION = "Description";
+    public static final String RULE_ID = "RuleId";
 
-    public static final String  FUNCTION_ID = "FunctionId";
+    public static final String RULE_EFFECT = "Effect";
 
-    public static final String  VARIABLE_ID = "VariableId";
+    public static final String RULE_DESCRIPTION = "Description";
 
-    public static final String  OBLIGATION_EXPRESSIONS = "ObligationExpressions";
+    public static final String FUNCTION_ID = "FunctionId";
 
-    public static final String  OBLIGATION_EXPRESSION = "ObligationExpression";
+    public static final String VARIABLE_ID = "VariableId";
 
-    public static final String  OBLIGATION_ID = "ObligationId";
+    public static final String OBLIGATION_EXPRESSIONS = "ObligationExpressions";
 
-    public static final String  OBLIGATION_EFFECT = "FulfillOn";
+    public static final String OBLIGATION_EXPRESSION = "ObligationExpression";
 
-    public static final String  ADVICE_EXPRESSIONS = "AdviceExpressions";
+    public static final String OBLIGATION_ID = "ObligationId";
 
-    public static final String  ADVICE_EXPRESSION = "AdviceExpression";
+    public static final String OBLIGATION_EFFECT = "FulfillOn";
 
-    public static final String  ADVICE_ID = "AdviceId";
+    public static final String ADVICE_EXPRESSIONS = "AdviceExpressions";
 
-    public static final String  ADVICE_EFFECT = "AppliesTo";
+    public static final String ADVICE_EXPRESSION = "AdviceExpression";
 
-    public static final String  ATTRIBUTE_ASSIGNMENT = "AttributeAssignmentExpression";
+    public static final String ADVICE_ID = "AdviceId";
 
-    public static final int CONDITION_ELEMENT_IDENTIFIER = -1 ;
+    public static final String ADVICE_EFFECT = "AppliesTo";
+
+    public static final String ATTRIBUTE_ASSIGNMENT = "AttributeAssignmentExpression";
 
     public static final String STRING_DATA_TYPE = "http://www.w3.org/2001/XMLSchema#string";
 
-     public static final String FUNCTION_BAG= "urn:oasis:names:tc:xacml:1.0:function:string-bag";
+    public static final String FUNCTION_BAG = "urn:oasis:names:tc:xacml:1.0:function:string-bag";
 
-    public static final String SUBJECT_ID_DEFAULT= "urn:oasis:names:tc:xacml:1.0:subject:subject-id";
+    public static final String SUBJECT_ID_DEFAULT = "urn:oasis:names:tc:xacml:1.0:subject:subject-id";
 
-    public static final String SUBJECT_ID_ROLE= "http://wso2.org/claims/role";
+    public static final String SUBJECT_ID_ROLE = "http://wso2.org/claims/role";
 
     public static final String RESOURCE_ID = "urn:oasis:names:tc:xacml:1.0:resource:resource-id";
 
@@ -156,16 +141,16 @@ public class EntitlementPolicyConstants {
 
     public static final String FUNCTION_AT_LEAST = "urn:oasis:names:tc:xacml:1.0:function:string-at-least-one-member-of";
 
-    public static final String FUNCTION_UNION= "urn:oasis:names:tc:xacml:1.0:function:string-union";
+    public static final String FUNCTION_UNION = "urn:oasis:names:tc:xacml:1.0:function:string-union";
 
-    public static final String FUNCTION_SUBSET= "urn:oasis:names:tc:xacml:1.0:function:string-subset";
+    public static final String FUNCTION_SUBSET = "urn:oasis:names:tc:xacml:1.0:function:string-subset";
 
     public static final String FUNCTION_SET_EQUAL = "urn:oasis:names:tc:xacml:1.0:function:string-set-equals";
 
     public static final String FUNCTION_ANY_OF = "urn:oasis:names:tc:xacml:1.0:function:any-of";
 
     public static final String FUNCTION_AND = "urn:oasis:names:tc:xacml:1.0:function:and";
-    
+
     public static final String EQUAL_TO = "equals to";
 
     public static final String MATCH_TO = "matching-with";
@@ -180,9 +165,9 @@ public class EntitlementPolicyConstants {
 
     public static final String AT_LEAST_ONE_MATCH_REGEXP = "at-least-one-matching-reg-ex-member-of";
 
-    public static final String SUBSET_OF = "a sub set of";
+    public static final String SUBSET_OF = "a-sub-set-of";
 
-    public static final String SET_OF = "a matching set of";
+    public static final String SET_OF = "a-matching-set-of";
 
     public static final String MATCH_REGEXP_SET_OF = "a matching reg-ex set of";
 
@@ -192,7 +177,7 @@ public class EntitlementPolicyConstants {
 
     public static final String ACTION_ID = "urn:oasis:names:tc:xacml:1.0:action:action-id";
 
-    public static final String ENVIRONMENT_ID= "urn:oasis:names:tc:xacml:1.0:environment:environment-id";
+    public static final String ENVIRONMENT_ID = "urn:oasis:names:tc:xacml:1.0:environment:environment-id";
 
     public static final String SUBJECT_TYPE_ROLES = "Roles";
 
@@ -224,7 +209,7 @@ public class EntitlementPolicyConstants {
 
     public static final String POLICY_REFERENCE = "PolicyIdReference";
 
-    public static final String POLICY_SET_REFERENCE = "PolicySetIdReference";    
+    public static final String POLICY_SET_REFERENCE = "PolicySetIdReference";
 
     public static final String ATTRIBUTE_SEPARATOR = ",";
 
@@ -240,7 +225,7 @@ public class EntitlementPolicyConstants {
 
     public static final String DEFAULT_META_DATA_MODULE_NAME = "Carbon Attribute Finder Module";
 
-    public static final int BASIC_POLICY_OPTIONAL_META_DATA_AMOUNT= 20;
+    public static final int BASIC_POLICY_OPTIONAL_META_DATA_AMOUNT = 20;
 
     public static final String ENTITLEMENT_PUBLISHER_PROPERTY = "entitlementPublisherPropertyDTO";
 

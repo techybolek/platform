@@ -26,6 +26,7 @@ public class SAMLSSOAuthnReqDTO {
     private String assertionConsumerURL;
     private String id;
     private String claim;
+    private String audience;
     private String nameIDFormat;
     private String logoutURL;
     private String loginPageURL;
@@ -33,7 +34,9 @@ public class SAMLSSOAuthnReqDTO {
     private String requestMessageString;
     private String queryString;
     private String[] requestedClaims;
+    private String[] requestedAudiences;
     private boolean doSingleLogout;
+    private boolean doSignResponse;
     private boolean doSignAssertions;
     private boolean useFullyQualifiedUsernameAsSubject;
     private boolean isStratosDeployment = false;
@@ -112,6 +115,14 @@ public class SAMLSSOAuthnReqDTO {
         this.claim = claim;
     }
 
+    public String getAudience() {
+        return audience;
+    }
+
+    public void setAudience(String audience) {
+        this.audience = audience;
+    }
+
     public String getLogoutURL() {
         return logoutURL;
     }
@@ -184,6 +195,14 @@ public class SAMLSSOAuthnReqDTO {
 	    this.requestedClaims = requestedClaims;
     }
 
+    public String[] getRequestedAudiences() {
+        return requestedAudiences;
+    }
+
+    public void setRequestedAudiences(String[] requestedAudiences) {
+        this.requestedAudiences = requestedAudiences;
+    }
+
 	public boolean isStratosDeployment() {
 	    return isStratosDeployment;
     }
@@ -205,5 +224,19 @@ public class SAMLSSOAuthnReqDTO {
     public void setQueryString(String queryString) {
 	    this.queryString = queryString;
     }
+
+	/**
+	 * @return the doSignResponse
+	 */
+	public boolean isDoSignResponse() {
+		return doSignResponse;
+	}
+
+	/**
+	 * @param doSignResponse the doSignResponse to set
+	 */
+	public void setDoSignResponse(boolean doSignResponse) {
+		this.doSignResponse = doSignResponse;
+	}
 
  }

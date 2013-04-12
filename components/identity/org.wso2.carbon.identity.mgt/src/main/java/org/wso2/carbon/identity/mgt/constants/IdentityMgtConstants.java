@@ -36,9 +36,6 @@ public class IdentityMgtConstants {
 
     public static final String CONFIRMATION_KEY_NOT_MACHING = "The credential update failed. Secret key is not matching.";
 
-//    public static final String ILLEGAL_CHARACTERS_FOR_TENANT_DOMAIN =
-//            ".*[^a-zA-Z0-9\\._\\-].*";
-
     public static final String EMAIL_CONF_DIRECTORY = "email";
 
     public static final String EMAIL_ADMIN_CONF_FILE = "email-admin-config.xml";
@@ -82,6 +79,8 @@ public class IdentityMgtConstants {
 
     public static  final String REDIRECT_PATH = "redirectPath";
 
+    public static  final String EXPIRE_TIME = "expireTime";
+
     public static  final String RECOVERY_TYPE_PASSWORD_RESET = "passwordReset";
 
     public static  final String RECOVERY_TYPE_ACCOUNT_ID = "accountId";
@@ -102,7 +101,63 @@ public class IdentityMgtConstants {
 
     public static final String DEFAULT_PASSWORD = "defaultPassword";
 
-    public static final int DEFAULT_MAX_FAILED_LOGIN_ATTEMPT = 100;
+    public static final String LINE_SEPARATOR = "!";
 
-    public static final String CHALLENGES_SEPARATOR = "!";    
+    public static final String DEFAULT_MAX_FAIL_LOGIN_ATTEMPTS = "10";
+
+
+    public class PropertyConfig{
+
+        public static final String  CONFIG_FILE_NAME = "identity-mgt.properties";
+
+        public static final String  EMAIL_SEND_ENABLE = "Email.Sending.Enable";
+
+        public static final String  IDENTITY_LISTENER_ENABLE = "Identity.Listener.Enable";
+
+        public static final String  EMAIL_SEND_INTERNALLY = "Email.Sending.Internally.Managed";
+
+        public static final String  ACCOUNT_VERIFICATION_ENABLE = "UserAccount.Verification.Enable";
+
+        public static final String  ACCOUNT_VERIFICATION_ROLE = "UserAccount.Verification.Role";
+
+        public static final String  CAPTCHA_VERIFICATION_INTERNALLY = "Captcha.Verification.Internally.Managed";
+
+        public static final String  TEMPORARY_PASSWORD_ENABLE = "Temporary.Password.Enable";
+
+        public static final String  TEMPORARY_PASSWORD_ONETIME = "Temporary.Password.OneTime";
+        
+        public static final String  TEMPORARY_PASSWORD_EXPIRE_TIME = "Temporary.Password.Expire.Time";
+
+        public static final String  TEMPORARY_PASSWORD_DEFAULT = "Temporary.Password.Default.Value";
+
+        public static final String  AUTH_POLICY_ENABLE = "Authentication.Policy.Enable";
+        
+        public static final String  AUTH_POLICY_PASSWORD_ONE_TIME = "Authentication.Policy.Check.OneTime.Password";
+        
+        public static final String  AUTH_POLICY_PASSWORD_EXPIRE = "Authentication.Policy.Check.Password.Expire";
+
+        public static final String  AUTH_POLICY_ACCOUNT_LOCK = "Authentication.Policy.Check.Account.Lock";
+
+        public static final String  AUTH_POLICY_ACCOUNT_EXIST = "Authentication.Policy.Check.Account.Exist";
+
+        public static final String  AUTH_POLICY_ACCOUNT_LOCKING_TIME = "Authentication.Policy.Account.Lock.Time";
+
+        public static final String  AUTH_POLICY_PASSWORD_EXPIRE_TIME = "Authentication.Policy.Password.Expire.Time";
+
+        public static final String  AUTH_POLICY_LOCK_ON_FAILURE = "Authentication.Policy.Account.Lock.On.Failure";
+
+        public static final String  AUTH_POLICY_ACCOUNT_LOCKING_FAIL_ATTEMPTS = "Authentication.Policy.Account.Lock.On.Failure.Max.Attempts";
+
+        public static final String  AUTH_POLICY_ACCOUNT_LOCK_ON_CREATION = "Authentication.Policy.Account.Lock.On.Creation";
+
+        public static final String  CHALLENGE_QUESTION_SEPARATOR = "Challenge.Question.Separator";
+
+        public static final String  EXTENSION_PASSWORD_GENERATOR = "Identity.Mgt.Random.Password.Generator";
+
+        public static final String  EXTENSION_USER_DATA_STORE = "Identity.Mgt.User.Data.Store";
+        
+        public static final String  EXTENSION_EMAIL_SENDING_MODULE = "Identity.Mgt.Email.Sending.Module";
+        
+        public static final String  EMAIL_LINK_EXPIRE_TIME = "Email.Link.Expire.Time";
+    }
 }

@@ -94,6 +94,15 @@ public class SAMLSSOConfigServiceClient {
         }
     }
     
+    public String reloadSAML2FedaretedIdpConfig(boolean reoload) throws AxisFault {
+        try {
+            return stub.reloadSAML2FedaretedIdpConfig(reoload);
+        } catch (Exception e) {
+            log.error("Error when reloading the SAML2 federation config", e);
+            throw new AxisFault(e.getMessage(), e);
+        }
+    }
+    
     public String[] getClaimURIs() throws AxisFault {
     	String[] claimUris = null;
     	try {

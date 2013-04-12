@@ -75,7 +75,7 @@
     <script type="text/javascript" src="../carbon/admin/js/main.js"></script>
 
     <script type="text/javascript">
-        function remove(appName, userName) {
+        function itemRemove(appName, userName) {
             CARBON.showConfirmationDialog("<fmt:message key='remove.message1'/>" + appName + "<fmt:message key='remove.message2'/>",
                     function() {
                         location.href = "my-oauth-app-remove-finish.jsp?appName=" + appName + "&userName=" + userName;
@@ -106,7 +106,7 @@
                     <td width="30%"><%=userName%></td>
                     <td width="40%"><a
                             title="<fmt:message key='remove.app'/>"
-                            onclick="remove('<%=appName%>','<%=loggedInUser%>');return false;"
+                            onclick="itemRemove('<%=appName%>','<%=loggedInUser%>');return false;"
                             href="#"
                             style="background-image: url(../oauth/images/delete.gif);"
                             class="icon-link"><fmt:message key='remove.app'/></a>

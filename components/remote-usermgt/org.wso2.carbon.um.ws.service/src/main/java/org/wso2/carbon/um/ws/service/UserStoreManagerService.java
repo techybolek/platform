@@ -25,7 +25,7 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.um.ws.service.dao.ClaimDTO;
 import org.wso2.carbon.um.ws.service.dao.PermissionDTO;
-import org.wso2.carbon.user.core.Permission;
+import org.wso2.carbon.user.api.Permission;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
@@ -58,7 +58,11 @@ public class UserStoreManagerService extends AbstractAdmin {
 
     public void addRole(String roleName, String[] userList, PermissionDTO[] permissions)
             throws UserStoreException {
-        getUserStoreManager().addRole(roleName, userList, convertDTOToPermission(permissions));
+        try {
+            getUserStoreManager().addRole(roleName, userList, convertDTOToPermission(permissions));
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw (UserStoreException) e;
+        }
     }
 
     public ClaimDTO [] getUserClaimValues(String userName, String profileName)

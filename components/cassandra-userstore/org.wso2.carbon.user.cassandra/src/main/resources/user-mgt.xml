@@ -79,19 +79,21 @@
         </UserStoreManager>
 
 
-        <!-- Following is the configuration for multiple credential Big data User Store. It is implemented based on  This user store manager is based on JDBC. In case if application needs to manage 		     passwords externally set property <Property name="PasswordsExternallyManaged">true</Property>. In case if user core cache domain is needed to 			identify uniquely set property <Property name="UserCoreCacheIdentifier">domain</Property>. Furthermore properties, IsEmailUserName and 	     			DomainCalculation are readonly properties.
+        <!-- Following is the configuration for multiple credential Big data User Store. It is implemented based on Cassandra.  This user store manager is based on JDBC. In case if application needs to manage 		     passwords externally set property <Property name="PasswordsExternallyManaged">true</Property>. In case if user core cache domain is needed to 			identify uniquely set property <Property name="UserCoreCacheIdentifier">domain</Property>. Furthermore properties, IsEmailUserName and 	     			DomainCalculation are readonly properties.
              Note: Do not comment within UserStoreManager tags. Cause, specific tag names are used as tokens when building configurations for products. -->
         <UserStoreManager class="org.wso2.carbon.user.cassandra.CassandraUserStoreManager">
             <Property name="Keyspace">User_KS</Property>
             <Property name="Host">localhost</Property>
             <Property name="Port">9160</Property>
+            <Property name="PasswordDigest">SHA-256</Property>
+            <Property name="StoreSaltedPassword">true</Property>
+            <Property name="AuthenticateWithAnyCredential">true</Property>
             <MultipleCredentials>
                 <Credential type="Device">org.wso2.carbon.user.cassandra.credentialtypes.DeviceCredential</Credential>
-                <Credential type="Email">org.wso2.carbon.user.cassandra.credentialtypes.DeviceCredential</Credential>
+                <Credential type="Email">org.wso2.carbon.user.cassandra.credentialtypes.EmailCredential</Credential>
             </MultipleCredentials>
             <!--<Property name="DomainCalculation">default</Property>-->
-            <!--<Property name="PasswordDigest">SHA-256</Property>-->
-            <!--<Property name="StoreSaltedPassword">true</Property>-->
+
             <!--<Property name="UserNameUniqueAcrossTenants">false</Property>-->
             <!--<Property name="PasswordJavaRegEx">^[\S]{5,30}$</Property>-->
             <!--<Property name="PasswordJavaScriptRegEx">^[\\S]{5,30}$</Property>-->

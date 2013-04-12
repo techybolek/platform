@@ -17,9 +17,6 @@
 */
 package org.wso2.carbon.identity.user.profile.ui.client;
 
-import java.util.Arrays;
-import java.util.Comparator;
-
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
@@ -28,6 +25,9 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceStub;
 import org.wso2.carbon.identity.user.profile.stub.types.UserFieldDTO;
 import org.wso2.carbon.identity.user.profile.stub.types.UserProfileDTO;
+
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class UserProfileCient {
 
@@ -151,5 +151,26 @@ public class UserProfileCient {
             log.error(e);
             throw e;
         }
+    }
+
+    public boolean isAddProfileEnabledForDomain(String domain) throws Exception{
+        try {
+            return stub.isAddProfileEnabledForDomain(domain);
+        } catch (Exception e) {
+            log.error(e);
+            throw e;
+        }
+    }
+
+
+
+    public static String extractDomainFromName(String nameWithDomain) {
+        int index;
+		if ((index = nameWithDomain.indexOf("/")) > 0) {
+			// extract the domain name if exist
+            String names[] = nameWithDomain.split("/");
+			return names[0];
+		}
+		return null;
     }
 }

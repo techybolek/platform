@@ -65,10 +65,6 @@ public class IdentitySCIMManager implements CharonManager {
     private static Map<Integer, UserManager> userManagers = new ConcurrentHashMap<Integer, UserManager>();
     private static final String INSTANCE = "instance";
 
-    //TODO:should be moved to charon-config
-    private static final String USERS_URL = "https://localhost:9443/wso2/scim/Users";
-    private static final String GROUPS_URL = "https://localhost:9443/wso2/scim/Groups";
-
     /**
      * Perform initialization at the deployment of the webapp.
      */

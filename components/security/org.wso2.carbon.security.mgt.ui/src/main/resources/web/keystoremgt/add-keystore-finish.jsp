@@ -23,6 +23,7 @@
 <%@page import="java.util.ResourceBundle" %>
 <%@page import="java.text.MessageFormat" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.security.ui.SecurityUIConstants" %>
 <%
     String forwardTo = null;
     String BUNDLE = "org.wso2.carbon.security.ui.i18n.Resources";
@@ -48,6 +49,8 @@
             String message = resourceBundle.getString("keystore.add");
             forwardTo = "keystore-mgt.jsp?region=region1&item=keystores_menu";
             CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
+            
+            session.setAttribute(SecurityUIConstants.RE_FETCH_KEYSTORES, Boolean.TRUE);
 
         } catch (Exception e) {
             String message = MessageFormat.format(resourceBundle.getString("keystore.cannot.add"),

@@ -307,11 +307,11 @@
                     <%
                         if (policyDescription != null && policyDescription.trim().length() > 0) {
                     %>
-                        <td><input type="text" name="policyDescription" id="policyDescription" value="<%=policyDescription%>"/></td>
+                        <td><textarea name="policyDescription" id="policyDescription"  class="text-box-big" value="<%=policyDescription%>"></textarea></td>
                     <%
                         } else {
                     %>
-                        <td><input type="text" name="policyDescription" id="policyDescription" /></td>
+                        <td><textarea type="text" name="policyDescription" id="policyDescription"  class="text-box-big"></textarea></td>
                     <%
                         }
                     %>
@@ -341,7 +341,7 @@
 
 
                          <div class="sectionHelp">
-                            Depending on the selection, you will be given different options to defince rules.
+                            Depending on the selection, you will be given different options to define rules.
                         </div>
                     </td>
                 </tr>
@@ -364,7 +364,7 @@
                 <div class="sectionSub sectionSubShifter">
                     <table class="oneline-listing">
                         <tr>
-                            <td>User Whose</td>
+                            <td>User whose</td>
                             <td>
                                 <select id="userAttributeId" name="userAttributeId" >
                                     <%
@@ -712,7 +712,7 @@
                     <table class="oneline-listing-alt">
 
                         <tr>
-                            <td>Environment which is</td>
+                            <td>Environment which </td>
                             <td>
                                 <select id="environmentId" name="environmentId"  >
                                     <%
@@ -730,7 +730,7 @@
                                     %>
                                 </select>
                             </td>
-                            <td> to </td>
+                            <td> is equals to </td>
                             <%
                                 if (selectedEnvironmentValue != null && selectedEnvironmentValue.trim().length() > 0) {
                             %>
@@ -878,7 +878,7 @@
                     <div class="sectionSeperator" id="policyTypeTitle"></div>
                     <table class="oneline-listing-alt">
                         <tr>
-                            <td>Resource </td>
+                            <td>Resource which is equals to</td>
 
                             <%
                                 if (selectedResourceValue != null && selectedResourceValue.trim().length() > 0) {

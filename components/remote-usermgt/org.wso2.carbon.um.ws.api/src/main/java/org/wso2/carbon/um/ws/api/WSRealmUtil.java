@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.wso2.carbon.um.ws.api.stub.*;
+import org.wso2.carbon.user.api.Claim;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.RealmConfiguration;
 
 /**
@@ -70,15 +72,15 @@ public class WSRealmUtil {
         return map;
     }
 
-    public static ClaimMapping[] convertToADBClaimMappings(
+    public static org.wso2.carbon.um.ws.api.stub.ClaimMapping[] convertToADBClaimMappings(
             org.wso2.carbon.user.core.claim.ClaimMapping[] claimMappings) {
         if (claimMappings == null) {
             return null;
         }
-        ClaimMapping[] cms = new ClaimMapping[claimMappings.length];
+        org.wso2.carbon.um.ws.api.stub.ClaimMapping[] cms = new org.wso2.carbon.um.ws.api.stub.ClaimMapping[claimMappings.length];
         int i = 0;
         for (org.wso2.carbon.user.core.claim.ClaimMapping claimMapping : claimMappings) {
-            ClaimMapping cm = new ClaimMapping();
+            org.wso2.carbon.um.ws.api.stub.ClaimMapping cm = new org.wso2.carbon.um.ws.api.stub.ClaimMapping();
             cm.setClaim(convertToADBClaim(claimMapping.getClaim()));
             cm.setMappedAttribute(claimMapping.getMappedAttribute());
             cms[i] = cm;
@@ -87,11 +89,11 @@ public class WSRealmUtil {
         return cms;
     }
 
-    public static Claim convertToADBClaim(org.wso2.carbon.user.core.claim.Claim claim) {
+    public static org.wso2.carbon.um.ws.api.stub.Claim convertToADBClaim(org.wso2.carbon.user.api.Claim claim) {
         if (claim == null) {
             return null;
         }
-        Claim claimz = new Claim();
+        org.wso2.carbon.um.ws.api.stub.Claim claimz = new org.wso2.carbon.um.ws.api.stub.Claim();
         claimz.setClaimUri(claim.getClaimUri());
         claimz.setDescription(claim.getDescription());
         claimz.setDialectURI(claim.getDialectURI());
@@ -104,23 +106,23 @@ public class WSRealmUtil {
         return claimz;
     }
 
-    public static ClaimMapping convertToADBClaimMapping(
-            org.wso2.carbon.user.core.claim.ClaimMapping claimMapping) {
+    public static org.wso2.carbon.um.ws.api.stub.ClaimMapping convertToADBClaimMapping(
+            org.wso2.carbon.user.api.ClaimMapping claimMapping) {
         if (claimMapping == null) {
             return null;
         }
-        ClaimMapping cm = new ClaimMapping();
+        org.wso2.carbon.um.ws.api.stub.ClaimMapping cm = new org.wso2.carbon.um.ws.api.stub.ClaimMapping();
         cm.setClaim(convertToADBClaim(claimMapping.getClaim()));
         cm.setMappedAttribute(claimMapping.getMappedAttribute());
         return cm;
     }
 
-    public static Claim[] convertToADBClaims(org.wso2.carbon.user.core.claim.Claim[] claims) {
+    public static org.wso2.carbon.um.ws.api.stub.Claim[] convertToADBClaims(org.wso2.carbon.user.core.claim.Claim[] claims) {
         if (claims == null) {
             return null;
         }
 
-        Claim[] claimz = new Claim[claims.length];
+        org.wso2.carbon.um.ws.api.stub.Claim[] claimz = new org.wso2.carbon.um.ws.api.stub.Claim[claims.length];
         for (int i = 0; i < claims.length; i++) {
             claimz[i] = convertToADBClaim(claims[i]);
         }
@@ -185,7 +187,7 @@ public class WSRealmUtil {
         return claimz;
     }
 
-    public static org.wso2.carbon.user.core.claim.Claim[] convertToClaims(Claim[] claims) {
+    /*public static org.wso2.carbon.user.core.claim.Claim[] convertToClaims(Claim[] claims) {
         if (claims == null) {
             return null;
         }
@@ -193,6 +195,19 @@ public class WSRealmUtil {
         int i = 0;
         for (Claim claim : claims) {
             claimz[i] = convertToClaim(claim);
+            i++;
+        }
+        return claimz;
+    }*/
+
+    public static ClaimMapping[] convertToClaimMappings(org.wso2.carbon.um.ws.api.stub.ClaimMapping[] claimMappings) {
+        if (claimMappings == null) {
+            return null;
+        }
+        ClaimMapping[] claimz = new ClaimMapping[claimMappings.length];
+        int i = 0;
+        for (org.wso2.carbon.um.ws.api.stub.ClaimMapping claim : claimMappings) {
+            claimz[i] = convertToClaimMapping(claim);
             i++;
         }
         return claimz;
@@ -215,7 +230,7 @@ public class WSRealmUtil {
         return claimz;
     }
 
-    public static org.wso2.carbon.user.core.claim.Claim convertToClaim(Claim claim) {
+    public static org.wso2.carbon.user.core.claim.Claim convertToClaim(org.wso2.carbon.um.ws.api.stub.Claim claim) {
         if (claim == null) {
             return null;
         }
@@ -234,7 +249,7 @@ public class WSRealmUtil {
 
 
     public static org.wso2.carbon.user.core.claim.ClaimMapping convertToClaimMapping(
-            ClaimMapping claimMapping) {
+            org.wso2.carbon.um.ws.api.stub.ClaimMapping claimMapping) {
         if (claimMapping == null) {
             return null;
         }
