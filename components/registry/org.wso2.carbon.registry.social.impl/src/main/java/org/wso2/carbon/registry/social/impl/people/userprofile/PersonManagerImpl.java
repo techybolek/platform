@@ -30,6 +30,7 @@ import org.wso2.carbon.registry.social.impl.internal.SocialDSComponent;
 import org.wso2.carbon.registry.social.impl.people.relationship.RelationshipManagerImpl;
 import org.wso2.carbon.registry.social.impl.people.userprofile.model.PersonImpl;
 import org.wso2.carbon.registry.social.impl.people.userprofile.model.impl.*;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.claim.Claim;
@@ -639,20 +640,26 @@ public class PersonManagerImpl implements PersonManager {
      */
     public Claim[] getOrderedUserClaimInfo() throws SocialDataException {
         Claim[] userClaims;
-        String[][] claimInfo;
+//        String[][] claimInfo;
         try {
             claimManager = getClaimManager();
-            userClaims = (Claim[]) claimManager.getAllSupportClaimsByDefault();
+//            userClaims = (Claim[]) claimManager.getAllSupportClaimsByDefault();
+            ClaimMapping[] userClaimMappings = claimManager.getAllSupportClaimMappingsByDefault();
             // sort the claims in display order
-            Arrays.sort(userClaims, new UserClaimComparator());
-            claimInfo = new String[2][userClaims.length];
-            int index = 0;
+            Arrays.sort(userClaimMappings, new UserClaimComparator());
+//            claimInfo = new String[2][userClaims.length];
+//            int index = 0;
             // retrieve claims uris in sorted order
-            for (Claim claim : userClaims) {
-                claimInfo[0][index] = claim.getClaimUri();
-                claimInfo[1][index++] = claim.getDisplayTag();
-                
+//            for (Claim claim : userClaims) {
+//                claimInfo[0][index] = claim.getClaimUri();
+//                claimInfo[1][index++] = claim.getDisplayTag();
+//
+//            }
+            userClaims = new Claim[userClaimMappings.length];
+            for(int i = 0; i< userClaimMappings.length; i++){
+                userClaims[i] = (Claim)userClaimMappings[i].getClaim();
             }
+
         } catch (RegistryException e) {
             log.error(e.getMessage(), e);
             throw new SocialDataException("Error while retrieving claims", e);
@@ -708,24 +715,24 @@ public class PersonManagerImpl implements PersonManager {
     /**
      * A Comparator to sort claim urls according to display order
      */
-    static class UserClaimComparator implements Comparator<Claim>, Serializable {
+    static class UserClaimComparator implements Comparator<ClaimMapping>, Serializable {
 
-        public int compare(Claim claim1, Claim claim2) {
-            if (claim1.getDisplayOrder() == 0) {
-                claim1.setDisplayOrder(Integer.MAX_VALUE);
+        public int compare(ClaimMapping claim1, ClaimMapping claim2) {
+            if (claim1.getClaim().getDisplayOrder() == 0) {
+                claim1.getClaim().setDisplayOrder(Integer.MAX_VALUE);
             }
 
-            if (claim2.getDisplayOrder() == 0) {
-                claim2.setDisplayOrder(Integer.MAX_VALUE);
+            if (claim2.getClaim().getDisplayOrder() == 0) {
+                claim2.getClaim().setDisplayOrder(Integer.MAX_VALUE);
             }
 
-            if (claim1.getDisplayOrder() < claim2.getDisplayOrder()) {
+            if (claim1.getClaim().getDisplayOrder() < claim2.getClaim().getDisplayOrder()) {
                 return -1;
             }
-            if (claim1.getDisplayOrder() == claim2.getDisplayOrder()) {
+            if (claim1.getClaim().getDisplayOrder() == claim2.getClaim().getDisplayOrder()) {
                 return 0;
             }
-            if (claim1.getDisplayOrder() > claim2.getDisplayOrder()) {
+            if (claim1.getClaim().getDisplayOrder() > claim2.getClaim().getDisplayOrder()) {
                 return 1;
             }
             return 0;
