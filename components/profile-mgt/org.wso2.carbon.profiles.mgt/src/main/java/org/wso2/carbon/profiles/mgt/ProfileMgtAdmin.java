@@ -34,6 +34,7 @@ import org.wso2.carbon.profiles.mgt.dto.ClaimConfigurationDTO;
 import org.wso2.carbon.profiles.mgt.dto.DetailedProfileConfigurationDTO;
 import org.wso2.carbon.profiles.mgt.dto.DialectDTO;
 import org.wso2.carbon.profiles.mgt.dto.ProfileConfigurationDTO;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
@@ -233,7 +234,7 @@ public class ProfileMgtAdmin {
         List<String> hiddenClaims = null;
         List<String> overriddenClaims = null;
         List<String> inheritedClaims = null;
-        Claim[] definedClaims = null;
+        ClaimMapping[] definedClaimMappings = null;
         List<String> definedClaimsList = null;
 
         validateInputParameters(new String[] { dialect, profileConfig });
@@ -261,10 +262,9 @@ public class ProfileMgtAdmin {
             }
 
             definedClaimsList = new ArrayList<String>();
-            definedClaims = (Claim[]) claimManager.getAllClaims(dialect);
-
-            for (int i = 0; i < definedClaims.length; i++) {
-                definedClaimsList.add(definedClaims[i].getClaimUri());
+            definedClaimMappings = claimManager.getAllClaimMappings(dialect);
+            for(ClaimMapping claimMapping:definedClaimMappings){
+                definedClaimsList.add(claimMapping.getClaim().getClaimUri());
             }
 
             profileConfiguration = (ProfileConfiguration) profileManager.getProfileConfig(profileConfig);
@@ -460,12 +460,11 @@ public class ProfileMgtAdmin {
             return null;
         }
 
-        claims = (Claim[]) claimsManager.getAllClaims();
         dialects = new ArrayList<String>();
 
-        for (int i = 0; i < claims.length; i++) {
-            if (!dialects.contains(claims[i].getDialectURI())) {
-                dialects.add(claims[i].getDialectURI());
+        for(ClaimMapping claimMapping:claimsManager.getAllClaimMappings()){
+            if(!dialects.contains(claimMapping.getClaim().getDialectURI())){
+                dialects.add(claimMapping.getClaim().getDialectURI());
             }
         }
 
@@ -671,7 +670,7 @@ public class ProfileMgtAdmin {
             throws ProfileManagementException {
         UserRealm realm = null;
         ClaimManager claimsManager = null;
-        Claim[] claims = null;
+        ClaimMapping[] claimMappings = null;
         List<ClaimConfigurationDTO> claimList = null;
 
         validateInputParameters(new String[] { dialect });
@@ -688,12 +687,12 @@ public class ProfileMgtAdmin {
                 throw null;
             }
 
-            claims = (Claim[]) claimsManager.getAllClaims(dialect);
+            claimMappings = claimsManager.getAllClaimMappings(dialect);
             claimList = new ArrayList<ClaimConfigurationDTO>();
 
-            for (int i = 0; i < claims.length; i++) {
+            for (int i = 0; i < claimMappings.length; i++) {
                 ClaimConfigurationDTO claim = new ClaimConfigurationDTO();
-                claim.setClaimUri(claims[i].getClaimUri());
+                claim.setClaimUri(claimMappings[i].getClaim().getClaimUri());
                 claim.setBehavior(UserCoreConstants.CLAIM_HIDDEN);
                 claimList.add(claim);
             }
