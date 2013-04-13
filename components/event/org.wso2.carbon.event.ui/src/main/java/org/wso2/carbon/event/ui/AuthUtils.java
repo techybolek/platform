@@ -8,7 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.um.ws.api.stub.RemoteAuthorizationManagerServiceStub;
 import org.wso2.carbon.um.ws.api.stub.UserStoreExceptionException;
-import org.wso2.carbon.user.mgt.common.FlaggedName;
+import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.user.mgt.ui.UserAdminClient;
 
 public class AuthUtils {
@@ -27,7 +27,7 @@ public class AuthUtils {
             RemoteAuthorizationManagerServiceStub authClient) throws Exception {
         this.userAdminClient = userAdminClient;
         this.authClient = authClient;
-        FlaggedName[] allRoles = userAdminClient.getAllRolesNames();
+        FlaggedName[] allRoles = userAdminClient.getAllRolesNames("*", -1);
 
         if (resourceName != null && resourceName.trim().length() > 0) {
             String[] rolesList = authClient.getAllowedRolesForResource(resourceName, "write");
@@ -52,7 +52,7 @@ public class AuthUtils {
             }
         }
 
-        String[] allUsers = userAdminClient.listUsers(null);
+        String[] allUsers = userAdminClient.listUsers("*", -1);
         for (String name : allUsers) {
             if (!usersWithAccess.contains(name)) {
                 usersWithoutAccess.add(name);
