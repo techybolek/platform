@@ -61,8 +61,8 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.mgt.stub.AddUserUserAdminExceptionException;
 import org.wso2.carbon.user.mgt.stub.UserAdminStub;
+import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.NetworkUtils;
 
@@ -1462,8 +1462,8 @@ public class AssetStoreHostObject extends ScriptableObject {
             stub.addUser(username, password, new String[] { role }, null, null);
         } catch (RemoteException e) {
             handleException(e.getMessage(), e);
-        } catch (AddUserUserAdminExceptionException e) {
-            handleException("Error while adding the user: " + username, e);
+        } catch (UserAdminUserAdminException e) {
+            handleException("Error occurred while adding the user", e);
         }
     }
 

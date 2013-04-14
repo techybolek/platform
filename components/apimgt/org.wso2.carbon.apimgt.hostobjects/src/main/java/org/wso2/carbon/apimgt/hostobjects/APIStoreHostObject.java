@@ -318,7 +318,7 @@ public class APIStoreHostObject extends ScriptableObject {
             CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword,
                     true, userAdminStub._getServiceClient());
 
-            FlaggedName[] roles = userAdminStub.getRolesOfUser(username);
+            FlaggedName[] roles = userAdminStub.getRolesOfUser(username,"*",-1);
             List<String> roleList = null;
 
             if(roles != null){
@@ -2142,7 +2142,7 @@ public class APIStoreHostObject extends ScriptableObject {
         UserAdminStub userAdminStub = new UserAdminStub(url);
         CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword,
                 true, userAdminStub._getServiceClient());
-        FlaggedName[] flaggedNames = userAdminStub.getRolesOfUser(userName);
+        FlaggedName[] flaggedNames = userAdminStub.getRolesOfUser(userName,"*",-1);
 		List<String> roles = new ArrayList<String>();
 		if (flaggedNames != null) {
 			for (int i = 0; i < flaggedNames.length; i++) {
