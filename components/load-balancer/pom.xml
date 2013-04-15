@@ -38,7 +38,7 @@
     <url>http://wso2.com</url>
 
     <modules>
-        <!--module>org.wso2.carbon.lb.common</module-->
+        <module>org.wso2.carbon.lb.common</module>
         <!--module>lb-endpoint</module-->
         <!--module>autoscaler-service/org.wso2.carbon.autoscaler.service</module-->
         <!--module>jvm-autoscaler-agent</module-->
