@@ -56,6 +56,10 @@
 	        <version>1.6.1.wso2v8</version>
         </dependency>
         <dependency>
+	    <groupId>org.wso2.xkms.wso2</groupId>
+            <artifactId>xkms</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.ws.security.wso2</groupId>
             <artifactId>wss4j</artifactId>
         </dependency>
@@ -115,6 +119,9 @@
                                 <bundleDef>org.apache.rampart.wso2:rampart-core</bundleDef>
                                 <bundleDef>org.apache.rampart.wso2:rampart-trust</bundleDef>
                             </bundles>
+			    <importBundles>
+                                <importBundleDef>org.wso2.xkms.wso2:xkms</importBundleDef>
+                            </importBundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
                             </importFeatures>
