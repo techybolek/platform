@@ -85,7 +85,7 @@
     <properties>
         <wso2carbon.version.security.mgt>${wso2carbon.version}</wso2carbon.version.security.mgt>
         <rampart.wso2.version>${rampart.osgi.version}</rampart.wso2.version>
-        <xkms.wso2.version>2.6.0.wso2v1</xkms.wso2.version>
+        <xkms.wso2.version>2.6.0-wso2v1</xkms.wso2.version>
 	<wss4j.wso2.version>1.5.11.wso2v1</wss4j.wso2.version>
     </properties>
 
