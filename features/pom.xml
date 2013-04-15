@@ -171,7 +171,7 @@
     </scm>
 
     <properties>
-        <wso2carbon.version>4.1.0-SNAPSHOT</wso2carbon.version>
+        <wso2carbon.version>4.2.0-SNAPSHOT</wso2carbon.version>
         <service.mgt.version>${wso2carbon.version}</service.mgt.version>
         <registry.core.feature.version>${wso2carbon.version}</registry.core.feature.version>
         <registry.social.feature.version>${wso2carbon.version}</registry.social.feature.version>
