@@ -22,13 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>qpid</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.0-SNAPSHOT</version>
 <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.qpid.authorization</artifactId>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.2.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Component - Qpid - Authorization Manager</name>
     <description>Qpid authorization manager based on Carbon authorization manager</description>
@@ -38,12 +38,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
   	    <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.qpid.wso2</groupId>

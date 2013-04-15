@@ -39,12 +39,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.governance.api</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.ws.client</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -58,12 +58,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.core</artifactId>
-             <version>4.1.0-SNAPSHOT</version>
+             <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.oauth</artifactId>
-             <version>4.1.0-SNAPSHOT</version>
+             <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.h2database.wso2</groupId>
@@ -83,12 +83,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rest.api.stub</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -98,12 +98,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.caching.core</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>

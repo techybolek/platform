@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -601,7 +601,7 @@
 
     <properties>
         <stratos.version>2.1.0-SNAPSHOT</stratos.version>
-        <carbon.platform.version>4.1.0-SNAPSHOT</carbon.platform.version>
+        <carbon.platform.version>4.2.0-SNAPSHOT</carbon.platform.version>
     </properties>
 
 </project>

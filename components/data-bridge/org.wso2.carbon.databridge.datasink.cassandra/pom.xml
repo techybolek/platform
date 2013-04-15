@@ -5,7 +5,7 @@
    <parent>
         <artifactId>data-bridge</artifactId>
         <groupId>org.wso2.carbon</groupId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.0-SNAPSHOT</version>
 <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -13,7 +13,7 @@
     <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.databridge.datasink.cassandra</artifactId>
     <packaging>bundle</packaging>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.2.0-SNAPSHOT</version>
     <name>WSO2 Carbon - Data Bridge Cassandra Data Sink</name>
     <description>Agent Event Receiver</description>
     <url>http://wso2.org</url>

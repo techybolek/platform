@@ -22,12 +22,12 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>humantask</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.0-SNAPSHOT</version>
 <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.2.0-SNAPSHOT</version>
     <artifactId>org.wso2.carbon.humantask</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Human Task Engine</name>
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.attachment.mgt</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -52,12 +52,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlbeans.wso2</groupId>
@@ -74,7 +74,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.datasource</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
@@ -87,7 +87,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.extensions</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>commons-dbcp.wso2</groupId>
@@ -112,17 +112,17 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.humantask.skeleton</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.unifiedendpoint.core</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ntask.core</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

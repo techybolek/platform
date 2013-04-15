@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-components</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -32,7 +32,7 @@
     <groupId>org.wso2.carbon</groupId>
     <artifactId>loadbalancer-components</artifactId>
     <packaging>pom</packaging>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.2.0-SNAPSHOT</version>
     <name>WSO2 Carbon Loadbalancer Components</name>
     <description>Carbon Components specifically used in Loadbalancer</description>
     <url>http://wso2.com</url>

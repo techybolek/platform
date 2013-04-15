@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>connectors</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.0-SNAPSHOT</version>
 	<relativePath>../pom.xml</relativePath>
     </parent>	
 
@@ -13,7 +13,7 @@
 
     <groupId>org.wso2.carbon</groupId>
     <packaging>bundle</packaging>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.2.0-SNAPSHOT</version>
     <name>WSO2 Carbon - Mediation Library Connector For EIPConnector</name>
     <url>http://wso2.org</url>
 

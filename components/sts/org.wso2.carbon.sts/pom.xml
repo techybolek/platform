@@ -22,14 +22,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>sts</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.0-SNAPSHOT</version>
 <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon</groupId>
     <artifactId>org.wso2.carbon.sts</artifactId>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.2.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - STS</name>
     <description>A custom wso2 products or solution</description>
@@ -47,22 +47,22 @@
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.security.mgt</artifactId>
-			<version>4.1.0-SNAPSHOT</version>
+			<version>4.2.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.registry.core</artifactId>
-			<version>4.1.0-SNAPSHOT</version>
+			<version>4.2.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.core</artifactId>
-			<version>4.1.0-SNAPSHOT</version>
+			<version>4.2.0-SNAPSHOT</version>
 		</dependency>
 		<!--dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.context</artifactId>
-			<version>4.1.0-SNAPSHOT</version>
+			<version>4.2.0-SNAPSHOT</version>
 		</dependency-->          
         <dependency>
             <groupId>org.wso2.carbon</groupId>
