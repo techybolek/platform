@@ -22,12 +22,12 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>restapi-feature</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.2.0-SNAPSHOT</version>
     <artifactId>org.wso2.carbon.rest.api.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Rest API Feature</name>
@@ -38,13 +38,13 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rest.api.ui.feature</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.rest.api.server.feature</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
             <type>zip</type>
         </dependency>
     </dependencies>

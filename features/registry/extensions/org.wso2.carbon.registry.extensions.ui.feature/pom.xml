@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>extensions-feature</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.0-SNAPSHOT</version>
 <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -30,7 +30,7 @@
     <artifactId>org.wso2.carbon.registry.extensions.ui.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Registry Extensions UI Feature</name>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.2.0-SNAPSHOT</version>
     <url>http://wso2.org</url>
     <description>
         Contains User Interface to install Extensions to the Registry

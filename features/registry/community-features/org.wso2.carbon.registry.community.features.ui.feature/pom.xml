@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>community.features-feature</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.0-SNAPSHOT</version>
 <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -30,7 +30,7 @@
     <artifactId>org.wso2.carbon.registry.community.features.ui.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Registry Community Features UI Feature</name>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.2.0-SNAPSHOT</version>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for Front-end Registry Community Features functionality</description>
     <dependencies>
@@ -42,17 +42,17 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.info.stub</artifactId>
-	    <version>4.1.0-SNAPSHOT</version>
+	    <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.email.verification.ui</artifactId>
-	    <version>4.1.0-SNAPSHOT</version>
+	    <version>4.2.0-SNAPSHOT</version>
         </dependency>
 	<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.email.verification.stub</artifactId>
-            <version>4.1.0-SNAPSHOT</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>

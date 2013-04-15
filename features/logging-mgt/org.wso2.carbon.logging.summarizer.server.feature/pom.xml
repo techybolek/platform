@@ -22,14 +22,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>logging-mgt-feature</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.logging.summarizer.server.feature</artifactId>
     <packaging>pom</packaging>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.2.0-SNAPSHOT</version>
     <name>WSO2 Carbon - Logging Summarizer Server Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the core bundles required for Log Summarizing Functionality</description>
@@ -68,7 +68,7 @@
  	<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.analytics.hive</artifactId>
-           <version>4.1.0-SNAPSHOT</version>
+           <version>4.2.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.hive</groupId>

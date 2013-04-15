@@ -243,7 +243,7 @@
                             </importBundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${wso2carbon.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.lb.common:4.1.0-SNAPSHOT</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.lb.common:4.2.0-SNAPSHOT</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.ntask.core:4.0.2</importFeatureDef> 
                             </importFeatures>
                         </configuration>

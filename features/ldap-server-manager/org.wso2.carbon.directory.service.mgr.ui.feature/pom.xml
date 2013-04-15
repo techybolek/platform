@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>ldap-server-manager</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -32,23 +32,23 @@
     <name>WSO2 Carbon - Service Principle Management UI</name>
     <url>http://wso2.org</url>
     <description>This feature contains the core bundles required to manage service principles in LDAP. This is the UI.</description>
-	<version>4.1.0-SNAPSHOT</version>
+	<version>4.2.0-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.directory.server.manager.common</artifactId>
-			<version>4.1.0-SNAPSHOT</version>
+			<version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.directory.server.manager.ui</artifactId>
-			<version>4.1.0-SNAPSHOT</version>
+			<version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.directory.server.manager.stub</artifactId>
-			<version>4.1.0-SNAPSHOT</version>
+			<version>4.2.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
