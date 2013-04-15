@@ -35,7 +35,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.ws.client.registry.WSRegistryServiceClient;
 import org.wso2.carbon.ui.CarbonUIUtil;
-import org.wso2.carbon.user.mgt.common.FlaggedName;
+import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.user.mgt.ui.UserAdminClient;
 import org.wso2.carbon.utils.ServerConstants;
 
@@ -111,9 +111,9 @@ public class ProjectDataProcessor {
                         roleMap.put("name", role);
                         List<Map> memberList = new LinkedList<Map>();
                         roleMap.put("member", memberList);
-                        FlaggedName[] usersOfRole = userManager.getUsersOfRole(role, "*");
+                        FlaggedName[] usersOfRole = userManager.getUsersOfRole(role, "*",-1);
                         for (FlaggedName flaggedName : usersOfRole) {
-                            if (flaggedName.isSelected()) {
+                            if (flaggedName.getSelected()) {
                                 memberList.add(Collections.singletonMap("name",
                                         flaggedName.getItemName()));
                             }
