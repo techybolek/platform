@@ -9,8 +9,8 @@ import org.wso2.carbon.messagebox.stub.QueueServiceStub;
 import org.wso2.carbon.messagebox.stub.admin.internal.MessageBoxAdminServiceStub;
 import org.wso2.carbon.qpid.stub.service.QpidAdminServiceStub;
 import org.wso2.carbon.ui.CarbonUIUtil;
-import org.wso2.carbon.user.mgt.stub.ListUsersUserAdminExceptionException;
 import org.wso2.carbon.user.mgt.stub.UserAdminStub;
+import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
 import org.wso2.carbon.user.mgt.ui.UserAdminClient;
 import org.wso2.carbon.utils.ServerConstants;
 
@@ -147,10 +147,10 @@ public class UIUtils {
 
     public static String[] searchUsers(String prefix, UserAdminStub userAdminStub) {
         try {
-            return userAdminStub.listUsers(prefix);
+            return userAdminStub.listUsers(prefix,-1);
         } catch (RemoteException e) {
             e.printStackTrace();
-        } catch (ListUsersUserAdminExceptionException e) {
+        } catch (UserAdminUserAdminException e) {
             e.printStackTrace();
         }
         return new String[0];
