@@ -86,7 +86,7 @@
                                 <artifactItem>
                                     <groupId>org.wso2.carbon</groupId>
                                     <artifactId>wso2carbon-core</artifactId>
-                                    <version>${patch.version.407}</version>
+                                    <version>4.2.0-SNAPSHOT</version>
                                     <type>zip</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>target</outputDirectory>
@@ -118,58 +118,58 @@
                                 </unzip>
 
                                 <replace
-                                        file="target/wso2carbon-core-${patch.version.407}/repository/conf/carbon.xml"
+                                        file="target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/carbon.xml"
                                         token="${product.name}" value="WSO2 Identity Server"/>
                                 <replace
-                                        file="target/wso2carbon-core-${patch.version.407}/repository/conf/carbon.xml"
+                                        file="target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/carbon.xml"
                                         token="&lt;ServerURL&gt;https://${carbon.local.ip}"
                                         value="&lt;ServerURL&gt;https://localhost"/>
                                 <replace
-                                        file="target/wso2carbon-core-${patch.version.407}/repository/conf/carbon.xml"
+                                        file="target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/carbon.xml"
                                         token="&lt;!--MgtHostName&gt;mgt.wso2.org&lt;/MgtHostName--&gt;"
                                         value="&lt;MgtHostName&gt;localhost&lt;/MgtHostName&gt;"/>
                                 <replace
-                                        file="target/wso2carbon-core-${patch.version.407}/repository/conf/carbon.xml"
+                                        file="target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/carbon.xml"
                                         token="&lt;!--HostName&gt;www.wso2.org&lt;/HostName--&gt;"
                                         value="&lt;HostName&gt;localhost&lt;/HostName&gt;"/>
                                 <replace
-                                        file="target/wso2carbon-core-${patch.version.407}/repository/conf/carbon.xml"
+                                        file="target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/carbon.xml"
                                         token="&lt;!--LdapServer&gt;"
                                         value="&lt;LdapServer&gt;"/>
 
                                 <replace
-                                        file="target/wso2carbon-core-${patch.version.407}/repository/conf/carbon.xml"
+                                        file="target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/carbon.xml"
                                         token="&lt;/LdapServer--&gt;"
                                         value="&lt;/LdapServer&gt;"/>
 
                                 <replace
-                                        file="target/wso2carbon-core-${patch.version.407}/repository/conf/carbon.xml"
+                                        file="target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/carbon.xml"
                                         token="&lt;!--TokenStoreClassName&gt;"
                                         value="&lt;TokenStoreClassName&gt;"/>
 
                                 <replace
-                                        file="target/wso2carbon-core-${patch.version.407}/repository/conf/carbon.xml"
+                                        file="target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/carbon.xml"
                                         token="&lt;/TokenStoreClassName--&gt;"
                                         value="&lt;/TokenStoreClassName&gt;"/>
 
 				<!-- Comment all active UserStoreManagers -->
                                 <replace
-                                        file="target/wso2carbon-core-${patch.version.407}/repository/conf/user-mgt.xml"
+                                        file="target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/user-mgt.xml"
                                         token="&lt;UserStoreManager"
                                         value="&lt;!--UserStoreManager"/>
 
                                 <replace
-                                        file="target/wso2carbon-core-${patch.version.407}/repository/conf/user-mgt.xml"
+                                        file="target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/user-mgt.xml"
                                         token="&lt;/UserStoreManager&gt;"
                                         value="&lt;/UserStoreManager--&gt;"/>
 
                                 <replace
-                                        file="target/wso2carbon-core-${patch.version.407}/repository/conf/user-mgt.xml"
+                                        file="target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/user-mgt.xml"
                                         token="&lt;!--ISUserStoreManager"
                                         value="&lt;UserStoreManager"/>
 				
                                 <replace
-                                        file="target/wso2carbon-core-${patch.version.407}/repository/conf/user-mgt.xml"
+                                        file="target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/user-mgt.xml"
                                         token="&lt;/ISUserStoreManager--&gt;"
                                         value="&lt;/UserStoreManager&gt;"/>
 
@@ -177,17 +177,17 @@
 				<!-- Enable KDC for IS -->
 
                                 <copy
-                                        todir="target/wso2carbon-core-${patch.version.407}/repository/components/"
+                                        todir="target/wso2carbon-core-4.2.0-SNAPSHOT/repository/components/"
                                         overwrite="false">
                                     <fileset
                                             dir="${tempdir}/wso2is-${project.version}/repository/components/">
                                     </fileset>            
                                 </copy>
                                 <copy
-                                        todir="target/wso2carbon-core-${patch.version.407}/repository/deployment/client/modules"
+                                        todir="target/wso2carbon-core-4.2.0-SNAPSHOT/repository/deployment/client/modules"
                                         overwrite="false">
                                     <fileset
-                                            dir="${tempdir}/wso2is-${project.version}/repository/deployment/client/modules">
+                                            dir="${tempdir}/wso2is-4.5.0-SNAPSHOT/repository/deployment/client/modules">
                                     </fileset>
                                 </copy>
                                 <delete file="target/wso2is-${project.version}.zip"/>
@@ -195,7 +195,7 @@
                                 <mkdir dir="${tempdir}"/>
                                 <unzip dest="${tempdir}">
                                     <fileset
-                                            dir="target/wso2carbon-core-${patch.version.407}/repository/components/plugins/">
+                                            dir="target/wso2carbon-core-4.2.0-SNAPSHOT/repository/components/plugins/">
                                         <include name="*.ui*.jar"/>
                                     </fileset>
                                 </unzip>
@@ -262,7 +262,7 @@
                                 <delete dir="target/archive-tmp"/>
                                 <delete dir="target/dependency-maven-plugin-markers"/>
                                 <delete dir="target/maven-archiver"/>
-                                <delete dir="target/wso2carbon-core-${patch.version.407}"/>
+                                <delete dir="target/wso2carbon-core-4.2.0-SNAPSHOT"/>
                                 <delete file="target/wso2is-${project.version}.jar"/>
                                 <delete dir="target/sources"/>
                                 <delete dir="target/site"/>
@@ -377,15 +377,6 @@
 
         </plugins>
     </build>
-    <properties>
-        <stratos.version>2.0.0</stratos.version>
-        <patch.version.401>4.0.1</patch.version.401>
-        <patch.version.402>4.0.2</patch.version.402>
-        <patch.version.403>4.0.3</patch.version.403>
-	<patch.version.405>4.0.5</patch.version.405>
-        <patch.version.406>4.0.6</patch.version.406>
-	<patch.version.407>4.0.7</patch.version.407>
-    </properties>
     <!--reporting>
         <plugins>
             <plugin>

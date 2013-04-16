@@ -23,7 +23,7 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <directory>target/wso2carbon-core-${patch.version.407}</directory>
+            <directory>target/wso2carbon-core-4.2.0-SNAPSHOT</directory>
             <outputDirectory>wso2is-${pom.version}</outputDirectory>
             <excludes>
                 <exclude>**/*.sh</exclude>
@@ -44,11 +44,11 @@
                 <exclude>**/wso2is-user-certs.jks</exclude>
                 <exclude>**/log4j.properties</exclude>
                 <exclude>**/registry.xml</exclude>
-		<exclude>**/email/email-admin-config.xml</exclude>
+		<!--exclude>**/email/email-admin-config.xml</exclude-->
             </excludes>
         </fileSet>
         <fileSet>
-            <directory>target/wso2carbon-core-${patch.version.407}</directory>
+            <directory>target/wso2carbon-core-4.2.0-SNAPSHOT</directory>
             <outputDirectory>wso2is-${pom.version}</outputDirectory>
             <excludes>
                 <exclude>**/wso2server.bat</exclude>
@@ -72,7 +72,7 @@
 
         <fileSet>
             <directory>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/repository/conf/
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/
             </directory>
             <outputDirectory>wso2is-${pom.version}/repository/conf/security</outputDirectory>
             <includes>
@@ -83,7 +83,7 @@
 
         <fileSet>
             <directory>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/dbscripts/identity/
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/dbscripts/identity/
             </directory>
             <outputDirectory>wso2is-${pom.version}/dbscripts/identity</outputDirectory>
             <includes>
@@ -123,7 +123,7 @@
 		<!--copy jaxrs web app for SCIM feature-->
 		<fileSet>
             <directory>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/repository/deployment/server/jaxwebapps
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/deployment/server/jaxwebapps
             </directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/jaxwebapps</outputDirectory>
             <includes>
@@ -134,7 +134,7 @@
         <!--copy jaxrs web app for OAuth feature-->
 		<fileSet>
             <directory>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/repository/deployment/server/jaxwebapps
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/deployment/server/jaxwebapps
             </directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/deployment/server/jaxwebapps</outputDirectory>
             <includes>
@@ -145,7 +145,7 @@
 	 <!--Multitenancy related file -->
         <fileSet>
             <directory>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/repository/conf/multitenancy/
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/multitenancy/
             </directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/multitenancy</outputDirectory>
             <includes>
@@ -205,38 +205,38 @@
             <fileMode>644</fileMode>
         </file>
         <file>
-            <source>target/wso2carbon-core-${patch.version.407}/bin/README.txt</source>
+            <source>target/wso2carbon-core-4.2.0-SNAPSHOT/bin/README.txt</source>
             <outputDirectory>wso2is-${pom.version}/bin/</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
         <file>
-            <source>target/wso2carbon-core-${patch.version.407}/bin/version.txt</source>
+            <source>target/wso2carbon-core-4.2.0-SNAPSHOT/bin/version.txt</source>
             <outputDirectory>wso2is-${pom.version}/bin/</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
         <file>
-            <source>target/wso2carbon-core-${patch.version.407}/repository/conf/carbon.xml</source>
+            <source>target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/carbon.xml</source>
             <outputDirectory>wso2is-${pom.version}/repository/conf/</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>target/wso2carbon-core-${patch.version.407}/repository/conf/axis2/axis2.xml
+            <source>target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/axis2/axis2.xml
             </source>
             <outputDirectory>wso2is-${pom.version}/repository/conf/axis2/</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
         <file>
-            <source>target/wso2carbon-core-${patch.version.407}/repository/conf/README</source>
+            <source>target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/README</source>
             <outputDirectory>wso2is-${pom.version}/repository/conf/</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
 
         <file>
-            <source>target/wso2carbon-core-${patch.version.407}/bin/wso2server.bat</source>
+            <source>target/wso2carbon-core-4.2.0-SNAPSHOT/bin/wso2server.bat</source>
             <outputDirectory>wso2is-${pom.version}/bin/</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
@@ -304,63 +304,63 @@
         </file-->
         <file>
             <source>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/repository/conf/identity.xml
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/identity.xml
             </source>
             <outputDirectory>wso2is-${pom.version}/repository/conf</outputDirectory>
             <fileMode>644</fileMode>
         </file>
 
-        <file>
+        <!--file>
             <source>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/repository/conf/email/email-admin-config.xml
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/email/email-admin-config.xml
             </source>
             <outputDirectory>wso2is-${pom.version}/repository/conf/email</outputDirectory>
             <fileMode>644</fileMode>
-        </file>
+        </file-->
 
+        <!--file>
+            <source>
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/security/identity-mgt.properties
+            </source>
+            <outputDirectory>wso2is-${pom.version}/repository/conf/security</outputDirectory>
+            <fileMode>644</fileMode>
+        </file-->
         <file>
             <source>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/repository/conf/security/identity-mgt.properties
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/security/entitlement.properties
             </source>
             <outputDirectory>wso2is-${pom.version}/repository/conf/security</outputDirectory>
             <fileMode>644</fileMode>
         </file>
         <file>
             <source>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/repository/conf/security/entitlement.properties
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/security/saml2.federation.properties
             </source>
             <outputDirectory>wso2is-${pom.version}/repository/conf/security</outputDirectory>
             <fileMode>644</fileMode>
         </file>
         <file>
             <source>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/repository/conf/security/saml2.federation.properties
-            </source>
-            <outputDirectory>wso2is-${pom.version}/repository/conf/security</outputDirectory>
-            <fileMode>644</fileMode>
-        </file>
-        <file>
-            <source>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/repository/data/is-default-schema.zip
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/data/is-default-schema.zip
             </source>
             <outputDirectory>wso2is-${pom.version}/repository/data</outputDirectory>
         </file>
         <file>
             <source>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/repository/conf/embedded-ldap.xml
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/embedded-ldap.xml
             </source>
             <outputDirectory>wso2is-${pom.version}/repository/conf</outputDirectory>
         </file>
 	<file>
             <source>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/repository/conf/multitenancy/tenant-mgt.xml
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/multitenancy/tenant-mgt.xml
             </source>
             <outputDirectory>wso2is-${pom.version}/repository/conf</outputDirectory>
         </file>
         <!-- Stratos specific files -->
         <file>
             <source>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/repository/conf/etc/logging-config.xml
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/etc/logging-config.xml
             </source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/etc/
             </outputDirectory>
@@ -368,7 +368,7 @@
 	 <!-- Including log4j.properties file -->
         <file>
             <source>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/repository/conf/log4j.properties
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/log4j.properties
             </source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/
             </outputDirectory>
@@ -384,7 +384,7 @@
 	<!--copy scim-consumer-config.xml-->
 	<file>
             <source>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/repository/conf/provisioning-config.xml
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/provisioning-config.xml
             </source>
             <outputDirectory>wso2is-${pom.version}/repository/conf</outputDirectory>
         </file>
@@ -397,13 +397,4 @@
         </file-->
 
     </files>
-     <properties>
-        <stratos.version>2.0.0</stratos.version>
-        <patch.version.401>4.0.1</patch.version.401>
-        <patch.version.402>4.0.2</patch.version.402>
-        <patch.version.403>4.0.3</patch.version.403>
-	<patch.version.405>4.0.5</patch.version.405>
-	<patch.version.406>4.0.6</patch.version.406>
-	<patch.version.407>4.0.7</patch.version.407>
-    </properties>
 </assembly>

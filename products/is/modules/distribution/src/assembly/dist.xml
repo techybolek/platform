@@ -24,7 +24,7 @@
 		<!-- Copying p2 profile and osgi bundles-->
 		<fileSet>
 			<directory>
-				../p2-profile-gen/target/wso2carbon-core-${patch.version.407}/repository/components
+				../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/components
 			</directory>
 			<outputDirectory>wso2is-${pom.version}/repository/components
 			</outputDirectory>
@@ -47,13 +47,4 @@
 			</includes>
 		</dependencySet>
 	</dependencySets>
-	 <properties>
-        <stratos.version>2.0.0</stratos.version>
-        <patch.version.401>4.0.1</patch.version.401>
-        <patch.version.402>4.0.2</patch.version.402>
-        <patch.version.403>4.0.3</patch.version.403>
-	<patch.version.405>4.0.5</patch.version.405>
-	<patch.version.406>4.0.6</patch.version.406>
-	<patch.version.406>4.0.7</patch.version.406>
-    </properties>
 </assembly>

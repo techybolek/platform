@@ -157,7 +157,7 @@
                             <productConfigurationFile>${basedir}/carbon.product</productConfigurationFile>
                             <metadataRepository>file:${basedir}/target/p2-repo</metadataRepository>
                             <artifactRepository>file:${basedir}/target/p2-repo</artifactRepository>
-                            <targetPath>file:${basedir}/target/wso2carbon-core-${carbon.kernel.version}/repository/components</targetPath>
+                            <targetPath>file:${basedir}/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/components</targetPath>
                             <profile>WSO2CarbonProfile</profile>
                         </configuration>
                     </execution>
@@ -388,7 +388,7 @@
 						<configuration>
 							<tasks>
 								<replace token="false" value="true"
-									dir="target/wso2carbon-core-${carbon.kernel.version}/repository/components">
+									dir="target/wso2carbon-core-4.2.0-SNAPSHOT/repository/components">
 									<include name="**/bundles.info" />
 								</replace>
 							</tasks>
