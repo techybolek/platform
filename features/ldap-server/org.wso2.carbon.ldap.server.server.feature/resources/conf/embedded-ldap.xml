@@ -53,7 +53,7 @@
     <Property name="instanceId">default</Property>
     <Property name="connectionPassword">admin</Property>
     <Property name="workingDirectory">.</Property>
-    <Property name="AdminEntryObjectClass">scimPerson</Property>
+    <Property name="AdminEntryObjectClass">identityPerson</Property>
     <Property name="allowAnonymousAccess">false</Property>
     <Property name="accessControlEnabled">true</Property>
     <Property name="denormalizeOpAttrsEnabled">false</Property>
