@@ -81,6 +81,18 @@
             </includes>
         </fileSet>
 
+	<fileSet>
+            <directory>
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/resources/security/ldif
+            </directory>
+            <outputDirectory>wso2is-${pom.version}/repository/resources/security/ldif</outputDirectory>
+            <includes>
+                <include>identityPerson.ldif</include>
+                <include>scimPerson.ldif</include>
+		<include>wso2Person.ldif</include>
+            </includes>
+        </fileSet>
+
         <fileSet>
             <directory>
                 ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/dbscripts/identity/
