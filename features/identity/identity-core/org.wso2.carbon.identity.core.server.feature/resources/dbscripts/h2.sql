@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS IDN_OPENID_ASSOCIATIONS (
 CREATE TABLE IDN_STS_STORE (
                         ID INTEGER AUTO_INCREMENT,
                         TOKEN_ID VARCHAR(255) NOT NULL,
-                        TOKEN_CONTENT BLOB(4096) NOT NULL,
+                        TOKEN_CONTENT BLOB NOT NULL,
                         CREATE_DATE TIMESTAMP NOT NULL,
                         EXPIRE_DATE TIMESTAMP NOT NULL,
                         STATE INTEGER DEFAULT 0,
