@@ -64,7 +64,7 @@
 
     <properties>
         <wso2carbon.version.xkms.mgt>${wso2carbon.version}</wso2carbon.version.xkms.mgt>
-        <xkms.wso2.version>2.4.0.wso2v1</xkms.wso2.version>
+        <xkms.wso2.version>2.6.0-wso2v1</xkms.wso2.version>
     </properties>
 
 </project>
