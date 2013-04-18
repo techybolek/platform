@@ -38,7 +38,7 @@ import java.util.Map;
  * @scr.component name="application.deployer.synapse" immediate="true"
  * @scr.reference name="synapse.env.service"
  * interface="org.wso2.carbon.mediation.initializer.services.SynapseEnvironmentService"
- * cardinality="1..n" policy="dynamic" bind="setSynapseEnvironmentService"
+ * cardinality="0..1" policy="dynamic" bind="setSynapseEnvironmentService"
  * unbind="unsetSynapseEnvironmentService"
  */
 
