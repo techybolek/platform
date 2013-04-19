@@ -94,7 +94,7 @@
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.core.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.provider.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.relying.party.feature:4.2.0-SNAPSHOT</featureArtifactDef>
-								<!--featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.mgt.feature:4.2.0-SNAPSHOT</featureArtifactDef-->
+								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.mgt.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.self.registration.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.user.profile.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.xacml.feature:4.2.0-SNAPSHOT</featureArtifactDef>
@@ -227,10 +227,10 @@
 									<version>4.2.0-SNAPSHOT</version>
 								</feature>
 
-								<!--feature>
+								<feature>
                                                                         <id>org.wso2.carbon.identity.mgt.feature.group</id>
                                                                         <version>4.2.0-SNAPSHOT</version>
-                                                                </feature-->
+                                                                </feature>
 
 								<feature>
 									<id>org.wso2.carbon.identity.relying.party.feature.group</id>
