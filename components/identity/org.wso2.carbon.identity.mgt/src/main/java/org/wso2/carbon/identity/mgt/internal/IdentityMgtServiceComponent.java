@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.identity.mgt.internal;
 
+import com.sun.xml.internal.xsom.impl.scd.Iterators;
 import org.apache.axis2.engine.AxisObserver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,9 +40,7 @@ import org.wso2.carbon.user.core.listener.UserOperationEventListener;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * 
@@ -80,8 +79,7 @@ public class IdentityMgtServiceComponent {
 
     protected void activate(ComponentContext context) {
 
-        // Publish the OSGi service
-        Properties props = new Properties();
+        Dictionary<String, String> props = new Hashtable<String, String>();
         props.put(CarbonConstants.AXIS2_CONFIG_SERVICE, AxisObserver.class.getName());
         context.getBundleContext().registerService(AxisObserver.class.getName(),
                                                 new IdentityMgtDeploymentInterceptor(), props);
