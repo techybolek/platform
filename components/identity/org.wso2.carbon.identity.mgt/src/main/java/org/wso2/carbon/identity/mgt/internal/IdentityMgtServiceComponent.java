@@ -15,7 +15,6 @@
  */
 package org.wso2.carbon.identity.mgt.internal;
 
-import com.sun.xml.internal.xsom.impl.scd.Iterators;
 import org.apache.axis2.engine.AxisObserver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
