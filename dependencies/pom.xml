@@ -36,12 +36,12 @@
 
             <modules>
 		<module>rampart/1.6.1-wso2v9</module>
+		<module>commons/siddhi/2.0.0-wso2v1</module>
 		<module>commons/caching/4.0.2</module>
 		<module>synapse/2.1.1-wso2v3</module>
                 <module>commons/charon/1.0.1-wso2v1</module>
                 <module>commons/balana/1.0.0-wso2v6</module>
 		<module>commons/xkms/2.6.0-wso2v1</module>
-                <module>commons/siddhi/2.0.0-wso2v1</module>
 		<module>andes/0.13.0-wso2v6</module>
                 <module>hive/0.8.1-wso2v6</module>
                 <module>hadoop/0.20.203.1-wso2v4</module>
