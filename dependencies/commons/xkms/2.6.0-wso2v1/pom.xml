@@ -58,10 +58,6 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-        <repository>
-            <id>ws-zones-repository</id>
-            <url>http://ws.zones.apache.org/repository2</url>
-        </repository>
     </repositories>
 
     <pluginRepositories>
