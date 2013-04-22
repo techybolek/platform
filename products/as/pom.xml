@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>carbon-products</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -239,7 +239,7 @@
 
     <properties>
         <!--carbon.platform.version>${carbon.platform.version}</carbon.platform.version-->
-        <carbon.kernel.version>4.1.0-SNAPSHOT</carbon.kernel.version>
+        <carbon.kernel.version>4.2.0-SNAPSHOT</carbon.kernel.version>
         <javax.servlet.version>${version.javax.servlet}</javax.servlet.version>
         <javax.servlet.jsp.version>${version.javax.servlet.jsp}</javax.servlet.jsp.version>
         <apache.derby.version>${version.wso2.derby}</apache.derby.version>
@@ -254,7 +254,7 @@
         <axis2.version>${orbit.version.axis2}</axis2.version>
 	<jaxb.version>2.2.5.wso2v1</jaxb.version>
         <!--stratos.version>${stratos.version}</stratos.version-->
-        <appserver.version>5.1.0</appserver.version>
+        <appserver.version>5.1.0-SNAPSHOT</appserver.version>
     </properties>
 
     <mailingLists>
