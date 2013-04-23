@@ -67,7 +67,7 @@
          <module>transport-statistics</module>
          <module>data-sources</module>
          <module>mediation-initializer</module>
-         <!--module>mediation-library</module-->
+         <module>mediation-library</module>
          <module>mediation-statistics</module>
          <module>mediation-tracer</module>
          <module>mediation</module>
@@ -130,7 +130,7 @@
         <module>coordination</module>
         <module>ntask</module>
         <module>transaction-manager</module>
-        <!--module>rest-api</module-->
+        <module>rest-api</module>
         <!--module>apimgt</module-->
 	    <module>andes</module>
 	    <module>data-agents</module>
