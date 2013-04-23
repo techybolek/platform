@@ -22,14 +22,14 @@
     <parent>
         <groupId>org.wso2.carbon</groupId>
         <artifactId>billing-feature</artifactId>
-        <version>2.1.0-SNAPSHOT</version>
+        <version>2.2.0-SNAPSHOT</version>
 	<relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.billing.server.feature</artifactId>
     <packaging>pom</packaging>
-    <version>2.1.0-SNAPSHOT</version>
+    <version>2.2.0-SNAPSHOT</version>
     <name>WSO2 Stratos - Billing Server Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the bundles required for billing server</description>
@@ -38,12 +38,12 @@
 	<dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.billing.core</artifactId>
-                <version>2.1.0-SNAPSHOT</version>
+                <version>2.2.0-SNAPSHOT</version>
         </dependency>
 	 <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.billing.mgt</artifactId>
-	    <version>2.1.0-SNAPSHOT</version>
+	    <version>2.2.0-SNAPSHOT</version>
         </dependency>
 	<dependency>
                 <groupId>org.wso2.carbon</groupId>
@@ -63,7 +63,7 @@
 	<dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.email.sender</artifactId>
-	    <version>2.1.0-SNAPSHOT</version>
+	    <version>2.2.0-SNAPSHOT</version>
 	</dependency>
         </dependencies>
     <build>
