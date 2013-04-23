@@ -145,7 +145,7 @@
         </carbon.platform.package.import.version.range>
 
         <!-- Stratos Version -->
-        <stratos.version>2.1.0-SNAPSHOT</stratos.version>
+        <stratos.version>2.2.0-SNAPSHOT</stratos.version>
 
         <!-- Equinox dependency versions -->
         <version.equinox.simpleconfigurator>1.0.301.v20120828-033635</version.equinox.simpleconfigurator>
