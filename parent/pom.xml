@@ -256,6 +256,7 @@
         <rampart.version>1.6.1-wso2v4</rampart.version>
         <rampart.mar.version>1.6.1-wso2v4</rampart.mar.version>
         <rampart.osgi.version>1.6.1.wso2v4</rampart.osgi.version>
+        <orbit.version.rampart>1.6.1.wso2v4</orbit.version.rampart>
 
 	<!-- Antlr Version -->
         <antlr.wso2.version>3.2.0.wso2v1</antlr.wso2.version>
