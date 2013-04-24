@@ -21,6 +21,7 @@ import org.apache.thrift.TException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,8 +59,8 @@ public class ThriftEntitlementServiceImpl extends AbstractAdmin implements Entit
      * @throws TException
      */
     public String getDecision(String request, String sessionId) throws EntitlementException,
-            TException {
-
+                                                                       TException {
+        boolean newTenantFlowStarted = false;
         try {
             if (thriftAuthenticatorService != null && entitlementService != null) {
 
@@ -73,26 +74,34 @@ public class ThriftEntitlementServiceImpl extends AbstractAdmin implements Entit
 
                     // obtain a dummy carbon context holder
                     PrivilegedCarbonContext carbonContextHolder = PrivilegedCarbonContext
-                            .getCurrentContext();
-
-                    /*
-                     * start tenant flow to stack up any existing carbon context holder base, and
-                     * initialize a raw one
-                     */
-                    carbonContextHolder.startTenantFlow();
-
+                            .getThreadLocalCarbonContext();
+                    
                     try {
-
-                        // need to populate current carbon context from the one created at
-                        // authentication
-                        populateCurrentCarbonContextFromAuthSession(carbonContextHolder,
-                                currentSession);
+                        if (carbonContextHolder.getTenantDomain() == null) {
+                            /*
+                            * (if the thread local cc is not populated at this moment)
+                            * start tenant flow to stack up any existing carbon context holder base, and
+                            * initialize a raw one
+                            */
+                            carbonContextHolder.startTenantFlow();
+                            newTenantFlowStarted = true;
+                            // need to populate current carbon context from the one created at
+                            // authentication
+                            populateCurrentCarbonContextFromAuthSession(carbonContextHolder,
+                                                                        currentSession);
+                        }
 
                         // perform the actual operation
                         return entitlementService.getDecision(request);
 
+                    } catch (Exception e) {
+                        String error = "Error while evaluating XACML decision from thrift service";
+                        log.error(error);
+                        throw new IdentityException(error, e);
                     } finally {
-                        carbonContextHolder.endTenantFlow();
+                        if (newTenantFlowStarted) {
+                            carbonContextHolder.endTenantFlow();
+                        }
                     }
 
                 } else {
@@ -103,7 +112,7 @@ public class ThriftEntitlementServiceImpl extends AbstractAdmin implements Entit
 
             } else {
                 String initErrorMsg = "Thrift Authenticator service or Entitlement "
-                        + "service is not initialized.";
+                                      + "service is not initialized.";
                 log.error(initErrorMsg);
                 throw new EntitlementException(initErrorMsg);
             }
