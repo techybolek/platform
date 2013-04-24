@@ -23,7 +23,7 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <directory>target/wso2carbon-core-${carbon.patch.version}</directory>
+            <directory>target/wso2carbon-core-${carbon.kernel.version}</directory>
             <outputDirectory>wso2esb-${pom.version}</outputDirectory>
             <excludes>
                 <exclude>**/*.sh</exclude>
@@ -65,7 +65,7 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>target/wso2carbon-core-${carbon.patch.version}</directory>
+            <directory>target/wso2carbon-core-${carbon.kernel.version}</directory>
             <outputDirectory>wso2esb-${pom.version}</outputDirectory>
             <includes>
                 <include>**/*.sh</include>
@@ -138,11 +138,11 @@
             <outputDirectory>wso2esb-${pom.version}/repository/deployment/server/synapse-configs</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>../p2-profile/target/wso2carbon-core-${carbon.patch.version}/repository/conf/advanced/</directory>
+            <directory>../p2-profile/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/advanced/</directory>
             <outputDirectory>wso2esb-${pom.version}/repository/conf/advanced</outputDirectory>
            </fileSet>
         <fileSet>
-            <directory>../p2-profile/target/wso2carbon-core-${carbon.patch.version}/repository/conf/security</directory>
+            <directory>../p2-profile/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/security</directory>
             <outputDirectory>wso2esb-${pom.version}/repository/conf/security</outputDirectory>
             <includes>
                 <include>**/jaas.conf</include>
@@ -152,7 +152,7 @@
 	 <!--Multitenancy related file -->
         <fileSet>
             <directory>
-                ../p2-profile/target/wso2carbon-core-${carbon.patch.version}/repository/conf/multitenancy/
+                ../p2-profile/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/multitenancy/
             </directory>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/multitenancy</outputDirectory>
             <includes>
@@ -164,7 +164,7 @@
         </fileSet>
 
         <fileSet>
-            <directory>../p2-profile/target/wso2carbon-core-${carbon.patch.version}/dbscripts/identity</directory>
+            <directory>../p2-profile/target/wso2carbon-core-${carbon.kernel.version}/dbscripts/identity</directory>
             <outputDirectory>wso2esb-${pom.version}/dbscripts/identity</outputDirectory>
             <includes>
                 <include>**/**.sql</include>
@@ -237,7 +237,7 @@
 
     <files>
 	    <file>
-            <source>../p2-profile/target/wso2carbon-core-${carbon.patch.version}/repository/conf/event-broker.xml</source>
+            <source>../p2-profile/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/event-broker.xml</source>
             <outputDirectory>wso2esb-${pom.version}/repository/conf</outputDirectory>
         </file>
 
@@ -301,7 +301,7 @@
             <filtered>true</filtered>
         </file>
         <file>
-            <source>../p2-profile/target/wso2carbon-core-${carbon.patch.version}/repository/conf/rule-engine-config.xml</source>
+            <source>../p2-profile/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/rule-engine-config.xml</source>
             <outputDirectory>wso2esb-${pom.version}/repository/conf</outputDirectory>
         </file>
         <file>
@@ -329,24 +329,24 @@
             <fileMode>644</fileMode>
         </file>
         <file>
-            <source>target/wso2carbon-core-${carbon.patch.version}/bin/README.txt</source>
+            <source>target/wso2carbon-core-${carbon.kernel.version}/bin/README.txt</source>
             <outputDirectory>wso2esb-${pom.version}/bin/</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
         <file>
-            <source>target/wso2carbon-core-${carbon.patch.version}/bin/version.txt</source>
+            <source>target/wso2carbon-core-${carbon.kernel.version}/bin/version.txt</source>
             <outputDirectory>wso2esb-${pom.version}/bin/</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>
         </file>
         <file>
-            <source>target/wso2carbon-core-${carbon.patch.version}/bin/wso2server.bat</source>
+            <source>target/wso2carbon-core-${carbon.kernel.version}/bin/wso2server.bat</source>
             <outputDirectory>wso2esb-${pom.version}/bin/</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>target/wso2carbon-core-${carbon.patch.version}/repository/conf/carbon.xml</source>
+            <source>target/wso2carbon-core-${carbon.kernel.version}/repository/conf/carbon.xml</source>
             <outputDirectory>wso2esb-${pom.version}/repository/conf/</outputDirectory>
             <filtered>true</filtered>
         </file>
@@ -380,11 +380,11 @@
         <!--Start Stratos ESB-->
 
         <file>
-            <source>../p2-profile/target/wso2carbon-core-${carbon.patch.version}/repository/conf/etc/logging-config.xml</source>
+            <source>../p2-profile/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/etc/logging-config.xml</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf/etc</outputDirectory>
         </file>
         <file>
-            <source>../p2-profile/target/wso2carbon-core-${carbon.patch.version}/repository/conf/identity.xml</source>
+            <source>../p2-profile/target/wso2carbon-core-${carbon.kernel.version}/repository/conf/identity.xml</source>
             <outputDirectory>${pom.artifactId}-${pom.version}/repository/conf</outputDirectory>
             <filtered>true</filtered>
             <fileMode>644</fileMode>

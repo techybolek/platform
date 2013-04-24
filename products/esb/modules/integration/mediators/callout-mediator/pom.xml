@@ -120,7 +120,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.integration.framework</artifactId>
-            <version>${carbon.version}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
@@ -137,7 +137,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>SecVerifier</artifactId>
-            <version>${carbon.version}</version>
+            <version>${carbon.platform.version}</version>
             <type>aar</type>
         </dependency>
     </dependencies>

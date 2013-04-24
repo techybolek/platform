@@ -109,12 +109,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.mediation.configadmin.stub</artifactId>
-            <version>${carbon.version}</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.integration.core</artifactId>
-            <version>${carbon.version}</version>
+            <version>${carbon.platform.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
             <exclusions>
