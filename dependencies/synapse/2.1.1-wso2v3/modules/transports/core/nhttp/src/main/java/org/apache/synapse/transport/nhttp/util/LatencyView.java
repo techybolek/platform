@@ -198,7 +198,7 @@ public class LatencyView implements LatencyViewMBean {
                 sum += array[array.length - 1 - i];
             }
         }
-
+        
         if (samples == 0) {
             return 0.0;
         }
@@ -251,7 +251,13 @@ public class LatencyView implements LatencyViewMBean {
             if (shortTermLatencyDataQueue.size() == SAMPLES_PER_MINUTE * 15) {
                 shortTermLatencyDataQueue.remove();
             }
-            shortTermLatencyDataQueue.offer(latency);
+
+            if (size == 0) {
+            	// there's no latency data available -> no new requests received 
+                shortTermLatencyDataQueue.offer(new Long(0));
+            } else {
+                shortTermLatencyDataQueue.offer(latency);
+            }
         }
     }
 
@@ -265,7 +271,10 @@ public class LatencyView implements LatencyViewMBean {
             if (longTermLatencyDataQueue.size() == SAMPLES_PER_HOUR * 24) {
                 longTermLatencyDataQueue.remove();
             }
-            longTermLatencyDataQueue.offer(latency);
+            
+            // adds the average latency value in last five minutes
+            longTermLatencyDataQueue
+                    .offer((long) getAverageLatencyByMinute(LARGE_DATA_COLLECTION_PERIOD / 60));
         }
     }
 }
