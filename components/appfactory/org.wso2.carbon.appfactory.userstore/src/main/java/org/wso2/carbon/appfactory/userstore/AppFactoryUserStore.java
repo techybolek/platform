@@ -29,7 +29,7 @@ public class AppFactoryUserStore extends ReadWriteLDAPUserStoreManager {
     }
     
     @Override
-    public boolean authenticate(String username, Object credential) throws UserStoreException {
+    public boolean doAuthenticate(String username, Object credential) throws UserStoreException {
         boolean isAuthenticated = false;
         isAuthenticated = super.authenticate(username, credential);
         if (isAuthenticated) {
@@ -42,7 +42,7 @@ public class AppFactoryUserStore extends ReadWriteLDAPUserStoreManager {
     }
 
     @Override
-    public String[] listUsers(String arg0, int maxItemLimit) throws UserStoreException {
+    public String[] doListUsers(String arg0, int maxItemLimit) throws UserStoreException {
         String[] roles = getRoleNames();
         List<String> users = new ArrayList<String>();
         for (String role : roles) {
@@ -63,7 +63,7 @@ public class AppFactoryUserStore extends ReadWriteLDAPUserStoreManager {
     }
 
     @Override
-    public void addUser(String userName, Object credential, String[] roleList,
+    public void doAddUser(String userName, Object credential, String[] roleList,
                         Map<String, String> claims, String profileName, boolean requirePasswordChange) throws UserStoreException {
         if (isExistingUser(userName)) {
             // do nothing
@@ -74,7 +74,7 @@ public class AppFactoryUserStore extends ReadWriteLDAPUserStoreManager {
     }
 
     @Override
-    public void updateCredentialByAdmin(String userName, Object newCredential) throws UserStoreException {
+    public void doUpdateCredentialByAdmin(String userName, Object newCredential) throws UserStoreException {
         // TODO - This is a hack to prevent password being updated each time the application is added
         String passwordValue = (String) newCredential;
         if (passwordValue != null && passwordValue.trim().length() > 0) {
