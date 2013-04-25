@@ -15,16 +15,25 @@
  */
 package org.wso2.carbon.identity.thrift.authentication;
 
+import net.sf.jsr107cache.Cache;
+import net.sf.jsr107cache.CacheException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.core.services.util.CarbonAuthenticationUtil;
 import org.wso2.carbon.identity.authentication.AuthenticationService;
+import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.thrift.authentication.dao.ThriftSessionDAO;
+import org.wso2.carbon.identity.thrift.authentication.internal.ThriftAuthenticationServiceComponent;
+import org.wso2.carbon.identity.thrift.authentication.util.ThriftAuthenticationConstants;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.core.util.UserCoreUtil;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ThriftSession;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,6 +69,23 @@ public class ThriftAuthenticatorServiceImpl extends AbstractAdmin
             }
         }
         return instance;
+    }
+
+    private void addThriftSession(ThriftSession thriftSession) throws IdentityException {
+        //add to cache
+        authenticatedSessions.put(thriftSession.getSessionId(), thriftSession);
+        //add to database
+        ThriftSessionDAO thriftSessionDAO = new ThriftSessionDAO();
+        thriftSessionDAO.addSession(thriftSession);
+    }
+
+    private void removeThriftSession(String thriftSessionId) throws IdentityException {
+        //remove from cache
+        //thriftSessionCache.remove(thriftSessionId);
+        authenticatedSessions.remove(thriftSessionId);
+        //remove from db
+        ThriftSessionDAO thriftSessionDAO = new ThriftSessionDAO();
+        thriftSessionDAO.removeSession(thriftSessionId);
     }
 
     /*initialize the org.wso2.carbon.identity.authentication.AuthenticationService which is wrapped
@@ -100,35 +126,7 @@ public class ThriftAuthenticatorServiceImpl extends AbstractAdmin
         }
 
         if (isSuccessful) {
-            //check if an already valid authenticated session exists for the given user name and password.
-            for (Map.Entry<String, ThriftSession> thriftSessionEntry : authenticatedSessions.entrySet()) {
-
-                if ((userName.equals(thriftSessionEntry.getValue().getUserName()))
-                    && password.equals(thriftSessionEntry.getValue().getPassword())) {
-                    //get relevant session id
-                    String existingId = thriftSessionEntry.getKey();
-                    if (log.isDebugEnabled()) {
-                        if (existingId != null) {
-                            log.debug("There is an existing session id for user: " + userName);
-                        }
-                    }
-                    //check whether session is valid
-                    if (isSessionValid(existingId)) {
-                        //update last access time
-                        authenticatedSessions.get(existingId).setLastAccess(System.currentTimeMillis());
-                        if (log.isDebugEnabled()) {
-                            log.debug("Existing session is valid for user: " + userName);
-                        }
-                        return thriftSessionEntry.getKey();
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Existing session is expired for user: " + userName);
-                        }
-                        //session expired, remove the session from map
-                        authenticatedSessions.remove(existingId);
-                    }
-                }
-            }
+            
             //if not, create a new session
             String sessionId = null;
             ThriftSession session = null;
@@ -138,23 +136,11 @@ public class ThriftAuthenticatorServiceImpl extends AbstractAdmin
                 session = new ThriftSession();
                 session.setSessionId(sessionId);
                 session.setUserName(userName);
-                session.setPassword(password);
                 session.setCreatedAt(System.currentTimeMillis());
                 session.setLastAccess(System.currentTimeMillis());
-                /*call onSuccessLogin in CarbonAuthenticationUtil to initialize registry for this
-                thrift session*/
-                if (realmService != null) {
-                    String tenantDomain = MultitenantUtils.getTenantDomain(userName);
-                    int tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
-                    CarbonAuthenticationUtil.onSuccessAdminLogin(session, userName, tenantId,
-                                                                 tenantDomain, "");
-                    /*call handleAuthenticationComplete to facilitate AuthenticationObservers*/
-                    authenticatedSessions.put(sessionId, session);
-                } else {
-                    String errorMsg = "Realm service not properly set..";
-                    log.error(errorMsg);
-                    throw new AuthenticationException(errorMsg);
-                }
+                
+                callOnSuccessAdminLogin(session);
+                addThriftSession(session);
 
             } catch (Exception e) {
                 String errorMsg = "Error occured while authenticating the user: " + userName;
@@ -173,32 +159,99 @@ public class ThriftAuthenticatorServiceImpl extends AbstractAdmin
     public boolean isAuthenticated(String sessionId) {
 
         if (sessionId == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Session id sent for authentication is null.");
-            }
             return false;
         }
-
-        if (authenticatedSessions.containsKey(sessionId)) {
-            if (isSessionValid(sessionId)) {
-                //update the last access time.
-                authenticatedSessions.get(sessionId).setLastAccess(System.currentTimeMillis());
-                if (log.isDebugEnabled()) {
-                    log.debug("Session id sent for authentication is successfully authenticated.");
-                }
-                return true;
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Session id sent for authentication is not valid.");
-                }
-                //invalidate session
-                authenticatedSessions.remove(sessionId);
-                return false;
+        //if cache empty, try to populate from db
+        if (authenticatedSessions.isEmpty()) {
+            try {
+                populateSessionsFromDB();
+            } catch (IdentityException e) {
+                String error = "Error while populating thrift sessions from cache";
+                log.error(error, e);
+            } catch (Exception e) {
+                String error = "Error while populating thrift sessions from cache";
+                log.error(error, e);
             }
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Session id sent for authentication is not existing.");
+        //if cache not empty, check if session id existing and valid, if so, update last access time and return it.
+        if (!authenticatedSessions.isEmpty()) {
+            ThriftSessionDAO thriftSessionDAO = new ThriftSessionDAO();
+            if (authenticatedSessions.containsKey(sessionId)) {
+                ThriftSession thriftSessionInCache = authenticatedSessions.get(sessionId);
+                if (isSessionValid(thriftSessionInCache)) {
+                    //update the last access time in cache and d
+                    long lastAccessTime = System.currentTimeMillis();
+                    (authenticatedSessions.get(sessionId)).setLastAccess(lastAccessTime);
+                    try {
+                        //if carbon context in the thrift session is not initialized, should do that now.
+                        if ((thriftSessionInCache.getAttribute(MultitenantConstants.TENANT_DOMAIN)) == null) {
+                            callOnSuccessAdminLogin(thriftSessionInCache);
+                        }
+                        //put the thrift session filled with carbon context info
+                        authenticatedSessions.put(sessionId, thriftSessionInCache);
+                        thriftSessionDAO.updateLastAccessTime(sessionId,lastAccessTime);
+                    } catch (IdentityException e) {
+                        String error = "Error while updating last access time in DB";
+                        log.error(error, e);
+                    } catch (Exception e) {
+                        String error = "Error in calling on success admin login for the thrift session.";
+                        log.error(error, e);
+                    }
+                    return true;
+                } else {
+                    //if not valid in cache, check if valid in db
+                    try {
+                        ThriftSession thriftSession = thriftSessionDAO.getSession(sessionId);
+                        if (isSessionValid(thriftSession)) {
+                            //update cache and return true
+                            thriftSession.setLastAccess(System.currentTimeMillis());
+                            if (thriftSession.getAttribute(MultitenantConstants.TENANT_DOMAIN) == null) {
+                                callOnSuccessAdminLogin(thriftSession);
+                            }
+                            authenticatedSessions.put(thriftSession.getSessionId(), thriftSession);
+                            thriftSessionDAO.updateLastAccessTime(sessionId, thriftSession.getLastAccess());
+                            return true;
+                        } else {
+                            //remove from cache and db and return false
+                            removeThriftSession(sessionId);
+                            return false;
+                        }
+                    } catch (IdentityException e) {
+                        String error = "Error while obtaining thrift session from database.";
+                        log.error(error, e);
+                    } catch (Exception e) {
+                        String error = "Error in calling on success admin login for the thrift session.";
+                        log.error(error, e);
+                    }
+                }
+            } else {
+                //if session id not found, check in db as well, if exist in db, populate cache
+                try {
+                    if (thriftSessionDAO.isSessionExisting(sessionId)) {
+                        ThriftSession thriftSession = thriftSessionDAO.getSession(sessionId);
+                        if (isSessionValid(thriftSession)) {
+                            thriftSession.setLastAccess(System.currentTimeMillis());
+                            if (thriftSession.getAttribute(MultitenantConstants.TENANT_DOMAIN) == null) {
+                                callOnSuccessAdminLogin(thriftSession);
+                            }
+                            authenticatedSessions.put(thriftSession.getSessionId(), thriftSession);
+                            thriftSessionDAO.updateLastAccessTime(sessionId, thriftSession.getLastAccess());
+                            return true;
+                        } else {
+                            thriftSessionDAO.removeSession(sessionId);
+                            return false;
+                        }
+                    }
+                } catch (IdentityException e) {
+                    String error = "Error while obtaining thrift session from database.";
+                    log.error(error, e);
+                } catch (Exception e) {
+                    String error = "Error in calling on success admin login for the thrift session obtained from DB.";
+                    log.error(error, e);
+                }
+            }
         }
+
         return false;
     }
 
@@ -233,12 +286,43 @@ public class ThriftAuthenticatorServiceImpl extends AbstractAdmin
             }
         }
     }*/
-    private boolean isSessionValid(String sessionId) {
-        if (authenticatedSessions.containsKey(sessionId)) {
-            ThriftSession authSession = authenticatedSessions.get(sessionId);
-            //check whether the session is expired.
-            return ((System.currentTimeMillis() - (authSession.getLastAccess()) < thriftSessionTimeOut));
+    private boolean isSessionValid(ThriftSession thriftSession) {
+        //check whether the session is expired.
+        return ((System.currentTimeMillis() - thriftSession.getLastAccess()) < thriftSessionTimeOut);
+    }
+
+    private void populateSessionsFromDB() throws Exception {
+        //first clear the cache
+        if (!authenticatedSessions.isEmpty()) {
+            authenticatedSessions.clear();
         }
-        return false;
+        //get all sessions from db
+        ThriftSessionDAO thriftSessionDAO = new ThriftSessionDAO();
+        List<ThriftSession> thriftSessions = thriftSessionDAO.getAllSessions();
+        //add to cache
+        if (thriftSessions != null && thriftSessions.size() != 0) {
+            for (ThriftSession thriftSession : thriftSessions) {
+                //callOnSuccessAdminLogin(thriftSession);
+                authenticatedSessions.put(thriftSession.getSessionId(), thriftSession);
+            }
+        }
+    }
+
+    private boolean isSessionExistInDB(String sessionId) throws IdentityException {
+        ThriftSessionDAO thriftSessionDAO = new ThriftSessionDAO();
+        return thriftSessionDAO.isSessionExisting(sessionId);
+    }
+
+    private void callOnSuccessAdminLogin(ThriftSession session) throws Exception {
+        if (realmService != null) {
+            String tenantDomain = MultitenantUtils.getTenantDomain(session.getUserName());
+            int tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
+            CarbonAuthenticationUtil.onSuccessAdminLogin(session, session.getUserName(), tenantId,
+                                                         tenantDomain, "");
+        } else {
+            String errorMsg = "Realm service not properly set..";
+            log.error(errorMsg);
+            throw new AuthenticationException(errorMsg);
+        }
     }
 }

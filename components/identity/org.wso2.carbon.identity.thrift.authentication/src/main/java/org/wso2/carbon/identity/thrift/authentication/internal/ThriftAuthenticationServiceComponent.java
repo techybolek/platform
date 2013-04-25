@@ -20,11 +20,10 @@ package org.wso2.carbon.identity.thrift.authentication.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.protocol.TCompactProtocol;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.identity.authentication.AuthenticationService;
 import org.wso2.carbon.identity.thrift.authentication.AuthenticatorService;
 import org.wso2.carbon.identity.thrift.authentication.AuthenticatorServiceImpl;
@@ -47,6 +46,7 @@ import java.util.Hashtable;
  * interface="org.wso2.carbon.user.core.service.RealmService"
  * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
  */
+ 
 public class ThriftAuthenticationServiceComponent {
 
     private static Log log = LogFactory.getLog(ThriftAuthenticationServiceComponent.class);
@@ -71,6 +71,9 @@ public class ThriftAuthenticationServiceComponent {
         
         //register AuthenticatorServiceImpl as a thrift service.
         startThriftServices();
+
+        //populate thrift sessions from db, if there is any in the db
+        
     }
 
     protected void deactivate(ComponentContext compCtx) {
@@ -133,5 +136,4 @@ public class ThriftAuthenticationServiceComponent {
             log.error("Unable to start thrift Authenticator Service");
         }
     }
-
 }
