@@ -60,6 +60,8 @@ public class SAMLSSOServiceProviderDAO extends AbstractDAO<SAMLSSOServiceProvide
 
         serviceProviderDO.setLogoutURL(resource
                 .getProperty(IdentityRegistryResources.PROP_SAML_SSO_LOGOUT_URL));
+        serviceProviderDO.setLoginPageURL(resource.
+                getProperty(IdentityRegistryResources.PROP_SAML_SSO_LOGIN_PAGE_URL));
 
         if (resource.getProperty(IdentityRegistryResources.PROP_SAML_SSO_DO_SIGN_RESPONSE) != null) {
             serviceProviderDO.setDoSignResponse(new Boolean(resource.getProperty(
@@ -119,6 +121,8 @@ public class SAMLSSOServiceProviderDAO extends AbstractDAO<SAMLSSOServiceProvide
                     serviceProviderDO.getCertAlias());
             resource.addProperty(IdentityRegistryResources.PROP_SAML_SSO_LOGOUT_URL,
                     serviceProviderDO.getLogoutURL());
+            resource.addProperty(IdentityRegistryResources.PROP_SAML_SSO_LOGIN_PAGE_URL,
+                                 serviceProviderDO.getLoginPageURL());
 
             String useFullyQualifiedUsername = serviceProviderDO.isUseFullyQualifiedUsername() ? "true"
                     : "false";
