@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon.automation</groupId>
     <artifactId>clarity-framework</artifactId>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>WSO2 Carbon Automation - Parent core project</name>
@@ -182,8 +182,8 @@
 
     <properties>
         <maven.test.skip>true</maven.test.skip>
-        <stub.version>4.1.0-SNAPSHOT</stub.version>
-        <carbon.version>4.1.0-SNAPSHOT</carbon.version>
+        <stub.version>4.2.0-SNAPSHOT</stub.version>
+        <carbon.version>4.2.0-SNAPSHOT</carbon.version>
         <clarity-version>4.0.8</clarity-version>
         <maven-javadoc-plugin.version>2.7</maven-javadoc-plugin.version>
         <maven-jxr-plugin.version>2.2</maven-jxr-plugin.version>
