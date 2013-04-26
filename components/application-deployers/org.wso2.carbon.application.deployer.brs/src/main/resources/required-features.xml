@@ -1,5 +1,5 @@
 <featureSets>
     <featureSet artifactType="service/rule">
-        <feature id="org.wso2.carbon.rule.service.feature.group" version="[4.1.0, 4.2.0)"/>
+        <feature id="org.wso2.carbon.rule.service.feature.group" version="[4.2.0, 4.3.0)"/>
     </featureSet>
 </featureSets>

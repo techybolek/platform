@@ -53,7 +53,8 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
      * @param carbonApp  - CarbonApplication instance to check for artifacts
      * @param axisConfig - AxisConfiguration of the current tenant
      */
-    public void deployArtifacts(CarbonApplication carbonApp, AxisConfiguration axisConfig) throws DeploymentException{
+    public void deployArtifacts(CarbonApplication carbonApp, AxisConfiguration axisConfig)
+            throws DeploymentException{
         List<Artifact.Dependency> artifacts = carbonApp.getAppConfig().getApplicationArtifact()
                 .getDependencies();
 
@@ -114,7 +115,8 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
      * @param carbonApplication - CarbonApplication instance
      * @param axisConfig - AxisConfiguration of the current tenant
      */
-    public void undeployArtifacts(CarbonApplication carbonApplication, AxisConfiguration axisConfig) throws DeploymentException{
+    public void undeployArtifacts(CarbonApplication carbonApplication, AxisConfiguration axisConfig)
+            throws DeploymentException{
 
         List<Artifact.Dependency> artifacts = carbonApplication.getAppConfig()
                 .getApplicationArtifact().getDependencies();
@@ -199,16 +201,21 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
      * @return Deployer instance
      */
     private Deployer getDeployer(AxisConfiguration axisConfig, String directory) {
+        Deployer deployer = null;
         // access the deployment engine through axis config
         DeploymentEngine deploymentEngine = (DeploymentEngine) axisConfig.getConfigurator();
         String tenantId = AppDeployerUtils.getTenantIdString(axisConfig);
         SynapseEnvironmentService environmentService = DataHolder.getInstance().
                 getSynapseEnvironmentService(Integer.parseInt(tenantId));
-        String synapseConfigPath = ServiceBusUtils.getSynapseConfigAbsPath(
-                environmentService.getSynapseEnvironment().getServerContextInformation());
-        String endpointDirPath = synapseConfigPath
-                                 + File.separator + directory;
-        return deploymentEngine.getDeployer(endpointDirPath, ServiceBusConstants.ARTIFACT_EXTENSION);
+        if (environmentService != null) {
+            String synapseConfigPath = ServiceBusUtils.getSynapseConfigAbsPath(
+                    environmentService.getSynapseEnvironment().getServerContextInformation());
+            String endpointDirPath = synapseConfigPath
+                                     + File.separator + directory;
+            deployer = deploymentEngine.getDeployer(endpointDirPath,
+                                                    ServiceBusConstants.ARTIFACT_EXTENSION);
+        }
+        return deployer;
     }
 
 }
