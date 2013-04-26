@@ -24,6 +24,7 @@ public class SAMLSSOServiceProviderDTO {
     private String assertionConsumerUrl;
     private String certAlias;
     private String logoutURL;
+    private String loginPageURL;
     private String attributeConsumingServiceIndex;
     private boolean useFullyQualifiedUsername;
     private boolean doSingleLogout;
@@ -78,6 +79,14 @@ public class SAMLSSOServiceProviderDTO {
 
     public void setLogoutURL(String logoutURL) {
         this.logoutURL = logoutURL;
+    }
+
+    public String getLoginPageURL() {
+        return loginPageURL;
+    }
+
+    public void setLoginPageURL(String loginPageURL) {
+        this.loginPageURL = loginPageURL;
     }
 
     /**

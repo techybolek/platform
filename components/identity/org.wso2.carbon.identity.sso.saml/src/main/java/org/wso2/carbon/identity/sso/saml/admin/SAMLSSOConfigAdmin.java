@@ -57,6 +57,7 @@ public class SAMLSSOConfigAdmin {
         serviceProviderDO.setCertAlias(serviceProviderDTO.getCertAlias());
         serviceProviderDO.setUseFullyQualifiedUsername(serviceProviderDTO.isUseFullyQualifiedUsername());
         serviceProviderDO.setDoSingleLogout(serviceProviderDTO.isDoSingleLogout());
+        serviceProviderDO.setLoginPageURL(serviceProviderDTO.getLoginPageURL());
         serviceProviderDO.setLogoutURL(serviceProviderDTO.getLogoutURL());
         serviceProviderDO.setDoSignResponse(serviceProviderDTO.isDoSignResponse());
         serviceProviderDO.setDoSignAssertions(serviceProviderDTO.isDoSignAssertions());
@@ -102,6 +103,7 @@ public class SAMLSSOConfigAdmin {
                 providerDTO.setDoSignResponse(providerDO.isDoSignResponse());
                 providerDTO.setDoSignAssertions(providerDO.isDoSignAssertions());
                 providerDTO.setDoSingleLogout(providerDO.isDoSingleLogout());
+                providerDTO.setLoginPageURL(providerDO.getLoginPageURL());
                 providerDTO.setLogoutURL(providerDO.getLogoutURL());
                 providerDTO.setRequestedClaims(providerDO.getRequestedClaims());
                 providerDTO.setRequestedAudiences(providerDO.getRequestedAudiences());
