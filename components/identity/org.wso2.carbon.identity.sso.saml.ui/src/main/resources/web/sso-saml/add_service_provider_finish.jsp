@@ -87,6 +87,7 @@
             serviceProviderDTO.setRequestedAudiences(samlSsoServuceProviderConfigBean.getSelectedAudiencesArray());
         }
         serviceProviderDTO.setLogoutURL(request.getParameter("logoutURL"));
+        serviceProviderDTO.setLoginPageURL(request.getParameter("loginPageURL"));
 
         if ("true".equals(request.getParameter("enableAttributeProfile"))) {
 

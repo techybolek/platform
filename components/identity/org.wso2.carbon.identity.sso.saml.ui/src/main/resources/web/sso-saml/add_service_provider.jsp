@@ -385,6 +385,32 @@
     </td>
 </tr>
 
+<!-- LoginPageUrl -->
+<%
+    if (isEditSP) {
+%>
+<tr>
+    <td style="width: 300px;">
+        <fmt:message key="loginPage.url"/>
+    </td>
+    <td>
+        <input type="text" id="loginPageURL" name="loginPageURL"
+               value="<%=provider.getLoginPageURL()%>"
+               class="text-box-big">
+    </td>
+
+</tr>
+<% } else {%>
+<td style="width: 300px;">
+    <fmt:message key="loginPage.url"/>
+</td>
+<td>
+    <input type="text" id="loginPageURL" name="loginPageURL"
+           value=""
+           class="text-box-big">
+</td>
+<% } %>
+
 <!-- UseFullQualifiedUsername -->
 
 <tr>
