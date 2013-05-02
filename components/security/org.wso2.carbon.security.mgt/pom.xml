@@ -40,17 +40,17 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-	    	<version>${project.version}</version>
+	    	<version>${carbon.kernel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.core</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.kernel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
-            <version>4.2.0-SNAPSHOT</version>
+            <version>${carbon.kernel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.ws.security.wso2</groupId>
@@ -60,17 +60,17 @@
         <dependency>
             <groupId>org.apache.rampart.wso2</groupId>
             <artifactId>rampart-core</artifactId>
-            <version>1.6.1.wso2v8</version>
+            <version>${orbit.version.rampart}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.rampart.wso2</groupId>
             <artifactId>rampart-policy</artifactId>
-            <version>1.6.1.wso2v8</version>
+            <version>${orbit.version.rampart}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.rampart.wso2</groupId>
             <artifactId>rampart-trust</artifactId>
-            <version>1.6.1.wso2v8</version>
+            <version>${orbit.version.rampart}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.xkms.wso2</groupId>
@@ -80,12 +80,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.core</artifactId>
-            <version>${project.version}</version>
+            <version>${carbon.kernel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.caching.core</artifactId>
-            <version>4.2.0-SNAPSHOT</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
 		<dependency>
 			<groupId>backport-util-concurrent.wso2</groupId>
@@ -148,5 +148,7 @@
             </plugin>
         </plugins>
     </build>
-
+    <properties>
+      <carbon.kernel.version>${carbon.platform.version}</carbon.kernel.version>
+    </properties>
 </project>
