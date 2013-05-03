@@ -13,6 +13,7 @@
             <!--<class name="org.wso2.carbon.integration.test.poxsecurity.POXSecurityByAdminTestCase"/>-->
             <!--<class name="org.wso2.carbon.integration.test.poxsecurity.POXSecurityVerifyPostMethod"/>-->
             <!--<class name="org.wso2.carbon.integration.test.poxsecurity.POXSecurityWithInvalidGroupTestCase"/>-->
+            <class name="org.wso2.carbon.integration.test.Http200ZeroContentLengthTestCase"/>
         </classes>
     </test>
 </suite>
