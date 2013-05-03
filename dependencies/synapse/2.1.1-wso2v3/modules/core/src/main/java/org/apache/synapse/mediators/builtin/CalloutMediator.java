@@ -24,6 +24,7 @@ import org.apache.axiom.om.OMNode;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
@@ -202,6 +203,15 @@ public class CalloutMediator extends AbstractMediator implements ManagedLifecycl
                 if (synLog.isTraceTraceEnabled()) {
                     synLog.traceTrace("Request message payload : " + request);
                 }
+            }
+
+            /*
+               User should set this property {<property name="enableMTOM" value="true"/>} before the Callout mediator,
+               if he needs to use MTOM in Callout mediator.
+            */
+
+            if (Constants.VALUE_TRUE.equals(synCtx.getProperty(Constants.Configuration.ENABLE_MTOM))) {
+                options.setProperty(Constants.Configuration.ENABLE_MTOM, Constants.VALUE_TRUE);
             }
 
             OMElement result = null;
