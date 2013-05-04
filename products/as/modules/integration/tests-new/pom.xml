@@ -218,17 +218,17 @@
         <dependency>
             <groupId>org.wso2.carbon.automation</groupId>
             <artifactId>org.wso2.carbon.automation.api</artifactId>
-            <version>${clarity.version}</version>
+            <version>${test.framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.automation</groupId>
             <artifactId>org.wso2.carbon.automation.core</artifactId>
-            <version>${clarity.version}</version>
+            <version>${test.framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.automation</groupId>
             <artifactId>org.wso2.carbon.automation.utils</artifactId>
-            <version>${clarity.version}</version>
+            <version>${test.framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
@@ -238,6 +238,6 @@
         </dependency>
     </dependencies>
     <properties>
-        <clarity.version>4.0.6</clarity.version>
+        <test.framework.version>${carbon.platform.version}</test.framework.version>
     </properties>
 </project>

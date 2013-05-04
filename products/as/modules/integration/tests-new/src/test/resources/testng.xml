@@ -1,19 +1,22 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="appserver-features-test-suite">
+<suite name="APPServer-features-test-suite">
     <parameter name="useDefaultListeners" value="false"/>
-    <test name="Test - APPserver" preserve-order="true" parallel="false">
+    <test name="Test - APPServer" preserve-order="true" parallel="false">
         <packages>
-            <package name="org.wso2.carbon.integration.test.poxsecurity"/>
+            <!--<package name="org.wso2.carbon.integration.test.*"/>
+            <package name="jaggery.integration.tests.*"/>
+            <package name="ms.integration.tests.*"/>-->
+            <package name="org.wso2.carbon.integration.test.webapp.*"/>
         </packages>
 
-
         <classes>
-            <!--<class name="org.wso2.carbon.integration.test.poxsecurity.ASServiceDeployment"/>-->
+            <!--<class name="org.wso2.carbon.integration.test.jndi.JNDITestCase"/>-->
+            <!--<class name="org.wso2.carbon.integration.test.qualityofservice.throtllingservice.ThrottlingTestCase"/>-->
+            <!--<class name="org.wso2.carbon.integration.test.webapp.mgt.WebApplicationFaultyDeploymentTestCase"/>-->
             <!--<class name="org.wso2.carbon.integration.test.poxsecurity.POXSecurityByAdminTestCase"/>-->
             <!--<class name="org.wso2.carbon.integration.test.poxsecurity.POXSecurityVerifyPostMethod"/>-->
             <!--<class name="org.wso2.carbon.integration.test.poxsecurity.POXSecurityWithInvalidGroupTestCase"/>-->
-            <class name="org.wso2.carbon.integration.test.Http200ZeroContentLengthTestCase"/>
         </classes>
     </test>
 </suite>
