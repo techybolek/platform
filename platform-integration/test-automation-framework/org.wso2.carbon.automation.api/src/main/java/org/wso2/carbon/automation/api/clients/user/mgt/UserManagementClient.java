@@ -21,11 +21,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.api.clients.utils.AuthenticateStub;
-import org.wso2.carbon.user.mgt.stub.DeleteUserUserAdminExceptionException;
-import org.wso2.carbon.user.mgt.stub.GetAllRolesNamesUserAdminExceptionException;
-import org.wso2.carbon.user.mgt.stub.GetUsersOfRoleUserAdminExceptionException;
-import org.wso2.carbon.user.mgt.stub.ListUsersUserAdminExceptionException;
-import org.wso2.carbon.user.mgt.stub.UpdateUsersOfRoleUserAdminExceptionException;
+import org.wso2.carbon.user.mgt.stub.*;
 import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.user.mgt.stub.types.carbon.ClaimValue;
 import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
@@ -87,7 +83,7 @@ public class UserManagementClient {
         FlaggedName[] existingRoles;
         try {
             userAdminStub.deleteRole(roleName);
-            existingRoles = userAdminStub.getAllRolesNames();
+            existingRoles = userAdminStub.getAllRolesNames(roleName, 100);
 
             for (FlaggedName existingRole : existingRoles) {
                 if (roleName.equals(existingRole.getItemName())) {
@@ -96,10 +92,6 @@ public class UserManagementClient {
             }
         } catch (RemoteException e) {
             handleException("Failed to get all roles", e);
-        } catch (GetAllRolesNamesUserAdminExceptionException e) {
-            handleException("Failed to get all role names", e);
-        } catch (Exception e) {
-            handleException("Failed to delete role", e);
         }
     }
 
@@ -108,24 +100,17 @@ public class UserManagementClient {
         String[] userList;
         try {
             userAdminStub.deleteUser(userName);
-            userList = userAdminStub.listUsers(userName);
+            userList = userAdminStub.listUsers(userName, 100);
             assert (userList == null || userList.length == 0);
         } catch (RemoteException e) {
             handleException("Failed to list users", e);
-        } catch (ListUsersUserAdminExceptionException e) {
-            handleException("Failed to list users", e);
-        } catch (DeleteUserUserAdminExceptionException e) {
-            if (e.getFaultMessage().isUserAdminExceptionSpecified()) {
-                handleException(e.getFaultMessage().getUserAdminException().getErrorMessage(), e);
-            }
-            handleException("Failed to delete user", e);
         }
     }
 
     private void addRoleWithUser(String roleName, String userName)
             throws Exception {
         userAdminStub.addRole(roleName, new String[]{userName}, null);
-        FlaggedName[] roles = userAdminStub.getAllRolesNames();
+        FlaggedName[] roles = userAdminStub.getAllRolesNames(roleName, 100);
         for (FlaggedName role : roles) {
             if (!role.getItemName().equals(roleName)) {
                 continue;
@@ -135,7 +120,6 @@ public class UserManagementClient {
             assert false : "Role: " + roleName + " was not added properly.";
         }
     }
-
 
     protected void handleException(String msg, Exception e) throws Exception {
         log.error(msg, e);
@@ -167,12 +151,11 @@ public class UserManagementClient {
             userAdminStub.updateUsersOfRole(roleName, updatedUserList.toArray(
                     new FlaggedName[updatedUserList.size()]));
 
-
             //if delete users in retrieved list, fail
             if (deletingUsers != null) {
                 for (String deletedUser : deletingUsers) {
                     FlaggedName[] verifyingList;
-                    verifyingList = userAdminStub.getUsersOfRole(roleName, deletedUser);
+                    verifyingList = userAdminStub.getUsersOfRole(roleName, deletedUser, 100);
 
                     assert (!verifyingList[0].getSelected());
                 }
@@ -181,30 +164,26 @@ public class UserManagementClient {
             if (addingUsers != null) {
                 //if all added users are not in list fail
                 for (String addingUser : addingUsers) {
-                    FlaggedName[] verifyingList = userAdminStub.getUsersOfRole(roleName, addingUser);
+                    FlaggedName[] verifyingList = userAdminStub.getUsersOfRole(roleName, addingUser, 100);
                     assert (verifyingList[0].getSelected());
                 }
             }
-        } catch (UpdateUsersOfRoleUserAdminExceptionException e) {
-            handleException("Failed to update users of role", e);
         } catch (RemoteException e1) {
             handleException("Failed to update role", e1);
-        } catch (GetUsersOfRoleUserAdminExceptionException e1) {
-            handleException("Failed to retrieve user of role", e1);
         }
+
     }
 
     public boolean roleNameExists(String roleName)
-            throws RemoteException, GetAllRolesNamesUserAdminExceptionException {
+            throws Exception {
         FlaggedName[] roles = new FlaggedName[0];
         try {
-            roles = userAdminStub.getAllRolesNames();
+            roles = userAdminStub.getAllRolesNames(roleName, 100);
+
         } catch (RemoteException e) {
-            log.error("Unable to get role names list", e);
-            throw new RemoteException("Unable to get role names list", e);
-        } catch (GetAllRolesNamesUserAdminExceptionException e) {
-            log.error("Unable to get role names list", e);
-            throw new GetAllRolesNamesUserAdminExceptionException("Unable to get role names list", e);
+            handleException("Unable to get role names list", e);
+        } catch (UserAdminUserAdminException e) {
+            handleException("Faile to get all roles", e);
         }
 
         for (FlaggedName role : roles) {
@@ -217,17 +196,18 @@ public class UserManagementClient {
     }
 
     public boolean userNameExists(String roleName, String userName)
-            throws RemoteException, GetAllRolesNamesUserAdminExceptionException {
+            throws Exception {
         FlaggedName[] users = new FlaggedName[0];
         try {
-            users = userAdminStub.getUsersOfRole(roleName, "*");
+            users = userAdminStub.getUsersOfRole(roleName, "*", 100);
+
         } catch (RemoteException e) {
             log.error("Unable to get user names list");
             throw new RemoteException("Unable to get user names list");
-        } catch (GetUsersOfRoleUserAdminExceptionException e) {
-            log.error("Unable to get user names list");
-            throw new GetAllRolesNamesUserAdminExceptionException("Unable to get user names list");
+        } catch (UserAdminUserAdminException e) {
+            handleException("Unable to get user name list", e);
         }
+
         for (FlaggedName user : users) {
             if (user.getItemName().equals(userName)) {
                 log.info("User name " + userName + " already exists");

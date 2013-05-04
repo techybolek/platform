@@ -26,7 +26,6 @@ import org.wso2.carbon.automation.api.clients.user.mgt.UserManagementClient;
 import org.wso2.carbon.automation.core.ProductConstant;
 import org.wso2.carbon.automation.core.utils.UserInfo;
 import org.wso2.carbon.registry.resource.stub.ResourceAdminServiceResourceServiceExceptionException;
-import org.wso2.carbon.user.mgt.stub.GetAllRolesNamesUserAdminExceptionException;
 
 import java.rmi.RemoteException;
 

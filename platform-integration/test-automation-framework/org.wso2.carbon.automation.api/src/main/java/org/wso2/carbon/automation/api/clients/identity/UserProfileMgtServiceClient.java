@@ -22,15 +22,14 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.api.clients.utils.AuthenticateStub;
-import org.wso2.carbon.identity.user.profile.stub.UserProfileExceptionException;
 import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceStub;
+import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceUserProfileExceptionException;
 import org.wso2.carbon.identity.user.profile.stub.types.UserProfileDTO;
 
 import java.rmi.RemoteException;
 
 public class UserProfileMgtServiceClient {
     private static final Log log = LogFactory.getLog(UserProfileMgtServiceClient.class);
-
 
     private final String serviceName = "UserProfileMgtService";
     private UserProfileMgtServiceStub userProfileMgtServiceStub;
@@ -61,62 +60,63 @@ public class UserProfileMgtServiceClient {
     }
 
     public void deleteUserProfile(String userName, String profileName)
-            throws RemoteException, UserProfileExceptionException {
+            throws RemoteException, UserProfileMgtServiceUserProfileExceptionException {
         try {
             userProfileMgtServiceStub.deleteUserProfile(userName, profileName);
         } catch (RemoteException e) {
             String msg = "Delete user profile fails";
             log.info(msg);
             throw new RemoteException(msg, e);
-        } catch (UserProfileExceptionException e) {
+        } catch (UserProfileMgtServiceUserProfileExceptionException e) {
             String msg = "Delete user profile fails";
             log.info(msg);
-            throw new UserProfileExceptionException(msg, e);
+            throw new UserProfileMgtServiceUserProfileExceptionException(msg, e);
         }
     }
 
     public void setUserProfile(String userName, UserProfileDTO profile)
-            throws RemoteException, UserProfileExceptionException {
+            throws RemoteException, UserProfileMgtServiceUserProfileExceptionException {
         try {
             userProfileMgtServiceStub.setUserProfile(userName, profile);
         } catch (RemoteException e) {
             String msg = "Set user profile fails";
             log.info(msg);
             throw new RemoteException(msg, e);
-        } catch (UserProfileExceptionException e) {
+
+        } catch (UserProfileMgtServiceUserProfileExceptionException e) {
             String msg = "Set user profile fails";
             log.info(msg);
-            throw new UserProfileExceptionException(msg, e);
+            throw new UserProfileMgtServiceUserProfileExceptionException(msg, e);
         }
     }
 
-    public UserProfileDTO[] getUserProfiles(String userName)
-            throws RemoteException, UserProfileExceptionException {
+    public UserProfileDTO[] getUserProfiles(String userName) throws RemoteException {
         try {
             return userProfileMgtServiceStub.getUserProfiles(userName);
         } catch (RemoteException e) {
             String msg = "Unable to get user profiles of " + userName;
             log.info(msg);
             throw new RemoteException(msg, e);
-        } catch (UserProfileExceptionException e) {
+        } catch (UserProfileMgtServiceUserProfileExceptionException e) {
             String msg = "Unable to get user profiles of " + userName;
             log.info(msg);
-            throw new UserProfileExceptionException(msg, e);
+            throw new RemoteException(msg, e);
         }
     }
 
     public UserProfileDTO getUserProfile(String userName, String profileName)
-            throws RemoteException, UserProfileExceptionException {
+            throws RemoteException, UserProfileMgtServiceUserProfileExceptionException {
         try {
             return userProfileMgtServiceStub.getUserProfile(userName, profileName);
         } catch (RemoteException e) {
             String msg = "Unable to get user profile of " + userName;
             log.info(msg);
             throw new RemoteException(msg, e);
-        } catch (UserProfileExceptionException e) {
+
+        } catch (UserProfileMgtServiceUserProfileExceptionException e) {
             String msg = "Unable to get user profile of " + userName;
             log.info(msg);
-            throw new UserProfileExceptionException(msg, e);
+            throw new UserProfileMgtServiceUserProfileExceptionException(msg, e);
         }
     }
 }
