@@ -117,8 +117,8 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
                 log.error("Issuer is empty in the SAML assertion");
                 throw new Exception("Issuer is empty in the SAML assertion");
             } else if (!OAuthServerConfiguration.getInstance().getSAML2Issuers().contains(assertion.getIssuer().getValue())){
-                log.error("SAML2 Issurs not registered");
-                throw new IdentityOAuth2Exception("SAML2 Issurs not registered");
+                log.error("SAML2 Issuers not registered");
+                throw new IdentityOAuth2Exception("SAML2 Issuers not registered");
             }
 
             /**
@@ -167,12 +167,6 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
              * MAY be included in an <AttributeStatement>.
              */
             if (assertion.getSubject() != null) {
-                // Get user the client_id belongs to
-//                String token_user = OAuth2Util.getAuthenticatedUsername(
-//                        tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId(),
-//                        tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientSecret()
-//                );
-                // User of client id should match user in subject
                 String resourceOwnerUserName = assertion.getSubject().getNameID().getValue();
                 if (resourceOwnerUserName == null || resourceOwnerUserName.equals("")) {
                     log.error("NameID in Assertion cannot be empty");
@@ -189,28 +183,6 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
              * can be expressed either as the NotOnOrAfter attribute of the <Conditions> element or as the NotOnOrAfter
              * attribute of a suitable <SubjectConfirmationData> element.
              */
-            boolean isNotOnOrAfterFound = false;
-            DateTime notOnOrAfterFromConditions = null;
-            Map<String,DateTime> notOnOrAfterFromSubjectConfirmations = new HashMap<String,DateTime>();
-            if (assertion.getConditions() != null) {
-                notOnOrAfterFromConditions = assertion.getConditions().getNotOnOrAfter();
-                isNotOnOrAfterFound = true;
-            }
-
-            List<SubjectConfirmation> subjectConfirmations = assertion.getSubject().getSubjectConfirmations();
-            if (subjectConfirmations != null && !subjectConfirmations.isEmpty()) {
-                for (SubjectConfirmation s : subjectConfirmations) {
-                    notOnOrAfterFromSubjectConfirmations.put(s.getMethod(),s.getSubjectConfirmationData().getNotOnOrAfter());
-                    isNotOnOrAfterFound = true;
-                }
-            }
-            if(!isNotOnOrAfterFound) {
-                // At this point there can be no NotOnOrAfter attributes, according to the spec description above
-                // we can safely throw the error
-                log.error("Didn't find any NotOnOrAfter attribute, must have an expiry time");
-                throw new IdentityOAuth2Exception("Didn't find any NotOnOrAfter attribute, must have an expiry time");
-            }
-
 
             /**
              * The <Subject> element MUST contain at least one <SubjectConfirmation> element that allows the
@@ -228,34 +200,62 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
              * Address is at the discretion of the authorization server.
              */
 
-            if (subjectConfirmations != null && subjectConfirmations.size() > 0) {
-                boolean bearerFound = false;
-                ArrayList<String> recipientURLS = new ArrayList<String>();
-                for (SubjectConfirmation c : subjectConfirmations) {
-                    if (c.getMethod().equals(OAuth2Constants.OAUTH_SAML2_BEARER_METHOD)) {
-                        bearerFound = true;
-                        recipientURLS.add(c.getSubjectConfirmationData().getRecipient());
-                    }
-                    if (c.getSubjectConfirmationData() == null) {
-                        if(notOnOrAfterFromConditions == null){
-                            log.error("Subject Confirmation does not contain a SubjectConfirmationData element and" +
-                                    "Conditions element does not contain a NotOnOrAfter attribute");
-                            throw new IdentityOAuth2Exception("Subject Confirmation does not contain a SubjectConfirmationData" +
-                                    "element and Conditions element does not contain a NotOnOrAfter attribute");
+            DateTime notOnOrAfterFromConditions = null;
+            Map<String,DateTime> notOnOrAfterFromSubjectConfirmations = new HashMap<String,DateTime>();
+            boolean bearerFound = false;
+            ArrayList<String> recipientURLS = new ArrayList<String>();
+
+            if (assertion.getConditions().getNotOnOrAfter() != null) {
+                notOnOrAfterFromConditions = assertion.getConditions().getNotOnOrAfter();
+            }
+
+            List<SubjectConfirmation> subjectConfirmations = assertion.getSubject().getSubjectConfirmations();
+            if (subjectConfirmations != null && !subjectConfirmations.isEmpty()) {
+                for (SubjectConfirmation s : subjectConfirmations) {
+                    if(s.getMethod() != null){
+                        if (s.getMethod().equals(OAuth2Constants.OAUTH_SAML2_BEARER_METHOD)) {
+                            bearerFound = true;
                         }
                     } else {
-                        if(c.getSubjectConfirmationData().getNotOnOrAfter() == null){
-                            log.error("SubjectConfirmationData does not contain a NotOnOrAfter attribute");
-                            throw new IdentityOAuth2Exception("SubjectConfirmationData does not contain a NotOnOrAfter attribute");
+                        log.error("Cannot find Method attribute in SubjectConfirmation " + s.toString());
+                        throw new IdentityOAuth2Exception("Cannot find Method attribute in SubjectConfirmation " + s.toString());
+                    }
+
+                    if(s.getSubjectConfirmationData() != null) {
+                        if(s.getSubjectConfirmationData().getRecipient() != null){
+                            recipientURLS.add(s.getSubjectConfirmationData().getRecipient());
+                        } else {
+                            log.error("Cannot find Recipient attribute in SubjectConfirmationData " + s.getSubjectConfirmationData());
+                            throw new IdentityOAuth2Exception("Cannot find Recipient attribute in SubjectConfirmationData " + s.getSubjectConfirmationData());
                         }
+                        if(s.getSubjectConfirmationData().getNotOnOrAfter() != null){
+                            notOnOrAfterFromSubjectConfirmations.put(s.getMethod(),s.getSubjectConfirmationData().getNotOnOrAfter());
+                        } else {
+                            log.error("Cannot find NotOnOrAfter attribute in SubjectConfirmationData " +
+                                    s.getSubjectConfirmationData().toString());
+                            throw new IdentityOAuth2Exception("Cannot find NotOnOrAfter attribute in SubjectConfirmationData " +
+                                    s.getSubjectConfirmationData().toString());
+                        }
+                    } else if (s.getSubjectConfirmationData() == null && notOnOrAfterFromConditions == null) {
+                        log.error("Neither can find NotOnOrAfter attribute in Conditions nor SubjectConfirmationData" +
+                                "in SubjectConfirmation " + s.toString());
+                        throw new IdentityOAuth2Exception("Neither can find NotOnOrAfter attribute in Conditions nor" +
+                                "SubjectConfirmationData in SubjectConfirmation " + s.toString());
                     }
                 }
-                if (!bearerFound) {
-                    log.error("Failed to find a SubjectConfirmation with a Method attribute having : " +
-                            OAuth2Constants.OAUTH_SAML2_BEARER_METHOD);
-                    throw new IdentityOAuth2Exception("Failed to find a SubjectConfirmation with a Method attribute having : " +
-                            OAuth2Constants.OAUTH_SAML2_BEARER_METHOD);
-                }
+            } else {
+                log.error("No SubjectConfirmation exist in Assertion");
+                throw new IdentityOAuth2Exception("No SubjectConfirmation exist in Assertion");
+            }
+
+            if (!bearerFound) {
+                log.error("Failed to find a SubjectConfirmation with a Method attribute having : " +
+                        OAuth2Constants.OAUTH_SAML2_BEARER_METHOD);
+                throw new IdentityOAuth2Exception("Failed to find a SubjectConfirmation with a Method attribute having : " +
+                        OAuth2Constants.OAUTH_SAML2_BEARER_METHOD);
+            }
+
+            if(recipientURLS.size() > 0){
                 if(!recipientURLS.contains(OAuthServerConfiguration.getInstance().getTokenEndPoint())){
                     boolean isAliasFound = false;
                     for(String alias : OAuthServerConfiguration.getInstance().getTokenEndPointAliases()){
@@ -269,10 +269,8 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
                         throw new IdentityOAuth2Exception("None of the recipient URLs match the token endpoint or an acceptable alias");
                     }
                 }
-            } else {
-                log.error("No SubjectConfirmation exist in Assertion");
-                throw new IdentityOAuth2Exception("No SubjectConfirmation exist in Assertion");
             }
+
 
             /**
              * The authorization server MUST verify that the NotOnOrAfter instant has not passed, subject to allowable
@@ -291,10 +289,10 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
             Map<String,DateTime> validSubjectConfirmations = new HashMap<String,DateTime>();
             if(!notOnOrAfterFromSubjectConfirmations.isEmpty()){
                 Set<String> confirmationMethods = notOnOrAfterFromSubjectConfirmations.keySet();
-                for(String confirmaitonMethod : confirmationMethods){
-                    DateTime value = notOnOrAfterFromSubjectConfirmations.get(confirmaitonMethod);
+                for(String confirmationMethod : confirmationMethods){
+                    DateTime value = notOnOrAfterFromSubjectConfirmations.get(confirmationMethod);
                     if(value.compareTo(new DateTime()) >= 1){
-                        validSubjectConfirmations.put(confirmaitonMethod,value);
+                        validSubjectConfirmations.put(confirmationMethod,value);
                     }
                 }
             }
