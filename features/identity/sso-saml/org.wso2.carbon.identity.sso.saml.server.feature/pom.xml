@@ -66,6 +66,8 @@
                                     <directory>resources</directory>
                                     <includes>
                                         <include>build.properties</include>
+					<include>p2.inf</include>
+					<include>saml2.federation.properties</include>
                                     </includes>
                                 </resource>
                             </resources>
