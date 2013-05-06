@@ -71,8 +71,7 @@
                                         <include>identity.xml</include>
 										<include>**/*.sql</include>
                                         <include>p2.inf</include>
-                                        <include>build.properties</include>
-					<include>saml2.federation.properties</include>                                        
+                                        <include>build.properties</include>                                        
                                     </includes>
                                 </resource>
                             </resources>
