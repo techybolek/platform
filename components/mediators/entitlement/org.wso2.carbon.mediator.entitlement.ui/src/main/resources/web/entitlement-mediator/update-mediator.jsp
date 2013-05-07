@@ -21,11 +21,19 @@
         String remoteServiceUserName = null;
 		String remoteServicePassword = null;
 		String remoteServiceUrl = null;
+        String callbackClass = null;
+        String thriftHost = null;
+        String thriftPort = null;
+        String client = null;
         String param = null;
 
 		remoteServiceUserName = request.getParameter("remoteServiceUserName");
 		remoteServicePassword = request.getParameter("remoteServicePassword");
 		remoteServiceUrl = request.getParameter("remoteServiceUrl");
+        callbackClass = request.getParameter("callbackClass");
+        thriftHost = request.getParameter("thriftHost");
+        thriftPort = request.getParameter("thriftPort");
+        client = request.getParameter("client");
 		 
         Mediator mediator = SequenceEditorHelper.getEditingMediator(request, session);
         if (!(mediator instanceof EntitlementMediator)) {
@@ -36,6 +44,10 @@
         entMediator.setRemoteServiceUrl(remoteServiceUrl);
         entMediator.setRemoteServiceUserName(remoteServiceUserName);
         entMediator.setRemoteServicePassword(remoteServicePassword);
+        entMediator.setCallbackClass(callbackClass);
+        entMediator.setThriftHost(thriftHost);
+        entMediator.setThriftPort(thriftPort);
+        entMediator.setClient(client);
 
         param = request.getParameter("onacceptgroup");
         if (param != null && !param.equals("")) {

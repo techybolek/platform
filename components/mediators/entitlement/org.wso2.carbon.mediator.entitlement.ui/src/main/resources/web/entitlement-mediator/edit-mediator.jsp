@@ -28,6 +28,10 @@
 		String remoteServiceUserName = null;
 		String remoteServicePassword = null;
 		String remoteServiceUrl = null;
+        String callbackClass = null;
+        String thriftHost = null;
+        String thriftPort = null;
+        String client = null;
         boolean acceptInline = false;
         boolean rejectInline = false;
         boolean obligationsInline = false;
@@ -52,7 +56,22 @@
             if(remoteServicePassword==null){
             	remoteServicePassword ="";
             }
-
+            callbackClass = entMediator.getCallbackClass();
+            if(callbackClass == null){
+                callbackClass = "";
+            }
+            thriftHost = entMediator.getThriftHost();
+            if(thriftHost == null){
+                thriftHost = "";
+            }
+            thriftPort = entMediator.getThriftPort();
+            if(thriftPort == null){
+                thriftPort = "";
+            }
+            client = entMediator.getClient();
+            if(client == null){
+                client = "";
+            }
             for (Mediator m : entMediator.getList()) {
                 if (m instanceof OnAcceptMediator) {
                     acceptInline = true;
@@ -134,6 +153,38 @@
                         </td>
                         <td class="text-box-big">
                         <input type="password" id="remoteServicePassword" name="remoteServicePassword" value="<%=remoteServicePassword%>" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="leftCol-small">
+                            <fmt:message key="mediator.ent.callbackClass"/>
+                        </td>
+                        <td class="text-box-big">
+                            <input type="text" id="callbackClass" name="callbackClass" value="<%=callbackClass%>"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="leftCol-small">
+                            <fmt:message key="mediator.ent.thriftHost"/>
+                        </td>
+                        <td class="text-box-big">
+                            <input type="text" id="thriftHost" name="thriftHost" value="<%=thriftHost%>"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="leftCol-small">
+                            <fmt:message key="mediator.ent.thriftPort"/>
+                        </td>
+                        <td class="text-box-big">
+                            <input type="text" id="thriftPort" name="thriftPort" value="<%=thriftPort%>"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="leftCol-small">
+                            <fmt:message key="mediator.ent.client.type"/>
+                        </td>
+                        <td class="text-box-big">
+                            <input type="text" id="client" name="client" value="<%=client%>"/>
                         </td>
                     </tr>
                     <tr>

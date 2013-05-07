@@ -30,9 +30,17 @@ public class EntitlementMediator extends AbstractListMediator {
     private String remoteServiceUserName;
     private String remoteServicePassword;
     private String remoteServiceUrl;
+    private String callbackClass;
+    private String thriftHost;
+    private String thriftPort;
+    private String client;
     private static final QName PROP_NAME_SERVICE_EPR = new QName("remoteServiceUrl");
     private static final QName PROP_NAME_USER = new QName("remoteServiceUserName");
     private static final QName PROP_NAME_PASSWORD = new QName("remoteServicePassword");
+    private static final QName PROP_NAME_CALLBACK_CLASS = new QName("callbackClass");
+    private static final QName PROP_NAME_THRIFT_HOST = new QName("thriftHost");
+    private static final QName PROP_NAME_THRIFT_PORT = new QName("thriftPort");
+    private static final QName PROP_NAME_CLIENT_CLASS = new QName("client");
     private static final String ADVICE = "advice";
     private static final String OBLIGATIONS = "obligations";
     private String onRejectSeqKey = null;
@@ -75,6 +83,22 @@ public class EntitlementMediator extends AbstractListMediator {
         } else {
             throw new MediatorException(
                     "Invalid Entitlement mediator. Remote service password required");
+        }
+
+        if (callbackClass != null && !"".equalsIgnoreCase(callbackClass)) {
+            entitlementService.addAttribute(fac.createOMAttribute("callbackClass", nullNS, callbackClass));
+        }
+
+        if (thriftHost != null && !"".equalsIgnoreCase(thriftHost)) {
+            entitlementService.addAttribute(fac.createOMAttribute("thriftHost", nullNS, thriftHost));
+        }
+
+        if (thriftPort != null && !"".equalsIgnoreCase(thriftPort)) {
+            entitlementService.addAttribute(fac.createOMAttribute("thriftPort", nullNS, thriftPort));
+        }
+
+        if (client != null && !"".equalsIgnoreCase(client)) {
+            entitlementService.addAttribute(fac.createOMAttribute("client", nullNS, client));
         }
 
         if (onRejectSeqKey != null) {
@@ -137,6 +161,10 @@ public class EntitlementMediator extends AbstractListMediator {
         OMAttribute attRemoteServiceUri = elem.getAttribute(PROP_NAME_SERVICE_EPR);
         OMAttribute attRemoteServiceUserName = elem.getAttribute(PROP_NAME_USER);
         OMAttribute attRemoteServicePassword = elem.getAttribute(PROP_NAME_PASSWORD);
+        OMAttribute attCallbackClass = elem.getAttribute(PROP_NAME_CALLBACK_CLASS);
+        OMAttribute attThriftHost = elem.getAttribute(PROP_NAME_THRIFT_HOST);
+        OMAttribute attThriftPort = elem.getAttribute(PROP_NAME_THRIFT_PORT);
+        OMAttribute attClient = elem.getAttribute(PROP_NAME_CLIENT_CLASS);
         this.onAcceptSeqKey = null;
         this.onRejectSeqKey = null;
         this.adviceSeqKey = null;
@@ -161,6 +189,22 @@ public class EntitlementMediator extends AbstractListMediator {
         } else {
             throw new MediatorException(
                     "The 'remoteServicePassword' attribute is required for the Entitlement mediator");
+        }
+
+        if (attCallbackClass != null) {
+            callbackClass = attCallbackClass.getAttributeValue();
+        }
+
+        if (attThriftHost != null) {
+            thriftHost = attThriftHost.getAttributeValue();
+        }
+
+        if (attThriftPort != null) {
+            thriftPort = attThriftPort.getAttributeValue();
+        }
+
+        if (attClient != null) {
+            client = attClient.getAttributeValue();
         }
 
         OMAttribute onReject = elem.getAttribute(
@@ -251,6 +295,38 @@ public class EntitlementMediator extends AbstractListMediator {
 
     public void setRemoteServiceUrl(String remoteServiceUrl) {
         this.remoteServiceUrl = remoteServiceUrl;
+    }
+
+    public String getCallbackClass() {
+        return callbackClass;
+    }
+
+    public void setCallbackClass(String callbackClass) {
+        this.callbackClass = callbackClass;
+    }
+
+    public String getThriftHost() {
+        return thriftHost;
+    }
+
+    public void setThriftHost(String thriftHost) {
+        this.thriftHost = thriftHost;
+    }
+
+    public String getThriftPort() {
+        return thriftPort;
+    }
+
+    public void setThriftPort(String thriftPort) {
+        this.thriftPort = thriftPort;
+    }
+
+    public String getClient() {
+        return client;
+    }
+
+    public void setClient(String client) {
+        this.client = client;
     }
 
     public String getOnRejectSeqKey() {
