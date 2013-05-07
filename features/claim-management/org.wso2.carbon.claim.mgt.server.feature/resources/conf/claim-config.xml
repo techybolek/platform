@@ -24,7 +24,7 @@
 				<AttributeID>givenName</AttributeID>
 				<Description>First Name</Description>
 				<Required />
-				<DisplayOrder>2</DisplayOrder>
+				<DisplayOrder>1</DisplayOrder>
 				<SupportedByDefault />
 			</Claim>
 			<Claim>
@@ -33,7 +33,7 @@
 				<AttributeID>sn</AttributeID>
 				<Description>Last Name</Description>
 				<Required />
-				<DisplayOrder>3</DisplayOrder>
+				<DisplayOrder>2</DisplayOrder>
 				<SupportedByDefault />
 			</Claim>
 			<Claim>
@@ -41,21 +41,24 @@
 				<DisplayName>Organization</DisplayName>
 				<AttributeID>organizationName</AttributeID>
 				<Description>Organization</Description>
-				<DisplayOrder>4</DisplayOrder>
+				<DisplayOrder>3</DisplayOrder>
+				<SupportedByDefault />
 			</Claim>
 			<Claim>
 				<ClaimURI>http://wso2.org/claims/streetaddress</ClaimURI>
 				<DisplayName>Address</DisplayName>
 				<AttributeID>streetAddress</AttributeID>
 				<Description>Address</Description>
-				<DisplayOrder>5</DisplayOrder>
+				<DisplayOrder>4</DisplayOrder>
+				<SupportedByDefault />
 			</Claim>
 			<Claim>
 				<ClaimURI>http://wso2.org/claims/country</ClaimURI>
 				<DisplayName>Country</DisplayName>
 				<AttributeID>country</AttributeID>
 				<Description>Country</Description>
-				<DisplayOrder>6</DisplayOrder>
+				<DisplayOrder>5</DisplayOrder>
+				<SupportedByDefault />
 			</Claim>
 			<Claim>
 				<ClaimURI>http://wso2.org/claims/emailaddress</ClaimURI>
@@ -63,7 +66,7 @@
 				<AttributeID>mail</AttributeID>
 				<Description>Email Address</Description>
 				<Required />
-				<DisplayOrder>7</DisplayOrder>
+				<DisplayOrder>6</DisplayOrder>
 				<SupportedByDefault />
                 <RegEx>^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$</RegEx>
 			</Claim>
@@ -72,28 +75,32 @@
 				<DisplayName>Telephone</DisplayName>
 				<AttributeID>telephoneNumber</AttributeID>
 				<Description>Telephone</Description>
-				<DisplayOrder>8</DisplayOrder>
+				<DisplayOrder>7</DisplayOrder>
+				<SupportedByDefault />
 			</Claim>
 			<Claim>
 				<ClaimURI>http://wso2.org/claims/mobile</ClaimURI>
 				<DisplayName>Mobile</DisplayName>
 				<AttributeID>mobile</AttributeID>
 				<Description>Mobile</Description>
-				<DisplayOrder>9</DisplayOrder>
+				<DisplayOrder>8</DisplayOrder>
+				<SupportedByDefault />
 			</Claim>
 			<Claim>
 				<ClaimURI>http://wso2.org/claims/im</ClaimURI>
 				<DisplayName>IM</DisplayName>
 				<AttributeID>im</AttributeID>
 				<Description>IM</Description>
-				<DisplayOrder>10</DisplayOrder>
+				<DisplayOrder>9</DisplayOrder>
+				<SupportedByDefault />
 			</Claim>
 			<Claim>
 				<ClaimURI>http://wso2.org/claims/url</ClaimURI>
 				<DisplayName>URL</DisplayName>
 				<AttributeID>url</AttributeID>
 				<Description>URL</Description>
-				<DisplayOrder>11</DisplayOrder>
+				<DisplayOrder>10</DisplayOrder>
+				<SupportedByDefault />
 			</Claim>
 			<Claim>
 				<ClaimURI>http://wso2.org/claims/gender</ClaimURI>
@@ -109,12 +116,10 @@
 			</Claim>
 			<Claim>
 				<ClaimURI>http://wso2.org/claims/role</ClaimURI>
-				<DisplayName>Role(s)</DisplayName>
+				<DisplayName>Role</DisplayName>
 				<AttributeID>role</AttributeID>
-				<Description>Role(s)</Description>
-	            		<SupportedByDefault/>
-				<ReadOnly/>
-
+				<Description>Role</Description>
+	            <SupportedByDefault />
 			</Claim>
 			<Claim>
 				<ClaimURI>http://wso2.org/claims/postalcode</ClaimURI>
@@ -169,84 +174,55 @@
 		    <Claim>
 				<ClaimURI>http://wso2.org/claims/primaryChallengeQuestion</ClaimURI>
 				<DisplayName>Primary Challenge Question</DisplayName>
-			<!-- Proper attribute Id in your user store must be configured for this value -->
-				<AttributeID>primaryChallenges</AttributeID>
+			<!-- Proper attribute Id in your user store must be configured for this -->
+				<AttributeID>title</AttributeID>
 				<Description>Primary Challenge Question</Description>
 		    </Claim>
 		    <Claim>
 				<ClaimURI>http://wso2.org/claims/challengeQuestionUris</ClaimURI>
 				<DisplayName>Challenge Question</DisplayName>
-			<!-- Proper attribute Id in your user store must be configured for this value-->
-				<AttributeID>challenges</AttributeID>
+			<!-- Proper attribute Id in your user store must be configured for this -->
+				<AttributeID>stateOrProvinceName</AttributeID>
 				<Description>Challenge Question</Description>
 		    </Claim>
 
 		    <Claim>
-				<ClaimURI>http://wso2.org/claims/accountLock</ClaimURI>
+				<ClaimURI>http://wso2.org/claims/oneTimePassword</ClaimURI>
+				<DisplayName>One Time Password</DisplayName>
+			<!-- Proper attribute Id in your user store must be configured for this -->
+				<AttributeID>postalcode</AttributeID>
+				<Description>One Time Password</Description>
+		    </Claim>
+		    <Claim>
+				<ClaimURI>http://wso2.org/claims/passwordTimestamp</ClaimURI>
+				<DisplayName>Password Time Stamp</DisplayName>
+			<!-- Proper attribute Id in your user store must be configured for this -->
+				<AttributeID>nickName</AttributeID>
+				<Description>Password Time Stamp</Description>
+		    </Claim>
+		    <Claim>
+				<ClaimURI>http://wso2.org/claims/accountStatus</ClaimURI>
 				<DisplayName>Account Locked</DisplayName>
-			<!-- Proper attribute Id in your user store must be configured for this value-->
-				<AttributeID>accountLock</AttributeID>
+			<!-- Proper attribute Id in your user store must be configured for this -->
+				<AttributeID>otherPhone</AttributeID>
 				<Description>Account Locked</Description>
 		    </Claim>
 
 		     <Claim>
 				<ClaimURI>http://wso2.org/claims/challengeQuestion1</ClaimURI>
 				<DisplayName>Challenge Question1</DisplayName>
-			<!-- Proper attribute Id in your user store must be configured for this value-->
-				<AttributeID>firstChallenge</AttributeID>
+			<!-- Proper attribute Id in your user store must be configured for this -->
+				<AttributeID>gender</AttributeID>
 				<Description>Challenge Question1</Description>
 
 			</Claim>
 			<Claim>
 				<ClaimURI>http://wso2.org/claims/challengeQuestion2</ClaimURI>
 				<DisplayName>Challenge Question2</DisplayName>
-			<!-- Proper attribute Id in your user store must be used configured for this value-->
-				<AttributeID>secondChallenge</AttributeID>
+			<!-- Proper attribute Id in your user store must be used configured for this -->
+				<AttributeID>localityName</AttributeID>
 				<Description>Challenge Question2</Description>
 			</Claim>
-
-			<Claim> 
-				<ClaimURI>http://wso2.org/claims/temporaryLock</ClaimURI> 
-				<DisplayName>Temporary Lock</DisplayName> 
-				<AttributeID>temporaryLock</AttributeID> 
-				<Description>Temporary Lock</Description> 
-			</Claim> 
-			<Claim> 
-				<ClaimURI>http://wso2.org/claims/lastFailedAttemptTime</ClaimURI> 
-				<DisplayName>Last Failed AttemptTime</DisplayName> 
-				<AttributeID>lastFailedAttemptTime</AttributeID> 
-				<Description>Last Failed AttemptTime</Description> 
-			</Claim> 
-			<Claim> 
-				<ClaimURI>http://wso2.org/claims/failedLoginAttempts</ClaimURI> 
-				<DisplayName>Failed Login Attempts</DisplayName> 
-				<AttributeID>failedLoginAttempts</AttributeID> 
-				<Description>failed Login Attempts</Description> 
-			</Claim> 
-			<Claim> 
-				<ClaimURI>http://wso2.org/claims/lastLogonTime</ClaimURI> 
-				<DisplayName>Last Logon Time</DisplayName> 
-				<AttributeID>lastLogonTime</AttributeID> 
-				<Description>Last Logon Time</Description> 
-			</Claim> 
-			<Claim> 
-				<ClaimURI>http://wso2.org/claims/unlockTime</ClaimURI> 
-				<DisplayName>Unlock Time</DisplayName> 
-				<AttributeID>unlockTime</AttributeID> 
-				<Description>Unlock Time</Description> 
-			</Claim> 
-			<Claim> 
-				<ClaimURI>http://wso2.org/claims/passwordChangeRequired</ClaimURI> 
-				<DisplayName>Password Change Required</DisplayName> 
-				<AttributeID>passwordChangeRequired</AttributeID> 
-				<Description>Password Change Required</Description> 
-			</Claim> 
-			<Claim> 
-				<ClaimURI>http://wso2.org/claims/passwordTimestamp</ClaimURI> 
-				<DisplayName>Password Time Stamp</DisplayName> 
-				<AttributeID>passwordTimestamp</AttributeID> 
-				<Description>Password Time Stamp</Description> 
-			</Claim> 
 
 		</Dialect>
 
