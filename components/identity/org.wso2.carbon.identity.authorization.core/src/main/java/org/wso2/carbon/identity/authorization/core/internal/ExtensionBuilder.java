@@ -21,6 +21,7 @@ package org.wso2.carbon.identity.authorization.core.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.authorization.core.extension.PostAuthorizationExtension;
+import org.wso2.carbon.identity.authorization.core.permission.CarbonPermissionFinderModule;
 import org.wso2.carbon.identity.authorization.core.permission.PermissionFinderModule;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -68,6 +69,12 @@ public class ExtensionBuilder {
 
             finderModule.init(designatorProps);
             holder.addPermissionFinderModule(finderModule, designatorProps);
+        }
+
+        if(holder.getPermissionFinderModules().size() == 0){
+            CarbonPermissionFinderModule defaultModule = new CarbonPermissionFinderModule();
+            // init is not needed for default module
+            holder.addPermissionFinderModule(defaultModule, new Properties());
         }
     }
 
