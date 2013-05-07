@@ -115,7 +115,7 @@
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.sts.passive.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.ldap.server.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.scim.feature:4.2.0-SNAPSHOT</featureArtifactDef>
-								<!-- featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.mgt.feature:4.2.0-SNAPSHOT</featureArtifactDef -->
+								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.identity.authorization.feature:4.2.0-SNAPSHOT</featureArtifactDef>
 								<!-- Features related to Cloud Identity -->
 								<featureArtifactDef>org.wso2.carbon:org.wso2.carbon.stratos.common.feature:2.2.0-SNAPSHOT</featureArtifactDef>
 								<featureArtifactDef>org.wso2.identity:org.wso2.identity.ui.feature:4.5.0-SNAPSHOT</featureArtifactDef>
@@ -191,10 +191,10 @@
 									<id>org.wso2.carbon.mex.feature.group</id>
 									<version>${wso2carbon.version}</version>
 								</feature>
-								<!--feature>
-									<id>org.wso2.carbon.registry.core.common.feature.group</id>
+								<feature>
+									<id>org.wso2.carbon.identity.authorization.feature.group</id>
 									<version>4.2.0-SNAPSHOT</version>
-								</feature-->
+								</feature>
 								<feature>
 									<id>org.wso2.carbon.registry.core.feature.group</id>
 									<version>4.2.0-SNAPSHOT</version>
