@@ -87,7 +87,7 @@ public class DefaultAttributeFinder extends AbstractPIPAttributeFinder {
 			if (roles != null && roles.length > 0) {
 				for (int i = 0; i < roles.length; i++) {
 					if (log.isDebugEnabled()) {
-						log.debug(String.format("User %1$s belongs to the Rolw %2$s", subjectId,
+						log.debug(String.format("User %1$s belongs to the Role %2$s", subjectId,
 								roles[i]));
 					}
 					values.add(roles[i]);
