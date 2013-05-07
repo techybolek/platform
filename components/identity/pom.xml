@@ -50,6 +50,8 @@
         <module>org.wso2.carbon.identity.relyingparty.ui</module>
         <module>org.wso2.carbon.identity.user.profile</module>
         <module>org.wso2.carbon.identity.user.profile.ui</module>
+	<module>org.wso2.carbon.identity.authorization.core</module>
+	<module>org.wso2.carbon.identity.authorization.ui</module>
         <module>org.wso2.carbon.identity.entitlement</module>
         <module>org.wso2.carbon.identity.entitlement.ui</module>
         <module>org.wso2.carbon.identity.entitlement.mediator</module>
