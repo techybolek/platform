@@ -209,8 +209,8 @@ public class CalloutMediator extends AbstractMediator implements ManagedLifecycl
                User should set this property {<property name="enableMTOM" value="true"/>} before the Callout mediator,
                if he needs to use MTOM in Callout mediator.
             */
-
-            if (Constants.VALUE_TRUE.equals(synCtx.getProperty(Constants.Configuration.ENABLE_MTOM))) {
+            org.apache.axis2.context.MessageContext axis2MsgCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+            if (Constants.VALUE_TRUE.equals(axis2MsgCtx.getProperty(Constants.Configuration.ENABLE_MTOM))) {
                 options.setProperty(Constants.Configuration.ENABLE_MTOM, Constants.VALUE_TRUE);
             }
 
