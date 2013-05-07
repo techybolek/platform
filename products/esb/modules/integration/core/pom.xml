@@ -77,7 +77,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.integration.framework</artifactId>
-            <version>4.1.0</version>
+            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -87,7 +87,7 @@
         <dependency>
             <groupId>org.apache.rampart.wso2</groupId>
             <artifactId>rampart-core</artifactId>
-            <version>1.6.1.wso2v4</version>
+            <version>${orbit.version.rampart}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.ws.security</groupId>

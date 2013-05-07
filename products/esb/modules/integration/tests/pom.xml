@@ -318,6 +318,6 @@
     </dependencies>
 
     <properties>
-        <clarity.version>4.1.1</clarity.version>
+        <clarity.version>${carbon.platform.version}</clarity.version>
     </properties>
 </project>
