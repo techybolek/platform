@@ -340,11 +340,6 @@
         </file-->
 
         <file>
-            <source>conf/claim-config.xml</source>
-            <outputDirectory>wso2is-${pom.version}/repository/conf/</outputDirectory>
-            <fileMode>644</fileMode>
-        </file>
-        <file>
             <source>conf/saml1-assertion-config.xml</source>
             <outputDirectory>wso2is-${pom.version}/repository/conf/</outputDirectory>
             <fileMode>644</fileMode>
@@ -381,12 +376,12 @@
         </file>
 
 
-        <!--file>
+        <file>
             <source>
-                ../p2-profile-gen/target/wso2carbon-core-${patch.version.406}/repository/conf/claim-config.xml
+                ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/claim-config.xml
             </source>
             <outputDirectory>wso2is-${pom.version}/repository/conf</outputDirectory>
-        </file-->
+        </file>
         <file>
             <source>
                 ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/identity.xml
