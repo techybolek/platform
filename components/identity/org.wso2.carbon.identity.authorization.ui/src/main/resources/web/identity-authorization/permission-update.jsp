@@ -103,7 +103,7 @@
             client.configurePermission(permissionDTOs.toArray(new PermissionDTO[permissionDTOs.size()]), 
                     moduleDTO.getModuleName());
             String userName = authorizationBean.getUserName();
-            String roleName = authorizationBean.getUserName();
+            String roleName = authorizationBean.getRoleName();
             if(userName != null){
                 forwardTo = "permission-root.jsp?fromUserMgt=true&userName=" + userName +
                         "&finderModule=" + authorizationBean.getPermissionModuleName();

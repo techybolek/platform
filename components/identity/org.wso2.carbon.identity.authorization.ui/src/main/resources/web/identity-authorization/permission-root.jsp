@@ -84,7 +84,7 @@
                         getUserPermissions(authorizationBean.getUserName(), selectedFinderName);
             } else if(authorizationBean.getRoleName() != null){
                 permissionDTOs = client.
-                        getRolePermissions(authorizationBean.getUserName(), selectedFinderName);
+                        getRolePermissions(authorizationBean.getRoleName(), selectedFinderName);
             }
         }
     } catch (Exception e){        
