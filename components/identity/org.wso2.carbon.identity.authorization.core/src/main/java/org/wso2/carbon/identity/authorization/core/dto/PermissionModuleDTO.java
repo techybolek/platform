@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.identity.authorization.core.dto;
 
+import java.util.Arrays;
+
 /**
  * 
  */
@@ -48,11 +50,11 @@ public class PermissionModuleDTO {
     }
 
     public String[] getRootNodeNames() {
-        return rootNodeNames;
+        return Arrays.copyOf(rootNodeNames, rootNodeNames.length);
     }
 
     public void setRootNodeNames(String[] rootNodeNames) {
-        this.rootNodeNames = rootNodeNames;
+        this.rootNodeNames = Arrays.copyOf(rootNodeNames, rootNodeNames.length);
     }
 
     public String getRootIdentifier() {
@@ -64,11 +66,11 @@ public class PermissionModuleDTO {
     }
 
     public String[] getSupportedActions() {
-        return supportedActions;
+        return Arrays.copyOf(supportedActions, supportedActions.length);
     }
 
     public void setSupportedActions(String[] supportedActions) {
-        this.supportedActions = supportedActions;
+        this.supportedActions = Arrays.copyOf(supportedActions, supportedActions.length);
     }
 
     public boolean isSecondaryRootSupported() {
@@ -96,10 +98,10 @@ public class PermissionModuleDTO {
     }
 
     public String[] getNameForChildRootNodeSet() {
-        return nameForChildRootNodeSet;
+        return Arrays.copyOf(nameForChildRootNodeSet, nameForChildRootNodeSet.length);
     }
 
     public void setNameForChildRootNodeSet(String[] nameForChildRootNodeSet) {
-        this.nameForChildRootNodeSet = nameForChildRootNodeSet;
+        this.nameForChildRootNodeSet = Arrays.copyOf(nameForChildRootNodeSet, nameForChildRootNodeSet.length);
     }
 }

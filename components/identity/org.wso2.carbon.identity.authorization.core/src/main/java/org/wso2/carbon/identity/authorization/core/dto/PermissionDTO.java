@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.identity.authorization.core.dto;
 
+import java.util.Arrays;
+
 /**
  * Encapsulate the instance of permission
  */
@@ -48,11 +50,11 @@ public class PermissionDTO {
     }
 
     public String[] getResources() {
-        return resources;
+        return Arrays.copyOf(resources, resources.length);
     }
 
     public void setResources(String[] resources) {
-        this.resources = resources;
+        this.resources = Arrays.copyOf(resources, resources.length);
     }
 
     public String getAction() {

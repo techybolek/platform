@@ -25,10 +25,7 @@ import org.wso2.carbon.identity.authorization.core.permission.CarbonPermissionFi
 import org.wso2.carbon.identity.authorization.core.permission.PermissionFinderModule;
 import org.wso2.carbon.utils.CarbonUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Properties;
 
 /**
@@ -105,19 +102,34 @@ public class ExtensionBuilder {
      * @return
      * @throws java.io.IOException
      */
-    private Properties loadProperties() throws IOException {
+    private Properties loadProperties() {
 
         Properties properties = new Properties();
         InputStream inStream = null;
 
         File pipConfigXml = new File(CarbonUtils.getCarbonSecurityConfigDirPath(), ENTITLEMENT_CONFIG);
-        if (pipConfigXml.exists()) {
-            inStream = new FileInputStream(pipConfigXml);
-        } else {
-            return properties;
-        }
 
-        properties.load(inStream);
+        try{
+            if (pipConfigXml.exists()) {
+                inStream = new FileInputStream(pipConfigXml);
+            } else {
+                return properties;
+            }
+
+            properties.load(inStream);
+        } catch (FileNotFoundException e) {
+            log.error(e.getMessage(), e);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        } finally {
+            if(inStream != null){
+                try {
+                    inStream.close();
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+        }
 
         return properties;
     }

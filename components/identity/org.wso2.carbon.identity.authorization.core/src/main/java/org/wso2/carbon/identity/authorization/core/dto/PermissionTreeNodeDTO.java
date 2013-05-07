@@ -126,10 +126,10 @@ public class PermissionTreeNodeDTO {
     }
 
     public String[] getSupportedActions() {
-        return supportedActions;
+        return Arrays.copyOf(supportedActions, supportedActions.length);
     }
 
     public void setSupportedActions(String[] supportedActions) {
-        this.supportedActions = supportedActions;
+        this.supportedActions = Arrays.copyOf(supportedActions, supportedActions.length);
     }
 }
