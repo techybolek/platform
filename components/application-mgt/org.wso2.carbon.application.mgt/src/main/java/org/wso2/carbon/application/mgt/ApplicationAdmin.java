@@ -16,36 +16,35 @@
 
 package org.wso2.carbon.application.mgt;
 
-import org.wso2.carbon.application.deployer.AppDeployerConstants;
-import org.wso2.carbon.application.deployer.config.RegistryConfig;
-import org.wso2.carbon.application.deployer.persistence.CarbonAppPersistenceManager;
-import org.wso2.carbon.application.deployer.CarbonApplication;
-import org.wso2.carbon.application.deployer.AppDeployerUtils;
-import org.wso2.carbon.application.deployer.service.ApplicationManagerService;
-import org.wso2.carbon.application.deployer.handler.DefaultAppDeployer;
-import org.wso2.carbon.application.deployer.handler.RegistryResourceDeployer;
-import org.wso2.carbon.application.deployer.config.Artifact;
-import org.wso2.carbon.CarbonException;
-import org.wso2.carbon.application.mgt.internal.AppManagementServiceComponent;
-import org.wso2.carbon.utils.ServerConstants;
-import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.core.util.SystemFilter;
-import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axis2.description.AxisServiceGroup;
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.AxisServiceGroup;
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonException;
+import org.wso2.carbon.application.deployer.AppDeployerConstants;
+import org.wso2.carbon.application.deployer.AppDeployerUtils;
+import org.wso2.carbon.application.deployer.CarbonApplication;
+import org.wso2.carbon.application.deployer.config.Artifact;
+import org.wso2.carbon.application.deployer.config.RegistryConfig;
+import org.wso2.carbon.application.deployer.handler.DefaultAppDeployer;
+import org.wso2.carbon.application.deployer.handler.RegistryResourceDeployer;
+import org.wso2.carbon.application.deployer.persistence.CarbonAppPersistenceManager;
+import org.wso2.carbon.application.mgt.internal.AppManagementServiceComponent;
+import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.core.util.SystemFilter;
+import org.wso2.carbon.utils.ServerConstants;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.io.File;
 
 public class ApplicationAdmin extends AbstractAdmin {
 
@@ -277,6 +276,8 @@ public class ApplicationAdmin extends AbstractAdmin {
         // list of registry artifacts
         List<RegistryMetadata> regArtifacts = new ArrayList<RegistryMetadata>();
 
+        List<ArtifactDeploymentStatus> artifactDeploymentStatusList = new ArrayList<ArtifactDeploymentStatus>();
+
         List<String> regFilterList = new ArrayList<String>();
         List<String> regHandlerList = new ArrayList<String>();
 
@@ -378,15 +379,24 @@ public class ApplicationAdmin extends AbstractAdmin {
             } else if (RegistryResourceDeployer.REGISTRY_HANDLER_TYPE.equals(type)) {
                 regHandlerList.add(instanceName);
             }
+
+            ArtifactDeploymentStatus artifactDeploymentStatus = new ArtifactDeploymentStatus();
+            artifactDeploymentStatus.setArtifactName(artifact.getName());
+            if (artifact.getDeploymentStatus() != null) {
+                artifactDeploymentStatus.setDeploymentStatus(artifact.getDeploymentStatus());
+            }
+            artifactDeploymentStatusList.add(artifactDeploymentStatus);
         }
 
         // Set found services in the appData object
         appData.setServiceGroups(serviceGroups
-                .toArray(new ServiceGroupMetadata[serviceGroups.size()]));
+                                         .toArray(new ServiceGroupMetadata[serviceGroups.size()]));
         appData.setRegistryFilters(regFilterList.toArray(new String[regFilterList.size()]));
         appData.setRegistryHandlers(regHandlerList.toArray(new String[regHandlerList.size()]));
         appData.setRegistryArtifacts(regArtifacts
                 .toArray(new RegistryMetadata[regArtifacts.size()]));
+        appData.setArtifactsDeploymentStatus(artifactDeploymentStatusList.
+                toArray(new ArtifactDeploymentStatus[artifactDeploymentStatusList.size()]));
 
         return appData;
     }

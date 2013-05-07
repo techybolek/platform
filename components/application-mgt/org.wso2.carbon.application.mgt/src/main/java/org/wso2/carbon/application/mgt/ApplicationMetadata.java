@@ -26,6 +26,7 @@ public class ApplicationMetadata {
     private RegistryMetadata[] registryArtifacts;
     private String[] registryFilters;
     private String[] registryHandlers;
+    private ArtifactDeploymentStatus[] artifactsDeploymentStatus;
 
     public String getAppName() {
         return appName;
@@ -73,5 +74,14 @@ public class ApplicationMetadata {
 
     public void setRegistryArtifacts(RegistryMetadata[] registryArtifacts) {
         this.registryArtifacts = registryArtifacts;
+    }
+
+    public ArtifactDeploymentStatus[] getArtifactsDeploymentStatus() {
+        return artifactsDeploymentStatus;
+    }
+
+    public void setArtifactsDeploymentStatus(
+            ArtifactDeploymentStatus[] artifactsDeploymentStatus) {
+        this.artifactsDeploymentStatus = artifactsDeploymentStatus;
     }
 }
