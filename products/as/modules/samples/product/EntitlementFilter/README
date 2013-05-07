@@ -4,7 +4,7 @@
 Pre Requests
 ---------------------------------------
   * Start WSO2 IS
-  * Import the sample XACML policy to the IS, which is given in src/main/resources
+  * Import the sample XACML policy to the IS, which is given in src/main/resources, enable it and Promote To PDP.
   * Please see the web.xml file given in the src/main/webapp/WEB-INF/web.xml
   * If you are running WSO2 IS in a  configuration other than default please edit the web.xml as needed.
 
