@@ -17,7 +17,9 @@
 */
 package org.wso2.carbon.application.deployer.gadget;
 
+import org.apache.axis2.deployment.Deployer;
 import org.apache.axis2.deployment.DeploymentException;
+import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,10 +54,8 @@ public class GadgetAppDeployer implements AppDeploymentHandler {
         List<Artifact.Dependency> artifacts = carbonApp.getAppConfig().getApplicationArtifact()
                 .getDependencies();
 
-        String repo = axisConfig.getRepository().getPath();
-
-        String artifactPath, destPath;
         for (Artifact.Dependency dep : artifacts) {
+            Deployer deployer;
             Artifact artifact = dep.getArtifact();
             if (artifact == null) {
                 continue;
@@ -66,8 +66,8 @@ public class GadgetAppDeployer implements AppDeploymentHandler {
                 continue;
             }
 
-            if (GADGET_TYPE.equals(artifact.getType())) {
-                destPath = repo + File.separator + GADGET_DIR;
+            if (GadgetAppDeployer.GADGET_TYPE.equals(artifact.getType())) {
+                deployer = AppDeployerUtils.getArtifactDeployer(axisConfig, GADGET_DIR, "gar");
             } else {
                 continue;
             }
@@ -75,13 +75,14 @@ public class GadgetAppDeployer implements AppDeploymentHandler {
             List<CappFile> files = artifact.getFiles();
             if (files.size() != 1) {
                 log.error("Gadgets must have a single .gar file to " +
-                          "be deployed. But " + files.size() + " files found.");
+                        "be deployed. But " + files.size() + " files found.");
                 continue;
             }
-            String fileName = artifact.getFiles().get(0).getName();
-            artifactPath = artifact.getExtractedPath() + File.separator + fileName;
-            AppDeployerUtils.createDir(destPath);
-            AppDeployerUtils.copyFile(artifactPath, destPath + File.separator + fileName);
+            if (deployer != null) {
+                String fileName = artifact.getFiles().get(0).getName();
+                String artifactPath = artifact.getExtractedPath() + File.separator + fileName;
+                deployer.deploy(new DeploymentFileData(new File(artifactPath), deployer));
+            }
         }
     }
 
@@ -89,7 +90,7 @@ public class GadgetAppDeployer implements AppDeploymentHandler {
      * Check the artifact type and if it is a Gadget, delete the file from the Gadget
      * deployment hot folder
      *
-     * @param carbonApp - CarbonApplication instance to check for Gadget artifacts
+     * @param carbonApp  - CarbonApplication instance to check for Gadget artifacts
      * @param axisConfig - AxisConfiguration of the current tenant
      */
     public void undeployArtifacts(CarbonApplication carbonApp, AxisConfiguration axisConfig) {
@@ -97,15 +98,15 @@ public class GadgetAppDeployer implements AppDeploymentHandler {
         List<Artifact.Dependency> artifacts = carbonApp.getAppConfig().getApplicationArtifact()
                 .getDependencies();
 
-        String repo = axisConfig.getRepository().getPath();
-        String artifactPath, destPath;
         for (Artifact.Dependency dep : artifacts) {
+            Deployer deployer;
             Artifact artifact = dep.getArtifact();
             if (artifact == null) {
                 continue;
             }
+
             if (GadgetAppDeployer.GADGET_TYPE.equals(artifact.getType())) {
-                destPath = repo + File.separator + GadgetAppDeployer.GADGET_DIR;
+                deployer = AppDeployerUtils.getArtifactDeployer(axisConfig,GADGET_DIR, "gar");
             } else {
                 continue;
             }
@@ -116,11 +117,14 @@ public class GadgetAppDeployer implements AppDeploymentHandler {
                         files.size() + " files found.");
                 continue;
             }
-            String fileName = artifact.getFiles().get(0).getName();
-            artifactPath = destPath + File.separator + fileName;
-            File artifactFile = new File(artifactPath);
-            if (artifactFile.exists() && !artifactFile.delete()) {
-                log.warn("Couldn't delete Gadget artifact file : " + artifactPath);
+            if (deployer != null) {
+                String fileName = artifact.getFiles().get(0).getName();
+                String artifactPath = artifact.getExtractedPath() + File.separator + fileName;
+                try {
+                    deployer.undeploy(artifactPath);
+                } catch (DeploymentException e) {
+                    log.error("Error occured while trying to un deploy : "+artifact.getName());
+                }
             }
         }
     }

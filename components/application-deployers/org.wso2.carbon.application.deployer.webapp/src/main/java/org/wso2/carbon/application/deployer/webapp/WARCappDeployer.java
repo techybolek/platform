@@ -17,7 +17,9 @@
 */
 package org.wso2.carbon.application.deployer.webapp;
 
+import org.apache.axis2.deployment.Deployer;
 import org.apache.axis2.deployment.DeploymentException;
+import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,10 +56,9 @@ public class WARCappDeployer implements AppDeploymentHandler {
         List<Artifact.Dependency> artifacts = carbonApp.getAppConfig().getApplicationArtifact()
                 .getDependencies();
 
-        String repo = axisConfig.getRepository().getPath();
-
-        String artifactPath, destPath;
+        // loop through all artifacts
         for (Artifact.Dependency dep : artifacts) {
+            Deployer deployer;
             Artifact artifact = dep.getArtifact();
             if (artifact == null) {
                 continue;
@@ -69,10 +70,11 @@ public class WARCappDeployer implements AppDeploymentHandler {
                 continue;
             }
 
+            // for each service type, select the correct deployer
             if (WAR_TYPE.equals(artifact.getType())) {
-                destPath = repo + File.separator + WAR_DIR;
+                deployer = AppDeployerUtils.getArtifactDeployer(axisConfig, WAR_DIR, "war");
             } else if (JAX_WAR_TYPE.equals(artifact.getType())) {
-                destPath = repo + File.separator + JAX_WAR_DIR;
+                deployer = AppDeployerUtils.getArtifactDeployer(axisConfig, JAX_WAR_DIR, "war");
             } else {
                 continue;
             }
@@ -80,13 +82,16 @@ public class WARCappDeployer implements AppDeploymentHandler {
             List<CappFile> files = artifact.getFiles();
             if (files.size() != 1) {
                 log.error("Web Applications must have a single WAR file to " +
-                          "be deployed. But " + files.size() + " files found.");
+                        "be deployed. But " + files.size() + " files found.");
                 continue;
             }
-            String fileName = artifact.getFiles().get(0).getName();
-            artifactPath = artifact.getExtractedPath() + File.separator + fileName;
-            AppDeployerUtils.createDir(destPath);
-            AppDeployerUtils.copyFile(artifactPath, destPath + File.separator + fileName);
+
+            // call the webapp deployer to deploy
+            if (deployer != null) {
+                String fileName = artifact.getFiles().get(0).getName();
+                String artifactPath = artifact.getExtractedPath() + File.separator + fileName;
+                deployer.deploy(new DeploymentFileData(new File(artifactPath), deployer));
+            }
         }
     }
 
@@ -102,40 +107,39 @@ public class WARCappDeployer implements AppDeploymentHandler {
         List<Artifact.Dependency> artifacts = carbonApp.getAppConfig().getApplicationArtifact()
                 .getDependencies();
 
-        String repo = axisConfig.getRepository().getPath();
-
-        String artifactPath, destPath;
+        // loop through all artifacts
         for (Artifact.Dependency dep : artifacts) {
+            Deployer deployer;
             Artifact artifact = dep.getArtifact();
             if (artifact == null) {
                 continue;
             }
-            if (!WAR_TYPE.equals(artifact.getType()) &&
-                !JAX_WAR_TYPE.equals(artifact.getType())) {
+
+            // for each service type, select the correct deployer
+            if (WAR_TYPE.equals(artifact.getType())) {
+                deployer = AppDeployerUtils.getArtifactDeployer(axisConfig, WAR_DIR, "war");
+            } else if (JAX_WAR_TYPE.equals(artifact.getType())) {
+                deployer = AppDeployerUtils.getArtifactDeployer(axisConfig, JAX_WAR_DIR, "war");
+            } else {
                 continue;
             }
 
             List<CappFile> files = artifact.getFiles();
             if (files.size() != 1) {
                 log.error("Web Applications must have a single WAR file. But " +
-                          files.size() + " files found.");
+                        files.size() + " files found.");
                 continue;
             }
 
-            String fileName = artifact.getFiles().get(0).getName();
-
-            if (WAR_TYPE.equals(artifact.getType())) {
-                destPath = repo + File.separator + WAR_DIR;
-            } else if (JAX_WAR_TYPE.equals(artifact.getType())) {
-                destPath = repo + File.separator + JAX_WAR_DIR;
-            } else {
-                continue;
-            }
-
-            artifactPath = destPath + File.separator + fileName;
-            File artifactFile = new File(artifactPath);
-            if (artifactFile.exists() && !artifactFile.delete()) {
-                log.warn("Couldn't delete webapp artifact file : " + artifactPath);
+            // call the webapp deployer to undeploy
+            if (deployer != null) {
+                String fileName = artifact.getFiles().get(0).getName();
+                String artifactPath = artifact.getExtractedPath() + File.separator + fileName;
+                try {
+                    deployer.undeploy(artifactPath);
+                } catch (DeploymentException e) {
+                    log.error("Error occured while trying to un deploy : "+artifact.getName());
+                }
             }
         }
     }

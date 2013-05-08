@@ -17,19 +17,21 @@
 */
 package org.wso2.carbon.application.deployer.humantask;
 
+import org.apache.axis2.deployment.Deployer;
 import org.apache.axis2.deployment.DeploymentException;
-import org.wso2.carbon.application.deployer.handler.AppDeploymentHandler;
-import org.wso2.carbon.application.deployer.CarbonApplication;
-import org.wso2.carbon.application.deployer.AppDeployerUtils;
-import org.wso2.carbon.application.deployer.humantask.internal.HumanTaskAppDeployerDSComponent;
-import org.wso2.carbon.application.deployer.config.Artifact;
-import org.wso2.carbon.application.deployer.config.CappFile;
+import org.apache.axis2.deployment.repository.util.DeploymentFileData;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.axis2.engine.AxisConfiguration;
+import org.wso2.carbon.application.deployer.AppDeployerUtils;
+import org.wso2.carbon.application.deployer.CarbonApplication;
+import org.wso2.carbon.application.deployer.config.Artifact;
+import org.wso2.carbon.application.deployer.config.CappFile;
+import org.wso2.carbon.application.deployer.handler.AppDeploymentHandler;
+import org.wso2.carbon.application.deployer.humantask.internal.HumanTaskAppDeployerDSComponent;
 
-import java.util.List;
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 
 public class HumanTaskAppDeployer implements AppDeploymentHandler {
@@ -44,7 +46,7 @@ public class HumanTaskAppDeployer implements AppDeploymentHandler {
     /**
      * Check the artifact type and if it is a HumanTask artifact, copy it to the HumanTask deployment hot folder
      *
-     * @param carbonApp - CarbonApplication instance to check for HumanTask artifacts
+     * @param carbonApp  - CarbonApplication instance to check for HumanTask artifacts
      * @param axisConfig - AxisConfiguration of the current tenant
      */
     public void deployArtifacts(CarbonApplication carbonApp, AxisConfiguration axisConfig)
@@ -52,10 +54,9 @@ public class HumanTaskAppDeployer implements AppDeploymentHandler {
         List<Artifact.Dependency> artifacts = carbonApp.getAppConfig().getApplicationArtifact()
                 .getDependencies();
 
-        String repo = axisConfig.getRepository().getPath();
-
-        String artifactPath, destPath;
+        // loop through all dependencies
         for (Artifact.Dependency dep : artifacts) {
+            Deployer deployer;
             Artifact artifact = dep.getArtifact();
             if (artifact == null) {
                 continue;
@@ -67,10 +68,11 @@ public class HumanTaskAppDeployer implements AppDeploymentHandler {
                 continue;
             }
 
-            if (HUMANTASK_TYPE.equals(artifact.getType())) {
-                destPath = repo + File.separator + HUMANTASK_DIR;
+            if (HumanTaskAppDeployer.HUMANTASK_TYPE.equals(artifact.getType())) {
+                deployer = AppDeployerUtils.getArtifactDeployer(axisConfig, HUMANTASK_DIR, "zip");
             } else {
                 continue;
+
             }
 
             List<CappFile> files = artifact.getFiles();
@@ -79,10 +81,12 @@ public class HumanTaskAppDeployer implements AppDeploymentHandler {
                         "be deployed. But " + files.size() + " files found.");
                 continue;
             }
-            String fileName = artifact.getFiles().get(0).getName();
-            artifactPath = artifact.getExtractedPath() + File.separator + fileName;
-            AppDeployerUtils.createDir(destPath);
-            AppDeployerUtils.copyFile(artifactPath, destPath + File.separator + fileName);
+
+            if (deployer != null) {
+                String fileName = artifact.getFiles().get(0).getName();
+                String artifactPath = artifact.getExtractedPath() + File.separator + fileName;
+                deployer.deploy(new DeploymentFileData(new File(artifactPath), deployer));
+            }
         }
     }
 
@@ -90,7 +94,7 @@ public class HumanTaskAppDeployer implements AppDeploymentHandler {
      * Check the artifact type and if it is a HumanTask, delete the file from the HumanTask
      * deployment hot folder
      *
-     * @param carbonApp - CarbonApplication instance to check for HumanTask artifacts
+     * @param carbonApp  - CarbonApplication instance to check for HumanTask artifacts
      * @param axisConfig - - axisConfig of the current tenant
      */
     public void undeployArtifacts(CarbonApplication carbonApp, AxisConfiguration axisConfig) {
@@ -98,17 +102,19 @@ public class HumanTaskAppDeployer implements AppDeploymentHandler {
         List<Artifact.Dependency> artifacts = carbonApp.getAppConfig().getApplicationArtifact()
                 .getDependencies();
 
-        String repo = axisConfig.getRepository().getPath();
-        String artifactPath, destPath;
+        // loop through all dependencies
         for (Artifact.Dependency dep : artifacts) {
+            Deployer deployer;
             Artifact artifact = dep.getArtifact();
             if (artifact == null) {
                 continue;
             }
+
             if (HumanTaskAppDeployer.HUMANTASK_TYPE.equals(artifact.getType())) {
-                destPath = repo + File.separator + HumanTaskAppDeployer.HUMANTASK_DIR;
+                deployer = AppDeployerUtils.getArtifactDeployer(axisConfig, HUMANTASK_DIR, "zip");
             } else {
                 continue;
+
             }
 
             List<CappFile> files = artifact.getFiles();
@@ -117,11 +123,14 @@ public class HumanTaskAppDeployer implements AppDeploymentHandler {
                         files.size() + " files found.");
                 continue;
             }
-            String fileName = artifact.getFiles().get(0).getName();
-            artifactPath = destPath + File.separator + fileName;
-            File artifactFile = new File(artifactPath);
-            if (artifactFile.exists() && !artifactFile.delete()) {
-                log.warn("Couldn't delete App artifact file : " + artifactPath);
+            if (deployer != null) {
+                String fileName = artifact.getFiles().get(0).getName();
+                String artifactPath = artifact.getExtractedPath() + File.separator + fileName;
+                try {
+                    deployer.undeploy(artifactPath);
+                } catch (DeploymentException e) {
+                    log.error("Error occured while trying to un deploy : "+artifact.getName());
+                }
             }
         }
     }
