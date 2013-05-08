@@ -103,7 +103,6 @@ public class MashupAppDeployer implements AppDeploymentHandler {
         List<Artifact.Dependency> artifacts =
                 carbonApp.getAppConfig().getApplicationArtifact().getDependencies();
 
-//        ArchiveManipulator archiveManipulator = new ArchiveManipulator();
         for (Artifact.Dependency dep : artifacts) {
             Deployer deployer;
             Artifact artifact = dep.getArtifact();
@@ -115,7 +114,6 @@ public class MashupAppDeployer implements AppDeploymentHandler {
                 deployer = AppDeployerUtils.getArtifactDeployer(axisConfig, MASHUP_DIR, "js");
             } else {
                 continue;
-
             }
 
             List<CappFile> files = artifact.getFiles();
