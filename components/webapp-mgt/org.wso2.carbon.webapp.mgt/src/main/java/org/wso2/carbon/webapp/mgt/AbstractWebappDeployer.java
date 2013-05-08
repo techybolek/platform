@@ -208,7 +208,8 @@ public abstract class AbstractWebappDeployer extends AbstractDeployer {
             isSkipped = explodedFile.exists();
         } else {
             // return false if jaxwebapp or jaggery app is being deployed
-            if (webappFilePath.contains("jaxwebapps") || webappFilePath.contains("jaggeryapps")) {
+            if (webappFilePath.contains("jaxwebapps") || webappFilePath.contains("jaggeryapps")
+                    || webappFilePath.contains("carbonapps")) {
                 return false;
             }
             Host host = DataHolder.getCarbonTomcatService().getTomcat().getHost();
