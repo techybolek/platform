@@ -128,7 +128,8 @@ public class BPELAppDeployer implements AppDeploymentHandler {
                 continue;
             }
 
-            if (deployer != null) {
+            if (deployer != null && AppDeployerConstants.DEPLOYMENT_STATUS_DEPLOYED.
+                                equals(artifact.getDeploymentStatus())) {
                 String fileName = artifact.getFiles().get(0).getName();
                 String artifactPath = artifact.getExtractedPath() + File.separator + fileName;
                 try {
