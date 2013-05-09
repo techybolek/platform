@@ -22,6 +22,12 @@
 
     <modules>
 
+        <module>../../../service-stubs/org.wso2.carbon.transport.adaptor.manager.stub</module>
+
+        <module>../../../components/transport-adaptor</module>
+        <module>../../../components/transport-adaptor-manager</module>
+
+
         <!-- Start of Data-bridge -->
         <!--<module>../../../components/data-bridge/org.wso2.carbon.databridge.persistence.cassandra</module>-->
         <!--<module>../../../components/data-bridge/org.wso2.carbon.databridge.core</module>-->
