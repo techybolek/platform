@@ -118,6 +118,14 @@
     }*/
 </script>-->
 
+<%  String endPointStr = "";
+    String[] eps = service.getEndPoints();
+    for (String ep : eps) {
+        endPointStr += ep + ",";
+    }
+    endPointStr = endPointStr.substring(0, endPointStr.length()-1);
+%>
+
 <div id="middle">
 <h2><fmt:message key="service.dashboard"/> (<%= serviceName%>)</h2>
 
@@ -202,7 +210,7 @@
             %>
             <tr>
                 <td colspan="2">
-                    <a href="../wsdl2code/index.jsp?generateClient=<%=service.getWsdlURLs()[0]%>&toppage=false" class="icon-link"
+                    <a href="../wsdl2code/index.jsp?generateClient=<%=service.getWsdlURLs()[0]%>&toppage=false&endpoints=<%=endPointStr%>" class="icon-link"
                        style="background-image:url(images/genclient.gif);">
                         <fmt:message key="generate.client"/>
                     </a>
