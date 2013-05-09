@@ -23,6 +23,7 @@ import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.application.deployer.AppDeployerConstants;
 import org.wso2.carbon.application.deployer.AppDeployerUtils;
 import org.wso2.carbon.application.deployer.CarbonApplication;
 import org.wso2.carbon.application.deployer.bpel.internal.BPELAppDeployerDSComponent;
@@ -83,7 +84,13 @@ public class BPELAppDeployer implements AppDeploymentHandler {
             if (deployer != null) {
                 String fileName = artifact.getFiles().get(0).getName();
                 String artifactPath = artifact.getExtractedPath() + File.separator + fileName;
-                deployer.deploy(new DeploymentFileData(new File(artifactPath), deployer));
+                try {
+                    deployer.deploy(new DeploymentFileData(new File(artifactPath), deployer));
+                    artifact.setDeploymentStatus(AppDeployerConstants.DEPLOYMENT_STATUS_DEPLOYED);
+                } catch (DeploymentException e) {
+                    artifact.setDeploymentStatus(AppDeployerConstants.DEPLOYMENT_STATUS_FAILED);
+                    throw e;
+                }
             }
         }
     }
@@ -126,7 +133,13 @@ public class BPELAppDeployer implements AppDeploymentHandler {
                 String artifactPath = artifact.getExtractedPath() + File.separator + fileName;
                 try {
                     deployer.undeploy(artifactPath);
+                    artifact.setDeploymentStatus(AppDeployerConstants.DEPLOYMENT_STATUS_PENDING);
+                    File artifactFile = new File(artifactPath);
+                    if (artifactFile.exists() && !artifactFile.delete()) {
+                        log.warn("Couldn't delete App artifact file : " + artifactPath);
+                    }
                 } catch (DeploymentException e) {
+                    artifact.setDeploymentStatus(AppDeployerConstants.DEPLOYMENT_STATUS_FAILED);
                     log.error("Error occured while trying to un deploy : "+artifact.getName());
                 }
             }

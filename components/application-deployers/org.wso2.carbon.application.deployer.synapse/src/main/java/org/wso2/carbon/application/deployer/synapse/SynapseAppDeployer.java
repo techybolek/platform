@@ -178,7 +178,7 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
                     }
                 } catch (Exception e) {
                     artifact.setDeploymentStatus(AppDeployerConstants.DEPLOYMENT_STATUS_FAILED);
-                    log.error("Error occured while trying to un deploy : "+artifactName);
+                    log.error("Error occured while trying to un deploy : "+ artifactName);
                 }
             }
         }
