@@ -88,6 +88,8 @@
     <properties>
         <wso2carbon.version.transport.adaptor>1.0.0-SNAPSHOT</wso2carbon.version.transport.adaptor>
         <carbon.version.407>4.0.7</carbon.version.407>
+        <carbon.version.406>4.0.6</carbon.version.406>
+        <carbon.version.405>4.0.5</carbon.version.405>
         <carbon.version.400>4.0.0</carbon.version.400>
         <carbon.p2.plugin.version>1.5.2-SNAPSHOT</carbon.p2.plugin.version>
     </properties>
