@@ -62,7 +62,7 @@
                                     org.wso2.carbon.event.server:${carbon.version.405}
                                 </importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.databridge.datareceiver
+                                    org.wso2.carbon.databridge.datareceiver:${carbon.version.407}
                                 </importFeatureDef>
                             </importFeatures>
                         </configuration>
