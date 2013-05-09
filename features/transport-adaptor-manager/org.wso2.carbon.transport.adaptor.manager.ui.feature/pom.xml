@@ -73,10 +73,10 @@
 							</adviceFile>
 							<bundles>
 								<bundleDef>org.wso2.carbon:org.wso2.carbon.transport.adaptor.manager.ui:${project.version}</bundleDef>
-								<bundleDef>org.wso2.carbon:org.wso2.carbon.transport.adaptor.manager.stub</bundleDef>
+								<bundleDef>org.wso2.carbon:org.wso2.carbon.transport.adaptor.manager.stub:${project.version}</bundleDef>
 							</bundles>
 							<importFeatures>
-								<importFeatureDef>org.wso2.carbon.core:${project.version}</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.core:${carbon.version.406}</importFeatureDef>
 							</importFeatures>
 						</configuration>
 					</execution>
