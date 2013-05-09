@@ -16,7 +16,6 @@
 package org.wso2.carbon.transport.test.util;
 
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
-import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 /**

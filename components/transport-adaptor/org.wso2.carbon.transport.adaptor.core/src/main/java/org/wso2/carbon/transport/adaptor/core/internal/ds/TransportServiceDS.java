@@ -23,7 +23,6 @@ import org.wso2.carbon.transport.adaptor.core.TransportAdaptorRegistrationServic
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 import org.wso2.carbon.transport.adaptor.core.internal.CarbonTransportAdaptorRegistrationService;
 import org.wso2.carbon.transport.adaptor.core.internal.CarbonTransportAdaptorService;
-import org.wso2.carbon.transport.adaptor.core.internal.CarbonTransportAdaptorService;
 
 /**
  * @scr.component name="transportservice.component" immediate="true"

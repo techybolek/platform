@@ -16,11 +16,7 @@
 
 package org.wso2.carbon.transport.adaptor.core.internal.ds;
 
-import org.wso2.carbon.databridge.agent.thrift.Agent;
-import org.wso2.carbon.databridge.core.DataBridgeSubscriberService;
-import org.wso2.carbon.event.core.EventBroker;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorRegistrationService;
-import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 
 /**
