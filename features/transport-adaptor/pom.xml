@@ -73,13 +73,13 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.event.server.feature</artifactId>
-                <version>${carbon.platform.version.400}</version>
+                <version>${carbon.version.400}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.databridge.datareceiver.feature</artifactId>
-                <version>${carbon.platform.version.407}</version>
+                <version>${carbon.version.407}</version>
                 <type>zip</type>
             </dependency>
         </dependencies>
@@ -87,8 +87,8 @@
 
     <properties>
         <wso2carbon.version.transport.adaptor>1.0.0-SNAPSHOT</wso2carbon.version.transport.adaptor>
-        <carbon.platform.version.407>4.0.7</carbon.platform.version.407>
-        <carbon.platform.version.400>4.0.0</carbon.platform.version.400>
+        <carbon.version.407>4.0.7</carbon.version.407>
+        <carbon.version.400>4.0.0</carbon.version.400>
         <carbon.p2.plugin.version>1.5.2-SNAPSHOT</carbon.p2.plugin.version>
     </properties>
 

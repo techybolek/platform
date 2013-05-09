@@ -21,7 +21,7 @@
        <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.databridge.datareceiver.feature</artifactId>
-            <!--<version>${carbon.platform.version.407}</version>-->
+            <!--<version>${carbon.version.407}</version>-->
             <type>zip</type>
         </dependency>
     </dependencies>
@@ -56,10 +56,10 @@
                                 </bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.version.400}
                                 </importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.event.server:${carbon.platform.version.400}
+                                    org.wso2.carbon.event.server:${carbon.version.400}
                                 </importFeatureDef>
                                 <importFeatureDef>
                                     org.wso2.carbon.databridge.datareceiver
