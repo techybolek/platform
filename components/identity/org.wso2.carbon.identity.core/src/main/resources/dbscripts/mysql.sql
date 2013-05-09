@@ -124,3 +124,12 @@ CREATE TABLE IDN_STS_STORE (
                         STATE INTEGER DEFAULT 0,
             PRIMARY KEY (ID)
 );
+
+CREATE TABLE IDN_IDENTITY_USER_DATA (
+                        TENANT_ID INTEGER DEFAULT -1234,
+                        USERR_NAME VARCHAR(255) NOT NULL,
+                        DATA_KEY VARCHAR(255) NOT NULL,
+                        DATA_VALUE VARCHAR(255) NOT NULL,
+            PRIMARY KEY (TENANT_ID, USERR_NAME, DATA_KEY)
+);
+
