@@ -1020,6 +1020,7 @@ public class ServiceAdmin extends AbstractAdmin implements ServiceAdminMBean {
         AxisServiceGroup serviceGroup = (AxisServiceGroup) service.getParent();
         serviceMetaData.setFoundWebResources(serviceGroup.isFoundWebResources());
         serviceMetaData.setScope(service.getScope());
+        serviceMetaData.setEndPoints(service.getEndpoints());
 
         Parameter deploymentTime =
                 service.getParameter(CarbonConstants.SERVICE_DEPLOYMENT_TIME_PARAM);

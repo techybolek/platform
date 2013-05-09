@@ -15,11 +15,14 @@
  */
 package org.wso2.carbon.service.mgt;
 
+import org.apache.axis2.description.AxisEndpoint;
 import org.wso2.carbon.service.mgt.util.Utils;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /*
 * 
@@ -42,6 +45,20 @@ public class ServiceMetaData {
     private String tryitURL;
     private boolean disableDeletion;
     private long deployedTime;
+    private String[] endPoints;
+
+    public void setEndPoints(Map endPnts){
+        endPoints = new String[endPnts.keySet().size()];
+        int i =0 ;
+        for (Object p : endPnts.keySet())     {
+            this.endPoints[i] = p.toString();
+            i++;
+        }
+    }
+
+    public String[] getEndPoints(){
+        return endPoints;
+    }
 
     public String getSecurityScenarioId() {
         return securityScenarioId;
