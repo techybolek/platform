@@ -122,3 +122,11 @@ CREATE TABLE IDN_STS_STORE (
                         EXPIRE_DATE DATETIME YEAR TO SECOND NOT NULL,
                         STATE INTEGER DEFAULT 0
 );
+
+CREATE TABLE IDN_IDENTITY_USER_DATA (
+                        TENANT_ID INTEGER DEFAULT -1234,
+                        USERR_NAME LVARCHAR(255) NOT NULL,
+                        DATA_KEY LVARCHAR(255) NOT NULL,
+                        DATA_VALUE LVARCHAR(255) NOT NULL,
+            PRIMARY KEY (TENANT_ID, USERR_NAME, DATA_KEY)
+);
