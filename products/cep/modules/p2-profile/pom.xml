@@ -150,6 +150,12 @@
                                 <featureArtifactDef>
                                     org.wso2.carbon:org.wso2.carbon.cep.statistics.feature:${carbon.platform.patch.version.405}
                                 </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.transport.adaptor.feature:1.0.0-SNAPSHOT
+                                </featureArtifactDef>
+                                <featureArtifactDef>
+                                    org.wso2.carbon:org.wso2.carbon.transport.adaptor.manager.feature:1.0.0-SNAPSHOT
+                                </featureArtifactDef>
 
                                 <!-- service.mgt -->
                                 <featureArtifactDef>
@@ -352,6 +358,14 @@
                                 <feature>
                                     <id>org.wso2.carbon.cep.statistics.feature.group</id>
                                     <version>${carbon.platform.patch.version.405}</version>
+                                </feature>
+                                <feature>
+                                    <id>org.wso2.carbon.transport.adaptor.feature.group</id>
+                                    <version>1.0.0-SNAPSHOT</version>
+                                </feature>
+                                <feature>
+                                    <id>org.wso2.carbon.transport.adaptor.manager.feature.group</id>
+                                    <version>1.0.0-SNAPSHOT</version>
                                 </feature>
 
                                 <!-- service.mgt -->
