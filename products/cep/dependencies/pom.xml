@@ -22,14 +22,16 @@
 
     <modules>
 
+        <module>../../../dependencies/commons/siddhi/2.0.0-wso2v4</module>
+
         <module>../../../service-stubs/org.wso2.carbon.transport.adaptor.manager.stub</module>
 
         <module>../../../components/transport-adaptor</module>
         <module>../../../components/transport-adaptor-manager</module>
+        <module>../../../components/event-builder</module>
 
         <module>../../../features/transport-adaptor</module>
         <module>../../../features/transport-adaptor-manager</module>
-
 
         <!-- Start of Data-bridge -->
         <!--<module>../../../components/data-bridge/org.wso2.carbon.databridge.persistence.cassandra</module>-->
