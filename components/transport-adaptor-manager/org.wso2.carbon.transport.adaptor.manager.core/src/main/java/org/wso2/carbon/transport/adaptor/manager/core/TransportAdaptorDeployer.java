@@ -27,7 +27,7 @@ import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.transport.adaptor.manager.core.exception.TMConfigurationException;
+import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportManagerConfigurationException;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.CarbonTransportManagerService;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.config.TransportConfigurationHelper;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TMConstants;
@@ -60,7 +60,6 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
     }
 
 
-
     /**
      * Process the transport adaptor file, create it and deploy it
      *
@@ -73,10 +72,8 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
         String path = deploymentFileData.getAbsolutePath();
 
         if (!deployedTransportAdaptorFilePaths.contains(path)) {
-               processDeploy(deploymentFileData, path);
-        }
-
-        else{
+            processDeploy(deploymentFileData, path);
+        } else {
             deployedTransportAdaptorFilePaths.remove(path);
         }
 
@@ -131,22 +128,20 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
      */
     public void undeploy(String filePath) throws DeploymentException {
 
-        if (! unDeployedTransportAdaptorFilePaths.contains(filePath)) {
+        if (!unDeployedTransportAdaptorFilePaths.contains(filePath)) {
             processUndeploy(filePath);
-        }
-
-        else {
+        } else {
             unDeployedTransportAdaptorFilePaths.remove(filePath);
         }
 
     }
 
-    public void processDeploy(DeploymentFileData deploymentFileData , String path) throws DeploymentException {
+    public void processDeploy(DeploymentFileData deploymentFileData, String path) throws DeploymentException {
 
-        log.info("Deploying a transport-adaptor file started");
+        log.info("Transport adaptor file is deployed");
         File transportAdaptorFile = new File(path);
         CarbonTransportManagerService carbonTransportManagerService = TransportManagerValueHolder.getCarbonTransportManagerService();
-        int tenantID = PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();
         String transportAdaptorName = "";
 
 
@@ -157,17 +152,20 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
             TransportAdaptorConfiguration transportAdaptorConfiguration = TransportConfigurationHelper.fromOM(transportAdaptorOMElement);
             transportAdaptorName = transportAdaptorOMElement.getAttributeValue(new QName(TMConstants.TM_ATTR_NAME));
 
-            if (carbonTransportManagerService.checkAdaptorValidity(tenantID, transportAdaptorName)) {
+            if (TransportConfigurationHelper.validateTransportAdaptorConfiguration(tenantId, TransportConfigurationHelper.fromOM(transportAdaptorOMElement))) {
 
-                carbonTransportManagerService.removeFromCancelDeployMap(tenantID, transportAdaptorName);
-                carbonTransportManagerService.addTransportConfigurationForTenant(tenantID, transportAdaptorConfiguration);
-                carbonTransportManagerService.addFileConfiguration(tenantID, transportAdaptorName, path, true);
-            } else {
-                throw new TMConfigurationException(transportAdaptorName + " is already registered for this tenant");
+                if (carbonTransportManagerService.checkAdaptorValidity(tenantId, transportAdaptorName)) {
+
+                    carbonTransportManagerService.addTransportConfigurationForTenant(tenantId, transportAdaptorConfiguration);
+                    carbonTransportManagerService.addFileConfiguration(tenantId, transportAdaptorName, path, true);
+                } else {
+                    throw new TransportManagerConfigurationException(transportAdaptorName + " is already registered for this tenant");
+                }
+
             }
 
-        } catch (TMConfigurationException e) {
-            carbonTransportManagerService.addFileConfiguration(tenantID, transportAdaptorName, path, false);
+        } catch (TransportManagerConfigurationException e) {
+            carbonTransportManagerService.addFileConfiguration(tenantId, transportAdaptorName, path, false);
             log.error("The deployment of " + transportAdaptorFile.getName() + " is not valid.", e);
             throw new DeploymentException(e);
         }
@@ -179,7 +177,6 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
         int tenantID = PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();
 
         CarbonTransportManagerService carbonTransportManagerService = TransportManagerValueHolder.getCarbonTransportManagerService();
-        carbonTransportManagerService.removeFromCancelUnDeployMap(tenantID, filePath);
         carbonTransportManagerService.removeTransportConfigurationFromMap(filePath, tenantID);
     }
 
@@ -188,17 +185,14 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
     }
 
     public void manualDeploy(DeploymentFileData deploymentFileData, String filePath) throws DeploymentException {
-        deployedTransportAdaptorFilePaths.add(filePath );
+        deployedTransportAdaptorFilePaths.add(filePath);
         processDeploy(deploymentFileData, filePath);
     }
 
-    public void manualUnDeploy(String filePath){
+    public void manualUnDeploy(String filePath) {
         unDeployedTransportAdaptorFilePaths.add(filePath);
         processUndeploy(filePath);
     }
-
-
-
 
 
 }

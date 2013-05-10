@@ -19,7 +19,7 @@ package org.wso2.carbon.transport.adaptor.manager.core.internal.build;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.transport.adaptor.manager.core.TransportManagerService;
-import org.wso2.carbon.transport.adaptor.manager.core.exception.TMConfigurationException;
+import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportManagerConfigurationException;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.CarbonTransportManagerService;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportManagerValueHolder;
 
@@ -35,9 +35,9 @@ public class TransportManagerServiceBuilder {
      * creates the service and register it
      *
      * @return - transport configuration service.
-     * @throws TMConfigurationException
+     * @throws org.wso2.carbon.transport.adaptor.manager.core.exception.TransportManagerConfigurationException
      */
-    public static TransportManagerService createTransportManagerService() throws TMConfigurationException {
+    public static TransportManagerService createTransportManagerService() throws TransportManagerConfigurationException {
 
         carbonTransportManagerService = new CarbonTransportManagerService();
         TransportManagerValueHolder.registerCarbonTransportManagerService(carbonTransportManagerService);

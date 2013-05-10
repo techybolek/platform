@@ -18,17 +18,17 @@ package org.wso2.carbon.transport.adaptor.manager.admin.internal;
  */
 
 
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.transport.adaptor.core.Property;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorDto;
-import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
 import org.wso2.carbon.transport.adaptor.manager.admin.internal.exception.TransportManagerAdminServiceException;
 import org.wso2.carbon.transport.adaptor.manager.admin.internal.util.TransportHolder;
 import org.wso2.carbon.transport.adaptor.manager.admin.internal.util.TransportManagerHolder;
 import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorFile;
-import org.wso2.carbon.transport.adaptor.manager.core.exception.TMConfigurationException;
+import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportManagerConfigurationException;
 
 import java.util.List;
 import java.util.Map;
@@ -36,11 +36,13 @@ import java.util.Map;
 public class TransportManagerAdminService extends AbstractAdmin {
 
     /**
-     * @return Array of Transport Adaptor names
-     * @throws TransportManagerAdminServiceException
+     * Get the Transport Ada
+     *
+     * @return Array of Transport Adaptor type names
+     * @throws AxisFault
      *          if Transport names are empty
      */
-    public String[] getTransportNames() throws TransportManagerAdminServiceException {
+    public String[] getTransportNames() throws AxisFault {
         TransportHolder transportHolder = TransportHolder.getInstance();
         List<TransportAdaptorDto> transportAdaptorDtoList = transportHolder.getTransportService().getTransportAdaptors();
         if (transportAdaptorDtoList != null) {
@@ -50,7 +52,7 @@ public class TransportManagerAdminService extends AbstractAdmin {
             }
             return transportNames;
         }
-        throw new TransportManagerAdminServiceException("No Transport Names are received.");
+        throw new AxisFault("No Transport adaptor type names are received.");
     }
 
     /**
@@ -58,18 +60,17 @@ public class TransportManagerAdminService extends AbstractAdmin {
      *
      * @param transportName - transport adaptor name
      * @return input transport properties
-     * @throws TransportManagerAdminServiceException
+     * @throws AxisFault
      *          if transport properties not found
      */
     public TransportPropertyDto[] getInputTransportProperties(String transportName)
-            throws TransportManagerAdminServiceException {
+            throws AxisFault {
         TransportHolder transportHolder = TransportHolder.getInstance();
         List<TransportAdaptorDto> transportAdaptorDtoList = transportHolder.getTransportService().getTransportAdaptors();
         for (TransportAdaptorDto transportAdaptorDto : transportAdaptorDtoList) {
             // check for transport adaptor with transport name
             if (transportAdaptorDto.getName().equals(transportName)) {
                 // get transport adaptor properties
-
                 List<Property> inputPropertyList = transportAdaptorDto.getAdaptorInPropertyList();
                 if (inputPropertyList != null) {
                     TransportPropertyDto[] inputTransportPropertyDtoArray = new TransportPropertyDto[inputPropertyList.size()];
@@ -92,24 +93,25 @@ public class TransportManagerAdminService extends AbstractAdmin {
 
 
         }
-        throw new TransportManagerAdminServiceException("No Transport adaptor Input Properties are received.");
+        throw new AxisFault("No Transport adaptor Input Properties are received.");
     }
 
     /**
+     * To get the output transport adaptor property array
+     *
      * @param transportName -transport adaptor name
      * @return output transport properties
-     * @throws TransportManagerAdminServiceException
+     * @throws AxisFault
      *
      */
     public TransportPropertyDto[] getOutputTransportProperties(String transportName)
-            throws TransportManagerAdminServiceException {
+            throws AxisFault {
         TransportHolder transportHolder = TransportHolder.getInstance();
         List<TransportAdaptorDto> transportAdaptorDtoList = transportHolder.getTransportService().getTransportAdaptors();
         for (TransportAdaptorDto transportAdaptorDto : transportAdaptorDtoList) {
             // check for transport adaptor with transport name
             if (transportAdaptorDto.getName().equals(transportName)) {
                 // get transport adaptor properties
-
                 List<Property> outputPropertyList = transportAdaptorDto.getAdaptorOutPropertyList();
                 if (outputPropertyList != null) {
                     TransportPropertyDto[] outputTransportPropertyDtoArray = new TransportPropertyDto[outputPropertyList.size()];
@@ -131,29 +133,28 @@ public class TransportManagerAdminService extends AbstractAdmin {
 
 
         }
-        throw new TransportManagerAdminServiceException("No Transport adaptor Output Properties are received.");
+        throw new AxisFault("No Transport adaptor Output Properties are received.");
     }
 
 
     /**
+     * To get the common transport adaptor property array
+     *
      * @param transportName - transport adaptor name
      * @return common transport properties
-     * @throws TransportManagerAdminServiceException
+     * @throws AxisFault
      *
      */
     public TransportPropertyDto[] getCommonTransportProperties(String transportName)
-            throws TransportManagerAdminServiceException {
+            throws AxisFault {
         TransportHolder transportHolder = TransportHolder.getInstance();
         List<TransportAdaptorDto> transportAdaptorDtoList = transportHolder.getTransportService().getTransportAdaptors();
         for (TransportAdaptorDto transportAdaptorDto : transportAdaptorDtoList) {
             // check for transport adaptor with transport name
             if (transportAdaptorDto.getName().equals(transportName)) {
                 // get transport adaptor properties
-
                 List<Property> commonPropertyList = transportAdaptorDto.getAdaptorCommonPropertyList();
-
                 if (commonPropertyList != null) {
-
                     TransportPropertyDto[] commonTransportPropertyDtoArray = new TransportPropertyDto[commonPropertyList.size()];
                     for (int index = 0; index < commonTransportPropertyDtoArray.length; index++) {
                         Property property = commonPropertyList.get(index);
@@ -174,16 +175,18 @@ public class TransportManagerAdminService extends AbstractAdmin {
 
 
         }
-        throw new TransportManagerAdminServiceException("No Transport adaptor Common Properties are received.");
+        throw new AxisFault("No Transport adaptor Common Properties are received.");
     }
 
     /**
+     * To get the all transport adaptor property object
+     *
      * @param transportName transport adaptor name
      * @return transport adaptor properties
-     * @throws TransportManagerAdminServiceException
+     * @throws AxisFault
      *
      */
-    public TransportAdaptorProperties getAllTransportAdaptorProperties(String transportName) throws TransportManagerAdminServiceException {
+    public TransportAdaptorProperties getAllTransportAdaptorProperties(String transportName) throws AxisFault {
         TransportAdaptorProperties transportAdaptorProperties = new TransportAdaptorProperties();
         transportAdaptorProperties.setCommonTransportPropertyDtos(getCommonTransportProperties(transportName));
         transportAdaptorProperties.setInputTransportPropertyDtos(getInputTransportProperties(transportName));
@@ -205,7 +208,7 @@ public class TransportManagerAdminService extends AbstractAdmin {
      */
     public void addTransportConfiguration(String transportAdaptorName, String transportAdaptorType,
                                           TransportPropertyDto[] inputPropertyDtos, TransportPropertyDto[] outputPropertyDtos, TransportPropertyDto[] commonPropertyDtos)
-            throws TransportManagerAdminServiceException {
+            throws AxisFault {
         TransportManagerHolder transportManagerHolder = TransportManagerHolder.getInstance();
         TransportAdaptorConfiguration transportAdaptorConfiguration = new TransportAdaptorConfiguration();
         transportAdaptorConfiguration.setName(transportAdaptorName);
@@ -228,77 +231,97 @@ public class TransportManagerAdminService extends AbstractAdmin {
             transportAdaptorConfiguration.addCommonAdaptorProperty(transportPropertyDto.getKey(), transportPropertyDto.getValue());
         }
 
-
         // add transport adaptor configuration
         try {
             transportManagerHolder.getTransportManagerService().saveTransportConfiguration(transportAdaptorConfiguration, axisConfiguration);
 
-        } catch (TMConfigurationException e) {
-            throw new TransportManagerAdminServiceException("Error in adding transport Configuration", e);
+        } catch (TransportManagerConfigurationException e) {
+            throw new AxisFault("Error in adding transport Configuration , ", e);
         }
     }
 
+
     /**
-     * Remove given transport adaptor configuration
+     * To remove a transport adaptor configuration by its name
      *
-     * @param transportAdaptorName transport adaptor to be removed
+     * @param transportAdaptorName transport Adaptor's name
+     * @throws AxisFault
      */
     public void removeTransportConfiguration(String transportAdaptorName)
-            throws TransportManagerAdminServiceException {
+            throws AxisFault {
         TransportManagerHolder transportManager = TransportManagerHolder.getInstance();
         AxisConfiguration axisConfiguration = getAxisConfig();
         try {
             transportManager.getTransportManagerService().removeTransportConfiguration(transportAdaptorName, axisConfiguration);
-        } catch (TMConfigurationException e) {
-            throw new TransportManagerAdminServiceException("Error in removing transport adaptor configurations" + e);
+        } catch (TransportManagerConfigurationException e) {
+            throw new AxisFault("Error in removing transport adaptor configurations , " + e);
         }
     }
 
-    public void editTransportAdaptorConfigurationFile(String transportAdaptorConfiguration, String transportAdaptorName) throws TransportManagerAdminServiceException {
+    /**
+     * to edit a transport adaptor configuration
+     *
+     * @param transportAdaptorConfiguration transport adaptor configuration of the edited adaptor
+     * @param transportAdaptorName  transport adaptor name
+     * @throws AxisFault
+     */
+    public void editTransportAdaptorConfigurationFile(String transportAdaptorConfiguration, String transportAdaptorName) throws AxisFault {
 
         TransportManagerHolder transportManager = TransportManagerHolder.getInstance();
         AxisConfiguration axisConfiguration = getAxisConfig();
         try {
             transportManager.getTransportManagerService().editTransportConfigurationFile(transportAdaptorConfiguration, transportAdaptorName, axisConfiguration);
 
-        } catch (TMConfigurationException e) {
-            throw new TransportManagerAdminServiceException("Error when editing transport adaptor configurations" + e);
+        } catch (TransportManagerConfigurationException e) {
+            throw new AxisFault("Error when editing transport adaptor configurations , " + e);
         }
 
     }
 
-
-    public String getTransportAdaptorConfigurationFile(String transportAdaptorName) throws TransportManagerAdminServiceException {
+    /**
+     * To get the transport adaptor configuration file from the file system
+     *
+     * @param transportAdaptorName transport adaptor name
+     * @return Transport adaptor configuration file
+     * @throws AxisFault
+     */
+    public String getTransportAdaptorConfigurationFile(String transportAdaptorName) throws AxisFault {
         TransportManagerHolder transportManager = TransportManagerHolder.getInstance();
         AxisConfiguration axisConfiguration = getAxisConfig();
         try {
             String transportConfigurationFile = transportManager.getTransportManagerService().getTransportConfigurationFile(transportAdaptorName, axisConfiguration);
             return transportConfigurationFile;
-        } catch (TMConfigurationException e) {
-            throw new TransportManagerAdminServiceException("Error in getting transport adaptor configurations" + e);
-        }
-    }
-
-    public void removeTransportAdaptorFile(String filePath)
-            throws TransportManagerAdminServiceException {
-        TransportManagerHolder transportManager = TransportManagerHolder.getInstance();
-        AxisConfiguration axisConfiguration = getAxisConfig();
-        try {
-            transportManager.getTransportManagerService().removeTransportAdaptorFile(filePath,axisConfig);
-        } catch (TMConfigurationException e) {
-            throw new TransportManagerAdminServiceException("Error in removing transport adaptor configurations" + e);
+        } catch (TransportManagerConfigurationException e) {
+            throw new AxisFault("Error in getting transport adaptor configurations , " + e);
         }
     }
 
     /**
-     * Get transport adaptor configurations and convert to TransportConfigurationDto
+     * to remove a transport adaptor configuration file from the file system
+     *
+     * @param filePath filePath of the Transport Adaptor file
+     * @throws AxisFault
+     */
+    public void removeTransportAdaptorFile(String filePath)
+            throws AxisFault {
+        TransportManagerHolder transportManager = TransportManagerHolder.getInstance();
+        AxisConfiguration axisConfiguration = getAxisConfig();
+        try {
+            transportManager.getTransportManagerService().removeTransportAdaptorFile(filePath, axisConfig);
+        } catch (TransportManagerConfigurationException e) {
+            throw new AxisFault("Error in removing transport adaptor configurations , " + e);
+        }
+    }
+
+    /**
+     * Get transport adaptor configurations and convert to TransportConfigurationDto object array
      *
      * @return Array of TransportConfigurationDto
      * @throws TransportManagerAdminServiceException
      *
      */
     public TransportConfigurationDto[] getAllTransportConfigurationNamesAndTypes()
-            throws TransportManagerAdminServiceException {
+            throws AxisFault {
         TransportManagerHolder transportManager = TransportManagerHolder.getInstance();
 
         AxisConfiguration axisConfiguration = getAxisConfig();
@@ -343,7 +366,7 @@ public class TransportManagerAdminService extends AbstractAdmin {
             }
             return transportConfigurationDtoArray;
         } else {
-            throw new TransportManagerAdminServiceException("No Transport Adaptor Configurations received.");
+            throw new AxisFault("No Transport Adaptor Configurations received.");
         }
 
     }
@@ -355,7 +378,7 @@ public class TransportManagerAdminService extends AbstractAdmin {
      * @throws TransportManagerAdminServiceException
      *
      */
-    public TransportAdaptorFileDto[] getUnDeployedFiles() throws TransportManagerAdminServiceException {
+    public TransportAdaptorFileDto[] getUnDeployedFiles() throws AxisFault {
 
         TransportManagerHolder transportManager = TransportManagerHolder.getInstance();
         AxisConfiguration axisConfiguration = getAxisConfig();
@@ -381,7 +404,7 @@ public class TransportManagerAdminService extends AbstractAdmin {
             }
             return transportAdaptorFileDtoArray;
         } else {
-            throw new TransportManagerAdminServiceException("No Transport Adaptor Files received.");
+            throw new AxisFault("No Transport Adaptor Files received.");
         }
 
 
@@ -396,7 +419,7 @@ public class TransportManagerAdminService extends AbstractAdmin {
      *          if Transport adaptor configuration not found
      */
     public TransportPropertyDto[] getInputTransportConfiguration(String transportName)
-            throws TransportManagerAdminServiceException {
+            throws AxisFault {
         TransportManagerHolder transportManager = TransportManagerHolder.getInstance();
 
         // get transport adaptor to get input transport properties with parameters isSecured, isRequired
@@ -406,8 +429,8 @@ public class TransportManagerAdminService extends AbstractAdmin {
         try {
             transportAdaptorConfiguration = transportManager.getTransportManagerService().
                     getTransportConfiguration(transportName, axisConfiguration);
-        } catch (TMConfigurationException e) {
-            new TransportManagerAdminServiceException("No Transport configuration for " + transportName);
+        } catch (TransportManagerConfigurationException e) {
+            throw new AxisFault(e.getMessage());
         }
         if (transportAdaptorConfiguration != null) {
             // get transport adaptor type
@@ -438,13 +461,20 @@ public class TransportManagerAdminService extends AbstractAdmin {
             }
             return inputTransportPropertyDtoArray;
         } else {
-            throw new TransportManagerAdminServiceException("No such transport adaptor exists.");
+            throw new AxisFault("No such transport adaptor exists.");
         }
     }
 
+    /**
+     * To get the output transport adaptor configuration of a transport adaptor
+     *
+     * @param transportName transport adapror name
+     * @return transport adaptor property dto
+     * @throws AxisFault
+     */
 
     public TransportPropertyDto[] getOutputTransportConfiguration(String transportName)
-            throws TransportManagerAdminServiceException {
+            throws AxisFault {
         TransportManagerHolder transportManager = TransportManagerHolder.getInstance();
 
         // get transport adaptor to get output transport properties with parameters isSecured, isRequired
@@ -454,8 +484,8 @@ public class TransportManagerAdminService extends AbstractAdmin {
         try {
             transportAdaptorConfiguration = transportManager.getTransportManagerService().
                     getTransportConfiguration(transportName, axisConfiguration);
-        } catch (TMConfigurationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (TransportManagerConfigurationException e) {
+            throw new AxisFault(e.getMessage());
         }
         if (transportAdaptorConfiguration != null) {
             // get transport adaptor type
@@ -484,13 +514,20 @@ public class TransportManagerAdminService extends AbstractAdmin {
             }
             return outputTransportPropertyDtoArray;
         } else {
-            throw new TransportManagerAdminServiceException("No such transport adaptor exists.");
+            throw new AxisFault("No such transport adaptor exists.");
         }
     }
 
 
+    /**
+     * To get the common transport adaptor configuration of a transport adaptor
+     *
+     * @param transportName  transport adaptor name
+     * @return
+     * @throws AxisFault
+     */
     public TransportPropertyDto[] getCommonTransportConfiguration(String transportName)
-            throws TransportManagerAdminServiceException {
+            throws AxisFault {
         TransportManagerHolder transportManager = TransportManagerHolder.getInstance();
 
         // get transport adaptor to get common transport properties with parameters isSecured, isRequired
@@ -500,8 +537,8 @@ public class TransportManagerAdminService extends AbstractAdmin {
         try {
             transportAdaptorConfiguration = transportManager.getTransportManagerService().
                     getTransportConfiguration(transportName, axisConfiguration);
-        } catch (TMConfigurationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (TransportManagerConfigurationException e) {
+            throw new AxisFault(e.getMessage());
         }
         if (transportAdaptorConfiguration != null) {
             // get transport adaptor type
@@ -530,39 +567,8 @@ public class TransportManagerAdminService extends AbstractAdmin {
             }
             return commonTransportPropertyDtoArray;
         } else {
-            throw new TransportManagerAdminServiceException("No such transport adaptor exists.");
+            throw new AxisFault("No such transport adaptor exists.");
         }
     }
-
-    private void testTransportConfiguration(String transportName)
-            throws TransportManagerAdminServiceException {
-        TransportHolder transportHolder = TransportHolder.getInstance();
-        TransportManagerHolder transportManager = TransportManagerHolder.getInstance();
-
-        AxisConfiguration axisConfiguration = getAxisConfig();
-        TransportAdaptorConfiguration transportAdaptorConfiguration =
-                null;
-        try {
-            transportAdaptorConfiguration = transportManager.getTransportManagerService().getTransportConfiguration(transportName, axisConfiguration);
-        } catch (TMConfigurationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-        org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfiguration configuration =
-                new org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfiguration();
-
-        configuration.setName(transportAdaptorConfiguration.getName());
-        configuration.setType(transportAdaptorConfiguration.getType());
-        configuration.setInputAdaptorProperties(transportAdaptorConfiguration.getInputAdaptorProperties());
-        configuration.setOutputAdaptorProperties(transportAdaptorConfiguration.getOutputAdaptorProperties());
-        configuration.setCommonAdaptorProperties(transportAdaptorConfiguration.getCommonAdaptorProperties());
-        try {
-            transportHolder.getTransportService().testConnection(configuration);
-        } catch (TransportEventProcessingException e) {
-            removeTransportConfiguration(transportName);
-            throw new TransportManagerAdminServiceException("Error at testing transport adaptor configuration with name"
-                    + transportName + ". " + e.getMessage(), e);
-        }
-    }
-
 
 }

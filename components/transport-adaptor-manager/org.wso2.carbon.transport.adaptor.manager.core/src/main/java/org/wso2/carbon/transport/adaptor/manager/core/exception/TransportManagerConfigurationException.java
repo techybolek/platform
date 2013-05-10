@@ -19,20 +19,20 @@ package org.wso2.carbon.transport.adaptor.manager.core.exception;
 /**
  * if there is a problem when creating the broker configurations.
  */
-public class TMConfigurationException extends Exception {
+public class TransportManagerConfigurationException extends Exception {
 
-    public TMConfigurationException() {
+    public TransportManagerConfigurationException() {
     }
 
-    public TMConfigurationException(String message) {
+    public TransportManagerConfigurationException(String message) {
         super(message);
     }
 
-    public TMConfigurationException(String message, Throwable cause) {
+    public TransportManagerConfigurationException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public TMConfigurationException(Throwable cause) {
+    public TransportManagerConfigurationException(Throwable cause) {
         super(cause);
     }
 }

@@ -17,7 +17,8 @@
 package org.wso2.carbon.transport.adaptor.manager.core;
 
 import org.apache.axis2.engine.AxisConfiguration;
-import org.wso2.carbon.transport.adaptor.manager.core.exception.TMConfigurationException;
+import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportManagerConfigurationException;
+import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportAdaptorInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -32,18 +33,8 @@ public interface TransportManagerService {
      * @param axisConfiguration
      */
 
-    public void saveTransportConfiguration(TransportAdaptorConfiguration transportAdaptorConfiguration,
-                                           AxisConfiguration axisConfiguration) throws TMConfigurationException;
-
-
-    /**
-     * @param transportAdaptorConfiguration - transport adaptor configuration to be updated
-     * @param axisConfiguration
-     * @throws TMConfigurationException
-     */
-    public void updateTransportConfiguration(TransportAdaptorConfiguration transportAdaptorConfiguration,
-                                             AxisConfiguration axisConfiguration) throws TMConfigurationException;
-
+     public void saveTransportConfiguration(TransportAdaptorConfiguration transportAdaptorConfiguration,
+                                           AxisConfiguration axisConfiguration) throws TransportManagerConfigurationException;
 
     /**
      * removes the transport configuration instance from the system.
@@ -52,7 +43,7 @@ public interface TransportManagerService {
      * @param axisConfiguration
      */
     public void removeTransportConfiguration(String name,
-                                             AxisConfiguration axisConfiguration) throws TMConfigurationException;
+                                             AxisConfiguration axisConfiguration) throws TransportManagerConfigurationException;
 
     /**
      * getting all the transport proxy instance deatils. this is used to dispaly all the
@@ -63,12 +54,6 @@ public interface TransportManagerService {
      */
     public List<TransportAdaptorConfiguration> getAllTransportConfigurations(AxisConfiguration axisConfiguration);
 
-//    /**
-//     * this method returns all the transport configuration names to be used by other componets
-//     *
-//     * @return - all transport configurations
-//     */
-//    public List<String> getAllTransportConfigurationNames(int tenantId);
 
     /**
      * retuns the transport configuration for the given name
@@ -77,35 +62,76 @@ public interface TransportManagerService {
      * @param axisConfiguration
      * @return - transport configuration
      */
-    public TransportAdaptorConfiguration getTransportConfiguration(String name, AxisConfiguration axisConfiguration) throws TMConfigurationException;
+    public TransportAdaptorConfiguration getTransportConfiguration(String name, AxisConfiguration axisConfiguration) throws TransportManagerConfigurationException;
 
     /**
-     *
-     * @param axisConfiguration  - Axis2 Configuration Object
+     * @param axisConfiguration - Axis2 Configuration Object
      * @return List of TransportAdaptorFile
      */
     public List<TransportAdaptorFile> getUnDeployedFiles(AxisConfiguration axisConfiguration);
 
-    /** This method used to delete the un-deployed Transport Adaptor File
+    /**
+     * This method used to delete the un-deployed Transport Adaptor File
      *
      * @param filePath FilePath of the Adaptor File that going to be deleted
-     * @throws TMConfigurationException
+     * @throws org.wso2.carbon.transport.adaptor.manager.core.exception.TransportManagerConfigurationException
+     *
      */
-    public void removeTransportAdaptorFile(String filePath, AxisConfiguration axisConfiguration) throws TMConfigurationException;
+    public void removeTransportAdaptorFile(String filePath, AxisConfiguration axisConfiguration) throws TransportManagerConfigurationException;
 
+    /**
+     * Use to get the transport adaptor configuration file
+     *
+     * @param transportAdaptorName transport adaptor name
+     * @param axisConfiguration
+     * @return
+     * @throws TransportManagerConfigurationException
+     */
+    public String getTransportConfigurationFile(String transportAdaptorName, AxisConfiguration axisConfiguration) throws TransportManagerConfigurationException;
 
-    public String getTransportConfigurationFile(String transportAdaptorName, AxisConfiguration axisConfiguration) throws TMConfigurationException;
+    /**
+     * To edit a transport adaptor configuration
+     *
+     * @param transportAdaptorConfiguration
+     * @param transportAdaptorName
+     * @param axisConfiguration
+     * @throws TransportManagerConfigurationException
+     */
+    public void editTransportConfigurationFile(String transportAdaptorConfiguration, String transportAdaptorName, AxisConfiguration axisConfiguration) throws TransportManagerConfigurationException;
 
-    public void editTransportConfigurationFile(String transportAdaptorConfiguration, String transportAdaptorName, AxisConfiguration axisConfiguration) throws TMConfigurationException;
+    /**
+     * To get the input transport adaptor configuration
+     *
+     * @param transportAdaptorName transport adaptor name
+     * @param tenantId
+     * @return
+     */
+    public Map<String, String> getInputTransportAdaptorConfiguration(String transportAdaptorName, int tenantId);
 
+    /**
+     * To get the output transport adaptor configuration
+     *
+     * @param transportAdaptorName  transport adaptor configuration
+     * @param tenantId
+     * @return
+     */
+    public Map<String, String> getOutputTransportAdaptorConfiguration(String transportAdaptorName, int tenantId);
 
-    public Map<String,String> getInputTransportAdaptorConfiguration(String transportAdaptorName, int tenantId);
+    /**
+     * To get the list of information about the IN transport adaptors
+     *
+     * @param tenantId tenant Id
+     * @return
+     */
+    public List<TransportAdaptorInfo> getInputTransportAdaptorInfo(int tenantId);
 
-    public List<String> getInputTransportAdaptorNames(int tenantId);
+    /**
+     * To get the list of information about the OUT transport adaptors
+     *
+     * @param tenantId
+     * @return
+     */
+    public List<TransportAdaptorInfo> getOutputTransportAdaptorInfo(int tenantId);
 
-    //TODO
-    //To get input transport Adaptor configuration
-
-    //TODO input & output transportAdaptornames
 
 }

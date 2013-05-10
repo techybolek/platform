@@ -15,39 +15,35 @@
  */
 package org.wso2.carbon.transport.adaptor.manager.core.internal.util;
 
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.service.RegistryService;
+
+import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 
 
-public class RegistryHolder {
+public class TransportAdaptorHolder {
 
 
     // Not deleted the file for the moment because of possibility of future need
-    private static RegistryHolder instance;
-    private static RegistryService registryService;
+    private static TransportAdaptorHolder instance;
+    private static TransportAdaptorService transportAdaptorService;
 
-    public static RegistryHolder getInstance() {
+    public static TransportAdaptorHolder getInstance() {
         if (instance == null) {
-            instance = new RegistryHolder();
+            instance = new TransportAdaptorHolder();
         }
         return instance;
     }
 
-    public void setRegistryService(RegistryService registryService) {
-        RegistryHolder.registryService = registryService;
+    public void setTransportAdaptorService(TransportAdaptorService transportAdaptorService) {
+        TransportAdaptorHolder.transportAdaptorService = transportAdaptorService;
     }
 
-    public void unSetRegistryService() {
-        RegistryHolder.registryService = null;
+    public void unSetTransportAdaptorService() {
+        TransportAdaptorHolder.transportAdaptorService = null;
     }
 
-    public RegistryService getRegistryService() {
-        return RegistryHolder.registryService;
+    public TransportAdaptorService getTransportAdaptorService() {
+        return TransportAdaptorHolder.transportAdaptorService;
     }
 
-    public Registry getRegistry(int tenantId) throws RegistryException {
-        return registryService.getConfigSystemRegistry(tenantId);
-    }
 
 }

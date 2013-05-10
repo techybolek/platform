@@ -30,9 +30,6 @@ public class UIUtils {
         option.setManageSession(true);
         option.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, cookie);
 
-//        String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
-//        backendServerURL = backendServerURL + "BrokerManagerAdminService";
-//        BrokerManagerAdminServiceStub stub = new BrokerManagerAdminServiceStub(backendServerURL);
         return stub;
     }
 

@@ -19,19 +19,18 @@ package org.wso2.carbon.transport.adaptor.manager.core.internal.ds;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 import org.wso2.carbon.transport.adaptor.manager.core.TransportManagerService;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.build.Axis2ConfigurationContextObserverImpl;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.build.TransportManagerServiceBuilder;
-import org.wso2.carbon.transport.adaptor.manager.core.internal.util.RegistryHolder;
+import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportAdaptorHolder;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
 /**
  * @scr.component name="transportmanager.component" immediate="true"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService"
- * cardinality="1..1" policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
+ * @scr.reference name="transportservice.service"
+ * interface="org.wso2.carbon.transport.adaptor.core.TransportAdaptorService" cardinality="1..1"
+ * policy="dynamic" bind="setTransportAdaptorService" unbind="unSetTransportAdaptorService"
  */
 public class TransportManagerDS {
 
@@ -57,12 +56,12 @@ public class TransportManagerDS {
         }
     }
 
-    protected void setRegistryService(RegistryService registryService) throws RegistryException {
-        RegistryHolder.getInstance().setRegistryService(registryService);
+    protected void setTransportAdaptorService(TransportAdaptorService transportService) {
+        TransportAdaptorHolder.getInstance().setTransportAdaptorService(transportService);
     }
 
-    protected void unsetRegistryService(RegistryService registryService) {
-        RegistryHolder.getInstance().unSetRegistryService();
+    protected void unSetTransportAdaptorService(TransportAdaptorService transportAdaptorService) {
+        TransportAdaptorHolder.getInstance().unSetTransportAdaptorService();
     }
 
     private void registerAxis2ConfigurationContextObserver(ComponentContext context) {
