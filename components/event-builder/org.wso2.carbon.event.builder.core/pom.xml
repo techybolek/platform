@@ -17,54 +17,49 @@
  ~ under the License.
  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<parent>
-		<groupId>org.wso2.carbon</groupId>
-		<artifactId>event-builder</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+    <parent>
+        <groupId>org.wso2.carbon</groupId>
+        <artifactId>event-builder</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
-	</parent>
+    </parent>
 
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.wso2.carbon</groupId>
-	<artifactId>org.wso2.carbon.event.builder.core</artifactId>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.wso2.carbon</groupId>
+    <artifactId>org.wso2.carbon.event.builder.core</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-	<packaging>bundle</packaging>
-	<name>WSO2 Carbon Component - WSO2 Carbon Event Builder - Core</name>
-	<description>org.wso2.carbon.event.builder.core provides the core functionality for event builder</description>
-	<url>http://wso2.org</url>
+    <packaging>bundle</packaging>
+    <name>WSO2 Carbon - Event Builder Core</name>
+    <description>org.wso2.carbon.event.builder.core provides the core functionality for event builder</description>
+    <url>http://wso2.org</url>
 
-	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-            <version>4.10</version>
-			<scope>test</scope>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>4.0.6</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.databridge.core</artifactId>
-            <version>4.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.transport.adaptor.core</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
         </dependency>
-
     </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-scr-plugin</artifactId>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
                 <version>1.7.4</version>
                 <executions>
                     <execution>
@@ -74,31 +69,31 @@
                         </goals>
                     </execution>
                 </executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-						<Bundle-Name>${project.artifactId}</Bundle-Name>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Name>${project.artifactId}</Bundle-Name>
 
-						<Private-Package>org.wso2.carbon.event.builder.core.internal.*</Private-Package>
-						<Export-Package>!org.wso2.carbon.event.builder.core.internal, org.wso2.carbon.event.builder.*</Export-Package>
+                        <Private-Package>org.wso2.carbon.event.builder.core.internal.*</Private-Package>
+                        <Export-Package>!org.wso2.carbon.event.builder.core.internal, org.wso2.carbon.event.builder.*</Export-Package>
 
-						<Import-Package>
+                        <Import-Package>
                             !javax.xml.namespace,
                             javax.xml.namespace; version=0.0.0,
                             org.wso2.carbon.transport.adaptor.core.*,
                             *;resolution:=optional
                         </Import-Package>
-						<!--<Bundle-Activator>org.wso2.carbon.event.builder.Activator</Bundle-Activator>-->
-						<DynamicImport-Package>*</DynamicImport-Package>
-					</instructions>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+                        <!--<Bundle-Activator>org.wso2.carbon.event.builder.Activator</Bundle-Activator>-->
+                        <DynamicImport-Package>*</DynamicImport-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
