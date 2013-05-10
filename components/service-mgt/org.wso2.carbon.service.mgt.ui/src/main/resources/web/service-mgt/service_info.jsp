@@ -118,12 +118,29 @@
     }*/
 </script>-->
 
-<%  String endPointStr = "";
+<%
+    String endPointStr = "";
     String[] eps = service.getEndPoints();
-    for (String ep : eps) {
-        endPointStr += ep + ",";
+    String[] epsTypes = service.getEndPointsTypes();
+
+    boolean isSecured = false;
+    isSecured = service.getSecurityScenarioId() != null ? true : false;
+
+    for (int i = 0; i < eps.length; i++) {
+
+        if (isSecured) {
+            if (epsTypes[i].equalsIgnoreCase("https")) {
+                endPointStr += eps[i] + ",";
+                continue;
+            }
+        } else {
+            if (epsTypes[i].equalsIgnoreCase("https") || epsTypes[i].equalsIgnoreCase("http"))
+                endPointStr += eps[i] + ",";
+            continue;
+        }
     }
-    endPointStr = endPointStr.substring(0, endPointStr.length()-1);
+    endPointStr = endPointStr.substring(0, endPointStr.length() - 1);
+
 %>
 
 <div id="middle">
