@@ -44,7 +44,7 @@ public interface TransportAdaptorService {
      *
      * @return message DTO
      */
-    MessageDto getTransportMessageDto(String transportAdaptorType);
+    MessageDto getTransportMessageDto(String transportAdaptorTypeName);
 
     /**
      * get all the names of the transport types
@@ -131,6 +131,13 @@ public interface TransportAdaptorService {
             throws TransportEventProcessingException;
 
 
+    /**
+     * This method returns the transport adaptor dto for a specific transport adaptor type
+     *
+     * @param transportAdaptorType
+     * @return
+     */
+    TransportAdaptorDto getTransportAdaptorDto(String transportAdaptorType);
 
-    TransportAdaptorDto.TransportAdaptorType getTransportAdaptorSupportedType(String transportAdaptorType);
+
 }
