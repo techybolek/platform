@@ -1,4 +1,4 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax2349="http://exception.internal.admin.manager.adaptor.transport.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://internal.admin.manager.adaptor.transport.carbon.wso2.org" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:ax2351="http://internal.admin.manager.adaptor.transport.carbon.wso2.org/xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://internal.admin.manager.adaptor.transport.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax2349="http://internal.admin.manager.adaptor.transport.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://internal.admin.manager.adaptor.transport.carbon.wso2.org" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://internal.admin.manager.adaptor.transport.carbon.wso2.org">
     <wsdl:documentation>TransportManagerAdminService</wsdl:documentation>
     <wsdl:types>
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://internal.admin.manager.adaptor.transport.carbon.wso2.org/xsd">
@@ -22,36 +22,23 @@
             </xs:complexType>
             <xs:complexType name="TransportConfigurationDto">
                 <xs:sequence>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="commonTransportPropertyDtos" nillable="true" type="ax2351:TransportPropertyDto"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="inputTransportPropertyDtos" nillable="true" type="ax2351:TransportPropertyDto"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="outputTransportPropertyDtos" nillable="true" type="ax2351:TransportPropertyDto"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="commonTransportPropertyDtos" nillable="true" type="ax2349:TransportPropertyDto"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="inputTransportPropertyDtos" nillable="true" type="ax2349:TransportPropertyDto"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="outputTransportPropertyDtos" nillable="true" type="ax2349:TransportPropertyDto"/>
                     <xs:element minOccurs="0" name="transportName" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="transportType" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="TransportAdaptorProperties">
                 <xs:sequence>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="commonTransportPropertyDtos" nillable="true" type="ax2351:TransportPropertyDto"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="inputTransportPropertyDtos" nillable="true" type="ax2351:TransportPropertyDto"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="outputTransportPropertyDtos" nillable="true" type="ax2351:TransportPropertyDto"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="commonTransportPropertyDtos" nillable="true" type="ax2349:TransportPropertyDto"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="inputTransportPropertyDtos" nillable="true" type="ax2349:TransportPropertyDto"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="outputTransportPropertyDtos" nillable="true" type="ax2349:TransportPropertyDto"/>
                 </xs:sequence>
             </xs:complexType>
         </xs:schema>
-        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://exception.internal.admin.manager.adaptor.transport.carbon.wso2.org/xsd">
-            <xs:complexType name="TransportManagerAdminServiceException">
-                <xs:sequence/>
-            </xs:complexType>
-        </xs:schema>
-        <xs:schema xmlns:ax2350="http://exception.internal.admin.manager.adaptor.transport.carbon.wso2.org/xsd" xmlns:ax2352="http://internal.admin.manager.adaptor.transport.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://internal.admin.manager.adaptor.transport.carbon.wso2.org">
-            <xs:import namespace="http://exception.internal.admin.manager.adaptor.transport.carbon.wso2.org/xsd"/>
+        <xs:schema xmlns:ax2350="http://internal.admin.manager.adaptor.transport.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://internal.admin.manager.adaptor.transport.carbon.wso2.org">
             <xs:import namespace="http://internal.admin.manager.adaptor.transport.carbon.wso2.org/xsd"/>
-            <xs:element name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="TransportManagerAdminServiceException" nillable="true" type="ax2349:TransportManagerAdminServiceException"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
             <xs:element name="removeTransportConfiguration">
                 <xs:complexType>
                     <xs:sequence>
@@ -74,7 +61,7 @@
             <xs:element name="getUnDeployedFilesResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2352:TransportAdaptorFileDto"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2349:TransportAdaptorFileDto"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -114,7 +101,7 @@
             <xs:element name="getOutputTransportPropertiesResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2352:TransportPropertyDto"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2349:TransportPropertyDto"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -128,7 +115,7 @@
             <xs:element name="getOutputTransportConfigurationResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2352:TransportPropertyDto"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2349:TransportPropertyDto"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -142,7 +129,7 @@
             <xs:element name="getInputTransportPropertiesResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2352:TransportPropertyDto"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2349:TransportPropertyDto"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -156,7 +143,7 @@
             <xs:element name="getInputTransportConfigurationResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2352:TransportPropertyDto"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2349:TransportPropertyDto"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -170,7 +157,7 @@
             <xs:element name="getCommonTransportPropertiesResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2352:TransportPropertyDto"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2349:TransportPropertyDto"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -184,7 +171,7 @@
             <xs:element name="getCommonTransportConfigurationResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2352:TransportPropertyDto"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2349:TransportPropertyDto"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -196,7 +183,7 @@
             <xs:element name="getAllTransportConfigurationNamesAndTypesResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2352:TransportConfigurationDto"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2349:TransportConfigurationDto"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -210,7 +197,7 @@
             <xs:element name="getAllTransportAdaptorPropertiesResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2352:TransportAdaptorProperties"/>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2349:TransportAdaptorProperties"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -227,9 +214,9 @@
                     <xs:sequence>
                         <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
                         <xs:element minOccurs="0" name="transportAdaptorType" nillable="true" type="xs:string"/>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="inputPropertyDtos" nillable="true" type="ax2352:TransportPropertyDto"/>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="outputPropertyDtos" nillable="true" type="ax2352:TransportPropertyDto"/>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="commonPropertyDtos" nillable="true" type="ax2352:TransportPropertyDto"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="inputPropertyDtos" nillable="true" type="ax2349:TransportPropertyDto"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="outputPropertyDtos" nillable="true" type="ax2349:TransportPropertyDto"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="commonPropertyDtos" nillable="true" type="ax2349:TransportPropertyDto"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -240,9 +227,6 @@
     </wsdl:message>
     <wsdl:message name="getTransportAdaptorConfigurationFileResponse">
         <wsdl:part name="parameters" element="ns:getTransportAdaptorConfigurationFileResponse"/>
-    </wsdl:message>
-    <wsdl:message name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-        <wsdl:part name="parameters" element="ns:TransportManagerAdminServiceTransportManagerAdminServiceException"/>
     </wsdl:message>
     <wsdl:message name="getTransportNamesRequest">
         <wsdl:part name="parameters" element="ns:getTransportNames"/>
@@ -324,77 +308,62 @@
         <wsdl:operation name="getTransportAdaptorConfigurationFile">
             <wsdl:input message="ns:getTransportAdaptorConfigurationFileRequest" wsaw:Action="urn:getTransportAdaptorConfigurationFile"/>
             <wsdl:output message="ns:getTransportAdaptorConfigurationFileResponse" wsaw:Action="urn:getTransportAdaptorConfigurationFileResponse"/>
-            <wsdl:fault message="ns:TransportManagerAdminServiceTransportManagerAdminServiceException" name="TransportManagerAdminServiceTransportManagerAdminServiceException" wsaw:Action="urn:getTransportAdaptorConfigurationFileTransportManagerAdminServiceTransportManagerAdminServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="getTransportNames">
             <wsdl:input message="ns:getTransportNamesRequest" wsaw:Action="urn:getTransportNames"/>
             <wsdl:output message="ns:getTransportNamesResponse" wsaw:Action="urn:getTransportNamesResponse"/>
-            <wsdl:fault message="ns:TransportManagerAdminServiceTransportManagerAdminServiceException" name="TransportManagerAdminServiceTransportManagerAdminServiceException" wsaw:Action="urn:getTransportNamesTransportManagerAdminServiceTransportManagerAdminServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="getOutputTransportConfiguration">
             <wsdl:input message="ns:getOutputTransportConfigurationRequest" wsaw:Action="urn:getOutputTransportConfiguration"/>
             <wsdl:output message="ns:getOutputTransportConfigurationResponse" wsaw:Action="urn:getOutputTransportConfigurationResponse"/>
-            <wsdl:fault message="ns:TransportManagerAdminServiceTransportManagerAdminServiceException" name="TransportManagerAdminServiceTransportManagerAdminServiceException" wsaw:Action="urn:getOutputTransportConfigurationTransportManagerAdminServiceTransportManagerAdminServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="getInputTransportConfiguration">
             <wsdl:input message="ns:getInputTransportConfigurationRequest" wsaw:Action="urn:getInputTransportConfiguration"/>
             <wsdl:output message="ns:getInputTransportConfigurationResponse" wsaw:Action="urn:getInputTransportConfigurationResponse"/>
-            <wsdl:fault message="ns:TransportManagerAdminServiceTransportManagerAdminServiceException" name="TransportManagerAdminServiceTransportManagerAdminServiceException" wsaw:Action="urn:getInputTransportConfigurationTransportManagerAdminServiceTransportManagerAdminServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="editTransportAdaptorConfigurationFile">
             <wsdl:input message="ns:editTransportAdaptorConfigurationFileRequest" wsaw:Action="urn:editTransportAdaptorConfigurationFile"/>
             <wsdl:output message="ns:editTransportAdaptorConfigurationFileResponse" wsaw:Action="urn:editTransportAdaptorConfigurationFileResponse"/>
-            <wsdl:fault message="ns:TransportManagerAdminServiceTransportManagerAdminServiceException" name="TransportManagerAdminServiceTransportManagerAdminServiceException" wsaw:Action="urn:editTransportAdaptorConfigurationFileTransportManagerAdminServiceTransportManagerAdminServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="getAllTransportAdaptorProperties">
             <wsdl:input message="ns:getAllTransportAdaptorPropertiesRequest" wsaw:Action="urn:getAllTransportAdaptorProperties"/>
             <wsdl:output message="ns:getAllTransportAdaptorPropertiesResponse" wsaw:Action="urn:getAllTransportAdaptorPropertiesResponse"/>
-            <wsdl:fault message="ns:TransportManagerAdminServiceTransportManagerAdminServiceException" name="TransportManagerAdminServiceTransportManagerAdminServiceException" wsaw:Action="urn:getAllTransportAdaptorPropertiesTransportManagerAdminServiceTransportManagerAdminServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="getInputTransportProperties">
             <wsdl:input message="ns:getInputTransportPropertiesRequest" wsaw:Action="urn:getInputTransportProperties"/>
             <wsdl:output message="ns:getInputTransportPropertiesResponse" wsaw:Action="urn:getInputTransportPropertiesResponse"/>
-            <wsdl:fault message="ns:TransportManagerAdminServiceTransportManagerAdminServiceException" name="TransportManagerAdminServiceTransportManagerAdminServiceException" wsaw:Action="urn:getInputTransportPropertiesTransportManagerAdminServiceTransportManagerAdminServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="getCommonTransportConfiguration">
             <wsdl:input message="ns:getCommonTransportConfigurationRequest" wsaw:Action="urn:getCommonTransportConfiguration"/>
             <wsdl:output message="ns:getCommonTransportConfigurationResponse" wsaw:Action="urn:getCommonTransportConfigurationResponse"/>
-            <wsdl:fault message="ns:TransportManagerAdminServiceTransportManagerAdminServiceException" name="TransportManagerAdminServiceTransportManagerAdminServiceException" wsaw:Action="urn:getCommonTransportConfigurationTransportManagerAdminServiceTransportManagerAdminServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="getAllTransportConfigurationNamesAndTypes">
             <wsdl:input message="ns:getAllTransportConfigurationNamesAndTypesRequest" wsaw:Action="urn:getAllTransportConfigurationNamesAndTypes"/>
             <wsdl:output message="ns:getAllTransportConfigurationNamesAndTypesResponse" wsaw:Action="urn:getAllTransportConfigurationNamesAndTypesResponse"/>
-            <wsdl:fault message="ns:TransportManagerAdminServiceTransportManagerAdminServiceException" name="TransportManagerAdminServiceTransportManagerAdminServiceException" wsaw:Action="urn:getAllTransportConfigurationNamesAndTypesTransportManagerAdminServiceTransportManagerAdminServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="getCommonTransportProperties">
             <wsdl:input message="ns:getCommonTransportPropertiesRequest" wsaw:Action="urn:getCommonTransportProperties"/>
             <wsdl:output message="ns:getCommonTransportPropertiesResponse" wsaw:Action="urn:getCommonTransportPropertiesResponse"/>
-            <wsdl:fault message="ns:TransportManagerAdminServiceTransportManagerAdminServiceException" name="TransportManagerAdminServiceTransportManagerAdminServiceException" wsaw:Action="urn:getCommonTransportPropertiesTransportManagerAdminServiceTransportManagerAdminServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="addTransportConfiguration">
             <wsdl:input message="ns:addTransportConfigurationRequest" wsaw:Action="urn:addTransportConfiguration"/>
             <wsdl:output message="ns:addTransportConfigurationResponse" wsaw:Action="urn:addTransportConfigurationResponse"/>
-            <wsdl:fault message="ns:TransportManagerAdminServiceTransportManagerAdminServiceException" name="TransportManagerAdminServiceTransportManagerAdminServiceException" wsaw:Action="urn:addTransportConfigurationTransportManagerAdminServiceTransportManagerAdminServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="getOutputTransportProperties">
             <wsdl:input message="ns:getOutputTransportPropertiesRequest" wsaw:Action="urn:getOutputTransportProperties"/>
             <wsdl:output message="ns:getOutputTransportPropertiesResponse" wsaw:Action="urn:getOutputTransportPropertiesResponse"/>
-            <wsdl:fault message="ns:TransportManagerAdminServiceTransportManagerAdminServiceException" name="TransportManagerAdminServiceTransportManagerAdminServiceException" wsaw:Action="urn:getOutputTransportPropertiesTransportManagerAdminServiceTransportManagerAdminServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="removeTransportAdaptorFile">
             <wsdl:input message="ns:removeTransportAdaptorFileRequest" wsaw:Action="urn:removeTransportAdaptorFile"/>
             <wsdl:output message="ns:removeTransportAdaptorFileResponse" wsaw:Action="urn:removeTransportAdaptorFileResponse"/>
-            <wsdl:fault message="ns:TransportManagerAdminServiceTransportManagerAdminServiceException" name="TransportManagerAdminServiceTransportManagerAdminServiceException" wsaw:Action="urn:removeTransportAdaptorFileTransportManagerAdminServiceTransportManagerAdminServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="removeTransportConfiguration">
             <wsdl:input message="ns:removeTransportConfigurationRequest" wsaw:Action="urn:removeTransportConfiguration"/>
             <wsdl:output message="ns:removeTransportConfigurationResponse" wsaw:Action="urn:removeTransportConfigurationResponse"/>
-            <wsdl:fault message="ns:TransportManagerAdminServiceTransportManagerAdminServiceException" name="TransportManagerAdminServiceTransportManagerAdminServiceException" wsaw:Action="urn:removeTransportConfigurationTransportManagerAdminServiceTransportManagerAdminServiceException"/>
         </wsdl:operation>
         <wsdl:operation name="getUnDeployedFiles">
             <wsdl:input message="ns:getUnDeployedFilesRequest" wsaw:Action="urn:getUnDeployedFiles"/>
             <wsdl:output message="ns:getUnDeployedFilesResponse" wsaw:Action="urn:getUnDeployedFilesResponse"/>
-            <wsdl:fault message="ns:TransportManagerAdminServiceTransportManagerAdminServiceException" name="TransportManagerAdminServiceTransportManagerAdminServiceException" wsaw:Action="urn:getUnDeployedFilesTransportManagerAdminServiceTransportManagerAdminServiceException"/>
         </wsdl:operation>
     </wsdl:portType>
     <wsdl:binding name="TransportManagerAdminServiceSoap11Binding" type="ns:TransportManagerAdminServicePortType">
@@ -407,9 +376,6 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getTransportAdaptorConfigurationFile">
             <soap:operation soapAction="urn:getTransportAdaptorConfigurationFile" style="document"/>
@@ -419,9 +385,6 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getInputTransportConfiguration">
             <soap:operation soapAction="urn:getInputTransportConfiguration" style="document"/>
@@ -431,9 +394,6 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getOutputTransportConfiguration">
             <soap:operation soapAction="urn:getOutputTransportConfiguration" style="document"/>
@@ -443,9 +403,6 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="editTransportAdaptorConfigurationFile">
             <soap:operation soapAction="urn:editTransportAdaptorConfigurationFile" style="document"/>
@@ -455,9 +412,6 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getInputTransportProperties">
             <soap:operation soapAction="urn:getInputTransportProperties" style="document"/>
@@ -467,9 +421,6 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getAllTransportAdaptorProperties">
             <soap:operation soapAction="urn:getAllTransportAdaptorProperties" style="document"/>
@@ -479,9 +430,6 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getCommonTransportConfiguration">
             <soap:operation soapAction="urn:getCommonTransportConfiguration" style="document"/>
@@ -491,9 +439,6 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getCommonTransportProperties">
             <soap:operation soapAction="urn:getCommonTransportProperties" style="document"/>
@@ -503,9 +448,6 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getAllTransportConfigurationNamesAndTypes">
             <soap:operation soapAction="urn:getAllTransportConfigurationNamesAndTypes" style="document"/>
@@ -515,9 +457,6 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="addTransportConfiguration">
             <soap:operation soapAction="urn:addTransportConfiguration" style="document"/>
@@ -527,9 +466,6 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getOutputTransportProperties">
             <soap:operation soapAction="urn:getOutputTransportProperties" style="document"/>
@@ -539,9 +475,6 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="removeTransportAdaptorFile">
             <soap:operation soapAction="urn:removeTransportAdaptorFile" style="document"/>
@@ -551,9 +484,6 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="removeTransportConfiguration">
             <soap:operation soapAction="urn:removeTransportConfiguration" style="document"/>
@@ -563,9 +493,6 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getUnDeployedFiles">
             <soap:operation soapAction="urn:getUnDeployedFiles" style="document"/>
@@ -575,9 +502,6 @@
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:binding name="TransportManagerAdminServiceSoap12Binding" type="ns:TransportManagerAdminServicePortType">
@@ -590,9 +514,6 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap12:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getTransportAdaptorConfigurationFile">
             <soap12:operation soapAction="urn:getTransportAdaptorConfigurationFile" style="document"/>
@@ -602,9 +523,6 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap12:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getInputTransportConfiguration">
             <soap12:operation soapAction="urn:getInputTransportConfiguration" style="document"/>
@@ -614,9 +532,6 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap12:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getOutputTransportConfiguration">
             <soap12:operation soapAction="urn:getOutputTransportConfiguration" style="document"/>
@@ -626,9 +541,6 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap12:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="editTransportAdaptorConfigurationFile">
             <soap12:operation soapAction="urn:editTransportAdaptorConfigurationFile" style="document"/>
@@ -638,9 +550,6 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap12:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getInputTransportProperties">
             <soap12:operation soapAction="urn:getInputTransportProperties" style="document"/>
@@ -650,9 +559,6 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap12:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getAllTransportAdaptorProperties">
             <soap12:operation soapAction="urn:getAllTransportAdaptorProperties" style="document"/>
@@ -662,9 +568,6 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap12:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getCommonTransportConfiguration">
             <soap12:operation soapAction="urn:getCommonTransportConfiguration" style="document"/>
@@ -674,9 +577,6 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap12:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getCommonTransportProperties">
             <soap12:operation soapAction="urn:getCommonTransportProperties" style="document"/>
@@ -686,9 +586,6 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap12:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getAllTransportConfigurationNamesAndTypes">
             <soap12:operation soapAction="urn:getAllTransportConfigurationNamesAndTypes" style="document"/>
@@ -698,9 +595,6 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap12:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="addTransportConfiguration">
             <soap12:operation soapAction="urn:addTransportConfiguration" style="document"/>
@@ -710,9 +604,6 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap12:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getOutputTransportProperties">
             <soap12:operation soapAction="urn:getOutputTransportProperties" style="document"/>
@@ -722,9 +613,6 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap12:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="removeTransportAdaptorFile">
             <soap12:operation soapAction="urn:removeTransportAdaptorFile" style="document"/>
@@ -734,9 +622,6 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap12:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="removeTransportConfiguration">
             <soap12:operation soapAction="urn:removeTransportConfiguration" style="document"/>
@@ -746,9 +631,6 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap12:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getUnDeployedFiles">
             <soap12:operation soapAction="urn:getUnDeployedFiles" style="document"/>
@@ -758,9 +640,6 @@
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="TransportManagerAdminServiceTransportManagerAdminServiceException">
-                <soap12:fault use="literal" name="TransportManagerAdminServiceTransportManagerAdminServiceException"/>
-            </wsdl:fault>
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:binding name="TransportManagerAdminServiceHttpBinding" type="ns:TransportManagerAdminServicePortType">
