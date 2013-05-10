@@ -194,6 +194,7 @@
                     <xs:element minOccurs="0" name="disableDeletion" type="xs:boolean"/>
                     <xs:element minOccurs="0" name="disableTryit" type="xs:boolean"/>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="endPoints" nillable="true" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="endPointsTypes" nillable="true" type="xs:string"/>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="eprs" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="foundWebResources" type="xs:boolean"/>
                     <xs:element minOccurs="0" name="mtomStatus" nillable="true" type="xs:string"/>
@@ -616,13 +617,13 @@
     </wsdl:binding>
     <wsdl:service name="ServiceGroupAdmin">
         <wsdl:port name="ServiceGroupAdminHttpsSoap11Endpoint" binding="tns:ServiceGroupAdminSoap11Binding">
-            <soap:address location="https://10.100.2.171:9443/services/ServiceGroupAdmin.ServiceGroupAdminHttpsSoap11Endpoint/"/>
+            <soap:address location="https://10.100.0.48:9443/services/ServiceGroupAdmin.ServiceGroupAdminHttpsSoap11Endpoint/"/>
         </wsdl:port>
         <wsdl:port name="ServiceGroupAdminHttpsSoap12Endpoint" binding="tns:ServiceGroupAdminSoap12Binding">
-            <soap12:address location="https://10.100.2.171:9443/services/ServiceGroupAdmin.ServiceGroupAdminHttpsSoap12Endpoint/"/>
+            <soap12:address location="https://10.100.0.48:9443/services/ServiceGroupAdmin.ServiceGroupAdminHttpsSoap12Endpoint/"/>
         </wsdl:port>
         <wsdl:port name="ServiceGroupAdminHttpsEndpoint" binding="tns:ServiceGroupAdminHttpBinding">
-            <http:address location="https://10.100.2.171:9443/services/ServiceGroupAdmin.ServiceGroupAdminHttpsEndpoint/"/>
+            <http:address location="https://10.100.0.48:9443/services/ServiceGroupAdmin.ServiceGroupAdminHttpsEndpoint/"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
