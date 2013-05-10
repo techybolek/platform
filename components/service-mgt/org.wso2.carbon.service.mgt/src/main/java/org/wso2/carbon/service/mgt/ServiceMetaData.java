@@ -20,9 +20,7 @@ import org.wso2.carbon.service.mgt.util.Utils;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /*
 * 
@@ -46,14 +44,24 @@ public class ServiceMetaData {
     private boolean disableDeletion;
     private long deployedTime;
     private String[] endPoints;
+    private String[] endPointsTypes;
 
     public void setEndPoints(Map endPnts){
         endPoints = new String[endPnts.keySet().size()];
+        endPointsTypes = new String[endPnts.keySet().size()];
         int i =0 ;
+
         for (Object p : endPnts.keySet())     {
             this.endPoints[i] = p.toString();
+            AxisEndpoint axisEndpoint = (AxisEndpoint) endPnts.get(p);
+            String endPoint = axisEndpoint.getEndpointURL().substring(0,axisEndpoint.getEndpointURL().indexOf(":"));
+            this.endPointsTypes[i]  =    endPoint;
             i++;
         }
+    }
+
+    public String[] getEndPointsTypes(){
+        return endPointsTypes;
     }
 
     public String[] getEndPoints(){
