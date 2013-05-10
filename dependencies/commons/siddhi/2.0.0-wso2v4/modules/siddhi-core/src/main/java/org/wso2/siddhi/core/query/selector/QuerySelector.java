@@ -29,7 +29,9 @@ import org.wso2.siddhi.core.event.in.InEvent;
 import org.wso2.siddhi.core.event.in.InListEvent;
 import org.wso2.siddhi.core.event.in.InStream;
 import org.wso2.siddhi.core.event.remove.RemoveStream;
+import org.wso2.siddhi.core.exception.QueryCreationException;
 import org.wso2.siddhi.core.executor.conditon.ConditionExecutor;
+import org.wso2.siddhi.core.extension.holder.ExpressionExtensionHolder;
 import org.wso2.siddhi.core.extension.holder.OutputAttributeExtensionHolder;
 import org.wso2.siddhi.core.query.QueryPostProcessingElement;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateManager;
@@ -47,6 +49,8 @@ import org.wso2.siddhi.core.util.parser.ExecutorParser;
 import org.wso2.siddhi.query.api.condition.Condition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.expression.Expression;
+import org.wso2.siddhi.query.api.expression.ExpressionExtension;
+import org.wso2.siddhi.query.api.extension.Extension;
 import org.wso2.siddhi.query.api.query.QueryEventSource;
 import org.wso2.siddhi.query.api.query.input.handler.Filter;
 import org.wso2.siddhi.query.api.query.selection.Selector;
@@ -133,7 +137,17 @@ public class QuerySelector implements QueryPostProcessingElement {
                 if (outputAttribute instanceof ComplexAttribute) {
                     outputAttributeProcessorFactory = (OutputAttributeProcessorFactory) SiddhiClassLoader.loadSiddhiImplementation(((ComplexAttribute) outputAttribute).getAttributeName(), OutputAttributeProcessorFactory.class);
                 } else {//extension
-                    outputAttributeProcessorFactory = (OutputAttributeProcessorFactory) SiddhiClassLoader.loadExtensionImplementation(((OutputAttributeExtension) outputAttribute), OutputAttributeExtensionHolder.getInstance(siddhiContext));
+                    if (null != OutputAttributeExtensionHolder.getInstance(siddhiContext).getExtension(((Extension) outputAttribute).getNamespace(), ((Extension) outputAttribute).getFunction())) {
+                        outputAttributeProcessorFactory = (OutputAttributeProcessorFactory) SiddhiClassLoader.loadExtensionImplementation(((OutputAttributeExtension) outputAttribute), OutputAttributeExtensionHolder.getInstance(siddhiContext));
+                    } else if (null != ExpressionExtensionHolder.getInstance(siddhiContext).getExtension(((Extension) outputAttribute).getNamespace(), ((Extension) outputAttribute).getFunction())) {
+                        ExpressionExtension expressionExtension = new ExpressionExtension(((Extension) outputAttribute).getNamespace(), ((Extension) outputAttribute).getFunction(), ((OutputAttributeExtension) outputAttribute).getExpressions());
+                        PassThroughAttributeProcessor attributeGenerator = new PassThroughAttributeProcessor(ExecutorParser.parseExpression(expressionExtension, queryEventSourceList, null, false, siddhiContext));
+                        attributeProcessorList.add(attributeGenerator);
+                        outputStreamDefinition.attribute(outputAttribute.getRename(), attributeGenerator.getOutputType());
+                        return;
+                    } else {
+                        throw new QueryCreationException("No extension exist for " + outputAttribute);
+                    }
                 }
                 Expression[] expressions = null;
                 if (outputAttribute instanceof ComplexAttribute) {
