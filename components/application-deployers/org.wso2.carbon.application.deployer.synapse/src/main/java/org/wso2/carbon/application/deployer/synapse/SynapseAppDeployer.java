@@ -101,6 +101,7 @@ public class SynapseAppDeployer implements AppDeploymentHandler {
                         "be deployed. But " + files.size() + " files found.");
                 continue;
             }
+            artifact.setRuntimeObjectName(artifact.getName());
             if (deployer != null) {
                 String fileName = artifact.getFiles().get(0).getName();
                 String artifactPath = artifact.getExtractedPath() + File.separator + fileName;
