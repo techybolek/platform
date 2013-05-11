@@ -1,0 +1,495 @@
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax2116="http://exception.internal.admin.manager.builder.event.carbon.wso2.org/xsd" xmlns:ns="http://internal.admin.manager.builder.event.carbon.wso2.org" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:ax2119="http://internal.admin.manager.builder.event.carbon.wso2.org/xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://internal.admin.manager.builder.event.carbon.wso2.org">
+    <wsdl:documentation>EventBuilderAdminService</wsdl:documentation>
+    <wsdl:types>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified"
+                   targetNamespace="http://internal.admin.manager.builder.event.carbon.wso2.org">
+            <xs:import namespace="http://exception.internal.admin.manager.builder.event.carbon.wso2.org/xsd"/>
+            <xs:import namespace="http://internal.admin.manager.builder.event.carbon.wso2.org/xsd"/>
+            <xs:element name="EventBuilderAdminServiceEventBuilderAdminServiceException">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="EventBuilderAdminServiceException" nillable="true"
+                                    type="ax2116:EventBuilderAdminServiceException"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="removeEventBuilderConfigurationFile">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="filePath" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="removeEventBuilderConfiguration">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getUnDeployedFiles">
+                <xs:complexType>
+                    <xs:sequence/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getUnDeployedFilesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true"
+                                    type="ax2119:EventBuilderFileDto"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getEventBuilders">
+                <xs:complexType>
+                    <xs:sequence/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getEventBuildersResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getEventBuilderProperties">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getEventBuilderPropertiesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true"
+                                    type="ax2119:EventBuilderPropertyDto"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getEventBuilderConfiguration">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getEventBuilderConfigurationResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true"
+                                    type="ax2119:EventBuilderPropertyDto"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addEventBuilderConfiguration">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="transportAdaptorType" nillable="true" type="xs:string"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="propertyDtos" nillable="true"
+                                    type="ax2119:EventBuilderPropertyDto"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified"
+                   targetNamespace="http://internal.admin.manager.builder.event.carbon.wso2.org/xsd">
+            <xs:complexType name="EventBuilderFileDto">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="filePath" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="EventBuilderPropertyDto">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="defaultValue" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="displayName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="hint" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="key" nillable="true" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="options" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="required" type="xs:boolean"/>
+                    <xs:element minOccurs="0" name="secured" type="xs:boolean"/>
+                    <xs:element minOccurs="0" name="value" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified"
+                   targetNamespace="http://exception.internal.admin.manager.builder.event.carbon.wso2.org/xsd">
+            <xs:complexType name="EventBuilderAdminServiceException">
+                <xs:sequence/>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="removeEventBuilderConfigurationRequest">
+        <wsdl:part name="parameters" element="ns:removeEventBuilderConfiguration"/>
+    </wsdl:message>
+    <wsdl:message name="removeEventBuilderConfigurationResponse"/>
+    <wsdl:message name="EventBuilderAdminServiceEventBuilderAdminServiceException">
+        <wsdl:part name="parameters"
+                   element="ns:EventBuilderAdminServiceEventBuilderAdminServiceException"/>
+    </wsdl:message>
+    <wsdl:message name="getEventBuilderPropertiesRequest">
+        <wsdl:part name="parameters" element="ns:getEventBuilderProperties"/>
+    </wsdl:message>
+    <wsdl:message name="getEventBuilderPropertiesResponse">
+        <wsdl:part name="parameters" element="ns:getEventBuilderPropertiesResponse"/>
+    </wsdl:message>
+    <wsdl:message name="removeEventBuilderConfigurationFileRequest">
+        <wsdl:part name="parameters" element="ns:removeEventBuilderConfigurationFile"/>
+    </wsdl:message>
+    <wsdl:message name="removeEventBuilderConfigurationFileResponse"/>
+    <wsdl:message name="getEventBuildersRequest">
+        <wsdl:part name="parameters" element="ns:getEventBuilders"/>
+    </wsdl:message>
+    <wsdl:message name="getEventBuildersResponse">
+        <wsdl:part name="parameters" element="ns:getEventBuildersResponse"/>
+    </wsdl:message>
+    <wsdl:message name="addEventBuilderConfigurationRequest">
+        <wsdl:part name="parameters" element="ns:addEventBuilderConfiguration"/>
+    </wsdl:message>
+    <wsdl:message name="addEventBuilderConfigurationResponse"/>
+    <wsdl:message name="getEventBuilderConfigurationRequest">
+        <wsdl:part name="parameters" element="ns:getEventBuilderConfiguration"/>
+    </wsdl:message>
+    <wsdl:message name="getEventBuilderConfigurationResponse">
+        <wsdl:part name="parameters" element="ns:getEventBuilderConfigurationResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getUnDeployedFilesRequest">
+        <wsdl:part name="parameters" element="ns:getUnDeployedFiles"/>
+    </wsdl:message>
+    <wsdl:message name="getUnDeployedFilesResponse">
+        <wsdl:part name="parameters" element="ns:getUnDeployedFilesResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="EventBuilderAdminServicePortType">
+        <wsdl:operation name="removeEventBuilderConfiguration">
+            <wsdl:input message="ns:removeEventBuilderConfigurationRequest"
+                        wsaw:Action="urn:removeEventBuilderConfiguration"/>
+            <wsdl:output message="ns:removeEventBuilderConfigurationResponse"
+                         wsaw:Action="urn:removeEventBuilderConfigurationResponse"/>
+            <wsdl:fault message="ns:EventBuilderAdminServiceEventBuilderAdminServiceException"
+                        name="EventBuilderAdminServiceEventBuilderAdminServiceException"
+                        wsaw:Action="urn:removeEventBuilderConfigurationEventBuilderAdminServiceEventBuilderAdminServiceException"/>
+        </wsdl:operation>
+        <wsdl:operation name="getEventBuilderProperties">
+            <wsdl:input message="ns:getEventBuilderPropertiesRequest" wsaw:Action="urn:getEventBuilderProperties"/>
+            <wsdl:output message="ns:getEventBuilderPropertiesResponse"
+                         wsaw:Action="urn:getEventBuilderPropertiesResponse"/>
+            <wsdl:fault message="ns:EventBuilderAdminServiceEventBuilderAdminServiceException"
+                        name="EventBuilderAdminServiceEventBuilderAdminServiceException"
+                        wsaw:Action="urn:getEventBuilderPropertiesEventBuilderAdminServiceEventBuilderAdminServiceException"/>
+        </wsdl:operation>
+        <wsdl:operation name="removeEventBuilderConfigurationFile">
+            <wsdl:input message="ns:removeEventBuilderConfigurationFileRequest"
+                        wsaw:Action="urn:removeEventBuilderConfigurationFile"/>
+            <wsdl:output message="ns:removeEventBuilderConfigurationFileResponse"
+                         wsaw:Action="urn:removeEventBuilderConfigurationFileResponse"/>
+            <wsdl:fault message="ns:EventBuilderAdminServiceEventBuilderAdminServiceException"
+                        name="EventBuilderAdminServiceEventBuilderAdminServiceException"
+                        wsaw:Action="urn:removeEventBuilderConfigurationFileEventBuilderAdminServiceEventBuilderAdminServiceException"/>
+        </wsdl:operation>
+        <wsdl:operation name="getEventBuilders">
+            <wsdl:input message="ns:getEventBuildersRequest" wsaw:Action="urn:getEventBuilders"/>
+            <wsdl:output message="ns:getEventBuildersResponse" wsaw:Action="urn:getEventBuildersResponse"/>
+            <wsdl:fault message="ns:EventBuilderAdminServiceEventBuilderAdminServiceException"
+                        name="EventBuilderAdminServiceEventBuilderAdminServiceException"
+                        wsaw:Action="urn:getEventBuildersEventBuilderAdminServiceEventBuilderAdminServiceException"/>
+        </wsdl:operation>
+        <wsdl:operation name="addEventBuilderConfiguration">
+            <wsdl:input message="ns:addEventBuilderConfigurationRequest"
+                        wsaw:Action="urn:addEventBuilderConfiguration"/>
+            <wsdl:output message="ns:addEventBuilderConfigurationResponse"
+                         wsaw:Action="urn:addEventBuilderConfigurationResponse"/>
+            <wsdl:fault message="ns:EventBuilderAdminServiceEventBuilderAdminServiceException"
+                        name="EventBuilderAdminServiceEventBuilderAdminServiceException"
+                        wsaw:Action="urn:addEventBuilderConfigurationEventBuilderAdminServiceEventBuilderAdminServiceException"/>
+        </wsdl:operation>
+        <wsdl:operation name="getEventBuilderConfiguration">
+            <wsdl:input message="ns:getEventBuilderConfigurationRequest"
+                        wsaw:Action="urn:getEventBuilderConfiguration"/>
+            <wsdl:output message="ns:getEventBuilderConfigurationResponse"
+                         wsaw:Action="urn:getEventBuilderConfigurationResponse"/>
+            <wsdl:fault message="ns:EventBuilderAdminServiceEventBuilderAdminServiceException"
+                        name="EventBuilderAdminServiceEventBuilderAdminServiceException"
+                        wsaw:Action="urn:getEventBuilderConfigurationEventBuilderAdminServiceEventBuilderAdminServiceException"/>
+        </wsdl:operation>
+        <wsdl:operation name="getUnDeployedFiles">
+            <wsdl:input message="ns:getUnDeployedFilesRequest" wsaw:Action="urn:getUnDeployedFiles"/>
+            <wsdl:output message="ns:getUnDeployedFilesResponse" wsaw:Action="urn:getUnDeployedFilesResponse"/>
+            <wsdl:fault message="ns:EventBuilderAdminServiceEventBuilderAdminServiceException"
+                        name="EventBuilderAdminServiceEventBuilderAdminServiceException"
+                        wsaw:Action="urn:getUnDeployedFilesEventBuilderAdminServiceEventBuilderAdminServiceException"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="EventBuilderAdminServiceSoap11Binding" type="ns:EventBuilderAdminServicePortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="removeEventBuilderConfiguration">
+            <soap:operation soapAction="urn:removeEventBuilderConfiguration" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EventBuilderAdminServiceEventBuilderAdminServiceException">
+                <soap:fault use="literal"
+                            name="EventBuilderAdminServiceEventBuilderAdminServiceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getEventBuilderProperties">
+            <soap:operation soapAction="urn:getEventBuilderProperties" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EventBuilderAdminServiceEventBuilderAdminServiceException">
+                <soap:fault use="literal"
+                            name="EventBuilderAdminServiceEventBuilderAdminServiceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getEventBuilders">
+            <soap:operation soapAction="urn:getEventBuilders" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EventBuilderAdminServiceEventBuilderAdminServiceException">
+                <soap:fault use="literal"
+                            name="EventBuilderAdminServiceEventBuilderAdminServiceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="removeEventBuilderConfigurationFile">
+            <soap:operation soapAction="urn:removeEventBuilderConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EventBuilderAdminServiceEventBuilderAdminServiceException">
+                <soap:fault use="literal"
+                            name="EventBuilderAdminServiceEventBuilderAdminServiceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="addEventBuilderConfiguration">
+            <soap:operation soapAction="urn:addEventBuilderConfiguration" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EventBuilderAdminServiceEventBuilderAdminServiceException">
+                <soap:fault use="literal"
+                            name="EventBuilderAdminServiceEventBuilderAdminServiceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getEventBuilderConfiguration">
+            <soap:operation soapAction="urn:getEventBuilderConfiguration" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EventBuilderAdminServiceEventBuilderAdminServiceException">
+                <soap:fault use="literal"
+                            name="EventBuilderAdminServiceEventBuilderAdminServiceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getUnDeployedFiles">
+            <soap:operation soapAction="urn:getUnDeployedFiles" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EventBuilderAdminServiceEventBuilderAdminServiceException">
+                <soap:fault use="literal"
+                            name="EventBuilderAdminServiceEventBuilderAdminServiceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="EventBuilderAdminServiceSoap12Binding" type="ns:EventBuilderAdminServicePortType">
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="removeEventBuilderConfiguration">
+            <soap12:operation soapAction="urn:removeEventBuilderConfiguration" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EventBuilderAdminServiceEventBuilderAdminServiceException">
+                <soap12:fault use="literal"
+                              name="EventBuilderAdminServiceEventBuilderAdminServiceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getEventBuilderProperties">
+            <soap12:operation soapAction="urn:getEventBuilderProperties" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EventBuilderAdminServiceEventBuilderAdminServiceException">
+                <soap12:fault use="literal"
+                              name="EventBuilderAdminServiceEventBuilderAdminServiceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getEventBuilders">
+            <soap12:operation soapAction="urn:getEventBuilders" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EventBuilderAdminServiceEventBuilderAdminServiceException">
+                <soap12:fault use="literal"
+                              name="EventBuilderAdminServiceEventBuilderAdminServiceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="removeEventBuilderConfigurationFile">
+            <soap12:operation soapAction="urn:removeEventBuilderConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EventBuilderAdminServiceEventBuilderAdminServiceException">
+                <soap12:fault use="literal"
+                              name="EventBuilderAdminServiceEventBuilderAdminServiceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="addEventBuilderConfiguration">
+            <soap12:operation soapAction="urn:addEventBuilderConfiguration" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EventBuilderAdminServiceEventBuilderAdminServiceException">
+                <soap12:fault use="literal"
+                              name="EventBuilderAdminServiceEventBuilderAdminServiceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getEventBuilderConfiguration">
+            <soap12:operation soapAction="urn:getEventBuilderConfiguration" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EventBuilderAdminServiceEventBuilderAdminServiceException">
+                <soap12:fault use="literal"
+                              name="EventBuilderAdminServiceEventBuilderAdminServiceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getUnDeployedFiles">
+            <soap12:operation soapAction="urn:getUnDeployedFiles" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="EventBuilderAdminServiceEventBuilderAdminServiceException">
+                <soap12:fault use="literal"
+                              name="EventBuilderAdminServiceEventBuilderAdminServiceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="EventBuilderAdminServiceHttpBinding" type="ns:EventBuilderAdminServicePortType">
+        <http:binding verb="POST"/>
+        <wsdl:operation name="removeEventBuilderConfiguration">
+            <http:operation location="removeEventBuilderConfiguration"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getEventBuilderProperties">
+            <http:operation location="getEventBuilderProperties"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getEventBuilders">
+            <http:operation location="getEventBuilders"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="removeEventBuilderConfigurationFile">
+            <http:operation location="removeEventBuilderConfigurationFile"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="addEventBuilderConfiguration">
+            <http:operation location="addEventBuilderConfiguration"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getEventBuilderConfiguration">
+            <http:operation location="getEventBuilderConfiguration"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getUnDeployedFiles">
+            <http:operation location="getUnDeployedFiles"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="EventBuilderAdminService">
+        <wsdl:port name="EventBuilderAdminServiceHttpsSoap11Endpoint"
+                   binding="ns:EventBuilderAdminServiceSoap11Binding">
+            <soap:address
+                    location="https://10.200.3.80:9443/services/EventBuilderAdminService.EventBuilderAdminServiceHttpsSoap11Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="EventBuilderAdminServiceHttpsSoap12Endpoint"
+                   binding="ns:EventBuilderAdminServiceSoap12Binding">
+            <soap12:address
+                    location="https://10.200.3.80:9443/services/EventBuilderAdminService.EventBuilderAdminServiceHttpsSoap12Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="EventBuilderAdminServiceHttpsEndpoint"
+                   binding="ns:EventBuilderAdminServiceHttpBinding">
+            <http:address
+                    location="https://10.200.3.80:9443/services/EventBuilderAdminService.EventBuilderAdminServiceHttpsEndpoint/"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
