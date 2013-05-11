@@ -42,26 +42,21 @@ public class EventBuilderConfigurationHelper {
                 new QName(EventBuilderConfigurationSyntax.EB_ATTR_NAME)));
         eventBuilderConfiguration.setType(ebConfigOMElement.getAttributeValue(
                 new QName(EventBuilderConfigurationSyntax.EB_ATTR_TYPE)));
-        InputTransportMessageConfiguration inputTransportMessageConfiguration = InputTransportConfigHelper.getInputTransportMessageConfiguration(
-                ebConfigOMElement.getFirstChildWithName(new QName(EventBuilderConfigurationSyntax.EB_CONF_NS, EventBuilderConfigurationSyntax.EB_ELEMENT_TRANSPORT_NAME)).getText());
-        eventBuilderConfiguration.setInputTransportMessageConfiguration(inputTransportMessageConfiguration);
+        OMElement transportTypeElement = ebConfigOMElement.getFirstChildWithName(new QName(EventBuilderConfigurationSyntax.EB_CONF_NS, EventBuilderConfigurationSyntax.EB_ELEMENT_TRANSPORT_TYPE));
+        InputTransportMessageConfiguration inputTransportMessageConfiguration = InputTransportConfigHelper.getInputTransportMessageConfiguration(transportTypeElement.getText());
 
         //Event Builder properties
         Iterator eventBuilderPropertyIterator = ebConfigOMElement.getChildrenWithName(
                 new QName(EventBuilderConfigurationSyntax.EB_CONF_NS, EventBuilderConfigurationSyntax.EB_ELEMENT_PROPERTY));
 
         while (eventBuilderPropertyIterator.hasNext()) {
-            OMElement commonPropertyOMElement = (OMElement) eventBuilderPropertyIterator.next();
-            Iterator propertyIter = commonPropertyOMElement.getChildrenWithName(
-                    new QName(EventBuilderConfigurationSyntax.EB_CONF_NS, EventBuilderConfigurationSyntax.EB_ELEMENT_PROPERTY));
-            while (propertyIter.hasNext()) {
-                OMElement propertyOMElement = (OMElement) propertyIter.next();
-                String name = propertyOMElement.getAttributeValue(
-                        new QName(EventBuilderConfigurationSyntax.EB_ATTR_NAME));
-                String value = propertyOMElement.getText();
-                eventBuilderConfiguration.addEventBuilderConfigurationProperty(name, value);
-            }
+            OMElement propertyOMElement = (OMElement) eventBuilderPropertyIterator.next();
+            String name = propertyOMElement.getAttributeValue(
+                    new QName(EventBuilderConfigurationSyntax.EB_ATTR_NAME));
+            String value = propertyOMElement.getText();
+            inputTransportMessageConfiguration.addInputMessageProperty(name, value);
         }
+        eventBuilderConfiguration.setInputTransportMessageConfiguration(inputTransportMessageConfiguration);
 
         return eventBuilderConfiguration;
     }
@@ -78,11 +73,11 @@ public class EventBuilderConfigurationHelper {
                 null);
         eventBuilderConfigElement.addAttribute(EventBuilderConfigurationSyntax.EB_ATTR_TYPE, eventBuilderConfiguration.getType(),
                 null);
-        OMElement transportNameElement = factory.createOMElement(new QName(EventBuilderConfigurationSyntax.
-                EB_CONF_NS, EventBuilderConfigurationSyntax.EB_ELEMENT_TRANSPORT_NAME,
+        OMElement transportTypeElement = factory.createOMElement(new QName(EventBuilderConfigurationSyntax.
+                EB_CONF_NS, EventBuilderConfigurationSyntax.EB_ELEMENT_TRANSPORT_TYPE,
                 EventBuilderConfigurationSyntax.EB_ELEMENT_CONF_EB_NS_PREFIX));
-        transportNameElement.setText(eventBuilderConfiguration.getInputTransportMessageConfiguration().getTransportName());
-        eventBuilderConfigElement.addChild(transportNameElement);
+        transportTypeElement.setText(eventBuilderConfiguration.getInputTransportMessageConfiguration().getTransportName());
+        eventBuilderConfigElement.addChild(transportTypeElement);
 
         //Event builder properties
         OMElement commonPropertyElement = factory.createOMElement(new QName(

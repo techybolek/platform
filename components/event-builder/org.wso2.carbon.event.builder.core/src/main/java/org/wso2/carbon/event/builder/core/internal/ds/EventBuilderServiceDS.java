@@ -6,8 +6,10 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.databridge.core.DataBridgeSubscriberService;
 import org.wso2.carbon.event.builder.core.EventBuilderService;
 import org.wso2.carbon.event.builder.core.internal.CarbonEventBuilderService;
+import org.wso2.carbon.event.builder.core.internal.build.Axis2ConfigurationContextObserverImpl;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderServiceValueHolder;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
 /**
  * @scr.component name="eventBuilderService.component" immediate="true"

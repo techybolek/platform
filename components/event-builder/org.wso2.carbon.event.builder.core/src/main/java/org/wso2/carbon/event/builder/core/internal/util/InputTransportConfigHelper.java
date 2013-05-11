@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.event.builder.core.internal.util;
 
+import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
 import org.wso2.carbon.transport.adaptor.core.Property;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorDto;
 import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
@@ -25,7 +26,9 @@ import org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfigurati
 import org.wso2.carbon.transport.adaptor.core.message.MessageDto;
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InputTransportConfigHelper {
 
@@ -40,14 +43,12 @@ public class InputTransportConfigHelper {
         return null;
     }
 
-    public static InputTransportMessageConfiguration getInputTransportMessageConfiguration(String transportConfigName) {
-        MessageDto messageDto = EventBuilderServiceValueHolder.getTransportAdaptorService().getTransportMessageDto("IN");
+    public static InputTransportMessageConfiguration getInputTransportMessageConfiguration(String transportAdaptorTypeName) {
+        MessageDto messageDto = EventBuilderServiceValueHolder.getTransportAdaptorService().getTransportMessageDto(transportAdaptorTypeName);
         InputTransportMessageConfiguration inputTransportMessageConfiguration = null;
         if(messageDto != null) {
             inputTransportMessageConfiguration = new InputTransportMessageConfiguration();
-            for(Property property : messageDto.getMessageInPropertyList()) {
-                inputTransportMessageConfiguration.addInputMessageProperty(property.getPropertyName(),property.getDefaultValue());
-            }
+            inputTransportMessageConfiguration.setTransportName(transportAdaptorTypeName);
         }
 
         return inputTransportMessageConfiguration;

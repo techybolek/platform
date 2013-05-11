@@ -14,7 +14,7 @@ public interface EventBuilderService {
      * @param streamDefinition
      * @param eventListener
      */
-    public void subscribe(StreamDefinition streamDefinition, EventListener eventListener);
+    public void subscribe(StreamDefinition streamDefinition, EventListener eventListener, AxisConfiguration axisConfiguration) throws EventBuilderConfigurationException;
 
     /**
      * Unsubscribes from a particular event builder for the given stream definition and event listener

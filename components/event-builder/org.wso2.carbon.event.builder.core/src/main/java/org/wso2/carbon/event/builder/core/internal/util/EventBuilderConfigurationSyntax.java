@@ -25,7 +25,7 @@ public class EventBuilderConfigurationSyntax {
     public static final String EB_CONFIG_DIRECTORY = "eventbuilders";
 
     public static final String EB_ELEMENT_PROPERTY = "property";
-    public static final String EB_ELEMENT_TRANSPORT_NAME = "transportName";
+    public static final String EB_ELEMENT_TRANSPORT_TYPE = "transportType";
 
     public static final String EB_ELEMENT_CONF_EB_NS_PREFIX = "builder";
 

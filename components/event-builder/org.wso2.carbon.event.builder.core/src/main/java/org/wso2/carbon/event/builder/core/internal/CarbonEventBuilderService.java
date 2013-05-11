@@ -32,14 +32,13 @@ public class CarbonEventBuilderService implements EventBuilderService {
     }
 
     @Override
-    public void subscribe(StreamDefinition streamDefinition, EventListener eventListener) {
+    public void subscribe(StreamDefinition streamDefinition, EventListener eventListener, AxisConfiguration axisConfiguration) throws EventBuilderConfigurationException {
         //TODO This is test code. Need to implement properly
         EventBuilder eventBuilder = eventBuilderMap.get(streamDefinition);
         if (eventBuilder == null) {
-            eventBuilder = new XmlInputEventBuilder();
-            eventBuilder.subscribe(eventListener);
+            throw new EventBuilderConfigurationException("No event builder exists for the stream definition " + streamDefinition + " provided for this tenant");
         }
-        eventBuilderMap.put(streamDefinition, eventBuilder);
+        eventBuilder.subscribe(eventListener, axisConfiguration);
     }
 
     @Override
@@ -59,18 +58,19 @@ public class CarbonEventBuilderService implements EventBuilderService {
             tenantSpecificEventBuilderConfigMap.put(tenantId, eventBuilderConfigurationMap);
         }
         eventBuilderConfigurationMap.put(eventBuilderConfiguration.getName(), eventBuilderConfiguration);
-        testSubscription(eventBuilderConfiguration);
+        testSubscription(eventBuilderConfiguration, axisConfiguration);
     }
 
-    private void testSubscription(EventBuilderConfiguration eventBuilderConfiguration) {
+    private void testSubscription(EventBuilderConfiguration eventBuilderConfiguration, AxisConfiguration axisConfiguration) throws EventBuilderConfigurationException {
         InputTransportMessageConfiguration messageConfiguration = eventBuilderConfiguration.getInputTransportMessageConfiguration();
-        String streamName = messageConfiguration.getInputMessageProperties().get("StreamName");
-        String version = messageConfiguration.getInputMessageProperties().get("Version");
+        String streamName = messageConfiguration.getInputMessageProperties().get("streamName");
+        String version = messageConfiguration.getInputMessageProperties().get("version");
 
         StreamDefinition streamDefinition = null;
         try {
             streamDefinition = new StreamDefinition(streamName, version);
-            eventBuilderMap.get(streamDefinition).subscribe(new BasicEventListener() {
+            eventBuilderMap.put(streamDefinition, new TupleInputEventBuilder(eventBuilderConfiguration));
+            subscribe(streamDefinition, new BasicEventListener() {
                 @Override
                 public void onEvent(Object[] event) {
                     System.out.println("Yippee!!! " + event);
@@ -85,9 +85,11 @@ public class CarbonEventBuilderService implements EventBuilderService {
                 public void onRemoveDefinition(Object definition) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
-            });
+            }, axisConfiguration);
+
         } catch (MalformedStreamDefinitionException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            log.error("Cannot define stream:" + e.getMessage());
+            throw new EventBuilderConfigurationException(e);
         }
     }
 

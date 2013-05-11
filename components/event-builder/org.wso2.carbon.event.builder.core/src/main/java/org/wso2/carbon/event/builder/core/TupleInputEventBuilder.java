@@ -18,11 +18,14 @@
 
 package org.wso2.carbon.event.builder.core;
 
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderServiceValueHolder;
 import org.wso2.carbon.transport.adaptor.core.TransportListener;
+import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
+import org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
 
 import java.util.ArrayList;
@@ -33,17 +36,27 @@ public class TupleInputEventBuilder implements EventBuilder {
 
     private List<BasicEventListener> basicEventListeners = new ArrayList<BasicEventListener>();
     private List<Wso2EventListener> wso2EventListeners = new ArrayList<Wso2EventListener>();
-    private EventBuilderConfiguration eventBuilderConfiguration = new EventBuilderConfiguration(null);
+    private EventBuilderConfiguration eventBuilderConfiguration = null;
+
+    public TupleInputEventBuilder(EventBuilderConfiguration eventBuilderConfiguration) {
+        this.eventBuilderConfiguration = eventBuilderConfiguration;
+    }
 
     @Override
-    public void subscribe(EventListener eventListener) {
+    public void subscribe(EventListener eventListener, AxisConfiguration axisConfiguration) {
         if(eventListener instanceof BasicEventListener) {
             basicEventListeners.add((BasicEventListener)eventListener);
         } else if(eventListener instanceof Wso2EventListener) {
             wso2EventListeners.add((Wso2EventListener)eventListener);
         }
         try {
-            EventBuilderServiceValueHolder.getTransportAdaptorService().subscribe(null, eventBuilderConfiguration.getInputTransportMessageConfiguration(), new TupleInputTransportListener(), null);
+            InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration = new TransportAdaptorConfiguration();
+            inputTransportAdaptorConfiguration.setType(eventBuilderConfiguration.getInputTransportMessageConfiguration().getTransportName());
+
+            //TODO This is to circumvent what seems to be a bug on the TA core. Need to remove after fix
+            eventBuilderConfiguration.getInputTransportMessageConfiguration().setTransportName(null);
+
+            EventBuilderServiceValueHolder.getTransportAdaptorService().subscribe(inputTransportAdaptorConfiguration, eventBuilderConfiguration.getInputTransportMessageConfiguration(), new TupleInputTransportListener(), axisConfiguration);
         } catch (TransportEventProcessingException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }

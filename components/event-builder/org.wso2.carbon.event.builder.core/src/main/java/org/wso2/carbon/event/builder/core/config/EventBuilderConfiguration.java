@@ -21,8 +21,8 @@ package org.wso2.carbon.event.builder.core.config;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EventBuilderConfiguration {
 
@@ -30,7 +30,7 @@ public class EventBuilderConfiguration {
     private InputTransportMessageConfiguration inputTransportMessageConfiguration;
     private String name;
     private String type;
-    private Map<String, String> eventBuilderConfigurationProperties = new HashMap<String, String>();
+    private Map<String, String> eventBuilderConfigurationProperties = new ConcurrentHashMap<String, String>();
 
     public EventBuilderConfiguration(InputTransportMessageConfiguration inputTransportMessageConfiguration) {
         this.inputTransportMessageConfiguration = inputTransportMessageConfiguration;

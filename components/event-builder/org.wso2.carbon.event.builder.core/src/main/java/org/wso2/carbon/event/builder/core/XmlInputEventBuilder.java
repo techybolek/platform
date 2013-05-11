@@ -1,5 +1,6 @@
 package org.wso2.carbon.event.builder.core;
 
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
@@ -19,14 +20,14 @@ public class XmlInputEventBuilder implements EventBuilder {
     private EventBuilderConfiguration eventBuilderConfiguration = new EventBuilderConfiguration(null);
 
     @Override
-    public void subscribe(EventListener eventListener) {
+    public void subscribe(EventListener eventListener, AxisConfiguration axisConfiguration) {
         if(eventListener instanceof BasicEventListener) {
             basicEventListeners.add((BasicEventListener)eventListener);
         } else if(eventListener instanceof Wso2EventListener) {
             wso2EventListeners.add((Wso2EventListener)eventListener);
         }
         try {
-            EventBuilderServiceValueHolder.getTransportAdaptorService().subscribe(null, eventBuilderConfiguration.getInputTransportMessageConfiguration(), new XMLInputTransportListener(), null);
+            EventBuilderServiceValueHolder.getTransportAdaptorService().subscribe(null, eventBuilderConfiguration.getInputTransportMessageConfiguration(), new XMLInputTransportListener(), axisConfiguration);
         } catch (TransportEventProcessingException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }

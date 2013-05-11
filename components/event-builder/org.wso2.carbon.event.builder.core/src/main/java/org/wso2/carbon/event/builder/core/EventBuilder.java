@@ -18,12 +18,13 @@
 
 package org.wso2.carbon.event.builder.core;
 
+import org.apache.axis2.engine.AxisConfiguration;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
 
 public interface EventBuilder {
 
-    public void subscribe(EventListener eventListener);
+    public void subscribe(EventListener eventListener, AxisConfiguration axisConfiguration);
 
     public void unsubscribe(EventListener eventListener);
 
