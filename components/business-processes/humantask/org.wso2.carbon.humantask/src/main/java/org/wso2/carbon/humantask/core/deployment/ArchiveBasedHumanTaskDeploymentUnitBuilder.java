@@ -52,6 +52,8 @@ public class ArchiveBasedHumanTaskDeploymentUnitBuilder extends HumanTaskDeploym
 
     private String fileName;
 
+    private int tenantId;
+
     private List<Definition> wsdlDefinitions = new ArrayList<Definition>();
 
     private InputStream hiDefinition;
@@ -86,6 +88,7 @@ public class ArchiveBasedHumanTaskDeploymentUnitBuilder extends HumanTaskDeploym
             throws HumanTaskDeploymentException {
         String hiArchiveZipName = hiArchiveZip.getName();
         this.fileName = hiArchiveZipName.substring(0, hiArchiveZipName.lastIndexOf('.'));
+        this.tenantId = tenantId;
         humantaskDir = extractBPELArchive(hiArchiveZip, tenantId);
         buildHumanInteractionDocuments();
         buildDeploymentConfiguration();
@@ -210,12 +213,15 @@ public class ArchiveBasedHumanTaskDeploymentUnitBuilder extends HumanTaskDeploym
             for (Map.Entry<String, InputStream> wsdl : wsdlsMap.entrySet()) {
                 try {
                     wsdlDefinitions.add(readInTheWSDLFile(wsdl.getValue(),
-                            HumanTaskConstants.HT_DEP_UNITS_REPO_LOCATION +
-                                    this.fileName + "/" +
-                                    wsdl.getKey(), false));
+                                                          CarbonUtils.getCarbonHome() + File.separator +
+                                                          "repository" + File.separator +
+                                                          HumanTaskConstants.HUMANTASK_REPO_DIRECTORY +
+                                                          File.separator + this.tenantId +
+                                                          File.separator + this.fileName +
+                                                          File.separator + wsdl.getKey(), false));
                 } catch (WSDLException e) {
                     String errMsg = "Error occurred while converting the wsdl input stream to " +
-                            "wsdl definition";
+                                    "wsdl definition";
                     throw new HumanTaskDeploymentException(errMsg, e);
                 }
             }

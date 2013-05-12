@@ -38,7 +38,7 @@ public class HumanTaskSchemaURIResolver implements org.apache.ws.commons.schema.
         }
         InputStream is;
         try {
-            URI base = new URI(baseUri);
+            URI base = new URI("file:"+baseUri);
             URI uri = base.resolve(schemaLocation);
             is = uri.toURL().openStream();
             if (is == null) {
