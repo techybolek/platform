@@ -38,6 +38,8 @@ import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.table.EventTable;
 import org.wso2.siddhi.core.table.InMemoryEventTable;
 import org.wso2.siddhi.core.table.RDBMSEventTable;
+import org.wso2.siddhi.core.treaser.EventTracer;
+import org.wso2.siddhi.core.treaser.EventTracerService;
 import org.wso2.siddhi.core.util.generator.GlobalIndexGenerator;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
@@ -87,6 +89,7 @@ public class SiddhiManager {
                                                                         new LinkedBlockingQueue<Runnable>()));
         this.siddhiContext.setScheduledExecutorService(Executors.newScheduledThreadPool(Integer.MAX_VALUE));
         this.siddhiContext.setPersistenceService(new PersistenceService(siddhiContext));
+        this.siddhiContext.setEventTracerService(new EventTracerService(siddhiContext));
 
         if (siddhiContext.isDistributedProcessing()) {
 
@@ -109,7 +112,7 @@ public class SiddhiManager {
             streamTableDefinitionMap.put(streamDefinition.getStreamId(), streamDefinition);
             StreamJunction streamJunction = streamJunctionMap.get(streamDefinition.getStreamId());
             if (streamJunction == null) {
-                streamJunction = new StreamJunction(streamDefinition.getStreamId());
+                streamJunction = new StreamJunction(streamDefinition.getStreamId(),siddhiContext.getEventTracerService());
                 streamJunctionMap.put(streamDefinition.getStreamId(), streamJunction);
             }
             InputHandler inputHandler = new InputHandler(streamDefinition.getStreamId(), streamJunction, siddhiContext);
@@ -315,7 +318,7 @@ public class SiddhiManager {
         streamCallback.setSiddhiContext(siddhiContext);
         StreamJunction streamJunction = streamJunctionMap.get(streamId);
         if (streamJunction == null) {
-            streamJunction = new StreamJunction(streamId);
+            streamJunction = new StreamJunction(streamId,siddhiContext.getEventTracerService());
             streamJunctionMap.put(streamId, streamJunction);
         }
         streamJunction.addEventFlow(streamCallback);
@@ -359,6 +362,19 @@ public class SiddhiManager {
     public void setPersistStore(PersistenceStore persistStore) {
         siddhiContext.getPersistenceService().setPersistenceStore(persistStore);
     }
+
+    public void setEventTracer(EventTracer eventTracer) {
+        siddhiContext.getEventTracerService().setEventTracer(eventTracer);
+    }
+
+    public void enableStats(boolean enableStats) {
+        siddhiContext.getEventTracerService().setEnableStats(enableStats);
+    }
+
+    public void enableTrace(boolean enableTrace) {
+        siddhiContext.getEventTracerService().setEnableTrace(enableTrace);
+    }
+
 
     public String persist() {
         return siddhiContext.getPersistenceService().persist();

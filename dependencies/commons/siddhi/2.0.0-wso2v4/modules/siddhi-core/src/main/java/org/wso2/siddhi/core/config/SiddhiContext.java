@@ -19,8 +19,9 @@ package org.wso2.siddhi.core.config;
 
 import com.hazelcast.core.HazelcastInstance;
 import org.wso2.siddhi.core.persistence.PersistenceService;
-import org.wso2.siddhi.core.table.SiddhiDataSource;
 import org.wso2.siddhi.core.persistence.ThreadBarrier;
+import org.wso2.siddhi.core.table.SiddhiDataSource;
+import org.wso2.siddhi.core.treaser.EventTracerService;
 import org.wso2.siddhi.core.util.generator.ElementIdGenerator;
 import org.wso2.siddhi.core.util.generator.GlobalIndexGenerator;
 
@@ -46,6 +47,7 @@ public class SiddhiContext {
     private String queryPlanIdentifier;
     private List<Class> siddhiExtensions;
     private ConcurrentHashMap<String, SiddhiDataSource> siddhiDataSources;
+    private EventTracerService eventTracerService;
 
 
     public SiddhiContext(String queryPlanIdentifier, boolean distributedProcessing) {
@@ -163,5 +165,13 @@ public class SiddhiContext {
 
     public void addSiddhiDataSource(SiddhiDataSource dataSource) {
         siddhiDataSources.put(dataSource.getType() + "." + dataSource.getName(), dataSource);
+    }
+
+    public EventTracerService getEventTracerService() {
+        return eventTracerService;
+    }
+
+    public void setEventTracerService(EventTracerService eventTracerService) {
+        this.eventTracerService = eventTracerService;
     }
 }

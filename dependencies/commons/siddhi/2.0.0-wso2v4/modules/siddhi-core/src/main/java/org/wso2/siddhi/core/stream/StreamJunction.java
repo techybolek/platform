@@ -19,6 +19,7 @@ package org.wso2.siddhi.core.stream;
 
 import org.wso2.siddhi.core.event.StreamEvent;
 import org.wso2.siddhi.core.query.processor.handler.HandlerProcessor;
+import org.wso2.siddhi.core.treaser.EventTracerService;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -26,12 +27,18 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class StreamJunction {
     private List<StreamReceiver> streamReceivers = new CopyOnWriteArrayList<StreamReceiver>();
     private String streamId;
+    private EventTracerService eventTracerService;
 
-    public StreamJunction(String streamId) {
+    public StreamJunction(String streamId, EventTracerService eventTracerService) {
         this.streamId = streamId;
+        this.eventTracerService = eventTracerService;
     }
 
     public void send(StreamEvent allEvents) {
+        if (eventTracerService.isEnableStats()) {
+            eventTracerService.trace(allEvents, " on Event Stream");
+        }
+        eventTracerService.calculateStats(allEvents);
         for (StreamReceiver handlerProcessor : streamReceivers) {
             handlerProcessor.receive(allEvents);
         }

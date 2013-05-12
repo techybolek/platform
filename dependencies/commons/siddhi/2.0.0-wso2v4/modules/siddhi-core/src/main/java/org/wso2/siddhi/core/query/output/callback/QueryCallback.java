@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.StreamEvent;
+import org.wso2.siddhi.core.treaser.EventTracerService;
 import org.wso2.siddhi.core.util.collection.queue.scheduler.SchedulerElement;
 import org.wso2.siddhi.core.util.CallbackEventComposite;
 import org.wso2.siddhi.core.util.collection.queue.scheduler.SchedulerSiddhiQueue;
@@ -28,18 +29,20 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
-public abstract class QueryCallback implements Runnable,SchedulerElement {
+public abstract class QueryCallback implements Runnable, SchedulerElement {
 
-    private SchedulerSiddhiQueue<CallbackEventComposite> inputQueue ;
+    private SchedulerSiddhiQueue<CallbackEventComposite> inputQueue;
     private ThreadPoolExecutor threadPoolExecutor;
     private SiddhiContext siddhiContext;
     private StreamDefinition streamDefinition;
     static final Logger log = Logger.getLogger(QueryCallback.class);
+    private EventTracerService eventTracerService;
 
 
     public void setSiddhiContext(SiddhiContext context) {
         this.siddhiContext = context;
         this.threadPoolExecutor = context.getThreadPoolExecutor();
+        this.eventTracerService = context.getEventTracerService();
         this.inputQueue = new SchedulerSiddhiQueue<CallbackEventComposite>(this);
     }
 
@@ -50,10 +53,10 @@ public abstract class QueryCallback implements Runnable,SchedulerElement {
     public void receive(long timeStamp, StreamEvent currentEvent, StreamEvent expiredEvent) {
 
         if (siddhiContext.isAsyncProcessing()) {
-            if(log.isDebugEnabled()){
-                log.debug("Adding to QueryCallback "+currentEvent+" "+expiredEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("Adding to QueryCallback " + currentEvent + " " + expiredEvent);
             }
-            inputQueue.put(new CallbackEventComposite(timeStamp,currentEvent,expiredEvent));
+            inputQueue.put(new CallbackEventComposite(timeStamp, currentEvent, expiredEvent));
         } else {
             send(timeStamp, currentEvent, expiredEvent);
         }
@@ -76,8 +79,17 @@ public abstract class QueryCallback implements Runnable,SchedulerElement {
     }
 
     private void send(long timeStamp, StreamEvent currentEvent, StreamEvent expiredEvent) {
-
-        receive(timeStamp,currentEvent!=null?currentEvent.toArray():null, expiredEvent!=null?expiredEvent.toArray():null);
+        if (currentEvent != null) {
+            if (eventTracerService.isEnableStats()) {
+                eventTracerService.trace(currentEvent, " current event on Query Callback");
+            }
+            receive(timeStamp, currentEvent.toArray(), null);
+        } else {
+            if (eventTracerService.isEnableStats()) {
+                eventTracerService.trace(expiredEvent, " expired event on Query Callback");
+            }
+            receive(timeStamp, null, expiredEvent.toArray());
+        }
     }
 
     public abstract void receive(long timeStamp, Event[] inEvents,

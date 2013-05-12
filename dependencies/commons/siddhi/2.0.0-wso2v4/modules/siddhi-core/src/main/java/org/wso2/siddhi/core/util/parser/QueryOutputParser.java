@@ -96,7 +96,7 @@ public class QueryOutputParser {
             } else {
                 StreamJunction outputStreamJunction = streamJunctionMap.get(id);
                 if (outputStreamJunction == null) {
-                    outputStreamJunction = new StreamJunction(id);
+                    outputStreamJunction = new StreamJunction(id,siddhiContext.getEventTracerService());
                     streamJunctionMap.putIfAbsent(id, outputStreamJunction);
                 }
                 return new InsertIntoStreamCallback(outputStreamJunction, outputStreamDefinition);
