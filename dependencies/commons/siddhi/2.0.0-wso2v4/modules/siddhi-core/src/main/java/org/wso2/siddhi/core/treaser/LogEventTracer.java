@@ -25,7 +25,7 @@ public class LogEventTracer extends EventTracer {
 
     @Override
     public void trace(ComplexEvent complexEvent, String message) {
-        String stringBuilder= String.valueOf(complexEvent) + message;
-        log.info(stringBuilder);
+        StringBuilder stringBuilder=new StringBuilder().append(System.currentTimeMillis()).append(" : ").append(complexEvent).append(message);
+        log.info(stringBuilder.toString());
     }
 }
