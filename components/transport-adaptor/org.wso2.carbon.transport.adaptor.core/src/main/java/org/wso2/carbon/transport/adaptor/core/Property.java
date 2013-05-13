@@ -1,5 +1,3 @@
-package org.wso2.carbon.transport.adaptor.core;
-
 /**
  * Copyright (c) 2009, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  * <p/>
@@ -15,6 +13,9 @@ package org.wso2.carbon.transport.adaptor.core;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.wso2.carbon.transport.adaptor.core;
+
 
 /**
  * TransportAdaptor property details are stored

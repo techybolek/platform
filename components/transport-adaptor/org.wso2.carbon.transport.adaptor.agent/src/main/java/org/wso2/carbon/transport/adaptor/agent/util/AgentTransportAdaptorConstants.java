@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.transport.adaptor.core.exception;
+package org.wso2.carbon.transport.adaptor.agent.util;
 
-/**
- * this class represents the exceptions related to deploy time configuration
- */
-public class TransportConfigException extends Exception {
 
-    public TransportConfigException() {
-    }
+public interface AgentTransportAdaptorConstants {
 
-    public TransportConfigException(String message) {
-        super(message);
-    }
+    String TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL = "receiverURL";
+    String TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL = "authenticatorURL";
+    String TRANSPORT_CONF_AGENT_PROP_USER_NAME = "username";
+    String TRANSPORT_CONF_AGENT_PROP_PASSWORD = "password";
+    String TRANSPORT_TYPE_AGENT = "agent";
 
-    public TransportConfigException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public TransportConfigException(Throwable cause) {
-        super(cause);
-    }
+    String TRANSPORT_MESSAGE_STREAM_DEFINITION = "stream";
+    String TRANSPORT_MESSAGE_STREAM_VERSION = "version";
 }

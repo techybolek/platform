@@ -1,4 +1,4 @@
-package org.wso2.carbon.transport.adaptor.core.config;/*
+/*
  * Copyright 2004,2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,9 @@ package org.wso2.carbon.transport.adaptor.core.config;/*
  * limitations under the License.
  */
 
+package org.wso2.carbon.transport.adaptor.core.config;
+
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,7 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * This class contain the configuration details of the transport
  */
 
-public class TransportAdaptorConfiguration implements InputTransportAdaptorConfiguration, OutputTransportAdaptorConfiguration {
+public class TransportAdaptorConfiguration
+        implements InputTransportAdaptorConfiguration, OutputTransportAdaptorConfiguration {
 
     /**
      * logical name use to identify this configuration
@@ -109,14 +113,22 @@ public class TransportAdaptorConfiguration implements InputTransportAdaptorConfi
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         TransportAdaptorConfiguration that = (TransportAdaptorConfiguration) o;
 
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        //if (properties != null ? !properties.equals(that.properties) : that.properties != null) return false;
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
+        if (name != null ? !name.equals(that.name) : that.name != null) {
+            return false;
+        }
+
+        if (type != null ? !type.equals(that.type) : that.type != null) {
+            return false;
+        }
 
         return true;
     }
@@ -125,7 +137,6 @@ public class TransportAdaptorConfiguration implements InputTransportAdaptorConfi
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (type != null ? type.hashCode() : 0);
-        //result = 31 * result + (properties != null ? properties.hashCode() : 0);
         return result;
     }
 }

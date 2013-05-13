@@ -1,4 +1,4 @@
-package org.wso2.carbon.transport.adaptor.core.config;/*
+/*
  * Copyright 2004,2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,27 +14,29 @@ package org.wso2.carbon.transport.adaptor.core.config;/*
  * limitations under the License.
  */
 
+package org.wso2.carbon.transport.adaptor.core.config;
+
 import java.util.Map;
 
 public interface OutputTransportAdaptorConfiguration {
 
-    public String getName();
+    String getName();
 
-    public void setName(String name);
+    void setName(String name);
 
-    public String getType();
+    String getType();
 
-    public void setType(String type);
+    void setType(String type);
 
-    public Map<String, String> getOutputAdaptorProperties();
+    Map<String, String> getOutputAdaptorProperties();
 
-    public void setOutputAdaptorProperties(Map<String, String> outputAdaptorProperties);
+    void setOutputAdaptorProperties(Map<String, String> outputAdaptorProperties);
 
-    public Map<String, String> getCommonAdaptorProperties();
+    Map<String, String> getCommonAdaptorProperties();
 
-    public void setCommonAdaptorProperties(Map<String, String> commonAdaptorProperties);
+    void setCommonAdaptorProperties(Map<String, String> commonAdaptorProperties);
 
-    public void addOutputAdaptorProperty(String name, String value);
+    void addOutputAdaptorProperty(String name, String value);
 
-    public void addCommonAdaptorProperty(String name, String value);
+    void addCommonAdaptorProperty(String name, String value);
 }

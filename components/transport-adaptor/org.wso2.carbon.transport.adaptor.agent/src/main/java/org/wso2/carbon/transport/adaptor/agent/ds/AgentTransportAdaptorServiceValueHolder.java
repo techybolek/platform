@@ -32,7 +32,8 @@ public final class AgentTransportAdaptorServiceValueHolder {
     private AgentTransportAdaptorServiceValueHolder() {
     }
 
-    public static void registerAgentTransportRegistrationService(TransportAdaptorRegistrationService agentTransportAdaptorRegistrationService) {
+    public static void registerAgentTransportRegistrationService(
+            TransportAdaptorRegistrationService agentTransportAdaptorRegistrationService) {
         AgentTransportAdaptorServiceValueHolder.agentTransportAdaptorRegistrationService = agentTransportAdaptorRegistrationService;
     }
 
@@ -40,7 +41,8 @@ public final class AgentTransportAdaptorServiceValueHolder {
         return AgentTransportAdaptorServiceValueHolder.agentTransportAdaptorRegistrationService;
     }
 
-    public static void registerDataBridgeSubscriberService(DataBridgeSubscriberService agentServer) {
+    public static void registerDataBridgeSubscriberService(
+            DataBridgeSubscriberService agentServer) {
         AgentTransportAdaptorServiceValueHolder.dataBridgeSubscriberService = agentServer;
     }
 

@@ -1,4 +1,4 @@
-package org.wso2.carbon.transport.adaptor.core.internal;/*
+/*
  * Copyright 2004,2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,41 +14,40 @@ package org.wso2.carbon.transport.adaptor.core.internal;/*
  * limitations under the License.
  */
 
+package org.wso2.carbon.transport.adaptor.core.internal;
+
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.transport.adaptor.core.TransportAdaptorFactory;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorRegistrationService;
-import org.wso2.carbon.transport.adaptor.core.TransportFactory;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
-import org.wso2.carbon.transport.adaptor.core.exception.TransportConfigException;
-import org.wso2.carbon.transport.adaptor.core.internal.ds.TransportServiceValueHolder;
+import org.wso2.carbon.transport.adaptor.core.exception.TransportAdaptorConfigException;
+import org.wso2.carbon.transport.adaptor.core.internal.ds.TransportAdaptorServiceValueHolder;
 
-public class CarbonTransportAdaptorRegistrationService implements TransportAdaptorRegistrationService {
+public class CarbonTransportAdaptorRegistrationService
+        implements TransportAdaptorRegistrationService {
 
     private static final Log log = LogFactory.getLog(TransportAdaptorService.class);
 
     @Override
-    public void registerTransportAdaptor(String className) throws TransportConfigException {
+    public void registerTransportAdaptor(String className) throws TransportAdaptorConfigException {
 
         try {
             Class transportTypeFactoryClass = Class.forName(className);
-            TransportFactory factory =
-                    (TransportFactory) transportTypeFactoryClass.newInstance();
-            ((CarbonTransportAdaptorService) (TransportServiceValueHolder.getCarbonTransportAdaptorService())).registerTransportAdaptor(factory.getTransport());
+            TransportAdaptorFactory adaptorFactory =
+                    (TransportAdaptorFactory) transportTypeFactoryClass.newInstance();
+            ((CarbonTransportAdaptorService) (TransportAdaptorServiceValueHolder.getCarbonTransportAdaptorService())).registerTransportAdaptor(adaptorFactory.getTransportAdaptor());
         } catch (ClassNotFoundException e) {
             log.error(e.getMessage(), e);
-            throw new TransportConfigException("TransportAdaptor class " + className + " can not be found", e);
+            throw new TransportAdaptorConfigException("TransportAdaptor class " + className + " can not be found", e);
         } catch (IllegalAccessException e) {
             log.error(e.getMessage(), e);
-            throw new TransportConfigException("Can not access the class " + className, e);
+            throw new TransportAdaptorConfigException("Can not access the class " + className, e);
         } catch (InstantiationException e) {
             log.error(e.getMessage(), e);
-            throw new TransportConfigException("Can not instantiate the class " + className, e);
-        } catch (Throwable e) {
-            log.error(e.getMessage(), e);
-            throw new TransportConfigException("Can not process class " + className, e);
+            throw new TransportAdaptorConfigException("Can not instantiate the class " + className, e);
         }
-
-
     }
 
     @Override

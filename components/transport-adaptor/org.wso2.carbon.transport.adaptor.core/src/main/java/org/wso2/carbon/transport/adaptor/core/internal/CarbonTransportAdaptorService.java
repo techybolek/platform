@@ -19,7 +19,12 @@ package org.wso2.carbon.transport.adaptor.core.internal;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.transport.adaptor.core.*;
+import org.wso2.carbon.transport.adaptor.core.AbstractTransportAdaptor;
+import org.wso2.carbon.transport.adaptor.core.InputTransportAdaptor;
+import org.wso2.carbon.transport.adaptor.core.OutputTransportAdaptor;
+import org.wso2.carbon.transport.adaptor.core.TransportAdaptorDto;
+import org.wso2.carbon.transport.adaptor.core.TransportAdaptorListener;
+import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.core.config.OutputTransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
@@ -46,7 +51,7 @@ public class CarbonTransportAdaptorService implements TransportAdaptorService {
 
     public void registerTransportAdaptor(AbstractTransportAdaptor abstractTransportAdaptor) {
         TransportAdaptorDto transportAdaptorDto = abstractTransportAdaptor.getTransportAdaptorDto();
-        this.transportAdaptorMap.put(transportAdaptorDto.getName(), abstractTransportAdaptor);
+        this.transportAdaptorMap.put(transportAdaptorDto.getTransportAdaptorTypeName(), abstractTransportAdaptor);
     }
 
 
@@ -63,7 +68,7 @@ public class CarbonTransportAdaptorService implements TransportAdaptorService {
     public MessageDto getTransportMessageDto(String transportAdaptorTypeName) {
 
         for (AbstractTransportAdaptor abstractTransportAdaptor : this.transportAdaptorMap.values()) {
-            if (abstractTransportAdaptor.getTransportAdaptorDto().getName().equals(transportAdaptorTypeName)) {
+            if (abstractTransportAdaptor.getTransportAdaptorDto().getTransportAdaptorTypeName().equals(transportAdaptorTypeName)) {
                 return abstractTransportAdaptor.getMessageDto();
             }
         }
@@ -76,37 +81,21 @@ public class CarbonTransportAdaptorService implements TransportAdaptorService {
     public List<String> getTransportAdaptorNames() {
         List<String> transportAdaptorNames = new ArrayList<String>();
         for (AbstractTransportAdaptor abstractTransportAdaptor : this.transportAdaptorMap.values()) {
-            transportAdaptorNames.add(abstractTransportAdaptor.getTransportAdaptorDto().getName());
+            transportAdaptorNames.add(abstractTransportAdaptor.getTransportAdaptorDto().getTransportAdaptorTypeName());
         }
         return transportAdaptorNames;
     }
 
     @Override
-    public List<Property> getInputAdaptorTransportProperties(String transportAdaptor) {
-        return transportAdaptorMap.get(transportAdaptor).getTransportAdaptorDto().getAdaptorInPropertyList();
-    }
-
-
-    @Override
-    public List<Property> getOutputAdaptorTransportProperties(String transportAdaptor) {
-        return transportAdaptorMap.get(transportAdaptor).getTransportAdaptorDto().getAdaptorOutPropertyList();
-    }
-
-
-    @Override
-    public List<Property> getCommonAdaptorTransportProperties(String transportAdaptor) {
-        return transportAdaptorMap.get(transportAdaptor).getTransportAdaptorDto().getAdaptorCommonPropertyList();
-    }
-
-    @Override
     public String subscribe(InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
                             InputTransportMessageConfiguration inputTransportMessageConfiguration,
-                            TransportListener transportListener,
-                            AxisConfiguration axisConfiguration) throws TransportEventProcessingException {
+                            TransportAdaptorListener transportAdaptorListener,
+                            AxisConfiguration axisConfiguration)
+            throws TransportEventProcessingException {
         InputTransportAdaptor inputTransportAdaptor = (InputTransportAdaptor) this.transportAdaptorMap.get(inputTransportAdaptorConfiguration.getType());
 
         try {
-            return inputTransportAdaptor.subscribe(inputTransportMessageConfiguration, transportListener, inputTransportAdaptorConfiguration, axisConfiguration);
+            return inputTransportAdaptor.subscribe(inputTransportMessageConfiguration, transportAdaptorListener, inputTransportAdaptorConfiguration, axisConfiguration);
         } catch (TransportEventProcessingException e) {
             log.error(e.getMessage(), e);
             throw new TransportEventProcessingException(e.getMessage(), e);
@@ -115,7 +104,8 @@ public class CarbonTransportAdaptorService implements TransportAdaptorService {
 
     @Override
     public void publish(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration,
-                        OutputTransportMessageConfiguration outputTransportMessageConfiguration, Object object) throws TransportEventProcessingException {
+                        OutputTransportMessageConfiguration outputTransportMessageConfiguration,
+                        Object object) throws TransportEventProcessingException {
 
         OutputTransportAdaptor outputTransportAdaptor = (OutputTransportAdaptor) this.transportAdaptorMap.get(outputTransportAdaptorConfiguration.getType());
         try {
@@ -127,7 +117,9 @@ public class CarbonTransportAdaptorService implements TransportAdaptorService {
     }
 
     @Override
-    public void testConnection(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration) throws TransportEventProcessingException {
+    public void testConnection(
+            OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration)
+            throws TransportEventProcessingException {
         OutputTransportAdaptor outputTransportAdaptor = (OutputTransportAdaptor) this.transportAdaptorMap.get(outputTransportAdaptorConfiguration.getType());
         try {
             outputTransportAdaptor.testConnection(outputTransportAdaptorConfiguration);
@@ -140,7 +132,8 @@ public class CarbonTransportAdaptorService implements TransportAdaptorService {
     @Override
     public void unsubscribe(InputTransportMessageConfiguration inputTransportMessageConfiguration,
                             InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
-                            AxisConfiguration axisConfiguration, String subscriptionId) throws TransportEventProcessingException {
+                            AxisConfiguration axisConfiguration, String subscriptionId)
+            throws TransportEventProcessingException {
         InputTransportAdaptor inputTransportAdaptor = (InputTransportAdaptor) this.transportAdaptorMap.get(inputTransportAdaptorConfiguration.getType());
         try {
             inputTransportAdaptor.unsubscribe(inputTransportMessageConfiguration, inputTransportAdaptorConfiguration, axisConfiguration, subscriptionId);

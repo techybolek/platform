@@ -1,4 +1,4 @@
-package org.wso2.carbon.transport.adaptor.core;/*
+/*
  * Copyright 2004,2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,15 @@ package org.wso2.carbon.transport.adaptor.core;/*
  * limitations under the License.
  */
 
+package org.wso2.carbon.transport.adaptor.core;
+
 import org.apache.axis2.engine.AxisConfiguration;
 import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
+import org.wso2.carbon.transport.adaptor.core.config.OutputTransportAdaptorConfiguration;
+import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
 import org.wso2.carbon.transport.adaptor.core.message.MessageDto;
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
-import org.wso2.carbon.transport.adaptor.core.config.OutputTransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.core.message.config.OutputTransportMessageConfiguration;
-import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
 
 import java.util.List;
 
@@ -41,7 +43,6 @@ public interface TransportAdaptorService {
     List<TransportAdaptorDto> getTransportAdaptors();
 
     /**
-     *
      * @return message DTO
      */
     MessageDto getTransportMessageDto(String transportAdaptorTypeName);
@@ -53,55 +54,36 @@ public interface TransportAdaptorService {
      */
     List<String> getTransportAdaptorNames();
 
-     /**
-     *
-     * @param transportAdaptor name of the transport adaptor
-     * @return input adaptor property list
-     */
-    List<Property> getInputAdaptorTransportProperties(String transportAdaptor);
-
-    /**
-     *
-     * @param transportAdaptor name of the transport adaptor
-     * @return output adaptor property list
-     */
-    List<Property> getOutputAdaptorTransportProperties(String transportAdaptor);
-
-    /**
-     *
-     * @param transportAdaptor nam eof the transport adaptor
-     * @return common adaptor property lists
-     */
-    List<Property> getCommonAdaptorTransportProperties(String transportAdaptor);
-
     /**
      * subscribe to a particular transport configuration. When the TransportAdaptor receives the
      * message it send that to the user through the listener interface.
      *
      * @param inputTransportAdaptorConfiguration
-     *                          - Configuration details of the transport
-     * @param inputTransportMessageConfiguration         - topic to subscribe
-     * @param transportListener - listener interface to notify
+     *                                 - Configuration details of the transport
+     * @param inputTransportMessageConfiguration
+     *                                 - topic to subscribe
+     * @param transportAdaptorListener - listener interface to notify
      * @throws org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException
      *          - if problem happen when subscribing
      */
     String subscribe(InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
                      InputTransportMessageConfiguration inputTransportMessageConfiguration,
-                     TransportListener transportListener,
+                     TransportAdaptorListener transportAdaptorListener,
                      AxisConfiguration axisConfiguration) throws TransportEventProcessingException;
 
 
     /**
      * publishes the message using the given transport proxy to the given topic.
      *
-     * @param OutputTransportAdaptorConfiguration
-     *                  - Configuration Details of the transport
-     * @param outputTransportMessageConfiguration - topic to publish
-     * @param object    - message to send
+     * @param outputTransportAdaptorConfiguration
+     *               - Configuration Details of the transport
+     * @param outputTransportMessageConfiguration
+     *               - topic to publish
+     * @param object - message to send
      * @throws org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException
      *          - if problem happen when publishing
      */
-    void publish(OutputTransportAdaptorConfiguration OutputTransportAdaptorConfiguration,
+    void publish(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration,
                  OutputTransportMessageConfiguration outputTransportMessageConfiguration,
                  Object object) throws TransportEventProcessingException;
 
@@ -113,12 +95,14 @@ public interface TransportAdaptorService {
      * @throws org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException
      *          - if problem happen when publishing
      */
-    void testConnection(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration) throws TransportEventProcessingException;
+    void testConnection(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration)
+            throws TransportEventProcessingException;
 
     /**
      * un subscribes from the transport.
      *
-     * @param inputTransportMessageConfiguration         - topic name to which previously subscribed
+     * @param inputTransportMessageConfiguration
+     *                          - topic name to which previously subscribed
      * @param inputTransportAdaptorConfiguration
      *                          - transport configuration to be used
      * @param axisConfiguration - acis configuration

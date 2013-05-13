@@ -14,14 +14,25 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.transport.adaptor.core;
+package org.wso2.carbon.transport.adaptor.core.exception;
 
-public interface TransportFactory {
+/**
+ * this class represents the exceptions related to deploy time configuration
+ */
+public class TransportAdaptorConfigException extends Exception {
 
-    /**
-     *
-     * @return transport adaptor object
-     */
-    AbstractTransportAdaptor getTransport();
+    public TransportAdaptorConfigException() {
+    }
 
+    public TransportAdaptorConfigException(String message) {
+        super(message);
+    }
+
+    public TransportAdaptorConfigException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public TransportAdaptorConfigException(Throwable cause) {
+        super(cause);
+    }
 }

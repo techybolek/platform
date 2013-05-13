@@ -1,4 +1,4 @@
-package org.wso2.carbon.transport.adaptor.core;/*
+/*
  * Copyright 2004,2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,38 +14,41 @@ package org.wso2.carbon.transport.adaptor.core;/*
  * limitations under the License.
  */
 
+package org.wso2.carbon.transport.adaptor.core;
+
+
 import org.wso2.carbon.transport.adaptor.core.config.OutputTransportAdaptorConfiguration;
-import org.wso2.carbon.transport.adaptor.core.message.config.OutputTransportMessageConfiguration;
 import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
+import org.wso2.carbon.transport.adaptor.core.message.config.OutputTransportMessageConfiguration;
 
 import java.util.List;
 
 public interface OutputTransportAdaptor {
 
     /**
-     *
      * @return output adaptor configuration property list
      */
-    List<Property> getOutAdaptorConfig();
+    List<Property> getOutputAdaptorProperties();
 
     /**
-     *
      * @return output message configuration property list
      */
-    List<Property> getOutMessageConfig();
+    List<Property> getOutputMessageProperties();
 
     /**
      * publish a message to a given connection with the transport configuration.
      *
-     * @param outputTransportMessageConfiguration                    - topic name to publish messages
-     * @param message                       - message to send
+     * @param outputTransportMessageConfiguration
+     *                                     - topic name to publish messages
+     * @param message                      - message to send
      * @param outputTransportConfiguration - transport adaptor configuration to be used
      * @throws TransportEventProcessingException
      *          - if the message can not publish
      */
     void publish(OutputTransportMessageConfiguration outputTransportMessageConfiguration,
                  Object message,
-                 OutputTransportAdaptorConfiguration outputTransportConfiguration) throws TransportEventProcessingException;
+                 OutputTransportAdaptorConfiguration outputTransportConfiguration)
+            throws TransportEventProcessingException;
 
     /**
      * publish test message to check the connection with the transport configuration.
@@ -54,7 +57,8 @@ public interface OutputTransportAdaptor {
      * @throws TransportEventProcessingException
      *          - if the message can not publish
      */
-    void testConnection(OutputTransportAdaptorConfiguration outputTransportConfiguration) throws TransportEventProcessingException;
+    void testConnection(OutputTransportAdaptorConfiguration outputTransportConfiguration)
+            throws TransportEventProcessingException;
 
 
 }

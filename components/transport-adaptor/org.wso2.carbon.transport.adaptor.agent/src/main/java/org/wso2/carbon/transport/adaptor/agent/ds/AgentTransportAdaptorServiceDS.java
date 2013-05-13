@@ -21,9 +21,9 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.databridge.agent.thrift.Agent;
 import org.wso2.carbon.databridge.core.DataBridgeSubscriberService;
-import org.wso2.carbon.transport.adaptor.agent.AgentTransportFactory;
+import org.wso2.carbon.transport.adaptor.agent.AgentTransportAdaptorFactory;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorRegistrationService;
-import org.wso2.carbon.transport.adaptor.core.exception.TransportConfigException;
+import org.wso2.carbon.transport.adaptor.core.exception.TransportAdaptorConfigException;
 
 
 /**
@@ -34,7 +34,7 @@ import org.wso2.carbon.transport.adaptor.core.exception.TransportConfigException
  * @scr.reference name="agentservice.service"
  * interface="org.wso2.carbon.databridge.agent.thrift.Agent" cardinality="1..1"
  * policy="dynamic" bind="setAgent" unbind="unSetAgent"
- * @scr.reference name="transportservice.service"
+ * @scr.reference name="transport.adaptor.service"
  * interface="org.wso2.carbon.transport.adaptor.core.TransportAdaptorRegistrationService" cardinality="1..1"
  * policy="dynamic" bind="setTransportAdaptorRegistrationService" unbind="unSetTransportAdaptorRegistrationService"
  */
@@ -53,28 +53,32 @@ public class AgentTransportAdaptorServiceDS {
 
         try {
 
-            AgentTransportAdaptorServiceValueHolder.getAgentTransportRegistrationService().registerTransportAdaptor(AgentTransportFactory.class.getName());
+            AgentTransportAdaptorServiceValueHolder.getAgentTransportRegistrationService().registerTransportAdaptor(AgentTransportAdaptorFactory.class.getName());
             log.info("Successfully deployed the agent transport service");
         } catch (RuntimeException e) {
             log.error("Can not create transport service ", e);
-        } catch (TransportConfigException e) {
+        } catch (TransportAdaptorConfigException e) {
             log.error("Transport adaptor configuration error occurred ");
         }
     }
 
-    protected void setTransportAdaptorRegistrationService(TransportAdaptorRegistrationService transportAdaptorRegistrationService) {
+    protected void setTransportAdaptorRegistrationService(
+            TransportAdaptorRegistrationService transportAdaptorRegistrationService) {
         AgentTransportAdaptorServiceValueHolder.registerAgentTransportRegistrationService(transportAdaptorRegistrationService);
     }
 
-    protected void unSetTransportAdaptorRegistrationService(TransportAdaptorRegistrationService transportAdaptorRegistrationServicee) {
+    protected void unSetTransportAdaptorRegistrationService(
+            TransportAdaptorRegistrationService transportAdaptorRegistrationServicee) {
 
     }
 
-    protected void setDataBridgeSubscriberService(DataBridgeSubscriberService dataBridgeSubscriberService) {
+    protected void setDataBridgeSubscriberService(
+            DataBridgeSubscriberService dataBridgeSubscriberService) {
         AgentTransportAdaptorServiceValueHolder.registerDataBridgeSubscriberService(dataBridgeSubscriberService);
     }
 
-    protected void unSetDataBridgeSubscriberService(DataBridgeSubscriberService dataBridgeSubscriberService) {
+    protected void unSetDataBridgeSubscriberService(
+            DataBridgeSubscriberService dataBridgeSubscriberService) {
 
     }
 

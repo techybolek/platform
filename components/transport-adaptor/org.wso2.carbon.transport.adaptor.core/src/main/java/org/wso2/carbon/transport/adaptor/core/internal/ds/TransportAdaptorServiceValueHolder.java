@@ -22,32 +22,34 @@ import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 /**
  * common place to hold some OSGI bundle references.
  */
-public final class TransportServiceValueHolder {
+public final class TransportAdaptorServiceValueHolder {
 
     private static TransportAdaptorService carbonTransportAdaptorService;
     private static TransportAdaptorRegistrationService transportAdaptorRegistrationService;
 
-    private TransportServiceValueHolder() {
+    private TransportAdaptorServiceValueHolder() {
     }
 
-    public static void registerCarbonTransportService(TransportAdaptorService carbonTransportAdaptorService) {
+    public static void registerCarbonTransportService(
+            TransportAdaptorService carbonTransportAdaptorService) {
 
-        TransportServiceValueHolder.carbonTransportAdaptorService = carbonTransportAdaptorService;
+        TransportAdaptorServiceValueHolder.carbonTransportAdaptorService = carbonTransportAdaptorService;
 
     }
 
     public static TransportAdaptorService getCarbonTransportAdaptorService() {
-        return TransportServiceValueHolder.carbonTransportAdaptorService;
+        return TransportAdaptorServiceValueHolder.carbonTransportAdaptorService;
     }
 
-    public static void registerTransportAdaptorRegistrationService(TransportAdaptorRegistrationService transportAdaptorRegistrationService) {
+    public static void registerTransportAdaptorRegistrationService(
+            TransportAdaptorRegistrationService transportAdaptorRegistrationService) {
 
-        TransportServiceValueHolder.transportAdaptorRegistrationService = transportAdaptorRegistrationService;
+        TransportAdaptorServiceValueHolder.transportAdaptorRegistrationService = transportAdaptorRegistrationService;
 
     }
 
     public static TransportAdaptorRegistrationService getTransportAdaptorRegistrationService() {
-        return TransportServiceValueHolder.transportAdaptorRegistrationService;
+        return TransportAdaptorServiceValueHolder.transportAdaptorRegistrationService;
     }
 
 

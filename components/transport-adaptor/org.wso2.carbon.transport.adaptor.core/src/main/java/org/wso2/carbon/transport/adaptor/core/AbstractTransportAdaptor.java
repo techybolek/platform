@@ -18,6 +18,7 @@ package org.wso2.carbon.transport.adaptor.core;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.transport.adaptor.core.exception.TransportAdaptorConfigException;
 import org.wso2.carbon.transport.adaptor.core.message.MessageDto;
 
 import java.util.List;
@@ -38,7 +39,7 @@ public abstract class AbstractTransportAdaptor {
 
         this.transportAdaptorDto = new TransportAdaptorDto();
         this.messageDto = new MessageDto();
-        this.transportAdaptorDto.setName(this.getName());
+        this.transportAdaptorDto.setTransportAdaptorTypeName(this.getName());
         this.transportAdaptorDto.setSupportedInputMessageType(this.getSupportedInputMessageTypes());
         this.transportAdaptorDto.setSupportedOutputMessageType(this.getSupportedOutputMessageTypes());
         this.transportAdaptorDto.setTransportAdaptorType(this.getTransportAdaptorType());
@@ -46,12 +47,12 @@ public abstract class AbstractTransportAdaptor {
         this.messageDto.setAdaptorName(this.getName());
 
         if (this instanceof InputTransportAdaptor) {
-            transportAdaptorDto.setAdaptorInPropertyList(((InputTransportAdaptor) (this)).getInAdaptorConfig());
-            messageDto.setMessageInPropertyList(((InputTransportAdaptor) (this)).getInMessageConfig());
+            transportAdaptorDto.setAdaptorInPropertyList(((InputTransportAdaptor) (this)).getInputAdaptorProperties());
+            messageDto.setMessageInPropertyList(((InputTransportAdaptor) (this)).getInputMessageProperties());
         }
         if (this instanceof OutputTransportAdaptor) {
-            transportAdaptorDto.setAdaptorOutPropertyList(((OutputTransportAdaptor) (this)).getOutAdaptorConfig());
-            messageDto.setMessageOutPropertyList(((OutputTransportAdaptor) (this)).getOutMessageConfig());
+            transportAdaptorDto.setAdaptorOutPropertyList(((OutputTransportAdaptor) (this)).getOutputAdaptorProperties());
+            messageDto.setMessageOutPropertyList(((OutputTransportAdaptor) (this)).getOutputMessageProperties());
         }
 
         if (getCommonAdaptorConfig() != null) {
@@ -60,10 +61,10 @@ public abstract class AbstractTransportAdaptor {
 
         try {
             if (!(this instanceof InputTransportAdaptor) && !(this instanceof OutputTransportAdaptor)) {
-                throw new Exception("Transport Adaptor must implement InputTransportAdaptor or/and OutputTransportAdaptor");
+                throw new TransportAdaptorConfigException("Transport Adaptor must implement InputTransportAdaptor or/and OutputTransportAdaptor");
             }
-        } catch (Exception ex) {
-            log.error("Error in creating TransportAdaptorDto" + ex);
+        } catch (TransportAdaptorConfigException ex) {
+            log.error("Error in creating TransportAdaptorDto for " + this.getName() + ex);
         }
 
 
@@ -73,8 +74,7 @@ public abstract class AbstractTransportAdaptor {
         return transportAdaptorDto;
     }
 
-    public MessageDto getMessageDto()
-    {
+    public MessageDto getMessageDto() {
         return messageDto;
     }
 
@@ -82,7 +82,7 @@ public abstract class AbstractTransportAdaptor {
 
     protected abstract List<Property> getCommonAdaptorConfig();
 
-    protected  abstract TransportAdaptorDto.TransportAdaptorType getTransportAdaptorType();
+    protected abstract TransportAdaptorDto.TransportAdaptorType getTransportAdaptorType();
 
     protected abstract List<TransportAdaptorDto.MessageType> getSupportedInputMessageTypes();
 

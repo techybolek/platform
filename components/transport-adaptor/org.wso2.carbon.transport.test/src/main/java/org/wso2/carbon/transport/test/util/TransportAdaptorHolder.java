@@ -21,7 +21,7 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 /**
  * singleton class to hold the transport adaptor service
  */
-public class TransportAdaptorHolder {
+public final class TransportAdaptorHolder {
     private TransportAdaptorService transportAdaptorService;
     private ConfigurationContextService configurationContextService;
     private static TransportAdaptorHolder instance = new TransportAdaptorHolder();
@@ -33,7 +33,7 @@ public class TransportAdaptorHolder {
         return transportAdaptorService;
     }
 
-    public  ConfigurationContextService getConfigurationContextService(){
+    public ConfigurationContextService getConfigurationContextService() {
         return configurationContextService;
     }
 
@@ -49,11 +49,13 @@ public class TransportAdaptorHolder {
         this.transportAdaptorService = null;
     }
 
-    public void registerConfigurationContextService(ConfigurationContextService configurationContextService) {
+    public void registerConfigurationContextService(
+            ConfigurationContextService configurationContextService) {
         this.configurationContextService = configurationContextService;
     }
 
-    public void unRegisterConfigurationContextService(ConfigurationContextService configurationContextService) {
+    public void unRegisterConfigurationContextService(
+            ConfigurationContextService configurationContextService) {
         this.configurationContextService = null;
     }
 

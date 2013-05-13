@@ -30,33 +30,46 @@ import org.wso2.carbon.databridge.core.AgentCallback;
 import org.wso2.carbon.databridge.core.exception.StreamDefinitionNotFoundException;
 import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
 import org.wso2.carbon.transport.adaptor.agent.ds.AgentTransportAdaptorServiceValueHolder;
-import org.wso2.carbon.transport.adaptor.core.*;
-import org.wso2.carbon.transport.adaptor.core.config.*;
+import org.wso2.carbon.transport.adaptor.agent.util.AgentTransportAdaptorConstants;
+import org.wso2.carbon.transport.adaptor.core.AbstractTransportAdaptor;
+import org.wso2.carbon.transport.adaptor.core.InputTransportAdaptor;
+import org.wso2.carbon.transport.adaptor.core.OutputTransportAdaptor;
+import org.wso2.carbon.transport.adaptor.core.Property;
+import org.wso2.carbon.transport.adaptor.core.TransportAdaptorDto;
+import org.wso2.carbon.transport.adaptor.core.TransportAdaptorListener;
+import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
+import org.wso2.carbon.transport.adaptor.core.config.OutputTransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
-import org.wso2.carbon.transport.adaptor.agent.util.AgentTransportConstants;
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 import org.wso2.carbon.transport.adaptor.core.message.config.OutputTransportMessageConfiguration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class AgentTransportType extends AbstractTransportAdaptor implements InputTransportAdaptor, OutputTransportAdaptor {
+public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
+        implements InputTransportAdaptor, OutputTransportAdaptor {
 
-    private static final Log log = LogFactory.getLog(AgentTransportType.class);
+    private static final Log log = LogFactory.getLog(AgentTransportAdaptorType.class);
 
-    private static AgentTransportType agentTransportAdaptor = new AgentTransportType();
+    private static AgentTransportAdaptorType agentTransportAdaptorAdaptor = new AgentTransportAdaptorType();
 
     private ResourceBundle resourceBundle;
-    private Map<InputTransportMessageConfiguration, Map<String, TransportListener>> inputTransportListenerMap =
-            new ConcurrentHashMap<InputTransportMessageConfiguration, Map<String, TransportListener>>();
+    private Map<InputTransportMessageConfiguration, Map<String, TransportAdaptorListener>> inputTransportListenerMap =
+            new ConcurrentHashMap<InputTransportMessageConfiguration, Map<String, TransportAdaptorListener>>();
     private Map<InputTransportMessageConfiguration, StreamDefinition> inputStreamDefinitionMap =
             new ConcurrentHashMap<InputTransportMessageConfiguration, StreamDefinition>();
-    private Map<String, Map<String, TransportListener>> streamIdTransportListenerMap =
-            new ConcurrentHashMap<String, Map<String, TransportListener>>();
+    private Map<String, Map<String, TransportAdaptorListener>> streamIdTransportListenerMap =
+            new ConcurrentHashMap<String, Map<String, TransportAdaptorListener>>();
     private ConcurrentHashMap<Integer, ConcurrentHashMap<OutputTransportAdaptorConfiguration, AsyncDataPublisher>> dataPublisherMap = new ConcurrentHashMap<Integer, ConcurrentHashMap<OutputTransportAdaptorConfiguration, AsyncDataPublisher>>();
     private Agent agent;
 
-    private AgentTransportType() {
+    private AgentTransportAdaptorType() {
 
         AgentTransportAdaptorServiceValueHolder.getDataBridgeSubscriberService().subscribe(new AgentTransportCallback());
 
@@ -85,21 +98,19 @@ public final class AgentTransportType extends AbstractTransportAdaptor implement
 
 
     /**
-     *
      * @return agent transport adaptor instance
      */
-    public static AgentTransportType getInstance() {
+    public static AgentTransportAdaptorType getInstance() {
 
-        return agentTransportAdaptor;
+        return agentTransportAdaptorAdaptor;
     }
 
     /**
-     *
      * @return name of the agent transport adaptor
      */
     @Override
     protected String getName() {
-        return AgentTransportConstants.TRANSPORT_TYPE_AGENT;
+        return AgentTransportAdaptorConstants.TRANSPORT_TYPE_AGENT;
     }
 
     /**
@@ -112,7 +123,6 @@ public final class AgentTransportType extends AbstractTransportAdaptor implement
     }
 
     /**
-     *
      * @return common adaptor configuration property list
      */
     @Override
@@ -120,36 +130,36 @@ public final class AgentTransportType extends AbstractTransportAdaptor implement
 
 
         List<Property> propertyList = new ArrayList<Property>();
-//
+
         // set receiver url transport
-        Property ipProperty = new Property(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL);
+        Property ipProperty = new Property(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL);
         ipProperty.setDisplayName(
-                resourceBundle.getString(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL));
+                resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL));
         ipProperty.setRequired(true);
         ipProperty.setHint("Please Enter the Receiver Url");
 
         // set authenticator url of transport
-        Property authenticatorIpProperty = new Property(AgentTransportConstants.
-                TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL);
+        Property authenticatorIpProperty = new Property(AgentTransportAdaptorConstants.
+                                                                TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL);
         authenticatorIpProperty.setDisplayName(
-                resourceBundle.getString(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL));
+                resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL));
         authenticatorIpProperty.setRequired(false);
         authenticatorIpProperty.setHint("Please Enter the Authenticator Url");
 
 
         // set connection user name as property
-        Property userNameProperty = new Property(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_USER_NAME);
+        Property userNameProperty = new Property(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_USER_NAME);
         userNameProperty.setRequired(true);
         userNameProperty.setDisplayName(
-                resourceBundle.getString(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_USER_NAME));
+                resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_USER_NAME));
         userNameProperty.setHint("Please Enter the UserName");
 
         // set connection password as property
-        Property passwordProperty = new Property(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_PASSWORD);
+        Property passwordProperty = new Property(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_PASSWORD);
         passwordProperty.setRequired(true);
         passwordProperty.setSecured(true);
         passwordProperty.setDisplayName(
-                resourceBundle.getString(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_PASSWORD));
+                resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_PASSWORD));
         passwordProperty.setHint("Please Enter the Password");
         propertyList.add(ipProperty);
         propertyList.add(authenticatorIpProperty);
@@ -160,48 +170,33 @@ public final class AgentTransportType extends AbstractTransportAdaptor implement
     }
 
     /**
-     *
-     * @return  input adaptor configuration property list
+     * @return input adaptor configuration property list
      */
     @Override
-    public List<Property> getInAdaptorConfig() {
-
-//        List<Property> propertyList = new ArrayList<Property>();
-//
-//        // set receiver url transport
-//        Property ipProperty = new Property(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL);
-//        ipProperty.setDisplayName(
-//                resourceBundle.getString(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL));
-//        ipProperty.setRequired(true);
-//        ipProperty.setDefaultValue("localhost");
-//        ipProperty.setHint("Please Enter the Receiver url");
-//
-//        propertyList.add(ipProperty);
-//        return propertyList;
+    public List<Property> getInputAdaptorProperties() {
 
         return null;
     }
 
     /**
-     *
-     * @return  input message configuration property list
+     * @return input message configuration property list
      */
     @Override
-    public List<Property> getInMessageConfig() {
+    public List<Property> getInputMessageProperties() {
 
         List<Property> propertyList = new ArrayList<Property>();
 
         // set stream definition
-        Property streamDefinitionProperty = new Property(AgentTransportConstants.TRANSPORT_MESSAGE_STREAM_DEFINITION);
+        Property streamDefinitionProperty = new Property(AgentTransportAdaptorConstants.TRANSPORT_MESSAGE_STREAM_DEFINITION);
         streamDefinitionProperty.setDisplayName(
-                resourceBundle.getString(AgentTransportConstants.TRANSPORT_MESSAGE_STREAM_DEFINITION));
+                resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_MESSAGE_STREAM_DEFINITION));
         streamDefinitionProperty.setRequired(true);
 
 
         // set stream version
-        Property streamVersionProperty = new Property(AgentTransportConstants.TRANSPORT_MESSAGE_STREAM_VERSION);
+        Property streamVersionProperty = new Property(AgentTransportAdaptorConstants.TRANSPORT_MESSAGE_STREAM_VERSION);
         streamVersionProperty.setDisplayName(
-                resourceBundle.getString(AgentTransportConstants.TRANSPORT_MESSAGE_STREAM_VERSION));
+                resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_MESSAGE_STREAM_VERSION));
         streamVersionProperty.setRequired(true);
 
         propertyList.add(streamDefinitionProperty);
@@ -209,78 +204,61 @@ public final class AgentTransportType extends AbstractTransportAdaptor implement
 
         return propertyList;
 
-
-       // return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     /**
-     *
      * @return output adaptor configuration property list
      */
     @Override
-    public List<Property> getOutAdaptorConfig() {
-//        List<Property> propertyList = new ArrayList<Property>();
-//
-//        // set authenticator url of transport
-//        Property authenticatorIpProperty = new Property(AgentTransportConstants.
-//                TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL);
-//        authenticatorIpProperty.setDisplayName(
-//                resourceBundle.getString(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL));
-//        authenticatorIpProperty.setRequired(false);
-//        authenticatorIpProperty.setHint("Please Enter the Authentication url");
-//
-//        propertyList.add(authenticatorIpProperty);
-//
-//        return propertyList;
+    public List<Property> getOutputAdaptorProperties() {
 
         return null;
 
     }
 
     /**
-     *
-     * @return  output message configuration property list
+     * @return output message configuration property list
      */
     @Override
-    public List<Property> getOutMessageConfig() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public List<Property> getOutputMessageProperties() {
+        return null;
     }
 
-    public String subscribe(InputTransportMessageConfiguration inputTransportMessageConfiguration, TransportListener transportListener,
+    public String subscribe(InputTransportMessageConfiguration inputTransportMessageConfiguration,
+                            TransportAdaptorListener transportAdaptorListener,
                             InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
                             AxisConfiguration axisConfiguration)
             throws TransportEventProcessingException {
         String subscriptionId = UUID.randomUUID().toString();
 
-//        for(InputTransportMessageConfiguration inputTransportMessageConfigurationKey : inputTransportListenerMap.keySet())
-//        {
-
-        if (! inputTransportListenerMap.keySet().contains(inputTransportMessageConfiguration)) {
-            Map<String, TransportListener> map = new HashMap<String, TransportListener>();
-            map.put(subscriptionId, transportListener);
+        if (!inputTransportListenerMap.keySet().contains(inputTransportMessageConfiguration)) {
+            Map<String, TransportAdaptorListener> map = new HashMap<String, TransportAdaptorListener>();
+            map.put(subscriptionId, transportAdaptorListener);
             inputTransportListenerMap.put(inputTransportMessageConfiguration, map);
         } else {
-            inputTransportListenerMap.get(inputTransportMessageConfiguration).put(subscriptionId, transportListener);
+            inputTransportListenerMap.get(inputTransportMessageConfiguration).put(subscriptionId, transportAdaptorListener);
             StreamDefinition streamDefinition = inputStreamDefinitionMap.get(inputTransportMessageConfiguration);
             if (streamDefinition != null) {
-                transportListener.addEventDefinition(streamDefinition);
+                transportAdaptorListener.addEventDefinition(streamDefinition);
             }
 
         }
-//        }
+
         return subscriptionId;
     }
 
 
     /**
-     * @param outputTransportMessageConfiguration - topic name to publish messages
-     * @param message   - is and Object[]{Event, EventDefinition}
+     * @param outputTransportMessageConfiguration
+     *                - topic name to publish messages
+     * @param message - is and Object[]{Event, EventDefinition}
      * @param outputTransportAdaptorConfiguration
-     *                  - transport configuration to be used
+     *                - transport configuration to be used
      * @throws TransportEventProcessingException
      *
      */
-    public void publish(OutputTransportMessageConfiguration outputTransportMessageConfiguration, Object message,
+    public void publish(OutputTransportMessageConfiguration outputTransportMessageConfiguration,
+                        Object message,
                         OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration)
             throws TransportEventProcessingException {
         Integer tenantId = CarbonContext.getCurrentContext().getTenantId();
@@ -305,7 +283,6 @@ public final class AgentTransportType extends AbstractTransportAdaptor implement
             Event event = (Event) ((Object[]) message)[0];
             StreamDefinition streamDefinition = (StreamDefinition) ((Object[]) message)[1];
 
-            //String streamId = outputStreamIdMap.get(topicName + tenantId);
             if (!dataPublisher.isStreamDefinitionAdded(streamDefinition)) {
                 dataPublisher.addStreamDefinition(streamDefinition);
 
@@ -322,55 +299,48 @@ public final class AgentTransportType extends AbstractTransportAdaptor implement
 
     }
 
-    private AsyncDataPublisher createDataPublisher(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration) {
+    private AsyncDataPublisher createDataPublisher(
+            OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration) {
         if (agent == null) {
             agent = AgentTransportAdaptorServiceValueHolder.getAgent();
         }
         AsyncDataPublisher dataPublisher;
         Map<String, String> adaptorCommonProperties = outputTransportAdaptorConfiguration.getCommonAdaptorProperties();
-//
-//        Map<String, String> adaptorCommonProperties = outputTransportAdaptorConfiguration.getCommonAdaptorProperties();
-//
-//        Map<String, String> adaptorCommonProperties = outputTransportAdaptorConfiguration.getCommonAdaptorProperties();
 
-        if (null != adaptorCommonProperties.get(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL) && adaptorCommonProperties.get(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL).length() > 0) {
-            dataPublisher = new AsyncDataPublisher(adaptorCommonProperties.get(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL),
-                    adaptorCommonProperties.get(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL),
-                    adaptorCommonProperties.get(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_USER_NAME),
-                    adaptorCommonProperties.get(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_PASSWORD),
-                    agent);
+        if (null != adaptorCommonProperties.get(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL) && adaptorCommonProperties.get(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL).length() > 0) {
+            dataPublisher = new AsyncDataPublisher(adaptorCommonProperties.get(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL),
+                                                   adaptorCommonProperties.get(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL),
+                                                   adaptorCommonProperties.get(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_USER_NAME),
+                                                   adaptorCommonProperties.get(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_PASSWORD),
+                                                   agent);
         } else {
-            dataPublisher = new AsyncDataPublisher(adaptorCommonProperties.get(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL),
-                    adaptorCommonProperties.get(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_USER_NAME),
-                    adaptorCommonProperties.get(AgentTransportConstants.TRANSPORT_CONF_AGENT_PROP_PASSWORD),
-                    agent);
+            dataPublisher = new AsyncDataPublisher(adaptorCommonProperties.get(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL),
+                                                   adaptorCommonProperties.get(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_USER_NAME),
+                                                   adaptorCommonProperties.get(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_PASSWORD),
+                                                   agent);
         }
         return dataPublisher;
     }
 
-    private void throwTransportEventProcessingException(TransportAdaptorConfiguration transportAdaptorConfiguration,
-                                                        Exception e)
-            throws TransportEventProcessingException {
-        throw new TransportEventProcessingException(
-                "Cannot create DataPublisher for the transport configuration:" + transportAdaptorConfiguration.getName(), e);
-    }
 
-    private void publishEvent(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration,
-                              AsyncDataPublisher dataPublisher,
-                              Event event, StreamDefinition streamDefinition)
+    private void publishEvent(
+            OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration,
+            AsyncDataPublisher dataPublisher,
+            Event event, StreamDefinition streamDefinition)
             throws TransportEventProcessingException {
         try {
             dataPublisher.publish(streamDefinition.getName(), streamDefinition.getVersion(), event);
         } catch (AgentException ex) {
             throw new TransportEventProcessingException(
                     "Cannot publish data via DataPublisher for the transport configuration:" +
-                            outputTransportAdaptorConfiguration.getName() + " for the  event " + event, ex);
+                    outputTransportAdaptorConfiguration.getName() + " for the  event " + event, ex);
         }
 
     }
 
     @Override
-    public void testConnection(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration)
+    public void testConnection(
+            OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration)
             throws TransportEventProcessingException {
         // no test
     }
@@ -379,7 +349,7 @@ public final class AgentTransportType extends AbstractTransportAdaptor implement
                             InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
                             AxisConfiguration axisConfiguration, String subscriptionId)
             throws TransportEventProcessingException {
-        Map<String, TransportListener> map = inputTransportListenerMap.get(inputTransportMessageConfiguration);
+        Map<String, TransportAdaptorListener> map = inputTransportListenerMap.get(inputTransportMessageConfiguration);
         if (map != null) {
             map.remove(subscriptionId);
         }
@@ -393,14 +363,14 @@ public final class AgentTransportType extends AbstractTransportAdaptor implement
         @Override
         public void removeStream(StreamDefinition streamDefinition, Credentials credentials) {
             inputStreamDefinitionMap.remove(createTopic(streamDefinition));
-            Map<String, TransportListener> transportListeners = inputTransportListenerMap.get(createTopic(streamDefinition));
+            Map<String, TransportAdaptorListener> transportListeners = inputTransportListenerMap.get(createTopic(streamDefinition));
             if (transportListeners != null) {
-                for (TransportListener transportListener : transportListeners.values()) {
+                for (TransportAdaptorListener transportAdaptorListener : transportListeners.values()) {
                     try {
-                        transportListener.removeEventDefinition(streamDefinition);
+                        transportAdaptorListener.removeEventDefinition(streamDefinition);
                     } catch (TransportEventProcessingException e) {
-                        log.error("Cannot remove Stream Definition from a transportListener subscribed to " +
-                                streamDefinition.getStreamId(), e);
+                        log.error("Cannot remove Stream Definition from a transportAdaptorListener subscribed to " +
+                                  streamDefinition.getStreamId(), e);
                     }
 
                 }
@@ -413,20 +383,20 @@ public final class AgentTransportType extends AbstractTransportAdaptor implement
             InputTransportMessageConfiguration inputTransportMessageConfiguration = createTopic(streamDefinition);
 
             inputStreamDefinitionMap.put(inputTransportMessageConfiguration, streamDefinition);
-            Map<String, TransportListener> transportListeners = inputTransportListenerMap.get(inputTransportMessageConfiguration);
+            Map<String, TransportAdaptorListener> transportListeners = inputTransportListenerMap.get(inputTransportMessageConfiguration);
             if (transportListeners == null) {
-                transportListeners = new HashMap<String, TransportListener>();
+                transportListeners = new HashMap<String, TransportAdaptorListener>();
 
                 inputTransportListenerMap.put(inputTransportMessageConfiguration, transportListeners);
 
             }
 
-            for (TransportListener transportListener : transportListeners.values()) {
+            for (TransportAdaptorListener transportAdaptorListener : transportListeners.values()) {
                 try {
-                    transportListener.addEventDefinition(streamDefinition);
+                    transportAdaptorListener.addEventDefinition(streamDefinition);
                 } catch (TransportEventProcessingException e) {
-                    log.error("Cannot send Stream Definition to a transportListener subscribed to " +
-                            streamDefinition.getStreamId(), e);
+                    log.error("Cannot send Stream Definition to a transportAdaptorListener subscribed to " +
+                              streamDefinition.getStreamId(), e);
                 }
 
             }
@@ -436,9 +406,9 @@ public final class AgentTransportType extends AbstractTransportAdaptor implement
         private InputTransportMessageConfiguration createTopic(StreamDefinition streamDefinition) {
 
             InputTransportMessageConfiguration inputTransportMessageConfiguration = new InputTransportMessageConfiguration();
-            Map<String,String> inputMessageProperties = new HashMap<String, String>();
-            inputMessageProperties.put("streamName",streamDefinition.getName());
-            inputMessageProperties.put("version",streamDefinition.getVersion());
+            Map<String, String> inputMessageProperties = new HashMap<String, String>();
+            inputMessageProperties.put("streamName", streamDefinition.getName());
+            inputMessageProperties.put("version", streamDefinition.getVersion());
             inputTransportMessageConfiguration.setInputMessageProperties(inputMessageProperties);
 
             return inputTransportMessageConfiguration;
@@ -447,17 +417,17 @@ public final class AgentTransportType extends AbstractTransportAdaptor implement
         @Override
         public void receive(List<Event> events, Credentials credentials) {
             for (Event event : events) {
-                Map<String, TransportListener> transportListeners = streamIdTransportListenerMap.get(event.getStreamId());
+                Map<String, TransportAdaptorListener> transportListeners = streamIdTransportListenerMap.get(event.getStreamId());
                 if (transportListeners == null) {
                     try {
                         definedStream(AgentTransportAdaptorServiceValueHolder.getDataBridgeSubscriberService().getStreamDefinition(credentials, event.getStreamId()), credentials);
                     } catch (StreamDefinitionNotFoundException e) {
                         log.error("No Stream definition store found for the event " +
-                                event.getStreamId(), e);
+                                  event.getStreamId(), e);
                         return;
                     } catch (StreamDefinitionStoreException e) {
                         log.error("No Stream definition store found when checking stream definition for " +
-                                event.getStreamId(), e);
+                                  event.getStreamId(), e);
                         return;
                     }
                     transportListeners = streamIdTransportListenerMap.get(event.getStreamId());
@@ -466,12 +436,12 @@ public final class AgentTransportType extends AbstractTransportAdaptor implement
                         return;
                     }
                 }
-                for (TransportListener transportListener : transportListeners.values()) {
+                for (TransportAdaptorListener transportAdaptorListener : transportListeners.values()) {
                     try {
-                        transportListener.onEvent(event);
+                        transportAdaptorListener.onEvent(event);
                     } catch (TransportEventProcessingException e) {
-                        log.error("Cannot send event to a transportListener subscribed to " +
-                                event.getStreamId(), e);
+                        log.error("Cannot send event to a transportAdaptorListener subscribed to " +
+                                  event.getStreamId(), e);
                     }
 
                 }

@@ -17,18 +17,18 @@ package org.wso2.carbon.transport.test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.transport.adaptor.core.TransportListener;
+import org.wso2.carbon.transport.adaptor.core.TransportAdaptorListener;
 import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
 
 /**
  * Topic subscription call back handler implementation
  */
-public class TestTransportAdaptorListener implements TransportListener {
-    private static final Log log = LogFactory.getLog(TestTransportAdaptorListener.class);
+public class TestTransportAdaptorAdaptorListener implements TransportAdaptorListener {
+    private static final Log log = LogFactory.getLog(TestTransportAdaptorAdaptorListener.class);
     private String transportAdaptorName;
     private String topic;
 
-    public TestTransportAdaptorListener(String transportAdaptorName, String topic) {
+    public TestTransportAdaptorAdaptorListener(String transportAdaptorName, String topic) {
         this.transportAdaptorName = transportAdaptorName;
         this.topic = topic;
     }

@@ -25,11 +25,10 @@ import java.util.List;
 public class TransportAdaptorDto {
 
 
-
     /**
      * logical name of this type
      */
-    private String name;
+    private String transportAdaptorTypeName;
 
     /**
      * Adaptor type that supports
@@ -37,11 +36,15 @@ public class TransportAdaptorDto {
 
     public enum TransportAdaptorType {
         IN, OUT, INOUT
-    };
+    }
 
-    public enum MessageType{
-        XML,TUPLE, MAP, TEXT
-    };
+    ;
+
+    public enum MessageType {
+        XML, TUPLE, MAP, TEXT
+    }
+
+    ;
 
     /**
      * Input Message types supported by the adaptor
@@ -60,7 +63,6 @@ public class TransportAdaptorDto {
 
 
     /**
-
      * Property Lists
      */
     private List<Property> adaptorOutPropertyList;
@@ -104,12 +106,12 @@ public class TransportAdaptorDto {
         this.adaptorCommonPropertyList = adaptorCommonPropertyList;
     }
 
-    public String getName() {
-        return name;
+    public String getTransportAdaptorTypeName() {
+        return transportAdaptorTypeName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTransportAdaptorTypeName(String transportAdaptorTypeName) {
+        this.transportAdaptorTypeName = transportAdaptorTypeName;
     }
 
     public List<MessageType> getSupportedInputMessageType() {

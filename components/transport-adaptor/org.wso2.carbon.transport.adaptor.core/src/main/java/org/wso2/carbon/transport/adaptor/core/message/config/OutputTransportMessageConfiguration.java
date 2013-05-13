@@ -1,4 +1,4 @@
-package org.wso2.carbon.transport.adaptor.core.message.config;/*
+/*
  * Copyright 2004,2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,16 +14,19 @@ package org.wso2.carbon.transport.adaptor.core.message.config;/*
  * limitations under the License.
  */
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class OutputTransportMessageConfiguration{
+package org.wso2.carbon.transport.adaptor.core.message.config;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class OutputTransportMessageConfiguration {
 
 
     /**
      * logical name use to identify the transport
      */
-    private String transportName;
+    private String transportAdaptorName;
 
 
     /**
@@ -32,10 +35,8 @@ public class OutputTransportMessageConfiguration{
     private Map<String, String> outputMessageProperties;
 
 
-
-
     public OutputTransportMessageConfiguration() {
-        this.outputMessageProperties = new ConcurrentHashMap<String, String>();
+        this.outputMessageProperties = new HashMap<String, String>();
     }
 
 
@@ -43,12 +44,12 @@ public class OutputTransportMessageConfiguration{
         this.outputMessageProperties.put(name, value);
     }
 
-    public String getTransportName() {
-        return this.transportName;
+    public String getTransportAdaptorName() {
+        return this.transportAdaptorName;
     }
 
-    public void setTransportName(String transportName) {
-        this.transportName = transportName;
+    public void setTransportAdaptorName(String transportAdaptorName) {
+        this.transportAdaptorName = transportAdaptorName;
     }
 
     public Map<String, String> getOutputMessageProperties() {
@@ -61,22 +62,28 @@ public class OutputTransportMessageConfiguration{
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof OutputTransportMessageConfiguration)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof OutputTransportMessageConfiguration)) {
+            return false;
+        }
 
         OutputTransportMessageConfiguration that = (OutputTransportMessageConfiguration) o;
 
-        if (outputMessageProperties != null ? !outputMessageProperties.equals(that.outputMessageProperties) : that.outputMessageProperties != null)
+        if (outputMessageProperties != null ? !outputMessageProperties.equals(that.outputMessageProperties) : that.outputMessageProperties != null) {
             return false;
-        if (transportName != null ? !transportName.equals(that.transportName) : that.transportName != null)
+        }
+        if (transportAdaptorName != null ? !transportAdaptorName.equals(that.transportAdaptorName) : that.transportAdaptorName != null) {
             return false;
+        }
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = transportName != null ? transportName.hashCode() : 0;
+        int result = transportAdaptorName != null ? transportAdaptorName.hashCode() : 0;
         result = 31 * result + (outputMessageProperties != null ? outputMessageProperties.hashCode() : 0);
         return result;
     }

@@ -22,8 +22,9 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfiguration;
+import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
-import org.wso2.carbon.transport.test.TestTransportAdaptorListener;
+import org.wso2.carbon.transport.test.TestTransportAdaptorAdaptorListener;
 import org.wso2.carbon.transport.test.util.TransportAdaptorHolder;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
@@ -43,7 +44,6 @@ public class TransportServiceTesterDS {
 
     protected void activate(ComponentContext context) {
 
-        System.out.println("********************** Test module deploying*********************************");
 
         TransportAdaptorService transportAdaptorService = TransportAdaptorHolder.getInstance().getTransportAdaptorService();
 
@@ -61,8 +61,8 @@ public class TransportServiceTesterDS {
         inputTransportMessageConfiguration.addInputMessageProperty("version", "1.2.0");
 
         try {
-            transportAdaptorService.subscribe(inputTransportAdaptorConfiguration, inputTransportMessageConfiguration, new TestTransportAdaptorListener("agent", "org.wso2.phone.retail.store:1.2.0"), TransportAdaptorHolder.getInstance().getConfigurationContextService().getServerConfigContext().getAxisConfiguration());
-        } catch (Throwable e) {
+            transportAdaptorService.subscribe(inputTransportAdaptorConfiguration, inputTransportMessageConfiguration, new TestTransportAdaptorAdaptorListener("agent", "org.wso2.phone.retail.store:1.2.0"), TransportAdaptorHolder.getInstance().getConfigurationContextService().getServerConfigContext().getAxisConfiguration());
+        } catch (TransportEventProcessingException e) {
             log.error("Error occurred when subscribing " + e);
         }
 

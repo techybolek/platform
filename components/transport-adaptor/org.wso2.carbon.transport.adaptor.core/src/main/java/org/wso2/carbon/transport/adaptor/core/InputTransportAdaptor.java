@@ -1,4 +1,4 @@
-package org.wso2.carbon.transport.adaptor.core;/*
+/*
  * Copyright 2004,2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +14,13 @@ package org.wso2.carbon.transport.adaptor.core;/*
  * limitations under the License.
  */
 
+
+package org.wso2.carbon.transport.adaptor.core;
+
 import org.apache.axis2.engine.AxisConfiguration;
 import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
-import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
+import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 
 import java.util.List;
 
@@ -26,34 +29,36 @@ public interface InputTransportAdaptor {
     /**
      * @return list of input adaptor configuration properties
      */
-    List<Property> getInAdaptorConfig();
+    List<Property> getInputAdaptorProperties();
 
     /**
      * @return list of input message configuration properties
      */
-    List<Property> getInMessageConfig();
+    List<Property> getInputMessageProperties();
 
     /**
      * subscribe to the connection specified in the transport configuration.
      *
-     * @param inputTransportMessageConfiguration         - topic name to subscribe
-     * @param transportListener - transport type will invoke this when it receive events
+     * @param inputTransportMessageConfiguration
+     *                                 - topic name to subscribe
+     * @param transportAdaptorListener - transport type will invoke this when it receive events
      * @param inputTransportAdaptorConfiguration
-     *                          - transport adaptor configuration details
+     *                                 - transport adaptor configuration details
      * @throws org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException
      *          - if can not subscribe to the transport
      */
     String subscribe(InputTransportMessageConfiguration inputTransportMessageConfiguration,
-                     TransportListener transportListener,
+                     TransportAdaptorListener transportAdaptorListener,
                      InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
                      AxisConfiguration axisConfiguration) throws TransportEventProcessingException;
 
     /**
      * this method unsubscribes the subscription from the transport.
      *
-     * @param inputTransportMessageConfiguration  - topic name
-     * @param inputTransportAdaptorConfiguration  - transport adaptor configuration
-     *
+     * @param inputTransportMessageConfiguration
+     *         - topic name
+     * @param inputTransportAdaptorConfiguration
+     *         - transport adaptor configuration
      * @throws TransportEventProcessingException
      *
      */

@@ -1,4 +1,4 @@
-package org.wso2.carbon.transport.adaptor.core;/*
+/*
  * Copyright 2004,2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,16 @@ package org.wso2.carbon.transport.adaptor.core;/*
  * limitations under the License.
  */
 
+package org.wso2.carbon.transport.adaptor.core;
+
+
 import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
 
 /**
  * listener class to receive the events from the transport proxy
  */
 
-public interface TransportListener {
+public interface TransportAdaptorListener {
 
 
     /**

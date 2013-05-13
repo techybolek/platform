@@ -18,12 +18,12 @@ package org.wso2.carbon.transport.adaptor.agent;
 
 
 import org.wso2.carbon.transport.adaptor.core.AbstractTransportAdaptor;
-import org.wso2.carbon.transport.adaptor.core.TransportFactory;
+import org.wso2.carbon.transport.adaptor.core.TransportAdaptorFactory;
 
 
-public class AgentTransportFactory implements TransportFactory {
+public class AgentTransportAdaptorFactory implements TransportAdaptorFactory {
 
-    public AbstractTransportAdaptor getTransport() {
-        return AgentTransportType.getInstance();
+    public AbstractTransportAdaptor getTransportAdaptor() {
+        return AgentTransportAdaptorType.getInstance();
     }
 }

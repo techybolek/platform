@@ -1,4 +1,4 @@
-package org.wso2.carbon.transport.adaptor.core;/*
+/*
  * Copyright 2004,2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,21 +14,23 @@ package org.wso2.carbon.transport.adaptor.core;/*
  * limitations under the License.
  */
 
-import org.wso2.carbon.transport.adaptor.core.exception.TransportConfigException;
+package org.wso2.carbon.transport.adaptor.core;
+
+import org.wso2.carbon.transport.adaptor.core.exception.TransportAdaptorConfigException;
 
 public interface TransportAdaptorRegistrationService {
 
     /**
-     *
      * @param className transport adaptor factory classname
-     * @throws TransportConfigException
+     * @throws org.wso2.carbon.transport.adaptor.core.exception.TransportAdaptorConfigException
+     *
      */
-    public void registerTransportAdaptor(String className) throws TransportConfigException;
+    void registerTransportAdaptor(String className) throws TransportAdaptorConfigException;
 
     /**
-     *
      * @param className transport adaptor factory classname
-     * @throws TransportConfigException
+     * @throws org.wso2.carbon.transport.adaptor.core.exception.TransportAdaptorConfigException
+     *
      */
-    public void unRegisterTransportAdaptor(String className) throws TransportConfigException;
+    void unRegisterTransportAdaptor(String className) throws TransportAdaptorConfigException;
 }

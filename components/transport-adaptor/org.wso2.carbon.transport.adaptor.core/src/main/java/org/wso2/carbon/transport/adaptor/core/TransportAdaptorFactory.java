@@ -1,4 +1,4 @@
-package org.wso2.carbon.transport.adaptor.agent.util;/*
+/*
  * Copyright 2004,2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +14,13 @@ package org.wso2.carbon.transport.adaptor.agent.util;/*
  * limitations under the License.
  */
 
-public interface AgentTransportConstants {
+package org.wso2.carbon.transport.adaptor.core;
 
-    String TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL = "receiverURL";
-    String TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL = "authenticatorURL";
-    String TRANSPORT_CONF_AGENT_PROP_USER_NAME = "username";
-    String TRANSPORT_CONF_AGENT_PROP_PASSWORD = "password";
-    String TRANSPORT_TYPE_AGENT = "agent";
+public interface TransportAdaptorFactory {
 
-    String TRANSPORT_MESSAGE_STREAM_DEFINITION ="stream";
-    String TRANSPORT_MESSAGE_STREAM_VERSION ="version";
+    /**
+     * @return transport adaptor object
+     */
+    AbstractTransportAdaptor getTransportAdaptor();
+
 }

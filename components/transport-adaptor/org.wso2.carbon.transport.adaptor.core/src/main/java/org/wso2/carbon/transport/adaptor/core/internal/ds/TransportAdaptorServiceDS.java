@@ -25,13 +25,13 @@ import org.wso2.carbon.transport.adaptor.core.internal.CarbonTransportAdaptorReg
 import org.wso2.carbon.transport.adaptor.core.internal.CarbonTransportAdaptorService;
 
 /**
- * @scr.component name="transportservice.component" immediate="true"
+ * @scr.component name="transport.adaptor.service.component" immediate="true"
  */
 
 
-public class TransportServiceDS {
+public class TransportAdaptorServiceDS {
 
-    private static final Log log = LogFactory.getLog(TransportServiceDS.class);
+    private static final Log log = LogFactory.getLog(TransportAdaptorServiceDS.class);
 
     /**
      * initialize the cep service here.
@@ -42,12 +42,12 @@ public class TransportServiceDS {
 
         try {
             TransportAdaptorRegistrationService transportAdaptorRegistrationService = new CarbonTransportAdaptorRegistrationService();
-            TransportServiceValueHolder.registerTransportAdaptorRegistrationService(transportAdaptorRegistrationService);
+            TransportAdaptorServiceValueHolder.registerTransportAdaptorRegistrationService(transportAdaptorRegistrationService);
             context.getBundleContext().registerService(TransportAdaptorRegistrationService.class.getName(), transportAdaptorRegistrationService, null);
 
 
             TransportAdaptorService transportAdaptorService = new CarbonTransportAdaptorService();
-            TransportServiceValueHolder.registerCarbonTransportService(transportAdaptorService);
+            TransportAdaptorServiceValueHolder.registerCarbonTransportService(transportAdaptorService);
             context.getBundleContext().registerService(TransportAdaptorService.class.getName(), transportAdaptorService, null);
 
             log.info("Successfully deployed the transport adaptor service");
