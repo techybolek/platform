@@ -21,12 +21,11 @@
                 <inherited>false</inherited>
                 <version>2.12.4</version>
                 <configuration>
-                    <!-- <argLine>-Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=512m -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5006</argLine>-->
+                    <!--argLine>-Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=512m -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5006</argLine-->
                     <argLine>-Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=512m</argLine>
-
                     <suiteXmlFiles>
-                        <!--   <suiteXmlFile>src/test/resources/testng-server-mgt.xml</suiteXmlFile>-->
-                        <!--  <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>-->
+                       <!--<suiteXmlFile>src/test/resources/testng-server-mgt.xml</suiteXmlFile>-->
+                          <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
 
                     <systemProperties>
@@ -270,7 +269,7 @@
         </dependency>
     </dependencies>
     <properties>
-        <clarity.version>4.0.8</clarity.version>
+        <clarity.version>4.2.0-SNAPSHOT</clarity.version>
         <is.version>4.5.0-SNAPSHOT</is.version>
         <emma.version>2.1.5320</emma.version>
     </properties>

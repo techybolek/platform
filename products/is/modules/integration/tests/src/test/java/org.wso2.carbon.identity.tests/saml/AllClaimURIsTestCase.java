@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
-import org.wso2.carbon.automation.api.clients.identity.sso.saml.SAMLSSOConfigServiceClient;
+//import org.wso2.carbon.automation.api.clients.identity.sso.saml.SAMLSSOConfigServiceClient;
 import org.wso2.carbon.automation.core.utils.UserInfo;
 import org.wso2.carbon.automation.core.utils.UserListCsvReader;
 import org.wso2.carbon.automation.core.utils.environmentutils.EnvironmentBuilder;
@@ -48,10 +48,10 @@ public class AllClaimURIsTestCase {
     @Test(groups = "wso2.is", description = "Get all claims")
     public void testAllClaims()
             throws RemoteException, IdentitySAMLSSOConfigServiceIdentityException {
-        SAMLSSOConfigServiceClient ssoConfigurationClient =
-                new SAMLSSOConfigServiceClient(identityServer.getBackEndUrl(),
-                                               identityServer.getSessionCookie());
-        ssoConfigurationClient.getClaimURIs();
+//        SAMLSSOConfigServiceClient ssoConfigurationClient =
+//                new SAMLSSOConfigServiceClient(identityServer.getBackEndUrl(),
+//                                               identityServer.getSessionCookie());
+//        ssoConfigurationClient.getClaimURIs();
     }
 
 }
