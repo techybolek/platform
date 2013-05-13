@@ -25,7 +25,6 @@ public class TransportAdaptorManagerValueHolder {
             CarbonTransportAdaptorManagerService carbonTransportAdaptorManagerService) {
 
         TransportAdaptorManagerValueHolder.carbonTransportAdaptorManagerService = carbonTransportAdaptorManagerService;
-
     }
 
     public static CarbonTransportAdaptorManagerService getCarbonTransportAdaptorManagerService() {

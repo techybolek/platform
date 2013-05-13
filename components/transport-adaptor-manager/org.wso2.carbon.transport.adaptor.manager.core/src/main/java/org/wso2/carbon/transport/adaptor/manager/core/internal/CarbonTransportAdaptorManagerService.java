@@ -62,18 +62,17 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
      * transport configuration map to keep the transport configuration details
      */
 
-    private Map<Integer, Map<String, TransportAdaptorConfiguration>> tenantSpecificTransportConfigurationMap;
-    private Map<Integer, Map<String, TransportAdaptorInfo>> tenantSpecificInputTransportInfoMap;
-    private Map<Integer, Map<String, TransportAdaptorInfo>> tenantSpecificOutputTransportInfoMap;
-
+    private Map<Integer, Map<String, TransportAdaptorConfiguration>> tenantSpecificTransportAdaptorConfigurationMap;
+    private Map<Integer, Map<String, TransportAdaptorInfo>> tenantSpecificInputTransportAdaptorInfoMap;
+    private Map<Integer, Map<String, TransportAdaptorInfo>> tenantSpecificOutputTransportAdaptorInfoMap;
     private Map<Integer, List<TransportAdaptorFile>> transportAdaptorFileMap;
 
 
     public CarbonTransportAdaptorManagerService() {
-        tenantSpecificTransportConfigurationMap = new ConcurrentHashMap<Integer, Map<String, TransportAdaptorConfiguration>>();
+        tenantSpecificTransportAdaptorConfigurationMap = new ConcurrentHashMap<Integer, Map<String, TransportAdaptorConfiguration>>();
         transportAdaptorFileMap = new ConcurrentHashMap<Integer, List<TransportAdaptorFile>>();
-        tenantSpecificInputTransportInfoMap = new HashMap<Integer, Map<String, TransportAdaptorInfo>>();
-        tenantSpecificOutputTransportInfoMap = new HashMap<Integer, Map<String, TransportAdaptorInfo>>();
+        tenantSpecificInputTransportAdaptorInfoMap = new HashMap<Integer, Map<String, TransportAdaptorInfo>>();
+        tenantSpecificOutputTransportAdaptorInfoMap = new HashMap<Integer, Map<String, TransportAdaptorInfo>>();
     }
 
     public void addFileConfiguration(int tenantId, String transportAdaptorName, String filePath,
@@ -83,7 +82,6 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
 
         if (transportAdaptorFileList == null) {
             transportAdaptorFileList = new ArrayList<TransportAdaptorFile>();
-
             TransportAdaptorFile transportAdaptorFile = new TransportAdaptorFile();
             transportAdaptorFile.setFilePath(filePath);
             transportAdaptorFile.setTransportAdaptorName(transportAdaptorName);
@@ -100,7 +98,6 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
             transportAdaptorFileMap.put(tenantId, transportAdaptorFileList);
 
         }
-
     }
 
     public void editTransportAdaptorConfigurationFile(String transportAdaptorConfiguration,
@@ -112,36 +109,54 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
         try {
             OMElement omElement = AXIOMUtil.stringToOM(transportAdaptorConfiguration);
             omElement.toString();
-            if (TransportAdaptorConfigurationHelper.validateTransportAdaptorConfiguration(tenantId, TransportAdaptorConfigurationHelper.fromOM(omElement))) {
-                String pathInFileSystem = getFilePath(tenantId, transportAdaptorName);
-                removeTransportAdaptorConfiguration(transportAdaptorName, axisConfiguration);
-                TransportAdaptorConfigurationFilesystemInvoker.saveConfigurationToFileSystem(omElement, transportAdaptorName, pathInFileSystem, axisConfiguration);
+            TransportAdaptorConfiguration transportAdaptorConfigurationObject = TransportAdaptorConfigurationHelper.fromOM(omElement);
+            if(! transportAdaptorConfigurationObject.getName().equals(transportAdaptorName)) {
+                if(checkAdaptorValidity(tenantId,transportAdaptorConfigurationObject.getName())){
+                    validateTransportAdaptorConfiguration(tenantId,transportAdaptorName,axisConfiguration,omElement);
+                }
+                else {
+                    throw new TransportAdaptorManagerConfigurationException("There is a transport adaptor already registered with the same name");
+                }
+            } else{
+                validateTransportAdaptorConfiguration(tenantId,transportAdaptorName,axisConfiguration,omElement);
             }
+
         } catch (XMLStreamException e) {
             log.error("Error while creating the xml object");
-            throw new TransportAdaptorManagerConfigurationException("Not a valid xml object" ,e);
+            throw new TransportAdaptorManagerConfigurationException("Not a valid xml object, " + e.getMessage());
         }
     }
 
-    public void editNotDeployedTransportAdaptorConfigurationFile(String transportAdaptorConfiguration,
-                                                                 String filePath,
-                                                                 AxisConfiguration axisConfiguration)
-            throws TransportAdaptorManagerConfigurationException{
+    private void validateTransportAdaptorConfiguration(int tenantId,String transportAdaptorName,AxisConfiguration axisConfiguration , OMElement omElement) throws TransportAdaptorManagerConfigurationException{
+        if (TransportAdaptorConfigurationHelper.validateTransportAdaptorConfiguration(TransportAdaptorConfigurationHelper.fromOM(omElement))) {
+            String pathInFileSystem = getFilePath(tenantId, transportAdaptorName);
+            removeTransportAdaptorConfiguration(transportAdaptorName, axisConfiguration);
+            TransportAdaptorConfigurationFilesystemInvoker.saveConfigurationToFileSystem(omElement, transportAdaptorName, pathInFileSystem, axisConfiguration);
+        }
+    }
+
+    public void editNotDeployedTransportAdaptorConfigurationFile(
+            String transportAdaptorConfiguration,
+            String filePath,
+            AxisConfiguration axisConfiguration)
+            throws TransportAdaptorManagerConfigurationException {
         try {
             OMElement omElement = AXIOMUtil.stringToOM(transportAdaptorConfiguration);
             omElement.toString();
-
             int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
-            if (TransportAdaptorConfigurationHelper.validateTransportAdaptorConfiguration(tenantId, TransportAdaptorConfigurationHelper.fromOM(omElement))) {
-                removeTransportAdaptorConfigurationFile(filePath,axisConfiguration);
-                TransportAdaptorConfigurationFilesystemInvoker.saveConfigurationToFileSystem(omElement,TransportAdaptorConfigurationHelper.fromOM(omElement).getName(),filePath,axisConfiguration);
+            TransportAdaptorConfiguration transportAdaptorConfigurationObject = TransportAdaptorConfigurationHelper.fromOM(omElement);
+            if (checkAdaptorValidity(tenantId, transportAdaptorConfigurationObject.getName())) {
+                if (TransportAdaptorConfigurationHelper.validateTransportAdaptorConfiguration(transportAdaptorConfigurationObject)) {
+                    removeTransportAdaptorConfigurationFile(filePath, axisConfiguration);
+                    TransportAdaptorConfigurationFilesystemInvoker.saveConfigurationToFileSystem(omElement, TransportAdaptorConfigurationHelper.fromOM(omElement).getName(), filePath, axisConfiguration);
+                }
+            } else {
+                throw new TransportAdaptorManagerConfigurationException("There is a transport adaptor with the same name");
             }
-        }
-        catch (XMLStreamException e) {
+        } catch (XMLStreamException e) {
             log.error("Error while creating the xml object");
-            throw new TransportAdaptorManagerConfigurationException("Not a valid xml object" ,e);
+            throw new TransportAdaptorManagerConfigurationException("Not a valid xml object "+ e.getMessage());
         }
-
     }
 
 
@@ -154,7 +169,7 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
         OMElement omElement = TransportAdaptorConfigurationHelper.transportAdaptorConfigurationToOM(transportAdaptorConfiguration);
         int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
 
-        if (TransportAdaptorConfigurationHelper.validateTransportAdaptorConfiguration(tenantId, TransportAdaptorConfigurationHelper.fromOM(omElement))) {
+        if (TransportAdaptorConfigurationHelper.validateTransportAdaptorConfiguration(TransportAdaptorConfigurationHelper.fromOM(omElement))) {
             File directory = new File(axisConfiguration.getRepository().getPath());
             if (!directory.exists()) {
                 if (directory.mkdir()) {
@@ -167,7 +182,6 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
                     throw new TransportAdaptorManagerConfigurationException("Cannot create directory " + TransportAdaptorManagerConstants.TM_ELE_DIRECTORY + " to add tenant specific transport adaptor :" + transportName);
                 }
             }
-
             String pathInFileSystem = directory.getAbsolutePath() + File.separator + transportName + ".xml";
             TransportAdaptorConfigurationFilesystemInvoker.saveConfigurationToFileSystem(omElement, transportName, pathInFileSystem, axisConfiguration);
         }
@@ -177,8 +191,8 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
     public void removeTransportAdaptorConfiguration(String transportAdaptorName,
                                                     AxisConfiguration axisConfiguration)
             throws TransportAdaptorManagerConfigurationException {
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
 
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
         List<TransportAdaptorFile> transportAdaptorFileList = transportAdaptorFileMap.get(tenantId);
         Iterator<TransportAdaptorFile> transportAdaptorFileIterator = transportAdaptorFileList.iterator();
         while (transportAdaptorFileIterator.hasNext()) {
@@ -187,53 +201,29 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
             if ((transportAdaptorFile.getTransportAdaptorName().equals(transportAdaptorName))) {
 
                 String filePath = transportAdaptorFile.getFilePath();
-                File file = new File(filePath);
-                if (file.exists()) {
-                    boolean fileDeleted = file.delete();
-                    if (!fileDeleted) {
-                        log.error("Could not delete " + filePath);
-                    } else {
-                        log.info(filePath + " is deleted from the file system");
-                        TransportAdaptorConfigurationFilesystemInvoker.executeUnDeploy(filePath, axisConfiguration);
-
-                    }
-                    break;
-                }
-
+                TransportAdaptorConfigurationFilesystemInvoker.deleteTransportAdaptorFile(filePath, axisConfiguration);
+                break;
             }
         }
-
     }
 
     public void removeTransportAdaptorConfigurationFile(String filePath,
                                                         AxisConfiguration axisConfiguration)
             throws TransportAdaptorManagerConfigurationException {
 
-        File file = new File(filePath);
-        if (file.exists()) {
-            boolean fileDeleted = file.delete();
-            if (!fileDeleted) {
-                log.error("Could not delete " + filePath);
-            } else {
-
-                log.info(filePath + " is deleted from the file system");
-                TransportAdaptorConfigurationFilesystemInvoker.executeUnDeploy(filePath, axisConfiguration);
-            }
-        }
-
+        TransportAdaptorConfigurationFilesystemInvoker.deleteTransportAdaptorFile(filePath, axisConfiguration);
     }
 
     @Override
     public String getTransportAdaptorConfigurationFile(String transportAdaptorName,
                                                        AxisConfiguration axisConfiguration)
             throws TransportAdaptorManagerConfigurationException {
-        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
 
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
         OMElement transportAdaptorOMElement = null;
         List<TransportAdaptorFile> transportAdaptorFileList = transportAdaptorFileMap.get(tenantId);
         Iterator<TransportAdaptorFile> transportAdaptorFileIterator = transportAdaptorFileList.iterator();
         while (transportAdaptorFileIterator.hasNext()) {
-
             TransportAdaptorFile transportAdaptorFile = transportAdaptorFileIterator.next();
             if ((transportAdaptorFile.getTransportAdaptorName().equals(transportAdaptorName))) {
 
@@ -241,9 +231,7 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
                 File file = new File(transportAdaptorFile.getFilePath());
                 if (file.exists()) {
                     transportAdaptorOMElement = getTransportOMElement(filePath, file);
-
                 }
-
             }
         }
         return transportAdaptorOMElement.toString();
@@ -261,11 +249,18 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
                 stringBuffer.append(line).append("\n");
             }
         } catch (FileNotFoundException e) {
-            throw new TransportAdaptorManagerConfigurationException("Transport Adaptor file not found",e);
+            throw new TransportAdaptorManagerConfigurationException("Transport Adaptor file not found", e);
         } catch (IOException e) {
-            throw new TransportAdaptorManagerConfigurationException("Cannot read the transport Adaptor file",e);
+            throw new TransportAdaptorManagerConfigurationException("Cannot read the transport Adaptor file", e);
+        } finally {
+            try {
+                if (bufferedReader != null) {
+                    bufferedReader.close();
+                }
+            } catch (IOException e) {
+                throw new TransportAdaptorManagerConfigurationException("Error occurred when reading the file ", e);
+            }
         }
-
         return stringBuffer.toString().trim();
     }
 
@@ -273,10 +268,11 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
     public List<TransportAdaptorConfiguration> getAllTransportAdaptorConfiguration(
             AxisConfiguration axisConfiguration)
             throws TransportAdaptorManagerConfigurationException {
+
         List<TransportAdaptorConfiguration> transportAdaptorConfigurations = new ArrayList<TransportAdaptorConfiguration>();
         int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
-        if (tenantSpecificTransportConfigurationMap.get(tenantId) != null) {
-            for (TransportAdaptorConfiguration transportAdaptorConfiguration : tenantSpecificTransportConfigurationMap.get(
+        if (tenantSpecificTransportAdaptorConfigurationMap.get(tenantId) != null) {
+            for (TransportAdaptorConfiguration transportAdaptorConfiguration : tenantSpecificTransportAdaptorConfigurationMap.get(
                     tenantId).values()) {
                 transportAdaptorConfigurations.add(transportAdaptorConfiguration);
             }
@@ -306,11 +302,10 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
             throws TransportAdaptorManagerConfigurationException {
 
         int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
-
-        if (tenantSpecificTransportConfigurationMap.get(tenantId) == null) {
+        if (tenantSpecificTransportAdaptorConfigurationMap.get(tenantId) == null) {
             throw new TransportAdaptorManagerConfigurationException("There is no any configuration exists for " + tenantId);
         }
-        return tenantSpecificTransportConfigurationMap.get(tenantId).get(name);
+        return tenantSpecificTransportAdaptorConfigurationMap.get(tenantId).get(name);
     }
 
     @Override
@@ -318,18 +313,16 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
                                                                              transportAdaptorName,
                                                                      int tenantId) {
 
-        Map<String, TransportAdaptorConfiguration> transportAdaptors = tenantSpecificTransportConfigurationMap.get(tenantId);
+        Map<String, TransportAdaptorConfiguration> transportAdaptors = tenantSpecificTransportAdaptorConfigurationMap.get(tenantId);
         Map<String, String> inProperties = null;
         if (transportAdaptors.containsKey(transportAdaptorName)) {
             TransportAdaptorConfiguration transportAdaptorConfiguration = transportAdaptors.get(transportAdaptorName);
-
 
             if (!transportAdaptorConfiguration.getInputAdaptorProperties().isEmpty()) {
                 inProperties = transportAdaptorConfiguration.getInputAdaptorProperties();
             }
 
             if (!transportAdaptorConfiguration.getCommonAdaptorProperties().isEmpty()) {
-
                 if (inProperties != null) {
                     Iterator commonAdaptorPropertyIterator = transportAdaptorConfiguration.getCommonAdaptorProperties().entrySet().iterator();
                     while (commonAdaptorPropertyIterator.hasNext()) {
@@ -340,8 +333,6 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
                     inProperties = transportAdaptorConfiguration.getCommonAdaptorProperties();
                 }
             }
-
-
         }
         return inProperties;
     }
@@ -352,18 +343,16 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
                                                                               transportAdaptorName,
                                                                       int tenantId) {
 
-        Map<String, TransportAdaptorConfiguration> transportAdaptors = tenantSpecificTransportConfigurationMap.get(tenantId);
+        Map<String, TransportAdaptorConfiguration> transportAdaptors = tenantSpecificTransportAdaptorConfigurationMap.get(tenantId);
         Map<String, String> outProperties = null;
         if (transportAdaptors.containsKey(transportAdaptorName)) {
             TransportAdaptorConfiguration transportAdaptorConfiguration = transportAdaptors.get(transportAdaptorName);
-
 
             if (!transportAdaptorConfiguration.getOutputAdaptorProperties().isEmpty()) {
                 outProperties = transportAdaptorConfiguration.getOutputAdaptorProperties();
             }
 
             if (!transportAdaptorConfiguration.getCommonAdaptorProperties().isEmpty()) {
-
                 if (outProperties != null) {
                     Iterator commonAdaptorPropertyIterator = transportAdaptorConfiguration.getCommonAdaptorProperties().entrySet().iterator();
                     while (commonAdaptorPropertyIterator.hasNext()) {
@@ -374,8 +363,6 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
                     outProperties = transportAdaptorConfiguration.getCommonAdaptorProperties();
                 }
             }
-
-
         }
         return outProperties;
     }
@@ -383,24 +370,22 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
     @Override
     public List<TransportAdaptorInfo> getInputTransportAdaptorInfo(int tenantId) {
 
-        Map<String, TransportAdaptorInfo> inputTransportAdaptorInfoMap = tenantSpecificInputTransportInfoMap.get(tenantId);
+        Map<String, TransportAdaptorInfo> inputTransportAdaptorInfoMap = tenantSpecificInputTransportAdaptorInfoMap.get(tenantId);
 
         if (inputTransportAdaptorInfoMap != null) {
             return (List) inputTransportAdaptorInfoMap.values();
         }
         return null;
-
     }
 
     @Override
     public List<TransportAdaptorInfo> getOutputTransportAdaptorInfo(int tenantId) {
 
-        Map<String, TransportAdaptorInfo> outputTransportAdaptorInfoMap = tenantSpecificOutputTransportInfoMap.get(tenantId);
+        Map<String, TransportAdaptorInfo> outputTransportAdaptorInfoMap = tenantSpecificOutputTransportAdaptorInfoMap.get(tenantId);
         if (outputTransportAdaptorInfoMap != null) {
             return (List) outputTransportAdaptorInfoMap.values();
         }
         return null;
-
     }
 
 
@@ -411,30 +396,25 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
         TransportAdaptorService transportAdaptorService = TransportAdaptorHolder.getInstance().getTransportAdaptorService();
         TransportAdaptorDto transportAdaptorDto = transportAdaptorService.getTransportAdaptorDto(transportAdaptorConfiguration.getType());
 
-
         if (transportAdaptorDto.getTransportAdaptorType().equals(TransportAdaptorDto.TransportAdaptorType.IN)) {
             addToInputTransportInfoMap(tenantId, transportAdaptorConfiguration);
 
         } else if (transportAdaptorDto.getTransportAdaptorType().equals(TransportAdaptorDto.TransportAdaptorType.OUT)) {
             addToOutputTransportInfoMap(tenantId, transportAdaptorConfiguration);
 
-
         } else if (transportAdaptorDto.getTransportAdaptorType().equals(TransportAdaptorDto.TransportAdaptorType.INOUT)) {
             addToInputTransportInfoMap(tenantId, transportAdaptorConfiguration);
             addToOutputTransportInfoMap(tenantId, transportAdaptorConfiguration);
-
         }
     }
 
     private void addToInputTransportInfoMap(int tenantId,
                                             TransportAdaptorConfiguration transportAdaptorConfiguration) {
 
-
         TransportAdaptorInfo transportAdaptorInfo = new TransportAdaptorInfo();
         transportAdaptorInfo.setTransportAdaptorName(transportAdaptorConfiguration.getName());
         transportAdaptorInfo.setTransportAdaptorType(transportAdaptorConfiguration.getType());
-
-        Map<String, TransportAdaptorInfo> transportAdaptorInfoMap = tenantSpecificInputTransportInfoMap.get(tenantId);
+        Map<String, TransportAdaptorInfo> transportAdaptorInfoMap = tenantSpecificInputTransportAdaptorInfoMap.get(tenantId);
 
         if (transportAdaptorInfoMap != null) {
 
@@ -443,10 +423,7 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
             transportAdaptorInfoMap = new HashMap<String, TransportAdaptorInfo>();
             transportAdaptorInfoMap.put(transportAdaptorConfiguration.getName(), transportAdaptorInfo);
         }
-
-        tenantSpecificInputTransportInfoMap.put(tenantId, transportAdaptorInfoMap);
-
-
+        tenantSpecificInputTransportAdaptorInfoMap.put(tenantId, transportAdaptorInfoMap);
     }
 
     private void addToOutputTransportInfoMap(int tenantId,
@@ -455,8 +432,7 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
         TransportAdaptorInfo transportAdaptorInfo = new TransportAdaptorInfo();
         transportAdaptorInfo.setTransportAdaptorName(transportAdaptorConfiguration.getName());
         transportAdaptorInfo.setTransportAdaptorType(transportAdaptorConfiguration.getType());
-
-        Map<String, TransportAdaptorInfo> transportAdaptorInfoMap = tenantSpecificOutputTransportInfoMap.get(tenantId);
+        Map<String, TransportAdaptorInfo> transportAdaptorInfoMap = tenantSpecificOutputTransportAdaptorInfoMap.get(tenantId);
 
         if (transportAdaptorInfoMap != null) {
 
@@ -465,17 +441,15 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
             transportAdaptorInfoMap = new HashMap<String, TransportAdaptorInfo>();
             transportAdaptorInfoMap.put(transportAdaptorConfiguration.getName(), transportAdaptorInfo);
         }
-
-        tenantSpecificOutputTransportInfoMap.put(tenantId, transportAdaptorInfoMap);
-
+        tenantSpecificOutputTransportAdaptorInfoMap.put(tenantId, transportAdaptorInfoMap);
     }
 
 
     private void removeFromTenantSpecificTransportAdaptorInfoMap(int tenantId,
                                                                  String transportAdaptorName) {
 
-        Map<String, TransportAdaptorInfo> inputTransportAdaptorInfoMap = tenantSpecificInputTransportInfoMap.get(tenantId);
-        Map<String, TransportAdaptorInfo> outputTransportAdaptorInfoMap = tenantSpecificOutputTransportInfoMap.get(tenantId);
+        Map<String, TransportAdaptorInfo> inputTransportAdaptorInfoMap = tenantSpecificInputTransportAdaptorInfoMap.get(tenantId);
+        Map<String, TransportAdaptorInfo> outputTransportAdaptorInfoMap = tenantSpecificOutputTransportAdaptorInfoMap.get(tenantId);
 
         if (inputTransportAdaptorInfoMap != null && inputTransportAdaptorInfoMap.containsKey(transportAdaptorName)) {
             inputTransportAdaptorInfoMap.remove(transportAdaptorName);
@@ -484,8 +458,6 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
         if (outputTransportAdaptorInfoMap != null && outputTransportAdaptorInfoMap.containsKey(transportAdaptorName)) {
             outputTransportAdaptorInfoMap.remove(transportAdaptorName);
         }
-
-
     }
 
 
@@ -493,20 +465,16 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
 
         if (transportAdaptorFileMap.size() > 0) {
             List<TransportAdaptorFile> transportAdaptorFileList = transportAdaptorFileMap.get(tenantId);
-
             Iterator<TransportAdaptorFile> transportAdaptorFileIterator = transportAdaptorFileList.iterator();
             while (transportAdaptorFileIterator.hasNext()) {
-
                 TransportAdaptorFile transportAdaptorFile = transportAdaptorFileIterator.next();
                 if ((transportAdaptorFile.getTransportAdaptorName().equals(transportAdaptorName)) && (transportAdaptorFile.isSuccess())) {
-
                     log.error("Transport adaptor " + transportAdaptorName + " is already registered with this tenant");
                     return false;
                 }
             }
         }
         return true;
-
     }
 
 
@@ -515,14 +483,12 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
         OMElement transportAdaptorElement;
         BufferedInputStream inputStream = null;
         try {
-
             inputStream = new BufferedInputStream(new FileInputStream(transportAdaptorFile));
             XMLStreamReader parser = XMLInputFactory.newInstance().
                     createXMLStreamReader(inputStream);
             StAXOMBuilder builder = new StAXOMBuilder(parser);
             transportAdaptorElement = builder.getDocumentElement();
             transportAdaptorElement.build();
-
         } catch (Exception e) {
             String errorMessage = " .xml file cannot be found in the path : " + path;
             log.error(errorMessage, e);
@@ -540,25 +506,22 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
         return transportAdaptorElement;
     }
 
-    public void removeTransportConfigurationFromMap(String filePath, int tenantId) {
+    public void removeTransportAdaptorConfigurationFromMap(String filePath, int tenantId) {
         List<TransportAdaptorFile> transportAdaptorFileList = transportAdaptorFileMap.get(tenantId);
 
         Iterator<TransportAdaptorFile> transportAdaptorFileIterator = transportAdaptorFileList.iterator();
         while (transportAdaptorFileIterator.hasNext()) {
-
             TransportAdaptorFile transportAdaptorFile = transportAdaptorFileIterator.next();
             if ((transportAdaptorFile.getFilePath().equals(filePath))) {
                 if (transportAdaptorFile.isSuccess()) {
                     String transportAdaptorName = transportAdaptorFile.getTransportAdaptorName();
-                    tenantSpecificTransportConfigurationMap.get(tenantId).remove(transportAdaptorName);
+                    tenantSpecificTransportAdaptorConfigurationMap.get(tenantId).remove(transportAdaptorName);
                     removeFromTenantSpecificTransportAdaptorInfoMap(tenantId, transportAdaptorName);
                 }
                 transportAdaptorFileList.remove(transportAdaptorFile);
                 return;
             }
         }
-
-
     }
 
 
@@ -566,10 +529,8 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
 
         if (transportAdaptorFileMap.size() > 0) {
             List<TransportAdaptorFile> transportAdaptorFileList = transportAdaptorFileMap.get(tenantId);
-
             Iterator<TransportAdaptorFile> transportAdaptorFileIterator = transportAdaptorFileList.iterator();
             while (transportAdaptorFileIterator.hasNext()) {
-
                 TransportAdaptorFile transportAdaptorFile = transportAdaptorFileIterator.next();
                 if ((transportAdaptorFile.getTransportAdaptorName().equals(transportAdaptorName))) {
                     return transportAdaptorFile.getFilePath();
@@ -580,21 +541,19 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
     }
 
 
-    public void addTransportConfigurationForTenant(
+    public void addTransportAdaptorConfigurationForTenant(
             int tenantId, TransportAdaptorConfiguration transportAdaptorConfiguration)
             throws TransportAdaptorManagerConfigurationException {
-        Map<String, TransportAdaptorConfiguration> transportConfigurationMap
-                = tenantSpecificTransportConfigurationMap.get(tenantId);
-        if (transportConfigurationMap == null) {
-            transportConfigurationMap = new ConcurrentHashMap<String, TransportAdaptorConfiguration>();
-            transportConfigurationMap.put(transportAdaptorConfiguration.getName(), transportAdaptorConfiguration);
-            tenantSpecificTransportConfigurationMap.put(tenantId, transportConfigurationMap);
+        Map<String, TransportAdaptorConfiguration> transportAdaptorConfigurationMap
+                = tenantSpecificTransportAdaptorConfigurationMap.get(tenantId);
+
+        if (transportAdaptorConfigurationMap == null) {
+            transportAdaptorConfigurationMap = new ConcurrentHashMap<String, TransportAdaptorConfiguration>();
+            transportAdaptorConfigurationMap.put(transportAdaptorConfiguration.getName(), transportAdaptorConfiguration);
+            tenantSpecificTransportAdaptorConfigurationMap.put(tenantId, transportAdaptorConfigurationMap);
         } else {
-            transportConfigurationMap.put(transportAdaptorConfiguration.getName(), transportAdaptorConfiguration);
+            transportAdaptorConfigurationMap.put(transportAdaptorConfiguration.getName(), transportAdaptorConfiguration);
         }
-
         addToTenantSpecificTransportAdaptorInfoMap(tenantId, transportAdaptorConfiguration);
-
     }
-
 }

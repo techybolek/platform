@@ -47,15 +47,13 @@ public class TransportAdaptorManagerDS {
         try {
             TransportAdaptorManagerService transportAdaptorProxyService =
                     TransportAdaptorManagerServiceBuilder.createTransportAdaptorManagerService();
-
             context.getBundleContext().registerService(TransportAdaptorManagerService.class.getName(),
                                                        transportAdaptorProxyService, null);
             registerAxis2ConfigurationContextObserver(context);
             log.info("Successfully deployed the transport manager service");
         } catch (RuntimeException e) {
             log.error("Can not create the transport manager service ", e);
-        }
-        catch (TransportAdaptorManagerConfigurationException e) {
+        } catch (TransportAdaptorManagerConfigurationException e) {
             log.error("Error occurred when creating the Adaptor manager configuration ", e);
         }
     }

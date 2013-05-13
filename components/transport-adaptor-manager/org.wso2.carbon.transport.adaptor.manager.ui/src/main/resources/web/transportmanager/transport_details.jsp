@@ -2,7 +2,8 @@
         import="org.wso2.carbon.transport.adaptor.manager.stub.TransportAdaptorManagerAdminServiceStub" %>
 <%@ page
         import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportAdaptorPropertiesDto" %>
-<%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportAdaptorPropertyDto" %>
+<%@ page
+        import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportAdaptorPropertyDto" %>
 <%@ page
         import="org.wso2.carbon.transport.adaptor.manager.ui.UIUtils" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>

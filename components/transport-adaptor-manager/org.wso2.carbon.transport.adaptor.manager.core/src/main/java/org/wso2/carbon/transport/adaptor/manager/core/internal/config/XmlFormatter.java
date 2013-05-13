@@ -20,6 +20,7 @@ package org.wso2.carbon.transport.adaptor.manager.core.internal.config;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.Document;
+import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportAdaptorManagerConfigurationException;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -44,7 +45,8 @@ public class XmlFormatter {
     public XmlFormatter() {
     }
 
-    public String format(String unformattedXml) {
+    public String format(String unformattedXml) throws
+                                                TransportAdaptorManagerConfigurationException {
         try {
             final Document document = parseXmlFile(unformattedXml);
 
@@ -58,22 +60,22 @@ public class XmlFormatter {
 
             return out.toString();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new TransportAdaptorManagerConfigurationException(e);
         }
     }
 
-    private Document parseXmlFile(String in) {
+    private Document parseXmlFile(String in) throws TransportAdaptorManagerConfigurationException {
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
             InputSource is = new InputSource(new StringReader(in));
             return db.parse(is);
         } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
+            throw new TransportAdaptorManagerConfigurationException(e);
         } catch (SAXException e) {
-            throw new RuntimeException(e);
+            throw new TransportAdaptorManagerConfigurationException(e);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new TransportAdaptorManagerConfigurationException(e);
         }
     }
 

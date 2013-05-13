@@ -17,9 +17,7 @@
             msg = e.getMessage();
 
         }
-    }
-
-    else if (transportPath != null) {
+    } else if (transportPath != null) {
         try {
             // add transport adaptor via admin service
             stub.editNotDeployedTransportAdaptorConfigurationFile(transportAdaptorConfiguration, transportPath);

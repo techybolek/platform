@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorDeployer;
 import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportAdaptorManagerConfigurationException;
+import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportAdaptorManagerConstants;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -39,43 +40,54 @@ public class TransportAdaptorConfigurationFilesystemInvoker {
             throws TransportAdaptorManagerConfigurationException {
 
         TransportAdaptorConfigurationFilesystemInvoker.save(transportAdaptorElement.toString(), transportName, pathInFileSystem, axisConfiguration);
-
     }
 
     public static void save(String transportAdaptor, String transportName,
-                            String transportPath, AxisConfiguration axisConfiguration) {
+                            String transportPath, AxisConfiguration axisConfiguration)
+            throws TransportAdaptorManagerConfigurationException {
         try {
             /* save contents to .xml file */
             BufferedWriter out = new BufferedWriter(new FileWriter(transportPath));
             out.write(new XmlFormatter().format(transportAdaptor));
             out.close();
-
-
             log.info("Transport Adaptor configuration for " + transportName + " saved in the filesystem");
 
-            TransportAdaptorDeployer deployer = (TransportAdaptorDeployer) getDeployer(axisConfiguration, "transportadaptors");
+            TransportAdaptorDeployer deployer = (TransportAdaptorDeployer) getDeployer(axisConfiguration,  TransportAdaptorManagerConstants.TM_ELE_DIRECTORY);
             DeploymentFileData deploymentFileData = new DeploymentFileData(new File(transportPath));
             deployer.manualDeploy(deploymentFileData, transportPath);
-
         } catch (IOException e) {
             log.error("Error while saving " + transportName, e);
+            throw new TransportAdaptorManagerConfigurationException("Error while saving ", e);
         }
+    }
 
+    public static void deleteTransportAdaptorFile(String filePath,
+                                                  AxisConfiguration axisConfiguration)
+            throws TransportAdaptorManagerConfigurationException {
+        try {
+            File file = new File(filePath);
+            if (file.exists()) {
+                boolean fileDeleted = file.delete();
+                if (!fileDeleted) {
+                    log.error("Could not delete " + filePath);
+                } else {
+                    log.info(filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length()) + " is deleted from the file system");
+                    TransportAdaptorConfigurationFilesystemInvoker.executeUnDeploy(filePath, axisConfiguration);
+                }
+            }
+        } catch (Exception e) {
+            throw new TransportAdaptorManagerConfigurationException("Error while deleting the transport adaptor " + e.getMessage());
+        }
     }
 
     private static Deployer getDeployer(AxisConfiguration axisConfig, String endpointDirPath) {
         // access the deployment engine through axis config
         DeploymentEngine deploymentEngine = (DeploymentEngine) axisConfig.getConfigurator();
-
         return deploymentEngine.getDeployer(endpointDirPath, "xml");
     }
 
     public static void executeUnDeploy(String transportPath, AxisConfiguration axisConfiguration) {
-        TransportAdaptorDeployer deployer = (TransportAdaptorDeployer) getDeployer(axisConfiguration, "transportadaptors");
-
+        TransportAdaptorDeployer deployer = (TransportAdaptorDeployer) getDeployer(axisConfiguration, TransportAdaptorManagerConstants.TM_ELE_DIRECTORY);
         deployer.manualUnDeploy(transportPath);
-
     }
-
-
 }

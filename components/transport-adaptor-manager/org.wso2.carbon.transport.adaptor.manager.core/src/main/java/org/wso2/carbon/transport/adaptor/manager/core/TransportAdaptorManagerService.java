@@ -158,6 +158,7 @@ public interface TransportAdaptorManagerService {
      * @param filePath file path of the not deployed transport adaptor
      * @return
      * @throws TransportAdaptorManagerConfigurationException
+     *
      */
     public String getNotDeployedTransportAdaptorConfigurationFile(String filePath)
             throws TransportAdaptorManagerConfigurationException;
@@ -165,13 +166,15 @@ public interface TransportAdaptorManagerService {
     /**
      * Used to save not deployed transport adaptor configuration details
      *
-     * @param transportAdaptorConfiguration  configuration details
-     * @param filePath  file path of the adaptor
+     * @param transportAdaptorConfiguration configuration details
+     * @param filePath                      file path of the adaptor
      * @param axisConfiguration
      * @throws TransportAdaptorManagerConfigurationException
+     *
      */
-    public void editNotDeployedTransportAdaptorConfigurationFile(String transportAdaptorConfiguration,
-                                                      String filePath,
-                                                      AxisConfiguration axisConfiguration)
+    public void editNotDeployedTransportAdaptorConfigurationFile(
+            String transportAdaptorConfiguration,
+            String filePath,
+            AxisConfiguration axisConfiguration)
             throws TransportAdaptorManagerConfigurationException;
 }

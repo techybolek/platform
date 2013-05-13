@@ -46,20 +46,23 @@
                     TransportAdaptorManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
                     TransportAdaptorFileDto[] transportDetailsArray = stub.getNotDeployedTransportAdaptorConfigurationFiles();
                     if (transportDetailsArray != null) {
-                        for (TransportAdaptorFileDto transportAdaptorFile : transportDetailsArray) {
-
                 %>
                 <thead>
                 <tr>
-                    <th>File Path</th>
+                    <th>File Name</th>
                     <th>Transport Adaptor Name</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
+                <%
+                    for (TransportAdaptorFileDto transportAdaptorFile : transportDetailsArray) {
+
+                %>
+
                 <tbody>
                 <tr>
                     <td>
-                        <%=transportAdaptorFile.getFilePath().substring(transportAdaptorFile.getFilePath().lastIndexOf('/')+1,transportAdaptorFile.getFilePath().length())%>
+                        <%=transportAdaptorFile.getFilePath().substring(transportAdaptorFile.getFilePath().lastIndexOf('/') + 1, transportAdaptorFile.getFilePath().length())%>
                     </td>
                     <td><%=transportAdaptorFile.getTransportAdaptorName()%>
                     </td>

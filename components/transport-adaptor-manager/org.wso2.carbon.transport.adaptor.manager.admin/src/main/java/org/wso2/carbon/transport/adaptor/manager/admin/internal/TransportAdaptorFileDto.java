@@ -17,7 +17,6 @@ package org.wso2.carbon.transport.adaptor.manager.admin.internal;/*
 public class TransportAdaptorFileDto {
 
     private String filePath;
-
     private String transportAdaptorName;
 
     public TransportAdaptorFileDto(String filePath, String transportAdaptorName) {

@@ -45,17 +45,14 @@ public class TransportAdaptorConfigurationHelper {
     public static TransportAdaptorConfiguration fromOM(OMElement transportConfigOMElement) {
 
         TransportAdaptorConfiguration transportAdaptorConfiguration = new TransportAdaptorConfiguration();
-
         transportAdaptorConfiguration.setName(transportConfigOMElement.getAttributeValue(
                 new QName(TransportAdaptorManagerConstants.TM_ATTR_NAME)));
-
         transportAdaptorConfiguration.setType(transportConfigOMElement.getAttributeValue(
                 new QName(TransportAdaptorManagerConstants.TM_ATTR_TYPE)));
 
         //Input Adaptor Properties
         Iterator inputPropertyIter = transportConfigOMElement.getChildrenWithName(
                 new QName(TransportAdaptorManagerConstants.TM_CONF_NS, TransportAdaptorManagerConstants.TM_ELE_INPUT_PROPERTY));
-
         for (; inputPropertyIter.hasNext(); ) {
             OMElement inputPropertyOMElement = (OMElement) inputPropertyIter.next();
             Iterator propertyIter = inputPropertyOMElement.getChildrenWithName(
@@ -72,7 +69,6 @@ public class TransportAdaptorConfigurationHelper {
         //Output Adaptor Properties
         Iterator outputPropertyIter = transportConfigOMElement.getChildrenWithName(
                 new QName(TransportAdaptorManagerConstants.TM_CONF_NS, TransportAdaptorManagerConstants.TM_ELE_OUTPUT_PROPERTY));
-
         for (; outputPropertyIter.hasNext(); ) {
             OMElement outputPropertyOMElement = (OMElement) outputPropertyIter.next();
             Iterator propertyIter = outputPropertyOMElement.getChildrenWithName(
@@ -86,11 +82,9 @@ public class TransportAdaptorConfigurationHelper {
             }
         }
 
-
         //Common Adaptor Properties
         Iterator commonPropertyIter = transportConfigOMElement.getChildrenWithName(
                 new QName(TransportAdaptorManagerConstants.TM_CONF_NS, TransportAdaptorManagerConstants.TM_ELE_COMMON_PROPERTY));
-
         for (; commonPropertyIter.hasNext(); ) {
             OMElement commonPropertyOMElement = (OMElement) commonPropertyIter.next();
             Iterator propertyIter = commonPropertyOMElement.getChildrenWithName(
@@ -103,10 +97,7 @@ public class TransportAdaptorConfigurationHelper {
                 transportAdaptorConfiguration.addCommonAdaptorProperty(name, value);
             }
         }
-
-
         return transportAdaptorConfiguration;
-
     }
 
 
@@ -123,12 +114,10 @@ public class TransportAdaptorConfigurationHelper {
         OMElement transportAdaptorItem = factory.createOMElement(new QName(
                 TransportAdaptorManagerConstants.TM_CONF_NS,
                 TransportAdaptorManagerConstants.TM_ELE_ROOT_ELEMENT, TransportAdaptorManagerConstants.TM_ELE_CONF_ADAPTOR_NAME_SPACE_PREFIX));
-
         transportAdaptorItem.addAttribute(TransportAdaptorManagerConstants.TM_ATTR_NAME, transportAdaptorName,
                                           null);
         transportAdaptorItem.addAttribute(TransportAdaptorManagerConstants.TM_ATTR_TYPE, transportAdaptorType,
                                           null);
-
 
         //input transport adaptor properties
         OMElement inputPropertyElement = factory.createOMElement(new QName(
@@ -141,13 +130,10 @@ public class TransportAdaptorConfigurationHelper {
             OMElement propertyElement = factory.createOMElement(new QName(
                     TransportAdaptorManagerConstants.TM_CONF_NS,
                     TransportAdaptorManagerConstants.TM_ELE_PROPERTY, TransportAdaptorManagerConstants.TM_ELE_CONF_ADAPTOR_NAME_SPACE_PREFIX));
-
             propertyElement.addAttribute(TransportAdaptorManagerConstants.TM_ATTR_NAME, inputPropertyEntry.getKey(), null);
             propertyElement.setText(inputPropertyEntry.getValue());
-
             inputPropertyElement.addChild(propertyElement);
         }
-
 
         //output transport adaptor properties
         OMElement outputPropertyElement = factory.createOMElement(new QName(
@@ -160,10 +146,8 @@ public class TransportAdaptorConfigurationHelper {
             OMElement propertyElement = factory.createOMElement(new QName(
                     TransportAdaptorManagerConstants.TM_CONF_NS,
                     TransportAdaptorManagerConstants.TM_ELE_PROPERTY, TransportAdaptorManagerConstants.TM_ELE_CONF_ADAPTOR_NAME_SPACE_PREFIX));
-
             propertyElement.addAttribute(TransportAdaptorManagerConstants.TM_ATTR_NAME, outputPropertyEntry.getKey(), null);
             propertyElement.setText(outputPropertyEntry.getValue());
-
             outputPropertyElement.addChild(propertyElement);
         }
 
@@ -171,26 +155,22 @@ public class TransportAdaptorConfigurationHelper {
         OMElement commonPropertyElement = factory.createOMElement(new QName(
                 TransportAdaptorManagerConstants.TM_CONF_NS,
                 TransportAdaptorManagerConstants.TM_ELE_COMMON_PROPERTY, TransportAdaptorManagerConstants.TM_ELE_CONF_ADAPTOR_NAME_SPACE_PREFIX));
-
         transportAdaptorItem.addChild(commonPropertyElement);
 
         for (Map.Entry<String, String> commonPropertyEntry : commonTransportAdaptorProperties.entrySet()) {
             OMElement propertyElement = factory.createOMElement(new QName(
                     TransportAdaptorManagerConstants.TM_CONF_NS,
                     TransportAdaptorManagerConstants.TM_ELE_PROPERTY, TransportAdaptorManagerConstants.TM_ELE_CONF_ADAPTOR_NAME_SPACE_PREFIX));
-
             propertyElement.addAttribute(TransportAdaptorManagerConstants.TM_ATTR_NAME, commonPropertyEntry.getKey(), null);
             propertyElement.setText(commonPropertyEntry.getValue());
-
             commonPropertyElement.addChild(propertyElement);
         }
-
         return transportAdaptorItem;
     }
 
 
-    public static boolean validateTransportAdaptorConfiguration(int tenantId,
-                                                                TransportAdaptorConfiguration transportAdaptorConfiguration)
+    public static boolean validateTransportAdaptorConfiguration(
+            TransportAdaptorConfiguration transportAdaptorConfiguration)
             throws TransportAdaptorManagerConfigurationException {
 
         TransportAdaptorService transportAdaptorService = TransportAdaptorHolder.getInstance().getTransportAdaptorService();
@@ -200,19 +180,16 @@ public class TransportAdaptorConfigurationHelper {
         List<Property> outputTransportAdaptorProperties = transportAdaptorDto.getAdaptorOutPropertyList();
         List<Property> commonTransportAdaptorProperties = transportAdaptorDto.getAdaptorCommonPropertyList();
 
-
         if (inputTransportAdaptorProperties != null) {
             Iterator propertyIterator = inputTransportAdaptorProperties.iterator();
             while (propertyIterator.hasNext()) {
                 Property transportProperty = (Property) propertyIterator.next();
                 if (transportProperty.isRequired()) {
-
                     if (!transportAdaptorConfiguration.getInputAdaptorProperties().containsKey(transportProperty.getPropertyName())) {
                         log.error("Required input property : " + transportProperty.getPropertyName() + " not in the Transport Adaptor Configuration");
                         throw new TransportAdaptorManagerConfigurationException("Required input property : " + transportProperty.getPropertyName() + " not in the Transport Adaptor Configuration");
                     }
                 }
-
             }
         }
 
@@ -221,13 +198,11 @@ public class TransportAdaptorConfigurationHelper {
             while (propertyIterator.hasNext()) {
                 Property transportProperty = (Property) propertyIterator.next();
                 if (transportProperty.isRequired()) {
-
                     if (!transportAdaptorConfiguration.getOutputAdaptorProperties().containsKey(transportProperty.getPropertyName())) {
                         log.error("Required output property : " + transportProperty.getPropertyName() + " not in the Transport Adaptor Configuration");
                         throw new TransportAdaptorManagerConfigurationException("Required output property : " + transportProperty.getPropertyName() + " not in the Transport Adaptor Configuration");
                     }
                 }
-
             }
         }
 
@@ -236,17 +211,13 @@ public class TransportAdaptorConfigurationHelper {
             while (propertyIterator.hasNext()) {
                 Property transportProperty = (Property) propertyIterator.next();
                 if (transportProperty.isRequired()) {
-
                     if (!transportAdaptorConfiguration.getCommonAdaptorProperties().containsKey(transportProperty.getPropertyName())) {
                         log.error("Required common property : " + transportProperty.getPropertyName() + " not in the Transport Adaptor Configuration");
                         throw new TransportAdaptorManagerConfigurationException("Required common property : " + transportProperty.getPropertyName() + " not in the Transport Adaptor Configuration");
                     }
                 }
-
             }
         }
-
         return true;
-
     }
 }

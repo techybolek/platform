@@ -19,6 +19,7 @@
 package org.wso2.carbon.transport.adaptor.manager.core;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.AbstractDeployer;
@@ -53,7 +54,6 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
 
     private static Log log = LogFactory.getLog(TransportAdaptorDeployer.class);
     private ConfigurationContext configurationContext;
-
     private List<String> deployedTransportAdaptorFilePaths = new ArrayList<String>();
     private List<String> unDeployedTransportAdaptorFilePaths = new ArrayList<String>();
 
@@ -62,7 +62,6 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
         this.configurationContext = configurationContext;
 
     }
-
 
     /**
      * Process the transport adaptor file, create it and deploy it
@@ -76,21 +75,23 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
         String path = deploymentFileData.getAbsolutePath();
 
         if (!deployedTransportAdaptorFilePaths.contains(path)) {
-            processDeploy(deploymentFileData, path);
-        } else {
-            deployedTransportAdaptorFilePaths.remove(path);
+            try {
+                processDeploy(deploymentFileData, path);
+            }
+                catch(TransportAdaptorManagerConfigurationException e){
+                    throw new DeploymentException("Transport Adaptor file is not deployed",e);
+                }
+            }else{
+                deployedTransportAdaptorFilePaths.remove(path);
+            }
         }
 
-
-    }
-
-    public OMElement getTransportAdaptorOMElement(String path,
+    public OMElement getTransportAdaptorOMElement(String filePath,
                                                   File transportAdaptorFile)
             throws DeploymentException {
         OMElement transportAdaptorElement;
         BufferedInputStream inputStream = null;
         try {
-
             inputStream = new BufferedInputStream(new FileInputStream(transportAdaptorFile));
             XMLStreamReader parser = XMLInputFactory.newInstance().
                     createXMLStreamReader(inputStream);
@@ -99,11 +100,15 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
             transportAdaptorElement.build();
 
         } catch (FileNotFoundException e) {
-            String errorMessage = " .xml file cannot be found in the path : " + path;
+            String errorMessage = " .xml file cannot be found in the path : " + filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length());
             log.error(errorMessage, e);
             throw new DeploymentException(errorMessage, e);
         } catch (XMLStreamException e) {
-            String errorMessage = "Invalid XML for " + transportAdaptorFile.getName() + " located in the path : " + path;
+            String errorMessage = "Invalid XML for " + transportAdaptorFile.getName() + " located in the path : " + filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length());
+            log.error(errorMessage, e);
+            throw new DeploymentException(errorMessage, e);
+        }catch (OMException e) {
+            String errorMessage = "XML tags are not properly closed " + filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length());
             log.error(errorMessage, e);
             throw new DeploymentException(errorMessage, e);
         } finally {
@@ -117,7 +122,6 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
             }
         }
         return transportAdaptorElement;
-
     }
 
     public void setExtension(String extension) {
@@ -142,54 +146,43 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
     }
 
     public void processDeploy(DeploymentFileData deploymentFileData, String path)
-            throws DeploymentException {
+            throws DeploymentException, TransportAdaptorManagerConfigurationException {
 
-        log.info("Transport adaptor file deployment started");
         File transportAdaptorFile = new File(path);
         CarbonTransportAdaptorManagerService carbonTransportAdaptorManagerService = TransportAdaptorManagerValueHolder.getCarbonTransportAdaptorManagerService();
         int tenantId = PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();
         String transportAdaptorName = "";
 
-
         try {
-
             OMElement transportAdaptorOMElement = getTransportAdaptorOMElement(path, transportAdaptorFile);
-
             TransportAdaptorConfiguration transportAdaptorConfiguration = TransportAdaptorConfigurationHelper.fromOM(transportAdaptorOMElement);
             transportAdaptorName = transportAdaptorOMElement.getAttributeValue(new QName(TransportAdaptorManagerConstants.TM_ATTR_NAME));
 
-            if (TransportAdaptorConfigurationHelper.validateTransportAdaptorConfiguration(tenantId, TransportAdaptorConfigurationHelper.fromOM(transportAdaptorOMElement))) {
-
+            if (TransportAdaptorConfigurationHelper.validateTransportAdaptorConfiguration(TransportAdaptorConfigurationHelper.fromOM(transportAdaptorOMElement))) {
                 if (carbonTransportAdaptorManagerService.checkAdaptorValidity(tenantId, transportAdaptorName)) {
-
-                    carbonTransportAdaptorManagerService.addTransportConfigurationForTenant(tenantId, transportAdaptorConfiguration);
+                    carbonTransportAdaptorManagerService.addTransportAdaptorConfigurationForTenant(tenantId, transportAdaptorConfiguration);
                     carbonTransportAdaptorManagerService.addFileConfiguration(tenantId, transportAdaptorName, path, true);
+                    log.info("Transport adaptor " +transportAdaptorName +" successfully deployed");
                 } else {
-                    throw new TransportAdaptorManagerConfigurationException();
+                    throw new TransportAdaptorManagerConfigurationException(transportAdaptorName + " is already registered for this tenant");
                 }
-
             }
-
-        }
-        catch (TransportAdaptorManagerConfigurationException ex){
+        } catch (TransportAdaptorManagerConfigurationException ex) {
             carbonTransportAdaptorManagerService.addFileConfiguration(tenantId, transportAdaptorName, path, false);
-            log.error(transportAdaptorName + " is already registered for this tenant",ex);
-
-        }
-        catch (Exception e) {
+            log.error(ex);
+            throw new TransportAdaptorManagerConfigurationException(ex);
+        } catch (DeploymentException e) {
             carbonTransportAdaptorManagerService.addFileConfiguration(tenantId, transportAdaptorName, path, false);
             log.error("The deployment of " + transportAdaptorFile.getName() + " is not valid.", e);
             throw new DeploymentException(e);
         }
-
     }
 
     private void processUndeploy(String filePath) {
         log.info("Transport Adaptor file is undeployed");
         int tenantID = PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();
-
         CarbonTransportAdaptorManagerService carbonTransportAdaptorManagerService = TransportAdaptorManagerValueHolder.getCarbonTransportAdaptorManagerService();
-        carbonTransportAdaptorManagerService.removeTransportConfigurationFromMap(filePath, tenantID);
+        carbonTransportAdaptorManagerService.removeTransportAdaptorConfigurationFromMap(filePath, tenantID);
     }
 
     public void setDirectory(String directory) {
@@ -197,17 +190,19 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
     }
 
     public void manualDeploy(DeploymentFileData deploymentFileData, String filePath)
-            throws DeploymentException {
-        deployedTransportAdaptorFilePaths.add(filePath);
-        processDeploy(deploymentFileData, filePath);
+            throws TransportAdaptorManagerConfigurationException {
+        try {
+            deployedTransportAdaptorFilePaths.add(filePath);
+            processDeploy(deploymentFileData, filePath);
+        } catch (DeploymentException ex) {
+            throw new TransportAdaptorManagerConfigurationException(ex.getMessage());
+        }
     }
 
     public void manualUnDeploy(String filePath) {
         unDeployedTransportAdaptorFilePaths.add(filePath);
         processUndeploy(filePath);
     }
-
-
 }
 
 

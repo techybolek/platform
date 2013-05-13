@@ -3,7 +3,8 @@
 
 <%@ page
         import="org.wso2.carbon.transport.adaptor.manager.stub.TransportAdaptorManagerAdminServiceStub" %>
-<%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportAdaptorConfigurationInfoDto" %>
+<%@ page
+        import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportAdaptorConfigurationInfoDto" %>
 <%@ page
         import="org.wso2.carbon.transport.adaptor.manager.ui.UIUtils" %>
 
@@ -71,7 +72,7 @@
                             color="#4682b4">Delete</font></a>
                     <a style="background-image: url(../admin/images/edit.gif);"
                        class="icon-link"
-                       href="edit_transport_details.jsp?transportName=<%=transportDetails.getTransportAdaptorName()%>&transportType=<%=transportDetails.getTransportAdaptorType()%>"><font
+                       href="edit_transport_details.jsp?transportName=<%=transportDetails.getTransportAdaptorName()%>"><font
                             color="#4682b4">Edit</font></a>
 
                 </td>

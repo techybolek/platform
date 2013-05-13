@@ -40,7 +40,6 @@ public class TransportAdaptorManagerServiceBuilder {
      */
     public static TransportAdaptorManagerService createTransportAdaptorManagerService()
             throws TransportAdaptorManagerConfigurationException {
-
         carbonTransportAdaptorManagerService = new CarbonTransportAdaptorManagerService();
         TransportAdaptorManagerValueHolder.registerCarbonTransportAdaptorManagerService(carbonTransportAdaptorManagerService);
         return carbonTransportAdaptorManagerService;

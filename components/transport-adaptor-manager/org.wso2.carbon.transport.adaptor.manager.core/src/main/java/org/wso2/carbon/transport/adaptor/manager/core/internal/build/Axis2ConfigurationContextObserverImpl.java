@@ -11,7 +11,6 @@ public class Axis2ConfigurationContextObserverImpl
     private static Log log = LogFactory.getLog(Axis2ConfigurationContextObserverImpl.class);
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
-
         //TODO check the usage of this method
         String tenantDomain = PrivilegedCarbonContext.getCurrentContext(
                 configurationContext).getTenantDomain();
@@ -24,7 +23,6 @@ public class Axis2ConfigurationContextObserverImpl
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
             PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
-
         } catch (Exception e) {
             log.error("Unable to load brokers from registry ", e);
         } finally {

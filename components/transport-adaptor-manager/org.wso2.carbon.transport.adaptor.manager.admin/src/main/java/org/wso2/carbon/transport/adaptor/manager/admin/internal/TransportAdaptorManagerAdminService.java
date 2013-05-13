@@ -77,7 +77,6 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
         } else {
             throw new AxisFault("Transport Adaptor Dto not found for " + transportAdaptorName);
         }
-
     }
 
 
@@ -103,7 +102,6 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
                 TransportAdaptorConfiguration transportAdaptorConfiguration = new TransportAdaptorConfiguration();
                 transportAdaptorConfiguration.setName(transportAdaptorName);
                 transportAdaptorConfiguration.setType(transportAdaptorType);
-
                 AxisConfiguration axisConfiguration = getAxisConfig();
 
                 // add input transport adaptor properties
@@ -121,14 +119,12 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
                     transportAdaptorConfiguration.addCommonAdaptorProperty(transportAdaptorPropertyDto.getKey(), transportAdaptorPropertyDto.getValue());
                 }
 
-
                 transportAdaptorManagerHolder.getTransportAdaptorManagerService().saveTransportAdaptorConfiguration(transportAdaptorConfiguration, axisConfiguration);
 
             } catch (TransportAdaptorManagerConfigurationException e) {
-                throw new AxisFault("Error in adding transport Configuration , ", e);
+                throw new AxisFault("Error in adding transport Configuration , ", e.getMessage());
             }
         } else {
-
             throw new AxisFault(transportAdaptorName + " is already registered for this tenant");
         }
     }
@@ -147,7 +143,7 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
         try {
             transportAdaptorManager.getTransportAdaptorManagerService().removeTransportAdaptorConfiguration(transportAdaptorName, axisConfiguration);
         } catch (TransportAdaptorManagerConfigurationException e) {
-            throw new AxisFault("Error in removing transport adaptor configurations , " + e);
+            throw new AxisFault("Error in removing transport adaptor configurations , " + e.getMessage());
         }
     }
 
@@ -161,38 +157,34 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
     public void editTransportAdaptorConfigurationFile(String transportAdaptorConfiguration,
                                                       String transportAdaptorName)
             throws AxisFault {
-
         TransportAdaptorManagerHolder transportAdaptorManager = TransportAdaptorManagerHolder.getInstance();
         AxisConfiguration axisConfiguration = getAxisConfig();
         try {
             transportAdaptorManager.getTransportAdaptorManagerService().editTransportAdaptorConfigurationFile(transportAdaptorConfiguration, transportAdaptorName, axisConfiguration);
-
         } catch (TransportAdaptorManagerConfigurationException e) {
-            throw new AxisFault("Error when editing transport adaptor configurations , " + e);
+            throw new AxisFault("Error when editing transport adaptor configurations , " + e.getMessage());
         }
-
     }
 
     /**
      * to edit not deployed transport adaptor configuration
      *
      * @param transportAdaptorConfiguration transport adaptor configuration of the edited adaptor
-     * @param filePath          file path of the configuration file
+     * @param filePath                      file path of the configuration file
      * @throws AxisFault
      */
-    public void editNotDeployedTransportAdaptorConfigurationFile(String transportAdaptorConfiguration,
-                                                      String filePath)
+    public void editNotDeployedTransportAdaptorConfigurationFile(
+            String transportAdaptorConfiguration,
+            String filePath)
             throws AxisFault {
 
         TransportAdaptorManagerHolder transportAdaptorManager = TransportAdaptorManagerHolder.getInstance();
         AxisConfiguration axisConfiguration = getAxisConfig();
         try {
             transportAdaptorManager.getTransportAdaptorManagerService().editNotDeployedTransportAdaptorConfigurationFile(transportAdaptorConfiguration, filePath, axisConfiguration);
-
         } catch (TransportAdaptorManagerConfigurationException e) {
-            throw new AxisFault("Error when editing transport adaptor configurations , " + e);
+            throw new AxisFault("Error when editing transport adaptor configurations , " + e.getMessage());
         }
-
     }
 
     /**
@@ -207,10 +199,10 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
         TransportAdaptorManagerHolder transportAdaptorManager = TransportAdaptorManagerHolder.getInstance();
         AxisConfiguration axisConfiguration = getAxisConfig();
         try {
-            String transportConfigurationFile = transportAdaptorManager.getTransportAdaptorManagerService().getTransportAdaptorConfigurationFile(transportAdaptorName, axisConfiguration);
-            return transportConfigurationFile;
+            String transportAdaptorConfigurationFile = transportAdaptorManager.getTransportAdaptorManagerService().getTransportAdaptorConfigurationFile(transportAdaptorName, axisConfiguration);
+            return transportAdaptorConfigurationFile;
         } catch (TransportAdaptorManagerConfigurationException e) {
-            throw new AxisFault("Error in getting transport adaptor configurations , " + e);
+            throw new AxisFault("Error in getting transport adaptor configurations , " + e.getMessage());
         }
     }
 
@@ -225,12 +217,11 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
     public String getNotDeployedTransportAdaptorConfigurationFile(String filePath)
             throws AxisFault {
         TransportAdaptorManagerHolder transportAdaptorManager = TransportAdaptorManagerHolder.getInstance();
-
         try {
-            String transportConfigurationFile = transportAdaptorManager.getTransportAdaptorManagerService().getNotDeployedTransportAdaptorConfigurationFile(filePath);
-            return transportConfigurationFile.trim();
+            String transportAdaptorConfigurationFile = transportAdaptorManager.getTransportAdaptorManagerService().getNotDeployedTransportAdaptorConfigurationFile(filePath);
+            return transportAdaptorConfigurationFile.trim();
         } catch (TransportAdaptorManagerConfigurationException e) {
-            throw new AxisFault("Error in getting transport adaptor configurations , " + e);
+            throw new AxisFault("Error in getting transport adaptor configurations , " + e.getMessage());
         }
     }
 
@@ -243,14 +234,13 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
     public void removeTransportAdaptorConfigurationFile(String filePath)
             throws AxisFault {
         TransportAdaptorManagerHolder transportAdaptorManager = TransportAdaptorManagerHolder.getInstance();
-
         try {
-            transportAdaptorManager.getTransportAdaptorManagerService().removeTransportAdaptorConfigurationFile(filePath, axisConfig);
+            AxisConfiguration axisConfiguration = getAxisConfig();
+            transportAdaptorManager.getTransportAdaptorManagerService().removeTransportAdaptorConfigurationFile(filePath, axisConfiguration);
         } catch (TransportAdaptorManagerConfigurationException e) {
-            throw new AxisFault("Error in removing transport adaptor configurations , " + e);
+            throw new AxisFault("Error in removing transport adaptor configurations , " + e.getMessage());
         }
     }
-
 
     /**
      * This method is used to get the transport adaptor name and type
@@ -262,11 +252,10 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
             throws AxisFault {
         try {
             TransportAdaptorManagerHolder transportAdaptorManager = TransportAdaptorManagerHolder.getInstance();
-
             AxisConfiguration axisConfiguration = getAxisConfig();
+
             // get transport adaptor configurations
             List<TransportAdaptorConfiguration> transportAdaptorConfigurationList = null;
-
             transportAdaptorConfigurationList = transportAdaptorManager.getTransportAdaptorManagerService().
                     getAllTransportAdaptorConfiguration(axisConfiguration);
 
@@ -283,14 +272,13 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
                     transportAdaptorConfigurationInfoDtoArray[index] = new TransportAdaptorConfigurationInfoDto();
                     transportAdaptorConfigurationInfoDtoArray[index].setTransportAdaptorName(transportAdaptorName);
                     transportAdaptorConfigurationInfoDtoArray[index].setTransportAdaptorType(transportAdaptorType);
-
                 }
                 return transportAdaptorConfigurationInfoDtoArray;
             } else {
                 return new TransportAdaptorConfigurationInfoDto[0];
             }
         } catch (TransportAdaptorManagerConfigurationException e) {
-            throw new AxisFault("No Transport Adaptor Configurations received. "+e);
+            throw new AxisFault("No Transport Adaptor Configurations received, " + e.getMessage());
         }
 
     }
@@ -307,7 +295,6 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
 
         TransportAdaptorManagerHolder transportAdaptorManager = TransportAdaptorManagerHolder.getInstance();
         AxisConfiguration axisConfiguration = getAxisConfig();
-
         List<TransportAdaptorFile> transportAdaptorFileList = transportAdaptorManager.getTransportAdaptorManagerService().
                 getNotDeployedTransportAdaptorConfigurationFiles(axisConfiguration);
         if (transportAdaptorFileList != null) {
@@ -323,21 +310,17 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
 
                 // create transport adaptor file with file path and adaptor name
                 transportAdaptorFileDtoArray[index] = new TransportAdaptorFileDto(filePath, transportAdaptorName);
-
-
             }
             return transportAdaptorFileDtoArray;
         } else {
             return new TransportAdaptorFileDto[0];
         }
-
-
     }
 
     /**
      * To get the transport adaptor configuration details with values and necessary properties
      *
-     * @param transportAdaptorName  transport adaptor name
+     * @param transportAdaptorName transport adaptor name
      * @return
      * @throws AxisFault
      */
@@ -368,14 +351,9 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
                 return null;
             }
         } catch (TransportAdaptorManagerConfigurationException e) {
-            throw new AxisFault("Cannot retrieve transport adaptor details " + e);
+            throw new AxisFault("Cannot retrieve transport adaptor details, " + e.getMessage());
         }
-
     }
-
-
-    //*****************************************************************************************************************
-    //Private Methods
 
 
     private TransportAdaptorPropertyDto[] getInputTransportAdaptorProperties(
@@ -398,9 +376,7 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
             }
             return inputTransportAdaptorPropertyDtoArray;
         }
-
         return new TransportAdaptorPropertyDto[0];
-
     }
 
     /**
@@ -429,7 +405,6 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
             return outputTransportAdaptorPropertyDtoArray;
         }
         return new TransportAdaptorPropertyDto[0];
-
     }
 
 
@@ -458,9 +433,7 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
             }
             return commonTransportAdaptorPropertyDtoArray;
         }
-
         return new TransportAdaptorPropertyDto[0];
-
     }
 
 
@@ -479,7 +452,6 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
 
             // get input transport adaptor properties
             List<Property> inputPropertyList = transportAdaptorDto.getAdaptorInPropertyList();
-
             Map<String, String> inputTransportProperties = transportAdaptorConfiguration.getInputAdaptorProperties();
             TransportAdaptorPropertyDto[] inputTransportAdaptorPropertyDtoArray = new TransportAdaptorPropertyDto[inputTransportProperties.size()];
             int index = 0;
@@ -499,13 +471,11 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
 
                     index++;
                 }
-
             }
             return inputTransportAdaptorPropertyDtoArray;
         } else {
             return new TransportAdaptorPropertyDto[0];
         }
-
     }
 
     /**
@@ -532,7 +502,6 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
                     // create transport adaptor property
                     outputTransportAdaptorPropertyDtoArray[index] = new TransportAdaptorPropertyDto(property.getPropertyName(),
                                                                                                     outputTransportProperties.get(property.getPropertyName()));
-
                     // set output transport adaptor property parameters
                     outputTransportAdaptorPropertyDtoArray[index].setSecured(property.isSecured());
                     outputTransportAdaptorPropertyDtoArray[index].setRequired(property.isRequired());
@@ -547,9 +516,7 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
         } else {
             return new TransportAdaptorPropertyDto[0];
         }
-
     }
-
 
     /**
      * @param transportAdaptorConfiguration
@@ -589,7 +556,6 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
         } else {
             return new TransportAdaptorPropertyDto[0];
         }
-
     }
 
     private boolean checkTransportAdaptorValidity(String transportAdaptorName) throws AxisFault {
@@ -598,10 +564,7 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
             AxisConfiguration axisConfiguration = getAxisConfig();
 
             List<TransportAdaptorConfiguration> transportAdaptorConfigurationList = null;
-
             transportAdaptorConfigurationList = transportAdaptorManagerHolder.getTransportAdaptorManagerService().getAllTransportAdaptorConfiguration(axisConfiguration);
-
-
             Iterator transportAdaptorConfigurationListIterator = transportAdaptorConfigurationList.iterator();
             while (transportAdaptorConfigurationListIterator.hasNext()) {
 
@@ -616,5 +579,4 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
         }
         return true;
     }
-
 }

@@ -20,9 +20,7 @@ public class TransportAdaptorFile {
 
     private boolean success;
 
-
     private String transportAdaptorName;
-
 
     public String getTransportAdaptorName() {
         return transportAdaptorName;
@@ -47,6 +45,4 @@ public class TransportAdaptorFile {
     public void setFilePath(String filePath) {
         this.filePath = filePath;
     }
-
-
 }
