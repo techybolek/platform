@@ -93,6 +93,10 @@ public class RoleHomePage {
 
         js.executeScript("doNext()");
 
+        if ((driver.getCurrentUrl().contains("?"))) {
+            throw new IllegalStateException("Request to /role/add-step3.jsp was not a POST request");
+        }
+
         driver.findElement(By.name(uiElementMapper.getElement("role.add.user.to.role.name"))).sendKeys("Seleniumtest");
         driver.findElement(By.xpath(uiElementMapper.getElement("role.search.button"))).click();
         driver.findElement(By.name(uiElementMapper.getElement("role.add.user.to.role.name.tick"))).click();
