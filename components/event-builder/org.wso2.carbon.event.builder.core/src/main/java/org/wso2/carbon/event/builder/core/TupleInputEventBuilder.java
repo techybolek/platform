@@ -42,7 +42,6 @@ public class TupleInputEventBuilder implements EventBuilder {
 
     public TupleInputEventBuilder(EventBuilderConfiguration eventBuilderConfiguration) {
         this.eventBuilderConfiguration = eventBuilderConfiguration;
-        this.eventBuilderConfiguration.getInputMappings();
 
         List<TupleInputMapping> tupleInputMappings = this.eventBuilderConfiguration.getInputMappings();
         Map<Integer, Integer> payloadDataMap = new TreeMap<Integer, Integer>();
@@ -93,8 +92,9 @@ public class TupleInputEventBuilder implements EventBuilder {
             wso2EventListeners.add((Wso2EventListener) eventListener);
         }
         try {
+            //TODO Type is duplicated in many places. Need to refactor
             InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration = new TransportAdaptorConfiguration();
-            inputTransportAdaptorConfiguration.setType(eventBuilderConfiguration.getInputTransportMessageConfiguration().getTransportAdaptorName());
+            inputTransportAdaptorConfiguration.setType(eventBuilderConfiguration.getType());
 
             //TODO This is to circumvent what seems to be a bug on the TA core. Need to remove after fix
             eventBuilderConfiguration.getInputTransportMessageConfiguration().setTransportAdaptorName(null);

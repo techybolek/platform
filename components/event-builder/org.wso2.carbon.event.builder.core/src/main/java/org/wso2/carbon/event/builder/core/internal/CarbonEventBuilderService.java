@@ -4,14 +4,11 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
-import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
 import org.wso2.carbon.event.builder.core.*;
 import org.wso2.carbon.event.builder.core.EventListener;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
 import org.wso2.carbon.event.builder.core.exception.EventBuilderConfigurationException;
-import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,7 +31,6 @@ public class CarbonEventBuilderService implements EventBuilderService {
 
     @Override
     public void subscribe(StreamDefinition streamDefinition, EventListener eventListener, AxisConfiguration axisConfiguration) throws EventBuilderConfigurationException {
-        //TODO This is test code. Need to implement properly
         EventBuilder eventBuilder = eventBuilderMap.get(streamDefinition);
         if (eventBuilder == null) {
             throw new EventBuilderConfigurationException("No event builder exists for the stream definition " + streamDefinition + " provided for this tenant");
@@ -64,6 +60,7 @@ public class CarbonEventBuilderService implements EventBuilderService {
 
     private void testSubscription(EventBuilderConfiguration eventBuilderConfiguration, AxisConfiguration axisConfiguration) throws EventBuilderConfigurationException {
         StreamDefinition streamDefinition = eventBuilderConfiguration.getStreamDefinition();
+/*
         eventBuilderMap.put(streamDefinition, new TupleInputEventBuilder(eventBuilderConfiguration));
         subscribe(streamDefinition, new Wso2EventListener() {
             @Override
@@ -82,6 +79,7 @@ public class CarbonEventBuilderService implements EventBuilderService {
                 //To change body of implemented methods use File | Settings | File Templates.
             }
         }, axisConfiguration);
+*/
 
         eventBuilderMap.put(streamDefinition, new TupleInputEventBuilder(eventBuilderConfiguration));
         subscribe(streamDefinition, new BasicEventListener() {
@@ -211,7 +209,7 @@ public class CarbonEventBuilderService implements EventBuilderService {
                     tenantSpecificEventBuilderConfigMap.get(tenantId).remove(eventBuilderConfigurationFile.getEventBuilderName());
                 }
                 eventBuilderConfigurationFileList.remove(eventBuilderConfigurationFile);
-                return;
+                break;
             }
         }
     }

@@ -23,6 +23,7 @@ import org.wso2.carbon.event.builder.core.InputMapping;
 import org.wso2.carbon.event.builder.core.internal.TupleInputMapping;
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,7 +32,7 @@ public class EventBuilderConfiguration<T extends InputMapping> {
 
     private StreamDefinition streamDefinition;
     private InputTransportMessageConfiguration inputTransportMessageConfiguration;
-    private List<T> inputMappings;
+    private List<T> inputMappings = new ArrayList<T>();
     private String name;
     private String type;
     private Map<String, String> eventBuilderConfigurationProperties = new ConcurrentHashMap<String, String>();

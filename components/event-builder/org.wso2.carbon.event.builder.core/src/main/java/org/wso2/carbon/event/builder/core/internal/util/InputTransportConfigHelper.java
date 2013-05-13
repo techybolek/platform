@@ -45,7 +45,10 @@ public class InputTransportConfigHelper {
         InputTransportMessageConfiguration inputTransportMessageConfiguration = null;
         if (messageDto != null) {
             inputTransportMessageConfiguration = new InputTransportMessageConfiguration();
-            inputTransportMessageConfiguration.setTransportAdaptorName(transportAdaptorTypeName);
+            inputTransportMessageConfiguration.setTransportAdaptorName(messageDto.getAdaptorName());
+            for(Property property: messageDto.getMessageInPropertyList()) {
+                inputTransportMessageConfiguration.addInputMessageProperty(property.getPropertyName(), property.getDefaultValue());
+            }
         }
 
         return inputTransportMessageConfiguration;
