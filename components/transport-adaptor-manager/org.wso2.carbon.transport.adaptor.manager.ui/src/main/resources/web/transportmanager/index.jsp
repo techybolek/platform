@@ -1,9 +1,11 @@
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
-<%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.TransportManagerAdminServiceStub" %>
-<%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportConfigurationDto" %>
-<%@ page import="org.wso2.carbon.transport.adaptor.manager.ui.UIUtils" %>
+<%@ page
+        import="org.wso2.carbon.transport.adaptor.manager.stub.TransportAdaptorManagerAdminServiceStub" %>
+<%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportAdaptorConfigurationInfoDto" %>
+<%@ page
+        import="org.wso2.carbon.transport.adaptor.manager.ui.UIUtils" %>
 
 <fmt:bundle basename="org.wso2.carbon.transport.adaptor.manager.ui.i18n.Resources">
 
@@ -27,8 +29,8 @@
     <%
         String transportName = request.getParameter("transportname");
         if (transportName != null) {
-            TransportManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
-            stub.removeTransportConfiguration(transportName);
+            TransportAdaptorManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
+            stub.removeTransportAdaptorConfiguration(transportName);
     %>
     <script type="text/javascript">CARBON.showInfoDialog('Transport adaptor successfully deleted.');</script>
     <%
@@ -48,28 +50,28 @@
             </thead>
             <tbody>
             <%
-                TransportManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
-                TransportConfigurationDto[] transportDetailsArray = stub.getAllTransportConfigurationNamesAndTypes();
+                TransportAdaptorManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
+                TransportAdaptorConfigurationInfoDto[] transportDetailsArray = stub.getAllTransportAdaptorConfigurationInfo();
                 if (transportDetailsArray != null) {
-                    for (TransportConfigurationDto transportDetails : transportDetailsArray) {
+                    for (TransportAdaptorConfigurationInfoDto transportDetails : transportDetailsArray) {
 
             %>
             <tr>
                 <td>
-                    <a href="transport_details.jsp?transportName=<%=transportDetails.getTransportName()%>&transportType=<%=transportDetails.getTransportType()%>"><%=transportDetails.getTransportName()%>
+                    <a href="transport_details.jsp?transportName=<%=transportDetails.getTransportAdaptorName()%>&transportType=<%=transportDetails.getTransportAdaptorType()%>"><%=transportDetails.getTransportAdaptorName()%>
                     </a>
 
                 </td>
-                <td><%=transportDetails.getTransportType()%>
+                <td><%=transportDetails.getTransportAdaptorType()%>
                 </td>
                 <td>
                     <a style="background-image: url(../admin/images/delete.gif);"
                        class="icon-link"
-                       onclick="doDelete('<%=transportDetails.getTransportName()%>')"><font
+                       onclick="doDelete('<%=transportDetails.getTransportAdaptorName()%>')"><font
                             color="#4682b4">Delete</font></a>
                     <a style="background-image: url(../admin/images/edit.gif);"
                        class="icon-link"
-                       href="edit_transport_details.jsp?transportName=<%=transportDetails.getTransportName()%>&transportType=<%=transportDetails.getTransportType()%>"><font
+                       href="edit_transport_details.jsp?transportName=<%=transportDetails.getTransportAdaptorName()%>&transportType=<%=transportDetails.getTransportAdaptorType()%>"><font
                             color="#4682b4">Edit</font></a>
 
                 </td>

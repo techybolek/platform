@@ -1,6 +1,10 @@
-<%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.TransportManagerAdminServiceStub" %>
-<%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportPropertyDto" %>
-<%@ page import="org.wso2.carbon.transport.adaptor.manager.ui.UIUtils" %>
+<%@ page
+        import="org.wso2.carbon.transport.adaptor.manager.stub.TransportAdaptorManagerAdminServiceStub" %>
+<%@ page
+        import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportAdaptorPropertiesDto" %>
+<%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportAdaptorPropertyDto" %>
+<%@ page
+        import="org.wso2.carbon.transport.adaptor.manager.ui.UIUtils" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
@@ -38,7 +42,7 @@ function addTransport(form) {
 
     // all common properties, not required and required are checked
     while (document.getElementById("commonProperty_Required_" + commonPropertyCount) != null ||
-            document.getElementById("commonProperty_" + commonPropertyCount) != null) {
+           document.getElementById("commonProperty_" + commonPropertyCount) != null) {
         // if required fields are empty
         if (document.getElementById("commonProperty_Required_" + commonPropertyCount) != null) {
             if (document.getElementById("commonProperty_Required_" + commonPropertyCount).value.trim() == "") {
@@ -70,7 +74,7 @@ function addTransport(form) {
 
     // all input properties, not required and required are checked
     while (document.getElementById("inputProperty_Required_" + inputPropertyCount) != null ||
-            document.getElementById("inputProperty_" + inputPropertyCount) != null) {
+           document.getElementById("inputProperty_" + inputPropertyCount) != null) {
         // if required fields are empty
         if (document.getElementById("inputProperty_Required_" + inputPropertyCount) != null) {
             if (document.getElementById("inputProperty_Required_" + inputPropertyCount).value.trim() == "") {
@@ -102,7 +106,7 @@ function addTransport(form) {
 
     // all output properties, not required and required are checked
     while (document.getElementById("outputProperty_Required_" + outputPropertyCount) != null ||
-            document.getElementById("outputProperty_" + outputPropertyCount) != null) {
+           document.getElementById("outputProperty_" + outputPropertyCount) != null) {
         // if required fields are empty
         if (document.getElementById("outputProperty_Required_" + outputPropertyCount) != null) {
             if (document.getElementById("outputProperty_Required_" + outputPropertyCount).value.trim() == "") {
@@ -147,7 +151,7 @@ function addTransport(form) {
         var selectedIndex = document.inputForm.transportTypeFilter.selectedIndex;
         var selected_text = document.inputForm.transportTypeFilter.options[selectedIndex].text;
         var parameters = "?transportName=" + (document.getElementById("transportNameId").value.trim())
-                + "&transportType=" + selected_text;
+                                 + "&transportType=" + selected_text;
         if (commonParameterString != "") {
             parameters = parameters + "&commonPropertySet=" + commonParameterString;
         }
@@ -162,20 +166,20 @@ function addTransport(form) {
 
         // ajax call for creating a transport adaptor at backend, needed parameters are appended.
         $.ajax({
-            type:"POST",
-            url:"add_transport_ajaxprocessor.jsp" + parameters,
-            contentType:"application/json; charset=utf-8",
-            dataType:"text",
-            data:{},
-            async:false,
-            success:function (msg) {
-                if (msg.trim() == "true") {
-                    form.submit();
-                } else {
-                    CARBON.showErrorDialog("Failed to add transport adaptor, Exception: " + msg);
-                }
-            }
-        });
+                   type:"POST",
+                   url:"add_transport_ajaxprocessor.jsp" + parameters,
+                   contentType:"application/json; charset=utf-8",
+                   dataType:"text",
+                   data:{},
+                   async:false,
+                   success:function (msg) {
+                       if (msg.trim() == "true") {
+                           form.submit();
+                       } else {
+                           CARBON.showErrorDialog("Failed to add transport adaptor, Exception: " + msg);
+                       }
+                   }
+               });
 
     }
 
@@ -211,76 +215,80 @@ function showTransportProperties() {
     }
 
     $.ajax({
-        type:"POST",
-        url:"get_properties_ajaxprocessor.jsp?transportType=" + selected_text + "",
-        data:{},
-        contentType:"application/json; charset=utf-8",
-        dataType:"text",
-        async:false,
-        success:function (msg) {
-            if (msg != null) {
+               type:"POST",
+               url:"get_properties_ajaxprocessor.jsp?transportType=" + selected_text + "",
+               data:{},
+               contentType:"application/json; charset=utf-8",
+               dataType:"text",
+               async:false,
+               success:function (msg) {
+                   if (msg != null) {
+
+                       var jsonObject = JSON.parse(msg);
+
+                       var commonTransportProperties = jsonObject.localCommonTransportAdaptorPropertyDtos;
+                       var inputTransportProperties = jsonObject.localInputTransportAdaptorPropertyDtos;
+                       var outputTransportProperties = jsonObject.localOutputTransportAdaptorPropertyDtos;
+
+                       if (commonTransportProperties != undefined) {
+                           var transportCommonPropertyLoop = 0;
+                           var commonProperty = "commonProperty_";
+                           var commonRequiredProperty = "commonProperty_Required_";
+                           var tableRow = transportInputTable.insertRow(transportInputTable.rows.length);
+                           tableRow.innerHTML = '<td colspan="2" class="middle-header"><fmt:message key='transport.common.tooltip'/> <input type="checkbox" id="commonCheckbox" onclick="enableMyInput(this)" align="bottom"/></td> ';
+
+                           $.each(commonTransportProperties, function (index,
+                                                                       commonTransportProperty) {
+                               loadTransportProperties(commonTransportProperty, transportInputTable, transportCommonPropertyLoop, commonProperty, commonRequiredProperty, 'commonFields')
+                               transportCommonPropertyLoop = transportCommonPropertyLoop + 1;
+
+                           });
+                       }
+
+                       if (inputTransportProperties != undefined) {
+                           var transportInputPropertyLoop = 0;
+                           var inputProperty = "inputProperty_";
+                           var inputRequiredProperty = "inputProperty_Required_";
+                           alert(inputTransportProperties)
+                           var tableRow = transportInputTable.insertRow(transportInputTable.rows.length);
+                           tableRow.innerHTML = '<td colspan="2" class="middle-header"><fmt:message key='transport.input.tooltip'/> <input type="checkbox" id="inputCheckbox" onclick="enableMyInput(this)" align="bottom"/></td> ';
+
+                           $.each(inputTransportProperties, function (index,
+                                                                      inputTransportProperty) {
+                               loadTransportProperties(inputTransportProperty, transportInputTable, transportInputPropertyLoop, inputProperty, inputRequiredProperty, 'inputFields')
+                               transportInputPropertyLoop = transportInputPropertyLoop + 1;
 
 
-                var jsonObject = JSON.parse(msg);
-                var commonTransportProperties = jsonObject.localCommonTransportPropertyDtos;
-                var inputTransportProperties = jsonObject.localInputTransportPropertyDtos;
-                var outputTransportProperties = jsonObject.localOutputTransportPropertyDtos;
-
-                if (commonTransportProperties != undefined) {
-                    var transportCommonPropertyLoop = 0;
-                    var commonProperty = "commonProperty_";
-                    var commonRequiredProperty = "commonProperty_Required_";
-                    var tableRow = transportInputTable.insertRow(transportInputTable.rows.length);
-                    tableRow.innerHTML = '<td colspan="2" class="middle-header"><fmt:message key='transport.common.tooltip'/> <input type="checkbox" id="commonCheckbox" onclick="enableMyInput(this)" align="bottom"/></td> ';
-
-                    $.each(commonTransportProperties, function (index, commonTransportProperty) {
-                        loadTransportProperties(commonTransportProperty, transportInputTable, transportCommonPropertyLoop, commonProperty, commonRequiredProperty ,'commonFields')
-                        transportCommonPropertyLoop = transportCommonPropertyLoop + 1;
-
-                    });
-                }
-
-                if (inputTransportProperties != undefined) {
-                    var transportInputPropertyLoop = 0;
-                    var inputProperty = "inputProperty_";
-                    var inputRequiredProperty = "inputProperty_Required_";
-                    alert(inputTransportProperties)
-                    var tableRow = transportInputTable.insertRow(transportInputTable.rows.length);
-                    tableRow.innerHTML = '<td colspan="2" class="middle-header"><fmt:message key='transport.input.tooltip'/> <input type="checkbox" id="inputCheckbox" onclick="enableMyInput(this)" align="bottom"/></td> ';
-
-                    $.each(inputTransportProperties, function (index, inputTransportProperty) {
-                        loadTransportProperties(inputTransportProperty, transportInputTable, transportInputPropertyLoop, inputProperty, inputRequiredProperty,'inputFields')
-                        transportInputPropertyLoop = transportInputPropertyLoop + 1;
+                           });
+                       }
 
 
-                    });
-                }
+                       if (outputTransportProperties != undefined) {
+                           var transportOutputPropertyLoop = 0;
+                           var outputProperty = "outputProperty_";
+                           var outputRequiredProperty = "outputProperty_Required_";
+                           alert(outputTransportProperties)
+                           var tableRow = transportInputTable.insertRow(transportInputTable.rows.length);
+                           tableRow.innerHTML = '<td colspan="2" class="middle-header"><fmt:message key='transport.output.tooltip'/>  <input type="checkbox" id="outputCheckbox" onclick="enableMyInput(this)" align="bottom"/> </td>';
+
+                           $.each(outputTransportProperties, function (index,
+                                                                       outputTransportProperty) {
+                               loadTransportProperties(outputTransportProperty, transportInputTable, transportOutputPropertyLoop, outputProperty, outputRequiredProperty, 'outputFields')
+                               transportOutputPropertyLoop = transportOutputPropertyLoop + 1;
+
+                           });
+                       }
 
 
-                if (outputTransportProperties != undefined) {
-                    var transportOutputPropertyLoop = 0;
-                    var outputProperty = "outputProperty_";
-                    var outputRequiredProperty = "outputProperty_Required_";
-                    alert(outputTransportProperties)
-                    var tableRow = transportInputTable.insertRow(transportInputTable.rows.length);
-                    tableRow.innerHTML = '<td colspan="2" class="middle-header"><fmt:message key='transport.output.tooltip'/>  <input type="checkbox" id="outputCheckbox" onclick="enableMyInput(this)" align="bottom"/> </td>';
-
-                    $.each(outputTransportProperties, function (index, outputTransportProperty) {
-                        loadTransportProperties(outputTransportProperty, transportInputTable, transportOutputPropertyLoop, outputProperty, outputRequiredProperty,'outputFields')
-                        transportOutputPropertyLoop = transportOutputPropertyLoop + 1;
-
-                    });
-                }
+                   }
 
 
-            }
-
-
-        }
-    });
+               }
+           });
 }
 
-function loadTransportProperties(transportProperty, transportInputTable, transportPropertyLoop, propertyValue, requiredValue ,classType) {
+function loadTransportProperties(transportProperty, transportInputTable, transportPropertyLoop,
+                                 propertyValue, requiredValue, classType) {
 
     var property = transportProperty.localDisplayName.trim();
     var tableRow = transportInputTable.insertRow(transportInputTable.rows.length);
@@ -311,7 +319,7 @@ function loadTransportProperties(transportProperty, transportInputTable, transpo
 
 
     var inputField = tableRow.insertCell(1);
-    inputField.innerHTML = '<div class="' +classType +'"> <input style="width:50%" type="' + textPasswordType + '"disabled=disabled"'+ '" id="' + requiredElementId + transportPropertyLoop + '" name="' + transportProperty.localKey + '" value="' + defaultValue + '" class="initE"  /> <br/> <div class="sectionHelp">' + hint + '</div></div>';
+    inputField.innerHTML = '<div class="' + classType + '"> <input style="width:50%" type="' + textPasswordType + '"disabled=disabled"' + '" id="' + requiredElementId + transportPropertyLoop + '" name="' + transportProperty.localKey + '" value="' + defaultValue + '" class="initE"  /> <br/> <div class="sectionHelp">' + hint + '</div></div>';
 
 }
 
@@ -392,11 +400,13 @@ function enableMyInput(obj) {
     <td><select name="transportTypeFilter"
                 onchange="showTransportProperties()">
         <%
-            TransportManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
-            String[] transportNames = stub.getTransportNames();
+            TransportAdaptorManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
+            String[] transportNames = stub.getTransportAdaptorNames();
+            TransportAdaptorPropertiesDto transportAdaptorPropertiesDto = null;
             String firstTransportName = null;
             if (transportNames != null) {
                 firstTransportName = transportNames[0];
+                transportAdaptorPropertiesDto = stub.getAllTransportAdaptorPropertiesDto(firstTransportName);
                 for (String type : transportNames) {
         %>
         <option><%=type%>
@@ -417,7 +427,7 @@ function enableMyInput(obj) {
 </tr>
 
 <%
-    if ((stub.getCommonTransportProperties(firstTransportName)) != null & firstTransportName != null) {
+    if ((transportAdaptorPropertiesDto.getCommonTransportAdaptorPropertyDtos()) != null & firstTransportName != null) {
 %>
 <tr>
     <td colspan="2" class="middle-header">
@@ -429,7 +439,7 @@ function enableMyInput(obj) {
 
     <% //Input fields for common transport adaptor properties
 
-        TransportPropertyDto[] commonTransportProperties = stub.getCommonTransportProperties(firstTransportName);
+        TransportAdaptorPropertyDto[] commonTransportProperties = transportAdaptorPropertiesDto.getCommonTransportAdaptorPropertyDtos();
 
         //Need to add other types of properties also here
 
@@ -458,7 +468,8 @@ function enableMyInput(obj) {
         }
     %>
     <td>
-        <div class=commonFields><input type="<%=type%>" name="<%=commonTransportProperties[index].getKey()%>"
+        <div class=commonFields><input type="<%=type%>"
+                                       name="<%=commonTransportProperties[index].getKey()%>"
                                        id="<%=propertyId%><%=index%>" class="initE"
                                        style="width:50%"
                                        value="<%= (commonTransportProperties[index].getDefaultValue()) != null ? commonTransportProperties[index].getDefaultValue() : "" %>"
@@ -481,7 +492,7 @@ function enableMyInput(obj) {
 
 
     //Input fields for input transport adaptor properties
-    if ((stub.getInputTransportProperties(firstTransportName)) != null & firstTransportName != null) {
+    if ((transportAdaptorPropertiesDto.getInputTransportAdaptorPropertyDtos()) != null & firstTransportName != null) {
 
 %>
 
@@ -494,7 +505,7 @@ function enableMyInput(obj) {
 </tr>
 
 <%
-    TransportPropertyDto[] inputTransportProperties = stub.getInputTransportProperties(firstTransportName);
+    TransportAdaptorPropertyDto[] inputTransportProperties = transportAdaptorPropertiesDto.getInputTransportAdaptorPropertyDtos();
 
     if (inputTransportProperties != null) {
         for (int index = 0; index < inputTransportProperties.length; index++) {
@@ -521,7 +532,8 @@ function enableMyInput(obj) {
     %>
 
     <td>
-        <div class=inputFields><input type="<%=type%>" name="<%=inputTransportProperties[index].getKey()%>"
+        <div class=inputFields><input type="<%=type%>"
+                                      name="<%=inputTransportProperties[index].getKey()%>"
                                       id="<%=propertyId%><%=index%>" class="initE"
                                       style="width:50%"
                                       value="<%= (inputTransportProperties[index].getDefaultValue()) != null ? inputTransportProperties[index].getDefaultValue() : "" %>"
@@ -541,7 +553,7 @@ function enableMyInput(obj) {
 
 %>
 <%
-    if ((stub.getOutputTransportProperties(firstTransportName)) != null & firstTransportName != null) {
+    if ((transportAdaptorPropertiesDto.getOutputTransportAdaptorPropertyDtos()) != null & firstTransportName != null) {
 %>
 
 <tr>
@@ -554,7 +566,7 @@ function enableMyInput(obj) {
 
     //Input fields for output transport adaptor properties
 
-    TransportPropertyDto[] outTransportProperties = stub.getOutputTransportProperties(firstTransportName);
+    TransportAdaptorPropertyDto[] outTransportProperties = transportAdaptorPropertiesDto.getOutputTransportAdaptorPropertyDtos();
 
     //Need to add other types of properties also here
 
@@ -584,7 +596,8 @@ function enableMyInput(obj) {
     %>
 
     <td>
-        <div class=outputFields><input type="<%=type%>" name="<%=outTransportProperties[index].getKey()%>"
+        <div class=outputFields><input type="<%=type%>"
+                                       name="<%=outTransportProperties[index].getKey()%>"
                                        id="<%=propertyId%><%=index%>" class="initE"
                                        style="width:50%"
                                        value="<%= (outTransportProperties[index].getDefaultValue()) != null ? outTransportProperties[index].getDefaultValue() : "" %>"

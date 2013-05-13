@@ -1,4 +1,5 @@
-<%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.TransportManagerAdminServiceStub" %>
+<%@ page
+        import="org.wso2.carbon.transport.adaptor.manager.stub.TransportAdaptorManagerAdminServiceStub" %>
 <%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportAdaptorFileDto" %>
 <%@ page import="org.wso2.carbon.transport.adaptor.manager.ui.UIUtils" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -27,8 +28,8 @@
     <%
         String filePath = request.getParameter("filePath");
         if (filePath != null) {
-            TransportManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
-            stub.removeTransportAdaptorFile(filePath);
+            TransportAdaptorManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
+            stub.removeTransportAdaptorConfigurationFile(filePath);
     %>
     <script type="text/javascript">CARBON.showInfoDialog('Transport File successfully deleted.');</script>
     <%
@@ -42,8 +43,8 @@
             <table class="styledLeft">
 
                 <%
-                    TransportManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
-                    TransportAdaptorFileDto[] transportDetailsArray = stub.getUnDeployedFiles();
+                    TransportAdaptorManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
+                    TransportAdaptorFileDto[] transportDetailsArray = stub.getNotDeployedTransportAdaptorConfigurationFiles();
                     if (transportDetailsArray != null) {
                         for (TransportAdaptorFileDto transportAdaptorFile : transportDetailsArray) {
 
@@ -58,9 +59,7 @@
                 <tbody>
                 <tr>
                     <td>
-                        <a href="transport_details.jsp?filePath=<%=transportAdaptorFile.getFilePath()%>&transportName=<%=transportAdaptorFile.getTransportAdaptorName()%>"><%=transportAdaptorFile.getFilePath()%>
-                        </a>
-
+                        <%=transportAdaptorFile.getFilePath().substring(transportAdaptorFile.getFilePath().lastIndexOf('/')+1,transportAdaptorFile.getFilePath().length())%>
                     </td>
                     <td><%=transportAdaptorFile.getTransportAdaptorName()%>
                     </td>
@@ -69,6 +68,10 @@
                            class="icon-link"
                            onclick="doDelete('<%=transportAdaptorFile.getFilePath()%>')"><font
                                 color="#4682b4">Delete</font></a>
+                        <a style="background-image: url(../admin/images/edit.gif);"
+                           class="icon-link"
+                           href="edit_transport_details.jsp?transportPath=<%=transportAdaptorFile.getFilePath()%>"><font
+                                color="#4682b4">Source View</font></a>
                     </td>
 
                 </tr>

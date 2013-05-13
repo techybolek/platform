@@ -1,4 +1,4 @@
-<service name="TransportManagerAdminService">
+<service name="TransportAdaptorManagerAdminService">
     <transports>
         <transport>https</transport>
     </transports>
@@ -11,56 +11,59 @@
                          class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
     </messageReceivers>
     <parameter name="ServiceClass">
-        org.wso2.carbon.transport.adaptor.manager.admin.internal.TransportManagerAdminService
+        org.wso2.carbon.transport.adaptor.manager.admin.internal.TransportAdaptorManagerAdminService
     </parameter>
 
-    <parameter name="AuthorizationAction" locked="false">/permission/admin/manage/brokerManager</parameter>
-    <operation name="getTransportNames">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager</parameter>
+    <parameter name="AuthorizationAction" locked="false">/permission/admin/manage/brokerManager
+    </parameter>
+    <operation name="getTransportAdaptorNames">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        </parameter>
     </operation>
-    <operation name="getInputTransportProperties">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager</parameter>
+    <operation name="getAllTransportAdaptorPropertiesDto">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        </parameter>
     </operation>
-    <operation name="getOutputTransportProperties">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager</parameter>
+    <operation name="addTransportAdaptorConfiguration">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        </parameter>
     </operation>
-    <operation name="getCommonTransportProperties">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager</parameter>
+    <operation name="removeTransportAdaptorConfiguration">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        </parameter>
     </operation>
-    <operation name="getAllTransportAdaptorProperties">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager</parameter>
+    <operation name="removeTransportAdaptorConfigurationFile">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        </parameter>
     </operation>
-    <operation name="addTransportConfiguration">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager</parameter>
-    </operation>
-    <operation name="removeTransportConfiguration">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager</parameter>
-    </operation>
-    <operation name="removeTransportAdaptorFile">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager</parameter>
-    </operation>
-    <operation name="getAllTransportConfigurationNamesAndTypes">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager</parameter>
-    </operation>
-    <operation name="getUnDeployedFiles">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager</parameter>
-    </operation>
-    <operation name="getInputTransportConfiguration">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager</parameter>
-    </operation>
-    <operation name="getOutputTransportConfiguration">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager</parameter>
-    </operation>
-    <operation name="getCommonTransportConfiguration">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager</parameter>
+    <operation name="getNotDeployedTransportAdaptorConfigurationFiles">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        </parameter>
     </operation>
     <operation name="getTransportAdaptorConfigurationFile">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager</parameter>
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        </parameter>
     </operation>
     <operation name="editTransportAdaptorConfigurationFile">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager</parameter>
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        </parameter>
     </operation>
-
+    <operation name="getTransportAdaptorConfigurationDetails">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        </parameter>
+    </operation>
+    <operation name="getAllTransportAdaptorConfigurationInfo">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        </parameter>
+    </operation>
+    <operation name="getNotDeployedTransportAdaptorConfigurationFile">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        </parameter>
+    </operation>
+    <operation name="editNotDeployedTransportAdaptorConfigurationFile">
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        </parameter>
+    </operation>
     <parameter name="adminService" locked="true">false</parameter>
     <parameter name="hiddenService" locked="true">false</parameter>
 </service>

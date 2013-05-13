@@ -1,4 +1,4 @@
-package org.wso2.carbon.transport.adaptor.manager.admin.internal.exception;
+package org.wso2.carbon.transport.adaptor.manager.admin.internal;
 
 /**
  * Copyright (c) 2009, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
@@ -15,19 +15,27 @@ package org.wso2.carbon.transport.adaptor.manager.admin.internal.exception;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class TransportManagerAdminServiceException extends Exception {
-    public TransportManagerAdminServiceException() {
+
+/**
+ * Transport Configuration Details are stored
+ */
+public class TransportAdaptorConfigurationInfoDto {
+    private String transportAdaptorName;
+    private String transportAdaptorType;
+
+    public String getTransportAdaptorName() {
+        return transportAdaptorName;
     }
 
-    public TransportManagerAdminServiceException(String message) {
-        super(message);
+    public void setTransportAdaptorName(String transportAdaptorName) {
+        this.transportAdaptorName = transportAdaptorName;
     }
 
-    public TransportManagerAdminServiceException(String message, Throwable cause) {
-        super(message, cause);
+    public String getTransportAdaptorType() {
+        return transportAdaptorType;
     }
 
-    public TransportManagerAdminServiceException(Throwable cause) {
-        super(cause);
+    public void setTransportAdaptorType(String transportAdaptorType) {
+        this.transportAdaptorType = transportAdaptorType;
     }
 }

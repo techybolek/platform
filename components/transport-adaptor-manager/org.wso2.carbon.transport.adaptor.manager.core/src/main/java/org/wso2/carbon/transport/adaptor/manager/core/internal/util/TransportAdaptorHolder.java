@@ -23,26 +23,23 @@ public class TransportAdaptorHolder {
 
 
     // Not deleted the file for the moment because of possibility of future need
-    private static TransportAdaptorHolder instance;
-    private static TransportAdaptorService transportAdaptorService;
+    private static TransportAdaptorHolder instance = new TransportAdaptorHolder();;
+    private TransportAdaptorService transportAdaptorService;
 
     public static TransportAdaptorHolder getInstance() {
-        if (instance == null) {
-            instance = new TransportAdaptorHolder();
-        }
         return instance;
     }
 
     public void setTransportAdaptorService(TransportAdaptorService transportAdaptorService) {
-        TransportAdaptorHolder.transportAdaptorService = transportAdaptorService;
+        this.transportAdaptorService = transportAdaptorService;
     }
 
     public void unSetTransportAdaptorService() {
-        TransportAdaptorHolder.transportAdaptorService = null;
+        this.transportAdaptorService = null;
     }
 
     public TransportAdaptorService getTransportAdaptorService() {
-        return TransportAdaptorHolder.transportAdaptorService;
+        return this.transportAdaptorService;
     }
 
 

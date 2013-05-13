@@ -27,29 +27,36 @@ import org.wso2.carbon.transport.adaptor.core.TransportAdaptorDto;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorFile;
-import org.wso2.carbon.transport.adaptor.manager.core.TransportManagerService;
-import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportManagerConfigurationException;
-import org.wso2.carbon.transport.adaptor.manager.core.internal.config.TransportConfigurationFilesystemInvoker;
-import org.wso2.carbon.transport.adaptor.manager.core.internal.config.TransportConfigurationHelper;
-import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TMConstants;
+import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorManagerService;
+import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportAdaptorManagerConfigurationException;
+import org.wso2.carbon.transport.adaptor.manager.core.internal.config.TransportAdaptorConfigurationFilesystemInvoker;
+import org.wso2.carbon.transport.adaptor.manager.core.internal.config.TransportAdaptorConfigurationHelper;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportAdaptorHolder;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportAdaptorInfo;
+import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportAdaptorManagerConstants;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * carbon implementation of the transport manager.
  */
-public class CarbonTransportManagerService implements TransportManagerService {
-    private static final Log log = LogFactory.getLog(CarbonTransportManagerService.class);
+public class CarbonTransportAdaptorManagerService implements TransportAdaptorManagerService {
+    private static final Log log = LogFactory.getLog(CarbonTransportAdaptorManagerService.class);
 
     /**
      * transport configuration map to keep the transport configuration details
@@ -62,14 +69,15 @@ public class CarbonTransportManagerService implements TransportManagerService {
     private Map<Integer, List<TransportAdaptorFile>> transportAdaptorFileMap;
 
 
-    public CarbonTransportManagerService() {
+    public CarbonTransportAdaptorManagerService() {
         tenantSpecificTransportConfigurationMap = new ConcurrentHashMap<Integer, Map<String, TransportAdaptorConfiguration>>();
         transportAdaptorFileMap = new ConcurrentHashMap<Integer, List<TransportAdaptorFile>>();
         tenantSpecificInputTransportInfoMap = new HashMap<Integer, Map<String, TransportAdaptorInfo>>();
         tenantSpecificOutputTransportInfoMap = new HashMap<Integer, Map<String, TransportAdaptorInfo>>();
     }
 
-    public void addFileConfiguration(int tenantId, String transportAdaptorName, String filePath, boolean flag) {
+    public void addFileConfiguration(int tenantId, String transportAdaptorName, String filePath,
+                                     boolean flag) {
 
         List<TransportAdaptorFile> transportAdaptorFileList = transportAdaptorFileMap.get(tenantId);
 
@@ -95,52 +103,80 @@ public class CarbonTransportManagerService implements TransportManagerService {
 
     }
 
-    public void editTransportConfigurationFile(String transportAdaptorConfiguration, String transportAdaptorName, AxisConfiguration axisConfiguration) throws TransportManagerConfigurationException {
+    public void editTransportAdaptorConfigurationFile(String transportAdaptorConfiguration,
+                                                      String transportAdaptorName,
+                                                      AxisConfiguration axisConfiguration)
+            throws TransportAdaptorManagerConfigurationException {
         int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
 
         try {
             OMElement omElement = AXIOMUtil.stringToOM(transportAdaptorConfiguration);
             omElement.toString();
-            if (TransportConfigurationHelper.validateTransportAdaptorConfiguration(tenantId, TransportConfigurationHelper.fromOM(omElement))) {
+            if (TransportAdaptorConfigurationHelper.validateTransportAdaptorConfiguration(tenantId, TransportAdaptorConfigurationHelper.fromOM(omElement))) {
                 String pathInFileSystem = getFilePath(tenantId, transportAdaptorName);
-                removeTransportConfiguration(transportAdaptorName, axisConfiguration);
-                TransportConfigurationFilesystemInvoker.saveConfigurationToFileSystem(omElement, transportAdaptorName, pathInFileSystem, axisConfiguration);
+                removeTransportAdaptorConfiguration(transportAdaptorName, axisConfiguration);
+                TransportAdaptorConfigurationFilesystemInvoker.saveConfigurationToFileSystem(omElement, transportAdaptorName, pathInFileSystem, axisConfiguration);
             }
         } catch (XMLStreamException e) {
             log.error("Error while creating the xml object");
+            throw new TransportAdaptorManagerConfigurationException("Not a valid xml object" ,e);
         }
     }
 
+    public void editNotDeployedTransportAdaptorConfigurationFile(String transportAdaptorConfiguration,
+                                                                 String filePath,
+                                                                 AxisConfiguration axisConfiguration)
+            throws TransportAdaptorManagerConfigurationException{
+        try {
+            OMElement omElement = AXIOMUtil.stringToOM(transportAdaptorConfiguration);
+            omElement.toString();
 
-    public void saveTransportConfiguration(TransportAdaptorConfiguration transportAdaptorConfiguration,
-                                           AxisConfiguration axisConfiguration) throws TransportManagerConfigurationException {
+            int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+            if (TransportAdaptorConfigurationHelper.validateTransportAdaptorConfiguration(tenantId, TransportAdaptorConfigurationHelper.fromOM(omElement))) {
+                removeTransportAdaptorConfigurationFile(filePath,axisConfiguration);
+                TransportAdaptorConfigurationFilesystemInvoker.saveConfigurationToFileSystem(omElement,TransportAdaptorConfigurationHelper.fromOM(omElement).getName(),filePath,axisConfiguration);
+            }
+        }
+        catch (XMLStreamException e) {
+            log.error("Error while creating the xml object");
+            throw new TransportAdaptorManagerConfigurationException("Not a valid xml object" ,e);
+        }
+
+    }
+
+
+    public void saveTransportAdaptorConfiguration(
+            TransportAdaptorConfiguration transportAdaptorConfiguration,
+            AxisConfiguration axisConfiguration)
+            throws TransportAdaptorManagerConfigurationException {
 
         String transportName = transportAdaptorConfiguration.getName();
-        OMElement omElement = TransportConfigurationHelper.transportAdaptorConfigurationToOM(transportAdaptorConfiguration);
+        OMElement omElement = TransportAdaptorConfigurationHelper.transportAdaptorConfigurationToOM(transportAdaptorConfiguration);
         int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
 
-        if (TransportConfigurationHelper.validateTransportAdaptorConfiguration(tenantId, TransportConfigurationHelper.fromOM(omElement))) {
+        if (TransportAdaptorConfigurationHelper.validateTransportAdaptorConfiguration(tenantId, TransportAdaptorConfigurationHelper.fromOM(omElement))) {
             File directory = new File(axisConfiguration.getRepository().getPath());
             if (!directory.exists()) {
                 if (directory.mkdir()) {
-                    throw new TransportManagerConfigurationException("Cannot create directory to add tenant specific transport adaptor :" + transportName);
+                    throw new TransportAdaptorManagerConfigurationException("Cannot create directory to add tenant specific transport adaptor :" + transportName);
                 }
             }
-            directory = new File(directory.getAbsolutePath() + File.separator + TMConstants.TM_ELE_DIRECTORY);
+            directory = new File(directory.getAbsolutePath() + File.separator + TransportAdaptorManagerConstants.TM_ELE_DIRECTORY);
             if (!directory.exists()) {
                 if (!directory.mkdir()) {
-                    throw new TransportManagerConfigurationException("Cannot create directory " + TMConstants.TM_ELE_DIRECTORY + " to add tenant specific transport adaptor :" + transportName);
+                    throw new TransportAdaptorManagerConfigurationException("Cannot create directory " + TransportAdaptorManagerConstants.TM_ELE_DIRECTORY + " to add tenant specific transport adaptor :" + transportName);
                 }
             }
 
             String pathInFileSystem = directory.getAbsolutePath() + File.separator + transportName + ".xml";
-            TransportConfigurationFilesystemInvoker.saveConfigurationToFileSystem(omElement, transportName, pathInFileSystem, axisConfiguration);
+            TransportAdaptorConfigurationFilesystemInvoker.saveConfigurationToFileSystem(omElement, transportName, pathInFileSystem, axisConfiguration);
         }
     }
 
 
-    public void removeTransportConfiguration(String transportAdaptorName,
-                                             AxisConfiguration axisConfiguration) throws TransportManagerConfigurationException {
+    public void removeTransportAdaptorConfiguration(String transportAdaptorName,
+                                                    AxisConfiguration axisConfiguration)
+            throws TransportAdaptorManagerConfigurationException {
         int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
 
         List<TransportAdaptorFile> transportAdaptorFileList = transportAdaptorFileMap.get(tenantId);
@@ -158,7 +194,7 @@ public class CarbonTransportManagerService implements TransportManagerService {
                         log.error("Could not delete " + filePath);
                     } else {
                         log.info(filePath + " is deleted from the file system");
-                        TransportConfigurationFilesystemInvoker.executeUnDeploy(filePath, axisConfiguration);
+                        TransportAdaptorConfigurationFilesystemInvoker.executeUnDeploy(filePath, axisConfiguration);
 
                     }
                     break;
@@ -169,7 +205,9 @@ public class CarbonTransportManagerService implements TransportManagerService {
 
     }
 
-    public void removeTransportAdaptorFile(String filePath, AxisConfiguration axisConfiguration) throws TransportManagerConfigurationException {
+    public void removeTransportAdaptorConfigurationFile(String filePath,
+                                                        AxisConfiguration axisConfiguration)
+            throws TransportAdaptorManagerConfigurationException {
 
         File file = new File(filePath);
         if (file.exists()) {
@@ -179,14 +217,16 @@ public class CarbonTransportManagerService implements TransportManagerService {
             } else {
 
                 log.info(filePath + " is deleted from the file system");
-                TransportConfigurationFilesystemInvoker.executeUnDeploy(filePath, axisConfiguration);
+                TransportAdaptorConfigurationFilesystemInvoker.executeUnDeploy(filePath, axisConfiguration);
             }
         }
 
     }
 
     @Override
-    public String getTransportConfigurationFile(String transportAdaptorName, AxisConfiguration axisConfiguration) throws TransportManagerConfigurationException {
+    public String getTransportAdaptorConfigurationFile(String transportAdaptorName,
+                                                       AxisConfiguration axisConfiguration)
+            throws TransportAdaptorManagerConfigurationException {
         int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
 
         OMElement transportAdaptorOMElement = null;
@@ -209,8 +249,30 @@ public class CarbonTransportManagerService implements TransportManagerService {
         return transportAdaptorOMElement.toString();
     }
 
+    public String getNotDeployedTransportAdaptorConfigurationFile(String filePath)
+            throws TransportAdaptorManagerConfigurationException {
 
-    public List<TransportAdaptorConfiguration> getAllTransportConfigurations(AxisConfiguration axisConfiguration) {
+        BufferedReader bufferedReader = null;
+        StringBuffer stringBuffer = new StringBuffer();
+        try {
+            bufferedReader = new BufferedReader(new FileReader(filePath));
+            String line = null;
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuffer.append(line).append("\n");
+            }
+        } catch (FileNotFoundException e) {
+            throw new TransportAdaptorManagerConfigurationException("Transport Adaptor file not found",e);
+        } catch (IOException e) {
+            throw new TransportAdaptorManagerConfigurationException("Cannot read the transport Adaptor file",e);
+        }
+
+        return stringBuffer.toString().trim();
+    }
+
+
+    public List<TransportAdaptorConfiguration> getAllTransportAdaptorConfiguration(
+            AxisConfiguration axisConfiguration)
+            throws TransportAdaptorManagerConfigurationException {
         List<TransportAdaptorConfiguration> transportAdaptorConfigurations = new ArrayList<TransportAdaptorConfiguration>();
         int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
         if (tenantSpecificTransportConfigurationMap.get(tenantId) != null) {
@@ -222,7 +284,8 @@ public class CarbonTransportManagerService implements TransportManagerService {
         return transportAdaptorConfigurations;
     }
 
-    public List<TransportAdaptorFile> getUnDeployedFiles(AxisConfiguration axisConfiguration) {
+    public List<TransportAdaptorFile> getNotDeployedTransportAdaptorConfigurationFiles(
+            AxisConfiguration axisConfiguration) {
 
         List<TransportAdaptorFile> unDeployedTransportAdaptorFileList = new ArrayList<TransportAdaptorFile>();
         int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
@@ -238,18 +301,22 @@ public class CarbonTransportManagerService implements TransportManagerService {
 
 
     @Override
-    public TransportAdaptorConfiguration getTransportConfiguration(String name, AxisConfiguration axisConfiguration) throws TransportManagerConfigurationException {
+    public TransportAdaptorConfiguration getTransportAdaptorConfiguration(String name,
+                                                                          AxisConfiguration axisConfiguration)
+            throws TransportAdaptorManagerConfigurationException {
 
         int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
 
         if (tenantSpecificTransportConfigurationMap.get(tenantId) == null) {
-            throw new TransportManagerConfigurationException("There is no any configuration exists for " + tenantId);
+            throw new TransportAdaptorManagerConfigurationException("There is no any configuration exists for " + tenantId);
         }
         return tenantSpecificTransportConfigurationMap.get(tenantId).get(name);
     }
 
     @Override
-    public Map<String, String> getInputTransportAdaptorConfiguration(String transportAdaptorName, int tenantId) {
+    public Map<String, String> getInputTransportAdaptorConfiguration(String
+                                                                             transportAdaptorName,
+                                                                     int tenantId) {
 
         Map<String, TransportAdaptorConfiguration> transportAdaptors = tenantSpecificTransportConfigurationMap.get(tenantId);
         Map<String, String> inProperties = null;
@@ -281,7 +348,9 @@ public class CarbonTransportManagerService implements TransportManagerService {
 
 
     @Override
-    public Map<String, String> getOutputTransportAdaptorConfiguration(String transportAdaptorName, int tenantId) {
+    public Map<String, String> getOutputTransportAdaptorConfiguration(String
+                                                                              transportAdaptorName,
+                                                                      int tenantId) {
 
         Map<String, TransportAdaptorConfiguration> transportAdaptors = tenantSpecificTransportConfigurationMap.get(tenantId);
         Map<String, String> outProperties = null;
@@ -335,7 +404,9 @@ public class CarbonTransportManagerService implements TransportManagerService {
     }
 
 
-    private void addToTenantSpecificTransportAdaptorInfoMap(int tenantId, TransportAdaptorConfiguration transportAdaptorConfiguration) throws TransportManagerConfigurationException {
+    private void addToTenantSpecificTransportAdaptorInfoMap(int tenantId,
+                                                            TransportAdaptorConfiguration transportAdaptorConfiguration)
+            throws TransportAdaptorManagerConfigurationException {
 
         TransportAdaptorService transportAdaptorService = TransportAdaptorHolder.getInstance().getTransportAdaptorService();
         TransportAdaptorDto transportAdaptorDto = transportAdaptorService.getTransportAdaptorDto(transportAdaptorConfiguration.getType());
@@ -355,7 +426,8 @@ public class CarbonTransportManagerService implements TransportManagerService {
         }
     }
 
-    private void addToInputTransportInfoMap(int tenantId, TransportAdaptorConfiguration transportAdaptorConfiguration) {
+    private void addToInputTransportInfoMap(int tenantId,
+                                            TransportAdaptorConfiguration transportAdaptorConfiguration) {
 
 
         TransportAdaptorInfo transportAdaptorInfo = new TransportAdaptorInfo();
@@ -377,7 +449,8 @@ public class CarbonTransportManagerService implements TransportManagerService {
 
     }
 
-    private void addToOutputTransportInfoMap(int tenantId, TransportAdaptorConfiguration transportAdaptorConfiguration) {
+    private void addToOutputTransportInfoMap(int tenantId,
+                                             TransportAdaptorConfiguration transportAdaptorConfiguration) {
 
         TransportAdaptorInfo transportAdaptorInfo = new TransportAdaptorInfo();
         transportAdaptorInfo.setTransportAdaptorName(transportAdaptorConfiguration.getName());
@@ -398,7 +471,8 @@ public class CarbonTransportManagerService implements TransportManagerService {
     }
 
 
-    private void removeFromTenantSpecificTransportAdaptorInfoMap(int tenantId, String transportAdaptorName) {
+    private void removeFromTenantSpecificTransportAdaptorInfoMap(int tenantId,
+                                                                 String transportAdaptorName) {
 
         Map<String, TransportAdaptorInfo> inputTransportAdaptorInfoMap = tenantSpecificInputTransportInfoMap.get(tenantId);
         Map<String, TransportAdaptorInfo> outputTransportAdaptorInfoMap = tenantSpecificOutputTransportInfoMap.get(tenantId);
@@ -436,7 +510,8 @@ public class CarbonTransportManagerService implements TransportManagerService {
     }
 
 
-    private OMElement getTransportOMElement(String path, File transportAdaptorFile) throws TransportManagerConfigurationException {
+    private OMElement getTransportOMElement(String path, File transportAdaptorFile)
+            throws TransportAdaptorManagerConfigurationException {
         OMElement transportAdaptorElement;
         BufferedInputStream inputStream = null;
         try {
@@ -451,7 +526,7 @@ public class CarbonTransportManagerService implements TransportManagerService {
         } catch (Exception e) {
             String errorMessage = " .xml file cannot be found in the path : " + path;
             log.error(errorMessage, e);
-            throw new TransportManagerConfigurationException(errorMessage, e);
+            throw new TransportAdaptorManagerConfigurationException(errorMessage, e);
         } finally {
             try {
                 if (inputStream != null) {
@@ -506,7 +581,8 @@ public class CarbonTransportManagerService implements TransportManagerService {
 
 
     public void addTransportConfigurationForTenant(
-            int tenantId, TransportAdaptorConfiguration transportAdaptorConfiguration) throws TransportManagerConfigurationException {
+            int tenantId, TransportAdaptorConfiguration transportAdaptorConfiguration)
+            throws TransportAdaptorManagerConfigurationException {
         Map<String, TransportAdaptorConfiguration> transportConfigurationMap
                 = tenantSpecificTransportConfigurationMap.get(tenantId);
         if (transportConfigurationMap == null) {

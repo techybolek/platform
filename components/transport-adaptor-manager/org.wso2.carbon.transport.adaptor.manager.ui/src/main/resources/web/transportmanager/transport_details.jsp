@@ -1,6 +1,10 @@
-<%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.TransportManagerAdminServiceStub" %>
-<%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportPropertyDto" %>
-<%@ page import="org.wso2.carbon.transport.adaptor.manager.ui.UIUtils" %>
+<%@ page
+        import="org.wso2.carbon.transport.adaptor.manager.stub.TransportAdaptorManagerAdminServiceStub" %>
+<%@ page
+        import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportAdaptorPropertiesDto" %>
+<%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportAdaptorPropertyDto" %>
+<%@ page
+        import="org.wso2.carbon.transport.adaptor.manager.ui.UIUtils" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
@@ -29,11 +33,14 @@
                     String transportName = request.getParameter("transportName");
                     String transportType = request.getParameter("transportType");
                     if (transportName != null) {
-                        TransportManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
+                        TransportAdaptorManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
 
-                        TransportPropertyDto[] inputTransportProperties = stub.getInputTransportConfiguration(transportName);
-                        TransportPropertyDto[] outputTransportProperties = stub.getOutputTransportConfiguration(transportName);
-                        TransportPropertyDto[] commonTransportProperties = stub.getCommonTransportConfiguration(transportName);
+
+                        TransportAdaptorPropertiesDto transportAdaptorPropertiesDto = stub.getTransportAdaptorConfigurationDetails(transportName);
+                        TransportAdaptorPropertyDto[] inputTransportProperties = transportAdaptorPropertiesDto.getInputTransportAdaptorPropertyDtos();
+                        TransportAdaptorPropertyDto[] outputTransportProperties = transportAdaptorPropertiesDto.getOutputTransportAdaptorPropertyDtos();
+                        TransportAdaptorPropertyDto[] commonTransportProperties = transportAdaptorPropertiesDto.getCommonTransportAdaptorPropertyDtos();
+
 
                 %>
                 <tr>
@@ -56,23 +63,23 @@
                 </tr>
                 <%
                     if (commonTransportProperties != null) {
-                        for (TransportPropertyDto transportPropertyDto : commonTransportProperties) {
+                        for (TransportAdaptorPropertyDto transportAdaptorPropertyDto : commonTransportProperties) {
 
                 %>
 
                 <tr>
-                    <td><%=transportPropertyDto.getDisplayName()%>
+                    <td><%=transportAdaptorPropertyDto.getDisplayName()%>
                     </td>
                     <%
-                        if (!transportPropertyDto.getSecured()) {
+                        if (!transportAdaptorPropertyDto.getSecured()) {
                     %>
-                    <td><input type="input" value="<%=transportPropertyDto.getValue()%>"
+                    <td><input type="input" value="<%=transportAdaptorPropertyDto.getValue()%>"
                                disabled="true"
                                style="width:50%"/>
                     </td>
                     <%
                     } else { %>
-                    <td><input type="password" value="<%=transportPropertyDto.getValue()%>"
+                    <td><input type="password" value="<%=transportAdaptorPropertyDto.getValue()%>"
                                disabled="true"
                                style="width:50%"/>
                     </td>
@@ -86,23 +93,23 @@
                     }
 
                     if (inputTransportProperties != null) {
-                        for (TransportPropertyDto transportPropertyDto : inputTransportProperties) {
+                        for (TransportAdaptorPropertyDto transportAdaptorPropertyDto : inputTransportProperties) {
 
                 %>
 
                 <tr>
-                    <td><%=transportPropertyDto.getDisplayName()%>
+                    <td><%=transportAdaptorPropertyDto.getDisplayName()%>
                     </td>
                     <%
-                        if (!transportPropertyDto.getSecured()) {
+                        if (!transportAdaptorPropertyDto.getSecured()) {
                     %>
-                    <td><input type="input" value="<%=transportPropertyDto.getValue()%>"
+                    <td><input type="input" value="<%=transportAdaptorPropertyDto.getValue()%>"
                                disabled="true"
                                style="width:50%"/>
                     </td>
                     <%
                     } else { %>
-                    <td><input type="password" value="<%=transportPropertyDto.getValue()%>"
+                    <td><input type="password" value="<%=transportAdaptorPropertyDto.getValue()%>"
                                disabled="true"
                                style="width:50%"/>
                     </td>
@@ -116,23 +123,23 @@
                     }
 
                     if (outputTransportProperties != null) {
-                        for (TransportPropertyDto transportPropertyDto : outputTransportProperties) {
+                        for (TransportAdaptorPropertyDto transportAdaptorPropertyDto : outputTransportProperties) {
 
                 %>
 
                 <tr>
-                    <td><%=transportPropertyDto.getDisplayName()%>
+                    <td><%=transportAdaptorPropertyDto.getDisplayName()%>
                     </td>
                     <%
-                        if (!transportPropertyDto.getSecured()) {
+                        if (!transportAdaptorPropertyDto.getSecured()) {
                     %>
-                    <td><input type="input" value="<%=transportPropertyDto.getValue()%>"
+                    <td><input type="input" value="<%=transportAdaptorPropertyDto.getValue()%>"
                                disabled="true"
                                style="width:50%"/>
                     </td>
                     <%
                     } else { %>
-                    <td><input type="password" value="<%=transportPropertyDto.getValue()%>"
+                    <td><input type="password" value="<%=transportAdaptorPropertyDto.getValue()%>"
                                disabled="true"
                                style="width:50%"/>
                     </td>

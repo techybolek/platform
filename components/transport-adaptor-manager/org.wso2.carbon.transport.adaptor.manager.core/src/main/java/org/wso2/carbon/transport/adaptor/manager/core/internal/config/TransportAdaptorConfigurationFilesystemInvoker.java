@@ -22,20 +22,23 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorDeployer;
-import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportManagerConfigurationException;
+import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportAdaptorManagerConfigurationException;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class TransportConfigurationFilesystemInvoker {
+public class TransportAdaptorConfigurationFilesystemInvoker {
 
-    private static final Log log = LogFactory.getLog(TransportConfigurationFilesystemInvoker.class);
+    private static final Log log = LogFactory.getLog(TransportAdaptorConfigurationFilesystemInvoker.class);
 
-    public static void saveConfigurationToFileSystem(OMElement transportAdaptorElement, String transportName, String pathInFileSystem, AxisConfiguration axisConfiguration) throws TransportManagerConfigurationException {
+    public static void saveConfigurationToFileSystem(OMElement transportAdaptorElement,
+                                                     String transportName, String pathInFileSystem,
+                                                     AxisConfiguration axisConfiguration)
+            throws TransportAdaptorManagerConfigurationException {
 
-        TransportConfigurationFilesystemInvoker.save(transportAdaptorElement.toString(), transportName, pathInFileSystem, axisConfiguration);
+        TransportAdaptorConfigurationFilesystemInvoker.save(transportAdaptorElement.toString(), transportName, pathInFileSystem, axisConfiguration);
 
     }
 

@@ -19,7 +19,7 @@ package org.wso2.carbon.transport.adaptor.manager.admin.internal;
 /**
  * Transport property related attributes are stored
  */
-public class TransportPropertyDto {
+public class TransportAdaptorPropertyDto {
     // property name
     private String key;
     // value of the property
@@ -62,10 +62,10 @@ public class TransportPropertyDto {
         this.hint = hint;
     }
 
-    public TransportPropertyDto() {
+    public TransportAdaptorPropertyDto() {
     }
 
-    public TransportPropertyDto(String key, String value) {
+    public TransportAdaptorPropertyDto(String key, String value) {
         this.key = key;
         this.value = value;
     }

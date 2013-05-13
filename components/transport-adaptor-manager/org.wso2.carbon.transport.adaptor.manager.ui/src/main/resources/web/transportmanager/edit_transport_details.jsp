@@ -1,5 +1,5 @@
-<%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.TransportManagerAdminServiceStub" %>
-<%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportPropertyDto" %>
+<%@ page
+        import="org.wso2.carbon.transport.adaptor.manager.stub.TransportAdaptorManagerAdminServiceStub" %>
 <%@ page import="org.wso2.carbon.transport.adaptor.manager.ui.UIUtils" %>
 <%@ page import="java.util.ResourceBundle" %>
 
@@ -29,7 +29,8 @@
 
     <link type="text/css" href="../dialog/js/jqueryui/tabs/ui.all.css" rel="stylesheet"/>
     <script type="text/javascript" src="../dialog/js/jqueryui/tabs/jquery-1.2.6.min.js"></script>
-    <script type="text/javascript" src="../dialog/js/jqueryui/tabs/jquery-ui-1.6.custom.min.js"></script>
+    <script type="text/javascript"
+            src="../dialog/js/jqueryui/tabs/jquery-ui-1.6.custom.min.js"></script>
     <script type="text/javascript" src="../dialog/js/jqueryui/tabs/jquery.cookie.js"></script>
 
     <!--Yahoo includes for dom event handling-->
@@ -59,13 +60,19 @@
     <%
         String transportName = request.getParameter("transportName");
         String transportType = request.getParameter("transportType");
+        String transportPath = request.getParameter("transportPath");
+
         String transportAdaptorFile = "";
         if (transportName != null) {
-            TransportManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
-
+            TransportAdaptorManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
             transportAdaptorFile = stub.getTransportAdaptorConfigurationFile(transportName);
 
+        } else if (transportPath != null) {
+            TransportAdaptorManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
+            transportAdaptorFile = stub.getNotDeployedTransportAdaptorConfigurationFile(transportPath);
+
         }
+
         Boolean loadEditArea = true;
         String synapseConfig = transportAdaptorFile;
 
@@ -74,10 +81,10 @@
     <% if (loadEditArea) { %>
     <script type="text/javascript">
         editAreaLoader.init({
-            id:"rawConfig"        // text area id
-            , syntax:"xml"            // syntax to be uses for highlighting
-            , start_highlight:true  // to display with highlight mode on start-up
-        });
+                                id:"rawConfig"        // text area id
+                                , syntax:"xml"            // syntax to be uses for highlighting
+                                , start_highlight:true  // to display with highlight mode on start-up
+                            });
     </script>
     <% } %>
 
@@ -92,22 +99,50 @@
             var parameters = "?transportName=" + transportName + "&transportConfiguration=" + newTransportAdaptorConfiguration;
 
             $.ajax({
-                type:"POST",
-                url:"edit_transport_ajaxprocessor.jsp" + parameters,
-                contentType:"application/json; charset=utf-8",
-                dataType:"text",
-                data:{},
-                async:false,
-                success:function (msg) {
-                    if (msg.trim() == "true") {
-                        form.submit();
-                    } else {
-                        CARBON.showErrorDialog("Failed to add transport adaptor, Exception: " + msg);
-                    }
-                }
-            });
+                       type:"POST",
+                       url:"edit_transport_ajaxprocessor.jsp" + parameters,
+                       contentType:"application/json; charset=utf-8",
+                       dataType:"text",
+                       data:{},
+                       async:false,
+                       success:function (msg) {
+                           if (msg.trim() == "true") {
+                               form.submit();
+                           } else {
+                               CARBON.showErrorDialog("Failed to add transport adaptor, Exception: " + msg);
+                           }
+                       }
+                   });
 
         }
+
+        function updateNotDeployedConfiguration(form, transportPath) {
+            var newTransportAdaptorConfiguration = ""
+
+            if (document.getElementById("rawConfig") != null) {
+                newTransportAdaptorConfiguration = editAreaLoader.getValue("rawConfig");
+            }
+
+            var parameters = "?transportPath=" + transportPath + "&transportConfiguration=" + newTransportAdaptorConfiguration;
+
+            $.ajax({
+                       type:"POST",
+                       url:"edit_transport_ajaxprocessor.jsp" + parameters,
+                       contentType:"application/json; charset=utf-8",
+                       dataType:"text",
+                       data:{},
+                       async:false,
+                       success:function (msg) {
+                           if (msg.trim() == "true") {
+                               form.submit();
+                           } else {
+                               CARBON.showErrorDialog("Failed to add transport adaptor, Exception: " + msg);
+                           }
+                       }
+                   });
+
+        }
+
 
         function resetConfiguration(form) {
 
@@ -160,10 +195,26 @@
                     </tr>
                     <tr>
                         <td class="buttonRow">
+                            <%
+                                if (transportName != null) {
+                            %>
+
                             <button class="button"
                                     onclick="updateConfiguration(document.getElementById('configform'),'<%=transportName%>'); return false;">
                                 <fmt:message
                                         key="update"/></button>
+
+                            <%
+                            } else if (transportPath != null) {
+                            %>
+                            <button class="button"
+                                    onclick="updateNotDeployedConfiguration(document.getElementById('configform'),'<%=transportPath%>'); return false;">
+                                <fmt:message
+                                        key="update"/></button>
+
+                            <%
+                                }
+                            %>
                             <button class="button"
                                     onclick="resetConfiguration(document.getElementById('configform')); return false;">
                                 <fmt:message

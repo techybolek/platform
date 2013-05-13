@@ -20,21 +20,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
-import org.wso2.carbon.transport.adaptor.manager.core.TransportManagerService;
+import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorManagerService;
+import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportAdaptorManagerConfigurationException;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.build.Axis2ConfigurationContextObserverImpl;
-import org.wso2.carbon.transport.adaptor.manager.core.internal.build.TransportManagerServiceBuilder;
+import org.wso2.carbon.transport.adaptor.manager.core.internal.build.TransportAdaptorManagerServiceBuilder;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportAdaptorHolder;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
 /**
  * @scr.component name="transportmanager.component" immediate="true"
- * @scr.reference name="transportservice.service"
+ * @scr.reference name="transport.adaptor.service"
  * interface="org.wso2.carbon.transport.adaptor.core.TransportAdaptorService" cardinality="1..1"
  * policy="dynamic" bind="setTransportAdaptorService" unbind="unSetTransportAdaptorService"
  */
-public class TransportManagerDS {
+public class TransportAdaptorManagerDS {
 
-    private static final Log log = LogFactory.getLog(TransportManagerDS.class);
+    private static final Log log = LogFactory.getLog(TransportAdaptorManagerDS.class);
 
     /**
      * initialize the Transport Manager core service here.
@@ -44,15 +45,18 @@ public class TransportManagerDS {
     protected void activate(ComponentContext context) {
 
         try {
-            TransportManagerService transportProxyService =
-                    TransportManagerServiceBuilder.createTransportManagerService();
+            TransportAdaptorManagerService transportAdaptorProxyService =
+                    TransportAdaptorManagerServiceBuilder.createTransportAdaptorManagerService();
 
-            context.getBundleContext().registerService(TransportManagerService.class.getName(),
-                    transportProxyService, null);
+            context.getBundleContext().registerService(TransportAdaptorManagerService.class.getName(),
+                                                       transportAdaptorProxyService, null);
             registerAxis2ConfigurationContextObserver(context);
             log.info("Successfully deployed the transport manager service");
-        } catch (Throwable e) {
+        } catch (RuntimeException e) {
             log.error("Can not create the transport manager service ", e);
+        }
+        catch (TransportAdaptorManagerConfigurationException e) {
+            log.error("Error occurred when creating the Adaptor manager configuration ", e);
         }
     }
 
@@ -66,8 +70,8 @@ public class TransportManagerDS {
 
     private void registerAxis2ConfigurationContextObserver(ComponentContext context) {
         context.getBundleContext().registerService(Axis2ConfigurationContextObserver.class.getName(),
-                new Axis2ConfigurationContextObserverImpl(),
-                null);
+                                                   new Axis2ConfigurationContextObserverImpl(),
+                                                   null);
     }
 
 }

@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.transport.adaptor.manager.core.internal.util;
 
-public interface TMConstants {
+public interface TransportAdaptorManagerConstants {
 
     String TM_CONF_NS = "http://wso2.org/carbon/transportmanager";
     String TM_ELE_ROOT_ELEMENT = "transportAdaptor";

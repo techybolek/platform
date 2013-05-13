@@ -15,19 +15,20 @@ package org.wso2.carbon.transport.adaptor.manager.core.internal.util;/*
  */
 
 
-import org.wso2.carbon.transport.adaptor.manager.core.internal.CarbonTransportManagerService;
+import org.wso2.carbon.transport.adaptor.manager.core.internal.CarbonTransportAdaptorManagerService;
 
-public class TransportManagerValueHolder {
+public class TransportAdaptorManagerValueHolder {
 
-    private static CarbonTransportManagerService carbonTransportManagerService;
+    private static CarbonTransportAdaptorManagerService carbonTransportAdaptorManagerService;
 
-    public static void registerCarbonTransportManagerService(CarbonTransportManagerService carbonTransportManagerService) {
+    public static void registerCarbonTransportAdaptorManagerService(
+            CarbonTransportAdaptorManagerService carbonTransportAdaptorManagerService) {
 
-        TransportManagerValueHolder.carbonTransportManagerService = carbonTransportManagerService;
+        TransportAdaptorManagerValueHolder.carbonTransportAdaptorManagerService = carbonTransportAdaptorManagerService;
 
     }
 
-    public static CarbonTransportManagerService getCarbonTransportManagerService() {
-        return TransportManagerValueHolder.carbonTransportManagerService;
+    public static CarbonTransportAdaptorManagerService getCarbonTransportAdaptorManagerService() {
+        return TransportAdaptorManagerValueHolder.carbonTransportAdaptorManagerService;
     }
 }

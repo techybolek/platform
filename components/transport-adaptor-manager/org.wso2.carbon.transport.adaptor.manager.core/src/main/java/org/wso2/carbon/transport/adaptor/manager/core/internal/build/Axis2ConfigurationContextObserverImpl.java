@@ -18,13 +18,13 @@ public class Axis2ConfigurationContextObserverImpl
         int tenantId = PrivilegedCarbonContext.getCurrentContext(
                 configurationContext).getTenantId();
         System.out.println("--------------- A new Axis2 Configuration context is created for : " +
-                tenantDomain);
+                           tenantDomain);
         log.info("Loading Brokers Specific to tenant when the tenant logged in");
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getCurrentContext().setTenantId(tenantId);
             PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
-            //TransportManagerServiceBuilder.loadConfigurationsFromRegistry();
+
         } catch (Exception e) {
             log.error("Unable to load brokers from registry ", e);
         } finally {

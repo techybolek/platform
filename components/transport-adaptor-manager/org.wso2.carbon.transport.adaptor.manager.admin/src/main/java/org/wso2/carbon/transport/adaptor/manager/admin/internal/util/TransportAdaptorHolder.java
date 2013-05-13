@@ -1,6 +1,7 @@
 package org.wso2.carbon.transport.adaptor.manager.admin.internal.util;
 
-import org.wso2.carbon.transport.adaptor.manager.core.TransportManagerService;
+
+import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 
 /**
  * Copyright (c) 2009, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
@@ -17,27 +18,26 @@ import org.wso2.carbon.transport.adaptor.manager.core.TransportManagerService;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class TransportManagerHolder {
-    private TransportManagerService transportManagerService;
-    private static TransportManagerHolder instance = new TransportManagerHolder();
+public final class TransportAdaptorHolder {
+    private TransportAdaptorService transportService;
+    private static TransportAdaptorHolder instance = new TransportAdaptorHolder();
 
-    private TransportManagerHolder() {
+    private TransportAdaptorHolder() {
     }
 
-    public TransportManagerService getTransportManagerService() {
-        return transportManagerService;
+    public TransportAdaptorService getTransportService() {
+        return transportService;
     }
 
-    public static TransportManagerHolder getInstance() {
+    public static TransportAdaptorHolder getInstance() {
         return instance;
     }
 
-    public void registerTransportManagerService(TransportManagerService transportManagerService) {
-        this.transportManagerService = transportManagerService;
+    public void registerTransportService(TransportAdaptorService transportService) {
+        this.transportService = transportService;
     }
 
-    public void unRegisterTransportManagerService(TransportManagerService transportManagerService) {
-        this.transportManagerService = null;
+    public void unRegisterTransportService(TransportAdaptorService transportService) {
+        this.transportService = null;
     }
-
 }
