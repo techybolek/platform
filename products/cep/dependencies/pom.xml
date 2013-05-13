@@ -30,6 +30,7 @@
         <module>../../../components/transport-adaptor</module>
         <module>../../../components/transport-adaptor-manager</module>
         <module>../../../components/event-builder</module>
+        <module>../../../components/event-processor</module>
 
         <module>../../../features/transport-adaptor</module>
         <module>../../../features/transport-adaptor-manager</module>
