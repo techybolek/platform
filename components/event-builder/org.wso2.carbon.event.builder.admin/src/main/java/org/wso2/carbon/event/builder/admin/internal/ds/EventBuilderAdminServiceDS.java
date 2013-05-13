@@ -21,7 +21,7 @@ package org.wso2.carbon.event.builder.admin.internal.ds;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.event.builder.admin.internal.util.EventBuilderAdminValueHolder;
 import org.wso2.carbon.event.builder.core.EventBuilderService;
-import org.wso2.carbon.transport.adaptor.manager.core.TransportManagerService;
+import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorManagerService;
 
 /**
  * This class is used to get the EventBuilder service.
@@ -31,8 +31,8 @@ import org.wso2.carbon.transport.adaptor.manager.core.TransportManagerService;
  * interface="org.wso2.carbon.event.builder.core.EventBuilderService" cardinality="1..1"
  * policy="dynamic" bind="setEventBuilderService" unbind="unsetEventBuilderService"
  * @scr.reference name="transportManager.service"
- * interface="org.wso2.carbon.transport.adaptor.manager.core.TransportManagerService" cardinality="1..1"
- * policy="dynamic" bind="setTransportManagerService" unbind="unsetTransportManagerService"
+ * interface="org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorManagerService" cardinality="1..1"
+ * policy="dynamic" bind="setTransportAdaptorManagerService" unbind="unsetTransportAdaptorManagerService"
  */
 public class EventBuilderAdminServiceDS {
     protected void activate(ComponentContext context) {
@@ -47,11 +47,11 @@ public class EventBuilderAdminServiceDS {
         EventBuilderAdminValueHolder.registerEventBuilderService(null);
     }
 
-    protected void setTransportManagerService(TransportManagerService transportManagerService) {
+    protected void setTransportAdaptorManagerService(TransportAdaptorManagerService transportManagerService) {
 
     }
 
-    protected void unsetTransportManagerService(TransportManagerService transportManagerService) {
+    protected void unsetTransportAdaptorManagerService(TransportAdaptorManagerService transportManagerService) {
 
     }
 }
