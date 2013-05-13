@@ -19,21 +19,37 @@
 package org.wso2.carbon.event.builder.core.config;
 
 import org.wso2.carbon.databridge.commons.StreamDefinition;
+import org.wso2.carbon.event.builder.core.InputMapping;
+import org.wso2.carbon.event.builder.core.internal.TupleInputMapping;
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class EventBuilderConfiguration {
+public class EventBuilderConfiguration<T extends InputMapping> {
 
     private StreamDefinition streamDefinition;
     private InputTransportMessageConfiguration inputTransportMessageConfiguration;
+    private List<T> inputMappings;
     private String name;
     private String type;
     private Map<String, String> eventBuilderConfigurationProperties = new ConcurrentHashMap<String, String>();
 
+    public EventBuilderConfiguration() {
+
+    }
+
     public EventBuilderConfiguration(InputTransportMessageConfiguration inputTransportMessageConfiguration) {
         this.inputTransportMessageConfiguration = inputTransportMessageConfiguration;
+    }
+
+    public List<T> getInputMappings() {
+        return inputMappings;
+    }
+
+    public void addInputMapping(T inputMapping) {
+        this.inputMappings.add(inputMapping);
     }
 
     public Map<String, String> getEventBuilderConfigurationProperties() {

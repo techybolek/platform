@@ -28,9 +28,7 @@ public class EventBuilderConfigurationFileHandler {
     private static final Log log = LogFactory.getLog(EventBuilderConfigurationFileHandler.class);
 
     public static void saveConfigurationToFileSystem(OMElement ebConfigElement, String eventBuilderName, String pathInFileSystem) throws EventBuilderConfigurationException {
-
         EventBuilderConfigurationFileHandler.save(ebConfigElement.toString(), eventBuilderName, pathInFileSystem);
-
     }
 
     public static void save(String event, String eventBuilderName,
@@ -44,8 +42,6 @@ public class EventBuilderConfigurationFileHandler {
         } catch (IOException e) {
             log.error("Error while saving " + eventBuilderName, e);
         }
-
     }
-
 
 }

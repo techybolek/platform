@@ -21,7 +21,7 @@
     <artifactId>event-builder</artifactId>
     <groupId>org.wso2.carbon</groupId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - Event Builder</name>
+    <name>WSO2 Carbon - Event Builder Aggregator Module</name>
     <description>WSO2 Carbon Event Builder is used to build an event from an available transport adaptor or otherwise</description>
     <version>1.0.0-SNAPSHOT</version>
     <url>http://wso2.org</url>

@@ -4,6 +4,7 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
 import org.wso2.carbon.event.builder.core.*;
@@ -62,35 +63,44 @@ public class CarbonEventBuilderService implements EventBuilderService {
     }
 
     private void testSubscription(EventBuilderConfiguration eventBuilderConfiguration, AxisConfiguration axisConfiguration) throws EventBuilderConfigurationException {
-        InputTransportMessageConfiguration messageConfiguration = eventBuilderConfiguration.getInputTransportMessageConfiguration();
-        String streamName = messageConfiguration.getInputMessageProperties().get("streamName");
-        String version = messageConfiguration.getInputMessageProperties().get("version");
+        StreamDefinition streamDefinition = eventBuilderConfiguration.getStreamDefinition();
+        eventBuilderMap.put(streamDefinition, new TupleInputEventBuilder(eventBuilderConfiguration));
+        subscribe(streamDefinition, new Wso2EventListener() {
+            @Override
+            public void onEvent(Event event) {
+                log.debug(event);
 
-        StreamDefinition streamDefinition = null;
-        try {
-            streamDefinition = new StreamDefinition(streamName, version);
-            eventBuilderMap.put(streamDefinition, new TupleInputEventBuilder(eventBuilderConfiguration));
-            subscribe(streamDefinition, new BasicEventListener() {
-                @Override
-                public void onEvent(Object[] event) {
-                    System.out.println("Yippee!!! " + event);
-                }
+            }
 
-                @Override
-                public void onAddDefinition(Object definition) {
-                    //To change body of implemented methods use File | Settings | File Templates.
-                }
+            @Override
+            public void onAddDefinition(Object definition) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
 
-                @Override
-                public void onRemoveDefinition(Object definition) {
-                    //To change body of implemented methods use File | Settings | File Templates.
-                }
-            }, axisConfiguration);
+            @Override
+            public void onRemoveDefinition(Object definition) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+        }, axisConfiguration);
 
-        } catch (MalformedStreamDefinitionException e) {
-            log.error("Cannot define stream:" + e.getMessage());
-            throw new EventBuilderConfigurationException(e);
-        }
+        eventBuilderMap.put(streamDefinition, new TupleInputEventBuilder(eventBuilderConfiguration));
+        subscribe(streamDefinition, new BasicEventListener() {
+            @Override
+            public void onEvent(Object[] event) {
+                log.debug(event);
+            }
+
+            @Override
+            public void onAddDefinition(Object definition) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            @Override
+            public void onRemoveDefinition(Object definition) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+        }, axisConfiguration);
+
     }
 
     @Override

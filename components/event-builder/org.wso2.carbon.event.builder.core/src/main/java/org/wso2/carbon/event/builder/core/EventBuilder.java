@@ -21,10 +21,12 @@ package org.wso2.carbon.event.builder.core;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
+import org.wso2.carbon.event.builder.core.exception.EventBuilderConfigurationException;
+import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
 
 public interface EventBuilder {
 
-    public void subscribe(EventListener eventListener, AxisConfiguration axisConfiguration);
+    public void subscribe(EventListener eventListener, AxisConfiguration axisConfiguration) throws EventBuilderConfigurationException;
 
     public void unsubscribe(EventListener eventListener);
 

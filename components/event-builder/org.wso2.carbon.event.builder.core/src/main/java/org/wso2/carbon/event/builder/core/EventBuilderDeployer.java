@@ -85,7 +85,7 @@ public class EventBuilderDeployer extends AbstractDeployer {
 
         } catch (Throwable t) {
             carbonEventBuilderService.addFileConfiguration(tenantID, eventBuilderName, path, false);
-            log.error("The deployment of " + eventBuilderConfigFile.getName() + " is not valid.", t);
+            log.error("Invalid configuration at " + eventBuilderConfigFile.getName(), t);
             throw new DeploymentException(t);
         }
 
