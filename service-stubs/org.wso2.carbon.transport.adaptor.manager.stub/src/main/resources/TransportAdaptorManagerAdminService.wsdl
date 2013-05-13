@@ -1,0 +1,630 @@
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax2349="http://internal.admin.manager.adaptor.transport.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://internal.admin.manager.adaptor.transport.carbon.wso2.org" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://internal.admin.manager.adaptor.transport.carbon.wso2.org">
+    <wsdl:documentation>TransportAdaptorManagerAdminService</wsdl:documentation>
+    <wsdl:types>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://internal.admin.manager.adaptor.transport.carbon.wso2.org/xsd">
+            <xs:complexType name="TransportAdaptorPropertiesDto">
+                <xs:sequence>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="commonTransportAdaptorPropertyDtos" nillable="true" type="ax2349:TransportAdaptorPropertyDto"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="inputTransportAdaptorPropertyDtos" nillable="true" type="ax2349:TransportAdaptorPropertyDto"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="outputTransportAdaptorPropertyDtos" nillable="true" type="ax2349:TransportAdaptorPropertyDto"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="TransportAdaptorPropertyDto">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="defaultValue" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="displayName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="hint" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="key" nillable="true" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="options" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="required" type="xs:boolean"/>
+                    <xs:element minOccurs="0" name="secured" type="xs:boolean"/>
+                    <xs:element minOccurs="0" name="value" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="TransportAdaptorFileDto">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="filePath" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="TransportAdaptorConfigurationInfoDto">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="transportAdaptorType" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+        <xs:schema xmlns:ax2350="http://internal.admin.manager.adaptor.transport.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://internal.admin.manager.adaptor.transport.carbon.wso2.org">
+            <xs:import namespace="http://internal.admin.manager.adaptor.transport.carbon.wso2.org/xsd"/>
+            <xs:element name="removeTransportAdaptorConfigurationFile">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="filePath" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="removeTransportAdaptorConfiguration">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getTransportAdaptorNames">
+                <xs:complexType>
+                    <xs:sequence/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getTransportAdaptorNamesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getTransportAdaptorConfigurationFile">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getTransportAdaptorConfigurationFileResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getTransportAdaptorConfigurationDetails">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getTransportAdaptorConfigurationDetailsResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2349:TransportAdaptorPropertiesDto"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getNotDeployedTransportAdaptorConfigurationFiles">
+                <xs:complexType>
+                    <xs:sequence/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getNotDeployedTransportAdaptorConfigurationFilesResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2349:TransportAdaptorFileDto"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getNotDeployedTransportAdaptorConfigurationFile">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="filePath" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getNotDeployedTransportAdaptorConfigurationFileResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAllTransportAdaptorPropertiesDto">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAllTransportAdaptorPropertiesDtoResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2349:TransportAdaptorPropertiesDto"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAllTransportAdaptorConfigurationInfo">
+                <xs:complexType>
+                    <xs:sequence/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getAllTransportAdaptorConfigurationInfoResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2349:TransportAdaptorConfigurationInfoDto"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="editTransportAdaptorConfigurationFile">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorConfiguration" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="editNotDeployedTransportAdaptorConfigurationFile">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorConfiguration" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="filePath" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addTransportAdaptorConfiguration">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="transportAdaptorType" nillable="true" type="xs:string"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="inputAdaptorPropertyDtos" nillable="true" type="ax2349:TransportAdaptorPropertyDto"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="outputAdaptorPropertyDtos" nillable="true" type="ax2349:TransportAdaptorPropertyDto"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="commonAdaptorPropertyDtos" nillable="true" type="ax2349:TransportAdaptorPropertyDto"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="getTransportAdaptorConfigurationFileRequest">
+        <wsdl:part name="parameters" element="ns:getTransportAdaptorConfigurationFile"/>
+    </wsdl:message>
+    <wsdl:message name="getTransportAdaptorConfigurationFileResponse">
+        <wsdl:part name="parameters" element="ns:getTransportAdaptorConfigurationFileResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getAllTransportAdaptorConfigurationInfoRequest">
+        <wsdl:part name="parameters" element="ns:getAllTransportAdaptorConfigurationInfo"/>
+    </wsdl:message>
+    <wsdl:message name="getAllTransportAdaptorConfigurationInfoResponse">
+        <wsdl:part name="parameters" element="ns:getAllTransportAdaptorConfigurationInfoResponse"/>
+    </wsdl:message>
+    <wsdl:message name="editTransportAdaptorConfigurationFileRequest">
+        <wsdl:part name="parameters" element="ns:editTransportAdaptorConfigurationFile"/>
+    </wsdl:message>
+    <wsdl:message name="editTransportAdaptorConfigurationFileResponse"/>
+    <wsdl:message name="getTransportAdaptorNamesRequest">
+        <wsdl:part name="parameters" element="ns:getTransportAdaptorNames"/>
+    </wsdl:message>
+    <wsdl:message name="getTransportAdaptorNamesResponse">
+        <wsdl:part name="parameters" element="ns:getTransportAdaptorNamesResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getAllTransportAdaptorPropertiesDtoRequest">
+        <wsdl:part name="parameters" element="ns:getAllTransportAdaptorPropertiesDto"/>
+    </wsdl:message>
+    <wsdl:message name="getAllTransportAdaptorPropertiesDtoResponse">
+        <wsdl:part name="parameters" element="ns:getAllTransportAdaptorPropertiesDtoResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getTransportAdaptorConfigurationDetailsRequest">
+        <wsdl:part name="parameters" element="ns:getTransportAdaptorConfigurationDetails"/>
+    </wsdl:message>
+    <wsdl:message name="getTransportAdaptorConfigurationDetailsResponse">
+        <wsdl:part name="parameters" element="ns:getTransportAdaptorConfigurationDetailsResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getNotDeployedTransportAdaptorConfigurationFilesRequest">
+        <wsdl:part name="parameters" element="ns:getNotDeployedTransportAdaptorConfigurationFiles"/>
+    </wsdl:message>
+    <wsdl:message name="getNotDeployedTransportAdaptorConfigurationFilesResponse">
+        <wsdl:part name="parameters" element="ns:getNotDeployedTransportAdaptorConfigurationFilesResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getNotDeployedTransportAdaptorConfigurationFileRequest">
+        <wsdl:part name="parameters" element="ns:getNotDeployedTransportAdaptorConfigurationFile"/>
+    </wsdl:message>
+    <wsdl:message name="getNotDeployedTransportAdaptorConfigurationFileResponse">
+        <wsdl:part name="parameters" element="ns:getNotDeployedTransportAdaptorConfigurationFileResponse"/>
+    </wsdl:message>
+    <wsdl:message name="editNotDeployedTransportAdaptorConfigurationFileRequest">
+        <wsdl:part name="parameters" element="ns:editNotDeployedTransportAdaptorConfigurationFile"/>
+    </wsdl:message>
+    <wsdl:message name="editNotDeployedTransportAdaptorConfigurationFileResponse"/>
+    <wsdl:message name="addTransportAdaptorConfigurationRequest">
+        <wsdl:part name="parameters" element="ns:addTransportAdaptorConfiguration"/>
+    </wsdl:message>
+    <wsdl:message name="addTransportAdaptorConfigurationResponse"/>
+    <wsdl:message name="removeTransportAdaptorConfigurationFileRequest">
+        <wsdl:part name="parameters" element="ns:removeTransportAdaptorConfigurationFile"/>
+    </wsdl:message>
+    <wsdl:message name="removeTransportAdaptorConfigurationFileResponse"/>
+    <wsdl:message name="removeTransportAdaptorConfigurationRequest">
+        <wsdl:part name="parameters" element="ns:removeTransportAdaptorConfiguration"/>
+    </wsdl:message>
+    <wsdl:message name="removeTransportAdaptorConfigurationResponse"/>
+    <wsdl:portType name="TransportAdaptorManagerAdminServicePortType">
+        <wsdl:operation name="getTransportAdaptorConfigurationFile">
+            <wsdl:input message="ns:getTransportAdaptorConfigurationFileRequest" wsaw:Action="urn:getTransportAdaptorConfigurationFile"/>
+            <wsdl:output message="ns:getTransportAdaptorConfigurationFileResponse" wsaw:Action="urn:getTransportAdaptorConfigurationFileResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getAllTransportAdaptorConfigurationInfo">
+            <wsdl:input message="ns:getAllTransportAdaptorConfigurationInfoRequest" wsaw:Action="urn:getAllTransportAdaptorConfigurationInfo"/>
+            <wsdl:output message="ns:getAllTransportAdaptorConfigurationInfoResponse" wsaw:Action="urn:getAllTransportAdaptorConfigurationInfoResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="editTransportAdaptorConfigurationFile">
+            <wsdl:input message="ns:editTransportAdaptorConfigurationFileRequest" wsaw:Action="urn:editTransportAdaptorConfigurationFile"/>
+            <wsdl:output message="ns:editTransportAdaptorConfigurationFileResponse" wsaw:Action="urn:editTransportAdaptorConfigurationFileResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getTransportAdaptorNames">
+            <wsdl:input message="ns:getTransportAdaptorNamesRequest" wsaw:Action="urn:getTransportAdaptorNames"/>
+            <wsdl:output message="ns:getTransportAdaptorNamesResponse" wsaw:Action="urn:getTransportAdaptorNamesResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getAllTransportAdaptorPropertiesDto">
+            <wsdl:input message="ns:getAllTransportAdaptorPropertiesDtoRequest" wsaw:Action="urn:getAllTransportAdaptorPropertiesDto"/>
+            <wsdl:output message="ns:getAllTransportAdaptorPropertiesDtoResponse" wsaw:Action="urn:getAllTransportAdaptorPropertiesDtoResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getTransportAdaptorConfigurationDetails">
+            <wsdl:input message="ns:getTransportAdaptorConfigurationDetailsRequest" wsaw:Action="urn:getTransportAdaptorConfigurationDetails"/>
+            <wsdl:output message="ns:getTransportAdaptorConfigurationDetailsResponse" wsaw:Action="urn:getTransportAdaptorConfigurationDetailsResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getNotDeployedTransportAdaptorConfigurationFiles">
+            <wsdl:input message="ns:getNotDeployedTransportAdaptorConfigurationFilesRequest" wsaw:Action="urn:getNotDeployedTransportAdaptorConfigurationFiles"/>
+            <wsdl:output message="ns:getNotDeployedTransportAdaptorConfigurationFilesResponse" wsaw:Action="urn:getNotDeployedTransportAdaptorConfigurationFilesResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getNotDeployedTransportAdaptorConfigurationFile">
+            <wsdl:input message="ns:getNotDeployedTransportAdaptorConfigurationFileRequest" wsaw:Action="urn:getNotDeployedTransportAdaptorConfigurationFile"/>
+            <wsdl:output message="ns:getNotDeployedTransportAdaptorConfigurationFileResponse" wsaw:Action="urn:getNotDeployedTransportAdaptorConfigurationFileResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="editNotDeployedTransportAdaptorConfigurationFile">
+            <wsdl:input message="ns:editNotDeployedTransportAdaptorConfigurationFileRequest" wsaw:Action="urn:editNotDeployedTransportAdaptorConfigurationFile"/>
+            <wsdl:output message="ns:editNotDeployedTransportAdaptorConfigurationFileResponse" wsaw:Action="urn:editNotDeployedTransportAdaptorConfigurationFileResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="addTransportAdaptorConfiguration">
+            <wsdl:input message="ns:addTransportAdaptorConfigurationRequest" wsaw:Action="urn:addTransportAdaptorConfiguration"/>
+            <wsdl:output message="ns:addTransportAdaptorConfigurationResponse" wsaw:Action="urn:addTransportAdaptorConfigurationResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="removeTransportAdaptorConfigurationFile">
+            <wsdl:input message="ns:removeTransportAdaptorConfigurationFileRequest" wsaw:Action="urn:removeTransportAdaptorConfigurationFile"/>
+            <wsdl:output message="ns:removeTransportAdaptorConfigurationFileResponse" wsaw:Action="urn:removeTransportAdaptorConfigurationFileResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="removeTransportAdaptorConfiguration">
+            <wsdl:input message="ns:removeTransportAdaptorConfigurationRequest" wsaw:Action="urn:removeTransportAdaptorConfiguration"/>
+            <wsdl:output message="ns:removeTransportAdaptorConfigurationResponse" wsaw:Action="urn:removeTransportAdaptorConfigurationResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="TransportAdaptorManagerAdminServiceSoap11Binding" type="ns:TransportAdaptorManagerAdminServicePortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="getTransportAdaptorConfigurationFile">
+            <soap:operation soapAction="urn:getTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllTransportAdaptorConfigurationInfo">
+            <soap:operation soapAction="urn:getAllTransportAdaptorConfigurationInfo" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="editTransportAdaptorConfigurationFile">
+            <soap:operation soapAction="urn:editTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getTransportAdaptorNames">
+            <soap:operation soapAction="urn:getTransportAdaptorNames" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllTransportAdaptorPropertiesDto">
+            <soap:operation soapAction="urn:getAllTransportAdaptorPropertiesDto" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getNotDeployedTransportAdaptorConfigurationFiles">
+            <soap:operation soapAction="urn:getNotDeployedTransportAdaptorConfigurationFiles" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getTransportAdaptorConfigurationDetails">
+            <soap:operation soapAction="urn:getTransportAdaptorConfigurationDetails" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getNotDeployedTransportAdaptorConfigurationFile">
+            <soap:operation soapAction="urn:getNotDeployedTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="addTransportAdaptorConfiguration">
+            <soap:operation soapAction="urn:addTransportAdaptorConfiguration" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="editNotDeployedTransportAdaptorConfigurationFile">
+            <soap:operation soapAction="urn:editNotDeployedTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="removeTransportAdaptorConfigurationFile">
+            <soap:operation soapAction="urn:removeTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="removeTransportAdaptorConfiguration">
+            <soap:operation soapAction="urn:removeTransportAdaptorConfiguration" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="TransportAdaptorManagerAdminServiceSoap12Binding" type="ns:TransportAdaptorManagerAdminServicePortType">
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="getTransportAdaptorConfigurationFile">
+            <soap12:operation soapAction="urn:getTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllTransportAdaptorConfigurationInfo">
+            <soap12:operation soapAction="urn:getAllTransportAdaptorConfigurationInfo" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="editTransportAdaptorConfigurationFile">
+            <soap12:operation soapAction="urn:editTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getTransportAdaptorNames">
+            <soap12:operation soapAction="urn:getTransportAdaptorNames" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllTransportAdaptorPropertiesDto">
+            <soap12:operation soapAction="urn:getAllTransportAdaptorPropertiesDto" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getNotDeployedTransportAdaptorConfigurationFiles">
+            <soap12:operation soapAction="urn:getNotDeployedTransportAdaptorConfigurationFiles" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getTransportAdaptorConfigurationDetails">
+            <soap12:operation soapAction="urn:getTransportAdaptorConfigurationDetails" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getNotDeployedTransportAdaptorConfigurationFile">
+            <soap12:operation soapAction="urn:getNotDeployedTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="addTransportAdaptorConfiguration">
+            <soap12:operation soapAction="urn:addTransportAdaptorConfiguration" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="editNotDeployedTransportAdaptorConfigurationFile">
+            <soap12:operation soapAction="urn:editNotDeployedTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="removeTransportAdaptorConfigurationFile">
+            <soap12:operation soapAction="urn:removeTransportAdaptorConfigurationFile" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="removeTransportAdaptorConfiguration">
+            <soap12:operation soapAction="urn:removeTransportAdaptorConfiguration" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="TransportAdaptorManagerAdminServiceHttpBinding" type="ns:TransportAdaptorManagerAdminServicePortType">
+        <http:binding verb="POST"/>
+        <wsdl:operation name="getTransportAdaptorConfigurationFile">
+            <http:operation location="getTransportAdaptorConfigurationFile"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllTransportAdaptorConfigurationInfo">
+            <http:operation location="getAllTransportAdaptorConfigurationInfo"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="editTransportAdaptorConfigurationFile">
+            <http:operation location="editTransportAdaptorConfigurationFile"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getTransportAdaptorNames">
+            <http:operation location="getTransportAdaptorNames"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getAllTransportAdaptorPropertiesDto">
+            <http:operation location="getAllTransportAdaptorPropertiesDto"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getNotDeployedTransportAdaptorConfigurationFiles">
+            <http:operation location="getNotDeployedTransportAdaptorConfigurationFiles"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getTransportAdaptorConfigurationDetails">
+            <http:operation location="getTransportAdaptorConfigurationDetails"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getNotDeployedTransportAdaptorConfigurationFile">
+            <http:operation location="getNotDeployedTransportAdaptorConfigurationFile"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="addTransportAdaptorConfiguration">
+            <http:operation location="addTransportAdaptorConfiguration"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="editNotDeployedTransportAdaptorConfigurationFile">
+            <http:operation location="editNotDeployedTransportAdaptorConfigurationFile"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="removeTransportAdaptorConfigurationFile">
+            <http:operation location="removeTransportAdaptorConfigurationFile"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="removeTransportAdaptorConfiguration">
+            <http:operation location="removeTransportAdaptorConfiguration"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="TransportAdaptorManagerAdminService">
+        <wsdl:port name="TransportAdaptorManagerAdminServiceHttpsSoap11Endpoint" binding="ns:TransportAdaptorManagerAdminServiceSoap11Binding">
+            <soap:address location="https://101.2.181.20:9443/services/TransportAdaptorManagerAdminService.TransportAdaptorManagerAdminServiceHttpsSoap11Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="TransportAdaptorManagerAdminServiceHttpsSoap12Endpoint" binding="ns:TransportAdaptorManagerAdminServiceSoap12Binding">
+            <soap12:address location="https://101.2.181.20:9443/services/TransportAdaptorManagerAdminService.TransportAdaptorManagerAdminServiceHttpsSoap12Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="TransportAdaptorManagerAdminServiceHttpsEndpoint" binding="ns:TransportAdaptorManagerAdminServiceHttpBinding">
+            <http:address location="https://101.2.181.20:9443/services/TransportAdaptorManagerAdminService.TransportAdaptorManagerAdminServiceHttpsEndpoint/"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
