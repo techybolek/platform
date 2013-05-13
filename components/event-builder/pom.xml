@@ -9,94 +9,105 @@
 	License for the specific language governing permissions and ~ limitations 
 	under the License. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<parent>
-		<groupId>org.wso2.carbon</groupId>
-		<artifactId>carbon-components</artifactId>
+    <parent>
+        <groupId>org.wso2.carbon</groupId>
+        <artifactId>carbon-components</artifactId>
         <version>4.2.0-SNAPSHOT</version>
-	</parent>
+    </parent>
 
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>event-builder</artifactId>
-	<groupId>org.wso2.carbon</groupId>
-	<packaging>pom</packaging>
-	<name>WSO2 Carbon - Event Builder</name>
-	<description>WSO2 Carbon Event Builder is used to build an event from an available transport adaptor or otherwise</description>
-	<version>1.0.0-SNAPSHOT</version>
-	<url>http://wso2.org</url>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>event-builder</artifactId>
+    <groupId>org.wso2.carbon</groupId>
+    <packaging>pom</packaging>
+    <name>WSO2 Carbon - Event Builder</name>
+    <description>WSO2 Carbon Event Builder is used to build an event from an available transport adaptor or otherwise</description>
+    <version>1.0.0-SNAPSHOT</version>
+    <url>http://wso2.org</url>
 
-	<repositories>
-		<repository>
-			<id>wso2-nexus1</id>
-			<name>WSO2 Internal Repository</name>
-			<url>http://sr5.us1.wso2.com/nexus/content/repositories/wso2-public/</url>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>daily</updatePolicy>
-				<checksumPolicy>ignore</checksumPolicy>
-			</releases>
-		</repository>
-		<repository>
-			<id>wso2-nexus2</id>
-			<name>WSO2 Public Repository</name>
-			<url>http://maven.wso2.org/nexus/content/repositories/wso2-public/</url>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>daily</updatePolicy>
-				<checksumPolicy>ignore</checksumPolicy>
-			</releases>
-		</repository>
-	</repositories>
+    <!--<repositories>-->
+    <!--<repository>-->
+    <!--<id>wso2-nexus1</id>-->
+    <!--<name>WSO2 Internal Repository</name>-->
+    <!--<url>http://sr5.us1.wso2.com/nexus/content/repositories/wso2-public/</url>-->
+    <!--<releases>-->
+    <!--<enabled>true</enabled>-->
+    <!--<updatePolicy>daily</updatePolicy>-->
+    <!--<checksumPolicy>ignore</checksumPolicy>-->
+    <!--</releases>-->
+    <!--</repository>-->
+    <!--<repository>-->
+    <!--<id>wso2-nexus2</id>-->
+    <!--<name>WSO2 Public Repository</name>-->
+    <!--<url>http://maven.wso2.org/nexus/content/repositories/wso2-public/</url>-->
+    <!--<releases>-->
+    <!--<enabled>true</enabled>-->
+    <!--<updatePolicy>daily</updatePolicy>-->
+    <!--<checksumPolicy>ignore</checksumPolicy>-->
+    <!--</releases>-->
+    <!--</repository>-->
+    <!--</repositories>-->
 
-	<modules>
-		<module>org.wso2.carbon.event.builder.core</module>
-		<module>org.wso2.carbon.event.builder.admin</module>
-		<!--<module>org.wso2.carbon.event.builder.ui</module>-->
-	</modules>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>${junit.version}</version>
-			</dependency>
+    <dependencyManagement>
+        <dependencies>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.10</version>
-                <scope>test</scope>
+                <version>${junit.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.core</artifactId>
-                <version>4.0.6</version>
+                <version>${carbon.platform.version.406}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.databridge.core</artifactId>
-                <version>4.0.7</version>
+                <version>${carbon.platform.version.407}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.core</artifactId>
-                <version>4.0.6</version>
+                <version>${carbon.platform.version.406}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.utils</artifactId>
-                <version>4.0.6</version>
+                <version>${carbon.platform.version.406}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.transport.adaptor.core</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
-		</dependencies>
-	</dependencyManagement>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.transport.adaptor.manager.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.event.builder.stub</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
-	<properties>
-	</properties>
+        </dependencies>
+    </dependencyManagement>
+
+    <modules>
+        <module>org.wso2.carbon.event.builder.core</module>
+        <module>org.wso2.carbon.event.builder.admin</module>
+        <!--<module>org.wso2.carbon.event.builder.ui</module>-->
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <carbon.platform.version.407>4.0.7</carbon.platform.version.407>
+        <carbon.platform.version.406>4.0.6</carbon.platform.version.406>
+        <carbon.platform.version.405>4.0.5</carbon.platform.version.405>
+        <carbon.platform.version.400>4.0.0</carbon.platform.version.400>
+    </properties>
+
 
 </project>	
