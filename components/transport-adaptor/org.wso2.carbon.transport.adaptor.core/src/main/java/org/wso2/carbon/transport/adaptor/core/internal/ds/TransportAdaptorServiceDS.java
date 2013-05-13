@@ -45,7 +45,6 @@ public class TransportAdaptorServiceDS {
             TransportAdaptorServiceValueHolder.registerTransportAdaptorRegistrationService(transportAdaptorRegistrationService);
             context.getBundleContext().registerService(TransportAdaptorRegistrationService.class.getName(), transportAdaptorRegistrationService, null);
 
-
             TransportAdaptorService transportAdaptorService = new CarbonTransportAdaptorService();
             TransportAdaptorServiceValueHolder.registerCarbonTransportService(transportAdaptorService);
             context.getBundleContext().registerService(TransportAdaptorService.class.getName(), transportAdaptorService, null);

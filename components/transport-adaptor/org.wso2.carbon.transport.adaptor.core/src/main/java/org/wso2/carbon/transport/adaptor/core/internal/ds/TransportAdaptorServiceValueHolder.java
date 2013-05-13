@@ -34,7 +34,6 @@ public final class TransportAdaptorServiceValueHolder {
             TransportAdaptorService carbonTransportAdaptorService) {
 
         TransportAdaptorServiceValueHolder.carbonTransportAdaptorService = carbonTransportAdaptorService;
-
     }
 
     public static TransportAdaptorService getCarbonTransportAdaptorService() {
@@ -45,7 +44,6 @@ public final class TransportAdaptorServiceValueHolder {
             TransportAdaptorRegistrationService transportAdaptorRegistrationService) {
 
         TransportAdaptorServiceValueHolder.transportAdaptorRegistrationService = transportAdaptorRegistrationService;
-
     }
 
     public static TransportAdaptorRegistrationService getTransportAdaptorRegistrationService() {

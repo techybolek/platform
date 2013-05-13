@@ -41,23 +41,23 @@ public interface OutputTransportAdaptor {
      * @param outputTransportMessageConfiguration
      *                                     - topic name to publish messages
      * @param message                      - message to send
-     * @param outputTransportConfiguration - transport adaptor configuration to be used
+     * @param outputTransportAdaptorConfiguration - transport adaptor configuration to be used
      * @throws TransportEventProcessingException
      *          - if the message can not publish
      */
     void publish(OutputTransportMessageConfiguration outputTransportMessageConfiguration,
                  Object message,
-                 OutputTransportAdaptorConfiguration outputTransportConfiguration)
+                 OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration)
             throws TransportEventProcessingException;
 
     /**
      * publish test message to check the connection with the transport configuration.
      *
-     * @param outputTransportConfiguration - transport configuration to be used
+     * @param outputTransportAdaptorConfiguration - transport configuration to be used
      * @throws TransportEventProcessingException
      *          - if the message can not publish
      */
-    void testConnection(OutputTransportAdaptorConfiguration outputTransportConfiguration)
+    void testConnection(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration)
             throws TransportEventProcessingException;
 
 

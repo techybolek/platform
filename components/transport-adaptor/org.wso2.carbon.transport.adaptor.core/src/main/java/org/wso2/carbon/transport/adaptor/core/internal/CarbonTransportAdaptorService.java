@@ -72,7 +72,6 @@ public class CarbonTransportAdaptorService implements TransportAdaptorService {
                 return abstractTransportAdaptor.getMessageDto();
             }
         }
-
         return null;
     }
 
@@ -151,8 +150,5 @@ public class CarbonTransportAdaptorService implements TransportAdaptorService {
             return abstractTransportAdaptor.getTransportAdaptorDto();
         }
         return null;
-
     }
-
-
 }

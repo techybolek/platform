@@ -77,7 +77,6 @@ public class InputTransportMessageConfiguration {
         if (transportAdaptorName != null ? !transportAdaptorName.equals(that.transportAdaptorName) : that.transportAdaptorName != null) {
             return false;
         }
-
         return true;
     }
 

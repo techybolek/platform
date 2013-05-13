@@ -56,9 +56,7 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
         implements InputTransportAdaptor, OutputTransportAdaptor {
 
     private static final Log log = LogFactory.getLog(AgentTransportAdaptorType.class);
-
     private static AgentTransportAdaptorType agentTransportAdaptorAdaptor = new AgentTransportAdaptorType();
-
     private ResourceBundle resourceBundle;
     private Map<InputTransportMessageConfiguration, Map<String, TransportAdaptorListener>> inputTransportListenerMap =
             new ConcurrentHashMap<InputTransportMessageConfiguration, Map<String, TransportAdaptorListener>>();
@@ -95,7 +93,6 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
 
         return supportOutputMessageTypes;
     }
-
 
     /**
      * @return agent transport adaptor instance
@@ -450,6 +447,5 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
         }
 
     }
-
 
 }

@@ -29,7 +29,6 @@ public class MessageDto {
      */
     private String adaptorName;
 
-
     private List<Property> messageInPropertyList;
     private List<Property> messageOutPropertyList;
 
