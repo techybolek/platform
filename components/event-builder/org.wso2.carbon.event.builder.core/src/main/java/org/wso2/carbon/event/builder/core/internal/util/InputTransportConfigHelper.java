@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.event.builder.core.internal.util;
 
-import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
 import org.wso2.carbon.transport.adaptor.core.Property;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorDto;
 import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
@@ -26,17 +25,15 @@ import org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfigurati
 import org.wso2.carbon.transport.adaptor.core.message.MessageDto;
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class InputTransportConfigHelper {
 
     public static InputTransportAdaptorConfiguration getInputTransportAdaptorConfiguration(String transportAdaptorName) {
         List<TransportAdaptorDto> transportAdaptorDtoList = EventBuilderServiceValueHolder.getTransportAdaptorService().getTransportAdaptors();
-        for(TransportAdaptorDto transportAdaptorDto: transportAdaptorDtoList) {
-            if(transportAdaptorDto.getName().equals(transportAdaptorName)) {
-                return  buildInputTransportAdaptorConfiguration(transportAdaptorDto);
+        for (TransportAdaptorDto transportAdaptorDto : transportAdaptorDtoList) {
+            if (transportAdaptorDto.getTransportAdaptorTypeName().equals(transportAdaptorName)) {
+                return buildInputTransportAdaptorConfiguration(transportAdaptorDto);
             }
         }
 
@@ -46,9 +43,9 @@ public class InputTransportConfigHelper {
     public static InputTransportMessageConfiguration getInputTransportMessageConfiguration(String transportAdaptorTypeName) {
         MessageDto messageDto = EventBuilderServiceValueHolder.getTransportAdaptorService().getTransportMessageDto(transportAdaptorTypeName);
         InputTransportMessageConfiguration inputTransportMessageConfiguration = null;
-        if(messageDto != null) {
+        if (messageDto != null) {
             inputTransportMessageConfiguration = new InputTransportMessageConfiguration();
-            inputTransportMessageConfiguration.setTransportName(transportAdaptorTypeName);
+            inputTransportMessageConfiguration.setTransportAdaptorName(transportAdaptorTypeName);
         }
 
         return inputTransportMessageConfiguration;
@@ -56,11 +53,11 @@ public class InputTransportConfigHelper {
 
     private static InputTransportAdaptorConfiguration buildInputTransportAdaptorConfiguration(TransportAdaptorDto transportAdaptorDto) {
         InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration = new TransportAdaptorConfiguration();
-        inputTransportAdaptorConfiguration.setName(transportAdaptorDto.getName());
-        for(Property property : transportAdaptorDto.getAdaptorCommonPropertyList()) {
+        inputTransportAdaptorConfiguration.setName(transportAdaptorDto.getTransportAdaptorTypeName());
+        for (Property property : transportAdaptorDto.getAdaptorCommonPropertyList()) {
             inputTransportAdaptorConfiguration.addCommonAdaptorProperty(property.getPropertyName(), property.getDefaultValue());
         }
-        for(Property property : transportAdaptorDto.getAdaptorInPropertyList()) {
+        for (Property property : transportAdaptorDto.getAdaptorInPropertyList()) {
             inputTransportAdaptorConfiguration.addInputAdaptorProperty(property.getPropertyName(), property.getDefaultValue());
         }
 

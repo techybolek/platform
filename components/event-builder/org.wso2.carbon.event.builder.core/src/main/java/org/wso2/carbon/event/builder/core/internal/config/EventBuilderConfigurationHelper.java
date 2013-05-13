@@ -76,7 +76,7 @@ public class EventBuilderConfigurationHelper {
         OMElement transportTypeElement = factory.createOMElement(new QName(EventBuilderConfigurationSyntax.
                 EB_CONF_NS, EventBuilderConfigurationSyntax.EB_ELEMENT_TRANSPORT_TYPE,
                 EventBuilderConfigurationSyntax.EB_ELEMENT_CONF_EB_NS_PREFIX));
-        transportTypeElement.setText(eventBuilderConfiguration.getInputTransportMessageConfiguration().getTransportName());
+        transportTypeElement.setText(eventBuilderConfiguration.getInputTransportMessageConfiguration().getTransportAdaptorName());
         eventBuilderConfigElement.addChild(transportTypeElement);
 
         //Event builder properties

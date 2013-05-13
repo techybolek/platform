@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderServiceValueHolder;
-import org.wso2.carbon.transport.adaptor.core.TransportListener;
+import org.wso2.carbon.transport.adaptor.core.TransportAdaptorListener;
 import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
@@ -33,7 +33,6 @@ import java.util.List;
 
 public class TupleInputEventBuilder implements EventBuilder {
     private static final Log log = LogFactory.getLog(TupleInputEventBuilder.class);
-
     private List<BasicEventListener> basicEventListeners = new ArrayList<BasicEventListener>();
     private List<Wso2EventListener> wso2EventListeners = new ArrayList<Wso2EventListener>();
     private EventBuilderConfiguration eventBuilderConfiguration = null;
@@ -44,17 +43,17 @@ public class TupleInputEventBuilder implements EventBuilder {
 
     @Override
     public void subscribe(EventListener eventListener, AxisConfiguration axisConfiguration) {
-        if(eventListener instanceof BasicEventListener) {
-            basicEventListeners.add((BasicEventListener)eventListener);
-        } else if(eventListener instanceof Wso2EventListener) {
-            wso2EventListeners.add((Wso2EventListener)eventListener);
+        if (eventListener instanceof BasicEventListener) {
+            basicEventListeners.add((BasicEventListener) eventListener);
+        } else if (eventListener instanceof Wso2EventListener) {
+            wso2EventListeners.add((Wso2EventListener) eventListener);
         }
         try {
             InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration = new TransportAdaptorConfiguration();
-            inputTransportAdaptorConfiguration.setType(eventBuilderConfiguration.getInputTransportMessageConfiguration().getTransportName());
+            inputTransportAdaptorConfiguration.setType(eventBuilderConfiguration.getInputTransportMessageConfiguration().getTransportAdaptorName());
 
             //TODO This is to circumvent what seems to be a bug on the TA core. Need to remove after fix
-            eventBuilderConfiguration.getInputTransportMessageConfiguration().setTransportName(null);
+            eventBuilderConfiguration.getInputTransportMessageConfiguration().setTransportAdaptorName(null);
 
             EventBuilderServiceValueHolder.getTransportAdaptorService().subscribe(inputTransportAdaptorConfiguration, eventBuilderConfiguration.getInputTransportMessageConfiguration(), new TupleInputTransportListener(), axisConfiguration);
         } catch (TransportEventProcessingException e) {
@@ -64,9 +63,9 @@ public class TupleInputEventBuilder implements EventBuilder {
 
     @Override
     public void unsubscribe(EventListener eventListener) {
-        if(eventListener instanceof BasicEventListener) {
+        if (eventListener instanceof BasicEventListener) {
             basicEventListeners.remove(eventListener);
-        } else if(eventListener instanceof Wso2EventListener) {
+        } else if (eventListener instanceof Wso2EventListener) {
             wso2EventListeners.remove(eventListener);
         }
     }
@@ -82,10 +81,10 @@ public class TupleInputEventBuilder implements EventBuilder {
     }
 
     public void sendEvent(Object obj) {
-        for(BasicEventListener basicEventListener : basicEventListeners) {
+        for (BasicEventListener basicEventListener : basicEventListeners) {
             sendEvent(basicEventListener, obj);
         }
-        for(Wso2EventListener wso2EventListener : wso2EventListeners) {
+        for (Wso2EventListener wso2EventListener : wso2EventListeners) {
             sendEvent(wso2EventListener, obj);
         }
     }
@@ -98,7 +97,7 @@ public class TupleInputEventBuilder implements EventBuilder {
         log.debug(obj.toString());
     }
 
-    private class TupleInputTransportListener implements TransportListener {
+    private class TupleInputTransportListener implements TransportAdaptorListener {
 
         @Override
         public void addEventDefinition(Object o) throws TransportEventProcessingException {
