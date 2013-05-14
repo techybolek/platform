@@ -21,7 +21,10 @@ package org.wso2.carbon.event.builder.core;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.databridge.commons.Attribute;
 import org.wso2.carbon.databridge.commons.Event;
+import org.wso2.carbon.databridge.commons.StreamDefinition;
+import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
 import org.wso2.carbon.event.builder.core.exception.EventBuilderConfigurationException;
 import org.wso2.carbon.event.builder.core.internal.TupleInputMapping;
@@ -38,12 +41,15 @@ public class TupleInputEventBuilder implements EventBuilder {
     private List<BasicEventListener> basicEventListeners = new ArrayList<BasicEventListener>();
     private List<Wso2EventListener> wso2EventListeners = new ArrayList<Wso2EventListener>();
     private EventBuilderConfiguration eventBuilderConfiguration = null;
-    private Map<TupleInputMapping.InputDataType, int[]> inputDataTypeMap = new HashMap<TupleInputMapping.InputDataType, int[]>();
+    private Map<TupleInputMapping.InputDataType, int[]> inputDataTypeMap = null;
 
     public TupleInputEventBuilder(EventBuilderConfiguration eventBuilderConfiguration) {
         this.eventBuilderConfiguration = eventBuilderConfiguration;
+    }
 
+    private void createMapping(StreamDefinition inputStreamDefinition) throws MalformedStreamDefinitionException {
         List<TupleInputMapping> tupleInputMappings = this.eventBuilderConfiguration.getInputMappings();
+        this.inputDataTypeMap = new HashMap<TupleInputMapping.InputDataType, int[]>();
         Map<Integer, Integer> payloadDataMap = new TreeMap<Integer, Integer>();
         Map<Integer, Integer> metaDataMap = new TreeMap<Integer, Integer>();
         Map<Integer, Integer> correlationDataMap = new TreeMap<Integer, Integer>();
@@ -51,37 +57,65 @@ public class TupleInputEventBuilder implements EventBuilder {
         for (TupleInputMapping tupleInputMapping : tupleInputMappings) {
             switch (tupleInputMapping.getInputDataType()) {
                 case META_DATA:
-                    metaDataMap.put(tupleInputMapping.getStreamPosition(), tupleInputMapping.getInputStreamPosition());
+                    List<Attribute> metaAttributes = inputStreamDefinition.getMetaData();
+                    for (int i = 0; i < metaAttributes.size(); i++) {
+                        if (metaAttributes.get(i).getName().equals(tupleInputMapping.getInputName())) {
+                            metaDataMap.put(tupleInputMapping.getStreamPosition(), i);
+                            break;
+                        }
+                    }
+                    if (metaDataMap.get(tupleInputMapping.getStreamPosition()) == null) {
+                        this.inputDataTypeMap = null;
+                        throw new MalformedStreamDefinitionException("Cannot find a corresponding input attribute '"
+                                + tupleInputMapping.getInputName() + "' in stream with id " + inputStreamDefinition.getStreamId());
+                    }
                     break;
                 case CORRELATION_DATA:
-                    correlationDataMap.put(tupleInputMapping.getStreamPosition(), tupleInputMapping.getInputStreamPosition());
+                    List<Attribute> correlationAttributes = inputStreamDefinition.getCorrelationData();
+                    for (int i = 0; i < correlationAttributes.size(); i++) {
+                        if (correlationAttributes.get(i).getName().equals(tupleInputMapping.getInputName())) {
+                            correlationDataMap.put(tupleInputMapping.getStreamPosition(), i);
+                            break;
+                        }
+                    }
+                    if (correlationDataMap.get(tupleInputMapping.getStreamPosition()) == null) {
+                        this.inputDataTypeMap = null;
+                        throw new MalformedStreamDefinitionException("Cannot find a corresponding input attribute '"
+                                + tupleInputMapping.getInputName() + "' in stream with id " + inputStreamDefinition.getStreamId());
+                    }
                     break;
                 case PAYLOAD_DATA:
-                    payloadDataMap.put(tupleInputMapping.getStreamPosition(), tupleInputMapping.getInputStreamPosition());
+                default:
+                    List<Attribute> payloadAttributes = inputStreamDefinition.getPayloadData();
+                    for (int i = 0; i < payloadAttributes.size(); i++) {
+                        if (payloadAttributes.get(i).getName().equals(tupleInputMapping.getInputName())) {
+                            payloadDataMap.put(tupleInputMapping.getStreamPosition(), i);
+                            break;
+                        }
+                    }
+                    if (payloadDataMap.get(tupleInputMapping.getStreamPosition()) == null) {
+                        this.inputDataTypeMap = null;
+                        throw new MalformedStreamDefinitionException("Cannot find a corresponding input attribute '"
+                                + tupleInputMapping.getInputName() + "' in stream with id : " + inputStreamDefinition.getStreamId());
+                    }
             }
         }
 
-        if (!payloadDataMap.isEmpty()) {
-            int[] payloadPositions = new int[payloadDataMap.size()];
-            for (int i = 0; i < payloadPositions.length; i++) {
-                payloadPositions[i] = payloadDataMap.get(i);
-            }
-            inputDataTypeMap.put(TupleInputMapping.InputDataType.PAYLOAD_DATA, payloadPositions);
+        int[] payloadPositions = new int[payloadDataMap.size()];
+        for (int i = 0; i < payloadPositions.length; i++) {
+            payloadPositions[i] = payloadDataMap.get(i);
         }
-        if (!metaDataMap.isEmpty()) {
-            int[] metaPositions = new int[metaDataMap.size()];
-            for (int i = 0; i < metaPositions.length; i++) {
-                metaPositions[i] = metaDataMap.get(i);
-            }
-            inputDataTypeMap.put(TupleInputMapping.InputDataType.META_DATA, metaPositions);
+        inputDataTypeMap.put(TupleInputMapping.InputDataType.PAYLOAD_DATA, payloadPositions);
+        int[] metaPositions = new int[metaDataMap.size()];
+        for (int i = 0; i < metaPositions.length; i++) {
+            metaPositions[i] = metaDataMap.get(i);
         }
-        if (!correlationDataMap.isEmpty()) {
-            int[] correlationPositions = new int[correlationDataMap.size()];
-            for (int i = 0; i < correlationPositions.length; i++) {
-                correlationPositions[i] = correlationDataMap.get(i);
-            }
-            inputDataTypeMap.put(TupleInputMapping.InputDataType.CORRELATION_DATA, correlationPositions);
+        inputDataTypeMap.put(TupleInputMapping.InputDataType.META_DATA, metaPositions);
+        int[] correlationPositions = new int[correlationDataMap.size()];
+        for (int i = 0; i < correlationPositions.length; i++) {
+            correlationPositions[i] = correlationDataMap.get(i);
         }
+        inputDataTypeMap.put(TupleInputMapping.InputDataType.CORRELATION_DATA, correlationPositions);
     }
 
     @Override
@@ -95,10 +129,6 @@ public class TupleInputEventBuilder implements EventBuilder {
             //TODO Type is duplicated in many places. Need to refactor
             InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration = new TransportAdaptorConfiguration();
             inputTransportAdaptorConfiguration.setType(eventBuilderConfiguration.getType());
-
-            //TODO This is to circumvent what seems to be a bug on the TA core. Need to remove after fix
-            eventBuilderConfiguration.getInputTransportMessageConfiguration().setTransportAdaptorName(null);
-
             EventBuilderServiceValueHolder.getTransportAdaptorService().subscribe(inputTransportAdaptorConfiguration, eventBuilderConfiguration.getInputTransportMessageConfiguration(), new TupleInputTransportListener(), axisConfiguration);
         } catch (TransportEventProcessingException e) {
             log.error("Cannot subscribe to " + this.getClass().getName() + ":\n" + e.getMessage());
@@ -125,7 +155,7 @@ public class TupleInputEventBuilder implements EventBuilder {
         this.eventBuilderConfiguration = builderConfiguration;
     }
 
-    public void sendEvent(Object obj) {
+    public void sendEvent(Object obj) throws EventBuilderConfigurationException {
         for (BasicEventListener basicEventListener : basicEventListeners) {
             sendEvent(basicEventListener, obj);
         }
@@ -138,22 +168,25 @@ public class TupleInputEventBuilder implements EventBuilder {
         wso2EventListener.onEvent(event);
     }
 
-    public void sendEvent(BasicEventListener basicEventListener, Object obj) {
+    public void sendEvent(BasicEventListener basicEventListener, Object obj) throws EventBuilderConfigurationException {
+        if (inputDataTypeMap == null) {
+            throw new EventBuilderConfigurationException("Input mapping is not available for the current input stream definition:");
+        }
         Object[] outObjArray = null;
         if (obj instanceof Event) {
             Event event = (Event) obj;
             List<Object> outObjList = new ArrayList<Object>();
             int[] metaPositions = inputDataTypeMap.get(TupleInputMapping.InputDataType.META_DATA);
             for (int i = 0; i < metaPositions.length; i++) {
-                outObjList.add(event.getMetaData()[i]);
+                outObjList.add(event.getMetaData()[metaPositions[i]]);
             }
-            int[] correlationPositions = inputDataTypeMap.get(TupleInputMapping.InputDataType.META_DATA);
+            int[] correlationPositions = inputDataTypeMap.get(TupleInputMapping.InputDataType.CORRELATION_DATA);
             for (int i = 0; i < correlationPositions.length; i++) {
-                outObjList.add(event.getCorrelationData()[i]);
+                outObjList.add(event.getCorrelationData()[correlationPositions[i]]);
             }
-            int[] payloadPositions = inputDataTypeMap.get(TupleInputMapping.InputDataType.META_DATA);
+            int[] payloadPositions = inputDataTypeMap.get(TupleInputMapping.InputDataType.PAYLOAD_DATA);
             for (int i = 0; i < payloadPositions.length; i++) {
-                outObjList.add(event.getPayloadData()[i]);
+                outObjList.add(event.getPayloadData()[payloadPositions[i]]);
             }
             outObjArray = outObjList.toArray();
         }
@@ -161,21 +194,51 @@ public class TupleInputEventBuilder implements EventBuilder {
         basicEventListener.onEvent(outObjArray);
     }
 
+    private void notifyEventAddition(Object o) {
+        for (BasicEventListener basicEventListener : basicEventListeners) {
+            basicEventListener.onAddDefinition(o);
+        }
+        for (Wso2EventListener wso2EventListener : wso2EventListeners) {
+            wso2EventListener.onAddDefinition(o);
+        }
+    }
+
+    private void notifyEventRemoval(Object o) {
+        for (BasicEventListener basicEventListener : basicEventListeners) {
+            basicEventListener.onRemoveDefinition(o);
+        }
+        for (Wso2EventListener wso2EventListener : wso2EventListeners) {
+            wso2EventListener.onRemoveDefinition(o);
+        }
+    }
+
     private class TupleInputTransportListener implements TransportAdaptorListener {
 
         @Override
         public void addEventDefinition(Object o) throws TransportEventProcessingException {
-            //To change body of implemented methods use File | Settings | File Templates.
+            if (o instanceof StreamDefinition) {
+                try {
+                    createMapping((StreamDefinition) o);
+                } catch (MalformedStreamDefinitionException e) {
+                    throw new TransportEventProcessingException("Cannot create mapping for input stream with id '"
+                            + ((StreamDefinition) o).getStreamId() + "':", e);
+                }
+            }
+            notifyEventAddition(o);
         }
 
         @Override
         public void removeEventDefinition(Object o) throws TransportEventProcessingException {
-            //To change body of implemented methods use File | Settings | File Templates.
+            notifyEventRemoval(o);
         }
 
         @Override
         public void onEvent(Object o) throws TransportEventProcessingException {
-            sendEvent(o);
+            try {
+                sendEvent(o);
+            } catch (EventBuilderConfigurationException e) {
+                throw new TransportEventProcessingException("Cannot send create an event from input:", e);
+            }
         }
     }
 }

@@ -57,7 +57,7 @@ public class EventBuilderConfigurationHelper {
         eventBuilderConfiguration.setType(transportAdaptorType);
 
         InputTransportMessageConfiguration inputTransportMessageConfiguration = InputTransportConfigHelper.getInputTransportMessageConfiguration(transportAdaptorType);
-        inputTransportMessageConfiguration.setTransportAdaptorName(fromElement.getAttributeValue(new QName(EventBuilderConfigurationSyntax.EB_ATTR_TA_NAME)));
+        eventBuilderConfiguration.setName(fromElement.getAttributeValue(new QName(EventBuilderConfigurationSyntax.EB_ATTR_TA_NAME)));
         Iterator fromElementPropertyIterator = fromElement.getChildrenWithName(
                 new QName(EventBuilderConfigurationSyntax.EB_CONF_NS, EventBuilderConfigurationSyntax.EB_ELEMENT_PROPERTY)
         );
@@ -67,7 +67,7 @@ public class EventBuilderConfigurationHelper {
             String propertyValue = fromElementProperty.getText();
             inputTransportMessageConfiguration.addInputMessageProperty(propertyName, propertyValue);
         }
-        String inputStreamName = inputTransportMessageConfiguration.getInputMessageProperties().get("streamName");
+        String inputStreamName = inputTransportMessageConfiguration.getInputMessageProperties().get("stream");
         String inputStreamVersion = inputTransportMessageConfiguration.getInputMessageProperties().get("version");
         StreamDefinition inputStreamDefinition = new StreamDefinition(inputStreamName, inputStreamVersion);
         eventBuilderConfiguration.setStreamDefinition(inputStreamDefinition);
@@ -130,11 +130,6 @@ public class EventBuilderConfigurationHelper {
                 null);
         eventBuilderConfigElement.addAttribute(EventBuilderConfigurationSyntax.EB_ATTR_TYPE, eventBuilderConfiguration.getType(),
                 null);
-        OMElement transportTypeElement = factory.createOMElement(new QName(EventBuilderConfigurationSyntax.
-                EB_CONF_NS, EventBuilderConfigurationSyntax.EB_ELEMENT_TRANSPORT_TYPE,
-                EventBuilderConfigurationSyntax.EB_ELEMENT_CONF_EB_NS_PREFIX));
-        transportTypeElement.setText(eventBuilderConfiguration.getInputTransportMessageConfiguration().getTransportAdaptorName());
-        eventBuilderConfigElement.addChild(transportTypeElement);
 
         //Event builder properties
         OMElement commonPropertyElement = factory.createOMElement(new QName(
