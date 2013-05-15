@@ -49,19 +49,20 @@ public class TransportServiceTesterDS {
 
         InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration = new TransportAdaptorConfiguration();
         inputTransportAdaptorConfiguration.setName("localAgentBroker");
-        inputTransportAdaptorConfiguration.setType("agent");
-        inputTransportAdaptorConfiguration.addCommonAdaptorProperty("receiverURL", "tcp://localhost:76111");
-        inputTransportAdaptorConfiguration.addCommonAdaptorProperty("authenticatorURL", "ssl://localhost:77111");
-        inputTransportAdaptorConfiguration.addCommonAdaptorProperty("username", "admin1");
-        inputTransportAdaptorConfiguration.addCommonAdaptorProperty("password", "admin1");
+        inputTransportAdaptorConfiguration.setType("wso2eventreceiver");
+//        inputTransportAdaptorConfiguration.setType("agent");
+//        inputTransportAdaptorConfiguration.addCommonAdaptorProperty("receiverURL", "tcp://localhost:76111");
+//        inputTransportAdaptorConfiguration.addCommonAdaptorProperty("authenticatorURL", "ssl://localhost:77111");
+//        inputTransportAdaptorConfiguration.addCommonAdaptorProperty("username", "admin1");
+//        inputTransportAdaptorConfiguration.addCommonAdaptorProperty("password", "admin1");
 
 
         InputTransportMessageConfiguration inputTransportMessageConfiguration = new InputTransportMessageConfiguration();
-        inputTransportMessageConfiguration.addInputMessageProperty("streamName", "org.wso2.phone.retail.store");
+        inputTransportMessageConfiguration.addInputMessageProperty("stream", "org.wso2.phone.retail.store");
         inputTransportMessageConfiguration.addInputMessageProperty("version", "1.2.0");
 
         try {
-            transportAdaptorService.subscribe(inputTransportAdaptorConfiguration, inputTransportMessageConfiguration, new TestTransportAdaptorAdaptorListener("agent", "org.wso2.phone.retail.store:1.2.0"), TransportAdaptorHolder.getInstance().getConfigurationContextService().getServerConfigContext().getAxisConfiguration());
+            transportAdaptorService.subscribe(inputTransportAdaptorConfiguration, inputTransportMessageConfiguration, new TestTransportAdaptorAdaptorListener("wso2eventreceiver", "org.wso2.phone.retail.store:1.2.0"), TransportAdaptorHolder.getInstance().getConfigurationContextService().getServerConfigContext().getAxisConfiguration());
         } catch (TransportAdaptorEventProcessingException e) {
             log.error("Error occurred when subscribing " + e);
         }

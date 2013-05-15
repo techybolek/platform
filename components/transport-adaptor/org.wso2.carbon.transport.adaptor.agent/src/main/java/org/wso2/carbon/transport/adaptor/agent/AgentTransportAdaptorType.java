@@ -128,20 +128,20 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
 
         List<Property> propertyList = new ArrayList<Property>();
 
-        // set receiver url transport
-        Property ipProperty = new Property(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL);
-        ipProperty.setDisplayName(
-                resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL));
-        ipProperty.setRequired(true);
-        ipProperty.setHint("Please Enter the Receiver Url");
-
-        // set authenticator url of transport
-        Property authenticatorIpProperty = new Property(AgentTransportAdaptorConstants.
-                                                                TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL);
-        authenticatorIpProperty.setDisplayName(
-                resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL));
-        authenticatorIpProperty.setRequired(false);
-        authenticatorIpProperty.setHint("Please Enter the Authenticator Url");
+//        // set receiver url transport
+//        Property ipProperty = new Property(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL);
+//        ipProperty.setDisplayName(
+//                resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL));
+//        ipProperty.setRequired(true);
+//        ipProperty.setHint(resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_HINT_RECEIVER_URL));
+//
+//        // set authenticator url of transport
+//        Property authenticatorIpProperty = new Property(AgentTransportAdaptorConstants.
+//                                                                TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL);
+//        authenticatorIpProperty.setDisplayName(
+//                resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL));
+//        authenticatorIpProperty.setRequired(false);
+//        authenticatorIpProperty.setHint(resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_HINT_AUTHENTICATOR_URL));
 
 
         // set connection user name as property
@@ -149,7 +149,7 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
         userNameProperty.setRequired(true);
         userNameProperty.setDisplayName(
                 resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_USER_NAME));
-        userNameProperty.setHint("Please Enter the UserName");
+        userNameProperty.setHint(resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_HINT_USER_NAME));
 
         // set connection password as property
         Property passwordProperty = new Property(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_PASSWORD);
@@ -157,9 +157,9 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
         passwordProperty.setSecured(true);
         passwordProperty.setDisplayName(
                 resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_PASSWORD));
-        passwordProperty.setHint("Please Enter the Password");
-        propertyList.add(ipProperty);
-        propertyList.add(authenticatorIpProperty);
+        passwordProperty.setHint(resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_HINT_PASSWORD));
+//        propertyList.add(ipProperty);
+//        propertyList.add(authenticatorIpProperty);
         propertyList.add(userNameProperty);
         propertyList.add(passwordProperty);
 
@@ -172,7 +172,19 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
     @Override
     public List<Property> getInputAdaptorProperties() {
 
-        return null;
+        List<Property> propertyList = new ArrayList<Property>();
+        // set receiver url transport
+        Property ipProperty = new Property(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL);
+        ipProperty.setDisplayName(
+                resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL));
+        ipProperty.setRequired(true);
+        ipProperty.setHint(resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_HINT_RECEIVER_URL));
+
+
+        propertyList.add(ipProperty);
+        return propertyList;
+
+        //return null;
     }
 
     /**
@@ -209,7 +221,19 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
     @Override
     public List<Property> getOutputAdaptorProperties() {
 
-        return null;
+        List<Property> propertyList = new ArrayList<Property>();
+        // set authenticator url of transport
+        Property authenticatorIpProperty = new Property(AgentTransportAdaptorConstants.
+                                                                TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL);
+        authenticatorIpProperty.setDisplayName(
+                resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL));
+        authenticatorIpProperty.setRequired(false);
+        authenticatorIpProperty.setHint(resourceBundle.getString(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_HINT_AUTHENTICATOR_URL));
+
+        propertyList.add(authenticatorIpProperty);
+
+        return propertyList;
+        //return null;
 
     }
 
@@ -401,8 +425,8 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
 
             InputTransportMessageConfiguration inputTransportMessageConfiguration = new InputTransportMessageConfiguration();
             Map<String, String> inputMessageProperties = new HashMap<String, String>();
-            inputMessageProperties.put("streamName", streamDefinition.getName());
-            inputMessageProperties.put("version", streamDefinition.getVersion());
+            inputMessageProperties.put(AgentTransportAdaptorConstants.TRANSPORT_MESSAGE_STREAM_DEFINITION, streamDefinition.getName());
+            inputMessageProperties.put(AgentTransportAdaptorConstants.TRANSPORT_MESSAGE_STREAM_VERSION, streamDefinition.getVersion());
             inputTransportMessageConfiguration.setInputMessageProperties(inputMessageProperties);
 
             return inputTransportMessageConfiguration;

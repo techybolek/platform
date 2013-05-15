@@ -24,11 +24,6 @@ public class InputTransportMessageConfiguration {
 
 
     /**
-     * logical name use to identify the transport
-     */
-    private String transportAdaptorName;
-
-    /**
      * Map contains the input message property configuration details
      */
     private Map<String, String> inputMessageProperties;
@@ -43,14 +38,6 @@ public class InputTransportMessageConfiguration {
         this.inputMessageProperties.put(name, value);
     }
 
-
-    public String getTransportAdaptorName() {
-        return this.transportAdaptorName;
-    }
-
-    public void setTransportAdaptorName(String transportAdaptorName) {
-        this.transportAdaptorName = transportAdaptorName;
-    }
 
     public Map<String, String> getInputMessageProperties() {
         return inputMessageProperties;
@@ -74,16 +61,13 @@ public class InputTransportMessageConfiguration {
         if (inputMessageProperties != null ? !inputMessageProperties.equals(that.inputMessageProperties) : that.inputMessageProperties != null) {
             return false;
         }
-        if (transportAdaptorName != null ? !transportAdaptorName.equals(that.transportAdaptorName) : that.transportAdaptorName != null) {
-            return false;
-        }
+
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = transportAdaptorName != null ? transportAdaptorName.hashCode() : 0;
-        result = 31 * result + (inputMessageProperties != null ? inputMessageProperties.hashCode() : 0);
+        int result = inputMessageProperties != null ? inputMessageProperties.hashCode() : 0;
         return result;
     }
 }

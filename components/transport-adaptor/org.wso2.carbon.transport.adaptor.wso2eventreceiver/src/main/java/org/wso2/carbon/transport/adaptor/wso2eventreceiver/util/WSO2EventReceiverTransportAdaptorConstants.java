@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.transport.adaptor.agent.util;
+package org.wso2.carbon.transport.adaptor.wso2eventreceiver.util;
 
 
-public interface AgentTransportAdaptorConstants {
+public interface WSO2EventReceiverTransportAdaptorConstants {
 
-    String TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL = "receiverURL";
-    String TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL = "authenticatorURL";
-    String TRANSPORT_CONF_AGENT_PROP_USER_NAME = "username";
-    String TRANSPORT_CONF_AGENT_PROP_PASSWORD = "password";
-    String TRANSPORT_TYPE_AGENT = "agent";
+    String TRANSPORT_TYPE_WSO2EVENTRECEIVER = "wso2eventreceiver";
 
     String TRANSPORT_MESSAGE_STREAM_DEFINITION = "stream";
     String TRANSPORT_MESSAGE_STREAM_VERSION = "version";
-
-    String TRANSPORT_CONF_AGENT_HINT_RECEIVER_URL = "enterReceiverUrl";
-    String TRANSPORT_CONF_AGENT_HINT_AUTHENTICATOR_URL = "enterAuthenticatorUrl";
-    String TRANSPORT_CONF_AGENT_HINT_USER_NAME = "enterUsername";
-    String TRANSPORT_CONF_AGENT_HINT_PASSWORD = "enterPassword";
-
 }

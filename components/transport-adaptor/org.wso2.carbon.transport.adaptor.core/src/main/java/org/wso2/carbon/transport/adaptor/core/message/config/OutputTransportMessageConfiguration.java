@@ -22,13 +22,6 @@ import java.util.Map;
 
 public class OutputTransportMessageConfiguration {
 
-
-    /**
-     * logical name use to identify the transport
-     */
-    private String transportAdaptorName;
-
-
     /**
      * Map contains the output message property configuration details
      */
@@ -42,14 +35,6 @@ public class OutputTransportMessageConfiguration {
 
     public void addOutputMessageProperty(String name, String value) {
         this.outputMessageProperties.put(name, value);
-    }
-
-    public String getTransportAdaptorName() {
-        return this.transportAdaptorName;
-    }
-
-    public void setTransportAdaptorName(String transportAdaptorName) {
-        this.transportAdaptorName = transportAdaptorName;
     }
 
     public Map<String, String> getOutputMessageProperties() {
@@ -74,17 +59,13 @@ public class OutputTransportMessageConfiguration {
         if (outputMessageProperties != null ? !outputMessageProperties.equals(that.outputMessageProperties) : that.outputMessageProperties != null) {
             return false;
         }
-        if (transportAdaptorName != null ? !transportAdaptorName.equals(that.transportAdaptorName) : that.transportAdaptorName != null) {
-            return false;
-        }
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = transportAdaptorName != null ? transportAdaptorName.hashCode() : 0;
-        result = 31 * result + (outputMessageProperties != null ? outputMessageProperties.hashCode() : 0);
+        int result = outputMessageProperties != null ? outputMessageProperties.hashCode() : 0;
         return result;
     }
 }

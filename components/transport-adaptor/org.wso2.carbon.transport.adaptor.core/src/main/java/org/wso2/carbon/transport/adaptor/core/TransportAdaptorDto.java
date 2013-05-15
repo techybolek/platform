@@ -59,7 +59,7 @@ public class TransportAdaptorDto {
     /**
      * types that supported by the transport adaptor
      */
-    private TransportAdaptorType transportAdaptorType;
+    private TransportAdaptorType supportedTransportAdaptorType;
 
 
     /**
@@ -131,12 +131,12 @@ public class TransportAdaptorDto {
     }
 
 
-    public TransportAdaptorType getTransportAdaptorType() {
-        return transportAdaptorType;
+    public TransportAdaptorType getSupportedTransportAdaptorType() {
+        return supportedTransportAdaptorType;
     }
 
-    public void setTransportAdaptorType(TransportAdaptorType transportAdaptorType) {
-        this.transportAdaptorType = transportAdaptorType;
+    public void setSupportedTransportAdaptorType(TransportAdaptorType supportedTransportAdaptorType) {
+        this.supportedTransportAdaptorType = supportedTransportAdaptorType;
     }
 
 }

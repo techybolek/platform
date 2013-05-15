@@ -42,7 +42,7 @@ public abstract class AbstractTransportAdaptor {
         this.transportAdaptorDto.setTransportAdaptorTypeName(this.getName());
         this.transportAdaptorDto.setSupportedInputMessageType(this.getSupportedInputMessageTypes());
         this.transportAdaptorDto.setSupportedOutputMessageType(this.getSupportedOutputMessageTypes());
-        this.transportAdaptorDto.setTransportAdaptorType(this.getTransportAdaptorType());
+        this.transportAdaptorDto.setSupportedTransportAdaptorType(this.getTransportAdaptorType());
 
         this.messageDto.setAdaptorName(this.getName());
 
