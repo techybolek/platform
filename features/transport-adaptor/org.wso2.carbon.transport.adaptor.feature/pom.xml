@@ -51,6 +51,12 @@
 			<version>${project.version}</version>
 			<type>zip</type>
 		</dependency>
+        <dependency>
+			<groupId>org.wso2.carbon</groupId>
+			<artifactId>org.wso2.carbon.transport.adaptor.jms.server.feature</artifactId>
+			<version>${project.version}</version>
+			<type>zip</type>
+		</dependency>
 
 	</dependencies>
 
@@ -76,6 +82,7 @@
 							<includedFeatures>
 								<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.transport.adaptor.server.feature:${project.version}</includedFeatureDef>
 								<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.transport.adaptor.agent.server.feature:${project.version}</includedFeatureDef>
+								<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.transport.adaptor.jms.server.feature:${project.version}</includedFeatureDef>
 							</includedFeatures>
 						</configuration>
 					</execution>
