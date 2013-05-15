@@ -22,27 +22,32 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.transport.http.HTTPConstants;
-import org.wso2.carbon.um.ws.api.WSAuthorizationManager;
-import org.wso2.carbon.user.core.claim.Claim;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
+import org.wso2.carbon.um.ws.api.WSAuthorizationManager;
 import org.wso2.carbon.um.ws.api.WSUserStoreManager;
 import org.wso2.carbon.user.core.UserStoreException;
+import org.wso2.carbon.user.core.claim.Claim;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  * This demonstrates how to use remote user management API to add, delete and read users.
  */
 public class RemoteUMClient {
 
-    private String serverUrl = "https://localhost:9443/services/";
+    private static String serverUrl;
+    private static String username;
+    private static String password;
 
     private AuthenticationAdminStub authstub = null;
     private ConfigurationContext ctx;
     private String authCookie = null;
     private WSUserStoreManager remoteUserStoreManager = null;
     private WSAuthorizationManager remoteAuthorizationManager = null;
-
 
     /**
      * Initialization of environment
@@ -59,14 +64,14 @@ public class RemoteUMClient {
         options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, authCookie);
 
         //set trust store properties required in SSL communication.
-        String is_Home = ".." + File.separator + ".." + File.separator;
-        System.setProperty("javax.net.ssl.trustStore", is_Home + "repository" + File.separator + "resources" +
-                File.separator + "security" + File.separator + "wso2carbon.jks");
+        String isHome = ".." + File.separator + ".." + File.separator;
+        System.setProperty("javax.net.ssl.trustStore", isHome + "repository" + File.separator + "resources" +
+                                                       File.separator + "security" + File.separator + "wso2carbon.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
 
 
         //log in as admin user and obtain the cookie
-        this.login("admin", "admin");
+        this.login(username, password);
 
         //create web service client
         this.createRemoteUserStoreManager();
@@ -85,6 +90,7 @@ public class RemoteUMClient {
         boolean loggedIn = authstub.login(username, password, "localhost");
         if (loggedIn) {
             System.out.println("The user " + username + " logged in successfully.");
+            System.out.println();
             authCookie = (String) authstub._getServiceClient().getServiceContext().getProperty(
                     HTTPConstants.COOKIE_STRING);
         } else {
@@ -106,6 +112,7 @@ public class RemoteUMClient {
 
     /**
      * create web service client for RemoteAuthorizationManager service.
+     *
      * @throws UserStoreException
      */
     public void createRemoteAuthorizationManager() throws UserStoreException {
@@ -122,6 +129,7 @@ public class RemoteUMClient {
 
         remoteUserStoreManager.addUser(userName, password, null, null, null);
         System.out.println("Added user: " + userName);
+        System.out.println();
     }
 
     /**
@@ -132,6 +140,7 @@ public class RemoteUMClient {
     public void addRole(String roleName) throws UserStoreException {
         remoteUserStoreManager.addRole(roleName, null, null);
         System.out.println("Added role: " + roleName);
+        System.out.println();
     }
 
     /**
@@ -143,6 +152,7 @@ public class RemoteUMClient {
             throws UserStoreException {
         remoteUserStoreManager.addUser(userName, password, new String[]{roleName}, null, null);
         System.out.println("Added user: " + userName + " with role: " + roleName);
+        System.out.println();
     }
 
     /**
@@ -162,10 +172,12 @@ public class RemoteUMClient {
     public void deleteUser(String userName) throws UserStoreException {
         remoteUserStoreManager.deleteUser(userName);
         System.out.println("Deleted user:" + userName);
+        System.out.println();
     }
 
     /**
      * Authorize a role with given permission.
+     *
      * @param roleName
      * @param resourceId
      * @param action
@@ -178,6 +190,7 @@ public class RemoteUMClient {
 
     /**
      * Check whether a given user has a given permission.
+     *
      * @param userName
      * @param resourceId
      * @param action
@@ -190,7 +203,7 @@ public class RemoteUMClient {
     }
 
     public static void main(String[] args) throws Exception {
-
+        loadConfiguration();
         /*Create client for RemoteUserStoreManagerService and perform user management operations*/
         RemoteUMClient remoteUMClient = new RemoteUMClient();
         //create web service client
@@ -207,6 +220,7 @@ public class RemoteUMClient {
         for (String user : users) {
             System.out.println(user);
         }
+        System.out.println();
         //delete an existing user
         remoteUMClient.deleteUser("kamal");
         //print the current list of users
@@ -215,11 +229,11 @@ public class RemoteUMClient {
         for (String user : userList) {
             System.out.println(user);
         }
-
-        remoteUMClient.addUser("dinuka","dinuka");
-        remoteUMClient.getUserClaims("admin","null");
-        remoteUMClient.updateLastName("dinuka","malalanayake");
-        remoteUMClient.updateEmail("dinuka","dinukam@wso2.com");
+        System.out.println();
+        remoteUMClient.addUser("dinuka", "dinuka");
+        remoteUMClient.getUserClaims("admin", "null");
+        remoteUMClient.updateLastName("dinuka", "malalanayake");
+        remoteUMClient.updateEmail("dinuka", "dinukam@wso2.com");
 
         //create remote authorization manager
         remoteUMClient.createRemoteAuthorizationManager();
@@ -233,17 +247,18 @@ public class RemoteUMClient {
     }
 
     /**
-     *  print the user claims of given user
+     * print the user claims of given user
+     *
      * @param username
      * @param profile
      * @throws Exception
      */
-    public void getUserClaims(String username,String profile) throws Exception {
-        System.out.println("================Print All Claims of "+username+"================");
+    public void getUserClaims(String username, String profile) throws Exception {
+        System.out.println("================Print All Claims of " + username + "================");
         //list down the user claims
-        for (Claim claims : remoteUserStoreManager.getUserClaimValues(username,profile)){
+        for (Claim claims : remoteUserStoreManager.getUserClaimValues(username, profile)) {
             System.out.println("-----------------------------------");
-            System.out.println(claims.getClaimUri()+" -- "+claims.getValue());
+            System.out.println(claims.getClaimUri() + " -- " + claims.getValue());
         }
 
         System.out.println("================================================================");
@@ -251,25 +266,38 @@ public class RemoteUMClient {
 
     /**
      * update the Last name of given user
+     *
      * @param username
      * @param value
      * @throws Exception
      */
-    public void updateLastName(String username,String value) throws Exception{
-        remoteUserStoreManager.setUserClaimValue(username,"http://wso2.org/claims/lastname",value,null);
-        System.out.println("lastname :"+value+" updated successful for"+" User :"+username);
-
+    public void updateLastName(String username, String value) throws Exception {
+        remoteUserStoreManager.setUserClaimValue(username, "http://wso2.org/claims/lastname", value, null);
+        System.out.println("lastname :" + value + " updated successful for" + " User :" + username);
+        System.out.println();
     }
 
     /**
      * update the email address  of given user
+     *
      * @param username
      * @param value
      * @throws Exception
      */
-    public void updateEmail(String username,String value) throws Exception{
-        remoteUserStoreManager.setUserClaimValue(username,"email",value,null);
-        System.out.println("email :"+value+" updated successful for"+" User :"+username);
+    public void updateEmail(String username, String value) throws Exception {
+        remoteUserStoreManager.setUserClaimValue(username, "email", value, null);
+        System.out.println("email :" + value + " updated successful for" + " User :" + username);
+        System.out.println();
+    }
+
+    private static void loadConfiguration() throws IOException {
+        Properties properties = new Properties();
+		FileInputStream freader = new FileInputStream(RemoteUMSampleConstants.PROPERTIES_FILE_NAME);
+		properties.load(freader);
+
+        serverUrl = properties.getProperty(RemoteUMSampleConstants.REMOTE_SERVER_URL);
+        username = properties.getProperty(RemoteUMSampleConstants.USER_NAME);
+        password = properties.getProperty(RemoteUMSampleConstants.PASSWORD);
     }
 
 }
