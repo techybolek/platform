@@ -19,7 +19,6 @@ package org.wso2.carbon.transport.adaptor.core;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.core.config.OutputTransportAdaptorConfiguration;
-import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
 import org.wso2.carbon.transport.adaptor.core.message.MessageDto;
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 import org.wso2.carbon.transport.adaptor.core.message.config.OutputTransportMessageConfiguration;
@@ -63,13 +62,11 @@ public interface TransportAdaptorService {
      * @param inputTransportMessageConfiguration
      *                                 - topic to subscribe
      * @param transportAdaptorListener - listener interface to notify
-     * @throws org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException
-     *          - if problem happen when subscribing
      */
     String subscribe(InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
                      InputTransportMessageConfiguration inputTransportMessageConfiguration,
                      TransportAdaptorListener transportAdaptorListener,
-                     AxisConfiguration axisConfiguration) throws TransportEventProcessingException;
+                     AxisConfiguration axisConfiguration);
 
 
     /**
@@ -80,23 +77,18 @@ public interface TransportAdaptorService {
      * @param outputTransportMessageConfiguration
      *               - topic to publish
      * @param object - message to send
-     * @throws org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException
-     *          - if problem happen when publishing
      */
     void publish(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration,
                  OutputTransportMessageConfiguration outputTransportMessageConfiguration,
-                 Object object) throws TransportEventProcessingException;
+                 Object object);
 
     /**
      * publish testConnection message using the given transport proxy.
      *
      * @param outputTransportAdaptorConfiguration
      *         - Configuration Details of the transport
-     * @throws org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException
-     *          - if problem happen when publishing
      */
-    void testConnection(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration)
-            throws TransportEventProcessingException;
+    void testConnection(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration);
 
     /**
      * un subscribes from the transport.
@@ -106,13 +98,11 @@ public interface TransportAdaptorService {
      * @param inputTransportAdaptorConfiguration
      *                          - transport configuration to be used
      * @param axisConfiguration - acis configuration
-     * @throws TransportEventProcessingException
      *
      */
     void unsubscribe(InputTransportMessageConfiguration inputTransportMessageConfiguration,
                      InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
-                     AxisConfiguration axisConfiguration, String subscriptionId)
-            throws TransportEventProcessingException;
+                     AxisConfiguration axisConfiguration, String subscriptionId);
 
 
     /**

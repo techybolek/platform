@@ -27,7 +27,7 @@ import org.wso2.carbon.transport.adaptor.core.TransportAdaptorListener;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.core.config.OutputTransportAdaptorConfiguration;
-import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
+import org.wso2.carbon.transport.adaptor.core.exception.TransportAdaptorEventProcessingException;
 import org.wso2.carbon.transport.adaptor.core.message.MessageDto;
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 import org.wso2.carbon.transport.adaptor.core.message.config.OutputTransportMessageConfiguration;
@@ -89,56 +89,53 @@ public class CarbonTransportAdaptorService implements TransportAdaptorService {
     public String subscribe(InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
                             InputTransportMessageConfiguration inputTransportMessageConfiguration,
                             TransportAdaptorListener transportAdaptorListener,
-                            AxisConfiguration axisConfiguration)
-            throws TransportEventProcessingException {
+                            AxisConfiguration axisConfiguration) {
         InputTransportAdaptor inputTransportAdaptor = (InputTransportAdaptor) this.transportAdaptorMap.get(inputTransportAdaptorConfiguration.getType());
 
         try {
             return inputTransportAdaptor.subscribe(inputTransportMessageConfiguration, transportAdaptorListener, inputTransportAdaptorConfiguration, axisConfiguration);
-        } catch (TransportEventProcessingException e) {
+        } catch (TransportAdaptorEventProcessingException e) {
             log.error(e.getMessage(), e);
-            throw new TransportEventProcessingException(e.getMessage(), e);
+            throw new TransportAdaptorEventProcessingException(e.getMessage(), e);
         }
     }
 
     @Override
     public void publish(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration,
                         OutputTransportMessageConfiguration outputTransportMessageConfiguration,
-                        Object object) throws TransportEventProcessingException {
+                        Object object){
 
         OutputTransportAdaptor outputTransportAdaptor = (OutputTransportAdaptor) this.transportAdaptorMap.get(outputTransportAdaptorConfiguration.getType());
         try {
             outputTransportAdaptor.publish(outputTransportMessageConfiguration, object, outputTransportAdaptorConfiguration);
-        } catch (TransportEventProcessingException e) {
+        } catch (TransportAdaptorEventProcessingException e) {
             log.error(e.getMessage(), e);
-            throw new TransportEventProcessingException(e.getMessage(), e);
+            throw new TransportAdaptorEventProcessingException(e.getMessage(), e);
         }
     }
 
     @Override
     public void testConnection(
-            OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration)
-            throws TransportEventProcessingException {
+            OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration) {
         OutputTransportAdaptor outputTransportAdaptor = (OutputTransportAdaptor) this.transportAdaptorMap.get(outputTransportAdaptorConfiguration.getType());
         try {
             outputTransportAdaptor.testConnection(outputTransportAdaptorConfiguration);
-        } catch (TransportEventProcessingException e) {
+        } catch (TransportAdaptorEventProcessingException e) {
             log.error(e.getMessage(), e);
-            throw new TransportEventProcessingException(e.getMessage(), e);
+            throw new TransportAdaptorEventProcessingException(e.getMessage(), e);
         }
     }
 
     @Override
     public void unsubscribe(InputTransportMessageConfiguration inputTransportMessageConfiguration,
                             InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
-                            AxisConfiguration axisConfiguration, String subscriptionId)
-            throws TransportEventProcessingException {
+                            AxisConfiguration axisConfiguration, String subscriptionId) {
         InputTransportAdaptor inputTransportAdaptor = (InputTransportAdaptor) this.transportAdaptorMap.get(inputTransportAdaptorConfiguration.getType());
         try {
             inputTransportAdaptor.unsubscribe(inputTransportMessageConfiguration, inputTransportAdaptorConfiguration, axisConfiguration, subscriptionId);
-        } catch (TransportEventProcessingException e) {
+        } catch (TransportAdaptorEventProcessingException e) {
             log.error(e.getMessage(), e);
-            throw new TransportEventProcessingException(e.getMessage(), e);
+            throw new TransportAdaptorEventProcessingException(e.getMessage(), e);
         }
     }
 

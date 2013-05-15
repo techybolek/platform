@@ -17,8 +17,6 @@
 package org.wso2.carbon.transport.adaptor.core;
 
 
-import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
-
 /**
  * listener class to receive the events from the transport proxy
  */
@@ -31,19 +29,19 @@ public interface TransportAdaptorListener {
      *
      * @param object - received event definition
      */
-    void addEventDefinition(Object object) throws TransportEventProcessingException;
+    void addEventDefinition(Object object);
 
     /**
      * when an event definition is removed transport proxy call this method with the definition.
      *
      * @param object - received event definition
      */
-    void removeEventDefinition(Object object) throws TransportEventProcessingException;
+    void removeEventDefinition(Object object);
 
     /**
      * when an event happens transport proxy call this method with the received event.
      *
      * @param object - received event
      */
-    void onEvent(Object object) throws TransportEventProcessingException;
+    void onEvent(Object object);
 }

@@ -19,7 +19,6 @@ package org.wso2.carbon.transport.adaptor.core;
 
 import org.apache.axis2.engine.AxisConfiguration;
 import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
-import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 
 import java.util.List;
@@ -44,13 +43,11 @@ public interface InputTransportAdaptor {
      * @param transportAdaptorListener - transport type will invoke this when it receive events
      * @param inputTransportAdaptorConfiguration
      *                                 - transport adaptor configuration details
-     * @throws org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException
-     *          - if can not subscribe to the transport
      */
     String subscribe(InputTransportMessageConfiguration inputTransportMessageConfiguration,
                      TransportAdaptorListener transportAdaptorListener,
                      InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
-                     AxisConfiguration axisConfiguration) throws TransportEventProcessingException;
+                     AxisConfiguration axisConfiguration);
 
     /**
      * this method unsubscribes the subscription from the transport.
@@ -59,13 +56,10 @@ public interface InputTransportAdaptor {
      *         - topic name
      * @param inputTransportAdaptorConfiguration
      *         - transport adaptor configuration
-     * @throws TransportEventProcessingException
-     *
      */
     void unsubscribe(InputTransportMessageConfiguration inputTransportMessageConfiguration,
                      InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
-                     AxisConfiguration axisConfiguration, String subscriptionId)
-            throws TransportEventProcessingException;
+                     AxisConfiguration axisConfiguration, String subscriptionId) ;
 
 
 }

@@ -39,7 +39,7 @@ import org.wso2.carbon.transport.adaptor.core.TransportAdaptorDto;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorListener;
 import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.core.config.OutputTransportAdaptorConfiguration;
-import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
+import org.wso2.carbon.transport.adaptor.core.exception.TransportAdaptorEventProcessingException;
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 import org.wso2.carbon.transport.adaptor.core.message.config.OutputTransportMessageConfiguration;
 
@@ -225,7 +225,7 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
                             TransportAdaptorListener transportAdaptorListener,
                             InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
                             AxisConfiguration axisConfiguration)
-            throws TransportEventProcessingException {
+            throws TransportAdaptorEventProcessingException {
         String subscriptionId = UUID.randomUUID().toString();
 
         if (!inputTransportListenerMap.keySet().contains(inputTransportMessageConfiguration)) {
@@ -251,13 +251,13 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
      * @param message - is and Object[]{Event, EventDefinition}
      * @param outputTransportAdaptorConfiguration
      *                - transport configuration to be used
-     * @throws TransportEventProcessingException
+     * @throws org.wso2.carbon.transport.adaptor.core.exception.TransportAdaptorEventProcessingException
      *
      */
     public void publish(OutputTransportMessageConfiguration outputTransportMessageConfiguration,
                         Object message,
                         OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration)
-            throws TransportEventProcessingException {
+            throws TransportAdaptorEventProcessingException {
         Integer tenantId = CarbonContext.getCurrentContext().getTenantId();
         ConcurrentHashMap<OutputTransportAdaptorConfiguration, AsyncDataPublisher> dataPublishers = dataPublisherMap.get(tenantId);
         if (dataPublishers == null) {
@@ -290,7 +290,7 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
                 publishEvent(outputTransportAdaptorConfiguration, dataPublisher, event, streamDefinition);
             }
         } catch (Exception ex) {
-            throw new TransportEventProcessingException(
+            throw new TransportAdaptorEventProcessingException(
                     ex.getMessage() + " Error Occurred When Publishing Events", ex);
         }
 
@@ -324,11 +324,11 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
             OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration,
             AsyncDataPublisher dataPublisher,
             Event event, StreamDefinition streamDefinition)
-            throws TransportEventProcessingException {
+            throws TransportAdaptorEventProcessingException {
         try {
             dataPublisher.publish(streamDefinition.getName(), streamDefinition.getVersion(), event);
         } catch (AgentException ex) {
-            throw new TransportEventProcessingException(
+            throw new TransportAdaptorEventProcessingException(
                     "Cannot publish data via DataPublisher for the transport configuration:" +
                     outputTransportAdaptorConfiguration.getName() + " for the  event " + event, ex);
         }
@@ -336,16 +336,13 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
     }
 
     @Override
-    public void testConnection(
-            OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration)
-            throws TransportEventProcessingException {
+    public void testConnection(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration) {
         // no test
     }
 
     public void unsubscribe(InputTransportMessageConfiguration inputTransportMessageConfiguration,
                             InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
-                            AxisConfiguration axisConfiguration, String subscriptionId)
-            throws TransportEventProcessingException {
+                            AxisConfiguration axisConfiguration, String subscriptionId) {
         Map<String, TransportAdaptorListener> map = inputTransportListenerMap.get(inputTransportMessageConfiguration);
         if (map != null) {
             map.remove(subscriptionId);
@@ -365,7 +362,7 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
                 for (TransportAdaptorListener transportAdaptorListener : transportListeners.values()) {
                     try {
                         transportAdaptorListener.removeEventDefinition(streamDefinition);
-                    } catch (TransportEventProcessingException e) {
+                    } catch (TransportAdaptorEventProcessingException e) {
                         log.error("Cannot remove Stream Definition from a transportAdaptorListener subscribed to " +
                                   streamDefinition.getStreamId(), e);
                     }
@@ -391,7 +388,7 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
             for (TransportAdaptorListener transportAdaptorListener : transportListeners.values()) {
                 try {
                     transportAdaptorListener.addEventDefinition(streamDefinition);
-                } catch (TransportEventProcessingException e) {
+                } catch (TransportAdaptorEventProcessingException e) {
                     log.error("Cannot send Stream Definition to a transportAdaptorListener subscribed to " +
                               streamDefinition.getStreamId(), e);
                 }
@@ -436,7 +433,7 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
                 for (TransportAdaptorListener transportAdaptorListener : transportListeners.values()) {
                     try {
                         transportAdaptorListener.onEvent(event);
-                    } catch (TransportEventProcessingException e) {
+                    } catch (TransportAdaptorEventProcessingException e) {
                         log.error("Cannot send event to a transportAdaptorListener subscribed to " +
                                   event.getStreamId(), e);
                     }

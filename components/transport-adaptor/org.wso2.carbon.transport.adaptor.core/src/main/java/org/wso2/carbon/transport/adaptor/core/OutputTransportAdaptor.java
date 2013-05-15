@@ -18,7 +18,6 @@ package org.wso2.carbon.transport.adaptor.core;
 
 
 import org.wso2.carbon.transport.adaptor.core.config.OutputTransportAdaptorConfiguration;
-import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
 import org.wso2.carbon.transport.adaptor.core.message.config.OutputTransportMessageConfiguration;
 
 import java.util.List;
@@ -42,23 +41,17 @@ public interface OutputTransportAdaptor {
      *                                     - topic name to publish messages
      * @param message                      - message to send
      * @param outputTransportAdaptorConfiguration - transport adaptor configuration to be used
-     * @throws TransportEventProcessingException
-     *          - if the message can not publish
      */
     void publish(OutputTransportMessageConfiguration outputTransportMessageConfiguration,
                  Object message,
-                 OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration)
-            throws TransportEventProcessingException;
+                 OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration);
 
     /**
      * publish test message to check the connection with the transport configuration.
      *
      * @param outputTransportAdaptorConfiguration - transport configuration to be used
-     * @throws TransportEventProcessingException
-     *          - if the message can not publish
      */
-    void testConnection(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration)
-            throws TransportEventProcessingException;
+    void testConnection(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration);
 
 
 }

@@ -19,20 +19,20 @@ package org.wso2.carbon.transport.adaptor.core.exception;
 /**
  * this class represents the message processing time issues
  */
-public class TransportEventProcessingException extends Exception {
+public class TransportAdaptorEventProcessingException extends RuntimeException {
 
-    public TransportEventProcessingException() {
+    public TransportAdaptorEventProcessingException() {
     }
 
-    public TransportEventProcessingException(String message) {
+    public TransportAdaptorEventProcessingException(String message) {
         super(message);
     }
 
-    public TransportEventProcessingException(String message, Throwable cause) {
+    public TransportAdaptorEventProcessingException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public TransportEventProcessingException(Throwable cause) {
+    public TransportAdaptorEventProcessingException(Throwable cause) {
         super(cause);
     }
 }

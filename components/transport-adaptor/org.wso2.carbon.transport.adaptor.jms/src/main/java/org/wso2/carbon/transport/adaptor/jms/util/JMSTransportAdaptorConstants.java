@@ -33,6 +33,8 @@ public interface JMSTransportAdaptorConstants {
     String TRANSPORT_JMS_DURABLE_SUBSCRIBER_NAME_HINT = "transport.jms.DurableSubscriberName.hint";
     String TRANSPORT_JMS_SUBSCRIPTION_DURABLE = "transport.jms.SubscriptionDurable";
     String TRANSPORT_JMS_SUBSCRIPTION_DURABLE_HINT = "transport.jms.SubscriptionDurable.hint";
+    String TRANSPORT_JMS_DESTINATION_TYPE = "transport.jms.DestinationType";
+    String TRANSPORT_JMS_DESTINATION_TYPE_HINT = "transport.jms.DestinationType.hint";
 
     String JMS_TOPIC = "jms.topic";
 

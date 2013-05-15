@@ -22,7 +22,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfiguration;
-import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
+import org.wso2.carbon.transport.adaptor.core.exception.TransportAdaptorEventProcessingException;
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 import org.wso2.carbon.transport.test.TestTransportAdaptorAdaptorListener;
 import org.wso2.carbon.transport.test.util.TransportAdaptorHolder;
@@ -62,7 +62,7 @@ public class TransportServiceTesterDS {
 
         try {
             transportAdaptorService.subscribe(inputTransportAdaptorConfiguration, inputTransportMessageConfiguration, new TestTransportAdaptorAdaptorListener("agent", "org.wso2.phone.retail.store:1.2.0"), TransportAdaptorHolder.getInstance().getConfigurationContextService().getServerConfigContext().getAxisConfiguration());
-        } catch (TransportEventProcessingException e) {
+        } catch (TransportAdaptorEventProcessingException e) {
             log.error("Error occurred when subscribing " + e);
         }
 

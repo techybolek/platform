@@ -17,10 +17,10 @@
 package org.wso2.carbon.transport.adaptor.jms;
 
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.transport.base.threads.NativeWorkerPool;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.databridge.agent.thrift.Agent;
-import org.wso2.carbon.databridge.agent.thrift.AsyncDataPublisher;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.transport.adaptor.core.AbstractTransportAdaptor;
 import org.wso2.carbon.transport.adaptor.core.InputTransportAdaptor;
 import org.wso2.carbon.transport.adaptor.core.OutputTransportAdaptor;
@@ -29,12 +29,21 @@ import org.wso2.carbon.transport.adaptor.core.TransportAdaptorDto;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorListener;
 import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.core.config.OutputTransportAdaptorConfiguration;
-import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
+import org.wso2.carbon.transport.adaptor.core.exception.TransportAdaptorEventProcessingException;
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 import org.wso2.carbon.transport.adaptor.core.message.config.OutputTransportMessageConfiguration;
+import org.wso2.carbon.transport.adaptor.jms.internal.JMSConnectionFactory;
+import org.wso2.carbon.transport.adaptor.jms.internal.JMSMessageListener;
+import org.wso2.carbon.transport.adaptor.jms.internal.JMSMessageSender;
+import org.wso2.carbon.transport.adaptor.jms.internal.JMSTaskManager;
+import org.wso2.carbon.transport.adaptor.jms.internal.JMSTaskManagerFactory;
+import org.wso2.carbon.transport.adaptor.jms.util.JMSConstants;
 import org.wso2.carbon.transport.adaptor.jms.util.JMSTransportAdaptorConstants;
 
+import javax.jms.JMSException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -48,10 +57,11 @@ public final class JMSTransportAdaptorType extends AbstractTransportAdaptor
     private static final Log log = LogFactory.getLog(JMSTransportAdaptorType.class);
     private static JMSTransportAdaptorType jmsTransportAdaptorAdaptor = new JMSTransportAdaptorType();
     private ResourceBundle resourceBundle;
-    private Map<InputTransportMessageConfiguration, Map<String, TransportAdaptorListener>> inputTransportListenerMap =
-            new ConcurrentHashMap<InputTransportMessageConfiguration, Map<String, TransportAdaptorListener>>();
-    private ConcurrentHashMap<Integer, ConcurrentHashMap<OutputTransportAdaptorConfiguration, AsyncDataPublisher>> dataPublisherMap = new ConcurrentHashMap<Integer, ConcurrentHashMap<OutputTransportAdaptorConfiguration, AsyncDataPublisher>>();
-    private Agent agent;
+    //    private Map<InputTransportMessageConfiguration, Map<String, TransportAdaptorListener>> inputTransportListenerMap =
+//            new ConcurrentHashMap<InputTransportMessageConfiguration, Map<String, TransportAdaptorListener>>();
+    private ConcurrentHashMap<String, ConcurrentHashMap<String, PublisherDetails>> publisherMap = new ConcurrentHashMap<String, ConcurrentHashMap<String, PublisherDetails>>();
+
+    private ConcurrentHashMap<Integer, ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<String, SubscriptionDetails>>>> tenantAdaptorDestinationSubscriptionsMap = new ConcurrentHashMap<Integer, ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<String, SubscriptionDetails>>>>();
 
     private JMSTransportAdaptorType() {
 
@@ -157,6 +167,18 @@ public final class JMSTransportAdaptorType extends AbstractTransportAdaptor
         javaNamingProviderUrlProperty.setHint(resourceBundle.getString(JMSTransportAdaptorConstants.TRANSPORT_JMS_CONNECTION_FACTORY_JNDINAME_HINT));
         propertyList.add(connectionFactoryNameProperty);
 
+
+        // Destination Type
+        Property destinationTypeProperty = new Property(JMSTransportAdaptorConstants.TRANSPORT_JMS_DESTINATION_TYPE);
+        destinationTypeProperty.setRequired(true);
+        destinationTypeProperty.setDisplayName(
+                resourceBundle.getString(JMSTransportAdaptorConstants.TRANSPORT_JMS_DESTINATION_TYPE));
+        destinationTypeProperty.setOptions(new String[]{"queue", "topic"});
+        destinationTypeProperty.setDefaultValue("topic");
+        javaNamingProviderUrlProperty.setHint(resourceBundle.getString(JMSTransportAdaptorConstants.TRANSPORT_JMS_DESTINATION_TYPE_HINT));
+        propertyList.add(destinationTypeProperty);
+
+
         return propertyList;
     }
 
@@ -239,22 +261,46 @@ public final class JMSTransportAdaptorType extends AbstractTransportAdaptor
     public String subscribe(InputTransportMessageConfiguration inputTransportMessageConfiguration,
                             TransportAdaptorListener transportAdaptorListener,
                             InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
-                            AxisConfiguration axisConfiguration)
-            throws TransportEventProcessingException {
+                            AxisConfiguration axisConfiguration) {
+
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+        ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<String, SubscriptionDetails>>> adaptorDestinationSubscriptionsMap = tenantAdaptorDestinationSubscriptionsMap.get(tenantId);
+        if (adaptorDestinationSubscriptionsMap == null) {
+            adaptorDestinationSubscriptionsMap = new ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<String, SubscriptionDetails>>>();
+            adaptorDestinationSubscriptionsMap = tenantAdaptorDestinationSubscriptionsMap.putIfAbsent(tenantId, adaptorDestinationSubscriptionsMap);
+        }
+
+        ConcurrentHashMap<String, ConcurrentHashMap<String, SubscriptionDetails>> destinationSubscriptionsMap = adaptorDestinationSubscriptionsMap.get(inputTransportAdaptorConfiguration.getName());
+        if (destinationSubscriptionsMap == null) {
+            destinationSubscriptionsMap = new ConcurrentHashMap<String, ConcurrentHashMap<String, SubscriptionDetails>>();
+            destinationSubscriptionsMap = adaptorDestinationSubscriptionsMap.putIfAbsent(inputTransportAdaptorConfiguration.getName(), destinationSubscriptionsMap);
+        }
+
+        String destination = inputTransportMessageConfiguration.getInputMessageProperties().get(JMSTransportAdaptorConstants.JMS_TOPIC);
+
+        ConcurrentHashMap<String, SubscriptionDetails> subscriptionsMap = destinationSubscriptionsMap.get(destination);
+        if (subscriptionsMap == null) {
+            subscriptionsMap = new ConcurrentHashMap<String, SubscriptionDetails>();
+            subscriptionsMap = destinationSubscriptionsMap.putIfAbsent(destination, subscriptionsMap);
+        }
+
         String subscriptionId = UUID.randomUUID().toString();
-//
-//        if (!inputTransportListenerMap.keySet().contains(inputTransportMessageConfiguration)) {
-//            Map<String, TransportAdaptorListener> map = new HashMap<String, TransportAdaptorListener>();
-//            map.put(subscriptionId, transportAdaptorListener);
-//            inputTransportListenerMap.put(inputTransportMessageConfiguration, map);
-//        } else {
-//            inputTransportListenerMap.get(inputTransportMessageConfiguration).put(subscriptionId, transportAdaptorListener);
-//            StreamDefinition streamDefinition = inputStreamDefinitionMap.get(inputTransportMessageConfiguration);
-//            if (streamDefinition != null) {
-//                transportAdaptorListener.addEventDefinition(streamDefinition);
-//            }
-//
-//        }
+
+
+        Map<String, String> adaptorProperties = new HashMap<String, String>();
+        adaptorProperties.putAll(inputTransportAdaptorConfiguration.getCommonAdaptorProperties());
+        adaptorProperties.putAll(inputTransportAdaptorConfiguration.getInputAdaptorProperties());
+
+        JMSConnectionFactory jmsConnectionFactory = new JMSConnectionFactory(new Hashtable<String, String>(adaptorProperties), inputTransportAdaptorConfiguration.getName());
+
+        Map<String, String> messageConfig = new HashMap<String, String>();
+        messageConfig.put(JMSConstants.PARAM_DESTINATION, destination);
+        JMSTaskManager JMSTaskManager = JMSTaskManagerFactory.createTaskManagerForService(jmsConnectionFactory, inputTransportAdaptorConfiguration.getName(), new NativeWorkerPool(4, 100, 1000, 1000, "JMS Threads", "JMSThreads" + UUID.randomUUID().toString()), messageConfig);
+        JMSTaskManager.setJmsMessageListener(new JMSMessageListener(transportAdaptorListener));
+        JMSTaskManager.start();
+
+        SubscriptionDetails subscriptionDetails = new SubscriptionDetails(jmsConnectionFactory, JMSTaskManager);
+        subscriptionsMap.put(subscriptionId, subscriptionDetails);
 
         return subscriptionId;
     }
@@ -266,68 +312,134 @@ public final class JMSTransportAdaptorType extends AbstractTransportAdaptor
      * @param message - is and Object[]{Event, EventDefinition}
      * @param outputTransportAdaptorConfiguration
      *                - transport configuration to be used
-     * @throws org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException
-     *
      */
     public void publish(OutputTransportMessageConfiguration outputTransportMessageConfiguration,
                         Object message,
-                        OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration)
-            throws TransportEventProcessingException {
-//        Integer tenantId = CarbonContext.getCurrentContext().getTenantId();
-//        ConcurrentHashMap<OutputTransportAdaptorConfiguration, AsyncDataPublisher> dataPublishers = dataPublisherMap.get(tenantId);
-//        if (dataPublishers == null) {
-//            dataPublishers = new ConcurrentHashMap<OutputTransportAdaptorConfiguration, AsyncDataPublisher>();
-//            dataPublisherMap.putIfAbsent(tenantId, dataPublishers);
-//            dataPublishers = dataPublisherMap.get(tenantId);
-//        }
-//        AsyncDataPublisher dataPublisher = dataPublishers.get(outputTransportAdaptorConfiguration);
-//        if (dataPublisher == null) {
-//            synchronized (this) {
-//                dataPublisher = dataPublishers.get(outputTransportAdaptorConfiguration);
-//                if (dataPublisher == null) {
-//                    dataPublisher = createDataPublisher(outputTransportAdaptorConfiguration);
-//                    dataPublishers.putIfAbsent(outputTransportAdaptorConfiguration, dataPublisher);
-//                }
-//            }
-//        }
-//
-//        try {
-//            Event event = (Event) ((Object[]) message)[0];
-//            StreamDefinition streamDefinition = (StreamDefinition) ((Object[]) message)[1];
-//
-//            if (!dataPublisher.isStreamDefinitionAdded(streamDefinition)) {
-//                dataPublisher.addStreamDefinition(streamDefinition);
-//
-//                //Sending the first Event
-//                publishEvent(outputTransportAdaptorConfiguration, dataPublisher, event, streamDefinition);
-//            } else {
-//                //Sending Events
-//                publishEvent(outputTransportAdaptorConfiguration, dataPublisher, event, streamDefinition);
-//            }
-//        } catch (Exception ex) {
-//            throw new TransportEventProcessingException(
-//                    ex.getMessage() + " Error Occurred When Publishing Events", ex);
-//        }
+                        OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration) {
+        ConcurrentHashMap<String, PublisherDetails> topicEventSender = publisherMap.get(outputTransportAdaptorConfiguration.getName());
+        if (null == topicEventSender) {
+            topicEventSender = new ConcurrentHashMap<String, PublisherDetails>();
+            topicEventSender = publisherMap.putIfAbsent(outputTransportAdaptorConfiguration.getName(), topicEventSender);
+        }
+
+        String topicName = new OutputTransportMessageConfiguration().getOutputMessageProperties().get(JMSTransportAdaptorConstants.JMS_TOPIC);
+        PublisherDetails publisherDetails = topicEventSender.get(topicName);
+        try {
+            if (null == publisherDetails) {
+
+                Hashtable<String, String> adaptorProperties = new Hashtable<String, String>();
+                adaptorProperties.putAll(outputTransportAdaptorConfiguration.getCommonAdaptorProperties());
+                adaptorProperties.putAll(outputTransportAdaptorConfiguration.getOutputAdaptorProperties());
+
+
+                JMSConnectionFactory jmsConnectionFactory = new JMSConnectionFactory(adaptorProperties, outputTransportAdaptorConfiguration.getName());
+                Map<String, String> messageConfig = new HashMap<String, String>();
+                messageConfig.put(JMSConstants.PARAM_DESTINATION, topicName);
+                JMSMessageSender jmsMessageSender = new JMSMessageSender(jmsConnectionFactory, messageConfig);
+                jmsMessageSender.send(message, messageConfig);
+
+                publisherDetails = new PublisherDetails(jmsConnectionFactory, jmsMessageSender);
+                topicEventSender.put(topicName, publisherDetails);
+
+            } else {
+                Map<String, String> messageConfig = new HashMap<String, String>();
+                messageConfig.put(JMSConstants.PARAM_DESTINATION, topicName);
+                publisherDetails.getJmsMessageSender().send(message, messageConfig);
+
+            }
+
+        } catch (RuntimeException e) {
+            publisherDetails = topicEventSender.remove(topicName);
+            if (publisherDetails != null) {
+                publisherDetails.getJmsMessageSender().close();
+                publisherDetails.getJmsConnectionFactory().stop();
+            }
+        }
 
     }
 
 
     @Override
-    public void testConnection(
-            OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration)
-            throws TransportEventProcessingException {
+    public void testConnection(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration) {
         // no test
     }
 
     public void unsubscribe(InputTransportMessageConfiguration inputTransportMessageConfiguration,
                             InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
-                            AxisConfiguration axisConfiguration, String subscriptionId)
-            throws TransportEventProcessingException {
-//        Map<String, TransportAdaptorListener> map = inputTransportListenerMap.get(inputTransportMessageConfiguration);
-//        if (map != null) {
-//            map.remove(subscriptionId);
-//        }
+                            AxisConfiguration axisConfiguration, String subscriptionId) {
 
+        String destination = inputTransportMessageConfiguration.getInputMessageProperties().get(JMSTransportAdaptorConstants.JMS_TOPIC);
+
+        int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
+
+        ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<String, SubscriptionDetails>>> adaptorDestinationSubscriptionsMap = tenantAdaptorDestinationSubscriptionsMap.get(tenantId);
+        if (adaptorDestinationSubscriptionsMap == null) {
+            throw new TransportAdaptorEventProcessingException("There is no subscription for " + destination + " for tenant " + PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantDomain());
+        }
+
+        ConcurrentHashMap<String, ConcurrentHashMap<String, SubscriptionDetails>> destinationSubscriptionsMap = adaptorDestinationSubscriptionsMap.get(inputTransportAdaptorConfiguration.getName());
+        if (destinationSubscriptionsMap == null) {
+            throw new TransportAdaptorEventProcessingException("There is no subscription for " + destination + " for transport adaptor " + inputTransportAdaptorConfiguration.getName());
+        }
+
+        ConcurrentHashMap<String, SubscriptionDetails> subscriptionsMap = destinationSubscriptionsMap.get(destination);
+        if (subscriptionsMap == null) {
+            throw new TransportAdaptorEventProcessingException("There is no subscription for " + destination);
+        }
+
+        SubscriptionDetails subscriptionDetails = subscriptionsMap.get(subscriptionId);
+        if (subscriptionDetails == null) {
+            throw new TransportAdaptorEventProcessingException("There is no subscription for " + destination + " for the subscriptionId:" + subscriptionId);
+        }
+
+        try {
+            subscriptionDetails.close();
+        } catch (JMSException e) {
+            throw new TransportAdaptorEventProcessingException("Can not unsubscribe from the destination " + destination + " with the transport adaptor " + inputTransportAdaptorConfiguration.getName(), e);
+        }
+
+    }
+
+    class PublisherDetails {
+        private final JMSConnectionFactory jmsConnectionFactory;
+        private final JMSMessageSender jmsMessageSender;
+
+        public PublisherDetails(JMSConnectionFactory jmsConnectionFactory, JMSMessageSender jmsMessageSender) {
+            this.jmsConnectionFactory = jmsConnectionFactory;
+            this.jmsMessageSender = jmsMessageSender;
+        }
+
+        public JMSConnectionFactory getJmsConnectionFactory() {
+            return jmsConnectionFactory;
+        }
+
+        public JMSMessageSender getJmsMessageSender() {
+            return jmsMessageSender;
+        }
+    }
+
+    class SubscriptionDetails {
+
+        private final JMSConnectionFactory jmsConnectionFactory;
+        private final JMSTaskManager jmsTaskManager;
+
+        public SubscriptionDetails(JMSConnectionFactory jmsConnectionFactory, JMSTaskManager jmsTaskManager) {
+            this.jmsConnectionFactory = jmsConnectionFactory;
+            this.jmsTaskManager = jmsTaskManager;
+        }
+
+        public void close() throws JMSException {
+            this.jmsTaskManager.stop();
+            this.jmsConnectionFactory.stop();
+        }
+
+        public JMSConnectionFactory getJmsConnectionFactory() {
+            return jmsConnectionFactory;
+        }
+
+        public JMSTaskManager getJmsTaskManager() {
+            return jmsTaskManager;
+        }
     }
 
 }
