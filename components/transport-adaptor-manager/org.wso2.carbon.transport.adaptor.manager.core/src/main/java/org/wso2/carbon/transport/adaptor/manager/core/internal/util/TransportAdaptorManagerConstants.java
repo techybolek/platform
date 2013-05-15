@@ -22,8 +22,8 @@ public interface TransportAdaptorManagerConstants {
     String TM_ELE_ROOT_ELEMENT = "transportAdaptor";
     String TM_ELE_DIRECTORY = "transportadaptors";
 
-    String TM_ELE_INPUT_PROPERTY = "inputproperty";
-    String TM_ELE_OUTPUT_PROPERTY = "outputproperty";
+    String TM_ELE_INPUT_PROPERTY = "input";
+    String TM_ELE_OUTPUT_PROPERTY = "output";
     String TM_ELE_COMMON_PROPERTY = "commonproperty";
     String TM_ELE_PROPERTY = "property";
     String TM_ELE_CONF_ADAPTOR_NAME_SPACE_PREFIX = "adaptor";

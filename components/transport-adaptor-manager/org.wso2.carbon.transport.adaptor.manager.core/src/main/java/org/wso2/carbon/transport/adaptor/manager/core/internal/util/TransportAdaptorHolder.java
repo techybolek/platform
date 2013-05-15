@@ -21,9 +21,8 @@ import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 
 public class TransportAdaptorHolder {
 
-    // Not deleted the file for the moment because of possibility of future need
     private static TransportAdaptorHolder instance = new TransportAdaptorHolder();
-    ;
+
     private TransportAdaptorService transportAdaptorService;
 
     public static TransportAdaptorHolder getInstance() {

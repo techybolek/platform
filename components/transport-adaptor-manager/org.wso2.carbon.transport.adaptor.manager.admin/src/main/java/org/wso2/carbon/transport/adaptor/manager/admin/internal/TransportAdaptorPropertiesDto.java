@@ -17,6 +17,8 @@ package org.wso2.carbon.transport.adaptor.manager.admin.internal;/*
 
 public class TransportAdaptorPropertiesDto {
 
+    private String supportedTransportAdaptorType;
+
     private TransportAdaptorPropertyDto[] inputTransportAdaptorPropertyDtos;
     private TransportAdaptorPropertyDto[] outputTransportAdaptorPropertyDtos;
     private TransportAdaptorPropertyDto[] commonTransportAdaptorPropertyDtos;
@@ -46,5 +48,13 @@ public class TransportAdaptorPropertiesDto {
     public void setCommonTransportAdaptorPropertyDtos(
             TransportAdaptorPropertyDto[] commonTransportAdaptorPropertyDtos) {
         this.commonTransportAdaptorPropertyDtos = commonTransportAdaptorPropertyDtos;
+    }
+
+    public String getSupportedTransportAdaptorType() {
+        return supportedTransportAdaptorType;
+    }
+
+    public void setSupportedTransportAdaptorType(String supportedTransportAdaptorType) {
+        this.supportedTransportAdaptorType = supportedTransportAdaptorType;
     }
 }

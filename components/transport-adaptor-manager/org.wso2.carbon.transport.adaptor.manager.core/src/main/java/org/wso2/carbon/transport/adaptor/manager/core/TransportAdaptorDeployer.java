@@ -79,7 +79,7 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
                 processDeploy(deploymentFileData, path);
             }
                 catch(TransportAdaptorManagerConfigurationException e){
-                    throw new DeploymentException("Transport Adaptor file is not deployed",e);
+                    throw new DeploymentException("Transport Adaptor file "+ path.substring(path.lastIndexOf('/') + 1, path.length())  +" is not deployed ",e);
                 }
             }else{
                 deployedTransportAdaptorFilePaths.remove(path);

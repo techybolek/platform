@@ -77,7 +77,7 @@ function addTransport(form) {
     while (document.getElementById("inputProperty_Required_" + inputPropertyCount) != null ||
            document.getElementById("inputProperty_" + inputPropertyCount) != null) {
         // if required fields are empty
-        if (document.getElementById("inputProperty_Required_" + inputPropertyCount) != null) {
+        if ((document.getElementById("inputProperty_Required_" + inputPropertyCount) != null) && ((document.getElementById("inputCheckbox")).checked)) {
             if (document.getElementById("inputProperty_Required_" + inputPropertyCount).value.trim() == "") {
                 // values are empty in fields
                 isFieldEmpty = true;
@@ -110,7 +110,7 @@ function addTransport(form) {
            document.getElementById("outputProperty_" + outputPropertyCount) != null) {
         // if required fields are empty
         if (document.getElementById("outputProperty_Required_" + outputPropertyCount) != null) {
-            if (document.getElementById("outputProperty_Required_" + outputPropertyCount).value.trim() == "") {
+            if ((document.getElementById("outputProperty_Required_" + outputPropertyCount).value.trim() == "") && ((document.getElementById("outputCheckbox")).checked)) {
                 // values are empty in fields
                 isFieldEmpty = true;
                 outputParameterString = "";
@@ -230,66 +230,85 @@ function showTransportProperties() {
                        var commonTransportProperties = jsonObject.localCommonTransportAdaptorPropertyDtos;
                        var inputTransportProperties = jsonObject.localInputTransportAdaptorPropertyDtos;
                        var outputTransportProperties = jsonObject.localOutputTransportAdaptorPropertyDtos;
+                       var supportedTransportAdaptorType = jsonObject.localSupportedTransportAdaptorType;
+
+
+                       var tableRow = transportInputTable.insertRow(transportInputTable.rows.length);
+                       if (supportedTransportAdaptorType == 'inout' && commonTransportProperties != undefined) {
+                           tableRow.innerHTML = '<td colspan="2" ><b><fmt:message key='transport.common.tooltip'/></b></td> ';
+                       }
+                       else if ((inputTransportProperties != undefined) || (outputTransportProperties != undefined || (commonTransportProperties != undefined))) {
+                           tableRow.innerHTML = '<td colspan="2" ><b><fmt:message key='transport.all.properties.tooltip'/></b></td> ';
+                       }
 
                        if (commonTransportProperties != undefined) {
                            var transportCommonPropertyLoop = 0;
                            var commonProperty = "commonProperty_";
                            var commonRequiredProperty = "commonProperty_Required_";
-                           var tableRow = transportInputTable.insertRow(transportInputTable.rows.length);
-                           tableRow.innerHTML = '<td colspan="2" class="middle-header"><fmt:message key='transport.common.tooltip'/> <input type="checkbox" id="commonCheckbox" onclick="enableMyInput(this)" align="bottom"/></td> ';
+
 
                            $.each(commonTransportProperties, function (index,
                                                                        commonTransportProperty) {
-                               loadTransportProperties(commonTransportProperty, transportInputTable, transportCommonPropertyLoop, commonProperty, commonRequiredProperty, 'commonFields')
+                               loadTransportProperties('common', commonTransportProperty, transportInputTable, transportCommonPropertyLoop, commonProperty, commonRequiredProperty, 'commonFields')
                                transportCommonPropertyLoop = transportCommonPropertyLoop + 1;
 
                            });
+                       }
+
+                       if (supportedTransportAdaptorType == 'inout') {
+                           var tableRow = transportInputTable.insertRow(transportInputTable.rows.length);
+                           tableRow.innerHTML = '<td colspan="2" class="middle-header"><fmt:message key='transport.input.tooltip'/> <input type="checkbox" id="inputCheckbox" onclick="enableMyInput(this)" align="bottom"/></td> ';
+
                        }
 
                        if (inputTransportProperties != undefined) {
                            var transportInputPropertyLoop = 0;
                            var inputProperty = "inputProperty_";
                            var inputRequiredProperty = "inputProperty_Required_";
-                           alert(inputTransportProperties)
-                           var tableRow = transportInputTable.insertRow(transportInputTable.rows.length);
-                           tableRow.innerHTML = '<td colspan="2" class="middle-header"><fmt:message key='transport.input.tooltip'/> <input type="checkbox" id="inputCheckbox" onclick="enableMyInput(this)" align="bottom"/></td> ';
+
+                           if (supportedTransportAdaptorType == 'inout') {
+                               var tableRowHeading = transportInputTable.insertRow(transportInputTable.rows.length);
+                               tableRowHeading.innerHTML = '<td colspan="2"><b><fmt:message key='transport.input.properties.tooltip'/></b></td> ';
+                           }
 
                            $.each(inputTransportProperties, function (index,
                                                                       inputTransportProperty) {
-                               loadTransportProperties(inputTransportProperty, transportInputTable, transportInputPropertyLoop, inputProperty, inputRequiredProperty, 'inputFields')
+                               loadTransportProperties('input', inputTransportProperty, transportInputTable, transportInputPropertyLoop, inputProperty, inputRequiredProperty, 'inputFields')
                                transportInputPropertyLoop = transportInputPropertyLoop + 1;
 
 
                            });
                        }
 
+                       if (supportedTransportAdaptorType == 'inout') {
+                           var tableRow = transportInputTable.insertRow(transportInputTable.rows.length);
+                           tableRow.innerHTML = '<td colspan="2" class="middle-header"><fmt:message key='transport.output.tooltip'/>  <input type="checkbox" id="outputCheckbox" onclick="enableMyInput(this)" align="bottom"/> </td>';
+
+                       }
 
                        if (outputTransportProperties != undefined) {
                            var transportOutputPropertyLoop = 0;
                            var outputProperty = "outputProperty_";
                            var outputRequiredProperty = "outputProperty_Required_";
-                           alert(outputTransportProperties)
-                           var tableRow = transportInputTable.insertRow(transportInputTable.rows.length);
-                           tableRow.innerHTML = '<td colspan="2" class="middle-header"><fmt:message key='transport.output.tooltip'/>  <input type="checkbox" id="outputCheckbox" onclick="enableMyInput(this)" align="bottom"/> </td>';
 
+                           if (supportedTransportAdaptorType == 'inout') {
+                               var tableRowHeading = transportInputTable.insertRow(transportInputTable.rows.length);
+                               tableRowHeading.innerHTML = '<td colspan="2"><b><fmt:message key='transport.output.properties.tooltip'/></b></td> ';
+                           }
                            $.each(outputTransportProperties, function (index,
                                                                        outputTransportProperty) {
-                               loadTransportProperties(outputTransportProperty, transportInputTable, transportOutputPropertyLoop, outputProperty, outputRequiredProperty, 'outputFields')
+                               loadTransportProperties('output', outputTransportProperty, transportInputTable, transportOutputPropertyLoop, outputProperty, outputRequiredProperty, 'outputFields')
                                transportOutputPropertyLoop = transportOutputPropertyLoop + 1;
 
                            });
                        }
-
-
                    }
-
-
                }
            });
 }
 
-function loadTransportProperties(transportProperty, transportInputTable, transportPropertyLoop,
-                                 propertyValue, requiredValue, classType) {
+function loadTransportProperties(propertyType, transportProperty, transportInputTable,
+                                 transportPropertyLoop, propertyValue, requiredValue, classType) {
 
     var property = transportProperty.localDisplayName.trim();
     var tableRow = transportInputTable.insertRow(transportInputTable.rows.length);
@@ -320,7 +339,25 @@ function loadTransportProperties(transportProperty, transportInputTable, transpo
 
 
     var inputField = tableRow.insertCell(1);
-    inputField.innerHTML = '<div class="' + classType + '"> <input style="width:50%" type="' + textPasswordType + '"disabled=disabled"' + '" id="' + requiredElementId + transportPropertyLoop + '" name="' + transportProperty.localKey + '" value="' + defaultValue + '" class="initE"  /> <br/> <div class="sectionHelp">' + hint + '</div></div>';
+
+    if (propertyType != 'common') {
+
+        if (hint != undefined) {
+            inputField.innerHTML = '<div class="' + classType + '"> <input style="width:50%" type="' + textPasswordType + '"disabled=disabled"' + '" id="' + requiredElementId + transportPropertyLoop + '" name="' + transportProperty.localKey + '" value="' + defaultValue + '" class="initE"  /> <br/> <div class="sectionHelp">' + hint + '</div></div>';
+        }
+        else {
+            inputField.innerHTML = '<div class="' + classType + '"> <input style="width:50%" type="' + textPasswordType + '"disabled=disabled"' + '" id="' + requiredElementId + transportPropertyLoop + '" name="' + transportProperty.localKey + '" value="' + defaultValue + '" class="initE"  /> </div>';
+        }
+    }
+    else {
+        if (hint != undefined) {
+            inputField.innerHTML = '<div class="' + classType + '"> <input style="width:50%" type="' + textPasswordType + '" id="' + requiredElementId + transportPropertyLoop + '" name="' + transportProperty.localKey + '" value="' + defaultValue + '" class="initE"  /> <br/> <div class="sectionHelp">' + hint + '</div></div>';
+        }
+        else {
+            inputField.innerHTML = '<div class="' + classType + '"> <input style="width:50%" type="' + textPasswordType + '" id="' + requiredElementId + transportPropertyLoop + '" name="' + transportProperty.localKey + '" value="' + defaultValue + '" class="initE"  /> </div>';
+        }
+
+    }
 
 }
 
@@ -344,16 +381,6 @@ function enableMyInput(obj) {
         else {
             jQuery('.inputFields').find('input', 'text').val("")
             jQuery('.inputFields').find('input').attr('disabled', 'disabled')
-        }
-    }
-
-    else if (jQuery(obj).attr('id') == "commonCheckbox") {
-        if ((jQuery(obj).is(':checked'))) {
-            jQuery('.commonFields').find('input').attr('disabled', false)
-        }
-        else {
-            jQuery('.commonFields').find('input', 'text').val("")
-            jQuery('.commonFields').find('input').attr('disabled', 'disabled')
         }
     }
 
@@ -405,13 +432,13 @@ function enableMyInput(obj) {
             String[] transportNames = stub.getTransportAdaptorNames();
             TransportAdaptorPropertiesDto transportAdaptorPropertiesDto = null;
             String firstTransportName = null;
+            String supportedTransportAdaptorType = null;
             if (transportNames != null) {
                 firstTransportName = transportNames[0];
                 transportAdaptorPropertiesDto = stub.getAllTransportAdaptorPropertiesDto(firstTransportName);
+                supportedTransportAdaptorType = transportAdaptorPropertiesDto.getSupportedTransportAdaptorType();
                 for (String type : transportNames) {
         %>
-        <option><%=type%>
-        </option>
         <option><%=type%>
         </option>
         <%
@@ -428,17 +455,31 @@ function enableMyInput(obj) {
 </tr>
 
 <%
-    if ((transportAdaptorPropertiesDto.getCommonTransportAdaptorPropertyDtos()) != null & firstTransportName != null) {
+    if (supportedTransportAdaptorType.equals("inout") && (transportAdaptorPropertiesDto.getCommonTransportAdaptorPropertyDtos()) != null) {
+
 %>
 <tr>
-    <td colspan="2" class="middle-header">
-        <fmt:message key="transport.common.tooltip"/>
-        <input type="checkbox" id="commonCheckbox" onclick="enableMyInput(this)" align="bottom"/>
+    <td colspan="2"><b>
+        <fmt:message key="transport.common.tooltip"/> </b>
     </td>
 </tr>
-<tr>
 
-    <% //Input fields for common transport adaptor properties
+<%
+
+} else if ((transportAdaptorPropertiesDto.getInputTransportAdaptorPropertyDtos()) != null || (transportAdaptorPropertiesDto.getOutputTransportAdaptorPropertyDtos()) != null) {
+
+%>
+<tr>
+    <td colspan="2"><b>
+        <fmt:message key="transport.all.properties.tooltip"/> </b>
+    </td>
+</tr>
+
+<%
+    }
+
+    if ((transportAdaptorPropertiesDto.getCommonTransportAdaptorPropertyDtos()) != null & firstTransportName != null) {
+        //Input fields for common transport adaptor properties
 
         TransportAdaptorPropertyDto[] commonTransportProperties = transportAdaptorPropertiesDto.getCommonTransportAdaptorPropertyDtos();
 
@@ -446,8 +487,8 @@ function enableMyInput(obj) {
 
         if (commonTransportProperties != null) {
             for (int index = 0; index < commonTransportProperties.length; index++) {
-    %>
-
+%>
+<tr>
     <td class="leftCol-med">
         <%=commonTransportProperties[index].getDisplayName()%>
         <%
@@ -474,11 +515,13 @@ function enableMyInput(obj) {
                                        id="<%=propertyId%><%=index%>" class="initE"
                                        style="width:50%"
                                        value="<%= (commonTransportProperties[index].getDefaultValue()) != null ? commonTransportProperties[index].getDefaultValue() : "" %>"
-                                       disabled="disabled"/>
-
+                />
+            <%
+                if (commonTransportProperties[index].getHint() != null) { %>
             <div class="sectionHelp">
                 <%=commonTransportProperties[index].getHint()%>
             </div>
+            <% } %>
         </div>
     </td>
 
@@ -487,16 +530,9 @@ function enableMyInput(obj) {
             }
         }
     }
+
+    if (supportedTransportAdaptorType.equals("inout")) {
 %>
-
-<%
-
-
-    //Input fields for input transport adaptor properties
-    if ((transportAdaptorPropertiesDto.getInputTransportAdaptorPropertyDtos()) != null & firstTransportName != null) {
-
-%>
-
 
 <tr>
     <td colspan="2" class="middle-header">
@@ -505,7 +541,23 @@ function enableMyInput(obj) {
     </td>
 </tr>
 
+
 <%
+
+    }
+    //Input fields for input transport adaptor properties
+    if ((transportAdaptorPropertiesDto.getInputTransportAdaptorPropertyDtos()) != null & firstTransportName != null) {
+        if (supportedTransportAdaptorType.equals("inout")) {
+%>
+
+
+<tr>
+    <td colspan="2"><b>
+        <fmt:message key="transport.input.properties.tooltip"/></b>
+    </td>
+</tr>
+
+<% }
     TransportAdaptorPropertyDto[] inputTransportProperties = transportAdaptorPropertiesDto.getInputTransportAdaptorPropertyDtos();
 
     if (inputTransportProperties != null) {
@@ -539,10 +591,12 @@ function enableMyInput(obj) {
                                       style="width:50%"
                                       value="<%= (inputTransportProperties[index].getDefaultValue()) != null ? inputTransportProperties[index].getDefaultValue() : "" %>"
                                       disabled="disabled"/>
-
+            <%
+                if (inputTransportProperties[index].getHint() != null) { %>
             <div class="sectionHelp">
                 <%=inputTransportProperties[index].getHint()%>
             </div>
+            <% } %>
         </div>
     </td>
 
@@ -551,20 +605,29 @@ function enableMyInput(obj) {
             }
         }
     }
+    if (supportedTransportAdaptorType.equals("inout")) {
 
 %>
-<%
-    if ((transportAdaptorPropertiesDto.getOutputTransportAdaptorPropertyDtos()) != null & firstTransportName != null) {
-%>
-
 <tr>
     <td colspan="2" class="middle-header">
         <fmt:message key="transport.output.tooltip"/>
         <input type="checkbox" id="outputCheckbox" onclick="enableMyInput(this)" align="bottom"/>
     </td>
 </tr>
-<%
 
+
+<% }
+    if ((transportAdaptorPropertiesDto.getOutputTransportAdaptorPropertyDtos()) != null & firstTransportName != null) {
+        if (supportedTransportAdaptorType.equals("inout")) {
+%>
+
+<tr>
+    <td colspan="2"><b>
+        <fmt:message key="transport.output.properties.tooltip"/> </b>
+    </td>
+</tr>
+<%
+    }
     //Input fields for output transport adaptor properties
 
     TransportAdaptorPropertyDto[] outTransportProperties = transportAdaptorPropertiesDto.getOutputTransportAdaptorPropertyDtos();
@@ -603,10 +666,12 @@ function enableMyInput(obj) {
                                        style="width:50%"
                                        value="<%= (outTransportProperties[index].getDefaultValue()) != null ? outTransportProperties[index].getDefaultValue() : "" %>"
                                        disabled="disabled"/>
-
+            <%
+                if (outTransportProperties[index].getHint() != null) { %>
             <div class="sectionHelp">
                 <%=outTransportProperties[index].getHint()%>
             </div>
+            <% } %>
         </div>
     </td>
 

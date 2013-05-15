@@ -16,55 +16,47 @@
 
 package org.wso2.carbon.transport.adaptor.manager.core;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * represents details of a particular transport adaptor connection
  */
 public class TransportAdaptorConfiguration {
 
-    /**
-     * logical name use to identify this configuration
-     */
+
     private String name;
 
-    /**
-     * transport  type for this configuration
-     */
     private String type;
 
-    /**
-     * Map contains the input adaptor property configuration details
-     */
-    private Map<String, String> inputAdaptorProperties;
+    private TransportAdaptorPropertyConfiguration inputAdaptorPropertyConfiguration = null;
 
-    /**
-     * Map contains the output adaptor property configuration details
-     */
-    private Map<String, String> outputAdaptorProperties;
+    private TransportAdaptorPropertyConfiguration outputAdaptorPropertyConfiguration = null;
 
-    /**
-     * Map contains the common adaptor property configuration details
-     */
-    private Map<String, String> commonAdaptorProperties;
+    private TransportAdaptorPropertyConfiguration commonAdaptorPropertyConfiguration = null;
 
-    public TransportAdaptorConfiguration() {
-        this.inputAdaptorProperties = new ConcurrentHashMap<String, String>();
-        this.outputAdaptorProperties = new ConcurrentHashMap<String, String>();
-        this.commonAdaptorProperties = new ConcurrentHashMap<String, String>();
+    public TransportAdaptorPropertyConfiguration getInputAdaptorPropertyConfiguration() {
+        return inputAdaptorPropertyConfiguration;
     }
 
-    public void addInputAdaptorProperty(String name, String value) {
-        this.inputAdaptorProperties.put(name, value);
+    public void setInputAdaptorPropertyConfiguration(
+            TransportAdaptorPropertyConfiguration inputAdaptorPropertyConfiguration) {
+        this.inputAdaptorPropertyConfiguration = inputAdaptorPropertyConfiguration;
     }
 
-    public void addOutputAdaptorProperty(String name, String value) {
-        this.outputAdaptorProperties.put(name, value);
+    public TransportAdaptorPropertyConfiguration getOutputAdaptorPropertyConfiguration() {
+        return outputAdaptorPropertyConfiguration;
     }
 
-    public void addCommonAdaptorProperty(String name, String value) {
-        this.commonAdaptorProperties.put(name, value);
+    public void setOutputAdaptorPropertyConfiguration(
+            TransportAdaptorPropertyConfiguration outputAdaptorPropertyConfiguration) {
+        this.outputAdaptorPropertyConfiguration = outputAdaptorPropertyConfiguration;
+    }
+
+    public TransportAdaptorPropertyConfiguration getCommonAdaptorPropertyConfiguration() {
+        return commonAdaptorPropertyConfiguration;
+    }
+
+    public void setCommonAdaptorPropertyConfiguration(
+            TransportAdaptorPropertyConfiguration commonAdaptorPropertyConfiguration) {
+        this.commonAdaptorPropertyConfiguration = commonAdaptorPropertyConfiguration;
     }
 
     public String getName() {
@@ -83,28 +75,5 @@ public class TransportAdaptorConfiguration {
         this.type = type;
     }
 
-    public Map<String, String> getInputAdaptorProperties() {
-        return inputAdaptorProperties;
-    }
-
-    public void setInputAdaptorProperties(Map<String, String> inputAdaptorProperties) {
-        this.inputAdaptorProperties = inputAdaptorProperties;
-    }
-
-    public Map<String, String> getOutputAdaptorProperties() {
-        return outputAdaptorProperties;
-    }
-
-    public void setOutputAdaptorProperties(Map<String, String> outputAdaptorProperties) {
-        this.outputAdaptorProperties = outputAdaptorProperties;
-    }
-
-    public Map<String, String> getCommonAdaptorProperties() {
-        return commonAdaptorProperties;
-    }
-
-    public void setCommonAdaptorProperties(Map<String, String> commonAdaptorProperties) {
-        this.commonAdaptorProperties = commonAdaptorProperties;
-    }
 }
 

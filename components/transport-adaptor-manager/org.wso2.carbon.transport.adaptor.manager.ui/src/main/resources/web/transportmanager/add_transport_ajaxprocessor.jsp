@@ -84,6 +84,13 @@
     } catch (Exception e) {
         msg = e.getMessage();
 
+        %>
+
+  <script type="text/javascript">
+      alert(msg);
+  </script>
+<%
+
     }
 
 %>  <%=msg%>   <%
