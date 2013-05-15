@@ -41,7 +41,7 @@ public class TransportAdaptorDto {
     ;
 
     public enum MessageType {
-        XML, TUPLE, MAP, TEXT
+        XML, TUPLE, MAP, TEXT, JSON
     }
 
     ;

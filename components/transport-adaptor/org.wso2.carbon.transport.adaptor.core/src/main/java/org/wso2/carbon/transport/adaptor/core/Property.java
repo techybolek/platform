@@ -24,9 +24,9 @@ public class Property {
 
     private String propertyName;
     // property is a required field or not
-    private boolean isRequired;
+    private boolean isRequired = false;
     // property is a password field or not
-    private boolean isSecured;
+    private boolean isSecured = false;
     // display name in ui
     private String displayName;
     // default value of the property
