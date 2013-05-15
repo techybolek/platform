@@ -396,13 +396,13 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
         TransportAdaptorService transportAdaptorService = TransportAdaptorHolder.getInstance().getTransportAdaptorService();
         TransportAdaptorDto transportAdaptorDto = transportAdaptorService.getTransportAdaptorDto(transportAdaptorConfiguration.getType());
 
-        if (transportAdaptorDto.getTransportAdaptorType().equals(TransportAdaptorDto.TransportAdaptorType.IN)) {
+        if (transportAdaptorDto.getSupportedTransportAdaptorType().equals(TransportAdaptorDto.TransportAdaptorType.IN)) {
             addToInputTransportInfoMap(tenantId, transportAdaptorConfiguration);
 
-        } else if (transportAdaptorDto.getTransportAdaptorType().equals(TransportAdaptorDto.TransportAdaptorType.OUT)) {
+        } else if (transportAdaptorDto.getSupportedTransportAdaptorType().equals(TransportAdaptorDto.TransportAdaptorType.OUT)) {
             addToOutputTransportInfoMap(tenantId, transportAdaptorConfiguration);
 
-        } else if (transportAdaptorDto.getTransportAdaptorType().equals(TransportAdaptorDto.TransportAdaptorType.INOUT)) {
+        } else if (transportAdaptorDto.getSupportedTransportAdaptorType().equals(TransportAdaptorDto.TransportAdaptorType.INOUT)) {
             addToInputTransportInfoMap(tenantId, transportAdaptorConfiguration);
             addToOutputTransportInfoMap(tenantId, transportAdaptorConfiguration);
         }
