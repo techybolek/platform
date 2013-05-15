@@ -6,7 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderServiceValueHolder;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorListener;
-import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
+import org.wso2.carbon.transport.adaptor.core.exception.TransportAdaptorEventProcessingException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ public class XmlInputEventBuilder implements EventBuilder {
         }
         try {
             EventBuilderServiceValueHolder.getTransportAdaptorService().subscribe(null, eventBuilderConfiguration.getInputTransportMessageConfiguration(), new XMLInputTransportListener(), axisConfiguration);
-        } catch (TransportEventProcessingException e) {
+        } catch (TransportAdaptorEventProcessingException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     }
@@ -70,17 +70,17 @@ public class XmlInputEventBuilder implements EventBuilder {
     private class XMLInputTransportListener implements TransportAdaptorListener {
 
         @Override
-        public void addEventDefinition(Object o) throws TransportEventProcessingException {
+        public void addEventDefinition(Object o) {
             //To change body of implemented methods use File | Settings | File Templates.
         }
 
         @Override
-        public void removeEventDefinition(Object o) throws TransportEventProcessingException {
+        public void removeEventDefinition(Object o) {
             //To change body of implemented methods use File | Settings | File Templates.
         }
 
         @Override
-        public void onEvent(Object o) throws TransportEventProcessingException {
+        public void onEvent(Object o)  {
             sendEvent(o);
         }
     }

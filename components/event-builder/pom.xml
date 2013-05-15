@@ -99,6 +99,7 @@
         <module>org.wso2.carbon.event.builder.core</module>
         <module>org.wso2.carbon.event.builder.admin</module>
         <!--<module>org.wso2.carbon.event.builder.ui</module>-->
+        <module>org.wso2.carbon.event.builder.test</module>
     </modules>
 
     <properties>

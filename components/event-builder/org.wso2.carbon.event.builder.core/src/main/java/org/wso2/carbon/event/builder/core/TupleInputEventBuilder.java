@@ -32,9 +32,13 @@ import org.wso2.carbon.event.builder.core.internal.util.EventBuilderServiceValue
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorListener;
 import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfiguration;
-import org.wso2.carbon.transport.adaptor.core.exception.TransportEventProcessingException;
+import org.wso2.carbon.transport.adaptor.core.exception.TransportAdaptorEventProcessingException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class TupleInputEventBuilder implements EventBuilder {
     private static final Log log = LogFactory.getLog(TupleInputEventBuilder.class);
@@ -130,7 +134,7 @@ public class TupleInputEventBuilder implements EventBuilder {
             InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration = new TransportAdaptorConfiguration();
             inputTransportAdaptorConfiguration.setType(eventBuilderConfiguration.getType());
             EventBuilderServiceValueHolder.getTransportAdaptorService().subscribe(inputTransportAdaptorConfiguration, eventBuilderConfiguration.getInputTransportMessageConfiguration(), new TupleInputTransportListener(), axisConfiguration);
-        } catch (TransportEventProcessingException e) {
+        } catch (TransportAdaptorEventProcessingException e) {
             log.error("Cannot subscribe to " + this.getClass().getName() + ":\n" + e.getMessage());
             throw new EventBuilderConfigurationException(e);
         }
@@ -215,12 +219,12 @@ public class TupleInputEventBuilder implements EventBuilder {
     private class TupleInputTransportListener implements TransportAdaptorListener {
 
         @Override
-        public void addEventDefinition(Object o) throws TransportEventProcessingException {
+        public void addEventDefinition(Object o) {
             if (o instanceof StreamDefinition) {
                 try {
                     createMapping((StreamDefinition) o);
                 } catch (MalformedStreamDefinitionException e) {
-                    throw new TransportEventProcessingException("Cannot create mapping for input stream with id '"
+                    throw new TransportAdaptorEventProcessingException("Cannot create mapping for input stream with id '"
                             + ((StreamDefinition) o).getStreamId() + "':", e);
                 }
             }
@@ -228,16 +232,16 @@ public class TupleInputEventBuilder implements EventBuilder {
         }
 
         @Override
-        public void removeEventDefinition(Object o) throws TransportEventProcessingException {
+        public void removeEventDefinition(Object o) {
             notifyEventRemoval(o);
         }
 
         @Override
-        public void onEvent(Object o) throws TransportEventProcessingException {
+        public void onEvent(Object o) {
             try {
                 sendEvent(o);
             } catch (EventBuilderConfigurationException e) {
-                throw new TransportEventProcessingException("Cannot send create an event from input:", e);
+                throw new TransportAdaptorEventProcessingException("Cannot send create an event from input:", e);
             }
         }
     }

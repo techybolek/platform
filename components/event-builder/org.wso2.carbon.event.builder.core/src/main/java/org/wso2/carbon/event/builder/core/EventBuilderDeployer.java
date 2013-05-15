@@ -29,7 +29,8 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
 import org.wso2.carbon.event.builder.core.exception.EventBuilderConfigurationException;
 import org.wso2.carbon.event.builder.core.internal.CarbonEventBuilderService;
-import org.wso2.carbon.event.builder.core.internal.config.EventBuilderConfigurationHelper;
+import org.wso2.carbon.event.builder.core.internal.config.TupleEventBuilderConfigBuilder;
+import org.wso2.carbon.event.builder.core.internal.config.TupleEventBuilderConfigBuilder;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConfigurationSyntax;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderServiceValueHolder;
 
@@ -65,18 +66,18 @@ public class EventBuilderDeployer extends AbstractDeployer {
         File eventBuilderConfigFile = new File(path);
         CarbonEventBuilderService carbonEventBuilderService = EventBuilderServiceValueHolder.getCarbonEventBuilderService();
         int tenantID = PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();
-        String eventBuilderName = "";
+        String eventBuilderName = null;
 
         try {
 
             OMElement ebConfigOMElement = getEbConfigOMElement(path, eventBuilderConfigFile);
 
-            EventBuilderConfiguration eventBuilderConfiguration = EventBuilderConfigurationHelper.fromOM(ebConfigOMElement);
+            EventBuilder eventBuilder = TupleEventBuilderConfigBuilder.getInstance().fromOM(ebConfigOMElement);
             eventBuilderName = ebConfigOMElement.getAttributeValue(new QName(EventBuilderConfigurationSyntax.EB_ATTR_NAME));
 
             if (carbonEventBuilderService.checkEventBuilderValidity(tenantID, eventBuilderName)) {
                 carbonEventBuilderService.removeFromCancelDeployMap(tenantID, eventBuilderName);
-                carbonEventBuilderService.addEventBuilder(eventBuilderConfiguration, configurationContext.getAxisConfiguration());
+                carbonEventBuilderService.addEventBuilder(eventBuilder, configurationContext.getAxisConfiguration());
                 carbonEventBuilderService.addFileConfiguration(tenantID, eventBuilderName, path, true);
                 log.info(eventBuilderName + " successfully deployed.");
             } else {

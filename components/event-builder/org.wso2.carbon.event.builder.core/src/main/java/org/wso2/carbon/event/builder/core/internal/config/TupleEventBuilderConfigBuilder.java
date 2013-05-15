@@ -24,6 +24,8 @@ import org.apache.axiom.om.OMFactory;
 import org.wso2.carbon.databridge.commons.AttributeType;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
+import org.wso2.carbon.event.builder.core.EventBuilder;
+import org.wso2.carbon.event.builder.core.TupleInputEventBuilder;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
 import org.wso2.carbon.event.builder.core.internal.TupleInputMapping;
 import org.wso2.carbon.event.builder.core.internal.util.EventBuilderConfigurationSyntax;
@@ -41,11 +43,26 @@ import static org.wso2.carbon.event.builder.core.internal.TupleInputMapping.Inpu
 /**
  * This class is used to read the values of the event builder configuration defined in XML configuration files
  */
-public class EventBuilderConfigurationHelper {
+public class TupleEventBuilderConfigBuilder implements EventBuilderConfigBuilder {
 
-    public static EventBuilderConfiguration fromOM(OMElement ebConfigOMElement) throws MalformedStreamDefinitionException {
+    private static TupleEventBuilderConfigBuilder tupleEventBuilderConfigBuilder = null;
 
-        EventBuilderConfiguration eventBuilderConfiguration = new EventBuilderConfiguration(null);
+    private TupleEventBuilderConfigBuilder() {
+
+    }
+
+    public static TupleEventBuilderConfigBuilder getInstance() {
+        if (TupleEventBuilderConfigBuilder.tupleEventBuilderConfigBuilder == null) {
+            tupleEventBuilderConfigBuilder = new TupleEventBuilderConfigBuilder();
+        }
+
+        return tupleEventBuilderConfigBuilder;
+    }
+
+    @Override
+    public EventBuilder fromOM(OMElement ebConfigOMElement) throws MalformedStreamDefinitionException {
+
+        EventBuilderConfiguration<TupleInputMapping> eventBuilderConfiguration = new EventBuilderConfiguration(null);
 
         OMElement fromElement = ebConfigOMElement.getFirstChildWithName(new QName(EventBuilderConfigurationSyntax.EB_CONF_NS, EventBuilderConfigurationSyntax.EB_ELEMENT_FROM));
         OMElement mappingElement = ebConfigOMElement.getFirstChildWithName(new QName(EventBuilderConfigurationSyntax.EB_CONF_NS, EventBuilderConfigurationSyntax.EB_ELEMENT_MAPPING));
@@ -100,10 +117,10 @@ public class EventBuilderConfigurationHelper {
         }
         eventBuilderConfiguration.setInputTransportMessageConfiguration(inputTransportMessageConfiguration);
 
-        return eventBuilderConfiguration;
+        return new TupleInputEventBuilder(eventBuilderConfiguration);
     }
 
-    private static void addAttributeToStreamDefinition(StreamDefinition streamDefinition, String attributeName, InputDataType inputDataType, AttributeType attributeType) {
+    private void addAttributeToStreamDefinition(StreamDefinition streamDefinition, String attributeName, InputDataType inputDataType, AttributeType attributeType) {
         switch (inputDataType) {
             case META_DATA:
                 streamDefinition.addMetaData(attributeName, attributeType);
@@ -117,8 +134,10 @@ public class EventBuilderConfigurationHelper {
         }
     }
 
-    public static OMElement eventBuilderConfigurationToOM(EventBuilderConfiguration eventBuilderConfiguration) {
+    @Override
+    public OMElement eventBuilderConfigurationToOM(EventBuilder eventBuilder) {
         //TODO Fix me like my brother
+        EventBuilderConfiguration eventBuilderConfiguration = eventBuilder.getEventBuilderConfiguration();
         Map<String, String> eventBuilderProperties = eventBuilderConfiguration.getEventBuilderConfigurationProperties();
 
         OMFactory factory = OMAbstractFactory.getOMFactory();
