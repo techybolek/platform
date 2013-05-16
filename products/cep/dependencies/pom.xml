@@ -34,6 +34,7 @@
 
         <module>../../../features/transport-adaptor</module>
         <module>../../../features/transport-adaptor-manager</module>
+        <module>../../../features/event-builder</module>
 
         <!-- Start of Data-bridge -->
         <!--<module>../../../components/data-bridge/org.wso2.carbon.databridge.persistence.cassandra</module>-->

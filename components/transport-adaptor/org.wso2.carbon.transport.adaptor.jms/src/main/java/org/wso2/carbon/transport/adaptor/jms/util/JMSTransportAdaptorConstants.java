@@ -36,6 +36,6 @@ public interface JMSTransportAdaptorConstants {
     String TRANSPORT_JMS_DESTINATION_TYPE = "transport.jms.DestinationType";
     String TRANSPORT_JMS_DESTINATION_TYPE_HINT = "transport.jms.DestinationType.hint";
 
-    String JMS_TOPIC = "jms.topic";
+    String TRANSPORT_JMS_DESTINATION = "transport.jms.Destination";
 
 }

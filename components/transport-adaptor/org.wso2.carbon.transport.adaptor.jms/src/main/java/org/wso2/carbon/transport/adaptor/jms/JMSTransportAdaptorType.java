@@ -220,9 +220,9 @@ public final class JMSTransportAdaptorType extends AbstractTransportAdaptor
         List<Property> propertyList = new ArrayList<Property>();
 
         // Topic
-        Property topicProperty = new Property(JMSTransportAdaptorConstants.JMS_TOPIC);
+        Property topicProperty = new Property(JMSTransportAdaptorConstants.TRANSPORT_JMS_DESTINATION);
         topicProperty.setDisplayName(
-                resourceBundle.getString(JMSTransportAdaptorConstants.JMS_TOPIC));
+                resourceBundle.getString(JMSTransportAdaptorConstants.TRANSPORT_JMS_DESTINATION));
         topicProperty.setRequired(true);
         propertyList.add(topicProperty);
 
@@ -248,9 +248,9 @@ public final class JMSTransportAdaptorType extends AbstractTransportAdaptor
         List<Property> propertyList = new ArrayList<Property>();
 
         // Topic
-        Property topicProperty = new Property(JMSTransportAdaptorConstants.JMS_TOPIC);
+        Property topicProperty = new Property(JMSTransportAdaptorConstants.TRANSPORT_JMS_DESTINATION);
         topicProperty.setDisplayName(
-                resourceBundle.getString(JMSTransportAdaptorConstants.JMS_TOPIC));
+                resourceBundle.getString(JMSTransportAdaptorConstants.TRANSPORT_JMS_DESTINATION));
         topicProperty.setRequired(true);
         propertyList.add(topicProperty);
 
@@ -276,7 +276,7 @@ public final class JMSTransportAdaptorType extends AbstractTransportAdaptor
             destinationSubscriptionsMap = adaptorDestinationSubscriptionsMap.putIfAbsent(inputTransportAdaptorConfiguration.getName(), destinationSubscriptionsMap);
         }
 
-        String destination = inputTransportMessageConfiguration.getInputMessageProperties().get(JMSTransportAdaptorConstants.JMS_TOPIC);
+        String destination = inputTransportMessageConfiguration.getInputMessageProperties().get(JMSTransportAdaptorConstants.TRANSPORT_JMS_DESTINATION);
 
         ConcurrentHashMap<String, SubscriptionDetails> subscriptionsMap = destinationSubscriptionsMap.get(destination);
         if (subscriptionsMap == null) {
@@ -322,7 +322,7 @@ public final class JMSTransportAdaptorType extends AbstractTransportAdaptor
             topicEventSender = publisherMap.putIfAbsent(outputTransportAdaptorConfiguration.getName(), topicEventSender);
         }
 
-        String topicName = new OutputTransportMessageConfiguration().getOutputMessageProperties().get(JMSTransportAdaptorConstants.JMS_TOPIC);
+        String topicName = new OutputTransportMessageConfiguration().getOutputMessageProperties().get(JMSTransportAdaptorConstants.TRANSPORT_JMS_DESTINATION);
         PublisherDetails publisherDetails = topicEventSender.get(topicName);
         try {
             if (null == publisherDetails) {
@@ -368,7 +368,7 @@ public final class JMSTransportAdaptorType extends AbstractTransportAdaptor
                             InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
                             AxisConfiguration axisConfiguration, String subscriptionId) {
 
-        String destination = inputTransportMessageConfiguration.getInputMessageProperties().get(JMSTransportAdaptorConstants.JMS_TOPIC);
+        String destination = inputTransportMessageConfiguration.getInputMessageProperties().get(JMSTransportAdaptorConstants.TRANSPORT_JMS_DESTINATION);
 
         int tenantId = PrivilegedCarbonContext.getCurrentContext(axisConfiguration).getTenantId();
 
