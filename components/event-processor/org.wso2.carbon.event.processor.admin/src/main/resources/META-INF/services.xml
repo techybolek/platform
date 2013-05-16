@@ -1,4 +1,4 @@
-<service name="TransportAdaptorManagerAdminService">
+<service name="EventProcessorAdminService">
     <transports>
         <transport>https</transport>
     </transports>

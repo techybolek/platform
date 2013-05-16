@@ -108,7 +108,7 @@
                             *;resolution:=optional,
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
-                        <!--<Axis2Deployer>TransportAdaptorDeployer</Axis2Deployer>-->
+                        <Axis2Deployer>EventProcessorDeployer</Axis2Deployer>
                     </instructions>
                 </configuration>
             </plugin>

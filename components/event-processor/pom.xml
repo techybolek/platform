@@ -23,7 +23,7 @@
     <groupId>org.wso2.carbon</groupId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - Event Processor Module</name>
+    <name>WSO2 Carbon - Event Processor Aggregator Module</name>
     <description>This is a Carbon bundle that represent the event processor module.</description>
     <url>http://wso2.org</url>
 
