@@ -326,7 +326,7 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
             agent = AgentTransportAdaptorServiceValueHolder.getAgent();
         }
         AsyncDataPublisher dataPublisher;
-        Map<String, String> adaptorCommonProperties = outputTransportAdaptorConfiguration.getCommonAdaptorProperties();
+        Map<String, String> adaptorCommonProperties = outputTransportAdaptorConfiguration.getTransportAdaptorCommonProperties();
 
         if (null != adaptorCommonProperties.get(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL) && adaptorCommonProperties.get(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL).length() > 0) {
             dataPublisher = new AsyncDataPublisher(adaptorCommonProperties.get(AgentTransportAdaptorConstants.TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL),

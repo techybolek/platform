@@ -229,7 +229,7 @@ public final class WSO2EventSenderTransportAdaptorType extends AbstractTransport
             agent = WSO2EventSenderTransportAdaptorServiceValueHolder.getAgent();
         }
         AsyncDataPublisher dataPublisher;
-        Map<String, String> adaptorCommonProperties = outputTransportAdaptorConfiguration.getCommonAdaptorProperties();
+        Map<String, String> adaptorCommonProperties = outputTransportAdaptorConfiguration.getTransportAdaptorCommonProperties();
 
         if (null != adaptorCommonProperties.get(WSO2EventSenderTransportAdaptorConstants.TRANSPORT_CONF_WSO2EVENTSENDER_PROP_AUTHENTICATOR_URL) && adaptorCommonProperties.get(WSO2EventSenderTransportAdaptorConstants.TRANSPORT_CONF_WSO2EVENTSENDER_PROP_AUTHENTICATOR_URL).length() > 0) {
             dataPublisher = new AsyncDataPublisher(adaptorCommonProperties.get(WSO2EventSenderTransportAdaptorConstants.TRANSPORT_CONF_WSO2EVENTSENDER_PROP_AUTHENTICATOR_URL),

@@ -28,15 +28,12 @@ public interface OutputTransportAdaptorConfiguration {
 
     void setType(String type);
 
-    Map<String, String> getOutputAdaptorProperties();
+    InternalTransportAdaptorConfiguration getOutputTransportAdaptorConfiguration();
 
-    void setOutputAdaptorProperties(Map<String, String> outputAdaptorProperties);
+    void setOutputTransportAdaptorConfiguration(InternalTransportAdaptorConfiguration outputTransportAdaptorConfiguration);
 
-    Map<String, String> getCommonAdaptorProperties();
+    Map<String,String> getTransportAdaptorCommonProperties();
 
-    void setCommonAdaptorProperties(Map<String, String> commonAdaptorProperties);
+    void setTransportAdaptorCommonProperties(Map<String,String> transportAdaptorCommonProperties);
 
-    void addOutputAdaptorProperty(String name, String value);
-
-    void addCommonAdaptorProperty(String name, String value);
 }

@@ -294,8 +294,8 @@ public final class JMSTransportAdaptorType extends AbstractTransportAdaptor
 
 
         Map<String, String> adaptorProperties = new HashMap<String, String>();
-        adaptorProperties.putAll(inputTransportAdaptorConfiguration.getCommonAdaptorProperties());
-        adaptorProperties.putAll(inputTransportAdaptorConfiguration.getInputAdaptorProperties());
+        adaptorProperties.putAll(inputTransportAdaptorConfiguration.getTransportAdaptorCommonProperties());
+        adaptorProperties.putAll(inputTransportAdaptorConfiguration.getInputTransportAdaptorConfiguration().getPropertyList());
 
         JMSConnectionFactory jmsConnectionFactory = new JMSConnectionFactory(new Hashtable<String, String>(adaptorProperties), inputTransportAdaptorConfiguration.getName());
 
@@ -334,8 +334,8 @@ public final class JMSTransportAdaptorType extends AbstractTransportAdaptor
             if (null == publisherDetails) {
 
                 Hashtable<String, String> adaptorProperties = new Hashtable<String, String>();
-                adaptorProperties.putAll(outputTransportAdaptorConfiguration.getCommonAdaptorProperties());
-                adaptorProperties.putAll(outputTransportAdaptorConfiguration.getOutputAdaptorProperties());
+                adaptorProperties.putAll(outputTransportAdaptorConfiguration.getTransportAdaptorCommonProperties());
+                adaptorProperties.putAll(outputTransportAdaptorConfiguration.getOutputTransportAdaptorConfiguration().getPropertyList());
 
 
                 JMSConnectionFactory jmsConnectionFactory = new JMSConnectionFactory(adaptorProperties, outputTransportAdaptorConfiguration.getName());
