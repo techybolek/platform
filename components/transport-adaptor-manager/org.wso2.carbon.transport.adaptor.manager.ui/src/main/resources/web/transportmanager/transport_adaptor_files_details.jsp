@@ -39,7 +39,7 @@
 
     <div id="middle">
         <div id="workArea">
-            <h3>Available Transport Adaptors</h3>
+            <h3>Not-Deployed Transport Adaptors</h3>
             <table class="styledLeft">
 
                 <%

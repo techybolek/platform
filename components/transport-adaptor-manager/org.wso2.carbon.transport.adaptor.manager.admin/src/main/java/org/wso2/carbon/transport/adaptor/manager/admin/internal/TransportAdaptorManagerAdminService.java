@@ -23,13 +23,14 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.transport.adaptor.core.Property;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorDto;
+import org.wso2.carbon.transport.adaptor.core.config.InternalTransportAdaptorConfiguration;
+import org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.manager.admin.internal.util.TransportAdaptorHolder;
 import org.wso2.carbon.transport.adaptor.manager.admin.internal.util.TransportAdaptorManagerHolder;
-import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorFile;
-import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorPropertyConfiguration;
 import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportAdaptorManagerConfigurationException;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -117,35 +118,35 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
 
                 // add input transport adaptor properties
                 if (inputAdaptorPropertyDtos.length != 0) {
-                    TransportAdaptorPropertyConfiguration inputTransportAdaptorPropertyConfiguration = new TransportAdaptorPropertyConfiguration();
+                    InternalTransportAdaptorConfiguration inputTransportAdaptorPropertyConfiguration = new InternalTransportAdaptorConfiguration();
                     for (TransportAdaptorPropertyDto transportAdaptorPropertyDto : inputAdaptorPropertyDtos) {
                         if (!transportAdaptorPropertyDto.getValue().trim().equals("")) {
                             inputTransportAdaptorPropertyConfiguration.addTransportAdaptorProperty(transportAdaptorPropertyDto.getKey(), transportAdaptorPropertyDto.getValue());
                         }
                     }
-                    transportAdaptorConfiguration.setInputAdaptorPropertyConfiguration(inputTransportAdaptorPropertyConfiguration);
+                    transportAdaptorConfiguration.setInputTransportAdaptorConfiguration(inputTransportAdaptorPropertyConfiguration);
                 }
 
                 // add output transport adaptor properties
                 if (outputAdaptorPropertyDtos.length != 0) {
-                    TransportAdaptorPropertyConfiguration outputTransportAdaptorPropertyConfiguration = new TransportAdaptorPropertyConfiguration();
+                    InternalTransportAdaptorConfiguration outputTransportAdaptorPropertyConfiguration = new InternalTransportAdaptorConfiguration();
                     for (TransportAdaptorPropertyDto transportAdaptorPropertyDto : outputAdaptorPropertyDtos) {
                         if (!transportAdaptorPropertyDto.getValue().trim().equals("")) {
                             outputTransportAdaptorPropertyConfiguration.addTransportAdaptorProperty(transportAdaptorPropertyDto.getKey(), transportAdaptorPropertyDto.getValue());
                         }
                     }
-                    transportAdaptorConfiguration.setOutputAdaptorPropertyConfiguration(outputTransportAdaptorPropertyConfiguration);
+                    transportAdaptorConfiguration.setOutputTransportAdaptorConfiguration(outputTransportAdaptorPropertyConfiguration);
                 }
 
                 // add common transport adaptor properties
                 if (commonAdaptorPropertyDtos.length != 0) {
-                    TransportAdaptorPropertyConfiguration commonTransportAdaptorPropertyConfiguration = new TransportAdaptorPropertyConfiguration();
+                    Map<String,String> transportAdaptorCommonProperties = new HashMap<String, String>();
                     for (TransportAdaptorPropertyDto transportAdaptorPropertyDto : commonAdaptorPropertyDtos) {
                         if (!transportAdaptorPropertyDto.getValue().trim().equals("")) {
-                            commonTransportAdaptorPropertyConfiguration.addTransportAdaptorProperty(transportAdaptorPropertyDto.getKey(), transportAdaptorPropertyDto.getValue());
+                            transportAdaptorCommonProperties.put(transportAdaptorPropertyDto.getKey(), transportAdaptorPropertyDto.getValue());
                         }
                     }
-                    transportAdaptorConfiguration.setCommonAdaptorPropertyConfiguration(commonTransportAdaptorPropertyConfiguration);
+                    transportAdaptorConfiguration.setTransportAdaptorCommonProperties(transportAdaptorCommonProperties);
                 }
 
                 transportAdaptorManagerHolder.getTransportAdaptorManagerService().saveTransportAdaptorConfiguration(transportAdaptorConfiguration, axisConfiguration);
@@ -481,8 +482,8 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
 
             // get input transport adaptor properties
             List<Property> inputPropertyList = transportAdaptorDto.getAdaptorInPropertyList();
-            if (transportAdaptorConfiguration.getInputAdaptorPropertyConfiguration() != null) {
-                Map<String, String> inputTransportProperties = transportAdaptorConfiguration.getInputAdaptorPropertyConfiguration().getPropertyList();
+            if (transportAdaptorConfiguration.getInputTransportAdaptorConfiguration() != null) {
+                Map<String, String> inputTransportProperties = transportAdaptorConfiguration.getInputTransportAdaptorConfiguration().getPropertyList();
                 TransportAdaptorPropertyDto[] inputTransportAdaptorPropertyDtoArray = new TransportAdaptorPropertyDto[inputTransportProperties.size()];
                 int index = 0;
                 if (inputPropertyList != null) {
@@ -525,8 +526,8 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
 
             // get output adaptor properties
             List<Property> outPropertyList = transportAdaptorDto.getAdaptorOutPropertyList();
-            if (transportAdaptorConfiguration.getOutputAdaptorPropertyConfiguration() != null) {
-                Map<String, String> outputTransportProperties = transportAdaptorConfiguration.getOutputAdaptorPropertyConfiguration().getPropertyList();
+            if (transportAdaptorConfiguration.getOutputTransportAdaptorConfiguration() != null) {
+                Map<String, String> outputTransportProperties = transportAdaptorConfiguration.getOutputTransportAdaptorConfiguration().getPropertyList();
                 TransportAdaptorPropertyDto[] outputTransportAdaptorPropertyDtoArray = new TransportAdaptorPropertyDto[outputTransportProperties.size()];
                 int index = 0;
                 if (outPropertyList != null) {
@@ -565,8 +566,8 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
 
             // get transport adaptor properties
             List<Property> commonPropertyList = transportAdaptorDto.getAdaptorCommonPropertyList();
-            if (transportAdaptorConfiguration.getCommonAdaptorPropertyConfiguration() != null) {
-                Map<String, String> commonTransportProperties = transportAdaptorConfiguration.getCommonAdaptorPropertyConfiguration().getPropertyList();
+            if (transportAdaptorConfiguration.getTransportAdaptorCommonProperties() != null) {
+                Map<String, String> commonTransportProperties = transportAdaptorConfiguration.getTransportAdaptorCommonProperties();
                 TransportAdaptorPropertyDto[] commonTransportAdaptorPropertyDtoArray = new TransportAdaptorPropertyDto[commonTransportProperties.size()];
                 int index = 0;
                 if (commonPropertyList != null) {

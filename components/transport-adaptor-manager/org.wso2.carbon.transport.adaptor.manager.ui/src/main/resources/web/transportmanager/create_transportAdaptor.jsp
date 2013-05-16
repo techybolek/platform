@@ -466,7 +466,7 @@ function enableMyInput(obj) {
 
 <%
 
-} else if ((transportAdaptorPropertiesDto.getInputTransportAdaptorPropertyDtos()) != null || (transportAdaptorPropertiesDto.getOutputTransportAdaptorPropertyDtos()) != null) {
+} else if ((transportAdaptorPropertiesDto.getInputTransportAdaptorPropertyDtos()) != null || (transportAdaptorPropertiesDto.getOutputTransportAdaptorPropertyDtos()) != null || (transportAdaptorPropertiesDto.getCommonTransportAdaptorPropertyDtos()) != null) {
 
 %>
 <tr>

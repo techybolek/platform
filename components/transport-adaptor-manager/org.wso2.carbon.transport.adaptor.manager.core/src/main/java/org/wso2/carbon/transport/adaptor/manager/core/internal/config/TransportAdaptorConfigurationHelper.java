@@ -24,14 +24,15 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.transport.adaptor.core.Property;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorDto;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
-import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorConfiguration;
-import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorPropertyConfiguration;
+import org.wso2.carbon.transport.adaptor.core.config.InternalTransportAdaptorConfiguration;
+import org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportAdaptorManagerConfigurationException;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportAdaptorHolder;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportAdaptorManagerConstants;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +61,7 @@ public class TransportAdaptorConfigurationHelper {
             Iterator propertyIter = inputPropertyOMElement.getChildrenWithName(
                     new QName(TransportAdaptorManagerConstants.TM_CONF_NS, TransportAdaptorManagerConstants.TM_ELE_PROPERTY));
             if (propertyIter.hasNext()) {
-                TransportAdaptorPropertyConfiguration inputTransportAdaptorPropertyConfiguration = new TransportAdaptorPropertyConfiguration();
+                InternalTransportAdaptorConfiguration inputTransportAdaptorPropertyConfiguration = new InternalTransportAdaptorConfiguration();
                 for (; propertyIter.hasNext(); ) {
                     OMElement propertyOMElement = (OMElement) propertyIter.next();
                     String name = propertyOMElement.getAttributeValue(
@@ -68,7 +69,7 @@ public class TransportAdaptorConfigurationHelper {
                     String value = propertyOMElement.getText();
                     inputTransportAdaptorPropertyConfiguration.addTransportAdaptorProperty(name, value);
                 }
-                transportAdaptorConfiguration.setInputAdaptorPropertyConfiguration(inputTransportAdaptorPropertyConfiguration);
+                transportAdaptorConfiguration.setInputTransportAdaptorConfiguration(inputTransportAdaptorPropertyConfiguration);
             }
         }
 
@@ -80,7 +81,7 @@ public class TransportAdaptorConfigurationHelper {
             OMElement outputPropertyOMElement = (OMElement) outputPropertyIter.next();
             Iterator propertyIter = outputPropertyOMElement.getChildrenWithName(
                     new QName(TransportAdaptorManagerConstants.TM_CONF_NS, TransportAdaptorManagerConstants.TM_ELE_PROPERTY));
-            TransportAdaptorPropertyConfiguration outputTransportAdaptorPropertyConfiguration = new TransportAdaptorPropertyConfiguration();
+            InternalTransportAdaptorConfiguration outputTransportAdaptorPropertyConfiguration = new InternalTransportAdaptorConfiguration();
             if (propertyIter.hasNext()) {
                 for (; propertyIter.hasNext(); ) {
                     OMElement propertyOMElement = (OMElement) propertyIter.next();
@@ -89,7 +90,7 @@ public class TransportAdaptorConfigurationHelper {
                     String value = propertyOMElement.getText();
                     outputTransportAdaptorPropertyConfiguration.addTransportAdaptorProperty(name, value);
                 }
-                transportAdaptorConfiguration.setOutputAdaptorPropertyConfiguration(outputTransportAdaptorPropertyConfiguration);
+                transportAdaptorConfiguration.setOutputTransportAdaptorConfiguration(outputTransportAdaptorPropertyConfiguration);
             }
         }
 
@@ -97,16 +98,16 @@ public class TransportAdaptorConfigurationHelper {
         Iterator commonPropertyIter = transportConfigOMElement.getChildrenWithName(
                 new QName(TransportAdaptorManagerConstants.TM_CONF_NS, TransportAdaptorManagerConstants.TM_ELE_PROPERTY));
         if (commonPropertyIter.hasNext()) {
-            TransportAdaptorPropertyConfiguration commonTransportAdaptorPropertyConfiguration = new TransportAdaptorPropertyConfiguration();
+            Map<String,String> transportAdaptorCommonProperties = new HashMap<String, String>();
             for (; commonPropertyIter.hasNext(); ) {
                 OMElement propertyOMElement = (OMElement) commonPropertyIter.next();
                 String name = propertyOMElement.getAttributeValue(
                         new QName(TransportAdaptorManagerConstants.TM_ATTR_NAME));
                 String value = propertyOMElement.getText();
-                commonTransportAdaptorPropertyConfiguration.addTransportAdaptorProperty(name, value);
+                transportAdaptorCommonProperties.put(name, value);
 
             }
-            transportAdaptorConfiguration.setCommonAdaptorPropertyConfiguration(commonTransportAdaptorPropertyConfiguration);
+            transportAdaptorConfiguration.setTransportAdaptorCommonProperties(transportAdaptorCommonProperties);
         }
 
         return transportAdaptorConfiguration;
@@ -131,7 +132,7 @@ public class TransportAdaptorConfigurationHelper {
         transportAdaptorItem.addAttribute(TransportAdaptorManagerConstants.TM_ATTR_TYPE, transportAdaptorType,
                                           null);
 
-        if (transportAdaptorConfiguration.getInputAdaptorPropertyConfiguration() != null) {
+        if (transportAdaptorConfiguration.getInputTransportAdaptorConfiguration() != null) {
         //input transport adaptor properties
         OMElement inputPropertyElement = factory.createOMElement(new QName(
                 TransportAdaptorManagerConstants.TM_CONF_NS,
@@ -139,7 +140,7 @@ public class TransportAdaptorConfigurationHelper {
 
         transportAdaptorItem.addChild(inputPropertyElement);
 
-            inputTransportAdaptorProperties = transportAdaptorConfiguration.getInputAdaptorPropertyConfiguration().getPropertyList();
+            inputTransportAdaptorProperties = transportAdaptorConfiguration.getInputTransportAdaptorConfiguration().getPropertyList();
             for (Map.Entry<String, String> inputPropertyEntry : inputTransportAdaptorProperties.entrySet()) {
                 OMElement propertyElement = factory.createOMElement(new QName(
                         TransportAdaptorManagerConstants.TM_CONF_NS,
@@ -150,7 +151,7 @@ public class TransportAdaptorConfigurationHelper {
             }
         }
 
-        if (transportAdaptorConfiguration.getOutputAdaptorPropertyConfiguration() != null) {
+        if (transportAdaptorConfiguration.getOutputTransportAdaptorConfiguration() != null) {
         //output transport adaptor properties
         OMElement outputPropertyElement = factory.createOMElement(new QName(
                 TransportAdaptorManagerConstants.TM_CONF_NS,
@@ -158,7 +159,7 @@ public class TransportAdaptorConfigurationHelper {
 
         transportAdaptorItem.addChild(outputPropertyElement);
 
-            outputTransportAdaptorProperties = transportAdaptorConfiguration.getOutputAdaptorPropertyConfiguration().getPropertyList();
+            outputTransportAdaptorProperties = transportAdaptorConfiguration.getOutputTransportAdaptorConfiguration().getPropertyList();
             for (Map.Entry<String, String> outputPropertyEntry : outputTransportAdaptorProperties.entrySet()) {
                 OMElement propertyElement = factory.createOMElement(new QName(
                         TransportAdaptorManagerConstants.TM_CONF_NS,
@@ -171,8 +172,8 @@ public class TransportAdaptorConfigurationHelper {
 
         //common transport adaptor properties
 
-        if (transportAdaptorConfiguration.getCommonAdaptorPropertyConfiguration() != null) {
-            commonTransportAdaptorProperties = transportAdaptorConfiguration.getCommonAdaptorPropertyConfiguration().getPropertyList();
+        if (transportAdaptorConfiguration.getTransportAdaptorCommonProperties() != null) {
+            commonTransportAdaptorProperties = transportAdaptorConfiguration.getTransportAdaptorCommonProperties();
             for (Map.Entry<String, String> commonPropertyEntry : commonTransportAdaptorProperties.entrySet()) {
                 OMElement propertyElement = factory.createOMElement(new QName(
                         TransportAdaptorManagerConstants.TM_CONF_NS,
@@ -202,16 +203,16 @@ public class TransportAdaptorConfigurationHelper {
         Map<String, String> outputAdaptorConfigurationPropertyList = null;
         Map<String, String> commonAdaptorConfigurationPropertyList = null;
 
-        if (transportAdaptorConfiguration.getInputAdaptorPropertyConfiguration() != null) {
-            inputAdaptorConfigurationPropertyList = transportAdaptorConfiguration.getInputAdaptorPropertyConfiguration().getPropertyList();
+        if (transportAdaptorConfiguration.getInputTransportAdaptorConfiguration() != null) {
+            inputAdaptorConfigurationPropertyList = transportAdaptorConfiguration.getInputTransportAdaptorConfiguration().getPropertyList();
         }
 
-        if (transportAdaptorConfiguration.getOutputAdaptorPropertyConfiguration() != null) {
-            outputAdaptorConfigurationPropertyList = transportAdaptorConfiguration.getOutputAdaptorPropertyConfiguration().getPropertyList();
+        if (transportAdaptorConfiguration.getOutputTransportAdaptorConfiguration() != null) {
+            outputAdaptorConfigurationPropertyList = transportAdaptorConfiguration.getOutputTransportAdaptorConfiguration().getPropertyList();
         }
 
-        if (transportAdaptorConfiguration.getCommonAdaptorPropertyConfiguration() != null) {
-            commonAdaptorConfigurationPropertyList = transportAdaptorConfiguration.getCommonAdaptorPropertyConfiguration().getPropertyList();
+        if (transportAdaptorConfiguration.getTransportAdaptorCommonProperties() != null) {
+            commonAdaptorConfigurationPropertyList = transportAdaptorConfiguration.getTransportAdaptorCommonProperties();
         }
 
         if (transportAdaptorDto.getSupportedTransportAdaptorType().equals(TransportAdaptorDto.TransportAdaptorType.IN)) {

@@ -17,6 +17,7 @@
 package org.wso2.carbon.transport.adaptor.manager.core;
 
 import org.apache.axis2.engine.AxisConfiguration;
+import org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportAdaptorManagerConfigurationException;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportAdaptorInfo;
 

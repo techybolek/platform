@@ -28,6 +28,7 @@ import org.apache.axis2.deployment.repository.util.DeploymentFileData;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportAdaptorManagerConfigurationException;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.CarbonTransportAdaptorManagerService;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.config.TransportAdaptorConfigurationHelper;

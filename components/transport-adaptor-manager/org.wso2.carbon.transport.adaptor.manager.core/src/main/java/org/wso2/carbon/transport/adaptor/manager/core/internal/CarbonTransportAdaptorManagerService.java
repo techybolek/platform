@@ -23,7 +23,7 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorConfiguration;
+import org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorFile;
 import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorManagerService;
 import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportAdaptorManagerConfigurationException;
@@ -305,18 +305,18 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
         if (transportAdaptors.containsKey(transportAdaptorName)) {
             TransportAdaptorConfiguration transportAdaptorConfiguration = transportAdaptors.get(transportAdaptorName);
 
-            if (transportAdaptorConfiguration.getInputAdaptorPropertyConfiguration() != null) {
-                inProperties = transportAdaptorConfiguration.getInputAdaptorPropertyConfiguration().getPropertyList();
+            if (transportAdaptorConfiguration.getInputTransportAdaptorConfiguration() != null) {
+                inProperties = transportAdaptorConfiguration.getInputTransportAdaptorConfiguration().getPropertyList();
             }
 
             if (inProperties != null) {
-                Iterator commonAdaptorPropertyIterator = transportAdaptorConfiguration.getCommonAdaptorPropertyConfiguration().getPropertyList().entrySet().iterator();
+                Iterator commonAdaptorPropertyIterator = transportAdaptorConfiguration.getTransportAdaptorCommonProperties().entrySet().iterator();
                 while (commonAdaptorPropertyIterator.hasNext()) {
                     Map.Entry thisEntry = (Map.Entry) commonAdaptorPropertyIterator.next();
                     inProperties.put(thisEntry.getKey().toString(), thisEntry.getValue().toString());
                 }
             } else {
-                inProperties = transportAdaptorConfiguration.getCommonAdaptorPropertyConfiguration().getPropertyList();
+                inProperties = transportAdaptorConfiguration.getTransportAdaptorCommonProperties();
 
             }
         }
@@ -334,18 +334,18 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
         if (transportAdaptors.containsKey(transportAdaptorName)) {
             TransportAdaptorConfiguration transportAdaptorConfiguration = transportAdaptors.get(transportAdaptorName);
 
-            if (transportAdaptorConfiguration.getOutputAdaptorPropertyConfiguration() != null) {
-                outProperties = transportAdaptorConfiguration.getOutputAdaptorPropertyConfiguration().getPropertyList();
+            if (transportAdaptorConfiguration.getOutputTransportAdaptorConfiguration() != null) {
+                outProperties = transportAdaptorConfiguration.getOutputTransportAdaptorConfiguration().getPropertyList();
             }
 
             if (outProperties != null) {
-                Iterator commonAdaptorPropertyIterator = transportAdaptorConfiguration.getCommonAdaptorPropertyConfiguration().getPropertyList().entrySet().iterator();
+                Iterator commonAdaptorPropertyIterator = transportAdaptorConfiguration.getTransportAdaptorCommonProperties().entrySet().iterator();
                 while (commonAdaptorPropertyIterator.hasNext()) {
                     Map.Entry thisEntry = (Map.Entry) commonAdaptorPropertyIterator.next();
                     outProperties.put(thisEntry.getKey().toString(), thisEntry.getValue().toString());
                 }
             } else {
-                outProperties = transportAdaptorConfiguration.getCommonAdaptorPropertyConfiguration().getPropertyList();
+                outProperties = transportAdaptorConfiguration.getTransportAdaptorCommonProperties();
 
             }
         }
@@ -378,10 +378,10 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
                                                             TransportAdaptorConfiguration transportAdaptorConfiguration)
             throws TransportAdaptorManagerConfigurationException {
 
-        if (transportAdaptorConfiguration.getInputAdaptorPropertyConfiguration() != null) {
+        if (transportAdaptorConfiguration.getInputTransportAdaptorConfiguration() != null) {
             addToInputTransportInfoMap(tenantId, transportAdaptorConfiguration);
 
-        } else if (transportAdaptorConfiguration.getOutputAdaptorPropertyConfiguration() != null) {
+        } else if (transportAdaptorConfiguration.getOutputTransportAdaptorConfiguration() != null) {
             addToOutputTransportInfoMap(tenantId, transportAdaptorConfiguration);
         }
 

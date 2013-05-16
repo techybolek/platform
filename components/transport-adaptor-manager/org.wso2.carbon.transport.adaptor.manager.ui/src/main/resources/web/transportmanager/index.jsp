@@ -7,6 +7,7 @@
         import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportAdaptorConfigurationInfoDto" %>
 <%@ page
         import="org.wso2.carbon.transport.adaptor.manager.ui.UIUtils" %>
+<%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportAdaptorFileDto" %>
 
 <fmt:bundle basename="org.wso2.carbon.transport.adaptor.manager.ui.i18n.Resources">
 
@@ -29,6 +30,8 @@
     </script>
     <%
         String transportName = request.getParameter("transportname");
+        int totalTransportAdaptors = 0;
+        int totalNotDeployedTransportAdaptors = 0;
         if (transportName != null) {
             TransportAdaptorManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
             stub.removeTransportAdaptorConfiguration(transportName);
@@ -36,11 +39,25 @@
     <script type="text/javascript">CARBON.showInfoDialog('Transport adaptor successfully deleted.');</script>
     <%
         }
+
+        TransportAdaptorManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
+        TransportAdaptorConfigurationInfoDto[] transportDetailsArray = stub.getAllTransportAdaptorConfigurationInfo();
+        if (transportDetailsArray != null) {
+            totalTransportAdaptors = transportDetailsArray.length;
+        }
+
+        TransportAdaptorFileDto[] notDeployedTransportAdaptorConfigurationFiles = stub.getNotDeployedTransportAdaptorConfigurationFiles();
+        if (notDeployedTransportAdaptorConfigurationFiles != null) {
+            totalNotDeployedTransportAdaptors = notDeployedTransportAdaptorConfigurationFiles.length;
+        }
+
     %>
 
     <div id="middle">
     <div id="workArea">
-        <h3>Available Transport Adaptors</h3>
+        <h3>Available Transport Adaptors</h3><br/>
+        <h5 class="activeAdaptors"><%=totalTransportAdaptors%> Active Transport Adaptors. <a href="transport_adaptor_files_details.jsp"><%=totalNotDeployedTransportAdaptors%> Inactive Transport Adaptors</a></h5>
+
         <table class="styledLeft">
             <thead>
             <tr>
@@ -51,11 +68,10 @@
             </thead>
             <tbody>
             <%
-                TransportAdaptorManagerAdminServiceStub stub = UIUtils.getTransportManagerAdminService(config, session, request);
-                TransportAdaptorConfigurationInfoDto[] transportDetailsArray = stub.getAllTransportAdaptorConfigurationInfo();
+
                 if (transportDetailsArray != null) {
                     for (TransportAdaptorConfigurationInfoDto transportDetails : transportDetailsArray) {
-
+                        totalTransportAdaptors++;
             %>
             <tr>
                 <td>
@@ -81,6 +97,7 @@
             </tr>
             <%
                     }
+
                 }
             %>
             </tbody>
