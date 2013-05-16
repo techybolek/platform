@@ -43,15 +43,16 @@ public class TransportServiceTesterDS {
     private static final Log log = LogFactory.getLog(TransportServiceTesterDS.class);
 
     protected void activate(ComponentContext context) {
+        try {
+            TransportAdaptorService transportAdaptorService = TransportAdaptorHolder.getInstance().getTransportAdaptorService();
 
+            registerWso2EventReceiver(transportAdaptorService);
+//            registerJMS(transportAdaptorService);
 
-        TransportAdaptorService transportAdaptorService = TransportAdaptorHolder.getInstance().getTransportAdaptorService();
-
-        registerWso2EventReceiver(transportAdaptorService);
-
-
-        log.info("successfully deployed transport adaptor service tester");
-
+            log.info("successfully deployed transport adaptor service tester");
+        } catch (Throwable t) {
+            log.error("Cannot deploy transport adaptor service tester", t);
+        }
     }
 
     private void registerWso2EventReceiver(TransportAdaptorService transportAdaptorService) {
@@ -85,21 +86,16 @@ public class TransportServiceTesterDS {
         inputTransportAdaptorConfiguration.addCommonAdaptorProperty("java.naming.provider.url", "tcp://localhost:61616");
         inputTransportAdaptorConfiguration.addCommonAdaptorProperty("java.naming.security.credentials", "admin");
         inputTransportAdaptorConfiguration.addCommonAdaptorProperty("java.naming.factory.initial", "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
+        inputTransportAdaptorConfiguration.addCommonAdaptorProperty("transport.jms.ConnectionFactoryJNDIName", "TopicConnectionFactory");
         inputTransportAdaptorConfiguration.addCommonAdaptorProperty("transport.jms.DestinationType", "topic");
 
-//        inputTransportAdaptorConfiguration.setType("agent");
-//        inputTransportAdaptorConfiguration.addCommonAdaptorProperty("receiverURL", "tcp://localhost:76111");
-//        inputTransportAdaptorConfiguration.addCommonAdaptorProperty("authenticatorURL", "ssl://localhost:77111");
-//        inputTransportAdaptorConfiguration.addCommonAdaptorProperty("username", "admin1");
-//        inputTransportAdaptorConfiguration.addCommonAdaptorProperty("password", "admin1");
-
+        inputTransportAdaptorConfiguration.addInputAdaptorProperty("transport.jms.SubscriptionDurable", "false   ");
 
         InputTransportMessageConfiguration inputTransportMessageConfiguration = new InputTransportMessageConfiguration();
-        inputTransportMessageConfiguration.addInputMessageProperty("transport.jms.Destination", "org.wso2.phone.retail.store");
-        inputTransportMessageConfiguration.addInputMessageProperty("version", "1.2.0");
+        inputTransportMessageConfiguration.addInputMessageProperty("transport.jms.Destination", "AllStockQuotes");
 
         try {
-            transportAdaptorService.subscribe(inputTransportAdaptorConfiguration, inputTransportMessageConfiguration, new TestTransportAdaptorAdaptorListener("wso2eventreceiver", "org.wso2.phone.retail.store:1.2.0"), TransportAdaptorHolder.getInstance().getConfigurationContextService().getServerConfigContext().getAxisConfiguration());
+            transportAdaptorService.subscribe(inputTransportAdaptorConfiguration, inputTransportMessageConfiguration, new TestTransportAdaptorAdaptorListener("jms", "AllStockQuotes"), TransportAdaptorHolder.getInstance().getConfigurationContextService().getServerConfigContext().getAxisConfiguration());
         } catch (TransportAdaptorEventProcessingException e) {
             log.error("Error occurred when subscribing " + e);
         }

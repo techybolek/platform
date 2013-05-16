@@ -267,13 +267,17 @@ public final class JMSTransportAdaptorType extends AbstractTransportAdaptor
         ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<String, SubscriptionDetails>>> adaptorDestinationSubscriptionsMap = tenantAdaptorDestinationSubscriptionsMap.get(tenantId);
         if (adaptorDestinationSubscriptionsMap == null) {
             adaptorDestinationSubscriptionsMap = new ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<String, SubscriptionDetails>>>();
-            adaptorDestinationSubscriptionsMap = tenantAdaptorDestinationSubscriptionsMap.putIfAbsent(tenantId, adaptorDestinationSubscriptionsMap);
+            if (null != tenantAdaptorDestinationSubscriptionsMap.putIfAbsent(tenantId, adaptorDestinationSubscriptionsMap)) {
+                adaptorDestinationSubscriptionsMap = tenantAdaptorDestinationSubscriptionsMap.get(tenantId);
+            }
         }
 
         ConcurrentHashMap<String, ConcurrentHashMap<String, SubscriptionDetails>> destinationSubscriptionsMap = adaptorDestinationSubscriptionsMap.get(inputTransportAdaptorConfiguration.getName());
         if (destinationSubscriptionsMap == null) {
             destinationSubscriptionsMap = new ConcurrentHashMap<String, ConcurrentHashMap<String, SubscriptionDetails>>();
-            destinationSubscriptionsMap = adaptorDestinationSubscriptionsMap.putIfAbsent(inputTransportAdaptorConfiguration.getName(), destinationSubscriptionsMap);
+            if (null != adaptorDestinationSubscriptionsMap.putIfAbsent(inputTransportAdaptorConfiguration.getName(), destinationSubscriptionsMap)) {
+                destinationSubscriptionsMap = adaptorDestinationSubscriptionsMap.get(inputTransportAdaptorConfiguration.getName());
+            }
         }
 
         String destination = inputTransportMessageConfiguration.getInputMessageProperties().get(JMSTransportAdaptorConstants.TRANSPORT_JMS_DESTINATION);
@@ -281,7 +285,9 @@ public final class JMSTransportAdaptorType extends AbstractTransportAdaptor
         ConcurrentHashMap<String, SubscriptionDetails> subscriptionsMap = destinationSubscriptionsMap.get(destination);
         if (subscriptionsMap == null) {
             subscriptionsMap = new ConcurrentHashMap<String, SubscriptionDetails>();
-            subscriptionsMap = destinationSubscriptionsMap.putIfAbsent(destination, subscriptionsMap);
+            if (null != destinationSubscriptionsMap.putIfAbsent(destination, subscriptionsMap)) {
+                subscriptionsMap = destinationSubscriptionsMap.get(destination);
+            }
         }
 
         String subscriptionId = UUID.randomUUID().toString();
