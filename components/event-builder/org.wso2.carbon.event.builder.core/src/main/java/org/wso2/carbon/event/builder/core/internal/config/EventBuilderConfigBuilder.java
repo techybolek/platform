@@ -16,8 +16,16 @@
  *  under the License.
  */
 
-package org.wso2.carbon.event.builder.admin;
+package org.wso2.carbon.event.builder.core.internal.config;
 
-public interface EventBuilderAdminService {
+import org.apache.axiom.om.OMElement;
+import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
+import org.wso2.carbon.event.builder.core.EventBuilder;
+import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
 
+public interface EventBuilderConfigBuilder {
+
+    public EventBuilder fromOM(OMElement ebConfigElement) throws MalformedStreamDefinitionException;
+
+    public OMElement eventBuilderConfigurationToOM(EventBuilder eventBuilderConfiguration);
 }

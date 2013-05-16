@@ -17,9 +17,9 @@
 package org.wso2.carbon.event.builder.core.exception;
 
 /**
- * if there is a problem when creating the broker configurations.
+ * If there is a problem when creating the event builder configuration.
  */
-public class EventBuilderConfigurationException extends Exception {
+public class EventBuilderConfigurationException extends RuntimeException {
 
     public EventBuilderConfigurationException() {
     }

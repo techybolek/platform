@@ -21,11 +21,14 @@ package org.wso2.carbon.event.builder.core.internal.util;
 import org.wso2.carbon.transport.adaptor.core.Property;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorDto;
 import org.wso2.carbon.transport.adaptor.core.config.InputTransportAdaptorConfiguration;
+import org.wso2.carbon.transport.adaptor.core.config.InternalTransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.core.message.MessageDto;
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InputTransportConfigHelper {
 
@@ -56,12 +59,17 @@ public class InputTransportConfigHelper {
     private static InputTransportAdaptorConfiguration buildInputTransportAdaptorConfiguration(TransportAdaptorDto transportAdaptorDto) {
         InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration = new TransportAdaptorConfiguration();
         inputTransportAdaptorConfiguration.setName(transportAdaptorDto.getTransportAdaptorTypeName());
+        Map<String, String> transportAdaptorCommonProperties = new HashMap<String, String>();
         for (Property property : transportAdaptorDto.getAdaptorCommonPropertyList()) {
-            inputTransportAdaptorConfiguration.addCommonAdaptorProperty(property.getPropertyName(), property.getDefaultValue());
+            transportAdaptorCommonProperties.put(property.getPropertyName(), property.getDefaultValue());
         }
+        inputTransportAdaptorConfiguration.setTransportAdaptorCommonProperties(transportAdaptorCommonProperties);
+
+        InternalTransportAdaptorConfiguration internalTransportAdaptorConfiguration = new InternalTransportAdaptorConfiguration();
         for (Property property : transportAdaptorDto.getAdaptorInPropertyList()) {
-            inputTransportAdaptorConfiguration.addInputAdaptorProperty(property.getPropertyName(), property.getDefaultValue());
+            internalTransportAdaptorConfiguration.addTransportAdaptorProperty(property.getPropertyName(), property.getDefaultValue());
         }
+        inputTransportAdaptorConfiguration.setInputTransportAdaptorConfiguration(internalTransportAdaptorConfiguration);
 
         return inputTransportAdaptorConfiguration;
     }

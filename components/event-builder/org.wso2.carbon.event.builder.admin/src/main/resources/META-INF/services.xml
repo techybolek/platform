@@ -11,7 +11,7 @@
                          class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
     </messageReceivers>
     <parameter name="ServiceClass">
-        org.wso2.carbon.event.builder.admin.internal.CarbonEventBuilderAdminService
+        org.wso2.carbon.event.builder.admin.CarbonEventBuilderAdminService
     </parameter>
 
     <parameter name="AuthorizationAction" locked="false">/permission/admin/manage/eventBuilderManager</parameter>

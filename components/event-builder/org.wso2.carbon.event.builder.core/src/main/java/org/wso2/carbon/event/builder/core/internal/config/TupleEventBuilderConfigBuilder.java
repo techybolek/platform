@@ -25,6 +25,7 @@ import org.wso2.carbon.databridge.commons.AttributeType;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
 import org.wso2.carbon.event.builder.core.EventBuilder;
+import org.wso2.carbon.event.builder.core.EventBuilderProperty;
 import org.wso2.carbon.event.builder.core.TupleInputEventBuilder;
 import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
 import org.wso2.carbon.event.builder.core.internal.TupleInputMapping;
@@ -138,7 +139,7 @@ public class TupleEventBuilderConfigBuilder implements EventBuilderConfigBuilder
     public OMElement eventBuilderConfigurationToOM(EventBuilder eventBuilder) {
         //TODO Fix me like my brother
         EventBuilderConfiguration eventBuilderConfiguration = eventBuilder.getEventBuilderConfiguration();
-        Map<String, String> eventBuilderProperties = eventBuilderConfiguration.getEventBuilderConfigurationProperties();
+        Map<String, EventBuilderProperty> eventBuilderProperties = eventBuilderConfiguration.getEventBuilderConfigurationProperties();
 
         OMFactory factory = OMAbstractFactory.getOMFactory();
         OMElement eventBuilderConfigElement = factory.createOMElement(new QName(
@@ -157,13 +158,13 @@ public class TupleEventBuilderConfigBuilder implements EventBuilderConfigBuilder
 
         eventBuilderConfigElement.addChild(commonPropertyElement);
 
-        for (Map.Entry<String, String> commonPropertyEntry : eventBuilderProperties.entrySet()) {
+        for (EventBuilderProperty eventBuilderProperty : eventBuilderProperties.values()) {
             OMElement propertyElement = factory.createOMElement(new QName(
                     EventBuilderConfigurationSyntax.EB_CONF_NS,
                     EventBuilderConfigurationSyntax.EB_ELEMENT_PROPERTY, EventBuilderConfigurationSyntax.EB_ELEMENT_CONF_EB_NS_PREFIX));
 
-            propertyElement.addAttribute(EventBuilderConfigurationSyntax.EB_ATTR_NAME, commonPropertyEntry.getKey(), null);
-            propertyElement.setText(commonPropertyEntry.getValue());
+            propertyElement.addAttribute(EventBuilderConfigurationSyntax.EB_ATTR_NAME, eventBuilderProperty.getPropertyName(), null);
+            propertyElement.setText(eventBuilderProperty.getDefaultValue());
 
             commonPropertyElement.addChild(propertyElement);
         }

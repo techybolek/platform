@@ -19,42 +19,37 @@
 package org.wso2.carbon.event.builder.admin.internal;
 
 import org.wso2.carbon.event.builder.core.EventBuilderProperty;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.wso2.carbon.event.builder.core.InputMapping;
+import org.wso2.carbon.event.builder.core.config.EventBuilderConfiguration;
+import org.wso2.carbon.transport.adaptor.core.message.MessageDto;
 
 /**
  * Event Builder Configuration Details are stored in this class
  */
 public class EventBuilderConfigurationDto {
-    private String configName;
-    private String eventBuilderType;
-    private List<EventBuilderPropertyDto> eventBuilderPropertyDtos = new ArrayList<EventBuilderPropertyDto>();
+    private EventBuilderConfiguration<? extends InputMapping> eventBuilderConfiguration;
 
-    public EventBuilderConfigurationDto(String configName, String eventBuilderType) {
-        this.configName = configName;
-        this.eventBuilderType = eventBuilderType;
-    }
-
-    public String getConfigName() {
-        return configName;
-    }
-
-    public String getEventBuilderType() {
-        return eventBuilderType;
-    }
-
-    public EventBuilderPropertyDto[] getEventBuilderPropertyDtos() {
-        EventBuilderPropertyDto[] ebPropertyDtoArray = new EventBuilderPropertyDto[0];
-        return eventBuilderPropertyDtos.toArray(ebPropertyDtoArray);
+    public EventBuilderConfigurationDto(EventBuilderConfiguration<? extends InputMapping> eventBuilderConfiguration) {
+        this.eventBuilderConfiguration = eventBuilderConfiguration;
     }
 
     public void addEventBuilderProperty(String key, String value) {
-        eventBuilderPropertyDtos.add(new EventBuilderPropertyDto(key, value));
+
     }
 
-    public List<EventBuilderProperty> getEventBuilderProperties() {
-        //TODO Create a list to hold event builder properties and return
+    public MessageDto getInputMessageDto() {
         return null;
+    }
+
+    public EventBuilderProperty[] getEventBuilderProperties() {
+        int propertyMapSize = eventBuilderConfiguration.getEventBuilderConfigurationProperties().size();
+        EventBuilderProperty[] eventBuilderProperties = new EventBuilderProperty[propertyMapSize];
+
+        int i = 0;
+        for (EventBuilderProperty eventBuilderProperty : eventBuilderConfiguration.getEventBuilderConfigurationProperties().values()) {
+            eventBuilderProperties[i++] = eventBuilderProperty;
+        }
+
+        return eventBuilderProperties;
     }
 }

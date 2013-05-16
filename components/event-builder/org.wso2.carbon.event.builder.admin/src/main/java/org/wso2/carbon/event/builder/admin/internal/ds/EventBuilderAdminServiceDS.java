@@ -19,7 +19,7 @@
 package org.wso2.carbon.event.builder.admin.internal.ds;
 
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.event.builder.admin.internal.util.EventBuilderAdminValueHolder;
+import org.wso2.carbon.event.builder.admin.internal.util.EventBuilderAdminServiceValueHolder;
 import org.wso2.carbon.event.builder.core.EventBuilderService;
 import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorManagerService;
 
@@ -40,11 +40,11 @@ public class EventBuilderAdminServiceDS {
     }
 
     protected void setEventBuilderService(EventBuilderService eventBuilderService) {
-        EventBuilderAdminValueHolder.registerEventBuilderService(eventBuilderService);
+        EventBuilderAdminServiceValueHolder.registerEventBuilderService(eventBuilderService);
     }
 
     protected void unsetEventBuilderService(EventBuilderService eventBuilderService) {
-        EventBuilderAdminValueHolder.registerEventBuilderService(null);
+        EventBuilderAdminServiceValueHolder.registerEventBuilderService(null);
     }
 
     protected void setTransportAdaptorManagerService(TransportAdaptorManagerService transportManagerService) {

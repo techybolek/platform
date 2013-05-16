@@ -36,6 +36,9 @@ import org.wso2.carbon.transport.adaptor.core.exception.TransportAdaptorEventPro
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * this class is used to get the Transport Adaptor service.
  *
@@ -101,11 +104,12 @@ public class EventBuilderTesterDS {
         if (inputTransportAdaptorConfiguration != null && inputTransportMessageConfiguration != null) {
             inputTransportAdaptorConfiguration.setName("localAgentBroker");
             inputTransportAdaptorConfiguration.setType("agent");
-            inputTransportAdaptorConfiguration.addCommonAdaptorProperty("receiverURL", "tcp://localhost:76111");
-            inputTransportAdaptorConfiguration.addCommonAdaptorProperty("authenticatorURL", "ssl://localhost:77111");
-            inputTransportAdaptorConfiguration.addCommonAdaptorProperty("username", "admin");
-            inputTransportAdaptorConfiguration.addCommonAdaptorProperty("password", "admin");
-
+            Map<String, String> transportAdaptorCommonProperties = new HashMap<String, String>();
+            transportAdaptorCommonProperties.put("receiverURL", "tcp://localhost:76111");
+            transportAdaptorCommonProperties.put("authenticatorURL", "ssl://localhost:77111");
+            transportAdaptorCommonProperties.put("username", "admin");
+            transportAdaptorCommonProperties.put("password", "admin");
+            inputTransportAdaptorConfiguration.setTransportAdaptorCommonProperties(transportAdaptorCommonProperties);
 
             inputTransportMessageConfiguration = new InputTransportMessageConfiguration();
             inputTransportMessageConfiguration.addInputMessageProperty("streamName", streamName);

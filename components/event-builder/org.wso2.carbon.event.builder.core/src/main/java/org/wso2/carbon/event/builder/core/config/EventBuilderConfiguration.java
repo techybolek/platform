@@ -19,6 +19,7 @@
 package org.wso2.carbon.event.builder.core.config;
 
 import org.wso2.carbon.databridge.commons.StreamDefinition;
+import org.wso2.carbon.event.builder.core.EventBuilderProperty;
 import org.wso2.carbon.event.builder.core.InputMapping;
 import org.wso2.carbon.event.builder.core.internal.TupleInputMapping;
 import org.wso2.carbon.transport.adaptor.core.message.config.InputTransportMessageConfiguration;
@@ -35,7 +36,7 @@ public class EventBuilderConfiguration<T extends InputMapping> {
     private List<T> inputMappings = new ArrayList<T>();
     private String name;
     private String type;
-    private Map<String, String> eventBuilderConfigurationProperties = new ConcurrentHashMap<String, String>();
+    private Map<String, EventBuilderProperty> eventBuilderConfigurationProperties = new ConcurrentHashMap<String, EventBuilderProperty>();
 
     public EventBuilderConfiguration() {
 
@@ -53,16 +54,12 @@ public class EventBuilderConfiguration<T extends InputMapping> {
         this.inputMappings.add(inputMapping);
     }
 
-    public Map<String, String> getEventBuilderConfigurationProperties() {
+    public Map<String, EventBuilderProperty> getEventBuilderConfigurationProperties() {
         return eventBuilderConfigurationProperties;
     }
 
-    public void setEventBuilderConfigurationProperties(Map<String, String> eventBuilderConfigurationProperties) {
-        this.eventBuilderConfigurationProperties = eventBuilderConfigurationProperties;
-    }
-
-    public void addEventBuilderConfigurationProperty(String key, String value) {
-        this.eventBuilderConfigurationProperties.put(key, value);
+    public void addEventBuilderConfigurationProperty(String key, EventBuilderProperty eventBuilderProperty) {
+        this.eventBuilderConfigurationProperties.put(key, eventBuilderProperty);
     }
 
     public String getName() {

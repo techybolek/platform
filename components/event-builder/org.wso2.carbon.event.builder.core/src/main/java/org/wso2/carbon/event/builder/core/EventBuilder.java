@@ -30,6 +30,6 @@ public interface EventBuilder {
 
     public EventBuilderConfiguration getEventBuilderConfiguration();
 
-    public void configureEventBuilder(EventBuilderConfiguration eventBuilderConfiguration);
+    public void configureEventBuilder(EventBuilderConfiguration<? extends InputMapping> eventBuilderConfiguration);
 
 }
