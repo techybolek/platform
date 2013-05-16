@@ -29,6 +29,18 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="getSSOSessionTimeout">
+                <xs:complexType>
+                    <xs:sequence/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getSSOSessionTimeoutResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
             <xs:element name="doSingleLogout">
                 <xs:complexType>
                     <xs:sequence>
@@ -137,6 +149,12 @@
     <wsdl:message name="IdentityException">
         <wsdl:part name="parameters" element="ns1:IdentityException"/>
     </wsdl:message>
+    <wsdl:message name="getSSOSessionTimeoutRequest">
+        <wsdl:part name="parameters" element="ns1:getSSOSessionTimeout"/>
+    </wsdl:message>
+    <wsdl:message name="getSSOSessionTimeoutResponse">
+        <wsdl:part name="parameters" element="ns1:getSSOSessionTimeoutResponse"/>
+    </wsdl:message>
     <wsdl:message name="validateRequestRequest">
         <wsdl:part name="parameters" element="ns1:validateRequest"/>
     </wsdl:message>
@@ -154,6 +172,10 @@
             <wsdl:input message="tns:authenticateRequest" wsaw:Action="urn:authenticate"/>
             <wsdl:output message="tns:authenticateResponse" wsaw:Action="urn:authenticateResponse"/>
             <wsdl:fault message="tns:IdentityException" name="IdentityException" wsaw:Action="urn:authenticateIdentityException"/>
+        </wsdl:operation>
+        <wsdl:operation name="getSSOSessionTimeout">
+            <wsdl:input message="tns:getSSOSessionTimeoutRequest" wsaw:Action="urn:getSSOSessionTimeout"/>
+            <wsdl:output message="tns:getSSOSessionTimeoutResponse" wsaw:Action="urn:getSSOSessionTimeoutResponse"/>
         </wsdl:operation>
         <wsdl:operation name="validateRequest">
             <wsdl:input message="tns:validateRequestRequest" wsaw:Action="urn:validateRequest"/>
@@ -179,6 +201,15 @@
             <wsdl:fault name="IdentityException">
                 <soap:fault use="literal" name="IdentityException"/>
             </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="getSSOSessionTimeout">
+            <soap:operation soapAction="urn:getSSOSessionTimeout" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="validateRequest">
             <soap:operation soapAction="urn:validateRequest" style="document"/>
@@ -219,6 +250,15 @@
                 <soap12:fault use="literal" name="IdentityException"/>
             </wsdl:fault>
         </wsdl:operation>
+        <wsdl:operation name="getSSOSessionTimeout">
+            <soap12:operation soapAction="urn:getSSOSessionTimeout" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="validateRequest">
             <soap12:operation soapAction="urn:validateRequest" style="document"/>
             <wsdl:input>
@@ -248,6 +288,15 @@
         <http:binding verb="POST"/>
         <wsdl:operation name="authenticate">
             <http:operation location="authenticate"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getSSOSessionTimeout">
+            <http:operation location="getSSOSessionTimeout"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
