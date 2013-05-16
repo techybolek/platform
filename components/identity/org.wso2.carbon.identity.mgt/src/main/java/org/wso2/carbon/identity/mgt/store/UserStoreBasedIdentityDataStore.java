@@ -16,19 +16,20 @@
 
 package org.wso2.carbon.identity.mgt.store;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
-import org.wso2.carbon.identity.mgt.dto.UserIdentityDTO;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.UserCoreConstants;
-import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
+import org.wso2.carbon.identity.mgt.dto.UserIdentityDTO;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 
 /**
  * This module persists data in to user store as user's attribute
@@ -38,7 +39,7 @@ public class UserStoreBasedIdentityDataStore extends InMemoryIdentityDataStore {
     private static Log log = LogFactory.getLog(UserStoreBasedIdentityDataStore.class);
 
     @Override
-    public void store(UserIdentityDTO userIdentityDTO, UserStoreManager userStoreManager) {
+    public void store(UserIdentityDTO userIdentityDTO, UserStoreManager userStoreManager) throws IdentityException {
 
         super.store(userIdentityDTO, userStoreManager);
 
@@ -57,7 +58,7 @@ public class UserStoreBasedIdentityDataStore extends InMemoryIdentityDataStore {
     }
 
     @Override
-    public UserIdentityDTO load(String userName, UserStoreManager userStoreManager) {
+    public UserIdentityDTO load(String userName, UserStoreManager userStoreManager) throws IdentityException {
 
         UserIdentityDTO userIdentityDTO = super.load(userName, userStoreManager);
         if(userIdentityDTO != null){
@@ -66,18 +67,17 @@ public class UserStoreBasedIdentityDataStore extends InMemoryIdentityDataStore {
 
         String[] data = new String[]{
             UserIdentityDataStore.FAIL_LOGIN_ATTEMPTS, UserIdentityDataStore.LAST_LOGON_TIME,
-            UserIdentityDataStore.PASSWORD_CHANGE_REQUIRED, UserIdentityDataStore.LAST_FAILED_ATTEMPT_TIME,
+            UserIdentityDataStore.PASSWORD_CHANGE_REQUIRED, UserIdentityDataStore.LAST_FAILED_LOGIN_ATTEMPT_TIME,
             UserIdentityDataStore.TEMPORARY_LOCK, UserIdentityDataStore.UNLOCKING_TIME,
             UserIdentityDataStore.ON_TIME_PASSWORD, UserIdentityDataStore.PASSWORD_TIME_STAMP,
-            UserIdentityDataStore.ACCOUNT_LOCK, UserCoreConstants.ClaimTypeURIs.CHALLENGES_URI,
-            UserCoreConstants.ClaimTypeURIs.PRIMARY_CHALLENGES
+            UserIdentityDataStore.ACCOUNT_LOCK, UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI
         };
 
         Map<String, String> userDataMap = null;
         ArrayList<String> list = new ArrayList<String>(Arrays.asList(data));
         try {
             String challengeUriString = ((AbstractUserStoreManager)userStoreManager).
-                    getUserClaimValue(userName, UserCoreConstants.ClaimTypeURIs.CHALLENGES_URI, null);
+                    getUserClaimValue(userName, UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI, null);
             if(challengeUriString != null){
                 String[] challengeUris =  challengeUriString.
                         split(IdentityMgtConfig.getInstance().getChallengeQuestionSeparator());

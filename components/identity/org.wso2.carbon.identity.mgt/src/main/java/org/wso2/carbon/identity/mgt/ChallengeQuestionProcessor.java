@@ -17,6 +17,12 @@
 package org.wso2.carbon.identity.mgt;
 
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
@@ -25,7 +31,6 @@ import org.wso2.carbon.identity.mgt.dto.UserChallengesDTO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.identity.mgt.util.ClaimsMgtUtil;
 import org.wso2.carbon.identity.mgt.util.PasswordUtil;
-import org.wso2.carbon.identity.mgt.util.Utils;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -36,8 +41,6 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.claim.Claim;
 import org.wso2.carbon.user.core.claim.ClaimMapping;
-
-import java.util.*;
 
 /**
  * process user challenges and questions 
@@ -212,7 +215,7 @@ public class ChallengeQuestionProcessor {
 
         try {
             claimValue = ClaimsMgtUtil.getClaimFromUserStoreManager(userName, tenantId,
-                                   UserCoreConstants.ClaimTypeURIs.CHALLENGES_URI);
+                                   UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI);
         } catch (IdentityMgtException e) {
             log.error("");
         }
@@ -302,7 +305,7 @@ public class ChallengeQuestionProcessor {
                 }
 
                 ClaimsMgtUtil.setClaimInUserStoreManager(userName, tenantId,
-                            UserCoreConstants.ClaimTypeURIs.CHALLENGES_URI, challengesUrisValue);
+                            UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI, challengesUrisValue);
 
             }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
@@ -376,7 +379,7 @@ public class ChallengeQuestionProcessor {
             String claimValue;
 
             claimValue = ClaimsMgtUtil.getClaimFromUserStoreManager(userName, tenantId,
-                                   UserCoreConstants.ClaimTypeURIs.PRIMARY_CHALLENGES);
+                                   UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI);
 
             String[] challenges = claimValue.split(IdentityMgtConfig.getInstance().getChallengeQuestionSeparator());
             for(String challenge : challenges){
@@ -416,7 +419,7 @@ public class ChallengeQuestionProcessor {
                 log.debug("Challenge Question from the user profile for user " + userName);
             }
             String claimValue = ClaimsMgtUtil.getClaimFromUserStoreManager(userName, tenantId,
-                                       UserCoreConstants.ClaimTypeURIs.PRIMARY_CHALLENGES);
+                                       UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI);
 
             if(claimValue == null){
                 log.debug("No associated challenge question found for the user " + userName);

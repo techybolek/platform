@@ -18,9 +18,10 @@
  */
 package org.wso2.carbon.identity.mgt.beans;
 
+import java.util.Arrays;
+
 import org.wso2.carbon.identity.mgt.dto.UserChallengesDTO;
 import org.wso2.carbon.identity.mgt.dto.UserEvidenceDTO;
-import java.util.Arrays;
 
 /**
  * Bean that encapsulates user and tenant info

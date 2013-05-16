@@ -15,6 +15,9 @@
  */
 package org.wso2.carbon.identity.mgt.mail;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.Constants;
@@ -29,9 +32,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.CarbonConfigurationContextFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * default email sending  implementation

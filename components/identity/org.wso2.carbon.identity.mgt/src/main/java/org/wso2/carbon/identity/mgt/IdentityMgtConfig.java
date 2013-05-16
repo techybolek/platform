@@ -16,6 +16,13 @@
 
 package org.wso2.carbon.identity.mgt;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
@@ -29,9 +36,6 @@ import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.jdbc.JDBCRealmConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 
-import java.io.*;
-import java.util.Properties;
-
 /**
  * encapsulates recovery config data
  */
@@ -42,7 +46,7 @@ public class IdentityMgtConfig {
     private int noOfUserChallenges;
 
     private boolean listenerEnable;
-
+    
     private boolean emailSendingInternallyManaged;
 
     private boolean captchaVerificationInternallyManaged;
@@ -136,7 +140,6 @@ public class IdentityMgtConfig {
             if(listenerEnable != null){
                 this.listenerEnable = Boolean.parseBoolean(listenerEnable.trim());
             }
-
 
             String  enableEmailSending = properties.
                     getProperty(IdentityMgtConstants.PropertyConfig.EMAIL_SEND_ENABLE);
@@ -452,4 +455,5 @@ public class IdentityMgtConfig {
     public boolean isListenerEnable() {
         return listenerEnable;
     }
+    
 }

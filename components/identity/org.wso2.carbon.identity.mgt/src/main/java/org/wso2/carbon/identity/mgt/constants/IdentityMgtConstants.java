@@ -113,7 +113,7 @@ public class IdentityMgtConstants {
         public static final String  EMAIL_SEND_ENABLE = "Email.Sending.Enable";
 
         public static final String  IDENTITY_LISTENER_ENABLE = "Identity.Listener.Enable";
-
+        
         public static final String  EMAIL_SEND_INTERNALLY = "Email.Sending.Internally.Managed";
 
         public static final String  ACCOUNT_VERIFICATION_ENABLE = "UserAccount.Verification.Enable";

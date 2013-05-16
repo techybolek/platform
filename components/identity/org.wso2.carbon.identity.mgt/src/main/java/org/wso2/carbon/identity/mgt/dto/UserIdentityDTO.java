@@ -19,10 +19,10 @@
 
 package org.wso2.carbon.identity.mgt.dto;
 
-import org.wso2.carbon.identity.mgt.store.UserIdentityDataStore;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.wso2.carbon.identity.mgt.store.UserIdentityDataStore;
 
 /**
  * This encapsulates the user's data that is related user's login information
@@ -56,6 +56,8 @@ public class UserIdentityDTO {
     public static final int TRUE = 1;
 
     public static final int FALSE = 2;
+    
+    private Map<String, String> securityQuestions = new HashMap<String, String>();
 
 
     public UserIdentityDTO(String userName) {
@@ -71,9 +73,9 @@ public class UserIdentityDTO {
             setFailAttempts(Integer.
                                 parseInt(userDataMap.get(UserIdentityDataStore.FAIL_LOGIN_ATTEMPTS)));
         }
-        if(userDataMap.get(UserIdentityDataStore.LAST_FAILED_ATTEMPT_TIME) != null){
+        if(userDataMap.get(UserIdentityDataStore.LAST_FAILED_LOGIN_ATTEMPT_TIME) != null){
             setLastFailAttemptTime(Long.
-                                parseLong(userDataMap.get(UserIdentityDataStore.LAST_FAILED_ATTEMPT_TIME)));
+                                parseLong(userDataMap.get(UserIdentityDataStore.LAST_FAILED_LOGIN_ATTEMPT_TIME)));
         }
         if(userDataMap.get(UserIdentityDataStore.TEMPORARY_LOCK) != null){
             setTemporaryLock(Boolean.
@@ -98,6 +100,18 @@ public class UserIdentityDTO {
             setAccountLock(Boolean.
                                 parseBoolean(userDataMap.get(UserIdentityDataStore.ACCOUNT_LOCK)));
         }
+    }
+    
+    public void setSecurityQuestion(String questionURI, String answer) {
+    	securityQuestions.put(questionURI, answer);
+    }
+    
+    public void setSecurityQuestions(Map<String, String> securityQuestions) {
+    	this.securityQuestions = securityQuestions;
+    }
+    
+    public Map<String, String> getSecurityQuestions(){
+    	return securityQuestions;
     }
 
     public String getUserName() {
@@ -128,7 +142,7 @@ public class UserIdentityDTO {
 
     public void setLastFailAttemptTime(long lastFailAttemptTime) {
         this.lastFailAttemptTime = lastFailAttemptTime;
-        this.userDataMap.put(UserIdentityDataStore.LAST_FAILED_ATTEMPT_TIME, Long.toString(lastFailAttemptTime));
+        this.userDataMap.put(UserIdentityDataStore.LAST_FAILED_LOGIN_ATTEMPT_TIME, Long.toString(lastFailAttemptTime));
     }
 
     public int getFailAttempts() {
@@ -172,7 +186,7 @@ public class UserIdentityDTO {
         this.userDataMap.put(UserIdentityDataStore.TEMPORARY_LOCK,  Boolean.toString(temporaryLock));
     }
 
-    public boolean getAccountLock() {
+    public boolean isAccountLocked() {
         if(unlockTime != 0 && unlockTime < System.currentTimeMillis()){
             return false;
         }
@@ -191,6 +205,15 @@ public class UserIdentityDTO {
     public void setUserDataMap(Map<String, String> userDataMap) {
         this.userDataMap = userDataMap;
     }
+    
+    /**
+     * Sets user identity data claim
+     * @param claim
+     * @param value
+     */
+    public void setUserIdentityDataClaim(String claim, String value) {
+    	userDataMap.put(claim, value);
+    }
 
     public long getPasswordTimeStamp() {
         return passwordTimeStamp;
@@ -203,6 +226,10 @@ public class UserIdentityDTO {
 
     public int getTenantId() {
         return tenantId;
+    }
+    
+    public void setTenantId(int tenantId) {
+        this.tenantId = tenantId;
     }
 
     public boolean getBoolean(Object value){

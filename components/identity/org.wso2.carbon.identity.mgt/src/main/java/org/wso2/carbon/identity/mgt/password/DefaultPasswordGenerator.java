@@ -24,6 +24,7 @@ import java.util.Random;
  */
 public class DefaultPasswordGenerator implements RandomPasswordGenerator {
 
+	//TODO : read the lenth from the user-mgt.xml
     private static final int PASSWORD_LENGTH = 8;
     private static final Random RANDOM = new SecureRandom();
 

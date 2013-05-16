@@ -16,6 +16,9 @@
 
 package org.wso2.carbon.identity.mgt;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.mgt.beans.UserMgtBean;
@@ -31,9 +34,6 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * recover processor 

@@ -1,5 +1,8 @@
 package org.wso2.carbon.identity.mgt.util;
 
+import java.io.ByteArrayInputStream;
+import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Policy;
@@ -23,9 +26,6 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
-import java.io.ByteArrayInputStream;
-import java.util.Properties;
 
 /**
  *

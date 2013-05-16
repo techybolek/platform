@@ -19,6 +19,8 @@
 
 package org.wso2.carbon.identity.mgt.internal;
 
+import java.util.ArrayList;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisModule;
@@ -30,10 +32,6 @@ import org.apache.axis2.engine.AxisEvent;
 import org.apache.axis2.engine.AxisObserver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.mgt.util.Utils;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.util.ArrayList;
 
 /**
  *
