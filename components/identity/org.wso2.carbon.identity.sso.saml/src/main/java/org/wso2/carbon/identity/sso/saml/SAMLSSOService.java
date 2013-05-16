@@ -20,7 +20,9 @@ package org.wso2.carbon.identity.sso.saml;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.xml.XMLObject;
+import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOAuthnReqDTO;
 import org.wso2.carbon.identity.sso.saml.dto.SAMLSSOReqValidationResponseDTO;
 import org.wso2.carbon.identity.sso.saml.dto.SAMLSSORespDTO;
@@ -133,4 +135,16 @@ public class SAMLSSOService {
 		return validationResponseDTO;
 	}
 
+    /**
+     * Get the SSO session's timeout
+     *
+     * @return timeout for SSO session
+     */
+    public static String getSSOSessionTimeout() {
+        String sessionTimeout = IdentityUtil.getProperty(IdentityConstants.ServerConfig.SSO_SESSION_TIMEOUT);
+        if(sessionTimeout == null){
+            sessionTimeout = "36000";
+        }
+        return sessionTimeout;
+    }
 }
