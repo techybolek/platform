@@ -30,6 +30,7 @@
             </xs:complexType>
             <xs:complexType name="TransportAdaptorConfigurationInfoDto">
                 <xs:sequence>
+                    <xs:element minOccurs="0" name="supportedTransportType" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="transportAdaptorName" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="transportAdaptorType" nillable="true" type="xs:string"/>
                 </xs:sequence>
@@ -167,6 +168,7 @@
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="inputAdaptorPropertyDtos" nillable="true" type="ax2349:TransportAdaptorPropertyDto"/>
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="outputAdaptorPropertyDtos" nillable="true" type="ax2349:TransportAdaptorPropertyDto"/>
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="commonAdaptorPropertyDtos" nillable="true" type="ax2349:TransportAdaptorPropertyDto"/>
+                        <xs:element minOccurs="0" name="supportedTransportType" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -619,13 +621,13 @@
     </wsdl:binding>
     <wsdl:service name="TransportAdaptorManagerAdminService">
         <wsdl:port name="TransportAdaptorManagerAdminServiceHttpsSoap11Endpoint" binding="ns:TransportAdaptorManagerAdminServiceSoap11Binding">
-            <soap:address location="https://10.200.3.51:9443/services/TransportAdaptorManagerAdminService.TransportAdaptorManagerAdminServiceHttpsSoap11Endpoint/"/>
+            <soap:address location="https://101.2.182.83:9443/services/TransportAdaptorManagerAdminService.TransportAdaptorManagerAdminServiceHttpsSoap11Endpoint/"/>
         </wsdl:port>
         <wsdl:port name="TransportAdaptorManagerAdminServiceHttpsSoap12Endpoint" binding="ns:TransportAdaptorManagerAdminServiceSoap12Binding">
-            <soap12:address location="https://10.200.3.51:9443/services/TransportAdaptorManagerAdminService.TransportAdaptorManagerAdminServiceHttpsSoap12Endpoint/"/>
+            <soap12:address location="https://101.2.182.83:9443/services/TransportAdaptorManagerAdminService.TransportAdaptorManagerAdminServiceHttpsSoap12Endpoint/"/>
         </wsdl:port>
         <wsdl:port name="TransportAdaptorManagerAdminServiceHttpsEndpoint" binding="ns:TransportAdaptorManagerAdminServiceHttpBinding">
-            <http:address location="https://10.200.3.51:9443/services/TransportAdaptorManagerAdminService.TransportAdaptorManagerAdminServiceHttpsEndpoint/"/>
+            <http:address location="https://101.2.182.83:9443/services/TransportAdaptorManagerAdminService.TransportAdaptorManagerAdminServiceHttpsEndpoint/"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
