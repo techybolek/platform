@@ -32,7 +32,8 @@
     <artifactId>org.wso2.carbon.transport.adaptor.jms</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - JMS Transport Adaptor Module</name>
-    <description>org.wso2.carbon.transport.adaptor.jms provides the back-end functionality of jms transport
+    <description>org.wso2.carbon.transport.adaptor.jms provides the back-end functionality of jms
+        transport
     </description>
     <url>http://wso2.org</url>
 

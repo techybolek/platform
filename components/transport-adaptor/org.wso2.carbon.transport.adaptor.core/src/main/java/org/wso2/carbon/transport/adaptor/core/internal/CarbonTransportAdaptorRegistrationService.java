@@ -25,6 +25,9 @@ import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 import org.wso2.carbon.transport.adaptor.core.exception.TransportAdaptorConfigException;
 import org.wso2.carbon.transport.adaptor.core.internal.ds.TransportAdaptorServiceValueHolder;
 
+/**
+ * This class is used to register the transport adaptor implementation with transport adaptor core service
+ */
 public class CarbonTransportAdaptorRegistrationService
         implements TransportAdaptorRegistrationService {
 

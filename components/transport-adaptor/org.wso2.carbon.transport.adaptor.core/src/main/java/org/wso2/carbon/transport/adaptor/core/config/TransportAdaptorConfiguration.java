@@ -18,13 +18,13 @@ package org.wso2.carbon.transport.adaptor.core.config;
 
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class contain the configuration details of the transport
  */
 
-public class TransportAdaptorConfiguration implements InputTransportAdaptorConfiguration, OutputTransportAdaptorConfiguration {
+public class TransportAdaptorConfiguration
+        implements InputTransportAdaptorConfiguration, OutputTransportAdaptorConfiguration {
 
 
     private String name;
@@ -35,7 +35,7 @@ public class TransportAdaptorConfiguration implements InputTransportAdaptorConfi
 
     private InternalTransportAdaptorConfiguration outputTransportAdaptorConfiguration = null;
 
-    private Map<String,String> transportAdaptorCommonProperties = null;
+    private Map<String, String> transportAdaptorCommonProperties = null;
 
     public InternalTransportAdaptorConfiguration getInputTransportAdaptorConfiguration() {
         return inputTransportAdaptorConfiguration;
@@ -55,12 +55,12 @@ public class TransportAdaptorConfiguration implements InputTransportAdaptorConfi
         this.outputTransportAdaptorConfiguration = outputTransportAdaptorConfiguration;
     }
 
-    public Map<String,String> getTransportAdaptorCommonProperties() {
+    public Map<String, String> getTransportAdaptorCommonProperties() {
         return transportAdaptorCommonProperties;
     }
 
     public void setTransportAdaptorCommonProperties(
-            Map<String,String> transportAdaptorCommonProperties) {
+            Map<String, String> transportAdaptorCommonProperties) {
         this.transportAdaptorCommonProperties = transportAdaptorCommonProperties;
     }
 

@@ -39,7 +39,8 @@ public class TestTransportAdaptorAdaptorListener implements TransportAdaptorList
     }
 
     @Override
-    public void removeEventDefinition(Object object) throws TransportAdaptorEventProcessingException {
+    public void removeEventDefinition(Object object)
+            throws TransportAdaptorEventProcessingException {
         System.out.println(" Remove Definition ==> " + object);
     }
 

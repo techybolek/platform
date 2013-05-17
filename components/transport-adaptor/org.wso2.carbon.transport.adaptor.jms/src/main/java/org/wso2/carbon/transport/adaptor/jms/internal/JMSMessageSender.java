@@ -104,7 +104,8 @@ public class JMSMessageSender {
      *
      * @param jmsConnectionFactory the JMSConnectionFactory
      */
-    public JMSMessageSender(JMSConnectionFactory jmsConnectionFactory, Map<String,String> messageProperties) {
+    public JMSMessageSender(JMSConnectionFactory jmsConnectionFactory,
+                            Map<String, String> messageProperties) {
 
         this.cacheLevel = jmsConnectionFactory.getCacheLevel();
         this.jmsSpec11 = jmsConnectionFactory.isJmsSpec11();
@@ -176,46 +177,46 @@ public class JMSMessageSender {
             String error = "Failed to publish to topic:" + messageProperties.get(JMSConstants.JMS_DESTINATION);
             log.error(error, e);
         }
-            boolean sendingSuccessful = false;
-            // perform actual message sending
-            try {
-                if (jmsSpec11 || isQueue == null) {
-                    producer.send(jmsMessage);
+        boolean sendingSuccessful = false;
+        // perform actual message sending
+        try {
+            if (jmsSpec11 || isQueue == null) {
+                producer.send(jmsMessage);
+
+            } else {
+                if (isQueue) {
+                    ((QueueSender) producer).send(jmsMessage);
 
                 } else {
-                    if (isQueue) {
-                        ((QueueSender) producer).send(jmsMessage);
-
-                    } else {
-                        ((TopicPublisher) producer).publish(jmsMessage);
-                    }
+                    ((TopicPublisher) producer).publish(jmsMessage);
                 }
+            }
 
 //            // set the actual MessageID to the message context for use by any others down the line
-                String msgId = null;
-                try {
-                    msgId = jmsMessage.getJMSMessageID();
+            String msgId = null;
+            try {
+                msgId = jmsMessage.getJMSMessageID();
 //                if (msgId != null) {
 //                    msgCtx.setProperty(JMSConstants.JMS_MESSAGE_ID, msgId);
 //                }
-                } catch (JMSException ignore) {
-                }
+            } catch (JMSException ignore) {
+            }
 
-                sendingSuccessful = true;
+            sendingSuccessful = true;
 
-                if (log.isDebugEnabled()) {
-                    log.debug(
-                            " with JMS Message ID : " + msgId +
-                            " to destination : " + producer.getDestination());
-                }
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        " with JMS Message ID : " + msgId +
+                        " to destination : " + producer.getDestination());
+            }
 
-            } catch (JMSException e) {
-                log.error("Error sending message  : " +
-                          " to destination : " + destination, e);
+        } catch (JMSException e) {
+            log.error("Error sending message  : " +
+                      " to destination : " + destination, e);
 
-            } finally {
+        } finally {
 
-                if (jtaCommit != null) {
+            if (jtaCommit != null) {
 
 //                UserTransaction ut = (UserTransaction) msgCtx.getProperty(BaseConstants.USER_TRANSACTION);
 //                if (ut != null) {
@@ -241,32 +242,32 @@ public class JMSMessageSender {
 //                }
 //
 //            } else {
-                    try {
-                        if (session.getTransacted()) {
-                            if (sendingSuccessful && (rollbackOnly == null || !rollbackOnly)) {
-                                session.commit();
-                            } else {
-                                session.rollback();
-                            }
+                try {
+                    if (session.getTransacted()) {
+                        if (sendingSuccessful && (rollbackOnly == null || !rollbackOnly)) {
+                            session.commit();
+                        } else {
+                            session.rollback();
                         }
-
-                        if (log.isDebugEnabled()) {
-                            log.debug((sendingSuccessful ? "Committed" : "Rolled back") +
-                                      " local (JMS Session) Transaction");
-                        }
-
-                    } catch (JMSException e) {
-                        handleException("Error committing/rolling back local (i.e. session) " +
-                                        "transaction after sending of message "//with MessageContext ID : " +
-                                        + " to destination : " + destination, e);
                     }
+
+                    if (log.isDebugEnabled()) {
+                        log.debug((sendingSuccessful ? "Committed" : "Rolled back") +
+                                  " local (JMS Session) Transaction");
+                    }
+
+                } catch (JMSException e) {
+                    handleException("Error committing/rolling back local (i.e. session) " +
+                                    "transaction after sending of message "//with MessageContext ID : " +
+                                    + " to destination : " + destination, e);
                 }
             }
         }
+    }
 
-        /**
-         * Close non-shared producer, session and connection if any
-         */
+    /**
+     * Close non-shared producer, session and connection if any
+     */
 
     public void close() {
         if (producer != null && cacheLevel < JMSConstants.CACHE_PRODUCER) {

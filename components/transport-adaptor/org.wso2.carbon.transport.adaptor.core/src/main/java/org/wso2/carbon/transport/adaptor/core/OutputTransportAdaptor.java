@@ -38,9 +38,10 @@ public interface OutputTransportAdaptor {
      * publish a message to a given connection with the transport configuration.
      *
      * @param outputTransportMessageConfiguration
-     *                                     - topic name to publish messages
-     * @param message                      - message to send
-     * @param outputTransportAdaptorConfiguration - transport adaptor configuration to be used
+     *                - topic name to publish messages
+     * @param message - message to send
+     * @param outputTransportAdaptorConfiguration
+     *                - transport adaptor configuration to be used
      */
     void publish(OutputTransportMessageConfiguration outputTransportMessageConfiguration,
                  Object message,
@@ -49,7 +50,8 @@ public interface OutputTransportAdaptor {
     /**
      * publish test message to check the connection with the transport configuration.
      *
-     * @param outputTransportAdaptorConfiguration - transport configuration to be used
+     * @param outputTransportAdaptorConfiguration
+     *         - transport configuration to be used
      */
     void testConnection(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration);
 

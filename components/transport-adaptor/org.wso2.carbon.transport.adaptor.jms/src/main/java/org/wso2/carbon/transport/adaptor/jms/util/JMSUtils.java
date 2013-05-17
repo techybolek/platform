@@ -113,7 +113,8 @@ public class JMSUtils extends BaseUtils {
      * @param message              the JMS Message
      * @throws javax.jms.JMSException on exception
      */
-    public static void setTransportHeaders(Map<String, String> messageConfiguration, Message message)
+    public static void setTransportHeaders(Map<String, String> messageConfiguration,
+                                           Message message)
             throws JMSException {
 
 
@@ -314,7 +315,8 @@ public class JMSUtils extends BaseUtils {
      * @return a MessageConsumer for the specified Destination
      * @throws javax.jms.JMSException
      */
-    public static MessageConsumer createConsumer(Session session, Destination dest, String messageSelector)
+    public static MessageConsumer createConsumer(Session session, Destination dest,
+                                                 String messageSelector)
             throws JMSException {
 
         if (dest instanceof Queue) {
@@ -378,8 +380,10 @@ public class JMSUtils extends BaseUtils {
      * @throws javax.jms.JMSException on errors, to be handled and logged by the caller
      */
     public static Connection createConnection(ConnectionFactory conFac,
-                                              String user, String pass, boolean jmsSpec11, Boolean isQueue,
-                                              boolean isDurable, String clientID) throws JMSException {
+                                              String user, String pass, boolean jmsSpec11,
+                                              Boolean isQueue,
+                                              boolean isDurable, String clientID)
+            throws JMSException {
 
         Connection connection = null;
         if (log.isDebugEnabled()) {
@@ -507,7 +511,8 @@ public class JMSUtils extends BaseUtils {
      * @throws javax.jms.JMSException on errors, to be handled and logged by the caller
      */
     public static MessageProducer createProducer(
-            Session session, Destination destination, Boolean isQueue, boolean jmsSpec11) throws JMSException {
+            Session session, Destination destination, Boolean isQueue, boolean jmsSpec11)
+            throws JMSException {
 
         if (jmsSpec11 || isQueue == null) {
             return session.createProducer(destination);

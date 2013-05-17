@@ -17,20 +17,23 @@
 package org.wso2.carbon.transport.adaptor.agent.util;
 
 
-public interface AgentTransportAdaptorConstants {
+public final class AgentTransportAdaptorConstants {
 
-    String TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL = "receiverURL";
-    String TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL = "authenticatorURL";
-    String TRANSPORT_CONF_AGENT_PROP_USER_NAME = "username";
-    String TRANSPORT_CONF_AGENT_PROP_PASSWORD = "password";
-    String TRANSPORT_TYPE_AGENT = "agent";
+    private AgentTransportAdaptorConstants() {
+    }
 
-    String TRANSPORT_MESSAGE_STREAM_DEFINITION = "stream";
-    String TRANSPORT_MESSAGE_STREAM_VERSION = "version";
+    public static final String TRANSPORT_CONF_AGENT_PROP_RECEIVER_URL = "receiverURL";
+    public static final String TRANSPORT_CONF_AGENT_PROP_AUTHENTICATOR_URL = "authenticatorURL";
+    public static final String TRANSPORT_CONF_AGENT_PROP_USER_NAME = "username";
+    public static final String TRANSPORT_CONF_AGENT_PROP_PASSWORD = "password";
+    public static final String TRANSPORT_TYPE_AGENT = "agent";
 
-    String TRANSPORT_CONF_AGENT_HINT_RECEIVER_URL = "enterReceiverUrl";
-    String TRANSPORT_CONF_AGENT_HINT_AUTHENTICATOR_URL = "enterAuthenticatorUrl";
-    String TRANSPORT_CONF_AGENT_HINT_USER_NAME = "enterUsername";
-    String TRANSPORT_CONF_AGENT_HINT_PASSWORD = "enterPassword";
+    public static final String TRANSPORT_MESSAGE_STREAM_DEFINITION = "stream";
+    public static final String TRANSPORT_MESSAGE_STREAM_VERSION = "version";
+
+    public static final String TRANSPORT_CONF_AGENT_HINT_RECEIVER_URL = "enterReceiverUrl";
+    public static final String TRANSPORT_CONF_AGENT_HINT_AUTHENTICATOR_URL = "enterAuthenticatorUrl";
+    public static final String TRANSPORT_CONF_AGENT_HINT_USER_NAME = "enterUsername";
+    public static final String TRANSPORT_CONF_AGENT_HINT_PASSWORD = "enterPassword";
 
 }

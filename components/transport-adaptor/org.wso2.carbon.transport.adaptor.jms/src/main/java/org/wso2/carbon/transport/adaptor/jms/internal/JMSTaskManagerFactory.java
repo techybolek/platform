@@ -40,7 +40,8 @@ public class JMSTaskManagerFactory {
      * @return
      */
     public static JMSTaskManager createTaskManagerForService(JMSConnectionFactory jcf,
-                                                                 String name, WorkerPool workerPool, Map<String, String> svc) {
+                                                             String name, WorkerPool workerPool,
+                                                             Map<String, String> svc) {
 
 //        Map<String, String> svc = getServiceStringParameters(service.getParameters());
         Map<String, String> cf = jcf.getParameters();
@@ -251,7 +252,7 @@ public class JMSTaskManagerFactory {
                 return BaseConstants.TRANSACTION_LOCAL;
             } else {
                 throw new TransportAdaptorEventProcessingException("Invalid option : " + val + " for parameter : " +
-                                                         BaseConstants.STR_TRANSACTION_JTA);
+                                                                   BaseConstants.STR_TRANSACTION_JTA);
             }
         }
     }
@@ -317,7 +318,8 @@ public class JMSTaskManagerFactory {
         return JMSConstants.CACHE_AUTO;
     }
 
-    private static boolean getJMSSpecVersion(Map<String, String> svcMap, Map<String, String> cfMap) {
+    private static boolean getJMSSpecVersion(Map<String, String> svcMap,
+                                             Map<String, String> cfMap) {
 
         String key = JMSConstants.PARAM_JMS_SPEC_VER;
         String val = svcMap.get(key);

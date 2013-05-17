@@ -135,7 +135,8 @@ public class TransportAdaptorDto {
         return supportedTransportAdaptorType;
     }
 
-    public void setSupportedTransportAdaptorType(TransportAdaptorType supportedTransportAdaptorType) {
+    public void setSupportedTransportAdaptorType(
+            TransportAdaptorType supportedTransportAdaptorType) {
         this.supportedTransportAdaptorType = supportedTransportAdaptorType;
     }
 

@@ -32,7 +32,8 @@
     <artifactId>org.wso2.carbon.transport.adaptor.wso2eventsender</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - WSO2EventSender Transport Adaptor Module</name>
-    <description>org.wso2.carbon.transport.adaptor.wso2eventsender provides the back-end functionality of
+    <description>org.wso2.carbon.transport.adaptor.wso2eventsender provides the back-end
+        functionality of
         wso2eventsender transport
     </description>
     <url>http://wso2.org</url>

@@ -17,25 +17,28 @@
 package org.wso2.carbon.transport.adaptor.jms.util;
 
 
-public interface JMSTransportAdaptorConstants {
+public final class JMSTransportAdaptorConstants {
 
-    String TRANSPORT_TYPE_JMS = "jms";
+    private JMSTransportAdaptorConstants() {
+    }
 
-    String JNDI_INITIAL_CONTEXT_FACTORY_CLASS = "java.naming.factory.initial";
-    String JNDI_INITIAL_CONTEXT_FACTORY_CLASS_HINT = "java.naming.factory.initial.hint";
-    String JAVA_NAMING_PROVIDER_URL = "java.naming.provider.url";
-    String JAVA_NAMING_PROVIDER_URL_HINT = "java.naming.provider.url.hint";
-    String JAVA_NAMING_SECURITY_PRINCIPAL = "java.naming.security.principal";
-    String JAVA_NAMING_SECURITY_CREDENTIALS = "java.naming.security.credentials";
-    String TRANSPORT_JMS_CONNECTION_FACTORY_JNDINAME = "transport.jms.ConnectionFactoryJNDIName";
-    String TRANSPORT_JMS_CONNECTION_FACTORY_JNDINAME_HINT = "transport.jms.ConnectionFactoryJNDIName.hint";
-    String TRANSPORT_JMS_DURABLE_SUBSCRIBER_NAME = "transport.jms.DurableSubscriberName";
-    String TRANSPORT_JMS_DURABLE_SUBSCRIBER_NAME_HINT = "transport.jms.DurableSubscriberName.hint";
-    String TRANSPORT_JMS_SUBSCRIPTION_DURABLE = "transport.jms.SubscriptionDurable";
-    String TRANSPORT_JMS_SUBSCRIPTION_DURABLE_HINT = "transport.jms.SubscriptionDurable.hint";
-    String TRANSPORT_JMS_DESTINATION_TYPE = "transport.jms.DestinationType";
-    String TRANSPORT_JMS_DESTINATION_TYPE_HINT = "transport.jms.DestinationType.hint";
+    public static final String TRANSPORT_TYPE_JMS = "jms";
 
-    String TRANSPORT_JMS_DESTINATION = "transport.jms.Destination";
+    public static final String JNDI_INITIAL_CONTEXT_FACTORY_CLASS = "java.naming.factory.initial";
+    public static final String JNDI_INITIAL_CONTEXT_FACTORY_CLASS_HINT = "java.naming.factory.initial.hint";
+    public static final String JAVA_NAMING_PROVIDER_URL = "java.naming.provider.url";
+    public static final String JAVA_NAMING_PROVIDER_URL_HINT = "java.naming.provider.url.hint";
+    public static final String JAVA_NAMING_SECURITY_PRINCIPAL = "java.naming.security.principal";
+    public static final String JAVA_NAMING_SECURITY_CREDENTIALS = "java.naming.security.credentials";
+    public static final String TRANSPORT_JMS_CONNECTION_FACTORY_JNDINAME = "transport.jms.ConnectionFactoryJNDIName";
+    public static final String TRANSPORT_JMS_CONNECTION_FACTORY_JNDINAME_HINT = "transport.jms.ConnectionFactoryJNDIName.hint";
+    public static final String TRANSPORT_JMS_DURABLE_SUBSCRIBER_NAME = "transport.jms.DurableSubscriberName";
+    public static final String TRANSPORT_JMS_DURABLE_SUBSCRIBER_NAME_HINT = "transport.jms.DurableSubscriberName.hint";
+    public static final String TRANSPORT_JMS_SUBSCRIPTION_DURABLE = "transport.jms.SubscriptionDurable";
+    public static final String TRANSPORT_JMS_SUBSCRIPTION_DURABLE_HINT = "transport.jms.SubscriptionDurable.hint";
+    public static final String TRANSPORT_JMS_DESTINATION_TYPE = "transport.jms.DestinationType";
+    public static final String TRANSPORT_JMS_DESTINATION_TYPE_HINT = "transport.jms.DestinationType.hint";
+
+    public static final String TRANSPORT_JMS_DESTINATION = "transport.jms.Destination";
 
 }

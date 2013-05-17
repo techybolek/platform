@@ -66,13 +66,13 @@ public class JMSMessageListener implements MessageListener {
                     log.error(e);
                 }
             }
-        } else if (message instanceof MapMessage){
+        } else if (message instanceof MapMessage) {
             MapMessage mapMessage = (MapMessage) message;
             Map event = new HashMap();
             try {
                 Enumeration names = mapMessage.getMapNames();
                 Object name;
-                while (names.hasMoreElements()){
+                while (names.hasMoreElements()) {
                     name = names.nextElement();
                     event.put(name, mapMessage.getObject((String) name));
                 }

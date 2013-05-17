@@ -17,10 +17,13 @@
 package org.wso2.carbon.transport.adaptor.wso2eventreceiver.util;
 
 
-public interface WSO2EventReceiverTransportAdaptorConstants {
+public final class WSO2EventReceiverTransportAdaptorConstants {
 
-    String TRANSPORT_TYPE_WSO2EVENTRECEIVER = "wso2eventreceiver";
+    private WSO2EventReceiverTransportAdaptorConstants() {
+    }
 
-    String TRANSPORT_MESSAGE_STREAM_DEFINITION = "stream";
-    String TRANSPORT_MESSAGE_STREAM_VERSION = "version";
+    public static final String TRANSPORT_TYPE_WSO2EVENTRECEIVER = "wso2eventreceiver";
+
+    public static final String TRANSPORT_MESSAGE_STREAM_DEFINITION = "stream";
+    public static final String TRANSPORT_MESSAGE_STREAM_VERSION = "version";
 }

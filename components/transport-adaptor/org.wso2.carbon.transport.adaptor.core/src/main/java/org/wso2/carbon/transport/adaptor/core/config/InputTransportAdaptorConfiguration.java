@@ -32,7 +32,8 @@ public interface InputTransportAdaptorConfiguration {
 
     Map<String, String> getTransportAdaptorCommonProperties();
 
-    void setInputTransportAdaptorConfiguration(InternalTransportAdaptorConfiguration inputTransportAdaptorConfiguration);
+    void setInputTransportAdaptorConfiguration(
+            InternalTransportAdaptorConfiguration inputTransportAdaptorConfiguration);
 
     InternalTransportAdaptorConfiguration getInputTransportAdaptorConfiguration();
 

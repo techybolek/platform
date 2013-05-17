@@ -30,10 +30,11 @@ public interface OutputTransportAdaptorConfiguration {
 
     InternalTransportAdaptorConfiguration getOutputTransportAdaptorConfiguration();
 
-    void setOutputTransportAdaptorConfiguration(InternalTransportAdaptorConfiguration outputTransportAdaptorConfiguration);
+    void setOutputTransportAdaptorConfiguration(
+            InternalTransportAdaptorConfiguration outputTransportAdaptorConfiguration);
 
-    Map<String,String> getTransportAdaptorCommonProperties();
+    Map<String, String> getTransportAdaptorCommonProperties();
 
-    void setTransportAdaptorCommonProperties(Map<String,String> transportAdaptorCommonProperties);
+    void setTransportAdaptorCommonProperties(Map<String, String> transportAdaptorCommonProperties);
 
 }

@@ -17,9 +17,15 @@ import java.util.concurrent.ConcurrentHashMap;
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
-*/public class InternalTransportAdaptorConfiguration {
+*/
 
-    private Map<String,String> propertyList;
+
+/**
+ * This class is used to wrap the input transport adaptor configuration and output transport adaptor configuration
+ */
+public class InternalTransportAdaptorConfiguration {
+
+    private Map<String, String> propertyList;
 
     public Map<String, String> getPropertyList() {
         return propertyList;
@@ -29,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
         this.propertyList = propertyList;
     }
 
-    public InternalTransportAdaptorConfiguration(){
+    public InternalTransportAdaptorConfiguration() {
         this.propertyList = new ConcurrentHashMap<String, String>();
     }
 

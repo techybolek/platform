@@ -360,7 +360,8 @@ public final class AgentTransportAdaptorType extends AbstractTransportAdaptor
     }
 
     @Override
-    public void testConnection(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration) {
+    public void testConnection(
+            OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration) {
         // no test
     }
 

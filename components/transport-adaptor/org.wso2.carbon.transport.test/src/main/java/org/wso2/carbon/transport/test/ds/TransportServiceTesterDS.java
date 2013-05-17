@@ -47,10 +47,15 @@ public class TransportServiceTesterDS {
 
     protected void activate(ComponentContext context) {
 
+        try{
 
+        }   catch (Throwable t){
+            log.error("Cannot deploy transport adaptor service tester",t);
+        }
         TransportAdaptorService transportAdaptorService = TransportAdaptorHolder.getInstance().getTransportAdaptorService();
 
-        registerWso2EventReceiver(transportAdaptorService);
+//        registerWso2EventReceiver(transportAdaptorService);
+        registerJMS(transportAdaptorService);
 
 
         log.info("successfully deployed transport adaptor service tester");
@@ -85,7 +90,7 @@ public class TransportServiceTesterDS {
         inputTransportAdaptorConfiguration.setName("jmsTransportAdaptor");
         inputTransportAdaptorConfiguration.setType("jms");
 
-        Map<String,String> transportAdaptorCommonPropertyList = new HashMap<String,String>();
+        Map<String, String> transportAdaptorCommonPropertyList = new HashMap<String, String>();
         transportAdaptorCommonPropertyList.put("java.naming.security.principal", "admin");
         transportAdaptorCommonPropertyList.put("java.naming.provider.url", "tcp://localhost:61616");
         transportAdaptorCommonPropertyList.put("java.naming.security.credentials", "admin");

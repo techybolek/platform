@@ -17,16 +17,16 @@
 package org.wso2.carbon.transport.adaptor.wso2eventsender.util;
 
 
-public interface WSO2EventSenderTransportAdaptorConstants {
+public final class WSO2EventSenderTransportAdaptorConstants {
 
-    String TRANSPORT_CONF_WSO2EVENTSENDER_PROP_RECEIVER_URL = "receiverURL";
-    String TRANSPORT_CONF_WSO2EVENTSENDER_PROP_AUTHENTICATOR_URL = "authenticatorURL";
-    String TRANSPORT_CONF_WSO2EVENTSENDER_PROP_USER_NAME = "username";
-    String TRANSPORT_CONF_WSO2EVENTSENDER_PROP_PASSWORD = "password";
-    String TRANSPORT_TYPE_WSO2EVENTSENDER = "wso2eventsender";
+    public static final String TRANSPORT_CONF_WSO2EVENTSENDER_PROP_RECEIVER_URL = "receiverURL";
+    public static final String TRANSPORT_CONF_WSO2EVENTSENDER_PROP_AUTHENTICATOR_URL = "authenticatorURL";
+    public static final String TRANSPORT_CONF_WSO2EVENTSENDER_PROP_USER_NAME = "username";
+    public static final String TRANSPORT_CONF_WSO2EVENTSENDER_PROP_PASSWORD = "password";
+    public static final String TRANSPORT_TYPE_WSO2EVENTSENDER = "wso2eventsender";
 
-    String TRANSPORT_CONF_WSO2EVENTSENDER_HINT_RECEIVER_URL = "enterReceiverUrl";
-    String TRANSPORT_CONF_WSO2EVENTSENDER_HINT_AUTHENTICATOR_URL = "enterAuthenticatorUrl";
-    String TRANSPORT_CONF_WSO2EVENTSENDER_HINT_USER_NAME = "enterUsername";
-    String TRANSPORT_CONF_WSO2EVENTSENDER_HINT_PASSWORD = "enterPassword";
+    public static final String TRANSPORT_CONF_WSO2EVENTSENDER_HINT_RECEIVER_URL = "enterReceiverUrl";
+    public static final String TRANSPORT_CONF_WSO2EVENTSENDER_HINT_AUTHENTICATOR_URL = "enterAuthenticatorUrl";
+    public static final String TRANSPORT_CONF_WSO2EVENTSENDER_HINT_USER_NAME = "enterUsername";
+    public static final String TRANSPORT_CONF_WSO2EVENTSENDER_HINT_PASSWORD = "enterPassword";
 }

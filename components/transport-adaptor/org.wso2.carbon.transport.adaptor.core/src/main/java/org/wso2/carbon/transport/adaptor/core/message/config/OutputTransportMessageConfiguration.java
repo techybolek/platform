@@ -20,6 +20,9 @@ package org.wso2.carbon.transport.adaptor.core.message.config;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Output transport message configuration
+ */
 public class OutputTransportMessageConfiguration {
 
     /**

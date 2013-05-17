@@ -21,6 +21,9 @@ import org.wso2.carbon.transport.adaptor.core.Property;
 
 import java.util.List;
 
+/**
+ * this class used to transport the transport adaptor message related DTO
+ */
 public class MessageDto {
 
 

@@ -366,7 +366,8 @@ public final class JMSTransportAdaptorType extends AbstractTransportAdaptor
 
 
     @Override
-    public void testConnection(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration) {
+    public void testConnection(
+            OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration) {
         // no test
     }
 
@@ -410,7 +411,8 @@ public final class JMSTransportAdaptorType extends AbstractTransportAdaptor
         private final JMSConnectionFactory jmsConnectionFactory;
         private final JMSMessageSender jmsMessageSender;
 
-        public PublisherDetails(JMSConnectionFactory jmsConnectionFactory, JMSMessageSender jmsMessageSender) {
+        public PublisherDetails(JMSConnectionFactory jmsConnectionFactory,
+                                JMSMessageSender jmsMessageSender) {
             this.jmsConnectionFactory = jmsConnectionFactory;
             this.jmsMessageSender = jmsMessageSender;
         }
@@ -429,7 +431,8 @@ public final class JMSTransportAdaptorType extends AbstractTransportAdaptor
         private final JMSConnectionFactory jmsConnectionFactory;
         private final JMSTaskManager jmsTaskManager;
 
-        public SubscriptionDetails(JMSConnectionFactory jmsConnectionFactory, JMSTaskManager jmsTaskManager) {
+        public SubscriptionDetails(JMSConnectionFactory jmsConnectionFactory,
+                                   JMSTaskManager jmsTaskManager) {
             this.jmsConnectionFactory = jmsConnectionFactory;
             this.jmsTaskManager = jmsTaskManager;
         }

@@ -102,9 +102,9 @@ public class JMSConnectionFactory {
 
         } catch (NamingException e) {
             throw new TransportAdaptorEventProcessingException("Cannot acquire JNDI context, JMS Connection factory : " +
-                                                     parameters.get(JMSConstants.PARAM_CONFAC_JNDI_NAME) + " or default destination : " +
-                                                     parameters.get(JMSConstants.PARAM_DESTINATION) +
-                                                     " for JMS CF : " + name + " using : " + parameters, e);
+                                                               parameters.get(JMSConstants.PARAM_CONFAC_JNDI_NAME) + " or default destination : " +
+                                                               parameters.get(JMSConstants.PARAM_DESTINATION) +
+                                                               " for JMS CF : " + name + " using : " + parameters, e);
         }
     }
 
@@ -266,7 +266,7 @@ public class JMSConnectionFactory {
                 return false;
             } else {
                 throw new TransportAdaptorEventProcessingException("Invalid " + JMSConstants.PARAM_CONFAC_TYPE + " : " +
-                                                         parameters.get(JMSConstants.PARAM_CONFAC_TYPE) + " for JMS CF : " + name);
+                                                                   parameters.get(JMSConstants.PARAM_CONFAC_TYPE) + " for JMS CF : " + name);
             }
         } else {
             if ("queue".equalsIgnoreCase(parameters.get(JMSConstants.PARAM_DEST_TYPE))) {
@@ -275,7 +275,7 @@ public class JMSConnectionFactory {
                 return false;
             } else {
                 throw new TransportAdaptorEventProcessingException("Invalid " + JMSConstants.PARAM_DEST_TYPE + " : " +
-                                                         parameters.get(JMSConstants.PARAM_DEST_TYPE) + " for JMS CF : " + name);
+                                                                   parameters.get(JMSConstants.PARAM_DEST_TYPE) + " for JMS CF : " + name);
             }
         }
     }

@@ -75,16 +75,6 @@ public class CarbonTransportAdaptorService implements TransportAdaptorService {
         return null;
     }
 
-
-    @Override
-    public List<String> getTransportAdaptorNames() {
-        List<String> transportAdaptorNames = new ArrayList<String>();
-        for (AbstractTransportAdaptor abstractTransportAdaptor : this.transportAdaptorMap.values()) {
-            transportAdaptorNames.add(abstractTransportAdaptor.getTransportAdaptorDto().getTransportAdaptorTypeName());
-        }
-        return transportAdaptorNames;
-    }
-
     @Override
     public String subscribe(InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
                             InputTransportMessageConfiguration inputTransportMessageConfiguration,
@@ -103,7 +93,7 @@ public class CarbonTransportAdaptorService implements TransportAdaptorService {
     @Override
     public void publish(OutputTransportAdaptorConfiguration outputTransportAdaptorConfiguration,
                         OutputTransportMessageConfiguration outputTransportMessageConfiguration,
-                        Object object){
+                        Object object) {
 
         OutputTransportAdaptor outputTransportAdaptor = (OutputTransportAdaptor) this.transportAdaptorMap.get(outputTransportAdaptorConfiguration.getType());
         try {

@@ -47,13 +47,6 @@ public interface TransportAdaptorService {
     MessageDto getTransportMessageDto(String transportAdaptorTypeName);
 
     /**
-     * get all the names of the transport types
-     *
-     * @return - list of transport names
-     */
-    List<String> getTransportAdaptorNames();
-
-    /**
      * subscribe to a particular transport configuration. When the TransportAdaptor receives the
      * message it send that to the user through the listener interface.
      *
@@ -98,7 +91,6 @@ public interface TransportAdaptorService {
      * @param inputTransportAdaptorConfiguration
      *                          - transport configuration to be used
      * @param axisConfiguration - acis configuration
-     *
      */
     void unsubscribe(InputTransportMessageConfiguration inputTransportMessageConfiguration,
                      InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,

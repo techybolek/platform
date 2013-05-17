@@ -154,7 +154,7 @@ public final class WSO2EventReceiverTransportAdaptorType extends AbstractTranspo
     public String subscribe(InputTransportMessageConfiguration inputTransportMessageConfiguration,
                             TransportAdaptorListener transportAdaptorListener,
                             InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
-                            AxisConfiguration axisConfiguration){
+                            AxisConfiguration axisConfiguration) {
         String subscriptionId = UUID.randomUUID().toString();
 
         if (!inputTransportListenerMap.keySet().contains(inputTransportMessageConfiguration)) {
@@ -175,7 +175,7 @@ public final class WSO2EventReceiverTransportAdaptorType extends AbstractTranspo
 
     public void unsubscribe(InputTransportMessageConfiguration inputTransportMessageConfiguration,
                             InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
-                            AxisConfiguration axisConfiguration, String subscriptionId){
+                            AxisConfiguration axisConfiguration, String subscriptionId) {
         Map<String, TransportAdaptorListener> map = inputTransportListenerMap.get(inputTransportMessageConfiguration);
         if (map != null) {
             map.remove(subscriptionId);

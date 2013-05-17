@@ -59,7 +59,7 @@ public interface InputTransportAdaptor {
      */
     void unsubscribe(InputTransportMessageConfiguration inputTransportMessageConfiguration,
                      InputTransportAdaptorConfiguration inputTransportAdaptorConfiguration,
-                     AxisConfiguration axisConfiguration, String subscriptionId) ;
+                     AxisConfiguration axisConfiguration, String subscriptionId);
 
 
 }
