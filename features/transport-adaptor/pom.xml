@@ -39,6 +39,8 @@
         <module>org.wso2.carbon.transport.adaptor.agent.server.feature</module>
         <module>org.wso2.carbon.transport.adaptor.jms.server.feature</module>
         <module>org.wso2.carbon.transport.adaptor.feature</module>
+        <module>org.wso2.carbon.transport.adaptor.wso2eventreceiver.server.feature</module>
+        <module>org.wso2.carbon.transport.adaptor.wso2eventsender.server.feature</module>
     </modules>
 
     <repositories>
