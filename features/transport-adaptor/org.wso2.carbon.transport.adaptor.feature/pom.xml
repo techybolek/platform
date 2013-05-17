@@ -83,6 +83,8 @@
 								<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.transport.adaptor.server.feature:${project.version}</includedFeatureDef>
 								<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.transport.adaptor.agent.server.feature:${project.version}</includedFeatureDef>
 								<includedFeatureDef>org.wso2.carbon:org.wso2.carbon.transport.adaptor.jms.server.feature:${project.version}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.transport.adaptor.wso2eventreceiver.server.feature:${project.version}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon:org.wso2.carbon.transport.adaptor.wso2eventsender.server.feature:${project.version}</includedFeatureDef>
 							</includedFeatures>
 						</configuration>
 					</execution>
