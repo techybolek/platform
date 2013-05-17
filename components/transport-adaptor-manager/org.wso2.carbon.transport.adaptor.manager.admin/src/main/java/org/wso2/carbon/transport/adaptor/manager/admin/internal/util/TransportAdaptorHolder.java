@@ -18,15 +18,19 @@ import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * This class is used to hold the transport adaptor service
+ */
 public final class TransportAdaptorHolder {
-    private TransportAdaptorService transportService;
+    private TransportAdaptorService transportAdaptorService;
     private static TransportAdaptorHolder instance = new TransportAdaptorHolder();
 
     private TransportAdaptorHolder() {
     }
 
-    public TransportAdaptorService getTransportService() {
-        return transportService;
+    public TransportAdaptorService getTransportAdaptorService() {
+        return transportAdaptorService;
     }
 
     public static TransportAdaptorHolder getInstance() {
@@ -34,10 +38,10 @@ public final class TransportAdaptorHolder {
     }
 
     public void registerTransportService(TransportAdaptorService transportService) {
-        this.transportService = transportService;
+        this.transportAdaptorService = transportService;
     }
 
     public void unRegisterTransportService(TransportAdaptorService transportService) {
-        this.transportService = null;
+        this.transportAdaptorService = null;
     }
 }

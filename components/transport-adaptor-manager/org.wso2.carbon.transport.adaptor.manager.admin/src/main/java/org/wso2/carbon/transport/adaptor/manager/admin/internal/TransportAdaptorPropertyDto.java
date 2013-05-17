@@ -17,7 +17,7 @@ package org.wso2.carbon.transport.adaptor.manager.admin.internal;
  */
 
 /**
- * Transport property related attributes are stored
+ * Transport property related attributes are stored with values
  */
 public class TransportAdaptorPropertyDto {
     // property name

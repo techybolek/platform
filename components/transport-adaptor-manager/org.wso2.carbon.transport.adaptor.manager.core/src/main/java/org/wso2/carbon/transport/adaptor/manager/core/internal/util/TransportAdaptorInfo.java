@@ -14,6 +14,9 @@ package org.wso2.carbon.transport.adaptor.manager.core.internal.util;/*
  * limitations under the License.
  */
 
+/**
+ * To store the transport adaptor name and transport adaptor type
+ */
 public class TransportAdaptorInfo {
 
     private String transportAdaptorName;

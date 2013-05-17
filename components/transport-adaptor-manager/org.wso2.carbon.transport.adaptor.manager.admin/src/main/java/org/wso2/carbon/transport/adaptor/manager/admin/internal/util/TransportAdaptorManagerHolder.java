@@ -17,6 +17,10 @@ import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorManagerSer
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * This class is used to hold the transport adaptor manager service
+ */
 public final class TransportAdaptorManagerHolder {
     private TransportAdaptorManagerService transportAdaptorManagerService;
     private static TransportAdaptorManagerHolder instance = new TransportAdaptorManagerHolder();

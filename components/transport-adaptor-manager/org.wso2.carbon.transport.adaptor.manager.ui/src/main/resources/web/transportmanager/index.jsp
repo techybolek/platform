@@ -6,8 +6,8 @@
 <%@ page
         import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportAdaptorConfigurationInfoDto" %>
 <%@ page
-        import="org.wso2.carbon.transport.adaptor.manager.ui.UIUtils" %>
-<%@ page import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportAdaptorFileDto" %>
+        import="org.wso2.carbon.transport.adaptor.manager.stub.types.TransportAdaptorFileDto" %>
+<%@ page import="org.wso2.carbon.transport.adaptor.manager.ui.UIUtils" %>
 
 <fmt:bundle basename="org.wso2.carbon.transport.adaptor.manager.ui.i18n.Resources">
 
@@ -56,28 +56,39 @@
     <div id="middle">
     <div id="workArea">
         <h3>Available Transport Adaptors</h3><br/>
-        <h5 class="activeAdaptors"><%=totalTransportAdaptors%> Active Transport Adaptors. <a href="transport_adaptor_files_details.jsp"><%=totalNotDeployedTransportAdaptors%> Inactive Transport Adaptors</a></h5>
+        <h5 class="activeAdaptors"><%=totalTransportAdaptors%> Active Transport
+                                                               Adaptors. <% if (totalNotDeployedTransportAdaptors > 0) { %><a
+                    href="transport_adaptor_files_details.jsp"><%=totalNotDeployedTransportAdaptors%>
+                Inactive Transport Adaptors</a><% } else {%><%=totalNotDeployedTransportAdaptors%>
+                                                               Inactive Transport Adaptors <% } %>
+        </h5>
 
+
+        <%
+
+            if (transportDetailsArray != null) {
+        %>
         <table class="styledLeft">
             <thead>
             <tr>
                 <th>Transport Adaptor Name</th>
+                <th>Supported Transport Type</th>
                 <th>Transport Adaptor Type</th>
                 <th>Actions</th>
             </tr>
             </thead>
             <tbody>
             <%
-
-                if (transportDetailsArray != null) {
-                    for (TransportAdaptorConfigurationInfoDto transportDetails : transportDetailsArray) {
-                        totalTransportAdaptors++;
+                for (TransportAdaptorConfigurationInfoDto transportDetails : transportDetailsArray) {
+                    totalTransportAdaptors++;
             %>
             <tr>
                 <td>
                     <a href="transport_details.jsp?transportName=<%=transportDetails.getTransportAdaptorName()%>&transportType=<%=transportDetails.getTransportAdaptorType()%>"><%=transportDetails.getTransportAdaptorName()%>
                     </a>
 
+                </td>
+                <td><%=transportDetails.getSupportedTransportType()%>
                 </td>
                 <td><%=transportDetails.getTransportAdaptorType()%>
                 </td>
@@ -105,7 +116,6 @@
 
         <div>
             <br/>
-            <a href="transport_adaptor_files_details.jsp">Not-Deployed Files</a>
 
             <form id="deleteForm" name="input" action="" method="get"><input type="HIDDEN"
                                                                              name="transportname"

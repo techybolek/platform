@@ -16,18 +16,19 @@
 
 package org.wso2.carbon.transport.adaptor.manager.core.internal.util;
 
-public interface TransportAdaptorManagerConstants {
+public final class TransportAdaptorManagerConstants {
 
-    String TM_CONF_NS = "http://wso2.org/carbon/transportmanager";
-    String TM_ELE_ROOT_ELEMENT = "transportAdaptor";
-    String TM_ELE_DIRECTORY = "transportadaptors";
+    private TransportAdaptorManagerConstants(){}
 
-    String TM_ELE_INPUT_PROPERTY = "input";
-    String TM_ELE_OUTPUT_PROPERTY = "output";
-    String TM_ELE_COMMON_PROPERTY = "commonproperty";
-    String TM_ELE_PROPERTY = "property";
-    String TM_ELE_CONF_ADAPTOR_NAME_SPACE_PREFIX = "adaptor";
+    public static final String TM_CONF_NS = "http://wso2.org/carbon/transportadaptormanager";
+    public static final String TM_ELE_ROOT_ELEMENT = "transportAdaptor";
+    public static final String TM_ELE_DIRECTORY = "transportadaptors";
 
-    String TM_ATTR_NAME = "name";
-    String TM_ATTR_TYPE = "type";
+    public static final String TM_ELE_INPUT_PROPERTY = "input";
+    public static final String TM_ELE_OUTPUT_PROPERTY = "output";
+    public static final String TM_ELE_PROPERTY = "property";
+    public static final String TM_ELE_CONF_ADAPTOR_NAME_SPACE_PREFIX = "ta";
+
+    public static final String TM_ATTR_NAME = "name";
+    public static final String TM_ATTR_TYPE = "type";
 }

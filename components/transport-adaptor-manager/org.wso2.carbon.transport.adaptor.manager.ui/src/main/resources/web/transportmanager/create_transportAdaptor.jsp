@@ -147,7 +147,15 @@ function addTransport(form) {
         // empty fields are encountered.
         CARBON.showErrorDialog("Empty inputs fields are not allowed.");
         return;
-    } else {
+    }
+
+
+    if ((document.getElementById("supportedTransportType").value == 'inout') && (! (document.getElementById("outputCheckbox")).checked) && (! (document.getElementById("inputCheckbox")).checked)   ) {
+        CARBON.showErrorDialog("Transport Adaptor need to support either input or output or both");
+        return;
+    }
+
+    else {
         // create parameter string
         var selectedIndex = document.inputForm.transportTypeFilter.selectedIndex;
         var selected_text = document.inputForm.transportTypeFilter.options[selectedIndex].text;
@@ -163,6 +171,26 @@ function addTransport(form) {
 
         if (outputParameterString != "") {
             parameters = parameters + "&outputPropertySet=" + outputParameterString;
+        }
+
+        if ((document.getElementById("supportedTransportType").value == 'inout') && ((document.getElementById("outputCheckbox")).checked) && ((document.getElementById("inputCheckbox")).checked)   ) {
+            parameters = parameters + "&supportedType=inout"
+        }
+
+        else if (((document.getElementById("supportedTransportType").value == 'inout')) && ((document.getElementById("inputCheckbox")).checked) ) {
+            parameters = parameters + "&supportedType=in"
+        }
+
+        else if (((document.getElementById("supportedTransportType").value == 'inout')) && ((document.getElementById("outputCheckbox")).checked) ) {
+            parameters = parameters + "&supportedType=out"
+        }
+
+        else if (((document.getElementById("supportedTransportType").value == 'out')) ) {
+            parameters = parameters + "&supportedType=out"
+        }
+
+        else if (((document.getElementById("supportedTransportType").value == 'in')) ) {
+            parameters = parameters + "&supportedType=in"
         }
 
         // ajax call for creating a transport adaptor at backend, needed parameters are appended.
@@ -302,6 +330,8 @@ function showTransportProperties() {
 
                            });
                        }
+                   document.getElementById("supportedTransportType").value = supportedTransportAdaptorType;
+
                    }
                }
            });
@@ -691,6 +721,7 @@ function enableMyInput(obj) {
     <td class="buttonRow">
         <input type="button" value="Add Transport Adaptor"
                onclick="addTransport(document.getElementById('addTransport'))"/>
+        <input type="hidden" id="supportedTransportType" value="<%=supportedTransportAdaptorType%>">
     </td>
 </tr>
 </tbody>

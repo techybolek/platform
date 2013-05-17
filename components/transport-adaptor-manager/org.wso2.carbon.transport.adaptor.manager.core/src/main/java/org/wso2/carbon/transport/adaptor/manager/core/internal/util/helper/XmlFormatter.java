@@ -15,7 +15,7 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.wso2.carbon.transport.adaptor.manager.core.internal.config;
+package org.wso2.carbon.transport.adaptor.manager.core.internal.util.helper;
 
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;

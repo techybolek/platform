@@ -14,7 +14,9 @@ package org.wso2.carbon.transport.adaptor.manager.admin.internal;/*
  * limitations under the License.
  */
 
-
+/**
+ * To group the input, output and common transport properties with their values - used to display the transport adaptor details
+ */
 public class TransportAdaptorPropertiesDto {
 
     private String supportedTransportAdaptorType;

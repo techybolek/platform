@@ -17,7 +17,7 @@
 package org.wso2.carbon.transport.adaptor.manager.core.exception;
 
 /**
- * if there is a problem when creating the broker configurations.
+ * if there is a problem when creating the transport adaptor configurations.
  */
 public class TransportAdaptorManagerConfigurationException extends Exception {
 

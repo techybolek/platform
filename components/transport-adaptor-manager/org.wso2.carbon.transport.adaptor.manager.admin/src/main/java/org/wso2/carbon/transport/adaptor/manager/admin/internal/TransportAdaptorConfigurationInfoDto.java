@@ -17,11 +17,20 @@ package org.wso2.carbon.transport.adaptor.manager.admin.internal;
  */
 
 /**
- * Transport Configuration Details are stored
+ * Transport Configuration Details are stored (Name and Type) which needed to display in the available transport adaptor list
  */
 public class TransportAdaptorConfigurationInfoDto {
     private String transportAdaptorName;
     private String transportAdaptorType;
+    private String supportedTransportType;
+
+    public String getSupportedTransportType() {
+        return supportedTransportType;
+    }
+
+    public void setSupportedTransportType(String supportedTransportType) {
+        this.supportedTransportType = supportedTransportType;
+    }
 
     public String getTransportAdaptorName() {
         return transportAdaptorName;

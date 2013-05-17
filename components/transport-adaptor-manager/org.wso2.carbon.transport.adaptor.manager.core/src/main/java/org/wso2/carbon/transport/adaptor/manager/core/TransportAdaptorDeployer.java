@@ -31,7 +31,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfiguration;
 import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportAdaptorManagerConfigurationException;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.CarbonTransportAdaptorManagerService;
-import org.wso2.carbon.transport.adaptor.manager.core.internal.config.TransportAdaptorConfigurationHelper;
+import org.wso2.carbon.transport.adaptor.manager.core.internal.util.helper.TransportAdaptorConfigurationHelper;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportAdaptorManagerConstants;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportAdaptorManagerValueHolder;
 
@@ -48,7 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Deploy cep buckets as axis2 service
+ * Deploy transport adaptors as axis2 service
  */
 @SuppressWarnings("unused")
 public class TransportAdaptorDeployer extends AbstractDeployer {
@@ -90,6 +90,7 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
     public OMElement getTransportAdaptorOMElement(String filePath,
                                                   File transportAdaptorFile)
             throws DeploymentException {
+        String fileName = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length());
         OMElement transportAdaptorElement;
         BufferedInputStream inputStream = null;
         try {
@@ -101,15 +102,15 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
             transportAdaptorElement.build();
 
         } catch (FileNotFoundException e) {
-            String errorMessage = " .xml file cannot be found in the path : " + filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length());
+            String errorMessage = " .xml file cannot be found in the path : " + fileName;
             log.error(errorMessage, e);
             throw new DeploymentException(errorMessage, e);
         } catch (XMLStreamException e) {
-            String errorMessage = "Invalid XML for " + transportAdaptorFile.getName() + " located in the path : " + filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length());
+            String errorMessage = "Invalid XML for " + transportAdaptorFile.getName() + " located in the path : " + fileName;
             log.error(errorMessage, e);
             throw new DeploymentException(errorMessage, e);
         }catch (OMException e) {
-            String errorMessage = "XML tags are not properly closed " + filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length());
+            String errorMessage = "XML tags are not properly closed " + fileName;
             log.error(errorMessage, e);
             throw new DeploymentException(errorMessage, e);
         } finally {
@@ -180,7 +181,9 @@ public class TransportAdaptorDeployer extends AbstractDeployer {
     }
 
     private void processUndeploy(String filePath) {
-        log.info("Transport Adaptor file is undeployed");
+
+        String fileName = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length());
+        log.info("Transport Adaptor file " + fileName + " is undeployed");
         int tenantID = PrivilegedCarbonContext.getCurrentContext(configurationContext).getTenantId();
         CarbonTransportAdaptorManagerService carbonTransportAdaptorManagerService = TransportAdaptorManagerValueHolder.getCarbonTransportAdaptorManagerService();
         carbonTransportAdaptorManagerService.removeTransportAdaptorConfigurationFromMap(filePath, tenantID);

@@ -27,10 +27,10 @@ import org.wso2.carbon.transport.adaptor.core.config.TransportAdaptorConfigurati
 import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorFile;
 import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorManagerService;
 import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportAdaptorManagerConfigurationException;
-import org.wso2.carbon.transport.adaptor.manager.core.internal.config.TransportAdaptorConfigurationFilesystemInvoker;
-import org.wso2.carbon.transport.adaptor.manager.core.internal.config.TransportAdaptorConfigurationHelper;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportAdaptorInfo;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportAdaptorManagerConstants;
+import org.wso2.carbon.transport.adaptor.manager.core.internal.util.helper.TransportAdaptorConfigurationFilesystemInvoker;
+import org.wso2.carbon.transport.adaptor.manager.core.internal.util.helper.TransportAdaptorConfigurationHelper;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -50,7 +50,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * carbon implementation of the transport manager.
+ * carbon implementation of the transport adaptor manager.
  */
 public class CarbonTransportAdaptorManagerService implements TransportAdaptorManagerService {
     private static final Log log = LogFactory.getLog(CarbonTransportAdaptorManagerService.class);
@@ -72,6 +72,15 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
         tenantSpecificOutputTransportAdaptorInfoMap = new HashMap<Integer, Map<String, TransportAdaptorInfo>>();
     }
 
+    /**
+     * This method is used to store all the deployed and non-deployed transport adaptors in a map
+     * (A flag used to uniquely identity whether the transport adaptor deployed or not
+     *
+     * @param tenantId
+     * @param transportAdaptorName
+     * @param filePath
+     * @param flag
+     */
     public void addFileConfiguration(int tenantId, String transportAdaptorName, String filePath,
                                      boolean flag) {
 
@@ -236,9 +245,9 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
                 stringBuffer.append(line).append("\n");
             }
         } catch (FileNotFoundException e) {
-            throw new TransportAdaptorManagerConfigurationException("Transport Adaptor file not found", e);
+            throw new TransportAdaptorManagerConfigurationException("Transport adaptor file not found ", e);
         } catch (IOException e) {
-            throw new TransportAdaptorManagerConfigurationException("Cannot read the transport Adaptor file", e);
+            throw new TransportAdaptorManagerConfigurationException("Cannot read the transport adaptor file ", e);
         } finally {
             try {
                 if (bufferedReader != null) {
@@ -374,56 +383,59 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
     }
 
 
+    /**
+     * to add to the input and output adaptor maps that gives information which transport adaptors supports
+     * for transport adaptor configuration
+     *
+     * @param tenantId
+     * @param transportAdaptorConfiguration
+     * @throws TransportAdaptorManagerConfigurationException
+     *
+     */
     private void addToTenantSpecificTransportAdaptorInfoMap(int tenantId,
                                                             TransportAdaptorConfiguration transportAdaptorConfiguration)
             throws TransportAdaptorManagerConfigurationException {
 
         if (transportAdaptorConfiguration.getInputTransportAdaptorConfiguration() != null) {
-            addToInputTransportInfoMap(tenantId, transportAdaptorConfiguration);
+            TransportAdaptorInfo transportAdaptorInfo = new TransportAdaptorInfo();
+            transportAdaptorInfo.setTransportAdaptorName(transportAdaptorConfiguration.getName());
+            transportAdaptorInfo.setTransportAdaptorType(transportAdaptorConfiguration.getType());
+            Map<String, TransportAdaptorInfo> transportAdaptorInfoMap = tenantSpecificInputTransportAdaptorInfoMap.get(tenantId);
 
-        } else if (transportAdaptorConfiguration.getOutputTransportAdaptorConfiguration() != null) {
-            addToOutputTransportInfoMap(tenantId, transportAdaptorConfiguration);
+            if (transportAdaptorInfoMap != null) {
+
+                transportAdaptorInfoMap.put(transportAdaptorConfiguration.getName(), transportAdaptorInfo);
+            } else {
+                transportAdaptorInfoMap = new HashMap<String, TransportAdaptorInfo>();
+                transportAdaptorInfoMap.put(transportAdaptorConfiguration.getName(), transportAdaptorInfo);
+            }
+            tenantSpecificInputTransportAdaptorInfoMap.put(tenantId, transportAdaptorInfoMap);
+
+        }
+        if (transportAdaptorConfiguration.getOutputTransportAdaptorConfiguration() != null) {
+            TransportAdaptorInfo transportAdaptorInfo = new TransportAdaptorInfo();
+            transportAdaptorInfo.setTransportAdaptorName(transportAdaptorConfiguration.getName());
+            transportAdaptorInfo.setTransportAdaptorType(transportAdaptorConfiguration.getType());
+            Map<String, TransportAdaptorInfo> transportAdaptorInfoMap = tenantSpecificOutputTransportAdaptorInfoMap.get(tenantId);
+
+            if (transportAdaptorInfoMap != null) {
+
+                transportAdaptorInfoMap.put(transportAdaptorConfiguration.getName(), transportAdaptorInfo);
+            } else {
+                transportAdaptorInfoMap = new HashMap<String, TransportAdaptorInfo>();
+                transportAdaptorInfoMap.put(transportAdaptorConfiguration.getName(), transportAdaptorInfo);
+            }
+            tenantSpecificOutputTransportAdaptorInfoMap.put(tenantId, transportAdaptorInfoMap);
         }
 
     }
 
-    private void addToInputTransportInfoMap(int tenantId,
-                                            TransportAdaptorConfiguration transportAdaptorConfiguration) {
-
-        TransportAdaptorInfo transportAdaptorInfo = new TransportAdaptorInfo();
-        transportAdaptorInfo.setTransportAdaptorName(transportAdaptorConfiguration.getName());
-        transportAdaptorInfo.setTransportAdaptorType(transportAdaptorConfiguration.getType());
-        Map<String, TransportAdaptorInfo> transportAdaptorInfoMap = tenantSpecificInputTransportAdaptorInfoMap.get(tenantId);
-
-        if (transportAdaptorInfoMap != null) {
-
-            transportAdaptorInfoMap.put(transportAdaptorConfiguration.getName(), transportAdaptorInfo);
-        } else {
-            transportAdaptorInfoMap = new HashMap<String, TransportAdaptorInfo>();
-            transportAdaptorInfoMap.put(transportAdaptorConfiguration.getName(), transportAdaptorInfo);
-        }
-        tenantSpecificInputTransportAdaptorInfoMap.put(tenantId, transportAdaptorInfoMap);
-    }
-
-    private void addToOutputTransportInfoMap(int tenantId,
-                                             TransportAdaptorConfiguration transportAdaptorConfiguration) {
-
-        TransportAdaptorInfo transportAdaptorInfo = new TransportAdaptorInfo();
-        transportAdaptorInfo.setTransportAdaptorName(transportAdaptorConfiguration.getName());
-        transportAdaptorInfo.setTransportAdaptorType(transportAdaptorConfiguration.getType());
-        Map<String, TransportAdaptorInfo> transportAdaptorInfoMap = tenantSpecificOutputTransportAdaptorInfoMap.get(tenantId);
-
-        if (transportAdaptorInfoMap != null) {
-
-            transportAdaptorInfoMap.put(transportAdaptorConfiguration.getName(), transportAdaptorInfo);
-        } else {
-            transportAdaptorInfoMap = new HashMap<String, TransportAdaptorInfo>();
-            transportAdaptorInfoMap.put(transportAdaptorConfiguration.getName(), transportAdaptorInfo);
-        }
-        tenantSpecificOutputTransportAdaptorInfoMap.put(tenantId, transportAdaptorInfoMap);
-    }
-
-
+    /**
+     * to remove the transport adaptor configuration when deployed from the map after un-deploy
+     *
+     * @param tenantId
+     * @param transportAdaptorName
+     */
     private void removeFromTenantSpecificTransportAdaptorInfoMap(int tenantId,
                                                                  String transportAdaptorName) {
 
@@ -439,7 +451,13 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
         }
     }
 
-
+    /**
+     * To check whether there is a transport adaptor with the same name
+     *
+     * @param tenantId
+     * @param transportAdaptorName
+     * @return
+     */
     public boolean checkAdaptorValidity(int tenantId, String transportAdaptorName) {
 
         if (transportAdaptorFileMap.size() > 0) {
@@ -456,7 +474,15 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
         return true;
     }
 
-
+    /**
+     * to get the OM element from transport adaptor configuration
+     *
+     * @param path
+     * @param transportAdaptorFile
+     * @return
+     * @throws TransportAdaptorManagerConfigurationException
+     *
+     */
     private OMElement getTransportOMElement(String path, File transportAdaptorFile)
             throws TransportAdaptorManagerConfigurationException {
         OMElement transportAdaptorElement;
@@ -486,6 +512,13 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
     }
 
 
+    /**
+     * to get the file path of a transport adaptor
+     *
+     * @param tenantId
+     * @param transportAdaptorName
+     * @return
+     */
     private String getFilePath(int tenantId, String transportAdaptorName) {
 
         if (transportAdaptorFileMap.size() > 0) {
@@ -501,7 +534,16 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
         return null;
     }
 
-
+    /**
+     * this stores the transport adaptor configuration to the file system after validating the transport adaptor when doing editing
+     *
+     * @param tenantId
+     * @param transportAdaptorName
+     * @param axisConfiguration
+     * @param omElement
+     * @throws TransportAdaptorManagerConfigurationException
+     *
+     */
     private void validateTransportAdaptorConfiguration(int tenantId, String transportAdaptorName,
                                                        AxisConfiguration axisConfiguration,
                                                        OMElement omElement)
@@ -513,6 +555,12 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
         }
     }
 
+    /**
+     * to remove the deployed and not-deployed the transport adaptor configuration from the map.
+     *
+     * @param filePath
+     * @param tenantId
+     */
     public void removeTransportAdaptorConfigurationFromMap(String filePath, int tenantId) {
         List<TransportAdaptorFile> transportAdaptorFileList = transportAdaptorFileMap.get(tenantId);
 
@@ -531,6 +579,14 @@ public class CarbonTransportAdaptorManagerService implements TransportAdaptorMan
         }
     }
 
+    /**
+     * to add to the tenant specific transport adaptor configuration map (only the correctly deployed transport adaptors)
+     *
+     * @param tenantId
+     * @param transportAdaptorConfiguration
+     * @throws TransportAdaptorManagerConfigurationException
+     *
+     */
     public void addTransportAdaptorConfigurationForTenant(
             int tenantId, TransportAdaptorConfiguration transportAdaptorConfiguration)
             throws TransportAdaptorManagerConfigurationException {

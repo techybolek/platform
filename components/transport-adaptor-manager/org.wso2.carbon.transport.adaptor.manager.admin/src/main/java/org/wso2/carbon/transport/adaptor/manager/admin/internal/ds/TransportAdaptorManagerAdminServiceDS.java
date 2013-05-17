@@ -23,7 +23,7 @@ import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorManagerSer
  */
 
 /**
- * this class is used to get the BrokerManager service.
+ * this class is used to get the TransportAdaptorManager service.
  *
  * @scr.component name="transportmanageradmin.component" immediate="true"
  * @scr.reference name="transportmanager.service"

@@ -17,6 +17,9 @@ package org.wso2.carbon.transport.adaptor.manager.core.internal.util;/*
 
 import org.wso2.carbon.transport.adaptor.manager.core.internal.CarbonTransportAdaptorManagerService;
 
+/**
+ * To hold the transport adaptor manager service
+ */
 public class TransportAdaptorManagerValueHolder {
 
     private static CarbonTransportAdaptorManagerService carbonTransportAdaptorManagerService;

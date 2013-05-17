@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.transport.adaptor.manager.core.internal.config;
+package org.wso2.carbon.transport.adaptor.manager.core.internal.util.helper;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * this class is used to read the values of the transport configurations define in the broker-manager-config.xml
+ * This class used to OM element related stuffs and for validating the xml files.
  */
 
 public class TransportAdaptorConfigurationHelper {
@@ -60,8 +60,8 @@ public class TransportAdaptorConfigurationHelper {
             OMElement inputPropertyOMElement = (OMElement) inputPropertyIter.next();
             Iterator propertyIter = inputPropertyOMElement.getChildrenWithName(
                     new QName(TransportAdaptorManagerConstants.TM_CONF_NS, TransportAdaptorManagerConstants.TM_ELE_PROPERTY));
+            InternalTransportAdaptorConfiguration inputTransportAdaptorPropertyConfiguration = new InternalTransportAdaptorConfiguration();
             if (propertyIter.hasNext()) {
-                InternalTransportAdaptorConfiguration inputTransportAdaptorPropertyConfiguration = new InternalTransportAdaptorConfiguration();
                 for (; propertyIter.hasNext(); ) {
                     OMElement propertyOMElement = (OMElement) propertyIter.next();
                     String name = propertyOMElement.getAttributeValue(
@@ -69,8 +69,8 @@ public class TransportAdaptorConfigurationHelper {
                     String value = propertyOMElement.getText();
                     inputTransportAdaptorPropertyConfiguration.addTransportAdaptorProperty(name, value);
                 }
-                transportAdaptorConfiguration.setInputTransportAdaptorConfiguration(inputTransportAdaptorPropertyConfiguration);
             }
+            transportAdaptorConfiguration.setInputTransportAdaptorConfiguration(inputTransportAdaptorPropertyConfiguration);
         }
 
         //Output Adaptor Properties
@@ -90,8 +90,8 @@ public class TransportAdaptorConfigurationHelper {
                     String value = propertyOMElement.getText();
                     outputTransportAdaptorPropertyConfiguration.addTransportAdaptorProperty(name, value);
                 }
-                transportAdaptorConfiguration.setOutputTransportAdaptorConfiguration(outputTransportAdaptorPropertyConfiguration);
             }
+            transportAdaptorConfiguration.setOutputTransportAdaptorConfiguration(outputTransportAdaptorPropertyConfiguration);
         }
 
         //Common Adaptor Properties
@@ -217,13 +217,13 @@ public class TransportAdaptorConfigurationHelper {
 
         if (transportAdaptorDto.getSupportedTransportAdaptorType().equals(TransportAdaptorDto.TransportAdaptorType.IN)) {
             if (outputAdaptorConfigurationPropertyList != null) {
-                throw new TransportAdaptorManagerConfigurationException("Not a valid Transport Adaptor, This Transport Adaptor not support for Output transports ");
+                throw new TransportAdaptorManagerConfigurationException("Not a valid transport adaptor, This transport adaptor not support for output transports ");
             }
         }
 
         if (transportAdaptorDto.getSupportedTransportAdaptorType().equals(TransportAdaptorDto.TransportAdaptorType.OUT)) {
             if (inputAdaptorConfigurationPropertyList != null) {
-                throw new TransportAdaptorManagerConfigurationException("Not a valid Transport Adaptor, This Transport Adaptor not support for input transports ");
+                throw new TransportAdaptorManagerConfigurationException("Not a valid transport adaptor, This transport adaptor not support for input transports ");
             }
         }
 
@@ -233,8 +233,8 @@ public class TransportAdaptorConfigurationHelper {
                 Property transportProperty = (Property) propertyIterator.next();
                 if (transportProperty.isRequired()) {
                     if (!inputAdaptorConfigurationPropertyList.containsKey(transportProperty.getPropertyName())) {
-                        log.error("Required input property : " + transportProperty.getPropertyName() + " not in the Transport Adaptor Configuration");
-                        throw new TransportAdaptorManagerConfigurationException("Required input property : " + transportProperty.getPropertyName() + " not in the Transport Adaptor Configuration");
+                        log.error("Required input property : " + transportProperty.getPropertyName() + " not in the transport adaptor configuration");
+                        throw new TransportAdaptorManagerConfigurationException("Required input property : " + transportProperty.getPropertyName() + " not in the transport adaptor configuration");
                     }
                 }
             }
@@ -251,8 +251,8 @@ public class TransportAdaptorConfigurationHelper {
             while (propertyConfigurationIterator.hasNext()) {
                 String transportPropertyName = (String) propertyConfigurationIterator.next();
                 if (!inputPropertyNames.contains(transportPropertyName)) {
-                    log.error(transportPropertyName + " is not a valid property for this Transport Adaptor type ");
-                    throw new TransportAdaptorManagerConfigurationException(transportPropertyName + " is not a valid property for this Transport Adaptor type : " + transportAdaptorConfiguration.getType());
+                    log.error(transportPropertyName + " is not a valid property for this transport adaptor type : "+ transportAdaptorConfiguration.getType());
+                    throw new TransportAdaptorManagerConfigurationException(transportPropertyName + " is not a valid property for this transport adaptor type : " + transportAdaptorConfiguration.getType());
                 }
 
 
@@ -265,8 +265,8 @@ public class TransportAdaptorConfigurationHelper {
                 Property transportProperty = (Property) propertyIterator.next();
                 if (transportProperty.isRequired()) {
                     if (!outputAdaptorConfigurationPropertyList.containsKey(transportProperty.getPropertyName())) {
-                        log.error("Required output property : " + transportProperty.getPropertyName() + " not in the Transport Adaptor Configuration");
-                        throw new TransportAdaptorManagerConfigurationException("Required output property : " + transportProperty.getPropertyName() + " not in the Transport Adaptor Configuration");
+                        log.error("Required output property : " + transportProperty.getPropertyName() + " not in the transport adaptor configuration");
+                        throw new TransportAdaptorManagerConfigurationException("Required output property : " + transportProperty.getPropertyName() + " not in the transport adaptor configuration");
                     }
                 }
             }
@@ -282,8 +282,8 @@ public class TransportAdaptorConfigurationHelper {
             while (propertyConfigurationIterator.hasNext()) {
                 String transportPropertyName = (String) propertyConfigurationIterator.next();
                 if (!outputPropertyNames.contains(transportPropertyName)) {
-                    log.error(transportPropertyName + " is not a valid property for this Transport Adaptor type ");
-                    throw new TransportAdaptorManagerConfigurationException(transportPropertyName + " is not a valid property for this Transport Adaptor type : " + transportAdaptorConfiguration.getType());
+                    log.error(transportPropertyName + " is not a valid property for this transport adaptor type : " +  transportAdaptorConfiguration.getType());
+                    throw new TransportAdaptorManagerConfigurationException(transportPropertyName + " is not a valid property for this transport adaptor type : " + transportAdaptorConfiguration.getType());
                 }
 
             }
@@ -295,8 +295,8 @@ public class TransportAdaptorConfigurationHelper {
                 Property transportProperty = (Property) propertyIterator.next();
                 if (transportProperty.isRequired()) {
                     if (!commonAdaptorConfigurationPropertyList.containsKey(transportProperty.getPropertyName())) {
-                        log.error("Required common property : " + transportProperty.getPropertyName() + " not in the Transport Adaptor Configuration");
-                        throw new TransportAdaptorManagerConfigurationException("Required common property : " + transportProperty.getPropertyName() + " not in the Transport Adaptor Configuration");
+                        log.error("Required common property : " + transportProperty.getPropertyName() + " not in the transport adaptor configuration");
+                        throw new TransportAdaptorManagerConfigurationException("Required common property : " + transportProperty.getPropertyName() + " not in the transport adaptor configuration");
                     }
                 }
             }
@@ -312,8 +312,8 @@ public class TransportAdaptorConfigurationHelper {
             while (propertyConfigurationIterator.hasNext()) {
                 String transportPropertyName = (String) propertyConfigurationIterator.next();
                 if (!commonPropertyNames.contains(transportPropertyName)) {
-                    log.error(transportPropertyName + " is not a valid property for this Transport Adaptor type ");
-                    throw new TransportAdaptorManagerConfigurationException(transportPropertyName + " is not a valid property for this Transport Adaptor type : " + transportAdaptorConfiguration.getType());
+                    log.error(transportPropertyName + " is not a valid property for this transport adaptor type : "+ transportAdaptorConfiguration.getType());
+                    throw new TransportAdaptorManagerConfigurationException(transportPropertyName + " is not a valid property for this transport adaptor type : " + transportAdaptorConfiguration.getType());
                 }
             }
 

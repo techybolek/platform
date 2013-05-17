@@ -14,6 +14,10 @@ package org.wso2.carbon.transport.adaptor.manager.admin.internal;/*
  * limitations under the License.
  */
 
+
+/**
+ * to store Not deployed transport adaptor configuration file details (filepath & transport adaptor name)
+ */
 public class TransportAdaptorFileDto {
 
     private String filePath;

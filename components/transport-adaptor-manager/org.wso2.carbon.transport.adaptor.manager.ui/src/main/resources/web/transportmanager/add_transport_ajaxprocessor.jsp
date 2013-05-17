@@ -10,7 +10,9 @@
     String msg = null;
 
     String transportType = request.getParameter("transportType");
-    // property set contains a set of properties, eg; userName$myName|url$http://wso2.org|
+
+    String supportedType = request.getParameter("supportedType");
+
     String commonPropertySet = request.getParameter("commonPropertySet");
     TransportAdaptorPropertyDto[] commonTransportProperties = null;
 
@@ -79,16 +81,16 @@
 
     try {
         // add transport adaptor via admin service
-        stub.addTransportAdaptorConfiguration(transportName, transportType, inputTransportProperties, outputTransportProperties, commonTransportProperties);
+        stub.addTransportAdaptorConfiguration(transportName, transportType, inputTransportProperties, outputTransportProperties, commonTransportProperties,supportedType);
         msg = "true";
     } catch (Exception e) {
         msg = e.getMessage();
 
-        %>
+%>
 
-  <script type="text/javascript">
-      alert(msg);
-  </script>
+<script type="text/javascript">
+    alert(msg);
+</script>
 <%
 
     }

@@ -45,7 +45,7 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
      */
     public String[] getTransportAdaptorNames() throws AxisFault {
         TransportAdaptorHolder transportAdaptorHolder = TransportAdaptorHolder.getInstance();
-        List<TransportAdaptorDto> transportAdaptorDtoList = transportAdaptorHolder.getTransportService().getTransportAdaptors();
+        List<TransportAdaptorDto> transportAdaptorDtoList = transportAdaptorHolder.getTransportAdaptorService().getTransportAdaptors();
         if (transportAdaptorDtoList != null) {
             String[] transportAdaptorNames = new String[transportAdaptorDtoList.size()];
             for (int index = 0; index < transportAdaptorNames.length; index++) {
@@ -53,7 +53,7 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
             }
             return transportAdaptorNames;
         }
-        throw new AxisFault("No Transport adaptor type names are received.");
+        throw new AxisFault("No transport adaptor type names are received.");
     }
 
     /**
@@ -67,7 +67,7 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
             String transportAdaptorName) throws AxisFault {
 
         TransportAdaptorHolder transportAdaptorHolder = TransportAdaptorHolder.getInstance();
-        TransportAdaptorDto transportAdaptorDto = transportAdaptorHolder.getTransportService().getTransportAdaptorDto(transportAdaptorName);
+        TransportAdaptorDto transportAdaptorDto = transportAdaptorHolder.getTransportAdaptorService().getTransportAdaptorDto(transportAdaptorName);
 
         if (transportAdaptorDto != null) {
 
@@ -105,34 +105,41 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
                                                  String transportAdaptorType,
                                                  TransportAdaptorPropertyDto[] inputAdaptorPropertyDtos,
                                                  TransportAdaptorPropertyDto[] outputAdaptorPropertyDtos,
-                                                 TransportAdaptorPropertyDto[] commonAdaptorPropertyDtos)
+                                                 TransportAdaptorPropertyDto[] commonAdaptorPropertyDtos,
+                                                 String supportedTransportType)
             throws AxisFault {
 
         if (checkTransportAdaptorValidity(transportAdaptorName)) {
             try {
                 TransportAdaptorManagerHolder transportAdaptorManagerHolder = TransportAdaptorManagerHolder.getInstance();
+
                 TransportAdaptorConfiguration transportAdaptorConfiguration = new TransportAdaptorConfiguration();
                 transportAdaptorConfiguration.setName(transportAdaptorName);
                 transportAdaptorConfiguration.setType(transportAdaptorType);
                 AxisConfiguration axisConfiguration = getAxisConfig();
 
+
                 // add input transport adaptor properties
-                if (inputAdaptorPropertyDtos.length != 0) {
+                if (supportedTransportType.equals("in") || supportedTransportType.equals("inout")) {
                     InternalTransportAdaptorConfiguration inputTransportAdaptorPropertyConfiguration = new InternalTransportAdaptorConfiguration();
-                    for (TransportAdaptorPropertyDto transportAdaptorPropertyDto : inputAdaptorPropertyDtos) {
-                        if (!transportAdaptorPropertyDto.getValue().trim().equals("")) {
-                            inputTransportAdaptorPropertyConfiguration.addTransportAdaptorProperty(transportAdaptorPropertyDto.getKey(), transportAdaptorPropertyDto.getValue());
+                    if (inputAdaptorPropertyDtos.length != 0) {
+                        for (TransportAdaptorPropertyDto transportAdaptorPropertyDto : inputAdaptorPropertyDtos) {
+                            if (!transportAdaptorPropertyDto.getValue().trim().equals("")) {
+                                inputTransportAdaptorPropertyConfiguration.addTransportAdaptorProperty(transportAdaptorPropertyDto.getKey(), transportAdaptorPropertyDto.getValue());
+                            }
                         }
                     }
                     transportAdaptorConfiguration.setInputTransportAdaptorConfiguration(inputTransportAdaptorPropertyConfiguration);
                 }
 
                 // add output transport adaptor properties
-                if (outputAdaptorPropertyDtos.length != 0) {
+                if (supportedTransportType.equals("out") || supportedTransportType.equals("inout")) {
                     InternalTransportAdaptorConfiguration outputTransportAdaptorPropertyConfiguration = new InternalTransportAdaptorConfiguration();
-                    for (TransportAdaptorPropertyDto transportAdaptorPropertyDto : outputAdaptorPropertyDtos) {
-                        if (!transportAdaptorPropertyDto.getValue().trim().equals("")) {
-                            outputTransportAdaptorPropertyConfiguration.addTransportAdaptorProperty(transportAdaptorPropertyDto.getKey(), transportAdaptorPropertyDto.getValue());
+                    if (outputAdaptorPropertyDtos.length != 0) {
+                        for (TransportAdaptorPropertyDto transportAdaptorPropertyDto : outputAdaptorPropertyDtos) {
+                            if (!transportAdaptorPropertyDto.getValue().trim().equals("")) {
+                                outputTransportAdaptorPropertyConfiguration.addTransportAdaptorProperty(transportAdaptorPropertyDto.getKey(), transportAdaptorPropertyDto.getValue());
+                            }
                         }
                     }
                     transportAdaptorConfiguration.setOutputTransportAdaptorConfiguration(outputTransportAdaptorPropertyConfiguration);
@@ -140,7 +147,7 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
 
                 // add common transport adaptor properties
                 if (commonAdaptorPropertyDtos.length != 0) {
-                    Map<String,String> transportAdaptorCommonProperties = new HashMap<String, String>();
+                    Map<String, String> transportAdaptorCommonProperties = new HashMap<String, String>();
                     for (TransportAdaptorPropertyDto transportAdaptorPropertyDto : commonAdaptorPropertyDtos) {
                         if (!transportAdaptorPropertyDto.getValue().trim().equals("")) {
                             transportAdaptorCommonProperties.put(transportAdaptorPropertyDto.getKey(), transportAdaptorPropertyDto.getValue());
@@ -152,7 +159,7 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
                 transportAdaptorManagerHolder.getTransportAdaptorManagerService().saveTransportAdaptorConfiguration(transportAdaptorConfiguration, axisConfiguration);
 
             } catch (TransportAdaptorManagerConfigurationException e) {
-                throw new AxisFault("Error in adding transport Configuration , ", e);
+                throw new AxisFault("Error in adding transport adaptor configuration , ", e);
             }
         } else {
             throw new AxisFault(transportAdaptorName + " is already registered for this tenant");
@@ -232,7 +239,7 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
             String transportAdaptorConfigurationFile = transportAdaptorManager.getTransportAdaptorManagerService().getTransportAdaptorConfigurationFile(transportAdaptorName, axisConfiguration);
             return transportAdaptorConfigurationFile;
         } catch (TransportAdaptorManagerConfigurationException e) {
-            throw new AxisFault("Error in getting transport adaptor configurations , " + e.getMessage());
+            throw new AxisFault("Error when retrieving transport adaptor configurations , " + e.getMessage());
         }
     }
 
@@ -251,7 +258,7 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
             String transportAdaptorConfigurationFile = transportAdaptorManager.getTransportAdaptorManagerService().getNotDeployedTransportAdaptorConfigurationFile(filePath);
             return transportAdaptorConfigurationFile.trim();
         } catch (TransportAdaptorManagerConfigurationException e) {
-            throw new AxisFault("Error in getting transport adaptor configurations , " + e.getMessage());
+            throw new AxisFault("Error when retrieving transport adaptor configurations , " + e.getMessage());
         }
     }
 
@@ -268,7 +275,7 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
             AxisConfiguration axisConfiguration = getAxisConfig();
             transportAdaptorManager.getTransportAdaptorManagerService().removeTransportAdaptorConfigurationFile(filePath, axisConfiguration);
         } catch (TransportAdaptorManagerConfigurationException e) {
-            throw new AxisFault("Error in removing transport adaptor configurations , " + e.getMessage());
+            throw new AxisFault("Error when removing transport adaptor configurations , " + e.getMessage());
         }
     }
 
@@ -297,18 +304,20 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
                     TransportAdaptorConfiguration transportAdaptorConfiguration = transportAdaptorConfigurationList.get(index);
                     String transportAdaptorName = transportAdaptorConfiguration.getName();
                     String transportAdaptorType = transportAdaptorConfiguration.getType();
+                    String supportedTransportType = getSupportedTransportType(transportAdaptorConfiguration);
 
                     // create transport adaptor configuration details with transport adaptor name and type
                     transportAdaptorConfigurationInfoDtoArray[index] = new TransportAdaptorConfigurationInfoDto();
                     transportAdaptorConfigurationInfoDtoArray[index].setTransportAdaptorName(transportAdaptorName);
                     transportAdaptorConfigurationInfoDtoArray[index].setTransportAdaptorType(transportAdaptorType);
+                    transportAdaptorConfigurationInfoDtoArray[index].setSupportedTransportType(supportedTransportType);
                 }
                 return transportAdaptorConfigurationInfoDtoArray;
             } else {
                 return new TransportAdaptorConfigurationInfoDto[0];
             }
         } catch (TransportAdaptorManagerConfigurationException e) {
-            throw new AxisFault("No Transport Adaptor Configurations received, " + e.getMessage());
+            throw new AxisFault("No transport adaptor configurations received, " + e.getMessage());
         }
 
     }
@@ -368,7 +377,7 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
                     getTransportAdaptorConfiguration(transportAdaptorName, axisConfiguration);
 
             TransportAdaptorHolder transportAdaptorHolder = TransportAdaptorHolder.getInstance();
-            TransportAdaptorDto transportAdaptorDto = transportAdaptorHolder.getTransportService().getTransportAdaptorDto(transportAdaptorConfiguration.getType());
+            TransportAdaptorDto transportAdaptorDto = transportAdaptorHolder.getTransportAdaptorService().getTransportAdaptorDto(transportAdaptorConfiguration.getType());
 
             if (transportAdaptorDto != null) {
                 TransportAdaptorPropertiesDto transportAdaptorPropertiesDto = new TransportAdaptorPropertiesDto();
@@ -613,5 +622,17 @@ public class TransportAdaptorManagerAdminService extends AbstractAdmin {
             new AxisFault("Error in validating the transport adaptor");
         }
         return true;
+    }
+
+    private String getSupportedTransportType(
+            TransportAdaptorConfiguration transportAdaptorConfiguration) {
+
+        if (transportAdaptorConfiguration.getInputTransportAdaptorConfiguration() != null && transportAdaptorConfiguration.getOutputTransportAdaptorConfiguration() == null) {
+            return "IN";
+        } else if (transportAdaptorConfiguration.getInputTransportAdaptorConfiguration() == null && transportAdaptorConfiguration.getOutputTransportAdaptorConfiguration() != null) {
+            return "OUT";
+        } else {
+            return "IN-OUT";
+        }
     }
 }

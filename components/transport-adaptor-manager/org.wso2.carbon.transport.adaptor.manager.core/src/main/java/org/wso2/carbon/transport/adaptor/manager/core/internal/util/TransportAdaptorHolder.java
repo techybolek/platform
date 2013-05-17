@@ -18,7 +18,9 @@ package org.wso2.carbon.transport.adaptor.manager.core.internal.util;
 
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 
-
+/**
+ * This method is used to hold the transport adaptor service
+ */
 public class TransportAdaptorHolder {
 
     private static TransportAdaptorHolder instance = new TransportAdaptorHolder();

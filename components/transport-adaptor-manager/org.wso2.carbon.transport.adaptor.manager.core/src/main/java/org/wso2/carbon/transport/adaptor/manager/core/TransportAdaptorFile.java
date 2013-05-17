@@ -14,6 +14,9 @@ package org.wso2.carbon.transport.adaptor.manager.core;/*
  * limitations under the License.
  */
 
+/**
+ * To create objects of transport adaptor file details
+ */
 public class TransportAdaptorFile {
 
     private String filePath;

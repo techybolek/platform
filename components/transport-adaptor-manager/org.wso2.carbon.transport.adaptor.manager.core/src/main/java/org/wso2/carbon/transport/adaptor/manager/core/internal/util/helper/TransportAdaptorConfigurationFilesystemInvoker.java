@@ -1,4 +1,4 @@
-package org.wso2.carbon.transport.adaptor.manager.core.internal.config;/*
+package org.wso2.carbon.transport.adaptor.manager.core.internal.util.helper;/*
  * Copyright 2004,2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +30,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+/**
+ * This class used to do the file system related tasks
+ */
 public class TransportAdaptorConfigurationFilesystemInvoker {
 
     private static final Log log = LogFactory.getLog(TransportAdaptorConfigurationFilesystemInvoker.class);
@@ -50,7 +53,7 @@ public class TransportAdaptorConfigurationFilesystemInvoker {
             BufferedWriter out = new BufferedWriter(new FileWriter(transportPath));
             out.write(new XmlFormatter().format(transportAdaptor));
             out.close();
-            log.info("Transport Adaptor configuration for " + transportName + " saved in the filesystem");
+            log.info("Transport adaptor configuration for " + transportName + " saved in the filesystem");
 
             TransportAdaptorDeployer deployer = (TransportAdaptorDeployer) getDeployer(axisConfiguration,  TransportAdaptorManagerConstants.TM_ELE_DIRECTORY);
             DeploymentFileData deploymentFileData = new DeploymentFileData(new File(transportPath));
@@ -65,13 +68,14 @@ public class TransportAdaptorConfigurationFilesystemInvoker {
                                                   AxisConfiguration axisConfiguration)
             throws TransportAdaptorManagerConfigurationException {
         try {
+            String fileName = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length());
             File file = new File(filePath);
             if (file.exists()) {
                 boolean fileDeleted = file.delete();
                 if (!fileDeleted) {
-                    log.error("Could not delete " + filePath);
+                    log.error("Could not delete " + fileName);
                 } else {
-                    log.info(filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length()) + " is deleted from the file system");
+                    log.info(fileName + " is deleted from the file system");
                     TransportAdaptorConfigurationFilesystemInvoker.executeUnDeploy(filePath, axisConfiguration);
                 }
             }

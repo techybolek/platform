@@ -22,9 +22,10 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.transport.adaptor.core.TransportAdaptorService;
 import org.wso2.carbon.transport.adaptor.manager.core.TransportAdaptorManagerService;
 import org.wso2.carbon.transport.adaptor.manager.core.exception.TransportAdaptorManagerConfigurationException;
+import org.wso2.carbon.transport.adaptor.manager.core.internal.CarbonTransportAdaptorManagerService;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.build.Axis2ConfigurationContextObserverImpl;
-import org.wso2.carbon.transport.adaptor.manager.core.internal.build.TransportAdaptorManagerServiceBuilder;
 import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportAdaptorHolder;
+import org.wso2.carbon.transport.adaptor.manager.core.internal.util.TransportAdaptorManagerValueHolder;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
 /**
@@ -38,7 +39,7 @@ public class TransportAdaptorManagerDS {
     private static final Log log = LogFactory.getLog(TransportAdaptorManagerDS.class);
 
     /**
-     * initialize the Transport Manager core service here.
+     * initialize the Transport Adaptor Manager core service here.
      *
      * @param context
      */
@@ -46,7 +47,7 @@ public class TransportAdaptorManagerDS {
 
         try {
             TransportAdaptorManagerService transportAdaptorProxyService =
-                    TransportAdaptorManagerServiceBuilder.createTransportAdaptorManagerService();
+                    createTransportAdaptorManagerService();
             context.getBundleContext().registerService(TransportAdaptorManagerService.class.getName(),
                                                        transportAdaptorProxyService, null);
             registerAxis2ConfigurationContextObserver(context);
@@ -70,6 +71,13 @@ public class TransportAdaptorManagerDS {
         context.getBundleContext().registerService(Axis2ConfigurationContextObserver.class.getName(),
                                                    new Axis2ConfigurationContextObserverImpl(),
                                                    null);
+    }
+
+    private TransportAdaptorManagerService createTransportAdaptorManagerService()
+            throws TransportAdaptorManagerConfigurationException {
+        CarbonTransportAdaptorManagerService carbonTransportAdaptorManagerService = new CarbonTransportAdaptorManagerService();
+        TransportAdaptorManagerValueHolder.registerCarbonTransportAdaptorManagerService(carbonTransportAdaptorManagerService);
+        return carbonTransportAdaptorManagerService;
     }
 
 }

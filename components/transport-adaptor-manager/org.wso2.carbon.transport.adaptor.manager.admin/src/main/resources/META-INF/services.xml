@@ -14,54 +14,54 @@
         org.wso2.carbon.transport.adaptor.manager.admin.internal.TransportAdaptorManagerAdminService
     </parameter>
 
-    <parameter name="AuthorizationAction" locked="false">/permission/admin/manage/brokerManager
+    <parameter name="AuthorizationAction" locked="false">/permission/admin/manage/transportAdaptorManager
     </parameter>
     <operation name="getTransportAdaptorNames">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/transportAdaptorManager
         </parameter>
     </operation>
     <operation name="getAllTransportAdaptorPropertiesDto">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/transportAdaptorManager
         </parameter>
     </operation>
     <operation name="addTransportAdaptorConfiguration">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/transportAdaptorManager
         </parameter>
     </operation>
     <operation name="removeTransportAdaptorConfiguration">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/transportAdaptorManager
         </parameter>
     </operation>
     <operation name="removeTransportAdaptorConfigurationFile">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/transportAdaptorManager
         </parameter>
     </operation>
     <operation name="getNotDeployedTransportAdaptorConfigurationFiles">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/transportAdaptorManager
         </parameter>
     </operation>
     <operation name="getTransportAdaptorConfigurationFile">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/transportAdaptorManager
         </parameter>
     </operation>
     <operation name="editTransportAdaptorConfigurationFile">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/transportAdaptorManager
         </parameter>
     </operation>
     <operation name="getTransportAdaptorConfigurationDetails">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/transportAdaptorManager
         </parameter>
     </operation>
     <operation name="getAllTransportAdaptorConfigurationInfo">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/transportAdaptorManager
         </parameter>
     </operation>
     <operation name="getNotDeployedTransportAdaptorConfigurationFile">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/transportAdaptorManager
         </parameter>
     </operation>
     <operation name="editNotDeployedTransportAdaptorConfigurationFile">
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/brokerManager
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage/transportAdaptorManager
         </parameter>
     </operation>
     <parameter name="adminService" locked="true">false</parameter>
