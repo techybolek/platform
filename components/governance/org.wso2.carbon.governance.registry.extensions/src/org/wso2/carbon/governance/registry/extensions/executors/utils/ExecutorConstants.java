@@ -1,7 +1,6 @@
 package org.wso2.carbon.governance.registry.extensions.executors.utils;
 
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
-import org.wso2.carbon.registry.core.RegistryConstants;
 
 public class ExecutorConstants {
 
@@ -100,4 +99,19 @@ public class ExecutorConstants {
      * Defines the xpath expression that is used to find the embedded schema
      */
     public static final String XSD_XPATH_STRING = "//x:schema";
+    
+    /**
+     * Defines the APIM endpoint(used to publish the service as API)
+     */
+    public static final String APIM_ENDPOINT = "apim.endpoint";
+    
+    /**
+     * Defines the APIM endpoint(used to publish the service as API)
+     */
+    public static final String APIM_USERNAME = "apim.username";
+    
+    /**
+     * Defines the APIM endpoint(used to publish the service as API)
+     */
+    public static final String APIM_PASSWORD = "apim.password";
 }

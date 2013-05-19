@@ -302,7 +302,11 @@
             <groupId>commons-scxml.wso2</groupId>
             <artifactId>commons-scxml</artifactId>
         </dependency>
-
+	<dependency>
+            <groupId>org.apache.httpcomponents.wso2</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.1.1.wso2v1</version>
+       </dependency>
     </dependencies>
     
 </project>
