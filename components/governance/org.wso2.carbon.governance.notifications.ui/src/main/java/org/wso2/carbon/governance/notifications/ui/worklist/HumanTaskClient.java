@@ -130,7 +130,10 @@ public class HumanTaskClient {
         }
     }
 
-    public String[] getRoles(HttpSession session) throws RemoteException {
+    public String[] getRoles(HttpSession session) throws RemoteException,
+            GetAllRolesNamesUserAdminExceptionException,
+            GetUserStoreInfoUserAdminExceptionException,
+            GetRolesOfCurrentUserUserAdminExceptionException {
 
         FlaggedName[] allRolesNames;
         String everyOneRole;
@@ -142,38 +145,17 @@ public class HumanTaskClient {
             allRolesNames = ((RoleDetails)roleDetails).getRoleNames();
             everyOneRole = ((RoleDetails)roleDetails).getEveryoneRole();
         } else {
-            try {
-                allRolesNames = umStub.getRolesOfCurrentUser();
-            } catch (UserAdminUserAdminException e) {
-                log.error("Error occurred while retrieving roles of current user",e);
-                throw new RemoteException("Error occurred while retrieving roles of current user",e);
-            }
-            String adminRole;
-            try {
-                adminRole = umStub.getUserRealmInfo().getAdminRole();
-            } catch (UserAdminUserAdminException e) {
-                log.error("Error occurred while retrieving \"admin\" role name",e);
-                throw new RemoteException("Error occurred while retrieving \"admin\" role name",e);
-            }
+            allRolesNames = umStub.getRolesOfCurrentUser();
+            String adminRole = umStub.getUserStoreInfo().getAdminRole();
 
             for (FlaggedName role : allRolesNames) {
                 String name = role.getItemName();
                 if (name.equals(adminRole)) {
-                    try {
-                        allRolesNames = umStub.getAllRolesNames("*",-1);
-                    } catch (UserAdminUserAdminException e) {
-                        log.error("Error occurred while retrieving all role names",e);
-                        throw new RemoteException("Error occurred while retrieving all role names",e);
-                    }
+                    allRolesNames = umStub.getAllRolesNames();
                     break;
                 }
             }
-            try {
-                everyOneRole = umStub.getUserRealmInfo().getEveryOneRole();
-            } catch (UserAdminUserAdminException e) {
-                log.error("Error occurred while retrieving \"everyone\" role name",e);
-                throw new RemoteException("Error occurred while retrieving \"everyone\" role name",e);
-            }
+            everyOneRole = umStub.getUserStoreInfo().getEveryOneRole();
             if (session!= null) {
                 session.setAttribute("roleDetails", new RoleDetails(allRolesNames, everyOneRole));
             }
