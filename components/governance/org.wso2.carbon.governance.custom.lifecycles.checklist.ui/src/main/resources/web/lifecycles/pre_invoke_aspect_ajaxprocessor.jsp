@@ -196,7 +196,12 @@
             <%
                 for (String association : associations) {
                     String assoName = association.substring(association.lastIndexOf("/") + 1);
-                    String tmp = association.substring(association.indexOf("/_system"));
+                    String tmp;
+                    if(association.equals("/")) {
+                        tmp = association;
+                    } else {
+                        tmp = association.substring(association.indexOf("/_system"));
+                    }
                     if (currentEnvironment == null || tmp.startsWith(currentEnvironment)) {
             %>
             <tr>
