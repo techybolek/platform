@@ -95,7 +95,7 @@ public class CassandraLogReader {
 	}
 
 	private boolean isManager() {
-		if (LoggingConstants.WSO2_STRATOS_MANAGER.equals(ServerConfiguration.getInstance()
+		if (LoggingConstants.WSO2_STRATOS_MANAGER.equalsIgnoreCase(ServerConfiguration.getInstance()
 				.getFirstProperty("ServerKey"))) {
 			return true;
 		} else {
