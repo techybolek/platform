@@ -62,4 +62,5 @@ public final class UIGeneratorConstants {
     public static final String DEFAULT_NAMESPACE = ".*";
 
     public static final String READONLY_ATTRIBUTE = "readonly";
+    public static final String PATH_START_WITH ="startsWith";
 }

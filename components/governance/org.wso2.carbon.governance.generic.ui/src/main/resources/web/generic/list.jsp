@@ -18,21 +18,21 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
-<%@ page import="org.wso2.carbon.governance.generic.ui.clients.ManageGenericArtifactServiceClient" %>
-<%@ page import="org.wso2.carbon.governance.generic.ui.utils.UIGeneratorConstants" %>
-<%@ page import="org.wso2.carbon.registry.core.RegistryConstants" %>
-<%@ page import="org.wso2.carbon.registry.core.utils.RegistryUtils" %>
-<%@ page
-        import="org.wso2.carbon.registry.extensions.utils.CommonConstants" %>
-<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
-<%@ page import="org.wso2.carbon.governance.generic.stub.beans.xsd.ArtifactsBean" %>
-<%@ page import="org.wso2.carbon.governance.generic.stub.beans.xsd.ArtifactBean" %>
-<%@ page import="java.net.URLEncoder" %>
-<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
-<%@ page import="org.wso2.carbon.governance.lcm.ui.clients.LifeCycleManagementServiceClient" %>
-<%@ page import="org.wso2.carbon.governance.generic.ui.utils.GenericUIGenerator" %>
 <%@ page import="org.apache.axiom.om.OMElement" %>
+<%@ page import="org.wso2.carbon.governance.generic.stub.beans.xsd.ArtifactBean" %>
+<%@ page import="org.wso2.carbon.governance.generic.stub.beans.xsd.ArtifactsBean" %>
+<%@ page import="org.wso2.carbon.governance.generic.ui.clients.ManageGenericArtifactServiceClient" %>
+<%@ page
+        import="org.wso2.carbon.governance.generic.ui.utils.GenericUIGenerator" %>
+<%@ page import="org.wso2.carbon.governance.generic.ui.utils.UIGeneratorConstants" %>
+<%@ page import="org.wso2.carbon.governance.lcm.ui.clients.LifeCycleManagementServiceClient" %>
+<%@ page import="org.wso2.carbon.registry.core.RegistryConstants" %>
+<%@ page import="org.wso2.carbon.registry.core.utils.PaginationContext" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
+<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="java.net.URLEncoder" %>
+<%@ page import="java.util.Date" %>
 
 <script type="text/javascript" src="../ajax/js/prototype.js"></script>
 <link type="text/css" rel="stylesheet" href="css/menu.css"/>
@@ -46,6 +46,7 @@
 <script type="text/javascript" src="../resources/js/resource_util.js"></script>
 <script type="text/javascript" src="../generic/js/genericpagi.js"></script>
 <script type="text/javascript" src="../generic/js/generic.js"></script>
+<script type="text/javascript" src="js/artifacts-list.js"></script>
 <%
     String key = request.getParameter("key");
     String breadcrumb = request.getParameter("breadcrumb");
@@ -53,6 +54,18 @@
     String lc_state = request.getParameter("lc_state");
     String lc_in_out = request.getParameter("lc_in_out");
     String lc_state_in_out = request.getParameter("lc_state_in_out");
+    String sortOrder = request.getParameter("sortOrder");
+    String sortBy = request.getParameter("sortBy");
+	String searchvalule = request.getParameter("searchValue");
+    String filterBy = request.getParameter("filterBy");
+    
+    if(sortBy==null){
+        sortBy = "";
+    }
+
+    if(sortOrder == null){
+        sortOrder = "ASC";
+    }
 
     String queryTrailer = "&key=" + key + "&breadcrumb=" + breadcrumb;
     String dataName = request.getParameter("dataName");
@@ -104,6 +117,15 @@
         return;
     }
     try {
+        String pageStr = request.getParameter("page");
+        int start;
+        int count = (int) (RegistryConstants.ITEMS_PER_PAGE * 1.5);
+        if (pageStr != null) {
+            start = (int) ((Integer.parseInt(pageStr) - 1) * (RegistryConstants.ITEMS_PER_PAGE * 1.5));
+        } else {
+            start = 1;
+        }
+        PaginationContext.init(start, count, sortOrder, sortBy);
         ManageGenericArtifactServiceClient client = new ManageGenericArtifactServiceClient(config, session);
 
         if(client != null) {
@@ -136,7 +158,9 @@
 <%
         }
         return;
-    }
+    }finally {
+            PaginationContext.destroy();
+        }
 %>
 <fmt:bundle basename="org.wso2.carbon.governance.generic.ui.i18n.Resources">
     <carbon:jsi18n
@@ -181,6 +205,8 @@
                     var value = $('id_Search_Val').value;
                     document.getElementById('searchVal').name = toPascalCase(field).substring(0, field.length);
                     document.getElementById('searchVal').value = value;
+                    document.getElementById('searchvalule').value = value;
+                    document.getElementById('filterBy').value = field;
                     submitToAdvanceFilter();
                 }else if(field==1){
                     var lcname = $('lifeCycleList').value;
@@ -240,7 +266,8 @@
                 <input type="hidden" name="region" value="<%=region%>">
                 <input type="hidden" name="item" value="<%=item%>">
                 <input type="hidden" name="breadcrumb" value="<%=breadcrumb%>">
-
+				<input id="filterBy" type="hidden" name="filterBy" value="<%=filterBy%>">
+				<input id="searchvalule" type="hidden" name="searchvalule" value="<%=searchvalule%>">
                 <input id="searchVal" type="hidden" name="" value="">
 
             </form>
@@ -258,10 +285,10 @@
                 <input type="hidden" name="item" value="<%=item%>">
                 <input type="hidden" name="breadcrumb" value="<%=breadcrumb%>">
 
-                <input id="searchVal2" type="hidden" name="lc_name" value="">
-                <input id="searchVal3" type="hidden" name="lc_state" value="">
-                <input id="searchVal4" type="hidden" name="lc_in_out" value="">
-                <input id="searchVal5" type="hidden" name="lc_state_in_out" value="">
+                <input id="searchVal2" type="hidden" name="lc_name" value="<%=lc_name%>">
+                <input id="searchVal3" type="hidden" name="lc_state" value="<%=lc_state%>">
+                <input id="searchVal4" type="hidden" name="lc_in_out" value="<%=lc_in_out%>">
+                <input id="searchVal5" type="hidden" name="lc_state_in_out" value="<%=lc_state_in_out%>">
 
             </form>
 
@@ -271,12 +298,10 @@
 
                 <table id="#_innerTable" style="width:100%">
                     <tr id="buttonRow">
-                        <td nowrap="nowrap" style="line-height:25px;padding-right:10px;width:50px;">Filter
-                                                                                                    by
-                        </td>
+                        <td nowrap="nowrap" style="line-height:25px;padding-right:10px;width:50px;"><fmt:message key="filter.by.name"/></td>
                         <td style="width:1px;">
                             <select id="filterByList" onchange="changeVisibility()">
-                                <option value="1" selected="selected">LifeCycle</option>
+                                 <option value="1" <%= ((request.getParameter("filterBy")==null||(request.getParameter("filterBy").equals("1")))?" selected ":"") %>>LifeCycle</option>
                                 <%
                                     GenericUIGenerator gen = new GenericUIGenerator();
                                     ManageGenericArtifactServiceClient client = new ManageGenericArtifactServiceClient(config,session);
@@ -291,7 +316,7 @@
                                         String name = field.substring(lastIndex+1);
                                 %>
 
-                                <option value="<%=field%>"><%=name%></option>
+                                <option <%= ((request.getParameter("filterBy")!=null&&(request.getParameter("filterBy").equals(field)))?" selected ":"") %> value="<%=field%>"><%=name%></option>
                                 <%
 
                                     }
@@ -302,13 +327,13 @@
 
                         <td style="width:1px;">
                             <input id="id_Search_Val"
-                                   type="text" name="search_val" style="width:200px;margin-bottom:10px;display:none;">
+                                   type="text" name="search_val" style="width:200px;margin-bottom:10px;display:none;" value="<%= ((searchvalule!=null)?searchvalule:"") %>">
                         </td>
 
                         <td style="width:1px;">
                             <select id="inoutListLC" onchange="changeInOutListLC()">
-                                <option value="in">Is</option>
-                                <option value="out">Is Not</option>
+                                <option  value="in">Is</option>
+                                <option <%= ((request.getParameter("lc_in_out")!=null&&(request.getParameter("lc_in_out").equals("out")))?" selected ":"") %>  value="out">Is Not</option>
                             </select>
                         </td>
 
@@ -320,12 +345,12 @@
                                     for (String next:temp) {
                                         if(once){
                                 %>
-                                <option value="<%=next%>" selected="selected"><%=next%></option>
+                                <option value="<%=next%>" <%= ((request.getParameter("lc_name")==null||((request.getParameter("lc_name").equals(next))||(request.getParameter("lc_name").equals(""))))?" selected ":"") %> > <%=next%></option>
                                 <%
                                     once = false;
                                 }else{
                                 %>
-                                <option value="<%=next%>"><%=next%></option>
+                                <option <%= ((request.getParameter("lc_name")!=null&&(request.getParameter("lc_name").equals(next)))?" selected ":"") %> value="<%=next%>"><%=next%></option>
 
                                 <%
                                         }
@@ -337,8 +362,8 @@
 
                         <td style="width:1px;">
                             <select id="inoutListLCState">
-                                <option value="in">In</option>
-                                <option value="out">Not In</option>
+                                <option <%= ((request.getParameter("lc_state_in_out")!=null&&(request.getParameter("lc_state_in_out").equals("in")))?" selected ":"") %> value="in">In</option>
+                                <option <%= ((request.getParameter("lc_state_in_out")!=null&&(request.getParameter("lc_state_in_out").equals("out")))?" selected ":"") %> value="out">Not In</option>
                             </select>
                         </td>
 
@@ -396,18 +421,18 @@
                         } else {
                             pageNumber = 1;
                         }
+                        int rowCount = Integer.parseInt(session.getAttribute("row_count").toString());
                         int itemsPerPage = (int) (RegistryConstants.ITEMS_PER_PAGE * 1.5);
                         int numberOfPages;
-                        if (bean.getArtifacts().length % itemsPerPage == 0) {
-                            numberOfPages = bean.getArtifacts().length / itemsPerPage;
+                        if (rowCount % itemsPerPage == 0) {
+                            numberOfPages = rowCount / itemsPerPage;
                         } else {
-                            numberOfPages = bean.getArtifacts().length / itemsPerPage + 1;
+                            numberOfPages = rowCount / itemsPerPage + 1;
                         }
                    boolean isBrowseAuthorized = CarbonUIUtil.isUserAuthorized(request,
                                 "/permission/admin/manage/resources/browse");
                         boolean isLCAvailable = false;
-                        for (int j = (pageNumber - 1) * itemsPerPage;
-                             j < pageNumber * itemsPerPage && j < bean.getArtifacts().length; j++) {
+                        for (int j = 0; j <bean.getArtifacts().length; j++) {
                             if (bean.getArtifacts()[j].getLCName() != null && !bean.getArtifacts()[j].getLCName().equals("")) {
                                 isLCAvailable = true;
                                 break;
@@ -417,10 +442,33 @@
                     <thead>
                     <tr>
                         <%
-                            for (String name : bean.getNames()) {
+                           String[] artifactKeys = bean.getKeys();
+                           String[] artifactNames = bean.getNames();
+
+                            for (int i=0;i <artifactNames.length;i++) {
+                                String displayStr;
+                                String imgType;
+                                if (request.getParameter("sortBy") !=null &&
+                                        request.getParameter("sortBy").equals(artifactKeys[i])) {
+                                    displayStr = "display:'';margin-top:4px;margin-right:2px;";
+                                } else {
+                                    displayStr = "display:none;";
+                                }
+                                if(sortOrder.equals("DES")){
+                                    imgType ="../admin/images/down-arrow.gif";
+                                } else {
+                                    imgType ="../admin/images/up-arrow.gif";
+                                }
                         %>
-                        <th><%=name%>
-                        </th>
+                         <th id="<%=artifactKeys[i]%>">
+                             <a onclick="sortAndOrder(
+                                     '<%=pageNumber%>',
+                                     '<%="ASC".equals(request.getParameter("sortOrder")) ? "DES" : "ASC" %>',
+                                     '<%=artifactKeys[i]%>')" title="Sort By <%=artifactNames[i]%>">
+
+                                 <img  src="<%=imgType%>" border="0" align="right" style="<%=displayStr%>"
+                                       id="<%=artifactKeys[i]%>" alt="up">
+                                 <%=artifactNames[i]%></a></th>
                         <%
                             }
                         %>
@@ -433,8 +481,7 @@
                     </thead>
                     <tbody>
                     <%
-                        for (int j = (pageNumber - 1) * itemsPerPage;
-                             j < pageNumber * itemsPerPage && j < bean.getArtifacts().length; j++) {
+                        for (int j = 0;j < bean.getArtifacts().length; j++) {
                             ArtifactBean artifact = bean.getArtifacts()[j];
 
                     %>
@@ -511,96 +558,62 @@
         alternateTableRows('customTable', 'tableEvenRow', 'tableOddRow');
 
         function loadPagedList(page) {
-            window.location = '<%="../generic/list.jsp?region=" + request.getParameter("region") + "&item=" + request.getParameter("item") + "&dataName=" + request.getParameter("dataName") + "&singularLabel=" + request.getParameter("singularLabel") + "&pluralLabel=" + request.getParameter("pluralLabel") + "&dataNamespace=" + request.getParameter("dataNamespace") + "&key=" + request.getParameter("key") + "&breadcrumb=" + request.getParameter("breadcrumb") + (filter ? "&filter=filter" : "") + "&page=" %>' + page;
+
+        if(document.getElementById('filterBy').value == "null"||document.getElementById('filterBy').value == "1"){
+
+		        window.location = '<%="../generic/list.jsp?" + ((request.getParameter("lc_name")!=null)?"lc_name=" +
+		        request.getParameter("lc_name"):"") + ((request.getParameter("lc_state")!=null)?"&lc_state=" +
+		        request.getParameter("lc_state"):"") + ((request.getParameter("lc_in_out")!=null)?"&lc_in_out=" +
+		        request.getParameter("lc_in_out"):"") + ((request.getParameter("lc_state_in_out")!=null)?"&lc_state_in_out=" +
+		        request.getParameter("lc_state_in_out"):"") + "&region=" + request.getParameter("region") + "&item=" +
+		        request.getParameter("item") + "&dataName=" + request.getParameter("dataName") + "&singularLabel=" +
+		        request.getParameter("singularLabel") + "&pluralLabel=" + request.getParameter("pluralLabel") + "&dataNamespace=" +
+		        request.getParameter("dataNamespace") + "&key=" + request.getParameter("key") + "&breadcrumb=" +
+		        request.getParameter("breadcrumb") + (filter ? "&filter=filter" : "") +"&sortOrder=" + sortOrder + "&sortBy=" +
+		         sortBy+ "&page=" %>' + page;
+
+         }else{
+
+	         	window.location = '<%="../generic/list.jsp?" + ((request.getParameter("filterBy")!=null)?"filterBy=" +
+		        request.getParameter("filterBy"):"") + ((request.getParameter("searchValue")!=null)?"&searchValue=" +
+		        request.getParameter("searchValue"):"") + "&region=" + request.getParameter("region") + "&item=" +
+		        request.getParameter("item") + "&dataName=" + request.getParameter("dataName") + "&singularLabel=" +
+		        request.getParameter("singularLabel") + "&pluralLabel=" + request.getParameter("pluralLabel") + "&dataNamespace=" +
+		        request.getParameter("dataNamespace") + "&key=" + request.getParameter("key") + "&breadcrumb=" +
+		        request.getParameter("breadcrumb") + (filter ? "&filter=filter" : "") +"&sortOrder=" + sortOrder + "&sortBy=" +
+		         sortBy+ "&page=" %>' + page;
+         }
+	 }
+
+        function sortAndOrder(page,sortOrder,sortBy ) {
+        	
+        	if(document.getElementById('filterBy').value == "null"||document.getElementById('filterBy').value == "1"){
+        		
+	            window.location = '<%="../generic/list.jsp?" + ((request.getParameter("lc_name")!=null)?"lc_name=" +
+		        request.getParameter("lc_name"):"") + ((request.getParameter("lc_state")!=null)?"&lc_state=" +
+		        request.getParameter("lc_state"):"") + ((request.getParameter("lc_in_out")!=null)?"&lc_in_out=" +
+		        request.getParameter("lc_in_out"):"") + ((request.getParameter("lc_state_in_out")!=null)?"&lc_state_in_out=" +
+		        request.getParameter("lc_state_in_out"):"") + "&region=" + request.getParameter("region") + "&item=" +
+		        request.getParameter("item") + "&dataName=" + request.getParameter("dataName") + "&singularLabel=" +
+		        request.getParameter("singularLabel") + "&pluralLabel=" + request.getParameter("pluralLabel") + "&dataNamespace=" +
+		        request.getParameter("dataNamespace") + "&key=" + request.getParameter("key") + "&breadcrumb=" +
+		        request.getParameter("breadcrumb") + (filter ? "&filter=filter" : "") + "&page=" %>'+ page +
+		        '<%="&sortOrder="%>' +sortOrder+ '<%="&sortBy="%>' +sortBy;
+        	
+        	}else{
+        		window.location = '<%="../generic/list.jsp?" + ((request.getParameter("filterBy")!=null)?"filterBy=" + 
+        		request.getParameter("filterBy"):"") + ((request.getParameter("searchValue")!=null)?"&searchValue=" + 
+        		request.getParameter("searchValue"):"") + "&region=" + request.getParameter("region") + "&item=" +
+     	        request.getParameter("item") + "&dataName=" + request.getParameter("dataName") + "&singularLabel=" +
+     	        request.getParameter("singularLabel") + "&pluralLabel=" + request.getParameter("pluralLabel") + "&dataNamespace=" +
+     	        request.getParameter("dataNamespace") + "&key=" + request.getParameter("key") + "&breadcrumb=" +
+     	        request.getParameter("breadcrumb") + (filter ? "&filter=filter" : "") + "&page=" %>'+ page +
+     	        '<%="&sortOrder="%>' +sortOrder+ '<%="&sortBy="%>' +sortBy;
+        	}
         }
-
-        function changeVisibility() {
-            var visible = $('filterByList').value;
-            resetInputVisibility();
-            switch (visible) {
-                case "1":
-                    $('lifeCycleList').style.display = "";
-                    $('inoutListLC').style.display = "";
-                    $('stateList').style.display = "";
-                    $('inoutListLCState').style.display = "";
-                    break;
-                default:
-                    $('id_Search_Val').style.display = "";
-                    break;
-            }
-
-        }
-
-
-        /**
-         This method is called at the page load and when the selected LC is changed in the LC select drop-down
-         This method load the state list related to the selected LC and fill the state list drop down using them
-         uses the lc_state_list_gen_ajaxprocessor.jsp
-         */
-        function changeLC() {
-            var visible = $('lifeCycleList').value;
-            var inout = $('inoutListLC').value;
-            if(visible == "Select"|| inout=="out" ){
-                $('stateList').style.display = "none";
-                $('inoutListLCState').style.display = "none";
-            }
-            else{
-
-                var stateHtml = null;
-                new Ajax.Request('../generic/lc_state_list_gen_ajaxprocessor.jsp', {
-                    method:'post',
-                    parameters: {LCName: visible},
-
-                    onSuccess: function(data) {
-                        stateHtml =  eval(data).responseText;
-                        $('stateList').innerHTML = stateHtml;
-                        $('stateList').style.display = "";
-                        $('inoutListLCState').style.display = "";
-                    },
-
-                    onFailure: function(transport) {
-                        CARBON.showErrorDialog("Failed to load all states of "+visible);
-                    }
-                });
-
-            }
-
-        }
-
-        function changeInOutListLC() {
-
-            var visible = $('inoutListLC').value;
-            if(visible == "out"){
-                $('stateList').style.display = "none";
-                $('inoutListLCState').style.display = "none";
-            }else{
-                $('stateList').style.display = "";
-                $('inoutListLCState').style.display = "";
-            }
-        }
-        //        change the visibility of the search components to hidden state
-        function resetInputVisibility() {
-            $('lifeCycleList').style.display = "none";
-            $('stateList').style.display = "none";
-            $('id_Search_Val').style.display = "none";
-            $('inoutListLC').style.display = "none";
-            $('inoutListLCState').style.display = "none";
-
-        }
-
-        //        change the sting in to pascal Case e.g overview name -> Overview_Name
-        function toPascalCase(str) {
-            var arr = str.split(/\s|_/);
-            for(var i=0,l=arr.length; i<l; i++) {
-                arr[i] = arr[i].substr(0,1).toUpperCase() +
-                         (arr[i].length > 1 ? arr[i].substr(1)+"_" : "_");
-            }
-            return arr.join("");
-        }
-
     </script>
-    <script>
+    <script type="text/javascript">
         //        call after page loaded
-        window.onload=changeLC;
+        window.onload=changeLC();
     </script>
 </fmt:bundle>

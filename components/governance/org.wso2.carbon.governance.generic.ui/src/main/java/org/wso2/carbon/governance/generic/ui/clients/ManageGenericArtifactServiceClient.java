@@ -31,12 +31,14 @@ import org.wso2.carbon.governance.generic.stub.beans.xsd.StoragePathBean;
 import org.wso2.carbon.governance.generic.ui.utils.GenericUtil;
 import org.wso2.carbon.governance.generic.ui.utils.ManageGenericArtifactUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.PaginationContext;
+import org.wso2.carbon.registry.core.utils.PaginationUtils;
 import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.utils.ServerConstants;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.lang.String;
 import java.rmi.RemoteException;
 
 public class ManageGenericArtifactServiceClient {
@@ -45,6 +47,8 @@ public class ManageGenericArtifactServiceClient {
 
     private ManageGenericArtifactServiceStub stub;
     private String epr;
+
+    private HttpSession session;
 
     @SuppressWarnings("unused")
     public ManageGenericArtifactServiceClient(
@@ -71,7 +75,7 @@ public class ManageGenericArtifactServiceClient {
 
     public ManageGenericArtifactServiceClient(ServletConfig config, HttpSession session)
             throws RegistryException {
-
+        this.session = session;
         String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
         String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
         ConfigurationContext configContext = (ConfigurationContext) config.
@@ -104,28 +108,103 @@ public class ManageGenericArtifactServiceClient {
     }
 
     public ArtifactsBean listArtifacts(String key, String criteria) throws Exception {
-        return stub.listArtifacts(key, criteria);
+        ArtifactsBean artifactsBean;
+        try {
+            if (PaginationContext.getInstance() == null) {
+                return stub.listArtifacts(key, criteria);
+            }
+            PaginationUtils.copyPaginationContext(stub._getServiceClient());
+            artifactsBean = stub.listArtifacts(key, criteria);
+            int rowCount = PaginationUtils.getRowCount(stub._getServiceClient());
+            session.setAttribute("row_count",Integer.toString(rowCount));
+        } finally {
+            PaginationContext.destroy();
+        }
+        return artifactsBean;
     }
 
     public ArtifactsBean listArtifactsByName(String key, String name) throws Exception {
-        return stub.listArtifactsByName(key, name);
+        ArtifactsBean artifactsBean;
+        try {
+            if (PaginationContext.getInstance() == null) {
+                return stub.listArtifactsByName(key, name);
+            }
+            PaginationUtils.copyPaginationContext(stub._getServiceClient());
+            artifactsBean = stub.listArtifactsByName(key, name);
+            int rowCount = PaginationUtils.getRowCount(stub._getServiceClient());
+            session.setAttribute("row_count", Integer.toString(rowCount));
+        } finally {
+            PaginationContext.destroy();
+        }
+        return artifactsBean;
+
     }
 
-    public ArtifactsBean listArtifactsByLC(String key, String LCName, String LCState, String LCInOut, String LCStateInOut) throws Exception {
-        return stub.listArtifactsByLC(key, LCName, LCState, LCInOut, LCStateInOut);
+    public ArtifactsBean listArtifactsByLC(String key, String LCName, String LCState, String LCInOut, String LCStateInOut)
+            throws Exception {
+        ArtifactsBean artifactsBean;
+        try {
+            if (PaginationContext.getInstance() == null) {
+                return stub.listArtifactsByLC(key, LCName, LCState, LCInOut, LCStateInOut);
+            }
+            PaginationUtils.copyPaginationContext(stub._getServiceClient());
+            artifactsBean = stub.listArtifactsByLC(key, LCName, LCState, LCInOut, LCStateInOut);
+            int rowCount = PaginationUtils.getRowCount(stub._getServiceClient());
+            session.setAttribute("row_count",Integer.toString(rowCount));
+        } finally {
+            PaginationContext.destroy();
+        }
+        return artifactsBean;
     }
 
     public ContentArtifactsBean listContentArtifacts(String mediaType) throws Exception {
-        return stub.listContentArtifacts(mediaType);
+        ContentArtifactsBean contentArtifactsBean;
+        try {
+            if (PaginationContext.getInstance() == null) {
+                return stub.listContentArtifacts(mediaType);
+            }
+            PaginationUtils.copyPaginationContext(stub._getServiceClient());
+            contentArtifactsBean = stub.listContentArtifacts(mediaType);
+            int rowCount = PaginationUtils.getRowCount(stub._getServiceClient());
+            session.setAttribute("row_count", Integer.toString(rowCount));
+        } finally {
+            PaginationContext.destroy();
+        }
+        return contentArtifactsBean;
     }
 
-    public ContentArtifactsBean listContentArtifactsbByLC(String mediaType, String LCName, String LCState, String LCInOut, String LCStateInOut) throws Exception {
-        return stub.listContentArtifactsByLC(mediaType, LCName, LCState, LCInOut, LCStateInOut);
+    public ContentArtifactsBean listContentArtifactsByLC(String mediaType, String LCName, String LCState,
+                                                         String LCInOut, String LCStateInOut) throws Exception {
+        ContentArtifactsBean contentArtifactsBean;
+        try {
+            if (PaginationContext.getInstance() == null) {
+                return stub.listContentArtifactsByLC(mediaType, LCName, LCState, LCInOut, LCStateInOut);
+            }
+            PaginationUtils.copyPaginationContext(stub._getServiceClient());
+            contentArtifactsBean = stub.listContentArtifactsByLC(mediaType, LCName, LCState, LCInOut, LCStateInOut);
+            int rowCount = PaginationUtils.getRowCount(stub._getServiceClient());
+            session.setAttribute("row_count", Integer.toString(rowCount));
+        } finally {
+            PaginationContext.destroy();
+        }
+        return contentArtifactsBean;
     }
 
     public ContentArtifactsBean listContentArtifactsByName(String mediaType, String criteria)
             throws Exception {
-        return stub.listContentArtifactsByName(mediaType, criteria);
+        ContentArtifactsBean contentArtifactsBean;
+        try {
+            if (PaginationContext.getInstance() == null) {
+                return stub.listContentArtifactsByName(mediaType, criteria);
+            }
+            PaginationUtils.copyPaginationContext(stub._getServiceClient());
+            contentArtifactsBean = stub.listContentArtifactsByName(mediaType, criteria);
+            int rowCount = PaginationUtils.getRowCount(stub._getServiceClient());
+            session.setAttribute("row_count", Integer.toString(rowCount));
+        } finally {
+            PaginationContext.destroy();
+        }
+        return contentArtifactsBean;
     }
 
     public StoragePathBean getStoragePath(String key) throws Exception {

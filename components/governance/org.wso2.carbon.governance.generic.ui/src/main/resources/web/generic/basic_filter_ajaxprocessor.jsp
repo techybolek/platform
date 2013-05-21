@@ -27,5 +27,7 @@ OMElement head = uigen.getUIConfiguration(client.getArtifactUIConfiguration(
         request.getParameter("key")),request,config,session);
 OMElement criteria = uigen.getDataFromUIForBasicFilter(head,request);
 session.setAttribute("criteria", criteria.toString());
-response.sendRedirect("../generic/list.jsp?filter=filter&region=" + request.getParameter("region") + "&item=" + request.getParameter("item") + "&dataName=" + request.getParameter("dataName") + "&singularLabel=" + request.getParameter("singularLabel") + "&pluralLabel=" + request.getParameter("pluralLabel") + "&dataNamespace=" + request.getParameter("dataNamespace") + "&key=" + request.getParameter("key") + "&breadcrumb=" + request.getParameter("breadcrumb"));
+String searchValue = request.getParameter("searchvalule");
+String feild = request.getParameter("filterBy");
+response.sendRedirect("../generic/list.jsp?filterBy="+feild+"&searchValue="+searchValue+ "&filter=filter&region=" + request.getParameter("region") + "&item=" + request.getParameter("item") + "&dataName=" + request.getParameter("dataName") + "&singularLabel=" + request.getParameter("singularLabel") + "&pluralLabel=" + request.getParameter("pluralLabel") + "&dataNamespace=" + request.getParameter("dataNamespace") + "&key=" + request.getParameter("key") + "&breadcrumb=" + request.getParameter("breadcrumb"));
 %>

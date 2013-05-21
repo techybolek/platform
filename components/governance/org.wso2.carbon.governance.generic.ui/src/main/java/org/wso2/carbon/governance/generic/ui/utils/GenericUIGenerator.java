@@ -194,6 +194,7 @@ public class GenericUIGenerator {
                             new QName(null, UIGeneratorConstants.URL_TEMPLATE_ATTRIBUTE));
                     boolean isPath = Boolean.toString(true).equals(arg.getAttributeValue(
                             new QName(null, UIGeneratorConstants.PATH_ATTRIBUTE)));
+                    String startsWith = arg.getAttributeValue(new QName(null,UIGeneratorConstants.PATH_START_WITH));
                     if (inner != null) {
                         //if the element contains value is not null get the value
                         value = inner.getText();
@@ -207,12 +208,12 @@ public class GenericUIGenerator {
                         if (value != null) {
                             table.append(printTextSkipName(arg.getFirstChildWithName(new QName(null,
                                     UIGeneratorConstants.ARGUMENT_NAME)).getText(), widgetName,
-                                    value, isURL, urlTemplate, isPath, isReadOnly, hasValue,
-                                    request, tooltip));
+                                    value, isURL, urlTemplate, isPath, isReadOnly,
+                                    hasValue, tooltip, startsWith, request));
                         } else {
                             table.append(printTextSkipName(arg.getFirstChildWithName(new QName(null,
                                     UIGeneratorConstants.ARGUMENT_NAME)).getText(), widgetName,
-                                    isPath, isReadOnly, request, tooltip));
+                                    isPath, isReadOnly, tooltip, request));
                         }
                         columnCount++;
                         if (columnCount == columns) {
@@ -233,11 +234,11 @@ public class GenericUIGenerator {
 
                         if (value != null) {
                             table.append(printTextField(label, name, mandat, widgetName, value,
-                                    isURL, urlTemplate, isPath, isReadOnly, hasValue, request,
-                                    tooltip));
+                                    isURL, urlTemplate, isPath, isReadOnly, hasValue,
+                                    tooltip, startsWith, request));
                         } else {
                             table.append(printTextField(label, name, mandat, widgetName, isPath,
-                                    isReadOnly, request, tooltip));
+                                    isReadOnly, tooltip, startsWith, request));
                         }
 
                     }
@@ -463,6 +464,7 @@ public class GenericUIGenerator {
                         boolean isPath = Boolean.toString(true).equals(arg.getAttributeValue(
                                 new QName(null, UIGeneratorConstants.PATH_ATTRIBUTE)));
 
+                        String startsWith = arg.getAttributeValue(new QName(null,UIGeneratorConstants.PATH_START_WITH));
 
 //                        String addedOptionValues [] = new String[Integer.parseInt(addedItems)];
 //                        String addedValues[] = new String[Integer.parseInt(addedItems)];
@@ -516,12 +518,12 @@ public class GenericUIGenerator {
                             table.append(printAddLink(label, name,
                                     UIGeneratorConstants.ADD_ICON_PATH,
                                     widgetName,
-                                    subList.toArray(new String[subList.size() + 1]), isPath));
+                                    subList.toArray(new String[subList.size() + 1]), isPath, startsWith));
                         } else if (addedItemsCount > 0) {
                             table.append(printAddLinkWithDisplay(label, name,
                                     UIGeneratorConstants.ADD_ICON_PATH,
                                     widgetName,
-                                    subList.toArray(new String[subList.size() + 1]), isPath));
+                                    subList.toArray(new String[subList.size() + 1]), isPath, startsWith));
                         }
                         List<String> optionValues = getOptionValues(arg, request, config);
                         if (addedItemsCount > 0) {
@@ -535,7 +537,7 @@ public class GenericUIGenerator {
                                             widgetName,
                                             addedOptionValue,
                                             addedValue,
-                                            isURL, urlTemplate, isPath, request, tooltip));
+                                            isURL, urlTemplate, isPath, tooltip, startsWith, request));
                                 }
                             }
                         }
@@ -546,6 +548,8 @@ public class GenericUIGenerator {
                         String name = firstChildWithName.getText();
                         String label = firstChildWithName.getAttributeValue(
                                 new QName(UIGeneratorConstants.ARGUMENT_LABEL));
+
+                        String startsWith = arg.getAttributeValue(new QName(null,UIGeneratorConstants.PATH_START_WITH));
 
                         if (label == null) {
                             label = name;
@@ -581,11 +585,11 @@ public class GenericUIGenerator {
                             table.append(printOptionText(label, name,
                                     optionValues.toArray(new String[optionValues.size()]),
                                     widgetName, optionValue, value, isURL, urlTemplate, isPath,
-                                    request, tooltip));
+                                    tooltip, startsWith, request));
                         } else {
                             table.append(printOptionText(label, name,
                                     optionValues.toArray(new String[optionValues.size()]),
-                                    widgetName, isPath, request, tooltip));
+                                    widgetName, isPath, tooltip,startsWith, request));
                         }
                     }
                 }
@@ -618,15 +622,19 @@ public class GenericUIGenerator {
     }
 
     public String printTextField(String label, String name, String mandatory, String widget,
-                                 boolean isPath, boolean isReadOnly, HttpServletRequest request,
-                                 String tooltip
-                                 ) {
+                                 boolean isPath, boolean isReadOnly,
+                                 String tooltip, String startsWith, HttpServletRequest request) {
         StringBuilder element = new StringBuilder();
         String selectResource = "";
         String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
         if (isPath) {
-            selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                    "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
+            if (startsWith != null) {
+                selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
+                        "org.wso2.carbon.governance.services.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTreeWithCustomPath('" + id + "' ,'" + startsWith + "');\"/>";
+            } else {
+                selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
+                        "org.wso2.carbon.governance.services.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
+            }
         }
         if ("true".equals(mandatory)) {
             element.append("<tr><td class=\"leftCol-big\">" + label + "<span class=\"required\">*</span></td>\n" +
@@ -746,8 +754,8 @@ public class GenericUIGenerator {
     }
 
     public String printTextSkipName(String name, String widget, boolean isPath,
-                                    boolean isReadOnly, HttpServletRequest request,
-                                    String tooltip) {
+                                    boolean isReadOnly,
+                                    String tooltip, HttpServletRequest request) {
         StringBuilder element = new StringBuilder();
         String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
         String selectResource = "";
@@ -781,7 +789,7 @@ public class GenericUIGenerator {
     }
 
     public String printOptionText(String label, String name, String[] values, String widget,
-                                  boolean isPath, HttpServletRequest request, String tooltip) {
+                                  boolean isPath, String tooltip, String startsWith, HttpServletRequest request) {
         StringBuilder dropDown = new StringBuilder();
         dropDown.append("<tr><td class=\"leftCol-big\"><select name=\"" + widget.replaceAll(" ",
                 "_") + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\">");
@@ -795,8 +803,13 @@ public class GenericUIGenerator {
         String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
         String selectResource = "";
         if (isPath) {
-            selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                    "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
+        	if(startsWith != null ){
+        		selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
+                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTreeWithCustomPath('" + id + "','" + startsWith + "');\"/>";
+        	} else {
+        		selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
+                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
+        	}
         }
         dropDown.append("<td width=500px><input type=\"text\" name=\"" + widget.replaceAll(" ", "_") + UIGeneratorConstants.TEXT_FIELD
                 + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\" id=\"" + id +
@@ -807,17 +820,25 @@ public class GenericUIGenerator {
     }
 
     public String printTextField(String label, String name, String mandatory, String widget, String value, boolean isURL, String urlTemplate, boolean isPath, boolean isReadOnly,
-                                 boolean hasValue, HttpServletRequest request, String tooltip) {
+                                 boolean hasValue, String tooltip, String startsWith, HttpServletRequest request) {
         StringBuilder element = new StringBuilder();
         String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
         String selectResource = "";
         String selectResourceButton = "$('" + id + "_button').style.display='';";
         value = StringEscapeUtils.escapeHtml(value);
         if (isPath) {
-            selectResource = " <input id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                    "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
+        	if (startsWith != null ) {
+        		selectResource = " <input id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
+                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTreeWithCustomPath('" + id + "','" + startsWith + "');\"/>";
+        	} else {
+        		selectResource = " <input id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
+                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
+        	}            
         }
-        String div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH : "") + (urlTemplate != null ? urlTemplate.replace("@{value}", value) : value) + "\">" + value + "</a>" +
+
+        String browsePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH;
+
+        String div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + browsePath : "") + (urlTemplate != null ? urlTemplate.replace("@{value}", value) : value) + "\">" + value + "</a>" +
                 "&nbsp;" + (!isReadOnly ? "<a onclick=\"$('" + id + "_link').style.display='none';$('" + id +
                 "')." +
                 "style.display='';" + (isPath ? selectResourceButton : "") + "\" title=\"" + CarbonUIUtil.geti18nString("edit",
@@ -1020,7 +1041,7 @@ public class GenericUIGenerator {
 
     public String printTextSkipName(String name, String widget, String value, boolean isURL,
                                     String urlTemplate, boolean isPath, boolean isReadOnly,
-                                    boolean hasValue, HttpServletRequest request, String tooltip) {
+                                    boolean hasValue, String tooltip, String startsWith, HttpServletRequest request) {
         StringBuilder element = new StringBuilder();
         String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
         value = StringEscapeUtils.escapeHtml(value);
@@ -1031,7 +1052,10 @@ public class GenericUIGenerator {
                 selectResource = " <input id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
                         "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
             }
-            String div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH : "") + (urlTemplate != null ? urlTemplate.replace("@{value}", value) : value) + "\">" + value + "</a>" +
+
+            String browsePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH;
+
+            String div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + browsePath : "") + (urlTemplate != null ? urlTemplate.replace("@{value}", value) : value) + "\">" + value + "</a>" +
                     "&nbsp;" + (!isReadOnly ? "<a onclick=\"$('" + id + "_link').style.display='none';$('" + id +
                     "')." +
                     "style.display='';" + (isPath ? selectResourceButton : "") + "\" title=\"" + CarbonUIUtil.geti18nString("edit",
@@ -1089,7 +1113,7 @@ public class GenericUIGenerator {
 
     public String printOptionText(String label, String name, String[] values, String widget,
                                   String option, String text, boolean isURL, String urlTemplate,
-                                  boolean isPath, HttpServletRequest request, String tooltip) {
+                                  boolean isPath, String tooltip, String startsWith, HttpServletRequest request) {
         StringBuilder dropDown = new StringBuilder();
         dropDown.append("<tr><td class=\"leftCol\"><select name=\"" + widget.replaceAll(" ",
                 "_") + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\">");
@@ -1113,8 +1137,11 @@ public class GenericUIGenerator {
                 selectResource = " <input style=\"display:none\" id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
                         "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
             }
+
+            String browsePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH;            
+
             String div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "" +
-                    "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH : "") +
+                    "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + browsePath : "") +
                     StringEscapeUtils.escapeHtml((urlTemplate != null ? urlTemplate.replace
                             ("@{value}", text) : text))
                     + "\">" + StringEscapeUtils.escapeHtml(text) + "</a>" +
@@ -1151,7 +1178,7 @@ public class GenericUIGenerator {
     public String printOptionTextWithId(String originalName, int index, String[] values,
                                         String widget, String option, String text, boolean isURL,
                                         String urlTemplate, boolean isPath,
-                                        HttpServletRequest request, String tooltip) {
+                                        String tooltip, String startsWith, HttpServletRequest request) {
         String name = originalName + index;
         StringBuilder dropDown = new StringBuilder();
         dropDown.append("<tr><td class=\"leftCol\"><select name=\"" + widget.replaceAll(" ",
@@ -1173,10 +1200,18 @@ public class GenericUIGenerator {
             String selectResource = "";
             String selectResourceButton = "$('" + id + "_button').style.display='';";
             if (isPath) {
-                selectResource = " <input style=\"display:none\" id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
+            	if (startsWith != null) {
+            		selectResource = " <input style=\"display:none\" id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
+                            "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTreeWithCustomPath('" + id + "','" + startsWith + "');\"/>";
+            	} else {
+            		selectResource = " <input style=\"display:none\" id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
+                            "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
+            	}                
             }
-            String div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH : "") +
+
+            String browsePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH;            
+
+            String div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + browsePath : "") +
                     StringEscapeUtils.escapeHtml((urlTemplate != null ? urlTemplate.replace("@{value}", text) : text))
                     + "\">" + StringEscapeUtils.escapeHtml(text) + "</a>" +
                     "&nbsp;<a onclick=\"$('" + id + "_link').style.display='none';$('" + id +
@@ -1206,12 +1241,16 @@ public class GenericUIGenerator {
         return dropDown.toString();
     }
 
-    public String printAddLink(String label, String name, String addIconPath, String widget, String[] subList, boolean isPath) {
+    public String printAddLink(String label, String name, String addIconPath, String widget, String[] subList, boolean isPath, String startsWith) {
         StringBuilder link = new StringBuilder();
         link.append("<tr><td colspan=\"3\"><a class=\"icon-link\" style=\"background-image: url(");
         link.append(addIconPath);
         link.append(");\" onclick=\"");
-        link.append("add" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(" + (isPath ? "'path'" : "") + ")\">"); //creating a JavaScript onclick method name which should be identical ex: addEndpoint_Endpoint
+        if (startsWith != null) {
+        	link.append("add" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(" + (isPath ? "'path'" : "''") + "," + "'"+startsWith +"'"+  ")\">"); //creating a JavaScript onclick method name which should be identical ex: addEndpoint_Endpoint
+        } else {
+        	link.append("add" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(" + (isPath ? "'path'" : "''") + ")\">"); //creating a JavaScript onclick method name which should be identical ex: addEndpoint_Endpoint
+        }
         link.append("Add " + label.replaceAll(" ", "-")); //This is the display string for add item ex: Add EndPoint
         link.append("</a></td></tr>");
         link.append("<tr><td colspan=\"3\">");
@@ -1221,12 +1260,16 @@ public class GenericUIGenerator {
         return link.toString();
     }
 
-    public String printAddLinkWithDisplay(String label, String name, String addIconPath, String widget, String[] subList, boolean isPath) {
+    public String printAddLinkWithDisplay(String label, String name, String addIconPath, String widget, String[] subList, boolean isPath, String startsWith) {
         StringBuilder link = new StringBuilder();
         link.append("<tr><td colspan=\"3\"><a class=\"icon-link\" style=\"background-image: url(");
         link.append(addIconPath);
         link.append(");\" onclick=\"");
-        link.append("add" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(" + (isPath ? "'path'" : "") + ")\">"); //creating a JavaScript onclick method name which should be identical ex: addEndpoint_Endpoint
+        if (startsWith != null) {
+        	link.append("add" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(" + (isPath ? "'path'" : "''") + "," + "'"+startsWith +"'"+  ")\">"); //creating a JavaScript onclick method name which should be identical ex: addEndpoint_Endpoint
+        } else {
+        	link.append("add" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(" + (isPath ? "'path'" : "''") + ")\">"); //creating a JavaScript onclick method name which should be identical ex: addEndpoint_Endpoint
+        }
         link.append("Add " + label.replaceAll(" ", "-")); //This is the display string for add item ex: Add EndPoint
         link.append("</a></td></tr>");
         link.append("<tr><td colspan=\"3\">");
@@ -1275,7 +1318,7 @@ public class GenericUIGenerator {
                                 String entryValue = "";
                                 String input = request.getParameter(widgetName.replaceAll(" ", "_") +
                                         "_" + name.replaceAll(" ", "-") + (i + 1));
-                                if (input != null && !("".equals(input)) && !("None".equals(input))) {
+                                if (input != null && !("".equals(input))) {
                                     entryValue += input;
                                 }
                                 entryValue += ":";
@@ -1298,7 +1341,7 @@ public class GenericUIGenerator {
                         else {
                             String input = request.getParameter(widgetName.replaceAll(" ", "_") + "_" +
                                     name.replaceAll(" ", "-"));
-                            if (input != null && !("".equals(input)) && !("None".equals(input))) {
+                            if (input != null && !("".equals(input))) {
                                 OMElement text = fac.createOMElement(GenericUtil.getDataElementName(name),
                                         namespace);
                                 text.setText(input);
@@ -1320,7 +1363,7 @@ public class GenericUIGenerator {
                                 name.replaceAll(" ", "-"));
                         OMElement text = null;
 
-                        if (input != null && !("".equals(input)) && !("None".equals(input))) {
+                        if (input != null && !("".equals(input))) {
                             text = fac.createOMElement(GenericUtil.getDataElementName(name), namespace);
                             text.setText(input);
                             widgetData.addChild(text);
@@ -1433,7 +1476,7 @@ public class GenericUIGenerator {
                         else {
                             String input = request.getParameter(widgetName.replaceAll(" ", "_") + "_" +
                                                                 name.replaceAll(" ", "-"));
-                            if (input != null && !("".equals(input)) && !("None".equals(input))) {
+                            if (input != null && !("".equals(input))) {
                                 OMElement text = fac.createOMElement(GenericUtil.getDataElementName(name),
                                                                      namespace);
                                 text.setText(input);
@@ -1455,7 +1498,7 @@ public class GenericUIGenerator {
                                                             name.replaceAll(" ", "-"));
                         OMElement text = null;
 
-                        if (input != null && !("".equals(input)) && !("None".equals(input))) {
+                        if (input != null && !("".equals(input))) {
                             text = fac.createOMElement(GenericUtil.getDataElementName(name), namespace);
                             text.setText(input);
                             widgetData.addChild(text);
@@ -1657,7 +1700,8 @@ public class GenericUIGenerator {
                 if (UIGeneratorConstants.ARGUMENT_ELMENT.equals(arg.getLocalName())) {
                     String name = arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText();
                     //check the mandatory fields and get the id's of them
-                    if (arg.getAttributeValue(new QName(null, UIGeneratorConstants.MANDETORY_ATTRIBUTE)) != null) {
+                    String mandatory = arg.getAttributeValue(new QName(null, UIGeneratorConstants.MANDETORY_ATTRIBUTE));
+                    if (mandatory != null && "true".equals(mandatory)) {
                         id.add("id_" + widgetName.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-"));
                     }
                 }
@@ -1701,7 +1745,8 @@ public class GenericUIGenerator {
                 arg = (OMElement) arguments.next();
                 if (UIGeneratorConstants.ARGUMENT_ELMENT.equals(arg.getLocalName())) {
                     String name_element = arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText();
-                    if (arg.getAttributeValue(new QName(null, UIGeneratorConstants.MANDETORY_ATTRIBUTE)) != null) {
+                    String mandatory = arg.getAttributeValue(new QName(null, UIGeneratorConstants.MANDETORY_ATTRIBUTE));
+                    if (mandatory != null && "true".equals(mandatory)) {
                         name.add(name_element);
                     }
                 }

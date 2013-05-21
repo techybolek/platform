@@ -20,13 +20,15 @@
 <%@ page import="org.wso2.carbon.governance.generic.ui.utils.GenericUIGenerator" %>
 <%
 String artby_name = request.getParameter("Name");
+    String searchValue = request.getParameter("searchvalule");
+    String feild = request.getParameter("filterBy");
 response.sendRedirect("../generic/" + (request.getParameter("isContent") != null ?
-        "list_content.jsp" : "list.jsp") + "?artby_name="+artby_name+"&filter=filter&region=" +
+        "list_content.jsp" : "list.jsp") + "?artby_name="+artby_name+"&filter="+artby_name+"&region=" +
         request.getParameter("region") + "&item=" + request.getParameter("item") + "&dataName=" +
         request.getParameter("dataName") + "&singularLabel=" +
         request.getParameter("singularLabel") + "&pluralLabel=" +
         request.getParameter("pluralLabel") + "&dataNamespace=" +
-        request.getParameter("dataNamespace") + "&key=" + request.getParameter("key") +
+        request.getParameter("dataNamespace") + "&searchValue="+searchValue+ "&filterBy=" + feild+ "&key="  +request.getParameter("key") +
         "&breadcrumb=" + request.getParameter("breadcrumb") + "&hasNamespace=" +
         request.getParameter("hasNamespace") + "&mediaType=" +
         request.getParameter("mediaType").replace(" ", "+"));

@@ -21,13 +21,13 @@
     ManageGenericArtifactServiceClient client = new ManageGenericArtifactServiceClient(config,session);
     String LCName;
     LCName = request.getParameter("LCName");
+    String State = request.getParameter("LCState");
     String[] LCStates;
     LCStates = client.getAllLifeCycleState(LCName);
-    String statesHtml="<option value=\"0\">Any State</option>";
+    String statesHtml="<option " +((State == null||State.equals("0"))?"selected":"")+" value=\"0\">Any State</option>";
 
     for (String state:LCStates){
-         statesHtml = statesHtml+ "<option value=\""+ state +"\">"+ state +"</option>";
-
+        statesHtml = statesHtml+ "<option " +((State!=null&&State.equals(state))?"selected":"")+"  value=\""+ state +"\">"+ state +"</option>";
     }
     out.write(statesHtml);
 

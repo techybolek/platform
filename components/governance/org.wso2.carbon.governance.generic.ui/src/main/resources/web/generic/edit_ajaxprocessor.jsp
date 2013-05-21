@@ -218,7 +218,7 @@
                 endpointMgt.parentNode.style.display = "none";
             }
         }
-        function add<%=unboundedNameList[i]%>_<%=unboundedWidgetList[i]%>(inputParam){
+        function add<%=unboundedNameList[i]%>_<%=unboundedWidgetList[i]%>(inputParam,startWith){
            
         <%String[] valuelist = unboundedValues[i];%>
             var epOptions = '<%for(int j=0;j<valuelist.length;j++){%><option value="<%=valuelist[j]%>"><%=valuelist[j]%></option><%}%>';
@@ -247,7 +247,12 @@
                     '" title="<%=unboundedTooltipList[i]%>" >' + epOptions + '</select>';
             var selectResource = "";
             if (inputParam == "path") {
-                selectResource = ' <input type="button" class="button" value=".." title="<fmt:message key="select.path"/>" onclick="showGovernanceResourceTree(\'id_<%=unboundedWidgetList[i].replaceAll(" ","_") + "_" + unboundedNameList[i].replaceAll(" ","-")%>'+<%=unboundedNameList[i]%>Count+'\');"/>';
+            	if(startWith !=null){
+            		selectResource = ' <input type="button" class="button" value=".." title="<fmt:message key="select.path"/>" onclick="showGovernanceResourceTreeWithCustomPath(\'id_<%=unboundedWidgetList[i].replaceAll(" ","_") + "_" + unboundedNameList[i].replaceAll(" ","-")%>' + <%=unboundedNameList[i]%>Count + "'" +  "," + "'" + startWith + '\');"/>';
+            	} else {
+            		selectResource = ' <input type="button" class="button" value=".." title="<fmt:message key="select.path"/>" onclick="showGovernanceResourceTree(\'id_<%=unboundedWidgetList[i].replaceAll(" ","_") + "_" + unboundedNameList[i].replaceAll(" ","-")%>'+<%=unboundedNameList[i]%>Count+'\');"/>';
+            	}
+                
             }
             var td2Inner = '<input id="id_<%=unboundedWidgetList[i].replaceAll(" ","_") + "_" + unboundedNameList[i].replaceAll(" ","-")%>'+<%=unboundedNameList[i]%>Count+'" type="text" name="<%=unboundedWidgetList[i].replaceAll(" ","-") + UIGeneratorConstants.TEXT_FIELD + "_" + unboundedNameList[i].replaceAll(" ","-")%>'+<%=unboundedNameList[i]%>Count
                     +'" style="width:400px" title="<%=unboundedTooltipList[i]%>"/>' +

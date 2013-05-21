@@ -66,9 +66,21 @@
 
 <%}
 } catch (Exception e) {
-	
-	
-	String error = "Failed to add the artifact, Special characters are not allowed in the name fields";
+
+    String errorMsg = e.getMessage();
+    String error;
+    if(errorMsg != null){
+        if(errorMsg.contains("contains one or more illegal characters")) {
+            error = "Failed to add the artifact, Special characters are not allowed in the name fields";
+        } else if(errorMsg.contains("Governance artifact") && errorMsg.contains("already exists")){
+            error = "Failed to add the artifact, Governance artifact is already exists";
+        } else {
+            error = errorMsg.replace("org.apache.axis2.AxisFault:", "").trim();
+        }
+    } else{
+        error = "An unknown error has occurred, please see the error log";
+    }
+
 	%>
     <script type="text/javascript">
        window.location = '../generic/add_edit.jsp?region=<%=request.getParameter("region")%>&item=<%=request.getParameter("item")%>&key=<%=request.getParameter("key")%>&lifecycleAttribute=<%=request.getParameter("lifecycleAttribute")%>&breadcrumb=<%=request.getParameter("breadcrumb")%>&wsdlError=<%=error%>';              

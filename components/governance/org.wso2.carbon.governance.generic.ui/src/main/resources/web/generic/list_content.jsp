@@ -18,16 +18,17 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
-<%@ page import="org.wso2.carbon.governance.generic.ui.clients.ManageGenericArtifactServiceClient" %>
 <%@ page import="org.wso2.carbon.governance.generic.stub.beans.xsd.ContentArtifactsBean" %>
+<%@ page import="org.wso2.carbon.governance.generic.ui.clients.ManageGenericArtifactServiceClient" %>
+<%@ page import="org.wso2.carbon.governance.lcm.ui.clients.LifeCycleManagementServiceClient" %>
 <%@ page import="org.wso2.carbon.registry.core.RegistryConstants" %>
-<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
+<%@ page import="org.wso2.carbon.registry.core.utils.PaginationContext" %>
 <%@ page import="org.wso2.carbon.registry.core.utils.RegistryUtils" %>
 <%@ page import="org.wso2.carbon.registry.extensions.utils.CommonConstants" %>
-<%@ page import="java.net.URLEncoder" %>
-<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
-<%@ page import="org.wso2.carbon.governance.lcm.ui.clients.LifeCycleManagementServiceClient" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIMessage" %>
+<%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
+<%@ page import="org.wso2.carbon.utils.ServerConstants" %>
+<%@ page import="java.net.URLEncoder" %>
 <link rel="stylesheet" type="text/css" href="../resources/css/registry.css"/>
 <link type="text/css" rel="stylesheet" href="css/menu.css"/>
 <link type="text/css" rel="stylesheet" href="css/style.css"/>
@@ -41,11 +42,24 @@
 <script type="text/javascript" src="../relations/js/relations.js"></script>
 <script type="text/javascript" src="../registry_common/js/registry_common.js"></script>
 <script type="text/javascript" src="../generic/js/generic.js"></script>
+<script type="text/javascript" src="js/artifacts-list.js"></script>
 <%
     String lc_name = request.getParameter("lc_name");
     String lc_state = request.getParameter("lc_state");
     String lc_in_out = request.getParameter("lc_in_out");
     String lc_state_in_out = request.getParameter("lc_state_in_out");
+    String sortOrder = request.getParameter("sortOrder");
+    String sortBy = request.getParameter("sortBy");
+    String filterBy = request.getParameter("filterBy");
+    String searchvalule = request.getParameter("searchValue");
+
+
+    if(sortBy==null){
+        sortBy = "";
+    }
+    if(sortOrder == null){
+        sortOrder = "ASC";
+    }
 
     ContentArtifactsBean bean;
     String breadcrumb = request.getParameter("breadcrumb");
@@ -87,15 +101,24 @@
     }
 
     try {
-        if(!filter) {
-            ManageGenericArtifactServiceClient listservice = new ManageGenericArtifactServiceClient(config, session);
-            bean = listservice.listContentArtifacts(mediaType);
-        }else if (lc_name == null && lc_state==null) {
-            ManageGenericArtifactServiceClient listservice = new ManageGenericArtifactServiceClient(config, session);
-            bean = listservice.listContentArtifactsByName(mediaType, filterKey);
+        String pageStr = request.getParameter("page");
+
+        int start;
+        int count = (int) (RegistryConstants.ITEMS_PER_PAGE * 1.5);
+        if (pageStr != null) {
+            start = (int) ((Integer.parseInt(pageStr) - 1) * (RegistryConstants.ITEMS_PER_PAGE * 1.5));
         } else {
-            ManageGenericArtifactServiceClient listservice = new ManageGenericArtifactServiceClient(config, session);
-            bean = listservice.listContentArtifactsbByLC(mediaType, lc_name, lc_state, lc_in_out, lc_state_in_out);
+            start = 1;
+        }
+        PaginationContext.init(start, count, sortOrder, sortBy);
+        ManageGenericArtifactServiceClient client = new ManageGenericArtifactServiceClient(config, session);
+
+        if(!filter) {
+            bean = client.listContentArtifacts(mediaType);
+        }else if (lc_name == null && lc_state==null) {
+            bean = client.listContentArtifactsByName(mediaType, request.getParameter("filter"));
+        } else {
+            bean = client.listContentArtifactsByLC(mediaType, lc_name, lc_state, lc_in_out, lc_state_in_out);
         }
 
     } catch (Exception e) {
@@ -111,7 +134,9 @@
 </script>
 <%
         return;
-    }
+    }finally {
+            PaginationContext.destroy();
+        }
 %>
 
 <fmt:bundle basename="org.wso2.carbon.governance.generic.ui.i18n.Resources">
@@ -130,15 +155,15 @@
             sessionAwareFunction(function() {
                 var field = $('filterByList').value;
 
-                if(field !=1){
+                if(field!=0 && field !=1){
                     var value = $('id_Search_Val').value;
+                    document.getElementById('searchVal').name = toPascalCase(field).substring(0, field.length);
                     document.getElementById('searchVal').value = value;
+                    document.getElementById('searchvalule').value = value;
+                    document.getElementById('filterBy').value = field;
                     submitToNameFilter();
                 }else if(field==1){
                     var lcname = $('lifeCycleList').value;
-                    if(lcname == "Select"){
-                        lcname="";
-                    }
                     var state = $('stateList').value;
                     var lcinout =  $('inoutListLC').value;
                     var lcstateinout =  $('inoutListLCState').value;
@@ -152,7 +177,9 @@
                         document.getElementById('searchVal4').value = lcinout;
                         document.getElementById('searchVal5').value = "";
                     }
-                    submitToLCFilter()
+                    if(lcname!= "Select"){
+                        submitToLCFilter()
+                    }
                 }else if(field==0){
                     loadPagedList(1);
                 }
@@ -224,7 +251,9 @@
             <input type="hidden" name="hasNamespace" value="<%=hasNamespaceStr%>">
             <input type="hidden" name="mediaType" value="<%=mediaType%>">
             <input type="hidden" name="isContent" value="true">
-                <input id="searchVal" type="hidden" name="Name" value="">
+            <input id="searchVal" type="hidden" name="Name" value="">
+            <input id="filterBy" type="hidden" name="filterBy" value="<%=filterBy%>">
+            <input id="searchvalule" type="hidden" name="searchvalule" value="<%=searchvalule%>">
             </form>
 
                 <%--This is a hidden form that is filled by the scripts when user search by LC. Will fill
@@ -240,10 +269,10 @@
                 <input type="hidden" name="hasNamespace" value="<%=hasNamespaceStr%>">
                 <input type="hidden" name="mediaType" value="<%=mediaType%>">
                 <input type="hidden" name="isContent" value="true">
-                <input id="searchVal2" type="hidden" name="lc_name" value="">
-                <input id="searchVal3" type="hidden" name="lc_state" value="">
-                <input id="searchVal4" type="hidden" name="lc_in_out" value="">
-                <input id="searchVal5" type="hidden" name="lc_state_in_out" value="">
+                <input id="searchVal2" type="hidden" name="lc_name" value="<%=lc_name%>">
+                <input id="searchVal3" type="hidden" name="lc_state" value="<%=lc_state%>">
+                <input id="searchVal4" type="hidden" name="lc_in_out" value="<%=lc_in_out%>">
+                <input id="searchVal5" type="hidden" name="lc_state_in_out" value="<%=lc_state_in_out%>">
             </form>
 
 
@@ -260,40 +289,41 @@
                 <input type="hidden" name="isContent" value="true">
                 <table id="#_innerTable" style="width:100%">
                     <tr id="buttonRow">
-                        <td nowrap="nowrap" style="line-height:25px;padding-right:10px;width:90px;"><fmt:message key="filter.by.name"><fmt:param value="<%=singularLabel%>"/></fmt:message></td>
+                        <td nowrap="nowrap" style="line-height:25px;padding-right:10px;width:50px;"><fmt:message key="filter.by.name"/></td>
                         <td style="width:1px;">
                             <select id="filterByList" onchange="changeVisibility()">
-                                <option value="1" selected="selected">LifeCycle</option>
-                                <option value="name" selected="selected">Name</option>
+                                <option value="1" <%= ((request.getParameter("filterBy")==null||(request.getParameter("filterBy").equals("1")))?" selected ":"") %>>LifeCycle</option>
+                                <option <%= ((request.getParameter("filterBy")!=null&&(request.getParameter("filterBy").equals("Name")))?" selected ":"") %> value="Name">Name</option>
+
                             </select>
                         </td>
 
                         <td style="width:1px;">
                             <input id="id_Search_Val"
-                                   type="text" name="search_val" style="width:200px;margin-bottom:10px;">
+                                   type="text" name="search_val" style="width:200px;margin-bottom:10px;display:none;" value="<%= ((searchvalule!=null)?searchvalule:"") %>">
                         </td>
 
                         <td style="width:1px;">
-                            <select id="inoutListLC" style="display: none;" onchange="changeInOutListLC()">
-                                <option value="in">Is</option>
-                                <option value="out">Is Not</option>
+                            <select id="inoutListLC" onchange="changeInOutListLC()">
+                                <option  value="in">Is</option>
+                                <option <%= ((request.getParameter("lc_in_out")!=null&&(request.getParameter("lc_in_out").equals("out")))?" selected ":"") %>  value="out">Is Not</option>
                             </select>
                         </td>
 
                         <td style="width:1px;">
-                            <select id="lifeCycleList" onchange="changeLC()" style="display:none;">
-
+                            <select id="lifeCycleList" onchange="changeLC()">
+                                <option value="Select">Any</option>
                                 <%
                                     boolean once = true;
                                     for (String next:temp) {
                                         if(once){
                                 %>
-                                <option value="<%=next%>"><%=next%></option>
+                                <option value="<%=next%>" <%= ((request.getParameter("lc_name")==null||((request.getParameter("lc_name").equals(next))||(request.getParameter("lc_name").equals(""))))?" selected ":"") %> > <%=next%></option>
                                 <%
                                     once = false;
                                 }else{
                                 %>
-                                <option value="<%=next%>"><%=next%></option>
+                                <option <%= ((request.getParameter("lc_name")!=null&&(request.getParameter("lc_name").equals(next)))?" selected ":"") %> value="<%=next%>"><%=next%></option>
 
                                 <%
                                         }
@@ -304,14 +334,14 @@
                         </td>
 
                         <td style="width:1px;">
-                            <select id="inoutListLCState" style="display: none;">
-                                <option value="in">In</option>
-                                <option value="out">Not In</option>
+                            <select id="inoutListLCState">
+                                <option <%= ((request.getParameter("lc_state_in_out")!=null&&(request.getParameter("lc_state_in_out").equals("in")))?" selected ":"") %> value="in">In</option>
+                                <option <%= ((request.getParameter("lc_state_in_out")!=null&&(request.getParameter("lc_state_in_out").equals("out")))?" selected ":"") %> value="out">Not In</option>
                             </select>
                         </td>
 
                         <td style="width:1px;">
-                            <select id="stateList" style="display: none;">
+                            <select id="stateList" style="display: '';">
                                     <%--will be filled out as soon as a LC is selected--%>
                             </select>
                         </td>
@@ -359,12 +389,13 @@
                         } else {
                             pageNumber = 1;
                         }
-                        int itemsPerPage = (int)(RegistryConstants.ITEMS_PER_PAGE * 1.5);
+                        int rowCount = Integer.parseInt(session.getAttribute("row_count").toString());
+                        int itemsPerPage = (int) (RegistryConstants.ITEMS_PER_PAGE * 1.5);
                         int numberOfPages;
-                        if (bean.getName().length % itemsPerPage == 0) {
-                            numberOfPages = bean.getName().length / itemsPerPage;
+                        if (rowCount % itemsPerPage == 0) {
+                            numberOfPages = rowCount / itemsPerPage;
                         } else {
-                            numberOfPages = bean.getName().length / itemsPerPage + 1;
+                            numberOfPages = rowCount / itemsPerPage + 1;
                         }
                         boolean isBrowseAuthorized = CarbonUIUtil.isUserAuthorized(request,
                                 "/permission/admin/manage/resources/browse");
@@ -377,8 +408,30 @@
                         }
                     %>
                     <thead>
+
                     <tr>
-                        <th><fmt:message key="name"/></th>
+                        <%
+                            String imgType;
+                            String displayStr;
+                            if(sortOrder.equals("DES")){
+                                imgType ="../admin/images/down-arrow.gif";
+                            } else {
+                                imgType ="../admin/images/up-arrow.gif";
+                            }
+
+                            if (request.getParameter("sortBy") !=null &&
+                                    request.getParameter("sortBy").equals("overview_name")) {
+                                displayStr = "display:'';margin-top:4px;margin-right:2px;";
+                            } else {
+                                displayStr = "display:none;";
+                            }
+                        %>
+                        <th><a onclick="sortContentList('overview_name',
+                                '<%="ASC".equals(request.getParameter("sortOrder")) ? "DES" : "ASC" %>');"
+                               title="Sort By <fmt:message key="name"/>"> <fmt:message key="name"/>
+                            <img  src="<%=imgType%>" border="0" align="right" style="<%=displayStr%>">
+                        </a></th>
+
                         <% if (hasNamespace) {%>
                         <th><fmt:message key="namespace"/></th>
                         <%}%>
@@ -389,7 +442,7 @@
                     </thead>
                     <tbody>
                     <%
-                        for(int i=(pageNumber - 1) * itemsPerPage;i<pageNumber * itemsPerPage && i<bean.getName().length;i++) {
+                        for(int i=0;i<bean.getName().length;i++) {
                             if(bean.getName()[i] == null) {
                               continue;
                             }
@@ -467,92 +520,24 @@
         function loadPagedList(page) {
             window.location = '<%="../generic/"+listURL+"&page="%>'+page;
         }
+        function sortContentList(sortBy, sortOrder) {
 
-        function changeVisibility() {
-            var visible = $('filterByList').value;
-            resetInputVisibility();
-            switch (visible) {
-                case "1":
-                    $('lifeCycleList').style.display = "";
-                    $('inoutListLC').style.display = "";
-                    $('stateList').style.display = "";
-                    $('inoutListLCState').style.display = "";
-                        changeLC();
-                    break;
-                default:
-                    $('id_Search_Val').style.display = "";
-                    break;
-            }
-
+            window.location = '<%="../generic/list_content.jsp?" + ((request.getParameter("lc_name")!=null)?"lc_name=" +
+        request.getParameter("lc_name"):"") + ((request.getParameter("lc_state")!=null)?"&lc_state=" +
+        request.getParameter("lc_state"):"") + ((request.getParameter("lc_in_out")!=null)?"&lc_in_out=" +
+        request.getParameter("lc_in_out"):"") + ((request.getParameter("lc_state_in_out")!=null)?"&lc_state_in_out=" +
+        request.getParameter("lc_state_in_out"):"") +((request.getParameter("searchValue")!=null)?"&searchValue=" +
+        request.getParameter("searchValue"):"")+ ((request.getParameter("filter")!=null)?"&filter=" +
+        request.getParameter("filter"):"") +((request.getParameter("artby_name")!=null)?"&artby_name=" +
+        request.getParameter("artby_name"):"")+((request.getParameter("filterBy")!=null)?"&filterBy=" +
+        request.getParameter("filterBy"):"") +"&region=" +region +"&item="+item +
+        "&key=" + key+ "&breadcrumb=" + breadcrumb +"&mediaType="+ mediaType+
+        "&singularLabel="+ singularLabel+ "&pluralLabel=" +pluralLabel+ "&hasNamespace=" +hasNamespace%>' +
+        '<%="&sortOrder="%>' + sortOrder + '<%="&sortBy="%>' + sortBy;
         }
-
-
-        /**
-         This method is called at the page load and when the selected LC is changed in the LC select drop-down
-         This method load the state list related to the selected LC and fill the state list drop down using them
-         uses the lc_state_list_gen_ajaxprocessor.jsp
-         */
-        function changeLC() {
-            var visible = $('lifeCycleList').value;
-            var inout = $('inoutListLC').value;
-            if(visible == "Select"|| inout=="out" ){
-                $('stateList').style.display = "none";
-                $('inoutListLCState').style.display = "none";
-            }
-            else{
-
-                var stateHtml = null;
-                new Ajax.Request('../generic/lc_state_list_gen_ajaxprocessor.jsp', {
-                    method:'post',
-                    parameters: {LCName: visible},
-
-                    onSuccess: function(data) {
-                        stateHtml =  eval(data).responseText;
-                        $('stateList').innerHTML = stateHtml;
-                        $('stateList').style.display = "";
-                        $('inoutListLCState').style.display = "";
-                    },
-
-                    onFailure: function(transport) {
-                        CARBON.showErrorDialog("Failed to load all states of "+visible);
-                    }
-                });
-
-            }
-
-        }
-
-        function changeInOutListLC() {
-
-            var visible = $('inoutListLC').value;
-            if(visible == "out"){
-                $('stateList').style.display = "none";
-                $('inoutListLCState').style.display = "none";
-            }else{
-                $('stateList').style.display = "";
-                $('inoutListLCState').style.display = "";
-            }
-        }
-        //        change the visibility of the search components to hidden state
-        function resetInputVisibility() {
-            $('lifeCycleList').style.display = "none";
-            $('stateList').style.display = "none";
-            $('id_Search_Val').style.display = "none";
-            $('inoutListLC').style.display = "none";
-            $('inoutListLCState').style.display = "none";
-
-        }
-
-
-        //        change the sting in to pascal Case e.g overview name -> Overview_Name
-        function toPascalCase(str) {
-            var arr = str.split(/\s|_/);
-            for(var i=0,l=arr.length; i<l; i++) {
-                arr[i] = arr[i].substr(0,1).toUpperCase() +
-                         (arr[i].length > 1 ? arr[i].substr(1)+"_" : "_");
-            }
-            return arr.join("");
-        }
-
+    </script>
+    <script type="text/javascript">
+        // call after page loaded to generate LC state list.
+        window.onload=changeLC();
     </script>
 </fmt:bundle>
