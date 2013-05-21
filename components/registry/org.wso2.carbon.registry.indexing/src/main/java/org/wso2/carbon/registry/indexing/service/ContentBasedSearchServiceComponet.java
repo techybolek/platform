@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * @scr.component name="registry.mgt.ui.search.dscomponent" immediate="true"
+ * @scr.component name="registry.indexing" immediate="true"
  * @scr.reference name="registry.service"
  * interface="org.wso2.carbon.registry.core.service.RegistryService" cardinality="1..1"
  * policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"

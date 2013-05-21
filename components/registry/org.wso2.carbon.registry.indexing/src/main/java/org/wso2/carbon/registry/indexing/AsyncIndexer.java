@@ -46,6 +46,8 @@ public class AsyncIndexer implements Runnable {
         public byte[] data;
         public String mediaType;
         public String path;
+        public String lcName;
+        public String lcState;
 
         public int tenantId;
 
@@ -54,6 +56,15 @@ public class AsyncIndexer implements Runnable {
             this.mediaType = mediaType;
             this.path = path;
             this.tenantId = tenantId;
+        }
+
+        public File2Index(byte[] data, String mediaType, String path, int tenantId, String lcName, String lcState) {
+            this.data = data;
+            this.mediaType = mediaType;
+            this.path = path;
+            this.tenantId = tenantId;
+            this.lcName = lcName;
+            this.lcState = lcState;
         }
     }
 

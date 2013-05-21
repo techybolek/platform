@@ -19,8 +19,6 @@
 
 package org.wso2.carbon.registry.indexing;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,6 +29,7 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.WaitBeforeShutdownObserver;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -49,11 +48,11 @@ public class Utils {
 
     private static String remoteSubscriptionStoreContext;
 
-    public static synchronized void setRegistryService(RegistryService service) {
+    public static void setRegistryService(RegistryService service) {
         registryService = service;
     }
 
-    public static synchronized RegistryService getRegistryService() {
+    public static RegistryService getRegistryService() {
         return registryService;
     }
 
@@ -105,20 +104,6 @@ public class Utils {
 
         return registry;
     }
-
-    /*
-    public static Registry getSystemRegistry() throws RegistryException {
-
-        if (registryService == null) {
-            String msg = "Unable to create system Registry instance. " +
-                    "Registry Service was not found.";
-            log.error(msg);
-            throw new RegistryException(msg);
-        }
-        return registryService.getSystemRegistry();         
-    }
-    */
-
     public static String getDefaultEventingServiceURL() {
         return defaultEventingServiceURL;
     }

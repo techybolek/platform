@@ -37,11 +37,9 @@ public class SearchResultsBeanPopulator {
 
         try {
             if (searchType.equalsIgnoreCase("Tag")) {
-                String tag = criteria;
-                searchResultsBean.setResourceDataList(searchByTags(tag, userRegistry));
+                searchResultsBean.setResourceDataList(searchByTags(criteria, userRegistry));
             } else {
-                String content = criteria;
-                searchResultsBean.setResourceDataList(searchByContent(content, userRegistry));
+                searchResultsBean.setResourceDataList(searchByContent(criteria, userRegistry));
             }
 
         } catch (RegistryException e) {

@@ -16,9 +16,6 @@
 
 package org.wso2.carbon.registry.indexing;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
@@ -26,7 +23,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
-import org.wso2.carbon.registry.core.*;
+import org.wso2.carbon.registry.core.ActionConstants;
+import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.CollectionImpl;
+import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.Handler;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
@@ -36,7 +36,6 @@ import org.wso2.carbon.registry.core.utils.MediaTypesUtils;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.AsyncIndexer.File2Index;
 import org.wso2.carbon.registry.indexing.indexer.IndexerException;
-import org.wso2.carbon.registry.indexing.indexer.IndexerFactory;
 import org.wso2.carbon.registry.indexing.solr.SolrClient;
 import org.wso2.carbon.registry.indexing.utils.IndexingUtils;
 import org.wso2.carbon.user.core.UserRealm;
@@ -44,6 +43,8 @@ import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.utils.ServerConstants;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A handler that performs indexing of resources using a Apache Solr server, and then provides
@@ -57,14 +58,12 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class IndexingHandler extends Handler {
     private static Log log = LogFactory.getLog(AsyncIndexer.class);
-    private static AsyncIndexer asyncIndexer;
+    private volatile static AsyncIndexer asyncIndexer;
 
     /**
      * <property name="indexingUrl" type="xml" value="url"/>
      */
     private String indexingUrl;
-
-
 
     public Resource get(RequestContext requestContext) throws RegistryException {
         return null;
@@ -74,7 +73,8 @@ public class IndexingHandler extends Handler {
         if (isIndexable(requestContext)) {
             return;
         }
-        submitFileForIndexing(getIndexer(), requestContext.getResource(), requestContext.getResourcePath().getPath(), null);
+        submitFileForIndexing(getIndexer(), requestContext.getResource(), requestContext.getResourcePath().getPath(),
+                null);
     }
 
     @Override
@@ -154,12 +154,10 @@ public class IndexingHandler extends Handler {
         List<String> filteredResults = new ArrayList<String>();
         try {
             client = SolrClient.getInstance();
-
             SolrDocumentList results = client.query(searchQuery, CurrentSession.getTenantId());
-
-            if (log.isDebugEnabled()) log.debug("result received "+ results);
-
-
+            if (log.isDebugEnabled()){
+                log.debug("result received "+ results);
+            }
             for(int i = 0;i < results.getNumFound();i++){
                 SolrDocument solrDocument = results.get(i);
                 String path = getPathFromId((String)solrDocument.getFirstValue("id"));
@@ -181,9 +179,8 @@ public class IndexingHandler extends Handler {
         return searchResults;
     }
 
-
     private String getPathFromId(String id) {
-        return id.substring(0, id.lastIndexOf("tenantId"));
+        return id.substring(0, id.lastIndexOf(IndexingConstants.FIELD_TENANT_ID));
     }
 
     private boolean isAuthorized(UserRegistry registry, String resourcePath, String action) throws RegistryException {
@@ -211,7 +208,7 @@ public class IndexingHandler extends Handler {
     }
 
     public void importResource(RequestContext requestContext) throws RegistryException {
-         if (isIndexable(requestContext)) {
+        if (isIndexable(requestContext)) {
             return;
         }
         submitFileForIndexing(getIndexer(), requestContext.getResource(), requestContext.getResourcePath().getPath(), requestContext.getSourceURL() );
@@ -248,12 +245,12 @@ public class IndexingHandler extends Handler {
     private AsyncIndexer getIndexer() throws RegistryException {
         try {
             if (asyncIndexer == null) {
-		synchronized (this) {
-		    if (asyncIndexer == null) {
-                	asyncIndexer = null;//AsyncIndexer.getInstance();
-                	new Thread(asyncIndexer).start();
-		    }
-	    	}
+                synchronized (this) {
+                    if (asyncIndexer == null) {
+                        asyncIndexer = null;//AsyncIndexer.getInstance();
+                        new Thread(asyncIndexer).start();
+                    }
+                }
             }
             return asyncIndexer;
         } catch (SolrException e) {
@@ -264,22 +261,25 @@ public class IndexingHandler extends Handler {
     private void submitFileForIndexing(AsyncIndexer indexer, Resource resource, String path, String sourceURL) {
         //if media type is null, mostly it is not a file. We will skip.
         String mediaType = resource.getMediaType();
-            if (mediaType == null && path != null) {
-                try {
-                    mediaType = MediaTypesUtils.getMediaType(RegistryUtils.getResourceName(path));
-                } catch (RegistryException ignored) {
-                    // We are only making an attempt to determine the media type.
-                }
+        if (mediaType == null && path != null) {
+            try {
+                mediaType = MediaTypesUtils.getMediaType(RegistryUtils.getResourceName(path));
+            } catch (RegistryException ignored) {
+                // We are only making an attempt to determine the media type.
             }
-            if (mediaType == null || IndexingManager.getInstance().getIndexerForMediaType(mediaType)
-                    == null) {
-                return;
-            }
+        }
+        if (mediaType == null || IndexingManager.getInstance().getIndexerForMediaType(mediaType)
+                == null) {
+            return;
+        }
         if (log.isDebugEnabled()) {
             log.debug("Submitting file "+ path + " for Indexing");
         }
         try {
-            indexer.addFile(new File2Index(IndexingUtils.getByteContent(resource, sourceURL),mediaType,path, CurrentSession.getTenantId()));
+            String lcName = resource.getProperty("registry.LC.name");
+            String lcState = lcName != null ? resource.getProperty("registry.lifecycle." + lcName + ".state") : null;
+            indexer.addFile(new File2Index(IndexingUtils.getByteContent(resource, sourceURL),mediaType,path,
+                    CurrentSession.getTenantId(), lcName, lcState));
         } catch (RegistryException e) {
             log.error("An error occurred while submitting file for indexing", e);
         }

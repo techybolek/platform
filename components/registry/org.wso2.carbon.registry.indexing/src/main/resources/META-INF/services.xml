@@ -24,6 +24,9 @@
         <operation name="getContentSearchResults">
         	<actionMapping>urn:getContentSearchResults</actionMapping>
         </operation>
+         <operation name="getAttributeSearchResults">
+             <actionMapping>urn:getAttributeSearchResults</actionMapping>
+         </operation>
     </service>
 
     <parameter name="adminService" locked="true">true</parameter>

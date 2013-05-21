@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.registry.indexing.solr;
 
+import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -32,7 +33,10 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.PaginationContext;
+import org.wso2.carbon.registry.core.utils.PaginationUtils;
 import org.wso2.carbon.registry.indexing.AsyncIndexer.File2Index;
+import org.wso2.carbon.registry.indexing.IndexingConstants;
 import org.wso2.carbon.registry.indexing.indexer.Indexer;
 import org.wso2.carbon.registry.indexing.indexer.IndexerException;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -43,15 +47,18 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class SolrClient {
-	
-	public static final Log log = LogFactory.getLog(SolrClient.class);
 
-	private static volatile SolrClient instance;
-	private SolrServer server;
+    public static final Log log = LogFactory.getLog(SolrClient.class);
 
-	protected SolrClient() throws IOException, ParserConfigurationException, SAXException {
+    private static volatile SolrClient instance;
+    private SolrServer server;
+
+    protected SolrClient() throws IOException, ParserConfigurationException, SAXException {
         File solrHome = new File(CarbonUtils.getCarbonHome() + File.separator + "repository" +
                 File.separator + "conf", "solr");
         if (!solrHome.exists() && !solrHome.mkdirs()) {
@@ -61,53 +68,44 @@ public class SolrClient {
         if (!confDir.exists() && !confDir.mkdirs()) {
             throw new IOException("Solf conf directory could not be created! Path: " + confDir);
         }
-//		System.out.println(created + confDir.getAbsolutePath());
 
-		String[] filePaths = new String[]{"elevate.xml", "protwords.txt", "schema.xml", 
-		                                  "scripts.conf", "solrconfig.xml", "spellings.txt", "stopwords.txt", "synonyms.txt"};
+        String[] filePaths = new String[]{"elevate.xml", "protwords.txt", "schema.xml",
+                "scripts.conf", "solrconfig.xml", "spellings.txt", "stopwords.txt", "synonyms.txt"};
 
-		for (String path:filePaths) {
-			InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(path);
-			if(resourceAsStream == null){
-				throw new SolrException(ErrorCode.NOT_FOUND, "Can not find resource "+ path + " from the classpath");
-			}
+        for (String path:filePaths) {
+            InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(path);
+            if(resourceAsStream == null){
+                throw new SolrException(ErrorCode.NOT_FOUND, "Can not find resource "+ path + " from the classpath");
+            }
             File file = new File(confDir, path);
             if (!file.exists()) {
                 write2File(resourceAsStream, file);
             }
-		}
+        }
 
-		System.setProperty("solr.solr.home", solrHome.getPath());
-		CoreContainer.Initializer initializer = new CoreContainer.Initializer();
-		CoreContainer coreContainer = initializer.initialize();
-		this.server = new EmbeddedSolrServer(coreContainer, "");
-		//		this.server = new CommonsHttpSolrServer(url);
-		//		if(url.startsWith("https")){
-		//			//here we use server credentials to setup https
-		//			enableSecurity();
-		//		}
-	}
-	
-	public static SolrClient getInstance() throws IndexerException {
-		if (instance == null) {
+        System.setProperty("solr.solr.home", solrHome.getPath());
+        CoreContainer.Initializer initializer = new CoreContainer.Initializer();
+        CoreContainer coreContainer = initializer.initialize();
+        this.server = new EmbeddedSolrServer(coreContainer, "");
+    }
+
+    public static SolrClient getInstance() throws IndexerException {
+        if (instance == null) {
             synchronized (SolrClient.class) {
-			    try {
-	                instance = new SolrClient();
+                try {
+                    instance = new SolrClient();
                 } catch (Exception e) {
-            	    log.error("Could not instantiate Solr client", e);
-	                throw new IndexerException("Could not instantiate Solr client", e);
+                    log.error("Could not instantiate Solr client", e);
+                    throw new IndexerException("Could not instantiate Solr client", e);
                 }
             }
-		}
-		return instance;
-	}
-	
-	private void write2File(InputStream in, File file) throws IOException{
-		byte[] buf = new byte[1024];
-//		if (!file.exists()) {
-//			file.createNewFile();
-//		}
-		FileOutputStream out = new FileOutputStream(file);
+        }
+        return instance;
+    }
+
+    private void write2File(InputStream in, File file) throws IOException{
+        byte[] buf = new byte[1024];
+        FileOutputStream out = new FileOutputStream(file);
         try {
             int read = 0;
 
@@ -118,152 +116,159 @@ public class SolrClient {
             out.close();
             in.close();
         }
-	}
-	
-	public void enableSecurity() throws Exception{/*
-		HttpClient client = ((CommonsHttpSolrServer)server).getHttpClient();
-		List authPrefs = new ArrayList(2);
-		authPrefs.add(AuthPolicy.BASIC);
-		client.getParams().setAuthenticationPreemptive(true);
+    }
+    private String generateId(int tenantId, String path) {
+        return path + IndexingConstants.FIELD_TENANT_ID + tenantId;
+    }
 
-		String user = "carbonUI";
-		String token = user + "_" + System.currentTimeMillis();
-		
-		ServerConfiguration config = ServerConfiguration.getInstance();
-		String alias = config.getFirstProperty(RegistryResources.SecurityManagement.SERVER_PRIMARY_KEYSTORE_KEY_ALIAS);
+    private void addDocument(IndexDocument indexDoc)
+            throws SolrException {
+        try {
+            String path = indexDoc.getPath();
+            String rawContent = indexDoc.getRawContent();
+            String contentAsText = indexDoc.getContentAsText();
+            int tenantId = indexDoc.getTenantId();
+            Map<String,List<String>> fields = indexDoc.getFields();
 
-		SignatureUtil.init();
-		byte[] thumbPrint = SignatureUtil.getThumbPrintForAlias(alias);
-		
-		byte[] signature = SignatureUtil.doSignature(token);
-		
-		String authHeader = new StringBuffer(Base64.encode(token.getBytes())).append(":").append(Base64.encode(signature))
-			.append(":").append(Base64.encode(thumbPrint)).toString();
-		
+            String id = generateId(tenantId, path);
+            if (id == null) {
+                id = "id" + rawContent.hashCode();
+            }
+            SolrInputDocument document = new SolrInputDocument();
+            document.addField(IndexingConstants.FIELD_ID, id, 1.0f);
+            document.addField(IndexingConstants.FIELD_TEXT, rawContent, 1.0f);
+            document.addField(IndexingConstants.FIELD_TENANT_ID, String.valueOf(tenantId));
 
-		// This will exclude the NTLM authentication scheme
-		client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY,
-				authPrefs);
+            if (contentAsText != null) {
+                document.addField(IndexingConstants.FIELD_COUNT_ONLY, contentAsText);
+            }
+            
+            if (fields!=null && fields.size() > 0) {
+                for (Map.Entry<String, List<String>> e : fields.entrySet()) {
+                    // The field is dynamic so we need to follow the solr schema.
+                    String key = e.getKey() + "_s";
+                    if (e.getValue().size() == 1) {
+                        document.addField(key, e.getValue().get(0));
+                    } else if (e.getValue().size() > 1) {
+                        StringBuilder builder = new StringBuilder();
+                        for (String s : e.getValue()) {
+                            builder.append(s).append(",");
+                        }
+                        document.addField(key, builder.substring(0, builder.length() - 1));
+                    }
+                }
+            }
+            
+            server.add(document);
+            UpdateResponse response = server.commit();
 
-		Credentials creds = new UsernamePasswordCredentials("admin", "admin");
-		client.getState().setCredentials(AuthScope.ANY, creds);
-		
-		ArrayList<Header> headers = new ArrayList<Header>();
-		headers.add(new Header("AUTHTOKEN",authHeader));
-		client.getHostConfiguration().getParams().setParameter("http.default-headers", headers);
+            if (log.isDebugEnabled()) {
+                log.debug("Indexed document "+id + " with "+ response.getStatus());
+            }
+        } catch (SolrServerException e) {
+            throw new SolrException(ErrorCode.SERVER_ERROR, "Error at indexing", e);
+        } catch (IOException e) {
+            throw new SolrException(ErrorCode.SERVER_ERROR, "Error at indexing", e);
+        }
+    }
 
-	*/}
+    public void indexDocument(File2Index fileData, Indexer indexer) throws RegistryException {
+        IndexDocument doc = indexer.getIndexedDocument(fileData);
+        doc.setTenantId(fileData.tenantId);
+        addDocument(doc);
+    }
 
-//	public void updateIndex(String id, byte[] data)
-//			throws SolrException {
-//		// we register both the content as it is and only text content
-//		String xmlAsStr = new String(data);
-//		addDocument(id, xmlAsStr, null);
-//	}
-	
-	private String generateId(int tenantId, String path) {
-		return path + "tenantId" + tenantId;
-	}
+    public synchronized void deleteFromIndex(String path, int tenantId)
+            throws SolrException {
+        try {
+            String id = generateId(tenantId, path);
+            /*if (id == null) {
+                   throw new SolrException(ErrorCode.BAD_REQUEST, "ID not found");
+               }*/
+            server.deleteById(id);
+            server.commit();
+            if (log.isDebugEnabled()) {
+                log.debug("Delete the document "+ id);
+            }
+        } catch (SolrServerException e) {
+            throw new SolrException(ErrorCode.SERVER_ERROR,"Failure at deleting", e);
+        } catch (IOException e) {
+            throw new SolrException(ErrorCode.SERVER_ERROR,"Failure at deleting", e);
+        }
+    }
 
-	private void addDocument(IndexDocument indexDoc)
-			throws SolrException {
-		try {
-			String path = indexDoc.getPath();
-			String rawContent = indexDoc.getRawContent();
-			String contentAsText = indexDoc.getContentAsText();
-			int tenantId = indexDoc.getTenantId();
-			
-			String id = generateId(tenantId, path);
-			if (id == null) {
-				id = new StringBuffer().append("id").append(
-						rawContent.hashCode()).toString();
-			}
-			SolrInputDocument document = new SolrInputDocument();
-			document.addField("id", id, 1.0f);
-			//System.out.println(contentString);
-			document.addField("text", rawContent, 1.0f);
-			document.addField("tenantId", String.valueOf(tenantId));
-			
-			if (contentAsText != null) {
-				document.addField("contentOnly", contentAsText);
-			}
-			server.add(document);
-			UpdateResponse response = server.commit();
-			
-			if (log.isDebugEnabled()) {
-				log.debug("Indexed document "+id + " with "+ response.getStatus());
-			}
-		} catch (SolrServerException e) {
-			throw new SolrException(ErrorCode.SERVER_ERROR, "Error at indexing", e);
-		} catch (IOException e) {
-			throw new SolrException(ErrorCode.SERVER_ERROR, "Error at indexing", e);
-		}
-	}
+    public SolrDocumentList query(String keywords, int tenantId) throws SolrException{
+        return query(keywords, tenantId, Collections.<String, String>emptyMap());
+    }
 
-	public void indexDocument(File2Index fileData, Indexer indexer) throws RegistryException {
-		IndexDocument doc = indexer.getIndexedDocument(fileData);
-		doc.setTenantId(fileData.tenantId);
-		addDocument(doc);
-	}
+    public SolrDocumentList query(int tenantId, Map<String, String> fields) throws SolrException{
+        return query("[* TO *]", tenantId, fields);
+    }
 
-	public synchronized void deleteFromIndex(String path, int tenantId)
-			throws SolrException {
-		try {
-			String id = generateId(tenantId, path);
-			/*if (id == null) {
-				throw new SolrException(ErrorCode.BAD_REQUEST, "ID not found");
-			}*/
-			server.deleteById(id);
-			server.commit();
-			if (log.isDebugEnabled()) {
-				log.debug("Delete the document "+ id);
-			}
-		} catch (SolrServerException e) {
-			throw new SolrException(ErrorCode.SERVER_ERROR,"Failure at deleting", e);
-		} catch (IOException e) {
-			throw new SolrException(ErrorCode.SERVER_ERROR,"Failure at deleting", e);
-		}
-	}
-	
-	public SolrDocumentList query(String keywords, int tenantId) throws SolrException{
-		try {
-			SolrQuery query = new SolrQuery(keywords);
+    public SolrDocumentList query(String keywords, int tenantId, Map<String, String> fields) throws SolrException{
+        try {
+            SolrQuery query = new SolrQuery(keywords);
             query.setRows(Integer.MAX_VALUE);
             //Solr does not allow to search with special characters ,
             //Therefore this fix allow to contain "-" in super tenant id.
             if(tenantId== MultitenantConstants.SUPER_TENANT_ID){
-                query.addFilterQuery("tenantId:" + "\\"+tenantId);
+                query.addFilterQuery(IndexingConstants.FIELD_TENANT_ID + ":" + "\\"+tenantId);
             }else {
-                query.addFilterQuery("tenantId:" + tenantId);
+                query.addFilterQuery(IndexingConstants.FIELD_TENANT_ID + ":" + tenantId);
             }
-			QueryResponse queryresponse = server.query(query);
-			return queryresponse.getResults();
-		} catch (SolrServerException e) {
-			throw new SolrException(ErrorCode.SERVER_ERROR, "Failure at query "+ keywords, e);
-		}
-	}
-	
-	public void cleanAllDocuments(){
-		try {
-			//server.deleteByQuery("ICWS");
-			
-			
-			QueryResponse results = server.query(new SolrQuery("ICWS"));
-			SolrDocumentList resultsList = results.getResults();
-			
-			for(int i =0; i < resultsList.size(); i++) {
-				String id = (String)resultsList.get(i).getFieldValue("id");
-				UpdateResponse deleteById = server.deleteById(id);
-				server.commit();
-				log.debug("Deleted ID "+ id + " Status " + deleteById.getStatus());
-			}
-		} catch (SolrServerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+            if (fields.size() > 0) {
+                for (Map.Entry<String, String> e : fields.entrySet()) {
+                    query.addFilterQuery(e.getKey() + "_s:" + e.getValue()); 
+                }
+            }
+            QueryResponse queryresponse;
+            MessageContext messageContext = MessageContext.getCurrentMessageContext();
+            if (PaginationUtils.isPaginationHeadersExist(messageContext)) {
+                try {
+                    PaginationContext paginationContext = PaginationUtils.initPaginationContext(messageContext);
+// TODO: Proper mechanism once authroizations are fixed - senaka
+//                    query.setStart(paginationContext.getStart());
+//                    query.setRows(paginationContext.getCount());
+                    String sortBy = paginationContext.getSortBy();
+                    if (sortBy.length() > 0) {
+                        query.setSortField(sortBy + "_s", paginationContext.getSortOrder().equals("ASC") ?
+                                SolrQuery.ORDER.asc : SolrQuery.ORDER.desc);
+                    }
+                    queryresponse = server.query(query);
+// TODO: Proper mechanism once authroizations are fixed - senaka
+//                    PaginationUtils.setRowCount(messageContext,
+//                            Long.toString(queryresponse.getResults().getNumFound()));
+                } finally {
+                    PaginationContext.destroy();
+                }
+            } else {
+                queryresponse = server.query(query);
+            }
+
+            return queryresponse.getResults();
+        } catch (SolrServerException e) {
+            throw new SolrException(ErrorCode.SERVER_ERROR, "Failure at query "+ keywords, e);
+        }
+    }
+
+    public void cleanAllDocuments(){
+        try {
+            QueryResponse results = server.query(new SolrQuery("ICWS"));
+            SolrDocumentList resultsList = results.getResults();
+
+            for(int i =0; i < resultsList.size(); i++) {
+                String id = (String)resultsList.get(i).getFieldValue(IndexingConstants.FIELD_ID);
+                UpdateResponse deleteById = server.deleteById(id);
+                server.commit();
+                log.debug("Deleted ID "+ id + " Status " + deleteById.getStatus());
+            }
+        } catch (SolrServerException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
 }

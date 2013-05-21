@@ -24,8 +24,8 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.registry.common.AttributeSearchService;
 import org.wso2.carbon.registry.common.ResourceData;
-import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -38,6 +38,7 @@ import org.wso2.carbon.registry.indexing.service.SearchResultsBean;
 import org.wso2.carbon.utils.WaitBeforeShutdownObserver;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -54,13 +55,13 @@ public class IndexingServiceComponent {
 
     private static Log log = LogFactory.getLog(IndexingServiceComponent.class);
 
-    private Registry registry = null;
-    private boolean initialized = false;
     private static Stack<ServiceRegistration> registrations = new Stack<ServiceRegistration>();
 
     protected void activate(ComponentContext context) {
         registrations.push(context.getBundleContext().registerService(
                 ContentSearchService.class.getName(), new ContentSearchServiceImpl(), null));
+        registrations.push(context.getBundleContext().registerService(
+                AttributeSearchService.class.getName(), new AttributeSearchServiceImpl(), null));
         registrations.push(context.getBundleContext().registerService(
                 WaitBeforeShutdownObserver.class.getName(), new WaitBeforeShutdownObserver() {
             boolean status = false;
@@ -76,14 +77,14 @@ public class IndexingServiceComponent {
                 return status;
             }
         }, null));
-        log.debug("******* Registry Indexing bundle is activated ******* ");
+        log.debug("Registry Indexing bundle is activated");
     }
 
     protected void deactivate(ComponentContext context) {
         while (!registrations.empty()) {
             registrations.pop().unregister();
         }
-        log.debug("******* Registry Indexing bundle is deactivated ******* ");
+        log.debug("Registry Indexing bundle is deactivated");
     }
 
     protected void setRegistryService(RegistryService registryService) {
@@ -108,8 +109,7 @@ public class IndexingServiceComponent {
 
         public ResourceData[] search(UserRegistry registry, String query)
                 throws RegistryException {
-            SearchResultsBean resultsBean =
-                    null;
+            SearchResultsBean resultsBean;
             try {
                 resultsBean = new ContentBasedSearchService().searchContent(query, registry);
             } catch (IndexerException e) {
@@ -132,101 +132,32 @@ public class IndexingServiceComponent {
             return search(MultitenantConstants.SUPER_TENANT_ID, query);
         }
     }
+    private static class AttributeSearchServiceImpl implements AttributeSearchService {
 
-   /* @Deprecated
-    private void initailize() {
-        if(initialized){
-            return;
-        }else{
+        public ResourceData[] search(UserRegistry registry, Map<String, String> query)
+                throws RegistryException {
+            SearchResultsBean resultsBean;
             try {
-                initialized = true;
-                RegistryService registryService = Utils.getRegistryService();
-                // We can't get Registry from Utils, as the MessageContext is not available at
-                // activation time.
-                Registry userRegistry = registryService.getUserRegistry();
-                if (registry != null && registry == userRegistry) {
-                    log.info("Handler has already been set.");
-                    return;
-                }
-                registry = userRegistry;
-                if (registry == null ||
-                        registry.getRegistryContext() == null ||
-                        registry.getRegistryContext().getHandlerManager() == null) {
-                    String msg = "Error Initializing Registry Eventing Handler";
-                    log.error(msg);
-                } else {
-                    IndexingHandler handler = new IndexingHandler();
-
-                    Filter filter = new Filter() {
-
-                        @Override
-                        public boolean handleRename(RequestContext requestContext) throws RegistryException {
-                            return true;
-                        }
-
-                        @Override
-                        public boolean handleCopy(RequestContext requestContext) throws RegistryException {
-                            return true;
-                        }
-
-                        @Override
-                        public boolean handleMove(RequestContext requestContext) throws RegistryException {
-                            return true;
-                        }
-
-                        @Override
-                        public boolean handleDelete(RequestContext arg0)
-                                throws RegistryException {
-                            return true;
-                        }
-
-                        @Override
-                        public boolean handleGet(RequestContext arg0)
-                                throws RegistryException {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean handleImportChild(RequestContext arg0)
-                                throws RegistryException {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean handleImportResource(RequestContext arg0)
-                                throws RegistryException {
-                            return true;
-                        }
-
-                        @Override
-                        public boolean handlePut(RequestContext arg0)
-                                throws RegistryException {
-                            return true;
-                        }
-
-                        @Override
-                        public boolean handlePutChild(RequestContext arg0)
-                                throws RegistryException {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean handleSearchContent(
-                                RequestContext requestContext)
-                                throws RegistryException {
-                            return true;
-                        }
-
-                    };
-
-                    registry.getRegistryContext().getHandlerManager().addHandler(null, filter, handler);
-                    log.info("Successfully Initialized the Indexing Handler");
-                }
-            } catch (RegistryException e) {
-                log.error(e);
+                resultsBean = new ContentBasedSearchService().searchByAttribute(query, registry);
+            } catch (IndexerException e) {
+                throw new RegistryException("Unable to obtain an instance of a Solr client", e);
             }
+            String errorMessage = resultsBean.getErrorMessage();
+            if (errorMessage != null) {
+                throw new RegistryException(errorMessage);
+            }
+            return resultsBean.getResourceDataList();
+        }
+
+        public ResourceData[] search(int tenantId, Map<String, String> query)
+                throws RegistryException {
+            return search(Utils.getRegistryService().getRegistry(
+                    CarbonConstants.REGISTRY_SYSTEM_USERNAME, tenantId), query);
+        }
+
+        public ResourceData[] search(Map<String, String> query) throws RegistryException {
+            return search(MultitenantConstants.SUPER_TENANT_ID, query);
         }
     }
-    */
 }
 

@@ -33,6 +33,9 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.PaginationContext;
+import org.wso2.carbon.registry.core.utils.PaginationUtils;
+import org.wso2.carbon.registry.indexing.IndexingConstants;
 import org.wso2.carbon.registry.indexing.IndexingManager;
 import org.wso2.carbon.registry.indexing.indexer.IndexerException;
 import org.wso2.carbon.registry.indexing.solr.SolrClient;
@@ -44,9 +47,7 @@ import org.wso2.carbon.utils.ServerConstants;
 import javax.servlet.http.HttpServletRequest;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 
 public class ContentBasedSearchService extends RegistryAbstractAdmin 
         implements IContentBasedSearchService {
@@ -73,30 +74,111 @@ public class ContentBasedSearchService extends RegistryAbstractAdmin
         return new SearchResultsBean();
 	}
 
-    public SearchResultsBean searchContent(String searchQuery,
-                              UserRegistry registry) throws IndexerException, RegistryException {
+    public SearchResultsBean getAttributeSearchResults(String[][] attributes) throws AxisFault{
+
+        try {
+            final Map<String, String> map = new HashMap<String, String>(attributes.length);
+            UserRegistry registry = (UserRegistry) getRootRegistry();
+            for (String[] mapping : attributes) {
+                map.put(mapping[0], mapping[1]);
+            }
+            return searchByAttribute(map, registry);
+        } catch (Exception e) {
+            log.error("Error occurred while getting the attribute search result.", e );
+        }
+        return new SearchResultsBean();
+    }
+
+    private SearchResultsBean searchContentInternal(String searchQuery, Map<String, String> attributes,
+                                           UserRegistry registry) throws IndexerException, RegistryException {
         SearchResultsBean resultsBean = new SearchResultsBean();
         SolrClient client = SolrClient.getInstance();
-        SolrDocumentList results = client.query(searchQuery, registry.getTenantId());
+        SolrDocumentList results = attributes.size() > 0 ? client.query(registry.getTenantId(), attributes) :
+                client.query(searchQuery, registry.getTenantId());
 
         if (log.isDebugEnabled()) log.debug("result received "+ results);
 
         List<ResourceData> filteredResults = new ArrayList<ResourceData>();
-        for (int i = 0;i < results.getNumFound();i++){
-            SolrDocument solrDocument = results.get(i);
-            String path = getPathFromId((String)solrDocument.getFirstValue("id"));
-            //if (AuthorizationUtils.authorize(path, ActionConstants.GET)){
-            if ((registry.resourceExists(path)) && (isAuthorized(registry,path, ActionConstants.GET))) {
-                filteredResults.add(loadResourceByPath(registry, path));
+// TODO: Proper mechanism once authroizations are fixed - senaka
+//        for (SolrDocument solrDocument : results){
+//            String path = getPathFromId((String)solrDocument.getFirstValue("id"));
+//            if ((isAuthorized(registry, path, ActionConstants.GET)) && (registry.resourceExists(path))) {
+//                filteredResults.add(loadResourceByPath(registry, path));
+//            }
+//        }
+// -- end of proper mechanism
+
+        MessageContext messageContext = MessageContext.getCurrentMessageContext();
+
+        if (PaginationUtils.isPaginationHeadersExist(messageContext)) {
+            try {
+                PaginationContext paginationContext = PaginationUtils.initPaginationContext(messageContext);
+                List<String> authorizedPathList = new ArrayList<String>();
+                for (SolrDocument solrDocument : results){
+                    if (paginationContext.getLimit() > 0 && authorizedPathList.size() == paginationContext.getLimit()) {
+                        break;
+                    }
+                    String path = getPathFromId((String)solrDocument.getFirstValue("id"));
+                    if ((isAuthorized(registry, path, ActionConstants.GET))) {
+                        authorizedPathList.add(path);
+                    }
+                }
+                String[] authorizedPaths = authorizedPathList.toArray(new String[authorizedPathList.size()]);
+                String[] paginatedPaths;
+                int start = paginationContext.getStart();
+                int count = paginationContext.getCount();
+                int rowCount = authorizedPaths.length;
+                PaginationUtils.setRowCount(messageContext, Integer.toString(rowCount));
+
+                int startIndex;
+                if (start == 1) {
+                    startIndex = 0;
+                } else {
+                    startIndex = start;
+                }
+                if (rowCount < start + count) {
+                    paginatedPaths = new String[rowCount - startIndex];
+                    System.arraycopy(authorizedPaths, startIndex, paginatedPaths, 0, (rowCount - startIndex));
+                } else {
+                    paginatedPaths = new String[count];
+                    System.arraycopy(authorizedPaths, startIndex, paginatedPaths, 0, count);
+                }
+                for (String path : paginatedPaths) {
+                    ResourceData resourceData = loadResourceByPath(registry, path);
+                    if (resourceData != null) {
+                        filteredResults.add(resourceData);
+                    }
+                }
+            } finally {
+                PaginationContext.destroy();
+            }
+
+        } else {
+            for (SolrDocument solrDocument : results){
+                String path = getPathFromId((String)solrDocument.getFirstValue("id"));
+                if ((isAuthorized(registry, path, ActionConstants.GET))) {
+                    ResourceData resourceData = loadResourceByPath(registry, path);
+                    if (resourceData != null) {
+                        filteredResults.add(resourceData);
+                    }
+                }
             }
         }
         if (log.isDebugEnabled()) {
             log.debug("filtered results "+ filteredResults + " for user "+ registry.getUserName());
         }
-
-        resultsBean.setResourceDataList(filteredResults.toArray(new ResourceData[0]));
-
+        resultsBean.setResourceDataList(filteredResults.toArray(new ResourceData[filteredResults.size()]));
         return resultsBean;
+    }
+
+    public SearchResultsBean searchContent(String searchQuery,
+                              UserRegistry registry) throws IndexerException, RegistryException {
+        return searchContentInternal(searchQuery, Collections.<String, String>emptyMap(), registry);
+    }
+
+    public SearchResultsBean searchByAttribute(Map<String, String> attributes,
+                                           UserRegistry registry) throws IndexerException, RegistryException {
+        return searchContentInternal(null, attributes, registry);
     }
 
     public void restartIndexing() throws RegistryException {
@@ -106,7 +188,7 @@ public class ContentBasedSearchService extends RegistryAbstractAdmin
     }
 
 	private String getPathFromId(String id) {
-		return id.substring(0, id.lastIndexOf("tenantId"));
+		return id.substring(0, id.lastIndexOf(IndexingConstants.FIELD_TENANT_ID));
 	}
 
 	private boolean isAuthorized(UserRegistry registry, String resourcePath, String action) throws RegistryException{
@@ -138,9 +220,19 @@ public class ContentBasedSearchService extends RegistryAbstractAdmin
 				resourceData.setName(parts[parts.length - 1]);
 			}
 		}
-
-		Resource child = registry.get(path);
-
+        Resource child;
+        //---------------------------------------------------------------------------------------------------------Ajith
+        //This fix is to improve the performance of the artifact search
+        //When we delete the artifacts that goes to activity logs and Solr indexer delete that resource from indexed
+        //files as well. Therefore no need an extra ResourceExist() check for the result path which is returned
+        //from Solr search.
+        try {
+            child = registry.get(path);
+        } catch (RegistryException e) {
+            log.debug("Failed to load resource from path which is returned from Solr search" + e.getMessage());
+            return null;
+        }
+        //---------------------------------------------------------------------------------------------------------Ajith
 		resourceData.setResourceType(child instanceof Collection ? "collection"
 				: "resource");
 		resourceData.setAuthorUserName(child.getAuthorUserName());

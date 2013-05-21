@@ -47,11 +47,9 @@ public class RegistryConfigLoader {
 
     private String lastAccessTimeLocation = null;
 
-    private Map<String, Indexer> indexerMap = new HashMap<String, Indexer>();
+    private Map<String, Indexer> indexerMap = new LinkedHashMap<String, Indexer>();
 
     private List<Pattern> exclusionList = new ArrayList<Pattern>();
-
-    private static RegistryConfigLoader instance = null;
 
 
     public RegistryConfigLoader() {
@@ -78,7 +76,7 @@ public class RegistryConfigLoader {
                 lastAccessTimeLocation = indexingConfig.getFirstChildWithName(
                         new QName("lastAccessTimeLocation")).getText();
             } catch (OMException e) {
-                lastAccessTimeLocation = IndexingConstants.LASTACCESSTIME_LOCATION;
+                lastAccessTimeLocation = IndexingConstants.LAST_ACCESS_TIME_LOCATION;
             }
             Iterator exclusions = indexingConfig.getFirstChildWithName(new QName("exclusions")).
                     getChildrenWithName(new QName("exclusion"));

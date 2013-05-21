@@ -17,23 +17,21 @@
 */
 package org.wso2.carbon.registry.indexing.service;
 
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.jdbc.EmbeddedRegistry;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.service.RegistryService;
 
 import javax.servlet.http.HttpServletRequest;
 
 public class Utils {
     private static final Log log = LogFactory.getLog(Utils.class);
-
     private static RegistryService registryService;
 
-    public static synchronized void setRegistryService(RegistryService service) {
+    public static void setRegistryService(RegistryService service) {
         registryService = service;
     }
 
@@ -71,17 +69,4 @@ public class Utils {
 
         return registry;
     }
-
-    /*
-    public static Registry getSystemRegistry() throws RegistryException {
-        Registry registry;
-        if (registryService == null) {
-            String msg = "Unable to get System Registry. " +
-                    "Registry Service was not found.";
-            log.error(msg);
-            throw new RegistryException(msg);
-        }
-        registry = registryService.getSystemRegistry();
-        return registry;
-    }*/
 }

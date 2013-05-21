@@ -23,10 +23,19 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 
 public class IndexingConstants {
 
-    public static final String LASTACCESSTIME_LOCATION = RegistryConstants.LOCAL_REPOSITORY_BASE_PATH +
+    public static final String LAST_ACCESS_TIME_LOCATION = RegistryConstants.LOCAL_REPOSITORY_BASE_PATH +
             RegistryConstants.REGISTRY_COMPONENT_PATH + "/indexing/lastaccesstime";
 
     public static final long STARTING_DELAY_IN_SECS_DEFAULT_VALUE = 10 * 60; //10 minutes
     public static final long INDEXING_FREQ_IN_SECS_DEFAULT_VALUE = 1 * 60; //1 minute
+
+    public static final String FIELD_ID ="id";
+    public static final String FIELD_TENANT_ID="tenantId";
+    public static final String FIELD_TEXT="text";
+    public static final String FIELD_COUNT_ONLY="contentOnly";
+    public static final String FIELD_MEDIA_TYPE="mediaType";
+    public static final String FIELD_LC_NAME="lcName";
+    public static final String FIELD_LC_STATE="lcState";
+
 
 }

@@ -150,16 +150,18 @@ public class IndexingManager {
         if (log.isDebugEnabled()) {
             log.debug("Submitting file " + path + " for Indexing");
         }
+        String lcName = resource.getProperty("registry.LC.name");
+        String lcState = lcName != null ? resource.getProperty("registry.lifecycle." + lcName + ".state") : null;
         getIndexer().addFile(new AsyncIndexer.File2Index(IndexingUtils.getByteContent(resource,
-                sourceURL), resource.getMediaType(), path, MultitenantConstants.SUPER_TENANT_ID));
+                sourceURL), resource.getMediaType(), path, MultitenantConstants.SUPER_TENANT_ID, lcName, lcState));
 
-	//Here, we are checking whether a resource has a symlink associated to it, if so, we submit that symlink path
+        //Here, we are checking whether a resource has a symlink associated to it, if so, we submit that symlink path
         //in the indexer. see CARBON-11510.
         String symlinkPath = resource.getProperty("registry.resource.symlink.path");
         if( symlinkPath != null)   {
             getIndexer().addFile(new AsyncIndexer.File2Index(IndexingUtils.getByteContent(resource,
-                sourceURL), resource.getMediaType(), symlinkPath,
-                    MultitenantConstants.SUPER_TENANT_ID));
+                    sourceURL), resource.getMediaType(), symlinkPath,
+                    MultitenantConstants.SUPER_TENANT_ID, lcName, lcState));
         }
     }
 
@@ -208,9 +210,9 @@ public class IndexingManager {
             final String lastAccessTimeLocation = getLastAccessTimeLocation();
             setLastAccessTime(
                     registry.resourceExists(lastAccessTimeLocation) ?
-                        new Date(Long.parseLong(
-                                RegistryUtils.decodeBytes((byte[]) registry.get(lastAccessTimeLocation).getContent())
-                         )) : null
+                            new Date(Long.parseLong(
+                                    RegistryUtils.decodeBytes((byte[]) registry.get(lastAccessTimeLocation).getContent())
+                            )) : null
             );
         } catch (RegistryException e) {
             log.error("Could not read last activity time when starting indexing", e);
