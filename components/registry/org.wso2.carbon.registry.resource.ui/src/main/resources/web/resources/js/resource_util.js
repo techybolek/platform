@@ -2462,7 +2462,7 @@ function setResourceTreeExpansionPath(path, onSuccessCallback) {
     });
 }
 
-function showResourceTreeWithLoadFunction(loadFunction, textBoxId, onOKCallback, rootPath, relativeRoot) {
+function showResourceTreeWithLoadFunction(loadFunction, textBoxId, onOKCallback, rootPath, relativeRoot, displayRootPath) {
 
     //This value is passed to address the cashing issue in IE
     var loadingContent = '<div class="ajax-loading-message"> <img src="../resources/images/ajax-loader.gif" align="top"/> <span>' + org_wso2_carbon_registry_resource_ui_jsi18n["resource.tree.loading"] + '</span> </div>';
@@ -2476,7 +2476,7 @@ function showResourceTreeWithLoadFunction(loadFunction, textBoxId, onOKCallback,
                 if (relativeRoot) {
                     new Ajax.Request('../resources/resource_tree_ajaxprocessor.jsp', {
                         method: 'get',
-                        parameters: {textBoxId:textBoxId,rootPath:rootPath,relativeRoot:relativeRoot,onOKCallback:onOKCallback,random:random},
+                        parameters: {textBoxId:textBoxId,rootPath:rootPath,relativeRoot:relativeRoot,displayRootPath:displayRootPath,onOKCallback:onOKCallback,random:random},
                         onSuccess: function(transport) {
                             var dialog = $('dialog');
                             dialog.innerHTML = transport.responseText;
@@ -2488,7 +2488,7 @@ function showResourceTreeWithLoadFunction(loadFunction, textBoxId, onOKCallback,
                 } else {
                     new Ajax.Request('../resources/resource_tree_ajaxprocessor.jsp', {
                         method: 'get',
-                        parameters: {textBoxId:textBoxId,rootPath:rootPath,onOKCallback:onOKCallback,random:random},
+                        parameters: {textBoxId:textBoxId,rootPath:rootPath,displayRootPath:displayRootPath,onOKCallback:onOKCallback,random:random},
                         onSuccess: function(transport) {
                             var dialog = $('dialog');
                             dialog.innerHTML = transport.responseText;
@@ -2515,7 +2515,7 @@ function showResourceTreeWithLoadFunction(loadFunction, textBoxId, onOKCallback,
             if (relativeRoot) {
                 new Ajax.Request('../resources/resource_tree_ajaxprocessor.jsp', {
                     method: 'get',
-                    parameters: {textBoxId:textBoxId,rootPath:rootPath,relativeRoot:relativeRoot,random:random},
+                    parameters: {textBoxId:textBoxId,rootPath:rootPath,relativeRoot:relativeRoot,displayRootPath:displayRootPath,random:random},
                     onSuccess: function(transport) {
                         var dialog = $('dialog');
                         dialog.innerHTML = transport.responseText;
@@ -2530,7 +2530,7 @@ function showResourceTreeWithLoadFunction(loadFunction, textBoxId, onOKCallback,
                 }
                 new Ajax.Request('../resources/resource_tree_ajaxprocessor.jsp', {
                     method: 'get',
-                    parameters: {textBoxId:textBoxId,rootPath:rootPath,random:random},
+                    parameters: {textBoxId:textBoxId,rootPath:rootPath,displayRootPath:displayRootPath,random:random},
                     onSuccess: function(transport) {
                         var dialog = $('dialog');
                         dialog.innerHTML = transport.responseText;
@@ -2562,13 +2562,13 @@ function showGovernanceResourceTree(textBoxId, onOKCallback) {
      if (!onOKCallback) {
          onOKCallback = "none";
      }
-     showResourceTreeWithLoadFunction(true, textBoxId, onOKCallback, "/_system/governance", "true");
+     showResourceTreeWithLoadFunction(true, textBoxId, onOKCallback, "/_system/governance", "true", "false");
  }
 function showGovernanceResourceTreeWithCustomPath(textBoxId, path, onOKCallback) {
     if (!onOKCallback) {
         onOKCallback = "none";
     }
-    showResourceTreeWithLoadFunction(true, textBoxId, onOKCallback, path, "true");
+    showResourceTreeWithLoadFunction(true, textBoxId, onOKCallback, path, "true", "true");
 }
 
  function showGovernanceCollectionTree(textBoxId, onOKCallback) {
@@ -2582,7 +2582,7 @@ function showGovernanceResourceTreeWithCustomPath(textBoxId, path, onOKCallback)
      if (!onOKCallback) {
          onOKCallback = "none";
      }
-     showResourceTreeWithLoadFunction(true, textBoxId, onOKCallback, "/_system/config", "true");
+     showResourceTreeWithLoadFunction(true, textBoxId, onOKCallback, "/_system/config", "true", "false");
  }
 
  function showConfigCollectionTree(textBoxId, onOKCallback) {
@@ -2593,7 +2593,7 @@ function showGovernanceResourceTreeWithCustomPath(textBoxId, path, onOKCallback)
  }
 
 function showResourceTree(textBoxId, onOKCallback, rootPath) {
-    showResourceTreeWithLoadFunction(true, textBoxId, onOKCallback, rootPath);
+    showResourceTreeWithLoadFunction(true, textBoxId, onOKCallback, rootPath, null, "false");
 }
 
 function showCollectionTreeWithLoadFunction(loadFunction, textBoxId, onOKCallback, rootPath, relativeRoot) {

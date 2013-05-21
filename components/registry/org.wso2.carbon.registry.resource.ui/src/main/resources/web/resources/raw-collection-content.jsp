@@ -710,8 +710,9 @@ if (CarbonUIUtil.isSuperTenant(request)) {
         <span style="cursor:default" title="<%=resourceData.getFormattedCreatedOn()%>">
         <%
             if (resourceData.getFormattedCreatedOn().length() > 12) {
+                String createdOn = resourceData.getFormattedCreatedOn();
             // Full date scenario
-        %><%=resourceData.getFormattedCreatedOn().subSequence(0, 9)%>
+        %><%=createdOn.subSequence(0, createdOn.indexOf("ago") + 3)%>
         <%
         } else { %>
         <%=resourceData.getFormattedCreatedOn()%>

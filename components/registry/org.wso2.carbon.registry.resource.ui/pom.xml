@@ -124,6 +124,15 @@
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.relations.ui</artifactId>
         </dependency>
+	<dependency>
+            <groupId>org.apache.amber</groupId>
+            <artifactId>oauth2-client</artifactId>
+            <version>0.22.1358727-wso2v2</version>
+        </dependency>
+         <dependency>
+             <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
+        </dependency>
     </dependencies>
     
 </project>
