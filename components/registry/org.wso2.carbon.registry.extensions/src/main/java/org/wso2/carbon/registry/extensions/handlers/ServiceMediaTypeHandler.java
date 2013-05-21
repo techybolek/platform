@@ -53,6 +53,7 @@ public class ServiceMediaTypeHandler extends Handler {
     private String defaultEnvironment;
 
     private boolean disableWSDLValidation = false;
+    private boolean disableWADLValidation = false;
     private List<String> smartLifecycleLinks = new LinkedList<String>();
 
     private String defaultServiceVersion = CommonConstants.SERVICE_VERSION_DEFAULT_VALUE;
@@ -188,8 +189,8 @@ public class ServiceMediaTypeHandler extends Handler {
                     requestContext.setProcessingComplete(true);
                     return;
                 }
-                if ("true".equals(resource.getProperty("registry.WSDLImport"))) {
-                    resource.removeProperty("registry.WSDLImport");
+                if ("true".equals(resource.getProperty("registry.DefinitionImport"))) {
+                    resource.removeProperty("registry.DefinitionImport");
                     try {
                         XMLStreamReader reader = XMLInputFactory.newInstance().
                                 createXMLStreamReader(new StringReader(oldContent));
@@ -198,8 +199,8 @@ public class ServiceMediaTypeHandler extends Handler {
                         CommonUtil.setServiceName(oldServiceInfoElement, CommonUtil.getServiceName(serviceInfoElement));
                         CommonUtil.setServiceNamespace(oldServiceInfoElement,
                                 CommonUtil.getServiceNamespace(serviceInfoElement));
-                        CommonUtil.setWSDLURL(oldServiceInfoElement,
-                                CommonUtil.getWSDLURL(serviceInfoElement));
+                        CommonUtil.setDefinitionURL(oldServiceInfoElement,
+                                CommonUtil.getDefinitionURL(serviceInfoElement));
                         CommonUtil.setEndpointEntries(oldServiceInfoElement,
                                 CommonUtil.getEndpointEntries(serviceInfoElement));
                         CommonUtil.setServiceVersion(oldServiceInfoElement,
@@ -207,6 +208,7 @@ public class ServiceMediaTypeHandler extends Handler {
                                         serviceInfoElement));
                         serviceInfoElement = oldServiceInfoElement;
                         resource.setContent(serviceInfoElement.toString());
+                        resource.setDescription(oldResource.getDescription());
                     } catch (Exception e) {
                         String msg = "Error in parsing the service content of the service. " +
                                 "The requested path to store the service: " + originalServicePath + ".";
@@ -223,22 +225,22 @@ public class ServiceMediaTypeHandler extends Handler {
                     log.error(msg);
                     throw new RegistryException(msg, e);
                 }
-            } else if ("true".equals(resource.getProperty("registry.WSDLImport"))) {
-                resource.removeProperty("registry.WSDLImport");                	
+            } else if ("true".equals(resource.getProperty("registry.DefinitionImport"))) {
+                resource.removeProperty("registry.DefinitionImport");
             }
 //            CommonUtil.addGovernanceArtifactEntryWithAbsoluteValues(
 //                    CommonUtil.getUnchrootedSystemRegistry(requestContext),
 //                    serviceId, servicePath);
 
-            String wsdlURL = CommonUtil.getWSDLURL(serviceInfoElement);
+            String definitionURL = CommonUtil.getDefinitionURL(serviceInfoElement);
             if (previousServiceInfoElement != null) {
-                String oldWSDL = CommonUtil.getWSDLURL(previousServiceInfoElement);
-                if ((!"".equals(oldWSDL) && "".equals(wsdlURL))
-                        || (!"".endsWith(oldWSDL) && !oldWSDL.equals(wsdlURL))) {
+                String oldDefinition = CommonUtil.getDefinitionURL(previousServiceInfoElement);
+                if ((!"".equals(oldDefinition) && "".equals(definitionURL))
+                        || (!"".endsWith(oldDefinition) && !oldDefinition.equals(definitionURL))) {
                     try {
-                        registry.removeAssociation(servicePath, oldWSDL, CommonConstants.DEPENDS);
-                        registry.removeAssociation(oldWSDL, servicePath, CommonConstants.USED_BY);
-                        EndpointUtils.removeEndpointEntry(oldWSDL, serviceInfoElement, registry);
+                        registry.removeAssociation(servicePath, oldDefinition, CommonConstants.DEPENDS);
+                        registry.removeAssociation(oldDefinition, servicePath, CommonConstants.USED_BY);
+                        EndpointUtils.removeEndpointEntry(oldDefinition, serviceInfoElement, registry);
                         resource.setContent(RegistryUtils.decodeBytes((serviceInfoElement.toString()).getBytes()));
                     } catch (RegistryException e) {
                         throw new RegistryException("Failed to remove endpoints from Service UI : "+serviceName,e);
@@ -246,73 +248,89 @@ public class ServiceMediaTypeHandler extends Handler {
                 }
             }
 
-                boolean alreadyAdded = false;
-                if (wsdlURL != null && (wsdlURL.startsWith("http://") || wsdlURL.startsWith("https://"))) {
+            boolean alreadyAdded = false;
+            if (definitionURL != null && (definitionURL.startsWith("http://") || definitionURL.startsWith("https://"))) {
+                String definitionPath;
+                if(definitionURL.toLowerCase().endsWith("wsdl")) {
                     wsdl = buildWSDLProcessor(requestContext);
                     RequestContext context = new RequestContext(registry, requestContext.getRepository(),
                             requestContext.getVersionRepository());
                     context.setResourcePath(new ResourcePath(RegistryConstants.PATH_SEPARATOR + serviceName + ".wsdl"));
-                    context.setSourceURL(wsdlURL);
+                    context.setSourceURL(definitionURL);
                     context.setResource(new ResourceImpl());
-                    String wsdlPath = wsdl.addWSDLToRegistry(context, wsdlURL, null, false, false,
+                    definitionPath = wsdl.addWSDLToRegistry(context, definitionURL, null, false, false,
                             disableWSDLValidation,disableSymlinkCreation);
-                    if (wsdlPath == null) {
-                        // we will get the null value, if this is called within addWSDLToRegistry
-                        return;
+
+                } else if(definitionURL.toLowerCase().endsWith("wadl")) {
+                    WADLProcessor wadlProcessor = buildWADLProcessor(requestContext);
+                    wadlProcessor.setCreateService(false);
+                    RequestContext context = new RequestContext(registry, requestContext.getRepository(),
+                            requestContext.getVersionRepository());
+                    context.setResourcePath(new ResourcePath(RegistryConstants.PATH_SEPARATOR + serviceName + ".wadl"));
+                    context.setSourceURL(definitionURL);
+                    context.setResource(new ResourceImpl());
+                    definitionPath = wadlProcessor.importWADLToRegistry(context, null, disableWADLValidation);
+                } else {
+                    throw new RegistryException("Invalid service definition found. " +
+                            "Please enter a valid WSDL/WADL URL");
+                }
+
+                if (definitionPath == null) {
+                    return;
+                }
+                definitionURL = RegistryUtils.getRelativePath(requestContext.getRegistryContext(), definitionPath);
+                CommonUtil.setDefinitionURL(serviceInfoElement, definitionURL);
+                resource.setContent(RegistryUtils.decodeBytes((serviceInfoElement.toString()).getBytes()));
+                // updating the wsdl/wadl url
+                ((ResourceImpl) resource).prepareContentForPut();
+                persistServiceResource(registry, resource, servicePath);
+                alreadyAdded = true;
+                // and make the associations
+                registry.addAssociation(servicePath, definitionPath, CommonConstants.DEPENDS);
+                registry.addAssociation(definitionPath, servicePath, CommonConstants.USED_BY);
+
+            } else if (definitionURL != null && definitionURL.startsWith(RegistryConstants.ROOT_PATH)) {
+                // it seems definitionUrl is a registry path..
+                String definitionPath = RegistryUtils.getAbsolutePath(requestContext.getRegistryContext(), definitionURL);
+                if (!definitionPath.startsWith(RegistryUtils.getAbsolutePath(
+                        requestContext.getRegistryContext(),
+                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH))) {
+
+                    definitionPath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + definitionPath;
+                }
+                boolean addItHere = false;
+                if (!registry.resourceExists(definitionPath)) {
+                    String msg = "Associating service to a non-existing WSDL. wsdl url: " + definitionPath + ", " +
+                            "service path: " + servicePath + ".";
+                    log.error(msg);
+                    throw new RegistryException(msg);
+                }
+                if (!registry.resourceExists(servicePath)) {
+                    addItHere = true;
+                } else {
+                    Association[] dependencies = registry.getAssociations(servicePath, CommonConstants.DEPENDS);
+                    boolean dependencyFound = false;
+                    if (dependencies != null) {
+                        for (Association dependency : dependencies) {
+                            if (definitionPath.equals(dependency.getDestinationPath())) {
+                                dependencyFound = true;
+                            }
+                        }
                     }
-                    wsdlURL = RegistryUtils.getRelativePath(requestContext.getRegistryContext(), wsdlPath);
-                    CommonUtil.setWSDLURL(serviceInfoElement, wsdlURL);
-                    resource.setContent(RegistryUtils.decodeBytes((serviceInfoElement.toString()).getBytes()));
-                    // updating the wsdl url
+                    if (!dependencyFound) {
+                        addItHere = true;
+                    }
+                }
+                if (addItHere) { // add the service right here..
                     ((ResourceImpl) resource).prepareContentForPut();
                     persistServiceResource(registry, resource, servicePath);
                     alreadyAdded = true;
                     // and make the associations
-                    registry.addAssociation(servicePath, wsdlPath, CommonConstants.DEPENDS);
-                    registry.addAssociation(wsdlPath, servicePath, CommonConstants.USED_BY);
 
-                } else if (wsdlURL != null && wsdlURL.startsWith(RegistryConstants.ROOT_PATH)) {
-                    // it seems wsdlUrl is a registry path..
-                    String wsdlPath = RegistryUtils.getAbsolutePath(requestContext.getRegistryContext(), wsdlURL);
-                    if (!wsdlPath.startsWith(RegistryUtils.getAbsolutePath(
-                            requestContext.getRegistryContext(),
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH))) {
-
-                        wsdlPath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + wsdlPath;
-                    }
-                    boolean addItHere = false;
-                    if (!registry.resourceExists(wsdlPath)) {
-                        String msg = "Associating service to a non-existing WSDL. wsdl url: " + wsdlPath + ", " +
-                                "service path: " + servicePath + ".";
-                        log.error(msg);
-                        throw new RegistryException(msg);
-                    }
-                    if (!registry.resourceExists(servicePath)) {
-                        addItHere = true;
-                    } else {
-                        Association[] dependencies = registry.getAssociations(servicePath, CommonConstants.DEPENDS);
-                        boolean dependencyFound = false;
-                        if (dependencies != null) {
-                            for (Association dependency : dependencies) {
-                                if (wsdlPath.equals(dependency.getDestinationPath())) {
-                                    dependencyFound = true;
-                                }
-                            }
-                        }
-                        if (!dependencyFound) {
-                            addItHere = true;
-                        }
-                    }
-                    if (addItHere) { // add the service right here..
-                        ((ResourceImpl) resource).prepareContentForPut();
-                        persistServiceResource(registry, resource, servicePath);
-                        alreadyAdded = true;
-                        // and make the associations
-
-                        registry.addAssociation(servicePath, wsdlPath, CommonConstants.DEPENDS);
-                        registry.addAssociation(wsdlPath, servicePath, CommonConstants.USED_BY);
-                    }
+                    registry.addAssociation(servicePath, definitionPath, CommonConstants.DEPENDS);
+                    registry.addAssociation(definitionPath, servicePath, CommonConstants.USED_BY);
                 }
+            }
 
             if (!alreadyAdded) {
                 // we are adding the resource anyway.
@@ -406,6 +424,16 @@ public class ServiceMediaTypeHandler extends Handler {
         return new WSDLProcessor(requestContext);
     }
 
+    /**
+     * Method to customize the WADL Processor.
+     * @param requestContext the request context for the import/put operation
+     * @return the WADL Processor instance.
+     */
+    @SuppressWarnings("unused")
+    protected WADLProcessor buildWADLProcessor(RequestContext requestContext) {
+        return new WADLProcessor(requestContext);
+    }
+
     private void persistServiceResource(Registry registry, Resource resource,
                                         String servicePath) throws RegistryException {
         registry.put(servicePath, resource);
@@ -413,6 +441,10 @@ public class ServiceMediaTypeHandler extends Handler {
 
     public void setDisableWSDLValidation(String disableWSDLValidation) {
         this.disableWSDLValidation = Boolean.toString(true).equals(disableWSDLValidation);
+    }
+
+    public void setDisableWADLValidation(String disableWADLValidation) {
+        this.disableWADLValidation = Boolean.getBoolean(disableWADLValidation);
     }
 
     public String mergeServiceContent(String newContent, String oldContent) {

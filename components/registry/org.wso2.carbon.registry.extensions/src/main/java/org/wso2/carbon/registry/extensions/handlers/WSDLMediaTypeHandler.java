@@ -22,21 +22,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.registry.common.utils.artifact.manager.ArtifactManager;
 import org.wso2.carbon.registry.core.*;
-import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.Handler;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
-import org.wso2.carbon.registry.core.utils.AuthorizationUtils;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.extensions.beans.BusinessServiceInfo;
-import org.wso2.carbon.registry.extensions.handlers.utils.SchemaProcessor;
-import org.wso2.carbon.registry.extensions.handlers.utils.UDDIPublisher;
-import org.wso2.carbon.registry.extensions.handlers.utils.WSDLInfo;
-import org.wso2.carbon.registry.extensions.handlers.utils.WSDLProcessor;
+import org.wso2.carbon.registry.extensions.handlers.utils.*;
 import org.wso2.carbon.registry.extensions.utils.CommonConstants;
 import org.wso2.carbon.registry.extensions.utils.CommonUtil;
 import org.wso2.carbon.registry.extensions.utils.WSDLValidationInfo;
-import org.wso2.carbon.user.mgt.UserMgtConstants;
 
 import javax.xml.namespace.QName;
 import java.io.*;
@@ -45,7 +39,7 @@ import java.util.*;
 @SuppressWarnings("unused")
 public class WSDLMediaTypeHandler extends Handler {
     private static final Log log = LogFactory.getLog(WSDLMediaTypeHandler.class);
-    private String locationTag = "location";
+    protected String locationTag = "location";
     
     private String wsdlLocation = "/wsdls/";        // location will always has a leading '/' and trailing '/'
     private OMElement wsdlLocationConfiguration;

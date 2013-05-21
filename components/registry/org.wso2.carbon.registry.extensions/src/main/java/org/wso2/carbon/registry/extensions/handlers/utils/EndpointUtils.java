@@ -46,8 +46,8 @@ public class EndpointUtils {
     private static final String SOAP11_ENDPOINT_EXPR = "/wsdl:definitions/wsdl:service/wsdl:port/soap:address";
     private static final String SOAP12_ENDPOINT_EXPR = "/wsdl:definitions/wsdl:service/wsdl:port/soap12:address";
     private static final String HTTP_ENDPOINT_EXPR = "/wsdl:definitions/wsdl:service/wsdl:port/http:address";
-    private static final String SERVICE_ENDPOINT_ENTRY_EXPR = "/s:serviceMetaData/s:endpoints/s:entry";
-    private static final String SERVICE_ENDPOINT_EXPR = "/s:serviceMetaData/s:endpoints";
+    private static final String SERVICE_ENDPOINT_ENTRY_EXPR = "/s:metadata/s:endpoints/s:entry";
+    private static final String SERVICE_ENDPOINT_EXPR = "/s:metadata/s:endpoints";
     private static final String SERVICE_ENDPOINTS_ELEMENT = "endpoints";
     private static final String SERVICE_ENDPOINTS_ENTRY_ELEMENT = "entry";
     private static final String LOCATION_ATTR = "location";
@@ -511,7 +511,17 @@ public class EndpointUtils {
         if (registry.resourceExists(endpointAbsolutePath)) {
             resource = registry.get(endpointAbsolutePath);
             endpointId = resource.getUUID();
-        } else {
+            String existingContent;
+            String newContent = getEndpointContent(url, endpointAbsolutePath);
+            if(resource.getContent() != null) {
+                existingContent = new String((byte[])(resource.getContent()));
+                if(!existingContent.equals(newContent)) {
+                    resource.setContent(RegistryUtils.encodeString(newContent));
+                }
+            } else {
+                resource.setContent(RegistryUtils.encodeString(newContent));
+            }
+        }else {
             resource = registry.newResource();
             resource.setContent(RegistryUtils.encodeString(getEndpointContent(url, endpointAbsolutePath)));
         }

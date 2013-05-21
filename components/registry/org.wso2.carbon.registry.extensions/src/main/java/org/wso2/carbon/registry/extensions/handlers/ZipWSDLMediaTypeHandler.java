@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.registry.extensions.handlers;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,6 +41,7 @@ import org.wso2.carbon.registry.extensions.utils.CommonUtil;
 import org.wso2.carbon.registry.extensions.utils.WSDLValidationInfo;
 import org.wso2.carbon.user.core.UserRealm;
 
+import javax.xml.namespace.QName;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
@@ -81,6 +83,14 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
 
     private String xsdExtension = ".xsd";
 
+    private String wadlMediaType = "application/wadl+xml";
+
+    private String wadlExtension = ".wadl";
+
+    private String wadlLocation = "/wadl/";
+
+    private OMElement wadlLocationConfiguration;
+
     private String archiveExtension = ".gar";
 
     private String tempFilePrefix = "wsdl";
@@ -91,6 +101,7 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
 
     private boolean disableSymlinkCreation = true;
     private static int numberOfRetry = 5;
+    private boolean disableWADLValidation = false;
 
     public void setNumberOfRetry(String numberOfRetry) {
         ZipWSDLMediaTypeHandler.numberOfRetry = Integer.parseInt(numberOfRetry);
@@ -111,6 +122,27 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
 
     public void setThreadPoolSize(String threadPoolSize) {
         this.threadPoolSize = Integer.parseInt(threadPoolSize);
+    }
+
+    public OMElement getWADLLocationConfiguration() {
+        return wadlLocationConfiguration;
+    }
+
+    public void setWadlLocationConfiguration(OMElement locationConfiguration) throws RegistryException {
+        Iterator confElements = locationConfiguration.getChildElements();
+        while (confElements.hasNext()) {
+            OMElement confElement = (OMElement)confElements.next();
+            if (confElement.getQName().equals(new QName(locationTag))) {
+                wadlLocation = confElement.getText();
+                if(!wadlLocation.startsWith(RegistryConstants.PATH_SEPARATOR)){
+                    wadlLocation = RegistryConstants.PATH_SEPARATOR + wadlLocation;
+                }
+                if(wadlLocation.endsWith(RegistryConstants.PATH_SEPARATOR)){
+                    wadlLocation = wadlLocation.substring(0, wadlLocation.length() - 1);
+                }
+            }
+        }
+        this.wadlLocationConfiguration = locationConfiguration;
     }
 
     public void put(RequestContext requestContext) throws RegistryException {
@@ -161,6 +193,7 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
                         ZipInputStream zs;
                         List<String> wsdlUriList = new LinkedList<String>();
                         List<String> xsdUriList = new LinkedList<String>();
+                        List<String> wadlUriList = new LinkedList<String>();
                         zs = new ZipInputStream(new FileInputStream(tempFile));
                         try {
                             entry = zs.getNextEntry();
@@ -227,6 +260,22 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
                                         uri = uri.substring(0, uri.length() -1);
                                     }
                                     xsdUriList.add(uri);
+                                } else if(entryName != null &&
+                                        entryName.toLowerCase().endsWith(wadlExtension)){
+                                    String uri = tempFile.toURI().toString();
+                                    uri = uri.substring(0, uri.length() -
+                                            archiveExtension.length()) + "/" + entryName;
+                                    if (uri.startsWith("file:")) {
+                                        uri = uri.substring(5);
+                                    }
+                                    while (uri.startsWith("/")) {
+                                        uri = uri.substring(1);
+                                    }
+                                    uri = "file:///" + uri;
+                                    if (uri.endsWith("/")) {
+                                        uri = uri.substring(0, uri.length() -1);
+                                    }
+                                    wadlUriList.add(uri);
                                 } else if (entryName != null) {
                                     String uri = tempFile.toURI().toString();
                                     uri = uri.substring(0, uri.length() -
@@ -252,7 +301,7 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
                             localPathMap =
                                     Collections.unmodifiableMap(CurrentSession.getLocalPathMap());
                         }
-                        if (wsdlUriList.isEmpty() && xsdUriList.isEmpty() && uriList.isEmpty()) {
+                        if (wsdlUriList.isEmpty() && xsdUriList.isEmpty() && wadlUriList.isEmpty() && uriList.isEmpty()) {
                             throw new RegistryException(
                                     "No Files found in the given archive");
                         }
@@ -270,6 +319,14 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
                                     CurrentSession.getUser(), CurrentSession.getCallerTenantId(),
                                     localPathMap));
                         }
+                        for (String uri : wadlUriList) {
+                            tasks.add(new UploadWadlTask(requestContext, uri,
+                                    CurrentSession.getTenantId(),
+                                    CurrentSession.getUserRegistry(), CurrentSession.getUserRealm(),
+                                    CurrentSession.getUser(), CurrentSession.getCallerTenantId(),
+                                    localPathMap));
+                        }
+
                         String mediaType = resource.getProperty("registry.mediaType");
                         if (mediaType != null) {
                             for (String uri : uriList) {
@@ -364,6 +421,45 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
     }
 
     /**
+     * Method that runs the WADL upload procedure.
+     *
+     * @param requestContext requestContext the request context for the import/put operation
+     * @param uri the URL from which the WADL is imported
+     *
+     * @return  the path at which the WADL was uploaded to
+     *
+     * @throws RegistryException if the operation failed.
+     */
+    protected String addWADLFromZip(RequestContext requestContext, String uri)
+            throws RegistryException {
+        if (uri != null) {
+            Resource local = requestContext.getRegistry().newResource();
+            local.setMediaType(wadlMediaType);
+            requestContext.setSourceURL(uri);
+            requestContext.setResource(local);
+            String path = requestContext.getResourcePath().getPath();
+            if (path.lastIndexOf("/") != -1) {
+                path = path.substring(0, path.lastIndexOf("/"));
+            } else {
+                path = "";
+            }
+            String wadlName = uri;
+            if (wadlName.lastIndexOf("/") != -1) {
+                wadlName = wadlName.substring(wadlName.lastIndexOf("/"));
+            } else {
+                wadlName = "/" + wadlName;
+            }
+            path = path + wadlName;
+            requestContext.setResourcePath(new ResourcePath(path));
+            WADLProcessor wadlProcessor = new WADLProcessor(requestContext);
+            return wadlProcessor.importWADLToRegistry(requestContext,
+                    getChrootedWADLLocation(requestContext.getRegistryContext()), disableWADLValidation);
+
+        }
+        return null;
+    }
+
+    /**
      * Method that runs the Schema upload procedure.
      *
      * @param requestContext the request context for the import/put operation
@@ -407,7 +503,7 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
 
             String savedName = schemaProcessor
                     .importSchemaToRegistry(requestContext, path,
-                            getChrootedLocation(requestContext.getRegistryContext()), true,disableSymlinkCreation);
+                            getChrootedSchemaLocation(requestContext.getRegistryContext()), true,disableSymlinkCreation);
 
             String parentPath = RegistryUtils.getParentPath(requestContext.getResourcePath().getPath());
 
@@ -427,9 +523,14 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
         return null;
     }
 
-    private String getChrootedLocation(RegistryContext registryContext) {
+    private String getChrootedSchemaLocation(RegistryContext registryContext) {
         return RegistryUtils.getAbsolutePath(registryContext,
                 RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + schemaLocation);
+    }
+
+    private String getChrootedWADLLocation(RegistryContext registryContext) {
+        return RegistryUtils.getAbsolutePath(registryContext,
+                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + wadlLocation);
     }
 
     public void importResource(RequestContext context) {
@@ -469,6 +570,10 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
 
     public void setDisableSchemaValidation(String disableSchemaValidation) {
         this.disableSchemaValidation = Boolean.toString(true).equals(disableSchemaValidation);
+    }
+
+    public void setDisableWADLValidation(String disableWADLValidation) {
+        this.disableWADLValidation = Boolean.getBoolean(disableWADLValidation);
     }
 
     public void setUseOriginalSchema(String useOriginalSchema) {
@@ -782,6 +887,21 @@ public class ZipWSDLMediaTypeHandler extends WSDLMediaTypeHandler {
         protected void doProcessing(RequestContext requestContext, String uri)
                 throws RegistryException {
             result = addWSDLFromZip(requestContext, uri);
+        }
+    }
+
+    protected class UploadWadlTask extends UploadTask {
+
+        public UploadWadlTask(RequestContext requestContext, String uri, int tenantId,
+                              UserRegistry userRegistry, UserRealm userRealm, String userId,
+                              int callerTenantId, Map<String, String> localPathMap) {
+            super(requestContext, uri, tenantId, userRegistry, userRealm, userId, callerTenantId,
+                    localPathMap);
+
+        }
+
+        protected void doProcessing(RequestContext requestContext, String uri) throws RegistryException {
+            result = addWADLFromZip(requestContext, uri);
         }
     }
 }

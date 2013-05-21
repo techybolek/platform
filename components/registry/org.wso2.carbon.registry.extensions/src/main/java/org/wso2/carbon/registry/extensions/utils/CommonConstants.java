@@ -32,7 +32,7 @@ public class CommonConstants {
     public static final String PROCESS_BPEL_ATTRIBUTE = "definition_bpelURL";
     public static final String SLA_BPEL_ATTRIBUTE = "definition_bpelURL";
 
-    public static final String SERVICE_ELEMENT_ROOT = "serviceMetaData";
+    public static final String SERVICE_ELEMENT_ROOT = "metadata";
     public static final String SERVICE_ELEMENT_NAMESPACE =
             org.wso2.carbon.registry.common.CommonConstants.SERVICE_ELEMENT_NAMESPACE;
 

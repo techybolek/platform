@@ -90,11 +90,11 @@ public class WSDLProcessor {
             }
         };
 
-        public static synchronized void loadImportedWSDLMap() {
+        public static void loadImportedWSDLMap() {
             importedWSDLs.get();
         }
 
-        public static synchronized void clearImportedWSDLMap() {
+        public static void clearImportedWSDLMap() {
             importedWSDLs.remove();
         }
 
@@ -312,7 +312,7 @@ public class WSDLProcessor {
             if (addService && getCreateService()) {
                 List<OMElement> serviceContentBeans = createServiceContent(masterWSDLPath, metadata);
                 for (OMElement serviceContentBean : serviceContentBeans) {
-                    addService(serviceContentBean, context);
+                    CommonUtil.addService(serviceContentBean, context);
 
                 }
             }
@@ -985,12 +985,12 @@ public class WSDLProcessor {
                 OMNamespace namespace = fac.createOMNamespace(CommonConstants.SERVICE_ELEMENT_NAMESPACE, "");
                 
                 OMElement data = fac.createOMElement(CommonConstants.SERVICE_ELEMENT_ROOT, namespace);
-                OMElement wsdlurl = fac.createOMElement("wsdlURL", namespace);
+                OMElement definitionURL = fac.createOMElement("wsdlURL", namespace);
                 OMElement overview = fac.createOMElement("overview", namespace);
                 OMElement interfaceelement = fac.createOMElement("interface", namespace);
                 OMElement name = fac.createOMElement("name", namespace);
                 name.setText(qname.getLocalPart());
-                wsdlurl.setText(RegistryUtils.getRelativePath(registry.getRegistryContext(), wsdlURL));
+                definitionURL.setText(RegistryUtils.getRelativePath(registry.getRegistryContext(), wsdlURL));
                 OMElement namespaceElement = fac.createOMElement("namespace", namespace);
                 OMElement descriptionelement = fac.createOMElement("description", namespace);
 
@@ -1038,7 +1038,7 @@ public class WSDLProcessor {
                 overview.addChild(name);
                 overview.addChild(namespaceElement);
                 overview.addChild(descriptionelement);
-                interfaceelement.addChild(wsdlurl);
+                interfaceelement.addChild(definitionURL);
                 data.addChild(overview);
                 data.addChild(interfaceelement);
                 serviceContentomelements.add(data);
@@ -1072,7 +1072,7 @@ public class WSDLProcessor {
         /* This property will be used in ServiceMediatype handler to recognize that particular service addition is
             initialized due to wsdl addition
          */
-        resource.setProperty("registry.WSDLImport","true");
+        resource.setProperty("registry.DefinitionImport","true");
         if (!isWSDL) {
             registry.put(path, resource);
         } else {
@@ -1126,37 +1126,6 @@ public class WSDLProcessor {
     protected SchemaProcessor buildSchemaProcessor(RequestContext requestContext,
                                                  WSDLValidationInfo validationInfo, boolean useOriginalSchema) {
         return new SchemaProcessor(requestContext, validationInfo, useOriginalSchema);
-    }
-
-    private void addService(OMElement service, RequestContext context)throws RegistryException{
-        Resource resource = registry.newResource();
-        String tempNamespace = CommonUtil.derivePathFragmentFromNamespace(
-                CommonUtil.getServiceNamespace(service));
-        String path = getChrootedServiceLocation(registry, context.getRegistryContext()) + tempNamespace +
-                CommonUtil.getServiceName(service);
-        String content = service.toString();
-        resource.setContent(RegistryUtils.encodeString(content));
-        resource.setMediaType(RegistryConstants.SERVICE_MEDIA_TYPE);
-        // when saving the resource we are expecting to call the service media type handler, so
-        // we intentionally release the lock here.
-        boolean lockAlreadyAcquired = !CommonUtil.isUpdateLockAvailable();
-        CommonUtil.releaseUpdateLock();
-        try {
-//            We check for an existing resource and add its UUID here.
-            if(registry.resourceExists(path)){
-                Resource existingResource = registry.get(path);
-                resource.setUUID(existingResource.getUUID());
-            }
-            saveResource(context, CommonUtil.getWSDLURL(service), path, resource, false);
-        } finally {
-            if (lockAlreadyAcquired) {
-                CommonUtil.acquireUpdateLock();
-            }
-        }
-        registry.addAssociation(path,RegistryUtils.getAbsolutePath(registry.getRegistryContext(),
-                CommonUtil.getWSDLURL(service)), CommonConstants.DEPENDS);
-        registry.addAssociation(RegistryUtils.getAbsolutePath(registry.getRegistryContext(),
-                CommonUtil.getWSDLURL(service)),path, CommonConstants.USED_BY);
     }
 
 }
