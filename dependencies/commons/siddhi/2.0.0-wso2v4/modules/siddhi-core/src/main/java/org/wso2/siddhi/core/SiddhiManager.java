@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiConfiguration;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.exception.DifferentDefinitionAlreadyExistException;
+import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.exception.QueryNotExistException;
 import org.wso2.siddhi.core.persistence.PersistenceService;
 import org.wso2.siddhi.core.persistence.PersistenceStore;
@@ -41,6 +42,7 @@ import org.wso2.siddhi.core.table.RDBMSEventTable;
 import org.wso2.siddhi.core.treaser.EventTracer;
 import org.wso2.siddhi.core.treaser.EventTracerService;
 import org.wso2.siddhi.core.util.generator.GlobalIndexGenerator;
+import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
@@ -49,6 +51,7 @@ import org.wso2.siddhi.query.api.query.Query;
 import org.wso2.siddhi.query.compiler.SiddhiCompiler;
 import org.wso2.siddhi.query.compiler.exception.SiddhiPraserException;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
@@ -112,7 +115,7 @@ public class SiddhiManager {
             streamTableDefinitionMap.put(streamDefinition.getStreamId(), streamDefinition);
             StreamJunction streamJunction = streamJunctionMap.get(streamDefinition.getStreamId());
             if (streamJunction == null) {
-                streamJunction = new StreamJunction(streamDefinition.getStreamId(),siddhiContext.getEventTracerService());
+                streamJunction = new StreamJunction(streamDefinition.getStreamId(), siddhiContext.getEventTracerService());
                 streamJunctionMap.put(streamDefinition.getStreamId(), streamJunction);
             }
             InputHandler inputHandler = new InputHandler(streamDefinition.getStreamId(), streamJunction, siddhiContext);
@@ -201,7 +204,7 @@ public class SiddhiManager {
     }
 
 
-        public void defineTable(String tableDefinition) throws SiddhiPraserException {
+    public void defineTable(String tableDefinition) throws SiddhiPraserException {
         defineTable(SiddhiCompiler.parseTableDefinition(tableDefinition));
 
     }
@@ -282,6 +285,23 @@ public class SiddhiManager {
 
     }
 
+    public void addExecutionPlan(String executionPlan) throws SiddhiPraserException {
+        List<ExecutionPlan> executionPlanList = SiddhiCompiler.parse(executionPlan);
+        for (ExecutionPlan plan : executionPlanList) {
+            if (plan instanceof Query) {
+                addQuery((Query) plan);
+            } else if (plan instanceof StreamDefinition) {
+                defineStream((StreamDefinition) plan);
+            } else if (plan instanceof TableDefinition) {
+                defineTable((TableDefinition) plan);
+            } else if (plan instanceof PartitionDefinition) {
+                definePartition((PartitionDefinition) plan);
+            } else {
+                throw new OperationNotSupportedException(plan.getClass().getName() + " is not supported as an execution plan element ");
+            }
+        }
+    }
+
     public void removeQuery(String queryId) {
         QueryManager queryManager = queryProcessorMap.remove(queryId);
         if (queryManager != null) {
@@ -318,7 +338,7 @@ public class SiddhiManager {
         streamCallback.setSiddhiContext(siddhiContext);
         StreamJunction streamJunction = streamJunctionMap.get(streamId);
         if (streamJunction == null) {
-            streamJunction = new StreamJunction(streamId,siddhiContext.getEventTracerService());
+            streamJunction = new StreamJunction(streamId, siddhiContext.getEventTracerService());
             streamJunctionMap.put(streamId, streamJunction);
         }
         streamJunction.addEventFlow(streamCallback);
