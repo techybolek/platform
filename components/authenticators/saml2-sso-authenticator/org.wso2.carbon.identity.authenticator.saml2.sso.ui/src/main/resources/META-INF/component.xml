@@ -21,7 +21,7 @@
             <id>saml_sso_auth</id>
             <i18n-key>saml.sso.menu</i18n-key>
             <i18n-bundle>org.wso2.carbon.identity.sso.saml.ui.i18n.Resources</i18n-bundle>
-            <link>../sso-saml/manage_service_providers.jsp</link>
+            <!--link>../sso-saml/manage_service_providers.jsp</link-->
             <skip-authentication>
                 <skip-link>../sso-acs/redirect.jsp</skip-link>
                 <skip-link>../sso-acs/notifications.jsp</skip-link>
