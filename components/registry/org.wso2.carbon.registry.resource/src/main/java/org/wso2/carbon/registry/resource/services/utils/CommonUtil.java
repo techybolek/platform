@@ -32,7 +32,7 @@ public class CommonUtil {
 
     private static NotificationService registryNotificationService;
 
-    public static synchronized void setRegistryService(RegistryService service) {
+    public static void setRegistryService(RegistryService service) {
         registryService = service;
     }
 

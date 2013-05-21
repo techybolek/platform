@@ -18,12 +18,9 @@ package org.wso2.carbon.registry.resource.services.utils;
 
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.impl.dom.factory.OMDOMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.om.xpath.AXIOMXPath;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,25 +33,20 @@ import org.wso2.carbon.registry.core.config.RemoteConfiguration;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.resource.beans.CollectionContentBean;
 import org.wso2.carbon.registry.resource.beans.ContentBean;
 import org.wso2.carbon.registry.resource.beans.ContentDownloadBean;
 import org.wso2.carbon.registry.resource.download.DownloadManagerService;
 import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.utils.ServerConstants;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletOutputStream;
 import javax.xml.namespace.QName;
 import java.io.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -369,7 +361,7 @@ public class ContentUtil {
                 DataOutputStream _fos = new DataOutputStream(new FileOutputStream(_tmp));
                 byte[] _bytes = IOUtils.toByteArray(bean.getContent().getInputStream());
 
-                createDependencies(associations,registry,zipDependencyPath,path,COLLECTION, AXIOMUtil.stringToOM(new String(_bytes)),_fos,true);
+                createDependencies(associations,registry,zipDependencyPath,path,COLLECTION, new String(_bytes),_fos,true);
 
                 ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile));
                 zipDir(zipDirPath, zos);
@@ -422,7 +414,7 @@ public class ContentUtil {
     }
 
         private static void createDependencies(Association[] associations, UserRegistry registry, String zipDependencyPath,
-                                           String scrPath, String COLLECTION,OMElement srcOMElement,DataOutputStream srcOutputStream,boolean isMasterArtifact) throws Exception {
+                                           String scrPath, String COLLECTION,String content,DataOutputStream srcOutputStream,boolean isMasterArtifact) throws Exception {
         for (Association associationBean : associations) {
             if (isADependency(associationBean, registry, scrPath, COLLECTION)) {
                 ContentDownloadBean dependencyBean = GetDownloadContentUtil.getContentDownloadBean(associationBean.getDestinationPath(), registry);
@@ -430,17 +422,19 @@ public class ContentUtil {
                 File tmp = new File(zipDependencyPath + File.separator + dependencyBean.getResourceName());
                 DataOutputStream fos = new DataOutputStream(new FileOutputStream(tmp));
                 byte[] bytes = IOUtils.toByteArray(dependencyContentStream);
-                OMElement subElement = AXIOMUtil.stringToOM(new String(bytes));
                 createDependencies(registry.getAssociations(associationBean.getDestinationPath(),"depends"),
-                        registry,zipDependencyPath,associationBean.getDestinationPath(),COLLECTION,subElement,fos,false);
+                        registry,zipDependencyPath,associationBean.getDestinationPath(),COLLECTION,new String(bytes),fos,false);
             }
         }
 
         if(scrPath.endsWith(".wsdl") || scrPath.endsWith(".xsd")) {
+            OMElement srcOMElement = AXIOMUtil.stringToOM(content);
             updateSchemaImports(srcOMElement,isMasterArtifact);
             updateWSDLImports(srcOMElement,isMasterArtifact);
+            IOUtils.write(srcOMElement.toString().getBytes(), srcOutputStream);
+        } else {
+            IOUtils.write(content.getBytes(), srcOutputStream);
         }
-        IOUtils.write(srcOMElement.toString().getBytes(), srcOutputStream);
 
     }
 
