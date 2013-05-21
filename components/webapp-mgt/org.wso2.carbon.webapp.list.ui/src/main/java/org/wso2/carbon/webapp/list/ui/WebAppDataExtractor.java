@@ -18,6 +18,8 @@ package org.wso2.carbon.webapp.list.ui;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -37,58 +39,77 @@ public class WebAppDataExtractor {
         this.jaxWSMap = jaxWSMap;
     }
 
-    public void getServletXML(InputStream inputStream) throws Exception{
+    public void getServletXML(InputStream inputStream) throws Exception {
         jaxWSMap.clear();
         jaxRSMap.clear();
-        byte[] buffer = new byte[2048];
+        String cxfConfigeFileName = "";
         ZipInputStream stream = new ZipInputStream(inputStream);
 
-        try
-        {
+        try {
 
             ZipEntry entry;
-            while((entry = stream.getNextEntry())!=null)
-            {
-                if(!entry.getName().equals("WEB-INF/cxf-servlet.xml")){
-                    continue;
-                }
-                int len = 0;
-                String output="";
-                while ((len = stream.read(buffer)) > 0)
-                {
-                    output+=(new String(buffer));
-                    buffer = new byte[2048];
+
+            HashMap<String, byte[]> map = new HashMap<String, byte[]>();
+            while ((entry = stream.getNextEntry()) != null) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                byte[] buff = new byte[1024];
+                int count;
+
+                while ((count = stream.read(buff)) != -1) {
+                    baos.write(buff, 0, count);
                 }
 
-                output = stripNonValidXMLCharacters(output);
-                OMElement element = AXIOMUtil.stringToOM(output);
+                String filename = entry.getName();
+                byte[] bytes = baos.toByteArray();
+                map.put(filename, bytes);
+            }
 
-                Iterator<OMElement> iterator = element.getChildrenWithName(new QName(
-                        "http://cxf.apache.org/jaxws", "endpoint"));
-                while (iterator.hasNext()) {
-                    OMElement temp = iterator.next();
-                    jaxWSMap.put(temp.getAttribute(new QName("id"))
-                            .getAttributeValue(),
-                            temp.getAttribute(new QName("address"))
-                                    .getAttributeValue());
+            String retVal = getConfigurationSourceName(new String(map.get("WEB-INF/web.xml")));
+            cxfConfigeFileName = (!retVal.equalsIgnoreCase("") && !retVal.equalsIgnoreCase(null)) ? retVal : "WEB-INF/cxf-servlet.xml";
 
-                }
+            String configFile = new String(map.get(cxfConfigeFileName));
+            map = null;
 
-                iterator = element.getChildrenWithName(new QName(
-                        "http://cxf.apache.org/jaxrs", "server"));
-                while (iterator.hasNext()) {
-                    OMElement temp = iterator.next();
-                    jaxRSMap.put(temp.getAttribute(new QName("id"))
-                            .getAttributeValue(),
-                            temp.getAttribute(new QName("address"))
-                                    .getAttributeValue());
+            configFile = stripNonValidXMLCharacters(configFile);
+            OMElement element = AXIOMUtil.stringToOM(configFile);
 
-                }
+
+            Iterator<OMElement> iterator = element.getChildrenWithName(new QName(
+                    "http://cxf.apache.org/jaxws", "endpoint"));
+            while (iterator.hasNext()) {
+                OMElement temp = iterator.next();
+                jaxWSMap.put(temp.getAttribute(new QName("id"))
+                        .getAttributeValue(),
+                        temp.getAttribute(new QName("address"))
+                                .getAttributeValue());
 
             }
-        }
-        finally
-        {
+
+            iterator = element.getChildrenWithName(new QName(
+                    "http://cxf.apache.org/jaxws", "server"));
+            while (iterator.hasNext()) {
+                OMElement temp = iterator.next();
+                jaxWSMap.put(temp.getAttribute(new QName("id"))
+                        .getAttributeValue(),
+                        temp.getAttribute(new QName("address"))
+                                .getAttributeValue());
+
+            }
+
+            iterator = element.getChildrenWithName(new QName(
+                    "http://cxf.apache.org/jaxrs", "server"));
+            while (iterator.hasNext()) {
+                OMElement temp = iterator.next();
+                jaxRSMap.put(temp.getAttribute(new QName("id"))
+                        .getAttributeValue(),
+                        temp.getAttribute(new QName("address"))
+                                .getAttributeValue());
+
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
             stream.close();
         }
     }
@@ -111,27 +132,67 @@ public class WebAppDataExtractor {
         return out.toString();
     }
 
-    public List getWSDLs(String serverURL){
-        List<String> list=new ArrayList<String>();
-        Iterator<String> iterator=jaxWSMap.keySet().iterator();
-        while (iterator.hasNext())  {
-            list.add(serverURL+"services"+jaxWSMap.get(iterator.next())+"?wsdl");
+    public List getWSDLs(String serverURL) {
+        List<String> list = new ArrayList<String>();
+        Iterator<String> iterator = jaxWSMap.keySet().iterator();
+        while (iterator.hasNext()) {
+            list.add(serverURL + "services" + jaxWSMap.get(iterator.next()) + "?wsdl");
         }
-        if(list.size()==0){
+        if (list.size() == 0) {
             return null;
         }
         return list;
     }
 
-    public List getWADLs(String serverURL){
-        List<String> list=new ArrayList<String>();
-        Iterator<String> iterator=jaxRSMap.keySet().iterator();
-        while (iterator.hasNext())  {
-            list.add(serverURL+"services"+jaxRSMap.get(iterator.next())+"?_wadl");
+    public List getWADLs(String serverURL) {
+        List<String> list = new ArrayList<String>();
+        Iterator<String> iterator = jaxRSMap.keySet().iterator();
+        while (iterator.hasNext()) {
+            list.add(serverURL + "services" + jaxRSMap.get(iterator.next()) + "?_wadl");
         }
-        if(list.size()==0){
+        if (list.size() == 0) {
             return null;
         }
         return list;
+    }
+
+    /**
+     * This method reads the web.xml file and seach for whether cxf configuration file is included
+     *
+     * @param String
+     * @return cxf file localtion
+     */
+
+    private String getConfigurationSourceName(String stream) {
+        String configName = "";
+
+        try {
+            stream = stripNonValidXMLCharacters(stream);
+            OMElement ome = AXIOMUtil.stringToOM(stream);
+
+            Iterator<OMElement> omElementIterator = ome.getChildElements();
+            while (omElementIterator.hasNext()) {
+                OMElement levelOne = omElementIterator.next();
+                Iterator<OMElement> levelTwo = (Iterator<OMElement>) levelOne.getChildElements();
+
+                while (levelTwo.hasNext()) {
+                    OMElement levelThree = levelTwo.next();
+                    Iterator<OMElement> levelFour = levelThree.getChildrenWithNamespaceURI("http://java.sun.com/xml/ns/javaee");
+                    while (levelFour.hasNext()) {
+                        OMElement ConfigurationName = levelFour.next();
+
+                        if (ConfigurationName.getText().toString().equalsIgnoreCase("config-location")) {
+                            configName = levelFour.next().getText();
+                            return configName.substring(1);
+                        }
+                    }
+                }
+
+            }
+            return configName;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
     }
 }
