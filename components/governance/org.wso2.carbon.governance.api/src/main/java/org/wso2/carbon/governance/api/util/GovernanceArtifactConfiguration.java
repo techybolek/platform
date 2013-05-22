@@ -38,6 +38,7 @@ public class GovernanceArtifactConfiguration {
     private String singularLabel;
     private String pluralLabel;
     private String pathExpression;
+    private String lifecycle;
     private OMElement uiConfigurations;
     private List<Association> relationships = new LinkedList<Association>();
     private OMElement contentDefinition;
@@ -398,6 +399,24 @@ public class GovernanceArtifactConfiguration {
      */
     public void setPathExpression(String pathExpression) {
         this.pathExpression = pathExpression;
+    }
+
+    /**
+     * Method to obtain the lifecycle associated with the artifact configuration
+     *
+     * @return Lifecycle name associated with the artifact configuration
+     */
+    public String getLifecycle() {
+        return lifecycle;
+    }
+
+    /**
+     * Method to associate lifecycle with the artifact configuration
+     *
+     * @param lifecycle Name of the lifecycle associated with the artifact configuration
+     */
+    public void setLifecycle(String lifecycle) {
+        this.lifecycle = lifecycle;
     }
 
     /**

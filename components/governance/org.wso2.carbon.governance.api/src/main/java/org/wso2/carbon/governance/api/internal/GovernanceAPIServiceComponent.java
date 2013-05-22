@@ -20,7 +20,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.registry.common.AttributeSearchService;
 import org.wso2.carbon.registry.core.service.RegistryService;
+
+
 
 /**
  * The Governance API Declarative Service Component.
@@ -29,6 +32,9 @@ import org.wso2.carbon.registry.core.service.RegistryService;
  * @scr.reference name="registryService.service"
  * interface="org.wso2.carbon.registry.core.service.RegistryService"
  * cardinality="1..1" policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
+ * @scr.reference name="registry.search.component"
+ * interface="org.wso2.carbon.registry.common.AttributeSearchService"
+ * cardinality="1..1" policy="dynamic" bind="setAttributeSearchService" unbind="unsetAttributeSearchService"
  */
 @SuppressWarnings({"JavaDoc", "unused"})
 public class GovernanceAPIServiceComponent {
@@ -77,5 +83,21 @@ public class GovernanceAPIServiceComponent {
     protected void unsetRegistryService(RegistryService registryService) {
         log.debug("Un-setting the Registry Service");
         GovernanceUtils.setRegistryService(null);
+    }
+
+    protected void  setAttributeSearchService(AttributeSearchService searchService){
+        if (log.isDebugEnabled()) {
+            log.debug("Setting ContentBasedSearchService");
+        }
+        GovernanceUtils.setAttributeSearchService(searchService);
+
+    }
+
+    protected void  unsetAttributeSearchService(AttributeSearchService searchService){
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting ContentBasedSearchService");
+        }
+        GovernanceUtils.setAttributeSearchService(null);
+
     }
 }

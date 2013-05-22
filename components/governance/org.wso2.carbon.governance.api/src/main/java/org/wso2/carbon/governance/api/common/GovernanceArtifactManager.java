@@ -33,6 +33,8 @@ import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.Paginate;
+import org.wso2.carbon.registry.core.utils.PaginationContext;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 
 import javax.xml.namespace.QName;
@@ -52,7 +54,9 @@ public class GovernanceArtifactManager {
     private String artifactElementRoot;
     private String artifactElementNamespace;
     private String pathExpression;
+    private String lifecycle;
     private List<Association> relationshipDefinitions;
+    private List<Map> validationAttributes;
 
     /**
      * Constructor accepting an instance of the registry, and also details on the type of manager.
@@ -81,6 +85,42 @@ public class GovernanceArtifactManager {
         this.artifactElementRoot = artifactElementRoot;
         this.artifactElementNamespace = artifactElementNamespace;
         this.pathExpression = pathExpression;
+        this.relationshipDefinitions = Arrays.asList(relationshipDefinitions);
+    }
+
+    /**
+     * Constructor accepting an instance of the registry, and also details on the type of manager.
+     *
+     * @param registry                   the instance of the registry.
+     * @param mediaType                  the media type of resources being saved or fetched.
+     * @param artifactNameAttribute      the attribute that specifies the name of the artifact.
+     * @param artifactNamespaceAttribute the attribute that specifies the namespace of the artifact.
+     * @param artifactElementRoot        the attribute that specifies the root artifact element.
+     * @param artifactElementNamespace   the attribute that specifies the artifact element's
+     *                                   namespace.
+     * @param pathExpression             the expression that can be used to compute where to store
+     *                                   the artifact.
+     * @param lifecycle                  the lifecycle name which associated with the artifacts
+     * @param validationAttributes       the validations for artifact attributes
+     * @param relationshipDefinitions    the relationship definitions for the types of associations
+     *                                   that will be created when the artifact gets updated.
+     *
+     */
+    public GovernanceArtifactManager(Registry registry, String mediaType,
+                                     String artifactNameAttribute,
+                                     String artifactNamespaceAttribute, String artifactElementRoot,
+                                     String artifactElementNamespace, String pathExpression,
+                                     String lifecycle, List<Map> validationAttributes,
+                                     Association[] relationshipDefinitions) {
+        this.registry = registry;
+        this.mediaType = mediaType;
+        this.artifactNameAttribute = artifactNameAttribute;
+        this.artifactNamespaceAttribute = artifactNamespaceAttribute;
+        this.artifactElementRoot = artifactElementRoot;
+        this.artifactElementNamespace = artifactElementNamespace;
+        this.pathExpression = pathExpression;
+        this.lifecycle = lifecycle;
+        this.validationAttributes = validationAttributes;
         this.relationshipDefinitions = Arrays.asList(relationshipDefinitions);
     }
 
@@ -123,7 +163,7 @@ public class GovernanceArtifactManager {
             log.error(msg);
             throw new GovernanceException(msg);
         }
-
+        validateArtifact(artifact);
         String artifactName = artifact.getQName().getLocalPart();
         artifact.setAttributes(artifactNameAttribute,
                 new String[]{artifactName});
@@ -153,6 +193,10 @@ public class GovernanceArtifactManager {
             String artifactId = artifact.getId();
             resource.setUUID(artifactId);
             registry.put(path, resource);
+
+            if (lifecycle != null){
+                registry.associateAspect(path, lifecycle);
+            }
 
             ((GovernanceArtifactImpl)artifact).updatePath();
 //            artifact.setId(resource.getUUID()); //This is done to get the UUID of a existing resource.
@@ -309,6 +353,7 @@ public class GovernanceArtifactManager {
         boolean succeeded = false;
         try {
             registry.beginTransaction();
+            validateArtifact(artifact);
             GovernanceArtifact oldArtifact = getGovernanceArtifact(artifact.getId());
             // first check for the old artifact and remove it.
             String oldPath = null;
@@ -339,7 +384,7 @@ public class GovernanceArtifactManager {
             Resource resource = registry.newResource();
             resource.setMediaType(mediaType);
             setContent(artifact, resource);
-             String path = GovernanceUtils.getPathFromPathExpression(
+            String path = GovernanceUtils.getPathFromPathExpression(
                     pathExpression, artifact);
 
             if (oldPath != null) {
@@ -536,6 +581,27 @@ public class GovernanceArtifactManager {
      * @return the artifacts that match.
      * @throws GovernanceException if the operation failed.
      */
+    public GovernanceArtifact[] findGovernanceArtifacts(Map<String, List<String>> criteria)
+            throws GovernanceException {
+        List<GovernanceArtifact> artifacts;
+        PaginationContext context = PaginationContext.getInstance();
+        artifacts = GovernanceUtils.findGovernanceArtifacts(criteria != null ? criteria :
+                Collections.<String, List<String>>emptyMap(), registry, mediaType);
+        if (artifacts != null) {
+            return artifacts.toArray(new GovernanceArtifact[artifacts.size()]);
+        } else {
+            return new GovernanceArtifact[0];
+        }
+    }
+
+    /**
+     * Finds all artifacts matching the given filter criteria.
+     *
+     * @param criteria the filter criteria to be matched.
+     *
+     * @return the artifacts that match.
+     * @throws GovernanceException if the operation failed.
+     */
     public GovernanceArtifact[] findGovernanceArtifacts(GovernanceArtifactFilter criteria)
             throws GovernanceException {
         List<GovernanceArtifact> artifacts = new ArrayList<GovernanceArtifact>();
@@ -556,6 +622,17 @@ public class GovernanceArtifactManager {
      * @throws GovernanceException if the operation failed.
      */
     public GovernanceArtifact[] getAllGovernanceArtifacts() throws GovernanceException {
+        List<String> paths = getPaginatedGovernanceArtifacts();
+
+        GovernanceArtifact[] artifacts = new GovernanceArtifact[paths.size()];
+        for (int i = 0; i < paths.size(); i++) {
+            artifacts[i] = GovernanceUtils.retrieveGovernanceArtifactByPath(registry, paths.get(i));
+        }
+        return artifacts;
+    }
+
+    @Paginate("getPaginatedGovernanceArtifacts")
+    public List<String> getPaginatedGovernanceArtifacts() throws GovernanceException {
         List<String> paths =
                 Arrays.asList(GovernanceUtils.getResultPaths(registry,
                         mediaType));
@@ -590,12 +667,7 @@ public class GovernanceArtifactManager {
                 return l2.compareTo(l1);
             }
         });
-
-        GovernanceArtifact[] artifacts = new GovernanceArtifact[paths.size()];
-        for (int i = 0; i < paths.size(); i++) {
-            artifacts[i] = GovernanceUtils.retrieveGovernanceArtifactByPath(registry, paths.get(i));
-        }
-        return artifacts;
+        return paths;
     }
 
     /**
@@ -628,6 +700,89 @@ public class GovernanceArtifactManager {
 
         public void setInteger(Integer integer) {
             this.integer = integer;
+        }
+    }
+
+    /**
+     * Retrieve all the governance artifacts which associated with the given lifecycle
+     *
+     * @param lcName Name of the lifecycle
+     *
+     * @return GovernanceArtifact array
+     * @throws GovernanceException
+     */
+    public GovernanceArtifact[] getAllGovernanceArtifactsByLifecycle(String lcName) throws GovernanceException {
+        String[] paths = GovernanceUtils.getAllArtifactPathsByLifecycle(registry, lcName, mediaType);
+        if (paths == null){
+            return new GovernanceArtifact[0];
+        }
+        GovernanceArtifact[] artifacts = new GovernanceArtifact[paths.length];
+        for(int i=0; i<paths.length; i++){
+            artifacts[i] = GovernanceUtils.retrieveGovernanceArtifactByPath(registry, paths[i]);
+        }
+
+        return artifacts;
+    }
+
+    /**
+     * Retrieve all the governance artifacts which associated with the given lifecycle in the given lifecycle state
+     *
+     * @param lcName  Name of the lifecycle
+     * @param lcState Name of the current lifecycle state
+     *
+     * @return GovernanceArtifact array
+     * @throws GovernanceException
+     */
+    public GovernanceArtifact[] getAllGovernanceArtifactsByLIfecycleStatus(String lcName, String lcState)
+            throws GovernanceException {
+        String[] paths = GovernanceUtils.getAllArtifactPathsByLifecycleState(registry, lcName, lcState, mediaType);
+        if (paths == null){
+            return new GovernanceArtifact[0];
+        }
+        GovernanceArtifact[] artifacts = new GovernanceArtifact[paths.length];
+        for(int i=0; i<paths.length; i++){
+            artifacts[i] = GovernanceUtils.retrieveGovernanceArtifactByPath(registry, paths[i]);
+        }
+
+        return artifacts;
+    }
+
+    private void validateArtifact(GovernanceArtifact artifact)
+            throws GovernanceException{
+        if(validationAttributes == null){
+            return;
+        }
+        Map<String, Object> map;
+        for (int i=0; i<validationAttributes.size(); ++i) {
+            map = validationAttributes.get(i);
+            String value = "";
+            String prop = (String)map.get("properties");
+            List<String> keys = (List<String>)map.get("keys");
+
+            if (prop != null && "unbounded".equals(prop)) {
+                //assume there are only 1 key
+                String[] values = artifact.getAttributes((String)keys.get(0));
+                if (values != null) {
+                    for (int j=0; j<values.length; ++j) {
+                        if (!values[j].matches((String)map.get("regexp"))) {
+                            //return an exception to stop adding artifact
+                            throw new GovernanceException((String)map.get("name") + " doesn't match regex: " +
+                                    (String)map.get("Regexp"));
+                        }
+                    }
+                }
+            } else {
+                for (int j=0; j<keys.size(); ++j) {
+                    String v = artifact.getAttribute(keys.get(j));
+                    if (j != 0) value += ":";
+                    value += (v == null ? "" : v);
+                }
+                if (!value.matches((String)map.get("regexp"))) {
+                    //return an exception to stop adding artifact
+                    throw new GovernanceException((String)map.get("name") + " doesn't match regex: " +
+                            (String)map.get("Regexp"));
+                }
+            }
         }
     }
 }

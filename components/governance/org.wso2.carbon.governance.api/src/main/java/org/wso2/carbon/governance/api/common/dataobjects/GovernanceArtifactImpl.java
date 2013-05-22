@@ -19,6 +19,8 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMText;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.governance.api.common.util.ApproveItemBean;
+import org.wso2.carbon.governance.api.common.util.CheckListItemBean;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
@@ -26,6 +28,7 @@ import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import javax.xml.namespace.QName;
 import java.util.*;
@@ -43,9 +46,9 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
     private String path;
     private Registry registry; // associated registry
 
-    public String lcName;
-    public String lcState;
-    public String artifactPath;
+    private String lcName;
+    private String lcState;
+    private String artifactPath;
 
     public String getLcName() {
         return lcName;
@@ -79,7 +82,7 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
     /**
      * Construct a governance artifact object from the path and the id.
      *
-     * @param id   the id
+     * @param id the id
      */
     public GovernanceArtifactImpl(String id) {
         this.id = id;
@@ -98,13 +101,22 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
      * @param artifact the object to be copied.
      */
     protected GovernanceArtifactImpl(GovernanceArtifactImpl artifact) {
-        if(artifact != null) {
-        this.attributes = artifact.attributes;
-        try {
-            associateRegistry(artifact.getAssociatedRegistry());
-        } catch (GovernanceException ignored) {
-        }
-        setId(artifact.getId());
+        if (artifact != null) {
+            this.attributes = artifact.attributes;
+            this.lcName = artifact.lcName;
+            this.lcState = artifact.lcState;
+//            if (artifact.checkListItemBeans != null) {
+//                this.checkListItemBeans = Arrays.copyOf(artifact.checkListItemBeans, artifact.checkListItemBeans.length);
+//            }
+//            if (artifact.approveItemBeans != null) {
+//                this.approveItemBeans = Arrays.copyOf(artifact.approveItemBeans, artifact.approveItemBeans.length);
+//            }
+            this.artifactPath = artifact.artifactPath;
+            try {
+                associateRegistry(artifact.getAssociatedRegistry());
+            } catch (GovernanceException ignored) {
+            }
+            setId(artifact.getId());
         }
     }
 
@@ -113,7 +125,6 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
      *
      * @param id             the resource identifier.
      * @param contentElement an XML element containing the content.
-     *
      * @throws GovernanceException if the construction fails.
      */
     public GovernanceArtifactImpl(String id, OMElement contentElement) throws GovernanceException {
@@ -160,7 +171,7 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
     }
 
     public static GovernanceArtifactImpl create(final Registry registry, final String artifactId,
-                                            final OMElement content) throws GovernanceException {
+                                                final OMElement content) throws GovernanceException {
         return new GovernanceArtifactImpl(artifactId, content) {
             {
                 associateRegistry(registry);
@@ -192,13 +203,12 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
         this.id = id;
     }
 
-    
+
     /**
      * Returns the path of the artifact, need to save the artifact before
      * getting the path.
-     * 
-     * @return here we return the path of the artifact.
      *
+     * @return here we return the path of the artifact.
      * @throws GovernanceException if an error occurred.
      */
     @Override
@@ -213,7 +223,6 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
      * Returns the name of the lifecycle associated with this artifact.
      *
      * @return the name of the lifecycle associated with this artifact.
-     *
      * @throws GovernanceException if an error occurred.
      */
     @Override
@@ -243,14 +252,13 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
      * Associates the named lifecycle with the artifact
      *
      * @param name the name of the lifecycle to be associated with this artifact.
-     *
      * @throws GovernanceException if an error occurred.
      */
     @Override
     public void attachLifecycle(String name) throws GovernanceException {
         String lifecycleName = getLifecycleName();
         try {
-            if(name == null){
+            if (name == null) {
                 GovernanceUtils.removeAspect(path, lifecycleName, registry);
                 return;
             }
@@ -262,18 +270,40 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
             }
         } catch (RegistryException e) {
             String msg = "Error in associating lifecycle for the artifact. id: " + id +
-                        ", path: " + path + ".";
-                log.error(msg, e);
-                throw new GovernanceException(msg, e);
+                    ", path: " + path + ".";
+            log.error(msg, e);
+            throw new GovernanceException(msg, e);
         }
 
     }
+
+
+    /**
+     * De-associate lifecycle associated with the artifact
+     *
+     * @throws GovernanceException if an error occurred.
+     */
+    public void detachLifecycle() throws GovernanceException {
+        String lifecycleName = getLifecycleName();
+        if (lifecycleName == null) {
+            throw new GovernanceException("No lifecycle associated with the artifact");
+        }
+        try {
+            GovernanceUtils.removeAspect(path, lifecycleName, registry);
+        } catch (RegistryException e) {
+            String msg = "Error in de-associating lifecycle for the artifact. id: " + id +
+                    ", path: " + path + ".";
+            log.error(msg, e);
+            throw new GovernanceException(msg, e);
+        }
+
+    }
+
 
     /**
      * Returns the state of the lifecycle associated with this artifact.
      *
      * @return the state of the lifecycle associated with this artifact.
-     *
      * @throws GovernanceException if an error occurred.
      */
     @Override
@@ -290,7 +320,7 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
                 }
                 Resource resource = registry.get(path);
                 for (Object object : resource.getProperties().keySet()) {
-                    String property = (String)object;
+                    String property = (String) object;
                     if (property.startsWith("registry.lifecycle.") && property.endsWith(".state")) {
                         return resource.getProperty(property);
                     }
@@ -304,7 +334,7 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
         }
         return null;
     }
-    
+
     /**
      * update the path after moving the resource.
      *
@@ -313,6 +343,7 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
     public void updatePath() throws GovernanceException {
         path = GovernanceUtils.getArtifactPath(registry, id);
     }
+
     /**
      * update the path after moving the resource.
      *
@@ -352,7 +383,6 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
      * artifact.
      *
      * @param registry the registry.
-     *
      * @throws GovernanceException throws if the operation failed.
      */
     public void associateRegistry(Registry registry) throws GovernanceException {
@@ -367,7 +397,6 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
      *
      * @param key   the key.
      * @param value the value.
-     *
      * @throws GovernanceException throws if the operation failed.
      */
     @Override
@@ -386,7 +415,6 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
      *
      * @param key       the key
      * @param newValues the value
-     *
      * @throws GovernanceException throws if the operation failed.
      */
     @Override
@@ -405,7 +433,6 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
      *
      * @param key      the key
      * @param newValue the value
-     *
      * @throws GovernanceException throws if the operation failed.
      */
     @Override
@@ -419,7 +446,6 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
      * Returns the attribute of a given key.
      *
      * @param key the key
-     *
      * @return the value of the attribute, if there are more than one attribute for the key this
      *         returns the first value.
      * @throws GovernanceException throws if the operation failed.
@@ -452,7 +478,6 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
      * Returns the attribute values for a key.
      *
      * @param key the key.
-     *
      * @return attribute values for the key.
      * @throws GovernanceException throws if the operation failed.
      */
@@ -469,7 +494,6 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
      * Remove attribute with the given key. The artifact should be saved to get effect the change.
      *
      * @param key the key
-     *
      * @throws GovernanceException throws if the operation failed.
      */
     @Override
@@ -494,9 +518,11 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
                     registry.getAssociations(path, GovernanceConstants.DEPENDS);
             for (Association association : associations) {
                 String destinationPath = association.getDestinationPath();
-                GovernanceArtifact governanceArtifact =
-                        GovernanceUtils.retrieveGovernanceArtifactByPath(registry, destinationPath);
-                governanceArtifacts.add(governanceArtifact);
+                if (!destinationPath.equals(path)) {
+                    GovernanceArtifact governanceArtifact =
+                            GovernanceUtils.retrieveGovernanceArtifactByPath(registry, destinationPath);
+                    governanceArtifacts.add(governanceArtifact);
+                }
             }
         } catch (RegistryException e) {
             String msg = "Error in getting dependencies from the artifact. id: " + id +
@@ -524,9 +550,11 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
                     registry.getAssociations(path, GovernanceConstants.USED_BY);
             for (Association association : associations) {
                 String destinationPath = association.getDestinationPath();
-                GovernanceArtifact governanceArtifact =
-                        GovernanceUtils.retrieveGovernanceArtifactByPath(registry, destinationPath);
-                governanceArtifacts.add(governanceArtifact);
+                if (!destinationPath.equals(path)) {
+                    GovernanceArtifact governanceArtifact =
+                            GovernanceUtils.retrieveGovernanceArtifactByPath(registry, destinationPath);
+                    governanceArtifacts.add(governanceArtifact);
+                }
             }
         } catch (RegistryException e) {
             String msg = "Error in getting dependents from the artifact. id: " + id +
@@ -538,12 +566,282 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
     }
 
     /**
+     * Get all lifecycle actions for the current state of the lifecycle
+     *
+     * @return Action set which can be invoked
+     * @throws org.wso2.carbon.governance.api.exception.GovernanceException
+     *          throws if the operation failed.
+     */
+    public String[] getAllLifecycleActions() throws GovernanceException {
+        String lifecycleName = getLifecycleName();
+        try {
+            return registry.getAspectActions(path, lifecycleName);
+        } catch (RegistryException e) {
+            String lifecycleState = getLifecycleState();
+            String msg = "Error while retrieving the lifecycle actions " +
+                    "for lifecycle: " + lifecycleName + " in lifecycle state: " + lifecycleState;
+            throw new GovernanceException(msg, e);
+        }
+    }
+
+    /**
+     * Invoke lifecycle action
+     *
+     * @param action lifecycle action tobe invoked
+     * @throws org.wso2.carbon.governance.api.exception.GovernanceException
+     *          throws if the operation failed.
+     */
+    public void invokeAction(String action) throws GovernanceException {
+        invokeAction(action, new HashMap<String, String>());
+    }
+
+    /**
+     * Invoke lifecycle action
+     *
+     * @param action     lifecycle action tobe invoked
+     * @param parameters extra parameters needed when promoting
+     * @throws org.wso2.carbon.governance.api.exception.GovernanceException
+     *          throws if the operation failed.
+     */
+    public void invokeAction(String action, Map<String, String> parameters) throws GovernanceException {
+        Resource artifactResource = getArtifactResource();
+        CheckListItemBean[] checkListItemBeans = GovernanceUtils.getAllCheckListItemBeans(artifactResource, this);
+        try {
+            if (checkListItemBeans != null) {
+                for (CheckListItemBean checkListItemBean : checkListItemBeans) {
+                    parameters.put(checkListItemBean.getOrder() + ".item", checkListItemBean.getValue().toString());
+                }
+            }
+            registry.invokeAspect(getArtifactPath(), getLcName(), action, parameters);
+        } catch (RegistryException e) {
+            String msg = "Invoking lifecycle action \"" + action + "\" failed";
+            log.error(msg, e);
+            throw new GovernanceException(msg, e);
+        }
+    }
+
+    /**
+     * Retrieve name set of the checklist items
+     *
+     * @return Checklist item name set
+     * @throws org.wso2.carbon.governance.api.exception.GovernanceException
+     *          throws if the operation failed.
+     */
+    public String[] getAllCheckListItemNames() throws GovernanceException {
+        Resource artifactResource = getArtifactResource();
+        CheckListItemBean[] checkListItemBeans = GovernanceUtils.getAllCheckListItemBeans(artifactResource, this);
+        if (checkListItemBeans == null) {
+            throw new GovernanceException("No checklist item found for the lifecycle: " + getLcName() +
+                    " lifecycle state: " + getLcState() + " in the artifact " + getQName().getLocalPart());
+        }
+        String[] checkListItemNames = new String[checkListItemBeans.length];
+        for (CheckListItemBean checkListItemBean : checkListItemBeans) {
+            checkListItemNames[checkListItemBean.getOrder()] = checkListItemBean.getName();
+        }
+        return checkListItemNames;
+    }
+
+    /**
+     * Check the checklist item
+     *
+     * @param order order of the checklist item need to checked
+     * @throws org.wso2.carbon.governance.api.exception.GovernanceException
+     *          throws if the operation failed.
+     */
+    public void checkLCItem(int order) throws GovernanceException {
+        Resource artifactResource = getArtifactResource();
+        CheckListItemBean[] checkListItemBeans = GovernanceUtils.getAllCheckListItemBeans(artifactResource, this);
+        if (checkListItemBeans == null || order < 0 || order >= checkListItemBeans.length) {
+            throw new GovernanceException("Invalid check list item.");
+        } else if (checkListItemBeans[order].getValue()) {
+            throw new GovernanceException("lifecycle checklist item \"" +
+                    checkListItemBeans[order].getName() + "\" already checked");
+        }
+        try {
+            setCheckListItemValue(order, true, checkListItemBeans);
+        } catch (RegistryException e) {
+            String msg = "Checking LC item failed for check list item " + checkListItemBeans[order].getName();
+            log.error(msg, e);
+            throw new GovernanceException(msg, e);
+        }
+    }
+
+    /**
+     * Check whether the given ordered lifecycle checklist item is checked or not
+     *
+     * @param order order of the checklist item need to unchecked
+     * @return whether the given ordered lifecycle checklist item is checked or not
+     * @throws org.wso2.carbon.governance.api.exception.GovernanceException
+     *          throws if the operation failed.
+     */
+    public boolean isLCItemChecked(int order) throws GovernanceException {
+        Resource artifactResource = getArtifactResource();
+        CheckListItemBean[] checkListItemBeans = GovernanceUtils.getAllCheckListItemBeans(artifactResource, this);
+        if (checkListItemBeans == null || order < 0 || order >= checkListItemBeans.length) {
+            throw new GovernanceException("Invalid check list item.");
+        }
+        return checkListItemBeans[order].getValue();
+
+    }
+
+    /**
+     * Un-check the checklist item
+     *
+     * @param order order of the checklist item need to unchecked
+     * @throws org.wso2.carbon.governance.api.exception.GovernanceException
+     *          throws if the operation failed.
+     */
+    public void uncheckLCItem(int order) throws GovernanceException {
+        Resource artifactResource = getArtifactResource();
+        CheckListItemBean[] checkListItemBeans = GovernanceUtils.getAllCheckListItemBeans(artifactResource, this);
+        if (checkListItemBeans == null || order < 0 || order >= checkListItemBeans.length) {
+            throw new GovernanceException("Invalid check list item.");
+        } else if (!checkListItemBeans[order].getValue()) {
+            throw new GovernanceException("lifecycle checklist item \"" +
+                    checkListItemBeans[order].getName() + "\" not checked");
+        }
+        try {
+            setCheckListItemValue(order, false, checkListItemBeans);
+        } catch (RegistryException e) {
+            String msg = "Unchecking LC item failed for check list item: " + checkListItemBeans[order].getName();
+            log.error(msg, e);
+            throw new GovernanceException(msg, e);
+        }
+    }
+
+    /**
+     * Set the checklist item value
+     *
+     * @param order order of the checklist item
+     * @param value value of the checklist item
+     * @throws RegistryException throws if the operation failed.
+     */
+    private void setCheckListItemValue(int order, boolean value,
+                                       CheckListItemBean[] checkListItemBeans) throws RegistryException {
+        checkListItemBeans[order].setValue(value);
+        Map<String, String> parameters = new HashMap<String, String>();
+        if (checkListItemBeans != null) {
+            for (CheckListItemBean checkListItemBean : checkListItemBeans) {
+                parameters.put(checkListItemBean.getOrder() + ".item", checkListItemBean.getValue().toString());
+            }
+        }
+        registry.invokeAspect(getArtifactPath(), getLcName(), "itemClick", parameters);
+    }
+
+    /**
+     * Retrieve action set which need votes
+     *
+     * @return Action set which can vote
+     * @throws org.wso2.carbon.governance.api.exception.GovernanceException
+     *          throws if the operation failed.
+     */
+    public String[] getAllVotingItems() throws GovernanceException {
+        Resource artifactResource = getArtifactResource();
+        ApproveItemBean[] approveItemBeans = GovernanceUtils.
+                getAllApproveItemBeans(((UserRegistry) registry).getUserName(), artifactResource, this);
+        if (approveItemBeans == null) {
+            throw new GovernanceException("No voting event found for the lifecycle: " + getLcName() +
+                    " in lifecycle state: " + getLcState() + " of the artifact " + getQName().getLocalPart());
+        }
+        String[] votingItems = new String[approveItemBeans.length];
+        for (ApproveItemBean approveItemBean : approveItemBeans) {
+            votingItems[approveItemBean.getOrder()] = approveItemBean.getName();
+        }
+        return votingItems;
+    }
+
+    /**
+     * Vote for an action
+     *
+     * @param order order of the action which need to be voted
+     * @throws org.wso2.carbon.governance.api.exception.GovernanceException
+     *          throws if the operation failed.
+     */
+    public void vote(int order) throws GovernanceException {
+        Resource artifactResource = getArtifactResource();
+        ApproveItemBean[] approveItemBeans = GovernanceUtils.
+                getAllApproveItemBeans(((UserRegistry) registry).getUserName(), artifactResource, this);
+        if (approveItemBeans == null || order < 0 || order >= approveItemBeans.length) {
+            throw new GovernanceException("Invalid voting action selected");
+        } else if (approveItemBeans[order].getValue()) {
+            throw new GovernanceException("Already voted for the action " + approveItemBeans[order].getName());
+        }
+        try {
+            setVotingItemValue(order, true, approveItemBeans);
+        } catch (RegistryException e) {
+            String msg = "Voting failed for action " + approveItemBeans[order].getName();
+            log.error(msg, e);
+            throw new GovernanceException(msg, e);
+        }
+    }
+
+    /**
+     * Check whether the current user voted for given order event
+     *
+     * @param order order of the action which need to be voted
+     * @return whether the current user voted for the given order event
+     * @throws org.wso2.carbon.governance.api.exception.GovernanceException
+     *          throws if the operation failed.
+     */
+    public boolean isVoted(int order) throws GovernanceException {
+        Resource artifactResource = getArtifactResource();
+        ApproveItemBean[] approveItemBeans = GovernanceUtils.
+                getAllApproveItemBeans(((UserRegistry) registry).getUserName(), artifactResource, this);
+        if (approveItemBeans == null || order < 0 || order >= approveItemBeans.length) {
+            throw new GovernanceException("Invalid voting action selected");
+        }
+        return approveItemBeans[order].getValue();
+    }
+
+    /**
+     * Unvote for an action
+     *
+     * @param order order of the action which need to be unvoted
+     * @throws org.wso2.carbon.governance.api.exception.GovernanceException
+     *          throws if the operation failed.
+     */
+    public void unvote(int order) throws GovernanceException {
+        Resource artifactResource = getArtifactResource();
+        ApproveItemBean[] approveItemBeans = GovernanceUtils.
+                getAllApproveItemBeans(((UserRegistry) registry).getUserName(), artifactResource, this);
+        if (approveItemBeans == null || order < 0 || order >= approveItemBeans.length) {
+            throw new GovernanceException("Invalid voting action selected");
+        } else if (!approveItemBeans[order].getValue()) {
+            throw new GovernanceException("Not voted for the action \""
+                    + approveItemBeans[order].getName() + "\"");
+        }
+        try {
+            setVotingItemValue(order, false, approveItemBeans);
+        } catch (RegistryException e) {
+            String msg = "Unvoting failed for action \"" + approveItemBeans[order].getName() + "\"";
+            log.error(msg, e);
+            throw new GovernanceException(msg, e);
+        }
+    }
+
+    /**
+     * Set the approval value
+     *
+     * @param order order of the approve event
+     * @param value value of the approve
+     * @throws RegistryException throws if the operation failed.
+     */
+    private void setVotingItemValue(int order, boolean value,
+                                    ApproveItemBean[] approveItemBeans) throws RegistryException {
+        approveItemBeans[order].setValue(value);
+        Map<String, String> parameters = new HashMap<String, String>();
+        for (ApproveItemBean approveItemBean : approveItemBeans) {
+            parameters.put(approveItemBean.getOrder() + ".vote", approveItemBean.getValue().toString());
+        }
+        registry.invokeAspect(getArtifactPath(), getLcName(), "voteClick", parameters);
+    }
+
+    /**
      * Attach the current artifact to an another artifact. Both the artifacts should be saved,
      * before calling this method. This method will two generic artifact types. There are specific
      * methods
      *
      * @param attachedToArtifact the artifact the current artifact is attached to
-     *
      * @throws GovernanceException throws if the operation failed.
      */
     protected void attach(GovernanceArtifact attachedToArtifact) throws GovernanceException {
@@ -557,8 +855,8 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
             throw new GovernanceException(msg);
         }
         try {
-            registry.addAssociation(path, attachedToArtifactPath, GovernanceConstants.DEPENDS);
             registry.addAssociation(attachedToArtifactPath, path, GovernanceConstants.USED_BY);
+            registry.addAssociation(path, attachedToArtifactPath, GovernanceConstants.DEPENDS);
         } catch (RegistryException e) {
             String msg = "Error in attaching the artifact. source id: " + id + ", path: " + path +
                     ", target id: " + attachedToArtifact.getId() + ", path:" +
@@ -575,7 +873,6 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
      * before calling this method.
      *
      * @param artifactId the artifact id of the attached artifact
-     *
      * @throws GovernanceException throws if the operation failed.
      */
     protected void detach(String artifactId) throws GovernanceException {
@@ -632,6 +929,22 @@ public abstract class GovernanceArtifactImpl implements GovernanceArtifact {
      */
     protected Registry getAssociatedRegistry() {
         return registry;
+    }
+
+    /**
+     * Get the resource related to this artifact
+     *
+     * @return resource related to this artifact
+     * @throws GovernanceException if there is no resource related to the artifact in the registry
+     */
+    private Resource getArtifactResource() throws GovernanceException {
+        Resource artifactResource;
+        try {
+            return registry.get(artifactPath);
+        } catch (RegistryException e) {
+            String msg = "Artifact resource \"" + getQName().getLocalPart() + "\" not found in the registry";
+            throw new GovernanceException();
+        }
     }
 
 }

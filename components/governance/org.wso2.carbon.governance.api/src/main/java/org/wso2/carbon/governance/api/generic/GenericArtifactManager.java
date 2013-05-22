@@ -92,7 +92,8 @@ public class GenericArtifactManager {
             manager = new GovernanceArtifactManager(registry, configuration.getMediaType(),
                     this.artifactNameAttribute, this.artifactNamespaceAttribute,
                     configuration.getArtifactElementRoot(), this.artifactElementNamespace,
-                    configuration.getPathExpression(), configuration.getRelationshipDefinitions());
+                    configuration.getPathExpression(), configuration.getLifecycle(),
+                    configuration.getValidationAttributes(), configuration.getRelationshipDefinitions());
             this.mediaType = configuration.getMediaType();
         } catch (RegistryException e) {
             throw new GovernanceException("Unable to obtain governance artifact configuration", e);
@@ -147,9 +148,10 @@ public class GenericArtifactManager {
                         artifactNamespaceAttribute, artifactElementNamespace) : null;
         if (name != null && !name.equals("")) {
             genericArtifact.setQName(new QName(namespace, name));
-        } else {
-            throw new GovernanceException("Unable to compute QName from given XML payload, " +
-                    "please ensure that the content passed in matches the configuration.");
+            //This is to fix the REGISTRY-1603.
+//        } else {
+//            throw new GovernanceException("Unable to compute QName from given XML payload, " +
+//                    "please ensure that the content passed in matches the configuration.");
         }
         return genericArtifact;
     }
@@ -214,6 +216,19 @@ public class GenericArtifactManager {
      * @return the artifacts that match.
      * @throws GovernanceException if the operation failed.
      */
+    public GenericArtifact[] findGenericArtifacts(Map<String, List<String>> criteria)
+            throws GovernanceException {
+        return getGenericArtifacts(manager.findGovernanceArtifacts(criteria));
+    }
+
+    /**
+     * Finds all artifacts matching the given filter criteria.
+     *
+     * @param criteria the filter criteria to be matched.
+     *
+     * @return the artifacts that match.
+     * @throws GovernanceException if the operation failed.
+     */
     public GenericArtifact[] findGenericArtifacts(GenericArtifactFilter criteria)
             throws GovernanceException {
         List<GenericArtifact> artifacts = new ArrayList<GenericArtifact>();
@@ -235,6 +250,31 @@ public class GenericArtifactManager {
      */
     public GenericArtifact[] getAllGenericArtifacts() throws GovernanceException {
         return getGenericArtifacts(manager.getAllGovernanceArtifacts());
+    }
+
+    /**
+     * Retrieve all the generic artifacts which associated with the given lifecycle
+     *
+     * @param lcName Name of the lifecycle
+     *
+     * @return GenericArtifact array
+     * @throws GovernanceException
+     */
+    public GenericArtifact[] getAllGenericArtifactsByLifecycle(String lcName) throws GovernanceException {
+        return getGenericArtifacts(manager.getAllGovernanceArtifactsByLifecycle(lcName));
+    }
+
+    /**
+     * Retrieve all the generic artifacts which associated with the given lifecycle in the given lifecycle state
+     *
+     * @param lcName  Name of the lifecycle
+     * @param lcState Name of the current lifecycle state
+     *
+     * @return GenericArtifact array
+     * @throws GovernanceException
+     */
+    public GenericArtifact[] getAllGenericArtifactsByLifecycleStatus(String lcName, String lcState) throws GovernanceException {
+        return getGenericArtifacts(manager.getAllGovernanceArtifactsByLIfecycleStatus(lcName, lcState));
     }
 
     // Method to obtain artifacts from governance artifacts.
@@ -259,39 +299,4 @@ public class GenericArtifactManager {
         return manager.getAllGovernanceArtifactIds();
     }
 
-    public void validateArtifact(GenericArtifact artifact, List<Map> validatationAttributes)
-            throws RegistryException{
-        Map<String, Object> map;
-        for (int i=0; i<validatationAttributes.size(); ++i) {
-            map = validatationAttributes.get(i);
-            String value = "";
-            String prop = (String)map.get("properties");
-            List<String> keys = (List<String>)map.get("keys");
-
-            if (prop != null && "unbounded".equals(prop)) {
-                //assume there are only 1 key
-                String[] values = artifact.getAttributes((String)keys.get(0));
-                if (values != null) {
-                    for (int j=0; j<values.length; ++j) {
-                        if (!values[j].matches((String)map.get("regexp"))) {
-                            //return an exception to stop adding artifact
-                            throw new RegistryException((String)map.get("name") + " doesn't match regex: " +
-                                    (String)map.get("Regexp"));
-                        }
-                    }
-                }
-            } else {
-                for (int j=0; j<keys.size(); ++j) {
-                    String v = artifact.getAttribute(keys.get(j));
-                    if (j != 0) value += ":";
-                    value += (v == null ? "" : v);
-                }
-                if (!value.matches((String)map.get("regexp"))) {
-                    //return an exception to stop adding artifact
-                    throw new RegistryException((String)map.get("name") + " doesn't match regex: " +
-                            (String)map.get("Regexp"));
-                }
-            }
-        }
-    }
 }

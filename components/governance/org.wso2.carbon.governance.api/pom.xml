@@ -124,6 +124,19 @@
                 <artifactId>wsdl4j</artifactId>
 		<scope>test</scope>
             </dependency>
+	   <dependency>
+             <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.registry.admin.api</artifactId>
+        </dependency>
+	<dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.registry.indexing</artifactId>           
+        </dependency>
+       	<dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.registry.common</artifactId>           
+        </dependency>
+ 
     </dependencies>
 
     <build>

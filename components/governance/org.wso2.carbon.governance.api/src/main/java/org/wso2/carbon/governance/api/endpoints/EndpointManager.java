@@ -26,13 +26,11 @@ import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.extensions.handlers.utils.EndpointUtils;
 import org.wso2.carbon.registry.extensions.utils.CommonUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * This provides the management functionality for endpoint artifacts stored on
@@ -287,5 +285,37 @@ public class EndpointManager {
             return getEndpoint(artifactId);
         }
         return null;
+    }
+
+
+    /**
+     * Finds all Endpoint artifacts on the registry.
+     *
+     * @return all Endpoint artifacts on the registry.
+     * @throws GovernanceException if the operation failed.
+     */
+    public Endpoint[] getAllEndpoints() throws GovernanceException {
+        List<String> endpointPaths =
+                Arrays.asList(GovernanceUtils.getResultPaths(registry,
+                        GovernanceConstants.ENDPOINT_MEDIA_TYPE));
+        Collections.sort(endpointPaths, new Comparator<String>() {
+            public int compare(String o1, String o2) {
+                // First order by name
+                int result = RegistryUtils.getResourceName(o1).compareToIgnoreCase(
+                        RegistryUtils.getResourceName(o2));
+                if (result != 0) {
+                    return result;
+                }
+                // Then order by namespace
+                return o1.compareToIgnoreCase(o2);
+            }
+        });
+        List<Endpoint> endpoints = new ArrayList<Endpoint>();
+        for (String endpointPath : endpointPaths) {
+            GovernanceArtifact artifact =
+                    GovernanceUtils.retrieveGovernanceArtifactByPath(registry, endpointPath);
+            endpoints.add((Endpoint) artifact);
+        }
+        return endpoints.toArray(new Endpoint[endpoints.size()]);
     }
 }

@@ -61,10 +61,9 @@ public class ServiceImpl extends GovernanceArtifactImpl implements Service {
     protected ServiceImpl(GovernanceArtifact service) {
         super((GovernanceArtifactImpl)service);
         this.qName = service.getQName();
-        this.lcName =(((GovernanceArtifactImpl) service).getLcName());
-        this.lcState = (((GovernanceArtifactImpl) service).getLcState());
-        this.artifactPath =(((GovernanceArtifactImpl) service).getArtifactPath());
-
+        setLcName(((GovernanceArtifactImpl) service).getLcName());
+        setLcState(((GovernanceArtifactImpl) service).getLcState());
+        setArtifactPath(((GovernanceArtifactImpl) service).getArtifactPath());
     }
 
     /**

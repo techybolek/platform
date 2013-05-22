@@ -51,9 +51,9 @@ public class GenericArtifactImpl extends GovernanceArtifactImpl implements Gener
     protected GenericArtifactImpl(GovernanceArtifact artifact, String mediaType) {
         super((GovernanceArtifactImpl)artifact);
         this.qName = artifact.getQName();
-        this.artifactPath = ((GovernanceArtifactImpl) artifact).getArtifactPath();
-        this.lcName = ((GovernanceArtifactImpl) artifact).getLcName();
-        this.lcState = ((GovernanceArtifactImpl) artifact).getLcState();
+        setArtifactPath(((GovernanceArtifactImpl) artifact).getArtifactPath());
+        setLcName(((GovernanceArtifactImpl) artifact).getLcName());
+        setLcState(((GovernanceArtifactImpl) artifact).getLcState());
         this.mediaType = mediaType;
     }
 

@@ -232,4 +232,29 @@ public class ServiceManager {
         return manager.getAllGovernanceArtifactIds();
     }
 
+    /**
+     * Retrieve all Services which associated with the given lifecycle
+     *
+     * @param lcName Name of the lifecycle
+     *
+     * @return Service array
+     * @throws GovernanceException if the operation failed.
+     */
+    public Service[] getAllServicesByLifecycle(String lcName) throws GovernanceException {
+        return (Service[]) manager.getAllGovernanceArtifactsByLifecycle(lcName);
+    }
+
+    /**
+     * Retrieve all Services which associated with the given lifecycle in the given lifecycle state
+     *
+     * @param lcName  Name of the lifecycle
+     * @param lcState Name of the current lifecycle state
+     *
+     * @return Service array
+     * @throws GovernanceException if the operation failed.
+     */
+    public Service[] getAllServicesByLifecycleStatus(String lcName, String lcState) throws GovernanceException {
+        return (Service[]) manager.getAllGovernanceArtifactsByLIfecycleStatus(lcName, lcState);
+    }
+
 }
