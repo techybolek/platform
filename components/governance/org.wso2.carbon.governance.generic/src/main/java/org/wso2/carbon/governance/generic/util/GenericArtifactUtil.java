@@ -37,7 +37,7 @@ public class GenericArtifactUtil {
 
     private static final Log log = LogFactory.getLog(GenericArtifactUtil.class);
 
-    public static String REL_RXT_BASE_PATH ;
+    public final static String REL_RXT_BASE_PATH ;
 
     static {
        REL_RXT_BASE_PATH = GovernanceConstants.RXT_CONFIGS_PATH.
@@ -51,6 +51,10 @@ public class GenericArtifactUtil {
         String rxtStoragePath = null;
 
         try {
+            if(rxtConfig == null || rxtConfig.equals("")){
+                log.error("Failed to add RXT resource , because RXT content is null or empty");
+                return false;
+            }
 
         OMElement element = buildOMElement(rxtConfig);
         if (!CommonUtil.validateXMLConfigOnSchema(
@@ -69,7 +73,7 @@ public class GenericArtifactUtil {
                 return false;
             }
 
-            if (rxtConfig != null && !rxtConfig.equals("")) {
+
                 if(path == null) {
                     resource = registry.newResource();
                     rxtStoragePath = getCalculatedRXTPath(rxtName);
@@ -77,9 +81,7 @@ public class GenericArtifactUtil {
                   resource = registry.get(getGovernanceRelativePath(path));
                   rxtStoragePath = getGovernanceRelativePath(path);
                 }
-            } else {
-                return false;
-            }
+
             resource.setContent(rxtConfig.getBytes());
             resource.setMediaType(CommonConstants.RXT_MEDIA_TYPE);
             registry.beginTransaction();
@@ -113,12 +115,9 @@ public class GenericArtifactUtil {
     }
 
     public static String getRXTKeyFromContent(String payload) throws RegistryException {
-         OMElement element = buildOMElement(payload);
-         if (element != null) {
-            return element.getAttributeValue(new QName("shortName"));
-         }  else {
-            return null;
-         }
+        OMElement element = buildOMElement(payload);
+        return element.getAttributeValue(new QName("shortName"));
+
     }
 
     public static String getArtifactUIContentFromConfig(String payload) throws RegistryException {

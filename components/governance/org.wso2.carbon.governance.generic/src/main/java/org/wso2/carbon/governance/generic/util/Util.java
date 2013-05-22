@@ -17,6 +17,7 @@ import javax.xml.validation.Validator;
 import java.io.*;
 
 public class Util {
+
     private static final Log log = LogFactory.getLog(Util.class);
 
     private static Validator serviceSchemaValidator = null;
@@ -83,4 +84,5 @@ public class Util {
         }
         return element;
     }
+
 }

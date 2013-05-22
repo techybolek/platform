@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
-import org.wso2.carbon.governance.api.generic.GenericArtifactFilter;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
@@ -35,7 +34,6 @@ import org.wso2.carbon.governance.generic.beans.ContentArtifactsBean;
 import org.wso2.carbon.governance.generic.beans.StoragePathBean;
 import org.wso2.carbon.governance.generic.util.GenericArtifactUtil;
 import org.wso2.carbon.governance.generic.util.Util;
-import org.wso2.carbon.governance.list.util.StringComparatorUtil;
 import org.wso2.carbon.governance.registry.extensions.utils.CommonUtil;
 import org.wso2.carbon.registry.admin.api.governance.IManageGenericArtifactService;
 import org.wso2.carbon.registry.common.CommonConstants;
@@ -44,6 +42,7 @@ import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.registry.indexing.IndexingConstants;
 import org.wso2.carbon.user.core.UserStoreException;
 
 import javax.xml.namespace.QName;
@@ -67,24 +66,14 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
             return null;
         }
         try {
-            XMLStreamReader reader =
-                    XMLInputFactory.newInstance().createXMLStreamReader(new StringReader(info));
+        	XMLInputFactory factory = XMLInputFactory.newInstance();
+        	factory.setProperty(XMLInputFactory.IS_COALESCING, true);
+            XMLStreamReader reader = factory.createXMLStreamReader(new StringReader(info));
 
-            GovernanceArtifactConfiguration configuration =
-                    GovernanceUtils.findGovernanceArtifactConfiguration(key, getRootRegistry());
-
-            GenericArtifactManager manager = new GenericArtifactManager(registry,
-                    configuration.getMediaType(), configuration.getArtifactNameAttribute(),
-                    configuration.getArtifactNamespaceAttribute(),
-                    configuration.getArtifactElementRoot(),
-                    configuration.getArtifactElementNamespace(),
-                    configuration.getPathExpression(),
-                    configuration.getRelationshipDefinitions());
+            GenericArtifactManager manager = new GenericArtifactManager(registry, key);
             GenericArtifact artifact = manager.newGovernanceArtifact(
                     new StAXOMBuilder(reader).getDocumentElement());
 
-            List<Map> validAttr = configuration.getValidationAttributes();
-            manager.validateArtifact(artifact, validAttr);
             manager.addGenericArtifact(artifact);
             if (lifecycleAttribute != null) {
                 String lifecycle = artifact.getAttribute(lifecycleAttribute);
@@ -109,7 +98,6 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
     }
 
     public StoragePathBean getStoragePath(String key) {
-        UserRegistry governanceRegistry = (UserRegistry) getGovernanceUserRegistry();
         StoragePathBean bean = new StoragePathBean();
         try {
             GovernanceArtifactConfiguration configuration =
@@ -223,51 +211,69 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
         return listContentArtifactsByName(mediaType, null);
     }
 
-    public ContentArtifactsBean listContentArtifactsByLC(String mediaType, String LCName, String LCState, String LCInOut, String LCStateInOut)throws RegistryException{
+    public ContentArtifactsBean listContentArtifactsByLC(String mediaType, String LCName, String LCState,
+                                                         String LCInOut, String LCStateInOut)throws RegistryException{
         RegistryUtils.recordStatistics();
+        //Construct Solr input
+        if ("Any".equals(LCName)) {
+            LCName = "[* TO *]";
+        }
         ContentArtifactsBean bean = new ContentArtifactsBean();
         UserRegistry registry = (UserRegistry)getGovernanceUserRegistry();
-        String[] paths;
-        try {
-            paths = GovernanceUtils.findGovernanceArtifacts(mediaType, registry);
-        } catch (RegistryException e) {
-            log.error("An error occurred while obtaining the list of artifacts.", e);
-            paths = new String[0];
-        }
-        String[] names = new String[paths.length];
-        String[] namespaces = new String[paths.length];
-        boolean[] canDelete = new boolean[paths.length];
-        String[] lifecycleName = new String[paths.length];
-        String[] lifecycleState = new String[paths.length];
-        for(int i = 0; i < paths.length; i++){
-            GovernanceArtifact artifact =
-                    GovernanceUtils.retrieveGovernanceArtifactByPath(registry, paths[i]);
-            if (!lcMatches(artifact, LCName, LCState, LCInOut, LCStateInOut)) {
-                continue;
+        GovernanceArtifactConfiguration configuration =
+                GovernanceUtils.findGovernanceArtifactConfigurationByMediaType(mediaType, getRootRegistry());
+
+        GenericArtifactManager manager = new GenericArtifactManager(registry,
+                configuration.getMediaType(), configuration.getArtifactNameAttribute(),
+                configuration.getArtifactNamespaceAttribute(),
+                configuration.getArtifactElementRoot(),
+                configuration.getArtifactElementNamespace(),
+                configuration.getPathExpression(),
+                configuration.getRelationshipDefinitions());
+        Map<String, List<String>> fields = new HashMap<String, List<String>>();
+        if (LCName.length() > 0) {
+            if (LCState.length() > 0) {
+                fields.put(LCStateInOut.equalsIgnoreCase("in") ? IndexingConstants.FIELD_LC_STATE : "-" +
+                        IndexingConstants.FIELD_LC_STATE, Arrays.asList(LCState));
             }
-            bean.increment();
-            names[i] = artifact.getQName().getLocalPart();
-            namespaces[i] = artifact.getQName().getNamespaceURI();
-            lifecycleName[i] = artifact.getLifecycleName();
-            lifecycleState[i] = artifact.getLifecycleState();
-            if (registry.getUserRealm() != null && registry.getUserName() != null) {
-                try {
-                    canDelete[i] =
-                            registry.getUserRealm().getAuthorizationManager().isUserAuthorized(
-                                    registry.getUserName(),
-                                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + paths[i],
-                                    ActionConstants.DELETE);
-                } catch (UserStoreException ignored) {
+            fields.put(LCInOut.equalsIgnoreCase("in") ? IndexingConstants.FIELD_LC_NAME : "-" +
+                    IndexingConstants.FIELD_LC_NAME, Arrays.asList(LCName));
+        }
+        GenericArtifact[] artifacts = manager.findGenericArtifacts(fields);
+        if (artifacts != null) {
+            String[] names = new String[artifacts.length];
+            String[] namespaces = new String[artifacts.length];
+            boolean[] canDelete = new boolean[artifacts.length];
+            String[] lifecycleName = new String[artifacts.length];
+            String[] lifecycleState = new String[artifacts.length];
+            String[] paths = new String[artifacts.length];
+            for (GenericArtifact artifact : artifacts) {
+                int i = bean.getSize();
+                paths[i] = artifact.getPath();
+                names[i] = artifact.getQName().getLocalPart();
+                namespaces[i] = artifact.getQName().getNamespaceURI();
+                lifecycleName[i] = artifact.getLifecycleName();
+                lifecycleState[i] = artifact.getLifecycleState();
+                if (registry.getUserRealm() != null && registry.getUserName() != null) {
+                    try {
+                        canDelete[i] =
+                                registry.getUserRealm().getAuthorizationManager().isUserAuthorized(
+                                        registry.getUserName(),
+                                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + paths[i],
+                                        ActionConstants.DELETE);
+                    } catch (UserStoreException ignored) {
+                    }
                 }
+                bean.increment();
             }
+            bean.setName(names);
+            bean.setNamespace(namespaces);
+            bean.setPath(paths);
+            bean.setCanDelete(canDelete);
+            bean.setLCName(lifecycleName);
+            bean.setLCState(lifecycleState);
         }
-        bean.setName(names);
-        bean.setNamespace(namespaces);
-        bean.setPath(paths);
-        bean.setCanDelete(canDelete);
-        bean.setLCName(lifecycleName);
-        bean.setLCState(lifecycleState);
-        return bean.getSize() > 1 ? sortArtifactsByName(bean) : bean;
+         return bean;
     }
 
     public ContentArtifactsBean listContentArtifactsByName(String mediaType, String criteria)
@@ -275,70 +281,119 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
         RegistryUtils.recordStatistics();
         ContentArtifactsBean bean = new ContentArtifactsBean();
         UserRegistry registry = (UserRegistry)getGovernanceUserRegistry();
-        String[] paths;
-        try {
-            paths = GovernanceUtils.findGovernanceArtifacts(mediaType, registry);
-        } catch (RegistryException e) {
-            log.error("An error occurred while obtaining the list of artifacts.", e);
-            paths = new String[0];
-        }
-        String[] names = new String[paths.length];
-        String[] namespaces = new String[paths.length];
-        boolean[] canDelete = new boolean[paths.length];
-        String[] lifecycleName = new String[paths.length];
-        String[] lifecycleState = new String[paths.length];
-        for(int i = 0; i < paths.length; i++){
-            GovernanceArtifact artifact =
-                    GovernanceUtils.retrieveGovernanceArtifactByPath(registry, paths[i]);
-            if (criteria != null && !criteria.equals("") && !nameMatches(artifact, criteria)) {
-                continue;
-            }
-            bean.increment();
-            names[i] = artifact.getQName().getLocalPart();
-            namespaces[i] = artifact.getQName().getNamespaceURI();
-            lifecycleName[i] = artifact.getLifecycleName();
-            lifecycleState[i] = artifact.getLifecycleState();
-            if (registry.getUserRealm() != null && registry.getUserName() != null) {
-                try {
-                    canDelete[i] =
-                            registry.getUserRealm().getAuthorizationManager().isUserAuthorized(
-                                    registry.getUserName(),
-                                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + paths[i],
-                                    ActionConstants.DELETE);
-                } catch (UserStoreException ignored) {
-                }
-            }
-        }
-        bean.setName(names);
-        bean.setNamespace(namespaces);
-        bean.setPath(paths);
-        bean.setCanDelete(canDelete);
-        bean.setLCName(lifecycleName);
-        bean.setLCState(lifecycleState);
-        return bean.getSize() > 1 ? sortArtifactsByName(bean) : bean;
-    }
+        GovernanceArtifactConfiguration configuration =
+                GovernanceUtils.findGovernanceArtifactConfigurationByMediaType(mediaType, getRootRegistry());
 
-    private static ContentArtifactsBean sortArtifactsByName(ContentArtifactsBean bean) {
-        List<ArtifactBean> temp = new LinkedList<ArtifactBean>();
-        for (int i = 0; i < bean.getSize(); i++) {
-            ArtifactBean artifact = new ArtifactBean();
-            artifact.setValuesA(new String[]{bean.getName()[i], bean.getNamespace()[i]});
-            artifact.setPath(bean.getPath()[i]);
-            artifact.setCanDelete(bean.getCanDelete()[i]);
-            artifact.setLCName(bean.getLCName()[i]);
-            artifact.setLCState(bean.getLCState()[i]);
-            temp.add(artifact);
+        GenericArtifactManager manager = new GenericArtifactManager(registry,
+                configuration.getMediaType(), configuration.getArtifactNameAttribute(),
+                configuration.getArtifactNamespaceAttribute(),
+                configuration.getArtifactElementRoot(),
+                configuration.getArtifactElementNamespace(),
+                configuration.getPathExpression(),
+                configuration.getRelationshipDefinitions());
+        GenericArtifact[] artifacts;
+        if (criteria == null) {
+            artifacts = manager.findGenericArtifacts(Collections.<String, List<String>>emptyMap());
+        } else {
+            artifacts = manager.findGenericArtifacts(Collections.<String, List<String>>singletonMap(
+                    configuration.getArtifactNameAttribute(), Arrays.asList(criteria)));
         }
-        ArtifactBean[] artifacts = sortArtifactsByName(temp.toArray(new ArtifactBean[temp.size()]));
-        for (int i = 0; i < bean.getSize(); i++) {
-            bean.getName()[i] = artifacts[i].getValuesA()[0];
-            bean.getNamespace()[i] = artifacts[i].getValuesA()[1];
-            bean.getPath()[i] = artifacts[i].getPath();
-            bean.getCanDelete()[i] = artifacts[i].getCanDelete();
-            bean.getLCName()[i] = artifacts[i].getLCName();
-            bean.getLCState()[i] = artifacts[i].getLCState();
+
+        if (artifacts != null) {
+            String[] names = new String[artifacts.length];
+            String[] namespaces = new String[artifacts.length];
+            boolean[] canDelete = new boolean[artifacts.length];
+            String[] lifecycleName = new String[artifacts.length];
+            String[] lifecycleState = new String[artifacts.length];
+            String[] paths = new String[artifacts.length];
+            for (GenericArtifact artifact : artifacts) {
+                int i = bean.getSize();
+                paths[i] = artifact.getPath();
+                names[i] = artifact.getQName().getLocalPart();
+                namespaces[i] = artifact.getQName().getNamespaceURI();
+                lifecycleName[i] = artifact.getLifecycleName();
+                lifecycleState[i] = artifact.getLifecycleState();
+                if (registry.getUserRealm() != null && registry.getUserName() != null) {
+                    try {
+                        canDelete[i] =
+                                registry.getUserRealm().getAuthorizationManager().isUserAuthorized(
+                                        registry.getUserName(),
+                                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + paths[i],
+                                        ActionConstants.DELETE);
+                    } catch (UserStoreException ignored) {
+                    }
+                }
+                bean.increment();
+            }
+            bean.setName(names);
+            bean.setNamespace(namespaces);
+            bean.setPath(paths);
+            bean.setCanDelete(canDelete);
+            bean.setLCName(lifecycleName);
+            bean.setLCState(lifecycleState);
         }
         return bean;
+    }
+
+    private Map<String, List<String>> getFieldsList(GovernanceArtifact referenceArtifact,
+                                              GovernanceArtifactConfiguration configuration) throws GovernanceException{
+        if (referenceArtifact == null) {
+            return Collections.<String, List<String>>emptyMap();
+        }
+        Map<String, List<String>> output = new HashMap<String, List<String>>();
+        String[] keys = referenceArtifact.getAttributeKeys();
+        boolean defaultNameMatched = false;
+        boolean defaultNamespaceMatched = false;
+
+        for (String key : keys) {
+            if ("operation".equals(key)) {
+                // this is a special case
+                continue;
+            }
+            if (key.toLowerCase().contains("count")) {
+                // we ignore the count.
+                continue;
+            }
+            String[] referenceValues = referenceArtifact.getAttributes(key);
+            if (referenceValues == null) {
+                continue;
+            }
+            else {
+                if(!defaultNameMatched &&
+                        key.equals(configuration.getArtifactNameAttribute()) &&
+                        GovernanceConstants.DEFAULT_SERVICE_NAME.
+                                equalsIgnoreCase(referenceArtifact.getAttribute(
+                                        configuration.getArtifactNameAttribute()))) {
+                    defaultNameMatched = true;
+                    continue;
+                }
+
+                if(!defaultNamespaceMatched &&
+                        key.equals(configuration.getArtifactNamespaceAttribute()) &&
+                        GovernanceConstants.DEFAULT_NAMESPACE.
+                                equals(referenceArtifact.getAttribute(
+                                        configuration.getArtifactNamespaceAttribute()))){
+                    defaultNamespaceMatched = true;
+                    continue;
+                }
+            }
+            output.put(key, Arrays.asList(referenceValues));
+        }
+        return output;
+    }
+
+    private GovernanceArtifactConfiguration loadAndFindGovernanceArtifactConfiguration(
+            String key, Registry registry) throws RegistryException {
+        List<GovernanceArtifactConfiguration> governanceArtifactConfigurations =
+                GovernanceUtils.findGovernanceArtifactConfigurations(registry);
+        GovernanceUtils.loadGovernanceArtifacts((UserRegistry) getGovernanceUserRegistry(),
+                governanceArtifactConfigurations);
+        for (GovernanceArtifactConfiguration configuration : governanceArtifactConfigurations) {
+            if (key.equals(configuration.getKey())) {
+                return configuration;
+            }
+        }
+        return null;
     }
 
     public ArtifactsBean listArtifacts(String key, String criteria) {
@@ -347,8 +402,7 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
         ArtifactsBean bean = new ArtifactsBean();
         try {
             final GovernanceArtifactConfiguration configuration =
-                    GovernanceUtils.findGovernanceArtifactConfiguration(key, getRootRegistry());
-
+                    loadAndFindGovernanceArtifactConfiguration(key, getRootRegistry());
             GenericArtifactManager manager = new GenericArtifactManager(governanceRegistry,
                     configuration.getMediaType(), configuration.getArtifactNameAttribute(),
                     configuration.getArtifactNamespaceAttribute(),
@@ -358,155 +412,75 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
                     configuration.getRelationshipDefinitions());
             final GenericArtifact referenceArtifact;
             if (criteria != null) {
-                XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(
+            	XMLInputFactory factory = XMLInputFactory.newInstance();
+            	factory.setProperty(XMLInputFactory.IS_COALESCING, true);
+                XMLStreamReader reader = factory.createXMLStreamReader(
                         new StringReader(criteria));
                 referenceArtifact = manager.newGovernanceArtifact(
                         new StAXOMBuilder(reader).getDocumentElement());
             } else {
                 referenceArtifact = null;
             }
-            GenericArtifactFilter artifactFilter = new GenericArtifactFilter() {
 
-                public boolean matches(GenericArtifact artifact) throws GovernanceException {
-                    if (referenceArtifact == null) {
-                        return true;
-                    }
-                    String[] keys = referenceArtifact.getAttributeKeys();
-                    boolean defaultNameMatched = false;
-                    boolean defaultNamespaceMatched = false;
-
-                    for (String key : keys) {
-                        if ("operation".equals(key)) {
-                            // this is a special case
-                            continue;
-                        }
-                        if (key.toLowerCase().contains("count")) {
-                            // we ignore the count.
-                            continue;
-                        }
-                        String[] referenceValues = referenceArtifact.getAttributes(key);
-                        if (referenceValues == null) {
-                            continue;
-                        }
-                        else {
-                            if(!defaultNameMatched &&
-                                    key.equals(configuration.getArtifactNameAttribute()) &&
-                                    GovernanceConstants.DEFAULT_SERVICE_NAME.
-                                    equalsIgnoreCase(referenceArtifact.getAttribute(
-                                            configuration.getArtifactNameAttribute()))) {
-                                defaultNameMatched = true;
-                                continue;
-                            }
-
-                            if(!defaultNamespaceMatched &&
-                                    key.equals(configuration.getArtifactNamespaceAttribute()) &&
-                                    GovernanceConstants.DEFAULT_NAMESPACE.
-                                    equals(referenceArtifact.getAttribute(
-                                            configuration.getArtifactNamespaceAttribute()))){
-                                defaultNamespaceMatched = true;
-                                continue;
-                            }
-                        }
-                        // all the valid keys should be satisfied..
-                        String[] realValues = artifact.getAttributes(key);
-                        if (realValues != null) {
-                            boolean satisfied = false; // either one of value should be satisfied.
-                            for (String referenceValue : referenceValues) {
-                                satisfied = false;
-                                for (String realValue : realValues) {
-                                    if (satisfied) {
-                                        continue;
-                                    }
-                                    try {
-                                        if (realValue.toLowerCase().contains(
-                                                referenceValue.toLowerCase()) ||
-                                                realValue.matches(referenceValue)) {
-                                            satisfied = true;
-                                        }
-                                    } catch (Exception e) {
-                                        String msg = "Error in performing the regular expression " +
-                                                "matches for: " + referenceValue + ".";
-                                        throw new GovernanceException(msg, e);
-                                    }
-                                }
-                                if (!satisfied) {
-                                    if (log.isDebugEnabled()) {
-                                        String msg = "key: " + key +
-                                                " is not satisfied by the service: " +
-                                                artifact.getQName() + ".";
-                                        log.debug(msg);
-                                    }
-                                    return false;
-                                }
-                            }
-                        } else {
-                            return false;
-                        }
-
-                    }
-                    return true;
-                }
-            };
             bean.setNames(configuration.getNamesOnListUI());
             bean.setTypes(configuration.getTypesOnListUI());
             bean.setKeys(configuration.getKeysOnListUI());
             String[] expressions = configuration.getExpressionsOnListUI();
             String[] keys = configuration.getKeysOnListUI();
-            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) getGovernanceUserRegistry());
-            GenericArtifact[] artifacts = manager.findGenericArtifacts(artifactFilter);
-            if (artifacts != null) {
-                List<ArtifactBean> artifactBeans = new LinkedList<ArtifactBean>();
-                for (GenericArtifact artifact : artifacts) {
-                    int kk=0;
-                    ArtifactBean artifactBean = new ArtifactBean();
-                    List<String> paths = new ArrayList<String>();
-                    List<String> values = new ArrayList<String>();
-                    String path =
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH + ((GenericArtifactImpl) artifact).getArtifactPath();
-                    artifactBean.setPath(path);
-                    for(int i=0;i<expressions.length;i++){
-                        if (expressions[i] != null) {
-                            if (expressions[i].contains("@{storagePath}") && ((GenericArtifactImpl) artifact).getArtifactPath() != null) {
+            List<GovernanceArtifact> artifacts = new LinkedList<GovernanceArtifact>();
+            artifacts.addAll(Arrays.asList(manager.findGenericArtifacts(getFieldsList(referenceArtifact, configuration))));
+            List<ArtifactBean> artifactBeans = new LinkedList<ArtifactBean>();
+            for (GovernanceArtifact artifact : artifacts) {
+                int kk=0;
+                ArtifactBean artifactBean = new ArtifactBean();
+                List<String> paths = new ArrayList<String>();
+                List<String> values = new ArrayList<String>();
+                String path =
+                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
+                                ((GenericArtifactImpl) artifact).getArtifactPath();
+                artifactBean.setPath(path);
+                for(int i=0;i<expressions.length;i++){
+                    if (expressions[i] != null) {
+                        if (expressions[i].contains("@{storagePath}") &&
+                                ((GenericArtifactImpl) artifact).getArtifactPath() != null) {
+                            paths.add(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
+                                    GovernanceUtils
+                                            .getPathFromPathExpression(expressions[i], artifact,
+                                                    ((GenericArtifactImpl) artifact).getArtifactPath()));
+                        } else {
+                            if("link".equals(bean.getTypes()[i])){
+                                paths.add(GovernanceUtils
+                                        .getPathFromPathExpression(expressions[i], artifact,
+                                                configuration.getPathExpression()));
+                            } else {
                                 paths.add(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
                                         GovernanceUtils
                                                 .getPathFromPathExpression(expressions[i], artifact,
-                                                        ((GenericArtifactImpl) artifact).getArtifactPath()));
-                            } else {
-                                if("link".equals(bean.getTypes()[i])){
-                                    paths.add(GovernanceUtils
-                                            .getPathFromPathExpression(expressions[i], artifact,
-                                                    configuration.getPathExpression()));
-                                } else {
-                                    paths.add(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH +
-                                            GovernanceUtils
-                                                    .getPathFromPathExpression(expressions[i], artifact,
-                                                            configuration.getPathExpression()));
-                                }
+                                                        configuration.getPathExpression()));
                             }
-                        } else {
-                            paths.add("");
                         }
+                    } else {
+                        paths.add("");
                     }
-                    artifactBean.setValuesB(paths.toArray(new String[paths.size()]));
-                    for (String keyForValue : keys) {
-                        if (keyForValue != null) {
-                            values.add(artifact.getAttribute(keyForValue));
-                        } else {
-                            values.add("");
-                        }
-                    }
-                    artifactBean.setValuesA(values.toArray(new String[values.size()]));
-                    artifactBean.setCanDelete(
-                            governanceRegistry.getUserRealm().getAuthorizationManager()
-                                    .isUserAuthorized(governanceRegistry.getUserName(),
-                                            path, ActionConstants.DELETE));
-                    artifactBean.setLCName(((GenericArtifactImpl) artifact).getLcName());
-                    artifactBean.setLCState(((GenericArtifactImpl) artifact).getLcState());
-                    artifactBeans.add(artifactBean);
                 }
-                bean.setArtifacts(sortArtifactsByName(
-                        artifactBeans.toArray(new ArtifactBean[artifactBeans.size()])));
+                artifactBean.setValuesB(paths.toArray(new String[paths.size()]));
+                for (String keyForValue : keys) {
+                    if (keyForValue != null) {
+                        values.add(artifact.getAttribute(keyForValue));
+                    } else {
+                        values.add("");
+                    }
+                }
+                artifactBean.setValuesA(values.toArray(new String[values.size()]));
+                artifactBean.setCanDelete(
+                        governanceRegistry.getUserRealm().getAuthorizationManager()
+                                .isUserAuthorized(governanceRegistry.getUserName(),
+                                        path, ActionConstants.DELETE));
+                artifactBean.setLCName(((GenericArtifactImpl) artifact).getLcName());
+                artifactBean.setLCState(((GenericArtifactImpl) artifact).getLcState());
+                artifactBeans.add(artifactBean);
             }
+            bean.setArtifacts(artifactBeans.toArray(new ArtifactBean[artifactBeans.size()]));
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -516,13 +490,18 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
     }
 
 
-    public ArtifactsBean listArtifactsByLC(String key, final String LCName, final String LCState, final String LCInOut, final String LCStateInOut) {
+    public ArtifactsBean listArtifactsByLC(String key, String LCName, String LCState, String LCInOut,
+                                           String LCStateInOut) {
         RegistryUtils.recordStatistics(key);
+        //Construct Solr input
+        if ("Any".equals(LCName)) {
+            LCName = "[* TO *]";
+        }
         UserRegistry governanceRegistry = (UserRegistry) getGovernanceUserRegistry();
         ArtifactsBean bean = new ArtifactsBean();
         try {
             GovernanceArtifactConfiguration configuration =
-                    GovernanceUtils.findGovernanceArtifactConfiguration(key, getRootRegistry());
+                    loadAndFindGovernanceArtifactConfiguration(key, getRootRegistry());
 
             GenericArtifactManager manager = new GenericArtifactManager(governanceRegistry,
                                                                         configuration.getMediaType(), configuration.getArtifactNameAttribute(),
@@ -532,65 +511,16 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
                                                                         configuration.getPathExpression(),
                                                                         configuration.getRelationshipDefinitions());
 
-            GenericArtifact[] artifacts =manager.findGenericArtifacts(new GenericArtifactFilter() {
-                public boolean matches(GenericArtifact genericArtifact) throws GovernanceException {
-
-                    String name = genericArtifact.getLifecycleName();
-                    String state = genericArtifact.getLifecycleState();
-
-                    if(!LCState.equalsIgnoreCase("")){
-                        if(LCInOut.equalsIgnoreCase("in") && LCStateInOut.equalsIgnoreCase("in")){
-                            if(name != null
-                               && state != null && LCState.equalsIgnoreCase(state)
-                               && LCName.equalsIgnoreCase(name)){
-                                return true;
-                            }else{
-                                return false;
-                            }
-                        } else if(LCInOut.equalsIgnoreCase("in") && !LCStateInOut.equalsIgnoreCase("in")){
-                            if(name != null
-                               && state != null && !LCState.equalsIgnoreCase(state)
-                               && LCName.equalsIgnoreCase(name)){
-                                return true;
-                            }else{
-                                return false;
-                            }
-                        } else if(!LCInOut.equalsIgnoreCase("in") && LCStateInOut.equalsIgnoreCase("in")){
-                            if(name != null
-                               && state != null && LCState.equalsIgnoreCase(state)
-                               && !LCName.equalsIgnoreCase(name)){
-                                return true;
-                            }else{
-                                return false;
-                            }
-                        } else {
-                            if(name != null
-                               && state != null && !LCState.equalsIgnoreCase(state)
-                               && !LCName.equalsIgnoreCase(name)){
-                                return true;
-                            }else{
-                                return false;
-                            }
-                        }
-
-                    }else{
-                        if(LCInOut.equalsIgnoreCase("in")){
-                            if(name != null
-                               && LCName.equalsIgnoreCase(name)){
-                                return true;
-                            }else{
-                                return false;
-                            }
-                        }else{
-                            if(!LCName.equalsIgnoreCase(name)){
-                                return true;
-                            }else{
-                                return false;
-                            }
-                        }
+            Map<String, List<String>> fields = new HashMap<String, List<String>>();
+            if (LCName.length() > 0) {
+                if (LCState.length() > 0) {
+                        fields.put(LCStateInOut.equalsIgnoreCase("in") ? IndexingConstants.FIELD_LC_STATE : "-" +
+                                IndexingConstants.FIELD_LC_STATE, Arrays.asList(LCState));
                     }
-                }
-            });
+                    fields.put(LCInOut.equalsIgnoreCase("in") ? IndexingConstants.FIELD_LC_NAME : "-" +
+                            IndexingConstants.FIELD_LC_NAME, Arrays.asList(LCName));
+            }
+            GenericArtifact[] artifacts = manager.findGenericArtifacts(fields);
 
             bean.setNames(configuration.getNamesOnListUI());
             bean.setTypes(configuration.getTypesOnListUI());
@@ -651,33 +581,6 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
         }
         return bean;
     }
-
-
-    private static ArtifactBean[] sortArtifactsByName(ArtifactBean[] artifacts) {
-        Arrays.sort(artifacts, new Comparator<ArtifactBean>()  {
-            public int compare(ArtifactBean se1, ArtifactBean se2) {
-                int res = 0;
-                for (int i = 0; i < se1.getValuesA().length; i++) {
-                    String val1 = se1.getValuesA()[i];
-                    String val2 = se2.getValuesA()[i];
-                    if (val1 != null && !val1.equals("")) {
-                        if (val1.matches(
-                                org.wso2.carbon.registry.extensions.utils.CommonConstants.SERVICE_VERSION_REGEX)) {
-                            res = StringComparatorUtil.compare(val1, val2);
-                        } else {
-                            res = val1.compareToIgnoreCase(val2);
-                        }
-                        if (res != 0) {
-                            return res;
-                        }
-                    }
-                }
-                return res;
-            }
-        });
-        return artifacts;
-    }
-
     public String editArtifact(String path, String key, String info, String lifecycleAttribute)
             throws RegistryException {
         RegistryUtils.recordStatistics(path, key, info, lifecycleAttribute);
@@ -686,19 +589,14 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
             return null;
         }
         try {
-            XMLStreamReader reader =
-                    XMLInputFactory.newInstance().createXMLStreamReader(new StringReader(info));
+        	XMLInputFactory factory = XMLInputFactory.newInstance();
+        	factory.setProperty(XMLInputFactory.IS_COALESCING, true);
+            XMLStreamReader reader = factory.createXMLStreamReader(new StringReader(info));
 
             GovernanceArtifactConfiguration configuration =
-                    GovernanceUtils.findGovernanceArtifactConfiguration(key, getRootRegistry());
+                    loadAndFindGovernanceArtifactConfiguration(key, getRootRegistry());
 
-            GenericArtifactManager manager = new GenericArtifactManager(registry,
-                    configuration.getMediaType(), configuration.getArtifactNameAttribute(),
-                    configuration.getArtifactNamespaceAttribute(),
-                    configuration.getArtifactElementRoot(),
-                    configuration.getArtifactElementNamespace(),
-                    configuration.getPathExpression(),
-                    configuration.getRelationshipDefinitions());
+            GenericArtifactManager manager = new GenericArtifactManager(registry, key);
             GenericArtifact artifact = manager.newGovernanceArtifact(
                     new StAXOMBuilder(reader).getDocumentElement());
             String currentPath;
@@ -718,25 +616,9 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
                     log.error(msg);
                     throw new Exception(msg);
                 }
-                for (String attributeKey : artifact.getAttributeKeys()) {
-                    oldArtifact.setAttributes(attributeKey, artifact.getAttributes(attributeKey));
-                }
-
-                //validates deleted attributes in update
-                for (String attributeKey : oldArtifact.getAttributeKeys()) {
-                    if(oldArtifact.getAttributes(attributeKey) != null
-                            && artifact.getAttributes(attributeKey) == null) {
-                    oldArtifact.removeAttribute(attributeKey);
-                    }
-                }
-
-                artifact = (GenericArtifact) oldArtifact;
-                List<Map> validAttr = configuration.getValidationAttributes();
-                manager.validateArtifact(artifact, validAttr);
+                artifact.setId(oldArtifact.getId());
                 manager.updateGenericArtifact(artifact);
             } else {
-                List<Map> validAttr = configuration.getValidationAttributes();
-                manager.validateArtifact(artifact, validAttr);
                 manager.addGenericArtifact(artifact);
             }
             if (lifecycleAttribute != null && !lifecycleAttribute.equals("null")) {
@@ -828,7 +710,7 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
         ArtifactsBean bean = new ArtifactsBean();
         try {
             GovernanceArtifactConfiguration configuration =
-                    GovernanceUtils.findGovernanceArtifactConfiguration(key, getRootRegistry());
+                    loadAndFindGovernanceArtifactConfiguration(key, getRootRegistry());
 
             GenericArtifactManager manager = new GenericArtifactManager(governanceRegistry,
                     configuration.getMediaType(), configuration.getArtifactNameAttribute(),
@@ -838,19 +720,8 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
                     configuration.getPathExpression(),
                     configuration.getRelationshipDefinitions());
 
-            GenericArtifact[] artifacts =manager.findGenericArtifacts(new GenericArtifactFilter() {
-                public boolean matches(GenericArtifact genericArtifact) throws GovernanceException {
-                    String local = genericArtifact.getQName().getLocalPart();
-                    if (local != null
-                            && name != null
-                            && !"".equals(name)
-                            && local.contains(name)) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            });
+            GenericArtifact[] artifacts = manager.findGenericArtifacts(Collections.<String, List<String>>singletonMap(
+                    configuration.getArtifactNameAttribute(), Arrays.asList(name)));
 
             bean.setNames(configuration.getNamesOnListUI());
             bean.setTypes(configuration.getTypesOnListUI());
@@ -900,9 +771,7 @@ public class ManageGenericArtifactService extends RegistryAbstractAdmin implemen
                     artifactBean.setLCState(artifact.getLifecycleState());
                     artifactBeans.add(artifactBean);
                 }
-                bean.setArtifacts(sortArtifactsByName(
-                        artifactBeans.toArray(new ArtifactBean[artifactBeans.size()])));
-
+                bean.setArtifacts(artifactBeans.toArray(new ArtifactBean[artifactBeans.size()]));
             }
         } catch (RuntimeException e) {
             throw e;
