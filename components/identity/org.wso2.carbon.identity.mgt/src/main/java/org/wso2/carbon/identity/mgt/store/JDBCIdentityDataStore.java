@@ -29,7 +29,7 @@ import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.persistence.JDBCPersistenceManager;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
-import org.wso2.carbon.identity.mgt.dto.UserIdentityDTO;
+import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimDO;
 import org.wso2.carbon.user.api.UserStoreManager;
 
 public class JDBCIdentityDataStore extends InMemoryIdentityDataStore {
@@ -37,7 +37,7 @@ public class JDBCIdentityDataStore extends InMemoryIdentityDataStore {
 	private static Log log = LogFactory.getLog(JDBCIdentityDataStore.class);
 
 	@Override
-	public void store(UserIdentityDTO userIdentityDTO, UserStoreManager userStoreManager)
+	public void store(UserIdentityClaimDO userIdentityDTO, UserStoreManager userStoreManager)
 	                                                                                     throws IdentityException {
 		if(userIdentityDTO == null || userIdentityDTO.getUserDataMap().size() < 1) {
 			return;
@@ -77,7 +77,7 @@ public class JDBCIdentityDataStore extends InMemoryIdentityDataStore {
 	}
 
 	@Override
-	public UserIdentityDTO load(String userName, UserStoreManager userStoreManager)
+	public UserIdentityClaimDO load(String userName, UserStoreManager userStoreManager)
 	                                                                               throws IdentityException {
 		super.load(userName, userStoreManager);
 		int tenantId = IdentityUtil.getTenantIdOFUser(userName);
@@ -99,7 +99,7 @@ public class JDBCIdentityDataStore extends InMemoryIdentityDataStore {
 					log.debug(dataEntry.getKey() + " : " + dataEntry.getValue());
 				}
 			}
-			UserIdentityDTO dto = new UserIdentityDTO(userName, data);
+			UserIdentityClaimDO dto = new UserIdentityClaimDO(userName, data);
 			dto.setTenantId(tenantId);
 			return dto;
 		} catch (SQLException e) {

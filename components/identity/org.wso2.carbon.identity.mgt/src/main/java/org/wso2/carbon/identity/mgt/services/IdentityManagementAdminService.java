@@ -27,7 +27,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.mgt.ChallengeQuestionProcessor;
-import org.wso2.carbon.identity.mgt.IdentityMgtException;
+import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
+import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
 import org.wso2.carbon.identity.mgt.beans.UserMgtBean;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.dto.ChallengeQuestionDTO;
@@ -53,10 +54,10 @@ public class IdentityManagementAdminService {
      *
      * @param userMgtBean  userMgtBean bean class that contains user and tenant Information
      * @return array of challenges  if null, return empty array
-     * @throws org.wso2.carbon.identity.mgt.IdentityMgtException  if fails
+     * @throws org.wso2.carbon.identity.mgt.IdentityMgtServiceException  if fails
      */
     public UserChallengesDTO[] getChallengeQuestionsOfUser(UserMgtBean userMgtBean)
-                                                                    throws IdentityMgtException {
+                                                                    throws IdentityMgtServiceException {
 
         Utils.processUserId(userMgtBean);
 
@@ -71,9 +72,9 @@ public class IdentityManagementAdminService {
      * get all promoted user challenges
      *
      * @return array of user challenges
-     * @throws IdentityMgtException  if fails
+     * @throws IdentityMgtServiceException  if fails
      */
-    public UserChallengesSetDTO[] getAllPromotedUserChallenge() throws IdentityMgtException {
+    public UserChallengesSetDTO[] getAllPromotedUserChallenge() throws IdentityMgtServiceException {
 
         ChallengeQuestionProcessor processor = IdentityMgtServiceComponent.
                                                         getRecoveryProcessor().getQuestionProcessor();
@@ -111,9 +112,9 @@ public class IdentityManagementAdminService {
      * get all challenge questions
      *
      * @return array of questions
-     * @throws IdentityMgtException if fails
+     * @throws IdentityMgtServiceException if fails
      */
-    public ChallengeQuestionDTO[] getAllChallengeQuestions() throws IdentityMgtException {
+    public ChallengeQuestionDTO[] getAllChallengeQuestions() throws IdentityMgtServiceException {
 
         ChallengeQuestionProcessor processor = IdentityMgtServiceComponent.
                                                         getRecoveryProcessor().getQuestionProcessor();
@@ -126,10 +127,10 @@ public class IdentityManagementAdminService {
      * set all challenge questions
      *
      * @param challengeQuestionDTOs  array of questions
-     * @throws IdentityMgtException if fails
+     * @throws IdentityMgtServiceException if fails
      */
     public void setChallengeQuestions(ChallengeQuestionDTO[] challengeQuestionDTOs)
-                                                                    throws IdentityMgtException {
+                                                                    throws IdentityMgtServiceException {
 
         ChallengeQuestionProcessor processor = IdentityMgtServiceComponent.
                                                         getRecoveryProcessor().getQuestionProcessor();
@@ -140,9 +141,9 @@ public class IdentityManagementAdminService {
      * set challenges of user
      *
      * @param userMgtBean  userMgtBean bean class that contains user and tenant Information
-     * @throws IdentityMgtException  if fails
+     * @throws IdentityMgtServiceException  if fails
      */
-    public void setChallengeQuestionsOfUser(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public void setChallengeQuestionsOfUser(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
 
         Utils.processUserId(userMgtBean);
@@ -151,7 +152,7 @@ public class IdentityManagementAdminService {
 
         if(challengesDTOs == null || challengesDTOs.length < 1){
             log.error("no challenges provided by user");
-            throw new IdentityMgtException("no challenges provided by user");
+            throw new IdentityMgtServiceException("no challenges provided by user");
         }
 
         ChallengeQuestionProcessor processor = IdentityMgtServiceComponent.
@@ -179,7 +180,7 @@ public class IdentityManagementAdminService {
             RecoveryDataDTO dto = IdentityMgtServiceComponent.getRecoveryProcessor().
                                                     processRecoveryUsingEmail(userMgtBean, tenantId);
             return dto.isEmailSent();
-        } catch (IdentityMgtException e) {
+        } catch (IdentityMgtServiceException e) {
             log.error(e);
             // ignore
         }
@@ -202,7 +203,7 @@ public class IdentityManagementAdminService {
             Utils.persistAccountStatus(userMgtBean.getUserId(),
                     Utils.getTenantId(userMgtBean.getTenantDomain()), UserCoreConstants.USER_UNLOCKED);
             return true;
-        } catch (IdentityMgtException e) {
+        } catch (IdentityMgtServiceException e) {
             log.error(e);
             // ignore
         }
@@ -223,6 +224,7 @@ public class IdentityManagementAdminService {
             UserStoreManager userStoreManager = IdentityMgtServiceComponent.
                             getRealmService().getTenantUserRealm(tenantId).getUserStoreManager();
             userStoreManager.updateCredentialByAdmin(userName, password);
+            IdentityMgtConfig.getInstance().getIdentityDataStore().load(userName, userStoreManager);
             return true;
         } catch (Exception e) {
             // ignore exceptions and only log error

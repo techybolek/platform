@@ -16,34 +16,58 @@
  ! limitations under the License.
  !-->
 <serviceGroup>
-    <service name="IdentityManagementService" scope="transportsession">
+    <service name="UserIdnetityManagementService" scope="transportsession">
         <transports>
             <transport>https</transport>
         </transports>
         <parameter name="ServiceClass" locked="false">
-            org.wso2.carbon.identity.mgt.services.IdentityManagementService
+            org.wso2.carbon.identity.mgt.services.UserIdnetityManagementService
         </parameter>
 	    <parameter name="hiddenService" locked="false">true</parameter>
    </service>
 
-    <service name="IdentityManagementAdminService" scope="transportsession">
+    <service name="UserIdentityManagementAdminService" scope="transportsession">
         <transports>
             <transport>https</transport>
         </transports>
         <parameter name="ServiceClass" locked="false">
-            org.wso2.carbon.identity.mgt.services.IdentityManagementAdminService
+            org.wso2.carbon.identity.mgt.services.UserIdentityManagementAdminService
         </parameter>
-		<operation name="getChallengeQuestionsOfUser">
+		<operation name="updateUserSecurityQuestion">
 			<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
 		</operation>
-		<operation name="setChallengeQuestionsOfUser">
+		<operation name="getUserSecurityQuestions">
 			<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
 		</operation>
-		<operation name="getAllPromotedUserChallenge">
+		<operation name="updateUserIdentityRecoveryData">
 			<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
 		</operation>
-		<operation name="getAllChallengeQuestions">
+		<operation name="getUserIdentityRecoveryData">
 			<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
+		</operation>
+		<operation name="addUser">
+			<parameter name="AuthorizationAction" locked="true">/permission/admin</parameter>
+		</operation>
+		<operation name="getUserIdentityRegistrationData">
+			<parameter name="AuthorizationAction" locked="true">/permission/admin</parameter>
+		</operation>
+		<operation name="deleteUser">
+			<parameter name="AuthorizationAction" locked="true">/permission/admin</parameter>
+		</operation>
+		<operation name="lockUserAccount">
+			<parameter name="AuthorizationAction" locked="true">/permission/admin</parameter>
+		</operation>
+		<operation name="unlockUserAccount">
+			<parameter name="AuthorizationAction" locked="true">/permission/admin</parameter>
+		</operation>
+		<operation name="resetUserPassword">
+			<parameter name="AuthorizationAction" locked="true">/permission/admin</parameter>
+		</operation>
+		<operation name="addPrimarySecurityQuestions">
+			<parameter name="AuthorizationAction" locked="true">/permission/admin</parameter>
+		</operation>
+		<operation name="removePrimarySecurityQuestion">
+			<parameter name="AuthorizationAction" locked="true">/permission/admin</parameter>
 		</operation>
         <parameter name="adminService" locked="false">true</parameter>
         <parameter name="hiddenService" locked="false">true</parameter>

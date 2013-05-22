@@ -26,7 +26,7 @@ import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.dto.RecoveryDataDTO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.identity.mgt.util.ClaimsMgtUtil;
-import org.wso2.carbon.identity.mgt.util.PasswordUtil;
+import org.wso2.carbon.identity.mgt.util.UserIdentityManagementUtil;
 import org.wso2.carbon.identity.mgt.util.Utils;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -60,10 +60,10 @@ public class IdentityMgtProcessor {
      * @param userMgtBean  bean class that contains user and tenant Information
      * @param tenantId  tenant id
      * @return true if the reset request is processed successfully.
-     * @throws IdentityMgtException  if fails
+     * @throws IdentityMgtServiceException  if fails
      */
     public RecoveryDataDTO processRecoveryUsingEmail(UserMgtBean userMgtBean, int tenantId)
-                                                                        throws IdentityMgtException {
+                                                                        throws IdentityMgtServiceException {
 
         if(!IdentityMgtConfig.getInstance().isEnableEmailSending()){
             return new RecoveryDataDTO("Email sending is disabled");
@@ -107,13 +107,12 @@ public class IdentityMgtProcessor {
                 userMgtBean.setSecretKey(secretKey);
 
             } else if(IdentityMgtConstants.RECOVERY_TYPE_TEMPORARY_PASSWORD.equals(recoveryType)){
-
                 String temporaryPassword = userMgtBean.getUserPassword();
                 if(temporaryPassword == null || temporaryPassword.trim().length() < 1){
-                    temporaryPassword = IdentityMgtConfig.getInstance().getPasswordGenerator().generatePassword();
+                    temporaryPassword = new String(UserIdentityManagementUtil.generateTemporaryPassword());
                     userMgtBean.setUserPassword(temporaryPassword);
                 }
-                PasswordUtil.updatePassword(userMgtBean);
+                //PasswordUtil.updatePassword(userMgtBean);
                 recoveryData = false;
             } else if(IdentityMgtConstants.NOTIFY_ACCOUNT_UNLOCK.equals(recoveryType) ||
                     IdentityMgtConstants.RECOVERY_TYPE_ACCOUNT_ID.equals(recoveryType)){
@@ -168,7 +167,7 @@ public class IdentityMgtProcessor {
         try {
             dataToStore.put(IdentityMgtConstants.FIRST_NAME, ClaimsMgtUtil.
                     getFirstName(userMgtBean.getUserId(), tenantId));
-        } catch (IdentityMgtException e) {
+        } catch (IdentityMgtServiceException e) {
             log.warn("FirstName of the user can not be retrieved.", e);
             dataToStore.put(IdentityMgtConstants.FIRST_NAME, userMgtBean.getUserId());
         }

@@ -29,7 +29,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.IdentityMgtEventListener;
-import org.wso2.carbon.identity.mgt.IdentityMgtException;
+import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
 import org.wso2.carbon.identity.mgt.IdentityMgtProcessor;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.dto.ChallengeQuestionDTO;
@@ -200,7 +200,7 @@ public class IdentityMgtServiceComponent {
         try {
             recoveryProcessor.getQuestionProcessor().setChallengeQuestions(questionSetDTOs.
                                     toArray(new ChallengeQuestionDTO[questionSetDTOs.size()]));
-        } catch (IdentityMgtException e) {
+        } catch (IdentityMgtServiceException e) {
             log.error("Error while promoting default challenge questions", e);
         }
     }

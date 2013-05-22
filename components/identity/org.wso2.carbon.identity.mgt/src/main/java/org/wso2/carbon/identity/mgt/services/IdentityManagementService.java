@@ -26,7 +26,7 @@ import org.wso2.carbon.captcha.mgt.beans.CaptchaInfoBean;
 import org.wso2.carbon.captcha.mgt.util.CaptchaUtil;
 import org.wso2.carbon.identity.mgt.ChallengeQuestionProcessor;
 import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
-import org.wso2.carbon.identity.mgt.IdentityMgtException;
+import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
 import org.wso2.carbon.identity.mgt.beans.UserMgtBean;
 import org.wso2.carbon.identity.mgt.beans.VerificationBean;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
@@ -79,7 +79,7 @@ public class IdentityManagementService {
         try {
             Utils.processUserId(userMgtBean);
             tenantId = Utils.getTenantId(userMgtBean.getTenantDomain());
-        } catch (IdentityMgtException e) {
+        } catch (IdentityMgtServiceException e) {
             log.error(e.getMessage());
             bean.setError("Unexpected error has occurred");
             bean.setVerified(false);
@@ -134,9 +134,9 @@ public class IdentityManagementService {
      *
      * @param userMgtBean userMgtBean bean class that contains user and tenant Information
      * @return recovery process success or not
-     * @throws IdentityMgtException if fails
+     * @throws IdentityMgtServiceException if fails
      */
-    public boolean processPasswordRecovery(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public boolean processPasswordRecovery(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         Utils.processUserId(userMgtBean);
 
@@ -157,9 +157,9 @@ public class IdentityManagementService {
      *
      * @param userMgtBean  userMgtBean bean class that contains user and tenant Information
      * @return confirmation process success or not
-     * @throws IdentityMgtException if fails
+     * @throws IdentityMgtServiceException if fails
      */
-    public boolean processAccountConfirmation(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public boolean processAccountConfirmation(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         Utils.processUserId(userMgtBean);
         userMgtBean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_ACCOUNT_CONFORM);
@@ -175,9 +175,9 @@ public class IdentityManagementService {
      *
      * @param userMgtBean userMgtBean bean class that contains user and tenant Information
      * @return processing temporary password success or not
-     * @throws IdentityMgtException if fails
+     * @throws IdentityMgtServiceException if fails
      */
-    public boolean processTemporaryPassword(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public boolean processTemporaryPassword(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         Utils.processUserId(userMgtBean);
 
@@ -199,9 +199,9 @@ public class IdentityManagementService {
      *
      * @param userMgtBean  userMgtBean bean class that contains user and tenant Information
      * @return  processing account recovery success or not
-     * @throws  IdentityMgtException if fails
+     * @throws  IdentityMgtServiceException if fails
      */
-    public boolean processAccountRecovery(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public boolean processAccountRecovery(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         userMgtBean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_ACCOUNT_ID);
         if(userMgtBean.getTenantDomain() == null){
@@ -359,16 +359,16 @@ public class IdentityManagementService {
      * generates a random Captcha
      *
      * @return captchaInfoBean
-     * @throws IdentityMgtException, if fails
+     * @throws IdentityMgtServiceException, if fails
      */
-    public CaptchaInfoBean generateRandomCaptcha() throws IdentityMgtException {
+    public CaptchaInfoBean generateRandomCaptcha() throws IdentityMgtServiceException {
 
         try {
             CaptchaUtil.cleanOldCaptchas();
             return CaptchaUtil.generateCaptchaImage();
         } catch (Exception e) {
             log.error("Error while generating captcha", e);
-            throw new IdentityMgtException("Error while generating captcha", e);
+            throw new IdentityMgtServiceException("Error while generating captcha", e);
         }
 
     }
@@ -378,10 +378,10 @@ public class IdentityManagementService {
      *
      * @param userMgtBean  userMgtBean bean class that contains user and tenant Information
      * @return array of challenges  if null, return empty array
-     * @throws IdentityMgtException  if fails
+     * @throws IdentityMgtServiceException  if fails
      */
     public UserChallengesDTO[] getChallengeQuestionsOfUser(UserMgtBean userMgtBean)
-                                                                    throws IdentityMgtException {
+                                                                    throws IdentityMgtServiceException {
 
         Utils.processUserId(userMgtBean);
 
@@ -397,10 +397,10 @@ public class IdentityManagementService {
      *
      * @param userMgtBean  userMgtBean bean class that contains user and tenant Information
      * @return array of primary user challenges, if null, return empty array 
-     * @throws IdentityMgtException if fails
+     * @throws IdentityMgtServiceException if fails
      */
     public UserChallengesDTO[] getPrimaryQuestionsOfUser(UserMgtBean userMgtBean)
-                                                                    throws IdentityMgtException {
+                                                                    throws IdentityMgtServiceException {
 
 
         Utils.processUserId(userMgtBean);
@@ -418,9 +418,9 @@ public class IdentityManagementService {
      *
      * @param userMgtBean    userMgtBean bean class that contains user and tenant Information
      * @return verification results as been
-     * @throws IdentityMgtException if any error occurs
+     * @throws IdentityMgtServiceException if any error occurs
      */
-    public VerificationBean verifyChallengeQuestion(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public VerificationBean verifyChallengeQuestion(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         VerificationBean bean = new VerificationBean();
         bean.setVerified(false);
@@ -496,9 +496,9 @@ public class IdentityManagementService {
      *
      * @param userMgtBean    userMgtBean bean class that contains user and tenant Information
      * @return verification results as been
-     * @throws IdentityMgtException if any error occurs
+     * @throws IdentityMgtServiceException if any error occurs
      */
-    public boolean verifyPrimaryChallengeQuestion(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public boolean verifyPrimaryChallengeQuestion(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
 
         Utils.processUserId(userMgtBean);
@@ -522,9 +522,9 @@ public class IdentityManagementService {
      *
      * @param userMgtBean bean class that contains user and tenant Information
      * @return  recovery data
-     * @throws IdentityMgtException if fails
+     * @throws IdentityMgtServiceException if fails
      */
-    public RecoveryDataDTO getPasswordRecoveryData(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public RecoveryDataDTO getPasswordRecoveryData(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         Utils.processUserId(userMgtBean);
         userMgtBean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_PASSWORD_RESET);
@@ -538,9 +538,9 @@ public class IdentityManagementService {
      *
      * @param userMgtBean  userMgtBean bean class that contains user and tenant Information
      * @return recovery data
-     * @throws IdentityMgtException if fails
+     * @throws IdentityMgtServiceException if fails
      */
-    public RecoveryDataDTO getAccountConfirmationData(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public RecoveryDataDTO getAccountConfirmationData(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         Utils.processUserId(userMgtBean);
         userMgtBean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_ACCOUNT_CONFORM);
@@ -555,9 +555,9 @@ public class IdentityManagementService {
      *
      * @param userMgtBean  userMgtBean bean class that contains user and tenant Information
      * @return recovery data
-     * @throws IdentityMgtException if fails
+     * @throws IdentityMgtServiceException if fails
      */
-    public RecoveryDataDTO getTemporaryPasswordData(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public RecoveryDataDTO getTemporaryPasswordData(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         Utils.processUserId(userMgtBean);
         userMgtBean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_TEMPORARY_PASSWORD);
@@ -571,9 +571,9 @@ public class IdentityManagementService {
      *
      * @param userMgtBean  userMgtBean bean class that contains user and tenant Information
      * @return recovery data
-     * @throws IdentityMgtException if fails
+     * @throws IdentityMgtServiceException if fails
      */
-    public RecoveryDataDTO getAccountRecoveryData(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public RecoveryDataDTO getAccountRecoveryData(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         Utils.processUserId(userMgtBean);
         userMgtBean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_ACCOUNT_ID);
@@ -594,9 +594,9 @@ public class IdentityManagementService {
      * set challenges of user
      *
      * @param userMgtBean  userMgtBean bean class that contains user and tenant Information
-     * @throws IdentityMgtException  if fails
+     * @throws IdentityMgtServiceException  if fails
      */
-    public void setChallengeQuestionsOfUser(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public void setChallengeQuestionsOfUser(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
 
         Utils.processUserId(userMgtBean);
@@ -605,7 +605,7 @@ public class IdentityManagementService {
 
         if(challengesDTOs == null || challengesDTOs.length < 1){
             log.error("no challenges provided by user");
-            throw new IdentityMgtException("no challenges provided by user");
+            throw new IdentityMgtServiceException("no challenges provided by user");
         }
 
         ChallengeQuestionProcessor processor = IdentityMgtServiceComponent.

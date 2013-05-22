@@ -63,7 +63,7 @@ public class EmailProcessor {
         emailSender = new EmailSender();
     }
 
-    public RecoveryDataDTO processEmail(Map<String, String> data, boolean recoveryData) throws IdentityMgtException {
+    public RecoveryDataDTO processEmail(Map<String, String> data, boolean recoveryData) throws IdentityMgtServiceException {
 
         EmailConfig emailConfig = null;
         RecoveryDataDTO emailDataDTO  = new RecoveryDataDTO();
@@ -71,7 +71,7 @@ public class EmailProcessor {
 
                 
         if(emailAddress == null){
-            throw new IdentityMgtException("Can not proceed without an email address");
+            throw new IdentityMgtServiceException("Can not proceed without an email address");
         }
 
         emailAddress = emailAddress.trim();
@@ -134,7 +134,7 @@ public class EmailProcessor {
         } catch (Exception e) {
             String msg = "Error in processing email sending";
             log.error(msg, e);
-            throw new IdentityMgtException(msg, e);
+            throw new IdentityMgtServiceException(msg, e);
         }
 
         return emailDataDTO;

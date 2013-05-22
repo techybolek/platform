@@ -16,20 +16,22 @@
 
 package org.wso2.carbon.identity.mgt.store;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
-import org.wso2.carbon.identity.mgt.dto.UserIdentityDTO;
+import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimDO;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.claim.Claim;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
+import org.wso2.carbon.user.core.jdbc.JDBCUserStoreManager;
+import org.wso2.carbon.user.core.ldap.ActiveDirectoryUserStoreManager;
+import org.wso2.carbon.user.core.ldap.ReadWriteLDAPUserStoreManager;
 
 /**
  * This module persists data in to user store as user's attribute
@@ -37,68 +39,86 @@ import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 public class UserStoreBasedIdentityDataStore extends InMemoryIdentityDataStore {
 
     private static Log log = LogFactory.getLog(UserStoreBasedIdentityDataStore.class);
+    private static ThreadLocal<String> userStoreInvoked = new ThreadLocal<String>(){
+    	protected String initialValue() {return "FALSE";};
+    };
 
+    /**
+     * This method stores data in the read write user stores. 
+     */
     @Override
-    public void store(UserIdentityDTO userIdentityDTO, UserStoreManager userStoreManager) throws IdentityException {
-
+    public void store(UserIdentityClaimDO userIdentityDTO, UserStoreManager userStoreManager) throws IdentityException {
         super.store(userIdentityDTO, userStoreManager);
-
         if(userIdentityDTO.getUserName() == null){
             log.error("Error while persisting user data.  Null user name is provided.");
             return;
         }
+        // using userstore implementations directly to avoid listeners which can cause for infinite loops
+		try {
+			if (userStoreManager instanceof JDBCUserStoreManager) {
+				((JDBCUserStoreManager) userStoreManager).doSetUserClaimValues(userIdentityDTO.getUserName(),
+				                                                             userIdentityDTO.getUserDataMap(),
+				                                                             null);
+			} else if (userStoreManager instanceof ActiveDirectoryUserStoreManager) {
+				((ActiveDirectoryUserStoreManager) userStoreManager).doSetUserClaimValues(userIdentityDTO.getUserName(),
+				                                                                        userIdentityDTO.getUserDataMap(),
+				                                                                        null);
+			} else if (userStoreManager instanceof ReadWriteLDAPUserStoreManager) {
+				((ReadWriteLDAPUserStoreManager) userStoreManager).doSetUserClaimValues(userIdentityDTO.getUserName(),
+				                                                                      userIdentityDTO.getUserDataMap(),
+				                                                                      null);
+			} else {
+				throw new IdentityException("Cannot write identity data to the userstore");
+			}
 
-        try {
-            ((AbstractUserStoreManager) userStoreManager).setUserClaimValues(userIdentityDTO.getUserName(),
-                                                                userIdentityDTO.getUserDataMap(), null);
-            
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            log.error("Error while persisting user data ",e);
-        }
+		} catch (org.wso2.carbon.user.api.UserStoreException e) {
+			log.error("Error while persisting user data ", e);
+		}
     }
 
-    @Override
-    public UserIdentityDTO load(String userName, UserStoreManager userStoreManager) throws IdentityException {
-
-        UserIdentityDTO userIdentityDTO = super.load(userName, userStoreManager);
-        if(userIdentityDTO != null){
-            return userIdentityDTO;
-        }
-
-        String[] data = new String[]{
-            UserIdentityDataStore.FAIL_LOGIN_ATTEMPTS, UserIdentityDataStore.LAST_LOGON_TIME,
-            UserIdentityDataStore.PASSWORD_CHANGE_REQUIRED, UserIdentityDataStore.LAST_FAILED_LOGIN_ATTEMPT_TIME,
-            UserIdentityDataStore.TEMPORARY_LOCK, UserIdentityDataStore.UNLOCKING_TIME,
-            UserIdentityDataStore.ON_TIME_PASSWORD, UserIdentityDataStore.PASSWORD_TIME_STAMP,
-            UserIdentityDataStore.ACCOUNT_LOCK, UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI
-        };
-
-        Map<String, String> userDataMap = null;
-        ArrayList<String> list = new ArrayList<String>(Arrays.asList(data));
-        try {
-            String challengeUriString = ((AbstractUserStoreManager)userStoreManager).
-                    getUserClaimValue(userName, UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI, null);
-            if(challengeUriString != null){
-                String[] challengeUris =  challengeUriString.
-                        split(IdentityMgtConfig.getInstance().getChallengeQuestionSeparator());
-                list.addAll(Arrays.asList(challengeUris));
-            }
-            userDataMap = ((AbstractUserStoreManager)userStoreManager).
-                    getUserClaimValues(userName, list.toArray(new String[list.size()]), null);
-        } catch (UserStoreException e) {
-            // ignore may be use is not exist
-        }
-
-        // if user is exiting there must be at least one user attribute.
-        if(userDataMap != null && userDataMap.size() > 0){
-            userIdentityDTO = new UserIdentityDTO(userName, userDataMap);
-            super.cache.put(CarbonContext.getCurrentContext().getTenantId() + userName, userIdentityDTO);
-            return userIdentityDTO;
-        }
-
-        return null;
-    }
-
-
+    /**
+     * This method loads identity and security questions from the user stores
+     */
+	@Override
+	public UserIdentityClaimDO load(String userName, UserStoreManager userStoreManager)
+	                                                                               throws IdentityException {
+		UserIdentityClaimDO userIdentityDTO = super.load(userName, userStoreManager);
+		if (userIdentityDTO != null) {
+			return userIdentityDTO;
+		}
+		
+		if (userStoreInvoked.get().equals("TRUE")) {
+			return null;
+		} else {
+			userStoreInvoked.set("TRUE");
+		}
+		
+		Map<String, String> userDataMap = new HashMap<String, String>();
+		try {
+			// reading all claims of the user
+			Claim[] claims =
+			                 ((AbstractUserStoreManager) userStoreManager).getUserClaimValues(userName,
+			                                                                                  null);
+			// select the security questions and identity claims
+			for (Claim claim : claims) {
+				String claimUri = claim.getClaimUri();
+				if (claimUri.contains(UserCoreConstants.ClaimTypeURIs.IDENTITY_CLAIM_URI) ||
+				    claimUri.contains(UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI)) {
+					userDataMap.put(claimUri, claim.getValue());
+				}
+			}
+		} catch (UserStoreException e) {
+			// ignore may be use is not exist
+		}
+		// if user is exiting there must be at least one user attribute.
+		if (userDataMap != null && userDataMap.size() > 0) {
+			userIdentityDTO = new UserIdentityClaimDO(userName, userDataMap);
+			int tenantId = CarbonContext.getCurrentContext().getTenantId();
+			userIdentityDTO.setTenantId(tenantId);
+			super.cache.put(tenantId + userName, userIdentityDTO);
+			return userIdentityDTO;
+		}
+		return null;
+	}
     
 }

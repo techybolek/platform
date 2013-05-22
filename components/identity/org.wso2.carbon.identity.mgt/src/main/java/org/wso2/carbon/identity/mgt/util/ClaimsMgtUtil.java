@@ -20,7 +20,7 @@ package org.wso2.carbon.identity.mgt.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.mgt.IdentityMgtException;
+import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.core.UserCoreConstants;
@@ -41,9 +41,9 @@ public class ClaimsMgtUtil {
      * @param userName userName of user
      * @param tenantId tenant Id
      * @return first name / calling name
-     * @throws IdentityMgtException if unable to retrieve the first name
+     * @throws IdentityMgtServiceException if unable to retrieve the first name
      */
-    public static String getFirstName(String userName, int tenantId) throws IdentityMgtException {
+    public static String getFirstName(String userName, int tenantId) throws IdentityMgtServiceException {
 
         String firstName = null;
         try {
@@ -66,10 +66,10 @@ public class ClaimsMgtUtil {
      * @param tenantId tenantId
      * @param claim claim name
      * @return claim value
-     * @throws IdentityMgtException if fails
+     * @throws IdentityMgtServiceException if fails
      */
     public static String getClaimFromUserStoreManager(String userName,int tenantId, String claim)
-                                                                    throws IdentityMgtException {
+                                                                    throws IdentityMgtServiceException {
 
         UserStoreManager userStoreManager = null;
         RealmService realmService = IdentityMgtServiceComponent.getRealmService();
@@ -84,7 +84,7 @@ public class ClaimsMgtUtil {
         } catch (Exception e) {
             String msg = "Error retrieving the user store manager for tenant id : " + tenantId;
             log.error(msg, e);
-            throw new IdentityMgtException(msg, e);
+            throw new IdentityMgtServiceException(msg, e);
         }
         try {
             if (userStoreManager != null) {
@@ -95,7 +95,7 @@ public class ClaimsMgtUtil {
         } catch (Exception e) {
             String msg = "Unable to retrieve the claim for user : " + userName;
             log.error(msg, e);
-            throw new IdentityMgtException(msg, e);
+            throw new IdentityMgtServiceException(msg, e);
         }
     }
 
@@ -106,10 +106,10 @@ public class ClaimsMgtUtil {
      * @param tenantId  tenant id
      * @param claim  claim uri
      * @param value  claim value
-     * @throws IdentityMgtException if fails
+     * @throws IdentityMgtServiceException if fails
      */
     public static void setClaimInUserStoreManager(String userName,int tenantId, String claim,
-                                                  String value) throws IdentityMgtException {
+                                                  String value) throws IdentityMgtServiceException {
         UserStoreManager userStoreManager = null;
         RealmService realmService = IdentityMgtServiceComponent.getRealmService();
         try {
@@ -121,7 +121,7 @@ public class ClaimsMgtUtil {
         } catch (Exception e) {
             String msg = "Error retrieving the user store manager for the tenant";
             log.error(msg, e);
-            throw new IdentityMgtException(msg, e);
+            throw new IdentityMgtServiceException(msg, e);
         }
         
         try {
@@ -135,7 +135,7 @@ public class ClaimsMgtUtil {
         } catch (Exception e) {
             String msg =  "Unable to set the claim for user : " + userName;
             log.error(msg, e);
-            throw new IdentityMgtException(msg, e);
+            throw new IdentityMgtServiceException(msg, e);
         }
     }
 
@@ -146,9 +146,9 @@ public class ClaimsMgtUtil {
      * @param claim   claim uri
      * @param value  claim value
      * @return  user list
-     * @throws IdentityMgtException  if fails
+     * @throws IdentityMgtServiceException  if fails
      */
-    public static String[] getUserList(int tenantId, String claim, String value) throws IdentityMgtException {
+    public static String[] getUserList(int tenantId, String claim, String value) throws IdentityMgtServiceException {
 
         UserStoreManager userStoreManager = null;
         String[] userList = null;
@@ -163,7 +163,7 @@ public class ClaimsMgtUtil {
         } catch (Exception e) {
             String msg = "Error retrieving the user store manager for the tenant";
             log.error(msg, e);
-            throw new IdentityMgtException(msg, e);
+            throw new IdentityMgtServiceException(msg, e);
         }
         try {
             if (userStoreManager != null) {
@@ -173,7 +173,7 @@ public class ClaimsMgtUtil {
         } catch (Exception e) {
             String msg = "Unable to retrieve the claim for the given tenant";
             log.error(msg, e);
-            throw new IdentityMgtException(msg, e);
+            throw new IdentityMgtServiceException(msg, e);
         }
     }
 

@@ -17,7 +17,7 @@
 package org.wso2.carbon.identity.mgt.store;
 
 import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.mgt.dto.UserIdentityDTO;
+import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimDO;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 
@@ -26,7 +26,7 @@ import org.wso2.carbon.user.core.UserCoreConstants;
  */
 public abstract class UserIdentityDataStore {
 
-	public static final String ON_TIME_PASSWORD = "http://wso2.org/claims/identity/onTimePassword";
+	public static final String ONE_TIME_PASSWORD = "http://wso2.org/claims/identity/onTimePassword";
 	public static final String PASSWORD_CHANGE_REQUIRED = "http://wso2.org/claims/identity/passwordChangeRequired";
 	public static final String TEMPORARY_LOCK = "http://wso2.org/claims/identity/temporaryLock";
 	public static final String LAST_FAILED_LOGIN_ATTEMPT_TIME = "http://wso2.org/claims/identity/lastFailedLoginAttemptTime";
@@ -43,7 +43,7 @@ public abstract class UserIdentityDataStore {
 	 */
 	public String[] getUserIdentityDataClaims() throws IdentityException {
 
-		return new String[] { ON_TIME_PASSWORD, PASSWORD_CHANGE_REQUIRED, TEMPORARY_LOCK,
+		return new String[] { ONE_TIME_PASSWORD, PASSWORD_CHANGE_REQUIRED, TEMPORARY_LOCK,
 		                     LAST_FAILED_LOGIN_ATTEMPT_TIME, FAIL_LOGIN_ATTEMPTS, LAST_LOGON_TIME,
 		                     UNLOCKING_TIME, PASSWORD_TIME_STAMP, ACCOUNT_LOCK,
 		                     UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI};
@@ -56,7 +56,7 @@ public abstract class UserIdentityDataStore {
 	 * @param userIdentityDTO
 	 * @param userStoreManager
 	 */
-	public abstract void store(UserIdentityDTO userIdentityDTO, UserStoreManager userStoreManager)
+	public abstract void store(UserIdentityClaimDO userIdentityDTO, UserStoreManager userStoreManager)
 	                                                                                              throws IdentityException;
 
 	/**
@@ -66,7 +66,7 @@ public abstract class UserIdentityDataStore {
 	 * @param userStoreManager
 	 * @return
 	 */
-	public abstract UserIdentityDTO load(String userName, UserStoreManager userStoreManager)
+	public abstract UserIdentityClaimDO load(String userName, UserStoreManager userStoreManager)
 	                                                                                        throws IdentityException;
 
 	/**

@@ -22,6 +22,7 @@ import java.util.Arrays;
 
 import org.wso2.carbon.identity.mgt.dto.UserChallengesDTO;
 import org.wso2.carbon.identity.mgt.dto.UserEvidenceDTO;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 /**
  * Bean that encapsulates user and tenant info
@@ -98,6 +99,9 @@ public class UserMgtBean {
     }
 
     public String getTenantDomain() {
+    	if(tenantDomain == null) {
+    		tenantDomain = MultitenantUtils.getTenantDomain(userId);
+    	}
         return tenantDomain;
     }
 

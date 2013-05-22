@@ -8,7 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
-import org.wso2.carbon.identity.mgt.IdentityMgtException;
+import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
 import org.wso2.carbon.identity.mgt.beans.UserMgtBean;
 import org.wso2.carbon.identity.mgt.beans.VerificationBean;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
@@ -38,15 +38,15 @@ public class Utils {
      * Processes user id and tenant domain that contains uin the UserMgtBean
      *
      * @param userMgtBean bean class that contains user and tenant Information
-     * @throws IdentityMgtException  if user id doesn't exist
+     * @throws IdentityMgtServiceException  if user id doesn't exist
      */
-    public static void processUserId(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public static void processUserId(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         String domainName = null;
         String userId = userMgtBean.getUserId();
 
         if(userId == null || userId.trim().length() < 1){
-            throw new IdentityMgtException("Can not proceed with out a user id");    
+            throw new IdentityMgtServiceException("Can not proceed with out a user id");    
         }
         
         if(userMgtBean.getTenantDomain() == null || userMgtBean.getTenantDomain().trim().length() < 1){
@@ -67,9 +67,9 @@ public class Utils {
      *
      * @param userMgtBean  bean class that contains user and tenant Information
      * @return verification success or not
-     * @throws IdentityMgtException  if fails or tenant doesn't exist
+     * @throws IdentityMgtServiceException  if fails or tenant doesn't exist
      */
-    public static boolean verifyUserId(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public static boolean verifyUserId(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         boolean verification = false;
         String userKey = userMgtBean.getUserKey();
@@ -121,9 +121,9 @@ public class Utils {
      *
      * @param userMgtBean bean class that contains user and tenant Information
      * @return no of verified challenges
-     * @throws IdentityMgtException  if fails
+     * @throws IdentityMgtServiceException  if fails
      */
-    public static int getVerifiedChallenges(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public static int getVerifiedChallenges(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         int noOfChallenges = 0;
 
@@ -152,9 +152,9 @@ public class Utils {
     /**
      * clear the pointer for verified user challenges
      * @param userMgtBean   bean class that contains user and tenant Information
-     * @throws IdentityMgtException if fails
+     * @throws IdentityMgtServiceException if fails
      */
-    public static void clearVerifiedChallenges(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public static void clearVerifiedChallenges(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         try{
             UserRegistry registry = IdentityMgtServiceComponent.getRegistryService().
@@ -173,9 +173,9 @@ public class Utils {
     /**
      * set pointer for verified user challenges 
      * @param userMgtBean  bean class that contains user and tenant Information
-     * @throws IdentityMgtException  if fails
+     * @throws IdentityMgtServiceException  if fails
      */
-    public static void setVerifiedChallenges(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public static void setVerifiedChallenges(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         try{
             UserRegistry registry = IdentityMgtServiceComponent.getRegistryService().
@@ -211,9 +211,9 @@ public class Utils {
      * 
      * @param domain - tenant domain name
      * @return tenantId
-     * @throws IdentityMgtException if fails or tenant doesn't exist
+     * @throws IdentityMgtServiceException if fails or tenant doesn't exist
      */
-    public static int getTenantId(String domain) throws IdentityMgtException {
+    public static int getTenantId(String domain) throws IdentityMgtServiceException {
 
         int tenantId;
         TenantManager tenantManager = IdentityMgtServiceComponent.getRealmService().getTenantManager();
@@ -230,12 +230,12 @@ public class Utils {
                 if (tenantId < 1 && tenantId != MultitenantConstants.SUPER_TENANT_ID) {
                     String msg = "This action can not be performed by the users in non-existing domains.";
                     log.error(msg);
-                    throw new IdentityMgtException(msg);
+                    throw new IdentityMgtServiceException(msg);
                 }
             } catch (org.wso2.carbon.user.api.UserStoreException e) {
                 String msg = "Error in retrieving tenant id of tenant domain: " + domain + ".";
                 log.error(msg, e);
-                throw new IdentityMgtException(msg, e);
+                throw new IdentityMgtServiceException(msg, e);
             }
         }
         return tenantId;
@@ -247,9 +247,9 @@ public class Utils {
      * @param userId user id
      * @param tenantId  tenant id
      * @param status whether account is lock or unlock
-     * @throws IdentityMgtException whether account is lock or unlock
+     * @throws IdentityMgtServiceException whether account is lock or unlock
      */
-    public static void persistAccountStatus(String userId, int tenantId, String status) throws IdentityMgtException {
+    public static void persistAccountStatus(String userId, int tenantId, String status) throws IdentityMgtServiceException {
 
         String accountStatus;
 
@@ -262,10 +262,10 @@ public class Utils {
         try {
             ClaimsMgtUtil.setClaimInUserStoreManager(userId, tenantId,
                     UserIdentityDataStore.ACCOUNT_LOCK, accountStatus);
-        } catch (IdentityMgtException e) {
+        } catch (IdentityMgtServiceException e) {
             String mgs = "Error while persisting account status for user : " + userId;
             log.error(mgs, e);
-            throw new IdentityMgtException(mgs, e);
+            throw new IdentityMgtServiceException(mgs, e);
         }
     }
 
@@ -394,7 +394,7 @@ public class Utils {
             }
         } catch (UserStoreException e) {
             log.error(e.getMessage(), e);
-        } catch (IdentityMgtException e) {
+        } catch (IdentityMgtServiceException e) {
             log.error(e.getMessage(), e);
         }
         return false;
@@ -405,9 +405,9 @@ public class Utils {
      *
      * @param userMgtBean  userMgtBean bean class that contains user and tenant Information
      * @return verification results as been
-     * @throws IdentityMgtException if any error occurs
+     * @throws IdentityMgtServiceException if any error occurs
      */
-    public static String verifyUserEvidences(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public static String verifyUserEvidences(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         String domainName = userMgtBean.getTenantDomain();
         int tenantId = Utils.getTenantId(domainName);

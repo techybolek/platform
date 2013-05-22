@@ -26,6 +26,6 @@ public interface RandomPasswordGenerator {
      *
      * @return password as String
      */
-    public String generatePassword();
+    public char[] generatePassword();
 
 }

@@ -52,9 +52,9 @@ public class ChallengeQuestionProcessor {
     /**
      *
      * @return
-     * @throws IdentityMgtException
+     * @throws IdentityMgtServiceException
      */
-    public List<ChallengeQuestionDTO> getAllChallengeQuestions() throws IdentityMgtException {
+    public List<ChallengeQuestionDTO> getAllChallengeQuestions() throws IdentityMgtServiceException {
 
         List<ChallengeQuestionDTO> questionDTOs = new ArrayList<ChallengeQuestionDTO>();
         try{
@@ -87,7 +87,7 @@ public class ChallengeQuestionProcessor {
 
             }
         } catch (RegistryException e) {
-            throw new IdentityMgtException(e.getMessage(), e);
+            throw new IdentityMgtServiceException(e.getMessage(), e);
         }
         return questionDTOs;
     }
@@ -95,9 +95,9 @@ public class ChallengeQuestionProcessor {
     /**
      *
      * @param questionDTOs
-     * @throws IdentityMgtException
+     * @throws IdentityMgtServiceException
      */
-    public void setChallengeQuestions(ChallengeQuestionDTO[] questionDTOs) throws IdentityMgtException {
+    public void setChallengeQuestions(ChallengeQuestionDTO[] questionDTOs) throws IdentityMgtServiceException {
         Registry registry = null;
         try {
             registry = IdentityMgtServiceComponent.getRegistryService().getConfigSystemRegistry();
@@ -138,11 +138,11 @@ public class ChallengeQuestionProcessor {
                 }
             }
         } catch (RegistryException e) {
-            throw new IdentityMgtException(e.getMessage(), e);
+            throw new IdentityMgtServiceException(e.getMessage(), e);
         } catch (UserStoreException e) {
-             throw new IdentityMgtException(e.getMessage(), e);
+             throw new IdentityMgtServiceException(e.getMessage(), e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            throw new IdentityMgtException(e.getMessage(), e);
+            throw new IdentityMgtServiceException(e.getMessage(), e);
         }
 
     }
@@ -216,7 +216,7 @@ public class ChallengeQuestionProcessor {
         try {
             claimValue = ClaimsMgtUtil.getClaimFromUserStoreManager(userName, tenantId,
                                    UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI);
-        } catch (IdentityMgtException e) {
+        } catch (IdentityMgtServiceException e) {
             log.error("");
         }
 
@@ -256,10 +256,10 @@ public class ChallengeQuestionProcessor {
      * @param userName
      * @param tenantId
      * @param challengesDTOs
-     * @throws IdentityMgtException
+     * @throws IdentityMgtServiceException
      */
     public void setChallengesOfUser(String userName, int tenantId,
-                                       UserChallengesDTO[] challengesDTOs) throws IdentityMgtException {
+                                       UserChallengesDTO[] challengesDTOs) throws IdentityMgtServiceException {
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Challenge Question from the user profile.");
@@ -310,7 +310,7 @@ public class ChallengeQuestionProcessor {
             }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "No associated challenge question found for the user";
-            throw new IdentityMgtException(msg, e);
+            throw new IdentityMgtServiceException(msg, e);
         }
     }
 

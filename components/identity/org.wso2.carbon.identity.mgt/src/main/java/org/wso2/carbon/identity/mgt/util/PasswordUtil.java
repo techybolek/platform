@@ -22,7 +22,7 @@ import java.security.NoSuchAlgorithmException;
 import org.apache.axiom.om.util.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.mgt.IdentityMgtException;
+import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
 import org.wso2.carbon.identity.mgt.beans.UserMgtBean;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -41,9 +41,9 @@ public class PasswordUtil {
      *
      * @param userMgtBean
      * @return true - if password was successfully reset
-     * @throws IdentityMgtException
+     * @throws IdentityMgtServiceException
      */
-    public static boolean updatePassword(UserMgtBean userMgtBean) throws IdentityMgtException {
+    public static boolean updatePassword(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         String userName = userMgtBean.getUserId();
         String password = userMgtBean.getUserPassword();
@@ -54,7 +54,7 @@ public class PasswordUtil {
                 password == null || password.trim().length() < 1 ){
             String msg = "Unable to find the required information for updating password";
             log.error(msg);
-            throw new IdentityMgtException(msg);
+            throw new IdentityMgtServiceException(msg);
         }
 
         try {
@@ -74,7 +74,7 @@ public class PasswordUtil {
             String msg = "Error in changing the password, user name: " + userName + "  domain: " +
                     tenantDomain + ".";
             log.error(msg, e);
-            throw new IdentityMgtException(msg, e);
+            throw new IdentityMgtServiceException(msg, e);
         }
     }
 

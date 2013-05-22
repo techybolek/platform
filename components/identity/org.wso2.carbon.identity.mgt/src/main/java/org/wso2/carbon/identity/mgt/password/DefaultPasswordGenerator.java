@@ -30,7 +30,7 @@ public class DefaultPasswordGenerator implements RandomPasswordGenerator {
 
 
     @Override
-    public String generatePassword() {
+    public char[] generatePassword() {
         // Pick from some letters that won't be easily mistaken for each
         // other. So, for example, omit o O and 0, 1 l and L.
         String letters = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789+@";
@@ -40,6 +40,8 @@ public class DefaultPasswordGenerator implements RandomPasswordGenerator {
           int index = (int)(RANDOM.nextDouble()*letters.length());
           pw.append(letters.substring(index, index+1));
         }
-        return pw.toString();
+        char[] password = new char[pw.length()];
+        pw.getChars(0, pw.length(), password, 0);
+        return password;
     }
 }

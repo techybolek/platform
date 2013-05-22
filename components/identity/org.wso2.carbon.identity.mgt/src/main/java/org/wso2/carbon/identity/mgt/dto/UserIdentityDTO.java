@@ -84,10 +84,10 @@ public class UserIdentityDTO {
         if(userDataMap.get(UserIdentityDataStore.UNLOCKING_TIME) != null){
             setUnlockTime(Long.parseLong(userDataMap.get(UserIdentityDataStore.UNLOCKING_TIME)));
         }
-        if(userDataMap.get(UserIdentityDataStore.ON_TIME_PASSWORD) != null){
-            setOneTimeLogin(Boolean.
-                                parseBoolean(userDataMap.get(UserIdentityDataStore.ON_TIME_PASSWORD)));
-        }
+//        if(userDataMap.get(UserIdentityDataStore.ON_TIME_PASSWORD) != null){
+//            setOneTimeLogin(Boolean.
+//                                parseBoolean(userDataMap.get(UserIdentityDataStore.ON_TIME_PASSWORD)));
+//        }
         if(userDataMap.get(UserIdentityDataStore.PASSWORD_CHANGE_REQUIRED) != null){
             setPasswordChangeRequired(Boolean.
                                 parseBoolean(userDataMap.get(UserIdentityDataStore.PASSWORD_CHANGE_REQUIRED)));
