@@ -64,10 +64,8 @@ public class SAMLSSOProvider extends HttpServlet {
 
 	private SAMLSSOService samlSsoService = new SAMLSSOService();
 
-	/**
-	 * session timeout happens in 10 hours
-	 */
-	private static final int SSO_SESSION_EXPIRE = 36000;
+    // session timeout for SSO provider
+	private static String SSO_SESSION_EXPIRE = null;
 
 	@Override
 	protected void doGet(HttpServletRequest httpServletRequest,
@@ -219,7 +217,10 @@ public class SAMLSSOProvider extends HttpServlet {
 			} else if (signInRespDTO.getResponse() != null) {
 				// user already has an existing SSO session, redirect
 				if (SAMLSSOProviderConstants.AuthnModes.OPENID.equals(authMode)) {
-					storeSSOTokenCookie(ssoTokenID, req, resp);
+                    if(SSO_SESSION_EXPIRE == null){
+                        SSO_SESSION_EXPIRE = client.getSSOSessionTimeout();
+                    }
+                    storeSSOTokenCookie(ssoTokenID, req, resp);
 				}
 				sendResponse(req, resp, relayState, signInRespDTO.getResponse(),
 						signInRespDTO.getAssertionConsumerURL(), signInRespDTO.getSubject());
@@ -318,7 +319,10 @@ public class SAMLSSOProvider extends HttpServlet {
 		SAMLSSORespDTO authRespDTO = ssoServiceClient.authenticate(authnReqDTO, ssoTokenID);
 
 		if (authRespDTO.isSessionEstablished()) { // authenticated
-			storeSSOTokenCookie(ssoTokenID, req, resp);
+            if(SSO_SESSION_EXPIRE == null){
+                SSO_SESSION_EXPIRE = ssoServiceClient.getSSOSessionTimeout();
+            }
+            storeSSOTokenCookie(ssoTokenID, req, resp);
 			sendResponse(req, resp, relayState, authRespDTO.getRespString(),
 					authRespDTO.getAssertionConsumerURL(), authRespDTO.getSubject());
 		} else { // authentication FAILURE
@@ -405,7 +409,7 @@ public class SAMLSSOProvider extends HttpServlet {
 		if (ssoTokenCookie == null) {
 			ssoTokenCookie = new Cookie(SAMLSSOProviderConstants.SSO_TOKEN_ID, ssoTokenID);
 		}
-		ssoTokenCookie.setMaxAge(SSO_SESSION_EXPIRE);
+		ssoTokenCookie.setMaxAge(Integer.parseInt(SSO_SESSION_EXPIRE));
 		resp.addCookie(ssoTokenCookie);
 	}
 

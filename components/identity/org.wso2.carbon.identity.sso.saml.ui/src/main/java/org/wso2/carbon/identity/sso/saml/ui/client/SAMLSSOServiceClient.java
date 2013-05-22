@@ -100,4 +100,19 @@ public class SAMLSSOServiceClient {
 			throw new IdentityException("Error performing Single Logout", ex);
 		}
 	}
+
+    /**
+     * Gets the SSO_SESSION_EXPIRE time for the SSO provider
+     * @return SSO session timeout value
+     * @throws IdentityException
+     */
+    public String getSSOSessionTimeout()
+            throws IdentityException {
+        try {
+            return stub.getSSOSessionTimeout();
+        } catch (Exception ex) {
+            log.error("Error obtaining SSO timeout from configuration file", ex);
+            throw new IdentityException("Error obtaining SSO timeout from configuration", ex);
+        }
+    }
 }
