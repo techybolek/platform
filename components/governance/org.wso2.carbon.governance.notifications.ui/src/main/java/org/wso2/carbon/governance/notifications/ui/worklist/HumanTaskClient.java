@@ -130,10 +130,8 @@ public class HumanTaskClient {
         }
     }
 
-    public String[] getRoles(HttpSession session) throws RemoteException,
-            GetAllRolesNamesUserAdminExceptionException,
-            GetUserStoreInfoUserAdminExceptionException,
-            GetRolesOfCurrentUserUserAdminExceptionException {
+    public String[] getRoles(HttpSession session) throws RemoteException, 
+							UserAdminUserAdminException {            
 
         FlaggedName[] allRolesNames;
         String everyOneRole;
@@ -146,16 +144,16 @@ public class HumanTaskClient {
             everyOneRole = ((RoleDetails)roleDetails).getEveryoneRole();
         } else {
             allRolesNames = umStub.getRolesOfCurrentUser();
-            String adminRole = umStub.getUserStoreInfo().getAdminRole();
+            String adminRole = umStub.getUserRealmInfo().getAdminRole();
 
             for (FlaggedName role : allRolesNames) {
                 String name = role.getItemName();
                 if (name.equals(adminRole)) {
-                    allRolesNames = umStub.getAllRolesNames();
+                    allRolesNames = umStub.getAllRolesNames("*", -1);
                     break;
                 }
             }
-            everyOneRole = umStub.getUserStoreInfo().getEveryOneRole();
+            everyOneRole = umStub.getUserRealmInfo().getEveryOneRole();
             if (session!= null) {
                 session.setAttribute("roleDetails", new RoleDetails(allRolesNames, everyOneRole));
             }
