@@ -43,9 +43,9 @@ public class IdentityMgtConfig {
 
     private static IdentityMgtConfig identityMgtConfig;
 
-    private int noOfUserChallenges;
-
     private boolean listenerEnable;
+    
+    private int noOfUserChallenges;
     
     private boolean emailSendingInternallyManaged;
 
@@ -99,6 +99,8 @@ public class IdentityMgtConfig {
 
     private EmailSendingModule emailSendingModule;
 
+	private String recoveryClaim;
+
     private static final Log log = LogFactory.getLog(IdentityMgtConfig.class);
 
     public IdentityMgtConfig(RealmConfiguration configuration) {
@@ -146,6 +148,13 @@ public class IdentityMgtConfig {
             if(enableEmailSending != null){
                 this.enableEmailSending = Boolean.parseBoolean(enableEmailSending.trim());
             }
+            
+            String  recoveryClaim = properties.
+                    getProperty(IdentityMgtConstants.PropertyConfig.RECOVERY_CLAIM);
+            if(recoveryClaim != null){
+                this.recoveryClaim = recoveryClaim.trim();
+            }
+
 
             String captchaVerificationInternallyManaged = properties.
                         getProperty(IdentityMgtConstants.PropertyConfig.CAPTCHA_VERIFICATION_INTERNALLY);
@@ -454,6 +463,14 @@ public class IdentityMgtConfig {
 
     public boolean isListenerEnable() {
         return listenerEnable;
+    }
+    
+    public EmailSendingModule getEmailSendingModule() {
+    	return emailSendingModule;
+    }
+
+	public String getAccountRecoveryClaim() {
+	    return recoveryClaim;
     }
     
 }

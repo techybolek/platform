@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.mgt.ChallengeQuestionProcessor;
 import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
-import org.wso2.carbon.identity.mgt.beans.UserMgtBean;
+import org.wso2.carbon.identity.mgt.beans.UserIdentityMgtBean;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.dto.ChallengeQuestionDTO;
 import org.wso2.carbon.identity.mgt.dto.RecoveryDataDTO;
@@ -56,7 +56,7 @@ public class IdentityManagementAdminService {
      * @return array of challenges  if null, return empty array
      * @throws org.wso2.carbon.identity.mgt.IdentityMgtServiceException  if fails
      */
-    public UserChallengesDTO[] getChallengeQuestionsOfUser(UserMgtBean userMgtBean)
+    public UserChallengesDTO[] getChallengeQuestionsOfUser(UserIdentityMgtBean userMgtBean)
                                                                     throws IdentityMgtServiceException {
 
         Utils.processUserId(userMgtBean);
@@ -143,7 +143,7 @@ public class IdentityManagementAdminService {
      * @param userMgtBean  userMgtBean bean class that contains user and tenant Information
      * @throws IdentityMgtServiceException  if fails
      */
-    public void setChallengeQuestionsOfUser(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
+    public void setChallengeQuestionsOfUser(UserIdentityMgtBean userMgtBean) throws IdentityMgtServiceException {
 
 
         Utils.processUserId(userMgtBean);
@@ -170,7 +170,7 @@ public class IdentityManagementAdminService {
      */
     public boolean notifyAccountUnlock(String userName) {
 
-        UserMgtBean userMgtBean = new UserMgtBean();
+        UserIdentityMgtBean userMgtBean = new UserIdentityMgtBean();
         userMgtBean.setUserId(userName);
 
         try{
@@ -196,7 +196,7 @@ public class IdentityManagementAdminService {
      */
     public boolean unlockAccount(String userName){
 
-        UserMgtBean userMgtBean = new UserMgtBean();
+        UserIdentityMgtBean userMgtBean = new UserIdentityMgtBean();
         userMgtBean.setUserId(userName);
         try{
             Utils.processUserId(userMgtBean);

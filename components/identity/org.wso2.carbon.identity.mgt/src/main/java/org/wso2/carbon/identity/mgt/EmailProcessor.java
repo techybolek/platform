@@ -123,7 +123,6 @@ public class EmailProcessor {
             if(IdentityMgtConfig.getInstance().isEmailSendingInternallyManaged()){
                 
                 EmailSendingModule module = emailSender.getModule();
-                module.setEmailDataDTO(emailDataDTO);
                 emailSender.sendEmail(module);
                 emailDataDTO = new RecoveryDataDTO();
                 emailDataDTO.setEmailSent(true);
@@ -140,6 +139,7 @@ public class EmailProcessor {
         return emailDataDTO;
     }
 
+    @Deprecated
     public void setEmailConfig(EmailConfig emailConfig){
         emailConfigs.put(emailConfig.getConfigType(), emailConfig);
     }
@@ -204,7 +204,7 @@ public class EmailProcessor {
      * @param configElement
      * @return - admin management config
      */
-    public EmailConfig loadEmailConfig(OMElement configElement) {
+    private EmailConfig loadEmailConfig(OMElement configElement) {
         EmailConfig config = new EmailConfig();
         Iterator it = configElement.getChildElements();
         while (it.hasNext()) {

@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.mgt.beans.UserMgtBean;
+import org.wso2.carbon.identity.mgt.beans.UserIdentityMgtBean;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.dto.RecoveryDataDTO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
@@ -62,7 +62,7 @@ public class IdentityMgtProcessor {
      * @return true if the reset request is processed successfully.
      * @throws IdentityMgtServiceException  if fails
      */
-    public RecoveryDataDTO processRecoveryUsingEmail(UserMgtBean userMgtBean, int tenantId)
+    public RecoveryDataDTO processRecoveryUsingEmail(UserIdentityMgtBean userMgtBean, int tenantId)
                                                                         throws IdentityMgtServiceException {
 
         if(!IdentityMgtConfig.getInstance().isEnableEmailSending()){
@@ -104,13 +104,13 @@ public class IdentityMgtProcessor {
                     emailDataDTO.setEmailSent(false);
                     return emailDataDTO;                    
                 }
-                userMgtBean.setSecretKey(secretKey);
+                userMgtBean.setConfirmationCode(secretKey);
 
             } else if(IdentityMgtConstants.RECOVERY_TYPE_TEMPORARY_PASSWORD.equals(recoveryType)){
-                String temporaryPassword = userMgtBean.getUserPassword();
+                String temporaryPassword = userMgtBean.getUserTemporaryPassword();
                 if(temporaryPassword == null || temporaryPassword.trim().length() < 1){
                     temporaryPassword = new String(UserIdentityManagementUtil.generateTemporaryPassword());
-                    userMgtBean.setUserPassword(temporaryPassword);
+                    userMgtBean.setUserTemporaryPassword(temporaryPassword);
                 }
                 //PasswordUtil.updatePassword(userMgtBean);
                 recoveryData = false;
@@ -159,7 +159,7 @@ public class IdentityMgtProcessor {
      * @param tenantId tenant id
      * @return Map
      */
-    private  Map<String, String> populateDataMap(UserMgtBean userMgtBean, int tenantId) {
+    private  Map<String, String> populateDataMap(UserIdentityMgtBean userMgtBean, int tenantId) {
 
         Map<String, String> dataToStore = new HashMap<String, String>();
 
@@ -173,8 +173,8 @@ public class IdentityMgtProcessor {
         }
         dataToStore.put(IdentityMgtConstants.USER_NAME, userMgtBean.getUserId());
         dataToStore.put(IdentityMgtConstants.TENANT_DOMAIN, userMgtBean.getTenantDomain());
-        dataToStore.put(IdentityMgtConstants.SECRET_KEY, userMgtBean.getSecretKey());
-        dataToStore.put(IdentityMgtConstants.TEMPORARY_PASSWORD, userMgtBean.getUserPassword());
+        dataToStore.put(IdentityMgtConstants.SECRET_KEY, userMgtBean.getConfirmationCode());
+        dataToStore.put(IdentityMgtConstants.TEMPORARY_PASSWORD, userMgtBean.getUserTemporaryPassword());
         dataToStore.put(IdentityMgtConstants.EMAIL_CONFIG_TYPE, userMgtBean.getRecoveryType());
 
         int expireTime = IdentityMgtConfig.getInstance().getEmailLinkExpireTime();

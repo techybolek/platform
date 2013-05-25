@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimDO;
+import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimsDO;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
@@ -47,7 +47,7 @@ public class UserStoreBasedIdentityDataStore extends InMemoryIdentityDataStore {
      * This method stores data in the read write user stores. 
      */
     @Override
-    public void store(UserIdentityClaimDO userIdentityDTO, UserStoreManager userStoreManager) throws IdentityException {
+    public void store(UserIdentityClaimsDO userIdentityDTO, UserStoreManager userStoreManager) throws IdentityException {
         super.store(userIdentityDTO, userStoreManager);
         if(userIdentityDTO.getUserName() == null){
             log.error("Error while persisting user data.  Null user name is provided.");
@@ -80,9 +80,9 @@ public class UserStoreBasedIdentityDataStore extends InMemoryIdentityDataStore {
      * This method loads identity and security questions from the user stores
      */
 	@Override
-	public UserIdentityClaimDO load(String userName, UserStoreManager userStoreManager)
+	public UserIdentityClaimsDO load(String userName, UserStoreManager userStoreManager)
 	                                                                               throws IdentityException {
-		UserIdentityClaimDO userIdentityDTO = super.load(userName, userStoreManager);
+		UserIdentityClaimsDO userIdentityDTO = super.load(userName, userStoreManager);
 		if (userIdentityDTO != null) {
 			return userIdentityDTO;
 		}
@@ -112,7 +112,7 @@ public class UserStoreBasedIdentityDataStore extends InMemoryIdentityDataStore {
 		}
 		// if user is exiting there must be at least one user attribute.
 		if (userDataMap != null && userDataMap.size() > 0) {
-			userIdentityDTO = new UserIdentityClaimDO(userName, userDataMap);
+			userIdentityDTO = new UserIdentityClaimsDO(userName, userDataMap);
 			int tenantId = CarbonContext.getCurrentContext().getTenantId();
 			userIdentityDTO.setTenantId(tenantId);
 			super.cache.put(tenantId + userName, userIdentityDTO);

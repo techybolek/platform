@@ -9,7 +9,7 @@ import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
-import org.wso2.carbon.identity.mgt.beans.UserMgtBean;
+import org.wso2.carbon.identity.mgt.beans.UserIdentityMgtBean;
 import org.wso2.carbon.identity.mgt.beans.VerificationBean;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.dto.UserEvidenceDTO;
@@ -40,7 +40,7 @@ public class Utils {
      * @param userMgtBean bean class that contains user and tenant Information
      * @throws IdentityMgtServiceException  if user id doesn't exist
      */
-    public static void processUserId(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
+    public static void processUserId(UserIdentityMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         String domainName = null;
         String userId = userMgtBean.getUserId();
@@ -69,7 +69,7 @@ public class Utils {
      * @return verification success or not
      * @throws IdentityMgtServiceException  if fails or tenant doesn't exist
      */
-    public static boolean verifyUserId(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
+    public static boolean verifyUserId(UserIdentityMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         boolean verification = false;
         String userKey = userMgtBean.getUserKey();
@@ -123,7 +123,7 @@ public class Utils {
      * @return no of verified challenges
      * @throws IdentityMgtServiceException  if fails
      */
-    public static int getVerifiedChallenges(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
+    public static int getVerifiedChallenges(UserIdentityMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         int noOfChallenges = 0;
 
@@ -154,7 +154,7 @@ public class Utils {
      * @param userMgtBean   bean class that contains user and tenant Information
      * @throws IdentityMgtServiceException if fails
      */
-    public static void clearVerifiedChallenges(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
+    public static void clearVerifiedChallenges(UserIdentityMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         try{
             UserRegistry registry = IdentityMgtServiceComponent.getRegistryService().
@@ -175,7 +175,7 @@ public class Utils {
      * @param userMgtBean  bean class that contains user and tenant Information
      * @throws IdentityMgtServiceException  if fails
      */
-    public static void setVerifiedChallenges(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
+    public static void setVerifiedChallenges(UserIdentityMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         try{
             UserRegistry registry = IdentityMgtServiceComponent.getRegistryService().
@@ -353,7 +353,7 @@ public class Utils {
      * @return true/false whether user is verified or not. If user is a tenant
      *         user then always return false
      */
-    public static boolean verifyUserForRecovery(UserMgtBean userMgtBean) {
+    public static boolean verifyUserForRecovery(UserIdentityMgtBean userMgtBean) {
 
         String userId = userMgtBean.getUserId();
 
@@ -407,7 +407,7 @@ public class Utils {
      * @return verification results as been
      * @throws IdentityMgtServiceException if any error occurs
      */
-    public static String verifyUserEvidences(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
+    public static String verifyUserEvidences(UserIdentityMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         String domainName = userMgtBean.getTenantDomain();
         int tenantId = Utils.getTenantId(domainName);

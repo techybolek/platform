@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimDO;
+import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimsDO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -38,7 +38,7 @@ public class InMemoryIdentityDataStore extends UserIdentityDataStore {
 	private static Log log = LogFactory.getLog(InMemoryIdentityDataStore.class);
 
 	@Override
-	public void store(UserIdentityClaimDO userIdentityDTO, UserStoreManager userStoreManager)
+	public void store(UserIdentityClaimsDO userIdentityDTO, UserStoreManager userStoreManager)
 	                                                                                     throws IdentityException {
 		if (userIdentityDTO != null && userIdentityDTO.getUserName() != null) {
 			String key =
@@ -52,11 +52,11 @@ public class InMemoryIdentityDataStore extends UserIdentityDataStore {
 	}
 
 	@Override
-	public UserIdentityClaimDO load(String userName, UserStoreManager userStoreManager)
+	public UserIdentityClaimsDO load(String userName, UserStoreManager userStoreManager)
 	                                                                               throws IdentityException {
 
 		if (userName != null) {
-			return (UserIdentityClaimDO) cache.get(CarbonContext.getCurrentContext().getTenantId() +
+			return (UserIdentityClaimsDO) cache.get(CarbonContext.getCurrentContext().getTenantId() +
 			                                   userName);
 		}
 		return null;

@@ -17,7 +17,7 @@
 package org.wso2.carbon.identity.mgt.store;
 
 import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimDO;
+import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimsDO;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 
@@ -56,7 +56,7 @@ public abstract class UserIdentityDataStore {
 	 * @param userIdentityDTO
 	 * @param userStoreManager
 	 */
-	public abstract void store(UserIdentityClaimDO userIdentityDTO, UserStoreManager userStoreManager)
+	public abstract void store(UserIdentityClaimsDO userIdentityDTO, UserStoreManager userStoreManager)
 	                                                                                              throws IdentityException;
 
 	/**
@@ -66,7 +66,7 @@ public abstract class UserIdentityDataStore {
 	 * @param userStoreManager
 	 * @return
 	 */
-	public abstract UserIdentityClaimDO load(String userName, UserStoreManager userStoreManager)
+	public abstract UserIdentityClaimsDO load(String userName, UserStoreManager userStoreManager)
 	                                                                                        throws IdentityException;
 
 	/**

@@ -23,7 +23,7 @@ import org.apache.axiom.om.util.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
-import org.wso2.carbon.identity.mgt.beans.UserMgtBean;
+import org.wso2.carbon.identity.mgt.beans.UserIdentityMgtBean;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -43,10 +43,10 @@ public class PasswordUtil {
      * @return true - if password was successfully reset
      * @throws IdentityMgtServiceException
      */
-    public static boolean updatePassword(UserMgtBean userMgtBean) throws IdentityMgtServiceException {
+    public static boolean updatePassword(UserIdentityMgtBean userMgtBean) throws IdentityMgtServiceException {
 
         String userName = userMgtBean.getUserId();
-        String password = userMgtBean.getUserPassword();
+        String password = userMgtBean.getUserTemporaryPassword();
         String tenantDomain = userMgtBean.getTenantDomain();
         int tenant = Utils.getTenantId(tenantDomain);
 

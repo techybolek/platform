@@ -111,6 +111,8 @@ public class IdentityMgtConstants {
         public static final String  CONFIG_FILE_NAME = "identity-mgt.properties";
 
         public static final String  EMAIL_SEND_ENABLE = "Email.Sending.Enable";
+        
+        public static final String 	RECOVERY_CLAIM = "Recovery.Claim";
 
         public static final String  IDENTITY_LISTENER_ENABLE = "Identity.Listener.Enable";
         

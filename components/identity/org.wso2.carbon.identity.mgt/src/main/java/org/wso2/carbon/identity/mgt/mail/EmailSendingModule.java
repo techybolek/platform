@@ -1,12 +1,12 @@
 /*
  * Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,30 +16,30 @@
 
 package org.wso2.carbon.identity.mgt.mail;
 
-import org.wso2.carbon.identity.mgt.dto.RecoveryDataDTO;
+import org.wso2.carbon.identity.mgt.beans.UserIdentityMgtBean;
 
 /**
- * email sending abstract module. This implements the runnable task for sending email. 
+ * email sending abstract module. This implements the runnable task for sending
+ * email.
  * So implementation of this module does not want to worry about threads.
- *
+ * 
  */
 public abstract class EmailSendingModule implements Runnable {
 
-    protected RecoveryDataDTO emailDataDTO;
+	protected UserIdentityMgtBean bean;
 
-    @Override
-    public void run() {
-        processSendingEmail();
+	@Override
+	public void run() {
+		prepareEmail();
+	}
+
+	/**
+	 * process email sending
+	 * 
+	 */
+	public abstract void prepareEmail();
+
+	public void setBean(UserIdentityMgtBean bean) {
+		this.bean = bean;
     }
-
-
-    public void setEmailDataDTO(RecoveryDataDTO emailDataDTO) {
-        this.emailDataDTO = emailDataDTO;
-    }
-
-    /**
-     * process email sending
-     *
-     */
-    public abstract void processSendingEmail();
 }
