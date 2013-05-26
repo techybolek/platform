@@ -253,7 +253,7 @@ public class UserIdentityManagementUtil {
 	                                                   String metadata) throws IdentityException {
 		UserIdentityMetadataStore store = new UserIdentityMetadataStore();
 		IdentityMetadataDO metadataDO = store.loadMetadata(userName, tenantId, metadataType, metadata);
-		if (metadataDO.isValid()) {
+		if (metadataDO != null && metadataDO.isValid()) {
 			return true;
 		} else {
 			return false;

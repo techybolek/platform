@@ -44,7 +44,7 @@ public class UserIdentityManagementAdminService {
 	 * @return
 	 * @throws IdentityMgtServiceException
 	 */
-	public UserIdentityRecoveryDTO addUser(String userName, Object credential, String[] roleList,
+	public UserIdentityRecoveryDTO addUser(String userName, String credential, String[] roleList,
 	                                       UserIdentityClaimDTO[] claims, String profileName)
 	                                                                                         throws IdentityMgtServiceException {
 		int tenantId = Utils.getTenantId(MultitenantUtils.getTenantDomain(userName));
@@ -137,6 +137,7 @@ public class UserIdentityManagementAdminService {
 			                                                               .getTenantUserRealm(tenantId)
 			                                                               .getUserStoreManager();
 			UserIdentityManagementUtil.lockUserAccount(userName, userStoreManager);
+			log.info("User account " + userName + " locked");
 		} catch (UserStoreException e) {
 			log.error("Error while loading user store", e);
 			throw new IdentityMgtServiceException("Unable to lock the account");

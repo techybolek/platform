@@ -40,7 +40,7 @@ public class UserIdentityManagementService {
 	 * @return
 	 * @throws IdentityMgtServiceException
 	 */
-	public UserIdentityClaimDTO[] authenticateWithTemporaryCredentials(String userName, Object tempCredential)
+	public UserIdentityClaimDTO[] authenticateWithTemporaryCredentials(String userName, String tempCredential)
 	                                                                                                          throws IdentityMgtServiceException {
 		try {
 			int tenantId = Utils.getTenantId(MultitenantUtils.getTenantDomain(userName));
@@ -49,10 +49,10 @@ public class UserIdentityManagementService {
 			                  UserIdentityManagementUtil.isValidIdentityMetadata(userName,
 			                                                                     tenantId,
 			                                                                     IdentityMetadataDO.METADATA_TEMPORARY_CREDENTIAL,
-			                                                                     (String) tempCredential);
+			                                                                     tempCredential);
 
 			if (!isValid) {
-				log.warn("WARNING: Invalid temporary credential provided by " + userName);
+				log.warn("WARNING: Invalidated temporary credential provided by " + userName);
 				throw new IdentityMgtServiceException("Invalid temporary credential provided");
 			}
 			UserStoreManager userStoreManager =
@@ -63,8 +63,8 @@ public class UserIdentityManagementService {
 			// this credential should not be used again
 			UserIdentityManagementUtil.invalidateUserIdentityMetadata(userName,
 			                                                          tenantId,
-			                                                          (String) tempCredential,
-			                                                          IdentityMetadataDO.METADATA_TEMPORARY_CREDENTIAL);
+			                                                          IdentityMetadataDO.METADATA_TEMPORARY_CREDENTIAL,
+			                                                          tempCredential);
 			return UserIdentityManagementUtil.getAllUserIdentityClaims(userName);
 		} catch (UserStoreException e) {
 			log.error("Error while authenticating", e);
@@ -90,8 +90,8 @@ public class UserIdentityManagementService {
 			boolean isValid =
 			                  UserIdentityManagementUtil.isValidIdentityMetadata(userName,
 			                                                                     tenantId,
-			                                                                     confirmationCode,
-			                                                                     IdentityMetadataDO.METADATA_CONFIRMATION_CODE);
+			                                                                     IdentityMetadataDO.METADATA_CONFIRMATION_CODE,
+			                                                                     confirmationCode);
 			if (!isValid) {
 				log.warn("WARNING: Invalid confirmation code provided by " + userName);
 				throw new IdentityMgtServiceException("Invalid confirmation code provided");
@@ -105,8 +105,8 @@ public class UserIdentityManagementService {
 			// invalidate the confirmation code
 			UserIdentityManagementUtil.invalidateUserIdentityMetadata(userName,
 			                                                          tenantId,
-			                                                          confirmationCode,
-			                                                          IdentityMetadataDO.METADATA_CONFIRMATION_CODE);
+			                                                          IdentityMetadataDO.METADATA_CONFIRMATION_CODE,
+			                                                          confirmationCode);
 		} catch (UserStoreException e) {
 			log.error("Error while confirming the account", e);
 			throw new IdentityMgtServiceException("Error while confirming the account");
@@ -215,7 +215,7 @@ public class UserIdentityManagementService {
 			                                                               .getUserStoreManager();
 			// reset the password with a random value
 			char[] tempPassword = UserIdentityManagementUtil.generateTemporaryPassword();
-			userStoreManager.updateCredentialByAdmin(userName, tempPassword);
+			userStoreManager.updateCredentialByAdmin(userName, new String(tempPassword));
 			// sending email 
 			UserIdentityMgtBean bean = new UserIdentityMgtBean();
 			String email =

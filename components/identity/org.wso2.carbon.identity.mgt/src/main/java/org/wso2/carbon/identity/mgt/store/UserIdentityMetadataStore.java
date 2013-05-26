@@ -34,7 +34,7 @@ import org.wso2.carbon.identity.mgt.dto.IdentityMetadataDO;
  * This class is used to access the identity metadata. Schema of the identity
  * metadata is as follows :
  * ====================================================
- * ||UserName|TenantID|MetadataType|Metadata|Validity||
+ * ||UserName|TenantID|MetadataType|Metadata|Valid||
  * ====================================================
  * 
  */
@@ -184,14 +184,15 @@ public class UserIdentityMetadataStore {
 		ResultSet results = null;
 		try {
 			prepStmt = connection.prepareStatement(SQLQuery.LOAD_USER_METADATA);
-			prepStmt.setInt(1, IdentityUtil.getTenantIdOFUser(userName));
-			prepStmt.setString(2, userName);
+			prepStmt.setString(1, userName);
+			prepStmt.setInt(2, IdentityUtil.getTenantIdOFUser(userName));
+			
 			results = prepStmt.executeQuery();
 			List<IdentityMetadataDO> metada = new ArrayList<IdentityMetadataDO>();
 			while (results.next()) {
 				metada.add(new IdentityMetadataDO(results.getString(1), results.getInt(2),
 				                                      results.getString(3), results.getString(4),
-				                                      results.getBoolean(5)));
+				                                      Boolean.parseBoolean(results.getString(5))));
 			}
 			IdentityMetadataDO[] resultMetadata = new IdentityMetadataDO[metada.size()];
 			return metada.toArray(resultMetadata);
@@ -227,7 +228,7 @@ public class UserIdentityMetadataStore {
 			while (results.next()) {
 				metada.add(new IdentityMetadataDO(results.getString(1), results.getInt(2),
 				                                      results.getString(3), results.getString(4),
-				                                      results.getBoolean(5)));
+				                                      Boolean.parseBoolean(results.getString(5))));
 			}
 			IdentityMetadataDO[] resultMetadata = new IdentityMetadataDO[metada.size()];
 			return metada.toArray(resultMetadata);
@@ -250,39 +251,39 @@ public class UserIdentityMetadataStore {
 		 */
 		public static final String LOAD_META_DATA =
 		                                            "SELECT "
-		                                                    + "USERNAME, TENANT_ID, METADATA_TYPE, METADATA, VALID "
+		                                                    + "USER_NAME, TENANT_ID, METADATA_TYPE, METADATA, VALID "
 		                                                    + "FROM IDN_IDENTITY_META_DATA "
-		                                                    + "WHERE USERNAME = ? AND TENANT_ID = ? AND METADATA_TYPE = ? AND METADATA = ?";
+		                                                    + "WHERE USER_NAME = ? AND TENANT_ID = ? AND METADATA_TYPE = ? AND METADATA = ?";
 
 		/**
 		 * Query to load user metadata
 		 */
 		public static final String LOAD_USER_METADATA =
 		                                                "SELECT "
-		                                                        + "USERNAME, TENANT_ID, METADATA_TYPE, METADATA, VALID "
+		                                                        + "USER_NAME, TENANT_ID, METADATA_TYPE, METADATA, VALID "
 		                                                        + "FROM IDN_IDENTITY_META_DATA "
-		                                                        + "WHERE USERNAME = ? AND TENANT_ID = ? ";
+		                                                        + "WHERE USER_NAME = ? AND TENANT_ID = ? ";
 
 		/**
 		 * Query to load security questions
 		 */
 		public static final String LOAD_TENANT_METADATA =
 		                                                  "SELECT "
-		                                                          + "USERNAME, TENANT_ID, METADATA_TYPE, METADATA, VALID "
+		                                                          + "USER_NAME, TENANT_ID, METADATA_TYPE, METADATA, VALID "
 		                                                          + "FROM IDN_IDENTITY_META_DATA "
 		                                                          + "WHERE TENANT_ID = ? AND METADATA_TYPE = ?";
 
 		public static final String STORE_META_DATA =
 		                                             "INSERT "
 		                                                     + "INTO IDN_IDENTITY_META_DATA "
-		                                                     + "USERNAME, TENANT_ID, METADATA_TYPE, METADATA, VALID "
+		                                                     + "(USER_NAME, TENANT_ID, METADATA_TYPE, METADATA, VALID)"
 		                                                     + "VALUES (?,?,?,?,?)";
 
 		public static final String INVALIDATE_METADATA =
 		                                                 "UPDATE "
 		                                                         + "IDN_IDENTITY_META_DATA "
-		                                                         + "SET VALID = FALSE "
-		                                                         + "WHERE USERNAME = ? AND TENANT_ID = ? AND METADATA_TYPE = ? AND METADATA = ?";
+		                                                         + "SET VALID = 'false' "
+		                                                         + "WHERE USER_NAME = ? AND TENANT_ID = ? AND METADATA_TYPE = ? AND METADATA = ?";
 	}
 
 }

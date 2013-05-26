@@ -133,13 +133,10 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 			log.warn("Invalid user name " + userName);
 			return false;
 		}
-		// if the account lock on creating accounts policy is enabled user
-		// should not be able to log in until admin unlocks it.
-		if (config.isAuthPolicyAccountLockCheck()) {
-			if (userIdentityDTO.isAccountLocked()) {
-				log.warn("User account is locked for user : " + userName);
-				return false;
-			}
+		// if the account is locked, should not be able to log in
+		if (userIdentityDTO.isAccountLocked()) {
+			log.warn("User account is locked for user : " + userName + ". cannot login until the account is unlocked ");
+			return false;
 		}
 
 		return true;

@@ -34,7 +34,7 @@ public abstract class UserIdentityDataStore {
 	public static final String LAST_LOGON_TIME = "http://wso2.org/claims/identity/lastLogonTime";
 	public static final String UNLOCKING_TIME = "http://wso2.org/claims/identity/unlockTime";
 	public static final String PASSWORD_TIME_STAMP = "http://wso2.org/claims/identity/passwordTimestamp";
-	public static final String ACCOUNT_LOCK = "http://wso2.org/claims/identity/accountLock";
+	public static final String ACCOUNT_LOCK = "http://wso2.org/claims/identity/accountLocked";
 
 	/**
 	 * Get all claim types that is need to persist in the store
