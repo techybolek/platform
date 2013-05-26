@@ -1,7 +1,6 @@
 package org.wso2.carbon.identity.mgt.util;
 
 import java.io.ByteArrayInputStream;
-import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,19 +9,15 @@ import org.apache.neethi.PolicyEngine;
 import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
 import org.wso2.carbon.identity.mgt.beans.UserIdentityMgtBean;
-import org.wso2.carbon.identity.mgt.beans.VerificationBean;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
-import org.wso2.carbon.identity.mgt.dto.UserEvidenceDTO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.identity.mgt.store.UserIdentityDataStore;
-import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -242,111 +237,6 @@ public class Utils {
     }
 
     /**
-     * persist user account status
-     *
-     * @param userId user id
-     * @param tenantId  tenant id
-     * @param status whether account is lock or unlock
-     * @throws IdentityMgtServiceException whether account is lock or unlock
-     */
-    public static void persistAccountStatus(String userId, int tenantId, String status) throws IdentityMgtServiceException {
-
-        String accountStatus;
-
-        if(UserCoreConstants.USER_LOCKED.equals(status)){
-            accountStatus = UserCoreConstants.USER_LOCKED;
-        } else {
-            accountStatus = UserCoreConstants.USER_UNLOCKED;
-        }
-
-        try {
-            ClaimsMgtUtil.setClaimInUserStoreManager(userId, tenantId,
-                    UserIdentityDataStore.ACCOUNT_LOCK, accountStatus);
-        } catch (IdentityMgtServiceException e) {
-            String mgs = "Error while persisting account status for user : " + userId;
-            log.error(mgs, e);
-            throw new IdentityMgtServiceException(mgs, e);
-        }
-    }
-
-
-    /**
-     * Confirm that confirmation key has been sent to the same user.
-     *
-     * @param confirmationKey confirmation key from the user
-     * @return verification result as a bean
-     */
-    public static VerificationBean verifyConfirmationKey(String confirmationKey){
-
-        VerificationBean verificationBean = new VerificationBean();
-
-        boolean success = false;
-        boolean isExpire = false;
-        Registry registry = null;
-        try {
-
-            registry = IdentityMgtServiceComponent.getRegistryService().
-                                getConfigSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
-
-            registry.beginTransaction();
-
-            String secretKeyPath = IdentityMgtConstants.IDENTITY_MANAGEMENT_DATA +
-                    RegistryConstants.PATH_SEPARATOR + confirmationKey;
-            if (registry.resourceExists(secretKeyPath)) {
-                Resource resource = registry.get(secretKeyPath);
-                Properties props = resource.getProperties();
-                for (Object o : props.keySet()) {
-                    String key = (String) o;
-                    if (key.equals(IdentityMgtConstants.REDIRECT_PATH)) {
-                        verificationBean.setRedirectPath(resource.getProperty(key));
-                    } else if (key.equals(IdentityMgtConstants.USER_NAME)) {
-                        verificationBean.setUserId(resource.getProperty(key));
-                    } else if (key.equals(IdentityMgtConstants.SECRET_KEY)) {
-                        verificationBean.setKey(resource.getProperty(key));
-                    } else if (key.equals(IdentityMgtConstants.EXPIRE_TIME)){
-                        String time = resource.getProperty(key);
-                        if(System.currentTimeMillis() > Long.parseLong(time)){
-                            log.warn("Expired confirmation key : " + confirmationKey);
-                            verificationBean.setError("Expired confirmation key");
-                            isExpire = true;
-                            break;
-                        }
-                    }
-                }
-                registry.delete(resource.getPath());
-                if(!isExpire){
-                    success = true;
-                    log.info("confirmation is success for key : " + confirmationKey);
-                }
-            } else {
-                log.warn("invalid confirmation key : " + confirmationKey);
-                verificationBean.setError("Invalid confirmation key");
-            }
-        } catch (RegistryException e) {
-            log.error(e.getMessage(), e);
-            verificationBean.setError("Unexpected error has occurred");
-        } finally {
-            if(registry != null){
-                try{
-                    if (success || isExpire) {
-                        registry.commitTransaction();
-                    } else {
-                        registry.rollbackTransaction();
-                    }
-                } catch (RegistryException e) {
-                    log.error("Error while processing registry transaction", e);
-                }
-            }
-        }
-        if(isExpire){
-            verificationBean.setVerified(false);
-        } else {
-            verificationBean.setVerified(success);
-        }
-        return verificationBean;
-    }
-
-    /**
      * Verifies user id with underline user store
      *
      * @param userMgtBean  bean class that contains user and tenant Information
@@ -400,59 +290,6 @@ public class Utils {
         return false;
     }
 
-    /**
-     * verify user evidences
-     *
-     * @param userMgtBean  userMgtBean bean class that contains user and tenant Information
-     * @return verification results as been
-     * @throws IdentityMgtServiceException if any error occurs
-     */
-    public static String verifyUserEvidences(UserIdentityMgtBean userMgtBean) throws IdentityMgtServiceException {
-
-        String domainName = userMgtBean.getTenantDomain();
-        int tenantId = Utils.getTenantId(domainName);
-
-        UserEvidenceDTO[] evidenceDTOs = userMgtBean.getUserEvidenceDTOs();
-
-        if(evidenceDTOs == null || evidenceDTOs.length < 1){
-            log.error("no evidence provided by user for verification process");
-            return null;
-        }
-
-        String userName = null;
-        try {
-            for(UserEvidenceDTO evidenceDTO : evidenceDTOs){
-                if(evidenceDTO.getClaimUri() != null && evidenceDTO.getClaimValue() != null){
-                    String[] userList = ClaimsMgtUtil.getUserList(tenantId,
-                                           evidenceDTO.getClaimUri(), evidenceDTO.getClaimValue());
-                    if(userList != null && userList.length > 0){
-                        if(userList.length == 1){
-                            if(userName == null){
-                                userName = userList[0];
-                            } else if(!userName.equals(userList[0])) {
-                                return null;
-                            } else {
-                                userName = userList[0];
-                            }
-                        } else {
-                            String msg = "More than one user is associated with the given claim values";
-                            log.error(msg);
-                            throw new Exception(msg);
-                        }
-                    } else {
-                        if(log.isDebugEnabled()){
-                            log.debug("No associated user is found for given claim values");                            
-                        }
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            log.error("Error while retrieving user list for given claim values", e);
-        }
-
-        return userName;
-    }
 
     public static String[] getChallengeUris(){
         //TODO

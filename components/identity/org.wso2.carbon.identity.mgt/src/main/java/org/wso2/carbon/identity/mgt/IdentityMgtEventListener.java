@@ -63,13 +63,10 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 		}
 	};
 	
-	private IdentityMgtProcessor processor;
-
 	private UserIdentityDataStore module;
 
 	public IdentityMgtEventListener() {
 
-		processor = IdentityMgtServiceComponent.getRecoveryProcessor();
 		module = IdentityMgtConfig.getInstance().getIdentityDataStore();
 		String adminUserName =
 		                       IdentityMgtServiceComponent.getRealmService()
@@ -396,12 +393,8 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 			bean.setUserId(userName);
 			bean.setConfirmationCode(newCredential.toString());
 			bean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_TEMPORARY_PASSWORD);
-			try {
-				log.debug("Sending the tempory password to the user " + userName);
-				processor.processRecoveryUsingEmail(bean, userStoreManager.getTenantId());
-			} catch (IdentityMgtServiceException e) {
-				log.error("Error while sending temporary password to user's email account");
-			}
+			log.debug("Sending the tempory password to the user " + userName);
+			UserIdentityManagementUtil.notifyViaEmail(bean);
 		} else {
 			log.debug("Updating credentials of user " + userName + " by admin with a non-empty password");
 		}

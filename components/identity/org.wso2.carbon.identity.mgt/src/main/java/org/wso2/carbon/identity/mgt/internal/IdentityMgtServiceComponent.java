@@ -30,7 +30,6 @@ import org.wso2.carbon.caching.core.CacheInvalidator;
 import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.IdentityMgtEventListener;
 import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
-import org.wso2.carbon.identity.mgt.IdentityMgtProcessor;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.dto.ChallengeQuestionDTO;
 import org.wso2.carbon.registry.core.Collection;
@@ -65,8 +64,6 @@ public class IdentityMgtServiceComponent {
     private static RealmService realmService;
 
     private static RegistryService registryService;
-
-    private static IdentityMgtProcessor recoveryProcessor;
 
     private static ConfigurationContextService configurationContextService;
 
@@ -139,10 +136,6 @@ public class IdentityMgtServiceComponent {
         return registryService;
     }
 
-    public static IdentityMgtProcessor getRecoveryProcessor() {
-        return recoveryProcessor;
-    }
-
     public static ConfigurationContextService getConfigurationContextService() {
         return configurationContextService;
     }
@@ -162,7 +155,6 @@ public class IdentityMgtServiceComponent {
     private static void init(){
 
         Registry registry;
-        recoveryProcessor = new IdentityMgtProcessor();
         IdentityMgtConfig.getInstance(realmService.getBootstrapRealmConfiguration());
         try {
             registry = IdentityMgtServiceComponent.getRegistryService().getConfigSystemRegistry();
@@ -197,12 +189,6 @@ public class IdentityMgtServiceComponent {
             questionSetDTOs.add(dto);
         }
 
-        try {
-            recoveryProcessor.getQuestionProcessor().setChallengeQuestions(questionSetDTOs.
-                                    toArray(new ChallengeQuestionDTO[questionSetDTOs.size()]));
-        } catch (IdentityMgtServiceException e) {
-            log.error("Error while promoting default challenge questions", e);
-        }
     }
 //
 //    private static void processLockUsers() {
