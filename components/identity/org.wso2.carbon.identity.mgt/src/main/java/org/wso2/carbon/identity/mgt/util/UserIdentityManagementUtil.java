@@ -1,5 +1,8 @@
 package org.wso2.carbon.identity.mgt.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -21,6 +24,7 @@ import org.wso2.carbon.identity.mgt.store.UserIdentityMetadataStore;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.ServerConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -106,46 +110,74 @@ public class UserIdentityManagementUtil {
 
 	/**
 	 * Returns an array of primary security questions
+	 * @param tenantId 
 	 * 
 	 * @return
 	 * @throws IdentityException
 	 */
-	public static String[] getPrimaryQuestions() throws IdentityException {
+	public static String[] getPrimaryQuestions(int tenantId) throws IdentityException {
 		UserIdentityMetadataStore store = new UserIdentityMetadataStore();
-		IdentityMetadataDO[] metadata =
-		                                store.loadMetadata(IdentityMetadataDO.METADATA_PRIMARAY_SECURITY_QUESTION,
-		                                                   -1234);
-		String[] secQuestions = new String[metadata.length];
-		int i = 0;
-		for (IdentityMetadataDO dataDO : metadata) {
-			secQuestions[i++] = dataDO.getMetadata();
+		IdentityMetadataDO[] metadata = store.loadMetadata("TENANT", tenantId);
+		if(metadata.length < 1) {
+			return null;
 		}
-		return secQuestions;
+		List<String> validSecurityQuestions = new ArrayList<String>();
+		for (IdentityMetadataDO metadataDO : metadata) {
+			// only valid primary security questions are returned
+			if(IdentityMetadataDO.METADATA_PRIMARAY_SECURITY_QUESTION.equals(metadataDO.getMetadataType()) && metadataDO.isValid()) {
+				validSecurityQuestions.add(metadataDO.getMetadata());
+			}
+		}
+		String[] questionsList = new String[validSecurityQuestions.size()];
+		return validSecurityQuestions.toArray(questionsList);
 	}
 
 	/**
 	 * Add or update primary security questions
 	 * 
-	 * @param primarySecurityQuestions
+	 * @param primarySecurityQuestion
+	 * @param tenantId 
 	 * @throws IdentityException 
 	 */
-	public static void setPrimaryQuestions(String[] primarySecurityQuestions) throws IdentityException {
+	public static void addPrimaryQuestions(String[] primarySecurityQuestion, int tenantId) throws IdentityException {
 		UserIdentityMetadataStore store = new UserIdentityMetadataStore();
-		IdentityMetadataDO[] metadata = new IdentityMetadataDO[primarySecurityQuestions.length];
+		IdentityMetadataDO[] metadata = new IdentityMetadataDO[primarySecurityQuestion.length];
 		int i = 0;
-		for(String secQuestion : primarySecurityQuestions) {
-			metadata[i++] = new IdentityMetadataDO(null, -1234, IdentityMetadataDO.METADATA_PRIMARAY_SECURITY_QUESTION, secQuestion, true);
+		for(String secQuestion : primarySecurityQuestion) {
+			if(!secQuestion.contains(UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI)) {
+				throw new IdentityException("One or more security questions does not contain the namespace " +
+				                            UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI);
+			}
+			metadata[i++] =
+			                new IdentityMetadataDO("TENANT", tenantId,
+			                                       IdentityMetadataDO.METADATA_PRIMARAY_SECURITY_QUESTION,
+			                                       secQuestion, true);
 		}
 		store.storeMetadataSet(metadata);
 	}
 
 	/**
 	 * Remove primary security questions
+	 * @param tenantId 
 	 * 
 	 * @param securityQuestions
+	 * @throws IdentityException 
 	 */
-	public static void removePrimaryQuestions(String[] primarySecurityQuestions) {
-		//store.removePrimarySecurityQuestions(primarySecurityQuestions);
+	public static void removePrimaryQuestions(String[] primarySecurityQuestion, int tenantId) throws IdentityException {
+		UserIdentityMetadataStore store = new UserIdentityMetadataStore();
+		IdentityMetadataDO[] metadata = new IdentityMetadataDO[primarySecurityQuestion.length];
+		int i = 0;
+		for(String secQuestion : primarySecurityQuestion) {
+			if(!secQuestion.contains(UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI)) {
+				throw new IdentityException("One or more security questions does not contain the namespace " +
+				                            UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI);
+			}
+			metadata[i++] =
+			                new IdentityMetadataDO("TENANT", tenantId,
+			                                       IdentityMetadataDO.METADATA_PRIMARAY_SECURITY_QUESTION,
+			                                       secQuestion, true);
+		}
+		store.invalidateMetadataSet(metadata);
 	}
 
 	// ---- Util methods for authenticated users ----///
@@ -153,18 +185,17 @@ public class UserIdentityManagementUtil {
 	/**
 	 * Update security questions of the logged in user.
 	 * 
-	 * @param securityQuestions
+	 * @param securityQuestion
 	 * @param userStoreManager
 	 * @throws IdentityException
 	 */
-	public static void updateUserSecurityQuestions(String userName,
-	                                               UserIdentityClaimDTO[] securityQuestions,
+	public static void updateUserSecurityQuestions(String userName, UserIdentityClaimDTO[] securityQuestion,
 	                                               UserStoreManager userStoreManager)
 	                                                                                 throws IdentityException {
 		UserIdentityDataStore store = IdentityMgtConfig.getInstance().getIdentityDataStore();
 		UserIdentityClaimsDO userIdentityDO = store.load(userName, userStoreManager);
 		if (userIdentityDO != null) {
-			userIdentityDO.updateUserSequeiryQuestions(securityQuestions);
+			userIdentityDO.updateUserSequeiryQuestions(securityQuestion);
 			store.store(userIdentityDO, userStoreManager);
 		} else {
 			throw new IdentityException("No user account found for user " + userName);
@@ -191,9 +222,8 @@ public class UserIdentityManagementUtil {
 				throw new IdentityMgtServiceException("No user account found for user " + userName);
 			}
 		} catch (IdentityException e) {
-			throw new IdentityMgtServiceException(
-			                                      "Error while loading security questions for user " +
-			                                              userName);
+			throw new IdentityMgtServiceException("Error while loading security questions for user " +
+			                                      userName);
 		}
 	}
 
@@ -320,15 +350,17 @@ public class UserIdentityManagementUtil {
 			                                                               .getUserStoreManager();
 			// read all claims and convert them to UserIdentityClaimDTO
 			Claim[] claims = userStoreManager.getUserClaimValues(userName, null);
-			UserIdentityClaimDTO[] claimDTOs = new UserIdentityClaimDTO[claims.length];
-			int i = 0;
+			List<UserIdentityClaimDTO> allDefaultClaims = new ArrayList<UserIdentityClaimDTO>();
 			for (Claim claim : claims) {
-				UserIdentityClaimDTO claimDTO = new UserIdentityClaimDTO();
-				claimDTO.setClaimUri(claim.getClaimUri());
-				claimDTO.setClaimValue(claim.getValue());
-				claimDTOs[i++] = claimDTO;
+				if (claim.getClaimUri().contains(UserCoreConstants.DEFAULT_CARBON_DIALECT)) {
+					UserIdentityClaimDTO claimDTO = new UserIdentityClaimDTO();
+					claimDTO.setClaimUri(claim.getClaimUri());
+					claimDTO.setClaimValue(claim.getValue());
+					allDefaultClaims.add(claimDTO);
+				}
 			}
-			return claimDTOs;
+			UserIdentityClaimDTO[] claimDTOs = new UserIdentityClaimDTO[allDefaultClaims.size()];
+			return allDefaultClaims.toArray(claimDTOs);
 		} catch (UserStoreException e) {
 			throw new IdentityMgtServiceException("Error while getting user identity claims");
 		}

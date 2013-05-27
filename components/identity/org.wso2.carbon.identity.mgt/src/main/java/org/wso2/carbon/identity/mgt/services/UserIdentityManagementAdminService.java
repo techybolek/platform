@@ -32,9 +32,10 @@ public class UserIdentityManagementAdminService {
 	// --------Operations require Admin permissions ---------//
 
 	/**
-	 * Admin adds a user to the system. The returning DTO contains the temporary
-	 * password or the account confirmation code to be sent to the user to
-	 * complete the registration process.
+	 * Admin adds a user to the system. The returning
+	 * {@code UserIdentityRecoveryDTO} contains the temporary password or the
+	 * account confirmation code to be sent to the user to complete the
+	 * registration process.
 	 * 
 	 * @param userName
 	 * @param credential
@@ -55,10 +56,10 @@ public class UserIdentityManagementAdminService {
 			                                                               .getUserStoreManager();
 			Map<String, String> claimsMap = new HashMap<String, String>();
 			for (UserIdentityClaimDTO claim : claims) {
-				if (claim.getClaimUri()
-				         .contains(UserCoreConstants.ClaimTypeURIs.IDENTITY_CLAIM_URI)) {
-					throw new IdentityMgtServiceException("Modification to the " +
-					                                      claim.getClaimUri() + " is not allowed");
+				// claims with "http://wso2.org/claims/identity" cannot be modified   
+				if (claim.getClaimUri().contains(UserCoreConstants.ClaimTypeURIs.IDENTITY_CLAIM_URI)) {
+					throw new IdentityMgtServiceException("Modification to the " + claim.getClaimUri() +
+					                                      " is not allowed");
 				}
 				claimsMap.put(claim.getClaimUri(), claim.getClaimValue());
 			}
@@ -76,7 +77,9 @@ public class UserIdentityManagementAdminService {
 
 	/**
 	 * Admin can get the user account registration data if it was not read from
-	 * the above {@link addUser()} method.
+	 * the above {@link addUser()} method. The returning
+	 * {@code UserIdentityRecoveryDTO} contains the temporary password or the
+	 * confirmation code.
 	 * 
 	 * @param userName
 	 * @return
@@ -90,8 +93,7 @@ public class UserIdentityManagementAdminService {
 			                                    IdentityMgtServiceComponent.getRealmService()
 			                                                               .getTenantUserRealm(tenantId)
 			                                                               .getUserStoreManager();
-			return UserIdentityManagementUtil.getUserIdentityRecoveryData(userName,
-			                                                              userStoreManager,
+			return UserIdentityManagementUtil.getUserIdentityRecoveryData(userName, userStoreManager,
 			                                                              tenantId);
 		} catch (UserStoreException e) {
 			log.error("Error while loading user store", e);
@@ -177,7 +179,7 @@ public class UserIdentityManagementAdminService {
 	 * @param newPassword
 	 * @throws IdentityMgtServiceException
 	 */
-	public void resetUserPassword(String userName, Object newPassword)
+	public void resetUserPassword(String userName, String newPassword)
 	                                                                  throws IdentityMgtServiceException {
 		int tenantId = Utils.getTenantId(MultitenantUtils.getTenantDomain(userName));
 		try {
@@ -193,14 +195,17 @@ public class UserIdentityManagementAdminService {
 	}
 
 	/**
-	 * Admin adds more security questions to the the system.
+	 * Admin adds more security questions to the the system. These questions
+	 * will be available for all the users.
 	 * 
-	 * @param securityQuestions
-	 * @throws IdentityMgtServiceException 
+	 * @param securityQuestion
+	 * @throws IdentityMgtServiceException
 	 */
-	public void addPrimarySecurityQuestions(String[] securityQuestions) throws IdentityMgtServiceException {
+	public void addPrimarySecurityQuestions(String[] securityQuestion) throws IdentityMgtServiceException {
+		String userName = UserIdentityManagementUtil.getLoggedInUser();
+		int tenantId = Utils.getTenantId(MultitenantUtils.getTenantDomain(userName));
 		try {
-	        UserIdentityManagementUtil.setPrimaryQuestions(securityQuestions);
+	        UserIdentityManagementUtil.addPrimaryQuestions(securityQuestion, tenantId);
         } catch (IdentityException e) {
         	throw new IdentityMgtServiceException("Error while reading security question");
         }
@@ -210,13 +215,39 @@ public class UserIdentityManagementAdminService {
 	 * Admin removes a primary security questions
 	 * 
 	 * @param securityQuestion
+	 * @throws IdentityMgtServiceException 
 	 */
-	public void removePrimarySecurityQuestion(String[] securityQuestions) {
-		UserIdentityManagementUtil.removePrimaryQuestions(securityQuestions);
+	public void removePrimarySecurityQuestion(String[] securityQuestion) throws IdentityMgtServiceException {
+		String userName = UserIdentityManagementUtil.getLoggedInUser();
+		int tenantId = Utils.getTenantId(MultitenantUtils.getTenantDomain(userName));
+		try {
+	        UserIdentityManagementUtil.removePrimaryQuestions(securityQuestion, tenantId);
+        } catch (IdentityException e) {
+        	throw new IdentityMgtServiceException("Error while removing identity security question");
+        }
 	}
-
+	
+	
 	// ------ Operations require only login permissions --------//
 
+	/**
+	 * Returns an array of primary security questions. Primary security
+	 * questions are the security questions which were configured by the admin
+	 * and every user will have to answer selected set of questions from this.
+	 * 
+	 * @return
+	 * @throws IdentityMgtServiceException 
+	 */
+	public String[] getPrimarySecurityQuestions() throws IdentityMgtServiceException {
+		try {
+			String userName = UserIdentityManagementUtil.getLoggedInUser();
+			int tenantId = Utils.getTenantId(MultitenantUtils.getTenantDomain(userName));
+	        return UserIdentityManagementUtil.getPrimaryQuestions(tenantId);
+        } catch (IdentityException e) {
+        	throw new IdentityMgtServiceException("Error while reading security questions");
+        }
+	}
+	
 	/**
 	 * The users changes their answers to the security questions or adding more
 	 * security questions.
@@ -225,7 +256,7 @@ public class UserIdentityManagementAdminService {
 	 * 
 	 * @throws IdentityMgtServiceException
 	 */
-	public void updateUserSecurityQuestion(UserIdentityClaimDTO[] securityQuestions)
+	public void updateUserSecurityQuestion(UserIdentityClaimDTO[] securityQuestion)
 	                                                                                throws IdentityMgtServiceException {
 		String userName = UserIdentityManagementUtil.getLoggedInUser();
 		int tenantId = Utils.getTenantId(MultitenantUtils.getTenantDomain(userName));
@@ -234,7 +265,7 @@ public class UserIdentityManagementAdminService {
 			                                    IdentityMgtServiceComponent.getRealmService()
 			                                                               .getTenantUserRealm(tenantId)
 			                                                               .getUserStoreManager();
-			UserIdentityManagementUtil.updateUserSecurityQuestions(userName, securityQuestions,
+			UserIdentityManagementUtil.updateUserSecurityQuestions(userName, securityQuestion,
 			                                                       userStoreManager);
 		} catch (UserStoreException e) {
 			log.error("Error while updating security questions", e);
@@ -316,6 +347,27 @@ public class UserIdentityManagementAdminService {
 	public UserIdentityClaimDTO[] getAllUserIdentityClaims() throws IdentityMgtServiceException {
 		String userName = UserIdentityManagementUtil.getLoggedInUser();
 		return UserIdentityManagementUtil.getAllUserIdentityClaims(userName);
+	}
+	
+	/**
+	 * User change the password of the user.
+	 * 
+	 * @param newPassword
+	 * @throws IdentityMgtServiceException
+	 */
+	public void changeUserPassword(String newPassword, String oldPassword) throws IdentityMgtServiceException {
+		String userName = UserIdentityManagementUtil.getLoggedInUser();
+		int tenantId = Utils.getTenantId(MultitenantUtils.getTenantDomain(userName));
+		try {
+			UserStoreManager userStoreManager =
+			                                    IdentityMgtServiceComponent.getRealmService()
+			                                                               .getTenantUserRealm(tenantId)
+			                                                               .getUserStoreManager();
+			userStoreManager.updateCredential(userName, newPassword, oldPassword);
+		} catch (UserStoreException e) {
+			log.error("Error while resetting the password", e);
+			throw new IdentityMgtServiceException("Unable reset the password");
+		}
 	}
 
 }

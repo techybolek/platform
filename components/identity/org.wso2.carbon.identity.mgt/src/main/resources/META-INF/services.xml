@@ -37,13 +37,19 @@
 		<operation name="updateUserSecurityQuestion">
 			<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
 		</operation>
+		<operation name="updateUserIdentityClaims">
+			<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
+		</operation>
 		<operation name="getUserSecurityQuestions">
 			<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
 		</operation>
-		<operation name="updateUserIdentityRecoveryData">
+		<operation name="getAllUserIdentityClaims">
 			<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
 		</operation>
-		<operation name="getUserIdentityRecoveryData">
+		<operation name="getUserIdentityRegistrationData">
+			<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
+		</operation>
+		<operation name="getPrimarySecurityQuestions">
 			<parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
 		</operation>
 		<operation name="addUser">

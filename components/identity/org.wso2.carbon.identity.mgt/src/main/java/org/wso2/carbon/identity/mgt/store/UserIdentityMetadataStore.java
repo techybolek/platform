@@ -67,6 +67,35 @@ public class UserIdentityMetadataStore {
 			IdentityDatabaseUtil.closeConnection(connection);
 		}
 	}
+	
+	/**
+	 * 
+	 * @param metadataSet
+	 * @throws IdentityException
+	 */
+	public void invalidateMetadataSet(IdentityMetadataDO[] metadataSet) throws IdentityException {
+		Connection connection = JDBCPersistenceManager.getInstance().getDBConnection();
+		PreparedStatement prepStmt = null;
+		try {
+			prepStmt = connection.prepareStatement(SQLQuery.INVALIDATE_METADATA);
+			for (IdentityMetadataDO metadata : metadataSet) {
+				prepStmt.setString(1, metadata.getUserName());
+				prepStmt.setInt(2, metadata.getTenantId());
+				prepStmt.setString(3, metadata.getMetadataType());
+				prepStmt.setString(4, metadata.getMetadata());
+				prepStmt.addBatch();
+			}
+			prepStmt.executeBatch();
+			connection.setAutoCommit(false);
+			connection.commit();
+		} catch (SQLException e) {
+			throw new IdentityException("Error while invalidating user identity data", e);
+		} finally {
+			IdentityDatabaseUtil.closeStatement(prepStmt);
+			IdentityDatabaseUtil.closeConnection(connection);
+		}
+	    
+    }
 
 	/**
 	 * Stores identity data.
@@ -107,16 +136,17 @@ public class UserIdentityMetadataStore {
 		Connection connection = JDBCPersistenceManager.getInstance().getDBConnection();
 		PreparedStatement prepStmt = null;
 		try {
+			connection.setAutoCommit(false);
+			prepStmt = connection.prepareStatement(SQLQuery.STORE_META_DATA);
 			for (IdentityMetadataDO metadata : metadataSet) {
-				prepStmt = connection.prepareStatement(SQLQuery.STORE_META_DATA);
 				prepStmt.setString(1, metadata.getUserName());
 				prepStmt.setInt(2, metadata.getTenantId());
 				prepStmt.setString(3, metadata.getMetadataType());
 				prepStmt.setString(4, metadata.getMetadata());
 				prepStmt.setString(5, Boolean.toString(metadata.isValid()));
+				prepStmt.addBatch();
 			}
 			prepStmt.executeBatch();
-			connection.setAutoCommit(false);
 			connection.commit();
 		} catch (SQLException e) {
 			throw new IdentityException("Error while storing user identity data", e);

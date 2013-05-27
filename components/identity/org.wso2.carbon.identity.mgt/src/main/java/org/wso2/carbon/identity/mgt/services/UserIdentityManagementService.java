@@ -80,9 +80,10 @@ public class UserIdentityManagementService {
 	 * 
 	 * @param userName
 	 * @param confirmationCode
+	 * @return 
 	 * @throws IdentityMgtServiceException
 	 */
-	public void confirmUserRegistration(String userName, String confirmationCode)
+	public UserIdentityClaimDTO[] confirmUserRegistration(String userName, String confirmationCode)
 	                                                                             throws IdentityMgtServiceException {
 		try {
 			int tenantId = Utils.getTenantId(MultitenantUtils.getTenantDomain(userName));
@@ -107,6 +108,7 @@ public class UserIdentityManagementService {
 			                                                          tenantId,
 			                                                          IdentityMetadataDO.METADATA_CONFIRMATION_CODE,
 			                                                          confirmationCode);
+			return UserIdentityManagementUtil.getAllUserIdentityClaims(userName);
 		} catch (UserStoreException e) {
 			log.error("Error while confirming the account", e);
 			throw new IdentityMgtServiceException("Error while confirming the account");
@@ -317,7 +319,7 @@ public class UserIdentityManagementService {
 	 */
 	public String[] getPrimarySecurityQuestions() throws IdentityMgtServiceException {
 		try {
-	        return UserIdentityManagementUtil.getPrimaryQuestions();
+	        return UserIdentityManagementUtil.getPrimaryQuestions(-1234);
         } catch (IdentityException e) {
         	throw new IdentityMgtServiceException("Error while reading security questions");
         }
