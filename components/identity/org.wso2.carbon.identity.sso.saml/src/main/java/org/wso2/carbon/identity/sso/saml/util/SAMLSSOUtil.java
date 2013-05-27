@@ -196,23 +196,16 @@ public class SAMLSSOUtil {
 	}
 
 	/**
-	 * Compressing and Encoding the response
+	 * Encoding the response
 	 * 
 	 * @param xmlString
 	 *            String to be encoded
-	 * @return compressed and encoded String
+	 * @return encoded String
 	 */
 	public static String encode(String xmlString) throws Exception {
-		Deflater deflater = new Deflater(Deflater.DEFLATED, true);
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		DeflaterOutputStream deflaterOutputStream =
-		                                            new DeflaterOutputStream(byteArrayOutputStream,
-		                                                                     deflater);
-		deflaterOutputStream.write(xmlString.getBytes());
-		deflaterOutputStream.close();
-		// Encoding the compressed message
+		// Encoding the message
 		String encodedRequestMessage =
-		                               Base64.encodeBytes(byteArrayOutputStream.toByteArray(),
+		                               Base64.encodeBytes(xmlString.getBytes(),
 		                                                  Base64.DONT_BREAK_LINES);
 		return encodedRequestMessage.trim();
 	}
@@ -351,7 +344,7 @@ public class SAMLSSOUtil {
 	}
 
     public static Assertion setSignature(Assertion assertion, String signatureAlgorithm,
-                                        X509Credential cred) throws IdentityException {
+            X509Credential cred) throws IdentityException {
         doBootstrap();
         try {
             Signature signature = (Signature) buildXMLObject(Signature.DEFAULT_ELEMENT_NAME);
@@ -362,11 +355,9 @@ public class SAMLSSOUtil {
             try {
                 KeyInfo keyInfo = (KeyInfo) buildXMLObject(KeyInfo.DEFAULT_ELEMENT_NAME);
                 X509Data data = (X509Data) buildXMLObject(X509Data.DEFAULT_ELEMENT_NAME);
-                X509Certificate cert =
-                        (X509Certificate) buildXMLObject(X509Certificate.DEFAULT_ELEMENT_NAME);
-                String value =
-                        org.apache.xml.security.utils.Base64.encode(cred.getEntityCertificate()
-                                .getEncoded());
+                X509Certificate cert = (X509Certificate) buildXMLObject(X509Certificate.DEFAULT_ELEMENT_NAME);
+                String value = org.apache.xml.security.utils.Base64.encode(cred
+                        .getEntityCertificate().getEncoded());
                 cert.setValue(value);
                 data.getX509Certificates().add(cert);
                 keyInfo.getX509Datas().add(data);
@@ -381,8 +372,8 @@ public class SAMLSSOUtil {
             signatureList.add(signature);
 
             // Marshall and Sign
-            MarshallerFactory marshallerFactory =
-                    org.opensaml.xml.Configuration.getMarshallerFactory();
+            MarshallerFactory marshallerFactory = org.opensaml.xml.Configuration
+                    .getMarshallerFactory();
             Marshaller marshaller = marshallerFactory.getMarshaller(assertion);
 
             marshaller.marshall(assertion);

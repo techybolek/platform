@@ -86,6 +86,7 @@ public class ResponseBuilder {
         }
         Response response = new org.opensaml.saml2.core.impl.ResponseBuilder().buildObject();
         response.setID(SAMLSSOUtil.createID());
+	response.setInResponseTo(authReqDTO.getId());
         response.setStatus(buildStatus(SAMLSSOConstants.StatusCodes.SUCCESS_CODE, null));
         response.setVersion(SAMLVersion.VERSION_20);
         DateTime issueInstant = new DateTime();
