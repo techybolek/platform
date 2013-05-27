@@ -38,5 +38,13 @@
     </jaxrs:server>
 
     <bean id="groupBean" class="org.wso2.carbon.identity.scim.provider.resources.GroupResource"/>
+
+    <jaxrs:server id="bulkResource" address="/Bulk">
+        <jaxrs:serviceBeans>
+            <ref bean="bulkBean"/>
+        </jaxrs:serviceBeans>
+    </jaxrs:server>
+
+    <bean id="bulkBean" class="org.wso2.carbon.identity.scim.provider.resources.BulkResource"/>
 </beans>
 
