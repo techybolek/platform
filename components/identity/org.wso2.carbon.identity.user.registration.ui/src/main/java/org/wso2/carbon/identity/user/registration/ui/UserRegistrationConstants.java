@@ -19,6 +19,7 @@ package org.wso2.carbon.identity.user.registration.ui;
 
 public class UserRegistrationConstants {
 
+    public static final String PARAM_DOMAINNAME = "domain";
     public static final String PARAM_USERNAME = "username";
     public static final String PARAM_PASSWORD = "password";
     public static final String PARAM_RETYPED_PASSWORD = "retypedPassword";

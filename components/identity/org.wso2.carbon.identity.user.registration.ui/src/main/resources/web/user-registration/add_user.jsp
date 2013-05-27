@@ -70,7 +70,7 @@
         }
 
         userDTO.setUserFields(fieldDTOs);
-        userDTO.setUserName(request.getParameter(UserRegistrationConstants.PARAM_USERNAME));
+        userDTO.setUserName(request.getParameter(UserRegistrationConstants.PARAM_DOMAINNAME)+"/"+request.getParameter(UserRegistrationConstants.PARAM_USERNAME));
         userDTO.setPassword(request.getParameter(UserRegistrationConstants.PARAM_PASSWORD));
         userDTO.setOpenID((String) session.getAttribute("openIdURL"));
         client.addUser(userDTO);

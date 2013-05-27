@@ -195,12 +195,8 @@
         	return false;
     	}
         
-        var domain = null;
-        
-        if (value.indexOf("/") > 0) {
-        	domain = value.substring(0, value.indexOf("/"));
-        	domain = domain.toUpperCase();
-        }
+        var domains = document.getElementsByName("<%=UserRegistrationConstants.PARAM_DOMAINNAME%>")[0];
+        var domain =  domains.options[domains.selectedIndex].value;
 
         value =
         document.getElementsByName("<%=UserRegistrationConstants.PARAM_PASSWORD%>")[0].value;
@@ -344,6 +340,20 @@ if(forwardPage!=null){
             </tr>
         </thead>
         <tbody>
+            <tr>
+                <td class="leftCol-small"><fmt:message key='domain.name'/><span
+                        class="required">*</span></td>
+                <td><select id="<%=UserRegistrationConstants.PARAM_DOMAINNAME%>" name="<%=UserRegistrationConstants.PARAM_DOMAINNAME%>">
+                    <%
+                        for(int j=0; j<regExes.length; j++) {
+                            String domainName= regExes[j].getDomainName().toUpperCase();
+                    %>
+                    <option value="<%=domainName%>"><%=domainName%></option>
+                    <%
+                        }
+                    %>
+                </select></td>
+            </tr>
             <tr>
                 <td class="leftCol-small"><fmt:message key='user.name'/><span
                         class="required">*</span></td>
