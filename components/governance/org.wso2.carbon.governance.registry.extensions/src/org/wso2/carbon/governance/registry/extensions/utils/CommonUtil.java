@@ -165,8 +165,8 @@ public class CommonUtil {
             return;
         }
         for (String rxtPath : rxtFilePaths) {
-            String resourcePath = GovernanceConstants.RXT_CONFIGS_PATH +
-                    RegistryConstants.PATH_SEPARATOR + rxtPath;
+            String resourcePath = RegistryConstants.GOVERNANCE_COMPONENT_PATH +
+                    RegistryConstants.PATH_SEPARATOR + "types" + RegistryConstants.PATH_SEPARATOR + rxtPath;
             int currentTenantId = CurrentSession.getTenantId();
             CurrentSession.setTenantId(tenantId);
             RegistryContext registryContext = systemRegistry.getRegistryContext();

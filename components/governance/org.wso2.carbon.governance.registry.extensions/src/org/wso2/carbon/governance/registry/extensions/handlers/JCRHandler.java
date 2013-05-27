@@ -43,9 +43,9 @@ public class JCRHandler extends Handler {
             Resource resource = requestContext.getResource();
             String tempKey = key;
             if (tempKey == null) {
-                GovernanceUtils.loadGovernanceArtifacts(registry);
                 List<GovernanceArtifactConfiguration> governanceArtifactConfigurations =
                         GovernanceUtils.findGovernanceArtifactConfigurations(registry);
+                GovernanceUtils.loadGovernanceArtifacts(registry, governanceArtifactConfigurations);
                 for (GovernanceArtifactConfiguration configuration : governanceArtifactConfigurations) {
                     if (configuration.getMediaType().equals(resource.getMediaType())) {
                         tempKey = configuration.getKey();

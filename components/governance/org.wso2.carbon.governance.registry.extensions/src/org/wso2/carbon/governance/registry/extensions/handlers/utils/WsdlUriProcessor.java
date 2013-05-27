@@ -952,9 +952,9 @@ public class WsdlUriProcessor {
             }
         }
         registry.addAssociation(path, RegistryUtils.getAbsolutePath(registry.getRegistryContext(),
-                CommonUtil.getWSDLURL(service)), CommonConstants.DEPENDS);
+                CommonUtil.getDefinitionURL(service)), CommonConstants.DEPENDS);
         registry.addAssociation(RegistryUtils.getAbsolutePath(registry.getRegistryContext(),
-                CommonUtil.getWSDLURL(service)),path, CommonConstants.USED_BY);
+                CommonUtil.getDefinitionURL(service)),path, CommonConstants.USED_BY);
     }
 
     public static String getSource(String uri){

@@ -16,6 +16,7 @@ package org.wso2.carbon.governance.registry.extensions.aspects.utils;/*
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.governance.registry.extensions.beans.ApprovalBean;
@@ -436,8 +437,7 @@ public class Utils {
 	
 	public static void addTransitionApprovalItems(Resource resource, List<ApprovalBean> approvalBeans, String state){
         if (approvalBeans != null) {
-        	Collections.sort(approvalBeans);
-            int order = 0;
+        	int order = 0;
             for (ApprovalBean approvalBean : approvalBeans) {
                 
             	List<String> allowedRoles = new ArrayList<String>();
@@ -449,6 +449,7 @@ public class Utils {
                 items.add("current:0");
                 items.add("votes:" + approvalBean.getVotes());
                 items.add("users:");
+                items.add("order:" + order);
                 String resourcePropertyNameForItem =
                         LifecycleConstants.REGISTRY_CUSTOM_LIFECYCLE_VOTES_OPTION + order
                                 + LifecycleConstants.VOTE;

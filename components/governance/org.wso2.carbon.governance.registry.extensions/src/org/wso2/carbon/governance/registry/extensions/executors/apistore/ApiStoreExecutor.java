@@ -266,7 +266,8 @@ public class ApiStoreExecutor implements Execution {
 	 * @param httpContext
 	 */
 	private void updateStatus(Service service, String serviceName, HttpContext httpContext) {
-		String lifeCycleEP = apimEndpoint +
+		String lifeCycleEP =
+		                     apimEndpoint +
 		                             "publisher/site/blocks/life-cycles/ajax/life-cycles.jag";
 		try {
 			// create a post request to addAPI.

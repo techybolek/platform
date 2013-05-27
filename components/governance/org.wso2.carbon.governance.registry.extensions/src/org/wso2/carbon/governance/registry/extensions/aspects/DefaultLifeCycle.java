@@ -440,7 +440,7 @@ public class DefaultLifeCycle extends Aspect {
 	
 	        resource = requestContext.getResource();
 	        newResourcePath = requestContext.getResourcePath().getPath();
-	
+	        
 	        if (!currentState.equals(nextState)) {
 	            State state = (State) scxml.getChildren().get(nextState);
 	            resource.setProperty(stateProperty, state.getId().replace(".", " "));
@@ -752,12 +752,9 @@ public class DefaultLifeCycle extends Aspect {
                 	} else if (userList == null ) {
                 		userList = new ArrayList<String>();
                 	}
-                	
+                	break;
                 }
             }
-            
-            //String userSpecificVote = LifecycleConstants.REGISTRY_CUSTOM_LIFECYCLE_USER_VOTE +"."+ user +"."+ currentState +"."+ forEvent;
-            // String resorceVal = resource.getProperty(userSpecificVote);           
             
             if ((userVoted == true ) || (userVoted == false && Boolean.valueOf(entry.getValue())) ) {            	
             	for (String propertyValue : propertyValues) {
@@ -766,21 +763,19 @@ public class DefaultLifeCycle extends Aspect {
                         String approvals = newProps.get(newProps.indexOf(propertyValue));
                         approvals = approvals.replace("current:", "");
                         int approvalCount  = Integer.parseInt(approvals);
-                        if(Boolean.valueOf(entry.getValue())){
+                        
+                        // Add new users in to voted user list
+                        List<String> list = new ArrayList<String>(userList);
+                        if(Boolean.valueOf(entry.getValue()) && userVoted == false){
                         	approvalCount++;
-                        }else{
+                        	list.add(user);
+                        }else if (!Boolean.valueOf(entry.getValue()) && userVoted == true){
                         	approvalCount--;
+                        	list.remove(user);
                         }
                         newProps.remove(propertyValue);
                         newProps.add("current:"+approvalCount);
                         
-                        // Add new users in to voted user list
-                        List<String> list = new ArrayList<String>(userList);
-                        if(userVoted == false){                        	
-                        	list.add(user);
-                        }else {
-                        	list.remove(user);
-                        }
                         StringBuilder sb = new StringBuilder();
                         for (String n : list) { 
                             if (sb.length() > 0) sb.append(',');
@@ -804,7 +799,8 @@ public class DefaultLifeCycle extends Aspect {
                         if(resource.getProperty(LifecycleConstants.REGISTRY_LIFECYCLE_HISTORY_ORIGINAL_PATH) != null){
                             statCollection.setOriginalPath(resource.getProperty(LifecycleConstants.REGISTRY_LIFECYCLE_HISTORY_ORIGINAL_PATH));
                         }
-                	}
+                        break;
+                	}                	
                 }            	
             } 
     	}

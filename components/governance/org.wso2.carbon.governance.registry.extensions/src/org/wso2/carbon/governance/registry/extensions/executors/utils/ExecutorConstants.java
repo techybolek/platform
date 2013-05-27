@@ -1,6 +1,7 @@
 package org.wso2.carbon.governance.registry.extensions.executors.utils;
 
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
+import org.wso2.carbon.registry.core.RegistryConstants;
 
 public class ExecutorConstants {
 
