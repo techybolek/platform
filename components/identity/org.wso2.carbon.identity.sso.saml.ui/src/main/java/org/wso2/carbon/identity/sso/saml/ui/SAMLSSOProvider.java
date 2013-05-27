@@ -86,14 +86,15 @@ public class SAMLSSOProvider extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		String username = CharacterEncoder.getSafeText(req
-				.getParameter(SAMLSSOProviderConstants.USERNAME));
+		
+		String username =
+		                  CharacterEncoder.getSafeText(req.getParameter(SAMLSSOProviderConstants.USERNAME));
 		String password = req.getParameter(SAMLSSOProviderConstants.PASSWORD);
+		
 		String federatedIdp = req.getParameter(SAMLSSOProviderConstants.FEDERATED_IDP);
 		if (federatedIdp == null) {
 			federatedIdp = req.getHeader(SAMLSSOProviderConstants.FEDERATED_IDP);
 		}
-		
 		federatedIdp = Util.getIdentityProviderSSOServiceURL(federatedIdp);
 		
 		HttpSession session = req.getSession();
@@ -102,20 +103,19 @@ public class SAMLSSOProvider extends HttpServlet {
 		if (tokenCookie != null) {
 			ssoTokenID = tokenCookie.getValue();
 		}
+		
 		try {
 			if (federatedIdp != null) {
 				handleFederatedLogin(req, resp);
 			} else if (username == null && password == null) {// SAMLRequest received.
+				// if an openid authentication or password authentication
 				String authMode = req.getParameter("authMode");
 				if (!SAMLSSOProviderConstants.AuthnModes.OPENID.equals(authMode)) {
 					authMode = SAMLSSOProviderConstants.AuthnModes.USERNAME_PASSWORD;
 				}
 				String relayState = req.getParameter(SAMLSSOProviderConstants.RELAY_STATE);
 				if (relayState == null) {
-					log.debug("RelayState is not present in the request.");
-					sendNotification(SAMLSSOProviderConstants.Notification.NORELAY_STATUS,
-							SAMLSSOProviderConstants.Notification.NORELAY_MESSAGE, req, resp);
-					return;
+					log.warn("RelayState is not present in the request.");
 				}
 				String samlRequest = req.getParameter("SAMLRequest");
 				if (samlRequest != null) {

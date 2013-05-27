@@ -56,7 +56,16 @@
     function doValidation() {
         var fld = document.getElementsByName("assrtConsumerURL")[0];
         var value = fld.value;
+        var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
         if (value.length == 0) {
+                CARBON.showWarningDialog(
+                        "<fmt:message key='sp.enter.valid.endpoint.address'/>",
+                        null, null);
+                return false;
+
+        }
+
+        if (!regexp.test(value)) {
             CARBON.showWarningDialog(
                     "<fmt:message key='sp.enter.valid.endpoint.address'/>",
                     null, null);
@@ -65,10 +74,23 @@
 
         value = value.replace(/^\s+/, "");
         if (value.length == 0) {
-            CARBON.showWarningDialog(
-                    "<fmt:message key='sp.enter.valid.endpoint.address'/>",
-                    null, null);
-            return false;
+                CARBON.showWarningDialog(
+                        "<fmt:message key='sp.enter.valid.endpoint.address'/>",
+                        null, null);
+                return false;
+
+        }
+
+        var fldLogin = document.getElementsByName("loginPageURL")[0];
+        var loginValue = fldLogin.value;
+
+        if(loginValue.length !=0){
+            if (!regexp.test(loginValue)) {
+                CARBON.showWarningDialog(
+                        "<fmt:message key='sp.enter.valid.login.endpoint.address'/>",
+                        null, null);
+                return false;
+            }
         }
 
         var fld = document.getElementsByName("issuer")[0];
@@ -396,7 +418,7 @@
     <td>
         <input type="text" id="loginPageURL" name="loginPageURL"
                value="<%=provider.getLoginPageURL()%>"
-               class="text-box-big">
+               class="text-box-big"/>
     </td>
 
 </tr>
@@ -407,7 +429,7 @@
 <td>
     <input type="text" id="loginPageURL" name="loginPageURL"
            value=""
-           class="text-box-big">
+           class="text-box-big"/>
 </td>
 <% } %>
 
