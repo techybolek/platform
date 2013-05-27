@@ -228,7 +228,6 @@
                 <include>org.apache.cxf.xjcplugins:cxf-xjc-dv:jar</include>
                 <include>commons-lang:commons-lang:jar</include>
                 <include>org.apache.cxf.xjc-utils:cxf-xjc-runtime:jar</include>
-                <include>org.apache.velocity:velocity:jar</include>
                 <include>org.apache.cxf.xjcplugins:cxf-xjc-ts:jar</include>
                 <include>org.apache.cxf.xjcplugins:cxf-xjc-boolean:jar</include>
                 <include>org.apache.cxf.xjcplugins:cxf-xjc-bug671:jar</include>
@@ -398,13 +397,13 @@
             <fileMode>644</fileMode>
         </file-->
 
-        <file>
+        <!--file>
             <source>
                 ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/security/identity-mgt.properties
             </source>
             <outputDirectory>wso2is-${pom.version}/repository/conf/security</outputDirectory>
             <fileMode>644</fileMode>
-        </file>
+        </file-->
         <file>
             <source>
                 ../p2-profile-gen/target/wso2carbon-core-4.2.0-SNAPSHOT/repository/conf/security/entitlement.properties
