@@ -388,7 +388,7 @@
         <fmt:message key="sp.issuer"/>
         <font color="red">*</font>
     </td>
-    <td><input type="text" id="issuer" name="issuer"
+    <td><input type="text" id="issuer" name="issuer" maxlength="30"
                class="text-box-big"
                value="<%=isEditSP? provider.getIssuer():""%>" <%=isEditSP ? "disabled=\"disabled\"" : ""%>/>
         <input type="hidden" id="hiddenIssuer" name="hiddenIssuer"
