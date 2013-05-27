@@ -703,16 +703,16 @@ public class SCIMUserManager implements UserManager {
                 scimUser.setGroup(null, group.getId(), role);
             }
         } catch (UserStoreException e) {
-            throw new CharonException("Error in getting user information from Carbon User Store for" +
+            throw new CharonException("Error in getting user information from Carbon User Store for " +
                                       "user: " + userName);
         } catch (CharonException e) {
-            throw new CharonException("Error in getting user information from Carbon User Store for" +
+            throw new CharonException("Error in getting user information from Carbon User Store for " +
                                       "user: " + userName);
         } catch (NotFoundException e) {
-            throw new CharonException("Error in getting user information from Carbon User Store for" +
+            throw new CharonException("Error in getting user information from Carbon User Store for " +
                                       "user: " + userName);
         } catch (IdentitySCIMException e) {
-            throw new CharonException("Error in getting group information from Identity DB for" +
+            throw new CharonException("Error in getting group information from Identity DB for " +
                                       "user: " + userName);
         }
         return scimUser;
