@@ -311,7 +311,7 @@ public class OpenIDHandler {
 				log.debug(openId + " not authenticated. Redirecting for autheitcation");
 			}
 			session.setAttribute(IdentityConstants.OpenId.PARAM_LIST, params);
-			return getLoginPageUrl(openId, request, request, params);
+			return getLoginPageUrl(openId, request, params);
 		}
 
 		//session.removeAttribute(IdentityConstants.OpenId.PARAM_LIST);
@@ -374,13 +374,11 @@ public class OpenIDHandler {
 	 * are not authenticated.
 	 * 
 	 * @param openId
-	 * @param session
 	 * @param request
 	 * @param params
 	 * @return loginPageUrl
 	 */
-	private String getLoginPageUrl(String openId, ServletRequest session,
-	                               HttpServletRequest request, ParameterList params) {
+	private String getLoginPageUrl(String openId, HttpServletRequest request, ParameterList params) {
 		String loginPageUrl = frontEndUrl;
 		String tenant = MultitenantUtils.getDomainNameFromOpenId(openId);
 		// checking for OpenID remember me cookie
@@ -399,8 +397,8 @@ public class OpenIDHandler {
 		}
 		// if cookie found
 		if ((token != null && !NULL.equals(token)) ||
-		    (openId.equals(session.getAttribute(OpenIDConstants.SessionAttribute.AUTHENTICATED_OPENID)))) {
-			session.setAttribute(OpenIDConstants.SessionAttribute.OPENID, openId);
+		    (openId.equals(request.getSession(false).getAttribute(OpenIDConstants.SessionAttribute.AUTHENTICATED_OPENID)))) {
+			request.getSession(false).setAttribute(OpenIDConstants.SessionAttribute.OPENID, openId);
 			loginPageUrl =
 			               loginPageUrl.replace("openid-provider/openid_auth.jsp",
 			                                    "openid-provider/openid_auth_submit.jsp");

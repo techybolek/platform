@@ -82,7 +82,7 @@
         <h2><fmt:message key='signin.with.openid'/></h2>
 
         <div id="workArea">
-            <fmt:message key='signin.to.authenticate1'/><strong>"<%=openidrp%>"</strong><fmt:message key='signin.to.authenticate2'/><strong>"<%=openididentity%>"</strong>.
+            <fmt:message key='signin.to.authenticate1'/><strong>"<%=openidrp%>" </strong><fmt:message key='signin.to.authenticate2'/><strong>"<%=openididentity%>"</strong>.
             <br/><br/>
 
             <table style="width:100%">

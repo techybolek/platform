@@ -88,7 +88,7 @@
 	                                                                                       : (String) session.getAttribute(OpenIDConstants.SessionAttribute.OPENID);
 
 	// Directed Identity handling		
-	String userName = request.getParameter(OpenIDConstants.RequestParameter.OPENID);
+	String userName = request.getParameter("userName");
 	if ((userName == null || "".equals(userName.trim())) && openid.endsWith("/openid/")) {
 		userName = (String) session.getAttribute(OpenIDConstants.SessionAttribute.USERNAME);
 		Cookie[] cookies = request.getCookies();
@@ -121,7 +121,7 @@
 	                                                        session, request, response,
 	                                                        isRemembered);
 
-	if (isAuthenticated ||  openid.equals(OpenIDConstants.SessionAttribute.AUTHENTICATED_OPENID)) {
+	if (isAuthenticated ||  openid.equals(session.getAttribute(OpenIDConstants.SessionAttribute.AUTHENTICATED_OPENID))) {
 		session.setAttribute(OpenIDConstants.SessionAttribute.IS_OPENID_AUTHENTICATED, "true");
 		session.setAttribute(OpenIDConstants.SessionAttribute.AUTHENTICATED_OPENID, openid);
 		
