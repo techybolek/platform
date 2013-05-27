@@ -114,9 +114,9 @@ public class SAMLSSOProvider extends HttpServlet {
 					authMode = SAMLSSOProviderConstants.AuthnModes.USERNAME_PASSWORD;
 				}
 				String relayState = req.getParameter(SAMLSSOProviderConstants.RELAY_STATE);
-				if (relayState == null) {
+				/*if (relayState == null) {
 					log.warn("RelayState is not present in the request.");
-				}
+				}*/
 				String samlRequest = req.getParameter("SAMLRequest");
 				if (samlRequest != null) {
 					handleSAMLRequest(req, resp, ssoTokenID, samlRequest, relayState, authMode);

@@ -47,10 +47,11 @@
     if("true".equals(IdentityUtil.getProperty((IdentityConstants.ServerConfig.SSO_TENANT_PARTITIONING_ENABLED)))){
         assertionConsumerURL = assertionConsumerURL+"?"+MultitenantConstants.TENANT_DOMAIN+"="+domain;
     }
-    relayState = URLDecoder.decode(relayState, "UTF-8");
-    relayState = relayState.replaceAll("&", "&amp;").replaceAll("\"", "&quot;").replaceAll("'", "&apos;").
-            replaceAll("<", "&lt;").replaceAll(">", "&gt;").replace("\n", "");
-    
+	if(relayState != null){
+	    relayState = URLDecoder.decode(relayState, "UTF-8");
+	    relayState = relayState.replaceAll("&", "&amp;").replaceAll("\"", "&quot;").replaceAll("'", "&apos;").
+	            replaceAll("<", "&lt;").replaceAll(">", "&gt;").replace("\n", "");
+	}
 %>
 <p>You are now redirected back to <%=assertionConsumerURL%>. If the
  redirection fails, please click the post button.</p>
