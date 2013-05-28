@@ -20,29 +20,27 @@ package org.wso2.carbon.identity.scim.provider.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.identity.scim.common.impl.DefaultSCIMProvisioningHandler;
-import org.wso2.carbon.identity.scim.common.utils.SCIMCommonConstants;
-import org.wso2.charon.core.provisioning.ProvisioningHandler;
 import org.wso2.carbon.identity.scim.common.config.SCIMProvisioningConfigManager;
 import org.wso2.carbon.identity.scim.common.group.SCIMGroupHandler;
 import org.wso2.carbon.identity.scim.common.utils.AttributeMapper;
 import org.wso2.carbon.identity.scim.common.utils.IdentitySCIMException;
+import org.wso2.carbon.identity.scim.common.utils.SCIMCommonConstants;
 import org.wso2.carbon.identity.scim.common.utils.SCIMCommonUtils;
-import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.claim.ClaimManager;
-import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.charon.core.attributes.Attribute;
 import org.wso2.charon.core.exceptions.CharonException;
+import org.wso2.charon.core.exceptions.DuplicateResourceException;
 import org.wso2.charon.core.exceptions.NotFoundException;
 import org.wso2.charon.core.extensions.UserManager;
 import org.wso2.charon.core.objects.Group;
 import org.wso2.charon.core.objects.SCIMObject;
 import org.wso2.charon.core.objects.User;
+import org.wso2.charon.core.provisioning.ProvisioningHandler;
 import org.wso2.charon.core.schema.SCIMConstants;
 
 import java.util.ArrayList;
@@ -73,7 +71,7 @@ public class SCIMUserManager implements UserManager {
         carbonClaimManager = claimManager;
     }
 
-    public User createUser(User user) throws CharonException {
+    public User createUser(User user) throws CharonException, DuplicateResourceException {
         SCIMProvisioningConfigManager provisioningConfigManager =
                 SCIMProvisioningConfigManager.getInstance();
         //if operating in dumb mode, do not persist the operation, only provision to providers
@@ -104,6 +102,10 @@ public class SCIMUserManager implements UserManager {
 
             //TODO: Do not accept the roles list - it is read only.
             try {
+                if(carbonUM.isExistingUser(user.getUserName())){
+                    String error = "User with the name: " + user.getUserName() + " already exists in the system.";
+                    throw new DuplicateResourceException(error);
+                }
                 carbonUM.addUser(user.getUserName(), user.getPassword(), null, claimsMap, null);
                 log.info("User: " + user.getUserName() + " is created through SCIM.");
 
@@ -342,7 +344,7 @@ public class SCIMUserManager implements UserManager {
         }
     }
 
-    public Group createGroup(Group group) throws CharonException {
+    public Group createGroup(Group group) throws CharonException, DuplicateResourceException {
         SCIMProvisioningConfigManager provisioningConfigManager =
                 SCIMProvisioningConfigManager.getInstance();
         
@@ -359,6 +361,13 @@ public class SCIMUserManager implements UserManager {
                 log.debug("Creating group: " + group.getDisplayName());
             }
             try {
+                //check if the group already exists
+                if (carbonUM.isExistingRole(group.getDisplayName())) {
+                    String error = "Group with name: " + group.getDisplayName() +
+                                   " already exists in the system.";
+                    throw new DuplicateResourceException(error);
+                }
+
                 /*set thread local property to signal the downstream SCIMUserOperationListener
                 about the provisioning route.*/
                 SCIMCommonUtils.setThreadLocalIsManagedThroughSCIMEP(true);
