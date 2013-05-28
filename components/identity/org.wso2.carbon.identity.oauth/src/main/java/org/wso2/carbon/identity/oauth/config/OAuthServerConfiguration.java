@@ -93,6 +93,7 @@ public class OAuthServerConfiguration {
 
         public static final String SAML2_GRANT = "SAML2Grant";
         public static final String ISSUERS = "Issuers";
+        public static final String ISSUER = "Issuer";
         public static final String AUDIENCE = "Audience";
         public static final String TOKEN_END_POINT = "TokenEndPoint";
         public static final String TOKEN_END_POINT_ALIASES = "TokenEndPointAliases";
@@ -151,7 +152,7 @@ public class OAuthServerConfiguration {
 
     private List<String> supportedClientAuthMethods = new ArrayList<String>();
 
-    private List<String> saml2Issuers = new ArrayList<String>();
+    private Map<String,String> saml2Issuers = new HashMap<String,String>();
 
     private List<String> saml2Audience = new ArrayList<String>();
 
@@ -297,7 +298,7 @@ public class OAuthServerConfiguration {
         return supportedClientAuthMethods;
     }
 
-    public List<String> getSAML2Issuers() {
+    public Map<String,String> getSAML2Issuers() {
         return saml2Issuers;
     }
 
@@ -785,14 +786,23 @@ public class OAuthServerConfiguration {
                 getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.ISSUERS));
 
         if (validSAML2IssuersElem != null) {
-            String[] issuers = validSAML2IssuersElem.getText().split(",");
-            for(String issuer:issuers){
-                saml2Issuers.add(issuer);
+            //String[] issuers = validSAML2IssuersElem.getText().split(",");
+            Iterator<OMElement> it = validSAML2IssuersElem.getChildrenWithName(getQNameWithIdentityNS(ConfigElements.ISSUER));
+            while(it.hasNext()){
+                OMElement issuer = it.next();
+                String issuerValue = issuer.getText();
+                String entityID = issuer.getAttributeValue(new QName("trustEntityId"));
+                if(saml2Issuers.containsKey(issuerValue)){
+                    log.warn("Duplicate entry in SAML2.0 Issuers: " + issuer);
+                } else {
+                    saml2Issuers.put(issuerValue,entityID);
+                }
             }
         }
         if (log.isDebugEnabled()) {
-            for(int i=0 ; i<saml2Issuers.size() ; i++){
-                log.debug("Valid SAML2Grant Issuer " + i +" : " + saml2Issuers.get(i));
+            Set<Map.Entry<String,String>> entries = saml2Issuers.entrySet();
+            for(Map.Entry<String,String> entry : entries){
+                log.debug("Valid SAML2Grant Issuer " + entry.getKey() +" : " + entry.getValue());
             }
         }
 

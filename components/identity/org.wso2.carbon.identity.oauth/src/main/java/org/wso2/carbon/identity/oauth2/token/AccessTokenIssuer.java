@@ -52,7 +52,7 @@ import org.wso2.carbon.identity.oauth2.token.handlers.grant.AuthorizationGrantHa
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGrantHandler;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.PasswordGrantHandler;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.RefreshGrantTypeHandler;
-import org.wso2.carbon.identity.oauth2.token.handlers.grant.SAML2BearerGrantTypeHandler;
+import org.wso2.carbon.identity.oauth2.token.handlers.grant.saml.SAML2BearerGrantTypeHandler;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Constants;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.identity.openidconnect.IDTokenGenerator;
