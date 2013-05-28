@@ -72,7 +72,10 @@ public abstract class AbstractAuthorizationHandler implements AuthorizationHandl
 			                                         authorizationReqDTO.getPassword());
 		}
         if(authStatus){
-        	RememberMeStore.getInstance().addUserToStore(authorizationReqDTO.getUsername());
+        	// store the authenticated user for the openid-connect rememberMe usecase
+			if (OIDCAuthzServerUtil.isOIDCAuthzRequest(authorizationReqDTO.getScopes())) {
+				RememberMeStore.getInstance().addUserToStore(authorizationReqDTO.getUsername());
+			}
             if(authorizationReqDTO.getUsername().indexOf(CarbonConstants.DOMAIN_SEPARATOR) < 0){
                 authorizationReqDTO.setUsername(UserCoreUtil.getDomainFromThreadLocal() + CarbonConstants.DOMAIN_SEPARATOR +
                         authorizationReqDTO.getUsername());
