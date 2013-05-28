@@ -337,14 +337,14 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
             try {
                 keyStore = tenantKSM.getKeyStore(jksName);
             } catch (Exception e) {
-                log.error(e.getMessage());
+                log.error(e);
                 throw new IdentityOAuth2Exception("Error retrieving key store: " + jksName);
             }
         }else{
             try {
                 keyStore = tenantKSM.getPrimaryKeyStore();
             } catch (Exception e) {
-                log.error(e.getMessage());
+                log.error(e);
                 throw new IdentityOAuth2Exception("Error retrieving primary key store");
             }
         }
@@ -364,7 +364,7 @@ public class SAML2BearerGrantTypeHandler extends AbstractAuthorizationGrantHandl
                 throw new IdentityOAuth2Exception("Signature was either invalid or signing key could not be established as trusted");
             }
         } catch (org.opensaml.xml.security.SecurityException e) {
-            log.error(e.getMessage());
+            log.error(e);
             throw new IdentityOAuth2Exception("Error occurred while validating signature");
         }
 

@@ -44,7 +44,7 @@ public class CarbonKeyStoreCredentialResolver extends KeyStoreCredentialResolver
             }
             return credentialSet;
         } catch (KeyStoreException e) {
-            log.error(e.getMessage());
+            log.error(e);
             throw new SecurityException("Error reading certificates from key store");
         }
     }
