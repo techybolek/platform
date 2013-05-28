@@ -24,8 +24,15 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.ui.CarbonUIUtil;
+import org.wso2.carbon.governance.generic.ui.common.dataobjects.AddLink;
+import org.wso2.carbon.governance.generic.ui.common.dataobjects.CheckBox;
+import org.wso2.carbon.governance.generic.ui.common.dataobjects.CloseAddLink;
+import org.wso2.carbon.governance.generic.ui.common.dataobjects.DateField;
+import org.wso2.carbon.governance.generic.ui.common.dataobjects.DropDown;
+import org.wso2.carbon.governance.generic.ui.common.dataobjects.OptionText;
+import org.wso2.carbon.governance.generic.ui.common.dataobjects.TextArea;
+import org.wso2.carbon.governance.generic.ui.common.dataobjects.TextField;
+import org.wso2.carbon.governance.generic.ui.common.dataobjects.UIComponent;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
@@ -205,16 +212,12 @@ public class GenericUIGenerator {
                         if (columnCount == 0) {
                             table.append("<tr>");
                         }
-                        if (value != null) {
-                            table.append(printTextSkipName(arg.getFirstChildWithName(new QName(null,
-                                    UIGeneratorConstants.ARGUMENT_NAME)).getText(), widgetName,
+                        UIComponent textField = new TextField(null, arg.getFirstChildWithName(new QName(null,
+                                    UIGeneratorConstants.ARGUMENT_NAME)).getText(),null, widgetName,
                                     value, isURL, urlTemplate, isPath, isReadOnly,
-                                    hasValue, tooltip, startsWith, request));
-                        } else {
-                            table.append(printTextSkipName(arg.getFirstChildWithName(new QName(null,
-                                    UIGeneratorConstants.ARGUMENT_NAME)).getText(), widgetName,
-                                    isPath, isReadOnly, tooltip, request));
-                        }
+                                    hasValue, tooltip, startsWith, request);
+                        table.append(textField.generate());
+                
                         columnCount++;
                         if (columnCount == columns) {
                             table.append("</tr>");
@@ -231,16 +234,10 @@ public class GenericUIGenerator {
                         if (label == null) {
                             label = name;
                         }
-
-                        if (value != null) {
-                            table.append(printTextField(label, name, mandat, widgetName, value,
-                                    isURL, urlTemplate, isPath, isReadOnly, hasValue,
-                                    tooltip, startsWith, request));
-                        } else {
-                            table.append(printTextField(label, name, mandat, widgetName, isPath,
-                                    isReadOnly, tooltip, startsWith, request));
-                        }
-
+                        UIComponent text =  new TextField(label, name, mandat, widgetName, value,
+                        			isURL, urlTemplate, isPath, isReadOnly, hasValue,
+                                    tooltip, startsWith, request);
+                        table.append(text.generate());
                     }
                 } else if (UIGeneratorConstants.DATE_FIELD.equals(elementType)) {
                     String mandet = arg.getAttributeValue(new QName(null, UIGeneratorConstants.MANDETORY_ATTRIBUTE));
@@ -261,15 +258,9 @@ public class GenericUIGenerator {
                         if (columnCount == 0) {
                             table.append("<tr>");
                         }
-                        if (value != null) {
-                            table.append(printDateSkipName(arg.getFirstChildWithName(
-                                    new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText
-                                    (), widgetName, value, isReadOnly, tooltip));
-                        } else {
-                            table.append(printDateSkipName(arg.getFirstChildWithName(
-                                    new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText
-                                    (), widgetName, isReadOnly, tooltip));
-                        }
+                        UIComponent dateField = new DateField(null,arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText(),null,widgetName, value, isReadOnly, tooltip,false);
+                        table.append(dateField.generate());
+                        
                         columnCount++;
                         if (columnCount == columns) {
                             table.append("</tr>");
@@ -286,13 +277,8 @@ public class GenericUIGenerator {
                             label = name;
                         }
 
-                        if (value != null) {
-                            table.append(printDate(label, name, mandet, widgetName, value,
-                                    isReadOnly, tooltip));
-                        } else {
-                            table.append(printDate(label, name, mandet, widgetName, isReadOnly,
-                                    tooltip));
-                        }
+                        UIComponent dateField = new DateField(label, name, mandet, widgetName, value,isReadOnly, tooltip,true);
+                        table.append(dateField.generate());
                     }
                 } else if (UIGeneratorConstants.OPTION_FIELD.equals(elementType)) {
                     OMElement firstChildWithName = arg.getFirstChildWithName(
@@ -318,15 +304,10 @@ public class GenericUIGenerator {
                         if (columnCount == 0) {
                             table.append("<tr>");
                         }
-                        if (optionValue != null) {
-                            table.append(printDropDownSkipName(name,
-                                    optionValues.toArray(new String[optionValues.size()]),
-                                    widgetName, optionValue, tooltip));
-                        } else {
-                            table.append(printDropDownSkipName(name,
-                                    optionValues.toArray(new String[optionValues.size()]),
-                                    widgetName, tooltip));
-                        }
+                        UIComponent dropDown = new DropDown(null,name, null,optionValues.toArray(new String[optionValues.size()]),
+                        	                                    widgetName, optionValue, tooltip);
+                        table.append(dropDown.generate());
+                        
                         columnCount++;
                         if (columnCount == columns) {
                             table.append("</tr>");
@@ -334,15 +315,10 @@ public class GenericUIGenerator {
                         }
 
                     } else {
-                        if (optionValue != null) {
-                            table.append(printDropDown(label, name, mandat,
+                    	UIComponent dropDown = new DropDown(label, name, mandat,
                                     optionValues.toArray(new String[optionValues.size()]),
-                                    widgetName, optionValue, tooltip));
-                        } else {
-                            table.append(printDropDown(label, name, mandat,
-                                    optionValues.toArray(new String[optionValues.size()]),
-                                    widgetName, tooltip));
-                        }
+                                    widgetName, optionValue, tooltip);
+                        table.append(dropDown.generate());
                     }
                 } else if (UIGeneratorConstants.CHECKBOX_FIELD.equals(elementType)) {
                     String name = arg.getFirstChildWithName(
@@ -355,8 +331,8 @@ public class GenericUIGenerator {
                         if (columnCount == 0) {
                             table.append("<tr>");
                         }
-                        table.append(printCheckboxSkipName(name, widgetName, optionValue,
-                                tooltip));
+                        UIComponent checkBox  = new CheckBox(name, widgetName, optionValue,tooltip,true);
+                        table.append(checkBox.generate());
                         columnCount++;
                         if (columnCount == columns) {
                             table.append("</tr>");
@@ -364,7 +340,8 @@ public class GenericUIGenerator {
                         }
 
                     } else {
-                        table.append(printCheckbox(name, widgetName, optionValue, tooltip));
+                    	UIComponent checkBox  = new CheckBox(name, widgetName, optionValue,tooltip,false);
+                        table.append(checkBox.generate());
                     }
                 } else if (UIGeneratorConstants.TEXT_AREA_FIELD.equals(elementType)) {
                     String mandet = arg.getAttributeValue(new QName(null, UIGeneratorConstants.MANDETORY_ATTRIBUTE));
@@ -408,15 +385,9 @@ public class GenericUIGenerator {
                         if (columnCount == 0) {
                             table.append("<tr>");
                         }
-                        if (value != null) {
-                            table.append(printTextAreaSkipName(arg.getFirstChildWithName(
-                                    new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText
-                                    (), widgetName, value, height, width, isReadOnly, tooltip));
-                        } else {
-                            table.append(printTextAreaSkipName(arg.getFirstChildWithName(
-                                    new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText
-                                    (), widgetName, height, width, isReadOnly, tooltip));
-                        }
+                        UIComponent textArea = new TextArea(null, arg.getFirstChildWithName(new QName(null, UIGeneratorConstants.ARGUMENT_NAME)).getText(), null, widgetName, value, height, width, isReadOnly, false, tooltip, true);
+                        table.append(textArea.generate());
+                       
                         columnCount++;
                         if (columnCount == columns) {
                             table.append("</tr>");
@@ -433,13 +404,10 @@ public class GenericUIGenerator {
                             label = name;
                         }
 
-                        if (value != null) {
-                            table.append(printTextArea(label, name, mandet, widgetName, value,
-                                    height, width, isReadOnly, isRichText, tooltip));
-                        } else {
-                            table.append(printTextArea(label, name, mandet, widgetName, height,
-                                    width, isReadOnly, isRichText, tooltip));
-                        }
+                        UIComponent textArea = new TextArea(label, name, mandet, widgetName, value,
+                     	                                    height, width, isReadOnly, isRichText, tooltip,false);
+                        table.append(textArea.generate());
+                        
                     }
                 } else if (UIGeneratorConstants.OPTION_TEXT_FIELD.equals(elementType)) {
                     if (UIGeneratorConstants.MAXOCCUR_UNBOUNDED.equals(maxOccurs)) {
@@ -514,17 +482,17 @@ public class GenericUIGenerator {
                             addedItemsCount = i;
                         }
                         /* if there are no added items headings of the table will hide,else display */
+                        boolean isDisplay = false;
+                        
                         if (addedItemsCount == 0) {
-                            table.append(printAddLink(label, name,
-                                    UIGeneratorConstants.ADD_ICON_PATH,
-                                    widgetName,
-                                    subList.toArray(new String[subList.size() + 1]), isPath, startsWith));
+                        	isDisplay = false;                        	
                         } else if (addedItemsCount > 0) {
-                            table.append(printAddLinkWithDisplay(label, name,
-                                    UIGeneratorConstants.ADD_ICON_PATH,
-                                    widgetName,
-                                    subList.toArray(new String[subList.size() + 1]), isPath, startsWith));
+                        	isDisplay = true;                        	                    
                         }
+                        UIComponent addLink =  new AddLink(label, name, UIGeneratorConstants.ADD_ICON_PATH,
+                                widgetName, subList.toArray(new String[subList.size() + 1]), isPath, startsWith, isDisplay);
+                    	
+                        table.append(addLink.generate());  
                         List<String> optionValues = getOptionValues(arg, request, config);
                         if (addedItemsCount > 0) {
                             // This is the place where we fill already added entries
@@ -532,16 +500,18 @@ public class GenericUIGenerator {
                                 String addedOptionValue = addedOptionValues.get(i);
                                 String addedValue = addedValues.get(i);
                                 if (addedOptionValue != null && addedValue != null) {
-                                    table.append(printOptionTextWithId(name, (i + 1),
-                                            optionValues.toArray(new String[optionValues.size()]),
-                                            widgetName,
-                                            addedOptionValue,
-                                            addedValue,
-                                            isURL, urlTemplate, isPath, tooltip, startsWith, request));
+                                	UIComponent optionText = new OptionText(name, (i + 1),null,null,
+                                                                           optionValues.toArray(new String[optionValues.size()]),
+                                                                           widgetName,
+                                                                           addedOptionValue,
+                                                                           addedValue,
+                                                                           isURL, urlTemplate, isPath, tooltip, startsWith, request);
+                                    table.append(optionText.generate());
                                 }
                             }
                         }
-                        table.append(printCloseAddLink(name, addedItemsCount)); // add the previously added items and then close the tbody
+                        UIComponent closeAddLink = new CloseAddLink(name, addedItemsCount);
+                        table.append(closeAddLink.generate()); // add the previously added items and then close the tbody
                     } else {
                         OMElement firstChildWithName = arg.getFirstChildWithName(
                                 new QName(null, UIGeneratorConstants.ARGUMENT_NAME));
@@ -581,16 +551,10 @@ public class GenericUIGenerator {
 
                         }
                         List<String> optionValues = getOptionValues(arg, request, config);
-                        if (optionValue != null && value != null) {
-                            table.append(printOptionText(label, name,
-                                    optionValues.toArray(new String[optionValues.size()]),
+                        UIComponent optionText = new OptionText(null, 0,label, name,optionValues.toArray(new String[optionValues.size()]),
                                     widgetName, optionValue, value, isURL, urlTemplate, isPath,
-                                    tooltip, startsWith, request));
-                        } else {
-                            table.append(printOptionText(label, name,
-                                    optionValues.toArray(new String[optionValues.size()]),
-                                    widgetName, isPath, tooltip,startsWith, request));
-                        }
+                                    tooltip, startsWith, request);
+                        table.append(optionText.generate());                        
                     }
                 }
             }
@@ -608,7 +572,7 @@ public class GenericUIGenerator {
 
     }
 
-    public String printSubHeaders(String[] headers) {
+    public static String printSubHeaders(String[] headers) {
         StringBuilder subHeaders = new StringBuilder();
         subHeaders.append("<tr>");
         for (String header : headers) {
@@ -619,664 +583,6 @@ public class GenericUIGenerator {
         subHeaders.append("<td class=\"sub-header\"></td>");
         subHeaders.append("</tr>");
         return subHeaders.toString();
-    }
-
-    public String printTextField(String label, String name, String mandatory, String widget,
-                                 boolean isPath, boolean isReadOnly,
-                                 String tooltip, String startsWith, HttpServletRequest request) {
-        StringBuilder element = new StringBuilder();
-        String selectResource = "";
-        String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
-        if (isPath) {
-            if (startsWith != null) {
-                selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                        "org.wso2.carbon.governance.services.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTreeWithCustomPath('" + id + "' ,'" + startsWith + "');\"/>";
-            } else {
-                selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                        "org.wso2.carbon.governance.services.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
-            }
-        }
-        if ("true".equals(mandatory)) {
-            element.append("<tr><td class=\"leftCol-big\">" + label + "<span class=\"required\">*</span></td>\n" +
-                    " <td><input type=\"text\" name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-")
-                    + "\" title=\"" + tooltip + "\" id=\"" + id + "\" style=\"width:" +
-                    UIGeneratorConstants
-                    .DEFAULT_WIDTH+ "px\"" + (isReadOnly ? " readonly" : "") + "/>" + (isPath ? selectResource : "") + "</td></tr>");
-        } else {
-            element.append("<tr><td class=\"leftCol-big\">" + label + "</td>\n" +
-                    " <td><input type=\"text\" name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-")
-                    + "\" title=\"" + tooltip + "\" id=\"" + id + "\" style=\"width:" +
-                    UIGeneratorConstants
-                    .DEFAULT_WIDTH+ "px\"" + (isReadOnly ? " readonly" : "") + "/>" + (isPath ? selectResource : "") + "</td></tr>");
-        }
-        return element.toString();
-    }
-
-    public String printDropDown(String label, String name, String mandatory, String[] values,
-                                String widget, String tooltip) {
-        StringBuilder dropDown = new StringBuilder();
-        if ("true".equals(mandatory)) {
-            dropDown.append("<tr><td class=\"leftCol-big\">" + label + "<span class=\"required\">*</span></td>\n" +
-                    "<td><select id=\"id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " +
-                    "name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ",
-                    "-") + "\" title=\"" + tooltip + "\">");
-        } else {
-            dropDown.append("<tr><td class=\"leftCol-big\">" + label + "</td>\n" +
-                    "<td><select id=\"id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " +
-                    "name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ",
-                    "-") + "\" title=\"" + tooltip + "\">");
-        }
-
-        for (int i = 0; i < values.length; i++) {
-            dropDown.append("<option value=\"" + StringEscapeUtils.escapeHtml(values[i]) +
-                    "\">");
-            dropDown.append(StringEscapeUtils.escapeHtml(values[i]));
-            dropDown.append("</option>");
-        }
-        dropDown.append("</select></td></tr>");
-        return dropDown.toString();
-    }
-
-    public String printTextArea(String label, String name, String mandatory, String widget,
-                                int height, int width, boolean isReadOnly, boolean isRichText,
-                                String tooltip) {
-        StringBuilder element = new StringBuilder();
-        StringBuilder size = new StringBuilder("style=\"");
-        if (height > 0) {
-            size.append("height:").append(height).append("px;");
-        }
-        if (width > 0) {
-            size.append("width:").append(width).append("px\"");
-        } else {
-            size.append("width:").append(UIGeneratorConstants.DEFAULT_WIDTH).append("px\"");
-        }
-        if ("true".equals(mandatory)) {
-            if (isRichText) {
-                element.append("<tr><td class=\"leftCol-big\">" + label + "<span class=\"required\">*</span></td>\n" +
-                        " <td  style=\"font-size:8px\" class=\"yui-skin-sam\"><textarea  name=\""
-                        + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ",
-                        "-") + "\" title=\"" + tooltip + "\" id=\"id_"
-                        + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " + size  + (isReadOnly ? " readonly" : "") + " ></textarea>");
-                element = appendRichTextScript(element, width, height, widget, name);
-                element.append("</td></tr>");
-
-            } else {
-                element.append("<tr><td class=\"leftCol-big\">" + label + "<span class=\"required\">*</span></td>\n" +
-                        " <td><textarea  name=\"" + widget.replaceAll(" ",
-                        "_") + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\" id=\"id_"
-                        + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " + size  + (isReadOnly ? " readonly" : "") + " ></textarea></td></tr>");
-                element = appendEmptyScript(element, widget, name);
-                element.append("</td></tr>");
-
-            }
-
-        } else {
-            if (isRichText) {
-                element.append("<tr><td class=\"leftCol-big\">" + label + "</td>\n" +
-                        " <td  style=\"font-size:8px\" class=\"yui-skin-sam\"><textarea  name=\""
-                        + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ",
-                        "-") + "\" title=\"" + tooltip + "\" id=\"id_"
-                        + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " + size  + (isReadOnly ? " readonly" : "") + " ></textarea>");
-                element = appendRichTextScript(element, width, height, widget, name);
-                element.append("</td></tr>");
-
-            } else {
-                element.append("<tr><td class=\"leftCol-big\">" + label + "</td>\n" +
-                        " <td><textarea  name=\"" + widget.replaceAll(" ",
-                        "_") + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\" id=\"id_"
-                        + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " + size  + (isReadOnly ? " readonly" : "") + " ></textarea></td></tr>");
-                element = appendEmptyScript(element, widget, name);
-                element.append("</td></tr>");
-
-            }
-        }
-        return element.toString();
-    }
-
-    public String printTextAreaSkipName(String name, String widget, int height, int width,
-                                        boolean isReadOnly, String tooltip) {
-        StringBuilder element = new StringBuilder();
-        StringBuilder size = new StringBuilder();
-        if (height > 0 || width > 0) {
-            size = size.append("");
-            if (height > 0) {
-                size.append("height:").append(height).append("px;");
-            }
-            if (width > 0) {
-                size.append("width:").append(width).append("px\"");
-            }
-            size.append("\"");
-        }
-        element.append("<td><textarea  name=\"" + widget.replaceAll(" ",
-                "_") + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\" " +
-                "id=\"id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " + size + (isReadOnly ? " readonly" : "") + " ></textarea></td>");
-        return element.toString();
-    }
-
-    public String printTextSkipName(String name, String widget, boolean isPath,
-                                    boolean isReadOnly,
-                                    String tooltip, HttpServletRequest request) {
-        StringBuilder element = new StringBuilder();
-        String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
-        String selectResource = "";
-        if (isPath) {
-            selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                    "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
-        }
-        element.append("<td><input type=\"text\" name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-")
-                + "\" title=\"" + tooltip + "\" id=\"" + id + "\"" + (isReadOnly ? " readonly" :
-                "")
-                + ">"+
-                (isPath?
-                selectResource : "") + "</td>");
-        return element.toString();
-    }
-
-    public String printDropDownSkipName(String name, String[] values, String widget,
-                                        String tooltip) {
-        StringBuilder dropDown = new StringBuilder();
-        dropDown.append("<td><select id=\"id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " +
-                "name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ",
-                "-") + "\" title=\"" + tooltip + "\">");
-        for (int i = 0; i < values.length; i++) {
-            dropDown.append("<option value=\"" + StringEscapeUtils.escapeHtml(values[i]) +
-                    "\">");
-            dropDown.append(StringEscapeUtils.escapeHtml(values[i]));
-            dropDown.append("</option>");
-        }
-        dropDown.append("</select></td>");
-        return dropDown.toString();
-    }
-
-    public String printOptionText(String label, String name, String[] values, String widget,
-                                  boolean isPath, String tooltip, String startsWith, HttpServletRequest request) {
-        StringBuilder dropDown = new StringBuilder();
-        dropDown.append("<tr><td class=\"leftCol-big\"><select name=\"" + widget.replaceAll(" ",
-                "_") + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\">");
-        for (int i = 0; i < values.length; i++) {
-            dropDown.append("<option value=\"" + StringEscapeUtils.escapeHtml(values[i]) +
-                    "\">");
-            dropDown.append(StringEscapeUtils.escapeHtml(values[i]));
-            dropDown.append("</option>");
-        }
-        dropDown.append("</select></td>");
-        String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
-        String selectResource = "";
-        if (isPath) {
-        	if(startsWith != null ){
-        		selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTreeWithCustomPath('" + id + "','" + startsWith + "');\"/>";
-        	} else {
-        		selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
-        	}
-        }
-        dropDown.append("<td width=500px><input type=\"text\" name=\"" + widget.replaceAll(" ", "_") + UIGeneratorConstants.TEXT_FIELD
-                + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\" id=\"" + id +
-                "\" " + "tyle=\"width:" + UIGeneratorConstants.DEFAULT_WIDTH + "px\"/>" + (isPath ? selectResource : "") + "</td>");
-        dropDown.append("<td><a class=\"icon-link\" title=\"delete\" onclick=\"" + "delete" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(this.parentNode.parentNode.rowIndex)\" style=\"background-image:url(../admin/images/delete.gif);\">Delete</a></td>");
-        dropDown.append("</tr>");
-        return dropDown.toString();
-    }
-
-    public String printTextField(String label, String name, String mandatory, String widget, String value, boolean isURL, String urlTemplate, boolean isPath, boolean isReadOnly,
-                                 boolean hasValue, String tooltip, String startsWith, HttpServletRequest request) {
-        StringBuilder element = new StringBuilder();
-        String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
-        String selectResource = "";
-        String selectResourceButton = "$('" + id + "_button').style.display='';";
-        value = StringEscapeUtils.escapeHtml(value);
-        if (isPath) {
-        	if (startsWith != null ) {
-        		selectResource = " <input id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTreeWithCustomPath('" + id + "','" + startsWith + "');\"/>";
-        	} else {
-        		selectResource = " <input id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
-        	}            
-        }
-
-        String browsePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH;
-
-        String div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + browsePath : "") + (urlTemplate != null ? urlTemplate.replace("@{value}", value) : value) + "\">" + value + "</a>" +
-                "&nbsp;" + (!isReadOnly ? "<a onclick=\"$('" + id + "_link').style.display='none';$('" + id +
-                "')." +
-                "style.display='';" + (isPath ? selectResourceButton : "") + "\" title=\"" + CarbonUIUtil.geti18nString("edit",
-                "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) +
-                "\" " +
-                "class=\"icon-link\" style=\"background-image: url('../admin/images/edit.gif');float: none\"></a>" : "") + "</div>";
-        //+ (hasValue ? "value=\"" + value + "\"" : "") +
-        if ("true".equals(mandatory)) {
-            element.append("<tr><td class=\"leftCol-big\">" + label + "<span class=\"required\">*</span></td>\n" +
-                    " <td>" + (isURL ? div : "") + "<input" + (isURL ? " style=\"display:none\"" : "") + " type=\"text\" name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-")
-                    + "\" title=\"" + tooltip + "\" " + (hasValue ? "value=\"" + value + "\"" :
-                    "") + " id=\"" + id + "\" " +
-                    "style=\"width:" + UIGeneratorConstants.DEFAULT_WIDTH + "px\"" + (isReadOnly ? " readonly" : "") + "/>" + (isPath ? selectResource : "") + "</td></tr>");
-        } else {
-            element.append("<tr><td class=\"leftCol-big\">" + label + "</td>\n" +
-                    " <td>" + (isURL ? div : "") + "<input" + (isURL ? " style=\"display:none\"" : "") + " type=\"text\" name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-")
-                    + "\"  title=\"" + tooltip + "\" "  + (hasValue ? "value=\"" + value + "\"" :
-                    "") + " id=\"" + id + "\" " +
-                    "style=\"width:" + UIGeneratorConstants.DEFAULT_WIDTH + "px\"" + (isReadOnly ? " readonly" : "") + "/>" + (isPath ? selectResource : "") + "</td></tr>");
-        }
-        return element.toString();
-    }
-
-    public String printDropDown(String label, String name, String mandatory, String[] values,
-                                String widget, String value, String tooltip) {
-        StringBuilder dropDown = new StringBuilder();
-        if ("true".equals(mandatory)) {
-            dropDown.append("<tr><td class=\"leftCol-big\">" + label + "<span class=\"required\">*</span></td>\n" +
-                    "<td><select id=\"id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " +
-                    "name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ",
-                    "-") + "\" title=\"" + tooltip + "\">");
-        } else {
-            dropDown.append("<tr><td class=\"leftCol-big\">" + label + "</td>\n" +
-                    "<td><select id=\"id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " +
-                    "name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ",
-                    "-") + "\" title=\"" + tooltip + "\">");
-        }
-
-        for (int i = 0; i < values.length; i++) {
-            dropDown.append("<option value=\"" + StringEscapeUtils.escapeHtml(values[i])
-                     + "\"");
-            if (values[i].equals(value)) {
-                dropDown.append(" selected>");
-            } else {
-                dropDown.append(">");
-            }
-            dropDown.append(StringEscapeUtils.escapeHtml(values[i]));
-            dropDown.append("</option>");
-        }
-        dropDown.append("</select></td></tr>");
-        return dropDown.toString();
-    }
-
-    public String printCheckbox(String name, String widget, String value, String tooltip) {
-        if (Boolean.toString(true).equals(value)) {
-            return "<tr><td class=\"leftCol-big\">" + name + "</td>\n" +
-                    "<td><input type=\"checkbox\" checked=\"checked\" name=\"" +
-                    widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") +
-                    "\" value=\"true\" title=\"" + tooltip + "\" /></td>";
-        } else {
-            return "<tr><td class=\"leftCol-big\">" + name + "</td>\n" +
-                    "<td><input type=\"checkbox\" name=\"" + widget.replaceAll(" ", "_") + "_" +
-                    name.replaceAll(" ", "-") + "\" value=\"true\" title=\"" + tooltip +
-                    "\"/></td>";
-        }
-    }
-
-    public String printTextArea(String label, String name, String mandatory, String widget,
-                                String value, int height, int width, boolean isReadOnly,
-                                boolean isRichText, String tooltip) {
-        StringBuilder element = new StringBuilder();
-        StringBuilder size = new StringBuilder("style=\"");
-        value = StringEscapeUtils.escapeHtml(value);
-        if (height > 0) {
-            size.append("height:").append(height).append("px;");
-        }
-        if (width > 0) {
-            size.append("width:").append(width).append("px\"");
-        } else {
-            size.append("width:").append(UIGeneratorConstants.DEFAULT_WIDTH).append("px\"");
-        }
-        if ("true".equals(mandatory)) {
-            if (isRichText) {
-                element.append("<tr><td class=\"leftCol-big\">" + label + "<span class=\"required\">*</span></td>\n" +
-                        " <td  style=\"font-size:8px\" class=\"yui-skin-sam\"><textarea  name=\""
-                        + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ",
-                        "-") + "\" title=\"" + tooltip + "\" id=\"id_"
-                        + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " + size  + (isReadOnly ? " readonly" : "") + " >" + value + "</textarea>");
-                element = appendRichTextScript(element, width, height, widget, name);
-                element.append("</td></tr>");
-
-            } else {
-                element.append("<tr><td class=\"leftCol-big\">" + label + "<span class=\"required\">*</span></td>\n" +
-                        " <td><textarea  name=\"" + widget.replaceAll(" ",
-                        "_") + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\" id=\"id_"
-                        + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " + size  + (isReadOnly ? " readonly" : "") + " >" + value + "</textarea>");
-                element = appendEmptyScript(element, widget, name);
-                element.append("</td></tr>");
-
-            }
-        } else {
-            if (isRichText) {
-                element.append("<tr><td class=\"leftCol-big\">" + label + "<span class=\"required\">*</span></td>\n" +
-                        " <td  style=\"font-size:8px\" class=\"yui-skin-sam\"><textarea  name=\""
-                        + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ",
-                        "-") + "\" title=\"" + tooltip + "\" id=\"id_"
-                        + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " + size  + (isReadOnly ? " readonly" : "") + " >" + value + "</textarea>");
-                element = appendRichTextScript(element, width, height, widget, name);
-                element.append("</td></tr>");
-
-            } else {
-                element.append("<tr><td class=\"leftCol-big\">" + label + "</td>\n" +
-                        " <td><textarea  name=\"" + widget.replaceAll(" ",
-                        "_") + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\" id=\"id_"
-                        + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " + size  + (isReadOnly ? " readonly" : "") + " >" + value + "</textarea>");
-                element = appendEmptyScript(element, widget, name);
-                element.append("</td></tr>");
-
-            }
-        }
-        return element.toString();
-    }
-
-    private StringBuilder appendEmptyScript(StringBuilder element, String widget, String name) {
-        //Create a empty JS function to avoid errors in rich text false state;
-        String eleName = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
-        String fun_name = "set_" + eleName;
-        element.append("<script>\n");
-        element.append("function " + fun_name + "(){}");
-        element.append("</script>");
-        return element;
-    }
-
-    private StringBuilder appendRichTextScript(StringBuilder element, int width, int height, String widget, String name) {
-        String attrName = widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
-        String eleName = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
-        String ele_id = "_id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
-        String fun_name = "set_" + eleName;
-        String richTextAttrName = "yui_txt_" + eleName;
-        element.append("<script>\n" +
-                "\n" + "var " + richTextAttrName + ";\n" +
-                "(function() {\n" +
-                "    var Dom = YAHOO.util.Dom,\n" +
-                "        Event = YAHOO.util.Event;\n" +
-                "    \n" +
-                "    var myConfig = {\n" +
-                "        height: '" + "120" + "px',\n" +
-                "        width: '" + "400" + "px',\n" +
-                "        dompath: true,\n" +
-                "        focusAtStart: true\n" +
-                "    };\n" +
-                "\n" +
-                "    YAHOO.log('Create the Editor..', 'info', 'example');\n" +
-                "    " + richTextAttrName + " = new YAHOO.widget.SimpleEditor('" + eleName + "', myConfig);\n" +
-                "    " + richTextAttrName + ".render();\n" +
-                "\n" +
-                "})();\n");
-
-        element.append("function " + fun_name + "(){\n" +
-                "        var form1 = document.getElementById('CustomUIForm');\n" +
-                "        var newInput = document.createElement('input');\n" +
-                "        newInput.setAttribute('type','hidden');\n" +
-                "        newInput.setAttribute('name','" + attrName + "');\n" +
-                "        newInput.setAttribute('id','" + ele_id + "');\n" +
-                "        form1.appendChild(newInput);" +
-
-                "    var contentText=\"\";\n" +
-                "    " + richTextAttrName + ".saveHTML();\n" +
-                "    contentText = " + richTextAttrName + ".get('textarea').value;\n" +
-                "    document.getElementById(\"" + ele_id + "\").value = contentText;\n" +
-                "}");
-
-        element.append("</script>");
-
-        return element;
-    }
-
-    public String printTextAreaSkipName(String name, String widget, String value, int height,
-                                        int width, boolean isReadOnly, String tooltip) {
-        StringBuilder element = new StringBuilder();
-        StringBuilder size = new StringBuilder();
-        if (height > 0 || width > 0) {
-            size = size.append("");
-            if (height > 0) {
-                size.append("height:").append(height).append("px;");
-            }
-            if (width > 0) {
-                size.append("width:").append(width).append("px\"");
-            }
-            size.append("\"");
-        }
-        element.append("<td><textarea  name=\"" + widget.replaceAll(" ",
-                "_") + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\" " +
-                "id=\"id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ",
-                "-") + "\" " + size  + (isReadOnly ? " readonly" : "") + " >" + StringEscapeUtils
-                .escapeHtml(value) +
-                "</textarea></td>");
-        return element.toString();
-    }
-
-    public String printTextSkipName(String name, String widget, String value, boolean isURL,
-                                    String urlTemplate, boolean isPath, boolean isReadOnly,
-                                    boolean hasValue, String tooltip, String startsWith, HttpServletRequest request) {
-        StringBuilder element = new StringBuilder();
-        String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
-        value = StringEscapeUtils.escapeHtml(value);
-        if (isURL) {
-            String selectResource = "";
-            String selectResourceButton = "$('" + id + "_button').style.display='';";
-            if (isPath) {
-                selectResource = " <input id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
-            }
-
-            String browsePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH;
-
-            String div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + browsePath : "") + (urlTemplate != null ? urlTemplate.replace("@{value}", value) : value) + "\">" + value + "</a>" +
-                    "&nbsp;" + (!isReadOnly ? "<a onclick=\"$('" + id + "_link').style.display='none';$('" + id +
-                    "')." +
-                    "style.display='';" + (isPath ? selectResourceButton : "") + "\" title=\"" + CarbonUIUtil.geti18nString("edit",
-                    "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) +
-                    "\" " +
-                    "class=\"icon-link\" style=\"background-image: url('../admin/images/edit.gif');float: none\"></a>" : "") + "</div>";
-            element.append("<td>" + div + "<input style=\"display:none\" type=\"text\" name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-")
-                    + "\" title=\"" + tooltip + "\" " + (hasValue ? "value=\"" + value + "\"" :
-                    "") + " id=\"" + id + "\"" + (isReadOnly ? " readonly" : "") + " />" + (isPath ? selectResource : "") + "</td>");
-        } else {
-            String selectResource = "";
-            if (isPath) {
-                selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
-            }
-            element.append("<td><input type=\"text\" name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-")
-                    + "\"" + (hasValue ? "value=\"" + value + "\"" : "") + " id=\"" + id + "\"" + (isReadOnly ? " readonly" : "") + " />" + (isPath ? selectResource : "") + "</td>");
-        }
-        return element.toString();
-    }
-
-    public String printDropDownSkipName(String name, String[] values, String widget,
-                                        String value, String tooltip) {
-        StringBuilder dropDown = new StringBuilder();
-        dropDown.append("<td><select id=\"id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") + "\" " +
-                "name=\"" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ",
-                "-") + "\" title=\"" + tooltip + "\">");
-
-        for (int i = 0; i < values.length; i++) {
-            dropDown.append("<option value=\"" + StringEscapeUtils.escapeHtml(values[i]) +
-                    "\"");
-            if (values[i].equals(value)) {
-                dropDown.append(" selected>");
-            } else {
-                dropDown.append(">");
-            }
-            dropDown.append(StringEscapeUtils.escapeHtml(values[i]));
-            dropDown.append("</option>");
-        }
-        dropDown.append("</select></td>");
-        return dropDown.toString();
-    }
-
-    public String printCheckboxSkipName(String name, String widget, String value, String tooltip) {
-        if (Boolean.toString(true).equals(value)) {
-            return "<td><input type=\"checkbox\" checked=\"checked\" name=\"" +
-                    widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-") +
-                    "\" value=\"true\" title=\"" + tooltip + "\"/></td>";
-        } else {
-            return "<td><input type=\"checkbox\" name=\"" + widget.replaceAll(" ", "_") + "_" +
-                    name.replaceAll(" ", "-") + "\" value=\"true\" title=\"" + tooltip +
-                    "\"/></td>";
-        }
-    }
-
-    public String printOptionText(String label, String name, String[] values, String widget,
-                                  String option, String text, boolean isURL, String urlTemplate,
-                                  boolean isPath, String tooltip, String startsWith, HttpServletRequest request) {
-        StringBuilder dropDown = new StringBuilder();
-        dropDown.append("<tr><td class=\"leftCol\"><select name=\"" + widget.replaceAll(" ",
-                "_") + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\">");
-        for (int i = 0; i < values.length; i++) {
-            dropDown.append("<option value=\"" + StringEscapeUtils.escapeHtml(values[i]) +
-                    "\"");
-            if (values[i].equals(option)) {
-                dropDown.append(" selected>");
-            } else {
-                dropDown.append(">");
-            }
-            dropDown.append(StringEscapeUtils.escapeHtml(values[i]));
-            dropDown.append("</option>");
-        }
-        dropDown.append("</select></td>");
-        String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
-        if (isURL) {
-            String selectResource = "";
-            String selectResourceButton = "$('" + id + "_button').style.display='';";
-            if (isPath) {
-                selectResource = " <input style=\"display:none\" id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
-            }
-
-            String browsePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH;            
-
-            String div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "" +
-                    "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + browsePath : "") +
-                    StringEscapeUtils.escapeHtml((urlTemplate != null ? urlTemplate.replace
-                            ("@{value}", text) : text))
-                    + "\">" + StringEscapeUtils.escapeHtml(text) + "</a>" +
-                    "&nbsp;<a onclick=\"$('" + id + "_link').style.display='none';$('" + id +
-                    "')." +
-                    "style.display='';" + (isPath ? selectResourceButton : "") + "\" title=\"" + CarbonUIUtil.geti18nString("edit",
-                    "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) +
-                    "\" " +
-                    "class=\"icon-link\" style=\"background-image: url('../admin/images/edit.gif');float: none\"></a></div>";
-            dropDown.append("<td>" + div + "<input style=\"display:none\" type=\"text\" name=\"" + widget.replaceAll(" ", "_") + UIGeneratorConstants.TEXT_FIELD
-                    + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\" value=\"" +
-                    StringEscapeUtils.escapeHtml(text) + "\" id=\"" + id +"\" " +
-                    "style=\"width:400px\"/>"
-                    + (isPath?
-                    selectResource
-                    : "") + "</td>");
-
-        } else {
-            String selectResource = "";
-            if (isPath) {
-                selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
-            }
-            dropDown.append("<td width=500px><input type=\"text\" name=\"" + widget.replaceAll(" ", "_") + UIGeneratorConstants.TEXT_FIELD
-                    + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\" value=\"" +
-                    StringEscapeUtils.escapeHtml(text) + "\" id=\""
-                    + id +"\" style=\"width:" + UIGeneratorConstants.DEFAULT_WIDTH + "px\"/>" + (isPath ? selectResource : "") + "</td>");
-        }
-        dropDown.append("<td><a class=\"icon-link\" title=\"delete\" onclick=\"" + "delete" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(this.parentNode.parentNode.rowIndex)\" style=\"background-image:url(../admin/images/delete.gif);\">Delete</a></td>");
-        dropDown.append("</tr>");
-        return dropDown.toString();
-    }
-
-    public String printOptionTextWithId(String originalName, int index, String[] values,
-                                        String widget, String option, String text, boolean isURL,
-                                        String urlTemplate, boolean isPath,
-                                        String tooltip, String startsWith, HttpServletRequest request) {
-        String name = originalName + index;
-        StringBuilder dropDown = new StringBuilder();
-        dropDown.append("<tr><td class=\"leftCol\"><select name=\"" + widget.replaceAll(" ",
-                "_") + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\">");
-        String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
-        for (int i = 0; i < values.length; i++) {
-            dropDown.append("<option value=\"" + StringEscapeUtils.escapeHtml(values[i]) +
-                    "\"");
-            if (values[i].equals(option)) {
-                dropDown.append(" selected>");
-            } else {
-                dropDown.append(">");
-            }
-            dropDown.append(StringEscapeUtils.escapeHtml(values[i]));
-            dropDown.append("</option>");
-        }
-        dropDown.append("</select></td>");
-        if (isURL) {
-            String selectResource = "";
-            String selectResourceButton = "$('" + id + "_button').style.display='';";
-            if (isPath) {
-            	if (startsWith != null) {
-            		selectResource = " <input style=\"display:none\" id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                            "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTreeWithCustomPath('" + id + "','" + startsWith + "');\"/>";
-            	} else {
-            		selectResource = " <input style=\"display:none\" id=\"" + id + "_button\" type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                            "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
-            	}                
-            }
-
-            String browsePath = RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH;            
-
-            String div = "<div id=\"" + id + "_link\"><a target=\"_blank\" href=\"" + (isPath ? "../resources/resource.jsp?region=region3&item=resource_browser_menu&path=" + browsePath : "") +
-                    StringEscapeUtils.escapeHtml((urlTemplate != null ? urlTemplate.replace("@{value}", text) : text))
-                    + "\">" + StringEscapeUtils.escapeHtml(text) + "</a>" +
-                    "&nbsp;<a onclick=\"$('" + id + "_link').style.display='none';$('" + id +
-                    "')." +
-                    "style.display='';" + (isPath ? selectResourceButton : "") + "\" title=\"" + CarbonUIUtil.geti18nString("edit",
-                    "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) +
-                    "\" " +
-                    "class=\"icon-link\" style=\"background-image: url('../admin/images/edit.gif');float: none\"></a></div>";
-            dropDown.append("<td>" + div + "<input style=\"display:none\" type=\"text\" name=\"" + widget.replaceAll(" ", "_") + UIGeneratorConstants.TEXT_FIELD
-                    + "_" + name.replaceAll(" ", "-") + "\" title=\"" + tooltip + "\" value=\"" +
-                    StringEscapeUtils.escapeHtml(text)
-                    + "\" id=\""
-                    + id +"\" style=\"width:400px\"/>" + (isPath ? selectResource : "") + "</td>");
-        } else {
-            String selectResource = "";
-            if (isPath) {
-                selectResource = " <input type=\"button\" class=\"button\" value=\"..\" title=\"" + CarbonUIUtil.geti18nString("select.path",
-                        "org.wso2.carbon.governance.generic.ui.i18n.Resources", request.getLocale()) + "\" onclick=\"showGovernanceResourceTree('" + id + "');\"/>";
-            }
-            dropDown.append("<td width=500px><input type=\"text\" name=\"" + widget.replaceAll(" ", "_") + UIGeneratorConstants.TEXT_FIELD
-                    + "_" + name.replaceAll(" ", "-") + "\"  title=\"" + tooltip + "\" value=\"" +
-                    StringEscapeUtils.escapeHtml(text) + "\" id=\"" + id +
-                    "\" style=\"width:400px\"/>" + (isPath ? selectResource : "") + "</td>");
-        }
-        dropDown.append("<td><a class=\"icon-link\" title=\"delete\" onclick=\"" + "delete" + originalName.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(this.parentNode.parentNode.rowIndex)\" style=\"background-image:url(../admin/images/delete.gif);\">Delete</a></td>");
-        dropDown.append("</tr>");
-        return dropDown.toString();
-    }
-
-    public String printAddLink(String label, String name, String addIconPath, String widget, String[] subList, boolean isPath, String startsWith) {
-        StringBuilder link = new StringBuilder();
-        link.append("<tr><td colspan=\"3\"><a class=\"icon-link\" style=\"background-image: url(");
-        link.append(addIconPath);
-        link.append(");\" onclick=\"");
-        if (startsWith != null) {
-        	link.append("add" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(" + (isPath ? "'path'" : "''") + "," + "'"+startsWith +"'"+  ")\">"); //creating a JavaScript onclick method name which should be identical ex: addEndpoint_Endpoint
-        } else {
-        	link.append("add" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(" + (isPath ? "'path'" : "''") + ")\">"); //creating a JavaScript onclick method name which should be identical ex: addEndpoint_Endpoint
-        }
-        link.append("Add " + label.replaceAll(" ", "-")); //This is the display string for add item ex: Add EndPoint
-        link.append("</a></td></tr>");
-        link.append("<tr><td colspan=\"3\">");
-        link.append("<table class=\"styledLeft\" style=\"display:none;border: 1px solid rgb(204, 204, 204) ! important;\"><thead>" +
-                printSubHeaders(subList) +
-                "</thead><tbody id=\"" + name.replaceAll(" ", "-") + "Mgt\">");
-        return link.toString();
-    }
-
-    public String printAddLinkWithDisplay(String label, String name, String addIconPath, String widget, String[] subList, boolean isPath, String startsWith) {
-        StringBuilder link = new StringBuilder();
-        link.append("<tr><td colspan=\"3\"><a class=\"icon-link\" style=\"background-image: url(");
-        link.append(addIconPath);
-        link.append(");\" onclick=\"");
-        if (startsWith != null) {
-        	link.append("add" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(" + (isPath ? "'path'" : "''") + "," + "'"+startsWith +"'"+  ")\">"); //creating a JavaScript onclick method name which should be identical ex: addEndpoint_Endpoint
-        } else {
-        	link.append("add" + name.replaceAll(" ", "-") + "_" + widget.replaceAll(" ", "_") + "(" + (isPath ? "'path'" : "''") + ")\">"); //creating a JavaScript onclick method name which should be identical ex: addEndpoint_Endpoint
-        }
-        link.append("Add " + label.replaceAll(" ", "-")); //This is the display string for add item ex: Add EndPoint
-        link.append("</a></td></tr>");
-        link.append("<tr><td colspan=\"3\">");
-        link.append("<table class=\"styledLeft\" style=\"border: 1px solid rgb(204, 204, 204) ! important;\"><thead>" +
-                printSubHeaders(subList) +
-                "</thead><tbody id=\"" + name.replaceAll(" ", "-") + "Mgt\">");
-        return link.toString();
     }
 
     public String printCloseAddLink(String name, int count) {
@@ -1582,109 +888,9 @@ public class GenericUIGenerator {
         return res;
     }
 
-    public String printDate(String label, String name, String mandatory, String widget,
-                            boolean isReadOnly, String tooltip) {
-        StringBuilder element = new StringBuilder();
-        String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
-        element.append("<tr><td class=\"leftCol-big\">" + label);
+    
 
-        if ("true".equals(mandatory)) {
-            element.append( "<span class=\"required\">*</span>");
-        }
-
-        element.append("</td>\n<td>");
-        if (!isReadOnly) {
-            element.append("<a class=\"icon-link\" style=\"background-image: " +
-                    "url( ../admin/images/calendar.gif);\" onclick=\"jQuery('#" + id + "')" +
-                    ".datepicker( 'show' );\" href=\"javascript:void(0)\"></a>");
-
-        }
-        element.append("<input type=\"text\" name=\"" + widget.replaceAll(" ",
-                "_") + "_" + name.replaceAll(" ", "-")
-                    + "\" title=\"" + tooltip + "\" style=\"width:" + UIGeneratorConstants
-                            .DATE_WIDTH + "px\"" + (isReadOnly ? " readonly" : "") + " id=\"" + id + "\" />"
-                    + "</td></tr>");
-
-        return element.toString();
-    }
-
-
-    public String printDate(String label, String name, String mandatory, String widget,
-                                String value, boolean isReadOnly, String tooltip) {
-        StringBuilder element = new StringBuilder();
-        String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
-        value = StringEscapeUtils.escapeHtml(value);
-
-        element.append("<tr><td class=\"leftCol-big\">" + label);
-
-        if ("true".equals(mandatory)) {
-            element.append( "<span class=\"required\">*</span>");
-        }
-
-        element.append("</td>\n<td>");
-        if (!isReadOnly) {
-            element.append("<a class=\"icon-link\" style=\"background-image: " +
-                    "url( ../admin/images/calendar.gif);\" onclick=\"jQuery('#" + id + "')" +
-                    ".datepicker( 'show' );\" href=\"javascript:void(0)\"></a>");
-
-        }
-        element.append("<input type=\"text\" name=\"" + widget.replaceAll(" ",
-                "_") + "_" + name.replaceAll(" ", "-")
-                + "\" title=\"" + tooltip + "\" style=\"width:" + UIGeneratorConstants
-                .DATE_WIDTH + "px\"" + (isReadOnly ? " readonly" : "") + " id=\"" + id + "\" " +
-                "value=\"" + value + "\" />"
-                + "</td></tr>");
-
-        return element.toString();
-    }
-
-
-    public String printDateSkipName(String name, String widget, boolean isReadOnly,
-                                    String tooltip) {
-
-        StringBuilder element = new StringBuilder();
-        String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
-
-        element.append("<td>");
-        if (!isReadOnly) {
-            element.append("<a class=\"icon-link\" style=\"background-image: " +
-                    "url( ../admin/images/calendar.gif);\" onclick=\"jQuery('#" + id + "')" +
-                    ".datepicker( 'show' );\" href=\"javascript:void(0)\"></a>");
-
-        }
-        element.append("<input type=\"text\" name=\"" + widget.replaceAll(" ",
-                "_") + "_" + name.replaceAll(" ", "-")
-                + "\" title=\"" + tooltip + "\" style=\"width:" + UIGeneratorConstants
-                .DATE_WIDTH + "px\"" + (isReadOnly ? " readonly" : "") + " id=\"" + id + "\" />"
-                + "</td>");
-
-        return element.toString();
-    }
-
-
-
-    public String printDateSkipName(String name, String widget, String value, boolean isReadOnly,
-                                    String tooltip) {
-        StringBuilder element = new StringBuilder();
-        String id = "id_" + widget.replaceAll(" ", "_") + "_" + name.replaceAll(" ", "-");
-        value = StringEscapeUtils.escapeHtml(value);
-
-        element.append("<td>");
-        if (!isReadOnly) {
-            element.append("<a class=\"icon-link\" style=\"background-image: " +
-                    "url( ../admin/images/calendar.gif);\" onclick=\"jQuery('#" + id + "')" +
-                    ".datepicker( 'show' );\" href=\"javascript:void(0)\"></a>");
-
-        }
-        element.append("<input type=\"text\" name=\"" + widget.replaceAll(" ",
-                "_") + "_" + name.replaceAll(" ", "-")
-                + "\" title=\"" + tooltip + "\" style=\"width:" + UIGeneratorConstants
-                .DATE_WIDTH + "px\"" + (isReadOnly ? " readonly" : "") + " id=\"" + id + "\" " +
-                "value=\"" + value + "\" />"
-                + "</td>");
-
-        return element.toString();
-    }
+    
 
 
     public String[] getMandatoryIdList(OMElement head) {
