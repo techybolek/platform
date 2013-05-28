@@ -30,6 +30,7 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ws.commons.schema.resolver.DefaultURIResolver;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.bpel.common.ServiceConfigurationUtil;
 import org.wso2.carbon.bpel.common.config.EndpointConfiguration;
@@ -55,6 +56,7 @@ import javax.wsdl.Definition;
 import javax.wsdl.OperationType;
 import javax.xml.namespace.QName;
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -207,8 +209,15 @@ public class HumanTaskStore {
         String wsdlBaseURI = wsdlDef.getDocumentBaseURI();
         serviceBuilder.setBaseUri(wsdlBaseURI);
         /*we don't need custom resolvers since registry takes care of it*/
-        serviceBuilder.setCustomResolver(new HumanTaskSchemaURIResolver());
-        serviceBuilder.setCustomWSDLResolver(new HumanTaskWSDLLocator());
+        serviceBuilder.setCustomResolver(new DefaultURIResolver());
+        URI wsdlBase = null;
+        try {
+            wsdlBase = new URI(wsdlBaseURI);
+        } catch (Exception e) {
+            String error = "Error occurred while creating AxisServiceBuilder.";
+            log.error(error);
+        }
+        serviceBuilder.setCustomWSDLResolver(new HumanTaskWSDLLocator(wsdlBase));
         serviceBuilder.setServerSide(true);
         return serviceBuilder;
     }
