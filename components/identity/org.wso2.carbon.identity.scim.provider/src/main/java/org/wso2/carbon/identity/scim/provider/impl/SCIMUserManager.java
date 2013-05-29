@@ -57,10 +57,6 @@ public class SCIMUserManager implements UserManager {
 
     private static Log log = LogFactory.getLog(SCIMUserManager.class);
 
-    //variables used in runnable's run method in a particular instance of the object:
-    private SCIMObject objectToBeProvisioned;
-    private int provisioningMethod;
-
     //to make provisioning to other providers asynchronously happen.
     private ExecutorService provisioningThreadPool = Executors.newCachedThreadPool();
 

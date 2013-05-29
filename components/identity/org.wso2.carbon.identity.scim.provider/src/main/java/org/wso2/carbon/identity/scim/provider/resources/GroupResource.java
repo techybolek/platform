@@ -355,17 +355,4 @@ public class GroupResource extends AbstractResource {
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         }
     }
-
-    /*@PATCH
-    public Response patchUser(@HeaderParam(SCIMConstants.CONTENT_TYPE_HEADER) String inputFormat,
-                              @HeaderParam(SCIMConstants.ACCEPT_HEADER) String outputFormat,
-                              @HeaderParam(SCIMConstants.AUTH_HEADER_USERNAME) String userName,
-                              @HeaderParam(SCIMConstants.AUTH_HEADER_PASSWORD) String password,
-                              @HeaderParam(SCIMConstants.AUTHORIZATION_HEADER) String authorization,
-                              String resourceString) {
-        System.out.println("patch method was called." + resourceString);
-        return null;
-
-    }*/
-
 }
