@@ -39,6 +39,8 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.mediators.base.SequenceMediator;
 import org.apache.synapse.util.MessageHelper;
 import org.jaxen.JaxenException;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.identity.entitlement.mediator.callback.EntitlementCallbackHandler;
 import org.wso2.carbon.identity.entitlement.mediator.callback.UTEntitlementCallbackHandler;
 import org.wso2.carbon.identity.entitlement.proxy.Attribute;
@@ -464,13 +466,31 @@ public class EntitlementMediator extends AbstractMediator implements ManagedLife
     }
 
     public String getRemoteServicePassword() {
+        if (!remoteServicePassword.startsWith("enc:")) {
+            try {
+                return "enc:"
+                        + CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(
+                                remoteServicePassword.getBytes());
+            } catch (CryptoException e) {
+                log.error(e);
+            }
+        }
         return remoteServicePassword;
     }
 
     public void setRemoteServicePassword(String remoteServicePassword) {
-        this.remoteServicePassword = remoteServicePassword;
+        if (remoteServicePassword.startsWith("enc:")) {
+            try {
+                this.remoteServicePassword = new String(CryptoUtil.getDefaultCryptoUtil()
+                        .base64DecodeAndDecrypt(remoteServicePassword.substring(4)));
+            } catch (CryptoException e) {
+                 log.error(e);
+            }
+        } else {
+            this.remoteServicePassword = remoteServicePassword;
+        }
     }
-
+    
     public String getRemoteServiceUrl() {
         return remoteServiceUrl;
     }
