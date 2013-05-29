@@ -22,6 +22,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.caching.core.CacheEntry;
+import org.wso2.carbon.identity.core.model.OAuthAppDO;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
@@ -217,12 +218,10 @@ public class OAuth2Util {
     }
 
     public static AccessTokenDO validateAccessTokenDO(AccessTokenDO accessTokenDO) {
-        long timestampSkew;
         long currentTime;
         //long validityPeriod = accessTokenDO.getValidityPeriod() * 1000;
         long validityPeriodMillis = accessTokenDO.getValidityPeriodInMillis();
         long issuedTime = accessTokenDO.getIssuedTime().getTime();
-        timestampSkew = OAuthServerConfiguration.getInstance().getDefaultTimeStampSkewInSeconds() * 1000;
         currentTime = System.currentTimeMillis();
 
         //check the validity of cached OAuth2AccessToken Response
@@ -334,5 +333,33 @@ public class OAuth2Util {
         }
         return userId;
     }
+    
+	/**
+	 * Returns the login page for the oauth client. If there is any configured
+	 * login page to the client in the UI, then that will be returned. If not,
+	 * then the URL configured in the identity.xml will be returned or else
+	 * null will be returned.
+	 * 
+	 * @param appDO
+	 * 
+	 * @return
+	 */
+	public static String getLoginPage(OAuthAppDO appDO) {
+		return OAuthServerConfiguration.getInstance().getCustomLoginPageUrl();
+	}
+
+	/**
+	 * Returns the error page for the oauth client. If there is any configured
+	 * login page to the client in the UI, then that will be returned. If not,
+	 * then the URL configured in the identity.xml will be returned or else
+	 * null will be returned.
+	 * 
+	 * @param appDO
+	 * 
+	 * @return
+	 */
+	public static String getErrorPage(OAuthAppDO appDO) {
+		return OAuthServerConfiguration.getInstance().getCustomErrorPageUrl();
+	}
     
 }

@@ -69,10 +69,14 @@ public class OAuthServerConfiguration {
         public static final String TIMESTAMP_SKEW = "TimestampSkew";
 
         // Default validity periods
-        private static final String AUTHORIZATION_CODE_DEFAULT_VALIDITY_PERIOD =
-                "AuthorizationCodeDefaultValidityPeriod";
-        private static final String ACCESS_TOKEN_DEFAULT_VALIDITY_PERIOD =
-                "AccessTokenDefaultValidityPeriod";
+		private static final String AUTHORIZATION_CODE_DEFAULT_VALIDITY_PERIOD =
+		                                                                         "AuthorizationCodeDefaultValidityPeriod";
+		
+		private static final String CUSTOM_LOGIN_PAGE_URL = "CustomLoginPageUrl";
+		
+		private static final String CUSTOM_ERROR_PAGE_URL = "CustomErrorPageUrl";
+		
+		private static final String ACCESS_TOKEN_DEFAULT_VALIDITY_PERIOD = "AccessTokenDefaultValidityPeriod";
         // Enable/Disable cache
         public static final String ENABLE_CACHE = "EnableOAuthCache";
 
@@ -121,6 +125,10 @@ public class OAuthServerConfiguration {
 
 
     private static OAuthServerConfiguration instance;
+    
+    private String loginPageUrl = null;
+    
+    private String errorPageUrl = null;
 
     private long defaultAuthorizationCodeValidityPeriodInSeconds = 300;
 
@@ -262,6 +270,24 @@ public class OAuthServerConfiguration {
         }
     }
 
+	/**
+	 * Returns the custom login page Url
+	 * 
+	 * @return
+	 */
+	public String getCustomLoginPageUrl() {
+		return loginPageUrl;
+	}
+
+	/**
+	 * Returns the custom error page Url
+	 * 
+	 * @return
+	 */
+	public String getCustomErrorPageUrl() {
+		return errorPageUrl;
+	}
+    
     public Set<OAuthCallbackHandlerMetaData> getCallbackHandlerMetaData() {
         return callbackHandlerMetaData;
     }
@@ -533,6 +559,21 @@ public class OAuthServerConfiguration {
     }
 
     private void parseDefaultValidityPeriods(OMElement oauthConfigElem) {
+    	
+    	// reads the custom login page url configuration
+		OMElement loginPageUrlElem =
+		                             oauthConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.CUSTOM_LOGIN_PAGE_URL));
+		if (loginPageUrlElem != null) {
+			loginPageUrl = loginPageUrlElem.getText();
+		}
+		
+		// read the custom error page url configuration
+		OMElement errorPageUrlElem =
+		                             oauthConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.CUSTOM_ERROR_PAGE_URL));
+		if (errorPageUrlElem != null) {
+			errorPageUrl = errorPageUrlElem.getText();
+		}
+		
         // set the authorization code default timeout
         OMElement authzCodeTimeoutElem = oauthConfigElem.getFirstChildWithName(
                 getQNameWithIdentityNS(ConfigElements.AUTHORIZATION_CODE_DEFAULT_VALIDITY_PERIOD));
