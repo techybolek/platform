@@ -153,8 +153,8 @@
         <module>cassandra-explorer</module>
         <module>data-bridge</module>
 		<module>ndatasource</module>
-		<module>appfactory</module>
 		<module>cep-statistics</module>
+                <module>appfac</module>
             </modules>
 	    <build>
 	        <plugins>
