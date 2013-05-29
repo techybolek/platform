@@ -50,12 +50,12 @@ public class OAuth2AuthzClient {
                 .getAttribute(OAuthConstants.OAUTH2_PARAMS);
 
         // user has denied the authorization. Send back the error code.
-        if("true".equals(request.getParameter("deny"))){
-            return OAuthASResponse.errorResponse(HttpServletResponse.SC_FOUND)
-                    .setError(OAuth2ErrorCodes.ACCESS_DENIED)
-                    .location(oauth2Params.getRedirectURI()).setState(oauth2Params.getState())
-                    .buildQueryMessage().getLocationUri();
-        }
+		if ("true".equals(request.getParameter("deny"))) {
+			return OAuthASResponse.errorResponse(HttpServletResponse.SC_FOUND)
+			                      .setError(OAuth2ErrorCodes.ACCESS_DENIED)
+			                      .location(oauth2Params.getRedirectURI()).setState(oauth2Params.getState())
+			                      .buildQueryMessage().getLocationUri();
+		}
 
         try {
             OAuth2AuthorizeRespDTO authzRespDTO = authorize(request, oauth2Params);
@@ -142,12 +142,15 @@ public class OAuth2AuthzClient {
             throws OAuthProblemException {
         try {
             // authenticate and issue the authorization code
-            String backendServerURL = CarbonUIUtil.getServerURL(req.getSession()
-                    .getServletContext(), req.getSession());
-            ConfigurationContext configContext = (ConfigurationContext) req.getSession()
-                    .getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
-            OAuth2ServiceClient oauth2ServiceClient = new OAuth2ServiceClient(backendServerURL,
-                    configContext);
+			String backendServerURL =
+			                          CarbonUIUtil.getServerURL(req.getSession().getServletContext(),
+			                                                    req.getSession());
+			ConfigurationContext configContext =
+			                                     (ConfigurationContext) req.getSession()
+			                                                               .getServletContext()
+			                                                               .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+			OAuth2ServiceClient oauth2ServiceClient =
+			                                          new OAuth2ServiceClient(backendServerURL, configContext);
 
             OAuth2AuthorizeReqDTO authzReqDTO = new OAuth2AuthorizeReqDTO();
             authzReqDTO.setCallbackUrl(oauth2Params.getRedirectURI());

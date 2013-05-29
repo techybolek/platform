@@ -18,14 +18,20 @@
 
 package org.wso2.carbon.identity.oauth.ui.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.identity.base.IdentityException;
+import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
 import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
+import org.wso2.carbon.identity.oauth.ui.OAuth2Parameters;
 import org.wso2.carbon.identity.oauth.ui.OAuthClientException;
 import org.wso2.carbon.identity.oauth.ui.OAuthConstants;
+import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientValidationResponseDTO;
 import org.wso2.carbon.ui.CarbonUIUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -119,4 +125,77 @@ public class OAuthUIUtil {
 
         return returnedOAuthConsumerSet;
     }
+
+	/**
+	 * Returns the error page URL. If no custom page is defined, then the
+	 * default will be returned.
+	 * 
+	 * @param req
+	 * @param clienDTO
+	 * @param errorCode
+	 * @param errorMessage
+	 * @return
+	 */
+	public static String getErrorPageURL(HttpServletRequest req, OAuth2ClientValidationResponseDTO clienDTO,
+	                                     String errorCode, String errorMessage) {
+		String errorPageURL = null;
+		// if there is a configured custom page, then user it
+		if (clienDTO != null && clienDTO.getErrorPageURL() != null) {
+			errorPageURL = clienDTO.getErrorPageURL();
+			try {
+				errorPageURL =
+				               errorPageURL + "?" + OAuthConstants.OAUTH_ERROR_CODE + "=" +
+				                       URLEncoder.encode(errorCode, "UTF-8") + "&" +
+				                       OAuthConstants.OAUTH_ERROR_MESSAGE + "=" +
+				                       URLEncoder.encode(errorMessage, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				// ignore, UTF-8 must be supported
+			}
+		} else { // else use the default 
+			errorPageURL = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth-error.jsp";
+			errorPageURL = errorPageURL.replace("/oauth2/authorize", "");
+			req.getSession().setAttribute(OAuthConstants.OAUTH_ERROR_CODE, errorCode);
+			req.getSession().setAttribute(OAuthConstants.OAUTH_ERROR_MESSAGE, errorMessage);
+		}
+		return errorPageURL;
+	}
+    
+	/**
+	 * Rerurns the login page URL. If no custom page is defined, then the
+	 * default will be returned.
+	 * 
+	 * @param req
+	 * @param params
+	 * @param clientDTO
+	 * @return
+	 */
+	public static String getLoginPageURL(HttpServletRequest req, OAuth2ClientValidationResponseDTO clientDTO,
+	                                     OAuth2Parameters params) {
+		String loginPage = null;
+		// if there is a configured custom page, then use it 
+		if (clientDTO != null && clientDTO.getLoginPageURL() != null) {
+			loginPage = clientDTO.getLoginPageURL();
+			try {
+				loginPage =
+				            loginPage + "?" + OAuthConstants.SCOPE + "=" +
+				                    URLEncoder.encode(getScope(params), "UTF-8") + "&" + "application" + "=" +
+				                    URLEncoder.encode(params.getApplicationName(), "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				// ignore
+			}
+		} else { // else use the default 
+			loginPage = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth2_authn_ajaxprocessor.jsp";
+			loginPage = loginPage.replace("/oauth2/authorize", "");
+		}
+
+		return loginPage;
+	}
+	
+	private static String getScope(OAuth2Parameters params) {
+		StringBuffer scopes = new StringBuffer();
+		for(String scope : params.getScopes() ) {
+			scopes.append(scope+" ");
+		}
+		return scopes.toString();
+	}
 }

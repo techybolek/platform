@@ -118,7 +118,8 @@ public class OAuth2ServiceClient {
         responseDTO.setErrorCode(validationRespDTO.getErrorCode());
         responseDTO.setErrorMsg(validationRespDTO.getErrorMsg());
         responseDTO.setValidClient(validationRespDTO.isValidClient());
-
+        responseDTO.setErrorPageURL(validationRespDTO.getErrorPageURL());
+        responseDTO.setLoginPageURL(validationRespDTO.getLoginPageURL());
         return responseDTO;
     }
 

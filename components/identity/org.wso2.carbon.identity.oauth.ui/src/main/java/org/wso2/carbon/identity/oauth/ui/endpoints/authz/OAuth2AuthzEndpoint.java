@@ -34,13 +34,14 @@ import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.oltu.openidconnect.as.util.OIDCAuthzServerUtil;
 import org.apache.oltu.openidconnect.as.OIDC;
+import org.apache.oltu.openidconnect.as.util.OIDCAuthzServerUtil;
 import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
 import org.wso2.carbon.identity.oauth.ui.OAuth2Parameters;
 import org.wso2.carbon.identity.oauth.ui.OAuthConstants;
 import org.wso2.carbon.identity.oauth.ui.client.OAuth2ServiceClient;
 import org.wso2.carbon.identity.oauth.ui.internal.OAuthUIServiceComponentHolder;
+import org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientValidationResponseDTO;
 import org.wso2.carbon.ui.CarbonUIUtil;
 import org.wso2.carbon.ui.util.CharacterEncoder;
@@ -70,24 +71,17 @@ public class OAuth2AuthzEndpoint extends HttpServlet {
     protected void service(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         try {
-
-            // requests coming for authorization.
-            if (req.getRequestURI().endsWith("authorize")) {
-                String redirectURL = handleOAuthAuthorizationRequest(req);
-                resp.sendRedirect(redirectURL);
-            }
-
-            else {
-                HttpSession session = req.getSession();
-                session.setAttribute(OAuthConstants.OAUTH_ERROR_CODE,
-                        OAuth2ErrorCodes.INVALID_OAUTH_URL);
-                session.setAttribute(OAuthConstants.OAUTH_ERROR_MESSAGE,
-                        "Invalid OAuth request URL.");
-                String errorPageURL = CarbonUIUtil.getAdminConsoleURL(req) +
-                        "oauth/oauth-error.jsp";
-                errorPageURL = errorPageURL.replace("/oauth2/authorize", "");
-                resp.sendRedirect(errorPageURL);
-            }
+			// requests coming for authorization.
+			if (req.getRequestURI().endsWith("authorize")) {
+				String redirectURL = handleOAuthAuthorizationRequest(req);
+				resp.sendRedirect(redirectURL);
+			} else {
+				String errorPageURL =
+				                      OAuthUIUtil.getErrorPageURL(req, null,
+				                                                  OAuth2ErrorCodes.INVALID_OAUTH_URL,
+				                                                  "Invalid OAuth request URL.");
+				resp.sendRedirect(errorPageURL);
+			}
         } catch (OAuthSystemException e) {
             log.error("Error when processing the authorization request.", e);
             HttpSession session = req.getSession();
@@ -100,7 +94,7 @@ public class OAuth2AuthzEndpoint extends HttpServlet {
     }
 
     private String handleOAuthAuthorizationRequest(HttpServletRequest req) throws IOException, OAuthSystemException {
-        OAuth2ClientValidationResponseDTO clientValidationResponseDTO = null;
+        OAuth2ClientValidationResponseDTO clientDTO = null;
         try {
             // Extract the client_id and callback url from the request, because constructing an Amber
             // Authz request can cause an OAuthProblemException exception. In that case, that error
@@ -109,35 +103,24 @@ public class OAuth2AuthzEndpoint extends HttpServlet {
             String callbackURL = CharacterEncoder.getSafeText(req.getParameter("redirect_uri"));
 
             if (clientId != null) {
-                clientValidationResponseDTO = validateClient(req, clientId, callbackURL);
+                clientDTO = validateClient(req, clientId, callbackURL);
             } else { // Client Id is not present in the request.
-                log.warn("Client Id is not present in the authorization request.");
-                HttpSession session = req.getSession();
-                session.setAttribute(OAuthConstants.OAUTH_ERROR_CODE,
-                        OAuth2ErrorCodes.INVALID_REQUEST);
-                session.setAttribute(OAuthConstants.OAUTH_ERROR_MESSAGE,
-                        "Invalid Request. Client Id is not present in the request");
-                String errorPageURL = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth-error.jsp";
-                errorPageURL = errorPageURL.replace("/oauth2/authorize", "");
-                return errorPageURL;
+				log.warn("Client Id is not present in the authorization request.");
+				return OAuthUIUtil.getErrorPageURL(req, clientDTO, OAuth2ErrorCodes.INVALID_REQUEST,
+				                                   "Invalid Request. Client Id is not present in the request");
             }
-            // Client is not valid. Do not send this error back to client, send to an error page instead.
-            if (!clientValidationResponseDTO.getValidClient()) {
-                HttpSession session = req.getSession();
-                session.setAttribute(OAuthConstants.OAUTH_ERROR_CODE,
-                        clientValidationResponseDTO.getErrorCode());
-                session.setAttribute(OAuthConstants.OAUTH_ERROR_MESSAGE,
-                        clientValidationResponseDTO.getErrorMsg());
-                String errorPageURL = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth-error.jsp";
-                errorPageURL = errorPageURL.replace("/oauth2/authorize", "");
-                return errorPageURL;
-            }
+			// Client is not valid. Do not send this error back to client, send
+			// to an error page instead.
+			if (!clientDTO.getValidClient()) {
+				return OAuthUIUtil.getErrorPageURL(req, clientDTO, clientDTO.getErrorCode(),
+				                                   clientDTO.getErrorMsg());
+			}
 
             // Now the client is valid, redirect him for authorization page.
             OAuthAuthzRequest oauthRequest = new OAuthAuthzRequest(req);
             OAuth2Parameters params = new OAuth2Parameters();
-            params.setApplicationName(clientValidationResponseDTO.getApplicationName());
-            params.setRedirectURI(clientValidationResponseDTO.getCallbackURL());
+            params.setApplicationName(clientDTO.getApplicationName());
+            params.setRedirectURI(clientDTO.getCallbackURL());
             params.setResponseType(oauthRequest.getResponseType());
             params.setScopes(oauthRequest.getScopes());
             params.setState(oauthRequest.getState());
@@ -160,24 +143,16 @@ public class OAuth2AuthzEndpoint extends HttpServlet {
 					// prompt can be four values {none, login, consent, select_profile}
 					String[] prompts = prompt.trim().split(" ");
 					boolean contains_none = prompt.contains("none");
-					if(prompts.length > 1 && contains_none) { // invalid combination
+					if (prompts.length > 1 && contains_none) { // invalid combination
 						log.error("Invalid prompt variable combination. " + prompt);
-						HttpSession session = req.getSession();
-						session.setAttribute(OAuthConstants.OAUTH_ERROR_CODE, OAuth2ErrorCodes.INVALID_REQUEST);
-						session.setAttribute(OAuthConstants.OAUTH_ERROR_MESSAGE, "Invalid prompt combination. The valune none cannot be used with others");
-						String errorPageURL = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth-error.jsp";
-						errorPageURL = errorPageURL.replace("/oauth2/authorize", "");
-						return errorPageURL;
+						OAuthUIUtil.getErrorPageURL(req, clientDTO, OAuth2ErrorCodes.INVALID_REQUEST,
+						                            "Invalid prompt combination. The valune none cannot be used with others");
 					}
 					Object logedInUser = req.getSession().getAttribute(OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER);
-					if(contains_none && logedInUser == null) {
+					if (contains_none && logedInUser == null) {
 						log.error("User not authenticated. " + prompt);
-						HttpSession session = req.getSession();
-						session.setAttribute(OAuthConstants.OAUTH_ERROR_CODE, OAuth2ErrorCodes.INVALID_REQUEST);
-						session.setAttribute(OAuthConstants.OAUTH_ERROR_MESSAGE, "Received prompt none but no authenticated user found");
-						String errorPageURL = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth-error.jsp";
-						errorPageURL = errorPageURL.replace("/oauth2/authorize", "");
-						return errorPageURL;
+						OAuthUIUtil.getErrorPageURL(req, clientDTO, OAuthConstants.OAUTH_ERROR_CODE,
+						                            "Received prompt none but no authenticated user found");
 					}
 					if(!prompt.contains("login")) { // we should not log the user
 						req.getSession().setAttribute(OAuthConstants.OAUTH2_PARAMS, params);
@@ -187,23 +162,18 @@ public class OAuth2AuthzEndpoint extends HttpServlet {
 					}
 				}
 			}
-
             req.getSession().setAttribute(OAuthConstants.OAUTH2_PARAMS, params);
-            String loginPage = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth2_authn_ajaxprocessor.jsp";
-            loginPage = loginPage.replace("/oauth2/authorize", "");
-            return loginPage;
+            return OAuthUIUtil.getLoginPageURL(req, clientDTO, params);
 
         } catch (OAuthProblemException e) {
-            log.error(e.getError(), e.getCause());
-            return OAuthASResponse.errorResponse(HttpServletResponse.SC_FOUND)
-                    .error(e).location(clientValidationResponseDTO.getCallbackURL())
-                    .buildQueryMessage().getLocationUri();
+			log.error(e.getError(), e.getCause());
+			return OAuthASResponse.errorResponse(HttpServletResponse.SC_FOUND).error(e)
+			                      .location(clientDTO.getCallbackURL()).buildQueryMessage().getLocationUri();
         }
     }
 
-	private OAuth2ClientValidationResponseDTO validateClient(HttpServletRequest req,
-	                                                         String clientId, String callbackURL)
-	                                                                                             throws OAuthSystemException {
+	private OAuth2ClientValidationResponseDTO validateClient(HttpServletRequest req, String clientId,
+	                                                         String callbackURL) throws OAuthSystemException {
 
 		String backendServerURL =
 		                          CarbonUIUtil.getServerURL(OAuthUIServiceComponentHolder.getInstance()
@@ -212,11 +182,10 @@ public class OAuth2AuthzEndpoint extends HttpServlet {
 		                                     OAuthUIServiceComponentHolder.getInstance()
 		                                                                  .getConfigurationContextService()
 		                                                                  .getServerConfigContext();
-		
+
 		try {
 			OAuth2ServiceClient oauth2ServiceClient =
-			                                          new OAuth2ServiceClient(backendServerURL,
-			                                                                  configContext);
+			                                          new OAuth2ServiceClient(backendServerURL, configContext);
 			return oauth2ServiceClient.validateClient(clientId, callbackURL);
 		} catch (RemoteException e) {
 			log.error("Error when invoking the OAuth2Service for client validation.");
