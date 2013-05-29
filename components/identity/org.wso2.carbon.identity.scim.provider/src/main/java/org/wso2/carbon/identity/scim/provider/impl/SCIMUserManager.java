@@ -106,6 +106,9 @@ public class SCIMUserManager implements UserManager {
                     String error = "User with the name: " + user.getUserName() + " already exists in the system.";
                     throw new DuplicateResourceException(error);
                 }
+                if(claimsMap.containsKey(SCIMConstants.USER_NAME_URI)){
+                    claimsMap.remove(SCIMConstants.USER_NAME_URI);
+                }
                 carbonUM.addUser(user.getUserName(), user.getPassword(), null, claimsMap, null);
                 log.info("User: " + user.getUserName() + " is created through SCIM.");
 
