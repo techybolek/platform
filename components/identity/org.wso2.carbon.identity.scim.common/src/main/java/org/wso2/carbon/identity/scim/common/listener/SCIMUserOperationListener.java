@@ -77,7 +77,18 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
     public boolean doPostAuthenticate(String userName, boolean authenticated,
                                       UserStoreManager userStoreManager)
             throws UserStoreException {
-        return true;
+        String activeAttributeValue = userStoreManager.getUserClaimValue(userName, SCIMConstants.ACTIVE_URI, null);
+        boolean  isUserActive = true;
+        if (activeAttributeValue != null) {
+            isUserActive = Boolean.parseBoolean(activeAttributeValue);
+            if(isUserActive){
+                return authenticated;
+            } else {
+                log.error("Trying to login from an inactive account of user: " + userName);
+                return false;
+            }
+        }
+        return authenticated;
     }
 
     public boolean doPreAddUser(String s, Object o, String[] strings,
