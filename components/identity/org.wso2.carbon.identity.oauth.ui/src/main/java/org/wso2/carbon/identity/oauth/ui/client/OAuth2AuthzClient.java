@@ -27,6 +27,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
 import org.wso2.carbon.identity.oauth.ui.OAuth2Parameters;
 import org.wso2.carbon.identity.oauth.ui.OAuthConstants;
@@ -61,7 +62,8 @@ public class OAuth2AuthzClient {
             OAuth2AuthorizeRespDTO authzRespDTO = authorize(request, oauth2Params);
             // Authentication Failure, send back to the login page
             if (!authzRespDTO.getAuthenticated()) {
-                return "../../carbon/oauth/oauth2_authn_ajaxprocessor.jsp?auth_status=failed";
+            	String loginPageInSession = (String) request.getSession().getAttribute("loginPage");
+            	return loginPageInSession+"&auth_status=failed";
             }
 
             OAuthASResponse.OAuthAuthorizationResponseBuilder builder = OAuthASResponse
@@ -142,9 +144,7 @@ public class OAuth2AuthzClient {
             throws OAuthProblemException {
         try {
             // authenticate and issue the authorization code
-			String backendServerURL =
-			                          CarbonUIUtil.getServerURL(req.getSession().getServletContext(),
-			                                                    req.getSession());
+			String backendServerURL = CarbonUIUtil.getServerURL(ServerConfiguration.getInstance());
 			ConfigurationContext configContext =
 			                                     (ConfigurationContext) req.getSession()
 			                                                               .getServletContext()

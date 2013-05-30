@@ -139,9 +139,14 @@ public class OAuthUIUtil {
 	public static String getErrorPageURL(HttpServletRequest req, OAuth2ClientValidationResponseDTO clienDTO,
 	                                     String errorCode, String errorMessage) {
 		String errorPageURL = null;
+		String errorPageInSession = (String) req.getSession().getAttribute("errorPageURL");
 		// if there is a configured custom page, then user it
-		if (clienDTO != null && clienDTO.getErrorPageURL() != null) {
+		if (clienDTO != null && clienDTO.getErrorPageURL() != null || errorPageInSession != null) {
 			errorPageURL = clienDTO.getErrorPageURL();
+			if(errorPageURL == null) {
+				errorPageURL = errorPageInSession;
+				req.getSession().setAttribute("errorPageURL", errorPageURL);
+			}
 			try {
 				errorPageURL =
 				               errorPageURL + "?" + OAuthConstants.OAUTH_ERROR_CODE + "=" +
@@ -161,7 +166,7 @@ public class OAuthUIUtil {
 	}
     
 	/**
-	 * Rerurns the login page URL. If no custom page is defined, then the
+	 * Returns the login page URL. If no custom page is defined, then the
 	 * default will be returned.
 	 * 
 	 * @param req
@@ -187,7 +192,7 @@ public class OAuthUIUtil {
 			loginPage = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth2_authn_ajaxprocessor.jsp";
 			loginPage = loginPage.replace("/oauth2/authorize", "");
 		}
-
+		req.getSession().setAttribute("loginPage", loginPage);
 		return loginPage;
 	}
 	

@@ -15,21 +15,20 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
+<%@page import="org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil"%>
 <%@ page import="org.apache.amber.oauth2.common.exception.OAuthSystemException" %>
 <%@ page import="org.wso2.carbon.identity.oauth.ui.OAuthConstants" %>
 <%@ page import="org.wso2.carbon.identity.oauth.ui.client.OAuth2AuthzClient" %>
 <%
-    OAuth2AuthzClient authzClient = new OAuth2AuthzClient();
+	OAuth2AuthzClient authzClient = new OAuth2AuthzClient();
     String redirectUrl;
     try {
         redirectUrl = authzClient.handleAuthorizationRequest(request, response);
     } catch (OAuthSystemException e) {
-        // System Error, redirect back to the server error page.
-        session.setAttribute(OAuthConstants.OAUTH_ERROR_CODE, "server_error");
-        session.setAttribute(OAuthConstants.OAUTH_ERROR_MESSAGE,
-                "Error when completing the user authorization.");
-        redirectUrl = "../../carbon/oauth/oauth-error.jsp";
-    }
+		redirectUrl =
+		              OAuthUIUtil.getErrorPageURL(request, null, "server_error",
+		                                          "Error when completing the user authorization");
+	}
 %>
 
 <script type="text/javascript">

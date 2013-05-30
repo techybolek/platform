@@ -25,6 +25,7 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.identity.oauth.ui.OAuthServlet;
+import org.wso2.carbon.identity.oauth.ui.endpoints.authz.OAuth2AuthnEndpoint;
 import org.wso2.carbon.identity.oauth.ui.endpoints.authz.OAuth2AuthzEndpoint;
 import org.wso2.carbon.identity.oauth2.OAuth2Service;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -49,6 +50,7 @@ public class OAuthUIServiceComponent {
     private static final Log log = LogFactory.getLog(OAuthUIServiceComponent.class);
     private static final String OAUTH2_TOKEN_URL = "/oauth2/token";
     public static final String OAUTH2_AUTHORIZE_URL = "/oauth2/authorize";
+    public static final String OAUTH2_AUTHENTICATION_URL = "/oauth2/authenticate";
     public static final String OAUTH_URL = "/oauth";
 
     @SuppressWarnings("unchecked")
@@ -63,11 +65,19 @@ public class OAuthUIServiceComponent {
             httpService.registerServlet(OAUTH_URL, oauth1aServlet, null, null);
             log.debug("Successfully registered an instance of OAuthServlet");
 
-            // Register OAuth 2.0 Authorization Endpoint
-            Servlet oauth2Servlet = new ContextPathServletAdaptor(new OAuth2AuthzEndpoint(),
-                    OAUTH2_AUTHORIZE_URL);
-            httpService.registerServlet(OAUTH2_AUTHORIZE_URL, oauth2Servlet, null, null);
-            log.debug("Successfully registered an instance of OAuth2 Authz Endpoint.");
+			// Register OAuth 2.0 Authorization Endpoint
+			Servlet oauth2Servlet =
+			                        new ContextPathServletAdaptor(new OAuth2AuthzEndpoint(),
+			                                                      OAUTH2_AUTHORIZE_URL);
+			httpService.registerServlet(OAUTH2_AUTHORIZE_URL, oauth2Servlet, null, null);
+			log.debug("Successfully registered an instance of OAuth2 Authz Endpoint.");
+			
+			// Register OAuth 2.0 Authentication Servlet
+			Servlet oauth2AuthServlet =
+			                        new ContextPathServletAdaptor(new OAuth2AuthnEndpoint(),
+			                                                      OAUTH2_AUTHENTICATION_URL);
+			httpService.registerServlet(OAUTH2_AUTHENTICATION_URL, oauth2AuthServlet, null, null);
+			log.debug("Successfully registered an instance of OAuth2 Authentication Servlet.");
 
 //            // Register OAuth 2.O token endpoint.
 //            Dictionary oauth2TokEndpointParams = new Hashtable();

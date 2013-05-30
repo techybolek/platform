@@ -156,9 +156,9 @@ public class OAuth2AuthzEndpoint extends HttpServlet {
 					}
 					if(!prompt.contains("login")) { // we should not log the user
 						req.getSession().setAttribute(OAuthConstants.OAUTH2_PARAMS, params);
-			            String loginPage = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth2-authn-finish.jsp";
-			            loginPage = loginPage.replace("/oauth2/authorize", "");
-			            return loginPage;
+			            String loginFinishPage = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth2-authn-finish.jsp";
+			            loginFinishPage = loginFinishPage.replace("/oauth2/authorize", "");
+			            return loginFinishPage;
 					}
 				}
 			}
