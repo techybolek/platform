@@ -422,7 +422,7 @@ public class SAMLSSOProvider extends HttpServlet {
 		if (customLoginPage != null) {
 			return "/carbon/" + customLoginPage.trim();
 		} else {
-			return "/carbon/" + "sso-saml/samlsso_login_ajaxprocessor.jsp";
+			return "/carbon/" + "sso-saml/samlsso_auth_ajaxprocessor.jsp";
 		}
 	}
 
