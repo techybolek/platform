@@ -95,7 +95,6 @@
                         </Bundle-SymbolicName>
 						<Private-Package>
 							org.wso2.carbon.identity.core.internal,
-							org.apache.ws.security,
                         </Private-Package>
 						<Export-Package>
 							org.wso2.carbon.identity.core.*,
