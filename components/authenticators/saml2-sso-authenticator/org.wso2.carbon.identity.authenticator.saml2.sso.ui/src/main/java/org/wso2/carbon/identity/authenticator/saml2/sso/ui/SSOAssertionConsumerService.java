@@ -117,7 +117,7 @@ public class SSOAssertionConsumerService extends HttpServlet {
 
         // Handle valid messages, either SAML Responses or LogoutRequests
         try {
-            XMLObject samlObject = Util.unmarshall(samlRespString);
+            XMLObject samlObject = Util.unmarshall(Util.decode(samlRespString));
             if (samlObject instanceof LogoutResponse) {   // if it is a logout response, redirect it to login page.
                 resp.sendRedirect(getAdminConsoleURL(req) + "admin/logout_action.jsp?logoutcomplete=true");
             } else if (samlObject instanceof Response) {    // if it is a SAML Response
