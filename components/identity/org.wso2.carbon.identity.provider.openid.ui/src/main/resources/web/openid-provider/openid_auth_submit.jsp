@@ -88,7 +88,7 @@
 	                                                                                       : (String) session.getAttribute(OpenIDConstants.SessionAttribute.OPENID);
 
 	// Directed Identity handling		
-	String userName = request.getParameter("userName");
+	String userName = request.getParameter(OpenIDConstants.SessionAttribute.USERNAME);
 	if ((userName == null || "".equals(userName.trim())) && openid.endsWith("/openid/")) {
 		userName = (String) session.getAttribute(OpenIDConstants.SessionAttribute.USERNAME);
 		Cookie[] cookies = request.getCookies();
@@ -131,12 +131,18 @@
 			session.setAttribute(OpenIDConstants.SessionAttribute.ACTION, "complete");
 			session.setAttribute(OpenIDConstants.SessionAttribute.USER_APPROVED, "true");
 			session.removeAttribute(OpenIDConstants.SessionAttribute.IS_OPENID_AUTHENTICATED);
+            if(isRemembered){
 %>
-		    <script type="text/javascript">
-		        Set_Cookie("openidtoken","<%=client.getNewCookieValue()%>",14,"/",null,true);
-		        Set_Cookie("openidrememberme","<%=userName%>",14,"/",null,true);
-		        location.href="../../openidserver";
-		    </script>
+                <script type="text/javascript">
+                    Set_Cookie("openidtoken","<%=client.getNewCookieValue()%>",14,"/",null,true);
+                    Set_Cookie("openidrememberme","<%=userName%>",14,"/",null,true);
+                </script>
+            <%
+                }
+            %>
+            <script type="text/javascript">
+                location.href="../../openidserver";
+            </script>
 <%
 	    } else {  // reading RP info from the database
 		    String[] rpInfo =
@@ -148,20 +154,32 @@
 			    session.setAttribute(OpenIDConstants.SessionAttribute.USER_APPROVED_ALWAYS, "true");
 			    session.setAttribute(OpenIDConstants.SessionAttribute.SELECTED_PROFILE, rpInfo[1]);
 			    session.removeAttribute(OpenIDConstants.SessionAttribute.IS_OPENID_AUTHENTICATED);
+                if(isRemembered){
 %>
-		        <script type="text/javascript">
-		            Set_Cookie("openidtoken","<%=client.getNewCookieValue()%>",14,"/",null,true);
-		            Set_Cookie("openidrememberme","<%=userName%>",14,"/",null,true);
-		            location.href="../../openidserver";
-		        </script>
+                    <script type="text/javascript">
+                        Set_Cookie("openidtoken","<%=client.getNewCookieValue()%>",14,"/",null,true);
+                        Set_Cookie("openidrememberme","<%=userName%>",14,"/",null,true);
+                    </script>
+<%
+                }
+%>
+                    <script type="text/javascript">
+                        location.href="../../openidserver";
+                    </script>
 <%
             } else { // redirect to user approval page
+                if(isRemembered){
 %>
-		       <script type="text/javascript">
-		          Set_Cookie("openidtoken","<%=client.getNewCookieValue()%>", 14, "/", null,true);
-		          Set_Cookie("openidrememberme","<%=userName%>",14,"/",null,true);
-		          location.href = "openid_profile_view.jsp";
-		       </script>
+                    <script type="text/javascript">
+                        Set_Cookie("openidtoken","<%=client.getNewCookieValue()%>",14,"/",null,true);
+                        Set_Cookie("openidrememberme","<%=userName%>",14,"/",null,true);
+                    </script>
+<%
+                }
+%>
+                    <script type="text/javascript">
+                        location.href="../../openidserver";
+                    </script>
 <%
             }
 	    }
@@ -174,11 +192,11 @@
 		session.removeAttribute("openId");
 		CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
 %>
-<script type="text/javascript">
-	Delete_Cookie("openidtoken", "/", null);
-	Delete_Cookie("openidrememberme", "/", null);
-	location.href = "openid_auth.jsp";
-</script>
+        <script type="text/javascript">
+            Delete_Cookie("openidtoken", "/", null);
+            Delete_Cookie("openidrememberme", "/", null);
+            location.href = "openid_auth.jsp";
+        </script>
 <%
 	}
 %>

@@ -93,9 +93,11 @@
                             <input type="hidden" id="remember" name="remember" value="false" />
                             
                             <div id="loginbox" class="identity-box">
-                                <strong id="loginDisplayText"><fmt:message key='enter.password.to.signin'/></strong>
-
-                                <h2></h2>
+                                <% if(userName == null || "".equals(userName.trim())) { %>
+                                    <strong id="loginDisplayText"><fmt:message key='enter.username.password.to.signin'/></strong>
+                                <% } else { %>
+                                    <strong id="loginDisplayText"><fmt:message key='enter.password.to.signin'/></strong>
+                                <% } %>
                                  <table id="loginTable">
                                     <tr height="20">
                                         <td colspan="2"></td>
@@ -106,14 +108,14 @@
 
                                         %>
                                         <tr>
-                                            <td>User Name</td>
+                                            <td><fmt:message key='username'/></td>
                                         <td>
                                             <input id='userName' name="userName" size='30'/>
                                         </td>
                                         </tr>
 
                                         <tr>
-                                             <td>Password</td>
+                                             <td><fmt:message key='password'/></td>
                                         <td>
                                             <input type="password" id='password' name="password" size='30'/>
                                         </td>
@@ -141,7 +143,7 @@
                                         %>
 
                                         <tr>
-                                        <td colspan="2"><input type="checkbox" id="chkRemember" onclick="setRememberMe();">Remember	me on this computer</td>
+                                        <td colspan="2"><input type="checkbox" id="chkRemember" onclick="setRememberMe();"><fmt:message key='remember.me'/></td>
                                        </tr>                                   
                                 </table>
                                 
