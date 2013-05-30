@@ -130,6 +130,7 @@
 						<Export-Package>
 							org.wso2.carbon.identity.oauth.*,
                             org.wso2.carbon.identity.oauth2.*,
+                            org.wso2.carbon.identity.openidconnect.*,
                         </Export-Package>
 						<DynamicImport-Package>*</DynamicImport-Package>
 					</instructions>
