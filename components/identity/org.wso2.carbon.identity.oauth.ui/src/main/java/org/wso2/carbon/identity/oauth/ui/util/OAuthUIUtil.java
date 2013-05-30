@@ -196,6 +196,42 @@ public class OAuthUIUtil {
 		return loginPage;
 	}
 	
+	/**
+	 * Returns the consent page URL. If no custom page is defined, then the
+	 * default will be returned.
+	 * 
+	 * @param req
+	 * @param params
+	 * @param clientDTO
+	 * @param redirectUrl 
+	 * @param loggedInUser 
+	 * @return
+	 */
+	public static String getUserConsentURL(HttpServletRequest req, OAuth2ClientValidationResponseDTO clientDTO,
+	                                     OAuth2Parameters params, String loggedInUser, String redirectUrl) {
+		String consentPage = null;
+		// if there is a configured custom page, then use it 
+		if (clientDTO != null && false) {
+			// read from the dto
+		} else { // else use the default 
+			consentPage = CarbonUIUtil.getAdminConsoleURL(req) + "oauth/oauth2_consent_ajaxprocessor.jsp";
+			consentPage = consentPage.replace("/oauth2/authenticate", "");
+		}
+		req.getSession().setAttribute("consentPage", consentPage);
+		try {
+			consentPage =
+			              consentPage + "?" + OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER + "=" +
+			                      URLEncoder.encode(loggedInUser, "UTF-8") + "&" +
+			                      OAuthConstants.OIDCSessionConstant.OIDC_RP + "=" +
+			                      URLEncoder.encode(params.getApplicationName(), "UTF-8") + "&" +
+			                      OAuthConstants.OIDCSessionConstant.OIDC_RESPONSE + "=" +
+			                      URLEncoder.encode(redirectUrl, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// ignore
+		}
+		return consentPage;
+	}
+	
 	private static String getScope(OAuth2Parameters params) {
 		StringBuffer scopes = new StringBuffer();
 		for(String scope : params.getScopes() ) {

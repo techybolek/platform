@@ -32,6 +32,7 @@ import org.wso2.carbon.identity.oauth.common.OAuth2ErrorCodes;
 import org.wso2.carbon.identity.oauth.ui.OAuth2Parameters;
 import org.wso2.carbon.identity.oauth.ui.OAuthConstants;
 import org.wso2.carbon.identity.oauth.ui.internal.OAuthUIServiceComponentHolder;
+import org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AuthorizeReqDTO;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AuthorizeRespDTO;
 import org.wso2.carbon.ui.CarbonUIUtil;
@@ -132,10 +133,9 @@ public class OAuth2AuthzClient {
 			if(isRpInStore && oauth2Params.getPrompt() != null && oauth2Params.getPrompt().contains("none")) {
 				return redirectUrl; // should not prompt for consent
 			}
+			redirectUrl = OAuthUIUtil.getUserConsentURL(request, null, oauth2Params, loggedInUser, redirectUrl);
 			// store the response and forward for user consent
-			request.getSession().setAttribute(OAuthConstants.OIDCSessionConstant.OIDC_RESPONSE,
-			                                  redirectUrl);
-			redirectUrl = "../../carbon/oauth/oauth2_consent_ajaxprocessor.jsp";
+			request.getSession().setAttribute(OAuthConstants.OIDCSessionConstant.OIDC_RESPONSE, redirectUrl);
 		}
 		return redirectUrl;
 	}

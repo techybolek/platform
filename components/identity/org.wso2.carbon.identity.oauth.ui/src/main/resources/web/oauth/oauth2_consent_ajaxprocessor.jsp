@@ -20,10 +20,10 @@
 <%@ page import="org.wso2.carbon.identity.oauth.ui.OAuthConstants" %>
 <%@ page import="org.wso2.carbon.identity.oauth.ui.internal.OAuthUIServiceComponentHolder" %>
 <%
-	String loggedInUser = (String)session.getAttribute(OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER);
-	String app =  (String) session.getAttribute(OAuthConstants.OIDCSessionConstant.OIDC_RP);
+	String loggedInUser = (String)request.getParameter(OAuthConstants.OIDCSessionConstant.OIDC_LOGGED_IN_USER);
+	String app =   (String)request.getParameter(OAuthConstants.OIDCSessionConstant.OIDC_RP);
 	OAuthUIServiceComponentHolder.getInstance().getOauth2UserAppsStore().putUserRPToStore(loggedInUser, app);
-    String redirectUrl = (String) request.getSession().getAttribute(OAuthConstants.OIDCSessionConstant.OIDC_RESPONSE);
+    String redirectUrl =  (String)request.getParameter(OAuthConstants.OIDCSessionConstant.OIDC_RESPONSE);
     request.getSession().removeAttribute(OAuthConstants.OIDCSessionConstant.OIDC_REQUEST);
   	request.getSession().removeAttribute(OAuthConstants.OIDCSessionConstant.OIDC_RESPONSE);
   	request.getSession().removeAttribute(OAuthConstants.OIDCSessionConstant.OIDC_RP);

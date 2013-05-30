@@ -52,7 +52,7 @@ public class OAuth2AuthnEndpoint extends HttpServlet {
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
 	                                                                        IOException {
-
+req.getRequestURL();
 		OAuth2AuthzClient authzClient = new OAuth2AuthzClient();
 		String redirectUrl;
 		try {
