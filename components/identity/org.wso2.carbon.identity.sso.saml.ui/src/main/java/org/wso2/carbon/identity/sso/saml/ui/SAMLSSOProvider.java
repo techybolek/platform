@@ -50,7 +50,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
  * <li>SP sends a SAML Request via HTTP POST to the https://<ip>:<port>/samlsso endpoint.</li>
  * <li>IdP validates the SAML Request and checks whether this user is already authenticated.</li>
  * <li>If the user is authenticated, it will generate a SAML Response and send it back the SP via
- * the redirect_ajaxprocessor.jsp.</li>
+ * the samlsso_redirect_ajaxprocessor.jsp.</li>
  * <li>If the user is not authenticated, it will send him to the login page and prompts user to
  * enter his credentials.</li>
  * <li>If these credentials are valid, then the user will be redirected back the SP with a valid
@@ -293,7 +293,7 @@ public class SAMLSSOProvider extends HttpServlet {
 		req.setAttribute(SAMLSSOProviderConstants.ASSRTN_CONSUMER_URL, acUrl);
 		req.setAttribute(SAMLSSOProviderConstants.SUBJECT, subject);
 		RequestDispatcher reqDispatcher = getServletContext().getRequestDispatcher(
-				"/carbon/sso-saml/redirect_ajaxprocessor.jsp");
+				"/carbon/sso-saml/samlsso_redirect_ajaxprocessor.jsp");
 		reqDispatcher.forward(req, resp);
 	}
 
@@ -422,7 +422,7 @@ public class SAMLSSOProvider extends HttpServlet {
 		if (customLoginPage != null) {
 			return "/carbon/" + customLoginPage.trim();
 		} else {
-			return "/carbon/" + "sso-saml/login_ajaxprocessor.jsp";
+			return "/carbon/" + "sso-saml/samlsso_login_ajaxprocessor.jsp";
 		}
 	}
 

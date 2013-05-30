@@ -23,8 +23,8 @@
             <i18n-bundle>org.wso2.carbon.identity.sso.saml.ui.i18n.Resources</i18n-bundle>
             <!--link>../sso-saml/manage_service_providers.jsp</link-->
             <skip-authentication>
-				<skip-link>../sso-saml/login.jsp</skip-link>
-				<skip-link>../sso-saml/redirect.jsp</skip-link>
+				<skip-link>../sso-saml/samlsso_login_ajaxprocessor.jsp</skip-link>
+				<skip-link>../sso-saml/samlsso_redirect_ajaxprocessor.jsp</skip-link>
                 <skip-link>../sso-saml/notification_page.jsp</skip-link>
 			</skip-authentication>
         </menu>
