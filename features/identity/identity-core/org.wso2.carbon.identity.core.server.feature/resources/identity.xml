@@ -61,7 +61,9 @@
 		<!-- Multifactor Authentication configuration -->
 	        <UseMultifactorAuthentication>false</UseMultifactorAuthentication>	
         	<!-- To enable or disable openid dumb mode -->
-        	<DisableOpenIDDumbMode>false</DisableOpenIDDumbMode>	
+        	<DisableOpenIDDumbMode>false</DisableOpenIDDumbMode>
+		<!-- remember me session timeout in seconds -->
+		<SessionTimeout>36000</SessionTimeout>
 	</OpenID>
 
 	<OAuth>
