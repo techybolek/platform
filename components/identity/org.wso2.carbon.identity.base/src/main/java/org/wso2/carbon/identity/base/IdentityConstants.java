@@ -126,6 +126,7 @@ public class IdentityConstants {
 		public final static String OPENID_REMEMBER_ME_EXPIRY = "OpenID.OpenIDRememberMeExpiry";
 		public final static String OPENID_USE_MULTIFACTOR_AUTHENTICATION = "OpenID.UseMultifactorAuthentication";
 		public final static String OPENID_DISABLE_DUMB_MODE = "OpenID.DisableOpenIDDumbMode";
+        	public final static String OPENID_SESSION_TIMEOUT = "OpenID.SessionTimeout";
 
 		public static final String ISSUER_POLICY = "Identity.IssuerPolicy";
 		public static final String TOKEN_VALIDATE_POLICY = "Identity.TokenValidationPolicy";
