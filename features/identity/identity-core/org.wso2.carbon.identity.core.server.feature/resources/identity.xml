@@ -115,7 +115,9 @@
 			<AuthorizationContextTTL>15</AuthorizationContextTTL>
 		</AuthorizationContextTokenGeneration>
 		<SAML2Grant>
-			<Issuers>https://localhost:9443/samlsso</Issuers>
+			<Issuers>
+				<Issuer trustEntityId="wso2carbon">https://localhost:9443/samlsso</Issuer>
+			</Issuers>
 			<TokenEndPoint>https://localhost:9443/oauth2endpoints/token</TokenEndPoint>
 			<TokenEndPointAliases>tokenEP</TokenEndPointAliases>
 			<Audience>https://localhost:9443/oauth2endpoints/token</Audience>
@@ -141,6 +143,7 @@
 		<SingleLogoutRetryCount>5</SingleLogoutRetryCount>
 		<SingleLogoutRetryInterval>60000</SingleLogoutRetryInterval> <!-- in milli seconds -->
 		<TenantPartitioningEnabled>false</TenantPartitioningEnabled>
+		<SessionTimeout>36000<SessionTimeout> <!-- remember me session timeout in seconds -->
 	</SSOService>
 
 	<EntitlementSettings>
