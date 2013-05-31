@@ -379,7 +379,6 @@
 		<profile>
 			<id>jdk14</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
 				<jdk>1.4</jdk>
 			</activation>
 			<dependencies>
@@ -394,6 +393,7 @@
 		<profile>
 			<id>jdk15</id>
 			<activation>
+				<activeByDefault>true</activeByDefault>
 				<jdk>1.5</jdk>
 			</activation>
 			<dependencies>
