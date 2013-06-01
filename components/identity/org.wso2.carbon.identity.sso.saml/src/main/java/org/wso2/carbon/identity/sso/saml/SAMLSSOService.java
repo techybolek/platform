@@ -108,12 +108,11 @@ public class SAMLSSOService {
 	 * @return
 	 * @throws IdentityException
 	 */
-	public SAMLSSORespDTO authenticate(SAMLSSOAuthnReqDTO authReqDTO, String sessionId)
+	public SAMLSSORespDTO authenticate(SAMLSSOAuthnReqDTO authReqDTO, String sessionId, boolean authenticated, String authMode)
 	                                                                                   throws IdentityException {
 		AuthnRequestProcessor authnRequestProcessor = new AuthnRequestProcessor();
 		try {
-			return authnRequestProcessor.process(authReqDTO, sessionId, false,
-			                                     SAMLSSOConstants.AuthnModes.USERNAME_PASSWORD);
+			return authnRequestProcessor.process(authReqDTO, sessionId, authenticated, authMode);
 		} catch (Exception e) {
 			throw new IdentityException("Error when authenticating the users", e);
 		}
@@ -140,11 +139,31 @@ public class SAMLSSOService {
      *
      * @return timeout for SSO session
      */
-    public static String getSSOSessionTimeout() {
-        String sessionTimeout = IdentityUtil.getProperty(IdentityConstants.ServerConfig.SSO_SESSION_TIMEOUT);
-        if(sessionTimeout == null){
-            sessionTimeout = "36000";
+    public static int getSSOSessionTimeout() {
+        if(IdentityUtil.getProperty(IdentityConstants.ServerConfig.SSO_SESSION_TIMEOUT).trim() != null &&
+                !IdentityUtil.getProperty(IdentityConstants.ServerConfig.SSO_SESSION_TIMEOUT).trim().equals("")){
+            return Integer.parseInt(IdentityUtil.getProperty(IdentityConstants.ServerConfig.SSO_SESSION_TIMEOUT).trim());
+        } else {
+            return 36000;
         }
-        return sessionTimeout;
     }
+
+    public static boolean isOpenIDLoginAccepted(){
+        if(IdentityUtil.getProperty(IdentityConstants.ServerConfig.ACCEPT_OPENID_LOGIN).trim() != null &&
+                !IdentityUtil.getProperty(IdentityConstants.ServerConfig.ACCEPT_OPENID_LOGIN).trim().equals("")){
+            return Boolean.parseBoolean(IdentityUtil.getProperty(IdentityConstants.ServerConfig.ACCEPT_OPENID_LOGIN).trim());
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean isSAMLSSOLoginAccepted(){
+        if(IdentityUtil.getProperty(IdentityConstants.ServerConfig.ACCEPT_SAMLSSO_LOGIN).trim() != null &&
+                !IdentityUtil.getProperty(IdentityConstants.ServerConfig.ACCEPT_SAMLSSO_LOGIN).trim().equals("")){
+            return Boolean.parseBoolean(IdentityUtil.getProperty(IdentityConstants.ServerConfig.ACCEPT_SAMLSSO_LOGIN).trim());
+        } else {
+            return false;
+        }
+    }
+
 }
