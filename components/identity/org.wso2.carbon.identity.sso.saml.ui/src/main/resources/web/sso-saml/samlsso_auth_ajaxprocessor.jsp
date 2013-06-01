@@ -114,6 +114,9 @@
                                         </td>
                                     </tr>
                                     <tr>
+                                        <td colspan="2"><input type="checkbox" id="chkRemember" name="chkRemember"><fmt:message key='remember.me'/></td>
+                                    </tr>
+                                    <tr>
                                         <td colspan="2">
                                             <input type="submit" value="<fmt:message key='login'/>"
                                                    class="button">

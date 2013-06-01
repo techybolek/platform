@@ -29,23 +29,44 @@ import org.wso2.carbon.identity.sso.saml.stub.types.SAMLSSOAuthnReqDTO;
 import org.wso2.carbon.identity.sso.saml.stub.types.SAMLSSOReqValidationResponseDTO;
 import org.wso2.carbon.identity.sso.saml.stub.types.SAMLSSORespDTO;
 
+import java.rmi.RemoteException;
+
 public class SAMLSSOServiceClient {
 
     private static Log log = LogFactory.getLog(SAMLSSOServiceClient.class);
     private IdentitySAMLSSOServiceStub stub;
-
+    private static Integer sessionTimeout = null;
+    private static Boolean isOpenIDLoginAccepted = null;
+    private static Boolean isSAMLSSOLoginAccepted = null;
     /**
      * 
      * @param backendServerURL
      * @param configCtx
      * @throws AxisFault
      */
-    public SAMLSSOServiceClient(String backendServerURL, ConfigurationContext configCtx) throws AxisFault {
+    public SAMLSSOServiceClient(String backendServerURL, ConfigurationContext configCtx) {
         String serviceURL = backendServerURL + "IdentitySAMLSSOService";
-        stub = new IdentitySAMLSSOServiceStub(configCtx, serviceURL);
+        try {
+            stub = new IdentitySAMLSSOServiceStub(configCtx, serviceURL);
+        } catch (AxisFault axisFault) {
+            log.error("Error while instantiating IdentitySAMLSSOServiceStub", axisFault);
+        }
         ServiceClient client = stub._getServiceClient();
         Options option = client.getOptions();
         option.setManageSession(true);
+        try {
+            if(sessionTimeout == null){
+                sessionTimeout = stub.getSSOSessionTimeout();
+            }
+            if(isOpenIDLoginAccepted == null){
+                isOpenIDLoginAccepted = stub.isOpenIDLoginAccepted();
+            }
+            if(isSAMLSSOLoginAccepted == null){
+                isSAMLSSOLoginAccepted = stub.isSAMLSSOLoginAccepted();
+            }
+        } catch (RemoteException e) {
+            log.error("Error while reading configurations from identity.xml", e);
+        }
     }
 
 	/**
@@ -106,13 +127,15 @@ public class SAMLSSOServiceClient {
      * @return SSO session timeout value
      * @throws IdentityException
      */
-    public String getSSOSessionTimeout()
-            throws IdentityException {
-        try {
-            return stub.getSSOSessionTimeout();
-        } catch (Exception ex) {
-            log.error("Error obtaining SSO timeout from configuration file", ex);
-            throw new IdentityException("Error obtaining SSO timeout from configuration", ex);
-        }
+    public int getSSOSessionTimeout(){
+        return sessionTimeout;
+    }
+
+    public boolean isOpenIDLoginAccepted(){
+        return isOpenIDLoginAccepted;
+    }
+
+    public boolean isSAMLSSOLoginAccepted(){
+        return isSAMLSSOLoginAccepted;
     }
 }
