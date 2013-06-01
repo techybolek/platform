@@ -128,6 +128,18 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+	    <xs:element name="getOpenIDSessionTimeout">
+                <xs:complexType>
+                    <xs:sequence/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getOpenIDSessionTimeoutResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
             <xs:element name="getOpenIDProviderInfo">
                 <xs:complexType>
                     <xs:sequence>
@@ -385,6 +397,12 @@
     <wsdl:message name="getOpenIDAssociationResponseResponse">
         <wsdl:part name="parameters" element="ns1:getOpenIDAssociationResponseResponse" />
     </wsdl:message>
+    <wsdl:message name="getOpenIDSessionTimeoutRequest">
+        <wsdl:part name="parameters" element="ns1:getOpenIDSessionTimeout"/>
+    </wsdl:message>
+    <wsdl:message name="getOpenIDSessionTimeoutResponse">
+        <wsdl:part name="parameters" element="ns1:getOpenIDSessionTimeoutResponse"/>
+    </wsdl:message>
     <wsdl:message name="updateOpenIDUserRPInfoRequest">
         <wsdl:part name="parameters" element="ns1:updateOpenIDUserRPInfo" />
     </wsdl:message>
@@ -463,6 +481,10 @@
             <wsdl:input message="tns:getOpenIDAssociationResponseRequest" wsaw:Action="urn:getOpenIDAssociationResponse" />
             <wsdl:output message="tns:getOpenIDAssociationResponseResponse" wsaw:Action="urn:getOpenIDAssociationResponseResponse" />
             <wsdl:fault message="tns:OpenIDProviderServiceException" name="OpenIDProviderServiceException" wsaw:Action="urn:getOpenIDAssociationResponseOpenIDProviderServiceException" />
+        </wsdl:operation>
+	<wsdl:operation name="getOpenIDSessionTimeout">
+            <wsdl:input message="tns:getOpenIDSessionTimeoutRequest" wsaw:Action="urn:getOpenIDSessionTimeout"/>
+            <wsdl:output message="tns:getOpenIDSessionTimeoutResponse" wsaw:Action="urn:getOpenIDSessionTimeoutResponse"/>
         </wsdl:operation>
         <wsdl:operation name="updateOpenIDUserRPInfo">
             <wsdl:input message="tns:updateOpenIDUserRPInfoRequest" wsaw:Action="urn:updateOpenIDUserRPInfo" />
@@ -593,6 +615,15 @@
             <wsdl:fault name="OpenIDProviderServiceException">
                 <soap:fault use="literal" name="OpenIDProviderServiceException" />
             </wsdl:fault>
+        </wsdl:operation>
+	<wsdl:operation name="getOpenIDSessionTimeout">
+            <soap:operation soapAction="urn:getOpenIDSessionTimeout" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="updateOpenIDUserRPInfo">
             <soap:operation soapAction="urn:updateOpenIDUserRPInfo" style="document" />
@@ -771,6 +802,15 @@
                 <soap12:fault use="literal" name="OpenIDProviderServiceException" />
             </wsdl:fault>
         </wsdl:operation>
+	<wsdl:operation name="getOpenIDSessionTimeout">
+            <soap12:operation soapAction="urn:getOpenIDSessionTimeout" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="updateOpenIDUserRPInfo">
             <soap12:operation soapAction="urn:updateOpenIDUserRPInfo" style="document" />
             <wsdl:input>
@@ -925,6 +965,15 @@
             </wsdl:input>
             <wsdl:output>
                 <mime:content type="text/xml" part="parameters" />
+            </wsdl:output>
+        </wsdl:operation>
+	<wsdl:operation name="getOpenIDSessionTimeout">
+            <http:operation location="getOpenIDSessionTimeout"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="updateOpenIDUserRPInfo">
