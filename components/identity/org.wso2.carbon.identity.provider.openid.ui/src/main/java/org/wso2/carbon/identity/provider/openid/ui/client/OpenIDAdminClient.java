@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openid4java.message.Parameter;
 import org.openid4java.message.ParameterList;
+import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.provider.openid.stub.OpenIDProviderServiceStub;
 import org.wso2.carbon.identity.provider.openid.stub.dto.*;
 import org.wso2.carbon.identity.provider.openid.ui.handlers.OpenIDHandler;
@@ -45,6 +46,7 @@ public class OpenIDAdminClient {
 	private OpenIDProviderServiceStub stub;
 	private String newCookieValue;
 	private boolean isUserApprovalBypassEnabled;
+    private static String sessionTimeout = null;
 	private static Log log = LogFactory.getLog(OpenIDHandler.class);
 
 	public String getNewCookieValue() {
@@ -377,4 +379,22 @@ public class OpenIDAdminClient {
 	public boolean isOpenIDUserApprovalBypassEnabled() throws Exception {
         return isUserApprovalBypassEnabled;
 	}
+
+    /**
+     * Gets the OPENID_SESSION_TIMEOUT value for the OpenID provider
+     * @return OpenID session timeout value
+     * @throws IdentityException
+     */
+     public int getOpenIDSessionTimeout() throws IdentityException {
+         if(sessionTimeout != null){
+            return Integer.parseInt(sessionTimeout);
+         } else {
+            try {
+                return Integer.parseInt(stub.getOpenIDSessionTimeout());
+            } catch (Exception ex) {
+                log.error("Error obtaining OpenID session timeout from configuration file", ex);
+                throw new IdentityException("Error obtaining OpenID session timeout from configuration", ex);
+            }
+         }
+    }
 }

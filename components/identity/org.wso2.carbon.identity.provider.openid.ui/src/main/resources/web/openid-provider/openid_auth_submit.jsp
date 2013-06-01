@@ -44,7 +44,7 @@
   */
   if ( expires )
   {
-  expires = expires * 1000 * 60 * 60 * 24;
+  expires = expires * 1000;
   }
   var expires_date = new Date( today.getTime() + (expires) );
 
@@ -134,8 +134,8 @@
             if(isRemembered){
 %>
                 <script type="text/javascript">
-                    Set_Cookie("openidtoken","<%=client.getNewCookieValue()%>",14,"/",null,true);
-                    Set_Cookie("openidrememberme","<%=userName%>",14,"/",null,true);
+                    Set_Cookie("openidtoken","<%=client.getNewCookieValue()%>",<%=client.getOpenIDSessionTimeout()%>,"/",null,true);
+                    Set_Cookie("openidrememberme","<%=userName%>",<%=client.getOpenIDSessionTimeout()%>,"/",null,true);
                 </script>
             <%
                 }
@@ -157,8 +157,8 @@
                 if(isRemembered){
 %>
                     <script type="text/javascript">
-                        Set_Cookie("openidtoken","<%=client.getNewCookieValue()%>",14,"/",null,true);
-                        Set_Cookie("openidrememberme","<%=userName%>",14,"/",null,true);
+                        Set_Cookie("openidtoken","<%=client.getNewCookieValue()%>",<%=client.getOpenIDSessionTimeout()%>,"/",null,true);
+                        Set_Cookie("openidrememberme","<%=userName%>",<%=client.getOpenIDSessionTimeout()%>,"/",null,true);
                     </script>
 <%
                 }
@@ -171,8 +171,8 @@
                 if(isRemembered){
 %>
                     <script type="text/javascript">
-                        Set_Cookie("openidtoken","<%=client.getNewCookieValue()%>",14,"/",null,true);
-                        Set_Cookie("openidrememberme","<%=userName%>",14,"/",null,true);
+                        Set_Cookie("openidtoken","<%=client.getNewCookieValue()%>",<%=client.getOpenIDSessionTimeout()%>,"/",null,true);
+                        Set_Cookie("openidrememberme","<%=userName%>",<%=client.getOpenIDSessionTimeout()%>,"/",null,true);
                     </script>
 <%
                 }
