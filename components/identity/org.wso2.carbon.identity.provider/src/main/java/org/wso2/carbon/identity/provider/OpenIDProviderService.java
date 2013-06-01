@@ -716,4 +716,12 @@ public class OpenIDProviderService {
 			}
 		}
 	}
+
+    public static String getOpenIDSessionTimeout() {
+        String sessionTimeout = IdentityUtil.getProperty(IdentityConstants.ServerConfig.OPENID_SESSION_TIMEOUT);
+        if(sessionTimeout == null){
+            sessionTimeout = "36000";
+        }
+        return sessionTimeout;
+    }
 }
