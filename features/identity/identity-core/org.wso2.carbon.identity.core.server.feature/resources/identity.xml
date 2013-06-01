@@ -64,6 +64,8 @@
         	<DisableOpenIDDumbMode>false</DisableOpenIDDumbMode>
 		<!-- remember me session timeout in seconds -->
 		<SessionTimeout>36000</SessionTimeout>
+		<!-- skips authentication if valid SAML2 Web SSO browser session available -->
+		<AcceptSAMLSSOLogin>true</AcceptSAMLSSOLogin>
 	</OpenID>
 
 	<OAuth>
@@ -145,6 +147,8 @@
 		<SingleLogoutRetryInterval>60000</SingleLogoutRetryInterval> <!-- in milli seconds -->
 		<TenantPartitioningEnabled>false</TenantPartitioningEnabled>
 		<SessionTimeout>36000</SessionTimeout> <!-- remember me session timeout in seconds -->
+		<!-- skips authentication if valid SAML2 Web SSO browser session available -->
+		<AcceptOpenIDLogin>true</AcceptOpenIDLogin>
 	</SSOService>
 
 	<EntitlementSettings>
