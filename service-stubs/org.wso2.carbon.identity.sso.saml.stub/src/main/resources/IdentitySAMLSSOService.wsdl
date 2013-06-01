@@ -29,6 +29,30 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+	    <xs:element name="isSAMLSSOLoginAccepted">
+                <xs:complexType>
+                    <xs:sequence/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="isSAMLSSOLoginAcceptedResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+	    <xs:element name="isOpenIDLoginAccepted">
+                <xs:complexType>
+                    <xs:sequence/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="isOpenIDLoginAcceptedResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
             <xs:element name="getSSOSessionTimeout">
                 <xs:complexType>
                     <xs:sequence/>
@@ -37,7 +61,7 @@
             <xs:element name="getSSOSessionTimeoutResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:int"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -149,6 +173,12 @@
     <wsdl:message name="IdentityException">
         <wsdl:part name="parameters" element="ns1:IdentityException"/>
     </wsdl:message>
+    <wsdl:message name="isOpenIDLoginAcceptedRequest">
+        <wsdl:part name="parameters" element="ns1:isOpenIDLoginAccepted"/>
+    </wsdl:message>
+    <wsdl:message name="isOpenIDLoginAcceptedResponse">
+        <wsdl:part name="parameters" element="ns1:isOpenIDLoginAcceptedResponse"/>
+    </wsdl:message>
     <wsdl:message name="getSSOSessionTimeoutRequest">
         <wsdl:part name="parameters" element="ns1:getSSOSessionTimeout"/>
     </wsdl:message>
@@ -167,11 +197,21 @@
     <wsdl:message name="doSingleLogoutResponse">
         <wsdl:part name="parameters" element="ns1:doSingleLogoutResponse"/>
     </wsdl:message>
+    <wsdl:message name="isSAMLSSOLoginAcceptedRequest">
+        <wsdl:part name="parameters" element="ns1:isSAMLSSOLoginAccepted"/>
+    </wsdl:message>
+    <wsdl:message name="isSAMLSSOLoginAcceptedResponse">
+        <wsdl:part name="parameters" element="ns1:isSAMLSSOLoginAcceptedResponse"/>
+    </wsdl:message>
     <wsdl:portType name="IdentitySAMLSSOServicePortType">
         <wsdl:operation name="authenticate">
             <wsdl:input message="tns:authenticateRequest" wsaw:Action="urn:authenticate"/>
             <wsdl:output message="tns:authenticateResponse" wsaw:Action="urn:authenticateResponse"/>
             <wsdl:fault message="tns:IdentityException" name="IdentityException" wsaw:Action="urn:authenticateIdentityException"/>
+        </wsdl:operation>
+	<wsdl:operation name="isOpenIDLoginAccepted">
+            <wsdl:input message="tns:isOpenIDLoginAcceptedRequest" wsaw:Action="urn:isOpenIDLoginAccepted"/>
+            <wsdl:output message="tns:isOpenIDLoginAcceptedResponse" wsaw:Action="urn:isOpenIDLoginAcceptedResponse"/>
         </wsdl:operation>
         <wsdl:operation name="getSSOSessionTimeout">
             <wsdl:input message="tns:getSSOSessionTimeoutRequest" wsaw:Action="urn:getSSOSessionTimeout"/>
@@ -187,6 +227,10 @@
             <wsdl:output message="tns:doSingleLogoutResponse" wsaw:Action="urn:doSingleLogoutResponse"/>
             <wsdl:fault message="tns:IdentityException" name="IdentityException" wsaw:Action="urn:doSingleLogoutIdentityException"/>
         </wsdl:operation>
+	<wsdl:operation name="isSAMLSSOLoginAccepted">
+            <wsdl:input message="tns:isSAMLSSOLoginAcceptedRequest" wsaw:Action="urn:isSAMLSSOLoginAccepted"/>
+            <wsdl:output message="tns:isSAMLSSOLoginAcceptedResponse" wsaw:Action="urn:isSAMLSSOLoginAcceptedResponse"/>
+        </wsdl:operation>
     </wsdl:portType>
     <wsdl:binding name="IdentitySAMLSSOServiceSoap11Binding" type="tns:IdentitySAMLSSOServicePortType">
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
@@ -201,6 +245,15 @@
             <wsdl:fault name="IdentityException">
                 <soap:fault use="literal" name="IdentityException"/>
             </wsdl:fault>
+        </wsdl:operation>
+	<wsdl:operation name="isOpenIDLoginAccepted">
+            <soap:operation soapAction="urn:isOpenIDLoginAccepted" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getSSOSessionTimeout">
             <soap:operation soapAction="urn:getSSOSessionTimeout" style="document"/>
@@ -235,6 +288,15 @@
                 <soap:fault use="literal" name="IdentityException"/>
             </wsdl:fault>
         </wsdl:operation>
+	<wsdl:operation name="isSAMLSSOLoginAccepted">
+            <soap:operation soapAction="urn:isSAMLSSOLoginAccepted" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
     </wsdl:binding>
     <wsdl:binding name="IdentitySAMLSSOServiceSoap12Binding" type="tns:IdentitySAMLSSOServicePortType">
         <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
@@ -249,6 +311,15 @@
             <wsdl:fault name="IdentityException">
                 <soap12:fault use="literal" name="IdentityException"/>
             </wsdl:fault>
+        </wsdl:operation>
+	<wsdl:operation name="isOpenIDLoginAccepted">
+            <soap12:operation soapAction="urn:isOpenIDLoginAccepted" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getSSOSessionTimeout">
             <soap12:operation soapAction="urn:getSSOSessionTimeout" style="document"/>
@@ -283,11 +354,29 @@
                 <soap12:fault use="literal" name="IdentityException"/>
             </wsdl:fault>
         </wsdl:operation>
+	<wsdl:operation name="isSAMLSSOLoginAccepted">
+            <soap12:operation soapAction="urn:isSAMLSSOLoginAccepted" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
     </wsdl:binding>
     <wsdl:binding name="IdentitySAMLSSOServiceHttpBinding" type="tns:IdentitySAMLSSOServicePortType">
         <http:binding verb="POST"/>
         <wsdl:operation name="authenticate">
             <http:operation location="authenticate"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+	 <wsdl:operation name="isOpenIDLoginAccepted">
+            <http:operation location="isOpenIDLoginAccepted"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -315,6 +404,15 @@
         </wsdl:operation>
         <wsdl:operation name="doSingleLogout">
             <http:operation location="doSingleLogout"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+	<wsdl:operation name="isSAMLSSOLoginAccepted">
+            <http:operation location="isSAMLSSOLoginAccepted"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
