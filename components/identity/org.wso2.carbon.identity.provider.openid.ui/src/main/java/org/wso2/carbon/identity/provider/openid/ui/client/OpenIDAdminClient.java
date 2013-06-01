@@ -46,7 +46,7 @@ public class OpenIDAdminClient {
 	private OpenIDProviderServiceStub stub;
 	private String newCookieValue;
 	private boolean isUserApprovalBypassEnabled;
-    private static String sessionTimeout = null;
+    private static Integer sessionTimeout = null;
 	private static Log log = LogFactory.getLog(OpenIDHandler.class);
 
 	public String getNewCookieValue() {
@@ -76,6 +76,9 @@ public class OpenIDAdminClient {
         }
         try {
             isUserApprovalBypassEnabled = stub.isOpenIDUserApprovalBypassEnabled();
+            if(sessionTimeout == null){
+                sessionTimeout = stub.getOpenIDSessionTimeout();
+            }
         } catch (RemoteException ignore) {
             isUserApprovalBypassEnabled  = false;
         }
@@ -385,16 +388,8 @@ public class OpenIDAdminClient {
      * @return OpenID session timeout value
      * @throws IdentityException
      */
-     public int getOpenIDSessionTimeout() throws IdentityException {
-         if(sessionTimeout != null){
-            return Integer.parseInt(sessionTimeout);
-         } else {
-            try {
-                return Integer.parseInt(stub.getOpenIDSessionTimeout());
-            } catch (Exception ex) {
-                log.error("Error obtaining OpenID session timeout from configuration file", ex);
-                throw new IdentityException("Error obtaining OpenID session timeout from configuration", ex);
-            }
-         }
+    public int getOpenIDSessionTimeout() throws IdentityException {
+        return sessionTimeout;
     }
+
 }

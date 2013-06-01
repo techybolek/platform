@@ -124,22 +124,28 @@
 	if (isAuthenticated ||  openid.equals(session.getAttribute(OpenIDConstants.SessionAttribute.AUTHENTICATED_OPENID))) {
 		session.setAttribute(OpenIDConstants.SessionAttribute.IS_OPENID_AUTHENTICATED, "true");
 		session.setAttribute(OpenIDConstants.SessionAttribute.AUTHENTICATED_OPENID, openid);
-		
+
 		// user approval is always bypased based on the identity.xml config
 		if (client.isOpenIDUserApprovalBypassEnabled()) {
 			session.setAttribute(OpenIDConstants.SessionAttribute.SELECTED_PROFILE, "default");
 			session.setAttribute(OpenIDConstants.SessionAttribute.ACTION, "complete");
 			session.setAttribute(OpenIDConstants.SessionAttribute.USER_APPROVED, "true");
 			session.removeAttribute(OpenIDConstants.SessionAttribute.IS_OPENID_AUTHENTICATED);
-            if(isRemembered){
+            if(client.getNewCookieValue() != null){
 %>
                 <script type="text/javascript">
                     Set_Cookie("openidtoken","<%=client.getNewCookieValue()%>",<%=client.getOpenIDSessionTimeout()%>,"/",null,true);
+                </script>
+<%
+            }
+            if(userName != null){
+%>
+                <script type="text/javascript">
                     Set_Cookie("openidrememberme","<%=userName%>",<%=client.getOpenIDSessionTimeout()%>,"/",null,true);
                 </script>
-            <%
-                }
-            %>
+<%
+            }
+%>
             <script type="text/javascript">
                 location.href="../../openidserver";
             </script>
@@ -154,35 +160,47 @@
 			    session.setAttribute(OpenIDConstants.SessionAttribute.USER_APPROVED_ALWAYS, "true");
 			    session.setAttribute(OpenIDConstants.SessionAttribute.SELECTED_PROFILE, rpInfo[1]);
 			    session.removeAttribute(OpenIDConstants.SessionAttribute.IS_OPENID_AUTHENTICATED);
-                if(isRemembered){
+                if(client.getNewCookieValue() != null){
 %>
                     <script type="text/javascript">
                         Set_Cookie("openidtoken","<%=client.getNewCookieValue()%>",<%=client.getOpenIDSessionTimeout()%>,"/",null,true);
+                    </script>
+<%
+                }
+                if(userName != null){
+%>
+                    <script type="text/javascript">
                         Set_Cookie("openidrememberme","<%=userName%>",<%=client.getOpenIDSessionTimeout()%>,"/",null,true);
                     </script>
 <%
                 }
 %>
-                    <script type="text/javascript">
-                        location.href="../../openidserver";
-                    </script>
+                <script type="text/javascript">
+                    location.href="../../openidserver";
+                </script>
 <%
             } else { // redirect to user approval page
-                if(isRemembered){
+                if(client.getNewCookieValue() != null){
 %>
                     <script type="text/javascript">
                         Set_Cookie("openidtoken","<%=client.getNewCookieValue()%>",<%=client.getOpenIDSessionTimeout()%>,"/",null,true);
+                    </script>
+<%
+                }
+                if(userName != null){
+%>
+                    <script type="text/javascript">
                         Set_Cookie("openidrememberme","<%=userName%>",<%=client.getOpenIDSessionTimeout()%>,"/",null,true);
                     </script>
 <%
                 }
 %>
-                    <script type="text/javascript">
-                        location.href="../../openidserver";
-                    </script>
+                <script type="text/javascript">
+                    location.href = "openid_profile_view.jsp";
+                </script>
 <%
             }
-	    }
+        }
 
 	} else {
 		session.removeAttribute(OpenIDConstants.SessionAttribute.IS_OPENID_AUTHENTICATED);

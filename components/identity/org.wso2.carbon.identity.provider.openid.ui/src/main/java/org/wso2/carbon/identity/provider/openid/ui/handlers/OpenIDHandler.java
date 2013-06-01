@@ -308,7 +308,7 @@ public class OpenIDHandler {
 			authenticated = false;
 		} else if (!authenticated) {
 			if (log.isDebugEnabled()) {
-				log.debug(openId + " not authenticated. Redirecting for autheitcation");
+                log.debug(openId + " not authenticated. Redirecting for authentication");
 			}
 			session.setAttribute(IdentityConstants.OpenId.PARAM_LIST, params);
 			return getLoginPageUrl(openId, request, params);
@@ -396,9 +396,9 @@ public class OpenIDHandler {
 			}
 		}
 		// if cookie found
-		if ((token != null && !NULL.equals(token)) ||
-		    (openId.equals(request.getSession(false).getAttribute(OpenIDConstants.SessionAttribute.AUTHENTICATED_OPENID)))) {
-			request.getSession(false).setAttribute(OpenIDConstants.SessionAttribute.OPENID, openId);
+        if (token != null && !NULL.equals(token) ||
+                (openId.equals(request.getSession(false).getAttribute(OpenIDConstants.SessionAttribute.AUTHENTICATED_OPENID)))) {
+            request.getSession(false).setAttribute(OpenIDConstants.SessionAttribute.OPENID, openId);
 			loginPageUrl =
 			               loginPageUrl.replace("openid-provider/openid_auth.jsp",
 			                                    "openid-provider/openid_auth_submit.jsp");
