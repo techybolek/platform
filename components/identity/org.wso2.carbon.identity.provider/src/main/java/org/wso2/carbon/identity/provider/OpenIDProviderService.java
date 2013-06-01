@@ -717,11 +717,13 @@ public class OpenIDProviderService {
 		}
 	}
 
-    public static String getOpenIDSessionTimeout() {
-        String sessionTimeout = IdentityUtil.getProperty(IdentityConstants.ServerConfig.OPENID_SESSION_TIMEOUT);
-        if(sessionTimeout == null){
-            sessionTimeout = "36000";
+    public static int getOpenIDSessionTimeout() {
+        if(IdentityUtil.getProperty(IdentityConstants.ServerConfig.OPENID_SESSION_TIMEOUT).trim() != null &&
+                !IdentityUtil.getProperty(IdentityConstants.ServerConfig.OPENID_SESSION_TIMEOUT).trim().equals("")){
+            return Integer.parseInt(IdentityUtil.getProperty(IdentityConstants.ServerConfig.OPENID_SESSION_TIMEOUT).trim());
+        } else {
+            return 36000;
         }
-        return sessionTimeout;
     }
+
 }
