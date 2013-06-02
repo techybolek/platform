@@ -1,0 +1,29 @@
+<project name="juddi-core-jpa" default="copy-from-core" basedir=".">
+	
+	<target name="copy-main">
+		    <echo>delete: ${basedir}/src/main/</echo>
+		    <delete dir="${basedir}/src/main/"  />
+	        <mkdir dir="${basedir}/src/main/"/>
+	        <echo>copy: ${juddi.core.dir}/src/main</echo>
+	        <copy todir="${basedir}/src/main">
+	            <fileset dir="${juddi.core.dir}/src/main">
+	               <include name="**/*"/>
+	            </fileset>
+	        </copy>
+	    </target>
+	
+	<target name="copy-test-java">
+		<echo>delete: ${basedir}/src/test/java</echo>
+		<delete dir="${basedir}/src/test/java" />
+        <mkdir dir="${basedir}/src/test/java"/>
+        <echo>copy: ${juddi.core.dir}/src/test/java</echo>
+        <copy todir="${basedir}/src/test/java">
+        	<fileset dir="${juddi.core.dir}/src/test/java">
+        	   <include name="**/*.java"/>
+        	</fileset>
+        </copy>
+    </target>
+	
+	<target name="copy-from-core" depends="copy-main,copy-test-java"/>
+
+</project>
