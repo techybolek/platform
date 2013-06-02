@@ -73,22 +73,22 @@ public class TargetMatch {
     /**
      * An integer value indicating that this class represents a SubjectMatch
      */
-    public static final int SUBJECT = 0;
+    public static final int SUBJECT = 1;
 
     /**
      * An integer value indicating that this class represents a ResourceMatch
      */
-    public static final int RESOURCE = 1;
+    public static final int RESOURCE = 2;
 
     /**
      * An integer value indicating that this class represents an ActionMatch
      */
-    public static final int ACTION = 2;
+    public static final int ACTION = 3;
 
     /**
      * An integer value indicating that this class represents an EnvironmentMatch
      */
-    public static final int ENVIRONMENT = 3;
+    public static final int ENVIRONMENT = 4;
 
     /**
      * Mapping from the 4 match types to their string representations
@@ -96,6 +96,7 @@ public class TargetMatch {
     public static final String[] NAMES = { "Subject", "Resource", "Action", "Environment"};
 
     // the type of this target match
+    // if there is no type, value is zero
     private int type;
 
     // the function used for matching
@@ -131,6 +132,27 @@ public class TargetMatch {
         this.eval = eval;
         this.attrValue = attrValue;
     }
+
+
+    /**
+     * Constructor that creates a <code>TargetMatch</code> from components.
+     *
+     * @param function the <code>Function</code> that represents the MatchId
+     * @param eval the <code>AttributeDesignator</code> or <code>AttributeSelector</code> to be used
+     *            to select attributes from the request context
+     * @param attrValue the <code>AttributeValue</code> to compare against
+     *
+     * @throws IllegalArgumentException if the input type isn't a valid value
+     */
+    public TargetMatch(Function function, Evaluatable eval, AttributeValue attrValue)
+            throws IllegalArgumentException {
+
+        this.function = function;
+        this.eval = eval;
+        this.attrValue = attrValue;
+    }
+
+
 
     /**
      * Creates a <code>TargetMatch</code> by parsing a node, using the input prefix to determine
@@ -184,6 +206,7 @@ public class TargetMatch {
      */
     public static TargetMatch getInstance(Node root, int matchType, PolicyMetaData metaData)
             throws ParsingException {
+
         Function function;
         Evaluatable eval = null;
         AttributeValue attrValue = null;
@@ -242,7 +265,11 @@ public class TargetMatch {
         inputs.add(eval);
         function.checkInputsNoBag(inputs);
 
-        return new TargetMatch(matchType, function, eval, attrValue);
+        if(matchType == 0){
+            return new TargetMatch(function, eval, attrValue);
+        } else {
+            return new TargetMatch(matchType, function, eval, attrValue);
+        }
     }
 
     /**
@@ -381,18 +408,6 @@ public class TargetMatch {
     }
 
     /**
-     * Encodes this <code>TargetMatch</code> into its XML form
-     *
-     * @return <code>String</code>
-     */
-    public String encode() {
-        StringBuilder builder = new StringBuilder();
-        encode(builder);
-        return builder.toString();
-    }
-
-
-    /**
      * Encodes this <code>TargetMatch</code> into its XML form and writes this out to the provided
      * <code>StringBuilder<code>
      *
@@ -400,7 +415,11 @@ public class TargetMatch {
      */
     public void encode(StringBuilder builder) {
 
-        String tagName = NAMES[type] + "Match";
+        String tagName = "Match";
+
+        if(type != 0){
+            tagName = NAMES[type] + "Match";    
+        }
 
         builder.append("<").append(tagName).append(" MatchId=\"").
                 append(function.getIdentifier().toString()).append("\">\n");

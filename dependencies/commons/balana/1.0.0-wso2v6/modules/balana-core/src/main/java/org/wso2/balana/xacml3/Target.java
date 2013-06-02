@@ -115,6 +115,10 @@ public class Target extends AbstractTarget {
         }
     }
 
+    public List<AnyOfSelection> getAnyOfSelections() {
+        return anyOfSelections;
+    }
+
     @Override
     public String encode() {
         return null; //TODO
@@ -122,6 +126,15 @@ public class Target extends AbstractTarget {
 
     @Override
     public void encode(StringBuilder builder) {
-        //TODO
+
+        builder.append("<Target>\n");
+
+        if(anyOfSelections != null){
+            for(AnyOfSelection anyOfSelection : anyOfSelections){
+                anyOfSelection.encode(builder);
+            }
+        }
+
+        builder.append("</Target>\n");
     }
 }

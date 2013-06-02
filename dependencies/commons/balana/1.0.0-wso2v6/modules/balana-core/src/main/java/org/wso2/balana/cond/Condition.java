@@ -66,7 +66,7 @@ public class Condition implements Evaluatable {
     private static URI booleanIdentifier;
 
     // regardless of version, this contains the Condition's children
-    private List children;
+    private List<Expression> children;
 
     // regardless of version, this is an expression that can be evaluated
     // directly
@@ -276,10 +276,8 @@ public class Condition implements Evaluatable {
         if (isVersionOne) {
             builder.append("<Condition FunctionId=\"").append(function.getIdentifier()).append("\">\n");
 
-            Iterator it = children.iterator();
-            while (it.hasNext()) {
-                Expression xpr = (Expression) (it.next());
-                xpr.encode(builder);
+            for (Expression aChildren : children) {
+                aChildren.encode(builder);
             }
         } else {
             builder.append("<Condition>\n");

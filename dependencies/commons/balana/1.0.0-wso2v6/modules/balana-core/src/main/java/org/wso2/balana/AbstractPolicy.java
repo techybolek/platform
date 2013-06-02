@@ -41,6 +41,7 @@ import org.wso2.balana.combine.*;
 import org.wso2.balana.ctx.AbstractResult;
 import org.wso2.balana.ctx.EvaluationCtx;
 import org.wso2.balana.ctx.xacml2.Result;
+import org.wso2.balana.xacml2.Obligation;
 import org.wso2.balana.xacml3.Advice;
 import org.wso2.balana.xacml3.AdviceExpression;
 
@@ -59,6 +60,7 @@ import java.util.Set;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.wso2.balana.xacml3.ObligationExpression;
 
 /**
  * Represents an instance of an XACML policy.
@@ -86,7 +88,7 @@ public abstract class AbstractPolicy  implements PolicyTreeElement{
 
     // the child elements under this policy represented simply as the
     // PolicyTreeElements...
-    private List children;
+    private List<PolicyTreeElement> children;
     // ...or the CombinerElements that are passed to combining algorithms
     private List<CombinerElement> childElements;
 
@@ -467,7 +469,7 @@ public abstract class AbstractPolicy  implements PolicyTreeElement{
      *
      * @return a <code>List</code> of child nodes
      */
-    public List getChildren() {
+    public List<PolicyTreeElement> getChildren() {
         return children;
     }
 
@@ -534,16 +536,14 @@ public abstract class AbstractPolicy  implements PolicyTreeElement{
         // we always want a concrete list, since we're going to pass it to
         // a combiner that expects a non-null input
         if (children == null) {
-            this.children = Collections.EMPTY_LIST;
+            this.children = new ArrayList<PolicyTreeElement>();
         } else {
             // NOTE: since this is only getting called by known child
             // classes we don't check that the types are all the same
             List<PolicyTreeElement> list = new ArrayList<PolicyTreeElement>();
-            Iterator it = children.iterator();
 
-            while (it.hasNext()) {
-                CombinerElement element = (CombinerElement) (it.next());
-                list.add(element.getElement());
+            for (CombinerElement aChildren : children) {
+                list.add(aChildren.getElement());
             }
 
             this.children = Collections.unmodifiableList(list);
@@ -624,17 +624,15 @@ public abstract class AbstractPolicy  implements PolicyTreeElement{
      */
     protected void encodeCommonElements(StringBuilder builder) {
 
-        Iterator it = childElements.iterator();
-        while (it.hasNext()) {
-            ((CombinerElement) (it.next())).encode(builder);
+        for (CombinerElement childElement : childElements) {
+            childElement.encode(builder);
         }
 
         if (obligationExpressions.size() != 0) {       // TODO check xacml2 or 3
             builder.append("<Obligations>\n");
 
-            it = obligationExpressions.iterator();
-            while (it.hasNext()) {
-                ((org.wso2.balana.xacml2.Obligation) (it.next())).encode(builder);
+            for (AbstractObligation obligationExpression : obligationExpressions) {
+                ((ObligationExpression) (obligationExpression)).encode(builder);
             }
 
             builder.append("</Obligations>\n");

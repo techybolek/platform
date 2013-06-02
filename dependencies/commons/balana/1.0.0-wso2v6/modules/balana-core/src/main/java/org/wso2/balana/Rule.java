@@ -61,6 +61,7 @@ import java.util.*;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.wso2.balana.xacml3.ObligationExpression;
 
 /**
  * Represents the RuleType XACML type. This has a target for matching, and encapsulates the
@@ -470,6 +471,39 @@ public class Rule implements PolicyTreeElement {
     }
 
     public void encode(StringBuilder builder) {
-        //TODO
+
+        builder.append("<Rule RuleId=\"" + idAttr + "\"" + " Effect=\"" +
+                AbstractResult.DECISIONS[effectAttr] + "\"  >\n");
+
+
+        if (description != null){
+            builder.append("<Description>").append(description).append("</Description>\n");
+        }
+
+        if(target != null){
+            target.encode(builder);
+        }
+
+        if(condition != null){
+            condition.encode(builder);
+        }
+
+        if(obligationExpressions != null && obligationExpressions.size() > 0){
+            builder.append("<ObligationExpressions>");
+            for(AbstractObligation expression : obligationExpressions){
+                expression.encode(builder);
+            }
+            builder.append("</ObligationExpressions>\n");
+        }
+
+        if(adviceExpressions != null && adviceExpressions.size() > 0){
+            builder.append("<AdviceExpressions>");
+            for(AdviceExpression expression : adviceExpressions){
+                expression.encode(builder);
+            }
+            builder.append("</AdviceExpressions>\n");
+        }
+
+        builder.append("</Rule>\n");
     }
 }
