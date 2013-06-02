@@ -38,4 +38,10 @@ public class CommonConstants {
 
     public static final String HANDLER_SKIP_PROP_NAME = "registry.handler.skip";
 
+    public static ThreadLocal<Boolean> isExternalUDDIInvoke = new ThreadLocal<Boolean>() {
+        protected Boolean initialValue() {
+            return false;
+        }
+    };
+
 }
