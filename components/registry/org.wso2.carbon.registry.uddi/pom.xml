@@ -48,16 +48,16 @@
                         <Axis2Module>${project.artifactId}-${project.version}</Axis2Module>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>org.wso2.carbon.registry.uddi.persistance.*,
-                            org.wso2.carbon.registry.uddi.internal.*,
-                            org.wso2.carbon.registry.uddi.deployer.*,
                             org.wso2.carbon.registry.uddi.servlet.*,
                             org.wso2.carbon.registry.uddi.utils.*,
-			    org.wso2.carbon.registry.uddi.uddiversionmodule.*
+			    org.wso2.carbon.registry.uddi.uddiversionmodule.*,
+			    org.uddi.*			    
                         </Export-Package>
                         <Import-Package>
                             org.apache.axis2.*; version="${axis2.osgi.version.range}",
                             javax.persistence.*;version="1.0",
                             org.wso2.carbon.common.*,
+			    org.apache.juddi.*;version="0.0.0",
                             org.wso2.carbon.registry.core.*;version=1.0.1,
                             org.wso2.carbon.registry.resource.*,
                             !javax.xml.namespace,
@@ -89,9 +89,15 @@
             <groupId>org.eclipse.osgi</groupId>
             <artifactId>org.eclipse.osgi.services</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.juddi.wso2</groupId>
+        <!--dependency>
+            <groupId>org.apache.juddi</groupId>
             <artifactId>juddi</artifactId>
+	    <version>3.1.5.wso2v1</version>
+        </dependency-->
+	<dependency>
+            <groupId>org.apache.juddi</groupId>
+            <artifactId>juddi-client</artifactId>
+            <version>3.1.5.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.equinox</groupId>
@@ -104,6 +110,14 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging</artifactId>
+        </dependency>
+	 <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.governance.api</artifactId>            
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.registry.common</artifactId>            
         </dependency>
 	<dependency>
 	    <groupId>commons-lang.wso2</groupId>
