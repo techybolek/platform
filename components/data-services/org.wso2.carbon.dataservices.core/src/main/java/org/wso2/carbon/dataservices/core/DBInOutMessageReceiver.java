@@ -19,6 +19,7 @@
 package org.wso2.carbon.dataservices.core;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.llom.OMSourcedElementImpl;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axis2.AxisFault;
@@ -28,6 +29,7 @@ import org.apache.axis2.receivers.RawXMLINOutMessageReceiver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.dataservices.common.DBConstants;
+import org.wso2.carbon.dataservices.core.engine.DSOMDataSource;
 
 /**
  * This class represents the Axis2 message receiver used to dispatch in-out service calls.
@@ -49,14 +51,23 @@ public class DBInOutMessageReceiver extends RawXMLINOutMessageReceiver {
 	public void invokeBusinessLogic(MessageContext msgContext,
 			MessageContext newMsgContext) throws AxisFault {
 		try {
-			OMElement result = DataServiceProcessor.dispatch(msgContext);
+            OMElement result = DataServiceProcessor.dispatch(msgContext);
+
+            if (result instanceof OMSourcedElementImpl) {
+                OMSourcedElementImpl result1 = (OMSourcedElementImpl) DataServiceProcessor.dispatch(msgContext);
+            /* first pass to execute validators etc.. */
+                DSOMDataSource dsomDS = (DSOMDataSource) result1.getDataSource();
+                dsomDS.execute(null);
+            /* first pass to execute validators etc.. */
+            }
+
 			SOAPFactory fac = getSOAPFactory(msgContext);
 			SOAPEnvelope envelope = fac.getDefaultEnvelope();
 			if (result != null) {
 				envelope.getBody().addChild(result);
 			}
 			newMsgContext.setEnvelope(envelope);
-		} catch(Exception e) {			
+		} catch(Exception e) {
 			log.error("Error in in-out message receiver", e);
 			msgContext.setProperty(Constants.FAULT_NAME, DBConstants.DS_FAULT_NAME);
 			throw DBUtils.createAxisFault(e);

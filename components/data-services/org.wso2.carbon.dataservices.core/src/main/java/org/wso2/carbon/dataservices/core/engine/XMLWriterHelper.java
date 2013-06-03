@@ -48,6 +48,9 @@ public class XMLWriterHelper {
 	public void startRowElement(XMLStreamWriter xmlWriter, String name,
 			int resultType, Result result, ExternalParamCollection params) 
 				throws XMLStreamException {
+        if (xmlWriter == null) {
+            return;
+        }
 		switch (resultType) {
 		case DBConstants.ResultTypes.XML:
 			xmlWriter.writeStartElement(this.getNamespace(), name);
@@ -71,6 +74,9 @@ public class XMLWriterHelper {
 	
 	public void startWrapperElement(XMLStreamWriter xmlWriter, String namespace,
 			String name, int resultType) throws XMLStreamException {
+        if (xmlWriter == null) {
+            return;
+        }
 		String nsPrefix;
 		boolean writeNS;
 		switch (resultType) {
@@ -98,11 +104,17 @@ public class XMLWriterHelper {
 	}
 	
 	public void endElement(XMLStreamWriter xmlWriter) throws XMLStreamException {
+        if (xmlWriter == null) {
+            return;
+        }
 		xmlWriter.writeEndElement();
 	}
 	
 	private void writeElementValue(XMLStreamWriter xmlWriter, ParamValue value)
 			throws XMLStreamException {
+        if (xmlWriter == null) {
+            return;
+        }
 		if (value.getArrayValue() == null && value.getScalarValue() == null &&
                 value.getUdt() == null) {
 			xmlWriter.writeNamespace(DBConstants.XSI_PREFIX, DBConstants.XSI_NAMESPACE);
@@ -122,6 +134,9 @@ public class XMLWriterHelper {
 	public void writeResultElement(XMLStreamWriter xmlWriter, String name, ParamValue value,
 			QName xsdType, int categoryType, int resultType, ExternalParamCollection params) 
 			throws XMLStreamException {
+        if (xmlWriter == null) {
+            return;
+        }
 		String nsPrefix;
 		boolean writeNS;
 		switch (resultType) {
@@ -169,6 +184,9 @@ public class XMLWriterHelper {
 	public void addAttribute(XMLStreamWriter xmlWriter, String name,
 			ParamValue value, QName xsdType, int resultType)
 			throws XMLStreamException {
+        if (xmlWriter == null) {
+            return;
+        }
 		switch (resultType) {
 		case DBConstants.ResultTypes.XML:
 			if (value != null) {

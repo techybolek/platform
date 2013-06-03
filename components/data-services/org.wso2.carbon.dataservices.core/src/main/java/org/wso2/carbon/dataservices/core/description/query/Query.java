@@ -246,6 +246,11 @@ public abstract class Query extends XMLWriterHelper {
 		this.preprocessParams(params);
 		/* validate params */
 		this.validateParams(params);
+        /* If xmlWriter null; that mean this is parameter validation call*/
+        if (xmlWriter == null) {
+            return;
+        }
+
 		/* extract parameters, to be used internally in queries */
 		InternalParamCollection internalParams = this.extractParams(params);
 		/* process input events */
