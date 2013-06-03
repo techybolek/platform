@@ -64,10 +64,8 @@ public class RemoteUMClient {
         options.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, authCookie);
 
         //set trust store properties required in SSL communication.
-        String isHome = ".." + File.separator + ".." + File.separator;
-        System.setProperty("javax.net.ssl.trustStore", isHome + "repository" + File.separator + "resources" +
-                                                       File.separator + "security" + File.separator + "wso2carbon.jks");
-        System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
+        System.setProperty("javax.net.ssl.trustStore", RemoteUMSampleConstants.TRUST_STORE_PATH);
+        System.setProperty("javax.net.ssl.trustStorePassword", RemoteUMSampleConstants.TRUST_STORE_PASSWORD);
 
 
         //log in as admin user and obtain the cookie

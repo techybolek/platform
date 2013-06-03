@@ -17,10 +17,19 @@
 */
 package org.wso2.remoteum.sample;
 
+import java.io.File;
+
 public class RemoteUMSampleConstants {
 
     public static final String PROPERTIES_FILE_NAME = "client.properties";
     public static final String REMOTE_SERVER_URL = "remote.server.url";
     public static final String USER_NAME = "user.name";
     public static final String PASSWORD = "user.password";
+
+    public static final String IS_HOME = ".." + File.separator + ".." + File.separator;
+
+    public static final String TRUST_STORE_PATH = IS_HOME + "repository" + File.separator + "resources" +
+                                                  File.separator + "security" + File.separator + "wso2carbon.jks";
+    
+    public static final String TRUST_STORE_PASSWORD = "wso2carbon";
 }
