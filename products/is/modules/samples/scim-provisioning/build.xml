@@ -26,6 +26,9 @@
                 <include name="org.wso2.charon.core*.jar"/>
                 <include name="commons-httpclient*.jar"/>
                 <include name="axiom*.jar"/>
+                <include name="json*.jar"/>
+                <include name="org.wso2.carbon.logging*.jar"/>
+                <include name="commons-codec*.jar"/>
             </fileset>
         </copy>        
         <delete dir="${build.dir}"/>
@@ -49,7 +52,7 @@
         <java classname="${create-user-main-class}" fork="true">
             <classpath>
                 <path refid="classpath"/>
-                <path location="${jar.dir}/${ant.project.name}.jar"/>
+                <path location="${jar.dir}/create-user.jar"/>
             </classpath>
         </java>
     </target>
