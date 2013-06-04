@@ -62,6 +62,8 @@ public class CreateUser {
             //encode the user in JSON format
             String encodedUser = scimClient.encodeSCIMObject(scimUser, SCIMConstants.JSON);
 
+            System.out.println("");
+            System.out.println("");
             System.out.println("User to be created in json format: " + encodedUser);
             System.out.println("");
 
@@ -82,6 +84,8 @@ public class CreateUser {
 
             String response = postMethod.getResponseBodyAsString();
 
+            System.out.println("");
+            System.out.println("");
             System.out.println("SCIM user creation response status: " + responseStatus);
             System.out.println("SCIM user creation response data: " + response);
             System.out.println("");
