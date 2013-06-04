@@ -35,12 +35,23 @@ public class SCIMSamplesUtils {
 
     public static final String TRUST_STORE_PATH = IS_HOME + "repository" + File.separator + "resources" +
                                                   File.separator + "security" + File.separator + "wso2carbon.jks";
-
+    
     public static final String TRUST_STORE_PASS = "wso2carbon";
 
+    public static final String PROPERTIES_FILE_NAME = "client.properties";
+    /*property names as constants*/
+    public static final String PROPERTY_NAME_USER_ENDPOINT_URL = "user.endpoint";
+    public static final String PROPERTY_NAME_GROUP_ENDPOINT_URL = "group.endpoint";
+    public static final String PROPERTY_NAME_USER_NAME = "provisioning.user.name";
+    public static final String PROPERTY_NAME_PASSWORD = "provisioning.password";
+
+
     /*to be read from properties file*/
-    public static final String USER_ENDPOINT_URL = "";
-    
+    public static String userEndpointURL = null;
+    public static String groupEndpointURL = null;
+
+    public static String userName = null;
+    public static String password = null;
 
     public static void setKeyStore() {
         System.setProperty("javax.net.ssl.trustStore", TRUST_STORE_PATH);
@@ -55,13 +66,14 @@ public class SCIMSamplesUtils {
         return encodedAuthHeader;
     }
 
-    /*private static void loadConfiguration() throws IOException {
+    public static void loadConfiguration() throws IOException {
         Properties properties = new Properties();
-		FileInputStream freader = new FileInputStream(RemoteUMSampleConstants.PROPERTIES_FILE_NAME);
+		FileInputStream freader = new FileInputStream(PROPERTIES_FILE_NAME);
 		properties.load(freader);
 
-        serverUrl = properties.getProperty(RemoteUMSampleConstants.REMOTE_SERVER_URL);
-        username = properties.getProperty(RemoteUMSampleConstants.USER_NAME);
-        password = properties.getProperty(RemoteUMSampleConstants.PASSWORD);
-    }*/
+        userEndpointURL = properties.getProperty(PROPERTY_NAME_USER_ENDPOINT_URL);
+        groupEndpointURL = properties.getProperty(PROPERTY_NAME_GROUP_ENDPOINT_URL);
+        userName = properties.getProperty(PROPERTY_NAME_USER_NAME);
+        password = properties.getProperty(PROPERTY_NAME_PASSWORD);
+    }
 }

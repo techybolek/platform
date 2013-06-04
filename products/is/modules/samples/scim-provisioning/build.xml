@@ -1,0 +1,58 @@
+<project name="SCIM_Provisioning_Client">
+    <property name="wso2is.home" value="../../"/>
+    <property name="scim.samples.lib" value="${wso2is.home}/samples/scim-provisioning/lib"/>
+    <property name="wso2is.plugins" value="${wso2is.home}/repository/components/plugins"/>
+    <property name="wso2is.lib.api" value="${wso2is.home}/lib/api"/>
+    <property name="build.dir" value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="src.dir" value="src"/>
+    <!--<property name="lib.dir" value="lib"/>-->
+    <property name="jar.dir" value="${build.dir}/jar"/>
+    <property name="create-user-main-class" value="org.wso2.scim.sample.user.CreateUser"/>
+
+    <path  id="classpath">
+        <fileset dir="${scim.samples.lib}" includes="**/*.jar"/>
+    </path>
+
+    <target name="init" depends="copy-libs">
+        <!--<mkdir dir="${lib.dir}"/>-->
+        <mkdir dir="${build.dir}"/>
+    </target>
+
+    <target name="copy-libs">
+        <mkdir dir="${scim.samples.lib}"/>
+        <copy todir="${scim.samples.lib}" overwrite="false">
+            <fileset dir="${wso2is.plugins}">
+                <include name="org.wso2.charon.core*.jar"/>
+                <include name="commons-httpclient*.jar"/>
+                <include name="axiom*.jar"/>
+            </fileset>
+        </copy>        
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}"  classpathref="classpath"/>
+    </target>
+
+    <target name="jarit-create-user" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/create-user.jar" basedir="${classes.dir}">
+        <manifest>
+            <attribute name="Main-Class" value="org.wso2.scim.sample.user.CreateUser"/>
+        </manifest>
+        </jar>
+    </target>
+
+    <target name="create-user" depends="jarit-create-user">
+        <java classname="${create-user-main-class}" fork="true">
+            <classpath>
+                <path refid="classpath"/>
+                <path location="${jar.dir}/${ant.project.name}.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+    
+</project>

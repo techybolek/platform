@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 public class CreateUser {
-     //user details
+    //user details
     private static String userName = "HasiniG";
     private static String externalID = "hasini@wso2.com";
     private static String[] emails = {"hasini@gmail.com", "hasinig@yahoo.com"};
@@ -44,6 +44,8 @@ public class CreateUser {
     public static void main(String[] args) {
 
         try {
+            //load sample configuration
+            SCIMSamplesUtils.loadConfiguration();
             //set the keystore
             SCIMSamplesUtils.setKeyStore();
             //create SCIM client
@@ -60,10 +62,15 @@ public class CreateUser {
             //encode the user in JSON format
             String encodedUser = scimClient.encodeSCIMObject(scimUser, SCIMConstants.JSON);
 
-            PostMethod postMethod = new PostMethod(SCIMSamplesUtils.USER_ENDPOINT_URL);
+            System.out.println("User to be created in json format: " + encodedUser);
+            System.out.println("");
+
+            PostMethod postMethod = new PostMethod(SCIMSamplesUtils.userEndpointURL);
             //add basic auth header
             postMethod.addRequestHeader(SCIMConstants.AUTHORIZATION_HEADER,
-                                        SCIMSamplesUtils.getBase64EncodedBasicAuthHeader(userName, password));
+                                        SCIMSamplesUtils.getBase64EncodedBasicAuthHeader(
+                                                SCIMSamplesUtils.userName,
+                                                SCIMSamplesUtils.password));
             //create request entity with the payload.
             RequestEntity requestEntity = new StringRequestEntity(encodedUser, SCIMSamplesUtils.CONTENT_TYPE, null);
             postMethod.setRequestEntity(requestEntity);
@@ -72,16 +79,21 @@ public class CreateUser {
             HttpClient httpClient = new HttpClient();
             //send the request
             int responseStatus = httpClient.executeMethod(postMethod);
-            
+
             String response = postMethod.getResponseBodyAsString();
+
+            System.out.println("SCIM user creation response status: " + responseStatus);
+            System.out.println("SCIM user creation response data: " + response);
+            System.out.println("");
+            
         } catch (CharonException e) {
             e.printStackTrace();
         } catch (HttpException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
     }
 }
