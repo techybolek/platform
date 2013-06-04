@@ -193,8 +193,8 @@ public class Rule implements PolicyTreeElement {
      */
     public static Rule getInstance(Node root, PolicyMetaData metaData, VariableManager manager)
             throws ParsingException {
+
         URI id = null;
-        String name = null;
         int effect = 0;
         String description = null;
         AbstractTarget target = null;
@@ -489,11 +489,22 @@ public class Rule implements PolicyTreeElement {
         }
 
         if(obligationExpressions != null && obligationExpressions.size() > 0){
-            builder.append("<ObligationExpressions>");
+
+            if(xacmlVersion == XACMLConstants.XACML_VERSION_3_0){
+                builder.append("<Obligations>\n");
+            } else {
+                builder.append("<ObligationExpressions>\n");
+            }
+
             for(AbstractObligation expression : obligationExpressions){
                 expression.encode(builder);
             }
-            builder.append("</ObligationExpressions>\n");
+
+            if(xacmlVersion == XACMLConstants.XACML_VERSION_3_0){
+                builder.append("</Obligations>\n");
+            } else {
+                builder.append("</ObligationExpressions>\n");
+            }
         }
 
         if(adviceExpressions != null && adviceExpressions.size() > 0){

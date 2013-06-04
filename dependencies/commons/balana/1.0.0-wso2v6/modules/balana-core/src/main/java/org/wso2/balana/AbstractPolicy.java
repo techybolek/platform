@@ -84,7 +84,7 @@ public abstract class AbstractPolicy  implements PolicyTreeElement{
     private String defaultVersion;
 
     // the meta-data associated with this policy
-    private PolicyMetaData metaData;
+    protected PolicyMetaData metaData;
 
     // the child elements under this policy represented simply as the
     // PolicyTreeElements...
@@ -628,15 +628,34 @@ public abstract class AbstractPolicy  implements PolicyTreeElement{
             childElement.encode(builder);
         }
 
-        if (obligationExpressions.size() != 0) {       // TODO check xacml2 or 3
-            builder.append("<Obligations>\n");
+        if (obligationExpressions != null && obligationExpressions.size() != 0) {
 
-            for (AbstractObligation obligationExpression : obligationExpressions) {
-                ((ObligationExpression) (obligationExpression)).encode(builder);
+            if(metaData.getXACMLVersion() == XACMLConstants.XACML_VERSION_3_0){
+                builder.append("<Obligations>\n");
+            } else {
+                builder.append("<ObligationExpressions>\n");
             }
 
-            builder.append("</Obligations>\n");
+            for (AbstractObligation obligationExpression : obligationExpressions) {
+                obligationExpression.encode(builder);
+            }
+
+            if(metaData.getXACMLVersion() == XACMLConstants.XACML_VERSION_3_0){
+                builder.append("</Obligations>\n");
+            } else {
+                builder.append("</ObligationExpressions>\n");
+            }
+        }
+
+        if (adviceExpressions != null && adviceExpressions.size() != 0) {
+
+            builder.append("<AdviceExpressions>\n");
+
+            for (AdviceExpression adviceExpression : adviceExpressions) {
+                adviceExpression.encode(builder);
+            }
+
+            builder.append("</AdviceExpressions>\n");
         }
     }
-
 }

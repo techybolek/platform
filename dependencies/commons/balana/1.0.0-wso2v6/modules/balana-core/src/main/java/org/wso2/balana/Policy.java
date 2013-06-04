@@ -409,8 +409,13 @@ public class Policy extends AbstractPolicy {
      * @param builder string stream into which the XML-encoded data is written
      */
     public void encode(StringBuilder builder) {
+        
+        String xacmlVersionId = metaData.getXACMLIdentifier();
 
-        builder.append("<Policy PolicyId=\"").append(getId().toString()).
+        String version = getVersion();
+
+        builder.append("<Policy xmlns=\"" + xacmlVersionId + "\""  + " PolicyId=\"" + getId() +
+                "\"" + " Version=\"" + version + "").
                 append("\" RuleCombiningAlgId=\"").append(getCombiningAlg().getIdentifier().toString()).append("\">\n");
 
         String description = getDescription();
@@ -418,9 +423,10 @@ public class Policy extends AbstractPolicy {
             builder.append("<Description>").append(description).append("</Description>\n");
         }
 
-        String version = getDefaultVersion();
-        if (version != null){
-            builder.append("<PolicyDefaults><XPathVersion>").append(version).append("</XPathVersion></PolicyDefaults>\n");
+        String xPathVersion = metaData.getXPathIdentifier();
+        if (xPathVersion != null){
+            builder.append("<PolicyDefaults><XPathVersion>").
+                    append(xPathVersion).append("</XPathVersion></PolicyDefaults>\n");
         }
 
         getTarget().encode(builder);
@@ -430,12 +436,6 @@ public class Policy extends AbstractPolicy {
         }
 
         encodeCommonElements(builder);
-
-        if(getChildren() != null){
-            for(PolicyTreeElement element : getChildren()){
-                element.encode(builder);
-            }
-        }
 
         builder.append("</Policy>\n");
     }
