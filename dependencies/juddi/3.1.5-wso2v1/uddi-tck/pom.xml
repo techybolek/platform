@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Copyright 2001-2009 The Apache Software Foundation.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.apache.juddi</groupId>
+		<artifactId>juddi-parent</artifactId>
+		<version>3.1.5.wso2v1</version>
+	</parent>
+	<artifactId>uddi-tck</artifactId>
+	<packaging>bundle</packaging>
+	<name>UDDI TCK Tests</name>
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.juddi</groupId>
+			<artifactId>uddi-ws</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.juddi</groupId>
+			<artifactId>uddi-tck-base</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.juddi</groupId>
+			<artifactId>juddi-client</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.juddi</groupId>
+			<artifactId>juddi-tomcat</artifactId>
+			<version>${project.parent.version}</version>
+			<type>zip</type>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.juddi</groupId>
+					<artifactId>juddi-core-openjpa</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!--  for JAXWS
+		   running into JUDDI-451 for CXF
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-jaxws</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		-->
+		<!-- so using the SUN reference implementation for now -->
+		<dependency>
+			<groupId>com.sun.xml.ws</groupId>
+			<artifactId>jaxws-rt</artifactId>
+			<version>2.1.4</version>
+		</dependency>
+		
+		<!--   for RMI 
+		<dependency> <groupId>jboss</groupId>
+			<artifactId>jbossall-client</artifactId>
+			<version>4.2.2.GA</version>
+			<scope>test</scope>
+		</dependency>
+		-->
+		<dependency>
+		    <groupId>org.easymock</groupId>
+		    <artifactId>easymock</artifactId>
+		    <version>2.0</version>
+		    <scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>dumbster</groupId>
+			<artifactId>dumbster</artifactId>
+			<version>1.5</version>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.1</version>
+				<executions>
+					<execution>
+						<id>copy</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.apache.juddi</groupId>
+									<artifactId>juddi-tomcat</artifactId>
+									<version>${project.parent.version}</version>
+									<type>zip</type>
+									<outputDirectory>${basedir}/target</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.3</version>
+				<executions>
+					<execution>
+						<id>test</id>
+						<phase>pre-integration-test</phase>
+						<configuration>
+							<tasks>
+								<unzip dest="target" src="target/juddi-tomcat-${project.parent.version}.zip" />
+								<copy file="${basedir}/server.xml" todir="target/juddi-tomcat-${project.parent.version}/conf" overwrite="true" />
+								<copy file="${basedir}/log4j.properties" todir="target/juddi-tomcat-${project.parent.version}/webapps/juddiv3/WEB-INF/classes" overwrite="true" />
+							</tasks>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.cargo</groupId>
+				<artifactId>cargo-maven2-plugin</artifactId>
+				<version>1.0</version>
+				<configuration>
+					<wait>false</wait>
+					<container>
+						<containerId>tomcat6x</containerId>
+						<home>${basedir}/target/juddi-tomcat-${project.parent.version}</home>
+					</container>
+					<configuration>
+						<type>existing</type>
+						<home>${project.build.directory}/juddi-tomcat-${project.parent.version}</home>
+						<properties>
+							<cargo.logging>high</cargo.logging>
+							<cargo.hostname>localhost</cargo.hostname>
+							<cargo.servlet.port>8880</cargo.servlet.port>
+							<cargo.jvmargs>-Xms256m -Xmx256m -XX:MaxPermSize=256M</cargo.jvmargs>
+						</properties>
+					</configuration>
+				</configuration>
+				<executions>
+					<execution>
+						<id>start-container</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>stop-container</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<skip>true</skip>
+					<includes>
+						<include>**/*IntegrationTest.java</include>
+					</includes>
+					<systemProperties>
+						<property>
+							<name>derby.stream.error.file</name>
+							<value>target/derby.log</value>
+						</property>
+						<property>
+							<name>java.io.tmpdir</name>
+							<value>${basedir}/temp</value>
+						</property>
+					</systemProperties>
+				</configuration>
+				<executions>
+					<execution>
+						<id>surefire-it</id>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<skip>false</skip>
+							<systemProperties>
+								<property>
+									<name>cactus.contextURL</name>
+									<value>http://localhost:8880/juddi</value>
+								</property>
+								<property>
+									<name>java.io.tmpdir</name>
+									<value>${basedir}/temp</value>
+								</property>
+							</systemProperties>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<profiles>
+		<profile>
+			<id>load</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.4</version>
+						<configuration>
+							<skip>true</skip>
+							<includes>
+								<include>**/*LoadTest.java</include>
+							</includes>
+							<systemProperties>
+								<property>
+									<name>derby.stream.error.file</name>
+									<value>target/derby.log</value>
+								</property>
+							</systemProperties>
+						</configuration>
+						<executions>
+							<execution>
+								<id>surefire-it</id>
+								<phase>integration-test</phase>
+								<goals>
+									<goal>test</goal>
+								</goals>
+								<configuration>
+									<skip>false</skip>
+									<systemProperties>
+										<property>
+											<name>cactus.contextURL</name>
+											<value>http://localhost:8880/juddi</value>
+										</property>
+									</systemProperties>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>
