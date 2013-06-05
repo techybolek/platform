@@ -1,0 +1,34 @@
+<project name="juddi-tomcat" default="package-tomcat" basedir=".">
+	<property file="package.properties"/>
+	<property name="lib.dir" value="${basedir}/target/tomcat/apache-tomcat-${apache.tomcat.version}/lib"/>
+	<property name="webapps.dir" value="${basedir}/target/tomcat/apache-tomcat-${apache.tomcat.version}/webapps"/>
+	<property name="conf.dir" value="${basedir}/target/tomcat/apache-tomcat-${apache.tomcat.version}/conf"/>
+	<property name="endorsed.dir" value="${basedir}/target/tomcat/apache-tomcat-${apache.tomcat.version}/endorsed"/>
+
+	<target name="unzip-tomcat">
+		<mkdir dir="${basedir}/target/tomcat"/>
+		<unzip dest="${basedir}/target/tomcat" src="${dependency.tomcat.zip}"/>
+		<unzip dest="${webapps.dir}/juddiv3" src="${dependency.juddiv3.war}"/>
+	</target>
+	
+	<target name="copy-resources" depends="unzip-tomcat">
+		<copy file="${basedir}/catalina.sh" todir="${basedir}/target/tomcat/apache-tomcat-${apache.tomcat.version}/bin" overwrite="true"/>
+		<copy file="${basedir}/context.xml" todir="${webapps.dir}/juddiv3/META-INF" overwrite="true"/>
+		<copy file="${basedir}/server.xml" todir="${conf.dir}" overwrite="true"/>
+ 		<copy file="${dependency.mysql.jar}" todir="${lib.dir}"/>
+		<copy file="${dependency.postgres.jar}" todir="${lib.dir}"/>
+		<copy file="${dependency.log4j.jar}" todir="${lib.dir}"/>
+		<copy file="${dependency.derby.jar}" todir="${lib.dir}"/>
+		<copy file="${dependency.commons-discovery.jar}" todir="${lib.dir}"/>
+		<copy file="${dependency.jaxws.jar}" todir="${endorsed.dir}"/>
+	</target>
+	
+	<target name="package-tomcat" depends="copy-resources">
+		<chmod perm="ugo+x">
+			<fileset dir="${basedir}/target/tomcat/apache-tomcat-${apache.tomcat.version}/bin">
+				<include name="*.sh"/>
+			</fileset>
+		</chmod>
+	</target>
+
+</project>
