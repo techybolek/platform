@@ -57,6 +57,7 @@ public class AttributeCallbackHandler implements SAMLCallbackHandler {
         RahasData data = null;
         OMElement claimElem = null;
         String userIdentifier = null;
+        String splitArr[] = null;
         IdentityAttributeService[] attributeCallbackServices = null;
         
         try {
@@ -65,6 +66,16 @@ public class AttributeCallbackHandler implements SAMLCallbackHandler {
                 data = attrCallback.getData();
                 claimElem = data.getClaimElem();
                 userIdentifier = data.getPrincipal().getName();
+                
+                if(userIdentifier != null){
+                    /*Extract 'Common Name' as the user id if authenticated
+                      via X.509 certificates*/
+                    splitArr = userIdentifier.split(",")[0].split("=");
+                    if(splitArr.length == 2){
+                        userIdentifier = splitArr[1];
+                    }
+                }
+                
                 loadClaims(claimElem, userIdentifier);
                 processClaimData(data, claimElem);
                 populateClaimValues(userIdentifier, attrCallback);
