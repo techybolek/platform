@@ -184,45 +184,19 @@ public class Util {
 	 *            encoded AuthReq
 	 * @return decoded AuthReq
 	 */
-	public static String decode(String encodedStr) throws SAML2SSOUIAuthenticatorException {
-		try {
-			org.apache.commons.codec.binary.Base64 base64Decoder = new org.apache.commons.codec.binary.Base64();
-			byte[] xmlBytes = encodedStr.getBytes("UTF-8");
-			byte[] base64DecodedByteArray = base64Decoder.decode(xmlBytes);
+    public static String decode(String encodedStr) throws SAML2SSOUIAuthenticatorException {
+        try {
+            org.apache.commons.codec.binary.Base64 base64Decoder = new org.apache.commons.codec.binary.Base64();
+            byte[] xmlBytes = encodedStr.getBytes("UTF-8");
+            byte[] base64DecodedByteArray = base64Decoder.decode(xmlBytes);
 
-			try {
-				Inflater inflater = new Inflater(true);
-				inflater.setInput(base64DecodedByteArray);
-				byte[] xmlMessageBytes = new byte[5000];
-				int resultLength = inflater.inflate(xmlMessageBytes);
+            return new String(base64DecodedByteArray, 0, base64DecodedByteArray.length, "UTF-8");
 
-				if (inflater.getRemaining() > 0) {
-					throw new RuntimeException("didn't allocate enough space to hold "
-							+ "decompressed data");
-				}
+        } catch (IOException e) {
+            throw new SAML2SSOUIAuthenticatorException("Error when decoding the SAML Request.", e);
+        }
 
-				inflater.end();
-				return new String(xmlMessageBytes, 0, resultLength, "UTF-8");
-
-			} catch (DataFormatException e) {
-				ByteArrayInputStream bais = new ByteArrayInputStream(base64DecodedByteArray);
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				InflaterInputStream iis = new InflaterInputStream(bais);
-				byte[] buf = new byte[1024];
-				int count = iis.read(buf);
-				while (count != -1) {
-					baos.write(buf, 0, count);
-					count = iis.read(buf);
-				}
-				iis.close();
-				String decodedStr = new String(baos.toByteArray());
-				return decodedStr;
-			}
-		} catch (IOException e) {
-			throw new SAML2SSOUIAuthenticatorException("Error when decoding the SAML Request.", e);
-		}
-
-	}
+    }
 
 	/**
 	 * This method is used to initialize the OpenSAML2 library. It calls the bootstrap method, if it
