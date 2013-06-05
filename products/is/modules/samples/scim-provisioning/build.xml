@@ -9,6 +9,7 @@
     <!--<property name="lib.dir" value="lib"/>-->
     <property name="jar.dir" value="${build.dir}/jar"/>
     <property name="create-user-main-class" value="org.wso2.scim.sample.user.CreateUser"/>
+    <property name="update-user-main-class" value="org.wso2.scim.sample.user.UpdateUser"/>
     <property name="create-group-main-class" value="org.wso2.scim.sample.group.CreateGroup"/>
 
     <path  id="classpath">
@@ -58,6 +59,15 @@
         </jar>
     </target>
 
+    <target name="jarit-update-user" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/update-user.jar" basedir="${classes.dir}">
+        <manifest>
+            <attribute name="Main-Class" value="org.wso2.scim.sample.user.UpdateUser"/>
+        </manifest>
+        </jar>
+    </target>
+
     <target name="create-user" depends="jarit-create-user">
         <java classname="${create-user-main-class}" fork="true">
             <classpath>
@@ -72,6 +82,15 @@
             <classpath>
                 <path refid="classpath"/>
                 <path location="${jar.dir}/create-group.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="update-user" depends="jarit-update-user">
+        <java classname="${update-user-main-class}" fork="true">
+            <classpath>
+                <path refid="classpath"/>
+                <path location="${jar.dir}/update-user.jar"/>
             </classpath>
         </java>
     </target>

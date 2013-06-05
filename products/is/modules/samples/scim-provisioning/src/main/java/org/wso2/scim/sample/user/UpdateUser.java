@@ -15,16 +15,16 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.wso2.scim.sample.group;
+package org.wso2.scim.sample.user;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.wso2.charon.core.client.SCIMClient;
 import org.wso2.charon.core.exceptions.CharonException;
-import org.wso2.charon.core.objects.Group;
 import org.wso2.charon.core.objects.ListedResource;
 import org.wso2.charon.core.objects.SCIMObject;
 import org.wso2.charon.core.objects.User;
@@ -32,16 +32,15 @@ import org.wso2.charon.core.schema.SCIMConstants;
 import org.wso2.scim.sample.utils.SCIMSamplesUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-public class CreateGroup {
+public class UpdateUser {
     //user details
     private static String userName = "HasiniG";
 
-    //group details
-    private static String displayName = "eng";
-    private static final String externalID = "eng";
-    
+    private static String newDisplayName = "HasiniThilomaGunasinghe";
+    private static String newWorkEmail = "hasini@wso2.com";
 
     public static void main(String[] args) {
 
@@ -52,51 +51,46 @@ public class CreateGroup {
             SCIMSamplesUtils.setKeyStore();
             //create SCIM client
             SCIMClient scimClient = new SCIMClient();
-            //create a group according to SCIM Group Schema
-            Group scimGroup = scimClient.createGroup();
-            scimGroup.setExternalId(externalID);
-            scimGroup.setDisplayName(displayName);
-            /************Uncomment the following if you want to add members to group*************/
-            //set group members
-            /*for (String member : members) {
-                scimGroup.setMember(member);
-            }*/
+            //create a user according to SCIM User Schema
+            User scimUser = scimClient.createUser();
+            scimUser.setUserName(userName);
+            scimUser.setDisplayName(newDisplayName);
+            scimUser.setWorkEmail(newWorkEmail, true);
+            //encode the user in JSON format
+            String encodedUser = scimClient.encodeSCIMObject(scimUser, SCIMConstants.JSON);
+
             String userId = getSCIMIdOfUser(userName);
-            scimGroup.setMember(userId);
-            //encode the group in JSON format
-            String encodedGroup = scimClient.encodeSCIMObject(scimGroup, SCIMConstants.JSON);
 
             System.out.println("");
             System.out.println("");
-            System.out.println("/******Group to be created in json format: " + encodedGroup + "******/");
+            System.out.println("/******Updated user in json format: " + encodedUser + "******/");
             System.out.println("");
 
+            String url = SCIMSamplesUtils.userEndpointURL + "/" + userId;
+            //now send the update request.
+            PutMethod putMethod = new PutMethod(url);
+            putMethod.addRequestHeader(
+                    SCIMConstants.AUTHORIZATION_HEADER,
+                    SCIMSamplesUtils.getBase64EncodedBasicAuthHeader(SCIMSamplesUtils.userName, SCIMSamplesUtils.password));
 
-            PostMethod postMethod = new PostMethod(SCIMSamplesUtils.groupEndpointURL);
-            //add basic auth header
-            postMethod.addRequestHeader(SCIMConstants.AUTHORIZATION_HEADER,
-                                        SCIMSamplesUtils.getBase64EncodedBasicAuthHeader(
-                                                SCIMSamplesUtils.userName,
-                                                SCIMSamplesUtils.password));
-            //create request entity with the payload.
-            RequestEntity requestEntity = new StringRequestEntity(encodedGroup, SCIMSamplesUtils.CONTENT_TYPE, null);
-            postMethod.setRequestEntity(requestEntity);
+            RequestEntity putRequestEntity = new StringRequestEntity(encodedUser, SCIMSamplesUtils.CONTENT_TYPE, null);
+            putMethod.setRequestEntity(putRequestEntity);
 
-            //create http client
-            HttpClient httpClient = new HttpClient();
-            //send the request
-            int responseStatus = httpClient.executeMethod(postMethod);
-
-            String response = postMethod.getResponseBodyAsString();
+            HttpClient httpUpdateClient = new HttpClient();
+            int updateResponseStatus = httpUpdateClient.executeMethod(putMethod);
+            String updateResponse = putMethod.getResponseBodyAsString();
 
             System.out.println("");
             System.out.println("");
-            System.out.println("/******SCIM group creation response status: " + responseStatus);
-            System.out.println("SCIM group creation response data: " + response + "******/");
+            System.out.println("/******SCIM user update response status: " + updateResponseStatus);
+            System.out.println("SCIM user update response data: " + updateResponse + "******/");
             System.out.println("");
-
 
         } catch (CharonException e) {
+            e.printStackTrace();
+        } catch (HttpException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();

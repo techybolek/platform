@@ -1,8 +1,9 @@
-This sample demonstrates how to use RemoteUserManagement web services API exposed by carbon, to write a client application
-to handle user management functionality of WSO2 Identity Server externally.
+This sample demonstrates how to consume SCIM Rest Endpoints in WSO2 Identity Server from a JAVA client application
+based on HttpClient.
 
 Steps to run the sample:
-1. Start the Identity Server using the startup script found in the bin folder.
+
+1. Start the Identity Server using the startup script found in the [IS_Home]/bin folder.
 (Use wso2server.sh for Linux and wso2server.bat for Windows)
 2. Make sure you have installed Apache Ant.
 3. Modify the client.properties file if the default configuration to run the sample are different. 

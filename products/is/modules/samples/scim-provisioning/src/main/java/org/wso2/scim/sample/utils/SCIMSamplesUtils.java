@@ -45,6 +45,7 @@ public class SCIMSamplesUtils {
     public static final String PROPERTY_NAME_USER_NAME = "provisioning.user.name";
     public static final String PROPERTY_NAME_PASSWORD = "provisioning.password";
 
+    public static final String USER_FILTER = "filter=userNameEq";
 
     /*to be read from properties file*/
     public static String userEndpointURL = null;

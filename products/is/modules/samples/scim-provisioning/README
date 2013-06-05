@@ -1,0 +1,48 @@
+This sample demonstrates how to use RemoteUserManagement web services API exposed by carbon, to write a client application
+to handle user management functionality of WSO2 Identity Server externally.
+
+Steps to run the sample:
+------------------------
+1. Start the Identity Server, using the startup script found in the [IS_Home]/bin folder.
+(Use wso2server.sh for Linux and wso2server.bat for Windows)
+2. Make sure you have installed Apache Ant.
+3. Refer the client.properties file for SCIM user endpoint, group endpoint URLs, username and password.
+Modify it if the default configuration to run the sample are different.
+
+Sample for creating a user:
+---------------------------
+4. Run the command: 'ant create-user' at this directory level in command line and observe the json message sent to
+the SCIM endpoint, the response status and the SCIM response printed in the command line out put.
+
+You will notice that the new user is created in Identity Server.
+
+If you wish, you can modify the org.wso2.scim.sample.user.CreateUser class to add more attributes to the creating user
+and observe the output in the commandline.
+
+Sample for creating a group:
+----------------------------
+5. Run the command: 'ant create-user' at this directory level in command line and observe the json message sent to
+the SCIM endpoint, the response status and the SCIM response are printed in the command line output.
+
+You will notice that the new group is created in the Identity Server and the user created in step 4 is added to the group.
+
+Sample for updating user identity information:
+----------------------------------------------
+6. Run the command: 'ant update-user' at this directory level in command line and observe the json message sent to
+the SCIM endpoint, the response status and the SCIM response are printed in the command line output.
+
+You will notice that the user created in the step 4 above, is updated with new attribute values for: display name and work email.
+
+Sample for updating group:
+--------------------------
+7. 
+
+Sample for deleting user:
+--------------------------
+
+
+Sample for deleting group:
+---------------------------
+
+
+Instructions to observe provisioning above operations to another SCIM provider
