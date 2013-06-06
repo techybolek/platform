@@ -112,13 +112,15 @@ public class CarbonPolicyFinder extends PolicyFinderModule {
             this.finderModules = new ArrayList<CarbonPolicyFinderModule>(finderModules.keySet());
         }
 
+        PolicyCollection tempPolicyCollection = null;
+        
         // get policy collection
         Map<PolicyCollection, Properties> policyCollections = EntitlementServiceComponent.
                                                 getEntitlementConfig().getPolicyCollections();
         if(policyCollections != null && policyCollections.size() > 0){
-            policyCollection =  policyCollections.entrySet().iterator().next().getKey();
+            tempPolicyCollection =  policyCollections.entrySet().iterator().next().getKey();
         } else {
-            policyCollection = new SimplePolicyCollection();
+            tempPolicyCollection = new SimplePolicyCollection();
         }
 
         // get policy reader
@@ -148,7 +150,7 @@ public class CarbonPolicyFinder extends PolicyFinderModule {
                 policyCombiningAlgorithm  = new DenyOverridesPolicyAlg();
             }
 
-            policyCollection.setPolicyCombiningAlgorithm(policyCombiningAlgorithm);
+            tempPolicyCollection.setPolicyCombiningAlgorithm(policyCombiningAlgorithm);
 
             for (int moduleOrder : moduleOrders) {
                 for(CarbonPolicyFinderModule finderModule : this.finderModules){
@@ -165,7 +167,7 @@ public class CarbonPolicyFinder extends PolicyFinderModule {
                         for(String policy : policies){
                             AbstractPolicy abstractPolicy = policyReader.getPolicy(policy);
                             if(abstractPolicy != null){
-                                policyCollection.addPolicy(abstractPolicy);
+                                tempPolicyCollection.addPolicy(abstractPolicy);
                             }
                         }
                     }
@@ -175,7 +177,8 @@ public class CarbonPolicyFinder extends PolicyFinderModule {
             log.warn("No Carbon policy finder modules are registered");
 
         }
-
+        
+        policyCollection = tempPolicyCollection;
         initFinish = true;
         log.info("Initializing of policy store is finished at :  " + new Date());
     }
