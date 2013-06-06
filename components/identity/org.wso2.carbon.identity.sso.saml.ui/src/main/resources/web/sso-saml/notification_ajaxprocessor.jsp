@@ -19,7 +19,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar"
            prefix="carbon" %>
-<jsp:include page="../carbon/dialog/display_messages.jsp"/>
+<jsp:include page="../dialog/display_messages.jsp"/>
 
 <%
     String stat = (String) request.getAttribute(SAMLSSOProviderConstants.STATUS);
