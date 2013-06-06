@@ -37,7 +37,6 @@ import java.util.List;
 
 public class UpdateUser {
     //user details
-    private static String userName = "HasiniG";
 
     private static String newDisplayName = "HasiniThilomaGunasinghe";
     private static String newWorkEmail = "hasini@wso2.com";
@@ -53,13 +52,13 @@ public class UpdateUser {
             SCIMClient scimClient = new SCIMClient();
             //create a user according to SCIM User Schema
             User scimUser = scimClient.createUser();
-            scimUser.setUserName(userName);
+            scimUser.setUserName(SCIMSamplesUtils.userNameToUpdateUser);
             scimUser.setDisplayName(newDisplayName);
             scimUser.setWorkEmail(newWorkEmail, true);
             //encode the user in JSON format
             String encodedUser = scimClient.encodeSCIMObject(scimUser, SCIMConstants.JSON);
 
-            String userId = getSCIMIdOfUser(userName);
+            String userId = getSCIMIdOfUser(SCIMSamplesUtils.userNameToUpdateUser);
 
             System.out.println("");
             System.out.println("");

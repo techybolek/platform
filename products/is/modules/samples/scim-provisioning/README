@@ -1,5 +1,5 @@
-This sample demonstrates how to use RemoteUserManagement web services API exposed by carbon, to write a client application
-to handle user management functionality of WSO2 Identity Server externally.
+This sample demonstrates how to consume SCIM Rest Endpoints in WSO2 Identity Server from a JAVA client application
+based on HttpClient.
 
 Steps to run the sample:
 ------------------------
@@ -12,7 +12,7 @@ Modify it if the default configuration to run the sample are different.
 Sample for creating a user:
 ---------------------------
 4. Run the command: 'ant create-user' at this directory level in command line and observe the json message sent to
-the SCIM endpoint, the response status and the SCIM response printed in the command line out put.
+the SCIM endpoint, the response status and the SCIM response printed in the command line output.
 
 You will notice that the new user is created in Identity Server.
 
@@ -33,16 +33,24 @@ the SCIM endpoint, the response status and the SCIM response are printed in the 
 
 You will notice that the user created in the step 4 above, is updated with new attribute values for: display name and work email.
 
+If you wish, you can modify the org.wso2.scim.sample.user.UpdateUser class to add more attributes to user
+and observe the output in the commandline.
+
 Sample for updating group:
 --------------------------
-7. 
+7.  Run the command: 'ant update-group' at this directory level in command line and observe the json message sent to
+the SCIM endpoint, the response status and the SCIM response are printed in the command line output.
+
+You will notice that the group created in the step 5 above, is updated with new attribute values for: display name.
 
 Sample for deleting user:
 --------------------------
+8. Run the command: 'ant delete-user' at this directory level in command line and observe the response status
+and the SCIM response printed in the command line output. If the
 
+You will notice that the user created in step 4 above is now deleted in Identity Server.
 
 Sample for deleting group:
 ---------------------------
+9.
 
-
-Instructions to observe provisioning above operations to another SCIM provider

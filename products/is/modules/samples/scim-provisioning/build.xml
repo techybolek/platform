@@ -10,7 +10,11 @@
     <property name="jar.dir" value="${build.dir}/jar"/>
     <property name="create-user-main-class" value="org.wso2.scim.sample.user.CreateUser"/>
     <property name="update-user-main-class" value="org.wso2.scim.sample.user.UpdateUser"/>
+    <property name="delete-user-main-class" value="org.wso2.scim.sample.user.DeleteUser"/>
+
     <property name="create-group-main-class" value="org.wso2.scim.sample.group.CreateGroup"/>
+    <property name="update-group-main-class" value="org.wso2.scim.sample.group.UpdateGroup"/>
+    <property name="delete-group-main-class" value="org.wso2.scim.sample.group.DeleteGroup"/>
 
     <path  id="classpath">
         <fileset dir="${scim.samples.lib}" includes="**/*.jar"/>
@@ -68,6 +72,33 @@
         </jar>
     </target>
 
+    <target name="jarit-update-group" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/update-group.jar" basedir="${classes.dir}">
+        <manifest>
+            <attribute name="Main-Class" value="org.wso2.scim.sample.group.UpdateGroup"/>
+        </manifest>
+        </jar>
+    </target>
+
+    <target name="jarit-delete-user" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/delete-user.jar" basedir="${classes.dir}">
+        <manifest>
+            <attribute name="Main-Class" value="org.wso2.scim.sample.user.DeleteUser"/>
+        </manifest>
+        </jar>
+    </target>
+
+    <target name="jarit-delete-group" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/delete-group.jar" basedir="${classes.dir}">
+        <manifest>
+            <attribute name="Main-Class" value="org.wso2.scim.sample.group.DeleteGroup"/>
+        </manifest>
+        </jar>
+    </target>
+
     <target name="create-user" depends="jarit-create-user">
         <java classname="${create-user-main-class}" fork="true">
             <classpath>
@@ -91,6 +122,33 @@
             <classpath>
                 <path refid="classpath"/>
                 <path location="${jar.dir}/update-user.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="update-group" depends="jarit-update-group">
+        <java classname="${update-group-main-class}" fork="true">
+            <classpath>
+                <path refid="classpath"/>
+                <path location="${jar.dir}/update-group.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="delete-user" depends="jarit-delete-user">
+        <java classname="${delete-user-main-class}" fork="true">
+            <classpath>
+                <path refid="classpath"/>
+                <path location="${jar.dir}/delete-user.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="delete-group" depends="jarit-delete-group">
+        <java classname="${delete-group-main-class}" fork="true">
+            <classpath>
+                <path refid="classpath"/>
+                <path location="${jar.dir}/delete-group.jar"/>
             </classpath>
         </java>
     </target>

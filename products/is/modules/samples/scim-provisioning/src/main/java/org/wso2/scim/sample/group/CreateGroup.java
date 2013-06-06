@@ -37,10 +37,6 @@ import java.util.List;
 public class CreateGroup {
     //user details
     private static String userName = "HasiniG";
-
-    //group details
-    private static String displayName = "eng";
-    private static final String externalID = "eng";
     
 
     public static void main(String[] args) {
@@ -54,8 +50,8 @@ public class CreateGroup {
             SCIMClient scimClient = new SCIMClient();
             //create a group according to SCIM Group Schema
             Group scimGroup = scimClient.createGroup();
-            scimGroup.setExternalId(externalID);
-            scimGroup.setDisplayName(displayName);
+            scimGroup.setExternalId(SCIMSamplesUtils.groupDisplayNameToCreateGroup);
+            scimGroup.setDisplayName(SCIMSamplesUtils.groupDisplayNameToCreateGroup);
             /************Uncomment the following if you want to add members to group*************/
             //set group members
             /*for (String member : members) {

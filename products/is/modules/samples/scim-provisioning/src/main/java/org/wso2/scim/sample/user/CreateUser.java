@@ -33,7 +33,6 @@ import java.io.UnsupportedEncodingException;
 
 public class CreateUser {
     //user details
-    private static String userName = "HasiniG";
     private static String externalID = "hasini@wso2.com";
     private static String[] emails = {"hasini@gmail.com", "hasinig@yahoo.com"};
     private static String displayName = "Hasini";
@@ -52,7 +51,7 @@ public class CreateUser {
             SCIMClient scimClient = new SCIMClient();
             //create a user according to SCIM User Schema
             User scimUser = scimClient.createUser();
-            scimUser.setUserName(userName);
+            scimUser.setUserName(SCIMSamplesUtils.userNameToCreateUser);
             scimUser.setExternalId(externalID);
             scimUser.setEmails(emails);
             scimUser.setDisplayName(displayName);

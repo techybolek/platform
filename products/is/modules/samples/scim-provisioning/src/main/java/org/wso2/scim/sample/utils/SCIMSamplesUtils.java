@@ -46,6 +46,7 @@ public class SCIMSamplesUtils {
     public static final String PROPERTY_NAME_PASSWORD = "provisioning.password";
 
     public static final String USER_FILTER = "filter=userNameEq";
+    public static final String GROUP_FILTER = "filter=displayNameEq";
 
     /*to be read from properties file*/
     public static String userEndpointURL = null;
@@ -53,6 +54,14 @@ public class SCIMSamplesUtils {
 
     public static String userName = null;
     public static String password = null;
+
+    public static String userNameToCreateUser = "HasiniG";
+    public static String userNameToUpdateUser = "HasiniG";
+    public static String userNameToDeleteUser = "HasiniG";
+
+    public static String groupDisplayNameToCreateGroup = "eng";
+    public static String updatedGroupDisplayName = "Engineering";
+    public static String groupDisplayNameToDeleteGroup = "Engineering";
 
     public static void setKeyStore() {
         System.setProperty("javax.net.ssl.trustStore", TRUST_STORE_PATH);
