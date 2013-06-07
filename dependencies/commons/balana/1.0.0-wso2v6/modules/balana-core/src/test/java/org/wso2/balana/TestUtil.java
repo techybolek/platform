@@ -8,7 +8,7 @@
  *
  *   1. Redistribution of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- * 
+ *
  *   2. Redistribution in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
@@ -16,7 +16,7 @@
  * Neither the name of Sun Microsystems, Inc. or the names of contributors may
  * be used to endorse or promote products derived from this software without
  * specific prior written permission.
- * 
+ *
  * This software is provided "AS IS," without a warranty of any kind. ALL
  * EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES, INCLUDING
  * ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
@@ -58,7 +58,7 @@ import java.util.Set;
 
 
 /**
- * Simple utility class 
+ * Simple utility class
  *
  * @author Seth Proctor
  */
@@ -220,7 +220,7 @@ public class TestUtil {
             }
 
             if(match){
-                finalResult = true;    
+                finalResult = true;
             } else {
                 finalResult = false;
                 break;
@@ -263,7 +263,7 @@ public class TestUtil {
             //As invalid request, by default XACML 3.0 response is created.
             responseCtx = new ResponseCtx(new Result(AbstractResult.DECISION_INDETERMINATE, status));
         }
-        
+
         return responseCtx;
     }
 
@@ -276,14 +276,14 @@ public class TestUtil {
      * @return String or null if any error
      */
     public static String createRequest(String rootDirectory, String versionDirectory,
-                                                   String requestId){
+                                       String requestId){
 
         File file = new File(".");
         StringWriter writer = null;
         try{
             String filePath =  file.getCanonicalPath() + File.separator +   TestConstants.RESOURCE_PATH +
-                        File.separator + rootDirectory + File.separator + versionDirectory +
-                        File.separator + TestConstants.REQUEST_DIRECTORY + File.separator + requestId;
+                    File.separator + rootDirectory + File.separator + versionDirectory +
+                    File.separator + TestConstants.REQUEST_DIRECTORY + File.separator + requestId;
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setIgnoringComments(true);
@@ -322,13 +322,13 @@ public class TestUtil {
      * @return ResponseCtx or null if any error
      */
     public static ResponseCtx createResponse(String rootDirectory, String versionDirectory,
-                                                                            String responseId) {
+                                             String responseId) {
 
         File file = new File(".");
         try{
             String filePath =  file.getCanonicalPath() + File.separator +   TestConstants.RESOURCE_PATH +
-                        File.separator + rootDirectory + File.separator + versionDirectory +
-                        File.separator + TestConstants.RESPONSE_DIRECTORY + File.separator + responseId;
+                    File.separator + rootDirectory + File.separator + versionDirectory +
+                    File.separator + TestConstants.RESPONSE_DIRECTORY + File.separator + responseId;
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setIgnoringComments(true);
@@ -352,13 +352,13 @@ public class TestUtil {
      * conformance tests.
      *
      * @param response  XACML response String
-     * @return XACML response String with out StatusMessage 
+     * @return XACML response String with out StatusMessage
      */
     private static String processResult(String response){
 
         if(response.contains("StatusMessage")){
-            response = response.substring(0, response.indexOf("<StatusMessage>")) + 
-                 response.substring(response.indexOf("</Status>"));
+            response = response.substring(0, response.indexOf("<StatusMessage>")) +
+                    response.substring(response.indexOf("</Status>"));
         }
 
         return response;
