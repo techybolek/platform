@@ -234,9 +234,11 @@ public class SAMLSSOProvider extends HttpServlet {
         } else { // a <LogoutRequest> received
 			// sending LogoutRequests to other session participants
 			LogoutRequestSender.getInstance().sendLogoutRequests(signInRespDTO.getLogoutRespDTO());
+            req.getSession().removeAttribute("authenticatedOpenID");
 			// sending LogoutResponse back to the initiator
 			sendResponse(req, resp, relayState, signInRespDTO.getLogoutResponse(),
 					signInRespDTO.getAssertionConsumerURL(), signInRespDTO.getSubject());
+
 		}
 	}
 
