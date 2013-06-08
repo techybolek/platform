@@ -26,6 +26,10 @@ public class OAuthAppDO {
 	private String userName;
     private String oauthVersion;
     private int tenantId;
+    private String loginPageUrl;
+    private String errorPageUrl;
+    private String consentPageUrl;
+    private String grantTypes;
     
 	public String getUserName() {
         return userName;
@@ -81,5 +85,37 @@ public class OAuthAppDO {
 
     public void setTenantId(int tenantId) {
         this.tenantId = tenantId;
+    }
+
+	public String getLoginPageUrl() {
+	    return loginPageUrl;
+    }
+
+	public void setLoginPageUrl(String loginPageUrl) {
+	    this.loginPageUrl = loginPageUrl;
+    }
+
+	public String getErrorPageUrl() {
+	    return errorPageUrl;
+    }
+
+	public void setErrorPageUrl(String errorPageUrl) {
+	    this.errorPageUrl = errorPageUrl;
+    }
+
+	public String getConsentPageUrl() {
+	    return consentPageUrl;
+    }
+
+	public void setConsentPageUrl(String consentPageUrl) {
+	    this.consentPageUrl = consentPageUrl;
+    }
+
+	public String getGrantTypes() {
+	    return grantTypes;
+    }
+
+	public void setGrantTypes(String grantTypes) {
+	    this.grantTypes = grantTypes;
     }
 }
