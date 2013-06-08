@@ -126,6 +126,15 @@
 			<TokenEndPointAliases>tokenEP</TokenEndPointAliases>
 			<Audience>https://localhost:9443/oauth2endpoints/token</Audience>
 		</SAML2Grant>
+                <OpenIDConnect>
+                         <IDTokenIssuer>https://localhost:9443/oauth2endpoints/token</IDTokenIssuer>
+                         <IDTokenExpiration>3600</IDTokenExpiration>
+                         <UserInfoEndpointClaimDialect>http://wso2.org/claims</UserInfoEndpoinntClaimDialect>
+                         <UserInfoEndpointClaimRetriever>org.wso2.carbon.identity.oauth.endpoint.user.impl.UserInfoUserStoreClaimRetriever</UserInfoEndpointClaimRetriever>
+                         <UserInfoEndpointRequestValidator>org.wso2.carbon.identity.oauth.endpoint.user.impl.UserInforRequestDefaultValidator</UserInfoEndpointRequestValidator>
+                         <UserInfoEndpointAccessTokenValidator>org.wso2.carbon.identity.oauth.endpoint.user.impl.UserInfoISAccessTokenValidator</UserInfoEndpointAccessTokenValidator>
+                         <UserInfoEndpointResponseBuilder>org.wso2.carbon.identity.oauth.endpoint.user.impl.UserInfoJSONResponseBuilder</UserInfoEndpointResponseBuilder>
+                </OpenIDConnect>
 	</OAuth>
 
 	<MultifactorAuthentication>
