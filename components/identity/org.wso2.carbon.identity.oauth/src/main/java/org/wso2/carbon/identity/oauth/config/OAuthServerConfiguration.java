@@ -144,6 +144,8 @@ public class OAuthServerConfiguration {
 	private String loginPageUrl = null;
 
 	private String errorPageUrl = null;
+	
+	private String consentPageUrl = null;
 
 	private long defaultAuthorizationCodeValidityPeriodInSeconds = 300;
 
@@ -310,6 +312,10 @@ public class OAuthServerConfiguration {
 	 */
 	public String getCustomErrorPageUrl() {
 		return errorPageUrl;
+	}
+	
+	public String getCustomConsentPageUrl() {
+		return consentPageUrl;
 	}
 
 	public Set<OAuthCallbackHandlerMetaData> getCallbackHandlerMetaData() {
@@ -618,6 +624,13 @@ public class OAuthServerConfiguration {
 		                             oauthConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.CUSTOM_ERROR_PAGE_URL));
 		if (errorPageUrlElem != null) {
 			errorPageUrl = errorPageUrlElem.getText();
+		}
+		
+		// read the custom error page url configuration
+		OMElement consentPageUrlElem =
+		                             oauthConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.CUSTOM_ERROR_PAGE_URL));
+		if (consentPageUrlElem != null) {
+			consentPageUrl = consentPageUrlElem.getText();
 		}
 
 		// set the authorization code default timeout

@@ -345,7 +345,11 @@ public class OAuth2Util {
 	 * @return
 	 */
 	public static String getLoginPage(OAuthAppDO appDO) {
-		return OAuthServerConfiguration.getInstance().getCustomLoginPageUrl();
+		if (appDO == null || appDO.getLoginPageUrl() == null) {
+			return OAuthServerConfiguration.getInstance().getCustomLoginPageUrl();
+		} else {
+			return appDO.getLoginPageUrl();
+		}
 	}
 
 	/**
@@ -359,7 +363,29 @@ public class OAuth2Util {
 	 * @return
 	 */
 	public static String getErrorPage(OAuthAppDO appDO) {
-		return OAuthServerConfiguration.getInstance().getCustomErrorPageUrl();
+		if (appDO == null || appDO.getErrorPageUrl() == null) {
+			return OAuthServerConfiguration.getInstance().getCustomErrorPageUrl();
+		} else {
+			return appDO.getErrorPageUrl();
+		}
+	}
+	
+	/**
+	 * Returns the consent page for the oauth client. If there is any configured
+	 * login page to the client in the UI, then that will be returned. If not,
+	 * then the URL configured in the identity.xml will be returned or else
+	 * null will be returned.
+	 * 
+	 * @param appDO
+	 * 
+	 * @return
+	 */
+	public static String getConsentPage(OAuthAppDO appDO) {
+		if (appDO == null || appDO.getConsentPageUrl() == null) {
+			return OAuthServerConfiguration.getInstance().getCustomConsentPageUrl();
+		} else {
+			return appDO.getConsentPageUrl();
+		}
 	}
     
 }

@@ -26,6 +26,7 @@ public class OAuth2ClientValidationResponseDTO {
     private String callbackURL;
     private String loginPageURL;
     private String errorPageURL;
+    private String consentPageUrl;
 
     public boolean isValidClient() {
         return validClient;
@@ -81,5 +82,13 @@ public class OAuth2ClientValidationResponseDTO {
 
 	public void setLoginPageURL(String loginPageURL) {
 	    this.loginPageURL = loginPageURL;
+    }
+
+	public String getConsentPageUrl() {
+	    return consentPageUrl;
+    }
+
+	public void setConsentPageUrl(String consentPageUrl) {
+	    this.consentPageUrl = consentPageUrl;
     }
 }

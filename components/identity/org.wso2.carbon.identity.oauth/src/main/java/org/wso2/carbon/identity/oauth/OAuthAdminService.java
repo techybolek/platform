@@ -105,6 +105,10 @@ public class OAuthAdminService extends AbstractAdmin {
                 dto.setOauthConsumerKey(app.getOauthConsumerKey());
                 dto.setOauthConsumerSecret(app.getOauthConsumerSecret());
                 dto.setOAuthVersion(app.getOauthVersion());
+                dto.setLoginPageUrl(app.getLoginPageUrl());
+                dto.setErrorPageUrl(app.getErrorPageUrl());
+                dto.setConsentPageUrl(app.getConsentPageUrl());
+                dto.setGrantTypes(app.getGrantTypes());
                 dtos[i] = dto;
             }
         }
@@ -128,6 +132,10 @@ public class OAuthAdminService extends AbstractAdmin {
             dto.setOauthConsumerKey(app.getOauthConsumerKey());
             dto.setOauthConsumerSecret(app.getOauthConsumerSecret());
             dto.setOAuthVersion(app.getOauthVersion());
+            dto.setLoginPageUrl(app.getLoginPageUrl());
+            dto.setErrorPageUrl(app.getErrorPageUrl());
+            dto.setConsentPageUrl(app.getConsentPageUrl());
+            dto.setGrantTypes(app.getGrantTypes());
         }
         return dto;
     }
@@ -163,6 +171,10 @@ public class OAuthAdminService extends AbstractAdmin {
                 } else {   // by default, assume OAuth 2.0, if it is not set.
                     app.setOauthVersion(OAuthConstants.OAuthVersions.VERSION_2);
                 }
+                app.setLoginPageUrl(application.getLoginPageUrl());
+                app.setErrorPageUrl(application.getErrorPageUrl());
+                app.setConsentPageUrl(application.getConsentPageUrl());
+                app.setGrantTypes(application.getGrantTypes());
                 dao.addOAuthApplication(app);
             }
         }
@@ -185,6 +197,10 @@ public class OAuthAdminService extends AbstractAdmin {
         oauthappdo.setOauthConsumerKey(consumerAppDTO.getOauthConsumerKey());
         oauthappdo.setOauthConsumerSecret(consumerAppDTO.getOauthConsumerSecret());
         oauthappdo.setCallbackUrl(consumerAppDTO.getCallbackUrl());
+        oauthappdo.setLoginPageUrl(consumerAppDTO.getLoginPageUrl());
+        oauthappdo.setErrorPageUrl(consumerAppDTO.getErrorPageUrl());
+        oauthappdo.setConsentPageUrl(consumerAppDTO.getConsentPageUrl());
+        oauthappdo.setGrantTypes(consumerAppDTO.getGrantTypes());
         dao.updateConsumerApplication(oauthappdo);
     }
 
@@ -235,6 +251,10 @@ public class OAuthAdminService extends AbstractAdmin {
                 OAuthConsumerAppDTO appDTO = new OAuthConsumerAppDTO();
                 appDTO.setApplicationName(appDO.getApplicationName());
                 appDTO.setUsername(appDO.getUserName());
+                appDTO.setLoginPageUrl(appDO.getLoginPageUrl());
+                appDTO.setErrorPageUrl(appDO.getErrorPageUrl());
+                appDTO.setConsentPageUrl(appDO.getConsentPageUrl());
+                appDTO.setGrantTypes(appDO.getGrantTypes());
                 appDTOs[i] = appDTO;
             } catch (IdentityOAuthAdminException e) {
                 log.error(e.getMessage());
