@@ -33,8 +33,8 @@ import org.wso2.carbon.identity.oauth.endpoint.OAuthRequestWrapper;
 import org.wso2.carbon.identity.oauth.ui.OAuthClientException;
 import org.wso2.carbon.identity.oauth.ui.OAuthConstants;
 import org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil;
-import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AccessTokenRespDTO;
-import org.wso2.carbon.identity.oauth2.stub.types.ResponseHeader;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenRespDTO;
+import org.wso2.carbon.identity.oauth2.ResponseHeader;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -105,7 +105,7 @@ public class OAuth2TokenEndpoint {
             // exchange the access token for the authorization grant.
             OAuth2AccessTokenRespDTO oauth2AccessTokenResp = tokenClient.getAccessToken(oauthRequest);
             // if there BE has returned an error
-            if(oauth2AccessTokenResp.getError()){
+            if(oauth2AccessTokenResp.getErrorMsg() != null){
                 // if the client has used Basic Auth and if there is an auth failure, HTTP 401 Status
                 // Code should be sent back to the client.
                 if(basicAuthUsed && OAuth2ErrorCodes.INVALID_CLIENT.equals(

@@ -15,30 +15,15 @@
  * limitations under the License.
  */
 package org.wso2.carbon.identity.oauth.endpoint.user;
-/**
- * 
- */
-import org.apache.amber.oauth2.common.utils.JSONUtils;
-import org.codehaus.jettison.json.JSONException;
-import org.wso2.carbon.identity.oauth.ui.OAuthClientException;
-import org.wso2.carbon.user.api.Claim;
 
-/**
- * @author sga
- *
- */
-public class UserInfoJSONResponse extends UserInfoResponse {
+import java.util.Map;
 
-	/* (non-Javadoc)
-	 * @see org.wso2.carbon.identity.oauth.endpoint.user.UserInfoResponse#getResponseString(org.wso2.carbon.user.api.Claim[])
-	 */
-	@Override
-	public String getResponseString(Claim[] claims) throws OAuthClientException {
-		try {
-	        return JSONUtils.buildJSON(getClaimMap(claims));
-        } catch (JSONException e) {
-        	throw new OAuthClientException("Error while generating the response JSON");
-        }
-	}
+import org.apache.amber.oauth2.common.exception.OAuthSystemException;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
+
+public interface UserInfoClaimRetriever {
+
+	public Map<String, Object> getClaimsMap(OAuth2TokenValidationResponseDTO tokenResponse)
+	                                                                                       throws OAuthSystemException;
 
 }

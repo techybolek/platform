@@ -26,8 +26,9 @@ import org.wso2.carbon.identity.oauth.common.CarbonOAuthTokenRequest;
 import org.wso2.carbon.identity.oauth.ui.OAuthClientException;
 import org.wso2.carbon.identity.oauth.ui.client.OAuth2ServiceClient;
 import org.wso2.carbon.identity.oauth.ui.internal.OAuthUIServiceComponentHolder;
-import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AccessTokenReqDTO;
-import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2AccessTokenRespDTO;
+import org.wso2.carbon.identity.oauth.util.EndpointUtil;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenReqDTO;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenRespDTO;
 import org.wso2.carbon.ui.CarbonUIUtil;
 
 /**
@@ -74,7 +75,8 @@ public class OAuth2TokenClient {
         try {
             OAuth2ServiceClient oauth2ServiceClient = new OAuth2ServiceClient(backendServerURL,
                     configContext);
-            return oauth2ServiceClient.issueAccessToken(tokenReqDTO);
+//            return oauth2ServiceClient.issueAccessToken(tokenReqDTO);
+            return EndpointUtil.getOAuth2Service().issueAccessToken(tokenReqDTO);
         } catch (Exception e){
             String errorMsg = "Error when invoking the OAuth2Service to get an access token.";
             log.error(errorMsg, e);

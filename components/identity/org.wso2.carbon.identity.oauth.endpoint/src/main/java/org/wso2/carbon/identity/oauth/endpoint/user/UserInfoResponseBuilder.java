@@ -16,39 +16,26 @@
  */
 package org.wso2.carbon.identity.oauth.endpoint.user;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.wso2.carbon.identity.oauth.ui.OAuthClientException;
-import org.wso2.carbon.user.api.Claim;
+import org.apache.amber.oauth2.common.exception.OAuthProblemException;
+import org.apache.amber.oauth2.common.exception.OAuthSystemException;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
 
 /**
  * Abstract representation of the UserInfoResponse. The response can be a JSON
  * or a JWT
  * 
  */
-public abstract class UserInfoResponse {
+public interface UserInfoResponseBuilder {
 
 	/**
 	 * 
+	 * @param tokenResponse 
 	 * @param claims
 	 * @return
-	 * @throws OAuthClientException
+	 * @throws OAuthSystemException 
+	 * @throws OAuthProblemException TODO
 	 */
-	public abstract String getResponseString(Claim[] claims) throws OAuthClientException;
+	public String getResponseString(OAuth2TokenValidationResponseDTO tokenResponse)
+	                                                                               throws UserInfoEndpointException, OAuthSystemException;
 
-	/**
-	 * Builds the claims defined in
-	 * http://openid.net/specs/openid-connect-basic-1_0-22.html#id_res
-	 * 
-	 * @param claims
-	 * @return
-	 */
-	public Map<String, Object> getClaimMap(Claim[] claims) {
-		Map<String, Object> claimMap = new HashMap<String, Object>();
-		for (Claim curClaim : claims) {
-			claimMap.put(curClaim.getClaimUri(), curClaim.getValue());
-		}
-		return claimMap;
-	}
 }

@@ -29,8 +29,8 @@ import org.wso2.carbon.identity.oauth.endpoint.OAuthRequestWrapper;
 import org.wso2.carbon.identity.oauth.ui.OAuthClientException;
 import org.wso2.carbon.identity.oauth.ui.OAuthConstants;
 import org.wso2.carbon.identity.oauth.ui.util.OAuthUIUtil;
-import org.wso2.carbon.identity.oauth2.stub.dto.OAuthRevocationRequestDTO;
-import org.wso2.carbon.identity.oauth2.stub.dto.OAuthRevocationResponseDTO;
+import org.wso2.carbon.identity.oauth2.dto.OAuthRevocationRequestDTO;
+import org.wso2.carbon.identity.oauth2.dto.OAuthRevocationResponseDTO;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -102,7 +102,7 @@ public class OAuthRevocationEndpoint {
             OAuthRevocationClient revokeClient = new OAuthRevocationClient();
             OAuthRevocationResponseDTO oauthRevokeResp = revokeClient.revokeTokens(revokeRequest);
             // if there BE has returned an error
-            if(oauthRevokeResp.getError()){
+            if(oauthRevokeResp.getErrorMsg()!= null){
                 // if the client has used Basic Auth and if there is an auth failure, HTTP 401 Status
                 // Code should be sent back to the client.
                 if(basicAuthUsed && OAuth2ErrorCodes.INVALID_CLIENT.equals(
