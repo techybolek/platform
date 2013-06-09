@@ -83,6 +83,8 @@ public class OAuthServerConfiguration {
 		private static final String CUSTOM_LOGIN_PAGE_URL = "CustomLoginPageUrl";
 
 		private static final String CUSTOM_ERROR_PAGE_URL = "CustomErrorPageUrl";
+		
+		private static final String CUSTOM_CONSENT_PAGE_URL = "CustomConsentPageUrl";
 
 		private static final String ACCESS_TOKEN_DEFAULT_VALIDITY_PERIOD = "AccessTokenDefaultValidityPeriod";
 		// Enable/Disable cache
@@ -628,7 +630,7 @@ public class OAuthServerConfiguration {
 		
 		// read the custom error page url configuration
 		OMElement consentPageUrlElem =
-		                             oauthConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.CUSTOM_ERROR_PAGE_URL));
+		                             oauthConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.CUSTOM_CONSENT_PAGE_URL));
 		if (consentPageUrlElem != null) {
 			consentPageUrl = consentPageUrlElem.getText();
 		}
