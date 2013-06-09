@@ -84,7 +84,33 @@
 		                        <td><input class="text-box-big" id="callback" name="callback"
 		                                   type="text" /></td>
 		                    </tr>
-
+							 <tr>
+		                        <td class="leftCol-small"><fmt:message key='loginPage'/></td>
+		                        <td><input class="text-box-big" id="loginPage" name="loginPage"
+		                                   type="text" /></td>
+		                    </tr>
+		                     <tr>
+		                        <td class="leftCol-small"><fmt:message key='errorPage'/></td>
+		                        <td><input class="text-box-big" id="errorPage" name="errorPage"
+		                                   type="text" /></td>
+		                    </tr>
+		                     <tr>
+		                        <td class="leftCol-small"><fmt:message key='consentPage'/></td>
+		                        <td><input class="text-box-big" id="consentPage" name="consentPage"
+		                                   type="text" /></td>
+		                    </tr>
+		                     <tr>
+		                        <td class="leftCol-small"><fmt:message key='grantTypes'/></td>
+		                        <td>
+		                        <table>
+		                           <tr><label><input type="checkbox" id="grant_code" name="grant_code" value="authorization_code" checked="checked"/>Code</label></tr>
+		                           <tr><lable><input type="checkbox" id="grant_password" name="grant_password" value="password" checked="checked"/>Password</lable></tr>
+		                           <tr><label><input type="checkbox" id="grant_client" name="grant_client" value="client_credentials" checked="checked"/>Client Credential</label></tr>
+		                           <tr><label><input type="checkbox" id="grant_refresh" name="grant_refresh" value="refresh_token" checked="checked"/>Refresh Token</label></tr>
+		                           <tr><label><input type="checkbox" id="grant_saml" name="grant_saml" value="urn:ietf:params:oauth:grant-type:saml2-bearer" checked="checked"/>SAML</label></tr>
+		                        </table>   
+		                        </td>
+		                    </tr>
 				</table>
 			</td>
 		    </tr>

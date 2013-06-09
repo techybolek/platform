@@ -40,6 +40,33 @@
     String applicationName = CharacterEncoder.getSafeText(request.getParameter("application"));
     String consumersecret = CharacterEncoder.getSafeText(request.getParameter("consumersecret"));
     String oauthVersion = CharacterEncoder.getSafeText(request.getParameter("oauthVersion"));
+    String loginPage = CharacterEncoder.getSafeText(request.getParameter("loginPage"));
+    String errorPage = CharacterEncoder.getSafeText(request.getParameter("errorPage"));
+    String consentPage = CharacterEncoder.getSafeText(request.getParameter("consentPage"));
+    //-- start setting grants
+    String grantCode = CharacterEncoder.getSafeText(request.getParameter("grant_code"));
+    String grantPassword = CharacterEncoder.getSafeText(request.getParameter("grant_password"));
+    String grantClient = CharacterEncoder.getSafeText(request.getParameter("grant_client"));
+    String grantRefresh = CharacterEncoder.getSafeText(request.getParameter("grant_refresh"));
+    String grantSAML = CharacterEncoder.getSafeText(request.getParameter("grant_saml"));
+    String grants = null;
+   	StringBuffer buff = new StringBuffer();
+	if (grantCode != null) {
+		buff.append(grantCode + " ");
+	}
+	if (grantPassword != null) {
+		buff.append(grantPassword + " ");
+	}
+	if (grantClient != null) {
+		buff.append(grantClient + " ");
+	}
+	if (grantRefresh != null) {
+		buff.append(grantRefresh + " ");
+	}
+	if (grantSAML != null) {
+		buff.append(grantSAML + " ");
+	}
+	grants = buff.toString();
 	String forwardTo = "index.jsp";
     String BUNDLE = "org.wso2.carbon.identity.oauth.ui.i18n.Resources";
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
@@ -57,6 +84,10 @@
         app.setCallbackUrl(callback);
         app.setApplicationName(applicationName);
         app.setOAuthVersion(oauthVersion);
+        app.setLoginPageUrl(loginPage);
+		app.setErrorPageUrl(errorPage);
+		app.setConsentPageUrl(consentPage);
+		app.setGrantTypes(grants);
         client.updateOAuthApplicationData(app);
         String message = resourceBundle.getString("app.updated.successfully");
         CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.INFO, request);

@@ -48,10 +48,11 @@ public class OAuth2AuthzClient {
     public String handleAuthorizationRequest(HttpServletRequest request,
                                              HttpServletResponse response) throws OAuthSystemException {
 
-        OAuth2Parameters oauth2Params = (OAuth2Parameters) request.getSession()
-                .getAttribute(OAuthConstants.OAUTH2_PARAMS);
+		OAuth2Parameters oauth2Params =
+		                                (OAuth2Parameters) request.getSession()
+		                                                          .getAttribute(OAuthConstants.OAUTH2_PARAMS);
 
-        // user has denied the authorization. Send back the error code.
+		// user has denied the authorization. Send back the error code.
 		if ("true".equals(request.getParameter("deny"))) {
 			return OAuthASResponse.errorResponse(HttpServletResponse.SC_FOUND)
 			                      .setError(OAuth2ErrorCodes.ACCESS_DENIED)
@@ -66,33 +67,32 @@ public class OAuth2AuthzClient {
             	String loginPageInSession = (String) request.getSession().getAttribute("loginPage");
             	return loginPageInSession+"&auth_status=failed";
             }
-
-            OAuthASResponse.OAuthAuthorizationResponseBuilder builder = OAuthASResponse
-                    .authorizationResponse(request, HttpServletResponse.SC_FOUND);
-
+			OAuthASResponse.OAuthAuthorizationResponseBuilder builder =
+			                                                            OAuthASResponse.authorizationResponse(request,
+			                                                                                                  HttpServletResponse.SC_FOUND);
             OAuthResponse oauthResponse;
-
             // user is authorized.
             if (authzRespDTO.getAuthorized()) {
 
-                if (ResponseType.CODE.toString().equals(oauth2Params.getResponseType())) {
-                    builder.setCode(authzRespDTO.getAuthorizationCode());
-                } else if (ResponseType.TOKEN.toString().equals(oauth2Params.getResponseType())) {
-                    builder.setAccessToken(authzRespDTO.getAccessToken());
-                    builder.setExpiresIn(String.valueOf(60 * 60));
-                }
+				if (ResponseType.CODE.toString().equals(oauth2Params.getResponseType())) {
+					builder.setCode(authzRespDTO.getAuthorizationCode());
+				} else if (ResponseType.TOKEN.toString().equals(oauth2Params.getResponseType())) {
+					builder.setAccessToken(authzRespDTO.getAccessToken());
+					builder.setExpiresIn(String.valueOf(60 * 60));
+				}
 
                 builder.setParam("state", oauth2Params.getState());
                 String redirectURL = authzRespDTO.getCallbackURI();
                 oauthResponse = builder.location(redirectURL).buildQueryMessage();
 
             } else {
-                OAuthProblemException oauthException = OAuthProblemException.error(
-                        authzRespDTO.getErrorCode(), authzRespDTO.getErrorMsg());
-                oauthResponse = OAuthASResponse.errorResponse(HttpServletResponse.SC_FOUND)
-                        .error(oauthException)
-                        .location(authzRespDTO.getCallbackURI()).setState(oauth2Params.getState())
-                        .buildQueryMessage();
+				OAuthProblemException oauthException =
+				                                       OAuthProblemException.error(authzRespDTO.getErrorCode(),
+				                                                                   authzRespDTO.getErrorMsg());
+				oauthResponse =
+				                OAuthASResponse.errorResponse(HttpServletResponse.SC_FOUND)
+				                               .error(oauthException).location(authzRespDTO.getCallbackURI())
+				                               .setState(oauth2Params.getState()).buildQueryMessage();
             }
             response.setStatus(HttpServletResponse.SC_FOUND);
             request.getSession().removeAttribute(OAuthConstants.OAUTH2_PARAMS);

@@ -38,29 +38,62 @@
 	String applicationName = CharacterEncoder.getSafeText(request.getParameter("application"));
     String callback = CharacterEncoder.getSafeText(request.getParameter("callback"));
     String oauthVersion = CharacterEncoder.getSafeText(request.getParameter("oauthVersion"));
+    String loginPage = CharacterEncoder.getSafeText(request.getParameter("loginPage"));
+    String errorPage = CharacterEncoder.getSafeText(request.getParameter("errorPage"));
+    String consentPage = CharacterEncoder.getSafeText(request.getParameter("consentPage"));
+    //-- start setting grants
+    String grantCode = CharacterEncoder.getSafeText(request.getParameter("grant_code"));
+    String grantPassword = CharacterEncoder.getSafeText(request.getParameter("grant_password"));
+    String grantClient = CharacterEncoder.getSafeText(request.getParameter("grant_client"));
+    String grantRefresh = CharacterEncoder.getSafeText(request.getParameter("grant_refresh"));
+    String grantSAML = CharacterEncoder.getSafeText(request.getParameter("grant_saml"));
+    String grants = null;
+   	StringBuffer buff = new StringBuffer();
+	if (grantCode != null) {
+		buff.append(grantCode + " ");
+	}
+	if (grantPassword != null) {
+		buff.append(grantPassword + " ");
+	}
+	if (grantClient != null) {
+		buff.append(grantClient + " ");
+	}
+	if (grantRefresh != null) {
+		buff.append(grantRefresh + " ");
+	}
+	if (grantSAML != null) {
+		buff.append(grantSAML + " ");
+	}
+	grants = buff.toString();
+	// -- end setting grants
 	String forwardTo = "index.jsp";
-    String BUNDLE = "org.wso2.carbon.identity.oauth.ui.i18n.Resources";
+	String BUNDLE = "org.wso2.carbon.identity.oauth.ui.i18n.Resources";
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 	OAuthConsumerAppDTO app = new OAuthConsumerAppDTO();
-	
-    try {
 
-        String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
-        String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
-        ConfigurationContext configContext =
-                (ConfigurationContext) config.getServletContext().getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
-        OAuthAdminClient client = new OAuthAdminClient(cookie, backendServerURL, configContext);
-        app.setApplicationName(applicationName);
-        app.setCallbackUrl(callback);
-        app.setOAuthVersion(oauthVersion);
-        client.registerOAuthApplicationData(app);
-        String message = resourceBundle.getString("app.added.successfully");
-        CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.INFO, request);
+	try {
 
-    } catch (Exception e) {
-    	String message = resourceBundle.getString("error.while.adding.app") +  " : " + e.getMessage();
-    	CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request,e);
-    }
+		String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+		String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
+		ConfigurationContext configContext =
+		                                     (ConfigurationContext) config.getServletContext()
+		                                                                  .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+		OAuthAdminClient client = new OAuthAdminClient(cookie, backendServerURL, configContext);
+		app.setApplicationName(applicationName);
+		app.setCallbackUrl(callback);
+		app.setOAuthVersion(oauthVersion);
+		app.setLoginPageUrl(loginPage);
+		app.setErrorPageUrl(errorPage);
+		app.setConsentPageUrl(consentPage);
+		app.setGrantTypes(grants);
+		client.registerOAuthApplicationData(app);
+		String message = resourceBundle.getString("app.added.successfully");
+		CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.INFO, request);
+
+	} catch (Exception e) {
+		String message = resourceBundle.getString("error.while.adding.app") + " : " + e.getMessage();
+		CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request, e);
+	}
 %>
 
 <script type="text/javascript">

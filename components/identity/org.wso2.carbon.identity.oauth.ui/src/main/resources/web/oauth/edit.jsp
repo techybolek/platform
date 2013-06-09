@@ -36,7 +36,7 @@
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 
 <%
-    String consumerkey = CharacterEncoder.getSafeText(request.getParameter("consumerkey"));
+	String consumerkey = CharacterEncoder.getSafeText(request.getParameter("consumerkey"));
     OAuthConsumerAppDTO app = null;
     String forwardTo = null;
     String[] profileConfigs = null;
@@ -44,30 +44,40 @@
 	ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE, request.getLocale());
 	String id = null;
 	String secret = null;
+	// grants
+	boolean codeGrant = false;
+	boolean passowrdGrant = false;
+	boolean clientCredGrant = false;
+	boolean refreshGrant = false;
+	boolean samlGrant = false;
 	
     try {
 
-        String cookie = (String) session
-                .getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
-        String backendServerURL = CarbonUIUtil.getServerURL(config
-                .getServletContext(), session);
-        ConfigurationContext configContext = (ConfigurationContext) config
-                .getServletContext().getAttribute(
-                        CarbonConstants.CONFIGURATION_CONTEXT);
-        OAuthAdminClient client = new OAuthAdminClient(cookie,
-                backendServerURL, configContext);
-        app = client.getOAuthApplicationData(consumerkey);
-        if (OAuthConstants.OAuthVersions.VERSION_2.equals(app.getOAuthVersion())){
-            id = resourceBundle.getString("consumerkey.oauth20");
-            secret = resourceBundle.getString("consumersecret.oauth20");
-        } else {
-            id = resourceBundle.getString("consumerkey.oauth10a");
-            secret = resourceBundle.getString("consumersecret.oauth10a");
-        }
-     } catch (Exception e) {
-    	String message = resourceBundle.getString("error.while.loading.app.data");
-        CarbonUIMessage.sendCarbonUIMessage(message,CarbonUIMessage.ERROR, request);
-        forwardTo = "../admin/error.jsp";
+       	String cookie = (String) session.getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
+		String backendServerURL = CarbonUIUtil.getServerURL(config.getServletContext(), session);
+		ConfigurationContext configContext =
+		                                     (ConfigurationContext) config.getServletContext()
+		                                                                  .getAttribute(CarbonConstants.CONFIGURATION_CONTEXT);
+		OAuthAdminClient client = new OAuthAdminClient(cookie, backendServerURL, configContext);
+		app = client.getOAuthApplicationData(consumerkey);
+		if (OAuthConstants.OAuthVersions.VERSION_2.equals(app.getOAuthVersion())) {
+			id = resourceBundle.getString("consumerkey.oauth20");
+			secret = resourceBundle.getString("consumersecret.oauth20");
+		} else {
+			id = resourceBundle.getString("consumerkey.oauth10a");
+			secret = resourceBundle.getString("consumersecret.oauth10a");
+		}
+		// setting geants
+		String grants = app.getGrantTypes();
+		codeGrant = grants.contains("authorization_code") ? true : false;
+		passowrdGrant = grants.contains("password");
+		clientCredGrant = grants.contains("client_credentials");
+		refreshGrant = grants.contains("refresh_token");
+		samlGrant = grants.contains("urn:ietf:params:oauth:grant-type:saml2-bearer");
+	} catch (Exception e) {
+		String message = resourceBundle.getString("error.while.loading.app.data");
+		CarbonUIMessage.sendCarbonUIMessage(message, CarbonUIMessage.ERROR, request);
+		forwardTo = "../admin/error.jsp";
 %>
 
 <script type="text/javascript">
@@ -138,6 +148,33 @@
 		                        <td class="leftCol-small"><fmt:message key='callback'/><font class="required">*</font></td>
 		                        <td><input class="text-box-big" id="callback" name="callback"
 		                                   type="text" value="<%=app.getCallbackUrl()%>" /></td>
+		                    </tr>
+		                    <tr>
+		                        <td class="leftCol-small"><fmt:message key='loginPage'/></td>
+		                        <td><input class="text-box-big" id="loginPage" name="loginPage"
+		                                   type="text" value="<%=app.getLoginPageUrl()%>" /></td>
+		                    </tr>
+		                    <tr>
+		                        <td class="leftCol-small"><fmt:message key='errorPage'/></td>
+		                        <td><input class="text-box-big" id="errorPage" name="errorPage"
+		                                   type="text" value="<%=app.getErrorPageUrl()%>" /></td>
+		                    </tr>
+		                    <tr>
+		                        <td class="leftCol-small"><fmt:message key='consentPage'/></td>
+		                        <td><input class="text-box-big" id="consentPage" name="consentPage"
+		                                   type="text" value="<%=app.getConsentPageUrl()%>" /></td>
+		                    </tr>
+		                     <tr>
+		                        <td class="leftCol-small"><fmt:message key='grantTypes'/></td>
+		                        <td>
+		                        <table>
+		                           <tr><label><input type="checkbox" id="grant_code" name="grant_code" value="authorization_code"  <%=(codeGrant ? "checked=\"checked\"" : "")%>/>Code</label></tr>
+		                           <tr><lable><input type="checkbox" id="grant_password" name="grant_password" value="password"  <%=(passowrdGrant ? "checked=\"checked\"" : "")%>/>Password</lable></tr>
+		                           <tr><label><input type="checkbox" id="grant_client" name="grant_client" value="client_credentials"  <%=(clientCredGrant ? "checked=\"checked\"" : "")%>/>Client Credential</label></tr>
+		                           <tr><label><input type="checkbox" id="grant_refresh" name="grant_refresh" value="refresh_token"  <%=(refreshGrant ? "checked=\"checked\"" : "")%>/>Refresh Token</label></tr>
+		                           <tr><label><input type="checkbox" id="grant_saml" name="grant_saml" value="urn:ietf:params:oauth:grant-type:saml2-bearer"  <%=(samlGrant ? "checked=\"checked\"" : "")%>/>SAML</label></tr>
+		                        </table>   
+		                        </td>
 		                    </tr>
 		                     <tr>
 		                        <td class="leftCol-small"><%=id%></td>

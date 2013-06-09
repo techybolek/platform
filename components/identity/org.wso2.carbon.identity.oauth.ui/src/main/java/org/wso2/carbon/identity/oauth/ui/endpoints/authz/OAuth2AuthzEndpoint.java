@@ -116,7 +116,7 @@ public class OAuth2AuthzEndpoint extends HttpServlet {
 				                                   clientDTO.getErrorMsg());
 			}
 
-            // Now the client is valid, redirect him for authorization page.
+            // Now the client is valid, redirect him to the authorization page.
             OAuthAuthzRequest oauthRequest = new OAuthAuthzRequest(req);
             OAuth2Parameters params = new OAuth2Parameters();
             params.setApplicationName(clientDTO.getApplicationName());
