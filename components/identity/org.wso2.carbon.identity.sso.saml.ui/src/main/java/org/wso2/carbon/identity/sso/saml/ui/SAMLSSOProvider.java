@@ -218,6 +218,7 @@ public class SAMLSSOProvider extends HttpServlet {
                 }
                 if(client.isSAMLSSOLoginAccepted()){
                     req.getSession().setAttribute("authenticatedOpenID",SAMLSSOUIUtil.getOpenID(signInRespDTO.getSubject()));
+                    req.getSession().setAttribute("openId",SAMLSSOUIUtil.getOpenID(signInRespDTO.getSubject()));
                 }
                 sendResponse(req, resp, relayState, signInRespDTO.getResponse(),
                         signInRespDTO.getAssertionConsumerURL(), signInRespDTO.getSubject());
@@ -236,6 +237,7 @@ public class SAMLSSOProvider extends HttpServlet {
 			LogoutRequestSender.getInstance().sendLogoutRequests(signInRespDTO.getLogoutRespDTO());
             if(client.isSAMLSSOLoginAccepted()){
                 req.getSession().removeAttribute("authenticatedOpenID");
+                req.getSession().removeAttribute("openId");
             }
 			// sending LogoutResponse back to the initiator
 			sendResponse(req, resp, relayState, signInRespDTO.getLogoutResponse(),
@@ -341,6 +343,7 @@ public class SAMLSSOProvider extends HttpServlet {
             }
             if(ssoServiceClient.isSAMLSSOLoginAccepted()){
                 req.getSession().setAttribute("authenticatedOpenID",SAMLSSOUIUtil.getOpenID(authRespDTO.getSubject()));
+                req.getSession().setAttribute("openId",SAMLSSOUIUtil.getOpenID(authRespDTO.getSubject()));
             }
             sendResponse(req, resp, relayState, authRespDTO.getRespString(),
 					authRespDTO.getAssertionConsumerURL(), authRespDTO.getSubject());
