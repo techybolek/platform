@@ -89,11 +89,11 @@
             <groupId>org.eclipse.osgi</groupId>
             <artifactId>org.eclipse.osgi.services</artifactId>
         </dependency>
-        <!--dependency>
+        <dependency>
             <groupId>org.apache.juddi</groupId>
-            <artifactId>juddi</artifactId>
+            <artifactId>juddi-core</artifactId>
 	    <version>3.1.5.wso2v1</version>
-        </dependency-->
+        </dependency>
 	<dependency>
             <groupId>org.apache.juddi</groupId>
             <artifactId>juddi-client</artifactId>
