@@ -74,7 +74,8 @@
 		<AuthorizeUrl>https://localhost:9443/oauth/authorize-url</AuthorizeUrl>
                 <!-- When an external login page needs to be configured, use the below
                 <CustomLoginPageUrl>http://hostname/loginpage</CustomLoginPageUrl>
-                <CustomErrorPageUrl>http://hostname/error</CustomErrorPageUrl> 
+                <CustomErrorPageUrl>http://hostname/error</CustomErrorPageUrl>
+                <CustomConsentPageUrl>http://hostname/consent</CustomConsentPageUrl> 
                 -->
 		<!-- Default validity period for Authorization Code in seconds -->
 		<AuthorizationCodeDefaultValidityPeriod>300</AuthorizationCodeDefaultValidityPeriod>
