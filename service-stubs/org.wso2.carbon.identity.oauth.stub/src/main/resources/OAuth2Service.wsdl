@@ -35,21 +35,6 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="validateClientInfo">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="clientId" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="callbackURI" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="validateClientInfoResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2285:OAuth2ClientValidationResponseDTO"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
             <xs:element name="issueAccessToken">
                 <xs:complexType>
                     <xs:sequence>
@@ -92,6 +77,21 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="validateClientInfo">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="clientId" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="callbackURI" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="validateClientInfoResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2285:OAuth2ClientValidationResponseDTO"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
         </xs:schema>
         <xs:schema xmlns:ax2288="http://oauth2.identity.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.oauth2.identity.carbon.wso2.org/xsd">
             <xs:import namespace="http://oauth2.identity.carbon.wso2.org/xsd"/>
@@ -116,17 +116,6 @@
                     <xs:element minOccurs="0" name="errorMsg" nillable="true" type="xs:string"/>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="scope" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="validityPeriod" type="xs:long"/>
-                </xs:sequence>
-            </xs:complexType>
-            <xs:complexType name="OAuth2ClientValidationResponseDTO">
-                <xs:sequence>
-                    <xs:element minOccurs="0" name="applicationName" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="callbackURL" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="errorCode" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="errorMsg" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="errorPageURL" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="loginPageURL" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="validClient" type="xs:boolean"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="OAuth2AccessTokenReqDTO">
@@ -175,6 +164,18 @@
                     <xs:element minOccurs="0" name="error" type="xs:boolean"/>
                     <xs:element minOccurs="0" name="errorCode" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="errorMsg" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="OAuth2ClientValidationResponseDTO">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="applicationName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="callbackURL" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="consentPageUrl" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="errorCode" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="errorMsg" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="errorPageURL" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="loginPageURL" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="validClient" type="xs:boolean"/>
                 </xs:sequence>
             </xs:complexType>
         </xs:schema>

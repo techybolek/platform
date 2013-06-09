@@ -1,20 +1,19 @@
-
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:tns="http://oauth2.identity.carbon.wso2.org" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax2283="http://dto.oauth2.identity.carbon.wso2.org/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://oauth2.identity.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:ax2297="http://dto.oauth2.identity.carbon.wso2.org/xsd" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:tns="http://oauth2.identity.carbon.wso2.org" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://oauth2.identity.carbon.wso2.org">
     <wsdl:documentation>OAuth2TokenValidationService</wsdl:documentation>
     <wsdl:types>
-        <xs:schema xmlns:ns="http://org.apache.axis2/xsd" xmlns:ax2284="http://dto.oauth2.identity.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
+        <xs:schema xmlns:ns="http://org.apache.axis2/xsd" xmlns:ax2298="http://dto.oauth2.identity.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
             <xs:import namespace="http://dto.oauth2.identity.carbon.wso2.org/xsd"/>
             <xs:element name="validate">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="validationReqDTO" nillable="true" type="ax2283:OAuth2TokenValidationRequestDTO"/>
+                        <xs:element minOccurs="0" name="validationReqDTO" nillable="true" type="ax2297:OAuth2TokenValidationRequestDTO"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="validateResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2283:OAuth2TokenValidationResponseDTO"/>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2297:OAuth2TokenValidationResponseDTO"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -30,7 +29,7 @@
             </xs:complexType>
             <xs:complexType name="OAuth2TokenValidationResponseDTO">
                 <xs:sequence>
-                    <xs:element minOccurs="0" name="authorizationContextToken" nillable="true" type="ax2283:AuthorizationContextToken"/>
+                    <xs:element minOccurs="0" name="authorizationContextToken" nillable="true" type="ax2297:AuthorizationContextToken"/>
                     <xs:element minOccurs="0" name="authorizedUser" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="consumerKey" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="errorMsg" nillable="true" type="xs:string"/>
