@@ -58,8 +58,8 @@ public class DeleteGroup {
 
             System.out.println("");
             System.out.println("");
-            System.out.println("/******SCIM user delete response status: " + deleteResponseStatus);
-            System.out.println("SCIM user delete response data: " + deleteResponse + "******/");
+            System.out.println("/******SCIM group delete response status: " + deleteResponseStatus);
+            System.out.println("SCIM group delete response data: " + deleteResponse + "******/");
             System.out.println("");
 
         } catch (CharonException e) {

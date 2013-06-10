@@ -46,11 +46,21 @@ You will notice that the group created in the step 5 above, is updated with new 
 Sample for deleting user:
 --------------------------
 8. Run the command: 'ant delete-user' at this directory level in command line and observe the response status
-and the SCIM response printed in the command line output. If the
+and the SCIM response printed in the command line output.
 
 You will notice that the user created in step 4 above is now deleted in Identity Server.
 
 Sample for deleting group:
 ---------------------------
-9.
+9. Run the command: 'ant delete-group' at this directory level in command line and observe the response status
+and the SCIM response printed in the command line output. If the
+
+You will notice that the group created in step 5 above is now deleted in Identity Server.
+
+10. Provisioning SCIM operations to other SCIM providers.
+---------------------------------------------------------
+
+You can also observe the provisioning of above SCIM operations to other SCIM providers - such as other
+Identity Server nodes by configuring SCIM providers in the current Identity Server node, as described in the documentation
+which can be found at: http://docs.wso2.org/wiki/display/IS450/Registering+SCIM+Providers
 

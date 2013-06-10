@@ -113,11 +113,11 @@ public class UpdateGroup {
             SCIMClient scimClient = new SCIMClient();
             //check for success of the response
             if (scimClient.evaluateResponseStatus(responseCode)) {
-                ListedResource listedUserResource =
+                ListedResource listedGroupResource =
                         scimClient.decodeSCIMResponseWithListedResource(
                                 response, SCIMConstants.identifyFormat(SCIMSamplesUtils.CONTENT_TYPE),
-                                SCIMConstants.USER_INT);
-                List<SCIMObject> filteredGroups = listedUserResource.getScimObjects();
+                                SCIMConstants.GROUP_INT);
+                List<SCIMObject> filteredGroups = listedGroupResource.getScimObjects();
                 for (SCIMObject filteredGroup : filteredGroups) {
                     //we expect only one result here
                     groupId = ((Group) filteredGroup).getId();
