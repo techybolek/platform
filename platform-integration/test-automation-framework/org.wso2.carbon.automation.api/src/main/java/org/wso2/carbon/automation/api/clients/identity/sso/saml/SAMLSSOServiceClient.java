@@ -59,7 +59,7 @@ public class SAMLSSOServiceClient {
 
     }
 
-    public String getSSOSessionTimeout()
+    public int getSSOSessionTimeout()
             throws Exception {
         try {
             return identitySAMLSSOServiceStub.getSSOSessionTimeout();
