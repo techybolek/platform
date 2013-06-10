@@ -43,6 +43,7 @@ public class SCIMCommonUtils {
         //to initialize scim urls once.
         //construct SCIM_USER_LOCATION and SCIM_GROUP_LOCATION like: https://localhost:9443/wso2/scim/Groups
         String portOffSet = ServerConfiguration.getInstance().getFirstProperty("Ports.Offset");
+        //TODO: read the https port from config file. Here the default one is hardcoded, but offset is read from config
         int httpsPort = 9443 + Integer.parseInt(portOffSet);
         String scimURL = "https://" + ServerConfiguration.getInstance().getFirstProperty("HostName")
                          + ":" + String.valueOf(httpsPort) + "/wso2/scim/";
@@ -51,11 +52,11 @@ public class SCIMCommonUtils {
     }
 
     public static String getSCIMUserURL(String id) {
-        return scimUserLocation + id;
+        return scimUserLocation + "/" + id;
     }
 
     public static String getSCIMGroupURL(String id) {
-        return scimGroupLocation + id;
+        return scimGroupLocation + "/" + id;
     }
 
     public static String getSCIMUserURL() {

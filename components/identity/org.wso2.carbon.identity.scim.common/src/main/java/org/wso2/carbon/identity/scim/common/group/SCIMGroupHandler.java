@@ -95,7 +95,7 @@ public class SCIMGroupHandler {
 
     /**
      * When adding group through SCIM Resource endpoint, add the group attributes to the
-     * Identity_SCIM_GROUP table, except the ones added in UserStore (i.e display name, users)
+     * Identity_SCIM_GROUP table, in addition to the ones added in UserStore (i.e display name, users)
      *
      * @param group
      */

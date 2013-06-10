@@ -37,6 +37,7 @@ import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.listener.UserOperationEventListener;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.charon.core.exceptions.CharonException;
 import org.wso2.charon.core.exceptions.NotFoundException;
 import org.wso2.charon.core.objects.Group;
@@ -78,10 +79,10 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
                                       UserStoreManager userStoreManager)
             throws UserStoreException {
         String activeAttributeValue = userStoreManager.getUserClaimValue(userName, SCIMConstants.ACTIVE_URI, null);
-        boolean  isUserActive = true;
+        boolean isUserActive = true;
         if (activeAttributeValue != null) {
             isUserActive = Boolean.parseBoolean(activeAttributeValue);
-            if(isUserActive){
+            if (isUserActive) {
                 return authenticated;
             } else {
                 log.error("Trying to login from an inactive account of user: " + userName);
@@ -153,7 +154,7 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
                 /*In SCIM, we do not manage groups through user resource. Hence, no need to send group
                  info in createUser request.*/
 
-                //TODO if groups are set (through) carbon APIs, then need to send a update group request as well.
+                //TODO if groups are set (through) carbon APIs, then need to send a update group provisioning request as well.
                 //but for the moment, do group mgt operations through group resource.
                 provisioningThreadPool.submit(new DefaultSCIMProvisioningHandler(
                         consumerUserId, user, SCIMConstants.POST, null));
@@ -340,20 +341,26 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
         return true;
     }
 
-    public boolean doPreAddRole(String s, String[] strings, org.wso2.carbon.user.api.Permission[] permissions,
+    public boolean doPreAddRole(String s, String[] strings,
+                                org.wso2.carbon.user.api.Permission[] permissions,
                                 UserStoreManager userStoreManager) throws UserStoreException {
         return true;
     }
 
-    public boolean doPostAddRole(String roleName, String[] userList, org.wso2.carbon.user.api.Permission[] permissions,
+    public boolean doPostAddRole(String roleName, String[] userList,
+                                 org.wso2.carbon.user.api.Permission[] permissions,
                                  UserStoreManager userStoreManager) throws UserStoreException {
         SCIMGroupHandler scimGroupHandler = new SCIMGroupHandler(userStoreManager.getTenantId());
+
+        String domainName = UserCoreUtil.getDomainName(userStoreManager.getRealmConfiguration());
+        String roleNameWithDomain = UserCoreUtil.addDomainToName(roleName, domainName);
+
         //query role name from identity table
         try {
-            if (!scimGroupHandler.isGroupExisting(roleName)) {
+            if (!scimGroupHandler.isGroupExisting(roleNameWithDomain)) {
                 //if no attributes - i.e: group added via mgt console, not via SCIM endpoint
                 //add META
-                scimGroupHandler.addMandatoryAttributes(roleName);
+                scimGroupHandler.addMandatoryAttributes(roleNameWithDomain);
             }
         } catch (IdentitySCIMException e) {
             throw new UserStoreException("Error retrieving group information from SCIM Tables.", e);
@@ -366,7 +373,7 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
             if (isProvisioningActionAuthorized(false, null) && isSCIMConsumerEnabled(consumerUserId)) {
                 //if user created through management console, claim values are not present.
                 group = new Group();
-                group.setDisplayName(roleName);
+                group.setDisplayName(roleNameWithDomain);
                 if (userList != null && userList.length != 0) {
                     for (String user : userList) {
                         Map<String, Object> members = new HashMap<String, Object>();
@@ -387,10 +394,13 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
     public boolean doPreDeleteRole(String roleName, UserStoreManager userStoreManager)
             throws UserStoreException {
         SCIMGroupHandler scimGroupHandler = new SCIMGroupHandler(userStoreManager.getTenantId());
+
+        String domainName = UserCoreUtil.getDomainName(userStoreManager.getRealmConfiguration());
+        String roleNameWithDomain = UserCoreUtil.addDomainToName(roleName, domainName);
         try {
             //delete group attributes - no need to check existence here,
             //since it is checked in below method.
-            scimGroupHandler.deleteGroupAttributes(roleName);
+            scimGroupHandler.deleteGroupAttributes(roleNameWithDomain);
         } catch (IdentitySCIMException e) {
             throw new UserStoreException("Error retrieving group information from SCIM Tables.", e);
         }
@@ -401,7 +411,7 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
             Group group = null;
             if (isProvisioningActionAuthorized(false, null) && isSCIMConsumerEnabled(consumerUserId)) {
                 group = new Group();
-                group.setDisplayName(roleName);
+                group.setDisplayName(roleNameWithDomain);
                 provisioningThreadPool.submit(new DefaultSCIMProvisioningHandler(
                         consumerUserId, group, SCIMConstants.DELETE, null));
             }
@@ -425,6 +435,17 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
                                         UserStoreManager userStoreManager)
             throws UserStoreException {
         //TODO:set last update date
+        SCIMGroupHandler scimGroupHandler = new SCIMGroupHandler(userStoreManager.getTenantId());
+
+        String domainName = UserCoreUtil.getDomainName(userStoreManager.getRealmConfiguration());
+        String roleNameWithDomain = UserCoreUtil.addDomainToName(roleName, domainName);
+        String newRoleNameWithDomain = UserCoreUtil.addDomainToName(newRoleName, domainName);
+        try {
+            scimGroupHandler.updateRoleName(roleNameWithDomain, newRoleNameWithDomain);
+            
+        } catch (IdentitySCIMException e) {
+            throw new UserStoreException("Error updating group information in SCIM Tables.", e);
+        }
         //do provisioning
         try {
             //identify the scim consumer from the user name in carbon context and perform provisioning.
@@ -437,7 +458,7 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
 
                 //create group with updated role name
                 Group group = new Group();
-                group.setDisplayName(newRoleName);
+                group.setDisplayName(newRoleNameWithDomain);
 
                 provisioningThreadPool.submit(new DefaultSCIMProvisioningHandler(
                         consumerUserId, group, SCIMConstants.PUT, additionalInformation));
@@ -492,6 +513,7 @@ public class SCIMUserOperationListener implements UserOperationEventListener {
     public boolean doPostUpdateRoleListOfUser(String s, String[] strings, String[] strings1,
                                               UserStoreManager userStoreManager)
             throws UserStoreException {
+        //TODO:
         return true;
     }
 
