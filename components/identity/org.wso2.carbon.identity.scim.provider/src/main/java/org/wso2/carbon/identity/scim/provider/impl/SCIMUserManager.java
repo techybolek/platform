@@ -32,6 +32,7 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.claim.ClaimManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.charon.core.attributes.Attribute;
 import org.wso2.charon.core.exceptions.CharonException;
 import org.wso2.charon.core.exceptions.DuplicateResourceException;
@@ -98,11 +99,11 @@ public class SCIMUserManager implements UserManager {
 
             //TODO: Do not accept the roles list - it is read only.
             try {
-                if(carbonUM.isExistingUser(user.getUserName())){
+                if (carbonUM.isExistingUser(user.getUserName())) {
                     String error = "User with the name: " + user.getUserName() + " already exists in the system.";
                     throw new DuplicateResourceException(error);
                 }
-                if(claimsMap.containsKey(SCIMConstants.USER_NAME_URI)){
+                if (claimsMap.containsKey(SCIMConstants.USER_NAME_URI)) {
                     claimsMap.remove(SCIMConstants.USER_NAME_URI);
                 }
                 carbonUM.addUser(user.getUserName(), user.getPassword(), null, claimsMap, null);
@@ -295,7 +296,7 @@ public class SCIMUserManager implements UserManager {
     public void deleteUser(String userId) throws NotFoundException, CharonException {
         SCIMProvisioningConfigManager provisioningConfigManager =
                 SCIMProvisioningConfigManager.getInstance();
-        
+
         //if operating in dumb mode, do not persist the operation, only provision to providers
         if (provisioningConfigManager.isDumbMode()) {
             if (log.isDebugEnabled()) {
@@ -346,7 +347,7 @@ public class SCIMUserManager implements UserManager {
     public Group createGroup(Group group) throws CharonException, DuplicateResourceException {
         SCIMProvisioningConfigManager provisioningConfigManager =
                 SCIMProvisioningConfigManager.getInstance();
-        
+
         //if operating in dumb mode, do not persist the operation, only provision to providers
         if (provisioningConfigManager.isDumbMode()) {
             if (log.isDebugEnabled()) {
@@ -360,6 +361,16 @@ public class SCIMUserManager implements UserManager {
                 log.debug("Creating group: " + group.getDisplayName());
             }
             try {
+                //modify display name if no domain is specified, in order to support multiple user store feature
+                String originalName = group.getDisplayName();
+                String roleNameWithDomain = null;
+                if (originalName.indexOf(CarbonConstants.DOMAIN_SEPARATOR) > 0) {
+                    roleNameWithDomain = originalName;
+                } else {
+                    roleNameWithDomain = UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME +
+                                         CarbonConstants.DOMAIN_SEPARATOR + originalName;
+                }
+                group.setDisplayName(roleNameWithDomain);
                 //check if the group already exists
                 if (carbonUM.isExistingRole(group.getDisplayName())) {
                     String error = "Group with name: " + group.getDisplayName() +
@@ -447,8 +458,8 @@ public class SCIMUserManager implements UserManager {
                 for (String roleName : roleNames) {
                     //skip internal roles
                     if ((CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equals(roleName)) ||
-                    		UserCoreUtil.isEveryoneRole(roleName, carbonUM.getRealmConfiguration()) ||
-                    		UserCoreUtil.isPrimaryAdminRole(roleName,carbonUM.getRealmConfiguration())) {	 
+                        UserCoreUtil.isEveryoneRole(roleName, carbonUM.getRealmConfiguration()) ||
+                        UserCoreUtil.isPrimaryAdminRole(roleName, carbonUM.getRealmConfiguration())) {
                         continue;
                     }
                     groupList.add(this.getGroupWithName(roleName));
@@ -470,7 +481,7 @@ public class SCIMUserManager implements UserManager {
 
     public List<Group> listGroupsByFilter(String filterAttribute, String filterOperation,
                                           String attributeValue) throws CharonException {
-        //since we only support eq filter operation, no need to check for that.
+        //since we only support "eq" filter operation for group name currently, no need to check for that.
         if (log.isDebugEnabled()) {
             log.debug("Listing groups with filter: " + filterAttribute + filterOperation +
                       attributeValue);
@@ -481,12 +492,21 @@ public class SCIMUserManager implements UserManager {
             if (attributeValue != null && carbonUM.isExistingRole(attributeValue)) {
                 //skip internal roles
                 if ((CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equals(attributeValue)) ||
-                		UserCoreUtil.isEveryoneRole(attributeValue, carbonUM.getRealmConfiguration()) ||
-                		UserCoreUtil.isPrimaryAdminRole(attributeValue,carbonUM.getRealmConfiguration())) {
+                    UserCoreUtil.isEveryoneRole(attributeValue, carbonUM.getRealmConfiguration()) ||
+                    UserCoreUtil.isPrimaryAdminRole(attributeValue, carbonUM.getRealmConfiguration())) {
                     throw new IdentitySCIMException("Internal roles do not support SCIM.");
                 }
-                //we expect only one result
-                group = getGroupWithName(attributeValue);
+                /********we expect only one result**********/
+                //construct the group name with domain -if not already provided, in order to support
+                //multiple user store feature with SCIM.
+                String groupNameWithDomain = null;
+                if (attributeValue.indexOf(CarbonConstants.DOMAIN_SEPARATOR) > 0) {
+                    groupNameWithDomain = attributeValue;
+                } else {
+                    groupNameWithDomain = UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME + CarbonConstants.DOMAIN_SEPARATOR
+                                          + attributeValue;
+                }
+                group = getGroupWithName(groupNameWithDomain);
                 filteredGroups.add(group);
             } else {
                 //returning null will send a resource not found error to client by Charon.
@@ -512,7 +532,7 @@ public class SCIMUserManager implements UserManager {
     public Group updateGroup(Group oldGroup, Group newGroup) throws CharonException {
         SCIMProvisioningConfigManager provisioningConfigManager =
                 SCIMProvisioningConfigManager.getInstance();
-        
+
         //if operating in dumb mode, do not persist the operation, only provision to providers
         if (provisioningConfigManager.isDumbMode()) {
             if (log.isDebugEnabled()) {
@@ -561,15 +581,13 @@ public class SCIMUserManager implements UserManager {
                         }
                     }
                 }
-
-                SCIMGroupHandler groupHandler = new SCIMGroupHandler(carbonUM.getTenantId());
+                //we do not update Identity_SCIM DB here since it is updated in SCIMUserOperationListener's methods.
 
                 //update name if it is changed
                 if (!(oldGroup.getDisplayName().equals(newGroup.getDisplayName()))) {
                     //update group name in carbon UM
                     carbonUM.updateRoleName(oldGroup.getDisplayName(), newGroup.getDisplayName());
-                    //update group name in SCIM_DB
-                    groupHandler.updateRoleName(oldGroup.getDisplayName(), newGroup.getDisplayName());
+
                     updated = true;
                 }
 
@@ -607,7 +625,6 @@ public class SCIMUserManager implements UserManager {
                     updated = true;
                 }
 
-
                 if (updated) {
                     log.info("Group: " + newGroup.getDisplayName() + " is updated through SCIM.");
                 } else {
@@ -639,7 +656,7 @@ public class SCIMUserManager implements UserManager {
             }
             Group group = new Group();
             group.setDisplayName(groupId);
-            this.provisionSCIMOperation(SCIMConstants.DELETE, group, SCIMConstants.GROUP_INT, null);    
+            this.provisionSCIMOperation(SCIMConstants.DELETE, group, SCIMConstants.GROUP_INT, null);
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Deleting group: " + groupId);
@@ -657,9 +674,7 @@ public class SCIMUserManager implements UserManager {
                     //delete group in carbon UM
                     carbonUM.deleteRole(groupName);
 
-                    //delete scim specific attributes stored in identity scim db
-                    groupHandler.deleteGroupAttributes(groupName);
-
+                    //we do not update Identity_SCIM DB here since it is updated in SCIMUserOperationListener's methods.
                     log.info("Group: " + groupName + " is deleted through SCIM.");
 
                 } else {
@@ -700,13 +715,13 @@ public class SCIMUserManager implements UserManager {
                     attributes, SCIMConstants.USER_INT);
             //add groups of user:
             for (String role : roles) {
-				if (UserCoreUtil.isEveryoneRole(role, carbonUM.getRealmConfiguration())
-						|| UserCoreUtil.isPrimaryAdminRole(role, carbonUM.getRealmConfiguration())
-						|| CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equalsIgnoreCase(role)) {
-					// carbon specific roles do not possess SCIM info, hence
-					// skipping them.
-					continue;
-				}
+                if (UserCoreUtil.isEveryoneRole(role, carbonUM.getRealmConfiguration())
+                    || UserCoreUtil.isPrimaryAdminRole(role, carbonUM.getRealmConfiguration())
+                    || CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME.equalsIgnoreCase(role)) {
+                    // carbon specific roles do not possess SCIM info, hence
+                    // skipping them.
+                    continue;
+                }
                 Group group = getGroupOnlyWithMetaAttributes(role);
                 scimUser.setGroup(null, group.getId(), role);
             }
