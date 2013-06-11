@@ -307,7 +307,7 @@
         <bouncycastle.version>132</bouncycastle.version>
 
         <!--Apache ODE-->
-        <orbit.version.ode>1.3.5.wso2v5</orbit.version.ode>
+        <orbit.version.ode>1.3.5.wso2v9</orbit.version.ode>
 
         <!--BPS specific-->
         <saxon-he.wso2.version>9.4.0.wso2v1</saxon-he.wso2.version>
