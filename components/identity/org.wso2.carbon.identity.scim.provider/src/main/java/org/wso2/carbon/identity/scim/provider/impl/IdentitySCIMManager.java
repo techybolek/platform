@@ -23,14 +23,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.scim.common.utils.SCIMCommonConstants;
 import org.wso2.carbon.identity.scim.common.utils.SCIMCommonUtils;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.claim.ClaimManager;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.charon.core.encoder.Decoder;
 import org.wso2.charon.core.encoder.Encoder;
@@ -173,6 +176,12 @@ public class IdentitySCIMManager implements CharonManager {
                 if (userRealm != null) {
                     //get claim manager for manipulating attributes
                     claimManager = (ClaimManager) userRealm.getClaimManager();
+                    //if tenantless username doesn't contain a domain, add domain to user name in order to comply with multiple user store feature. 
+                    if (tenantLessUserName.indexOf(CarbonConstants.DOMAIN_SEPARATOR) < 0) {
+                        String domain = UserCoreUtil.getDomainFromThreadLocal();
+                        tenantLessUserName = domain + CarbonConstants.DOMAIN_SEPARATOR + tenantLessUserName;
+                    }
+
                     //check whether the user who is trying to obtain the realm is authorized
                     boolean isUserAuthorized = userRealm.getAuthorizationManager().isUserAuthorized(
                             tenantLessUserName, SCIMCommonConstants.PROVISIONING_ADMIN_PERMISSION,
@@ -187,7 +196,7 @@ public class IdentitySCIMManager implements CharonManager {
                     String authenticatedUser = PrivilegedCarbonContext.getCurrentContext().getUsername();
                     if (authenticatedUser == null) {
                         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantLessUserName);
-                        if(log.isDebugEnabled()){
+                        if (log.isDebugEnabled()) {
                             log.debug("User read from carbon context is null, hence setting " +
                                       "authenticated user: " + tenantLessUserName);
                         }
