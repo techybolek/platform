@@ -27,7 +27,6 @@ public class SCIMUIUtils {
     }
 
     public static String getUserConsumerId(String loggedInUser) {
-        //String userName = PrivilegedCarbonContext.getCurrentContext().getUsername();
         String currentTenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain();
         String consumerId = loggedInUser + "@" + currentTenantDomain;
         return consumerId;
