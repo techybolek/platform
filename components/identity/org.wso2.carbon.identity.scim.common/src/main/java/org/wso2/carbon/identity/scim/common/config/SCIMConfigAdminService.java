@@ -36,19 +36,7 @@ public class SCIMConfigAdminService {
 
     public SCIMProviderDTO[] getAllGlobalProviders(String consumerId) throws IdentitySCIMException {
         SCIMProviderDTO[] scimProviderDTOs = new SCIMProviderDTO[0];
-        //check if given tenant id matches with the logged in user tenant id.
-        /*if (SCIMCommonUtils.providers.containsKey(consumerId)) {
-            List<SCIMProviderDTO> globalProviders = SCIMCommonUtils.providers.get(consumerId);
-            if (globalProviders != null && globalProviders.size() != 0) {
-                scimProviderDTOs = new SCIMProviderDTO[globalProviders.size()];
-                int i = 0;
-                for (SCIMProviderDTO globalProvider : globalProviders) {
-                    scimProviderDTOs[i] = globalProvider;
-                    i++;
-                }
-                return scimProviderDTOs;
-            }
-        }*/
+        
         if (consumerId.equals(SCIMCommonUtils.getGlobalConsumerId())) {
             SCIMProviderDAO providerDAO = new SCIMProviderDAO();
             List<SCIMProviderDTO> globalProviders = providerDAO.getAllProviders(consumerId);
@@ -73,19 +61,7 @@ public class SCIMConfigAdminService {
 
     public void addGlobalProvider(String consumerId, SCIMProviderDTO scimProviderDTO)
             throws IdentitySCIMException {
-        /*if (SCIMCommonUtils.providers.containsKey(consumerId)) {
-            List<SCIMProviderDTO> globalProviders = SCIMCommonUtils.providers.get(consumerId);
-            for (SCIMProviderDTO globalProvider : globalProviders) {
-                if (scimProviderDTO.getProviderId().equals(globalProvider.getProviderId())) {
-                    throw new IdentitySCIMException("Provider with given id already exists.");
-                }
-            }
-            globalProviders.add(scimProviderDTO);
-        } else {
-            List<SCIMProviderDTO> globalProviders = new ArrayList<SCIMProviderDTO>();
-            globalProviders.add(scimProviderDTO);
-            SCIMCommonUtils.providers.put(consumerId, globalProviders);
-        }*/
+
         if (consumerId.equals(SCIMCommonUtils.getGlobalConsumerId())) {
             SCIMProviderDAO providerDAO = new SCIMProviderDAO();
             providerDAO.addProvider(consumerId, scimProviderDTO);
@@ -100,15 +76,7 @@ public class SCIMConfigAdminService {
 
     public SCIMProviderDTO getGlobalProvider(String consumerId, String providerId)
             throws IdentitySCIMException {
-        /*if (SCIMCommonUtils.providers.containsKey(consumerId)) {
-            List<SCIMProviderDTO> globalProviders = SCIMCommonUtils.providers.get(consumerId);
-            for (SCIMProviderDTO globalProvider : globalProviders) {
-                if (providerId.equals(globalProvider.getProviderId())) {
-                    return globalProvider;
-                }
-            }
-        }
-        return null;*/
+       
         SCIMProviderDTO scimProviderDTO = null;
         if (consumerId.equals(SCIMCommonUtils.getGlobalConsumerId())) {
             SCIMProviderDAO providerDAO = new SCIMProviderDAO();
@@ -125,19 +93,7 @@ public class SCIMConfigAdminService {
 
     public void updateGlobalProvider(String consumerId, SCIMProviderDTO scimProviderDTO)
             throws IdentitySCIMException {
-        /*if (SCIMCommonUtils.providers.containsKey(consumerId)) {
-            List<SCIMProviderDTO> globalProviders = SCIMCommonUtils.providers.get(consumerId);
-            for (SCIMProviderDTO globalProvider : globalProviders) {
-                if (globalProvider.getProviderId().equals(scimProviderDTO.getProviderId())) {
-                    globalProviders.remove(globalProvider);
-                    globalProviders.add(scimProviderDTO);
-                    return;
-                }
-            }
-            throw new IdentitySCIMException("No provider registered with the given provider id.");
-        } else {
-            throw new IdentitySCIMException("No providers registered for the given consumer..");
-        }*/
+        
         if (consumerId.equals(SCIMCommonUtils.getGlobalConsumerId())) {
             SCIMProviderDAO providerDAO = new SCIMProviderDAO();
             providerDAO.updateProvider(consumerId, scimProviderDTO);
@@ -165,19 +121,7 @@ public class SCIMConfigAdminService {
     }
 
     public SCIMProviderDTO[] getAllUserProviders(String consumerId) throws IdentitySCIMException {
-        /*SCIMProviderDTO[] scimProviderDTOs = new SCIMProviderDTO[0];
-        //check if given consumer id matches with the logged in user id.
-        if (SCIMCommonUtils.providers.containsKey(consumerId)) {
-            List<SCIMProviderDTO> userProviders = SCIMCommonUtils.providers.get(consumerId);
-            scimProviderDTOs = new SCIMProviderDTO[userProviders.size()];
-            int i = 0;
-            for (SCIMProviderDTO userProvider : userProviders) {
-                scimProviderDTOs[i] = userProvider;
-                i++;
-            }
-            return scimProviderDTOs;
-        }
-        return scimProviderDTOs;*/
+        
         SCIMProviderDTO[] scimProviderDTOs = new SCIMProviderDTO[0];
         if (consumerId.equals(SCIMCommonUtils.getUserConsumerId())) {
             SCIMProviderDAO providerDAO = new SCIMProviderDAO();
@@ -203,19 +147,7 @@ public class SCIMConfigAdminService {
 
     public void addUserProvider(String consumerId, SCIMProviderDTO scimProviderDTO)
             throws IdentitySCIMException {
-        /*if (SCIMCommonUtils.providers.containsKey(consumerId)) {
-            List<SCIMProviderDTO> userProviders = SCIMCommonUtils.providers.get(consumerId);
-            for (SCIMProviderDTO userProvider : userProviders) {
-                if (scimProviderDTO.getProviderId().equals(userProvider.getProviderId())) {
-                    throw new IdentitySCIMException("Provider with given id already exists.");
-                }
-            }
-            userProviders.add(scimProviderDTO);
-        } else {
-            List<SCIMProviderDTO> userProviders = new ArrayList<SCIMProviderDTO>();
-            userProviders.add(scimProviderDTO);
-            SCIMCommonUtils.providers.put(consumerId, userProviders);
-        }*/
+        
         if (consumerId.equals(SCIMCommonUtils.getUserConsumerId())) {
             SCIMProviderDAO providerDAO = new SCIMProviderDAO();
             providerDAO.addProvider(consumerId, scimProviderDTO);
@@ -230,15 +162,7 @@ public class SCIMConfigAdminService {
 
     public SCIMProviderDTO getUserProvider(String consumerId, String providerId)
             throws IdentitySCIMException {
-        /*if (SCIMCommonUtils.providers.containsKey(consumerId)) {
-            List<SCIMProviderDTO> userProviders = SCIMCommonUtils.providers.get(consumerId);
-            for (SCIMProviderDTO userProvider : userProviders) {
-                if (providerId.equals(userProvider.getProviderId())) {
-                    return userProvider;
-                }
-            }
-        }
-        return null;*/
+        
         SCIMProviderDTO scimProviderDTO = null;
         if (consumerId.equals(SCIMCommonUtils.getUserConsumerId())) {
             SCIMProviderDAO providerDAO = new SCIMProviderDAO();
@@ -255,19 +179,7 @@ public class SCIMConfigAdminService {
 
     public void updateUserProvider(String consumerId, SCIMProviderDTO scimProviderDTO)
             throws IdentitySCIMException {
-        /*if (SCIMCommonUtils.providers.containsKey(consumerId)) {
-            List<SCIMProviderDTO> userProviders = SCIMCommonUtils.providers.get(consumerId);
-            for (SCIMProviderDTO userProvider : userProviders) {
-                if (userProvider.getProviderId().equals(scimProviderDTO.getProviderId())) {
-                    userProviders.remove(userProvider);
-                    userProviders.add(scimProviderDTO);
-                    return;
-                }
-            }
-            throw new IdentitySCIMException("No provider registered with the given provider id.");
-        } else {
-            throw new IdentitySCIMException("No providers registered for the given consumer..");
-        }*/
+       
         if (consumerId.equals(SCIMCommonUtils.getUserConsumerId())) {
             SCIMProviderDAO providerDAO = new SCIMProviderDAO();
             providerDAO.updateProvider(consumerId, scimProviderDTO);
@@ -282,18 +194,7 @@ public class SCIMConfigAdminService {
 
     public void deleteUserProvider(String consumerId, String providerId)
             throws IdentitySCIMException {
-        /*if (SCIMCommonUtils.providers.containsKey(consumerId)) {
-            List<SCIMProviderDTO> userProviders = SCIMCommonUtils.providers.get(consumerId);
-            for (SCIMProviderDTO userProvider : userProviders) {
-                if (providerId.equals(userProvider.getProviderId())) {
-                    userProviders.remove(userProvider);
-                    return;
-                }
-            }
-            throw new IdentitySCIMException("No provider registered with the given provider id.");
-        } else {
-            throw new IdentitySCIMException("No providers registered for the given consumer..");
-        }*/
+        
         if (consumerId.equals(SCIMCommonUtils.getUserConsumerId())) {
             SCIMProviderDAO providerDAO = new SCIMProviderDAO();
             providerDAO.deleteProvider(consumerId, providerId);

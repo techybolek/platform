@@ -47,7 +47,6 @@ public class SCIMProvisioningConfigManager {
     }
 
     public static boolean isConsumerRegistered(String consumerName) {
-        //return scimConfig.getConsumersMap().containsKey(consumerName);
 
         //From SCIMProviderDAO and check if exists.
         boolean isConsumerExisting = false;
@@ -64,8 +63,7 @@ public class SCIMProvisioningConfigManager {
             logger.error(e.getMessage());
             return false;
         }
-        //scimDAO.getAllProviders(consumerName);
-        //if an error occurs, log the error and return false for other operations to proceed
+        
     }
 
     public static SCIMConsumer getSCIMConsumerConfig(String consumerName)
