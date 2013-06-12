@@ -50,4 +50,6 @@ public class UsageConstants {
     
     final public static String WEBAPP_INCOMING_BW = WEBAPP_BANDWIDTH + IN_LABLE;
     final public static String WEBAPP_OUTGOING_BW = WEBAPP_BANDWIDTH + OUT_LABLE;
+
+    final public static String API_CALL_COUNT = "apiCallCount";
 }
