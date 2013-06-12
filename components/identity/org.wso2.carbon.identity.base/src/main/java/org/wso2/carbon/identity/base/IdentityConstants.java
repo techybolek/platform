@@ -172,12 +172,13 @@ public class IdentityConstants {
 
         //SAML SSO Service config
         public final static String SSO_IDP_URL = "SSOService.IdentityProviderURL";
+        public final static String SSO_ATTRIB_STATEMENT_BUILDER = "SSOService.AttributeStatementBuilder";
         public final static String SSO_ATTRIB_CLAIM_DIALECT = "SSOService.AttributesClaimDialect";
         public static final String SINGLE_LOGOUT_RETRY_COUNT = "SSOService.SingleLogoutRetryCount";
         public static final String SINGLE_LOGOUT_RETRY_INTERVAL = "SSOService.SingleLogoutRetryInterval";
         public static final String SSO_TENANT_PARTITIONING_ENABLED = "SSOService.TenantPartitioningEnabled";
         public static final String SSO_SESSION_TIMEOUT = "SSOService.SessionTimeout";
-	public static final String ACCEPT_OPENID_LOGIN = "SSOService.AcceptOpenIDLogin";
+	    public static final String ACCEPT_OPENID_LOGIN = "SSOService.AcceptOpenIDLogin";
 
         //Identity Persistence Manager
         public static final String SKIP_DB_SCHEMA_CREATION = "JDBCPersistenceManager.SkipDBSchemaCreation";
