@@ -93,8 +93,9 @@
          <module>mediators</module>
          <module>profile-management</module>
          <module>claim-management</module>
-         <!--module>humantask</module-->
-         <!--module>bpel</module-->
+         <module>attachment-mgt</module>
+         <module>humantask</module>
+         <module>bpel</module>
         <module>authenticators</module>
         <module>gadgets</module>
         <module>tryit</module>
@@ -137,7 +138,6 @@
 	    <module>bam2</module>
 	    <module>analytics</module>
 	    <module>gadget-ide</module>
-	    <module>attachment-mgt</module>
         <!--module>autoscaler</module-->
         <!--module>autoscaler-service</module-->
         <!--module>tenantaware-load-balancer</module-->
