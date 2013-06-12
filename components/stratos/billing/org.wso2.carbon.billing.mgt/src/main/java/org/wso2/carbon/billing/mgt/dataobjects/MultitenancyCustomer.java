@@ -30,6 +30,7 @@ public class MultitenancyCustomer extends Customer {
     private long currentStorage;
     private long historyStorage;
     private long totalStorage;
+    private long cartridgeCPUHours;
     private int tenantId = MultitenantConstants.INVALID_TENANT_ID;
 
     public int getTenantId() {
@@ -94,6 +95,14 @@ public class MultitenancyCustomer extends Customer {
 
     public void setTotalStorage(long totalStorage) {
         this.totalStorage = totalStorage;
+    }
+
+    public long getCartridgeCPUHours() {
+        return cartridgeCPUHours;
+    }
+
+    public void setCartridgeCPUHours(long cartridgeCPUHours) {
+        this.cartridgeCPUHours = cartridgeCPUHours;
     }
 
     @Override

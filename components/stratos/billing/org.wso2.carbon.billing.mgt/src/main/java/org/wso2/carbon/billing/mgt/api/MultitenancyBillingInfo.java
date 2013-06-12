@@ -112,6 +112,10 @@ public class MultitenancyBillingInfo {
             String bandwidthLimit = getPackageConfigValue("bandwidth.limit", packageConfigEle);
             String bandwidthOveruseCharge =
                     getPackageConfigValue("bandwidth.overuseCharge", packageConfigEle);
+            String cartridgeCPUHourLimit =
+                    getPackageConfigValue("cartridge.hourLimit", packageConfigEle);
+            String cartridgeCPUHourOverUsageCharge =
+                    getPackageConfigValue("cartridge.overUsageCharge", packageConfigEle);
             int usersLimitInt = -1;
             if (!usersLimit.equals("unlimited")) {
                 usersLimitInt = Integer.parseInt(usersLimit);
@@ -124,6 +128,12 @@ public class MultitenancyBillingInfo {
             if (!bandwidthLimit.equals("unlimited")) {
                 bandwidthLimitInt = Integer.parseInt(bandwidthLimit);
             }
+            
+            int cartridgeCPUHourLimitInt = -1;
+            if(cartridgeCPUHourLimit!=null && !cartridgeCPUHourLimit.equals("unlimited")){
+                cartridgeCPUHourLimitInt = Integer.parseInt(cartridgeCPUHourLimit);
+            }
+
 
             multitenancyPackage.setName(packageName);
             multitenancyPackage.setSubscriptionCharge(new Cash(subscriptionCharge));
@@ -133,6 +143,8 @@ public class MultitenancyBillingInfo {
             multitenancyPackage.setResourceVolumeOveruseCharge(new Cash(resourceVolumeOveruseCharge));
             multitenancyPackage.setBandwidthLimit(bandwidthLimitInt);
             multitenancyPackage.setBandwidthOveruseCharge(new Cash(bandwidthOveruseCharge));
+            multitenancyPackage.setCartridgeCPUHourLimit(cartridgeCPUHourLimitInt);
+            multitenancyPackage.setCartridgeCPUOveruseCharge(new Cash(cartridgeCPUHourOverUsageCharge));
 
             
             multitenancyPackages.add(multitenancyPackage);

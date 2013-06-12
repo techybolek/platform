@@ -57,7 +57,11 @@ public class BillingEngine {
     public void scheduleBilling() throws BillingException {
         // the logic to schedule the billing
         SchedulerContext schedulerContext = billingScheduler.createScheduleContext();
-        billingScheduler.scheduleNextCycle(schedulerContext);
+        if(schedulerContext.getCronString() != null || !schedulerContext.getCronString().equals("")) {
+        	billingScheduler.scheduleNextCycle(schedulerContext);
+        } else {
+        	log.debug("Billing is not scheduled : due to undefined cron expression");
+        }
     }
 
     public void generateBill() throws BillingException {
@@ -91,7 +95,7 @@ public class BillingEngine {
             commitTransaction();
         }catch (Exception e){
             String msg = "Error occurred while generating the bill:" + e.getMessage();
-            log.error(msg);
+            log.error(msg, e);
             //rollback transaction
             rollbackTransaction();
             throw new BillingException(msg, e);
@@ -136,7 +140,7 @@ public class BillingEngine {
         } catch(Exception e){
             String msg = "Error occurred while adding item: " + item.getName() +
                             " " + e.getMessage();
-            log.error(msg);
+            log.error(msg, e);
             rollbackTransaction();
             throw new BillingException(msg, e);
         }
@@ -152,7 +156,7 @@ public class BillingEngine {
         } catch(Exception e){
             String msg = "Error occurred while getting item with id: " + itemId +
                             " " + e.getMessage();
-            log.error(msg);
+            log.error(msg, e);
             rollbackTransaction();
             throw new BillingException(msg, e);
         }

@@ -169,6 +169,9 @@ public class MultitenancySubscriptionFeedingHandler implements BillingHandler {
             customer.setOutgoingBandwidth(outgoingBW);
             customer.setTotalBandwidth(incomingBW + outgoingBW);
 
+            //Getting the cartridge hours and setting it to the customer
+            customer.setTotalCartridgeCPUHours(usage.getTotalCartridgeHours().getCartridgeHours());
+
             log.debug("Customer: " + customer.getTenantId() + " - Data Capacity: " + customer.getTotalStorage());
 
             customer.setNumberOfUsers(usage.getNumberOfUsers());
@@ -192,7 +195,7 @@ public class MultitenancySubscriptionFeedingHandler implements BillingHandler {
                                                 Customer customer)throws BillingException {
         DataAccessObject dataAccessObject = Util.getBillingManager().getDataAccessObject();
         List<Subscription> subscriptions = null;
-        Map<Integer, Customer> customersCash = new HashMap<Integer, Customer>();
+        Map<Integer, Customer> customersCache = new HashMap<Integer, Customer>();
         try {
             dataAccessObject.beginTransaction();
             if (customer == null) {
@@ -204,10 +207,10 @@ public class MultitenancySubscriptionFeedingHandler implements BillingHandler {
                 for (Subscription subscription : subscriptions) {
                     Customer dummyCustomer = subscription.getCustomer();
                     int customerId = dummyCustomer.getId();
-                    Customer correctCustomer = customersCash.get(customerId);
+                    Customer correctCustomer = customersCache.get(customerId);
                     if (correctCustomer == null) {
                         correctCustomer = getCustomer(customerId);
-                        customersCash.put(customerId, correctCustomer);
+                        customersCache.put(customerId, correctCustomer);
                     }
                     subscription.setCustomer(correctCustomer);
 

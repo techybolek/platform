@@ -48,6 +48,7 @@ public class BillingConstants {
     public static final String SUBSCRIPTION_SUBITEM = "subscription";
     public static final String BANDWIDTH_SUBITEM = "bwOveruse";
     public static final String STORAGE_SUBITEM = "storageOveruse";
+    public static final String CARTRIDGE_SUBITEM = "cartridgeOveruse";
     public static final String PAYMENT_RECEIVED_EMAIL_CUSTOMER_FILE = "email-payment-received-customer.xml";
     public static final String REGISTRATION_PAYMENT_RECEIVED_EMAIL_CUSTOMER_FILE = "email-registration-payment-received-customer.xml";
     public static final String PAYMENT_RECEIVED_EMAIL_WSO2_FILE = "email-payment-received-wso2.xml";

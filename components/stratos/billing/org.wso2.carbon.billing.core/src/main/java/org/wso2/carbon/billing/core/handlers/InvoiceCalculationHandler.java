@@ -122,7 +122,8 @@ public class InvoiceCalculationHandler implements BillingHandler {
         if(item.getChildren()!=null){
             for(Item subItem : item.getChildren()){
                 if((BillingConstants.BANDWIDTH_SUBITEM.equals(subItem.getName()) ||
-                    BillingConstants.STORAGE_SUBITEM.equals(subItem.getName())) && subscription.isActive()){
+                    BillingConstants.STORAGE_SUBITEM.equals(subItem.getName()) ||
+                    BillingConstants.CARTRIDGE_SUBITEM.equals(subItem.getName())) && subscription.isActive()){
                     calculateOverUseCharges(item, subItem, subscription);
                 }else if(BillingConstants.SUBSCRIPTION_SUBITEM.equals(subItem.getName())){
                     prorateItemCosts(subItem, invoice, subscription);
@@ -155,6 +156,19 @@ public class InvoiceCalculationHandler implements BillingHandler {
             StringBuffer description = new StringBuffer();
             description.append(subItem.getDescription());
             description.append(": ").append(storageOveruse).append("MB");
+            subItem.setDescription(description.toString());
+        //calculating the cost for cartridge overuse
+        }else if(BillingConstants.CARTRIDGE_SUBITEM.equals(subItem.getName())){
+            long cartridgeCpuUsage = subscription.getCustomer().getTotalCartridgeCPUHours();
+            long cartridgeCpuOveruse = 0;
+            if(cartridgeCpuUsage > item.getCartridgeCPUHourLimit()){
+                cartridgeCpuOveruse = cartridgeCpuUsage - item.getCartridgeCPUHourLimit();
+                subItem.setCost(item.getCartridgeCPUOveruseCharge().multiply(cartridgeCpuOveruse));
+            }
+
+            StringBuffer description = new StringBuffer();
+            description.append(subItem.getDescription());
+            description.append(": ").append(cartridgeCpuOveruse).append("Hours");
             subItem.setDescription(description.toString());
         }
 

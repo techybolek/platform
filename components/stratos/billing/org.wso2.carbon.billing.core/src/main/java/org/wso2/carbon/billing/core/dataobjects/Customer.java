@@ -32,6 +32,7 @@ public class Customer {
     private Invoice activeInvoice;
     private long totalBandwidth;
     private long totalStorage;
+    private long totalCartridgeCPUHours;
 
     public int getId() {
         return id;
@@ -116,6 +117,14 @@ public class Customer {
 
     public void setTotalStorage(long totalStorage) {
         this.totalStorage = totalStorage;
+    }
+
+    public long getTotalCartridgeCPUHours() {
+        return totalCartridgeCPUHours;
+    }
+
+    public void setTotalCartridgeCPUHours(long totalCartridgeCPUHours) {
+        this.totalCartridgeCPUHours = totalCartridgeCPUHours;
     }
 
     @Override

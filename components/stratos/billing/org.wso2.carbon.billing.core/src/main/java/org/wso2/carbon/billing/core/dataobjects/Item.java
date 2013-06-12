@@ -26,6 +26,8 @@ public class Item {
     private Cash bandwidthOveruseCharge;
     private int resourceVolumeLimit;
     private Cash resourceVolumeOveruseCharge;
+    private int cartridgeCPUHourLimit;
+    private Cash cartridgeCPUOveruseCharge;
     private String description;
     private Item parent;
     private List<? extends Item> children;
@@ -116,6 +118,22 @@ public class Item {
 
     public void setResourceVolumeOveruseCharge(Cash resourceVolumeOveruseCharge) {
         this.resourceVolumeOveruseCharge = resourceVolumeOveruseCharge;
+    }
+
+    public int getCartridgeCPUHourLimit() {
+        return cartridgeCPUHourLimit;
+    }
+
+    public void setCartridgeCPUHourLimit(int cartridgeCPUHourLimit) {
+        this.cartridgeCPUHourLimit = cartridgeCPUHourLimit;
+    }
+
+    public Cash getCartridgeCPUOveruseCharge() {
+        return cartridgeCPUOveruseCharge;
+    }
+
+    public void setCartridgeCPUOveruseCharge(Cash cartridgeCPUOveruseCharge) {
+        this.cartridgeCPUOveruseCharge = cartridgeCPUOveruseCharge;
     }
 
     @Override

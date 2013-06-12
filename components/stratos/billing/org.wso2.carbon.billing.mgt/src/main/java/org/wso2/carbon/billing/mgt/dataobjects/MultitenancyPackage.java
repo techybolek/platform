@@ -25,6 +25,8 @@ public class MultitenancyPackage extends Item {
     public static final String SUBSCRIPTION_SUB_ITEM_NAME = "subscription";
     public static final String BW_OVERUSE_SUB_ITEM_NAME = "bwOveruse";
     public static final String STORAGE_OVERUSE_SUB_ITEM_NAME = "storageOveruse";
+    public static final String CARTRIDGE_OVERUSE_SUB_ITEM_NAME = "cartridgeOveruse";
+
     private int usersLimit;
     private Cash subscriptionCharge;
     private Cash chargePerUser;
@@ -56,6 +58,13 @@ public class MultitenancyPackage extends Item {
         storageOverUseSubItem.setParent(this);
         subItems.add(storageOverUseSubItem);
 
+        // adding cartridge overuse sub item
+        MultitenancyPackageSubItem cartridgeOverUseSubItem = new MultitenancyPackageSubItem();
+        cartridgeOverUseSubItem.setName(CARTRIDGE_OVERUSE_SUB_ITEM_NAME);
+        cartridgeOverUseSubItem.setDescription("Cartridge overuse");
+        cartridgeOverUseSubItem.setParent(this);
+        subItems.add(cartridgeOverUseSubItem);
+
     }
 
     public MultitenancyPackage(MultitenancyPackage staticMtPackage, boolean isSubscriptionActive) {
@@ -66,6 +75,8 @@ public class MultitenancyPackage extends Item {
         super.setResourceVolumeOveruseCharge(staticMtPackage.getResourceVolumeOveruseCharge());
         super.setBandwidthLimit(staticMtPackage.getBandwidthLimit());
         super.setBandwidthOveruseCharge(staticMtPackage.getBandwidthOveruseCharge());
+        super.setCartridgeCPUHourLimit(staticMtPackage.getCartridgeCPUHourLimit());
+        super.setCartridgeCPUOveruseCharge(staticMtPackage.getCartridgeCPUOveruseCharge());
         setId(staticMtPackage.getId());
         setName(staticMtPackage.getName());
         setCost(staticMtPackage.getCost());
