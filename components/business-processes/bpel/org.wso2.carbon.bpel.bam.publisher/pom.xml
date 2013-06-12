@@ -30,7 +30,7 @@
         <dependency>
             <groupId>org.apache.ode.wso2</groupId>
             <artifactId>ode</artifactId>
-            <version>1.3.5.wso2v7</version>
+            <version>1.3.5.wso2v9</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>

@@ -16,18 +16,14 @@
 
 package org.wso2.carbon.attachment.mgt.test;
 
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.attachment.mgt.configuration.AttachmentMgtConfigurationConstants;
 import org.wso2.carbon.attachment.mgt.configuration.AttachmentServerConfiguration;
 import org.wso2.carbon.attachment.mgt.core.dao.DAOManagerImpl;
 import org.wso2.carbon.attachment.mgt.core.datasource.impl.JDBCManager;
 import org.wso2.carbon.attachment.mgt.core.exceptions.AttachmentMgtException;
 import org.wso2.carbon.attachment.mgt.server.AbstractAttachmentServer;
-import org.wso2.carbon.attachment.mgt.server.internal.AttachmentServerHolder;
-import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.ServerConstants;
 
 import java.io.File;
@@ -47,7 +43,7 @@ public class MockAttachmentServer extends AbstractAttachmentServer {
     private AttachmentServerConfiguration serverConfig;
 
     private static final String CONFIG_FILE_PATH = "src" + File.separator + "test" + File
-            .separator + "resources" + File.separator + "attach-mgt-conf.properties";
+            .separator + "resources" + File.separator + AttachmentMgtConfigurationConstants.ATTACHMENT_MANAGEMENT_CONFIG_FILE;
 
     private static final String DATABASE_CONFIG_FILE_PATH = "src" + File.separator + "test" + File
             .separator + "resources" + File.separator + "dbConfig.xml";

@@ -29,7 +29,7 @@
       <xsd:element name="contentCategory" type="xsd:anyURI"/>
       <xsd:element name="attachedTime" type="xsd:dateTime"/>
       <xsd:element name="attachedBy" type="tUser"/>
-      <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:anyType namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
     </xsd:sequence>
   </xsd:complexType>
   <xsd:element name="attachment" type="tAttachment"/>
@@ -50,20 +50,27 @@
       <xsd:element name="lastModifiedTime" type="xsd:dateTime"/>
       <xsd:element name="lastModifiedBy" type="tUser"/>
       <xsd:element name="text" type="xsd:string"/>
-      <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:anyType namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
     </xsd:sequence>
   </xsd:complexType>
 
   <!-- data types for simple query operations -->
   <xsd:element name="taskAbstract" type="tTaskAbstract"/>
-  <xsd:complexType name="tTaskAbstract">
+<xsd:complexType name="tTaskAbstract">
     <xsd:sequence>
       <xsd:element name="id" type="xsd:anyURI"/>
       <xsd:element name="taskType" type="xsd:string"/>
       <xsd:element name="name" type="xsd:QName"/>
       <xsd:element name="status" type="tStatus"/>
       <xsd:element name="priority" type="tPriority" minOccurs="0"/>
+      <xsd:element name="taskInitiator" type="tUser" minOccurs="0"/>
+      <xsd:element name="taskStakeholders" type="tOrganizationalEntity" minOccurs="0"/>
+      <xsd:element name="potentialOwners" type="tOrganizationalEntity" minOccurs="0"/>
+      <xsd:element name="businessAdministrators" type="tOrganizationalEntity" minOccurs="0"/>
+      <xsd:element name="actualOwner" type="tUser" minOccurs="0"/>
+      <xsd:element name="notificationRecipients" type="tOrganizationalEntity" minOccurs="0"/>
       <xsd:element name="createdTime" type="xsd:dateTime"/>
+      <xsd:element name="updatedTime" type="xsd:dateTime"/>
       <xsd:element name="activationTime" type="xsd:dateTime" minOccurs="0"/>
       <xsd:element name="expirationTime" type="xsd:dateTime" minOccurs="0"/>
       <xsd:element name="isSkipable" type="xsd:boolean" minOccurs="0"/>
@@ -72,6 +79,7 @@
       <xsd:element name="completeByTimeExists" type="xsd:boolean" minOccurs="0"/>
       <xsd:element name="presentationName" type="tPresentationName" minOccurs="0"/>
       <xsd:element name="presentationSubject" type="tPresentationSubject" minOccurs="0"/>
+      <xsd:element name="presentationDescription" type="tPresentationDescription" minOccurs="0"/>
       <xsd:element name="renderingMethodExists" type="xsd:boolean"/>
       <xsd:element name="hasOutput" type="xsd:boolean" minOccurs="0"/>
       <xsd:element name="hasFault" type="xsd:boolean" minOccurs="0"/>
@@ -96,9 +104,9 @@
       <xsd:element name="isRemovable" type="xsd:boolean" minOccurs="0" maxOccurs="1"/>
       <xsd:element name="isForwardable" type="xsd:boolean" minOccurs="0" maxOccurs="1"/>
       <xsd:element name="isDelegatable" type="xsd:boolean" minOccurs="0" maxOccurs="1"/>
-      <xsd:element name="actualOwner" type="tUser" minOccurs="0"/>
       <xsd:element name="packageName" type="xsd:string" maxOccurs="1"/>
-      <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element name="tenantId" type="xsd:int" minOccurs="0"/>
+      <xsd:anyType namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
     </xsd:sequence>
   </xsd:complexType>
   <xsd:element name="taskDetails" type="tTaskDetails"/>
@@ -137,7 +145,7 @@
       <xsd:element name="outcome" type="xsd:string" minOccurs="0"/>
       <xsd:element name="parentTaskId" type="xsd:anyURI" minOccurs="0"/>
       <xsd:element name="hasSubTasks" type="xsd:boolean" minOccurs="0"/>
-      <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:anyType namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
     </xsd:sequence>
   </xsd:complexType>
   <xsd:simpleType name="tPresentationName">
@@ -145,7 +153,6 @@
       <xsd:documentation>length-restricted string</xsd:documentation>
     </xsd:annotation>
     <xsd:restriction base="xsd:string">
-      <xsd:maxLength value="64"/>
       <xsd:whiteSpace value="preserve"/>
     </xsd:restriction>
   </xsd:simpleType>
@@ -154,12 +161,44 @@
       <xsd:documentation>length-restricted string</xsd:documentation>
     </xsd:annotation>
     <xsd:restriction base="xsd:string">
-      <xsd:maxLength value="254"/>
+      <xsd:whiteSpace value="preserve"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:simpleType name="tPresentationDescription">
+    <xsd:annotation>
+      <xsd:documentation>length-restricted string</xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
       <xsd:whiteSpace value="preserve"/>
     </xsd:restriction>
   </xsd:simpleType>
   <xsd:simpleType name="tStatus">
     <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+  <xsd:simpleType name="tSimpleQueryCategory">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="ASSIGNED_TO_ME"/>
+      <xsd:enumeration value="ASSIGNABLE"/>
+      <xsd:enumeration value="CLAIMABLE"/>
+	  <xsd:enumeration value="ALL_TASKS"/>
+	  <xsd:enumeration value="NOTIFICATIONS"/>
+	  <xsd:enumeration value="ADVANCED_QUERY"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:simpleType name="tSimpleQueryOrder">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="ASCENDING"/>
+      <xsd:enumeration value="DESCENDING"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:simpleType name="tSimpleQueryOrderBy">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="TASK_NAME"/>
+      <xsd:enumeration value="CREATED_DATE"/>
+	  <xsd:enumeration value="UPDATED_DATE"/>
+	  <xsd:enumeration value="PRIORITY"/>
+	  <xsd:enumeration value="STATUS"/>
+    </xsd:restriction>
   </xsd:simpleType>
   <xsd:simpleType name="tPredefinedStatus">
     <xsd:annotation>
@@ -189,6 +228,22 @@
       <xsd:element name="timePeriod" type="xsd:duration"/>
       <xsd:element name="pointOfTime" type="xsd:dateTime"/>
     </xsd:choice>
+  </xsd:complexType>
+
+  <xsd:element name="simpleQueryInput" type="tSimpleQueryInput"/>
+  <xsd:complexType name="tSimpleQueryInput">
+	  <xsd:sequence>
+	      <xsd:element name="status" type="tStatus" minOccurs="0"
+	                   maxOccurs="unbounded"/>
+	      <xsd:element name="createdDate" type="xsd:dateTime" minOccurs="0"/>
+	      <xsd:element name="undatedDate" type="xsd:dateTime" minOccurs="0"/>
+	      <xsd:element name="taskName" type="xsd:string" minOccurs="0"/>
+	      <xsd:element name="pageSize" type="xsd:int" minOccurs="0"/>
+		  <xsd:element name="pageNumber" type="xsd:int" minOccurs="0"/>
+		  <xsd:element name="simpleQueryCategory" type="tSimpleQueryCategory" minOccurs="0"/>
+		  <xsd:element name="queryOrder" type="tSimpleQueryOrder" minOccurs="0"/>
+		  <xsd:element name="queryOrderBy" type="tSimpleQueryOrderBy" minOccurs="0" />
+	  </xsd:sequence>
   </xsd:complexType>
 
   <!-- task operations -->
@@ -244,13 +299,66 @@
       <xsd:element name="suspend" type="tTaskOperation"/>
       <xsd:element name="suspendUntil" type="tTaskOperation"/>
       <xsd:element name="updateComment" type="tTaskOperation"/>
-      <xsd:any namespace="##other" processContents="lax"/>
+      <xsd:anyType namespace="##other" processContents="lax"/>
     </xsd:choice>
   </xsd:complexType>
   <xsd:complexType name="tTaskOperation">
     <xsd:complexContent>
       <xsd:restriction base="xsd:anyType"/>
     </xsd:complexContent>
+  </xsd:complexType>
+
+
+  <xsd:element name="taskSimpleQueryResultSet" type="tTaskSimpleQueryResultSet"/>
+  <xsd:complexType name="tTaskSimpleQueryResultSet">
+    <xsd:sequence>
+      <xsd:element name="row" type="tTaskSimpleQueryResultRow" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element name="pages" type="xsd:int" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="tTaskSimpleQueryResultRow">
+    <xsd:sequence>
+      <xsd:element name="id" type="xsd:anyURI"/>
+      <xsd:element name="taskType" type="xsd:string"/>
+      <xsd:element name="name" type="xsd:QName"/>
+	  <xsd:element name="presentationSubject" type="tPresentationSubject" minOccurs="0" />
+      <xsd:element name="presentationName" type="tPresentationName" minOccurs="0" />
+      <xsd:element name="status" type="tStatus"/>
+      <xsd:element name="priority" type="tPriority"/>
+      <xsd:element name="createdTime" type="xsd:dateTime" minOccurs="0" />     
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:element name="taskAuthorisationParamsResult" type="tTaskAuthorisationParams"/>
+  <xsd:complexType name="tTaskAuthorisationParams">
+    <xsd:sequence>
+      <xsd:element name="authorisedToClaim" type="xsd:boolean"/>
+      <xsd:element name="authorisedToComplete" type="xsd:boolean"/>
+      <xsd:element name="authorisedToDelegate" type="xsd:boolean"/>
+      <xsd:element name="authorisedToExit" type="xsd:boolean"/>
+      <xsd:element name="authorisedToNominate" type="xsd:boolean"/>
+      <xsd:element name="authorisedToStop" type="xsd:boolean"/>
+      <xsd:element name="authorisedToComment" type="xsd:boolean"/>
+      <xsd:element name="authorisedToGetComments" type="xsd:boolean"/>
+	  <xsd:element name="authorisedToDeleteComment" type="xsd:boolean"/>      
+      <xsd:element name="authorisedToUpdateComment" type="xsd:boolean"/>
+      <xsd:element name="authorisedToDeleteFault" type="xsd:boolean"/> 
+      <xsd:element name="authorisedToFail" type="xsd:boolean"/> 
+      <xsd:element name="authorisedToForward" type="xsd:boolean"/>
+      <xsd:element name="authorisedToDeleteOutput" type="xsd:boolean"/>
+      <xsd:element name="authorisedToRelease" type="xsd:boolean"/>
+      <xsd:element name="authorisedToResume" type="xsd:boolean"/>
+      <xsd:element name="authorisedToRemove" type="xsd:boolean"/>
+      <xsd:element name="authorisedToSuspend" type="xsd:boolean"/>
+      <xsd:element name="authorisedToSetPriority" type="xsd:boolean"/>       
+      <xsd:element name="authorisedToSkip" type="xsd:boolean"/>
+      <xsd:element name="authorisedToStart" type="xsd:boolean"/>
+      <xsd:element name="authorisedToSetFault" type="xsd:boolean"/>
+      <xsd:element name="authorisedToGetInput" type="xsd:boolean"/>
+      <xsd:element name="authorisedToGetDescription" type="xsd:boolean"/>
+      <xsd:element name="authorisedToSetOutput" type="xsd:boolean"/>
+      <xsd:element name="authorisedToActivate" type="xsd:boolean"/>
+    </xsd:sequence>
   </xsd:complexType>
 
   <!-- data types for advanced query operations -->
@@ -296,9 +404,30 @@
       <xsd:element name="searchBy" type="xsd:string"/>
       <xsd:element name="outcome" type="xsd:string"/>
       <xsd:element name="taskOperations" type="tTaskOperations"/>
-      <xsd:any namespace="##other" processContents="lax"/>
+      <xsd:anyType namespace="##other" processContents="lax"/>
     </xsd:choice>
   </xsd:complexType>
+
+    <!-- data types for simple task events -->
+    <xsd:element name="taskEvents" type="tTaskEvents"/>
+    <xsd:complexType name="tTaskEvents">
+        <xsd:sequence>
+            <xsd:element name="event" type="tTaskEvent" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="tTaskEvent">
+        <xsd:sequence>
+          <xsd:element name="eventId" type="xsd:anyURI"/>
+          <xsd:element name="eventType" type="xsd:string"/>
+          <xsd:element name="eventInitiator" type="tUser"/>
+          <xsd:element name="oldState" type="tStatus" minOccurs="0"/>
+          <xsd:element name="newState" type="tStatus" minOccurs="0"/>
+          <xsd:element name="eventDetail" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="eventTime" type="xsd:dateTime"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
   <xsd:complexType name="tFault">
     <xsd:sequence>
       <xsd:element name="faultName" type="xsd:NCName"/>
@@ -327,7 +456,7 @@
   <xsd:element name="part" type="tPart"/>
   <xsd:complexType name="tPart" mixed="true">
     <xsd:sequence>
-      <xsd:any processContents="skip" minOccurs="0"/>
+      <xsd:anyType processContents="skip" minOccurs="0"/>
     </xsd:sequence>
     <xsd:attribute name="name" type="xsd:NCName" use="required"/>
   </xsd:complexType>
@@ -367,7 +496,7 @@
   <xsd:element name="rendering" type="tRendering"/>
   <xsd:complexType name="tRendering">
     <xsd:sequence>
-      <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:anyType namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
     </xsd:sequence>
     <xsd:attribute name="type" type="xsd:QName" use="required"/>
   </xsd:complexType>
@@ -390,7 +519,7 @@
       <xsd:element ref="renderings" minOccurs="0"/>
       <xsd:element ref="comments" minOccurs="0"/>
       <xsd:element ref="attachmentInfos" minOccurs="0"/>
-      <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:anyType namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
     </xsd:sequence>
   </xsd:complexType>
 
@@ -454,7 +583,7 @@
         <xsd:element name="eventData" type="xsd:anyType" nillable="true" minOccurs="0"/>
         <xsd:element name="faultName" type="xsd:string" nillable="true" minOccurs="0"/>
         <!-- extensibility -->
-        <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:anyType namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>

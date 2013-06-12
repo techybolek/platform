@@ -225,13 +225,15 @@ public class HumanTaskDAOConnectionImpl implements HumanTaskDAOConnection {
      * @return number of jobs updated
      */
     public int updateAssignToNode(String nodeId, int x, int y, long maxtime) {
+        //entityManager.getTransaction().begin();
         Query q = entityManager.createQuery("UPDATE org.wso2.carbon.humantask.core.dao.jpa.openjpa.model.HumanTaskJob t SET t.nodeId = ?1 WHERE t.nodeId IS NULL AND MOD(t.time, ?2) = ?3 and t.time < ?4");
         q.setParameter(1, nodeId);
         q.setParameter(2, y);
         q.setParameter(3, x);
         q.setParameter(4, maxtime);
-
-        return q.executeUpdate();
+        int result = q.executeUpdate();
+        //entityManager.getTransaction().commit();
+        return result;
     }
 
     /**

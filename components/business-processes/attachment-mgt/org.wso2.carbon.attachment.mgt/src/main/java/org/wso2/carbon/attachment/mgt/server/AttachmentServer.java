@@ -108,7 +108,7 @@ public class AttachmentServer extends AbstractAttachmentServer {
             serverConfig = new AttachmentServerConfiguration(attMgtConfigFile);
         } else {
             log.info("Humantask configuration file: " + AttachmentMgtConfigurationConstants
-                    .ATTACHMENT_MGT_CONFIG_FILE + " not found. Loading default configurations.");
+                    .ATTACHMENT_MANAGEMENT_CONFIG_FILE + " not found. Loading default configurations.");
             serverConfig = new AttachmentServerConfiguration();
         }
     }
@@ -135,6 +135,6 @@ public class AttachmentServer extends AbstractAttachmentServer {
 
     private String calculateAttachmentMgtServerConfigurationFilePath() {
         return CarbonUtils.getCarbonConfigDirPath() + File.separator + AttachmentMgtConfigurationConstants
-                .ATTACHMENT_MGT_CONFIG_FILE;
+                .ATTACHMENT_MANAGEMENT_CONFIG_FILE;
     }
 }

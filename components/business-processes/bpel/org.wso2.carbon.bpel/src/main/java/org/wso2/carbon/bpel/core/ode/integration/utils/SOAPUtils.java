@@ -424,8 +424,9 @@ public final class SOAPUtils {
             final javax.wsdl.extensions.soap.SOAPHeader soapHeaderElementDefinition)
             throws BPELFault {
         Map<String, Node> headerParts = messageFromOde.getHeaderParts();
-        Message responseMessageDefinition =
-                wsdlOperation.getOutput().getMessage();
+
+        Message responseMessageDefinition = wsdlOperation.getOutput() != null ?
+                wsdlOperation.getOutput().getMessage() : null;
 
         // If there isn't a message attribute in header element definition or if the
         // message attribute value is equal to the response message QName, then this
@@ -433,8 +434,8 @@ public final class SOAPUtils {
         // Refer SOAP Binding specification at http://www.w3.org/TR/wsdl#_soap-b.
         final boolean isHeaderElementAPartOfPayload =
                 soapHeaderElementDefinition.getMessage() == null
-                        || soapHeaderElementDefinition.getMessage().equals(
-                        responseMessageDefinition.getQName());
+                        || ((wsdlOperation.getStyle() !=  OperationType.ONE_WAY) && soapHeaderElementDefinition.getMessage().equals(
+                        responseMessageDefinition.getQName()));
 
         if (soapHeaderElementDefinition.getPart() == null) {
             // Part information not found. Ignoring this header definition.
@@ -442,8 +443,8 @@ public final class SOAPUtils {
         }
 
         if (isHeaderElementAPartOfPayload
-                && responseMessageDefinition.getPart(soapHeaderElementDefinition.getPart())
-                == null) {
+                && (responseMessageDefinition != null && responseMessageDefinition.getPart(soapHeaderElementDefinition.getPart())
+                == null)) {
             // If SOAP Header element is part of the actual payload and
             // if we couldn't find part in the response message definition equals to
             // name of the SOAP header element definition part attribute value,
@@ -472,6 +473,16 @@ public final class SOAPUtils {
             }
         }
 
+        // Handle headers defined as abstract message parts. In this scenario, the header is not part of the payload,
+        // and can be found and extracted from the odeMessage object
+        if(partElement == null && messageFromOde.getParts().size() > 0 && !isHeaderElementAPartOfPayload) {
+            try{
+            partElement = (Element)messageFromOde.getPart(soapHeaderElementDefinition.getPart());
+            }catch (ClassCastException e) {
+               throw new BPELFault("Soap header must be an element" + messageFromOde.getPart(soapHeaderElementDefinition.getPart()));
+
+            }
+        }
         // If header is not part of the payload and if header element is null,
         // just ignore this case.
         if (partElement == null) {
