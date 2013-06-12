@@ -55,7 +55,7 @@ import org.wso2.carbon.identity.oauth2.token.handlers.grant.RefreshGrantTypeHand
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.saml.SAML2BearerGrantTypeHandler;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Constants;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
-import org.wso2.carbon.identity.openidconnect.IDTokenGenerator;
+import org.wso2.carbon.identity.openidconnect.IDTokenBuilder;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -281,8 +281,8 @@ public class AccessTokenIssuer {
         
         if(tokReqMsgCtx.getScope() != null && OIDCAuthzServerUtil.isOIDCAuthzRequest(tokReqMsgCtx.getScope())) {
         	// TODO : We should allow to plug-in many generators 
-        	IDTokenGenerator generator = new IDTokenGenerator(tokReqMsgCtx, tokenRespDTO);
-			tokenRespDTO.setIDToken(generator.generateToken());
+        	IDTokenBuilder builder = OAuthServerConfiguration.getInstance().getOpenIDConnectIDTokenBuilder();
+			tokenRespDTO.setIDToken(builder.buildIDToken(tokReqMsgCtx, tokenRespDTO));
         }
         return tokenRespDTO;
     }

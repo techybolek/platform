@@ -33,21 +33,13 @@ import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
  * IDToken Generator utilizes the Amber IDTokenBuilder to build the IDToken.
  * 
  */
-public class IDTokenGenerator {
+public class DefaultIDTokenBuilder implements org.wso2.carbon.identity.openidconnect.IDTokenBuilder {
 
-	private static Log log = LogFactory.getLog(IDTokenGenerator.class);
+	private static Log log = LogFactory.getLog(DefaultIDTokenBuilder.class);
 	private static boolean DEBUG = log.isDebugEnabled();
 
-	private OAuthTokenReqMessageContext request = null;
-	private OAuth2AccessTokenRespDTO response = null;
-
-	public IDTokenGenerator(OAuthTokenReqMessageContext tokReqMsgCtx,
-	                        OAuth2AccessTokenRespDTO tokenRespDTO) {
-		request = tokReqMsgCtx;
-		response = tokenRespDTO;
-	}
-
-	public String generateToken() throws IdentityOAuth2Exception {
+	public String buildIDToken(OAuthTokenReqMessageContext request, OAuth2AccessTokenRespDTO tokenRespDTO)
+	                                                                                                      throws IdentityOAuth2Exception {
 		OAuthServerConfiguration config = OAuthServerConfiguration.getInstance();
 		String issuer = config.getOpenIDConnectIDTokenIssuer();
 		int lifetime = Integer.parseInt(config.getOpenIDConnectIDTokenExpiration()) * 1000;
@@ -64,8 +56,7 @@ public class IDTokenGenerator {
 			                           .setSubject(request.getAuthorizedUser())
 			                           .setAudience(request.getOauth2AccessTokenReqDTO().getClientId())
 			                           .setAuthorizedParty(request.getOauth2AccessTokenReqDTO().getClientId())
-			                           .setExpiration(curTime + lifetime).setIssuedAt(curTime)
-			                           .buildIDToken();
+			                           .setExpiration(curTime + lifetime).setIssuedAt(curTime).buildIDToken();
 		} catch (IDTokenException e) {
 			throw new IdentityOAuth2Exception("Erro while generating the IDToken", e);
 		}

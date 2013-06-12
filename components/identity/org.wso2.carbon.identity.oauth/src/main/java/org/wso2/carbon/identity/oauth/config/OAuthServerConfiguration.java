@@ -42,6 +42,7 @@ import org.wso2.carbon.identity.oauth.preprocessor.TokenPersistencePreprocessor;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.validators.OAuth2TokenValidator;
 import org.wso2.carbon.identity.oauth2.validators.TokenValidationHandler;
+import org.wso2.carbon.identity.openidconnect.IDTokenBuilder;
 import org.wso2.carbon.utils.CarbonUtils;
 
 /**
@@ -129,7 +130,8 @@ public class OAuthServerConfiguration {
 
 		// OpenIDConnect confiurations
 		public static final String OPENID_CONNECT = "OpenIDConnect";
-		public static final String OPENID_CONNECT_IDTOKEN_ISSUER = "IDTokenIssuer";
+		public static final String OPENID_CONNECT_IDTOKEN_BUILDER = "IDTokenBuilder";
+		public static final String OPENID_CONNECT_IDTOKEN_ISSUER_ID = "IDTokenIssuerID";
 		public static final String OPENID_CONNECT_IDTOKEN_EXPIRATION = "IDTokenExpiration";
 		public static final String OPENID_CONNECT_USERINFO_ENDPOINT_CLAIM_DIALECT =
 		                                                                            "UserInfoEndpointClaimDialect";
@@ -202,6 +204,10 @@ public class OAuthServerConfiguration {
 	private String authContextTTL = "15L";
 
 	// OpenID Connect configurations
+	private String openIDConnectIDTokenBuilderClassName = "org.wso2.carbon.identity.openidconnect.DefaultIDTokenBuilder";
+	
+	private IDTokenBuilder openIDConnectIDTokenBuilder = null;
+	
 	private String openIDConnectIDTokenIssuer = "OIDCAuthzServer";
 
 	private String openIDConnectIDTokenExpiration = "300";
@@ -445,6 +451,32 @@ public class OAuthServerConfiguration {
 			}
 		}
 		return tokenPersistencePreprocessor;
+	}
+	
+	/**
+	 * Return an instance of the IDToken builder 
+	 * @return
+	 */
+	public IDTokenBuilder getOpenIDConnectIDTokenBuilder() {
+		if (openIDConnectIDTokenBuilder == null) {
+			synchronized (IDTokenBuilder.class) {
+				if (openIDConnectIDTokenBuilder == null) {
+					try {
+						Class clazz =
+						              Thread.currentThread().getContextClassLoader()
+						                    .loadClass(openIDConnectIDTokenBuilderClassName);
+						openIDConnectIDTokenBuilder = (IDTokenBuilder) clazz.newInstance();
+					} catch (ClassNotFoundException e) {
+						log.error("Error while instantiating the IDTokenBuilder ", e);
+					} catch (InstantiationException e) {
+						log.error("Error while instantiating the IDTokenBuilder ", e);
+					} catch (IllegalAccessException e) {
+						log.error("Error while instantiating the IDTokenBuilder ", e);
+					}
+				}
+			}
+		}
+		return openIDConnectIDTokenBuilder;
 	}
 
 	/**
@@ -998,9 +1030,14 @@ public class OAuthServerConfiguration {
 		                                    oauthConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT));
 
 		if (openIDConnectConfigElem != null) {
-			if (openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_ISSUER)) != null) {
+			if (openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_BUILDER)) != null) {
+				openIDConnectIDTokenBuilderClassName =
+				                             openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_BUILDER))
+				                                                    .getText().trim();
+			}
+			if (openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_ISSUER_ID)) != null) {
 				openIDConnectIDTokenIssuer =
-				                             openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_ISSUER))
+				                             openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_ISSUER_ID))
 				                                                    .getText().trim();
 			}
 			if (openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_IDTOKEN_EXPIRATION)) != null) {
