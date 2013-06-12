@@ -240,6 +240,12 @@ public class UsageUtil {
             throw new UIException(msg, e);
         }
     }
+    public static String getAPIUsage(TenantUsage usage) {
+        long count = 0;
 
-
+        if (usage.getApiManagerUsageStats() != null) {
+            count =usage.getApiManagerUsageStats()[0].getRequestCount();
+        }
+        return Long.toString(count);
+    }
 }

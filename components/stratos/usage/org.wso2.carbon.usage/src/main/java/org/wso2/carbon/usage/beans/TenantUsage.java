@@ -23,14 +23,24 @@ public class TenantUsage {
     private BandwidthStatistics[] registryBandwidthStatistics;
     private BandwidthStatistics[] serviceBandwidthStatistics;
     private BandwidthStatistics[] webappBandwidthStatistics;
+    private CartridgeStatistics[] cartridgeStatistics;
     private RequestStatistics[] requestStatistics;
     private TenantDataCapacity registryCapacity;
     private RequestStatistics totalRequestStatistics;
     private BandwidthStatistics totalRegistryBandwidth;
     private BandwidthStatistics totalServiceBandwidth;
     private BandwidthStatistics totalWebappBandwidth;
+    private CartridgeStatistics totalCartridgeHours;
+    private APIManagerUsageStats[] apiManagerUsageStats;
 
-    
+    public APIManagerUsageStats[] getApiManagerUsageStats() {
+        return apiManagerUsageStats;
+    }
+
+    public void setApiManagerUsageStats(APIManagerUsageStats[] apiManagerUsageStats) {
+        this.apiManagerUsageStats = apiManagerUsageStats;
+    }
+
     public BandwidthStatistics[] getRegistryBandwidthStatistics() {
         return registryBandwidthStatistics;
     }
@@ -87,6 +97,22 @@ public class TenantUsage {
         this.totalWebappBandwidth = totalWebappBandwidth;
     }
 
+    public CartridgeStatistics[] getCartridgeStatistics() {
+        return cartridgeStatistics;
+    }
+
+    public void setCartridgeStatistics(CartridgeStatistics[] cartridgeStatistics) {
+        this.cartridgeStatistics = cartridgeStatistics;
+    }
+
+    public CartridgeStatistics getTotalCartridgeHours() {
+        return totalCartridgeHours;
+    }
+
+    public void setTotalCartridgeHours(CartridgeStatistics totalCartridgeHours) {
+        this.totalCartridgeHours = totalCartridgeHours;
+    }
+
     public TenantUsage() {
         // empty method required for used in web services
     }
@@ -119,7 +145,7 @@ public class TenantUsage {
     public void setUsageEntries(UsageEntry[] usageEntries) {
         this.usageEntries = usageEntries;
     }
-    
+
     public RequestStatistics[] getRequestStatistics() {
         return requestStatistics;
     }
@@ -127,7 +153,7 @@ public class TenantUsage {
     public void setRequestStatistics(RequestStatistics[] requestStatistics) {
         this.requestStatistics = requestStatistics;
     }
-    
+
     public TenantDataCapacity getRegistryCapacity() {
         return registryCapacity;
     }
@@ -135,7 +161,7 @@ public class TenantUsage {
     public void setRegistryCapacity(TenantDataCapacity registryCapacity) {
         this.registryCapacity = registryCapacity;
     }
-    
+
     public int getNumberOfUsers() {
         return numberOfUsers;
     }
@@ -143,7 +169,7 @@ public class TenantUsage {
     public void setNumberOfUsers(int numberOfUsers) {
         this.numberOfUsers = numberOfUsers;
     }
-    
+
     public long getRegistryContentCapacity(){
         long retValue = 0;
         if (registryCapacity != null) {
@@ -151,7 +177,7 @@ public class TenantUsage {
         }
         return retValue;
     }
-    
+
     public long getRegistryContentHistoryCapacity(){
         long retValue = 0;
         if (registryCapacity != null) {
@@ -159,7 +185,7 @@ public class TenantUsage {
         }
         return retValue;
     }
-    
+
     public long getTotalIncomingBandwidth(){
         long incomingBW =  0;
         if(totalRegistryBandwidth != null){
@@ -173,7 +199,7 @@ public class TenantUsage {
         }
         return incomingBW;
     }
-    
+
     public long getTotalOutgoingBandwidth(){
         long outgoingBW =  0;
         if(totalRegistryBandwidth != null){

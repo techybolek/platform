@@ -288,4 +288,112 @@ public class DataAccessObject {
         return lastSummaryTs.toString();
     }
 
+    public String getAndUpdateLastCartridgeStatsHourlyTimestamp() throws SQLException {
+
+        Timestamp lastSummaryTs = null;
+        Connection connection = null;
+
+        try {
+            connection = dataSource.getConnection();
+            String sql = "SELECT TIMESTMP FROM CARTRIDGE_STATS_LAST_HOURLY_TS WHERE ID='LatestTS'";
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                lastSummaryTs = resultSet.getTimestamp("TIMESTMP");
+            } else {
+                lastSummaryTs = new Timestamp(0);
+            }
+
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:00");
+            Timestamp currentTs = Timestamp.valueOf(formatter.format(new Date()));
+
+            String currentSql = "INSERT INTO CARTRIDGE_STATS_LAST_HOURLY_TS (ID, TIMESTMP) VALUES('LatestTS',?) ON DUPLICATE KEY UPDATE TIMESTMP=?";
+            PreparedStatement ps1 = connection.prepareStatement(currentSql);
+            ps1.setTimestamp(1, currentTs);
+            ps1.setTimestamp(2, currentTs);
+            ps1.execute();
+
+        } catch (SQLException e) {
+            log.error("Error occurred while trying to get and update the last hourly timestamp for cartridge stats. ", e);
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
+
+        return lastSummaryTs.toString();
+    }
+
+    public String getAndUpdateLastCartridgeStatsDailyTimestamp() throws SQLException {
+
+        Timestamp lastSummaryTs = null;
+        Connection connection = null;
+
+        try {
+            connection = dataSource.getConnection();
+            String sql = "SELECT TIMESTMP FROM CARTRIDGE_STATS_LAST_DAILY_TS WHERE ID='LatestTS'";
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                lastSummaryTs = resultSet.getTimestamp("TIMESTMP");
+            } else {
+                lastSummaryTs = new Timestamp(0);
+            }
+
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:00:00");
+            Timestamp currentTs = Timestamp.valueOf(formatter.format(new Date()));
+
+            String currentSql = "INSERT INTO CARTRIDGE_STATS_LAST_DAILY_TS (ID, TIMESTMP) VALUES('LatestTS',?) ON DUPLICATE KEY UPDATE TIMESTMP=?";
+            PreparedStatement ps1 = connection.prepareStatement(currentSql);
+            ps1.setTimestamp(1, currentTs);
+            ps1.setTimestamp(2, currentTs);
+            ps1.execute();
+
+        } catch (SQLException e) {
+            log.error("Error occurred while trying to get and update the last daily timestamp for cartridge stats. ", e);
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
+
+        return lastSummaryTs.toString();
+    }
+
+    public String getAndUpdateLastCartridgeStatsMonthlyTimestamp() throws SQLException {
+
+        Timestamp lastSummaryTs = null;
+        Connection connection = null;
+
+        try {
+            connection = dataSource.getConnection();
+            String sql = "SELECT TIMESTMP FROM CARTRIDGE_STATS_LAST_MONTHLY_TS WHERE ID='LatestTS'";
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                lastSummaryTs = resultSet.getTimestamp("TIMESTMP");
+            } else {
+                lastSummaryTs = new Timestamp(0);
+            }
+
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+            Timestamp currentTs = Timestamp.valueOf(formatter.format(new Date()));
+
+            String currentSql = "INSERT INTO CARTRIDGE_STATS_LAST_MONTHLY_TS (ID, TIMESTMP) VALUES('LatestTS',?) ON DUPLICATE KEY UPDATE TIMESTMP=?";
+            PreparedStatement ps1 = connection.prepareStatement(currentSql);
+            ps1.setTimestamp(1, currentTs);
+            ps1.setTimestamp(2, currentTs);
+            ps1.execute();
+
+        } catch (SQLException e) {
+            log.error("Error occurred while trying to get and update the last monthly timestamp for cartridge stats. ", e);
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
+
+        return lastSummaryTs.toString();
+    }
+
 }

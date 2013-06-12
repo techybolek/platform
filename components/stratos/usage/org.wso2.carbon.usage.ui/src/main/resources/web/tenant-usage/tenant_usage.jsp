@@ -21,6 +21,7 @@
 <%@ page import="org.wso2.carbon.usage.stub.beans.xsd.TenantUsage" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.wso2.carbon.usage.ui.utils.UsageUtil" %>
+<%@ page import="org.wso2.carbon.usage.stub.beans.xsd.CartridgeStatistics" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -165,6 +166,25 @@
 <%
     }
 %>
+
+<tr>
+    <td colspan="4" class="middle-header"><fmt:message key="api.usage"/></td>
+</tr>
+<tr>
+    <td><fmt:message key="server.name"/></td>
+    <td><fmt:message key="number.of.api.calls"/></td>
+</tr>
+<%
+    String apiCallCount = UsageUtil.getAPIUsage(usage);
+%>
+
+<tr>
+    <td><fmt:message key="all.server.name"/></td>
+    <td>
+        <input readonly="1" type="text" name="totalAPICalls" id="APICalls"
+               style="width:200px" value="<%=apiCallCount%>"/>
+    </td>
+</tr>
 
 <%--<tr>
     <td colspan="4" class="middle-header"><fmt:message key="registry.bandwidth.usage"/></td>
@@ -393,6 +413,52 @@
     </td>
 </tr>
 
+<!--cartridge stats-->
+<tr>
+    <td colspan="4" class="middle-header"><fmt:message key="cartridge.stat"/></td>
+</tr>
+<tr>
+    <td><fmt:message key="cartridge.type"/></td>
+    <td><fmt:message key="image.id"/></td>
+    <td><fmt:message key="cartridge.hours"/></td>
+    <%--<td><fmt:message key="service.usage.fault"/></td>--%>
+</tr>
+<%
+    long totalHours = usage.getTotalCartridgeHours().getCartridgeHours();
+    CartridgeStatistics[] cs = usage.getCartridgeStatistics();
+    if(cs!=null && cs.length>0 && cs[0] != null) {
+        for(CartridgeStatistics stat: cs) {
+
+%>
+<tr>
+    <td><%=stat.getKey()%>
+    </td>
+    <td>
+        <input readonly="1" type="text" name="imageId" id="imageId"
+               style="width:200px" value="<%=stat.getInstanceId()%>"/>
+    </td>
+    <td>
+        <input readonly="1" type="text" name="cartridgeHours" id="cartridgeHours"
+               style="width:200px" value="<%=stat.getCartridgeHours()%>"/>
+    </td>
+
+</tr>
+<%
+        }
+    }
+%>
+<tr>
+    <td><fmt:message key="all.server.name"/></td>
+    <td>
+        <input readonly="1" type="text" name="totalImageIds" id="totalImageIds"
+               style="width:200px" value=""/>
+    </td>
+    <td>
+        <input readonly="1" type="text" name="totalCartridgeHours" id="totalCartridgeHours"
+               style="width:200px" value="<%=totalHours%>"/>
+    </td>
+
+</tr>
 
 </tbody>
 </table>

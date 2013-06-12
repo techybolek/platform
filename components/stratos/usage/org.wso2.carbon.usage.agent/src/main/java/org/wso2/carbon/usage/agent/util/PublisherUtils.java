@@ -45,6 +45,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.usage.agent.beans.APIManagerRequestStats;
 
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -366,6 +367,61 @@ public class PublisherUtils {
                             statistics.getCurrentInvocationFaultCount(),
                             statistics.getCurrentInvocationResponseTime()});
 
+            dataPublisher.publish(usageEvent);
+
+        } catch (Exception e) {
+            log.error("Error occurred while publishing usage event to BAM. " + e.getMessage(), e);
+            throw new UsageException(e.getMessage(), e);
+        }
+
+    }
+
+    /**
+     * @param statistics APIManagerRequestStats which contains usage data
+     * @param tenantId   Tenant id of tenant associated with usage stat
+     * @throws Exception UsageException when error in usage stat publishing
+     */
+    public static void publish(APIManagerRequestStats statistics, int tenantId) throws Exception {
+
+        if (dataPublisher == null) {
+            log.info("Creating data publisher for usage data publishing");
+            createDataPublisher();
+
+            //If we cannot create a data publisher we should give up
+            //this means data will not be published
+            if (dataPublisher == null) {
+                return;
+            }
+        }
+
+        if (streamId == null) {
+            try {
+                streamId = dataPublisher.findStream(usageEventStream, usageEventStreamVersion);
+            } catch (NoStreamDefinitionExistException e) {
+                log.info("Defining the event stream because it was not found in BAM");
+                try {
+                    defineStream();
+                } catch (Exception ex) {
+                    String msg = "Error occurred while defining the event stream for publishing usage data. " + ex.getMessage();
+                    log.error(msg);
+                    //We do not want to proceed without an event stream. Therefore we return.
+                    return;
+                }
+            } catch (Exception exc) {
+                log.error("Error occurred while searching for stream id. " + exc.getMessage());
+                //We do not want to proceed without an event stream. Therefore we return.
+                return;
+            }
+        }
+
+        try {
+            //Get data from API manager request stat object and create event
+            Event usageEvent = new Event(streamId, System.currentTimeMillis(), new Object[]{"external"}, null,
+                    new Object[]{getServerUrl(statistics.getTenantId()),
+                            Integer.toString(statistics.getTenantId()),
+                            statistics.getMeasurement(),
+                            statistics.getValue()});
+            //publish usage to bam
             dataPublisher.publish(usageEvent);
 
         } catch (Exception e) {

@@ -39,6 +39,7 @@ public class TenantUsageRetriever {
     public static final int REG_BANDWIDTH_INDEX = 0;
     public static final int SVC_BANDWIDTH_INDEX = 1;
     public static final int WEBAPP_BANDWIDTH_INDEX = 2;
+    public static final int API_CALL_STATS=3;
 
     private RegistryService registryService;
     private DataAccessObject dao;
@@ -95,19 +96,19 @@ public class TenantUsageRetriever {
             //get from daily usage stats
             List<BandwidthStatistics> bwsList = new ArrayList<BandwidthStatistics>();
             bwsList = dao.getDailyBandwidthStats(tenantId, startDate, endDate);
-            
+
             //next we'll get from the houlry stats to get the stats which are not yet
             //summarized to the daily stats table
             Calendar startHour = Calendar.getInstance();
             startHour.set(Calendar.HOUR, 0);
             startHour.set(Calendar.MINUTE, 0);
             startHour.set(Calendar.SECOND, 0);
-            
+
             Calendar endHour = Calendar.getInstance();
-            
+
             bwsList.addAll(dao.getHourlyBandwidthStats(tenantId, startHour, endHour));
             stats = convertBWListToArray(bwsList);
-            
+
         } else {
             //get from monthly usage stats
             Calendar monthCal = (Calendar) endDate.clone();
@@ -180,6 +181,73 @@ public class TenantUsageRetriever {
         return returnValue;
     }
 
+
+    public APIManagerUsageStats[] getAPIManagerUsageStats(int tenantId, Calendar startDate,
+                                                          Calendar endDate, boolean currentMonth) throws Exception {
+        //return the bandwidth usage of a user for a given period
+        APIManagerUsageStats[] stats;
+        if (currentMonth) {
+            //get from daily usage stats
+            List<APIManagerUsageStats> bwsList = new ArrayList<APIManagerUsageStats>();
+            bwsList = dao.getDailyAPIManagerUsageStats(tenantId, startDate, endDate);
+
+            //next we'll get from the houlry stats to get the stats which are not yet
+            //summarized to the daily stats table
+            Calendar startHour = Calendar.getInstance();
+            startHour.set(Calendar.HOUR, 0);
+            startHour.set(Calendar.MINUTE, 0);
+            startHour.set(Calendar.SECOND, 0);
+
+            Calendar endHour = Calendar.getInstance();
+
+            bwsList.addAll(dao.getHourlyAPIManagerUsageStats(tenantId, startHour, endHour));
+            stats = convertAPIStatListToArray(bwsList);
+
+        } else {
+            //get from monthly usage stats
+            Calendar monthCal = (Calendar) endDate.clone();
+            monthCal.set(Calendar.DATE, 0);
+            monthCal.set(Calendar.HOUR, 0);
+            monthCal.set(Calendar.MINUTE, 0);
+            monthCal.set(Calendar.SECOND, 0);
+
+            stats = convertAPIStatListToArray(dao.getMonthlyAPIManagerUsageStats(tenantId, monthCal));
+        }
+        HashMap<String, APIManagerUsageStats> statMap = new HashMap<String, APIManagerUsageStats>();
+        if (stats != null) {
+            for (APIManagerUsageStats stat : stats) {
+                if (stat.getRequestCount() == 0) {
+                    continue;
+                }
+                String serverName = extractServiceNameFromUrl(stat.getServerUrl());
+                String statName = stat.getKey();
+
+                HashMap<String, APIManagerUsageStats> statsHashMap;
+                if (statName.equals("API-Call")) {
+                    statsHashMap = statMap;
+                } else {
+                    log.warn("Unable to identify bandwidth name " + statName);
+                    continue;
+                }
+
+                //find whether the map already has this key; If not, insert a new one
+                APIManagerUsageStats reqStat = statsHashMap.get(serverName);
+                if (reqStat == null) {
+                    reqStat = new APIManagerUsageStats(serverName);
+                    statsHashMap.put(serverName, reqStat);
+                }
+                reqStat.setRequestCount(stat.getRequestCount());
+            }
+        }
+
+        //Convert to array and return it
+        APIManagerUsageStats[] returnValue = new APIManagerUsageStats[0];
+        Collection<APIManagerUsageStats> values = statMap.values();
+        returnValue = values.toArray(new APIManagerUsageStats[values.size()]);
+        return returnValue;
+    }
+
+
     public RequestStatistics[] getRequestStatistics(int tenantId, Calendar startDate,
                                                     Calendar endDate, boolean currentMonth) throws Exception {
         RequestStatistics[] stats;
@@ -243,6 +311,70 @@ public class TenantUsageRetriever {
         //Convert to array and return it
         Collection<RequestStatistics> values = tempReqStatMap.values();
         return values.toArray(new RequestStatistics[values.size()]);
+
+    }
+
+    public CartridgeStatistics[] getCartridgeStatistics(int tenantId, Calendar startDate,
+                                                    Calendar endDate, boolean currentMonth) throws Exception {
+        CartridgeStatistics[] stats;
+        /*if (currentMonth) {
+            //get from daily usage stats
+            List<CartridgeStatistics> csList = new ArrayList<CartridgeStatistics>();
+            csList = dao.getDailyCartridgeStats(tenantId, startDate, endDate);
+
+            //next we'll get from the houlry stats to get the stats which are not yet
+            //summarized to the daily stats table
+            Calendar startHour = Calendar.getInstance();
+            startHour.set(Calendar.HOUR, 0);
+            startHour.set(Calendar.MINUTE, 0);
+            startHour.set(Calendar.SECOND, 0);
+
+            Calendar endHour = Calendar.getInstance();
+
+            csList.addAll(dao.getHourlyCartridgeStats(tenantId, startHour, endHour));
+
+            stats = convertCSListToArray(csList);
+        } else {
+            //get from monthly usage stats
+            Calendar monthCal = (Calendar) endDate.clone();
+            monthCal.set(Calendar.DATE, 0);
+            monthCal.set(Calendar.HOUR, 0);
+            monthCal.set(Calendar.MINUTE, 0);
+            monthCal.set(Calendar.SECOND, 0);
+
+            stats = convertCSListToArray(dao.getMonthlyCartridgeStats(tenantId, monthCal));
+        }*/
+        List<CartridgeStatistics> csList = new ArrayList<CartridgeStatistics>();
+        csList = dao.getHourlyCartridgeStats(tenantId, startDate, endDate);
+        stats = convertCSListToArray(csList);
+
+        //Add a comment explaining following logic later
+        HashMap<String, CartridgeStatistics> tempCartridgeStatMap = new HashMap<String, CartridgeStatistics>();
+
+        if (stats != null) {
+            for (CartridgeStatistics stat : stats) {
+                //Proceed only if request count is not zero
+                if (stat.getCartridgeHours() == 0) {
+                    continue;
+                }
+
+                
+                //find whether the map already has this key; If not, insert a new one
+                CartridgeStatistics cartridgeStat = tempCartridgeStatMap.get(stat.getKey());
+                if (cartridgeStat == null) {
+                    cartridgeStat = new CartridgeStatistics(stat.getKey());
+                    tempCartridgeStatMap.put(stat.getKey(), cartridgeStat);
+                }
+
+                // Update the service specific statistics
+                cartridgeStat.setCartridgeHours(cartridgeStat.getCartridgeHours() + stat.getCartridgeHours());
+                cartridgeStat.setInstanceId(stat.getInstanceId());
+            }
+        }
+
+        //Convert to array and return it
+        Collection<CartridgeStatistics> values = tempCartridgeStatMap.values();
+        return values.toArray(new CartridgeStatistics[values.size()]);
 
     }
 
@@ -346,7 +478,32 @@ public class TenantUsageRetriever {
             int usersCount = getCurrentUserCount(tenantId);
             tenantUsage.setNumberOfUsers(usersCount);
         }
+        // get the API invocation data
+        APIManagerUsageStats[] apiStats = null;
+        try {
+            apiStats = getAPIManagerUsageStats(tenantId, startDate, endDate, isCurrentMonth);
+        } catch (Exception e) {
+            String msg = "Error in getting bandwidth statistics from metering service.";
+            log.error(msg, e);
+            throw new Exception(msg, e);
+        }
+        tenantUsage.setApiManagerUsageStats(apiStats);
 
+        //retrieving cartridge hours
+        CartridgeStatistics[] cartridgeStatistics = getCartridgeStatistics(tenantId, startDate, endDate, isCurrentMonth);
+        tenantUsage.setCartridgeStatistics(cartridgeStatistics);
+        long totalCartridgeHours = 0;
+        if(cartridgeStatistics!=null && cartridgeStatistics.length>0){
+            
+            for (CartridgeStatistics cs : cartridgeStatistics){
+                totalCartridgeHours += cs.getCartridgeHours();
+            }
+        }
+
+        CartridgeStatistics totalCS = new CartridgeStatistics();
+        totalCS.setCartridgeHours(totalCartridgeHours);
+
+        tenantUsage.setTotalCartridgeHours(totalCS);
         return tenantUsage;
     }
 
@@ -419,17 +576,29 @@ public class TenantUsageRetriever {
         return returnValue;
         */
     }
-    
-    
+
+
     private BandwidthStatistics[] convertBWListToArray(List<BandwidthStatistics> bwsList) {
         BandwidthStatistics[] bwsArray = new BandwidthStatistics[bwsList.size()];
         bwsArray = bwsList.toArray(bwsArray);
         return bwsArray;
     }
-    
+
+    private APIManagerUsageStats[] convertAPIStatListToArray(List<APIManagerUsageStats> bwsList) {
+        APIManagerUsageStats[] bwsArray = new APIManagerUsageStats[bwsList.size()];
+        bwsArray = bwsList.toArray(bwsArray);
+        return bwsArray;
+    }
+
     private RequestStatistics[] convertRSListToArray(List<RequestStatistics> rsList) {
         RequestStatistics[] rsArray = new RequestStatistics[rsList.size()];
         rsArray = rsList.toArray(rsArray);
         return rsArray;
+    }
+
+    private CartridgeStatistics[] convertCSListToArray(List<CartridgeStatistics> csList){
+        CartridgeStatistics[] csArray = new CartridgeStatistics[csList.size()];
+        csArray = csList.toArray(csArray);
+        return csArray;
     }
 }
