@@ -13,6 +13,16 @@
         </xs:schema>
         <xs:schema xmlns:ax26="http://service.security.handlers.gateway.apimgt.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://service.security.handlers.gateway.apimgt.carbon.wso2.org">
             <xs:import namespace="http://service.security.handlers.gateway.apimgt.carbon.wso2.org/xsd"/>
+            <xs:element name="invalidateResourceCache">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="apiContext" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiVersion" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="resourceURLContext" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="httpVerb" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
             <xs:element name="invalidateOAuthKeys">
                 <xs:complexType>
                     <xs:sequence>
@@ -40,6 +50,9 @@
     <wsdl:message name="invalidateKeyRequest">
         <wsdl:part name="parameters" element="ns:invalidateKey"/>
     </wsdl:message>
+    <wsdl:message name="invalidateResourceCacheRequest">
+        <wsdl:part name="parameters" element="ns:invalidateResourceCache"/>
+    </wsdl:message>
     <wsdl:message name="invalidateKeysRequest">
         <wsdl:part name="parameters" element="ns:invalidateKeys"/>
     </wsdl:message>
@@ -49,6 +62,9 @@
     <wsdl:portType name="APIAuthenticationServicePortType">
         <wsdl:operation name="invalidateKey">
             <wsdl:input message="ns:invalidateKeyRequest" wsaw:Action="urn:invalidateKey"/>
+        </wsdl:operation>
+        <wsdl:operation name="invalidateResourceCache">
+            <wsdl:input message="ns:invalidateResourceCacheRequest" wsaw:Action="urn:invalidateResourceCache"/>
         </wsdl:operation>
         <wsdl:operation name="invalidateKeys">
             <wsdl:input message="ns:invalidateKeysRequest" wsaw:Action="urn:invalidateKeys"/>
@@ -61,6 +77,12 @@
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
         <wsdl:operation name="invalidateKey">
             <soap:operation soapAction="urn:invalidateKey" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="invalidateResourceCache">
+            <soap:operation soapAction="urn:invalidateResourceCache" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -86,6 +108,12 @@
                 <soap12:body use="literal"/>
             </wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="invalidateResourceCache">
+            <soap12:operation soapAction="urn:invalidateResourceCache" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
         <wsdl:operation name="invalidateKeys">
             <soap12:operation soapAction="urn:invalidateKeys" style="document"/>
             <wsdl:input>
@@ -107,6 +135,12 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
         </wsdl:operation>
+        <wsdl:operation name="invalidateResourceCache">
+            <http:operation location="invalidateResourceCache"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+        </wsdl:operation>
         <wsdl:operation name="invalidateKeys">
             <http:operation location="invalidateKeys"/>
             <wsdl:input>
@@ -122,13 +156,13 @@
     </wsdl:binding>
     <wsdl:service name="APIAuthenticationService">
         <wsdl:port name="APIAuthenticationServiceHttpsSoap11Endpoint" binding="ns:APIAuthenticationServiceSoap11Binding">
-            <soap:address location="https://localhost:8255/services/APIAuthenticationService.APIAuthenticationServiceHttpsSoap11Endpoint"/>
+            <soap:address location="https://lalaji-TECRA-M11:8243/services/APIAuthenticationService.APIAuthenticationServiceHttpsSoap11Endpoint"/>
         </wsdl:port>
         <wsdl:port name="APIAuthenticationServiceHttpsSoap12Endpoint" binding="ns:APIAuthenticationServiceSoap12Binding">
-            <soap12:address location="https://localhost:8255/services/APIAuthenticationService.APIAuthenticationServiceHttpsSoap12Endpoint"/>
+            <soap12:address location="https://lalaji-TECRA-M11:8243/services/APIAuthenticationService.APIAuthenticationServiceHttpsSoap12Endpoint"/>
         </wsdl:port>
         <wsdl:port name="APIAuthenticationServiceHttpsEndpoint" binding="ns:APIAuthenticationServiceHttpBinding">
-            <http:address location="https://localhost:8255/services/APIAuthenticationService.APIAuthenticationServiceHttpsEndpoint"/>
+            <http:address location="https://lalaji-TECRA-M11:8243/services/APIAuthenticationService.APIAuthenticationServiceHttpsEndpoint"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
