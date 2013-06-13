@@ -48,9 +48,9 @@
                         </property>
                         <sec.verifier.dir>${basedir}/target/security-verifier/</sec.verifier.dir>
                         <maven.test.haltafterfailure>false</maven.test.haltafterfailure>
-                        <esb.carbon.zip>
+                        <carbon.zip>
                             ${basedir}/../../distribution/target/wso2esb-${project.version}.zip
-                        </esb.carbon.zip>
+                        </carbon.zip>
                         <emma.home>${basedir}/target/emma</emma.home>
                         <instr.file>${basedir}/src/test/resources/instrumentation.txt</instr.file>
                         <filters.file>${basedir}/src/test/resources/filters.txt</filters.file>
