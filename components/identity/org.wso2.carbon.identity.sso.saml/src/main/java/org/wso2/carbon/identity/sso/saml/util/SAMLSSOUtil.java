@@ -518,13 +518,12 @@ public class SAMLSSOUtil {
 
 		if (authnReqDTO.getQueryString() != null) {
 			// DEFLATE signature in Redirect Binding
-			validateDeflateSignature(authnReqDTO.getQueryString(), authnReqDTO.getIssuer(), alias,
+			return validateDeflateSignature(authnReqDTO.getQueryString(), authnReqDTO.getIssuer(), alias,
 			                         domainName);
 		} else {
 			// XML signature in SAML Request message for POST Binding
 			return validateXMLSignature(request, alias, domainName);
 		}
-		return false;
 	}
 	
 	/**
@@ -547,12 +546,11 @@ public class SAMLSSOUtil {
 		 * }
 		 */
 		if (queryString != null) {
-			validateDeflateSignature(queryString, logoutRequest.getIssuer().getValue(), alias,
+			return validateDeflateSignature(queryString, logoutRequest.getIssuer().getValue(), alias,
 			                         domainName);
 		} else {
-			validateXMLSignature(logoutRequest, alias, domainName);
+			return validateXMLSignature(logoutRequest, alias, domainName);
 		}
-		return false;
 	}
 
 	/**
@@ -567,7 +565,7 @@ public class SAMLSSOUtil {
 	private static boolean validateDeflateSignature(String queryString, String issuer,
 	                                                String alias, String domainName) {
 		try {
-			SAML2HTTPRedirectDeflateSignatureValidator.validateSignature(queryString, issuer,
+			return SAML2HTTPRedirectDeflateSignatureValidator.validateSignature(queryString, issuer,
 			                                                             alias, domainName);
 		} catch (SecurityException e) {
 			log.error("Error validating deflate signature", e);
@@ -577,7 +575,6 @@ public class SAMLSSOUtil {
 			         alias);
 			return false;
 		}
-		return true;
 	}
 
 	/**

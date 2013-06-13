@@ -18,6 +18,7 @@
 package org.wso2.carbon.identity.sso.saml.validators;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,7 +66,6 @@ public class SAML2HTTPRedirectDeflateSignatureValidator {
 		CriteriaSet criteriaSet = buildCriteriaSet(issuer);
 
 		// creating the SAML2HTTPRedirectDeflateSignatureRule
-		SAMLSSOUtil.getX509CredentialImplForTenant(domainName, alias);
 		X509CredentialImpl credential =
 		                                SAMLSSOUtil.getX509CredentialImplForTenant(domainName,
 		                                                                           alias);
@@ -75,8 +75,7 @@ public class SAML2HTTPRedirectDeflateSignatureValidator {
 		CollectionCredentialResolver credResolver = new CollectionCredentialResolver(credentials);
 		KeyInfoCredentialResolver kiResolver = SecurityHelper.buildBasicInlineKeyInfoResolver();
 		SignatureTrustEngine engine = new ExplicitKeySignatureTrustEngine(credResolver, kiResolver);
-		engine.validate(signature, signedContent, algorithmUri, criteriaSet, null);
-		return true;
+		return engine.validate(signature, signedContent, algorithmUri, criteriaSet, null);
 	}
 	
 	/**
@@ -100,14 +99,24 @@ public class SAML2HTTPRedirectDeflateSignatureValidator {
 	 * @param queryString
 	 * @return
 	 * @throws SecurityPolicyException
+	 * @throws IdentitySAML2SSOException 
 	 */
 	private static String getSigAlg(String queryString) throws SecurityPolicyException {
-		String signature = HTTPTransportUtils.getRawQueryStringParameter(queryString, "Signature");
-		if (DatatypeHelper.isEmpty(signature)) {
+		String sigAlgQueryParam = HTTPTransportUtils.getRawQueryStringParameter(queryString, "SigAlg");
+		if (DatatypeHelper.isEmpty(sigAlgQueryParam)) {
 			throw new SecurityPolicyException(
 			                                  "Could not extract Signature Algorithm from query string");
 		}
-		return signature;
+		String sigAlg = null;
+		try {
+		    /* Split 'SigAlg=<sigalg_value>' query param using '=' as the delimiter, 
+            and get the Signature Algorithm */
+		    sigAlg = URLDecoder.decode(sigAlgQueryParam.split("=")[1], "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // JVM is required to support UTF-8
+            return null;
+        }
+		return sigAlg;
 	}
 
 	/**
@@ -122,12 +131,22 @@ public class SAML2HTTPRedirectDeflateSignatureValidator {
 	 * @param queryString
 	 * @return
 	 * @throws SecurityPolicyException
+	 * @throws IdentitySAML2SSOException 
 	 */
 	protected static byte[] getSignature(String queryString) throws SecurityPolicyException {
-		String signature = HTTPTransportUtils.getRawQueryStringParameter(queryString, "Signature");
-		if (DatatypeHelper.isEmpty(signature)) {
+		String signatureQueryParam = HTTPTransportUtils.getRawQueryStringParameter(queryString, "Signature");
+		if (DatatypeHelper.isEmpty(signatureQueryParam)) {
 			throw new SecurityPolicyException("Could not extract the Signature from query string");
 		}
+		String signature = null;
+		try {
+		    /* Split 'Signature=<sig_value>' query param using '=' as the delimiter, 
+		      and get the Signature value */
+		    signature = URLDecoder.decode(signatureQueryParam.split("=")[1], "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // JVM is required to support UTF-8
+            return null;
+        }
 		return Base64.decode(signature);
 	}
 	
