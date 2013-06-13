@@ -1,6 +1,7 @@
 <% jagg.template("item-edit", function(inputs, outputs, jagg) {
  var mod = jagg.module("api");
  var result = mod.getTiers().tiers;
+ var isSuperTenant = jagg.getUser().isSuperTenant;
  var i,resCount,rowNums = [],api = outputs.api;%>
 
 <script type="text/javascript">
@@ -33,7 +34,9 @@ $(document).ready(function() {
 <div class="alert alert-block" id="editAPIWarn" style="display:none">
 <span id="editWarnSpan"><b>Warning!</b><br/>
 You are editing an API with active subscribers. Tier Availability changes will not be reflected on
-active subscriptions.</span>
+active subscriptions.<br/>
+API Definition for Swagger will not be overriden with the changes you will do to the API. 
+</span>
 </div>
 <script type="text/javascript">
     var subs = "<%=api.subs%>";
@@ -65,6 +68,8 @@ active subscriptions.</span>
                     <input type="text" class="input-xlarge required contextExists" id="context" name="context" value="<%=api.context%>" onChange="setContextValue('<%=api.version%>')"/>
                 </div>
             </div>
+            
+            <% if (isSuperTenant) { %>
             <div class="control-group">
                 <label class="control-label" for="visibility"><%=i18n.localize("visibility")%>:<span class="requiredAstrix">*</span></label>
                 <div class="controls">
@@ -75,15 +80,39 @@ active subscriptions.</span>
                 </div>
 
             </div>
+            <%} else {%>
+            <div class="control-group">
+                <label class="control-label" for="visibility"><%=i18n.localize("visibility")%>:<span class="requiredAstrix">*</span></label>
+                <div class="controls">
+                    <select class="select required" id="visibility" name="visibility" onchange="showHideRoles()">
+                        <option value="public" <%if(api.visibility=="public"){%> selected="selected" <%}%>><%=i18n.localize("public")%></option>
+                        <option value="restricted" <%if(api.visibility=="restricted"){%> selected="selected" <%}%>><%=i18n.localize("restricted")%></option>
+                        <option value="controlled" <%if(api.visibility=="controlled"){%> selected="selected" <%}%>><%=i18n.localize("controlled")%></option>
+                    </select>
+                </div>
 
-            <div class="control-group" id="rolesDiv" <%if(api.visibility=="public"){%>style="display: none;"<%}%>>
+            </div>
+            <% } %>
+
+            <div class="control-group" id="rolesDiv" <%if(api.visibility!="restricted"){%>style="display: none;"<%}%>>
                 <label class="control-label" for="roles" id="rolesLabel" name="rolesLabel">
-                    <%=i18n.localize("roles")%>:<span class="requiredAstrix">*</span>
+                    <%=i18n.localize("roles")%>:<% if (isSuperTenant) { %><span class="requiredAstrix">*</span><%}%>
                 </label>
                 <div class="controls">
-                    <input type="text" class="input required" id="roles" name="roles"  value="<%=api.roles%>"/>
+                    <input type="text" <% if (isSuperTenant) { %>class="input required"<%}else{%>class="input"<%}%> 
+                    id="roles" name="roles"  value="<%=api.roles%>"/>
                 </div>
             </div>
+	
+	    <div class="control-group" id="allowTenantsDiv" <%if(api.visibility!="controlled"){%>style="display: none;"<%}%>>
+			<label class="control-label" for="allowTenants" id="allowTenantsLabel">
+				<%=i18n.localize("tenants")%>:<span class="requiredAstrix">*</span>
+			</label>
+			<div class="controls">
+				<input type="text" class="input required" id="allowTenants" name="allowTenants" value="<%=api.tenants%>"/>
+				<p class="help-block" id="allowTenantsHelp"><%=i18n.localize("allowTenantsHelpMsg")%></p>
+			</div>
+	    </div>
             <div class="control-group">
                 <label class="control-label" for="imageUrl"><%=i18n.localize("icon")%></label>
                 <div class="controls">
@@ -93,8 +122,9 @@ active subscriptions.</span>
                         <i class="icon-picture"></i> <%=i18n.localize("changeIcon")%>
                     </a>
                 </div>
-                <div class="controls">
-                    <input type="file" class="input-xlarge" id="imageUrl" style="display:none;" name="apiThumb"/>
+                <div class="controls" id="imageUrl" style="display:none;">
+                    <div id="apiThumb-container"> <input type="file" class="input-xlarge" name="apiThumb" /></div>
+                    <input type="button" id="clearThumb" value="<%=i18n.localize("clear")%>"/>
                     <p class="help-block"><%=i18n.localize("imgHelpMsg")%></p>
                 </div>
             </div>
@@ -112,8 +142,8 @@ active subscriptions.</span>
             <div class="control-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>">
             <label class="control-label" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
             <div class="controls">
-                <input type="text" class="input-small" id="epUsername" name="epUsername"  value="<%=api.epUsername%>">
-                <input type="password" class="input-small" id="epPassword" name="epPassword" value="<%=api.epPassword%>">
+                <input type="text" class="input-small required" id="epUsername" name="epUsername"  value="<%=api.epUsername%>">
+                <input type="password" class="input-small required" id="epPassword" name="epPassword" value="<%=api.epPassword%>">
             </div>
            </div>
               
@@ -363,19 +393,18 @@ active subscriptions.</span>
                                         <option <%if(getAuthVal && getAuthVal=="Any"){%> selected="selected" <%}%>><%=i18n.localize("application&applicationUser")%></option>
 
                                     </select>
-                                    <select style="width:100%" class="putAuthType">
-                                        <option <%if(putAuthVal && putAuthVal=="None"){%> selected="selected" <%}%>><%=i18n.localize("none")%></option>
-                                        <option <%if(putAuthVal && putAuthVal=="Application"){%> selected="selected" <%}%>><%=i18n.localize("application")%></option>
-                                        <option <%if(putAuthVal && putAuthVal=="Application User"){ %> selected="selected" <%}%>><%=i18n.localize("applicationUser")%></option>
-                                        <option <% if(putAuthVal && putAuthVal=="Any"){ %> selected="selected" <%}%>><%=i18n.localize("application&applicationUser")%></option>
-
-
-                                    </select>
                                     <select style="width:100%" class="postAuthType">
                                         <option <%if(postAuthVal && postAuthVal=="None"){%> selected="selected" <%}%>><%=i18n.localize("none")%></option>
                                         <option <%if(postAuthVal && postAuthVal=="Application"){%> selected="selected" <%}%>><%=i18n.localize("application")%></option>
                                         <option <%if(postAuthVal && postAuthVal=="Application User"){%> selected="selected" <%}%>><%=i18n.localize("applicationUser")%></option>
                                         <option <%if(postAuthVal && postAuthVal=="Any"){%> selected="selected" <%}%>><%=i18n.localize("application&applicationUser")%></option>
+
+                                    </select>
+                                    <select style="width:100%" class="putAuthType">
+                                        <option <%if(putAuthVal && putAuthVal=="None"){%> selected="selected" <%}%>><%=i18n.localize("none")%></option>
+                                        <option <%if(putAuthVal && putAuthVal=="Application"){%> selected="selected" <%}%>><%=i18n.localize("application")%></option>
+                                        <option <%if(putAuthVal && putAuthVal=="Application User"){ %> selected="selected" <%}%>><%=i18n.localize("applicationUser")%></option>
+                                        <option <% if(putAuthVal && putAuthVal=="Any"){ %> selected="selected" <%}%>><%=i18n.localize("application&applicationUser")%></option>
 
                                     </select>
                                     <select style="width:100%" class="deleteAuthType">

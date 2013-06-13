@@ -17,6 +17,10 @@ $(document).ready(function() {
 
     });
 
+    $("#clearThumb").on("click", function () {
+        $('#apiThumb-container').html('<input type="file" class="input-xlarge" name="apiThumb" />');
+    });
+
     enableDisableButtons();
     $('#context').change(function() {
         getContextValue();
@@ -131,6 +135,7 @@ var moveMe = function(moveButton){
 
     enableDisableButtons();
     createHiddenForm();
+    validateResourceTable();
 };
 var createHiddenForm = function(){
     $('#hiddenFormElements input').remove();
@@ -242,8 +247,10 @@ var validateResourceTable = function(){
     if(errors != ""){
         $('#resourceTableError').show('fast');
         $('#resourceTableError').html(errors);
+        $('#updateButton').attr('disabled','disabled');
     }else{
         $('#resourceTableError').hide('fast');
+        $('#updateButton').removeAttr('disabled');
     }
     return errors;
 };
@@ -272,16 +279,16 @@ function getContextValue() {
 }
 function showHideRoles(){
     var visibility = $('#visibility').find(":selected").val();
-    if(visibility == "public"){
-        $('#roles').val('');
-        $('#roles').hide();
-        $('#rolesLabel').hide();
-    }
-    else{
-        $('#rolesDiv').show();
-        $('#roles').show();
-        $('#rolesLabel').show();
-    }
+    if (visibility == "public" || visibility == "controlled"){
+		$('#rolesDiv').hide();
+	} else{
+		$('#rolesDiv').show();
+	}
+	if (visibility == "controlled") {
+		$('#allowTenantsDiv').show();
+	} else {
+		$('#allowTenantsDiv').hide();
+	}
 }
 
 

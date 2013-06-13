@@ -1,7 +1,10 @@
 <% jagg.template("tokens", function(inputs, outputs, jagg) {
 
 %>
- <div id="tokens"><h2><%=i18n.localize("revokeTitle")%></h2>
+ <div id="tokens">
+     <div class="title-section"> <h2><%=i18n.localize("revokeTitle")%></h2> </div>
+     <div class="content-section shadow-up">
+     <div class="content-data">
  <%jagg.includeBlock("search/token-search", null); %>
  <br/>
 
@@ -25,9 +28,14 @@
                   <b><%=i18n.localize("tokenScope")%>:</b>
                      <%=accessTokens[i].scope%> <br/>
                   <b><%=i18n.localize("createdTime")%>:</b>
-                     <%=accessTokens[i].createTime%><br/>
+                     <%=accessTokens[i].createTime%> UTC<br/>
                   <b><%=i18n.localize("validPeriod")%>:</b>
+                     <%if(accessTokens[i].validTime=="Won't Expire"){%>
+                     <%=accessTokens[i].validTime%>
+                     <%}else{%>
                      <%=accessTokens[i].validTime%> ms
+                     <%}%>
+
            </span></td>
         <td>
             <i class="icon-trash"></i><a href="#" onclick="revokeAccessToken(<%=String(i)%>)"><%=i18n.localize("revoke")%></a>
@@ -50,6 +58,7 @@
         </div>
         </div>
         </div>
-
+ </div>
+ </div>
 
 <% });%>

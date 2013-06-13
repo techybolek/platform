@@ -1,7 +1,16 @@
 <% jagg.template("listing", function(inputs, outputs, jagg) { %>
 <div id="listing">
-    <h2><%=i18n.localize("allAPIs")%></h2>
+    <div class="title-section">
+        <h2><%=i18n.localize("allAPIs")%></h2>
+    </div>
+    <div class="content-section shadow-up">
+    <div class="content-data">
     <%
+    var tenant=request.getParameter("tenant");
+    var urlPrefix;
+    var urlPostfix;
+    if(tenant!=null) {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
+    if(tenant!=null) {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
     if ((outputs.apis != null && outputs.apis.length > 0) || request.getParameter('query') != null) {
         jagg.includeBlock("search/api-search", null);
     }
@@ -30,13 +39,13 @@
            if((currentPage-1)*itemsPerPage == length){
                 if(String(currentPage)=='1'){%>
                  <script>
-                    window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>";
+                    window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%><%=urlPrefix%>";
                 </script>
                 <%}else{
                 currentPage = currentPage - 1;
                 %>
                 <script>
-                    window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>" +"?page="+"<%=String(currentPage)%>";
+                    window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/index.jag")%>" +"?page="+"<%=String(currentPage)%><%=urlPostfix%>";
                 </script><%
         } }  }
         var from = (currentPage - 1)*itemsPerPage;
@@ -54,7 +63,7 @@
        <% if(apis){
         for(i = from; i < to; i++) {
                     api = apis[i];
-                    path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider;
+                    path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+urlPostfix;
 
                     var nameSubstring = api.name;
                     if (api.name.length > 10) {
@@ -109,7 +118,7 @@
     <div class="alert alert-info">
         <%if(outputs.isCreatePermitted){ %>
         <div style="padding-bottom:10px"><%=i18n.localize("noAPIsMsg1")%></div>
-        <div><a class="btn btn-primary" href="<%=jagg.getMappedUrl("/site/pages/add.jag")%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/site/pages/add.jag")%>',e:event})" ><%=i18n.localize("newAPI")%></a></div>
+        <div><a class="btn btn-primary" href="<%=jagg.getMappedUrl("/site/pages/add.jag")%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/site/pages/add.jag")%><%=urlPrefix%>',e:event})" ><%=i18n.localize("newAPI")%></a></div>
         <%}else{%>
         <div style="padding-bottom:10px"><%=i18n.localize("noAPIsMsg")%></div>
         <%}%>
@@ -122,4 +131,7 @@
 
 
 </div>
+</div>
+</div>
+
 <% }); %>

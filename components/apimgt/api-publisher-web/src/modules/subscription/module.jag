@@ -15,6 +15,9 @@ jagg.module("subscription", {
     },
     getAccessTokenData:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/token.jag").getAccessTokenData.apply(this, arguments);
+    },
+    updateSubscription:function () {
+        return jagg.require(jagg.getModulesDir() + "subscription/subscription.jag").updateSubscription.apply(this, arguments);
     }
 
 });

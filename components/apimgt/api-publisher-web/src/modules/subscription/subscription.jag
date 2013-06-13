@@ -47,6 +47,7 @@ var getSubscribersOfProvider = function (username) {
             list.push({
                 username:subscriber.userName,
                 application:subscriber.application,
+                appId:subscriber.appId,
                 token:subscriber.token,
                 tokenStatus:subscriber.tokenStatus,
                 apis:subscriber.apis
@@ -94,6 +95,29 @@ var getSubscribedAPIs = function (username) {
         return {
             error:e,
             apis:null,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
+var updateSubscription = function (api, appId,newStatus) {
+    var result,  length,log = new Log(),
+            list = [],
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        result = provider.updateSubscriptionStatus(api, newStatus,appId);
+        if (log.isDebugEnabled()) {
+            log.debug("updateSubscription : " + stringify(apis));
+        }
+
+        return {
+            error:false,
+            update:result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
             message:e.message.split(":")[1]
         };
     }

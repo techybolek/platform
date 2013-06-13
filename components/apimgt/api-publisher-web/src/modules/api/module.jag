@@ -49,6 +49,9 @@ jagg.module("api", {
     hasCreatePermission:function () {
         return jagg.require(jagg.getModulesDir() + "api/check-permissions.jag").hasCreatePermission.apply(this, arguments);
     },
+    hasUserPermissions:function () {
+        return jagg.require(jagg.getModulesDir() + "api/check-permissions.jag").hasUserPermissions.apply(this, arguments);
+    },
     hasPublishPermission:function () {
         return jagg.require(jagg.getModulesDir() + "api/check-permissions.jag").hasPublishPermission.apply(this, arguments);
     }   

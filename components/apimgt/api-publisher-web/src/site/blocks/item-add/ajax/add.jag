@@ -36,6 +36,7 @@ include("/jagg/jagg.jag");
             apiData.techOwnerEmail = request.getParameter("techOwnerMail","UTF-8");
             apiData.visibility = request.getParameter("visibility");
             apiData.visibleRoles = request.getParameter("roles","UTF-8");
+            apiData.visibleTenants = request.getParameter("allowTenants","UTF-8");
             apiData.endpointSecured = request.getParameter("endpointType");
             apiData.endpointUTUsername = request.getParameter("epUsername");
             apiData.endpointUTPassword = request.getParameter("epPassword");

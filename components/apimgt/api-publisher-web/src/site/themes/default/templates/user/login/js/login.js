@@ -1,14 +1,19 @@
 var login = function () {
     var name = $("#username").val();
     var pass = $("#pass").val();
-    jagg.post("/site/blocks/user/login/ajax/login.jag", { action:"login", username:name, password:pass },
+    var tenantDomain = $("#tenant").val();
+    jagg.post("/site/blocks/user/login/ajax/login.jag", { action:"login", username:name, password:pass,tenant:tenantDomain },
               function (result) {
                   if (!result.error) {
                       var current = window.location.pathname;
+                      var currentHref=window.location.search;
+                      var queryParam;
+                      if(currentHref.indexOf("tenant")>-1){queryParam=currentHref;}
+                      else{queryParam='';}
                       if (current.indexOf(".jag") >= 0) {
-                          location.href = "index.jag";
+                          location.href = "index.jag"+queryParam;
                       } else {
-                          location.href = 'site/pages/index.jag';
+                          location.href = 'site/pages/index.jag'+queryParam;
                       }
 
                   } else {

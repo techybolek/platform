@@ -2,8 +2,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <%
-var i18n = require("i18n");
+var i18n = require("/i18n.js");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
+var tenantDomain=request.getParameter("tenant");
+var urlPrefix;
+var urlPostfix;
+if(tenantDomain!=null){
+   urlPrefix="?tenant="+tenantDomain;
+   urlPostfix="&tenant="+tenantDomain;
+}else{
+   urlPrefix='';
+   urlPostfix='';
+}
 i18n.init(request,localeResourcesBasePath);
 %>
 <head>
@@ -15,6 +25,8 @@ i18n.init(request,localeResourcesBasePath);
     %>
     <script>
         var requestURL = '<%=partWithContext%>';
+        var ssoEnabled = '<%=site.ssoConfiguration.enabled%>';
+        var tenantDomain = '<%=tenantDomain%>';
     </script>
     <title><%=outputs.title%></title>
     <meta charset="UTF-8">
@@ -61,9 +73,20 @@ var editUrl="info";
 <body <% if(reqUrl.indexOf(inlineUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%=provider%>','<%=name%>','<%=version%>','<%=docName%>')"<%}%>
 <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> onload="loadTiers()"<%}%>
 >
-    <div id="header"><% jagg.includeBlocks(outputs.header); %></div>
-    <div id="body"><% jagg.includeBlocks(outputs.body); %></div>
-    <div id="footer"><% jagg.includeBlocks(outputs.footer); %></div>
+    <div id="wrap">
+        <div class="container-fluid header">
+          <div class="row-fluid">
+              <div class="span6"></div>
+              <div class="span6 top-menu"></div>
+          </div>
+        </div>
+
+        <div class="clearfix"></div>
+        <div id="header"><% jagg.includeBlocks(outputs.header); %></div>
+        <div id="body"><% jagg.includeBlocks(outputs.body); %></div>
+        <div id="push"></div>
+    </div>
+    <div id="footer" class="footer-main"><% jagg.includeBlocks(outputs.footer); %></div>
     <% jagg.includeBlock("dialogs", null); %>
     <%
     if(data.footer) {
@@ -94,6 +117,7 @@ var editUrl="info";
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/bootstrap/js/bootstrap-collapse.js"))%>"></script>
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/bootstrap/js/bootstrap-carousel.js"))%>"></script>
     <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/bootstrap/js/bootstrap-typeahead.js"))%>"></script>
+    <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/bootstrap/js/bootstrap-affix.js"))%>"></script>
 </body>
 </html>
 <% }); %>

@@ -99,6 +99,7 @@ var moveMe = function(moveButton){
 
     enableDisableButtons();
     createHiddenForm();
+    validateResourceTable();
 };
 var createHiddenForm = function(){
     $('#hiddenFormElements input').remove();
@@ -212,8 +213,10 @@ var validateResourceTable = function(){
     if(errors != ""){
         $('#resourceTableError').show('fast');
         $('#resourceTableError').html(errors);
+        $('#addNewAPIButton').attr('disabled','disabled');
     }else{
         $('#resourceTableError').hide('fast');
+        $('#addNewAPIButton').removeAttr('disabled');
     }
     return errors;
 };

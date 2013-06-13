@@ -11,7 +11,6 @@ var getAPI = function (api) {
         api = {
             name:result[0],
             version:result[4],
-            provider:api.provider,
             description:result[1],
             endpoint:result[2],
             wsdl:result[3],
@@ -32,9 +31,11 @@ var getAPI = function (api) {
             wadl:result[19],
             visibility:result[20],
             roles:result[21],
-            epUsername:result[22],
-            epPassword:result[23],
-            endpointTypeSecured:result[24]
+            tenants:result[22],
+            epUsername:result[23],
+            epPassword:result[24],
+            endpointTypeSecured:result[25],
+            provider:result[26]
         };
         return {
             error:false,

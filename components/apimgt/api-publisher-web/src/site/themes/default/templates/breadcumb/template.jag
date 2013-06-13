@@ -1,22 +1,30 @@
 <% jagg.template("breadcumb", function(inputs, outputs, jagg) { %>
             <%
-                var reqUrl = request.getRequestURI();
-                var listUrl=jagg.getAbsoluteUrl("/site/pages/index.jag");
-                var listMappedUrl=jagg.getMappedUrl("/site/pages/index.jag");
+                var tenantDomain=request.getParameter("tenant");
+                var urlPrefix;
+                var urlPostfix;
+                if(tenantDomain!=null){
+                urlPrefix="?tenant="+tenantDomain;
+                urlPostfix="&tenant="+tenantDomain;
+                }else{
+                urlPrefix='';
+                urlPostfix='';
+                }
+                var reqUrl = request.getRequestURI()+urlPrefix;
+                var listUrl=jagg.getAbsoluteUrl("/site/pages/index.jag")+urlPrefix;
+                var listMappedUrl=jagg.getMappedUrl("/site/pages/index.jag")+urlPrefix;
                 var infoUrl=jagg.getAbsoluteUrl("/site/pages/item-info.jag");
                 var infoMappedUrl=jagg.getMappedUrl("/site/pages/item-info.jag");
-                var addUrl=jagg.getAbsoluteUrl("/site/pages/add.jag");
-                var addMappedUrl=jagg.getMappedUrl("/site/pages/add.jag");
-                var subsUrl=jagg.getAbsoluteUrl("/site/pages/subscriptions.jag");
-                var subsMappedUrl=jagg.getMappedUrl("/site/pages/subscriptions.jag");
-                var userUrl=jagg.getAbsoluteUrl("/site/pages/user.jag");
-                var userMappedUrl=jagg.getMappedUrl("/site/pages/user.jag");
-                var statsUrl=jagg.getAbsoluteUrl("/site/pages/statistics.jag");
-                var statsMappedUrl=jagg.getMappedUrl("/site/pages/statistics.jag");
-                var allStatsUrl=jagg.getAbsoluteUrl("/site/pages/all-statistics.jag");
-                var allStatsMappedUrl=jagg.getMappedUrl("/site/pages/all-statistics.jag");
-                var revokeUrl=jagg.getAbsoluteUrl("/site/pages/tokens.jag");
-                var revokeMappedUrl=jagg.getMappedUrl("/site/pages/tokens.jag");
+                var addUrl=jagg.getAbsoluteUrl("/site/pages/add.jag")+urlPrefix;
+                var addMappedUrl=jagg.getMappedUrl("/site/pages/add.jag")+urlPrefix;
+                var subsUrl=jagg.getAbsoluteUrl("/site/pages/subscriptions.jag")+urlPrefix;
+                var subsMappedUrl=jagg.getMappedUrl("/site/pages/subscriptions.jag")+urlPrefix;
+                var userUrl=jagg.getAbsoluteUrl("/site/pages/user.jag")+urlPrefix;
+                var userMappedUrl=jagg.getMappedUrl("/site/pages/user.jag")+urlPrefix;
+                var statsUrl=jagg.getAbsoluteUrl("/site/pages/statistics.jag")+urlPrefix;
+                var statsMappedUrl=jagg.getMappedUrl("/site/pages/statistics.jag")+urlPrefix;
+                var allStatsUrl=jagg.getAbsoluteUrl("/site/pages/all-statistics.jag")+urlPrefix;
+                var allStatsMappedUrl=jagg.getMappedUrl("/site/pages/all-statistics.jag")+urlPrefix;
             %>
             <ul class="breadcrumb">
                 <% if(reqUrl.indexOf(listUrl)>=0 ||reqUrl.indexOf(listMappedUrl)>=0||reqUrl.equals(site.context+"/")){%>
@@ -39,7 +47,7 @@
                 </li>
                 <li>
                     <%
-                        var apiUrl = infoMappedUrl + "?name=" + request.getParameter("name") + "&version=" + request.getParameter("version")+ "&provider=" + request.getParameter("provider");
+                        var apiUrl = infoMappedUrl + "?name=" + request.getParameter("name") + "&version=" + request.getParameter("version")+ "&provider=" + request.getParameter("provider")+urlPostfix;
                     %>
                     <a href="<%=apiUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=apiUrl%>',e:event})"><%=request.getParameter("name")%>-<%=request.getParameter("version")%></a>
                 </li>
@@ -85,7 +93,7 @@
                 </li>
                 <li>
                     <%
-                    var userTmpUrl = userMappedUrl + "?uname=" + request.getParameter("uname");
+                    var userTmpUrl = userMappedUrl + "?uname=" + request.getParameter("uname")+urlPostfix;
                     %>
                     <a href="<%=userTmpUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=userTmpUrl%>',e:event})"><%=i18n.localize("user", "User")%> - <%=request.getParameter("uname")%></a>
                 </li>
@@ -96,20 +104,6 @@
                 </li>
                 <li>
                     <a href="<%=subsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>',e:event})"><%=i18n.localize("subscriptions", "Subscriptions")%></a>
-                </li>
-                <% } %>
-
-
-                <% if(reqUrl.indexOf(revokeUrl)>=0||reqUrl.indexOf(revokeMappedUrl)>=0){%>
-                <li>
-                    <%=i18n.localize("myAPIs", "My APIs")%> <span class="divider">/</span>
-                </li>
-
-                <li>
-                    <%
-                    var userTmpUrl = userMappedUrl + "?uname=" + request.getParameter("uname");
-                    %>
-                    <a href="<%=userTmpUrl%>" ><%=i18n.localize("revokeTokens", "Revoke Tokens")%></a>
                 </li>
                 <% } %>
 

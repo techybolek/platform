@@ -50,11 +50,11 @@ function getSubscriberCountByAPIVersions(providerName, apiName) {
     }
 }
 
-function getProviderAPIUsage(providerName, server) {
+function getProviderAPIUsage(providerName,from,to, server) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiProvider.getProviderAPIUsage(providerName, server);
+        usage = apiProvider.getProviderAPIUsage(providerName,from,to, server);
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIUsage for : " + server);
         }
@@ -110,11 +110,11 @@ function getProviderAPIUserUsage(providerName, apiName, server) {
     }
 }
 
-function getAPIUsageByResourcePath(providerName) {
+function getAPIUsageByResourcePath(providerName,from,to) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiProvider.getAPIUsageByResourcePath(providerName);
+        usage = apiProvider.getAPIUsageByResourcePath(providerName,from,to);
         if (log.isDebugEnabled()) {
             log.debug("getAPIUsageByResourcePath for : " + providerName);
         }
@@ -140,10 +140,10 @@ function getAPIUsageByResourcePath(providerName) {
     }
 }
 
-function getProviderAPIVersionUserLastAccess(providerName, server) {
+function getProviderAPIVersionUserLastAccess(providerName,from,to, server) {
     var usage = [];
     try {
-        usage = apiProvider.getProviderAPIVersionUserLastAccess(providerName, server);
+        usage = apiProvider.getProviderAPIVersionUserLastAccess(providerName,from,to, server);
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIVersionUserLastAccess for : " + server);
         }
@@ -168,11 +168,11 @@ function getProviderAPIVersionUserLastAccess(providerName, server) {
     }
 }
 
-function getProviderAPIServiceTime(providerName, server) {
+function getProviderAPIServiceTime(providerName,from,to, server) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiProvider.getProviderAPIServiceTime(providerName, server);
+        usage = apiProvider.getProviderAPIServiceTime(providerName,from,to, server);
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIServiceTime for : " + server);
         }
@@ -256,11 +256,11 @@ function getProviderAPIVersionUserUsage(providerName,apiName,version,serverUrl) 
     }
 }
 
-function getAPIResponseFaultCount(providerName) {
+function getAPIResponseFaultCount(providerName,from,to) {
      var usage = [];
      var usageout = [];
      try {
-         usage = apiProvider.getAPIResponseFaultCount(providerName);
+         usage = apiProvider.getAPIResponseFaultCount(providerName,from,to);
          if (log.isDebugEnabled()) {
              log.debug("getAPIResponseFaultCount for : " + providerName);
          }
@@ -313,6 +313,36 @@ function getAPIFaultyAnalyzeByTime(providerName) {
          };
      }
  }
+
+function getFirstAccessTime(providerName, server) {
+    var usage = [];
+    var usageout = [];
+    try {
+        usage = apiProvider.getFirstAccessTime(providerName, server);
+        if (log.isDebugEnabled()) {
+            log.debug("getProviderAPIFirstAccessTime for : " + server);
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
 
 
 

@@ -17,15 +17,17 @@ include("/jagg/jagg.jag");
         mod = jagg.module("statistics");
         var provider;
         var currentLocation = request.getParameter("currentLocation");
+        var from = request.getParameter("fromDate");
+        var to = request.getParameter("toDate");
         var mode = request.getParameter("mode");
         if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0) {
-            result = mod.getProviderAPIServiceTime(allProviders);
+            result = mod.getProviderAPIServiceTime(allProviders,from,to);
         } else if (mode != null && mode == "browse") {
             provider = request.getParameter("provider");
-            result = mod.getProviderAPIServiceTime(provider);
+            result = mod.getProviderAPIServiceTime(provider,from,to);
         } else {
             provider = jagg.getUser().username;
-            result = mod.getProviderAPIServiceTime(provider);
+            result = mod.getProviderAPIServiceTime(provider,from,to);
         }
         if (result.error == "true") {
             obj = {
@@ -43,10 +45,12 @@ include("/jagg/jagg.jag");
         mod = jagg.module("statistics");
         var provider = jagg.getUser().username;
         var currentLocation = request.getParameter("currentLocation");
+        var from = request.getParameter("fromDate");
+        var to = request.getParameter("toDate");
         if (currentLocation.indexOf("all-statistics") >= 0) {
-            result = mod.getProviderAPIUsage(allProviders);
+            result = mod.getProviderAPIUsage(allProviders,from,to);
         } else {
-            result = mod.getProviderAPIUsage(provider);
+            result = mod.getProviderAPIUsage(provider,from,to);
         }
         if (result.error == "true") {
             obj = {
@@ -65,15 +69,17 @@ include("/jagg/jagg.jag");
         mod = jagg.module("statistics");
         var currentLocation = request.getParameter("currentLocation");
         var mode = request.getParameter("mode");
+        var from = request.getParameter("fromDate");
+        var to = request.getParameter("toDate");
         var provider;
         if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0) {
-            result = mod.getProviderAPIVersionUserLastAccess(allProviders);
+            result = mod.getProviderAPIVersionUserLastAccess(allProviders,from,to);
         } else if (mode != null && mode == "browse") {
             provider = request.getParameter("provider");
-            result = mod.getProviderAPIVersionUserLastAccess(provider);
+            result = mod.getProviderAPIVersionUserLastAccess(provider,from,to);
         } else {
             provider = jagg.getUser().username;
-            result = mod.getProviderAPIVersionUserLastAccess(provider);
+            result = mod.getProviderAPIVersionUserLastAccess(provider,from,to);
         }
         if (result.error == "true") {
             obj = {
@@ -114,10 +120,12 @@ include("/jagg/jagg.jag");
         mod = jagg.module("statistics");
         var provider = jagg.getUser().username;
         var currentLocation = request.getParameter("currentLocation");
+        var from = request.getParameter("fromDate");
+        var to = request.getParameter("toDate");
         if (currentLocation.indexOf("all-statistics") >= 0) {
-            result = mod.getAPIUsageByResourcePath(allProviders);
+            result = mod.getAPIUsageByResourcePath(allProviders,from,to);
         } else {
-            result = mod.getAPIUsageByResourcePath(provider);
+            result = mod.getAPIUsageByResourcePath(provider,from,to);
         }
 
         if (result.error == "true") {
@@ -136,11 +144,13 @@ include("/jagg/jagg.jag");
     } else if (action === "getAPIResponseFaultCount") {
              mod = jagg.module("statistics");
              var provider = jagg.getUser().username;
+             var from = request.getParameter("fromDate");
+             var to = request.getParameter("toDate");
              var currentLocation = request.getParameter("currentLocation");
              if (currentLocation.indexOf("all-statistics") >= 0) {
-                 result = mod.getAPIResponseFaultCount(allProviders);
+                 result = mod.getAPIResponseFaultCount(allProviders,from,to);
              } else {
-                 result = mod.getAPIResponseFaultCount(provider);
+                 result = mod.getAPIResponseFaultCount(provider,from,to);
              }
 
              if (result.error == "true") {
@@ -177,6 +187,28 @@ include("/jagg/jagg.jag");
                  }
              }
              print(obj);
+    }else if (action === "getFirstAccessTime") {
+        mod = jagg.module("statistics");
+        var provider = jagg.getUser().username;
+        var currentLocation = request.getParameter("currentLocation");
+        if (currentLocation.indexOf("all-statistics") >= 0) {
+            result = mod.getFirstAccessTime(allProviders);
+        } else {
+            result = mod.getFirstAccessTime(provider);
+        }
+        if (result.error == "true") {
+            obj = {
+                error:result.error,
+                message:msg.error.backendError(action)
+            };
+        } else {
+            obj = {
+                error:false,
+                usage:result.usage
+            }
+        }
+        print(obj);
+
     }
     else {
         print({

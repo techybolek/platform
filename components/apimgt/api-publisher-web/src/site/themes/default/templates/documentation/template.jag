@@ -10,6 +10,11 @@
         var result = mod.getAllDocumentation(apiData);
         var docs = result.docs;
         var createPermitted = outputs.isCreatePermitted;
+        var tenant=request.getParameter("tenant");
+        var urlPrefix;
+        var urlPostfix;
+        if(tenant!=null) {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
+        if(tenant!=null) {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
 
 
      %>
@@ -145,15 +150,19 @@
                     <td class="dateFull"><%=doc.docLastUpdated%></td>
                     <%if(createPermitted){%>
                     <td id="buttonTd"><% if(doc.sourceType == "INLINE") { %>
-                        <a href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%=doc.docName%>','edit')"><i class="icon-edit"></i> <%=i18n.localize("editContent")%></a> |
+                        <a href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%=doc.docName%>','edit','<%=urlPostfix%>')"><i class="icon-edit"></i> <%=i18n.localize("editContent")%></a> 
                         <% }else if (doc.sourceType == "URL"){%>
-                         <a href="<%=doc.sourceUrl%>" target="_blank" ><i class="icon-check"></i> <%=i18n.localize("view")%></a> |
+                         <a href="<%=doc.sourceUrl%><%=urlPrefix%>" target="_blank" ><i class="icon-check"></i> <%=i18n.localize("view")%></a> 
                         <%}else if (doc.sourceType == "FILE"){ %>
-			 <a href="<%=doc.filePath%>" target="_blank" ><i class="icon-check"></i> <%=i18n.localize("open")%></a> |
+			 <a href="<%=doc.filePath%><%=urlPrefix%>" target="_blank" ><i class="icon-check"></i> <%=i18n.localize("open")%></a> 
 			<%}%>	
-                        <a href="javascript:updateDocumentation('<%=api.name%>-<%=doc.docName%>','<%=doc.docName%>','<%=doc.docType%>','<%=doc.summary%>','<%=doc.sourceType%>','<%=doc.sourceUrl%>','<%=doc.filePath%>','<%=doc.otherTypeName%>')"><i class="icon-retweet"></i> <%=i18n.localize("update")%></a> |
+                        <% if (doc.docType != "API Definition") {%>
+                        | <a href="javascript:updateDocumentation('<%=api.name%>-<%=doc.docName%>','<%=doc.docName%>','<%=doc.docType%>','<%=doc.summary%>','<%=doc.sourceType%>','<%=doc.sourceUrl%>','<%=doc.filePath%>','<%=doc.otherTypeName%>')"><i class="icon-retweet"></i> <%=i18n.localize("update")%></a> |
+			
                         <a href="javascript:removeDocumentation('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%=doc.docName%>','<%=doc.docType%>')"><i class="icon-trash"></i> <%=i18n.localize("deleteMethod")%></a>
-                    </td>
+
+						<% } %>
+			</td>
                     <%}%>
                 </tr>
                 <% } %>

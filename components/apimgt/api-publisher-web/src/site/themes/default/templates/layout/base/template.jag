@@ -7,7 +7,7 @@
         mw = 10;
     }
 %>
-<div id="layout-base" class="container-fluid content-section">
+<div id="layout-base" class="container-fluid">
     <div class="row-fluid">
         <% if(outputs.top) { %>
         <div id="top">

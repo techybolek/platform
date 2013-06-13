@@ -6,11 +6,20 @@ var removeAPI = function(name, version, provider) {
         anotherDialog:true,
         okCallback:function(){
 
-            jagg.post("/site/blocks/item-add/ajax/remove.jag", { action:"removeAPI",name:name, version:version,provider:provider },
-              function (result) {
-                  if (result.message == "timeout") {
-                      jagg.showLogin();
-                  }
+            jagg.post("/site/blocks/item-add/ajax/remove.jag", { action:"removeAPI", name:name, version:version, provider:provider },
+                      function (result) {
+                          if (result.message == "timeout") {
+                              if (ssoEnabled) {
+                                  var current = window.location.pathname;
+                                  if (current.indexOf(".jag") >= 0) {
+                                      location.href = "index.jag";
+                                  } else {
+                                      location.href = 'site/pages/index.jag';
+                                  }
+                              } else {
+                                  jagg.showLogin();
+                              }
+                          }
                   else if (!result.error) {
                       window.location.reload();
                   }else{

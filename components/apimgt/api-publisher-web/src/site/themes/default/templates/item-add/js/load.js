@@ -47,6 +47,11 @@ $(document).ready(function() {
         }
 
     });
+
+    $("#clearThumb").on("click", function () {
+        $('#apiThumb-container').html('<input type="file" class="input-xlarge" name="apiThumb" />');
+    });
+
     var v = $("#addAPIForm").validate({
         submitHandler: function(form) {
             //Adding custom validation for the resource url UI
@@ -67,9 +72,18 @@ $(document).ready(function() {
                             location.href = 'site/pages/index.jag';
                         }
                     } else {
-                        if(responseText.message == "timeout"){
-                            jagg.showLogin();
-                        }else{
+                        if (responseText.message == "timeout") {
+                            if (ssoEnabled) {
+                                var currentLoc = window.location.pathname;
+                                if (currentLoc.indexOf(".jag") >= 0) {
+                                    location.href = "add.jag";
+                                } else {
+                                    location.href = 'site/pages/add.jag';
+                                }
+                            } else {
+                                jagg.showLogin();
+                            }
+                        } else {
                             jagg.message({content:responseText.message,type:"error"});
                         }
                         $('#saveMessage').hide();
@@ -108,15 +122,16 @@ function getContextValue() {
 
 function showHideRoles(){
 	var visibility = $('#visibility').find(":selected").val();
-	if(visibility == "public"){
-		$('#roles').hide();
-		$('#rolesHelp').hide();
-		$('#rolesLabel').hide();
+	
+	if (visibility == "public" || visibility == "controlled"){
+		$('#rolesDiv').hide();
+	} else{
+		$('#rolesDiv').show();
 	}
-	else{
-		$('#roles').show();
-		$('#rolesHelp').show();
-		$('#rolesLabel').show();
+	if (visibility == "controlled") {
+		$('#allowTenantsDiv').show();
+	} else {
+		$('#allowTenantsDiv').hide();
 	}
 }
 

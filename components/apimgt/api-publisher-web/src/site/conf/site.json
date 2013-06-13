@@ -8,10 +8,12 @@
     "ssoConfiguration" : {
         "enabled" : "false",
         "issuer" : "API_PUBLISHER",
-        "identityProviderURL" : "",
+        "identityProviderURL" : "https://localhost:9443/samlsso",
         "keyStorePassword" : "",
         "identityAlias" : "",
-        "keyStoreName" : ""
+        "responseSigningEnabled":"true",
+        "keyStoreName" :""
     }
+
 
 }

@@ -24,7 +24,7 @@
                     <thead>
                     <tr>
                         <th class="span4"><%=i18n.localize("name")%></th>
-                        <th><%=i18n.localize("dateOfSubscription")%></th>
+                        <th><%=i18n.localize("dateOfUserRegistration")%></th>
                         <!--<th>Actions</th> -->
                     </tr>
                     </thead>

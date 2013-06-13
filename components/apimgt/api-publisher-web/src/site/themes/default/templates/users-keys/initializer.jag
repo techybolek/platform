@@ -1,7 +1,8 @@
 <%
 jagg.initializer("users-keys", {
 
-    preInitialize:function () {
+     preInitialize:function () {
+     jagg.addHeaderJS("users-keys", "users-keys", "templates/users-keys/js/subscriptions.js");
     }
 });
 %>

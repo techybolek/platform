@@ -23,6 +23,8 @@ jagg.module("statistics", {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getAPIResponseFaultCount.apply(this, arguments);
     },getAPIFaultyAnalyzeByTime:function () {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getAPIFaultyAnalyzeByTime.apply(this, arguments);
+    },getFirstAccessTime:function () {
+        return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getFirstAccessTime.apply(this, arguments);
     }
 
 });

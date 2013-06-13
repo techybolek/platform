@@ -3,7 +3,7 @@ include("/jagg/jagg.jag");
 include("header.jag");
 var site = require("/site/conf/site.json");
 
-var i18n = require("i18n");
+var i18n = require("/i18n.js");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 
@@ -13,7 +13,7 @@ i18n.init(request,localeResourcesBasePath);
     isPermitted= permit.permitted;
     }
     if (!user) {
-        response.sendRedirect(jagg.getAbsoluteUrl("/site/pages/login.jag"));
+        response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
         return;
     }else if (!isPermitted) {
         response.sendRedirect(jagg.getAbsoluteUrl("/site/pages/index.jag"));

@@ -33,7 +33,13 @@ function loadDefaultTinyMCEContent(provider,apiName, version, docName) {
 }
 
 function saveContent(provider, apiName, apiVersion, docName, mode) {
-    var contentDoc = tinyMCE.get('inlineEditor').getContent();
+	var contentDoc = tinyMCE.get('inlineEditor').getContent();
+	if (docName == "API Definition") {
+		/* Remove html tags */
+		contentDoc = contentDoc.replace(/(<([^>]+)>)/ig,"");
+		/* Remove &nbsp */
+	  	contentDoc = contentDoc.replace(/&nbsp;/gi,'');
+	}
     jagg.post("/site/blocks/documentation/ajax/docs.jag", { action:"addInlineContent",provider:provider,apiName:apiName,version:apiVersion,docName:docName,content:contentDoc},
               function (result) {
                   if (result.error) {

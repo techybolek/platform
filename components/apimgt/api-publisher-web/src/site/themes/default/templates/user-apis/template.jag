@@ -1,17 +1,16 @@
 <% jagg.template("user-apis", function(inputs, outputs, jagg) {
 var uname=request.getParameter("uname");
 %>
-<div id="user"><h2><%=i18n.localize("apisByProviderTitle")%> <%=uname%></h2>
-  <br/>
+<div id="user">
+    <div class="title-section"><h2><%=i18n.localize("apisByProviderTitle")%> <%=uname%></h2></div>
     <%
        if ((outputs.apis != null && outputs.apis.length > 0) || request.getParameter('query') != null) {
            jagg.includeBlock("search/apis-by-provider-search", null);
        }
        %>
 
-<div class="row">
-
-    <div class="span7">
+    <div class="content-section shadow-up">
+    <div class="content-data">
         <table class="table table-bordered">
             <thead>
             <tr>
