@@ -35,7 +35,7 @@
                             <value>false</value>
                         </property>
                         <property>
-                            <name>as.carbon.zip</name>
+                            <name>carbon.zip</name>
                             <value>
                                 ${basedir}/../../distribution/target/wso2as-${project.version}.zip
                             </value>
