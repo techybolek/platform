@@ -20,7 +20,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
+// TODO: User Account Recovery Service 
 public class UserIdentityManagementService {
 
 	Log log = LogFactory.getLog(UserIdentityManagementService.class);
@@ -34,7 +34,7 @@ public class UserIdentityManagementService {
 	 * forgetting their password or after the identity being stolen. Then they
 	 * can update the values for these identity claims to keep their identity
 	 * safe.
-	 * 
+	 * TODO : Captcha must be considered  
 	 * @param userName
 	 * @param tempCredential
 	 * @return
@@ -82,7 +82,7 @@ public class UserIdentityManagementService {
 	 * @param confirmationCode
 	 * @return 
 	 * @throws IdentityMgtServiceException
-	 */
+	 */ //TODO : expiration of confirmation code (1 time, 24hrs). Use only UserName
 	public UserIdentityClaimDTO[] confirmUserRegistration(String userName, String confirmationCode)
 	                                                                             throws IdentityMgtServiceException {
 		try {
@@ -125,7 +125,7 @@ public class UserIdentityManagementService {
 	 * are answered properly, then the system will generate a random password,
 	 * and reset the user password with it and then will be returned the
 	 * resulting DTO containing the temporary password.
-	 * 
+	 * TODO : Re-think 
 	 * @param userName
 	 * @param secQuesAnsweres
 	 * @return
@@ -203,7 +203,7 @@ public class UserIdentityManagementService {
 
 	/**
 	 * Recovers the account with user email
-	 * 
+	 * TODO : what if the user name is invalid, send the error code over mail. TODO : store the temp in metadata, DONOT update.   
 	 * @param userName
 	 * @throws IdentityMgtServiceException
 	 */
@@ -247,7 +247,7 @@ public class UserIdentityManagementService {
 	 * @param claims
 	 * @param profileName
 	 * @throws IdentityMgtServiceException
-	 */
+	 *//*
 	public void registerUser(String userName, Object credential, String[] roleList,
 	                         UserIdentityClaimDTO[] claims, String profileName)
 	                                                                           throws IdentityMgtServiceException {
@@ -271,7 +271,7 @@ public class UserIdentityManagementService {
 			log.error("Error while reading identity claims", e);
 			throw new IdentityMgtServiceException("Error while reading identity claims");
 		}
-	}
+	}*/
 
 	/**
 	 * Returns if the user exist in the system

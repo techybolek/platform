@@ -127,8 +127,8 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 		}
 
 		if (userIdentityDTO == null) {
-			log.warn("Invalid user name " + userName);
-			return false;
+			log.warn("No identity data found for the user: " + userName);
+			return true;
 		}
 		// if the account is locked, should not be able to log in
 		if (userIdentityDTO.isAccountLocked()) {

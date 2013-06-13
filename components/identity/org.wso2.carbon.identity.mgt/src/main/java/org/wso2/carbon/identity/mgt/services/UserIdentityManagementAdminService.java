@@ -31,7 +31,7 @@ public class UserIdentityManagementAdminService {
 
 	// --------Operations require Admin permissions ---------//
 
-	/**
+/*	*//**
 	 * Admin adds a user to the system. The returning
 	 * {@code UserIdentityRecoveryDTO} contains the temporary password or the
 	 * account confirmation code to be sent to the user to complete the
@@ -44,7 +44,7 @@ public class UserIdentityManagementAdminService {
 	 * @param profileName
 	 * @return
 	 * @throws IdentityMgtServiceException
-	 */
+	 *//*
 	public UserIdentityRecoveryDTO addUser(String userName, String credential, String[] roleList,
 	                                       UserIdentityClaimDTO[] claims, String profileName)
 	                                                                                         throws IdentityMgtServiceException {
@@ -73,7 +73,7 @@ public class UserIdentityManagementAdminService {
 			log.error("Error while reading registration info", e);
 			throw new IdentityMgtServiceException("Unable to read registration info");
 		}
-	}
+	}*/
 
 	/**
 	 * Admin can get the user account registration data if it was not read from
@@ -197,7 +197,7 @@ public class UserIdentityManagementAdminService {
 	/**
 	 * Admin adds more security questions to the the system. These questions
 	 * will be available for all the users.
-	 * 
+	 * TODO : these must be store in the database
 	 * @param securityQuestion
 	 * @throws IdentityMgtServiceException
 	 */
