@@ -27,11 +27,15 @@ import org.wso2.carbon.task.stub.TaskAdminStub;
 import org.wso2.carbon.task.stub.TaskManagementException;
 
 import javax.activation.DataHandler;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class TaskAdminClient {
     private static final Log log = LogFactory.getLog(TaskAdminClient.class);
@@ -78,4 +82,22 @@ public class TaskAdminClient {
         return taskAdminStub.getTaskDescription(name, group);
 
     }
+
+    public OMElement getAllTaskDescriptions() throws RemoteException, TaskManagementException {
+        return taskAdminStub.getAllTaskDescriptions();
+    }
+
+    public List<String> getScheduleTaskList() throws RemoteException, TaskManagementException {
+        ArrayList<String> taskList = new ArrayList();
+        OMElement tasksOme = getAllTaskDescriptions().getFirstElement();
+        if (tasksOme != null) {
+            Iterator<OMElement> itr = tasksOme.getChildrenWithName(new QName("task"));
+            while (itr.hasNext()) {
+                OMElement taskOme = itr.next();
+                taskList.add(taskOme.getAttributeValue(new QName("name")));
+            }
+        }
+        return taskList;
+    }
+
 }

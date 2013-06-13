@@ -48,23 +48,25 @@ public class ArtifactHome {
             String resourceXpath2 = "]/td";
 
             for (int i = 2; i < 10; i++) {
-                String artifactNameOnAppserver = resourceXpath + i + resourceXpath2;
+                String artifactNameOnAppServer = resourceXpath + i + resourceXpath2;
 
-                String actualUsername = driver.findElement(By.xpath(artifactNameOnAppserver)).getText();
+                String actualUsername = driver.findElement(By.xpath(artifactNameOnAppServer)).getText();
                 log.info("val on app is -------> " + actualUsername);
                 log.info("Correct is    -------> " + artifactNameOnServer);
 
                 try {
 
-                    if (artifactNameOnServer.equals(actualUsername)) {
+                    if (artifactNameOnServer.contains(actualUsername)) {
                         log.info("newly Created artifact   exists");
                         return true;
 
+                    } else{
+                        return false;
                     }
 
                 } catch (NoSuchElementException ex) {
                     log.info("Cannot Find the newly Created artifact");
-                    return false;
+
                 }
             }
         }

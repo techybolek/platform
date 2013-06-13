@@ -33,7 +33,7 @@ public class UsersHomePage {
         }
     }
 
-    public boolean checkonUploadusr(String UserName) throws InterruptedException {
+    public boolean checkOnUploadUser(String UserName) throws InterruptedException {
 
         if (!driver.findElement(By.id(uiElementMapper.getElement("users.adn.roles.add.page.middle.text"))).
                 getText().contains("Users")) {
@@ -44,9 +44,9 @@ public class UsersHomePage {
         log.info(UserName);
         Thread.sleep(5000);
 
-        String userNameeOnServer = driver.findElement(By.xpath("/html/body/table/tbody/tr[2]/td[3]/table/tbody/tr[2]/td/div/div/table[2]/tbody/tr/td")).getText();
-        log.info(userNameeOnServer);
-        if (UserName.equals(userNameeOnServer)) {
+        String userNameOnServer = driver.findElement(By.xpath("/html/body/table/tbody/tr[2]/td[3]/table/tbody/tr[2]/td/div/div/table[2]/tbody/tr/td")).getText();
+        log.info(userNameOnServer);
+        if (UserName.equals(userNameOnServer)) {
             log.info("Uploaded Item exists");
             return true;
 
@@ -55,23 +55,25 @@ public class UsersHomePage {
             String resourceXpath2 = "]/td";
 
             for (int i = 2; i < 10; i++) {
-                String userNameOnAppserver = resourceXpath + i + resourceXpath2;
+                String userNameOnAppServer = resourceXpath + i + resourceXpath2;
 
-                String actualUsername = driver.findElement(By.xpath(userNameOnAppserver)).getText();
+                String actualUsername = driver.findElement(By.xpath(userNameOnAppServer)).getText();
                 log.info("val on app is -------> " + actualUsername);
                 log.info("Correct is    -------> " + UserName);
 
                 try {
 
-                    if (UserName.equals(actualUsername)) {
+                    if (UserName.contains(actualUsername)) {
                         log.info("newly Created User   exists");
                         return true;
 
+                    }  else {
+                        return false;
                     }
 
                 } catch (NoSuchElementException ex) {
                     log.info("Cannot Find the newly Created User");
-                    return false;
+
                 }
 
             }
@@ -83,10 +85,10 @@ public class UsersHomePage {
 
     public void addUser(String userName, String passWord) {
 
-        driver.findElement(By.linkText(uiElementMapper.getElement("users.add.newuser.link.id"))).click();
-        driver.findElement(By.name(uiElementMapper.getElement("users.add.newuser.name.id"))).sendKeys(userName);
-        driver.findElement(By.name(uiElementMapper.getElement("users.add.newuser.password.name"))).sendKeys(passWord);
-        driver.findElement(By.name(uiElementMapper.getElement("users.add.newuser.password.retype.name"))).sendKeys(passWord);
+        driver.findElement(By.linkText(uiElementMapper.getElement("users.add.new.user.link.id"))).click();
+        driver.findElement(By.name(uiElementMapper.getElement("users.add.new.user.name.id"))).sendKeys(userName);
+        driver.findElement(By.name(uiElementMapper.getElement("users.add.new.user.password.name"))).sendKeys(passWord);
+        driver.findElement(By.name(uiElementMapper.getElement("users.add.new.user.password.retype.name"))).sendKeys(passWord);
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("doNext()");
         driver.findElement(By.xpath(uiElementMapper.getElement("users.save"))).click();

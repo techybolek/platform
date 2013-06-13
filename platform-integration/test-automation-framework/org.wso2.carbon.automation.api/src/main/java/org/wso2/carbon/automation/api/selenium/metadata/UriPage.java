@@ -34,65 +34,65 @@ public class UriPage {
         }
     }
 
-    public ResourceBrowsePage uploadgGenericUri(String uriaddress, String name)
+    public ResourceBrowsePage uploadGenericUri(String uriAddress, String name)
             throws InterruptedException, IOException {
 
         WebElement serviceUploadField = driver.findElement(By.id(uiElementMapper.getElement("uri.add.uri")));
-        serviceUploadField.sendKeys(uriaddress);
+        serviceUploadField.sendKeys(uriAddress);
         WebElement serviceUploadNamespace = driver.findElement(By.id(uiElementMapper.getElement("uri.add.uri.name")));
         serviceUploadNamespace.sendKeys(name);
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("addEditArtifact()");
-        log.info("successfuly Saved");
+        log.info("successfully Saved");
         return new ResourceBrowsePage(driver);
 
     }
 
-    public ResourceBrowsePage uploadgWsdlUri(String uriaddress, String name)
+    public ResourceBrowsePage uploadWsdlUri(String uriAddress, String name)
             throws InterruptedException, IOException {
 
         driver.findElement(By.linkText(uiElementMapper.getElement("uri.add.link"))).click();
         new Select(driver.findElement(By.id("id_Overview_Type"))).selectByVisibleText("WSDL");
         WebElement serviceUploadField = driver.findElement(By.id(uiElementMapper.getElement("uri.add.uri")));
-        serviceUploadField.sendKeys(uriaddress);
+        serviceUploadField.sendKeys(uriAddress);
         WebElement serviceUploadNamespace = driver.findElement(By.id(uiElementMapper.getElement("uri.add.uri.name")));
         serviceUploadNamespace.sendKeys(name);
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("addEditArtifact()");
-        log.info("successfuly Saved");
+        log.info("successfully Saved");
         return new ResourceBrowsePage(driver);
 
     }
 
-    public ResourceBrowsePage uploadXsdlUri(String uriaddress, String name)
+    public ResourceBrowsePage uploadXsdUri(String uriAddress, String name)
             throws InterruptedException, IOException {
 
         log.info("this is the failing Uri name " + name);
         driver.findElement(By.linkText(uiElementMapper.getElement("uri.add.link"))).click();
         new Select(driver.findElement(By.id("id_Overview_Type"))).selectByVisibleText("XSD");
         WebElement serviceUploadField = driver.findElement(By.id(uiElementMapper.getElement("uri.add.uri")));
-        serviceUploadField.sendKeys(uriaddress);
+        serviceUploadField.sendKeys(uriAddress);
         WebElement serviceUploadNamespace = driver.findElement(By.id(uiElementMapper.getElement("uri.add.uri.name")));
         serviceUploadNamespace.sendKeys(name);
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("addEditArtifact()");
-        log.info("successfuly Saved");
+        log.info("successfully Saved");
         return new ResourceBrowsePage(driver);
 
     }
 
-    public ResourceBrowsePage uploaPolicylUri(String uriaddress, String name)
+    public ResourceBrowsePage uploadPolicyUri(String uriAddress, String name)
             throws InterruptedException, IOException {
 
         driver.findElement(By.linkText(uiElementMapper.getElement("uri.add.link"))).click();
         new Select(driver.findElement(By.id("id_Overview_Type"))).selectByVisibleText("Policy");
         WebElement serviceUploadField = driver.findElement(By.id(uiElementMapper.getElement("uri.add.uri")));
-        serviceUploadField.sendKeys(uriaddress);
+        serviceUploadField.sendKeys(uriAddress);
         WebElement serviceUploadNamespace = driver.findElement(By.id(uiElementMapper.getElement("uri.add.uri.name")));
         serviceUploadNamespace.sendKeys(name);
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("addEditArtifact()");
-        log.info("successfuly Saved");
+        log.info("successfully Saved");
         return new ResourceBrowsePage(driver);
 
     }

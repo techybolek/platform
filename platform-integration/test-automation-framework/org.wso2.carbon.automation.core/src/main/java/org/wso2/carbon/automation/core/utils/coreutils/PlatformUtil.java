@@ -70,6 +70,8 @@ public class PlatformUtil {
             location = System.getProperty("is.carbon.zip");
         } else if (ProductConstant.APP_FACTORY_SERVER_NAME.equalsIgnoreCase(productName)) {
             location = System.getProperty("af.carbon.zip");
+        } else if (ProductConstant.BAM_SERVER_NAME.equalsIgnoreCase(productName)) {
+            location = System.getProperty("bam.carbon.zip");
         } else {
             log.warn("Product Name not found, invalid product");
             return null;

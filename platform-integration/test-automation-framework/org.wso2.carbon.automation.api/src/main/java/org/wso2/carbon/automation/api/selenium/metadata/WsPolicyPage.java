@@ -27,14 +27,14 @@ public class WsPolicyPage {
         driver.findElement(By.linkText(uiElementMapper.getElement("wsPolicy.add.link"))).click();
         log.info("ws policy add page");
 
-        if (!driver.findElement(By.id(uiElementMapper.getElement("wsPolicy.dashbord.middle.text"))).
+        if (!driver.findElement(By.id(uiElementMapper.getElement("wsPolicy.dashboard.middle.text"))).
                 getText().contains("Policy")) {
 
             throw new IllegalStateException("This is not the Ws Policy  Add Page");
         }
     }
 
-    public wsPolicyListPage uploadwsPolciyFromUrl(String wsPolicyUrl, String wsPolicyName)
+    public wsPolicyListPage uploadWsPolicyFromUrl(String wsPolicyUrl, String wsPolicyName)
             throws InterruptedException, IOException {
 
         WebElement policyUploadField = driver.findElement(By.id(uiElementMapper.getElement("wsPolicy.add.url")));
@@ -46,25 +46,25 @@ public class WsPolicyPage {
         log.info("Printing the Schema name" + schemaName);
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("addFile();");
-        log.info("successfuly Saved");
+        log.info("successfully Saved");
         Thread.sleep(10000);
         return new wsPolicyListPage(driver);
 
     }
 
-    public wsPolicyListPage uploadwsPolciyFromFile(String wsFilePath, String wsPolicyName)
+    public wsPolicyListPage uploadWsPolicyFromFile(String wsFilePath, String wsPolicyName)
             throws InterruptedException, IOException {
         driver.findElement(By.linkText(uiElementMapper.getElement("wsPolicy.add.link"))).click();
 
         new Select(driver.findElement(By.id("addMethodSelector"))).selectByVisibleText("Upload Policy from a file");
         WebElement serviceUploadField = driver.findElement(By.id(uiElementMapper.getElement("wsPolicy.add.file.id")));
         serviceUploadField.sendKeys(wsFilePath);
-        WebElement serviceUploadNamespace = driver.findElement(By.id(uiElementMapper.getElement("wsPolicy.add.schemaname.id")));
+        WebElement serviceUploadNamespace = driver.findElement(By.id(uiElementMapper.getElement("wsPolicy.add.schema.name.id")));
         serviceUploadNamespace.clear();
         serviceUploadNamespace.sendKeys(wsPolicyName);
         JavascriptExecutor js2 = (JavascriptExecutor) driver;
         js2.executeScript("addFile();");
-        log.info("successfuly Saved");
+        log.info("successfully Saved");
         return new wsPolicyListPage(driver);
 
     }

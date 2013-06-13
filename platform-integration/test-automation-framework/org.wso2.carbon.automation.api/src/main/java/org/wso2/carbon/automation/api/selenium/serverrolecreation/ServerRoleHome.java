@@ -31,7 +31,7 @@ public class ServerRoleHome {
         }
     }
 
-    public boolean checkonUplodedServerRole(String serverRoleName) throws InterruptedException {
+    public boolean checkOnUploadedServerRole(String serverRoleName) throws InterruptedException {
         log.info("---------------------------->>>> " + serverRoleName);
         Thread.sleep(5000);
         String serverRoleNameOnServer = driver.findElement(By.xpath("/html/body/table/tbody/tr[2]/td[3]/table/tbody/tr[2]/td/div/div/table/tbody/tr/td")).getText();
@@ -50,14 +50,16 @@ public class ServerRoleHome {
                 log.info("val on app is -------> " + actualUsername);
                 log.info("Correct is    -------> " + serverRoleName);
                 try {
-                    if (serverRoleName.equals(actualUsername)) {
+                    if (serverRoleName.contains(actualUsername)) {
                         log.info("newly Created notification   exists");
                         return true;
+                    }   else {
+                        return false;
                     }
 
                 } catch (NoSuchElementException ex) {
                     log.info("Cannot Find the newly Created notification");
-                    return false;
+
                 }
 
             }

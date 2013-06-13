@@ -37,7 +37,7 @@ public class ChangePasswordPage {
 
         driver.findElement(By.linkText(uiElementMapper.getElement("home.greg.sign.out.xpath"))).click();
         new LoginPage(driver).loginAs(UserName, passWord);
-        log.info("password Change Successfull");
+        log.info("password Change Successful");
     }
 
     public void changePassword(String passWord, String newPassword) throws InterruptedException {

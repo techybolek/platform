@@ -23,44 +23,45 @@ public class JaggeryListPage {
          log.info("in the jaggeryList page");
         if (!driver.findElement(By.id(uiElementMapper.getElement("jaggery.dashboard.middle.text"))).
                 getText().contains("Running Applications")) {
-            throw new IllegalStateException("This is not the Jaggary list page");
+            throw new IllegalStateException("This is not the Jaggery list page");
         }
     }
 
     public boolean checkOnUploadJaggeryItem(String serviceName) throws InterruptedException {
         log.info(serviceName);
-        Thread.sleep(5000);
+        Thread.sleep(15000);
         driver.navigate().refresh();
 
-           String ServicenameOnServer = driver.findElement(By.xpath("/html/body/table/tbody/tr[2]/td[3]" +
+           String ServiceNameOnServer = driver.findElement(By.xpath("/html/body/table/tbody/tr[2]/td[3]" +
                 "/table/tbody/tr[2]/td/div/div/form[2]/table/tbody/tr/td[2]/a")).getText();
 
-        log.info(ServicenameOnServer);
+        log.info(ServiceNameOnServer);
 
-        if (serviceName.equals(ServicenameOnServer)) {
+        if (serviceName.equals(ServiceNameOnServer)) {
             log.info("Uploaded service exists");
             return true;
 
         } else {
-            String resourceXpath = "/html/body/table/tbody/tr[2]/td[3]/table/tbody/tr[2]/td/div/div" +
-                    "/form[2]/table/tbody/tr/td[";
+            String resourceXpath = "/html/body/table/tbody/tr[2]/td[3]/table/tbody/tr[2]/td/div/div/form[2]/table/tbody/tr[";
 
-            String resourceXpath2 = "]/a";
+            String resourceXpath2 = "]/td[2]/a";
             for (int i = 2; i < 10; i++) {
-                String servicenameOnAppserver = resourceXpath + i + resourceXpath2;
-                String actualresorcename = driver.findElement(By.xpath(servicenameOnAppserver)).getText();
-                log.info("val on app is -------> " + actualresorcename);
+                String serviceNameOnAppServer = resourceXpath + i + resourceXpath2;
+                String actualResourceName = driver.findElement(By.xpath(serviceNameOnAppServer)).getText();
+                log.info("val on app is -------> " + actualResourceName);
                 log.info("Correct is    -------> " + serviceName);
                 try {
-                    if (serviceName.equals(actualresorcename)) {
+                    if (serviceName.contains(actualResourceName)) {
                         log.info("Uploaded service exists");
                         return true;
 
+                    }  else {
+                        return false ;
                     }
 
                 } catch (NoSuchElementException ex) {
                     log.info("Cannot Find the Uploaded service");
-                    return false;
+
                 }
 
             }

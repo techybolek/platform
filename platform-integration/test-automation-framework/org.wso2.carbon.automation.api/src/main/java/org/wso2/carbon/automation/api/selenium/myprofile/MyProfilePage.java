@@ -25,14 +25,14 @@ public class MyProfilePage {
         driver.findElement(By.linkText(uiElementMapper.getElement("my.profile.add.page.link"))).click();
 
         log.info("profile Add Page");
-        if (!driver.findElement(By.id(uiElementMapper.getElement("my.profile.dashbord.middle.text"))).
+        if (!driver.findElement(By.id(uiElementMapper.getElement("my.profile.dashboard.middle.text"))).
                 getText().contains("Profiles")) {
 
             throw new IllegalStateException("This is not the My Profile  Add Page");
         }
     }
 
-    public boolean checkonUploadProfile(String apiName) throws InterruptedException {
+    public boolean checkOnUploadProfile(String apiName) throws InterruptedException {
 
         driver.findElement(By.linkText(uiElementMapper.getElement("api.list.link"))).click();
         log.info(apiName);
@@ -55,22 +55,22 @@ public class MyProfilePage {
 
             for (int i = 2; i < 10; i++) {
                 String profileNameOnAppServer = resourceXpath + i + resourceXpath2;
-                String actualProfilename = driver.findElement(By.xpath(profileNameOnAppServer)).getText();
-                log.info("val on app is -------> " + actualProfilename);
+                String actualProfileName = driver.findElement(By.xpath(profileNameOnAppServer)).getText();
+                log.info("val on app is -------> " + actualProfileName);
                 log.info("Correct is    -------> " + apiName);
 
                 try {
 
-                    if (apiName.equals(actualProfilename)) {
+                    if (apiName.contains(actualProfileName)) {
                         log.info("Uploaded Profile    exists");
                         return true;
 
+                    }  else {
+                        return false ;
                     }
 
                 } catch (NoSuchElementException ex) {
                     log.info("Cannot Find the Uploaded Profile");
-
-                    return false;
                 }
 
             }
@@ -89,10 +89,10 @@ public class MyProfilePage {
         WebElement profileName = driver.findElement(By.id(uiElementMapper.getElement("my.profile.name.id")));
         profileName.sendKeys(provider);
 
-        WebElement profileFirstName = driver.findElement(By.id(uiElementMapper.getElement("my.profile.firstname.id")));
+        WebElement profileFirstName = driver.findElement(By.id(uiElementMapper.getElement("my.profile.first.name.id")));
         profileFirstName.sendKeys(name);
 
-        WebElement profileLastName = driver.findElement(By.id(uiElementMapper.getElement("my.profile.lastname.id")));
+        WebElement profileLastName = driver.findElement(By.id(uiElementMapper.getElement("my.profile.last.name.id")));
         profileLastName.sendKeys(context);
 
         WebElement profileEmail = driver.findElement(By.id(uiElementMapper.getElement("my.profile.email.id")));
@@ -101,8 +101,7 @@ public class MyProfilePage {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("validate()");
 
-        //driver.findElement(By.xpath(uiElementMapper.getElement("my.profile.successful.save.pane"))).click();
-        log.info("successfuly Saved");
+        log.info("successfully Saved");
 
     }
 

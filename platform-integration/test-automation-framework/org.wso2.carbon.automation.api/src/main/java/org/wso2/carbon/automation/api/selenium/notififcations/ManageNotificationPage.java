@@ -29,15 +29,15 @@ public class ManageNotificationPage {
         }
     }
 
-    public boolean checkonUplodedNotification(String notificationsubscribe)
+    public boolean checkOnUploadedNotification(String notificationSubscribe)
             throws InterruptedException {
 
-        log.info("---------------------------->>>> " + notificationsubscribe);
+        log.info("---------------------------->>>> " + notificationSubscribe);
         Thread.sleep(5000);
         String notificationNameOnServer = driver.findElement(By.xpath("/html/body/table/tbody/tr[2]/" +
                                                                       "td[3]/table/tbody/tr[2]/td/div/div/table/tbody/tr/td[5]")).getText();
         log.info(notificationNameOnServer);
-        if (notificationsubscribe.equals(notificationNameOnServer)) {
+        if (notificationSubscribe.equals(notificationNameOnServer)) {
             log.info("newly Created notification exists");
             return true;
 
@@ -46,21 +46,24 @@ public class ManageNotificationPage {
             String resourceXpath2 = "]/td[5]";
 
             for (int i = 2; i < 10; i++) {
-                String notificationNameOnAppserver = resourceXpath + i + resourceXpath2;
-                String actualUsername = driver.findElement(By.xpath(notificationNameOnAppserver)).getText();
+                String notificationNameOnAppServer = resourceXpath + i + resourceXpath2;
+                String actualUsername = driver.findElement(By.xpath(notificationNameOnAppServer)).getText();
                 log.info("val on app is -------> " + actualUsername);
-                log.info("Correct is    -------> " + notificationsubscribe);
+                log.info("Correct is    -------> " + notificationSubscribe);
                 try {
 
-                    if (notificationsubscribe.equals(actualUsername)) {
+                    if (notificationSubscribe.contains(actualUsername)) {
                         log.info("newly Created notification   exists");
                         return true;
 
+                    }  else  {
+                        return false;
                     }
+
 
                 } catch (NoSuchElementException ex) {
                     log.info("Cannot Find the newly Created notification");
-                    return false;
+
 
                 }
 

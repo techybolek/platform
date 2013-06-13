@@ -46,16 +46,16 @@ public class ResourceHome {
 
         log.info("------------------>" + FilePath);
         driver.findElement(By.linkText(uiElementMapper.getElement("resource.add.resource.link"))).click();
-        WebElement CarbonuploadResource = driver.findElement(By.id(uiElementMapper.getElement
+        WebElement CarbonUploadResource = driver.findElement(By.id(uiElementMapper.getElement
                 ("resource.add.resource.input.field")));
-        CarbonuploadResource.sendKeys(FilePath);
+        CarbonUploadResource.sendKeys(FilePath);
         driver.findElement(By.id(uiElementMapper.getElement("resource.add.resource.name"))).sendKeys("TestFile");
         driver.findElement(By.xpath(uiElementMapper.getElement("resource.add.button"))).click();
-        if (!driver.findElement(By.id(uiElementMapper.getElement("resource.upload.successfull.message"))).
+        if (!driver.findElement(By.id(uiElementMapper.getElement("resource.upload.successful.message"))).
                 getText().contains("successfully")) {
             log.info("Successfully uploaded a resource");
         }
-        driver.findElement(By.className(uiElementMapper.getElement("resource.upload.suffessfull.button"))).click();
+        driver.findElement(By.className(uiElementMapper.getElement("resource.upload.successful.button"))).click();
 
     }
 
@@ -63,38 +63,40 @@ public class ResourceHome {
         log.info(URL);
         driver.findElement(By.linkText(uiElementMapper.getElement("resource.add.resource.link"))).click();
         new Select(driver.findElement(By.id("addMethodSelector"))).selectByVisibleText("Import content from URL");
-        WebElement CarbonuploadResource = driver.findElement(By.id(uiElementMapper.getElement("resource.add.Url.input.id")));
-        CarbonuploadResource.sendKeys(URL);
+        WebElement CarbonUploadResource = driver.findElement(By.id(uiElementMapper.getElement("resource.add.Url.input.id")));
+        CarbonUploadResource.sendKeys(URL);
         driver.findElement(By.xpath(uiElementMapper.getElement("resource.add.Url.button.xpath"))).click();
-        if (!driver.findElement(By.id(uiElementMapper.getElement("resource.upload.successfull.message"))).
+        if (!driver.findElement(By.id(uiElementMapper.getElement("resource.upload.successful.message"))).
                 getText().contains("successfully")) {
             log.info("Successfully uploaded a resource");
 
         }
 
-        driver.findElement(By.xpath(uiElementMapper.getElement("resource.add.Url.Successfull.close"))).click();
+        driver.findElement(By.xpath(uiElementMapper.getElement("resource.add.Url.Successful.close"))).click();
 
     }
 
-    public boolean checkonUploadSuccess(String uploadedElement) {
+    public boolean checkOnUploadSuccess(String uploadedElement) {
         String resourceId = "resourceView";
 
         for (int i = 1; i < 10; i++) {
-            String actResourceName = resourceId + i;
+            String actualResourceId = resourceId + i;
 
-            String actualresorcename = driver.findElement(By.id(actResourceName)).getText();
-            log.info("value here is -------> " + actualresorcename);
-            log.info("actval ere is -------> " + uploadedElement);
+            String actualResourceName = driver.findElement(By.id(actualResourceId)).getText();
+            log.info("value here is -------> " + actualResourceName);
+            log.info("actual value here is -------> " + uploadedElement);
             try {
-                if (uploadedElement.equals(actualresorcename)) {
+                if (uploadedElement.contains(actualResourceName)) {
                     log.info("Uploaded resource exists");
                     return true;
 
+                } else {
+                    return false;
                 }
+
 
             } catch (NoSuchElementException ex) {
                 log.info("Cannot Find the Uploaded Element");
-                return false;
             }
 
         }
@@ -110,12 +112,12 @@ public class ResourceHome {
         ResourceUploadField.sendKeys(folderName);
         driver.findElement(By.id(uiElementMapper.getElement("resource.add.collection.description"))).sendKeys("My File");
         driver.findElement(By.xpath(uiElementMapper.getElement("resource.collection.add.button"))).click();
-        if (!driver.findElement(By.id(uiElementMapper.getElement("resource.upload.successfull.collection.message"))).
+        if (!driver.findElement(By.id(uiElementMapper.getElement("resource.upload.successful.collection.message"))).
                 getText().contains("successfully")) {
             log.info("Successfully uploaded a Collection");
         }
 
-        driver.findElement(By.xpath(uiElementMapper.getElement("resource.upload.collection.successfull.close.button"))).click();
+        driver.findElement(By.xpath(uiElementMapper.getElement("resource.upload.collection.successful.close.button"))).click();
 
     }
 

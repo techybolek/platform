@@ -3,7 +3,9 @@ package org.wso2.carbon.automation.api.selenium.uriList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.Select;
 import org.wso2.carbon.automation.api.selenium.util.UIElementMapper;
 
 import java.io.IOException;
@@ -25,7 +27,7 @@ public class UriListPage {
         }
     }
 
-    public boolean checkonUploadUri(String UriName) throws InterruptedException {
+    public boolean checkOnUploadUri(String UriName) throws InterruptedException {
 
         driver.findElement(By.linkText(uiElementMapper.getElement("uri.add.list.id"))).click();
 
@@ -44,23 +46,26 @@ public class UriListPage {
             String resourceXpath2 = "]/td";
 
             for (int i = 2; i < 10; i++) {
-                String urinameOnAppserver = resourceXpath + i + resourceXpath2;
+                String uriNameOnAppServer = resourceXpath + i + resourceXpath2;
 
-                String actualUriname = driver.findElement(By.xpath(urinameOnAppserver)).getText();
-                log.info("val on app is -------> " + actualUriname);
+                String actualUriName = driver.findElement(By.xpath(uriNameOnAppServer)).getText();
+                log.info("val on app is -------> " + actualUriName);
                 log.info("Correct is    -------> " + UriName);
 
                 try {
 
-                    if (UriName.equals(actualUriname)) {
+                    if (UriName.contains(actualUriName)) {
                         log.info("Uploaded URI exists");
                         return true;
 
+                    }  else {
+                        return false;
                     }
+
 
                 } catch (NoSuchElementException ex) {
                     log.info("Cannot Find the Uploaded Element");
-                    return false;
+
                 }
 
             }
@@ -69,5 +74,148 @@ public class UriListPage {
 
         return false;
     }
+
+
+    public void lifeCyclePromotion(String lifeCycleName) throws InterruptedException {
+        driver.findElement(By.id(uiElementMapper.getElement("life.cycle.expand.id"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement("life.cycle.add"))).click();
+        new Select(driver.findElement(By.id("aspect"))).selectByVisibleText(lifeCycleName);
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("addAspect()");
+
+        //checking the checkList
+        String lifeCycleStage= driver.findElement(By.xpath(uiElementMapper.getElement("life.cycle.stage"))).getText();
+
+        if(lifeCycleStage.contains("Development")){
+            log.info("lifecycle is at the Testing stage");
+
+            driver.findElement(By.id(uiElementMapper.getElement("life.cycle.add.option"))).click();
+            Thread.sleep(1000);
+            driver.findElement(By.id(uiElementMapper.getElement("life.cycle.add.option1"))).click();
+            Thread.sleep(2000);
+            driver.findElement(By.id(uiElementMapper.getElement("life.cycle.add.option2"))).click();
+            Thread.sleep(1000);
+
+            //promoting the lifecycle
+            driver.findElement(By.id(uiElementMapper.getElement("life.cycle.promote"))).click();
+
+
+            driver.findElement(By.cssSelector(uiElementMapper.getElement("life.cycle.promote.ok.button"))).click();
+
+            String nextLifeCycleStage= driver.findElement(By.xpath(uiElementMapper.getElement("life.cycle.stage"))).getText();
+
+            if(nextLifeCycleStage.contains("Testing")){
+                log.info("lifecycle is at the Testing stage");
+
+
+            }  else {
+                log.info("lifecycle is not  at the Testing stage");
+                throw new NoSuchElementException();
+            }
+
+        } else {
+            log.info("lifecycle is not  at the Development stage");
+            throw new NoSuchElementException();
+        }
+
+
+        String lifeCycleStage2= driver.findElement(By.xpath(uiElementMapper.getElement("life.cycle.stage"))).getText();
+
+
+        if(lifeCycleStage2.contains("Testing")){
+            log.info("lifecycle is promoting from  Testing stage");
+
+            driver.findElement(By.id(uiElementMapper.getElement("life.cycle.add.option"))).click();
+            Thread.sleep(1000);
+            driver.findElement(By.id(uiElementMapper.getElement("life.cycle.add.option1"))).click();
+            Thread.sleep(1000);
+            driver.findElement(By.id(uiElementMapper.getElement("life.cycle.add.option2"))).click();
+
+            Thread.sleep(1000);
+            //promoting the lifecycle
+            driver.findElement(By.id(uiElementMapper.getElement("life.cycle.promote"))).click();
+            driver.findElement(By.cssSelector(uiElementMapper.getElement("life.cycle.promote.ok.button"))).click();
+            Thread.sleep(1000);
+
+            String FinalLifeCycleStage= driver.findElement(By.xpath(uiElementMapper.getElement("life.cycle.stage"))).getText();
+
+            if(FinalLifeCycleStage.contains("production")){
+                log.info("lifecycle is at the production stage");
+
+                driver.findElement(By.id(uiElementMapper.getElement("life.cycle.publish"))).click();
+                driver.findElement(By.cssSelector(uiElementMapper.getElement("life.cycle.promote.ok.button"))).click();
+
+
+            }
+            else {
+                log.info("lifecycle is not at the production stage");
+                throw new NoSuchElementException();
+
+            }
+
+        }
+
+        else {
+            log.info("cannot promote the lifecycle its not at the Testing stage");
+            throw new NoSuchElementException();
+        }
+
+    }
+
+
+
+
+    public boolean promoteUriLifecycle(String UriName,String lifeCycleName) throws InterruptedException {
+
+        log.info(UriName);
+        Thread.sleep(5000);
+
+        String firstElementXpath ="/html/body/table/tbody/tr[2]/td[3]/table/tbody/tr[2]/td/div/div/" +
+                "form[4]/table/tbody/tr/td/a";
+        String uriNameOnServer = driver.findElement(By.xpath(firstElementXpath)).getText();
+        log.info(uriNameOnServer);
+        if (UriName.equals(uriNameOnServer)) {
+            log.info("Uploaded URI exists");
+            driver.findElement(By.xpath(firstElementXpath)).click();
+            lifeCyclePromotion(lifeCycleName);
+            return true;
+        } else {
+            String resourceXpath = "/html/body/table/tbody/tr[2]/td[3]/table/tbody/tr[2]/td/div/div/" +
+                    "form[4]/table/tbody/tr[";
+            String resourceXpath2 = "]/td/a";
+            for (int i = 2; i < 10; i++) {
+                String uriNameOnAppServer = resourceXpath + i + resourceXpath2;
+
+                String actualUriName = driver.findElement(By.xpath(uriNameOnAppServer)).getText();
+                log.info("val on app is -------> " + actualUriName);
+                log.info("Correct is    -------> " + UriName);
+
+                try {
+                    if (UriName.contains(actualUriName)) {
+                        log.info("Uploaded URI exists");
+                        driver.findElement(By.xpath(uriNameOnAppServer)).click();
+                        lifeCyclePromotion(lifeCycleName);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } catch (NoSuchElementException ex) {
+                    log.info("Cannot Find the Uploaded URI");
+
+                }
+            }
+        }
+        return false;
+    }
+
+
+
+
+
+
+
+
+
+
 
 }

@@ -25,7 +25,7 @@ public class LoggingHomePage {
 
         driver.findElement(By.linkText(uiElementMapper.getElement("logging.add.link"))).click();
 
-        log.info("Loging Configuration Page");
+        log.info("Logging Configuration Page");
 
         if (!driver.findElement(By.id(uiElementMapper.getElement("logging.dashboard.middle.text"))).
                 getText().contains("Logging")) {
@@ -71,7 +71,7 @@ public class LoggingHomePage {
         String selectId = loggerName + "LogLevel";
         new Select(driver.findElement(By.id(selectId))).selectByVisibleText(globalLogLevel);
         System.out.println("im printing9999");
-        driver.findElement(By.xpath(uiElementMapper.getElement("log4j.logger.successfull.button.xpath"))).click();
+        driver.findElement(By.xpath(uiElementMapper.getElement("log4j.logger.successful.button.xpath"))).click();
         System.out.println("im printing");
         
 

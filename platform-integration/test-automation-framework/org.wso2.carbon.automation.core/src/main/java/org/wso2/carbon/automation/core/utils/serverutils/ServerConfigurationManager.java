@@ -151,7 +151,7 @@ public class ServerConfigurationManager {
         //todo use ServerUtils class restart
         ServerAdminClient serverAdmin = new ServerAdminClient(backEndUrl, admin.getUserName(), admin.getPassword());
         serverAdmin.restartGracefully();
-        CodeCoverageUtils.renameCoverageDataFile();
+        CodeCoverageUtils.renameCoverageDataFile(System.getProperty(ServerConstants.CARBON_HOME));
         Thread.sleep(20000);
         ClientConnectionUtil.waitForPort(port, TIME_OUT, true, hostname);
         ClientConnectionUtil.waitForLogin(port, hostname, backEndUrl);
@@ -168,7 +168,7 @@ public class ServerConfigurationManager {
         //todo use ServerUtils class restart
         ServerAdminClient serverAdmin = new ServerAdminClient(backEndUrl, sessionCookie);
         serverAdmin.restartGracefully();
-        CodeCoverageUtils.renameCoverageDataFile();
+        CodeCoverageUtils.renameCoverageDataFile(System.getProperty(ServerConstants.CARBON_HOME));
         Thread.sleep(20000);
         ClientConnectionUtil.waitForPort(port, TIME_OUT, true, hostname);
         ClientConnectionUtil.waitForLogin(port, hostname, backEndUrl);

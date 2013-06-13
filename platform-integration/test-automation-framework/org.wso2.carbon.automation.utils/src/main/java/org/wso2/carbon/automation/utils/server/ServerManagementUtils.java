@@ -21,6 +21,7 @@ package org.wso2.carbon.automation.utils.server;
 import org.wso2.carbon.automation.api.clients.server.admin.ServerAdminClient;
 import org.wso2.carbon.automation.core.utils.ClientConnectionUtil;
 import org.wso2.carbon.automation.core.utils.coreutils.CodeCoverageUtils;
+import org.wso2.carbon.utils.ServerConstants;
 
 import java.rmi.RemoteException;
 
@@ -35,7 +36,7 @@ public class ServerManagementUtils {
 
         ClientConnectionUtil.waitForPort(port, hostName);
         ClientConnectionUtil.waitForLogin(port, hostName, backendURL);
-        CodeCoverageUtils.renameCoverageDataFile();
+        CodeCoverageUtils.renameCoverageDataFile(System.getProperty(ServerConstants.CARBON_HOME));
         Thread.sleep(2000);
     }
 }

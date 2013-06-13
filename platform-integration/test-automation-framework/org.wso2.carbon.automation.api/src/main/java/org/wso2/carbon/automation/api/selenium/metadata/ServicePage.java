@@ -39,7 +39,7 @@ public class ServicePage {
         serviceUploadNamespace.sendKeys(nameSpace);
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("addEditArtifact()");
-        log.info("successfuly Saved");
+        log.info("successfully Saved");
         driver.findElement(By.linkText(uiElementMapper.getElement("service.check.save.service"))).click();
         return new ServiceListPage(driver);
 

@@ -21,10 +21,10 @@ public class KeyStoreHome {
         // Check that we're on the right page.
         driver.findElement(By.id(uiElementMapper.getElement("configure.tab.id"))).click();
 
-        driver.findElement(By.linkText(uiElementMapper.getElement("keysoter.add.link"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement("key.store.add.link"))).click();
 
         log.info("key store add page");
-        if (!driver.findElement(By.id(uiElementMapper.getElement("keystore.dashboard.middle.text"))).
+        if (!driver.findElement(By.id(uiElementMapper.getElement("key.store.dashboard.middle.text"))).
                 getText().contains("Key")) {
 
             throw new IllegalStateException("This is not the correct Page");
@@ -34,16 +34,16 @@ public class KeyStoreHome {
     public void addKeyStore(String keyStoreFilePath, String passWord, String keyStoreProvider)
             throws InterruptedException {
 
-        driver.findElement(By.linkText(uiElementMapper.getElement("keystore.add.new.link.text"))).click();
-        driver.findElement(By.id(uiElementMapper.getElement("keystore.file.path.id"))).sendKeys(keyStoreFilePath);
-        driver.findElement(By.name(uiElementMapper.getElement("keystore.password.name"))).sendKeys(passWord);
-        driver.findElement(By.name(uiElementMapper.getElement("keystore.provider.name"))).sendKeys(keyStoreProvider);
-        driver.findElement(By.xpath(uiElementMapper.getElement("keystore.next.button"))).click();
-        driver.findElement(By.name(uiElementMapper.getElement("keystore.pass.key"))).sendKeys(passWord);
+        driver.findElement(By.linkText(uiElementMapper.getElement("key.store.add.new.link.text"))).click();
+        driver.findElement(By.id(uiElementMapper.getElement("key.store.file.path.id"))).sendKeys(keyStoreFilePath);
+        driver.findElement(By.name(uiElementMapper.getElement("key.store.password.name"))).sendKeys(passWord);
+        driver.findElement(By.name(uiElementMapper.getElement("key.store.provider.name"))).sendKeys(keyStoreProvider);
+        driver.findElement(By.xpath(uiElementMapper.getElement("key.store.next.button"))).click();
+        driver.findElement(By.name(uiElementMapper.getElement("key.store.pass.key"))).sendKeys(passWord);
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("doValidation()");
         Thread.sleep(5000);
-        driver.findElement(By.xpath(uiElementMapper.getElement("keystore.successfull.xpath"))).click();
+        driver.findElement(By.xpath(uiElementMapper.getElement("key.store.successful.xpath"))).click();
 
     }
 

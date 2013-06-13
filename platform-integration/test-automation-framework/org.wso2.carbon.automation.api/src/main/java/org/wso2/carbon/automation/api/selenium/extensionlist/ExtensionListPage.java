@@ -40,22 +40,24 @@ public class ExtensionListPage {
             String resourceXpath2 = "]/td";
 
             for (int i = 2; i < 10; i++) {
-                String extensionNameOnAppserver = resourceXpath + i + resourceXpath2;
+                String extensionNameOnAppServer = resourceXpath + i + resourceXpath2;
 
-                String actualUsername = driver.findElement(By.xpath(extensionNameOnAppserver)).getText();
+                String actualUsername = driver.findElement(By.xpath(extensionNameOnAppServer)).getText();
                 log.info("val on app is -------> " + actualUsername);
                 log.info("Correct is    -------> " + extensionName);
 
                 try {
 
-                    if (extensionName.equals(actualUsername)) {
+                    if (extensionName.contains(actualUsername)) {
                         log.info("newly Created extension   exists");
                         return true;
+                    }  else {
+                        return false;
                     }
 
                 } catch (NoSuchElementException ex) {
                     log.info("Cannot Find the newly Created organization");
-                    return false;
+
                 }
             }
         }

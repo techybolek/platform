@@ -65,6 +65,11 @@ public class MessageStoreAdminClient {
         messageStoreAdminServiceStub.addMessageStore(messageStore.toString());
     }
 
+    public void updateMessageStore(OMElement messageStore) throws RemoteException {
+        messageStoreAdminServiceStub.modifyMessageStore(messageStore.toString());
+    }
+
+
     public void deleteMessageStore(String messageStoreName) throws RemoteException {
         messageStoreAdminServiceStub.deleteMessageStore(messageStoreName);
     }

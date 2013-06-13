@@ -3,7 +3,9 @@ package org.wso2.carbon.automation.api.selenium.apilist;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.Select;
 import org.wso2.carbon.automation.api.selenium.login.LoginPage;
 import org.wso2.carbon.automation.api.selenium.util.UIElementMapper;
 
@@ -21,11 +23,11 @@ public class ApiListPage {
         this.uiElementMapper = UIElementMapper.getInstance();
         // Check that we're on the right page.
         driver.findElement(By.id(uiElementMapper.getElement("carbon.Main.tab"))).click();
-        driver.findElement(By.linkText(uiElementMapper.getElement("api.add.link"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement("api.list.link"))).click();
 
-        log.info("API Add Page");
-        if (!driver.findElement(By.id(uiElementMapper.getElement("api.dashbord.middle.text"))).
-                getText().contains("API")) {
+        log.info("API List Page");
+        if (!driver.findElement(By.id(uiElementMapper.getElement("api.dashboard.middle.text"))).
+                getText().contains("API List")) {
 
             throw new IllegalStateException("This is not the API  Add Page");
         }
@@ -33,15 +35,15 @@ public class ApiListPage {
 
     public boolean checkOnUploadApi(String apiName) throws InterruptedException {
 
-        driver.findElement(By.linkText(uiElementMapper.getElement("api.list.link"))).click();
+
         log.info(apiName);
         Thread.sleep(5000);
-
-        String apiNameeOnServer = driver.findElement(By.xpath("/html/body/table/tbody/tr[2]/td[3]/table" +
-                                                              "/tbody/tr[2]/td/div/div/form[4]/table/tbody" +
-                                                              "/tr/td/a")).getText();
-        log.info(apiNameeOnServer);
-        if (apiName.equals(apiNameeOnServer)) {
+        
+        String firstElementXpath = "/html/body/table/tbody/tr[2]/td[3]/table/tbody/tr[2]/td/div/div/" +
+                                   "form[4]/table/tbody/tr/td/a";
+        String apiNameOnServer = driver.findElement(By.xpath(firstElementXpath)).getText();
+        log.info(apiNameOnServer);
+        if (apiName.equals(apiNameOnServer)) {
             log.info("Uploaded Api exists");
             return true;
         } else {
@@ -49,25 +51,172 @@ public class ApiListPage {
                                    "form[4]/table/tbody/tr[";
             String resourceXpath2 = "]/td/a";
             for (int i = 2; i < 10; i++) {
-                String apiNameOnAppserver = resourceXpath + i + resourceXpath2;
+                String apiNameOnAppServer = resourceXpath + i + resourceXpath2;
 
-                String actualApiname = driver.findElement(By.xpath(apiNameOnAppserver)).getText();
-                log.info("val on app is -------> " + actualApiname);
+                String actualApiName = driver.findElement(By.xpath(apiNameOnAppServer)).getText();
+                log.info("val on app is -------> " + actualApiName);
                 log.info("Correct is    -------> " + apiName);
 
                 try {
-                    if (apiName.equals(actualApiname)) {
+                    if (apiName.contains(actualApiName)) {
                         log.info("Uploaded API    exists");
-                        return true;
-                    }
+                        return true; 
+                        } else {
+                          return false;
+                        }
                 } catch (NoSuchElementException ex) {
                     log.info("Cannot Find the Uploaded API");
-                    return false;
+                    
                 }
             }
         }
         return false;
     }
+
+        public void lifeCyclePromotion(String lifeCycleName) throws InterruptedException {
+            driver.findElement(By.id(uiElementMapper.getElement("life.cycle.expand.id"))).click();
+            driver.findElement(By.linkText(uiElementMapper.getElement("life.cycle.add"))).click();
+            new Select(driver.findElement(By.id("aspect"))).selectByVisibleText(lifeCycleName);
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            js.executeScript("addAspect()");
+
+            //checking the checkList
+             String lifeCycleStage= driver.findElement(By.xpath(uiElementMapper.getElement("life.cycle.stage"))).getText();
+
+            if(lifeCycleStage.contains("Development")){
+              log.info("lifecycle is at the Testing stage");
+
+            driver.findElement(By.id(uiElementMapper.getElement("life.cycle.add.option"))).click();
+            Thread.sleep(1000);
+            driver.findElement(By.id(uiElementMapper.getElement("life.cycle.add.option1"))).click();
+            Thread.sleep(2000);
+            driver.findElement(By.id(uiElementMapper.getElement("life.cycle.add.option2"))).click();
+            Thread.sleep(1000);
+
+            //promoting the lifecycle
+            driver.findElement(By.id(uiElementMapper.getElement("life.cycle.promote"))).click();
+
+
+            driver.findElement(By.cssSelector(uiElementMapper.getElement("life.cycle.promote.ok.button"))).click();
+
+            String nextLifeCycleStage= driver.findElement(By.xpath(uiElementMapper.getElement("life.cycle.stage"))).getText();
+
+                  if(nextLifeCycleStage.contains("Testing")){
+                      log.info("lifecycle is at the Testing stage");
+
+
+                  }  else {
+                      log.info("lifecycle is not  at the Testing stage");
+                      throw new NoSuchElementException();
+                  }
+
+            } else {
+                  log.info("lifecycle is not  at the Development stage");
+                  throw new NoSuchElementException();
+                   }
+
+
+            String lifeCycleStage2= driver.findElement(By.xpath(uiElementMapper.getElement("life.cycle.stage"))).getText();
+
+
+            if(lifeCycleStage2.contains("Testing")){
+                log.info("lifecycle is promoting from  Testing stage");
+
+                driver.findElement(By.id(uiElementMapper.getElement("life.cycle.add.option"))).click();
+                Thread.sleep(1000);
+                driver.findElement(By.id(uiElementMapper.getElement("life.cycle.add.option1"))).click();
+                Thread.sleep(1000);
+                driver.findElement(By.id(uiElementMapper.getElement("life.cycle.add.option2"))).click();
+
+                Thread.sleep(1000);
+                //promoting the lifecycle
+                driver.findElement(By.id(uiElementMapper.getElement("life.cycle.promote"))).click();
+                driver.findElement(By.cssSelector(uiElementMapper.getElement("life.cycle.promote.ok.button"))).click();
+                Thread.sleep(1000);
+
+                String FinalLifeCycleStage= driver.findElement(By.xpath(uiElementMapper.getElement("life.cycle.stage"))).getText();
+
+                if(FinalLifeCycleStage.contains("production")){
+                    log.info("lifecycle is at the production stage");
+
+                    driver.findElement(By.id(uiElementMapper.getElement("life.cycle.publish"))).click();
+                    driver.findElement(By.cssSelector(uiElementMapper.getElement("life.cycle.promote.ok.button"))).click();
+
+
+                }
+                else {
+                    log.info("lifecycle is not at the production stage");
+                    throw new NoSuchElementException();
+
+                }
+
+            }
+
+            else {
+                log.info("cannot promote the lifecycle its not at the Testing stage");
+                throw new NoSuchElementException();
+            }
+
+        }
+
+
+
+    public boolean promoteApiLifecycle(String apiName,String lifeCycleName) throws InterruptedException {
+
+
+        log.info(apiName);
+        Thread.sleep(5000);
+
+        String firstElementXpath ="/html/body/table/tbody/tr[2]/td[3]/table/tbody/tr[2]/td/div/div/" +
+                "form[4]/table/tbody/tr/td/a";
+        String apiNameOnServer = driver.findElement(By.xpath(firstElementXpath)).getText();
+        log.info(apiNameOnServer);
+        if (apiName.equals(apiNameOnServer)) {
+            log.info("Uploaded Api exists");
+           driver.findElement(By.xpath(firstElementXpath)).click();
+           lifeCyclePromotion(lifeCycleName);
+           return true;
+        } else {
+            String resourceXpath = "/html/body/table/tbody/tr[2]/td[3]/table/tbody/tr[2]/td/div/div/" +
+                    "form[4]/table/tbody/tr[";
+            String resourceXpath2 = "]/td/a";
+            for (int i = 2; i < 10; i++) {
+                String apiNameOnAppServer = resourceXpath + i + resourceXpath2;
+
+                String actualApiName = driver.findElement(By.xpath(apiNameOnAppServer)).getText();
+                log.info("val on app is -------> " + actualApiName);
+                log.info("Correct is    -------> " + apiName);
+
+                try {
+                    if (apiName.contains(actualApiName)) {
+                        log.info("Uploaded API    exists");
+                        driver.findElement(By.xpath(apiNameOnAppServer)).click();
+                        lifeCyclePromotion(lifeCycleName);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } catch (NoSuchElementException ex) {
+                    log.info("Cannot Find the Uploaded API");
+
+                }
+            }
+        }
+        return false;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     public LoginPage logout() throws IOException {
         driver.findElement(By.linkText(uiElementMapper.getElement("home.greg.sign.out.xpath"))).click();

@@ -24,29 +24,31 @@ public class JaggeryHome {
         driver.findElement(By.id(uiElementMapper.getElement("jaggery.Main.tab"))).click();
         driver.findElement(By.id(uiElementMapper.getElement("jaggery.Region1.tab"))).click();
         driver.findElement(By.linkText(uiElementMapper.getElement("add.jaggery.href"))).click();
-        log.info("in the jaggary upload page");
+        log.info("in the Jaggery upload page");
         if (!driver.findElement(By.id(uiElementMapper.getElement("jaggery.dashboard.middle.text"))).
                 getText().contains("Upload Jaggery Applications")) {
-            throw new IllegalStateException("This is not the Jaggary page");
+            throw new IllegalStateException("This is not the Jaggery page");
         }
     }
 
-    public JaggeryListPage UploadJaggeryItem(String UploadItem) throws IOException {
+    public JaggeryListPage UploadJaggeryItem(String UploadItem) throws IOException, InterruptedException {
         log.info(UploadItem);
         WebElement jaggeryUploadField = driver.findElement(By.name(uiElementMapper.getElement
-                ("jaggery.war.file.uploader.name")));
+                ("jaggery.war.file.upload.name")));
 
         jaggeryUploadField.sendKeys(UploadItem);
         driver.findElement(By.name(uiElementMapper.getElement("jaggery.upload.button.name"))).click();
-        if (!driver.findElement(By.id(uiElementMapper.getElement("jaggery.upload.successfull.message"))).
+        if (!driver.findElement(By.id(uiElementMapper.getElement("jaggery.upload.successful.message"))).
                 getText().contains("successfully")) {
 
             throw new NoSuchElementException();
         }
 
         log.info("Successfully Uploaded");
-        driver.findElement(By.className(uiElementMapper.getElement("jaggery.upload.suffessfull.button"))).click();
+        driver.findElement(By.className(uiElementMapper.getElement("jaggery.upload.successful.button"))).click();
         log.info("Ready to sign out");
+        Thread.sleep(10000);
+        driver.navigate().refresh();
         return new JaggeryListPage(driver);
 
     }

@@ -32,7 +32,7 @@ public class RoleHomePage {
         }
     }
 
-    public boolean checkonUploadrole(String roleName) throws InterruptedException {
+    public boolean checkOnUploadRole(String roleName) throws InterruptedException {
 
         if (!driver.findElement(By.id(uiElementMapper.getElement("users.adn.roles.add.page.middle.text"))).
                 getText().contains("Roles")) {
@@ -43,9 +43,9 @@ public class RoleHomePage {
         log.info(roleName);
         Thread.sleep(5000);
 
-        String roleNameeOnServer = driver.findElement(By.xpath("/html/body/table/tbody/tr[2]/td[3]/table/tbody/tr[2]/td/div/div/table/tbody/tr/td")).getText();
-        log.info(roleNameeOnServer);
-        if (roleName.equals(roleNameeOnServer)) {
+        String roleNameOnServer = driver.findElement(By.xpath("/html/body/table/tbody/tr[2]/td[3]/table/tbody/tr[2]/td/div/div/table/tbody/tr/td")).getText();
+        log.info(roleNameOnServer);
+        if (roleName.equals(roleNameOnServer)) {
             log.info("Uploaded Api exists");
             return true;
 
@@ -54,23 +54,25 @@ public class RoleHomePage {
             String resourceXpath2 = "]/td";
 
             for (int i = 2; i < 10; i++) {
-                String roleNameOnAppserver = resourceXpath + i + resourceXpath2;
+                String roleNameOnAppServer = resourceXpath + i + resourceXpath2;
 
-                String actualRolename = driver.findElement(By.xpath(roleNameOnAppserver)).getText();
-                log.info("val on app is -------> " + actualRolename);
+                String actualRoleName = driver.findElement(By.xpath(roleNameOnAppServer)).getText();
+                log.info("val on app is -------> " + actualRoleName);
                 log.info("Correct is    -------> " + roleName);
 
                 try {
 
-                    if (roleName.equals(actualRolename)) {
+                    if (roleName.contains(actualRoleName)) {
                         log.info("newly Created Role   exists");
                         return true;
 
+                    }  else {
+                        return false;
                     }
 
                 } catch (NoSuchElementException ex) {
                     log.info("Cannot Find the newly Created ROle");
-                    return false;
+
                 }
 
             }
@@ -82,8 +84,8 @@ public class RoleHomePage {
 
     public void addRole(String roleName) throws InterruptedException {
 
-        driver.findElement(By.linkText(uiElementMapper.getElement("role.add.newuser.link.id"))).click();
-        driver.findElement(By.name(uiElementMapper.getElement("role.add.newuser.name.id"))).sendKeys(roleName);
+        driver.findElement(By.linkText(uiElementMapper.getElement("role.add.new.user.link.id"))).click();
+        driver.findElement(By.name(uiElementMapper.getElement("role.add.new.user.name.id"))).sendKeys(roleName);
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("doNext()");
 
@@ -92,10 +94,6 @@ public class RoleHomePage {
         Thread.sleep(3000);
 
         js.executeScript("doNext()");
-
-        if ((driver.getCurrentUrl().contains("?"))) {
-            throw new IllegalStateException("Request to /role/add-step3.jsp was not a POST request");
-        }
 
         driver.findElement(By.name(uiElementMapper.getElement("role.add.user.to.role.name"))).sendKeys("Seleniumtest");
         driver.findElement(By.xpath(uiElementMapper.getElement("role.search.button"))).click();

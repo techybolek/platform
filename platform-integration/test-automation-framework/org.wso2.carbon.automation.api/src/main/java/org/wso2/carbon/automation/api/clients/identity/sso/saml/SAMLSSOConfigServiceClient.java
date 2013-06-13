@@ -22,7 +22,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.automation.api.clients.utils.AuthenticateStub;
-import org.wso2.carbon.identity.sso.saml.stub.*;
+import org.wso2.carbon.identity.sso.saml.stub.IdentitySAMLSSOConfigServiceIdentityException;
 import org.wso2.carbon.identity.sso.saml.stub.IdentitySAMLSSOConfigServiceStub;
 
 import java.rmi.RemoteException;
@@ -61,11 +61,13 @@ public class SAMLSSOConfigServiceClient {
     }
 
     public String[] getClaimURIs()
-            throws Exception {
+            throws RemoteException, IdentitySAMLSSOConfigServiceIdentityException {
         try {
             return identitySAMLSSOConfigServiceStub.getClaimURIs();
         } catch (RemoteException e) {
             throw new RemoteException("Error while getting claim URIs ", e);
+        } catch (IdentitySAMLSSOConfigServiceIdentityException e) {
+            throw new IdentitySAMLSSOConfigServiceIdentityException("Error while getting claim URIs ", e);
         }
 
     }

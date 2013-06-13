@@ -151,7 +151,7 @@ public class SqlDataSourceUtil {
      * @throws SQLException
      */
     public void createDataSource(List<File> sqlFileList) throws IOException, ClassNotFoundException,
-                                                                SQLException {
+            SQLException {
         databaseName = frameworkProperties.getDataSource().getDbName();
         databaseUser = frameworkProperties.getDataSource().getDbUser();
         databasePassword = frameworkProperties.getDataSource().getDbPassword();
@@ -185,6 +185,54 @@ public class SqlDataSourceUtil {
             if (jdbcUrl.contains("h2") && jdbcDriver.contains("h2")) {
                 /*Random number appends to a database name to create new database for H2*/
                 databaseName = databaseName + new Random().nextInt();
+                jdbcUrl = jdbcUrl + databaseName;
+                //create database on in-memory
+                H2DataBaseManager h2 = null;
+                try {
+                    h2 = new H2DataBaseManager(jdbcUrl, databaseUser, databasePassword);
+                    h2.executeUpdate("DROP ALL OBJECTS");
+                } finally {
+                    if (h2 != null) {
+                        h2.disconnect();
+                    }
+                }
+
+            } else {
+                createDataBase(jdbcDriver, jdbcUrl, databaseUser, databasePassword);
+            }
+        }
+        executeUpdate(sqlFileList);
+    }
+
+    public void createNonRandomDataSource(List<File> sqlFileList) throws IOException, ClassNotFoundException,
+            SQLException {
+        databaseName = frameworkProperties.getDataSource().getDbName();
+        databaseUser = frameworkProperties.getDataSource().getDbUser();
+        databasePassword = frameworkProperties.getDataSource().getDbPassword();
+        jdbcUrl = frameworkProperties.getDataSource().getDbUrl();
+        jdbcDriver = frameworkProperties.getDataSource().get_dbDriverName();
+        databaseUser = frameworkProperties.getDataSource().getDbUser();
+        databasePassword = frameworkProperties.getDataSource().getDbPassword();
+        EnvironmentBuilder environmentBuilder = new EnvironmentBuilder();
+        String executionMode = environmentBuilder.getFrameworkSettings().getEnvironmentSettings()
+                .executionMode().toString();
+        String environment = environmentBuilder.getFrameworkSettings().getEnvironmentSettings()
+                .executionEnvironment();
+        if (environment.equals(ExecutionEnvironment.stratos.name())) {
+            rssAdminClient = new RSSManagerAdminServiceClient(dssBackEndUrl, sessionCookie);
+            DatabaseMetaData rssInstance = rssAdminClient.getDatabaseInstance(databaseName + "_" + userInfo.getDomain().replace(".", "_"));
+            if (rssInstance != null) {
+                setPriConditions();
+                createDataBase();
+                createPrivilegeGroup();
+                createUser();
+            } else {
+                createDataBase(jdbcDriver, jdbcUrl, databaseUser, databasePassword);
+            }
+        } else {
+            jdbcUrl = frameworkProperties.getDataSource().getDbUrl();
+            jdbcDriver = frameworkProperties.getDataSource().get_dbDriverName();
+            if (jdbcUrl.contains("h2") && jdbcDriver.contains("h2")) {
                 jdbcUrl = jdbcUrl + databaseName;
                 //create database on in-memory
                 H2DataBaseManager h2 = null;

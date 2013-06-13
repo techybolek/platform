@@ -24,7 +24,7 @@ public class WSDLPage {
         this.uiElementMapper = UIElementMapper.getInstance();
 
         driver.findElement(By.linkText(uiElementMapper.getElement("wsdl.add.link"))).click();
-        if (!driver.findElement(By.id(uiElementMapper.getElement("wsdl.dashbord.middle.text"))).
+        if (!driver.findElement(By.id(uiElementMapper.getElement("wsdl.dashboard.middle.text"))).
                 getText().contains("WSDL")) {
             throw new IllegalStateException("This is not the Wsdl Add Page");
         }
@@ -43,10 +43,10 @@ public class WSDLPage {
         serviceUploadNamespace.clear();
         serviceUploadNamespace.sendKeys(WsdlName);
         String wsdlName = serviceUploadField.getText();
-        log.info("Pringting the wsdl name" + wsdlName);
+        log.info("Printing the wsdl name" + wsdlName);
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("addFile()");
-        log.info("successfuly Saved");
+        log.info("successfully Saved");
         Thread.sleep(15000);
         return new WsdlListPage(driver);
 
@@ -64,7 +64,7 @@ public class WSDLPage {
         serviceUploadNamespace.sendKeys(WsdlName);
         JavascriptExecutor js2 = (JavascriptExecutor) driver;
         js2.executeScript("addFile()");
-        log.info("successfuly Saved");
+        log.info("successfully Saved");
         return new WsdlListPage(driver);
 
     }

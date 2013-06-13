@@ -112,6 +112,11 @@ public class ModuleAdminServiceClient {
         return moduleAdminServiceStub.engageModuleForService(moduleId, ServiceName);
     }
 
+    public boolean disengageModule(String moduleId, String ServiceName) throws
+            ModuleAdminServiceModuleMgtExceptionException, RemoteException {
+        return moduleAdminServiceStub.disengageModuleForService(moduleId, ServiceName);
+    }
+
     public ServiceClient getServiceClient() {
         ServiceClient serverClient;
         serverClient = moduleAdminServiceStub._getServiceClient();

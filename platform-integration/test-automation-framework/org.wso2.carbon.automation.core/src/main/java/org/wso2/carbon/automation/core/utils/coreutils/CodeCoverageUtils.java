@@ -26,6 +26,7 @@ import org.wso2.carbon.automation.core.utils.fileutils.ArchiveExtractor;
 import org.wso2.carbon.utils.ArchiveManipulator;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.FileManipulator;
+import org.wso2.carbon.utils.ServerConstants;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -115,6 +116,7 @@ public final class CodeCoverageUtils {
     }
 
     private static void instrumentSelectedFiles(String carbonHome) throws IOException {
+        log.info("Instrumentation of jar files in progress ...");
         File instrumentationTxt = System.getProperty("instr.file") != null ?
                                   new File(System.getProperty("instr.file")) :
                                   new File(System.getProperty("basedir") + File.separator + "src" +
@@ -240,7 +242,8 @@ public final class CodeCoverageUtils {
         cmd.run();
     }
 
-    public static void generateReports() {       //-r html -in coverage.em,coverage.ec
+    public static void generateReports(String carbonHome) {       //-r html -in coverage.em,coverage.ec
+        log.info("Generate code coverage report ...");
         String emmaHome = System.getProperty("emma.home");
         if (emmaHome == null) {
             return;
@@ -256,7 +259,7 @@ public final class CodeCoverageUtils {
         }
 
         // find all coverage.ec files, and generate the report
-        File[] coverageDataFiles = getCoverageDataFiles();
+        File[] coverageDataFiles = getCoverageDataFiles(carbonHome);
 
 
 //        Collection<File> ecFiles = FileUtils.listFiles(new File(basedir), new String[]{"ec"}, true);
@@ -273,18 +276,18 @@ public final class CodeCoverageUtils {
         log.info("Generated Emma reports");
     }
 
-    private static File[] getCoverageDataFiles() {
-        return new File(CarbonUtils.getCarbonHome()).listFiles(new FilenameFilter() {
+    private static File[] getCoverageDataFiles(String carbonHome) {
+        return new File(carbonHome).listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 return name.endsWith(".ec");
             }
         });
     }
 
-    public static boolean renameCoverageDataFile() {
-        String carbonHome = CarbonUtils.getCarbonHome();
+    public static boolean renameCoverageDataFile(String carbonHome) {
+//        String carbonHome = CarbonUtils.getCarbonHome();
         //get all .ec fies and then find coverage.ec, after that rename those files
-        File[] coverageDataFiles = getCoverageDataFiles();
+        File[] coverageDataFiles = getCoverageDataFiles(carbonHome);
 
         for (int i = 0, coverageDataFilesLength = coverageDataFiles.length; i < coverageDataFilesLength; i++) {
             File coverageDatafile = coverageDataFiles[i];

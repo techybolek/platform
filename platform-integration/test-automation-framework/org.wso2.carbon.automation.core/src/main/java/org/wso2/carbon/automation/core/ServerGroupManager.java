@@ -53,6 +53,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static org.testng.Assert.assertFalse;
 
@@ -73,7 +74,7 @@ public class ServerGroupManager {
     protected String startServer(String productName) throws IOException {
         FrameworkProperties frameworkProperties = null;
         if (carbonZip == null) {
-            carbonZip = PlatformUtil.getCarbonZipLocation(productName);
+            carbonZip = System.getProperty("carbon.zip");
             log.info("Carbon zip file - " + carbonZip);
             frameworkProperties = FrameworkFactory.getFrameworkProperties(productName);
         }
@@ -86,8 +87,9 @@ public class ServerGroupManager {
         if (!frameworkProperties.getDataSource().get_dbDriverName().contains("h2")) {
             copyJdbcDriverToLib(carbonHome, productName, frameworkProperties.getDataSource().get_dbDriverName());
         }
-        serverUtils.startServerUsingCarbonHome(carbonHome, portOffset, frameworkProperties);
-
+        Map<String, String> commandMap = new HashMap<String, String>();
+        commandMap.put(ProductConstant.PORT_OFFSET_COMMAND, "0");
+        serverUtils.startServerUsingCarbonHome(carbonHome, frameworkProperties, commandMap);
         return carbonHome;
     }
 
@@ -100,7 +102,6 @@ public class ServerGroupManager {
     public synchronized void startServers(List<String> productList) throws Exception {
         log.info("Server starting...");
         EnvironmentBuilder env = new EnvironmentBuilder();
-
 
         Assert.assertNotNull("Deployment Framework Home not provided", env.getFrameworkSettings().
                 getEnvironmentVariables().getDeploymentFrameworkPath());
@@ -150,7 +151,6 @@ public class ServerGroupManager {
             throw new XMLStreamException("Exception while reading  commonConfig.xml in deployment framework " + e);
         }
     }
-
 
     private static String getDatabaseName(String driverName, String url) {
         String databaseName = null;
@@ -259,7 +259,6 @@ public class ServerGroupManager {
                             " shouldn't be open when the server is gracefully shutting down");
                 servers.remove(product);
 
-
             }
         } catch (Exception e) {
             log.error("Error when shutting down the server.", e);
@@ -337,7 +336,7 @@ public class ServerGroupManager {
 
     protected void stopServer(FrameworkProperties properties) throws Exception {
         serverUtils.shutdown(portOffset, properties);
-       /* CodeCoverageUtils.generateReports();*/
+        /* CodeCoverageUtils.generateReports();*/
     }
 
     public static ServerUtils getServerUtils() {

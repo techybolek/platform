@@ -26,7 +26,7 @@ public class ApiPage {
         driver.findElement(By.linkText(uiElementMapper.getElement("api.add.link"))).click();
 
         log.info("API Add Page");
-        if (!driver.findElement(By.id(uiElementMapper.getElement("api.dashbord.middle.text"))).
+        if (!driver.findElement(By.id(uiElementMapper.getElement("api.dashboard.middle.text"))).
                 getText().contains("API")) {
 
             throw new IllegalStateException("This is not the API  Add Page");
@@ -37,8 +37,8 @@ public class ApiPage {
                                         String version)
             throws InterruptedException, IOException {
 
-        WebElement apiProvoder = driver.findElement(By.id(uiElementMapper.getElement("api.provider.id")));
-        apiProvoder.sendKeys(provider);
+        WebElement apiProvider = driver.findElement(By.id(uiElementMapper.getElement("api.provider.id")));
+        apiProvider.sendKeys(provider);
 
         WebElement apiName = driver.findElement(By.id(uiElementMapper.getElement("api.name.id")));
         apiName.sendKeys(name);
@@ -51,7 +51,7 @@ public class ApiPage {
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("addEditArtifact()");
-        log.info("successfuly Saved");
+        log.info("successfully Saved");
 
         return new ResourceBrowsePage(driver);
 

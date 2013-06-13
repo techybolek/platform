@@ -29,7 +29,7 @@ public class TenantListpage {
         }
     }
 
-    public boolean checkonUplodedTenant(String tenantName) throws InterruptedException {
+    public boolean checkOnUplodedTenant(String tenantName) throws InterruptedException {
 
         log.info("---------------------------->>>> " + tenantName);
         Thread.sleep(5000);

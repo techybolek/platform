@@ -30,7 +30,7 @@ public class ManageReportPage {
 
     }
 
-    public boolean chechOnUploadedReport(String reportName) throws InterruptedException {
+    public boolean checkOnUploadedReport(String reportName) throws InterruptedException {
         log.info(reportName);
         Thread.sleep(5000);
         // driver.findElement(By.xpath(uiElementMapper.getElement("service.check.save.service"))).click();
@@ -49,24 +49,26 @@ public class ManageReportPage {
             String resourceXpath2 = "]/td/a";
 
             for (int i = 2; i < 10; i++) {
-                String reportnameOnAppserver = resourceXpath + i + resourceXpath2;
-                String actualresorcename = driver.findElement(By.xpath(reportnameOnAppserver)).getText();
-                log.info("val on app is -------> " + actualresorcename);
+                String reportNameOnAppServer = resourceXpath + i + resourceXpath2;
+                String actualResourceName = driver.findElement(By.xpath(reportNameOnAppServer)).getText();
+                log.info("val on app is -------> " + actualResourceName);
                 log.info("Correct is    -------> " + reportName);
 
                 try {
 
-                    if (reportName.equals(actualresorcename)) {
+                    if (reportName.contains(actualResourceName)) {
 
                         log.info("Uploaded report exists");
 
-                        return false;
+                        return true;
 
+                    } else {
+                        return false;
                     }
 
                 } catch (NoSuchElementException ex) {
                     log.info("Cannot Find the Uploaded report");
-                    return false;
+
                 }
 
             }

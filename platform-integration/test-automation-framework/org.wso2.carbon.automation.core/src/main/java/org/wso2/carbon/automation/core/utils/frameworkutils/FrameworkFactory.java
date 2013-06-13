@@ -1,6 +1,7 @@
 package org.wso2.carbon.automation.core.utils.frameworkutils;
 
 import org.wso2.carbon.automation.core.ProductConstant;
+import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.AFSetter;
 import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.AMSetter;
 import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.AsSetter;
 import org.wso2.carbon.automation.core.utils.frameworkutils.productsetters.Axis2Setter;
@@ -191,6 +192,16 @@ public class FrameworkFactory {
             properties.setWorkerVariables(bamSetter.getWorkerVariables());
         }
 
+        if (product.equals(ProductConstant.APP_FACTORY_SERVER_NAME)) {
+            AFSetter afSetter = new AFSetter();
+            properties.setDataSource(afSetter.getDataSource());
+            properties.setEnvironmentSettings(afSetter.getEnvironmentSettings());
+            properties.setEnvironmentVariables(afSetter.getEnvironmentVariables());
+            properties.setRavana(afSetter.getRavana());
+            properties.setSelenium(afSetter.getSelenium());
+            properties.setProductVariables(afSetter.getProductVariables());
+            properties.setWorkerVariables(afSetter.getWorkerVariables());
+        }
 
         if (product.equals(ProductConstant.MANAGER_SERVER_NAME)) {
             ManagerSetter manSetter = new ManagerSetter();

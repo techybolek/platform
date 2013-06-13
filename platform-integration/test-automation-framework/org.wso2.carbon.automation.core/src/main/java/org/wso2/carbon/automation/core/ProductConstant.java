@@ -57,9 +57,11 @@ public class ProductConstant {
     public static final int SUPER_ADMIN_USER_ID = 0;
     public static final int ADMIN_USER_ID = 1;
     public static final String TENANT_ADMIN_PASSWORD = "admin123";
+    public static final String PORT_OFFSET_COMMAND = "-DportOffset";
 
     public static final String DEFAULT_PRODUCT_ROLE = "testRole";
     public static final String ADMIN_ROLE_NAME = "admin";
+    public static final String SEVER_STARTUP_SCRIPT_NAME= "wso2server";
 
 
     public static EnvironmentBuilder env;

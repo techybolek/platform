@@ -31,7 +31,7 @@ public class LifeCyclesPage {
         }
     }
 
-    public boolean checkonUplodedLifeCycle(String lifeCycleName) throws InterruptedException {
+    public boolean checkOnUploadedLifeCycle(String lifeCycleName) throws InterruptedException {
 
         Thread.sleep(10000);
         String lifeCycleNameOnServer = driver.findElement(By.xpath("/html/body/table/tbody/tr[2]/" +
@@ -48,29 +48,24 @@ public class LifeCyclesPage {
             String resourceXpath2 = "]/td";
 
             for (int i = 2; i < 10; i++) {
-                String lifeCycleNameOnAppserver = resourceXpath + i + resourceXpath2;
-
-                String actualUsername = driver.findElement(By.xpath(lifeCycleNameOnAppserver)).getText();
-
+                String lifeCycleNameOnAppServer = resourceXpath + i + resourceXpath2;
+                String actualUsername = driver.findElement(By.xpath(lifeCycleNameOnAppServer)).getText();
                 log.info("val on app is -------> " + actualUsername);
-
                 log.info("Correct is    -------> " + lifeCycleName);
-
                 try {
 
-                    if (lifeCycleName.equals(actualUsername)) {
+                    if (lifeCycleName.contains(actualUsername)) {
 
                         log.info("newly Created lifecycle   exists");
-
                         return true;
 
+                    }   else {
+                        return false;
                     }
 
                 } catch (NoSuchElementException ex) {
+                  log.info("Cannot Find the newly Created lifecycle");
 
-                    log.info("Cannot Find the newly Created lifecycle");
-
-                    return false;
 
                 }
 

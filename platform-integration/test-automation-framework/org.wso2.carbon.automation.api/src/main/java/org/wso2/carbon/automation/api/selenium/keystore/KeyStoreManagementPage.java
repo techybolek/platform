@@ -19,15 +19,15 @@ public class KeyStoreManagementPage {
         UIElementMapper uiElementMapper = UIElementMapper.getInstance();
         // Check that we're on the right page.
         driver.findElement(By.id(uiElementMapper.getElement("configure.tab.id"))).click();
-        driver.findElement(By.linkText(uiElementMapper.getElement("keysoter.add.link"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement("key.store.add.link"))).click();
         log.info("key store add page");
-        if (!driver.findElement(By.id(uiElementMapper.getElement("keystore.dashboard.middle.text"))).
+        if (!driver.findElement(By.id(uiElementMapper.getElement("key.store.dashboard.middle.text"))).
                 getText().contains("Key Store Management")) {
             throw new IllegalStateException("This is not the correct Page");
         }
     }
 
-    public boolean checkonUplodedKeyStore(String keyStoreName) throws InterruptedException {
+    public boolean checkOnUploadedKeyStore(String keyStoreName) throws InterruptedException {
         log.info("---------------------------->>>> " + keyStoreName);
         Thread.sleep(25000);
 
@@ -43,9 +43,9 @@ public class KeyStoreManagementPage {
             String resourceXpath2 = "]/td";
 
             for (int i = 2; i < 10; i++) {
-                String keyStorenameNameOnAppserver = resourceXpath + i + resourceXpath2;
+                String keyStoreNameNameOnAppServer = resourceXpath + i + resourceXpath2;
 
-                String actualUsername = driver.findElement(By.xpath(keyStorenameNameOnAppserver)).getText();
+                String actualUsername = driver.findElement(By.xpath(keyStoreNameNameOnAppServer)).getText();
 
                 log.info("val on app is -------> " + actualUsername);
 
@@ -53,15 +53,17 @@ public class KeyStoreManagementPage {
 
                 try {
 
-                    if (keyStoreName.equals(actualUsername)) {
+                    if (keyStoreName.contains(actualUsername)) {
                         log.info("newly Created keyStore   exists");
                         return true;
 
+                    } else {
+                        return false ;
                     }
 
                 } catch (NoSuchElementException ex) {
                     log.info("Cannot Find the newly Created keryStore");
-                    return false;
+
                 }
             }
 

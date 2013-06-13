@@ -24,7 +24,7 @@ public class UninstallFeaturePage {
         // Check that we're on the right page.
         driver.findElement(By.id(uiElementMapper.getElement("configure.tab.id"))).click();
         driver.findElement(By.linkText(uiElementMapper.getElement("features.add.link"))).click();
-        driver.findElement(By.linkText(uiElementMapper.getElement("installed.features.tab.linktext"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement("installed.features.tab.linkText"))).click();
         log.info("API Add Page");
         if (!driver.findElement(By.id(uiElementMapper.getElement("repositories.dashboard.text"))).
                 getText().contains("Feature")) {
@@ -32,25 +32,25 @@ public class UninstallFeaturePage {
         }
     }
 
-    public void checkonUninstalledSuccess(String repositoryName) throws InterruptedException {
+    public void checkOnUnInstalledSuccess(String repositoryName) throws InterruptedException {
         driver.findElement(By.id(uiElementMapper.getElement("carbon.Main.tab    "))).click();
-        driver.findElement(By.linkText(uiElementMapper.getElement("iserver.shutdown.link.text"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement("Is.server.shutdown.link.text"))).click();
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("restartServer();return false");
         //cannot close the popup window coding is hold due to this server restart pop up
     }
 
-    public void revertTheUninstallation() {
+    public void revertTheUninstall() {
         // Check that we're on the right page.
         driver.findElement(By.id(uiElementMapper.getElement("configure.tab.id"))).click();
         driver.findElement(By.linkText(uiElementMapper.getElement("features.add.link"))).click();
-        driver.findElement(By.linkText(uiElementMapper.getElement("feaure.revert.tab"))).click();
+        driver.findElement(By.linkText(uiElementMapper.getElement("feature.revert.tab"))).click();
 
     }
 
     public void uninstallFeature(String uninstallApplicationName) {
 
-        driver.findElement(By.id(uiElementMapper.getElement("feaures.filter.id"))).sendKeys(uninstallApplicationName);
+        driver.findElement(By.id(uiElementMapper.getElement("features.filter.id"))).sendKeys(uninstallApplicationName);
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("searchInstalledFeatures(); return false;");
         driver.findElement(By.name(uiElementMapper.getElement("feature.checkbox.click.name"))).click();

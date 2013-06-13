@@ -33,15 +33,15 @@ public class CappHome {
         }
     }
 
-    public void UploadCarbonItem() throws InterruptedException {
-        WebElement jaggeryUploadField = driver.findElement(By.name(uiElementMapper.getElement("carbon.file.upload.field")));
-        jaggeryUploadField.sendKeys("/home/randika/Downloads/Capp_1.0.0LT.car");
+    public CappListPage UploadCarbonItem(String carbonElement) throws InterruptedException, IOException {
+        WebElement carbonUploadField = driver.findElement(By.name(uiElementMapper.getElement("carbon.file.upload.field")));
+        carbonUploadField.sendKeys(carbonElement);
         Thread.sleep(5000);
 
         driver.findElement(By.name(uiElementMapper.getElement("carbon.upload.button"))).click();
         Thread.sleep(5000);
 
-        if (!driver.findElement(By.id(uiElementMapper.getElement("carbon.upload.successfull.message"))).
+        if (!driver.findElement(By.id(uiElementMapper.getElement("carbon.upload.successful.message"))).
                 getText().contains("successfully")) {
 
             throw new NoSuchElementException();
@@ -49,8 +49,10 @@ public class CappHome {
 
         log.info("Successfully Uploaded");
 
-        driver.findElement(By.className(uiElementMapper.getElement("carbon.upload.suffessfull.button"))).click();
+        driver.findElement(By.className(uiElementMapper.getElement("carbon.upload.successful.button"))).click();
         log.info("Ready to sign out");
+
+        return new CappListPage(driver);
     }
 
     public LoginPage logout() throws IOException {

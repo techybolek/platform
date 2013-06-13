@@ -33,6 +33,7 @@ import org.wso2.carbon.automation.api.clients.proxy.admin.ProxyServiceAdminClien
 import org.wso2.carbon.automation.api.clients.rest.api.RestApiAdminClient;
 import org.wso2.carbon.automation.api.clients.sequences.SequenceAdminServiceClient;
 import org.wso2.carbon.automation.api.clients.service.mgt.ServiceAdminClient;
+import org.wso2.carbon.automation.api.clients.tasks.TaskAdminClient;
 import org.wso2.carbon.automation.api.clients.template.EndpointTemplateAdminServiceClient;
 import org.wso2.carbon.automation.api.clients.template.SequenceTemplateAdminServiceClient;
 import org.wso2.carbon.automation.core.ProductConstant;
@@ -42,6 +43,7 @@ import org.wso2.carbon.localentry.stub.types.LocalEntryAdminException;
 import org.wso2.carbon.proxyadmin.stub.ProxyServiceAdminProxyAdminException;
 import org.wso2.carbon.rest.api.stub.RestApiAdminAPIException;
 import org.wso2.carbon.sequences.stub.types.SequenceEditorException;
+import org.wso2.carbon.task.stub.TaskManagementException;
 
 import javax.servlet.ServletException;
 import javax.xml.namespace.QName;
@@ -482,6 +484,23 @@ public class ESBTestCaseUtils {
 
 
     /**
+     * @param backEndUrl
+     * @param sessionCookie
+     * @param taskDescription
+     * @throws TaskManagementException
+     * @throws RemoteException
+     */
+    public void addScheduleTask(String backEndUrl, String sessionCookie, OMElement taskDescription)
+            throws TaskManagementException, RemoteException {
+        TaskAdminClient taskAdminClient = new TaskAdminClient(backEndUrl, sessionCookie);
+        taskAdminClient.addTask(taskDescription);
+        Assert.assertTrue(isScheduleTaskDeployed(backEndUrl, sessionCookie
+                , taskDescription.getAttributeValue(new QName("name"))),
+                          "ScheduleTask deployment failed");
+    }
+
+
+    /**
      * Waiting for proxy to deploy
      *
      * @param backEndUrl
@@ -801,6 +820,40 @@ public class ESBTestCaseUtils {
         return isExecutorFound;
     }
 
+    /**
+     * Wait for task to to deploy and return true once it deploy
+     *
+     * @param backEndUrl
+     * @param sessionCookie
+     * @param taskName
+     * @return
+     * @throws RemoteException
+     * @throws TaskManagementException
+     */
+    public boolean isScheduleTaskDeployed(String backEndUrl, String sessionCookie, String taskName)
+            throws RemoteException, TaskManagementException {
+        log.info("waiting " + SERVICE_DEPLOYMENT_DELAY + " millis for Task deployment " + taskName);
+
+        boolean isTaskDeployed = false;
+        TaskAdminClient taskAdminClient = new TaskAdminClient(backEndUrl, sessionCookie);
+        Calendar startTime = Calendar.getInstance();
+        long time;
+        while ((time = (Calendar.getInstance().getTimeInMillis() - startTime.getTimeInMillis())) < SERVICE_DEPLOYMENT_DELAY) {
+            if (taskAdminClient.getScheduleTaskList().contains(taskName)) {
+                isTaskDeployed = true;
+                log.info(taskName + " Task Deployed in " + time + " millis");
+                break;
+            }
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ignored) {
+
+            }
+        }
+
+        return isTaskDeployed;
+    }
+
 
     /**
      * @param backEndUrl
@@ -933,6 +986,12 @@ public class ESBTestCaseUtils {
 
     }
 
+    public boolean isScheduleTaskExist(String backEndUrl, String sessionCookie, String taskName)
+            throws RemoteException, TaskManagementException {
+        TaskAdminClient taskAdminClient = new TaskAdminClient(backEndUrl, sessionCookie);
+        return taskAdminClient.getScheduleTaskList().contains(taskName);
+    }
+
 
     /**
      * @param backEndUrl
@@ -1053,6 +1112,25 @@ public class ESBTestCaseUtils {
         PriorityMediationAdminClient priorityMediationAdminClient = new PriorityMediationAdminClient(backEndUrl, sessionCookie);
         priorityMediationAdminClient.remove(executorName);
         Assert.assertTrue(isPriorityExecutorUnDeployed(backEndUrl, sessionCookie, executorName), "Priority Executor undeployment failed");
+    }
+
+
+    /**
+     * @param backEndUrl
+     * @param sessionCookie
+     * @param taskName      name of the ScheduleTask
+     * @param group         group of the ScheduleTask
+     * @throws TaskManagementException
+     * @throws RemoteException
+     */
+    public void deleteScheduleTask(String backEndUrl, String sessionCookie, String taskName,
+                                   String group)
+            throws TaskManagementException, RemoteException {
+        TaskAdminClient taskAdminClient = new TaskAdminClient(backEndUrl, sessionCookie);
+        taskAdminClient.deleteTask(taskName, group);
+        Assert.assertTrue(isScheduleTaskUnDeployed(backEndUrl, sessionCookie, taskName),
+                          "ScheduleTask deployment failed");
+
     }
 
     /**
@@ -1368,6 +1446,40 @@ public class ESBTestCaseUtils {
         return isExecutorUnDeployed;
     }
 
+    /**
+     * wait for task to undeploy and return true once it is undeployed
+     *
+     * @param backEndUrl
+     * @param sessionCookie
+     * @param taskName
+     * @return
+     * @throws RemoteException
+     * @throws TaskManagementException
+     */
+    public boolean isScheduleTaskUnDeployed(String backEndUrl, String sessionCookie,
+                                            String taskName)
+            throws RemoteException, TaskManagementException {
+        log.info("waiting " + SERVICE_DEPLOYMENT_DELAY + " millis for Task Undeployment " + taskName);
+
+        boolean isTaskUnDeployed = false;
+        TaskAdminClient taskAdminClient = new TaskAdminClient(backEndUrl, sessionCookie);
+        Calendar startTime = Calendar.getInstance();
+        long time;
+        while ((time = (Calendar.getInstance().getTimeInMillis() - startTime.getTimeInMillis())) < SERVICE_DEPLOYMENT_DELAY) {
+            if (!taskAdminClient.getScheduleTaskList().contains(taskName)) {
+                isTaskUnDeployed = true;
+                log.info(taskName + " Task UnDeployed in " + time + " millis");
+                break;
+            }
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ignored) {
+
+            }
+        }
+
+        return isTaskUnDeployed;
+    }
 
     /**
      * @param synapseConfig
@@ -1572,4 +1684,5 @@ public class ESBTestCaseUtils {
         log.info("Synapse configuration  unDeployed");
 
     }
+
 }

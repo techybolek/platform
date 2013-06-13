@@ -106,6 +106,14 @@ public class PlatformExecutionManager implements IExecutionListener {
                                     , SampleAxis2Server.SECURE_STOCK_QUOTE_SERVICE
                                     , builder.getFrameworkSettings().getEnvironmentVariables().getDeploymentDelay());
                         }
+
+                        if (adminServiceService.isServiceExists(SampleAxis2Server.LB_SERVICE_1)) {
+                            adminServiceService.deleteService(new String[]{SampleAxis2Server.LB_SERVICE_1});
+                            isServiceUnDeployed(appServer.getBackEndUrl(), appServer.getSessionCookie()
+                                    , SampleAxis2Server.LB_SERVICE_1
+                                    , builder.getFrameworkSettings().getEnvironmentVariables().getDeploymentDelay());
+                        }
+
                         adminServiceAARServiceUploader.uploadAARFile(SampleAxis2Server.SIMPLE_STOCK_QUOTE_SERVICE + ".aar"
                                 , ProductConstant.getResourceLocations(ProductConstant.AXIS2_SERVER_NAME)
                                   + File.separator + "aar" + File.separator + "SimpleStockQuoteService.aar"
@@ -114,6 +122,7 @@ public class PlatformExecutionManager implements IExecutionListener {
                                 , SampleAxis2Server.SIMPLE_STOCK_QUOTE_SERVICE
                                 , builder.getFrameworkSettings().getEnvironmentVariables().getDeploymentDelay())
                                 , "SimpleStockQuoteService deployment failed in Application Server");
+
                         adminServiceAARServiceUploader.uploadAARFile(SampleAxis2Server.SECURE_STOCK_QUOTE_SERVICE + ".aar"
                                 , ProductConstant.getResourceLocations(ProductConstant.AXIS2_SERVER_NAME)
                                   + File.separator + "aar" + File.separator + "SecureStockQuoteService.aar"
@@ -122,6 +131,16 @@ public class PlatformExecutionManager implements IExecutionListener {
                                 , SampleAxis2Server.SECURE_STOCK_QUOTE_SERVICE
                                 , builder.getFrameworkSettings().getEnvironmentVariables().getDeploymentDelay())
                                 , "SecureStockQuoteService deployment failed in Application Server");
+
+                        adminServiceAARServiceUploader.uploadAARFile(SampleAxis2Server.LB_SERVICE_1 + ".aar"
+                                , ProductConstant.getResourceLocations(ProductConstant.AXIS2_SERVER_NAME)
+                                  + File.separator + "aar" + File.separator + "LBService1.aar"
+                                , "");
+                        Assert.assertTrue(isServiceDeployed(appServer.getBackEndUrl(), appServer.getSessionCookie()
+                                , SampleAxis2Server.LB_SERVICE_1
+                                , builder.getFrameworkSettings().getEnvironmentVariables().getDeploymentDelay())
+                                , "LBService1 deployment failed in Application Server");
+
                     } catch (RemoteException e) {
                         log.fatal("Artifact Deployment in Application Server failed. " + e);
                     } catch (LoginAuthenticationExceptionException e) {

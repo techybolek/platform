@@ -33,11 +33,11 @@ public class HandlerHome {
         }
     }
 
-    public boolean checkOnUploadedhandler(String handlerName) throws InterruptedException {
+    public boolean checkOnUploadedHandler(String handlerName) throws InterruptedException {
 
         Thread.sleep(10000);
         String handlerNameOnServer = driver.findElement(By.xpath("/html/body/table/tbody/tr[2]/td[3]" +
-                                                                 "/table/tbody/tr[2]/td/div/div/table/tbody/tr/td")).getText();
+                                          "/table/tbody/tr[2]/td/div/div/table/tbody/tr/td")).getText();
 
         log.info(handlerName);
         if (handlerName.equals(handlerNameOnServer)) {
@@ -49,9 +49,9 @@ public class HandlerHome {
             String resourceXpath2 = "]/td";
 
             for (int i = 2; i < 10; i++) {
-                String artifactNameOnAppserver = resourceXpath + i + resourceXpath2;
+                String artifactNameOnAppServer = resourceXpath + i + resourceXpath2;
 
-                String actualUsername = driver.findElement(By.xpath(artifactNameOnAppserver)).getText();
+                String actualUsername = driver.findElement(By.xpath(artifactNameOnAppServer)).getText();
 
                 log.info("val on app is -------> " + actualUsername);
 
@@ -59,15 +59,18 @@ public class HandlerHome {
 
                 try {
 
-                    if (handlerNameOnServer.equals(actualUsername)) {
+                    if (handlerNameOnServer.contains(actualUsername)) {
                         log.info("newly Created handler   exists");
                         return true;
 
+                    } else {
+                        return false;
                     }
+
 
                 } catch (NoSuchElementException ex) {
                     log.info("Cannot Find the newly Created handler");
-                    return false;
+
                 }
 
             }

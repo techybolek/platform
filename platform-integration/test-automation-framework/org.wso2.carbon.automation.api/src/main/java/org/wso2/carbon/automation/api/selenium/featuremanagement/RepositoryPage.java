@@ -32,14 +32,14 @@ public class RepositoryPage {
         }
     }
 
-    public boolean checkonUplodedReposirory(String repositoryName) throws InterruptedException {
+    public boolean checkOnUploadRepository(String repositoryName) throws InterruptedException {
 
         log.info("---------------------------->>>> " + repositoryName);
         Thread.sleep(25000);
 
         String repositoryNameOnServer = driver.findElement(By.xpath("/html/body/table/tbody/tr[2]/" +
-                                                                    "td[3]/table/tbody/tr[2]/td/div/div/div/div[3]/div/table/tbody/tr/td/table/tbody/" +
-                                                                    "tr[4]/td/div/table/tbody/tr/td")).getText();
+                 "td[3]/table/tbody/tr[2]/td/div/div/div/div[3]/div/table/tbody/tr/td/table/tbody/" +
+                 "tr[4]/td/div/table/tbody/tr/td")).getText();
 
         log.info(repositoryNameOnServer);
         if (repositoryName.equals(repositoryNameOnServer)) {
@@ -52,20 +52,22 @@ public class RepositoryPage {
             String resourceXpath2 = "]/td";
 
             for (int i = 2; i < 10; i++) {
-                String reponameNameOnAppserver = resourceXpath + i + resourceXpath2;
+                String repositoryNameOnAppServer = resourceXpath + i + resourceXpath2;
                 try {
-                    String actualUsername = driver.findElement(By.xpath(reponameNameOnAppserver)).getText();
+                    String actualUsername = driver.findElement(By.xpath(repositoryNameOnAppServer)).getText();
                     log.info("val on app is -------> " + actualUsername);
                     log.info("Correct is    -------> " + repositoryName);
 
-                    if (repositoryName.equals(actualUsername)) {
+                    if (repositoryName.contains(actualUsername)) {
                         log.info("newly Created repository   exists");
                         return true;
+                    }  else {
+                        return false ;
                     }
 
                 } catch (NoSuchElementException ex) {
                     log.info("Cannot Find the newly Created repository");
-                    return false;
+
                 }
             }
         }
