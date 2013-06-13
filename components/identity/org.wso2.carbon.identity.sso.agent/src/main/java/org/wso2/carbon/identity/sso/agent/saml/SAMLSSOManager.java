@@ -150,7 +150,7 @@ public class SAMLSSOManager {
         }
         
         if(SSOConfigs.isRequestSigned()){
-            Util.addDeflateSignatureToHTTPQueryString(httpQueryString, credential);
+            Util.addDeflateSignatureToHTTPQueryString(httpQueryString, credential.getPrivateKey());
         }
         
         if(SSOConfigs.getIdPUrl().indexOf("?") > -1){

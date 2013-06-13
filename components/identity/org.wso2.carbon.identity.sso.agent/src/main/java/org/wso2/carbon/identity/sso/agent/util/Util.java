@@ -37,6 +37,7 @@ import org.wso2.carbon.identity.sso.agent.exception.SSOAgentException;
 import javax.xml.namespace.QName;
 
 import java.net.URLEncoder;
+import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -177,13 +178,13 @@ public class Util {
     }
     
     public static void addDeflateSignatureToHTTPQueryString(StringBuilder httpQueryString,
-            X509Credential credential) throws SSOAgentException {
+                                            PrivateKey privateKey) throws SSOAgentException {
         try {
             httpQueryString.append("&SigAlg="
                     + URLEncoder.encode(XMLSignature.ALGO_ID_SIGNATURE_RSA, "UTF-8").trim());
 
             java.security.Signature signature = java.security.Signature.getInstance("SHA1withRSA");
-            signature.initSign(credential.getPrivateKey());
+            signature.initSign(privateKey);
             signature.update(httpQueryString.toString().getBytes());
             byte[] signatureByteArray = signature.sign();
 
