@@ -20,8 +20,6 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.*;
 
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -232,10 +230,11 @@ public interface APIManager {
      *
      * @param searchType
      * @param searchTerm
+     * @param loggedInUser
      * @return
      * @throws APIManagementException
      */
-    public Map<Integer, APIKey> searchAccessToken(String searchType, String searchTerm)
+    public Map<Integer, APIKey> searchAccessToken(String searchType, String searchTerm, String loggedInUser)
             throws APIManagementException;
 
     /**

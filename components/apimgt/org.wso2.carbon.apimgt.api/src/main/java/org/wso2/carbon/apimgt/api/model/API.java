@@ -58,6 +58,7 @@ public class API {
 
     private String visibility;
     private String visibleRoles;
+    private String visibleTenants;
 
     private boolean endpointSecured = false;
 	private String endpointUTUsername;
@@ -277,6 +278,14 @@ public class API {
 
     public void setVisibleRoles(String visibleRoles) {
         this.visibleRoles = visibleRoles;
+    }
+    
+    public String getVisibleTenants() {
+    	return visibleTenants;
+    }
+    
+    public void setVisibleTenants(String visibleTenants) {
+    	this.visibleTenants = visibleTenants;
     }
 
     public boolean isApiHeaderChanged() {

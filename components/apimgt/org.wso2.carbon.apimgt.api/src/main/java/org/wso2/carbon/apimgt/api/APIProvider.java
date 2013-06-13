@@ -219,6 +219,18 @@ public interface APIProvider extends APIManager {
      */
     public void addDocumentationContent(APIIdentifier identifier, String documentationName, String text)
             throws APIManagementException;
+    
+    /**
+     * This method used to update the API definition content - Swagger
+     *
+     * @param identifier,        API identifier
+     * @param documentationName, name of the inline documentation
+     * @param text,              content of the inline documentation
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          if failed to add the document as a resource to registry
+     */
+    public void addAPIDefinitionContent(APIIdentifier identifier, String documentationName, String text) 
+    					throws APIManagementException;
 
     /**
      * Updates a given documentation
@@ -267,5 +279,16 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     public List<API> searchAPIs(String searchTerm, String searchType, String providerId) throws APIManagementException;
+    /**
+     * Update the subscription status
+     *
+     * @param apiId API Identifier
+     * @param subStatus Subscription Status
+     * @param appId Application Id              *
+     * @return int value with subscription id
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to update subscription status
+     */
+    public void updateSubscription(APIIdentifier apiId,String subStatus,int appId) throws APIManagementException;
 
 }

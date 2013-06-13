@@ -28,6 +28,7 @@ public enum DocumentationType {
     PUBLIC_FORUM("Public Forum"),
     SUPPORT_FORUM("Support Forum"),
     API_MESSAGE_FORMAT("API Message Format"),
+    SWAGGER_DOC("API Definition"),
     OTHER("Other");
 
     private String type;

@@ -33,6 +33,7 @@ public class Application {
     private Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
     private List<APIKey> keys = new ArrayList<APIKey>();
     private String tier;
+    private String callbackUrl;
 
     public Application(String name, Subscriber subscriber) {
         this.name = name;
@@ -86,7 +87,16 @@ public class Application {
         this.tier = tier;
     }
 
-    @Override
+    
+    public String getCallbackUrl() {
+		return callbackUrl;
+	}
+
+	public void setCallbackUrl(String callbackUrl) {
+		this.callbackUrl = callbackUrl;
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

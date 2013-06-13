@@ -23,9 +23,10 @@ public class APIKey {
     private String accessToken;
     private String type;
     private String tokenScope;
-    private String validityPeriod;
+    private long validityPeriod;
     private String createdDate;
     private String authUser;
+    private String authorizedDomains;
 
     public String getConsumerKey() {
         return consumerKey;
@@ -65,11 +66,11 @@ public class APIKey {
     public void setAuthUser(String userId) {
         this.authUser = userId;
     }
-    public String getValidityPeriod() {
+    public long getValidityPeriod() {
         return validityPeriod;
     }
 
-    public void setValidityPeriod(String validityPeriod) {
+    public void setValidityPeriod(long validityPeriod) {
         this.validityPeriod = validityPeriod;
     }
 
@@ -86,5 +87,13 @@ public class APIKey {
 
     public void setTokenScope(String tokenScope) {
         this.tokenScope = tokenScope;
+    }
+
+    public String getAuthorizedDomains() {
+        return authorizedDomains;
+    }
+
+    public void setAuthorizedDomains(String authorizedDomains) {
+        this.authorizedDomains = authorizedDomains;
     }
 }

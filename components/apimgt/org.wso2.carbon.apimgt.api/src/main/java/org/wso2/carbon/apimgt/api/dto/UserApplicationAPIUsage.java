@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api.dto;
 
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +29,12 @@ import java.util.List;
 public class UserApplicationAPIUsage {
 
     private String userId;
+    private int appId;
     private String applicationName;
+    private String subStatus;
     private String accessToken;
     private String accessTokenStatus;
-    private List<APIIdentifier> apiIdentifiers = new ArrayList<APIIdentifier>();
+    private List<SubscribedAPI> apiSubscriptions = new ArrayList<SubscribedAPI>();
 
     public String getUserId() {
         return userId;
@@ -39,6 +42,13 @@ public class UserApplicationAPIUsage {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+    public int getAppId() {
+        return appId;
+    }
+
+    public void setAppId(int appId) {
+        this.appId = appId;
     }
 
     public String getApplicationName() {
@@ -48,13 +58,20 @@ public class UserApplicationAPIUsage {
     public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
     }
-
-    public APIIdentifier[] getApiIdentifiers() {
-        return apiIdentifiers.toArray(new APIIdentifier[apiIdentifiers.size()]);
+    public String getSubStatus() {
+        return subStatus;
     }
 
-    public void addApiIdentifier(APIIdentifier apiIdentifier) {
-        apiIdentifiers.add(apiIdentifier);
+    public void setSubStatus(String subStatus) {
+        this.subStatus = subStatus;
+    }
+
+    public SubscribedAPI[] getApiSubscriptions() {
+        return apiSubscriptions.toArray(new SubscribedAPI[apiSubscriptions.size()]);
+    }
+
+    public void addApiSubscriptions(SubscribedAPI apiSubscription) {
+        apiSubscriptions.add(apiSubscription);
     }
     public void setAccessToken(String accessToken){
         this.accessToken=accessToken;

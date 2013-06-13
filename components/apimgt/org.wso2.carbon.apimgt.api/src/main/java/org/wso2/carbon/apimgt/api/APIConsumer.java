@@ -51,7 +51,7 @@ public interface APIConsumer extends APIManager {
      * @return set of API
      * @throws APIManagementException if failed to API set
      */
-    public Set<API> getAllPublishedAPIs() throws APIManagementException;
+    public Set<API> getAllPublishedAPIs(String tenantDomain) throws APIManagementException;
 
     /**
      * Returns top rated APIs
@@ -66,10 +66,11 @@ public interface APIConsumer extends APIManager {
      * Get recently added APIs to the store
      *
      * @param limit if -1, no limit. Return everything else, limit the return list to specified value.
+     * @param requestedTenantDomain This value is required when need to get tenant specific recently added APIs.In standalone mode,value is null
      * @return set of API
      * @throws APIManagementException if failed to get recently added APIs
      */
-    public Set<API> getRecentlyAddedAPIs(int limit) throws APIManagementException;
+    public Set<API> getRecentlyAddedAPIs(int limit,String requestedTenantDomain) throws APIManagementException;
 
     /**
      * Get all tags of published APIs
@@ -88,15 +89,14 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException If an error occurs while rating the API
      */
     public void rateAPI(APIIdentifier apiId, APIRating rating, String user) throws APIManagementException;
-
     /**
-     * Search matching APIs for given search terms
+     * Remove an user rating of a particular API. This will be called when subscribers remove their rating on an API
      *
-     * @param searchTerm , name of the search term
-     * @return Set<API>
-     * @throws APIManagementException if failed to get APIs for given search term
+     * @param apiId  The API identifier
+     * @param user Username of the subscriber providing the rating
+     * @throws APIManagementException If an error occurs while rating the API
      */
-    public Set<API> searchAPI(String searchTerm) throws APIManagementException;
+    public void removeAPIRating(APIIdentifier apiId,  String user) throws APIManagementException;
 
     /**
      * Returns a set of SubscribedAPI purchased by the given Subscriber
@@ -209,7 +209,7 @@ public interface APIConsumer extends APIManager {
     
     public Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException;
 
-    public Set<API> searchAPI(String searchTerm, String searchType) throws APIManagementException;
+    public Set<API> searchAPI(String searchTerm, String searchType,String tenantDomain) throws APIManagementException;
     public int getUserRating(APIIdentifier apiId, String user) throws APIManagementException;
 
     /**
@@ -247,4 +247,12 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get the predefined tiers
      */
     public Set<Tier> getTiers() throws APIManagementException;
+
+    /**
+     * Update exiting access allowing domain list
+     * @param accessToken
+     * @param accessAllowDomains
+     * @throws APIManagementException
+     */
+    public void updateAccessAllowDomains(String accessToken, String[] accessAllowDomains) throws APIManagementException;
 }

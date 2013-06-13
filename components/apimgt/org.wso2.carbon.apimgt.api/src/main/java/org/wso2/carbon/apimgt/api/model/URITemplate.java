@@ -75,10 +75,21 @@ public class URITemplate {
         httpVerbs.add(httpVerb);
     }
 
+    public String getHttpVerbs() {
+
+        return httpVerb;
+    }
+
     public void setAuthTypes(String authType) {
 
         authTypes.add(authType);
     }
+
+    public String getAuthTypes() {
+
+        return authType;
+    }
+
 
     public String getMethodsAsString() {
         String str = "";
