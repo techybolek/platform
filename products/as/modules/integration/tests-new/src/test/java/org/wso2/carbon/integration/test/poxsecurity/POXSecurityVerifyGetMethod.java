@@ -55,9 +55,9 @@ public class POXSecurityVerifyGetMethod extends ASIntegrationTest{
         String securedRestURL = getSecuredServiceEndpoint(SERVICE_NAME) + "/getSimpleQuote";
         HttpsResponse response = HttpsURLConnectionClient.getWithBasicAuth(securedRestURL, "symbol=IBM",
                                                                            userInfo.getUserName(), userInfo.getPassword());
-        assertTrue(response.getData().contains("<ax2413:name>IBM Company</ax2413:name>"),
+        assertTrue(response.getData().contains("IBM Company"),
                    "getQuote doesn't return expected values");
-        assertTrue(response.getData().contains("<ax2413:symbol>IBM</ax2413:symbol>"),
+        assertTrue(response.getData().contains("IBM"),
                    "getQuote doesn't return expected values");
     }
 

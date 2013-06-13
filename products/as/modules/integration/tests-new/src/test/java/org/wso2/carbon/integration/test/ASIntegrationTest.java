@@ -84,7 +84,6 @@ public class ASIntegrationTest {
                           "Service file uploading failed withing given deployment time");
     }
 
-
     protected void deleteService(String serviceName) throws RemoteException {
         ServiceAdminClient adminServiceService =
                 new ServiceAdminClient(asServer.getBackEndUrl(), asServer.getSessionCookie());
@@ -137,6 +136,5 @@ public class ASIntegrationTest {
                                                  new String[]{KeyStoreName}, KeyStoreName);
         Thread.sleep(2000);
     }
-
 
 }

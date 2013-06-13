@@ -11,7 +11,7 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <name>WSO2 AppServer - Clarity Test New Module</name>
+    <name>WSO2 AppServer - Test New Module</name>
     <artifactId>org.wso2.appserver.test</artifactId>
     <packaging>jar</packaging>
 
@@ -21,7 +21,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <inherited>false</inherited>
                 <configuration>
-                     <!--<argLine>-Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=512m -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5006</argLine>-->
+                    <!--<argLine>-Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=512m -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5006</argLine>-->
                     <argLine>-Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=512m</argLine>
 
                     <suiteXmlFiles>
@@ -222,6 +222,11 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.automation</groupId>
+            <artifactId>org.wso2.carbon.automation.tools.jmeter</artifactId>
+            <version>${test.framework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.automation</groupId>
             <artifactId>org.wso2.carbon.automation.core</artifactId>
             <version>${test.framework.version}</version>
         </dependency>
@@ -229,6 +234,16 @@
             <groupId>org.wso2.carbon.automation</groupId>
             <artifactId>org.wso2.carbon.automation.utils</artifactId>
             <version>${test.framework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.xfer</groupId>
+            <artifactId>wso2xfer</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.tomcat</artifactId>
+            <version>${carbon.platform.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
