@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://ws.apache.org/ns/synapse">
+
+	<sequence name="main">
+		<in>
+			<log level="full" />
+			<send>
+				<endpoint>
+					<address uri="http://localhost:9000/services/SimpleStockQuoteService" />
+				</endpoint>
+			</send>
+		</in>
+		<out>
+			<log level="full" />
+			<property name="target.endpoint" value="foo" />
+			<store messageStore="JMS_Store" />
+		</out>
+		<description>The main sequence for the message mediation</description>
+	</sequence>
+	<messageStore class="org.wso2.carbon.message.store.persistence.jms.JMSMessageStore" name="JMS_Store">
+        <parameter name="java.naming.factory.initial">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
+		<parameter name="store.jms.cache.connection">false</parameter>
+		<parameter name="java.naming.provider.url">tcp://127.0.0.1:61616</parameter>
+		<parameter name="store.jms.destination">JMS_Store</parameter>
+		<parameter name="store.jms.JMSSpecVersion">1.1</parameter>
+	</messageStore>
+
+</definitions>
