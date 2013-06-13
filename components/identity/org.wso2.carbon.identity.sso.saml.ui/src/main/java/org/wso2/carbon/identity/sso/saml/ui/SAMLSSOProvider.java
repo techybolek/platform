@@ -376,8 +376,8 @@ public class SAMLSSOProvider extends HttpServlet {
 		authnReqDTO.setRequestMessageString(getRequestParameter(req,
 				SAMLSSOProviderConstants.REQ_MSG_STR));
 		authnReqDTO.setQueryString((String) req
-				.getAttribute(SAMLSSOProviderConstants.HTTP_QUERY_STRING));
-		req.removeAttribute(SAMLSSOProviderConstants.HTTP_QUERY_STRING);
+				.getSession().getAttribute(SAMLSSOProviderConstants.HTTP_QUERY_STRING));
+		req.getSession().removeAttribute(SAMLSSOProviderConstants.HTTP_QUERY_STRING);
 	}
 
 	/**
