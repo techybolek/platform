@@ -1,4 +1,4 @@
-Installing  WSO2 Platform Automated Test Suite, v1.1.2
+Installing  WSO2 Platform Automated Test Suite, v4.2.0-SNAPSHOT
 ================================================
 
 WSO2 platform automated test suite runner is ant based testNG jar executor.

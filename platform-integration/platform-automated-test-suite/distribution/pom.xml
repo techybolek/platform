@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.wso2.carbon.automation</groupId>
         <artifactId>wso2-platform-automated-test-suite</artifactId>
-        <version>1.1.3</version>
+        <version>4.2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -141,14 +141,14 @@
         <dependency>
             <groupId>org.wso2.carbon.automation</groupId>
             <artifactId>org.wso2.carbon.automation.test.repo</artifactId>
-            <version>1.1.2</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.automation</groupId>
             <artifactId>org.wso2.carbon.automation.test.platform.scenario</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
-            <version>1.1.3</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.automation</groupId>
