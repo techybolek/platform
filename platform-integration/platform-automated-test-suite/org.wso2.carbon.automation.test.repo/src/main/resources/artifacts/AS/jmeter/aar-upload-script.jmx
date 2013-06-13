@@ -377,7 +377,7 @@
           <collectionProp name="-290977453">
             <stringProp name="92668751">admin</stringProp>
             <stringProp name="92668751">admin</stringProp>
-            <stringProp name="1168052447">/home/nuwanw/svn/carbon/platform/branches/4.1.0/products/as/5.1.1/modules/integration/tests-new/src/test/resources/artifacts/AS/aar/Axis2Service.aar</stringProp>
+            <stringProp name="1168052447">/home/krishantha/svn/trunk/carbon/platform/branches/4.1.0/products/as/5.1.1/modules/integration/tests-new/src/test/resources/artifacts/AS/aar/Axis2Service.aar</stringProp>
             <stringProp name="-1348260636">Axis2Service</stringProp>
             <stringProp name="1861797526">echoString</stringProp>
           </collectionProp>
