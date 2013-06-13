@@ -6,7 +6,7 @@
 
 	var security =require("sso");
 	var ssoRelyingParty = new security.SSORelyingParty(site.ssoConfiguration.issuer);
-	var samlLogoutRequest = ssoRelyingParty.getSAMLLogoutRequest(session.get("LOGGED_IN_USER"));
+	var samlLogoutRequest = ssoRelyingParty.getSAMLLogoutRequest(session.get("LOGGED_IN_USER"),session.getId());
 	var encodedRequest = ssoRelyingParty.encode(samlLogoutRequest);
 	var relayState = ssoRelyingParty.getUUID();
 	var idpURL = ssoRelyingParty.getProperty("identityProviderURL");

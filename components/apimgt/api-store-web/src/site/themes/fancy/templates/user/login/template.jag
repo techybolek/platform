@@ -1,34 +1,34 @@
 <% jagg.template("user/login", function(inputs, outputs, jagg) {
-var i18n = require("i18n");
+var i18n = require("/i18n.js");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 %>
 <% var user = outputs.user; %>
 <%
+        var isSuperTenant, tenantDomain;
         var mod = jagg.module("manager");
         var httpsUrl= mod.getHTTPsURL();
-
+		var isSelfSignupEnabled = mod.isSelfSignupEnabled();
         var currentURL = request.getRequestURI();
         if(request.getQueryString()){
             currentURL += "?" + request.getQueryString();
         }
-
+        var tenant=request.getParameter("tenant");
+        var urlPrefix;
+        if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
+        
+        if (jagg.getUser() != null) {
+        	isSuperTenant = jagg.getUser().isSuperTenant;
+			tenantDomain = jagg.getUser().username.split('@')[1];
+        }
 
 %>
 <% if(user) { %>
-       <ul class="nav actions login-sign-up">
-            <li class="dropdown">
-              <a class="link-to-user dropdown-toggle" data-toggle="dropdown"><%=user.username%> <b class="caret"></b></a>
-              <ul class="dropdown-menu" id="userInfoMenu">
-                <li class="userInfoSection">
-                <%=i18n.localize("logged")%> <h4><%=user.username%></h4>
-                </li>
-                <li class="logout-link-special"><button id="logout-link" class="btn btn-danger"><%=i18n.localize("logout")%></button></li>
-              </ul>
-            </li>
-            <li class="divider-vertical"></li>
+<ul class="nav actions login-sign-up pull-right">
             <li class="dropdown settingsSection">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-weal"></i></a>
+                <i class="icon-theme"></i>
+                                <br>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Themes <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li  class="themeSelection"><h3><%=i18n.localize("selectTheme")%></h3>
                     <form id="themeSelectForm" action="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/user/theme/template.jag?theme=modern"))%>">
@@ -47,16 +47,6 @@ i18n.init(request,localeResourcesBasePath);
 
                                 </td>
                                 <td>
-                                    <div class="thumbnail <% if(jagg.getUserTheme().base == "modern" && jagg.getUserTheme().subtheme == "modern") { %>currentTheme<% } %>">
-                                        <a data-theme="fancy" data-subtheme="modern" class="badge themeLabel" onclick="applyTheme(this)">
-                                            <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/thumb-modern.png"))%>" />
-                                            <br /><div class="themeName"><%=i18n.localize("modern")%></div>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
                                     <div class="thumbnail <% if(jagg.getUserTheme().base == "dark" && jagg.getUserTheme().subtheme == null) { %>currentTheme<% } %>">
                                         <a data-theme="fancy" data-subtheme="dark" class="badge themeLabel" onclick="applyTheme(this)">
                                             <img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/thumb-dark.png"))%>" />
@@ -65,23 +55,59 @@ i18n.init(request,localeResourcesBasePath);
                                     </div>
 
                                 </td>
-                                <td></td>
                             </tr>
                         </table>
                     </form>
                 </li>
               </ul>
             </li>
-          </ul>
+           <li class="divider-vertical"></li>
+           <li class="dropdown">
+               <i class="icon-user-top"></i>
+               <br>
+               <a class="link-to-user dropdown-toggle" data-toggle="dropdown"><%=user.username%> <b class="caret"></b></a>
+             <ul class="dropdown-menu" id="userInfoMenu">
+               <li class="userInfoSection">
+                   <%=i18n.localize("logged")%> <h4><%=user.username%></h4>
+               </li>
+               <li class="logout-link-special"><button id="logout-link" class="btn btn-danger"><%=i18n.localize("logout")%></button></li>
+             </ul>
+           </li>
+</ul>
 <% } else { %>
-<ul class="nav actions login-sign-up">
+<ul class="nav actions login-sign-up pull-right">
+    <%if(isSelfSignupEnabled){%>
     <li>
-        <a id="register-link" href="<%=httpsUrl%><%=site.context%>/site/pages/sign-up.jag"><%=i18n.localize("signup")%></a>
+        <i class="icon-signup-top"></i>
+        <br>
+        <a id="register-link" href="<%=httpsUrl%><%=site.context%>/site/pages/sign-up.jag?<%=urlPrefix%>"><%=i18n.localize("signup")%></a>
     </li>
-    <li class="divider-vertical"></li>
+	<%}%>
     <li>
+        <i class="icon-user-top"></i>
+        <br>
         <a id="login-link"><%=i18n.localize("login")%></a>
     </li>
 </ul>
 <% } %>
+<!--Links to Access Tenant Store and Public Store-->
+<div class="tenant-position-setter">
+		<%if (tenant == null && isSuperTenant != null && !isSuperTenant) {%>
+			Go to <a href="<%=jagg.getAbsoluteUrl("/")%><%="?tenant=" + tenantDomain%>"><%=tenantDomain%>'s API Store</a>
+
+			<a onclick="javascript:$('#APIStoreHelp').toggle('fast')" class="icon-chevron-right searchHelp"></a>
+
+			<div id="APIStoreHelp" class="help-block" style="display:none;">
+			You are accessing Public API Store. Go to <a href="<%=jagg.getAbsoluteUrl("/")%><%="?tenant=" + tenantDomain%>"><%=tenantDomain%>'s API Store</a>
+			</div>
+		<%} else if (tenant != null) {%>
+			Go to <a href="<%=jagg.getAbsoluteUrl("/")%>">Public API Store</a>
+
+			<a onclick="javascript:$('#APIStoreHelp').toggle('fast')" class="icon-chevron-right searchHelp"></a>
+
+			<div id="APIStoreHelp" class="help-block" style="display:none;">
+			You are accessing <%=tenantDomain%>'s API Store. Go to <a href="<%=jagg.getAbsoluteUrl("/")%>">Public API Store</a>
+			</div>
+		<%}%>
+	</div>
 <% }); %>

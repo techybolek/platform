@@ -3,13 +3,16 @@ include("/jagg/jagg.jag");
 include("header.jag");
 var site = require("/site/conf/site.json");
 var site = require("/site/conf/site.json");
-var i18n = require("i18n");
+var i18n = require("/i18n.js");
+var tenantDomain=getTenantDomain();
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 (function () {
     var usage, site,  result, mod, user = jagg.getUser();
+    isTenantAllowed();
+
     if (!user) {
-        response.sendRedirect(jagg.getAbsoluteUrl("/"));
+        response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
         return;
     }
     mod = jagg.module("billing");
@@ -37,25 +40,8 @@ i18n.init(request,localeResourcesBasePath);
                         ],
                         "left":[
                             {
-                                "name":"ui/tab",
-                                "inputs":{
-                                    "classes":"cat_and_charts",
-                                    "tabs":[
-                                        {
-                                            "body":[
-                                                {
-                                                    "name":"api/recently-added",
-                                                    "inputs":null
-                                                },
-                                                {
-                                                    "name":"api/top-rated",
-                                                    "inputs":null
-                                                }
-                                            ]
-                                        }
-
-                                    ]
-                                }
+                                "name":"api/recently-added",
+                                "inputs":{"tenant":tenantDomain}
                             }
                         ],
                         "middle":[{

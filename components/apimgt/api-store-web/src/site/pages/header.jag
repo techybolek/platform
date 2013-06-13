@@ -7,4 +7,31 @@ if (ssoEnabled === 'true') {
     jagg.includeBlock("sso/filter", {});
 }
 
+var getRedirectPathForNonAuthenticatedUser = function () {
+    var requestedPage = request.getRequestURI();
+    if (request.getQueryString() != null) {
+        requestedPage = requestedPage + '?' + encodeURIComponent(request.getQueryString());
+    }
+    var redirectPath = jagg.getAbsoluteUrl("/?requestedPage=" + requestedPage);
+    return redirectPath;
+};
+
+var getTenantDomain=function(){
+return request.getParameter("tenant");
+};
+
+var isTenantAllowed=function(){
+ var user = jagg.getUser(),username;
+
+   if(user!=null){
+   username=user.username;
+   if(request.getParameter("tenant")!=null){
+   if(user.username.split("@")[1]!=request.getParameter("tenant")){
+   jagg.setUser(null);
+   response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
+   return;
+   }
+   }
+   }
+   };
 %>

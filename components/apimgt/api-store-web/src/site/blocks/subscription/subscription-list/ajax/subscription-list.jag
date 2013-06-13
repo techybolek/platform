@@ -3,7 +3,8 @@ include("/jagg/jagg.jag");
 (function () {
     var mod, obj, result, username,
             msg = require("/site/conf/ui-messages.jag"),
-            action = request.getParameter("action");
+            action = request.getParameter("action"),
+            user = jagg.getUser();
     if (action == "getAllSubscriptions") {
         if (!user) {
             print({

@@ -2,14 +2,18 @@
     "theme" : {
         "base" : "fancy"
     },
-    "context" : "/store",    
+    "context" : "/store",
+    "tagWiseMode" :"false",
+    "tagGroupKey" :"-group",
     "ssoConfiguration" : {
         "enabled" : "false",
         "issuer" : "API_STORE",
-        "identityProviderURL" : "",
+        "identityProviderURL" : "https://localhost:9443/samlsso",
         "keyStorePassword" : "",
         "identityAlias" : "",
-        "keyStoreName" : ""
+        "responseSigningEnabled":"true",
+        "keyStoreName" :""
     }
+
 
 }

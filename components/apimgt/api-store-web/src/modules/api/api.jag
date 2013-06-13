@@ -1,10 +1,13 @@
 <%
 var getAPIDescription = function (api, username) {
-    var log = new Log(),
+    var discoveryURL, 
+    		log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
-
-    try {
+	
+	try {
+		discoveryURL = store.getSwaggerDiscoveryUrl(api.name, api.version, api.provider);
         api = store.getAPI(api.provider, api.name, api.version, username);
+		        
         if (log.isDebugEnabled()) {
             log.debug("getAPI : " + stringify(api));
         }
@@ -12,6 +15,7 @@ var getAPIDescription = function (api, username) {
         return {
             error:false,
             api:api,
+            discoveryURL:discoveryURL,
             message:null
         };
     } catch (e) {

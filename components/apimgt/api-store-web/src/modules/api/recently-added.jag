@@ -1,11 +1,11 @@
 <%
-var getRecentlyAddedAPIs = function (limit) {
+var getRecentlyAddedAPIs = function (limit,tenant) {
     var list, i, length, api, apis,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        apis = store.getRecentlyAddedAPIs(String(limit));
+            apis = store.getRecentlyAddedAPIs(String(limit),tenant);
         if (log.isDebugEnabled()) {
             log.debug("getRecentlyAddedAPIs : " + stringify(apis));
         }

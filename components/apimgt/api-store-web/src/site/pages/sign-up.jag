@@ -1,9 +1,11 @@
 <%
 include("/jagg/jagg.jag");
 var site = require("/site/conf/site.json");
-var i18n = require("i18n");
+var i18n = require("/i18n.js");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
+include("header.jag");
+var tenantDomain=getTenantDomain();
         
 (function () {
    jagg.render({
@@ -28,24 +30,8 @@ i18n.init(request,localeResourcesBasePath);
                         ],
                         "left":[
                             {
-                                "name":"ui/tab",
-                                "inputs":{
-                                    "classes":"cat_and_charts",
-                                    "tabs":[
-                                        {
-                                            "body":[
-                                                {
-                                                    "name":"api/recently-added",
-                                                    "inputs":null
-                                                },
-                                                {
-                                                    "name":"api/top-rated",
-                                                    "inputs":null
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
+                                "name":"api/recently-added",
+                                "inputs":{"tenant":tenantDomain}
                             }
                         ],
                         "middle":[

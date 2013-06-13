@@ -2,7 +2,12 @@
 var usage=outputs.usage;var length;if (usage!=null){length=outputs.usage.length;}
 
 %>
-        <div id="userKey"><h2>Usage Summary</h2>  </br>
+<div class="title-section">
+            <h2>Usage Summary</h2>
+</div>
+<div class="content-section shadow-up">
+    <div class="content-data">
+        <div id="userKey">
         <label class="control-label"><b>Period:</b></label>
         <div class="well form-inline">
             <select id="year" style="WIDTH: 100px" name="year" >
@@ -14,33 +19,33 @@ var usage=outputs.usage;var length;if (usage!=null){length=outputs.usage.length;
 
 
             <select id="month" size="1" name="month" >
-      <option value="01" >January</option>
+      <option value="1" >January</option>
 
-      <option value="02">February</option>
+      <option value="2">February</option>
 
-      <option value="03">March</option>
+      <option value="3">March</option>
 
-      <option value="04">April</option>
+      <option value="4">April</option>
 
-      <option value="05">May</option>
+      <option value="5">May</option>
 
-      <option value="06">June</option>
+      <option value="6">June</option>
 
-      <option value="07">July</option>
+      <option value="7">July</option>
 
-      <option value="08">August</option>
+      <option value="8">August</option>
 
-      <option value="09">September</option>
+      <option value="9">September</option>
 
       <option value="10">October</option>
 
-      <option value="11" selected=true>November</option>
+      <option value="11">November</option>
 
       <option value="12">December</option>
     </select>
      <button class="btn btn-primary" id="generate">Generate</button>
        </div>
-        <div  id="showMsg" style="display:none;"><label><b>No usage details available for the user: &nbsp;<%=jagg.getUser().username%>  yet.</b></label></div>
+        <div  id="showMsg" style="display:none;"><label><b>No usage details available for the user: &nbsp;<%=jagg.getUser().username%>  (for provided month).</b></label></div>
         <div id="usageDiv" class="row-fluid" style="display:none;">
         <div class="span12">
         <table id="usageSummary" class="table table-bordered" style="width:411px;">
@@ -78,6 +83,7 @@ var usage=outputs.usage;var length;if (usage!=null){length=outputs.usage.length;
         </div>
     </div>
 </div>
-
+</div>
+</div>
 
 <%});%>

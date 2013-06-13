@@ -38,14 +38,25 @@ var log = new Log();
             }else{
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
             }
-            xhr.send();
+            try {
+                xhr.send();
+            } catch (e) {
+                 print(xhr.statusText);
+                 return;
+            }
         }else{
             if(contentTypeHeader){
                 xhr.setRequestHeader(contentTypeHeader, contentTypeValue);
             }else{
                 xhr.setRequestHeader('Content-Type', content_type);
             }
-            xhr.send(req_body);
+            try {
+                xhr.send(req_body);
+            } catch (e) {
+                 print(xhr.statusText);
+                 return;
+            }
+
         }
 
         result = {};

@@ -22,6 +22,9 @@ jagg.module("api", {
 
     getTopRatedAPIs:function () {
         return jagg.require(jagg.getModulesDir() + "api/top-rated.jag").getTopRatedAPIs.apply(this, arguments);
+    },
+    hasUserPermissions:function () {
+        return jagg.require(jagg.getModulesDir() + "api/permissions.jag").hasUserPermissions.apply(this, arguments);
     }
 });
 %>

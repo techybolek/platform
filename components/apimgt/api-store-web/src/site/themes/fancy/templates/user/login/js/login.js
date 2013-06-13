@@ -2,8 +2,8 @@ var login = login || {};
 (function () {
     var loginbox = login.loginbox || (login.loginbox = {});
 
-    loginbox.login = function (username, password, url) {
-        jagg.post("/site/blocks/user/login/ajax/login.jag", { action:"login", username:username, password:password },
+    loginbox.login = function (username, password, url,tenant) {
+        jagg.post("/site/blocks/user/login/ajax/login.jag", { action:"login", username:username, password:password,tenant:tenant },
                  function (result) {
                      if (result.error == false) {
                          if (redirectToHTTPS && redirectToHTTPS != "" && redirectToHTTPS != "{}" &&redirectToHTTPS != "null") {
@@ -24,7 +24,7 @@ var login = login || {};
     loginbox.logout = function () {
         jagg.post("/site/blocks/user/login/ajax/login.jag", {action:"logout"}, function (result) {
             if (result.error == false) {
-                window.location.href=requestURL;
+                window.location.href=requestURL+"?"+urlPrefix;
             } else {
                 jagg.message({content:result.message,type:"error"});
             }
@@ -43,7 +43,7 @@ $(document).ready(function () {
          if (event.which == 13) {
                 var goto_url =$.cookie("goto_url");
                 event.preventDefault();
-                login.loginbox.login($("#username").val(), $("#password").val(), goto_url);
+                login.loginbox.login($("#username").val(), $("#password").val(), goto_url,$("#tenant").val());
 
             }
         });
@@ -52,7 +52,7 @@ $(document).ready(function () {
          $('#loginBtn').click(
             function() {
                 var goto_url = $.cookie("goto_url");
-                login.loginbox.login($("#username").val(), $("#password").val(), goto_url);
+                login.loginbox.login($("#username").val(), $("#password").val(), goto_url,$("#tenant").val());
             }
          );
     };
@@ -98,5 +98,6 @@ function applyTheme(elm){
     $('#subthemeToApply').val($(elm).attr("data-subtheme"));
     $('#themeSelectForm').submit();
 }
+
 
 

@@ -5,12 +5,18 @@ var addRating = function (api, rating) {
 
     try {
         //TODO : how to idenftify the rated user
-        store.rateAPI(api.provider, api.name, api.version, String(rating));
+        var result=store.rateAPI(api.provider, api.name, api.version, String(rating));
         if (log.isDebugEnabled()) {
             log.debug("addRating");
         }
+        var rating=null;
+        if(result)
+        {
+          rating=result[0].newRating;
+        }
         return {
-            error:false
+            error:false,
+            rating:rating
         };
     } catch (e) {
         log.error(e.message);

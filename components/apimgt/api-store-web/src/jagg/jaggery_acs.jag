@@ -29,17 +29,24 @@
                         }
 
                         // validating the signature
+                        if(site.ssoConfiguration.responseSigningEnabled === 'true'){
                         var isSignatureValid =ssoRelyingParty.validateSignature(samlResponse);
                         if(!Boolean(isSignatureValid)){
                             log.error("SAML response signature is verification failed.");
                             response.sendRedirect("../error.jag");
                             return;
                         }
-
+                        }
                         ssoRelyingParty.setSessionAuthenticated(sessionId,samlResponse);
-                        jagg.setUser({username:ssoRelyingParty.getLoggedInUser(sessionId), cookie:null});
                         session.put("showLogin", "false");
-			
+                        var api = jagg.module("api");
+                        var isUserPermitted=api.hasUserPermissions(ssoRelyingParty.getLoggedInUser(sessionId));
+                        jagg.setUser({username:ssoRelyingParty.getLoggedInUser(sessionId), cookie:null});
+                        session.put("LOGGED_IN_USER",ssoRelyingParty.getLoggedInUser(sessionId));
+                        //First check whether user is having sufficent permissions [create/publish]
+                         if(!isUserPermitted.permitted ){
+                         response.sendRedirect("../site/pages/logout.jag");
+                         } else{
 			            var username = ssoRelyingParty.getLoggedInUser(sessionId);
 			            var manager = jagg.module("manager");
           		        var  store = manager.getAPIStoreObj();
@@ -50,10 +57,11 @@
     			        }
                         session.put("LOGGED_IN_USER",ssoRelyingParty.getLoggedInUser(sessionId));
                         response.sendRedirect(requestedURI);
-                    }else{
+                   } }else{
                         // if the saml response is log out request from IDP, we log out from web app.
                         ssoRelyingParty.invalidateSessionBySessionId(sessionId);
                         jagg.setUser(null);
+                        session.invalidate();
                         response.sendRedirect("../");
                         return;
                     }
@@ -66,6 +74,7 @@
                     if(Boolean(isLogoutRequest))  {
                         ssoRelyingParty.invalidateSessionBySAMLResponse(samlRequest);
                         jagg.setUser(null);
+                        session.invalidate();
                     }
                 }
 

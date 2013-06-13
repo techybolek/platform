@@ -19,12 +19,14 @@ $(document).ready(function () {
     var applicationAdd = function(){
         var application = $("#application-name").val();
         var tier = $("#appTier").val();
+        var callbackUrl = $("#callback-url").val();
         var apiPath = $("#apiPath").val();
         var goBack = $("#goBack").val();
         jagg.post("/site/blocks/application/application-add/ajax/application-add.jag", {
             action:"addApplication",
             application:application,
-            tier:tier
+            tier:tier,
+            callbackUrl:callbackUrl
         }, function (result) {
             if (result.error == false) {
                 var date = new Date();
@@ -33,16 +35,16 @@ $(document).ready(function () {
                 $.cookie('lastAppName',application,{ expires: date});
                 if(goBack == "yes"){
                     jagg.message({content:i18n.t('info.returntoAPIPage'),type:'confirm',okCallback:function(){
-                         window.location.href = apiViewUrl + "?" +  apiPath;
+                         window.location.href = apiViewUrl + "?" +  apiPath+"&"+urlPrefix;
                     },cancelCallback:function(){
-                        window.location.href= appAddUrl;
+                        window.location.reload();
                     }});
                 } else{
                     window.location.reload();
                 }
 
             } else {
-                jagg.message({content:result.error,type:"error"});
+                jagg.message({content:result.message,type:"error"});
             }
         }, "json");
     };

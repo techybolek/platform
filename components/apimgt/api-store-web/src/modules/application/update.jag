@@ -1,10 +1,10 @@
 <%
-var updateApplication = function (applicationNew,applicationOld,username,tier) {
+var updateApplication = function (applicationNew,applicationOld,username,tier,callbackUrlNew) {
     var log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        store.updateApplication(applicationNew,applicationOld,username,tier);
+        store.updateApplication(applicationNew,applicationOld,username,tier,callbackUrlNew);
         if (log.isDebugEnabled()) {
             log.debug("updateApplication");
         }

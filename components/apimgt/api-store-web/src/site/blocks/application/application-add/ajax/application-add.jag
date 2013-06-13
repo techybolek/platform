@@ -2,7 +2,7 @@
 include("/jagg/jagg.jag");
 
 (function () {
-    var mod, obj, application, result, username,tier,
+    var mod, obj, application, result, username, tier, callbackUrl,
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action"),
             user = jagg.getUser();
@@ -18,14 +18,15 @@ include("/jagg/jagg.jag");
         application = request.getParameter("application");
         username = user.username;
         tier = request.getParameter("tier");
+        callbackUrl = request.getParameter("callbackUrl");
 
         mod = jagg.module("application");
-        result = mod.addApplication(username, application, tier);
+        result = mod.addApplication(username, application, tier, callbackUrl);
 
         if (result.error) {
             obj = {
-                error:result.error,
-                message:msg.error.authError(action, username)
+                error:true,
+                message:result.error
             };
         } else {
             obj = {

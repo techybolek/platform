@@ -22,6 +22,10 @@ var getServer = function() {
     };
 };
 
+var isSelfSignupEnabled = function(){
+	return 	getAPIStoreObj().isSelfSignupEnabled();
+};
+
 var getAdminCookie = function() {
     //TODO : this should be set in the Context during the deployment
 

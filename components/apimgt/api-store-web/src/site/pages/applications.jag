@@ -2,14 +2,17 @@
 include("/jagg/jagg.jag");
 include("header.jag");
 var site = require("/site/conf/site.json");
-var i18n = require("i18n");
+var i18n = require("/i18n.js");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
+var tenantDomain=getTenantDomain();
+
         
 (function () {
     var apis, site, tag, query, result, mod, user = jagg.getUser();
+    isTenantAllowed();
     if (!user) {
-        response.sendRedirect(jagg.getAbsoluteUrl("/"));
+        response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
         return;
     }
 
@@ -35,36 +38,15 @@ i18n.init(request,localeResourcesBasePath);
                         ],
                         "left":[
                             {
-                                "name":"ui/tab",
-                                "inputs":{
-                                    "classes":"cat_and_charts",
-                                    "tabs":[
-                                        {
-                                            "body":[
-                                                {
-                                                    "name":"api/recently-added",
-                                                    "inputs":null
-                                                },
-                                                {
-                                                    "name":"api/top-rated",
-                                                    "inputs":null
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
+                                "name":"api/recently-added",
+                                "inputs":{"tenant":tenantDomain}
                             }
                         ],
                         "middle":[
                             {
                                 "name":"application/application-add",
                                 "inputs":{
-                                    "apis":apis
-                                }
-                            },
-                            {
-                                "name":"application/application-list",
-                                "inputs":{
+                                    "apis":apis,
                                     "user":user
                                 }
                             }

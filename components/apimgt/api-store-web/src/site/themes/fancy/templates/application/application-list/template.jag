@@ -2,7 +2,7 @@
 <div id="application-list">
     <%
 
-    var i, classes, path, app, apps = outputs.applications, length = apps.length;
+    var i, classes, path, callbackUrl, app, apps = outputs.applications, length = apps.length;
     if(length > 0) {
 
     var itemsPerPage = 20; //reduce this number to preview the pagination
@@ -19,7 +19,7 @@
             page = page - 1;
             %>
             <script>
-                window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/applications.jag")%>" +"?page="+"<%=String(page)%>";
+                window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/applications.jag")%>" +"?page="+"<%=String(page)%>"+"&"+"<%=urlPrefix%>";
             </script>
             <%
         }
@@ -43,19 +43,24 @@
     <table cellspacing="0" cellpadding="0" class="table table-bordered table-striped" id="applicationTable">
         <thead>
             <tr class="alt first last">
-                <th value="Name" rel="0" style="width:300px;"><%=i18n.localize("name")%></th>
-                <th value="Tier" rel="0" style="width:300px;"><%=i18n.localize("throttlingTier")%></th>
-                <th value="Actions" rel="1" colspan="2" style="width:100px;"><%=i18n.localize("actions")%></th>
+                <th value="Name" rel="0" style="width:200px;"><%=i18n.localize("name")%></th>
+                <th value="Tier" rel="0" style="width:100px;"><%=i18n.localize("throttlingTier")%></th>
+                <th value="callbackUrl" rel="0" style="width:150px;"><%=i18n.localize("callbackUrl")%></th>
+                <th value="Actions" rel="1" colspan="2" style="width:150px;"><%=i18n.localize("actions")%></th>
             </tr>
         </thead>
         <tbody>
             <%
             for(i = from ; i < to; i++) {
                 app = apps[i];
+		callbackUrl = app.callbackUrl; 
+		if (callbackUrl == null || callbackUrl == "") {
+			callbackUrl = i18n.localize("notSpecified");
+		} 
                 if(i == 0) classes = "first";
                 else if(i + 1 == length) classes = "last";
             %>
-            <tr class="<%=classes%>" data-value="<%=app.name%>" tier-value="<%=app.tier%>">
+            <tr class="<%=classes%>" data-value="<%=app.name%>" tier-value="<%=app.tier%>" callback-value="<%=callbackUrl%>">
                 <td class="app_name_cell"><%=app.name%></td>
                 <td class="app_name_cell">
                     <select id="<%="tiers" + i%>" name="<%="tiers" + i%>" disabled="disabled">
@@ -67,6 +72,7 @@
                         <%}%>
                     </select>
                 </td>
+				<td class="app_name_cell"><%=callbackUrl%></td>
                 <td>
                     <a onclick="changeAppNameMode(this)"><i class="icon-edit"></i> <%=i18n.localize("edit")%></a>
                     <div style="display: none;">
@@ -84,7 +90,7 @@
     <% if(numberOfPages > 1) { %>
     <div class="pagination">
         <ul>
-          <li <% if(page == 1) { %> class="disabled" <% } %>><a href="?page=<%=String((page-1))%>"><%=i18n.localize("prev")%></a></li>
+          <li <% if(page == 1) { %> class="disabled" <% } %>><a href="?page=<%=String((page-1))%>&<%=urlPrefix%>"><%=i18n.localize("prev")%></a></li>
 
 
 
@@ -96,69 +102,69 @@
 
            if(numberOfPages <= (pConst+6)){
                    for(var i=1;i<=numberOfPages;i++) { %>
-                       <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>"><%=String(i).split('.')[0]%></a></li>
+                       <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
                     <% }
            }
            else{
                if (page <= (pConst+6)){
                    if(page<pConst){
                         for(var i=1;i<=((pConst+6) -4);i++) { %>
-                           <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>"><%=String(i).split('.')[0]%></a></li>
+                           <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
                         <% }  %>
                            <li class="disabled"><a href="#">...</a></li>
-                           <li><a href="?page=<%=String(numberOfPages-1)%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
-                           <li><a href="?page=<%=String(numberOfPages)%>"><%=String(numberOfPages).split('.')[0]%></a></li>
+                           <li><a href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
+                           <li><a href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
                     <% } else if((numberOfPages - page) < pConst){ %>
-                           <li><a href="?page=<%=String(1)%>">1</a></li>
-                           <li><a href="?page=<%=String(2)%>">2</a></li>
+                           <li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
+                           <li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
                            <li class="disabled"><a href="#">...</a></li>
                             <%
                            for(var i=(numberOfPages - pConst-1);i<= numberOfPages;i++) { %>
-                              <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>"><%=String(i).split('.')[0]%></a></li>
+                              <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
                            <% }
 
                        } else { %>
-                           <li><a href="?page=<%=String(1)%>">1</a></li>
-                           <li><a href="?page=<%=String(2)%>">2</a></li>
+                           <li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
+                           <li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
                            <li class="disabled"><a href="#">...</a></li>
 
                            <%
                            for(var i=(page-3);i<= (page +3);i++) { %>
-                              <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>"><%=String(i).split('.')[0]%></a></li>
+                              <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
                            <% } %>
 
 
                            <li class="disabled"><a href="#">...</a></li>
-                           <li><a href="?page=<%=String(numberOfPages-1)%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
-                           <li><a href="?page=<%=String(numberOfPages)%>"><%=String(numberOfPages).split('.')[0]%></a></li>
+                           <li><a href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
+                           <li><a href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
                     <% } %>
                <%
                }
                else{ //  cp 14, 15 ...
 
                    if (numberOfPages - page < pConst){   %>
-                           <li><a href="?page=<%=String(1)%>">1</a></li>
-                           <li><a href="?page=<%=String(2)%>">2</a></li>
+                           <li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
+                           <li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
                            <li class="disabled"><a href="#">...</a></li>
                            <%
                            for(var i=(numberOfPages - pConst-1);i<= numberOfPages;i++) { %>
-                              <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>"><%=String(i).split('.')[0]%></a></li>
+                              <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
                            <% }
                    }
                    else{  %>
-                                       <li><a href="?page=<%=String(1)%>">1</a></li>
-                                       <li><a href="?page=<%=String(2)%>">2</a></li>
+                                       <li><a href="?page=<%=String(1)%>&<%=urlPrefix%>">1</a></li>
+                                       <li><a href="?page=<%=String(2)%>&<%=urlPrefix%>">2</a></li>
                                        <li class="disabled"><a href="#">...</a></li>
 
                                        <%
                                        for(var i=(page-3);i<= (page +3);i++) { %>
-                                          <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>"><%=String(i).split('.')[0]%></a></li>
+                                          <li <% if(parseInt(i)==parseInt(page)){ %> class="active" <% } %>><a href="?page=<%=String(i)%>&<%=urlPrefix%>"><%=String(i).split('.')[0]%></a></li>
                                        <% } %>
 
 
                                        <li class="disabled"><a href="#">...</a></li>
-                                       <li><a href="?page=<%=String(numberOfPages-1)%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
-                                       <li><a href="?page=<%=String(numberOfPages)%>"><%=String(numberOfPages).split('.')[0]%></a></li>
+                                       <li><a href="?page=<%=String(numberOfPages-1)%>&<%=urlPrefix%>"><%=String(numberOfPages-1).split('.')[0]%></a></li>
+                                       <li><a href="?page=<%=String(numberOfPages)%>&<%=urlPrefix%>"><%=String(numberOfPages).split('.')[0]%></a></li>
                    <%
                    }
                }
@@ -170,7 +176,7 @@
 
 
 
-          <li <% if(page == numberOfPages) { %> class="disabled" <% } %>><a href="?page=<%=String((page+1))%>"><%=i18n.localize("next")%></a></li>
+          <li <% if(page == numberOfPages) { %> class="disabled" <% } %>><a href="?page=<%=String((page+1))%>&<%=urlPrefix%>"><%=i18n.localize("next")%></a></li>
         </ul>
       </div>
     <% } %>

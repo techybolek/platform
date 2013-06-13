@@ -1,11 +1,11 @@
 <%
-var getAllPublishedAPIs = function () {
+var getAllPublishedAPIs = function (tenantDomain) {
     var list, i, length, api, apis,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        apis = store.getAllPublishedAPIs();
+        apis = store.getAllPublishedAPIs(tenantDomain);
         if (log.isDebugEnabled()) {
             log.debug("getAllPublishedAPIs : " + stringify(apis));
         }

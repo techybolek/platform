@@ -5,6 +5,9 @@ var version=request.getParameter("version");
 var reqUrl = request.getRequestURI();
 var docUrl=jagg.getAbsoluteUrl("/site/pages/doc-viewer.jag");
 var docMappedUrl=jagg.getMappedUrl("/site/pages/doc-viewer.jag");
+var urlPrefix;
+var tenant=request.getParameter("tenant");
+if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
 %>
 <div class="api-documentation">
     <%
@@ -45,9 +48,9 @@ var docMappedUrl=jagg.getMappedUrl("/site/pages/doc-viewer.jag");
                     %>
                     <div>
                      <%if(reqUrl.indexOf(".jag")>=0){%>
-                     <a href="doc-viewer.jag?docName=<%=doc.name%>&name=<%=name%>&version=<%=version%>&provider=<%=provider%>"  target="_blank"><%=i18n.localize("viewDoc")%></a>
+                     <a href="doc-viewer.jag?docName=<%=doc.name%>&name=<%=name%>&version=<%=version%>&provider=<%=provider%>&<%=urlPrefix%>"  target="_blank"><%=i18n.localize("viewDoc")%></a>
                      <%}else{%>
-                     <a href="../site/pages/doc-viewer.jag?docName=<%=doc.name%>&name=<%=name%>&version=<%=version%>&provider=<%=provider%>"  target="_blank"><%=i18n.localize("viewDoc")%></a>
+                     <a href="../site/pages/doc-viewer.jag?docName=<%=doc.name%>&name=<%=name%>&version=<%=version%>&provider=<%=provider%>&<%=urlPrefix%>"  target="_blank"><%=i18n.localize("viewDoc")%></a>
                      <%}%>
                     </div>
                      <%}%>

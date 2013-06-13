@@ -42,15 +42,18 @@ var getDynamicStars = function (rating) {
         html += getHTML(j < rating ? "star-1" : "star-0");
     }
     var selectedRating;
+    var returnScript = '<div class="dynamic-rating">' +
+    '<span>Your rating:</span>' +
+    '<span class="dynamic-rating-stars">' + html + '</span>';
+    
     if (rating == 0) {
         selectedRating = 'N/A';
+        returnScript = returnScript + selectedRating + '</div>';
     } else {
         selectedRating = '<a class="selected-rating">' + rating + '</a>/5';
+        returnScript = returnScript + selectedRating +
+        '<a title="Remove Rating" class="remove-rating"  onclick="removeRating(jagg.api)"></a>' +
+        '</div>';
     }
-    return '<div class="dynamic-rating">' +
-           '<span>Your rating:</span>' +
-           '<span class="dynamic-rating-stars">' + html + '</span>' +
-            selectedRating +
-           '<a title="Remove Rating" class="remove-rating"  onclick="removeRating(jagg.api)"></a>' +
-           '</div>';
+    return returnScript;
 };

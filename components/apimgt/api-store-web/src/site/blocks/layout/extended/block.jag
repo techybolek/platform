@@ -6,6 +6,7 @@ jagg.block("layout/extended", {
     },
 
     getOutputs:function (inputs) {
+    var tenantDomain=request.getParameter("tenant");
         return {
             "title":inputs.title,
             "top":[
@@ -20,24 +21,8 @@ jagg.block("layout/extended", {
             ],
             "left":[
                 {
-                    "name":"ui/tab",
-                    "inputs":{
-                        "classes":"cat_and_charts",
-                        "tabs":[
-                            {
-                                "body":[
-                                    {
-                                        "name":"api/recently-added",
-                                        "inputs":null
-                                    },
-                                    {
-                                        "name":"api/top-rated",
-                                        "inputs":null
-                                    }
-                                ]
-                            }
-                        ]
-                    }
+                    "name":"api/recently-added",
+                    "inputs":{"tenant":tenantDomain}
                 }
             ],
             "middle":inputs.middle,

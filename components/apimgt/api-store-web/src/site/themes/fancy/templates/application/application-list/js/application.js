@@ -3,11 +3,12 @@ function changeAppNameMode(linkObj){
     var appName = $(theTr).attr('data-value');
     $('td:first',theTr).html('<div class="row-fluid"><div class="span6"> <input class="app_name_new" maxlength="70" value="'
     +theTr.attr('data-value')+'" type="text" /> </div></div> ');
-
+    $('td:eq(2)',theTr).html('<div class="row-fluid"><div class="span6"> <input class="callback_new" maxlength="70" value="'
+    	    +theTr.attr('callback-value')+'" type="text" /> </div></div> ');
     //Hide the Edit link
-    $("td:eq(2)", theTr).children("a").hide();
+    $("td:eq(3)", theTr).children("a").hide();
     //Show the Save and Cancel buttons
-    $("td:eq(2)", theTr).children("div").show();
+    $("td:eq(3)", theTr).children("div").show();
 
     $('input.app_name_new',theTr).focus();
     $('input.app_name_new',theTr).keyup(function(){
@@ -41,19 +42,21 @@ function updateApplication_reset(linkObj){
     var theTr = $(linkObj).parent().parent().parent();
     var appName = $(theTr).attr('data-value');
     var tier = $(theTr).attr('tier-value');
+    var callbackUrl = $(theTr).attr('callback-value');
     $('td:first',theTr).html(appName);
     $("td:eq(1)", theTr).children("select").val(tier);
     $("td:eq(1)", theTr).children("select").attr("disabled", "disabled");
-
+    $('td:eq(2)',theTr).html(callbackUrl);
     //Hide the Save and Cancel buttons
-    $("td:eq(2)", theTr).children("div").hide();
+    $("td:eq(3)", theTr).children("div").hide();
     //Show the Edit link
-    $("td:eq(2)", theTr).children("a").show();
+    $("td:eq(3)", theTr).children("a").show();
 }
 function updateApplication(linkObj){
     var theTr = $(linkObj).parent().parent().parent();
     var applicationOld = $(theTr).attr('data-value');
     var applicationNew = $('input.app_name_new',theTr).val();
+    var callbackUrlNew = $('input.callback_new',theTr).val();
     var tier = $("td:eq(1)", theTr).children("select").val();
     var error = "";
     var illegalChars = /([~!#$;%^*+={}\|\\<>\"\'\/,])/;
@@ -73,7 +76,8 @@ function updateApplication(linkObj){
             action:"updateApplication",
             applicationOld:applicationOld,
             applicationNew:applicationNew,
-            tier:tier
+            tier:tier,
+            callbackUrlNew:callbackUrlNew
         }, function (result) {
             if (result.error == false) {
                 window.location.reload();

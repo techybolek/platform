@@ -1,19 +1,6 @@
 $(document).ready(function () {
 
-    var yearVal = $("#year");
-    var monthVal = $("#month");
-
-    var selectedYearVal;
-    if(yearVal.length!=0){
-        selectedYearVal = year.options[year.selectedIndex].value;}else{
-        selectedYearVal = "2012";
-    }
-    var selectedMonthVal;
-    if(monthVal.length!=0){
-        selectedMonthVal= month.options[month.selectedIndex].value;}else{
-        selectedMonthVal = "11";
-    }
-    populateUsageData(selectedYearVal + '-' + selectedMonthVal);
+    populateUsageData($("#year").val() + '-' + $("#month").val());
 
     $("#generate").click(function () {
         var year = $("#year");

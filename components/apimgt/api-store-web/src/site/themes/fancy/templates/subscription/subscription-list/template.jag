@@ -1,6 +1,8 @@
 <% jagg.template("subscription/subscription-list", function(inputs, outputs, jagg) { %>
-
-<div class="subscription-listing accordion" style="margin-top:22px;" id="accordion2">
+<div class="title-section">
+           <h2>Subscriptions</h2>
+</div>
+<div class="subscription-listing accordion" id="accordion2">
     <%
     var i, j, app, api, apis, key, lenI, clazz, lenJ, path, apps = outputs.applications; if(apps!=null){lenI = apps.length;}
     for(i = 0; i < lenI; i++) {
@@ -15,10 +17,14 @@
 
     <% } %>
     <% if(lenI==0){ %>
+    <div class="content-section shadow-up">
+    <div class="content-data">
         <div class="alert alert-info">
             <%=i18n.localize("noSubsMsg")%>
 
         </div>
+    </div>
+    </div>
     <% } %>
 </div>
 <% }); %>

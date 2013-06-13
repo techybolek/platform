@@ -12,8 +12,10 @@
         <script>
             var context= "<%=site.context%>";
         </script>
-<div class="signUp-title"><%=i18n.localize("signupTitle")%></div>
-<form class="form-horizontal well" id="sign-up">
+<div class="title-section"><h2><%=i18n.localize("signupTitle")%></h2></div>
+<div class="content-section shadow-up">
+<div class="content-data">
+<form class="form-horizontal" id="sign-up">
 <fieldset>
     <div class="control-group">
         <label class="control-label"  for="newUsername"><%=i18n.localize("username")%>:<span class="requiredAstrix">*</span></label>
@@ -125,7 +127,8 @@
     </div>
 </fieldset>
       </form>
-
+</div>
+</div>
 <form id="signUpRedirectForm" method="post" action="<%=httpsUrl%><%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/user/sign-up/redirector.jag"))%>">
         <input type="hidden" name="redirectToHome" id="redirectToHome" value="<%=site.context%>" />
 </form>

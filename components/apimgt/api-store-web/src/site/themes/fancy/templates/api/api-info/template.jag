@@ -1,8 +1,12 @@
 <% jagg.template("api/api-info", function(inputs, outputs, jagg) { %>
 <% var stars = require(jagg.getThemeFile("utils/ratings/star-generator.js"));  %>
 
-<% var i, length, app, thumbURL, api = outputs.api, apps = outputs.applications, user = outputs.user,isRatingActivated = outputs.isRatingActivated;   
-
+<%
+var i, length, app, thumbURL, api = outputs.api, apps = outputs.applications, user = outputs.user,isRatingActivated = outputs.isRatingActivated;
+var urlPrefix;
+var tenant=request.getParameter("tenant");
+if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
+%>
   <%if(api!=null){
  
    thumbURL = api.thumbnailurl;
@@ -17,7 +21,37 @@
 
    session.put("endpointUrl",endpointUrl);
 %>
-<div><h2 style="display:inline"><%=api.name%> - <%=api.version%></h2> &nbsp;&nbsp;&nbsp;&nbsp;| &nbsp;&nbsp;&nbsp;&nbsp;<a id="tryit-btn" href="<%=jagg.getAbsoluteUrl('/site/pages/rest-client.jag')%>" target="_blank" class="label label-info"> Try me <i class="icon-play icon-white"></i></a></div>
+<div class="title-section">
+
+        <script>var isRatingActivated = <%=isRatingActivated%>, context = '<%=site.context%>',theme = '<%=jagg.getUserTheme().base%>', user = <%=(user != null)%>
+        var existingRating = <%=api.rating%>
+        </script>
+        <h2 style="margin-right:10px"><%=api.name%> - <%=api.version%></h2>
+        <%
+            var tagDisplayName = "";
+            var tag = "";
+            if (request.getParameter('tag') != null) {
+                tag = request.getParameter('tag');
+                tagDisplayName = tag;
+                if( tag.split(site.tagGroupKey).length == 2 ){
+                    tagDisplayName = tag.split(site.tagGroupKey)[0];
+                }
+                var groupPath = "/site/pages/list-apis.jag?tag="+tag;
+                if( tag.split(site.tagGroupKey).length == 2 ){
+                %>
+
+                <ul class="breadcrumb">
+                    <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/list-apis.jag?")%><%=urlPrefix%>">APIs groups</a> <span class="divider">/</span></li>
+                    <li><a href="<%=jagg.getAbsoluteUrl(groupPath+"&")%><%=urlPrefix%>"><%=tagDisplayName%></a> <span class="divider">/</span></li>
+                    <li class="active"><%=api.name%> - <%=api.version%></li>
+                </ul>
+                <%
+                }
+            }
+        %>
+</div>
+<div class="content-section shadow-up">
+<div class="content-data">
 <h6><i class="icon-user"></i> <%=api.provider%></h6>
 <div class="api-info">
     <div class="row-fluid">
@@ -101,7 +135,7 @@
                         if(firstTierDesc=="null"){firstTierDesc='';}
                         %>
                         <span class="help-block" id="tierDesc"><%=firstTierDesc%></span>
-                        <div class="simple-space-maker"><button id="subscribe-button" class="btn btn-primary <% if(!user) { %>need-login<% } %>"><%=i18n.localize("subscribe")%></button></div>
+                        <div class="simple-space-maker"><button onclick="triggerSubscribe()" id="subscribe-button" class="btn btn-primary <% if(!user) { %>need-login<% } %>"><%=i18n.localize("subscribe")%></button></div>
              <% } }%>
 
         </div>
@@ -114,5 +148,7 @@
 </div>
 <%}else{%><div style="padding-bottom:10px"> <div class="alert alert-info">
     <strong><%=i18n.localize("noAPIMsg1")%><%=request.getParameter("name")%> <%=i18n.localize("noAPIMsg2")%></strong>
-</div></div>  <% }
- }); %>
+</div></div>  <% } %>
+</div>
+</div>
+<% }); %>

@@ -1,11 +1,11 @@
 <%
-var searchAPIs = function (query) {
+var searchAPIs = function (query,tenantDomain) {
     var list, i, length, api, apis,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        apis = store.searchAPIbyType(query);
+        apis = store.searchAPIbyType(query,tenantDomain);
         if (log.isDebugEnabled()) {
             log.debug("searchAPIs : " + stringify(apis));
         }

@@ -1,7 +1,8 @@
 <% jagg.template("ui/dialogs", function(inputs, outputs, jagg){
-var i18n = require("i18n");
+var i18n = require("/i18n.js");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
+
 %>
 <script type="text/javascript">
         var isSecure = <%=outputs.isSecure%>;
@@ -41,6 +42,8 @@ i18n.init(request,localeResourcesBasePath);
             <input type="text" id="username" name="name" class="span3" placeholder="<%=i18n.localize("usernamePlcHolder")%>"/>
             <label><%=i18n.localize("password")%>:</label>
             <input type="password" id="password" name="pass" class="span3"/>
+            <input type="hidden" id="tenant" name="tenant" value="<%=request.getParameter("tenant")%>">
+
 
         </div>
         <div class="modal-footer">
@@ -70,3 +73,4 @@ i18n.init(request,localeResourcesBasePath);
     </div>
 </div>
 <% }); %>
+

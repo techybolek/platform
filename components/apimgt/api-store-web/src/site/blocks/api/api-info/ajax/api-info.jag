@@ -34,7 +34,41 @@ include("/jagg/jagg.jag");
             };
         } else {
             obj = {
-                error:false
+                error:false,
+                rating:result.rating
+            }
+        }
+        print(obj);
+    } else if (action == "removeRating") {
+        if (!user) {
+            print({
+                error:true,
+                message:msg.error.loginRequired(action)
+            });
+            return;
+        }
+
+        name = request.getParameter("name");
+        version = request.getParameter("version");
+        provider = request.getParameter("provider");
+        username = user.username;
+
+        mod = jagg.module("rating");
+        result = mod.removeRating({
+            name:name,
+            version:version,
+            provider:provider
+        });
+
+        if (result.error) {
+            obj = {
+                error:result.error,
+                message:msg.error.authError(action, username)
+            };
+        } else {
+            obj = {
+                error:false,
+                rating:0
             }
         }
         print(obj);

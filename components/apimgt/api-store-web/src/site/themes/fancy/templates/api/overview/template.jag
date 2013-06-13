@@ -1,5 +1,8 @@
 <% jagg.template("api/overview", function(inputs, outputs, jagg) { %>
 <% var api = outputs.api, user = outputs.user; %>
+ <%
+var discoveryUrl = outputs.discoveryURL;
+%>
 <div id="overview">
     <h6><%=i18n.localize("urls")%>:</h6>
     <ul>
@@ -49,8 +52,9 @@
     </p>
     <% } %>
 
-    <h3><%=i18n.localize("comments")%>:</h3>
+    <h5><%=i18n.localize("comments")%>:</h5>
     <% if(user) jagg.includeBlock("comment/comment-add", null); %>
     <% jagg.includeBlock("comment/comment-list", {api:api}); %>
 </div>
+
 <% }); %>
