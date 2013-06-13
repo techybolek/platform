@@ -19,6 +19,7 @@
 package org.wso2.carbon.identity.sso.agent.util;
 
 import org.apache.xml.security.c14n.Canonicalizer;
+import org.apache.xml.security.signature.XMLSignature;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.xml.XMLObject;
@@ -30,9 +31,12 @@ import org.opensaml.xml.signature.KeyInfo;
 import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.Signer;
 import org.opensaml.xml.signature.X509Data;
+import org.opensaml.xml.util.Base64;
 import org.wso2.carbon.identity.sso.agent.exception.SSOAgentException;
 
 import javax.xml.namespace.QName;
+
+import java.net.URLEncoder;
 import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -169,6 +173,26 @@ public class Util {
 
         } catch (Exception e) {
             throw new SSOAgentException("Error while signing the Logout Request message", e);
+        }
+    }
+    
+    public static void addDeflateSignatureToHTTPQueryString(StringBuilder httpQueryString,
+            X509Credential credential) throws SSOAgentException {
+        try {
+            httpQueryString.append("&SigAlg="
+                    + URLEncoder.encode(XMLSignature.ALGO_ID_SIGNATURE_RSA, "UTF-8").trim());
+
+            java.security.Signature signature = java.security.Signature.getInstance("SHA1withRSA");
+            signature.initSign(credential.getPrivateKey());
+            signature.update(httpQueryString.toString().getBytes());
+            byte[] signatureByteArray = signature.sign();
+
+            String signatureBase64encodedString = Base64.encodeBytes(signatureByteArray,
+                    Base64.DONT_BREAK_LINES);
+            httpQueryString.append("&Signature="
+                    + URLEncoder.encode(signatureBase64encodedString, "UTF-8").trim());
+        } catch (Exception e) {
+            throw new SSOAgentException("Error applying SAML2 Redirect Binding signature", e);
         }
     }
 

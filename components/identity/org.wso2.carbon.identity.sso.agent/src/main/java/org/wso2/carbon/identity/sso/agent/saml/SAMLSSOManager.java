@@ -18,9 +18,16 @@
 
 package org.wso2.carbon.identity.sso.agent.saml;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
@@ -29,12 +36,28 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.xml.security.signature.XMLSignature;
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLVersion;
-import org.opensaml.saml2.core.*;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Attribute;
+import org.opensaml.saml2.core.AttributeStatement;
+import org.opensaml.saml2.core.Audience;
+import org.opensaml.saml2.core.AudienceRestriction;
+import org.opensaml.saml2.core.AuthnContextClassRef;
+import org.opensaml.saml2.core.AuthnContextComparisonTypeEnumeration;
+import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml2.core.Conditions;
+import org.opensaml.saml2.core.Issuer;
+import org.opensaml.saml2.core.LogoutRequest;
+import org.opensaml.saml2.core.LogoutResponse;
+import org.opensaml.saml2.core.NameID;
+import org.opensaml.saml2.core.NameIDPolicy;
+import org.opensaml.saml2.core.RequestAbstractType;
+import org.opensaml.saml2.core.RequestedAuthnContext;
+import org.opensaml.saml2.core.Response;
+import org.opensaml.saml2.core.SessionIndex;
 import org.opensaml.saml2.core.impl.AuthnContextClassRefBuilder;
 import org.opensaml.saml2.core.impl.AuthnRequestBuilder;
 import org.opensaml.saml2.core.impl.IssuerBuilder;
@@ -114,16 +137,30 @@ public class SAMLSSOManager {
                     getAttribute(SSOConfigs.getSubjectIdSessionAttributeName()));
 		}
         String idpUrl = null;
+        
+        String encodedRequestMessage = encodeRequestMessage(requestMessage);
+        StringBuilder httpQueryString = new StringBuilder("SAMLRequest=" + encodedRequestMessage);
+                
+        if(relayState != null && !relayState.isEmpty()){
+            try {
+                httpQueryString.append("&RelayState=" + URLEncoder.encode(relayState, "UTF-8").trim());
+            } catch (UnsupportedEncodingException e) {
+                throw new SSOAgentException("Error occurred while url encoding RelayState", e);
+            }
+        }
+        
+        if(SSOConfigs.isRequestSigned()){
+            Util.addDeflateSignatureToHTTPQueryString(httpQueryString, credential);
+        }
+        
         if(SSOConfigs.getIdPUrl().indexOf("?") > -1){
-            idpUrl = SSOConfigs.getIdPUrl().concat("&SAMLRequest=").concat(encodeRequestMessage(requestMessage)) +
-                    "&RelayState=" + relayState;
+            idpUrl = SSOConfigs.getIdPUrl().concat("&").concat(httpQueryString.toString());
         } else {
-            idpUrl = SSOConfigs.getIdPUrl().concat("?SAMLRequest=").concat(encodeRequestMessage(requestMessage)) +
-                    "&RelayState=" + relayState;
+            idpUrl = SSOConfigs.getIdPUrl().concat("?").concat(httpQueryString.toString());
         }
         return idpUrl;
 	}
-
+	
     public void processResponse(HttpServletRequest request) throws SSOAgentException {
 
             String decodedResponse = new String(Base64.decode(request.getParameter(SSOConstants.HTTP_POST_PARAM_SAML2_RESP)));
@@ -236,10 +273,6 @@ public class SAMLSSOManager {
 
 		logoutReq.setReason("Single Logout");
 
-        if(SSOConfigs.isRequestSigned()){
-            Util.setSignature(logoutReq, XMLSignature.ALGO_ID_SIGNATURE_RSA, credential);
-        }
-
 		return logoutReq;
 	}
 
@@ -296,10 +329,6 @@ public class SAMLSSOManager {
 		if (SSOConfigs.getAttributeConsumingServiceIndex() != null && SSOConfigs.getAttributeConsumingServiceIndex().trim().length() > 0) {
 			authRequest.setAttributeConsumingServiceIndex(Integer.parseInt(SSOConfigs.getAttributeConsumingServiceIndex()));
 		}
-
-        if(SSOConfigs.isRequestSigned()){
-            Util.setSignature(authRequest, XMLSignature.ALGO_ID_SIGNATURE_RSA, credential);
-        }
 
 		return authRequest;
 	}
