@@ -57,7 +57,7 @@ public abstract class UserIdentityDataStore {
 	 * @param userStoreManager
 	 */
 	public abstract void store(UserIdentityClaimsDO userIdentityDTO, UserStoreManager userStoreManager)
-	                                                                                              throws IdentityException;
+                                                                            throws IdentityException;
 
 	/**
 	 * Loads
@@ -66,8 +66,8 @@ public abstract class UserIdentityDataStore {
 	 * @param userStoreManager
 	 * @return
 	 */
-	public abstract UserIdentityClaimsDO load(String userName, UserStoreManager userStoreManager)
-	                                                                                        throws IdentityException;
+	public abstract UserIdentityClaimsDO load(String userName, UserStoreManager userStoreManager);
+
 
 	/**
 	 * Removes
@@ -75,6 +75,5 @@ public abstract class UserIdentityDataStore {
 	 * @param userName
 	 * @param userStoreManager
 	 */
-	public abstract void remove(String userName, UserStoreManager userStoreManager)
-	                                                                               throws IdentityException;
+	public abstract void remove(String userName, UserStoreManager userStoreManager)  throws IdentityException;
 }

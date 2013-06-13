@@ -35,6 +35,7 @@ import org.wso2.carbon.user.core.ldap.ReadWriteLDAPUserStoreManager;
 
 /**
  * This module persists data in to user store as user's attribute
+ * //TODO remove method when user is deleted
  */
 public class UserStoreBasedIdentityDataStore extends InMemoryIdentityDataStore {
 
@@ -68,11 +69,11 @@ public class UserStoreBasedIdentityDataStore extends InMemoryIdentityDataStore {
 				                                                                      userIdentityDTO.getUserDataMap(),
 				                                                                      null);
 			} else {
-				throw new IdentityException("Cannot write identity data to the userstore");
+				throw new IdentityException("Cannot persist identity data in to the user store");
 			}
 
 		} catch (org.wso2.carbon.user.api.UserStoreException e) {
-			log.error("Error while persisting user data ", e);
+            throw new IdentityException("Error while persisting identity user data in to user store", e);
 		}
     }
 
@@ -80,8 +81,7 @@ public class UserStoreBasedIdentityDataStore extends InMemoryIdentityDataStore {
      * This method loads identity and security questions from the user stores
      */
 	@Override
-	public UserIdentityClaimsDO load(String userName, UserStoreManager userStoreManager)
-	                                                                               throws IdentityException {
+	public UserIdentityClaimsDO load(String userName, UserStoreManager userStoreManager){
 		UserIdentityClaimsDO userIdentityDTO = super.load(userName, userStoreManager);
 		if (userIdentityDTO != null) {
 			return userIdentityDTO;
@@ -108,7 +108,7 @@ public class UserStoreBasedIdentityDataStore extends InMemoryIdentityDataStore {
 				}
 			}
 		} catch (UserStoreException e) {
-			// ignore may be use is not exist
+			// ignore may be user is not exist
 		}
 		// if user is exiting there must be at least one user attribute.
 		if (userDataMap != null && userDataMap.size() > 0) {

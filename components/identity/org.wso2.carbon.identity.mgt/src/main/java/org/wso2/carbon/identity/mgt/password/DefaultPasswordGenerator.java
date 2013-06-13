@@ -35,7 +35,7 @@ public class DefaultPasswordGenerator implements RandomPasswordGenerator {
         // other. So, for example, omit o O and 0, 1 l and L.
         String letters = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789+@";
 
-        StringBuffer pw = new StringBuffer();
+        StringBuilder pw = new StringBuilder();
         for (int i = 0; i<PASSWORD_LENGTH; i++){
           int index = (int)(RANDOM.nextDouble()*letters.length());
           pw.append(letters.substring(index, index+1));

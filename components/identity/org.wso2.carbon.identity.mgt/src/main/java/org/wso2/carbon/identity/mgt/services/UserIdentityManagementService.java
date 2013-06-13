@@ -1,8 +1,5 @@
 package org.wso2.carbon.identity.mgt.services;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.captcha.mgt.beans.CaptchaInfoBean;
@@ -11,14 +8,13 @@ import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
 import org.wso2.carbon.identity.mgt.beans.UserIdentityMgtBean;
-import org.wso2.carbon.identity.mgt.dto.IdentityMetadataDO;
+import org.wso2.carbon.identity.mgt.dto.UserRecoveryDataDO;
 import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimDTO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.identity.mgt.util.UserIdentityManagementUtil;
 import org.wso2.carbon.identity.mgt.util.Utils;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 // TODO: User Account Recovery Service 
 public class UserIdentityManagementService {
@@ -48,7 +44,7 @@ public class UserIdentityManagementService {
 			boolean isValid =
 			                  UserIdentityManagementUtil.isValidIdentityMetadata(userName,
 			                                                                     tenantId,
-			                                                                     IdentityMetadataDO.METADATA_TEMPORARY_CREDENTIAL,
+			                                                                     UserRecoveryDataDO.METADATA_TEMPORARY_CREDENTIAL,
 			                                                                     tempCredential);
 
 			if (!isValid) {
@@ -63,7 +59,7 @@ public class UserIdentityManagementService {
 			// this credential should not be used again
 			UserIdentityManagementUtil.invalidateUserIdentityMetadata(userName,
 			                                                          tenantId,
-			                                                          IdentityMetadataDO.METADATA_TEMPORARY_CREDENTIAL,
+			                                                          UserRecoveryDataDO.METADATA_TEMPORARY_CREDENTIAL,
 			                                                          tempCredential);
 			return UserIdentityManagementUtil.getAllUserIdentityClaims(userName);
 		} catch (UserStoreException e) {
@@ -91,7 +87,7 @@ public class UserIdentityManagementService {
 			boolean isValid =
 			                  UserIdentityManagementUtil.isValidIdentityMetadata(userName,
 			                                                                     tenantId,
-			                                                                     IdentityMetadataDO.METADATA_CONFIRMATION_CODE,
+			                                                                     UserRecoveryDataDO.METADATA_CONFIRMATION_CODE,
 			                                                                     confirmationCode);
 			if (!isValid) {
 				log.warn("WARNING: Invalid confirmation code provided by " + userName);
@@ -106,7 +102,7 @@ public class UserIdentityManagementService {
 			// invalidate the confirmation code
 			UserIdentityManagementUtil.invalidateUserIdentityMetadata(userName,
 			                                                          tenantId,
-			                                                          IdentityMetadataDO.METADATA_CONFIRMATION_CODE,
+			                                                          UserRecoveryDataDO.METADATA_CONFIRMATION_CODE,
 			                                                          confirmationCode);
 			return UserIdentityManagementUtil.getAllUserIdentityClaims(userName);
 		} catch (UserStoreException e) {
@@ -176,9 +172,9 @@ public class UserIdentityManagementService {
 			userStoreManager.updateCredentialByAdmin(userName, tempPassword);
 
 			// store the temp password as a Metadata
-			IdentityMetadataDO metadataDO = new IdentityMetadataDO();
+			UserRecoveryDataDO metadataDO = new UserRecoveryDataDO();
 			metadataDO.setUserName(userName).setTenantId(tenantId).setMetadata(new String(tempPassword))
-			          .setMetadataType(IdentityMetadataDO.METADATA_TEMPORARY_CREDENTIAL);
+			          .setMetadataType(UserRecoveryDataDO.METADATA_TEMPORARY_CREDENTIAL);
 			UserIdentityManagementUtil.storeUserIdentityMetadata(metadataDO);
 
 			// sending an email to the user

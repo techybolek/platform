@@ -81,15 +81,15 @@ public class IdentityMgtConstants {
 
     public static  final String EXPIRE_TIME = "expireTime";
 
-    public static  final String RECOVERY_TYPE_PASSWORD_RESET = "passwordReset";
+//    public static  final String RECOVERY_TYPE_PASSWORD_RESET = "passwordReset";
+//
+//    public static  final String RECOVERY_TYPE_ACCOUNT_ID = "accountId";
+//
+//    public static  final String RECOVERY_TYPE_TEMPORARY_PASSWORD = "temporaryPassword";
+//
+//    public static  final String RECOVERY_TYPE_ACCOUNT_CONFORM= "accountConformation";
 
-    public static  final String RECOVERY_TYPE_ACCOUNT_ID = "accountId";
-
-    public static  final String RECOVERY_TYPE_TEMPORARY_PASSWORD = "temporaryPassword";
-
-    public static  final String RECOVERY_TYPE_ACCOUNT_CONFORM= "accountConformation";
-
-    public static  final String NOTIFY_ACCOUNT_UNLOCK= "notifyAccountUnlock";
+//    public static  final String NOTIFY_ACCOUNT_UNLOCK= "notifyAccountUnlock";
 
     public static  final String EMAIL_MANAGE_INTERNALLY = "emailSendingInternallyManaged";
 
@@ -161,5 +161,19 @@ public class IdentityMgtConstants {
         public static final String  EXTENSION_EMAIL_SENDING_MODULE = "Identity.Mgt.Email.Sending.Module";
         
         public static final String  EMAIL_LINK_EXPIRE_TIME = "Email.Link.Expire.Time";
+    }
+
+
+    public  class NotificationType {
+
+        public static  final String PASSWORD_RESET_RECOVERY = "passwordReset";
+
+        public static  final String ACCOUNT_ID_RECOVERY = "accountIdRecovery";
+
+        public static  final String TEMPORARY_PASSWORD = "temporaryPassword";
+
+        public static  final String ACCOUNT_CONFORM = "accountConformation";
+
+        public static  final String ACCOUNT_UNLOCK = "accountLock";
     }
 }

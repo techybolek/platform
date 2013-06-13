@@ -39,7 +39,7 @@ public class InMemoryIdentityDataStore extends UserIdentityDataStore {
 
 	@Override
 	public void store(UserIdentityClaimsDO userIdentityDTO, UserStoreManager userStoreManager)
-	                                                                                     throws IdentityException {
+                                                                        throws IdentityException{
 		if (userIdentityDTO != null && userIdentityDTO.getUserName() != null) {
 			String key =
 			             CarbonContext.getCurrentContext().getTenantId() +
@@ -52,8 +52,7 @@ public class InMemoryIdentityDataStore extends UserIdentityDataStore {
 	}
 
 	@Override
-	public UserIdentityClaimsDO load(String userName, UserStoreManager userStoreManager)
-	                                                                               throws IdentityException {
+	public UserIdentityClaimsDO load(String userName, UserStoreManager userStoreManager) {
 
 		if (userName != null) {
 			return (UserIdentityClaimsDO) cache.get(CarbonContext.getCurrentContext().getTenantId() +
@@ -62,7 +61,7 @@ public class InMemoryIdentityDataStore extends UserIdentityDataStore {
 		return null;
 	}
 
-	public void remove(String userName, UserStoreManager userStoreManager) throws IdentityException {
+	public void remove(String userName, UserStoreManager userStoreManager)  throws IdentityException {
 
 		if (userName == null) {
 			return;
@@ -73,7 +72,7 @@ public class InMemoryIdentityDataStore extends UserIdentityDataStore {
 		invalidateCache(userName);
 	}
 
-	public void invalidateCache(String userName) throws IdentityException {
+	public void invalidateCache(String userName){
 
 		if (log.isDebugEnabled()) {
 			log.debug("Init invalidation caching process");

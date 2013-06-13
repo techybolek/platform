@@ -12,7 +12,7 @@ import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.mgt.IdentityMgtConfig;
 import org.wso2.carbon.identity.mgt.IdentityMgtServiceException;
 import org.wso2.carbon.identity.mgt.beans.UserIdentityMgtBean;
-import org.wso2.carbon.identity.mgt.dto.IdentityMetadataDO;
+import org.wso2.carbon.identity.mgt.dto.UserRecoveryDataDO;
 import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimDTO;
 import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimsDO;
 import org.wso2.carbon.identity.mgt.dto.UserIdentityRecoveryDTO;
@@ -20,7 +20,7 @@ import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.identity.mgt.mail.EmailSender;
 import org.wso2.carbon.identity.mgt.mail.EmailSendingModule;
 import org.wso2.carbon.identity.mgt.store.UserIdentityDataStore;
-import org.wso2.carbon.identity.mgt.store.UserIdentityMetadataStore;
+import org.wso2.carbon.identity.mgt.store.JDBCUserRecoveryDataStore;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -52,16 +52,16 @@ public class UserIdentityManagementUtil {
 	                                                                  int tenantId)
 	                                                                               throws IdentityException {
 
-		UserIdentityMetadataStore metadatStore = new UserIdentityMetadataStore();
-		IdentityMetadataDO[] metadataDO = metadatStore.loadMetadata(userName, tenantId);
+		JDBCUserRecoveryDataStore metadatStore = new JDBCUserRecoveryDataStore();
+		UserRecoveryDataDO[] metadataDO = metadatStore.load(userName, tenantId);
 		UserIdentityRecoveryDTO registrationDTO = new UserIdentityRecoveryDTO(userName);
 		// 
-		for (IdentityMetadataDO metadata : metadataDO) {
+		for (UserRecoveryDataDO metadata : metadataDO) {
 			// only valid metadata should be returned
-			if (IdentityMetadataDO.METADATA_CONFIRMATION_CODE.equals(metadata.getMetadataType()) &&
+			if (UserRecoveryDataDO.METADATA_CONFIRMATION_CODE.equals(metadata.getMetadataType()) &&
 			    metadata.isValid()) {
 				registrationDTO.setConfirmationCode(metadata.getMetadata());
-			} else if (IdentityMetadataDO.METADATA_TEMPORARY_CREDENTIAL.equals(metadata.getMetadataType()) &&
+			} else if (UserRecoveryDataDO.METADATA_TEMPORARY_CREDENTIAL.equals(metadata.getMetadataType()) &&
 			           metadata.isValid()) {
 				registrationDTO.setTemporaryPassword(metadata.getMetadata());
 			}
@@ -116,15 +116,15 @@ public class UserIdentityManagementUtil {
 	 * @throws IdentityException
 	 */
 	public static String[] getPrimaryQuestions(int tenantId) throws IdentityException {
-		UserIdentityMetadataStore store = new UserIdentityMetadataStore();
-		IdentityMetadataDO[] metadata = store.loadMetadata("TENANT", tenantId);
+		JDBCUserRecoveryDataStore store = new JDBCUserRecoveryDataStore();
+		UserRecoveryDataDO[] metadata = store.load("TENANT", tenantId);
 		if(metadata.length < 1) {
 			return null;
 		}
 		List<String> validSecurityQuestions = new ArrayList<String>();
-		for (IdentityMetadataDO metadataDO : metadata) {
+		for (UserRecoveryDataDO metadataDO : metadata) {
 			// only valid primary security questions are returned
-			if(IdentityMetadataDO.METADATA_PRIMARAY_SECURITY_QUESTION.equals(metadataDO.getMetadataType()) && metadataDO.isValid()) {
+			if(UserRecoveryDataDO.METADATA_PRIMARAY_SECURITY_QUESTION.equals(metadataDO.getMetadataType()) && metadataDO.isValid()) {
 				validSecurityQuestions.add(metadataDO.getMetadata());
 			}
 		}
@@ -140,8 +140,8 @@ public class UserIdentityManagementUtil {
 	 * @throws IdentityException 
 	 */
 	public static void addPrimaryQuestions(String[] primarySecurityQuestion, int tenantId) throws IdentityException {
-		UserIdentityMetadataStore store = new UserIdentityMetadataStore();
-		IdentityMetadataDO[] metadata = new IdentityMetadataDO[primarySecurityQuestion.length];
+		JDBCUserRecoveryDataStore store = new JDBCUserRecoveryDataStore();
+		UserRecoveryDataDO[] metadata = new UserRecoveryDataDO[primarySecurityQuestion.length];
 		int i = 0;
 		for(String secQuestion : primarySecurityQuestion) {
 			if(!secQuestion.contains(UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI)) {
@@ -149,23 +149,22 @@ public class UserIdentityManagementUtil {
 				                            UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI);
 			}
 			metadata[i++] =
-			                new IdentityMetadataDO("TENANT", tenantId,
-			                                       IdentityMetadataDO.METADATA_PRIMARAY_SECURITY_QUESTION,
+			                new UserRecoveryDataDO("TENANT", tenantId,
+			                                       UserRecoveryDataDO.METADATA_PRIMARAY_SECURITY_QUESTION,
 			                                       secQuestion, true);
 		}
-		store.storeMetadataSet(metadata);
+		store.store(metadata);
 	}
 
 	/**
 	 * Remove primary security questions
 	 * @param tenantId 
-	 * 
-	 * @param securityQuestions
+	 *
 	 * @throws IdentityException 
 	 */
 	public static void removePrimaryQuestions(String[] primarySecurityQuestion, int tenantId) throws IdentityException {
-		UserIdentityMetadataStore store = new UserIdentityMetadataStore();
-		IdentityMetadataDO[] metadata = new IdentityMetadataDO[primarySecurityQuestion.length];
+		JDBCUserRecoveryDataStore store = new JDBCUserRecoveryDataStore();
+		UserRecoveryDataDO[] metadata = new UserRecoveryDataDO[primarySecurityQuestion.length];
 		int i = 0;
 		for(String secQuestion : primarySecurityQuestion) {
 			if(!secQuestion.contains(UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI)) {
@@ -173,11 +172,11 @@ public class UserIdentityManagementUtil {
 				                            UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI);
 			}
 			metadata[i++] =
-			                new IdentityMetadataDO("TENANT", tenantId,
-			                                       IdentityMetadataDO.METADATA_PRIMARAY_SECURITY_QUESTION,
+			                new UserRecoveryDataDO("TENANT", tenantId,
+			                                       UserRecoveryDataDO.METADATA_PRIMARAY_SECURITY_QUESTION,
 			                                       secQuestion, true);
 		}
-		store.invalidateMetadataSet(metadata);
+		store.invalidate(metadata);
 	}
 
 	// ---- Util methods for authenticated users ----///
@@ -214,17 +213,12 @@ public class UserIdentityManagementUtil {
 	                                                                                                throws IdentityMgtServiceException {
 		UserIdentityDataStore store = IdentityMgtConfig.getInstance().getIdentityDataStore();
 		UserIdentityClaimsDO userIdentityDO;
-		try {
-			userIdentityDO = store.load(userName, userStoreManager);
-			if (userIdentityDO != null) {
-				return userIdentityDO.getUserSequeiryQuestions();
-			} else {
-				throw new IdentityMgtServiceException("No user account found for user " + userName);
-			}
-		} catch (IdentityException e) {
-			throw new IdentityMgtServiceException("Error while loading security questions for user " +
-			                                      userName);
-		}
+        userIdentityDO = store.load(userName, userStoreManager);
+        if (userIdentityDO != null) {
+            return userIdentityDO.getUserSequeiryQuestions();
+        } else {
+            throw new IdentityMgtServiceException("No user account found for user " + userName);
+        }
 	}
 
 	/**
@@ -281,8 +275,8 @@ public class UserIdentityManagementUtil {
 	 */
 	public static boolean isValidIdentityMetadata(String userName, int tenantId, String metadataType,
 	                                                   String metadata) throws IdentityException {
-		UserIdentityMetadataStore store = new UserIdentityMetadataStore();
-		IdentityMetadataDO metadataDO = store.loadMetadata(userName, tenantId, metadataType, metadata);
+		JDBCUserRecoveryDataStore store = new JDBCUserRecoveryDataStore();
+		UserRecoveryDataDO metadataDO = store.load(userName, tenantId, metadataType, metadata);
 		if (metadataDO != null && metadataDO.isValid()) {
 			return true;
 		} else {
@@ -301,11 +295,11 @@ public class UserIdentityManagementUtil {
 	 */
 	public static void invalidateUserIdentityMetadata(String userName, int tenantId, String metadataType,
 	                                                  String metadata) throws IdentityException {
-		UserIdentityMetadataStore store = new UserIdentityMetadataStore();
-		IdentityMetadataDO metadataDO =
-		                                    new IdentityMetadataDO(userName, tenantId, metadataType,
+		JDBCUserRecoveryDataStore store = new JDBCUserRecoveryDataStore();
+		UserRecoveryDataDO metadataDO =
+		                                    new UserRecoveryDataDO(userName, tenantId, metadataType,
 		                                                               metadata, false);
-		store.invalidateMetadata(metadataDO);
+		store.invalidate(metadataDO);
 
 	}
 
@@ -314,10 +308,10 @@ public class UserIdentityManagementUtil {
 	 * @param metadata
 	 * @throws IdentityException
 	 */
-	public static void storeUserIdentityMetadata(IdentityMetadataDO metadata) throws IdentityException {
-		UserIdentityMetadataStore store = new UserIdentityMetadataStore();
+	public static void storeUserIdentityMetadata(UserRecoveryDataDO metadata) throws IdentityException {
+		JDBCUserRecoveryDataStore store = new JDBCUserRecoveryDataStore();
 		metadata.setValid(true);
-		store.storeMetadata(metadata);
+		store.store(metadata);
 	}
 	
 	
@@ -328,7 +322,7 @@ public class UserIdentityManagementUtil {
 		                 .store(identityClaims, userStoreManager);
 	}
 
-	public static IdentityMetadataDO getUserIdentityMetadata(String userName, int tenantId,
+	public static UserRecoveryDataDO getUserIdentityMetadata(String userName, int tenantId,
 	                                                             String metadataType) {
 		return null;
 	}

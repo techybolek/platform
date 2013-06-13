@@ -26,7 +26,7 @@ import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.mgt.beans.UserIdentityMgtBean;
 import org.wso2.carbon.identity.mgt.constants.IdentityMgtConstants;
 import org.wso2.carbon.identity.mgt.dto.UserIdentityClaimsDO;
-import org.wso2.carbon.identity.mgt.dto.IdentityMetadataDO;
+import org.wso2.carbon.identity.mgt.dto.UserRecoveryDataDO;
 import org.wso2.carbon.identity.mgt.internal.IdentityMgtServiceComponent;
 import org.wso2.carbon.identity.mgt.store.UserIdentityDataStore;
 import org.wso2.carbon.identity.mgt.util.UserIdentityManagementUtil;
@@ -97,7 +97,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 	}
 
 	/**
-	 * This method checks if the user account is locked. If the account is
+	 * This method checks if the user account exist or is locked. If the account is
 	 * locked, the authentication process will be terminated after this method
 	 * returning false.
 	 */
@@ -111,32 +111,24 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 
 		IdentityMgtConfig config = IdentityMgtConfig.getInstance();
 
-		if (!config.isListenerEnable()) {
-			return true;
-		}
-
 		if (!config.isEnableAuthPolicy()) {
 			return true;
 		}
 
-		UserIdentityClaimsDO userIdentityDTO = null;
-		try {
-			userIdentityDTO = module.load(userName, userStoreManager);
-		} catch (IdentityException e) {
-			throw new UserStoreException("Error while doPreAuthenticate", e);
-		}
+        if(config.isAuthPolicyAccountExistCheck() && !userStoreManager.isExistingUser(userName)){
+            log.warn("User name does not exist in system : " + userName);
+            throw new UserStoreException(UserCoreConstants.ErrorCode.USER_DOES_NOT_EXIST);
+        }
 
-		if (userIdentityDTO == null) {
-			log.warn("No identity data found for the user: " + userName);
-			return true;
-		}
+		UserIdentityClaimsDO userIdentityDTO = module.load(userName, userStoreManager);
+
 		// if the account is locked, should not be able to log in
-		if (userIdentityDTO.isAccountLocked()) {
+		if (userIdentityDTO != null && userIdentityDTO.isAccountLocked()) {
 			log.warn("User account is locked for user : " + userName + ". cannot login until the account is unlocked ");
-			return false;
+            throw new UserStoreException(UserCoreConstants.ErrorCode.USER_IS_LOCKED);
 		}
 
-		return true;
+        return true;
 	}
 
 	/**
@@ -154,20 +146,14 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 
 		IdentityMgtConfig config = IdentityMgtConfig.getInstance();
 
-		if (!config.isListenerEnable()) {
-			return true;
-		}
-
 		if (!config.isEnableAuthPolicy()) {
 			return authenticated;
 		}
 
-		UserIdentityClaimsDO userIdentityDTO = null;
-		try {
-			userIdentityDTO = module.load(userName, userStoreManager);
-		} catch (IdentityException e) {
-			throw new UserStoreException("Error while doPostAuthenticate", e);
-		}
+		UserIdentityClaimsDO userIdentityDTO = module.load(userName, userStoreManager);
+        if(userIdentityDTO == null){
+            userIdentityDTO = new UserIdentityClaimsDO(userName);
+        }
 
 		if (!authenticated && config.isAuthPolicyAccountLockOnFailure()) {
 			userIdentityDTO.setFailAttempts();
@@ -229,9 +215,9 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 		}
 		// empty password account creation
 		if (credential == null ||
-		    (credential instanceof StringBuffer && ((StringBuffer) credential).toString().trim()
-		                                                                      .length() < 1)) {
-			if(!config.isEnableTemporaryPassword()) {
+		    (credential instanceof StringBuffer && (credential.toString().trim().length() < 1))) {
+
+            if(!config.isEnableTemporaryPassword()) {
 				log.error("Empty passwords are not allowed");
 				return false;
 			}
@@ -242,21 +228,24 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 			threadLocalProperties.get().put(EMPTY_PASSWORD_USED, true); 
 			// temporary passwords will be used
 			char[] temporaryPassword = UserIdentityManagementUtil.generateTemporaryPassword();
-			
+
 			// setting the password value
+            credential = new StringBuffer();
 			((StringBuffer) credential).replace(0, temporaryPassword.length, new String(temporaryPassword));
 		}
+
 		// Filtering security question URIs from claims and add them to the thread local dto
-		UserIdentityClaimsDO identityDTO = new UserIdentityClaimsDO(userName);
 		Map<String,String> userDataMap = new HashMap<String, String>();
-		
-		for (Map.Entry<String, String> entry : claims.entrySet()) {
+
+		for (Map.Entry<String, String> entry : claims.entrySet()) {  // TODO why challenge Q
 			if (entry.getKey().contains(UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI) ||
 			    entry.getKey().contains(UserCoreConstants.ClaimTypeURIs.IDENTITY_CLAIM_URI)) {
 				userDataMap.put(entry.getKey(), entry.getValue());
 				claims.remove(entry.getKey());
 			}
 		}
+
+        UserIdentityClaimsDO identityDTO = new UserIdentityClaimsDO(userName, userDataMap);
 		// adding dto to thread local to be read again from the doPostAddUser method
 		threadLocalProperties.get().put(USER_IDENTITY_DO, identityDTO);
 		return true;
@@ -285,19 +274,22 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 		// reading the value from the thread local
 		UserIdentityClaimsDO userIdentityClaimsDO = (UserIdentityClaimsDO) threadLocalProperties.get().get(USER_IDENTITY_DO);
 
-		if (config.isEnableUserAccountVerification()) { // empty password account creation
+
+		if (config.isEnableUserAccountVerification()) {
+
+            // empty password account creation
 			if (threadLocalProperties.get().containsKey(EMPTY_PASSWORD_USED)) {
 				// store identity data
 				userIdentityClaimsDO.setAccountLock(false).setPasswordTimeStamp(System.currentTimeMillis());
 				try {
-					UserIdentityManagementUtil.storeUserIdentityClaims(userIdentityClaimsDO, userStoreManager);
+					module.store(userIdentityClaimsDO, userStoreManager);
 				} catch (IdentityException e) {
-					throw new UserStoreException("Error while doPreAddUser", e);
+					throw new UserStoreException("Error while doPostAddUser", e);
 				}
 				// store identity metadata
-				IdentityMetadataDO metadataDO = new IdentityMetadataDO();
+				UserRecoveryDataDO metadataDO = new UserRecoveryDataDO();
 				metadataDO.setUserName(userName).setTenantId(userStoreManager.getTenantId())
-				          .setMetadataType(IdentityMetadataDO.METADATA_TEMPORARY_CREDENTIAL)
+				          .setMetadataType(UserRecoveryDataDO.METADATA_TEMPORARY_CREDENTIAL)
 				          .setMetadata((String) credential);
 				try {
 	                UserIdentityManagementUtil.storeUserIdentityMetadata(metadataDO);
@@ -307,7 +299,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 				// preparing a bean to send the email
 				UserIdentityMgtBean bean = new UserIdentityMgtBean();
 				bean.setUserId(userName).setUserTemporaryPassword(credential)
-				    .setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_TEMPORARY_PASSWORD)
+				    .setRecoveryType(IdentityMgtConstants.NotificationType.TEMPORARY_PASSWORD)
 				    .setEmail(claims.get(config.getAccountRecoveryClaim()));
 				// sending email
 				UserIdentityManagementUtil.notifyViaEmail(bean);
@@ -323,9 +315,9 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 				}
 				String confirmationCode = UserIdentityManagementUtil.generateRandomConfirmationCode();
 				// store identity metadata
-				IdentityMetadataDO metadataDO = new IdentityMetadataDO();
+				UserRecoveryDataDO metadataDO = new UserRecoveryDataDO();
 				metadataDO.setUserName(userName).setTenantId(userStoreManager.getTenantId())
-				          .setMetadataType(IdentityMetadataDO.METADATA_CONFIRMATION_CODE)
+				          .setMetadataType(UserRecoveryDataDO.METADATA_CONFIRMATION_CODE)
 				          .setMetadata(confirmationCode);
 				try {
 	                UserIdentityManagementUtil.storeUserIdentityMetadata(metadataDO);
@@ -335,7 +327,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 				// sending a mail with the confirmation code
 				UserIdentityMgtBean bean = new UserIdentityMgtBean();
 				bean.setUserId(userName)
-				    .setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_ACCOUNT_CONFORM)
+				    .setRecoveryType(IdentityMgtConstants.NotificationType.ACCOUNT_CONFORM)
 				    .setConfirmationCode(confirmationCode);
 				UserIdentityManagementUtil.notifyViaEmail(bean);
 				return true;
@@ -392,7 +384,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 			UserIdentityMgtBean bean = new UserIdentityMgtBean();
 			bean.setUserId(userName);
 			bean.setConfirmationCode(newCredential.toString());
-			bean.setRecoveryType(IdentityMgtConstants.RECOVERY_TYPE_TEMPORARY_PASSWORD);
+			bean.setRecoveryType(IdentityMgtConstants.NotificationType.TEMPORARY_PASSWORD);
 			log.debug("Sending the tempory password to the user " + userName);
 			UserIdentityManagementUtil.notifyViaEmail(bean);
 		} else {
@@ -418,23 +410,20 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 		UserIdentityDataStore identityDataStore = IdentityMgtConfig.getInstance()
 		                                                           .getIdentityDataStore();
 		UserIdentityClaimsDO identityDTO = null;
-		try {
-			// security questions and identity claims are updated at the identity store
-			if (claimURI.contains(UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI) ||
-			    claimURI.contains(UserCoreConstants.ClaimTypeURIs.IDENTITY_CLAIM_URI)) {
-				identityDTO = identityDataStore.load(userName, userStoreManager);
-				if (identityDTO == null) { // no such user is added to the system
-					return false;
-				}
-				identityDTO.setUserIdentityDataClaim(claimURI, claimValue);
-				return false; // this claim will not be added to the user store
-			} else {
-				// a simple user claim. add it to the user store
-				return true;
-			}
-		} catch (IdentityException e) {
-			throw new UserStoreException("Error while doPreAddUser", e);
-		}
+
+        // security questions and identity claims are updated at the identity store
+        if (claimURI.contains(UserCoreConstants.ClaimTypeURIs.CHALLENGE_QUESTION_URI) ||
+            claimURI.contains(UserCoreConstants.ClaimTypeURIs.IDENTITY_CLAIM_URI)) {
+            identityDTO = identityDataStore.load(userName, userStoreManager);
+            if (identityDTO == null) { // no such user is added to the system
+                return false;
+            }
+            identityDTO.setUserIdentityDataClaim(claimURI, claimValue);
+            return false; // this claim will not be added to the user store
+        } else {
+            // a simple user claim. add it to the user store
+            return true;
+        }
 	}
 
 	/**
@@ -454,14 +443,11 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 		                                          IdentityMgtConfig.getInstance()
 		                                                           .getIdentityDataStore();
 		UserIdentityClaimsDO identityDTO;
-		try {
-			identityDTO = identityDataStore.load(userName, userStoreManager);
-			if (identityDTO == null) { // user doesn't exist in the system
-				return false;
-			}
-		} catch (IdentityException e) {
-			throw new UserStoreException("Error while doPreSetUserClaimValues", e);
-		}
+
+        identityDTO = identityDataStore.load(userName, userStoreManager);
+        if (identityDTO == null) { // user doesn't exist in the system
+            return false;
+        }
 
 		// removing identity claims and security questions
 		for (Map.Entry<String, String> entry : claims.entrySet()) {
@@ -551,12 +537,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 			return true;
 		}
 		// there is/are identity claim/s . load the dto
-		UserIdentityClaimsDO identityDTO;
-		try {
-			identityDTO = identityDataStore.load(userName, storeManager);
-		} catch (IdentityException e) {
-			throw new UserStoreException("Error while doPostGetUserClaimValues", e);
-		}
+		UserIdentityClaimsDO identityDTO = identityDataStore.load(userName, storeManager);
 		// if no user identity data found, just continue
 		if(identityDTO == null) {
 			return true;
@@ -585,12 +566,7 @@ public class IdentityMgtEventListener extends AbstractUserOperationEventListener
 		UserIdentityDataStore identityDataStore =
 		                                          IdentityMgtConfig.getInstance()
 		                                                           .getIdentityDataStore();
-		UserIdentityClaimsDO identityDTO;
-		try {
-			identityDTO = identityDataStore.load(userName, storeManager);
-		} catch (IdentityException e) {
-			throw new UserStoreException("Error while doPostGetUserClaimValue", e);
-		}
+		UserIdentityClaimsDO identityDTO = identityDataStore.load(userName, storeManager);
 		// check if its a security question or identity claim 
 		if (identityDTO.getUserDataMap().containsKey(claim)) {
 			claimValue.add(identityDTO.getUserDataMap().get(claim));
