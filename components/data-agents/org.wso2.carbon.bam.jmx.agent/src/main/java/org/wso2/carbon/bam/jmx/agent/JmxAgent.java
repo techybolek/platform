@@ -22,25 +22,40 @@ package org.wso2.carbon.bam.jmx.agent;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.bam.jmx.agent.profiles.Profile;
 
-import javax.management.*;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.TreeSet;
 
 public class JmxAgent {
 
     private static Logger log = Logger.getLogger(JmxAgent.class);
-    private MBeanServerConnection mbsc;
+    private Profile profile;
 
     public JmxAgent(Profile profile) {
+        this.profile = profile;
 
+    }
+
+
+    public Object getAttribute(String mBean, String attr) {
+
+        JMXServiceURL jmxServiceURL;
+        JMXConnector jmxc = null;
+        MBeanServerConnection mbsc;
+
+        //TODO: should find an elegant way to catch the non existing attributes
         try {
-            JMXServiceURL url = new JMXServiceURL(profile.getUrl());
+
+            jmxServiceURL = new JMXServiceURL(profile.getUrl());
 
             //set-up authentication
             HashMap map = new HashMap();
@@ -50,68 +65,9 @@ public class JmxAgent {
 
             map.put("jmx.remote.credentials", credentials);
 
-            JMXConnector jmxc = JMXConnectorFactory.connect(url, map);
+            jmxc = JMXConnectorFactory.connect(jmxServiceURL, map);
             mbsc = jmxc.getMBeanServerConnection();
 
-        } catch (MalformedURLException e) {
-            log.error(e);
-            e.printStackTrace();
-        } catch (IOException e) {
-            log.error(e);
-            e.printStackTrace();
-        }
-
-    }
-
-    public String[] getDomains() throws IOException {
-
-        return mbsc.getDomains();
-    }
-
-    public String[][] getMBeans() throws IOException {
-
-        int count = 0;
-        Set<ObjectName> names =
-                new TreeSet<ObjectName>(mbsc.queryNames(null, null));
-        String[][] nameArr = new String[names.size()][2];
-
-        for (ObjectName name : names) {
-
-            nameArr[count][0] = name.getDomain();
-            nameArr[count][1] = name.getCanonicalName();
-
-
-            count++;
-
-        }
-
-        return nameArr;
-
-    }
-
-    public String[] getMBeanAttributeInfo(String objName)
-            throws MalformedObjectNameException, IntrospectionException,
-                   InstanceNotFoundException, IOException, ReflectionException {
-
-        MBeanAttributeInfo[] attrs = mbsc.getMBeanInfo(new ObjectName(objName)).getAttributes();
-
-        String[] strAttrs = new String[attrs.length];
-        int count = 0;
-        for (MBeanAttributeInfo info : attrs) {
-            strAttrs[count] = info.getName();
-
-            count++;
-
-        }
-
-        return strAttrs;
-    }
-
-    public Object getAttribute(String mBean, String attr) {
-
-
-        //TODO: should find an elegant way to catch the non existing attributes
-        try {
             ObjectName mBeanName = new ObjectName(mBean);
 
             return mbsc.getAttribute(mBeanName, attr);
@@ -131,9 +87,22 @@ public class JmxAgent {
             e1.printStackTrace();
         } catch (UnsupportedOperationException e) {
             e.printStackTrace();
+        } finally {
+            if (jmxc != null) {
+
+                try {
+                    jmxc.close();
+                } catch (IOException e) {
+                    log.error(e);
+                }
+            }
         }
 
 
         return null;
+    }
+
+    public Profile getProfile() {
+        return profile;
     }
 }

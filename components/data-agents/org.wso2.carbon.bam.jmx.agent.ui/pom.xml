@@ -63,6 +63,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
                             org.wso2.carbon.bam.jmx.agent.ui.*,
                             org.wso2.carbon.bam.jmx.agent.profiles.*,
@@ -73,6 +74,7 @@
                             javax.xml.namespace;version="0.0.0",
                             *;resolution:=optional,
                         </Import-Package>
+                        <Fragment-Host>org.wso2.carbon.ui</Fragment-Host>
                         <Carbon-Component>UIBundle</Carbon-Component>
                     </instructions>
                 </configuration>

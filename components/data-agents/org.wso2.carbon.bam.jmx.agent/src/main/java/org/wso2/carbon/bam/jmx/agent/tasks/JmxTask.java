@@ -302,12 +302,16 @@ public class JmxTask extends AbstractTask {
 
 
                 }
-
-
             }
         }
+
+        String host = PublisherUtil.getHostAddress();
+        if ((jmxAgent.getProfile() != null) && (jmxAgent.getProfile().getUrl() != null)) {
+            host = jmxAgent.getProfile().getUrl().substring(18, jmxAgent.getProfile().getUrl().indexOf('/', 19));
+        }
+
         Event jmxEvent = new Event(streamId, System.currentTimeMillis(),
-                                   new Object[]{"externalEvent", PublisherUtil.getHostAddress()}, null,
+                                   new Object[]{"externalEvent", host}, null,
                                    arrayList.toArray());
         dataPublisher.publish(jmxEvent);
         if (log.isDebugEnabled()) {

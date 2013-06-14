@@ -56,17 +56,20 @@ public class PublisherUtil {
             return hostAddressAndPort;
         }
         String hostAddress =   ServerConfiguration.getInstance().getFirstProperty(HOST_NAME);
-        if(null == hostAddress){
-        hostAddress = getLocalAddress().getHostName();
-        if (hostAddress == null) {
-            hostAddress = UNKNOWN_HOST;
-        }
-        int portsOffset = Integer.parseInt(CarbonUtils.getServerConfiguration().getFirstProperty(
-                PORTS_OFFSET));
-        int portValue = CARBON_SERVER_DEFAULT_PORT + portsOffset;
-        hostAddressAndPort = hostAddress +  ":" + portValue;
-        return hostAddressAndPort;
-        }else {
+        if (null == hostAddress) {
+            InetAddress localAddress = getLocalAddress();
+            if (localAddress != null) {
+                hostAddress = localAddress.getHostAddress();
+            } else {
+                hostAddress = "localhost"; // Defaults to localhost
+                log.warn("Unable to get the ip address, hence using hostname as localhost");
+            }
+            int portsOffset = Integer.parseInt(CarbonUtils.getServerConfiguration().getFirstProperty(
+                    PORTS_OFFSET));
+            int portValue = CARBON_SERVER_DEFAULT_PORT + portsOffset;
+            hostAddressAndPort = hostAddress + ":" + portValue;
+            return hostAddressAndPort;
+        } else {
             return hostAddress.trim();
         }
     }

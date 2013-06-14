@@ -1,0 +1,82 @@
+<%
+        var config = {};
+        var db = session.get("db");
+        if(db==null){
+          db = new Database("jdbc:mysql://localhost:3306/bamwebappstats?autoReconnect=true", "root", "root123", config);
+          session.put("db",db);
+        }
+
+        var maxResultCount =2147483647;
+        var query ="";
+    	var action = request.getParameter("action");
+    	var providerName = request.getParameter("providerName");
+    	var limit = request.getParameter("limit");
+
+    	if(limit==null){
+    	    limit = maxResultCount;
+    	}
+
+    	if(action=="getAllPublishedAppsUsage"){
+            query = "select appName, sum(total_request_count) as requests from WEBAPP_REQUEST_SUMMARY where appOwnerTenant='"+providerName+"' group by appName, appOwnerTenant order by requests desc limit " + limit;
+    	}
+
+    	if(action=="getPublishedAppUsageByUser"){
+    	    var appName = request.getParameter("appName");
+    	    query = "select userId, sum(total_request_count) as requests from WEBAPP_REQUEST_SUMMARY where appOwnerTenant='"+providerName+"' and appName='"+appName+"' group by userId order by requests desc limit " + limit;
+    	}
+
+    	if(action=="getPublishedAppUsageBySolutionConsumer"){
+    	    var appName = request.getParameter("appName");
+    	    query = "select userTenant, sum(total_request_count) as requests from WEBAPP_REQUEST_SUMMARY where appOwnerTenant='"+providerName+"' and appName='"+appName+"' group by userTenant order by requests desc limit " + limit;
+    	}
+
+    	if(action=="getResourceUsageOfPublishedApp"){
+    	    var appName = request.getParameter("appName");
+            query = "select resource, sum(total_request_count) as requests from WEBAPP_RESOURCE_SUMMARY where appOwnerTenant='"+providerName+"' and appName='"+appName+"' group by appVersion,resource order by requests desc limit "+ limit;
+    	}
+
+
+
+    	if(action=="getTopConsumersOfOrganization"){
+    	    var consumerOrganization = request.getParameter("consumerOrganization");
+            query = " select userId, sum(total_request_count) as requests from WEBAPP_REQUEST_SUMMARY where appOwnerTenant='"+providerName+"' and userTenant='"+consumerOrganization+"' group by userId order by requests desc limit " + limit;
+    	}
+
+    	if(action=="getTopConsumerUsersOfProvider"){
+            query = "select userId, sum(total_request_count) as requests from WEBAPP_REQUEST_SUMMARY where appOwnerTenant='"+providerName+"' group by userId order by requests desc limit " + limit;
+    	}
+
+    	if(action=="getTopConsumerOrganiationsOfProvider"){
+            query = "select userTenant, sum(total_request_count) as requests from WEBAPP_REQUEST_SUMMARY where appOwnerTenant='"+providerName+"' group by userTenant order by requests desc limit " + limit;
+    	}
+
+
+
+        var result = db.query(query);
+        var respJson = null;
+
+        function createTableJSON(result) {
+            var len = result.length;
+            var rows = [];
+            var columnNames = []
+            for (var i = 0; i < len; i++) {
+                var obj = result[i];
+                var row = []
+                for(var k in obj) {
+                    if ({}.hasOwnProperty.call(obj, k)) {
+                        if (i == 0) {
+                            columnNames.push(k);
+                        }
+                        row.push(obj[k]);
+                    }
+                }
+                rows.push(row);
+            }
+            return {Rows: rows, ColumnNames : columnNames};
+        }
+
+        respJson = createTableJSON(result);
+    
+
+        print(respJson);
+   		 %>

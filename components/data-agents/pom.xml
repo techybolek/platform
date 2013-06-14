@@ -34,11 +34,13 @@
             <modules>
                 <module>org.wso2.carbon.bam.service.data.publisher</module>
                 <module>org.wso2.carbon.bam.service.data.publisher.ui</module>
-	        <module>org.wso2.carbon.bam.mediationstats.data.publisher</module>
-	        <module>org.wso2.carbon.bam.mediationstats.data.publisher.ui</module>
+	        	<module>org.wso2.carbon.bam.mediationstats.data.publisher</module>
+	        	<module>org.wso2.carbon.bam.mediationstats.data.publisher.ui</module>
                 <module>org.wso2.carbon.bam.data.publisher.util</module>
-		 <module>org.wso2.carbon.bam.jmx.agent</module>
-		<module>org.wso2.carbon.bam.jmx.agent.ui</module>
+		 		<module>org.wso2.carbon.bam.jmx.agent</module>
+				<module>org.wso2.carbon.bam.jmx.agent.ui</module>
+ 				<module>org.wso2.carbon.bam.webapp.stat.publisher</module>
+				<module>org.wso2.carbon.bam.webapp.stat.publisher.ui</module>
             </modules>
 
     <dependencyManagement>
