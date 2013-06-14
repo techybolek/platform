@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.CollectionImpl;
@@ -201,10 +202,7 @@ public class IndexingHandler extends Handler {
     }
 
     private String getLoggedInUserName() {
-        MessageContext messageContext = MessageContext.getCurrentMessageContext();
-        HttpServletRequest request =
-                (HttpServletRequest) messageContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
-        return (String) request.getSession().getAttribute(ServerConstants.USER_LOGGED_IN);
+        return PrivilegedCarbonContext.getCurrentContext().getUsername();
     }
 
     public void importResource(RequestContext requestContext) throws RegistryException {

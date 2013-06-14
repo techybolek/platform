@@ -2,6 +2,7 @@ package org.wso2.carbon.registry.indexing.utils;
 
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -114,10 +115,6 @@ public class IndexingUtils {
 	}
 
     public static String getLoggedInUserName(){
-        MessageContext messageContext = MessageContext.getCurrentMessageContext();
-        HttpServletRequest request =
-                (HttpServletRequest) messageContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
-        String userName = (String) request.getSession().getAttribute(ServerConstants.USER_LOGGED_IN);
-        return userName;
+        return PrivilegedCarbonContext.getCurrentContext().getUsername();
     }
 }

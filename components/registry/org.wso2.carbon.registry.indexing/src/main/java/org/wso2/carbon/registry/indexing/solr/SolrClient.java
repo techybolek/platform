@@ -223,7 +223,7 @@ public class SolrClient {
             }
             QueryResponse queryresponse;
             MessageContext messageContext = MessageContext.getCurrentMessageContext();
-            if (PaginationUtils.isPaginationHeadersExist(messageContext)) {
+            if (messageContext != null && PaginationUtils.isPaginationHeadersExist(messageContext)) {
                 try {
                     PaginationContext paginationContext = PaginationUtils.initPaginationContext(messageContext);
 // TODO: Proper mechanism once authroizations are fixed - senaka

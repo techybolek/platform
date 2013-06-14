@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.admin.api.indexing.IContentBasedSearchService;
 import org.wso2.carbon.registry.common.ResourceData;
 import org.wso2.carbon.registry.common.services.RegistryAbstractAdmin;
@@ -110,7 +111,7 @@ public class ContentBasedSearchService extends RegistryAbstractAdmin
 
         MessageContext messageContext = MessageContext.getCurrentMessageContext();
 
-        if (PaginationUtils.isPaginationHeadersExist(messageContext)) {
+        if (messageContext != null && PaginationUtils.isPaginationHeadersExist(messageContext)) {
             try {
                 PaginationContext paginationContext = PaginationUtils.initPaginationContext(messageContext);
                 List<String> authorizedPathList = new ArrayList<String>();
@@ -250,11 +251,7 @@ public class ContentBasedSearchService extends RegistryAbstractAdmin
 	}
 
 	public static String getLoggedInUserName(){
-		MessageContext messageContext = MessageContext.getCurrentMessageContext();
-		HttpServletRequest request = 
-			(HttpServletRequest) messageContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
-		String userName = (String) request.getSession().getAttribute(ServerConstants.USER_LOGGED_IN);
-		return userName;
+        return PrivilegedCarbonContext.getCurrentContext().getUsername();
 	}
 
 }
