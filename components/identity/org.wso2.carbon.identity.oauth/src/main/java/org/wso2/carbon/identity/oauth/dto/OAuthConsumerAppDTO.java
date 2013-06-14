@@ -26,10 +26,10 @@ public class OAuthConsumerAppDTO {
     private String callbackUrl;
     private String oauthVersion;
     private String username;
-    private String loginPageUrl = null;
-    private String errorPageUrl = null;
-    private String consentPageUrl = null;
-    private String grantTypes = null;
+    private String loginPageUrl = "";
+    private String errorPageUrl = "";
+    private String consentPageUrl = "";
+    private String grantTypes = "";
 
     public String getApplicationName() {
         return applicationName;
@@ -78,22 +78,37 @@ public class OAuthConsumerAppDTO {
 	public void setGrantTypes(String grantTypes) {
 	    this.grantTypes = grantTypes;
     }
+
 	public String getConsentPageUrl() {
-	    return consentPageUrl;
-    }
+		if (consentPageUrl == null || consentPageUrl.equals("null")) {
+			return "";
+		}
+		return consentPageUrl;
+	}
+
 	public void setConsentPageUrl(String consentPageUrl) {
-	    this.consentPageUrl = consentPageUrl;
-    }
+		this.consentPageUrl = consentPageUrl;
+	}
+
 	public String getErrorPageUrl() {
-	    return errorPageUrl;
-    }
+		if (errorPageUrl == null || errorPageUrl.equals("null")) {
+			return "";
+		}
+		return errorPageUrl;
+	}
+
 	public void setErrorPageUrl(String errorPageUrl) {
-	    this.errorPageUrl = errorPageUrl;
-    }
+		this.errorPageUrl = errorPageUrl;
+	}
+
 	public String getLoginPageUrl() {
-	    return loginPageUrl;
-    }
+		if (loginPageUrl == null || loginPageUrl.equals("null")) {
+			return "";
+		}
+		return loginPageUrl;
+	}
+
 	public void setLoginPageUrl(String loginPageUrl) {
-	    this.loginPageUrl = loginPageUrl;
-    }
+		this.loginPageUrl = loginPageUrl;
+	}
 }
