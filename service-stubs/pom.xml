@@ -240,6 +240,7 @@
 				<module>org.wso2.carbon.appfactory.events.notification.stub</module>
 				<module>org.wso2.carbon.appfactory.jenkins.build.stub</module>
 				<module>org.wso2.carbon.bam.jmx.agent.stub</module>
+				<module>org.wso2.carbon.bam.webapp.stat.publisher.stub</module>
 			</modules>
 
     <build>
