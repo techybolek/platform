@@ -20,7 +20,6 @@
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
 <%@ page import="org.wso2.carbon.captcha.mgt.beans.xsd.CaptchaInfoBean" %>
-<%@ page import="org.wso2.carbon.identity.mgt.stub.beans.UserMgtBean" %>
 
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib uri="http://wso2.org/projects/carbon/taglibs/carbontags.jar" prefix="carbon" %>
@@ -38,14 +37,13 @@
         IdentityManagementClient client =
                 new IdentityManagementClient(backendServerURL, configContext);
         CaptchaInfoBean captchaInfoBean = new CaptchaInfoBean();
-        UserMgtBean userMgtBean = new UserMgtBean();
-        
+
         captchaInfoBean.setSecretKey(request.getParameter("captcha-secret-key"));
         captchaInfoBean.setUserAnswer(request.getParameter("captcha-user-answer"));
-        userMgtBean.setUserId(request.getParameter("userName"));
-        userMgtBean.setSecretKey(request.getParameter("secretKey"));
-        userMgtBean.setUserPassword(request.getParameter("userPassword"));
-        boolean  isCredentialsUpdated = client.updateCredential(userMgtBean, captchaInfoBean);
+        String userId = request.getParameter("userName");
+        String userKey = request.getParameter("secretKey");
+        String password = request.getParameter("userPassword");
+        boolean  isCredentialsUpdated = client.updateCredential(userId, userKey,password, captchaInfoBean);
 
         if (isCredentialsUpdated) {
             session.setAttribute("update-credentials-success", "true");

@@ -35,7 +35,7 @@
     String email = request.getParameter("emailAddress");
     String lastName = request.getParameter("lastName");
 
-    UserMgtBean bean = new UserMgtBean();
+
     UserEvidenceDTO dto1 = new UserEvidenceDTO();
     UserEvidenceDTO dto2 = new UserEvidenceDTO();
     dto1.setClaimUri("http://wso2.org/claims/emailaddress");

@@ -24,8 +24,7 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.mgt.stub.IdentityManagementAdminServiceStub;
-import org.wso2.carbon.identity.mgt.stub.beans.UserMgtBean;
+import org.wso2.carbon.identity.mgt.stub.UserIdentityManagementAdminServiceStub;
 import org.wso2.carbon.identity.mgt.stub.dto.ChallengeQuestionDTO;
 import org.wso2.carbon.identity.mgt.stub.dto.UserChallengesDTO;
 
@@ -36,14 +35,14 @@ public class IdentityManagementAdminClient {
 
     public static final String CHALLENGE_QUESTION = "challenge.question";
 
-    protected IdentityManagementAdminServiceStub stub = null;
+    protected UserIdentityManagementAdminServiceStub stub = null;
 
     protected static Log log = LogFactory.getLog(IdentityManagementAdminClient.class);
 
     public IdentityManagementAdminClient(String cookie, String url, ConfigurationContext configContext)
             throws java.lang.Exception {
         try {
-            stub = new IdentityManagementAdminServiceStub(configContext, url + "IdentityManagementAdminService");
+            stub = new UserIdentityManagementAdminServiceStub(configContext, url + "UserIdentityManagementAdminService");
             ServiceClient client = stub._getServiceClient();
             Options option = client.getOptions();
             option.setManageSession(true);
@@ -75,12 +74,8 @@ public class IdentityManagementAdminClient {
 
     public void setChallengeQuestionsOfUser(String userId, UserChallengesDTO[] userChallengesDTOs)
                                                                             throws AxisFault {
-
-        UserMgtBean userMgtBean = new UserMgtBean();
-        userMgtBean.setUserId(userId);
-        userMgtBean.setUserChallenges(userChallengesDTOs);        
         try {
-            stub.setChallengeQuestionsOfUser(userMgtBean);
+            stub.setChallengeQuestionsOfUser(userId, userChallengesDTOs);
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }
@@ -88,11 +83,8 @@ public class IdentityManagementAdminClient {
 
     public UserChallengesDTO[] getChallengeQuestionsOfUser(String userId) throws AxisFault {
 
-        UserMgtBean userMgtBean = new UserMgtBean();
-        userMgtBean.setUserId(userId);
-
         try {
-            return stub.getChallengeQuestionsOfUser(userMgtBean);
+            return stub.getChallengeQuestionsOfUser(userId);
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }

@@ -25,8 +25,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.captcha.mgt.beans.xsd.CaptchaInfoBean;
-import org.wso2.carbon.identity.mgt.stub.IdentityManagementServiceStub;
-import org.wso2.carbon.identity.mgt.stub.beans.UserMgtBean;
+import org.wso2.carbon.identity.mgt.stub.UserIdentityManagementServiceStub;
 import org.wso2.carbon.identity.mgt.stub.beans.VerificationBean;
 import org.wso2.carbon.identity.mgt.stub.dto.UserChallengesDTO;
 
@@ -37,14 +36,14 @@ public class IdentityManagementClient {
 
     public static final String USER_CHALLENGE_QUESTION = "user.challenge.question";
     
-    protected IdentityManagementServiceStub stub = null;
+    protected UserIdentityManagementServiceStub stub = null;
        
     protected static Log log = LogFactory.getLog(IdentityManagementClient.class);
 
     public IdentityManagementClient(String url, ConfigurationContext configContext)
             throws java.lang.Exception {
         try {
-            stub = new IdentityManagementServiceStub(configContext, url + "IdentityManagementService");
+            stub = new UserIdentityManagementServiceStub(configContext, url + "UserIdentityManagementService");
         } catch (java.lang.Exception e) {
             handleException(e.getMessage(), e);
         }
@@ -53,7 +52,7 @@ public class IdentityManagementClient {
     public IdentityManagementClient(String cookie, String url, ConfigurationContext configContext)
             throws java.lang.Exception {
         try {
-            stub = new IdentityManagementServiceStub(configContext, url + "IdentityManagementService");
+            stub = new UserIdentityManagementServiceStub(configContext, url + "UserIdentityManagementService");
             ServiceClient client = stub._getServiceClient();
             Options option = client.getOptions();
             option.setManageSession(true);
@@ -76,9 +75,7 @@ public class IdentityManagementClient {
     public VerificationBean verifyUser(String userId, CaptchaInfoBean captchaInfoBean)
                                                                         throws AxisFault {
         try {
-            UserMgtBean userMgtBean = new UserMgtBean();
-            userMgtBean.setUserId(userId);
-            return stub.verifyUser(userMgtBean, captchaInfoBean);
+            return stub.verifyUser(userId, captchaInfoBean);
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }
@@ -89,10 +86,7 @@ public class IdentityManagementClient {
     public boolean processPasswordRecoveryLink(String userId, String userKey)
                                                                         throws AxisFault {
         try {
-            UserMgtBean bean = new UserMgtBean();
-            bean.setUserId(userId);
-            bean.setUserKey(userKey);
-            return stub.processPasswordRecovery(bean);
+            return stub.processPasswordRecovery(userId, userKey, "EMAIL");
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }
@@ -102,10 +96,7 @@ public class IdentityManagementClient {
     public UserChallengesDTO[] getChallengeQuestionsOfUser(String userId, String userKey)
                                                                         throws AxisFault {
         try {
-            UserMgtBean bean = new UserMgtBean();
-            bean.setUserId(userId);
-            bean.setUserPassword(userKey);
-            return stub.getChallengeQuestionsOfUser(bean);
+            return stub.getChallengeQuestionsForUser(userId, userKey);
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }
@@ -116,14 +107,10 @@ public class IdentityManagementClient {
     public VerificationBean verifyChallengeQuestion(String userId, String userKey, String question,
                                                         String answer) throws AxisFault {
         try {
-            UserMgtBean bean = new UserMgtBean();
             UserChallengesDTO dto = new UserChallengesDTO();
             dto.setQuestion(question);
-            dto.setAnswer(answer);
-            bean.setUserId(userId);
-            bean.setUserKey(userKey);
-            bean.addUserChallenges(dto);
-            return stub.verifyChallengeQuestion(bean);
+            dto.setAnswer(answer);            
+            return stub.verifyChallengeQuestion(userId, userKey, new UserChallengesDTO[]{dto});
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }
@@ -141,31 +128,32 @@ public class IdentityManagementClient {
         return null;
     }
 
-    public boolean updateCredential(UserMgtBean userMgtBean, CaptchaInfoBean captchaInfoBean)
-                                                                                throws AxisFault {
+    public boolean updateCredential(String userId, String userKey, String password,
+                                    CaptchaInfoBean captchaInfoBean) throws AxisFault {
         try {
-            return stub.updateCredential(userMgtBean, captchaInfoBean);
+            VerificationBean bean = stub.updateCredential(userId, userKey, password, captchaInfoBean);
+            return  bean.getVerified();
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }
         return false;
     }
 
-    public boolean unlockUserAccount(UserMgtBean userMgtBean) throws AxisFault {
+    public boolean unlockUserAccount(String userId, String userKey) throws AxisFault {
         try {
-            return stub.unlockUserAccount(userMgtBean);
+            System.out.println("+===========================  ACCOUNT UNLOCK   =========  " + userKey + " ======");
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }
         return false;
     }
-
-    public boolean processAccountRecovery(UserMgtBean userMgtBean) throws AxisFault {
-        try {
-            return stub.processAccountRecovery(userMgtBean);
-        } catch (Exception e) {
-            handleException(e.getMessage(), e);
-        }
+           // TODO
+    public boolean processAccountRecovery() throws AxisFault {
+//        try {
+//           // return stub.processAccountRecovery(userMgtBean);
+//        } catch (Exception e) {
+//            handleException(e.getMessage(), e);
+//        }
         return false;
     }
 

@@ -19,7 +19,6 @@
 <%@ page import="org.wso2.carbon.CarbonConstants" %>
 <%@ page import="org.apache.axis2.context.ConfigurationContext" %>
 <%@ page import="org.wso2.carbon.ui.CarbonUIUtil" %>
-<%@ page import="org.wso2.carbon.identity.mgt.stub.beans.UserMgtBean" %>
 <%@ page import="org.wso2.carbon.identity.mgt.stub.beans.VerificationBean" %>
 
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -36,10 +35,7 @@
         IdentityManagementClient client =
                 new IdentityManagementClient(backendServerURL, configContext);
         VerificationBean bean = (VerificationBean) session.getAttribute("confirmationBean");
-        UserMgtBean userMgtBean = new UserMgtBean();
-        userMgtBean.setUserId(bean.getUserId());
-        userMgtBean.setSecretKey(bean.getKey());
-        isAccountUnlocked = client.unlockUserAccount(userMgtBean);
+        isAccountUnlocked = client.unlockUserAccount(bean.getUserId(), bean.getKey());
     } catch (Exception e) {
         //ignore
     }
