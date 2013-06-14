@@ -45,22 +45,22 @@
             <url-pattern>/scim/*</url-pattern>
         </web-resource-collection>
         <!--we take default name for everyone role.If it is changed in user-mgt.xml,this needs to be changed as well.-->
-        <auth-constraint>
+        <!--<auth-constraint>
             <role-name>Internal/everyone</role-name>
-        </auth-constraint>
+        </auth-constraint>-->
         <user-data-constraint>
             <!-- transport-guarantee can be CONFIDENTIAL, INTEGRAL, or NONE -->
             <transport-guarantee>CONFIDENTIAL</transport-guarantee>
         </user-data-constraint>
     </security-constraint>
 
-    <login-config>
+    <!--login-config>
         <auth-method>BASIC</auth-method>
     </login-config>
     <context-param>
         <param-name>carbon.enable.saas</param-name>
         <param-value>*</param-value>
-    </context-param>
+    </context-param-->
 
 </web-app>
 

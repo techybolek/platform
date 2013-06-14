@@ -17,10 +17,6 @@
 */
 package org.wso2.carbon.identity.scim.provider.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
@@ -29,7 +25,6 @@ import org.wso2.carbon.identity.scim.common.utils.SCIMCommonConstants;
 import org.wso2.carbon.identity.scim.common.utils.SCIMCommonUtils;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.claim.ClaimManager;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -51,6 +46,10 @@ import org.wso2.charon.core.extensions.UserManager;
 import org.wso2.charon.core.protocol.ResponseCodeConstants;
 import org.wso2.charon.core.protocol.endpoints.AbstractResourceEndpoint;
 import org.wso2.charon.core.schema.SCIMConstants;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class IdentitySCIMManager implements CharonManager {
     /*private static AuthenticationHandler authenticationHandler;
@@ -179,7 +178,9 @@ public class IdentitySCIMManager implements CharonManager {
                     //if tenantless username doesn't contain a domain, add domain to user name in order to comply with multiple user store feature. 
                     if (tenantLessUserName.indexOf(CarbonConstants.DOMAIN_SEPARATOR) < 0) {
                         String domain = UserCoreUtil.getDomainFromThreadLocal();
-                        tenantLessUserName = domain + CarbonConstants.DOMAIN_SEPARATOR + tenantLessUserName;
+                        if (domain != null) {
+                            tenantLessUserName = domain + CarbonConstants.DOMAIN_SEPARATOR + tenantLessUserName;
+                        }
                     }
 
                     //check whether the user who is trying to obtain the realm is authorized
@@ -210,7 +211,7 @@ public class IdentitySCIMManager implements CharonManager {
             }
             //get user store manager
         } catch (UserStoreException e) {
-            String error = "Error obtaining tenant id for the user: " + userName;
+            String error = "Error obtaining user realm for the user: " + userName;
             throw new CharonException(error);
         }
         return scimUserManager;

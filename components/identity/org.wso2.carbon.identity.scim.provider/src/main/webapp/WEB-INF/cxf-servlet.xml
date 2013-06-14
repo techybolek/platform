@@ -27,6 +27,11 @@
         <jaxrs:serviceBeans>
             <ref bean="userBean"/>
         </jaxrs:serviceBeans>
+
+        <jaxrs:providers>
+            <ref bean="authenticationFilter"/>
+        </jaxrs:providers>
+
     </jaxrs:server>
 
     <bean id="userBean" class="org.wso2.carbon.identity.scim.provider.resources.UserResource"/>
@@ -35,6 +40,10 @@
         <jaxrs:serviceBeans>
             <ref bean="groupBean"/>
         </jaxrs:serviceBeans>
+
+        <jaxrs:providers>
+            <ref bean="authenticationFilter"/>
+        </jaxrs:providers>
     </jaxrs:server>
 
     <bean id="groupBean" class="org.wso2.carbon.identity.scim.provider.resources.GroupResource"/>
@@ -43,8 +52,17 @@
         <jaxrs:serviceBeans>
             <ref bean="bulkBean"/>
         </jaxrs:serviceBeans>
+
+        <jaxrs:providers>
+            <ref bean="authenticationFilter"/>
+        </jaxrs:providers>
+        
     </jaxrs:server>
 
     <bean id="bulkBean" class="org.wso2.carbon.identity.scim.provider.resources.BulkResource"/>
+
+    <bean id="authenticationFilter" class="org.wso2.carbon.identity.scim.provider.filter.AuthenticationFilter">
+            <!-- authorization bean properties -->
+        </bean>
 </beans>
 

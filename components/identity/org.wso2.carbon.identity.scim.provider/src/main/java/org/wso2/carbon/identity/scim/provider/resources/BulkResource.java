@@ -22,8 +22,6 @@ import org.wso2.carbon.identity.scim.provider.util.JAXRSResponseBuilder;
 import org.wso2.charon.core.encoder.Encoder;
 import org.wso2.charon.core.exceptions.CharonException;
 import org.wso2.charon.core.exceptions.FormatNotSupportedException;
-import org.wso2.charon.core.exceptions.UnauthorizedException;
-import org.wso2.charon.core.extensions.AuthenticationInfo;
 import org.wso2.charon.core.extensions.UserManager;
 import org.wso2.charon.core.protocol.ResponseCodeConstants;
 import org.wso2.charon.core.protocol.SCIMResponse;
@@ -35,8 +33,6 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.Map;
 
 @Path("/")
 public class BulkResource {
@@ -62,15 +58,15 @@ public class BulkResource {
             }
             //obtain the encoder at this layer in case exceptions needs to be encoded.
             encoder = identitySCIMManager.getEncoder(SCIMConstants.identifyFormat(outputFormat));
-            //perform authentication
+            /*//perform authentication
             Map<String, String> headerMap = new HashMap<String, String>();
             headerMap.put(SCIMConstants.AUTHORIZATION_HEADER, authorization);
             //authenticate the request
-            AuthenticationInfo authInfo = identitySCIMManager.handleAuthentication(headerMap);
+            AuthenticationInfo authInfo = identitySCIMManager.handleAuthentication(headerMap);*/
 
             //obtain the user store manager
             UserManager userManager = identitySCIMManager.getInstance().getUserManager(
-                    authInfo.getUserName());
+                    authorization);
 
             BulkResourceEndpoint bulkResourceEndpoint = new BulkResourceEndpoint();
             SCIMResponse responseString = bulkResourceEndpoint.processBulkData(resourceString,
@@ -86,9 +82,6 @@ public class BulkResource {
             if (e.getCode() == -1) {
                 e.setCode(ResponseCodeConstants.CODE_INTERNAL_SERVER_ERROR);
             }
-            return new JAXRSResponseBuilder().buildResponse(
-                    AbstractResourceEndpoint.encodeSCIMException(encoder, e));
-        } catch (UnauthorizedException e) {
             return new JAXRSResponseBuilder().buildResponse(
                     AbstractResourceEndpoint.encodeSCIMException(encoder, e));
         } catch (FormatNotSupportedException e) {
