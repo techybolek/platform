@@ -45,6 +45,7 @@ import org.wso2.carbon.identity.oauth2.validators.TokenValidationHandler;
 import org.wso2.carbon.identity.openidconnect.IDTokenBuilder;
 import org.wso2.carbon.utils.CarbonUtils;
 
+import java.util.concurrent.ConcurrentHashMap;
 /**
  * Runtime representation of the OAuth Configuration as configured through
  * identity.xml
@@ -88,6 +89,10 @@ public class OAuthServerConfiguration {
 		private static final String CUSTOM_CONSENT_PAGE_URL = "CustomConsentPageUrl";
 
 		private static final String ACCESS_TOKEN_DEFAULT_VALIDITY_PERIOD = "AccessTokenDefaultValidityPeriod";
+		
+		private static final String APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD =
+                "ApplicationAccessTokenDefaultValidityPeriod";
+				
 		// Enable/Disable cache
 		public static final String ENABLE_CACHE = "EnableOAuthCache";
 
@@ -140,6 +145,12 @@ public class OAuthServerConfiguration {
 		public static final String OPENID_CONNECT_USERINFO_ENDPOINT_REQUEST_VALIDATOR = "UserInfoEndpointRequestValidator";
 		public static final String OPENID_CONNECT_USERINFO_ENDPOINT_ACCESS_TOKEN_VALIDATOR = "UserInfoEndpointAccessTokenValidator";
 		public static final String OPENID_CONNECT_USERINFO_ENDPOINT_RESPONSE_BUILDER = "UserInfoEndpointResponseBuilder";
+		
+		// Primary/Secondary Login conifguration
+		private static final String LOGIN_CONFIG = "LoginConfig";
+		private static final String USERID_LOGIN = "UserIdLogin";
+		private static final String EMAIL_LOGIN = "EmailLogin";
+		private static final String PRIMARY_LOGIN = "primary";
 
 	}
 
@@ -155,6 +166,8 @@ public class OAuthServerConfiguration {
 
 	private long defaultAccessTokenValidityPeriodInSeconds = 3600;
 
+	private long defaultApplicationAccessTokenValidityPeriodInSeconds = 3600;
+	
 	private long defaultTimeStampSkewInSeconds = 300;
 
 	private boolean cacheEnabled = true;
@@ -184,6 +197,8 @@ public class OAuthServerConfiguration {
 	private Map<String, String> saml2Issuers = new HashMap<String, String>();
 
 	private List<String> saml2Audience = new ArrayList<String>();
+	
+	private Map<String,Map<String,String>> loginConfiguration = new ConcurrentHashMap<String, Map<String,String>>();
 
 	private String tokenEP = null;
 
@@ -297,6 +312,9 @@ public class OAuthServerConfiguration {
 
 			// read openid connect configurations
 			parseOpenIDConnectConfig(oauthElem);
+			
+			// read loginconfig
+			parseLoginConfig(oauthElem);
 
 		} catch (ServerConfigurationException e) {
 			log.error("Error when reading the OAuth Configurations. "
@@ -338,6 +356,11 @@ public class OAuthServerConfiguration {
 		return defaultAccessTokenValidityPeriodInSeconds;
 	}
 
+	
+    public long getDefaultApplicationAccessTokenValidityPeriodInSeconds() {
+        return defaultApplicationAccessTokenValidityPeriodInSeconds;
+    }
+	
 	public long getDefaultTimeStampSkewInSeconds() {
 		return defaultTimeStampSkewInSeconds;
 	}
@@ -423,6 +446,10 @@ public class OAuthServerConfiguration {
 		return authContextTTL;
 	}
 
+	public Map<String, Map<String, String>> getLoginConfiguration() {
+		return loginConfiguration;
+	}
+	
 	public TokenPersistencePreprocessor getTokenPersistencePreprocessor() throws IdentityOAuth2Exception {
 		// create an instance of a TokenPersistencePreprocessor. This is a one
 		// time operation
@@ -513,6 +540,7 @@ public class OAuthServerConfiguration {
 		return openIDConnectUserInfoEndpointResponseBuilder;
 	}
 
+	   	
 	private void parseOAuthCallbackHandlers(OMElement callbackHandlersElem) {
 		if (callbackHandlersElem == null) {
 			warnOnFaultyConfiguration("AuthorizationCallbackHandlers element is not available.");
@@ -682,6 +710,13 @@ public class OAuthServerConfiguration {
 			defaultAccessTokenValidityPeriodInSeconds = Long.parseLong(accessTokTimeoutElem.getText());
 		}
 
+		 // set the application access token default timeout
+        OMElement applicationAccessTokTimeoutElem = oauthConfigElem.getFirstChildWithName(
+                getQNameWithIdentityNS(ConfigElements.APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD));
+        if (applicationAccessTokTimeoutElem != null) {
+            defaultApplicationAccessTokenValidityPeriodInSeconds = Long.parseLong(applicationAccessTokTimeoutElem.getText());
+        }
+
 		OMElement timeStampSkewElem =
 		                              oauthConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.TIMESTAMP_SKEW));
 		if (timeStampSkewElem != null) {
@@ -705,6 +740,8 @@ public class OAuthServerConfiguration {
 			          defaultAuthorizationCodeValidityPeriodInSeconds + "ms.");
 			log.debug("Access Token Default Timeout is set to " + defaultAccessTokenValidityPeriodInSeconds +
 			          "ms.");
+			log.debug("Application Access Token Default Timeout is set to " +
+                      defaultAccessTokenValidityPeriodInSeconds + "ms.");
 			log.debug("Default TimestampSkew is set to " + defaultTimeStampSkewInSeconds + "ms.");
 		}
 	}
@@ -1070,6 +1107,52 @@ public class OAuthServerConfiguration {
 				                                               openIDConnectConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.OPENID_CONNECT_USERINFO_ENDPOINT_RESPONSE_BUILDER))
 				                                                                      .getText().trim();
 			}
+		}
+	}
+	
+		/**
+	 * Read the primary/secondary login configuration
+	 * <OAuth>
+	 *	....
+	 *	<LoginConfig>
+	 *		<UserIdLogin  primary="true">
+	 *			<ClaimUri></ClaimUri>
+	 *		</UserIdLogin>
+	 *		<EmailLogin  primary="false">
+	 *			<ClaimUri>http://wso2.org/claims/emailaddress</ClaimUri>
+	 *		</EmailLogin>
+	 *	</LoginConfig>
+	 *	.....
+	 *   </OAuth>
+	 * @param oauthConfigElem
+	 */
+	private void parseLoginConfig(OMElement oauthConfigElem) {
+		OMElement loginConfigElem =  oauthConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.LOGIN_CONFIG));
+		if (loginConfigElem != null) {
+			if (log.isDebugEnabled()) {
+				log.debug("Login configuration is set ");
+			}
+			// Primary/Secondary supported login mechanisms
+			OMElement emailConfigElem = loginConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.EMAIL_LOGIN));
+
+			OMElement userIdConfigElem =  loginConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.USERID_LOGIN));
+
+			Map<String, String> emailConf = new HashMap<String, String>(2);
+			emailConf.put(ConfigElements.PRIMARY_LOGIN,
+			              emailConfigElem.getAttributeValue(new QName(ConfigElements.PRIMARY_LOGIN)));
+			emailConf.put(ConfigElements.CLAIM_URI,
+			              emailConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.CLAIM_URI))
+			                             .getText());
+
+			Map<String, String> userIdConf = new HashMap<String, String>(2);
+			userIdConf.put(ConfigElements.PRIMARY_LOGIN,
+			               userIdConfigElem.getAttributeValue(new QName(ConfigElements.PRIMARY_LOGIN)));
+			userIdConf.put(ConfigElements.CLAIM_URI,
+			               userIdConfigElem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.CLAIM_URI))
+			                               .getText());
+
+			loginConfiguration.put(ConfigElements.EMAIL_LOGIN, emailConf);
+			loginConfiguration.put(ConfigElements.USERID_LOGIN, userIdConf);
 		}
 	}
 }
