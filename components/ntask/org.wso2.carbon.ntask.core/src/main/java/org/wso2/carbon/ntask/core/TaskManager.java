@@ -15,9 +15,9 @@
  */
 package org.wso2.carbon.ntask.core;
 
-import java.util.List;
-
 import org.wso2.carbon.ntask.common.TaskException;
+
+import java.util.List;
 
 /**
  * This interface represents the task manager functionalities.
@@ -28,7 +28,7 @@ public interface TaskManager {
 	 * Schedule all the tasks which the current node is responsible for.
 	 * @throws TaskException
 	 */
-	public void scheduleAllTasks() throws TaskException;
+	public void initStartupTasks() throws TaskException;
 	
 	/**
 	 * Starts a task with the given name.

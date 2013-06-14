@@ -61,7 +61,7 @@ public class ClusteredTaskManager extends AbstractQuartzTaskManager {
 		return ClusterGroupCommunicator.getInstance();
 	}
 
-	public void scheduleAllTasks() throws TaskException {
+	public void initStartupTasks() throws TaskException {
 		if (this.isLeader()) {
 			List<TaskInfo> tasks = this.getAllTasks();
 			for (TaskInfo task : tasks) {

@@ -15,10 +15,6 @@
  */
 package org.wso2.carbon.ntask.core.impl.remote;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringCommand;
 import org.apache.axis2.clustering.ClusteringFault;
@@ -37,6 +33,10 @@ import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
 import org.wso2.carbon.remotetasks.stub.admin.common.RemoteTaskAdmin;
 import org.wso2.carbon.remotetasks.stub.admin.common.xsd.DeployedTaskInformation;
 import org.wso2.carbon.utils.ConfigurationContextService;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class represents a remote task manager implementation.
@@ -83,7 +83,7 @@ public class RemoteTaskManager implements TaskManager {
 	}
 	
 	@Override
-	public void scheduleAllTasks() throws TaskException {
+	public void initStartupTasks() throws TaskException {
 		for (TaskInfo taskInfo : this.getAllTasks()) {
 			try {
 			    this.scheduleTask(taskInfo.getName());

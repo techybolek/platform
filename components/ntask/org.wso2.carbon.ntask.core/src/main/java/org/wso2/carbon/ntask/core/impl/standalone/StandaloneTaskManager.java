@@ -15,26 +15,26 @@
  */
 package org.wso2.carbon.ntask.core.impl.standalone;
 
-import java.util.List;
-
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.core.TaskInfo;
 import org.wso2.carbon.ntask.core.TaskRepository;
 import org.wso2.carbon.ntask.core.TaskUtils;
 import org.wso2.carbon.ntask.core.impl.AbstractQuartzTaskManager;
 
+import java.util.List;
+
 /**
  * This class represents a single node task server manager, which is created when the server is run
  * in standalone mode.
  */
 public class StandaloneTaskManager extends AbstractQuartzTaskManager {
-		
+
 	public StandaloneTaskManager(TaskRepository taskRepository) throws TaskException {
 		super(taskRepository);
 	}
-	
+
 	@Override
-	public void scheduleAllTasks() throws TaskException {
+	public void initStartupTasks() throws TaskException {
 		this.scheduleLocalAllTasks();
 	}
 

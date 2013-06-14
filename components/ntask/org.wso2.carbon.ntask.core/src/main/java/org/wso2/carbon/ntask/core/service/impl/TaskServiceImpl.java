@@ -15,14 +15,6 @@
  */
 package org.wso2.carbon.ntask.core.service.impl;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -41,6 +33,13 @@ import org.wso2.carbon.ntask.core.impl.standalone.StandaloneTaskManagerFactory;
 import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.utils.CarbonUtils;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import java.io.File;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This class represents the TaskService implementation.
@@ -116,7 +115,7 @@ public class TaskServiceImpl implements TaskService {
 		List<TaskManager> startupTms = this.getTaskManagerFactory().
 		        getStartupSchedulingTaskManagersForType(taskType);
 		for (TaskManager tm : startupTms) {
-			tm.scheduleAllTasks();
+			tm.initStartupTasks();
 		}
 	}
 	
