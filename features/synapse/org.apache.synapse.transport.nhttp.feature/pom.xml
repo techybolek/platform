@@ -90,7 +90,4 @@
             </plugin>
         </plugins>
     </build>
-    <properties>
-        <synapse.version>2.1.1-wso2v3</synapse.version>
-    </properties>
 </project>
