@@ -7,6 +7,8 @@ import org.wso2.carbon.bam.toolbox.deployer.BasicToolBox;
 import org.wso2.carbon.bam.toolbox.deployer.ServiceHolder;
 import org.wso2.carbon.bam.toolbox.deployer.config.ToolBoxConfigurationManager;
 import org.wso2.carbon.bam.toolbox.deployer.exception.BAMToolboxDeploymentException;
+import org.wso2.carbon.bam.toolbox.deployer.util.JaggeryDashboardDTO;
+import org.wso2.carbon.bam.toolbox.deployer.util.ToolBoxDTO;
 import org.wso2.carbon.bam.toolbox.deployer.util.ToolBoxStatusDTO;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
@@ -111,6 +113,19 @@ public class BAMToolBoxUploaderService extends AbstractAdmin {
         }
 
         return toolBoxStatusDTO;
+    }
+
+    public ArrayList<JaggeryDashboardDTO> getJaggeryDashboards() throws BAMToolboxDeploymentException {
+        ArrayList<JaggeryDashboardDTO> jaggeryDashboardDTOs = new ArrayList<JaggeryDashboardDTO>();
+
+        int tenantId = CarbonContext.getCurrentContext().getTenantId();
+        ToolBoxConfigurationManager configurationManager = ToolBoxConfigurationManager.getInstance();
+        ArrayList<String> toolsInConf = configurationManager.getAllToolBoxNames(tenantId);
+        for (String toolbox : toolsInConf) {
+            ToolBoxDTO toolBoxDTO = configurationManager.getToolBox(toolbox, tenantId);
+            jaggeryDashboardDTOs.addAll(toolBoxDTO.getJaggeryDashboards());
+        }
+        return jaggeryDashboardDTOs;
     }
 
 

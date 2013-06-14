@@ -43,6 +43,12 @@ public class BAMToolBoxDeployerConstants {
     public static final String TAB_NAME_SUFFIX = "name";
     public static final String GADGET_NAME_SUFFIX = "gadgets";
 
+    public static final String JAGGERY_APPS = "dashboard.jaggery.apps";
+    public static final String JAGGERY_APP_MAIN_DISPLAY_NANE = "main.displayName";
+    public static final String JAGGERY_APP_SUBS = "tabs";
+    public static final String JAGGERY_APP_SUB_DISPLAY_NAME="displayName";
+    public static final String JAGGERY_APP_SUB_URL = "url";
+
     public static final String ANALYZER_SCRIPTS_VAR_NAME = "analyzers.scripts";
     public static final String ANALYZER_SCRIPT_PREFIX = "analyzers.scripts";
     public static final String ANALYZER_SCRIPT_FILE_NAME_SUFFIX = "filename";

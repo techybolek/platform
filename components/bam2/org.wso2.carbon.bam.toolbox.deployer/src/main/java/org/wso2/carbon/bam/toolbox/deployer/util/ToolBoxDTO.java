@@ -33,6 +33,7 @@ public class ToolBoxDTO {
     private String gagetsParentDirectory;
     private String jasperParentDirectory;
     private String jaggeryAppParentDirectory;
+    private ArrayList<JaggeryDashboardDTO> jaggeryDashboards;
     private String streamDefnParentDirectory;
     private String hotDeploymentRootDir;
     private String datasource;
@@ -44,6 +45,7 @@ public class ToolBoxDTO {
         dashboardTabs = new ArrayList<DashBoardTabDTO>();
         jasperTabs = new ArrayList<JasperTabDTO>();
         dataStreamDefs = new ArrayList<StreamDefnDTO>();
+        jaggeryDashboards = new ArrayList<JaggeryDashboardDTO>();
         datasource = "";
     }
 
@@ -74,6 +76,13 @@ public class ToolBoxDTO {
         }
     }
 
+    public ArrayList<JaggeryDashboardDTO> getJaggeryDashboards() {
+        return jaggeryDashboards;
+    }
+
+    public void setJaggeryDashboards(ArrayList<JaggeryDashboardDTO> jaggeryDashboards) {
+        this.jaggeryDashboards = jaggeryDashboards;
+    }
 
     public ArrayList<AnalyzerScriptDTO> getAnaltytics() {
         return analtytics;

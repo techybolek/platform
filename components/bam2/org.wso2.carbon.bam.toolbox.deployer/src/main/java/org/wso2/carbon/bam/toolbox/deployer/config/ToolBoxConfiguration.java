@@ -23,6 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.bam.toolbox.deployer.exception.BAMToolboxDeploymentException;
 import org.wso2.carbon.bam.toolbox.deployer.util.DashBoardTabDTO;
+import org.wso2.carbon.bam.toolbox.deployer.util.JaggeryDashboardDTO;
+import org.wso2.carbon.bam.toolbox.deployer.util.JaggeryTabDTO;
 import org.wso2.carbon.bam.toolbox.deployer.util.JasperTabDTO;
 
 import javax.xml.namespace.QName;
@@ -37,6 +39,9 @@ public class ToolBoxConfiguration {
     private static String SCRIPTS = "scripts";
     private static String SCRIPT = "script";
     private static String DASHBOARD = "dashboard";
+    private static String JAGGERYDASHBOARDS = "jaggeryDashboards";
+    private static String DISPLAYNAME = "displayName";
+    private static String URL = "URL";
     private static String GADGETS = "gadgets";
     private static String GADGET = "gadget";
     private static String TAB = "tab";
@@ -95,6 +100,9 @@ public class ToolBoxConfiguration {
 
         OMElement dashboard = fac.createOMElement(new QName(DASHBOARD));
         config.addChild(dashboard);
+
+        OMElement jaggerydashboard = fac.createOMElement(new QName(JAGGERYDASHBOARDS));
+        config.addChild(jaggerydashboard);
     }
 
     private void addGadget(String gadgetName, OMElement element)
@@ -175,6 +183,30 @@ public class ToolBoxConfiguration {
             throw new BAMToolboxDeploymentException("Cannot find " + JRXML + "node in the " +
                     "configuration file when adding jrxml name: " +
                     jrxmlName + " for tool box :" + toolboxName);
+        }
+    }
+
+    public void addJaggeryDashboards(ArrayList<JaggeryDashboardDTO> dashboardDTOs){
+        Iterator iterator = config.getChildrenWithName(new QName(JAGGERYDASHBOARDS));
+        if (iterator != null && iterator.hasNext()) {
+            OMElement jaggeryDashboards = (OMElement) iterator.next();
+
+            for (JaggeryDashboardDTO dashboardDTO : dashboardDTOs) {
+                OMFactory fac = OMAbstractFactory.getOMFactory();
+                OMElement dashboard = fac.createOMElement(new QName(DASHBOARD));
+                dashboard.addAttribute(DISPLAYNAME, dashboardDTO.getDashboardName(), null);
+
+                ArrayList<JaggeryTabDTO> tabs = dashboardDTO.getJaggeryTabs();
+
+                for (JaggeryTabDTO aTab : tabs) {
+                    OMElement tab = fac.createOMElement(new QName(TAB));
+                    tab.addAttribute(DISPLAYNAME, aTab.getDisplayName(), null);
+                    tab.addAttribute(URL, aTab.getUrl(), null);
+
+                    dashboard.addChild(tab);
+                }
+                jaggeryDashboards.addChild(dashboard);
+            }
         }
     }
 
@@ -283,6 +315,47 @@ public class ToolBoxConfiguration {
                 log.warn("No dashboard configuration is found for" +
                         " tool box:" + this.toolboxName);
                 return tabs;
+            }
+        } else {
+            log.error("Configuration has not been set for the tool " +
+                    "box:" + this.toolboxName);
+            throw new BAMToolboxDeploymentException("Configuration has not been set " +
+                    "for the tool box:" + this.toolboxName);
+        }
+    }
+
+    public ArrayList<JaggeryDashboardDTO> getJaggeryDashboards() throws BAMToolboxDeploymentException {
+       if (null != config) {
+            ArrayList<JaggeryDashboardDTO> jaggerydashboards = new ArrayList<JaggeryDashboardDTO>();
+            Iterator dashboardsIterator = config.getChildrenWithName(new QName(JAGGERYDASHBOARDS));
+            if (null != dashboardsIterator && dashboardsIterator.hasNext()) {
+                OMElement jaggeryDashboards = (OMElement) dashboardsIterator.next();
+                Iterator dashboardIterator = jaggeryDashboards.getChildrenWithName(new QName(DASHBOARD));
+                if (null != dashboardIterator && dashboardIterator.hasNext()) {
+                    while (dashboardIterator.hasNext()) {
+                        OMElement dashboard = (OMElement) dashboardIterator.next();
+                        String displayname = dashboard.getAttributeValue(new QName(DISPLAYNAME));
+
+                        JaggeryDashboardDTO jaggeryDashboardDTO = new JaggeryDashboardDTO();
+                        jaggeryDashboardDTO.setDashboardName(displayname);
+
+                        Iterator tabIterator = dashboard.getChildrenWithName(new QName(TAB));
+                        while (tabIterator.hasNext()) {
+                            JaggeryTabDTO tabDTO = new JaggeryTabDTO();
+                            OMElement tab = (OMElement) tabIterator.next();
+
+                            tabDTO.setDisplayName(tab.getAttribute(new QName(DISPLAYNAME)).getAttributeValue());
+                            tabDTO.setUrl(tab.getAttribute(new QName(URL)).getAttributeValue());
+                            jaggeryDashboardDTO.addJaggeryTab(tabDTO);
+                        }
+                       jaggerydashboards.add(jaggeryDashboardDTO);
+                    }
+                }
+                return jaggerydashboards;
+            } else {
+                log.debug("No jaggery dashboard configuration is found for" +
+                        " tool box:" + this.toolboxName);
+                return jaggerydashboards;
             }
         } else {
             log.error("Configuration has not been set for the tool " +

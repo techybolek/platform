@@ -4,9 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.bam.toolbox.deployer.BAMToolBoxDeployerConstants;
 import org.wso2.carbon.bam.toolbox.deployer.exception.BAMToolboxDeploymentException;
-import org.wso2.carbon.bam.toolbox.deployer.util.DashBoardTabDTO;
-import org.wso2.carbon.bam.toolbox.deployer.util.JasperTabDTO;
-import org.wso2.carbon.bam.toolbox.deployer.util.ToolBoxDTO;
+import org.wso2.carbon.bam.toolbox.deployer.util.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -274,16 +272,81 @@ public class BAMArtifactProcessor {
 
     private void setJaggeryAppNames(ToolBoxDTO toolBoxDTO, String barDir)
             throws BAMToolboxDeploymentException {
-            File jaggeryDir = new File(barDir + File.separator + BAMToolBoxDeployerConstants.DASHBOARD_DIR
+        File jaggeryDir = new File(barDir + File.separator + BAMToolBoxDeployerConstants.DASHBOARD_DIR
+                + File.separator + BAMToolBoxDeployerConstants.JAGGERY_DIR);
+        if (jaggeryDir.exists()) {
+            toolBoxDTO.setJaggeryAppParentDirectory(barDir + File.separator + BAMToolBoxDeployerConstants.DASHBOARD_DIR
                     + File.separator + BAMToolBoxDeployerConstants.JAGGERY_DIR);
-            if (jaggeryDir.exists()) {
-                toolBoxDTO.setJaggeryAppParentDirectory(barDir + File.separator + BAMToolBoxDeployerConstants.DASHBOARD_DIR
-                        + File.separator + BAMToolBoxDeployerConstants.JAGGERY_DIR);
+            File jaggeryMetaFile = new File(barDir + File.separator + BAMToolBoxDeployerConstants.DASHBOARD_DIR +
+                    File.separator + BAMToolBoxDeployerConstants.GADGET_META_FILE);
+            if (jaggeryMetaFile.exists()) {
+                Properties properties = new Properties();
+                try {
+                    properties.load(new FileInputStream(jaggeryMetaFile));
+                    setJaggeryAppsDashboardProperties(toolBoxDTO, properties);
+
+                } catch (FileNotFoundException e) {
+                    log.warn("No " + BAMToolBoxDeployerConstants.GADGET_META_FILE +
+                            " found in dir:" + barDir + File.separator + BAMToolBoxDeployerConstants.DASHBOARD_DIR);
+                    log.error("Jaggery Applications won't be added to the BAM dashboard");
+                    toolBoxDTO.setJaggeryDashboards(new ArrayList<JaggeryDashboardDTO>());
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                    throw new BAMToolboxDeploymentException(e.getMessage(), e);
+                }
             } else {
-                log.warn("No jaggery artifacts found..");
-                toolBoxDTO.setJaggeryAppParentDirectory(null);
+                toolBoxDTO.setJaggeryDashboards(new ArrayList<JaggeryDashboardDTO>());
             }
+        } else {
+            log.warn("No jaggery artifacts found..");
+            toolBoxDTO.setJaggeryAppParentDirectory(null);
+        }
     }
+
+    private void setJaggeryAppsDashboardProperties(ToolBoxDTO toolBoxDTO, Properties properties) {
+        String appsString = properties.getProperty(BAMToolBoxDeployerConstants.JAGGERY_APPS);
+        if (appsString != null) {
+            ArrayList<JaggeryDashboardDTO> dashboardDTOs = new ArrayList<JaggeryDashboardDTO>();
+            String[] apps = appsString.split(",");
+            for (String app : apps) {
+                JaggeryDashboardDTO dashboardDTO = new JaggeryDashboardDTO();
+                app = app.trim();
+                String perfixProperty = BAMToolBoxDeployerConstants.JAGGERY_APPS + "." + app + ".";
+                String mainDisplay = properties.getProperty(perfixProperty +
+                        BAMToolBoxDeployerConstants.JAGGERY_APP_MAIN_DISPLAY_NANE);
+
+                if (null != mainDisplay) {
+                    dashboardDTO.setDashboardName(mainDisplay);
+                } else {
+                    dashboardDTO.setDashboardName(app);
+                }
+
+                String jaggeryTabsString = properties.getProperty(
+                        perfixProperty + BAMToolBoxDeployerConstants.JAGGERY_APP_SUBS);
+
+                if (null != jaggeryTabsString) {
+                    String[] jaggeryTabs = jaggeryTabsString.split(",");
+                    for (String aTab : jaggeryTabs) {
+                      aTab = aTab.trim();
+                      String tabPrefix = perfixProperty+aTab;
+                      String displayName = properties.getProperty(tabPrefix+"."+
+                              BAMToolBoxDeployerConstants.JAGGERY_APP_SUB_DISPLAY_NAME);
+                      String url = properties.getProperty(tabPrefix+"."+BAMToolBoxDeployerConstants.JAGGERY_APP_SUB_URL);
+                      if(null != displayName && null!= url){
+                         JaggeryTabDTO tabDTO = new JaggeryTabDTO(displayName, url);
+                         dashboardDTO.addJaggeryTab(tabDTO);
+                      }
+                    }
+                }
+
+                if(dashboardDTO.isValidDashboardConfig()){
+                    dashboardDTOs.add(dashboardDTO);
+                }
+            }
+            toolBoxDTO.setJaggeryDashboards(dashboardDTOs);
+        }
+    }
+
 
     private void setGadgetNames(ToolBoxDTO toolBoxDTO, String barDir)
             throws BAMToolboxDeploymentException {
