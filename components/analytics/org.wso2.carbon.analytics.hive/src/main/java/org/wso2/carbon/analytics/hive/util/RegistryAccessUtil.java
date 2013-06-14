@@ -62,7 +62,7 @@ public class RegistryAccessUtil {
                     if (log.isDebugEnabled()) {
                         log.debug((new StringBuilder()).append("Place-holder key :").append(matchingRegistryKey).toString());
                     }
-                    String registryCode = matchingRegistryKey.substring(2, matchingRegistryKey.indexOf(':'));
+                    String registryCode = matchingRegistryKey.substring(2, matchingRegistryKey.indexOf(RegistryAccessUtilConstants.COLON));
                     if (log.isDebugEnabled()) {
                         log.debug((new StringBuilder()).append("Registry code: ").append(registryCode).toString());
                     }
@@ -70,7 +70,6 @@ public class RegistryAccessUtil {
                     String resourcePath = matchingRegistryKey.substring(
                             matchingRegistryKey.indexOf(RegistryAccessUtilConstants.COLON) + 1,
                             matchingRegistryKey.indexOf(RegistryAccessUtilConstants.CLOSE_CURLY_BRACKET));
-                    resourcePath = resourcePath.replace(RegistryAccessUtilConstants.PERIOD, RegistryAccessUtilConstants.FRONT_SLASH);
                     if (log.isDebugEnabled()) {
                         log.debug((new StringBuilder()).append("Resource path :").append(resourcePath).toString());
                     }

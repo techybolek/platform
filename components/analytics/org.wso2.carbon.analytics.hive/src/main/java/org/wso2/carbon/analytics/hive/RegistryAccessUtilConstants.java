@@ -22,15 +22,14 @@ public class RegistryAccessUtilConstants {
     public RegistryAccessUtilConstants() {
     }
 
-    public static final char PERIOD = '.';
-    public static final char FRONT_SLASH = '/';
     public static final char CLOSE_CURLY_BRACKET = '}';
     public static final char COLON = ':';
 
     public static final String REGISTRY_GOVERNANCE = "gov";
-    public static final String REGISTRY_CONFIG = "cfg";
+    public static final String REGISTRY_CONFIG = "conf";
     public static final String REGISTRY_LOCAL = "local";
 
     public static final String MEDIA_TYPE_TEXT_PLAIN = "text/plain";
-    public static final String REGISTRY_KEY_PATTERN = "\\$\\{(" + REGISTRY_GOVERNANCE + "|" + REGISTRY_CONFIG + "|" + REGISTRY_LOCAL + ")\\w*:\\w+(\\.\\w+)+\\}";
+    //\$\{(conf|gov|local)\w*:\/\w+(\/\w+)+\}
+    public static final String REGISTRY_KEY_PATTERN = "\\$\\{(" + REGISTRY_GOVERNANCE + "|" + REGISTRY_CONFIG + "|" + REGISTRY_LOCAL + ")\\w*:\\/\\w+(\\/\\w+)+\\}";
 }

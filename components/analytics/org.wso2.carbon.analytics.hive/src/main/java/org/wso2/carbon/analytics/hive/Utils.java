@@ -15,7 +15,7 @@
  */
 package org.wso2.carbon.analytics.hive;
 
-import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.utils.CarbonUtils;
 
 public class Utils {
 
@@ -28,15 +28,8 @@ public class Utils {
     public static boolean connectRSS = false;
 
     public static int getPortOffset() {
-        String portOffset = ServerConfiguration.getInstance().getFirstProperty(
-                CARBON_CONFIG_PORT_OFFSET_NODE);
-
-        try {
-            return ((portOffset != null) ? Integer.parseInt(portOffset.trim()) :
-                    CARBON_DEFAULT_PORT_OFFSET);
-        } catch (Exception e) {
-            return CARBON_DEFAULT_PORT_OFFSET;
-        }
+        return CarbonUtils.getPortFromServerConfig(
+                CARBON_CONFIG_PORT_OFFSET_NODE)+1;
     }
 
     public static boolean canConnectToRSS(){

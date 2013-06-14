@@ -50,6 +50,11 @@
     String scriptContent = "";
     String cron = "";
     String mode = request.getParameter("mode");
+
+    String isSchedulingCanceled = "false";
+    if("true".equals(request.getParameter("schedulingCanceled"))){
+        isSchedulingCanceled  = "true";
+    }
     int max = 40;
     boolean scriptNameExists = false;
     if (request.getParameter("scriptName") != null && !request.getParameter("scriptName").equals("")) {
@@ -242,6 +247,7 @@
 <script type="text/javascript">
     var cron = '<%=cron%>';
     var scriptName = '<%=scriptName%>';
+    var saveWithoutPrompt = '<%=isSchedulingCanceled%>';
     var allQueries = '';
     function executeQuery() {
         document.getElementById('hiveResult').innerHTML = '';
@@ -291,7 +297,7 @@
         allQueries = trim(allQueries);
         if (allQueries != "") {
             if (scriptName != "") {
-                if (cron != "") {
+                if (cron != "" || saveWithoutPrompt == "true") {
                     checkExistingNameAndSaveScript();
                 }
                 else {

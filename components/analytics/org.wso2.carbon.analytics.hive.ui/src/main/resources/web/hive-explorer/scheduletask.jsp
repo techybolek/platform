@@ -220,7 +220,8 @@
     //    }
 
     function cancelCron() {
-        history.go(-1);
+        location.href = '../hive-explorer/hiveexplorer.jsp?scriptName=' + '<%=scriptName%>' + '&mode=' + '<%=mode%>'
+                + '&saveWithCron="false"&schedulingCanceled=true';
     }
 
 

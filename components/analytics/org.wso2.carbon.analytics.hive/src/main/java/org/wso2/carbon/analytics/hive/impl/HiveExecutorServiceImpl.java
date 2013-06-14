@@ -28,6 +28,7 @@ import org.wso2.carbon.analytics.hive.dto.ScriptResult;
 import org.wso2.carbon.analytics.hive.exception.HiveExecutionException;
 import org.wso2.carbon.analytics.hive.exception.RegistryAccessException;
 import org.wso2.carbon.analytics.hive.extension.AbstractHiveAnalyzer;
+import org.wso2.carbon.analytics.hive.multitenancy.HiveMultitenantUtil;
 import org.wso2.carbon.analytics.hive.multitenancy.HiveRSSMetastoreManager;
 import org.wso2.carbon.analytics.hive.service.HiveExecutorService;
 import org.wso2.carbon.analytics.hive.util.RegistryAccessUtil;
@@ -81,7 +82,7 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
     public QueryResult[] execute(String script) throws HiveExecutionException {
         String tenantDomain = PrivilegedCarbonContext.getCurrentContext().getTenantDomain(true);
         int tenantId = PrivilegedCarbonContext.getCurrentContext().getTenantId();
-        if (Utils.canConnectToRSS() && null != HiveRSSMetastoreManager.getInstance()) {
+        if (Utils.canConnectToRSS() && HiveMultitenantUtil.isMultiTenantMode() &&  null != HiveRSSMetastoreManager.getInstance()) {
             HiveRSSMetastoreManager.getInstance().prepareRSSMetaStore(tenantDomain, tenantId);
         }
         if (script != null) {
@@ -115,6 +116,8 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
                 if (result.getErrorMessage() != null) {
                     throw new HiveExecutionException(result.getErrorMessage());
                 }
+
+                removeUTFCharsFromValues(result);
 
                 return result.getQueryResults();
 
@@ -155,6 +158,22 @@ public class HiveExecutorServiceImpl implements HiveExecutorService {
 
         return null;
 
+    }
+
+    private void removeUTFCharsFromValues(ScriptResult result) {
+        QueryResult[] queryResults = result.getQueryResults();
+        for(QueryResult queryResult:queryResults){
+            QueryResultRow[] resultRows = queryResult.getResultRows();
+            for(QueryResultRow queryResultRow:resultRows){
+                String[] columnValues = queryResultRow.getColumnValues();
+                String[] columnValuesWithoutUTFChars = new String[columnValues.length];
+                for (int i=0; i< columnValues.length;i++){
+                    columnValuesWithoutUTFChars[i] =columnValues[i].replaceAll("[\\u0000]", "");
+                }
+                queryResultRow.setColumnValues(columnValuesWithoutUTFChars);
+            }
+
+        }
     }
 
     /**
