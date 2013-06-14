@@ -24,9 +24,13 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSSLTransportFactory;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ThriftKeyValidatorClient {
 
@@ -61,12 +65,13 @@ public class ThriftKeyValidatorClient {
     }
 
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
-                                                 String apiKey,String requiredAuthenticationLevel) throws APISecurityException {
+                                                 String apiKey,String requiredAuthenticationLevel,
+                                                 String clientDomain) throws APISecurityException {
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
         org.wso2.carbon.apimgt.gateway.handlers.security.thrift.APIKeyValidationInfoDTO thriftDTO;
 
         try {
-            thriftDTO = keyValClient.validateKey(context, apiVersion, apiKey, sessionId,requiredAuthenticationLevel);
+            thriftDTO = keyValClient.validateKey(context, apiVersion, apiKey, sessionId,requiredAuthenticationLevel,clientDomain);
 
         } catch (Exception e) {
             try {
@@ -76,7 +81,7 @@ public class ThriftKeyValidatorClient {
                 //we re-initialize the thrift client in case open sockets have been closed due to
                 //key manager restart.
                 reInitializeClient();
-                thriftDTO = keyValClient.validateKey(context, apiVersion, apiKey, sessionId,requiredAuthenticationLevel);
+                thriftDTO = keyValClient.validateKey(context, apiVersion, apiKey, sessionId,requiredAuthenticationLevel, clientDomain);
 
             } catch (Exception e1) {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e1.getMessage());
@@ -97,6 +102,45 @@ public class ThriftKeyValidatorClient {
 
         return apiKeyValidationInfoDTO;
     }
+    public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
+    ) throws APISecurityException {
+        ArrayList<URITemplate> templates=new ArrayList<URITemplate>();
+        List<org.wso2.carbon.apimgt.gateway.handlers.security.thrift.URITemplate> uriTemplates;
+
+        try {
+            uriTemplates = keyValClient.getAllURITemplates(context, apiVersion,sessionId);
+
+        } catch (Exception e) {
+            try {
+
+                log.warn("Login failed.. Authenticating again..");
+                sessionId = thriftUtils.reLogin();
+                //we re-initialize the thrift client in case open sockets have been closed due to
+                //key manager restart.
+                reInitializeClient();
+                uriTemplates = keyValClient.getAllURITemplates(context, apiVersion, sessionId);
+
+            } catch (Exception e1) {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e1.getMessage());
+            }
+        }
+        for (org.wso2.carbon.apimgt.gateway.handlers.security.thrift.URITemplate aDto : uriTemplates) {
+            URITemplate temp = toTemplates(aDto);
+            templates.add(temp);
+        }
+        return templates;
+    }
+
+    private URITemplate toTemplates(
+            org.wso2.carbon.apimgt.gateway.handlers.security.thrift.URITemplate dto) {
+        URITemplate template = new URITemplate();
+        template.setAuthType(dto.getAuthType());
+        template.setHTTPVerb(dto.getHttpVerb());
+        template.setResourceSandboxURI(dto.getResourceSandboxURI());
+        template.setUriTemplate(dto.getUriTemplate());
+        return template;
+    }
+
 
     private void reInitializeClient() throws APISecurityException, TTransportException {
             //create new APIKeyValidator client

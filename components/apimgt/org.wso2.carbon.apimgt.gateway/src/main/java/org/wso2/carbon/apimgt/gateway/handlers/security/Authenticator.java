@@ -64,4 +64,6 @@ public interface Authenticator {
      */
     public String getChallengeString();
     
+    public String getRequestOrigin();
+    
 }

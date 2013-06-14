@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.throttle.*;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -180,6 +181,15 @@ public class APIThrottleHandler extends AbstractHandler {
             Utils.setSOAPFault(messageContext, "Server", "Message Throttled Out",
                     "You have exceeded your quota");
         }
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+
+        /* For CORS support adding required headers to the fault response */
+        Map<String, String> headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS_VALUE);
+        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS_VALUE);
+        axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
         Utils.sendFault(messageContext, HttpStatus.SC_SERVICE_UNAVAILABLE);
     }
 
@@ -428,7 +438,8 @@ public class APIThrottleHandler extends AbstractHandler {
                 //If an application level tier has been specified and it is not 'Unlimited'
                 if(applicationTier != null && !APIConstants.UNLIMITED_TIER.equals(applicationTier)){
                     //Get the configuration role of the application
-                    applicationRoleId = config.getConfigurationKeyOfCaller(applicationTier);
+                    //applicationRoleId = config.getConfigurationKeyOfCaller(applicationTier);
+                    applicationRoleId = applicationTier;
                 }
 
                 AccessInformation info = null;

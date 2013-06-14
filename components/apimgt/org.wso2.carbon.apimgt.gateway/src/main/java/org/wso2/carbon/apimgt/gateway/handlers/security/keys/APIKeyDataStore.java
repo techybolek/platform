@@ -16,8 +16,11 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+
+import java.util.ArrayList;
 
 /**
  * Represents the interface used by the APIKeyValidator to interact with the API
@@ -36,7 +39,7 @@ public interface APIKeyDataStore {
      * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException on error
      */
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
-                                                 String apiKey) throws APISecurityException;
+                                                 String apiKey, String clientDomain) throws APISecurityException;
 
     /**
      * Validate the given API key for the specified API context and version.
@@ -49,7 +52,18 @@ public interface APIKeyDataStore {
      * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException on error
      */
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
-                                                 String apiKey, String requiredAuthenticationLevel) throws APISecurityException;
+                                                 String apiKey, String requiredAuthenticationLevel, String clientDomain) throws APISecurityException;
+
+    /**
+     * Get API Resource URI Templates
+     *
+     * @param context Context of an API
+     * @param apiVersion A valid version of the API
+     * @return an APIKeyValidationInfoDTO instance containing key validation data
+     * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException on error
+     */
+    public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
+    ) throws APISecurityException;
 
 
     /**

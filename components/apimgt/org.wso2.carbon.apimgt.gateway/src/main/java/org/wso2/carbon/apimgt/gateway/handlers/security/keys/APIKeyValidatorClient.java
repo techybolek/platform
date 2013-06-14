@@ -21,14 +21,18 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceAPIManagementException;
 import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceStub;
 import org.wso2.carbon.utils.CarbonUtils;
+
+import java.util.ArrayList;
 
 public class APIKeyValidatorClient {
 
@@ -65,7 +69,8 @@ public class APIKeyValidatorClient {
     }
 
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
-                                                 String apiKey,String requiredAuthenticationLevel) throws APISecurityException {
+                                                 String apiKey,String requiredAuthenticationLevel,
+                                                 String clientDomain) throws APISecurityException {
 
         CarbonUtils.setBasicAccessSecurityHeaders(username, password,
                 true, clientStub._getServiceClient());
@@ -74,17 +79,21 @@ public class APIKeyValidatorClient {
         }
         try {
             org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO dto =
-                    clientStub.validateKey(context, apiVersion, apiKey,requiredAuthenticationLevel);
+                    clientStub.validateKey(context, apiVersion, apiKey,requiredAuthenticationLevel,clientDomain);
             ServiceContext serviceContext = clientStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
             cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
             return toDTO(dto);
-        } catch (Exception e) {
+        }
+        catch (APIKeyValidationServiceAPIManagementException ex){
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                                    "Resource forbidden", ex);
+        }catch (Exception e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error while accessing backend services for API key validation", e);
         }
     }
-    
+
     private APIKeyValidationInfoDTO toDTO(
             org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO generatedDto) {
         APIKeyValidationInfoDTO dto = new APIKeyValidationInfoDTO();
@@ -101,5 +110,39 @@ public class APIKeyValidatorClient {
         dto.setApplicationId(generatedDto.getApplicationId());
         dto.setApplicationTier(generatedDto.getApplicationTier());
         return dto;
+    }
+    public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
+    ) throws APISecurityException {
+
+        CarbonUtils.setBasicAccessSecurityHeaders(username, password,
+                                                  true, clientStub._getServiceClient());
+        if (cookie != null) {
+            clientStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
+        }
+        try {
+            org.wso2.carbon.apimgt.api.model.xsd.URITemplate[] dto =
+                    clientStub.getAllURITemplates(context, apiVersion);
+            ServiceContext serviceContext = clientStub.
+                    _getServiceClient().getLastOperationContext().getServiceContext();
+            cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
+            ArrayList<URITemplate> templates = new ArrayList<URITemplate>();
+            for (org.wso2.carbon.apimgt.api.model.xsd.URITemplate aDto : dto) {
+                URITemplate temp = toTemplates(aDto);
+                templates.add(temp);
+            }
+            return templates;
+        } catch (Exception e) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                                           "Error while accessing backend services for API key validation", e);
+        }
+    }
+    private URITemplate toTemplates(
+            org.wso2.carbon.apimgt.api.model.xsd.URITemplate dto) {
+        URITemplate template = new URITemplate();
+        template.setAuthType(dto.getAuthType());
+        template.setHTTPVerb(dto.getHTTPVerb());
+        template.setResourceSandboxURI(dto.getResourceSandboxURI());
+        template.setUriTemplate(dto.getUriTemplate());
+        return template;
     }
 }

@@ -45,7 +45,9 @@ public class OAuthAuthenticator implements Authenticator {
     private String oauthHeaderSplitter = ",";
     private String consumerKeySegmentDelimiter = " ";
     private String securityContextHeader;
-    private boolean removeOAuthHeadersFromOutMessage=false;
+    private boolean removeOAuthHeadersFromOutMessage=true;
+    private String clientDomainHeader = "referer";
+    private String requestOrigin;
 
     public void init(SynapseEnvironment env) {
         this.keyValidator = new APIKeyValidator(env.getSynapseConfiguration().getAxisConfiguration());
@@ -59,6 +61,7 @@ public class OAuthAuthenticator implements Authenticator {
     public boolean authenticate(MessageContext synCtx) throws APISecurityException {
         Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        requestOrigin = (String) headers.get("Origin");
         String apiKey = null;
         if (headers != null) {
             apiKey = extractCustomerKeyFromAuthHeader(headers);
@@ -71,9 +74,13 @@ public class OAuthAuthenticator implements Authenticator {
         String fullRequestPath = (String)synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
 
         String requestPath = fullRequestPath.substring((apiContext + apiVersion).length() + 1, fullRequestPath.length());
+        if (requestPath.equals("")) {
+            requestPath = requestPath + "/";
+        }
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
 
+        String clientDomain = getClientDomain(synCtx);
         //If the matching resource does not require authentication
         String authenticationScheme = keyValidator.getResourceAuthenticationScheme(apiContext, apiVersion, requestPath, httpMethod);
         APIKeyValidationInfoDTO info;
@@ -106,7 +113,7 @@ public class OAuthAuthenticator implements Authenticator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
                                                "Required OAuth credentials not provided");
             }
-            info = keyValidator.getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme);
+            info = keyValidator.getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme, clientDomain);
             synCtx.setProperty("APPLICATION_NAME", info.getApplicationName());
             synCtx.setProperty("END_USER_NAME", info.getEndUserName());
         }
@@ -117,7 +124,7 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setTier(info.getTier());
             authContext.setApiKey(apiKey);
             authContext.setKeyType(info.getType());
-            authContext.setUsername(info.getSubscriber());
+            authContext.setUsername(info.getEndUserName());
             authContext.setCallerToken(info.getEndUserToken());
             authContext.setApplicationId(info.getApplicationId());
             authContext.setApplicationName(info.getApplicationName());
@@ -215,9 +222,34 @@ public class OAuthAuthenticator implements Authenticator {
         if (value != null) {
             securityContextHeader = value;
         }
+        value = config.getFirstProperty(
+                APISecurityConstants.API_SECURITY_REMOVE_OAUTH_HEADERS_FROM_OUT_MESSAGE);
+        if (value != null) {
+            removeOAuthHeadersFromOutMessage = Boolean.parseBoolean(value);
+        }
+
+        value = config.getFirstProperty
+                (APIConstants.API_GATEWAY_CLIENT_DOMAIN_HEADER);
+        if (value != null) {
+            clientDomainHeader = value;
+        }
     }
 
     public String getChallengeString() {
         return "OAuth2 realm=\"WSO2 API Manager\"";
     }
+
+    private String getClientDomain(MessageContext synCtx) {
+        String clientDomainHeaderValue = null;
+        Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
+                getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        if (headers != null) {
+            clientDomainHeaderValue = (String) headers.get(clientDomainHeader);
+        }
+        return clientDomainHeaderValue;
+    }
+
+	public String getRequestOrigin() {
+		return requestOrigin;
+	}
 }

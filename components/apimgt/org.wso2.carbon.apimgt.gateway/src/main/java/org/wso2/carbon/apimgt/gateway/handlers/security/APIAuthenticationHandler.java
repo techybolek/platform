@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
+import org.apache.axis2.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
@@ -32,6 +33,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -98,6 +100,15 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     }
 
     public boolean handleResponse(MessageContext messageContext) {
+    	/* For CORS support adding required headers to the response */
+    	org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+    	Map<String, String> headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, authenticator.getRequestOrigin());
+        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS_VALUE);
+        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS_VALUE);
+        axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+ 
         return true;
     }
 
@@ -118,11 +129,12 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         // By default we send a 401 response back
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
+        axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/soap+xml");
 
         int status;
         if (e.getErrorCode() == APISecurityConstants.API_AUTH_GENERAL_ERROR) {
             status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
-        } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_INCORRECT_API_RESOURCE) {
+        } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_INCORRECT_API_RESOURCE || e.getErrorCode() == APISecurityConstants.API_AUTH_FORBIDDEN) {
             status = HttpStatus.SC_FORBIDDEN;
         } else {
             status = HttpStatus.SC_UNAUTHORIZED;
@@ -136,6 +148,12 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         } else {
             Utils.setSOAPFault(messageContext, "Client", "Authentication Failure", e.getMessage());
         }
+        /* For CORS support adding required headers to the fault response */
+        Map<String, String> headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, authenticator.getRequestOrigin());
+        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS_VALUE);
+        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS_VALUE);
+        axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
         Utils.sendFault(messageContext, status);
     }
 

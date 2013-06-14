@@ -17,11 +17,14 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+
+import java.util.ArrayList;
 
 /**
  * A JDBC interface for the API key data store. This implementation directly
@@ -37,7 +40,7 @@ public class JDBCAPIKeyDataStore implements APIKeyDataStore {
     }
 
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
-                                                 String apiKey) throws APISecurityException {
+                                                 String apiKey, String clientDomain) throws APISecurityException {
         try {
             return dao.validateKey(context, apiVersion, apiKey, APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
         } catch (APIManagementException e) {
@@ -47,12 +50,21 @@ public class JDBCAPIKeyDataStore implements APIKeyDataStore {
     }
 
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
-                                                 String apiKey,String requiredAuthenticationLevel) throws APISecurityException {
+                                                 String apiKey,String requiredAuthenticationLevel, String clientDomain) throws APISecurityException {
         try {
             return dao.validateKey(context, apiVersion, apiKey,requiredAuthenticationLevel);
         } catch (APIManagementException e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error while looking up API key data in the database", e);
+        }
+    }
+    public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
+    ) throws APISecurityException {
+        try {
+            return ApiMgtDAO.getAllURITemplates(context, apiVersion);
+        } catch (APIManagementException e) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                                           "Error while looking up API resource URI templates in the database", e);
         }
     }
 

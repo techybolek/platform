@@ -21,13 +21,22 @@ import net.sf.jsr107cache.Cache;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.initializer.AbstractServiceBusAdmin;
 
+import java.util.Set;
+
 public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
     public void invalidateKeys(APIKeyMapping[] mappings) {
         Cache cache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("keyCache");
         for (APIKeyMapping mapping : mappings) {
             String cacheKey = mapping.getKey() + ":" + mapping.getContext() + ":" + mapping.getApiVersion();
-            cache.remove(cacheKey);
+            Set keys = cache.keySet();
+            for (Object cKey : keys) {
+                String key = cKey.toString();
+                if (key.contains(cacheKey)) {
+                    cache.remove(key);
+
+                }
+            }
         }
     }
 
@@ -35,6 +44,40 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
         Cache cache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("keyCache");
         String cacheKey = consumerKey + ":" + authorizedUser;
         cache.remove(cacheKey);
+
+    }
+
+    public void invalidateResourceCache(String apiContext, String apiVersion,
+                                        String resourceURLContext, String httpVerb) {
+        String resourceVerbCacheKey = apiContext + "/" + apiVersion +
+                                      resourceURLContext + ":" + httpVerb;
+        String resourceCacheKey = apiContext + ":" + apiVersion;
+        Cache cache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("resourceCache");
+        Cache keyCache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("keyCache");
+        if (keyCache.size() != 0) {
+            Set keys = keyCache.keySet();
+            for (Object cacheKey : keys) {
+                String key = cacheKey.toString();
+                if (key.contains(apiContext + ":" + apiVersion)) {
+                    keyCache.remove(key);
+                }
+            }
+        }
+        if (cache.size() != 0) {
+            if (resourceURLContext.equals("/")) {
+                Set keys = cache.keySet();
+                for (Object cacheKey : keys) {
+                    String key = cacheKey.toString();
+                    if (key.contains(apiContext + "/" + apiVersion + resourceURLContext)) {
+                        cache.remove(key);
+                    }
+                }
+            } else if (cache.get(resourceCacheKey) != null) {
+                cache.remove(resourceVerbCacheKey);
+            }
+
+            cache.remove(resourceCacheKey);
+        }
 
     }
 

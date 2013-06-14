@@ -39,6 +39,12 @@ public class APISecurityConstants {
     public static final int API_AUTH_INCORRECT_API_RESOURCE = 900906;
     public static final String API_AUTH_INCORRECT_API_RESOURCE_MESSAGE = "No matching resource found in the API for the given request";
 
+    public static final int API_BLOCKED = 900907;
+    public static final String API_BLOCKED_MESSAGE = "The requested API is temporarily blocked";
+
+    public static final int API_AUTH_FORBIDDEN = 900908;
+    public static final String API_AUTH_FORBIDDEN_MESSAGE = "Resource forbidden ";
+
     /**
      * returns an String that corresponds to errorCode passed in
      * @param errorCode
@@ -68,6 +74,12 @@ public class APISecurityConstants {
             case API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE:
                 errorMessage = API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE_MESSAGE;
             break;
+            case API_BLOCKED:
+                errorMessage = API_BLOCKED_MESSAGE;
+            break;
+            case API_AUTH_FORBIDDEN:
+                errorMessage = API_AUTH_FORBIDDEN_MESSAGE;
+                break;
             default:
                 errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;
             break;

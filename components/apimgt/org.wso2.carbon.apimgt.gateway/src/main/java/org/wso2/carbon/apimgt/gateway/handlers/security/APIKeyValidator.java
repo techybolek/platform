@@ -20,24 +20,24 @@ import net.sf.jsr107cache.Cache;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.rest.RESTUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftAPIDataStore;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.apache.synapse.rest.RESTUtils;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 
 /**
  * This class is used to validate a given API key against a given API context and a version.
@@ -88,8 +88,8 @@ public class APIKeyValidator {
      * @throws APISecurityException If an error occurs while accessing backend services
      */
     public APIKeyValidationInfoDTO getKeyValidationInfo(String context, String apiKey,
-                                                        String apiVersion,String authenticationScheme) throws APISecurityException {
-        String cacheKey = apiKey + ":" + context + ":" + apiVersion;
+                                                        String apiVersion,String authenticationScheme, String clientDomain) throws APISecurityException {
+        String cacheKey = apiKey + ":" + context + ":" + apiVersion+":"+authenticationScheme;
         if (isGatewayAPIKeyValidationEnabled) {
             APIKeyValidationInfoDTO info = (APIKeyValidationInfoDTO) infoCache.get(cacheKey);
             if (info != null) {
@@ -107,9 +107,9 @@ public class APIKeyValidator {
             // if (info != null) {
             //   return info;
             //}
-            APIKeyValidationInfoDTO info = doGetKeyValidationInfo(context, apiVersion, apiKey,authenticationScheme);
+            APIKeyValidationInfoDTO info = doGetKeyValidationInfo(context, apiVersion, apiKey,authenticationScheme, clientDomain);
             if (info != null) {
-                if (isGatewayAPIKeyValidationEnabled) {
+                if (isGatewayAPIKeyValidationEnabled && clientDomain == null) { //save into cache only if, validation is correct and api is allowed for all domains
                     infoCache.put(cacheKey, info);
                 }
                 return info;
@@ -121,9 +121,9 @@ public class APIKeyValidator {
     }
 
     protected APIKeyValidationInfoDTO doGetKeyValidationInfo(String context, String apiVersion,
-                                                             String apiKey,String authenticationScheme) throws APISecurityException {
+                                                             String apiKey,String authenticationScheme, String clientDomain) throws APISecurityException {
 
-        return dataStore.getAPIKeyData(context, apiVersion, apiKey, authenticationScheme);
+        return dataStore.getAPIKeyData(context, apiVersion, apiKey, authenticationScheme, clientDomain);
     }
 
     public void cleanup() {
@@ -145,7 +145,10 @@ public class APIKeyValidator {
                                                   String requestPath, String httpMethod){
 
         String cacheKey = context + ":" + apiVersion;
-        APIInfoDTO apiInfoDTO = (APIInfoDTO)resourceCache.get(cacheKey);
+        APIInfoDTO apiInfoDTO = null;
+        if (isGatewayAPIKeyValidationEnabled) {
+            apiInfoDTO = (APIInfoDTO)resourceCache.get(cacheKey);
+        }
 
         if(apiInfoDTO == null){
             apiInfoDTO = doGetAPIInfo(context, apiVersion);
@@ -157,7 +160,10 @@ public class APIKeyValidator {
             String requestCacheKey = context + "/" + apiVersion + requestPath + ":" + httpMethod;
 
             //Get decision from cache.
-            VerbInfoDTO matchingVerb = (VerbInfoDTO)resourceCache.get(requestCacheKey);
+            VerbInfoDTO matchingVerb=null;
+            if (isGatewayAPIKeyValidationEnabled) {
+            matchingVerb= (VerbInfoDTO)resourceCache.get(requestCacheKey);
+            }
             //On a cache hit
             if(matchingVerb != null){
                 return matchingVerb.getAuthType();
@@ -188,7 +194,10 @@ public class APIKeyValidator {
             String requestCacheKey = context + "/" + apiVersion + requestPath + ":" + httpMethod;
 
             //Get decision from cache.
-            VerbInfoDTO matchingVerb = (VerbInfoDTO)resourceCache.get(requestCacheKey);
+            VerbInfoDTO matchingVerb=null;
+            if (isGatewayAPIKeyValidationEnabled) {
+            matchingVerb= (VerbInfoDTO)resourceCache.get(requestCacheKey);
+            }
 
             //On a cache hit
             if(matchingVerb != null){
@@ -230,7 +239,7 @@ public class APIKeyValidator {
     private APIInfoDTO doGetAPIInfo(String context, String apiVersion) {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         try {
-            ArrayList<URITemplate> uriTemplates = ApiMgtDAO.getAllURITemplates(context, apiVersion);
+            ArrayList<URITemplate> uriTemplates = getAllURITemplates(context, apiVersion);
 
             apiInfoDTO.setApiName(context);
             apiInfoDTO.setContext(context);
@@ -263,7 +272,14 @@ public class APIKeyValidator {
             }
         } catch (APIManagementException e) {
             log.error("Loading URI templates for " + context + ":" + apiVersion + " failed", e);
+        } catch (APISecurityException e) {
+            log.error("Loading URI templates for " + context + ":" + apiVersion + " failed", e);
         }
         return apiInfoDTO;
+    }
+
+    private ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion)
+            throws APIManagementException, APISecurityException {
+        return dataStore.getAllURITemplates(context, apiVersion);
     }
 }

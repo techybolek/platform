@@ -16,14 +16,12 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators;
 
-import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 
-import java.util.Calendar;
 import java.util.Map;
 
 /**
@@ -42,5 +40,9 @@ public class TokenPasser extends AbstractMediator {
         Map transportHeaders = (Map)((Axis2MessageContext) synCtx).getAxis2MessageContext()
                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         transportHeaders.put("assertion", authContext.getCallerToken());
+    }
+    
+    public boolean isContentAware(){
+        return false;
     }
 }
