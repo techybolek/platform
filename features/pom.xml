@@ -137,7 +137,7 @@
 	    <module>data-agents</module>
 	    <module>bam2</module>
 	    <module>analytics</module>
-	    <module>gadget-ide</module>
+	    <!-- module>gadget-ide</module -->
         <!--module>autoscaler</module-->
         <!--module>autoscaler-service</module-->
         <!--module>tenantaware-load-balancer</module-->
