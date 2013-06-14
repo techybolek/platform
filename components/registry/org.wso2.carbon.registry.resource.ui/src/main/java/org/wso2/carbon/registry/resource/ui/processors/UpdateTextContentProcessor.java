@@ -19,6 +19,7 @@ package org.wso2.carbon.registry.resource.ui.processors;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.registry.common.ui.UIException;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.resource.ui.clients.ResourceServiceClient;
 import org.wso2.carbon.utils.ServerConstants;
 
@@ -42,6 +43,13 @@ public class UpdateTextContentProcessor {
                 getSession().getAttribute(ServerConstants.ADMIN_SERVICE_COOKIE);
 
         try {
+        	if (request.getSession().getAttribute("resourceVersion") == null){
+        		/*
+        		 * refer JIRA -- REGISTRY-1637
+        		 */
+        		throw new RegistryException("Unable to access information from Session, Please reload the page and try again");
+        	}
+        	
             ResourceServiceClient client =
                     new ResourceServiceClient(cookie, config, request.getSession());
             client.updateTextContent(resourcePath, contentText,updateOverride, (String) request.getSession().getAttribute("resourceVersion"));

@@ -574,6 +574,9 @@ function updateTextContent(resourcePath,mediaType,override) {
                     } else if (transport.responseText.lastIndexOf("Resource Retention") != -1) {
                         showRegistryError(org_wso2_carbon_registry_resource_ui_jsi18n["failed.to.update.retention"]);
                         document.getElementById('saveContentButtonID').disabled = false;
+                    } else if (transport.responseText.lastIndexOf("Unable to access information from Session") != -1) {
+                        showRegistryError("Unable to access information from Session, Please reload the page and try again");
+                        document.getElementById('saveContentButtonID').disabled = false;
                     } else {
                         showRegistryError(org_wso2_carbon_registry_resource_ui_jsi18n["failed.to.update"] + " " + transport.responseText);
                         document.getElementById('saveContentButtonID').disabled = false;
